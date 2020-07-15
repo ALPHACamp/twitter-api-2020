@@ -1,0 +1,119 @@
+diff --git a/package.json b/package.json
+index e46122d..c807aa8 100644
+--- a/package.json
++++ b/package.json
+@@ -6,7 +6,7 @@
+   "scripts": {
+     "start": "NODE_ENV=development node app.js",
+     "dev": "NODE_ENV=development nodemon app.js",
+-    "test": "NODE_ENV=test mocha test/*/*.js --exit --recursive --timeout 5000"
++    "test": "NODE_ENV=test mocha test --exit --recursive --timeout 5000"
+   },
+   "author": "",
+   "license": "ISC",
+diff --git a/test/models/User.spec.js b/test/models/User.spec.js
+index a1bbfdc..f3b6a6f 100644
+--- a/test/models/User.spec.js
++++ b/test/models/User.spec.js
+@@ -27,7 +27,7 @@ describe('# User Model', () => {
+ 
+   context('properties', () => {
+     ;[
+-      'name', 'email', 'password'
++      'name', 'email', 'password', 'account', 'cover', 'avator'
+     ].forEach(checkPropertyExists(user))
+   })
+ 
+diff --git a/test/requests/admin/user.spec.js b/test/requests/admin/user.spec.js
+index 17ccaf7..9b88942 100644
+--- a/test/requests/admin/user.spec.js
++++ b/test/requests/admin/user.spec.js
+@@ -27,7 +27,7 @@ describe('# Admin::User request', () => {
+ 
+       it('should redirect to root path', (done) => {
+         request(app)
+-          .get('/admin/tweets')
++          .get('/admin/users')
+           .expect(302)
+           .end(function(err, res) {
+             if (err) return done(err);
+diff --git a/test/requests/user.spec.js b/test/requests/user.spec.js
+index f27d0d8..703e7ae 100644
+--- a/test/requests/user.spec.js
++++ b/test/requests/user.spec.js
+@@ -13,6 +13,7 @@ describe('# user request', () => {
+   context('# tweets', () => {
+     before(async() => {
+       
++
+       this.ensureAuthenticated = sinon.stub(
+         helpers, 'ensureAuthenticated'
+       ).returns(true);
+@@ -75,28 +76,42 @@ describe('# user request', () => {
+       this.getUser = sinon.stub(
+           helpers, 'getUser'
+         ).returns({id: 1, Followings: []});
+-      await db.User.create({})
+-      await db.User.create({})
++      await db.User.create({name: 'User1'})
++      await db.User.create({name: 'User2'})
+     })
+ 
+     describe('go to edit page', () => {
++      
++      // it('will render edit page', (done) => {
++      //   request(app)
++      //     .get('/users/1/edit')
++      //     .set('Accept', 'application/json')
++      //     .expect(200)
++      //     .end(function(err, res) {
++      //       if (err) return done(err);
++      //       return done();
++      //     });
++      // })
++
+       it('will render edit page', (done) => {
+         request(app)
+-          .get('/users/1/edit')
++          .get('/api/users/1')
+           .set('Accept', 'application/json')
+           .expect(200)
+           .end(function(err, res) {
+             if (err) return done(err);
++            res.body.name.should.equal('User1');
+             return done();
+           });
+       })
+       it('will redirect if not this user', (done) => {
+         request(app)
+-          .get('/users/2/edit')
++          .get('/api/users/2')
+           .set('Accept', 'application/json')
+-          .expect(302)
++          .expect(200)
+           .end(function(err, res) {
+             if (err) return done(err);
++            res.body.status.should.equal('error');
+             return done();
+           });
+       })
+@@ -125,10 +140,10 @@ describe('# user request', () => {
+     describe('successfully update', () => {
+       it('will change users intro', (done) => {
+         request(app)
+-          .post('/users/1/edit')
++          .post('/api/users/1')
+           .send('name=abc')
+           .set('Accept', 'application/json')
+-          .expect(302)
++          .expect(200)
+           .end(function(err, res) {
+             if (err) return done(err);
+             db.User.findByPk(1).then(user => {
+@@ -264,5 +279,4 @@ describe('# user request', () => {
+       await db.Like.destroy({where: {},truncate: true})
+     })
+   })
+-
+ });
+\ No newline at end of file
