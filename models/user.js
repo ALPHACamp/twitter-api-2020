@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     introduction: DataTypes.TEXT,
     avatar: DataTypes.STRING,
     backgroundImage: DataTypes.STRING,
-    isAdmin: DataTypes.STRING
+    isAdmin: DataTypes.BOOLEAN
   }, {});
   User.associate = function (models) {
     User.hasMany(models.Tweet)
