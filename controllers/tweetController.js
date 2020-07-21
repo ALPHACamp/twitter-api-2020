@@ -42,5 +42,14 @@ let restController = {
       })
     })
   },
+  postTweet: (req, res) => {
+    return Tweet.create({
+      description: req.body.text,
+      // UserId: req.user.id
+    })
+      .then((tweet) => {
+        return res.json({ status: 'success', message: '' })
+      })
+  },
 }
 module.exports = restController
