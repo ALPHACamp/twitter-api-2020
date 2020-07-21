@@ -43,13 +43,19 @@ let restController = {
     })
   },
   postTweet: (req, res) => {
-    return Tweet.create({
-      description: req.body.text,
-      // UserId: req.user.id
-    })
-      .then((tweet) => {
-        return res.json({ status: 'success', message: '' })
+    if (!req.body.text) {
+      return res.json({ status: 'error', message: "貼文不能為空白" })
+    } else if (req.body.text.length > 140) {
+      return res.json({ status: 'error', message: "字數限制為140字以內" })
+    } else {
+      return Tweet.create({
+        description: req.body.text,
+        // UserId: req.user.id
       })
+        .then((tweet) => {
+          return res.json({ status: 'success', message: '推文成功' })
+        })
+    }
   },
 }
 module.exports = restController
