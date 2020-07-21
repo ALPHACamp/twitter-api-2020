@@ -6,7 +6,10 @@ const moment = require('moment')
 
 let restController = {
   getTweets: (req, res, callback) => {
-    Tweet.findAll({ include: [User, Reply, { model: User, as: 'LikedUsers' }] }).then(tweets => {
+    Tweet.findAll({
+      order: [['createdAt', 'DESC']],
+      include: [User, Reply, { model: User, as: 'LikedUsers' }]
+    }).then(tweets => {
       const data = tweets.map(r => ({
         ...r.dataValues,
         description: r.dataValues.description.substring(0, 50),
