@@ -35,3 +35,5 @@ app.use('/api', routes)
 
 // start API web server
 app.listen(port, () => console.log(`API Web Server app listening on port ${port}!`))
+
+module.exports = app

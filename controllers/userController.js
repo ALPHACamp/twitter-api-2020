@@ -12,13 +12,9 @@ const userController = {
     const name = (req.body.name) ? req.body.name.trim() : req.body.name
     const email = (req.body.email) ? req.body.email.trim() : req.body.email
     const password = (req.body.password) ? req.body.password.trim() : req.body.password
-    const passwordCheck = (req.body.passwordCheck) ? req.body.passwordCheck.trim() : req.body.passwordCheck
 
-    if (!account || !name || !email || !password || !passwordCheck) {
+    if (!account || !name || !email || !password) {
       return res.json({ status: 'error', message: '所有欄位均不能空白' })
-    }
-    if (passwordCheck !== password) {
-      return res.json({ status: 'error', message: '兩次密碼不一致' })
     }
 
     // 確認 email、account 有無重複
