@@ -27,7 +27,9 @@ router.get('/test', authenticated, authenticatedAdmin, testController.getTestDat
 router.post('/users', userController.signUp)
 router.post('/login', userController.signIn)
 
+// 需驗證的路由，一定要加 authenticated 這個 middleware，否則後面拿不到 helpers.getUser(req)（等同於 req.user）
 // tweet
-router.post('/tweets', authenticated, tweetController.postTweet) // 一定要加 authenticated 這個 middleware，否則後面拿不到 req.user
+router.post('/tweets', authenticated, tweetController.postTweet)
+router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 
 module.exports = router
