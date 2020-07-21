@@ -29,7 +29,8 @@ const userController = {
           account,
           name,
           email,
-          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+          role: 0
         })
       })
       .then(user => {
@@ -64,7 +65,7 @@ const userController = {
           message: '登入成功',
           token: token,
           user: {
-            id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin
+            id: user.id, name: user.name, email: user.email, isAdmin: Boolean(Number(user.role))
           }
         })
       })
