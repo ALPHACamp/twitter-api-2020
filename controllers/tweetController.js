@@ -55,10 +55,8 @@ const tweetController = {
         return res.json({
           status: 'success',
           message: '找到指定的貼文',
-          data: {
-            ...tweet,
-            isLiked
-          }
+          ...tweet,
+          isLiked
         })
       })
       .catch(err => {
@@ -86,17 +84,15 @@ const tweetController = {
           delete tweet.User.password
 
           tweetsData.push({
+            status: 'success',
+            message: '找到指定的貼文',
             ...tweet,
             isLiked
           })
         }
       })
       .then(() => {
-        return res.json({
-          status: 'success',
-          message: '找到指定的貼文',
-          data: tweetsData
-        })
+        return res.json(tweetsData)
       })
   }
 }
