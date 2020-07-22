@@ -43,6 +43,9 @@ const tweetController = {
         userData.isAdmin = Boolean(Number(userData.role))
         delete userData.role
 
+        // 刪除敏感資訊
+        delete userData.password
+
         return res.json({
           status: 'success',
           message: '找到指定的貼文',
