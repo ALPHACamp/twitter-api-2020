@@ -1,7 +1,19 @@
 const db = require('../models')
 const Tweet = db.Tweet
 const Like = db.Like
+const User = db.User
 const helpers = require('../_helpers.js')
+
+// 撈取此使用者是否按這則貼文讚 (return true or false)
+const getUserLike = (tweet, UserId) => {
+  return Like.findOne({
+    where: { TweetId: tweet.id, UserId }
+  })
+    .then(like => {
+      if (like) return true
+      return false
+    })
+}
 
 const tweetController = {
   postTweet: (req, res) => {
@@ -25,37 +37,62 @@ const tweetController = {
   },
 
   getTweet: (req, res) => {
-    const User = helpers.getUser(req)
-    let isLiked
-
-    Tweet.findOne({ where: { id: req.params.tweet_id } })
+    Tweet.findOne({
+      where: { id: req.params.tweet_id },
+      include: [User]
+    })
       .then(async (tweet) => {
-
         if (!tweet) return res.json({ status: 'error', message: '找不到此筆推文資料' })
 
-        await Like.findOne({ where: { UserId: User.id } })
-          .then(like => {
-            isLiked = (like) ? true : false
-          })
+        tweet = tweet.toJSON()
+        const isLiked = await getUserLike(tweet, helpers.getUser(req).id)
 
-        // role 轉成 isAdmin
-        const userData = { ...User.toJSON() }
-        userData.isAdmin = Boolean(Number(userData.role))
-        delete userData.role
+        // 回傳值過濾 (role >> isAdmin, remove password)
+        tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+        delete tweet.User.role
+        delete tweet.User.password
 
         return res.json({
           status: 'success',
           message: '找到指定的貼文',
-          data: {
-            ...tweet.toJSON(),
-            isLiked,
-            user: userData
-          }
+          ...tweet,
+          isLiked
         })
       })
       .catch(err => {
         console.log(err)
         return res.json({ status: 'error', message: '找尋此筆推文資料失敗' })
+      })
+  },
+
+  getTweets: (req, res) => {
+    const tweetsData = []
+
+    return Tweet.findAll({
+      raw: true,
+      nest: true,
+      order: [['createdAt', 'DESC']],
+      include: [User]
+    })
+      .then(async (tweets) => {
+        for (const tweet of tweets) {
+          const isLiked = await getUserLike(tweet, helpers.getUser(req).id)
+
+          // 回傳值過濾 (role >> isAdmin, remove password)
+          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+          delete tweet.User.role
+          delete tweet.User.password
+
+          tweetsData.push({
+            status: 'success',
+            message: '找到指定的貼文',
+            ...tweet,
+            isLiked
+          })
+        }
+      })
+      .then(() => {
+        return res.json(tweetsData)
       })
   }
 }
