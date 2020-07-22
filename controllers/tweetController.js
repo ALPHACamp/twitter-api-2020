@@ -2,13 +2,14 @@ const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
+const Like = db.Like
 const moment = require('moment')
 
 let restController = {
   getTweets: (req, res) => {
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
-      include: [User, Reply, { model: User, as: 'LikedUsers' }]
+      include: [User, Reply, Like]
     }).then(tweets => {
       const data = tweets.map(r => ({
         ...r.dataValues,
@@ -18,7 +19,7 @@ let restController = {
         userAvatar: r.User.avatar,
         userAccount: r.User.account,
         replyConut: r.Replies.length,
-        likeConut: r.LikedUsers.length,
+        likeConut: r.Likes.length,
         // isLiked: req.user.LikedTweets.map(d => d.id).includes(r.id)
       }))
       return res.json({ Tweets: data })
@@ -28,15 +29,15 @@ let restController = {
     return Tweet.findByPk(req.params.id, {
       include: [
         User,
+        Like,
         { model: Reply, include: [User] },
-        { model: User, as: 'LikedUsers' }
       ]
     }).then(tweet => {
       // const isLiked = restaurant.LikedUsers.map(d => d.id).includes(req.user.id)
       return res.json({
         tweet: tweet,
         replyConut: tweet.Replies.length,
-        likeConut: tweet.LikedUsers.length,
+        likeConut: tweet.Likes.length,
         tweetCreatedAt: moment(tweet.dataValues.createdAt).fromNow(),
         // isLiked: isLiked
       })

@@ -8,15 +8,27 @@ module.exports = (sequelize, DataTypes) => {
     introduction: DataTypes.TEXT,
     role: DataTypes.STRING,
     account: DataTypes.STRING,
-    coverImg: DataTypes.STRING,
+    cover: DataTypes.STRING,
   }, {});
   User.associate = function (models) {
     User.hasMany(models.Reply)
-    User.belongsToMany(models.Tweet, {
-      through: models.Like,
-      foreignKey: 'UserId',
-      as: 'LikedTweets'
+    User.hasMany(models.Tweet)
+    User.hasMany(models.Like)
+    User.belongsToMany(User, {
+      through: models.Followship,
+      foreignKey: 'followingId',
+      as: 'Followers'
     })
+    User.belongsToMany(User, {
+      through: models.Followship,
+      foreignKey: 'followerId',
+      as: 'Followings'
+    })
+    // User.belongsToMany(models.Tweet, {
+    //   through: models.Like,
+    //   foreignKey: 'UserId',
+    //   as: 'LikedTweets'
+    // })
   };
   return User;
 };
