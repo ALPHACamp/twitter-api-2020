@@ -5,7 +5,7 @@ const Reply = db.Reply
 const Like = db.Like
 const moment = require('moment')
 
-let restController = {
+let tweetController = {
   getTweets: (req, res) => {
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
@@ -59,4 +59,4 @@ let restController = {
     }
   },
 }
-module.exports = restController
+module.exports = tweetController
