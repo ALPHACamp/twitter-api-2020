@@ -4,6 +4,17 @@ const Like = db.Like
 const User = db.User
 const helpers = require('../_helpers.js')
 
+// 撈取此使用者是否按這則貼文讚 (return true or false)
+const getUserLike = (tweet, UserId) => {
+  return Like.findOne({
+    where: { TweetId: tweet.id, UserId }
+  })
+    .then(like => {
+      if (like) return true
+      return false
+    })
+}
+
 const tweetController = {
   postTweet: (req, res) => {
     // 初始值去除空白字元
@@ -26,48 +37,66 @@ const tweetController = {
   },
 
   getTweet: (req, res) => {
-    Tweet.findOne({ where: { id: req.params.tweet_id } })
-      .then(tweet => {
+    Tweet.findOne({
+      where: { id: req.params.tweet_id },
+      include: [User]
+    })
+      .then(async (tweet) => {
         if (!tweet) return res.json({ status: 'error', message: '找不到此筆推文資料' })
 
-        // 撈取推文作者
-        const getAuthor = User.findByPk(tweet.UserId)
+        tweet = tweet.toJSON()
+        const isLiked = await getUserLike(tweet, helpers.getUser(req).id)
 
-        // 撈取此使用者是否按這則貼文讚
-        const getUserLike = Like.findOne({
-          where: { TweetId: tweet.id, UserId: User.id }
+        // 回傳值過濾 (role >> isAdmin, remove password)
+        tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+        delete tweet.User.role
+        delete tweet.User.password
+
+        return res.json({
+          status: 'success',
+          message: '找到指定的貼文',
+          data: {
+            ...tweet,
+            isLiked
+          }
         })
-
-        Promise.all([getAuthor, getUserLike])
-          .then(results => {
-            // 結果 1
-            if (!results[0]) return res.json({ status: 'error', message: '找不到推文者資料' })
-            const authorData = { ...results[0].toJSON() }
-            authorData.isAdmin = Boolean(Number(authorData.role)) // role 轉成 isAdmin
-            delete authorData.role
-            delete authorData.password // 刪除敏感資訊
-
-            // 結果 2
-            const isLiked = (results[1]) ? true : false
-
-            return res.json({
-              status: 'success',
-              message: '找到指定的貼文',
-              data: {
-                ...tweet.toJSON(),
-                isLiked,
-                user: authorData
-              }
-            })
-          })
-          .catch(err => {
-            console.log(err)
-            return res.json({ status: 'error', message: '找尋推文者或按讚資料失敗' })
-          })
       })
       .catch(err => {
         console.log(err)
         return res.json({ status: 'error', message: '找尋此筆推文資料失敗' })
+      })
+  },
+
+  getTweets: (req, res) => {
+    const tweetsData = []
+
+    return Tweet.findAll({
+      raw: true,
+      nest: true,
+      order: [['createdAt', 'DESC']],
+      include: [User]
+    })
+      .then(async (tweets) => {
+        for (const tweet of tweets) {
+          const isLiked = await getUserLike(tweet, helpers.getUser(req).id)
+
+          // 回傳值過濾 (role >> isAdmin, remove password)
+          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+          delete tweet.User.role
+          delete tweet.User.password
+
+          tweetsData.push({
+            ...tweet,
+            isLiked
+          })
+        }
+      })
+      .then(() => {
+        return res.json({
+          status: 'success',
+          message: '找到指定的貼文',
+          data: tweetsData
+        })
       })
   }
 }
