@@ -1,5 +1,6 @@
 const tweetController = require('../controllers/tweetController.js')
 const replyController = require('../controllers/replyController.js')
+const userController = require('../controllers/userController.js')
 
 module.exports = (app) => {
   app.get('/api/tweets', tweetController.getTweets)
@@ -7,4 +8,6 @@ module.exports = (app) => {
   app.post('/api/tweets', tweetController.postTweet)
 
   app.post('/api/reply', replyController.postReply)
+
+  app.get('/api/users/:id', userController.getUser)
 }

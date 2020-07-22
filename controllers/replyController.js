@@ -1,7 +1,7 @@
 const db = require('../models')
 const Reply = db.Reply
 
-let restController = {
+let replyController = {
   postReply: (req, res) => {
     if (!req.body.text) {
       return res.json({ status: 'error', message: "貼文不能為空白" })
@@ -17,4 +17,4 @@ let restController = {
     }
   },
 }
-module.exports = restController
+module.exports = replyController
