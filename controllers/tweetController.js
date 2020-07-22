@@ -1,6 +1,7 @@
 const db = require('../models')
 const Tweet = db.Tweet
 const Like = db.Like
+const User = db.User
 const helpers = require('../_helpers.js')
 
 const tweetController = {
@@ -25,36 +26,44 @@ const tweetController = {
   },
 
   getTweet: (req, res) => {
-    const User = helpers.getUser(req)
-    let isLiked
-
     Tweet.findOne({ where: { id: req.params.tweet_id } })
-      .then(async (tweet) => {
-
+      .then(tweet => {
         if (!tweet) return res.json({ status: 'error', message: '找不到此筆推文資料' })
 
-        await Like.findOne({ where: { UserId: User.id } })
-          .then(like => {
-            isLiked = (like) ? true : false
-          })
+        // 撈取推文作者
+        const getAuthor = User.findByPk(tweet.UserId)
 
-        // role 轉成 isAdmin
-        const userData = { ...User.toJSON() }
-        userData.isAdmin = Boolean(Number(userData.role))
-        delete userData.role
-
-        // 刪除敏感資訊
-        delete userData.password
-
-        return res.json({
-          status: 'success',
-          message: '找到指定的貼文',
-          data: {
-            ...tweet.toJSON(),
-            isLiked,
-            user: userData
-          }
+        // 撈取此使用者是否按這則貼文讚
+        const getUserLike = Like.findOne({
+          where: { TweetId: tweet.id, UserId: User.id }
         })
+
+        Promise.all([getAuthor, getUserLike])
+          .then(results => {
+            // 結果 1
+            if (!results[0]) return res.json({ status: 'error', message: '找不到推文者資料' })
+            const authorData = { ...results[0].toJSON() }
+            authorData.isAdmin = Boolean(Number(authorData.role)) // role 轉成 isAdmin
+            delete authorData.role
+            delete authorData.password // 刪除敏感資訊
+
+            // 結果 2
+            const isLiked = (results[1]) ? true : false
+
+            return res.json({
+              status: 'success',
+              message: '找到指定的貼文',
+              data: {
+                ...tweet.toJSON(),
+                isLiked,
+                user: authorData
+              }
+            })
+          })
+          .catch(err => {
+            console.log(err)
+            return res.json({ status: 'error', message: '找尋推文者或按讚資料失敗' })
+          })
       })
       .catch(err => {
         console.log(err)
