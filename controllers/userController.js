@@ -69,7 +69,27 @@ const userController = {
           }
         })
       })
-  }
+  },
+
+  getUser: (req, res) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        // 使用者不存在 => 報錯
+        if (!user) return res.json({ status: 'error', message: '找不到使用者' })
+
+        // 移除密碼，避免回傳時露出敏感資訊
+        const safeUser = user.toJSON()
+        delete safeUser.password
+
+        // 使用者存在 => 回傳資料
+        return res.json({
+          status: 'success',
+          message: '找到使用者的資料',
+          user: safeUser
+        })
+      })
+      .catch(err => res.json({ status: 'error', message: `${err}` }))
+  },
 }
 
 module.exports = userController

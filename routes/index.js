@@ -22,5 +22,6 @@ const userController = require('../controllers/userController.js')
 router.get('/test', authenticated, authenticatedAdmin, testController.getTestData)
 router.post('/users', userController.signUp)
 router.post('/login', userController.signIn)
+router.get('/users/:id', authenticated, userController.getUser)
 
 module.exports = router
