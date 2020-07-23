@@ -34,5 +34,5 @@ module.exports = (app) => {
 
   app.post('/api/register', userController.register)
   app.post('/api/login', userController.login)
-
+  app.put('/api/users/:id/:editPage', authenticated, userController.putUser)
 }

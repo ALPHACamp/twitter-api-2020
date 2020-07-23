@@ -110,6 +110,141 @@ const userController = {
     })
   },
 
+  putUser: (req, res) => {
+    const { account, name, email, password, passwordConfirm, avatar, introduction, cover } = req.body
+    const { id, editPage } = req.params
+    //check page
+    if (req.user.id === Number(id) && editPage === 'account') {
+      //check user
+      User.findByPk(id)
+        .then(user => {
+          if (!user) return res.json({ status: "error", "message": "user does not exist" })
+          if (user) {
+            // user update account and email
+            if (account !== user.account && email !== user.email) {
+              //check account and email are not duplicated
+              return User.findOne({ where: { account } })
+                .then(userAccount => {
+                  if (userAccount) return res.json({ status: 'error', message: `account "${account}" is registered` })
+                  return User.findOne({ where: { email } })
+                    .then(userEmail => {
+                      if (userEmail) return res.json({ status: 'error', message: `"email ${email}" is registered` })
+                    })
+                    .then(() => {
+                      // user does not update password
+                      if (!password && !passwordConfirm) {
+                        return user.update({
+                          account: account || user.account,
+                          name: name || user.name,
+                          email: email || user.email,
+                        })
+                      }
+                      // user update password                      
+                      if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
+                      return user.update({
+                        account: account || user.account,
+                        name: name || user.name,
+                        email: email || user.email,
+                        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+                      })
+                    })
+                    .then(() => res.json({ status: 'success', message: 'user account updated successfully', }))
+                    .catch(err => console.log(err))
+                }).catch(err => console.log(err))
+            }
+            // user update account
+            if (account !== user.account && email === user.email) {
+              //check account is not duplicated
+              return User.findOne({ where: { account } })
+                .then(userAccount => {
+                  if (userAccount) return res.json({ status: 'error', message: `account "${account}" is registered` })
+                })
+                .then(() => {
+                  // user does not update password
+                  if (!password && !passwordConfirm) {
+                    return user.update({
+                      account,
+                      name: name || user.name
+                    })
+                  }
+                  // user update password                      
+                  if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
+                  return user.update({
+                    account,
+                    name: name || user.name,
+                    password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+                  })
+                })
+                .then(() => res.json({ status: 'success', message: 'user account updated successfully', }))
+                .catch(err => console.log(err))
+            }
+
+            // user update email
+            if (account === user.account && email !== user.email) {
+              //check email is not duplicated
+              return User.findOne({ where: { email } })
+                .then(userEmail => {
+                  if (userEmail) return res.json({ status: 'error', message: `email "${email}" is registered` })
+                })
+                .then(() => {
+                  // user does not update password
+                  if (!password && !passwordConfirm) {
+                    return user.update({
+                      email,
+                      name: name || user.name
+                    })
+                  }
+                  // user update password                      
+                  if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
+                  return user.update({
+                    email,
+                    name: name || user.name,
+                    password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+                  })
+                })
+                .then(() => res.json({ status: 'success', message: 'user account updated successfully', }))
+                .catch(err => console.log(err))
+            }
+
+            if (account === user.account && email === user.email) {
+              // user does not update password
+              if (!password && !passwordConfirm) {
+                return user.update({
+                  name: name || user.name
+                })
+              }
+              // user update password                      
+              if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
+              return user.update({
+                name: name || user.name,
+                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+              })
+                .then(() => res.json({ status: 'success', message: 'user account updated successfully', }))
+                .catch(err => console.log(err))
+            }
+          }
+        }).catch(err => console.log(err))
+    } else {
+      return res.json({ status: "error", "message": "permission denied" })
+    }
+
+    if (req.user.id === Number(id) && editPage === 'profile') {
+      User.findByPk(id)
+        .then(user => {
+          if (!user) return res.json({ status: "error", "message": "user does not exist" })
+          if (!name) return res.json({ status: 'error', message: 'name is empty' })
+          return user.update({
+            name: name || user.name,
+            avatar: avatar || user.avatar,
+            introduction: introduction || user.introduction,
+            cover: cover || user.cover
+          }).then(() => res.json({ status: 'success', message: 'user profile updated successfully', }))
+        }).catch(err => console.log(err))
+    } else {
+      return res.json({ status: "error", "message": "permission denied" })
+    }
+  },
+
   getFollowers: (req, res) => {
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followers' }]
