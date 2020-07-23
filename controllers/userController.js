@@ -8,6 +8,11 @@ const moment = require('moment')
 let userController = {
   getUser: (req, res) => {
     return User.findByPk(req.params.id, {
+      order: [
+        [{ model: Tweet }, 'createdAt', 'DESC']
+        [{ model: Reply }, 'createdAt', 'DESC'],
+        [{ model: Like }, 'createdAt', 'DESC'],
+      ],
       include: [
         { model: Tweet, include: [Like, Reply] },
         { model: Reply, include: [Tweet] },

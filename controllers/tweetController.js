@@ -27,6 +27,7 @@ let tweetController = {
   },
   getTweet: (req, res) => {
     return Tweet.findByPk(req.params.id, {
+      order: [[{ model: Reply }, 'createdAt', 'DESC']],
       include: [
         User,
         Like,
