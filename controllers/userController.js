@@ -110,23 +110,32 @@ const userController = {
     })
   },
 
-  getFollower: (req, res) => {
+  getFollowers: (req, res) => {
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followers' }]
     }).then(user => {
+      const data = user.Followers.map(r => ({
+        ...r.dataValues,
+        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+      }))
       console.log(req.user)
+      console.log(req.user.Followings.map(d => d.id))
       return res.json({
-        user: user
+        user: data,
       })
     })
   },
 
-  getFollowing: (req, res) => {
+  getFollowings: (req, res) => {
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followings' }]
     }).then(user => {
+      const data = user.Followings.map(r => ({
+        ...r.dataValues,
+        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+      }))
       return res.json({
-        user: user
+        user: data
       })
     })
   },
