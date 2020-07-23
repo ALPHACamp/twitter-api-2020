@@ -20,7 +20,7 @@ describe('# user requests', () => {
       it(' - successfully', (done) => {
         request(app)
           .post('/api/users')
-          .send('account=User1&name=User1&email=User1&password=User1')
+          .send('account=User1&name=User1&email=User1@example.com&password=User1&checkPassword=User1')
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
