@@ -7,4 +7,5 @@ module.exports = (app) => {
   app.post('/api/tweets', tweetController.postTweet)
 
   app.post('/api/register', userController.register)
+  app.post('/api/login', userController.login)
 }
