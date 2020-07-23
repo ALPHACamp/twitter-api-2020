@@ -34,7 +34,7 @@ const userController = {
         if (userOwnedAccount) {
           return res.json({ status: 'error', message: 'this account is registered' })
         }
-        User.findOne({ where: { email } })
+        return User.findOne({ where: { email } })
           .then(userOwnedEmail => {
             if (userOwnedEmail) {
               return res.json({ status: 'error', message: 'this email is registered' })
