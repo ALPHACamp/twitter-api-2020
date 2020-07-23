@@ -89,11 +89,11 @@ const userController = {
         })
       })
   },
-  
+
   getUser: (req, res) => {
     return User.findByPk(req.params.id, {
       order: [
-        [{ model: Tweet }, 'createdAt', 'DESC']
+        [{ model: Tweet }, 'createdAt', 'DESC'],
         [{ model: Reply }, 'createdAt', 'DESC'],
         [{ model: Like }, 'createdAt', 'DESC'],
       ],
