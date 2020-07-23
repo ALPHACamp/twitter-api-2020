@@ -8,6 +8,14 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.TEXT,
       allowNull: false
+    },
+    commentCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    likeCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {});
   Tweet.associate = function (models) {
