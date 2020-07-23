@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJWT = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
+const moment = require('moment')
 
 const db = require('../models')
-const { User } = db
+const { User, Tweet, Reply, Like } = db
 
 const userController = {
   register: (req, res) => {
@@ -87,8 +88,27 @@ const userController = {
           }
         })
       })
-  }
+  },
+  
+  getUser: (req, res) => {
+    return User.findByPk(req.params.id, {
+      order: [
+        [{ model: Tweet }, 'createdAt', 'DESC']
+        [{ model: Reply }, 'createdAt', 'DESC'],
+        [{ model: Like }, 'createdAt', 'DESC'],
+      ],
+      include: [
+        { model: Tweet, include: [Like, Reply] },
+        { model: Reply, include: [Tweet] },
+        { model: Like, include: [Tweet] },
+      ]
+    }).then(user => {
+      return res.json({
+        user: user,
+        tweetCounts: user.Tweets.length,
+      })
+    })
+  },
 
 }
-
 module.exports = userController
