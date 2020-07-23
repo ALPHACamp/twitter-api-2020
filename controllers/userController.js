@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 
 const userController = {
-  signUp: (req, res) => {
+  register: (req, res) => {
     const { account, name, email, password, passwordConfirm } = req.body
     const errors = []
     if (!account && !name && !email && !password && !passwordConfirm) {
@@ -20,7 +20,6 @@ const userController = {
       errors.push({ status: 'error', message: 'password or passwordConfirm is incorrect' })
     }
     if (errors.length) return res.json(...errors);
-
 
     User.findOne({ where: { account } })
       .then(userOwnedAccount => {
