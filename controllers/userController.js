@@ -6,7 +6,7 @@ const JwtStrategy = passportJWT.Strategy
 const moment = require('moment')
 
 const db = require('../models')
-const { User, Tweet, Reply, Like } = db
+const { User, Tweet, Reply, Like, Followship } = db
 
 const userController = {
   register: (req, res) => {
