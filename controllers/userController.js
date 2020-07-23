@@ -110,5 +110,56 @@ const userController = {
     })
   },
 
+  getFollower: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followers' }]
+    }).then(user => {
+      console.log(req.user)
+      return res.json({
+        user: user
+      })
+    })
+  },
+
+  getFollowing: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followings' }]
+    }).then(user => {
+      return res.json({
+        user: user
+      })
+    })
+  },
+
+  addFollowing: (req, res) => {
+    if (Number(req.user.id) !== Number(req.params.userId)) {
+      return Followship.create({
+        followerId: req.user.id,
+        followingId: req.params.userId
+      })
+        .then((followship) => {
+          res.json({ status: 'success', message: '' })
+        })
+    }
+    else {
+      res.json({ status: 'error', message: '不能追蹤自己' })
+    }
+
+  },
+
+  removeFollowing: (req, res) => {
+    return Followship.findOne({
+      where: {
+        followerId: req.user.id,
+        followingId: req.params.userId
+      }
+    })
+      .then((followship) => {
+        followship.destroy()
+          .then((followship) => {
+            res.json({ status: 'success', message: '' })
+          })
+      })
+  }
 }
 module.exports = userController
