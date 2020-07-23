@@ -253,8 +253,6 @@ const userController = {
         ...r.dataValues,
         isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
       }))
-      console.log(req.user)
-      console.log(req.user.Followings.map(d => d.id))
       return res.json({
         user: data,
       })
