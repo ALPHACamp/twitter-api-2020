@@ -6,7 +6,7 @@ const JwtStrategy = passportJWT.Strategy
 const moment = require('moment')
 
 const db = require('../models')
-const { User, Tweet, Reply, Like } = db
+const { User, Tweet, Reply, Like, Followship } = db
 
 const userController = {
   register: (req, res) => {
@@ -243,7 +243,67 @@ const userController = {
     } else {
       return res.json({ status: "error", "message": "permission denied" })
     }
-  }
+  },
 
+  getFollowers: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followers' }]
+    }).then(user => {
+      const data = user.Followers.map(r => ({
+        ...r.dataValues,
+        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+      }))
+      console.log(req.user)
+      console.log(req.user.Followings.map(d => d.id))
+      return res.json({
+        user: data,
+      })
+    })
+  },
+
+  getFollowings: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followings' }]
+    }).then(user => {
+      const data = user.Followings.map(r => ({
+        ...r.dataValues,
+        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+      }))
+      return res.json({
+        user: data
+      })
+    })
+  },
+
+  addFollowing: (req, res) => {
+    if (Number(req.user.id) !== Number(req.params.userId)) {
+      return Followship.create({
+        followerId: req.user.id,
+        followingId: req.params.userId
+      })
+        .then((followship) => {
+          res.json({ status: 'success', message: '' })
+        })
+    }
+    else {
+      res.json({ status: 'error', message: '不能追蹤自己' })
+    }
+
+  },
+
+  removeFollowing: (req, res) => {
+    return Followship.findOne({
+      where: {
+        followerId: req.user.id,
+        followingId: req.params.userId
+      }
+    })
+      .then((followship) => {
+        followship.destroy()
+          .then((followship) => {
+            res.json({ status: 'success', message: '' })
+          })
+      })
+  }
 }
 module.exports = userController
