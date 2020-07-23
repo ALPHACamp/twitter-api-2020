@@ -85,7 +85,7 @@ const tweetController = {
 
           tweetsData.push({
             status: 'success',
-            message: '找到指定的貼文',
+            message: '成功找到推文資料',
             ...tweet,
             isLiked
           })
@@ -93,6 +93,10 @@ const tweetController = {
       })
       .then(() => {
         return res.json(tweetsData)
+      })
+      .catch(err => {
+        console.log(err)
+        return res.json({ status: 'error', message: '找尋所有推文資料失敗' })
       })
   }
 }
