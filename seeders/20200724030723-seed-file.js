@@ -4,6 +4,7 @@ const faker = require('faker')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
+    // one admin
     queryInterface.bulkInsert('Users', [{
       name: 'root',
       account: 'root',
@@ -13,6 +14,11 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date()
     }], {});
+
+    // modify seed data arguments here
+    const userCounts = 5        // 5 users by default
+    const tweetsEachUser = 10   // each user has 10 tweets
+    const repliesEachTweet = 3  // each tweet has 3 replies
 
     queryInterface.bulkInsert('Users',
       Array.from({ length: 5 }, (_, i) =>
@@ -27,11 +33,6 @@ module.exports = {
         })
       ), {})
 
-    const userCounts = 5
-    const tweetsEachUser = 10
-    const repliesEachTweet = 3
-
-    // each user has 10 tweets
     const tweetsUserIdArray = []
     for (let i = 0; i < tweetsEachUser; i++) {
       for (let j = 2; j <= userCounts + 1; j++) {
@@ -75,7 +76,7 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-     queryInterface.bulkDelete('Users', null, {});
+    queryInterface.bulkDelete('Users', null, {});
     queryInterface.bulkDelete('Tweets', null, {});
     return queryInterface.bulkDelete('Replies', null, {});
   }
