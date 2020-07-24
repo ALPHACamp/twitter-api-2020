@@ -31,6 +31,8 @@ module.exports = (app) => {
   app.get('/api/users/:id/followings', authenticated, userController.getFollowings)
   app.post('/api/following/:userId', authenticated, userController.addFollowing)
   app.delete('/api/following/:userId', authenticated, userController.removeFollowing)
+  app.post('/api/like/:tweetId', authenticated, userController.addLike)
+  app.delete('/api/like/:tweetId', authenticated, userController.removeLike)
 
   app.post('/api/register', userController.register)
   app.post('/api/login', userController.login)
