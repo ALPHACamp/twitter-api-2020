@@ -31,8 +31,8 @@ const tweetController = {
         return res.json({ status: 'success', message: '成功建立一則推文資料' })
       })
       .catch(err => {
-        console.log(err) // error for us to see
-        return res.json({ status: 'error', message: '建立推文資料失敗' }) // fail message for user to know
+        console.log(err)
+        return res.json({ status: 'error', message: `${err}` })
       })
   },
 
@@ -61,7 +61,7 @@ const tweetController = {
       })
       .catch(err => {
         console.log(err)
-        return res.json({ status: 'error', message: '找尋此筆推文資料失敗' })
+        return res.json({ status: 'error', message: `${err}` })
       })
   },
 
@@ -96,7 +96,7 @@ const tweetController = {
       })
       .catch(err => {
         console.log(err)
-        return res.json({ status: 'error', message: '找尋所有推文資料失敗' })
+        return res.json({ status: 'error', message: `${err}` })
       })
   }
 }

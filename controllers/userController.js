@@ -4,6 +4,7 @@ const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -39,7 +40,10 @@ const userController = {
       .then(user => {
         return res.json({ status: 'success', message: '成功建立使用者資料' })
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        console.log(err)
+        return res.json({ status: 'error', message: `${err}` })
+      })
   },
 
   signIn: (req, res) => {
@@ -72,6 +76,10 @@ const userController = {
           }
         })
       })
+      .catch(err => {
+        console.log(err)
+        return res.json({ status: 'error', message: `${err}` })
+      })
   },
 
   getUser: (req, res) => {
@@ -93,7 +101,7 @@ const userController = {
       })
       .catch(err => {
         console.log(err)
-        res.json({ status: 'error', message: `${err}` })
+        return res.json({ status: 'error', message: `${err}` })
       })
   },
 
@@ -173,6 +181,38 @@ const userController = {
         res.json({ status: 'error', message: `${err}` })
       })
   },
+
+  getUserTweets: (req, res) => {
+    const tweetsData = []
+
+    return Tweet.findAll({
+      raw: true,
+      nest: true,
+      where: { UserId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      include: [User]
+    })
+      .then(tweets => {
+        for (const tweet of tweets) {
+          // 回傳值過濾 (role >> isAdmin, remove password)
+          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+          delete tweet.User.role
+          delete tweet.User.password
+
+          tweetsData.push({
+            status: 'success',
+            message: '成功找到使用者的推文資料',
+            ...tweet
+          })
+        }
+
+        return res.json(tweetsData)
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  }
 }
 
 module.exports = userController

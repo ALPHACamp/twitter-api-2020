@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000
 
 // modules and files
 const express = require('express')
-const cors = require('cors');
+const cors = require('cors')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
 const session = require('express-session')
@@ -29,6 +29,7 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(cors())
 
 // routes
 app.get('/', (req, res) => res.send('Hello World!'))
