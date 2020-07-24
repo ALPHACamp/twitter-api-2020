@@ -3,6 +3,7 @@ const Reply = db.Reply
 const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
+const helpers = require('../_helpers.js')
 
 // 撈取此使用者是否按這則回應讚 (return true or false)
 const getUserLike = (reply, UserId) => {
@@ -29,7 +30,7 @@ const replyController = {
     return Reply.create({
       comment: comment,
       TweetId: req.params.tweet_id,
-      UserId: req.user.id
+      UserId: helpers.getUser(req).id
     })
       .then(reply => {
         res.status(200).json({ status: 'success', message: '成功建立回覆' })
@@ -53,7 +54,7 @@ const replyController = {
           return res.json({ status: 'success', message: '推文尚未有任何回覆' })
         } else {
           const repliesData = replies.map(async (reply) => {
-            const isLiked = await getUserLike(reply, req.user.id)
+            const isLiked = await getUserLike(reply, helpers.getUser(req).id)
 
             // 回傳值過濾 (role >> isAdmin, remove password)
             reply.User.isAdmin = Boolean(Number(reply.User.role))
