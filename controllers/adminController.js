@@ -19,7 +19,7 @@ const adminController = {
       users = users.map(user => ({
         ...user.dataValues,
         FollowerCount: user.Followers.length,
-        FollowungCount: user.Followings.length,
+        FollowingCount: user.Followings.length,
         tweetCounts: user.Tweets.length,
         tweetLikedCounts: user.Tweets.map(r => r.Likes.length).reduce(function (a, b) { return a + b }, 0)
       }))
