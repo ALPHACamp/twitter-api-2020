@@ -20,7 +20,7 @@ let tweetController = {
         userAccount: r.User.account,
         replyConut: r.Replies.length,
         likeConut: r.Likes.length,
-        // isLiked: req.user.LikedTweets.map(d => d.id).includes(r.id)
+        isLiked: req.user.LikedTweets.map(d => d.id).includes(r.id)
       }))
       return res.json({ Tweets: data })
     })
@@ -32,15 +32,16 @@ let tweetController = {
         User,
         Like,
         { model: Reply, include: [User] },
+        { model: User, as: 'LikedUsers' }
       ]
     }).then(tweet => {
-      // const isLiked = restaurant.LikedUsers.map(d => d.id).includes(req.user.id)
+      const isLiked = tweet.LikedUsers.map(d => d.id).includes(req.user.id)
       return res.json({
         tweet: tweet,
         replyConut: tweet.Replies.length,
         likeConut: tweet.Likes.length,
         tweetCreatedAt: moment(tweet.dataValues.createdAt).fromNow(),
-        // isLiked: isLiked
+        isLiked: isLiked
       })
     })
   },
