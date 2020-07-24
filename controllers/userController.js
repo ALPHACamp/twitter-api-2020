@@ -302,6 +302,30 @@ const userController = {
             res.json({ status: 'success', message: '' })
           })
       })
-  }
+  },
+
+  addLike: (req, res) => {
+    return Like.create({
+      UserId: req.user.id,
+      TweetId: req.params.tweetId
+    })
+      .then((like) => {
+        res.json({ status: 'success', message: '' })
+      })
+  },
+  removeLike: (req, res, callback) => {
+    return Like.findOne({
+      where: {
+        UserId: req.user.id,
+        TweetId: req.params.tweetId
+      }
+    })
+      .then((like) => {
+        like.destroy()
+          .then((like) => {
+            res.json({ status: 'success', message: '' })
+          })
+      })
+  },
 }
 module.exports = userController
