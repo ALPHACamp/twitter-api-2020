@@ -5,7 +5,7 @@ const tweetController = require('../controllers/tweetController.js')
 
 const replyController = require('../controllers/replyController.js')
 const userController = require('../controllers/userController.js')
-
+const adminController = require('../controllers/adminController.js')
 
 // middleware
 const authenticated = passport.authenticate('jwt', { session: false })
@@ -38,4 +38,6 @@ module.exports = (app) => {
   app.post('/api/register', userController.register)
   app.post('/api/login', userController.login)
   app.put('/api/users/:id/:editPage', authenticated, userController.putUser)
+
+  app.get('/api/admin/users', authenticated, adminController.getUsers)
 }
