@@ -21,7 +21,7 @@ module.exports = {
     const repliesEachTweet = 3  // each tweet has 3 replies
 
     queryInterface.bulkInsert('Users',
-      Array.from({ length: 5 }, (_, i) =>
+      Array.from({ length: userCounts }, (_, i) =>
         ({
           name: faker.name.findName(),
           account: `user${i}`,
@@ -40,7 +40,7 @@ module.exports = {
       }
     }
     queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 50 }, (_, i) =>
+      Array.from({ length: userCounts * tweetsEachUser }, (_, i) =>
         ({
           UserId: tweetsUserIdArray.shift(),
           description: faker.lorem.text(),
