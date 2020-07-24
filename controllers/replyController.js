@@ -16,7 +16,7 @@ const replyController = {
 
     return Reply.create({
       comment: comment,
-      TweetId: req.body.tweet_id,
+      TweetId: req.params.tweet_id,
       UserId: req.user.id
     })
       .then(reply => {
@@ -26,7 +26,39 @@ const replyController = {
         console.log(err)
         res.json({ status: 'error', message: `${err}` })
       })
-  }
+  },
+
+  deleteReply: (req, res) => {
+    return Reply.findByPk(req.params.reply_id, {
+      include: [Tweet]
+    })
+      .then(reply => {
+        console.log('=== reply ===', reply.toJSON())
+        const userId = Number(req.user.id)
+        const data = reply.toJSON()
+
+        // 如果 reply 作者和 tweet 作者同一人 => 刪除
+        // 如果 reply 作者就是自己 => 刪除
+        if (userId === data.UserId || userId === data.Tweet.UserId) {
+          return reply.destroy()
+            .then(reply => {
+              console.log('回覆已刪除')
+              return res.json({ status: 'success', message: '回覆已刪除' })
+            })
+        } else {
+          console.log('沒有權限刪除此回覆')
+          return res.json({ status: 'error', message: '沒有權限刪除此回覆' })
+        }
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  },
+
+
+
 }
+
 
 module.exports = replyController

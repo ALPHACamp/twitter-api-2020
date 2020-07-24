@@ -41,5 +41,6 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 
 // reply
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.deleteReply)
 
 module.exports = router
