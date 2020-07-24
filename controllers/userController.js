@@ -40,7 +40,10 @@ const userController = {
       .then(user => {
         return res.json({ status: 'success', message: '成功建立使用者資料' })
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        console.log(err)
+        return res.json({ status: 'error', message: `${err}` })
+      })
   },
 
   signIn: (req, res) => {
@@ -73,6 +76,10 @@ const userController = {
           }
         })
       })
+      .catch(err => {
+        console.log(err)
+        return res.json({ status: 'error', message: `${err}` })
+      })
   },
 
   getUser: (req, res) => {
@@ -92,7 +99,10 @@ const userController = {
           user: safeUser
         })
       })
-      .catch(err => res.json({ status: 'error', message: `${err}` }))
+      .catch(err => {
+        console.log(err)
+        return res.json({ status: 'error', message: `${err}` })
+      })
   },
 
   putUser: (req, res) => {
