@@ -28,17 +28,37 @@ const replyController = {
       })
   },
 
-  deleteReply: (req, res) => {
-    return Reply.findByPk(req.params.reply_id, {
-      include: [Tweet]
+  getReplies: (req, res) => {
+    return Reply.findAll({
+      raw: true,
+      nest: true,
+      order: [['createdAt', 'DESC']],
+      where: { TweetId: req.params.tweet_id },
+      include: [User]
     })
+      .then(replies => {
+        // console.log('=== single reply ===', replies[0])
+        if (replies.length === 0) {
+          return res.json({ status: 'success', message: '推文不存在或沒有任何回覆', data: replies })
+        } else {
+          return res.json({ status: 'success', message: '取回推文的所有回覆', data: replies })
+        }
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  },
+
+  deleteReply: (req, res) => {
+    return Reply.findByPk(req.params.reply_id, { include: [Tweet] })
       .then(reply => {
         console.log('=== reply ===', reply.toJSON())
         const userId = Number(req.user.id)
         const data = reply.toJSON()
 
-        // 如果 reply 作者和 tweet 作者同一人 => 刪除
-        // 如果 reply 作者就是自己 => 刪除
+        // 如果使用者 = tweet 作者 => 刪除
+        // 如果使用者 = reply 作者 => 刪除
         if (userId === data.UserId || userId === data.Tweet.UserId) {
           return reply.destroy()
             .then(reply => {
