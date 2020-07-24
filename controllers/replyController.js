@@ -32,7 +32,7 @@ const replyController = {
       UserId: req.user.id
     })
       .then(reply => {
-        res.json({ status: 'success', message: '成功建立回覆' })
+        res.status(200).json({ status: 'success', message: '成功建立回覆' })
       })
       .catch(err => {
         console.log(err)
@@ -71,10 +71,10 @@ const replyController = {
         }
       })
       .then(results => {
-        console.log(results)
+        console.log([...results])
 
         // 回傳每則回覆的資料
-        res.json(results)
+        res.json([...results])
       })
       .catch(err => {
         console.log(err)

@@ -9,6 +9,7 @@ const port = process.env.PORT || 3000
 
 // modules and files
 const express = require('express')
+const cors = require('cors');
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
 const session = require('express-session')
@@ -32,6 +33,7 @@ app.use(passport.session())
 // routes
 app.get('/', (req, res) => res.send('Hello World!'))
 app.use('/api', routes)
+app.use(cors())
 
 // start API web server
 app.listen(port, () => console.log(`API Web Server app listening on port ${port}!`))
