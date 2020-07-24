@@ -130,22 +130,16 @@ const userController = {
         return user
       })
       .then(user => {
-        /////////////////////// 下面是有問題的 code  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
         // 判斷有沒有 avatar 和 cover 圖片上傳項目
         let { avatar, cover } = req.files
         avatar = avatar ? avatar[0] : null
         cover = cover ? cover[0] : null
 
-        console.log('avatar 資料', avatar)
-        console.log('cover 資料', cover)
-
         const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
 
+        // tasks 陣列項目存在 => 轉成 Promise，負責上傳到 imgur，再更新到資料庫
         const tasks = [avatar, cover].map(file => {
-          if (file) {  // tasks 陣列項目存在 => 轉成 Promise，負責上傳到 imgur，再更新到資料庫
-            console.log('上傳檔案資料', file)
-
+          if (file) {
             return new Promise((resolve, reject) => {
               imgur.setClientID(IMGUR_CLIENT_ID)
               imgur.upload(file.path, (err, img) => {
@@ -158,17 +152,17 @@ const userController = {
                   [file.fieldname]: file ? img.data.link : user[file.fieldname]
                 })
               })
+              resolve('upload done')
             })
-          } else {  // 項目不存在 => 轉成 Promise，丟出文字訊息
+          } else {  // tasks 項目不存在 => 轉成 Promise，丟出文字訊息
             return new Promise((resolve, reject) => {
               resolve('no upload task')
             })
           }
         })
 
-        console.log('tasks 內容', tasks)
-
-        if (!avatar && !cover) {  // 沒有上傳任何圖片，直接更新使用者的其他資料
+        // 判斷有沒有上傳任何圖片 => 執行對應的任務
+        if (!avatar && !cover) {
           return user.update({
             account,
             name,
@@ -176,16 +170,11 @@ const userController = {
             password: hashedPassword,
             introduction,
           })
-            .then(user => res.json({ status: 'success', message: 'simple user 成功更新使用者資料' }))
-        } else {  // 如果上傳一到二張圖片，等待每個 promise 確定狀態 (這邊會等待到 timeout)
+            .then(user => res.json({ status: 'success', message: '成功更新使用者資料' }))
+        } else {
           return Promise.all(tasks)
-            .then(results => res.json({ status: 'success', message: 'promise 成功更新使用者資料' }))
+            .then(results => res.json({ status: 'success', message: '成功更新使用者資料' }))
         }
-
-        /////////////////////// 上面是有問題的 code  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-      })
-      .then(results => {
-        console.log(results)
       })
       .catch(err => {
         console.log(err)

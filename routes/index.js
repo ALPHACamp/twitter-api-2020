@@ -21,6 +21,7 @@ const authenticatedAdmin = (req, res, next) => {
 const testController = require('../controllers/testController.js')
 const userController = require('../controllers/userController.js')
 const tweetController = require('../controllers/tweetController.js')
+const replyController = require('../controllers/replyController.js')
 
 // test
 router.get('/test', authenticated, authenticatedAdmin, testController.getTestData)
@@ -37,5 +38,10 @@ router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
+
+// reply
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
+router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.deleteReply)
 
 module.exports = router

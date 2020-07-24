@@ -34,6 +34,7 @@ app.use(cors())
 // routes
 app.get('/', (req, res) => res.send('Hello World!'))
 app.use('/api', routes)
+app.use(cors())
 
 // start API web server
 app.listen(port, () => console.log(`API Web Server app listening on port ${port}!`))
