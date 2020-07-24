@@ -2,6 +2,18 @@ const db = require('../models')
 const Reply = db.Reply
 const Tweet = db.Tweet
 const User = db.User
+const Like = db.Like
+
+// 撈取此使用者是否按這則回應讚 (return true or false)
+const getUserLike = (reply, UserId) => {
+  return Like.findOne({
+    where: { ReplyId: reply.id, UserId }
+  })
+    .then(like => {
+      if (like) return true
+      return false
+    })
+}
 
 const replyController = {
   postReply: (req, res) => {
@@ -37,12 +49,32 @@ const replyController = {
       include: [User]
     })
       .then(replies => {
-        // console.log('=== single reply ===', replies[0])
         if (replies.length === 0) {
-          return res.json({ status: 'success', message: '推文不存在或沒有任何回覆', data: replies })
+          return res.json({ status: 'success', message: '推文尚未有任何回覆' })
         } else {
-          return res.json({ status: 'success', message: '取回推文的所有回覆', data: replies })
+          const repliesData = replies.map(async (reply) => {
+            const isLiked = await getUserLike(reply, req.user.id)
+
+            // 回傳值過濾 (role >> isAdmin, remove password)
+            reply.User.isAdmin = Boolean(Number(reply.User.role))
+            delete reply.User.password
+            delete reply.User.role
+
+            return {
+              status: 'success',
+              message: '取得推文的回覆',
+              isLiked,
+              ...reply
+            }
+          })
+          return Promise.all(repliesData)
         }
+      })
+      .then(results => {
+        console.log(results)
+
+        // 回傳每則回覆的資料
+        res.json(results)
       })
       .catch(err => {
         console.log(err)
