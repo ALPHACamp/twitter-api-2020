@@ -96,7 +96,7 @@ const userController = {
         return res.json({
           status: 'success',
           message: '找到使用者的資料',
-          user: safeUser
+          ...safeUser
         })
       })
       .catch(err => {
@@ -107,11 +107,11 @@ const userController = {
 
   putUser: (req, res) => {
     const userId = Number(req.params.id)
-    const account = req.body.account.trim()
-    const name = req.body.name.trim()
-    const email = req.body.email.trim()
-    const password = req.body.password.trim()
-    const introduction = req.body.introduction.trim()
+    const account = (req.body.account) ? req.body.account.trim() : req.body.account
+    const name = (req.body.name) ? req.body.name.trim() : req.body.name
+    const email = (req.body.email) ? req.body.email.trim() : req.body.email
+    const password = (req.body.password) ? req.body.password.trim() : req.body.password
+    const introduction = (req.body.introduction) ? req.body.introduction.trim() : req.body.introduction
 
     if (!account || !name || !email || !password) {
       return res.json({ status: 'error', message: '填寫資訊不完整' })
@@ -122,12 +122,16 @@ const userController = {
     // 如果 user.id 和 userId 不一樣 => 輸入的資料和別人的資料一樣 => 和其他人的重複 => 不可以寫入
     User.findOne({ where: { email } })
       .then(user => {
-        if (user.id !== userId) return res.json({ status: 'error', message: '電子郵件已被註冊' })
+        if (user) {
+          if (user.id !== userId) return res.json({ status: 'error', message: '電子郵件已被註冊' })
+        }
         return User.findOne({ where: { account } })
       })
       .then(user => {
-        if (user.id !== userId) return res.json({ status: 'error', message: '使用者帳號不可重複' })
-        return user
+        if (user) {
+          if (user.id !== userId) return res.json({ status: 'error', message: '使用者帳號不可重複' })
+        }
+        return User.findByPk(userId) // TO FH：你要找這個使用者才行，因為接下來要對他 update，否則他會是「有這個重複帳號的那位人」或是「無」
       })
       .then(user => {
         // 判斷有沒有 avatar 和 cover 圖片上傳項目
@@ -143,6 +147,7 @@ const userController = {
             return new Promise((resolve, reject) => {
               imgur.setClientID(IMGUR_CLIENT_ID)
               imgur.upload(file.path, (err, img) => {
+                if (err) reject(err)
                 user.update({
                   account,
                   name,
@@ -178,7 +183,7 @@ const userController = {
       })
       .catch(err => {
         console.log(err)
-        res.json({ status: 'error', message: `${err}` })
+        return res.json({ status: 'error', message: `${err}` })
       })
   },
 
