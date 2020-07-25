@@ -48,5 +48,6 @@ router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyControl
 
 // followship
 router.post('/followships', authenticated, followshipController.postFollowship)
+router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship)
 
 module.exports = router

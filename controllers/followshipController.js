@@ -3,6 +3,18 @@ const User = db.User
 const Followship = db.Followship
 const helpers = require('../_helpers.js')
 
+// 檢查使用者是否存在
+const checkUser = (id) => {
+  return User.findByPk(id)
+}
+
+// 檢查追蹤關係是否存在
+const checkFollowship = (followerId, followingId) => {
+  return Followship.findOne({
+    where: { followerId, followingId }
+  })
+}
+
 const followshipController = {
   postFollowship: async (req, res) => {
     const followerId = helpers.getUser(req).id
@@ -10,18 +22,6 @@ const followshipController = {
 
     if (!followingId) return res.json({ status: 'error', message: '欲追蹤的使用者請勿空白' })
     if (followerId === followingId) return res.json({ status: 'error', message: '無法追蹤自己' })
-
-    // 檢查使用者是否存在
-    const checkUser = (id) => {
-      return User.findByPk(id)
-    }
-
-    // 檢查追蹤關係是否存在
-    const checkFollowship = (followerId, followingId) => {
-      return Followship.findOne({
-        where: { followerId, followingId }
-      })
-    }
 
     try {
       await Promise.all([checkUser(followingId), checkFollowship(followerId, followingId)])
@@ -45,6 +45,40 @@ const followshipController = {
                   await followerUser.increment('followingCount', { by: 1 })
                   await followingUser.increment('followerCount', { by: 1 })
                   return res.json({ status: 'success', message: '成功建立一組追蹤關係' })
+                })
+            })
+        })
+    } catch (err) {
+      console.warn(err)
+      return res.json({ status: 'error', message: `${err}` })
+    }
+  },
+
+  deleteFollowship: async (req, res) => {
+    const followerId = helpers.getUser(req).id
+    const followingId = (req.params.followingId) ? +req.params.followingId.trim() : +req.params.followingId
+
+    if (!followingId) return res.json({ status: 'error', message: '被追蹤的使用者請勿空白' })
+    if (followerId === followingId) return res.json({ status: 'error', message: '沒有追蹤自己的記錄，故無法刪除' })
+
+    try {
+      await Promise.all([checkUser(followingId), checkFollowship(followerId, followingId)])
+        .then(results => {
+          if (!results[0]) return res.json({ status: 'error', message: '找不到被追蹤的使用者資料' })
+          if (!results[1]) return res.json({ status: 'error', message: '沒有此追蹤資料，故無法刪除' })
+
+          const followingUser = results[0]
+          const followship = results[1]
+
+          // 刪除追蹤關係
+          return followship.destroy()
+            .then(followship => {
+              // 更新 follower user 資料: 追蹤別人數量、following user 資料: 被別人追蹤數量
+              return User.findByPk(followerId)
+                .then(async (followerUser) => {
+                  await followerUser.decrement('followingCount', { by: 1 })
+                  await followingUser.decrement('followerCount', { by: 1 })
+                  return res.json({ status: 'success', message: '成功刪除一組追蹤關係' })
                 })
             })
         })
