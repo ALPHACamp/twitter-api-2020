@@ -5,6 +5,7 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Followship = db.Followship
 const helpers = require('../_helpers.js')
 
 // JWT
@@ -228,6 +229,7 @@ const userController = {
     })
       .then(user => {
         user = user.toJSON()
+
         let followingUsers = user.Followings.map(followingUser => {
           // 回傳值過濾 (role >> isAdmin, remove password)
           followingUser.isAdmin = Boolean(Number(followingUser.role))
@@ -248,6 +250,53 @@ const userController = {
         })
 
         return res.json(followingUsers)
+      })
+  },
+
+  getUserFollowers: (req, res) => {
+    // 撈取是否有追蹤紀錄 (return true or false)
+    const getFollowship = (followerId, followingId) => {
+      return Followship.findOne({
+        where: { followerId, followingId }
+      })
+    }
+
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followers' }
+      ]
+    })
+      .then(async (user) => {
+        user = user.toJSON()
+
+        let followerUsers = user.Followers.map(followerUser => {
+          // 回傳值過濾 (role >> isAdmin, remove password)
+          followerUser.isAdmin = Boolean(Number(followerUser.role))
+          delete followerUser.role
+          delete followerUser.password
+
+          return followerUser
+        })
+
+        // 依追蹤紀錄建立時間排序清單
+        followerUsers = followerUsers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+
+        // 撈取「登入的使用者」是否追蹤「這位追蹤使用者(req.params.id)的人」，並刪除多餘欄位
+        await Promise.all(followerUsers.map(followerUser => getFollowship(helpers.getUser(req).id, followerUser.id)))
+          .then(followships => {
+            followships.forEach((followship, index) => {
+              if (followship) followerUsers[index].isFollowed = true
+              else followerUsers[index].isFollowed = false
+
+              delete followerUsers[index].Followship
+            })
+          })
+          .catch(err => {
+            console.warn(err)
+            return res.json({ status: 'error', message: `${err}` })
+          })
+
+        return res.json(followerUsers)
       })
   }
 }
