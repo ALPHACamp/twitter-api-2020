@@ -23,6 +23,7 @@ const testController = require('../controllers/testController.js')
 const userController = require('../controllers/userController.js')
 const tweetController = require('../controllers/tweetController.js')
 const replyController = require('../controllers/replyController.js')
+const followshipController = require('../controllers/followshipController.js')
 
 // test
 router.get('/test', authenticated, authenticatedAdmin, testController.getTestData)
@@ -44,5 +45,8 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
 router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.deleteReply)
+
+// followship
+router.post('/followships', authenticated, followshipController.postFollowship)
 
 module.exports = router
