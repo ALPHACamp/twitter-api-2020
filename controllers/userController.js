@@ -91,24 +91,62 @@ const userController = {
   },
 
   getUser: (req, res) => {
+    return User.findByPk(req.params.id, { include: [Tweet] })
+      .then(user => {
+        return res.json({
+          account: user.account,
+          email: user.email,
+          user: user,
+          tweetCounts: user.Tweets.length,
+        })
+      }).catch(err => console.log(err))
+  },
+
+  getUserTweets: (req, res) => {
     return User.findByPk(req.params.id, {
       order: [
         [{ model: Tweet }, 'createdAt', 'DESC'],
-        [{ model: Reply }, 'createdAt', 'DESC'],
-        [{ model: Like }, 'createdAt', 'DESC'],
       ],
       include: [
         { model: Tweet, include: [Like, Reply] },
+      ]
+    }).then(user => {
+      const data = user.Tweets.map(r => ({
+        ...r.dataValues,
+      }))
+      return res.json(data)
+    }).catch(err => console.log(err))
+  },
+
+  getUserReply: (req, res) => {
+    return User.findByPk(req.params.id, {
+      order: [
+        [{ model: Reply }, 'createdAt', 'DESC'],
+      ],
+      include: [
         { model: Reply, include: [Tweet] },
+      ]
+    }).then(user => {
+      const data = user.Replies.map(r => ({
+        ...r.dataValues,
+      }))
+      return res.json(data)
+    }).catch(err => console.log(err))
+  },
+
+  getUserLike: (req, res) => {
+    return User.findByPk(req.params.id, {
+      order: [
+        [{ model: Like }, 'createdAt', 'DESC'],
+      ],
+      include: [
         { model: Like, include: [Tweet] },
       ]
     }).then(user => {
-      return res.json({
-        account: user.account,
-        email: user.email,
-        user: user,
-        tweetCounts: user.Tweets.length,
-      })
+      const data = user.Likes.map(r => ({
+        ...r.dataValues,
+      }))
+      return res.json(data)
     }).catch(err => console.log(err))
   },
 
