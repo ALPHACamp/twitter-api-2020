@@ -29,5 +29,19 @@ const adminController = {
       })
     })
   },
+  deleteTweet: (req, res) => {
+    if (req.user.role === 'admin') {
+      return Tweet.findByPk(req.params.id)
+        .then((tweet) => {
+          tweet.destroy()
+            .then((tweet) => {
+              res.json({ status: 'success', message: "成功刪除貼文" })
+            })
+        })
+    } else {
+      res.json({ status: 'error', message: "沒有權限刪除貼文" })
+    }
+
+  },
 }
 module.exports = adminController

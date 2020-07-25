@@ -40,4 +40,5 @@ module.exports = (app) => {
   app.put('/api/users/:id/:editPage', authenticated, userController.putUser)
 
   app.get('/api/admin/users', authenticated, adminController.getUsers)
+  app.delete('/api/admin/tweets/:id', authenticated, adminController.deleteTweet)
 }
