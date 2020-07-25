@@ -49,7 +49,7 @@ const tweetController = {
         if (!tweet) return res.json({ status: 'error', message: '找不到此筆推文資料' })
 
         tweet = tweet.toJSON()
-        const isLiked = await getUserLike(tweet, helpers.getUser(req).id)
+        const isLikedByLoginUser = await getUserLike(tweet, helpers.getUser(req).id)
 
         // 回傳值過濾 (role >> isAdmin, remove password)
         tweet.User.isAdmin = Boolean(Number(tweet.User.role))
@@ -60,7 +60,7 @@ const tweetController = {
           status: 'success',
           message: '找到指定的貼文',
           ...tweet,
-          isLiked
+          isLikedByLoginUser
         })
       })
       .catch(err => {
@@ -80,7 +80,7 @@ const tweetController = {
     })
       .then(async (tweets) => {
         for (const tweet of tweets) {
-          const isLiked = await getUserLike(tweet, helpers.getUser(req).id)
+          const isLikedByLoginUser = await getUserLike(tweet, helpers.getUser(req).id)
 
           // 回傳值過濾 (role >> isAdmin, remove password)
           tweet.User.isAdmin = Boolean(Number(tweet.User.role))
@@ -91,7 +91,7 @@ const tweetController = {
             status: 'success',
             message: '成功找到推文資料',
             ...tweet,
-            isLiked
+            isLikedByLoginUser
           })
         }
       })
