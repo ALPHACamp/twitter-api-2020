@@ -5,6 +5,7 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const helpers = require('../_helpers.js')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -216,6 +217,37 @@ const userController = {
       .catch(err => {
         console.log(err)
         res.json({ status: 'error', message: `${err}` })
+      })
+  },
+
+  getUserFollowings: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then(user => {
+        user = user.toJSON()
+        let followingUsers = user.Followings.map(followingUser => {
+          // 回傳值過濾 (role >> isAdmin, remove password)
+          followingUser.isAdmin = Boolean(Number(followingUser.role))
+          delete followingUser.role
+          delete followingUser.password
+
+          return followingUser
+        })
+
+        // 依追蹤紀錄建立時間排序清單
+        followingUsers = followingUsers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+
+        // 刪除多餘欄位
+        followingUsers = followingUsers.map(followingUser => {
+          delete followingUser.Followship
+
+          return followingUser
+        })
+
+        return res.json(followingUsers)
       })
   }
 }
