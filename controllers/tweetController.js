@@ -20,14 +20,18 @@ const tweetController = {
     // 初始值去除空白字元
     const description = (req.body.description) ? req.body.description.trim() : req.body.description
 
+    const User = helpers.getUser(req)
+
     if (!description) return res.json({ status: 'error', message: '內容請勿空白' })
     if (description.length > 140) return res.json({ status: 'error', message: '內容請勿超過 140 個字' })
 
     return Tweet.create({
-      UserId: helpers.getUser(req).id,
+      UserId: User.id,
       description
     })
-      .then(tweet => {
+      .then(async (tweet) => {
+        // 更新使用者資料: 發布貼文數量
+        await User.increment('tweetCount', { by: 1 })
         return res.json({ status: 'success', message: '成功建立一則推文資料' })
       })
       .catch(err => {
