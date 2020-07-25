@@ -8,6 +8,7 @@ const upload = multer({ dest: 'temp/' })
 
 // passport authentication
 const authenticated = passport.authenticate('jwt', { session: false })
+// const authenticated = (req, res, next) => { next() } // 測試時，開啟這條即可，不用取消下方的 authenticated
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
     if (helpers.getUser(req).isAdmin) { return next() }
