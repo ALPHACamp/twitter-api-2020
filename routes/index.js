@@ -1,8 +1,10 @@
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/'})
+const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1}])
 
 const tweetController = require('../controllers/tweetController.js')
-
 const replyController = require('../controllers/replyController.js')
 const userController = require('../controllers/userController.js')
 
@@ -37,5 +39,5 @@ module.exports = (app) => {
 
   app.post('/api/register', userController.register)
   app.post('/api/login', userController.login)
-  app.put('/api/users/:id/:editPage', authenticated, userController.putUser)
+  app.put('/api/users/:id', authenticated, cpUpload, userController.putUser)
 }

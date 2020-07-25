@@ -4,6 +4,8 @@ const passportJWT = require('passport-jwt')
 const ExtractJWT = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 const moment = require('moment')
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const db = require('../models')
 const { User, Tweet, Reply, Like, Followship } = db
@@ -111,138 +113,146 @@ const userController = {
   },
 
   putUser: (req, res) => {
-    const { account, name, email, password, passwordConfirm, avatar, introduction, cover } = req.body
-    const { id, editPage } = req.params
-    //check page
-    if (req.user.id === Number(id) && editPage === 'account') {
-      //check user
-      User.findByPk(id)
-        .then(user => {
-          if (!user) return res.json({ status: "error", "message": "user does not exist" })
-          if (user) {
-            // user update account and email
-            if (account !== user.account && email !== user.email) {
-              //check account and email are not duplicated
-              return User.findOne({ where: { account } })
-                .then(userAccount => {
-                  if (userAccount) return res.json({ status: 'error', message: `account "${account}" is registered` })
-                  return User.findOne({ where: { email } })
-                    .then(userEmail => {
-                      if (userEmail) return res.json({ status: 'error', message: `"email ${email}" is registered` })
-                    })
-                    .then(() => {
-                      // user does not update password
-                      if (!password && !passwordConfirm) {
-                        return user.update({
-                          account: account || user.account,
-                          name: name || user.name,
-                          email: email || user.email,
-                        })
-                      }
-                      // user update password                      
-                      if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
-                      return user.update({
-                        account: account || user.account,
-                        name: name || user.name,
-                        email: email || user.email,
-                        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-                      })
-                    })
-                    .then(() => res.json({ status: 'success', message: 'user account updated successfully', }))
-                    .catch(err => console.log(err))
-                }).catch(err => console.log(err))
-            }
-            // user update account
-            if (account !== user.account && email === user.email) {
-              //check account is not duplicated
-              return User.findOne({ where: { account } })
-                .then(userAccount => {
-                  if (userAccount) return res.json({ status: 'error', message: `account "${account}" is registered` })
-                })
-                .then(() => {
-                  // user does not update password
-                  if (!password && !passwordConfirm) {
-                    return user.update({
-                      account,
-                      name: name || user.name
-                    })
-                  }
-                  // user update password                      
-                  if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
-                  return user.update({
-                    account,
-                    name: name || user.name,
-                    password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-                  })
-                })
-                .then(() => res.json({ status: 'success', message: 'user account updated successfully', }))
-                .catch(err => console.log(err))
-            }
+    let { account, name, email, password, passwordConfirm, introduction } = req.body
+    const { id } = req.params
 
-            // user update email
-            if (account === user.account && email !== user.email) {
-              //check email is not duplicated
-              return User.findOne({ where: { email } })
-                .then(userEmail => {
-                  if (userEmail) return res.json({ status: 'error', message: `email "${email}" is registered` })
-                })
-                .then(() => {
-                  // user does not update password
-                  if (!password && !passwordConfirm) {
-                    return user.update({
-                      email,
-                      name: name || user.name
-                    })
-                  }
-                  // user update password                      
-                  if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
-                  return user.update({
-                    email,
-                    name: name || user.name,
-                    password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-                  })
-                })
-                .then(() => res.json({ status: 'success', message: 'user account updated successfully', }))
-                .catch(err => console.log(err))
-            }
+    //check user
+    if (req.user.id === Number(id)) {
 
-            if (account === user.account && email === user.email) {
-              // user does not update password
-              if (!password && !passwordConfirm) {
-                return user.update({
-                  name: name || user.name
-                })
-              }
-              // user update password                      
-              if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
-              return user.update({
+      if (!req.files) {
+        // user edit profile page without image
+        if (name || introduction && !account && !email && !password && !passwordConfirm) {
+          return User.findByPk(id)
+            .then(user => {
+              user.update({
                 name: name || user.name,
-                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+                introduction: introduction || user.introduction
               })
-                .then(() => res.json({ status: 'success', message: 'user account updated successfully', }))
-                .catch(err => console.log(err))
-            }
+              return res.json({ status: 'success', message: 'user profile updated successfully' })
+            }).catch(err => console.log(err))
+        }
+
+        // 不能有空白
+        if (account) account = account.replace(/\s*/g, "")
+        if (email) email = email.replace(/\s*/g, "")
+
+        // user edit account page
+        if (account || email || password || passwordConfirm || name && !introduction) {
+          return User.findByPk(id)
+            .then(user => {
+              if (account && account !== user.account) {
+                return User.findOne({ where: { account } })
+                  .then(userAccount => {
+                    if (userAccount) return res.json({ status: 'error', message: `account "${account}" is registered` })
+                  })
+              }
+
+              if (email && email !== user.email) {
+                return User.findOne({ where: { email } })
+                  .then(userEmail => {
+                    if (userEmail) return res.json({ status: 'error', message: `"email ${email}" is registered` })
+                  })
+              }
+
+              if (password || passwordConfirm) {
+                if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
+                user.update({
+                  account: account || user.account,
+                  name: name || user.name,
+                  email: email || user.email,
+                  password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+                })
+                return res.json({ status: 'success', message: 'user account updated successfully' })
+              }
+
+              user.update({
+                account: account || user.account,
+                name: name || user.name,
+                email: email || user.email
+              })
+              return res.json({ status: 'success', message: 'user account updated successfully' })
+            }).catch(err => console.log(err))
+        }
+
+
+
+      }
+
+      if (req.files) {
+        const uploadAvatarImage = new Promise((resolve, reject) => {
+          let imageURL = { avatar: '' }
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          // upload avatar image
+          if (req.files.avatar) {
+            imgur.upload(req.files.avatar[0].path, (err, img) => {
+              if (err) return reject(err)
+              // if (err) {
+              //   console.log(`[ERROR]: ${err}`)
+              //   return res.json({ status: 'error', message: 'something wrong when uploading to imgur' })
+              // }
+              imageURL.avatar = img.data.link
+              resolve(imageURL)
+            })
+          } else {
+            imageURL.avatar = null
+            resolve(imageURL)
           }
-        }).catch(err => console.log(err))
+        })
+
+        const uploadCoverImage = new Promise((resolve, reject) => {
+          let imageURL = { cover: '' }
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          // upload cover image
+          if (req.files.cover) {
+            imgur.upload(req.files.cover[0].path, (err, img) => {
+              if (err) return reject(err)
+              // if (err) {
+              //   console.log(`[ERROR]: ${err}`)
+              //   return res.json({ status: 'error', message: 'something wrong when uploading to imgur' })
+              // }
+              imageURL.cover = img.data.link
+              resolve(imageURL)
+            })
+          } else {
+            imageURL.cover = null
+            resolve(imageURL)
+          }
+        })
+
+        async function updateUser() {
+          // user edit profile page and upload image
+          let avatarURL = ''
+          let coverURL = ''
+          if (req.files.avatar) {
+            avatarURL = await uploadAvatarImage
+              .catch(err => console.log(err))
+          }
+          if (req.files.cover) {
+            coverURL = await uploadCoverImage
+              .catch(err => console.log(err))
+          }
+          console.log(avatarURL, coverURL)
+          return User.findByPk(id)
+            .then(user => {
+              user.update({
+                name: name || user.name,
+                introduction: introduction || user.introduction,
+                avatar: avatarURL.avatar || user.avatar,
+                cover: coverURL.cover || user.cover
+              })
+              return res.json({ status: 'success', message: 'user profile updated successfully' })
+            }).catch(err => console.log(err))
+        }
+        // user edit profile page with image
+        updateUser()
+      }
+
     } else {
       return res.json({ status: "error", "message": "permission denied" })
     }
 
-    if (req.user.id === Number(id) && editPage === 'profile') {
-      User.findByPk(id)
-        .then(user => {
-          if (!user) return res.json({ status: "error", "message": "user does not exist" })
-          if (!name) return res.json({ status: 'error', message: 'name is empty' })
-          return user.update({
-            name: name || user.name,
-            avatar: avatar || user.avatar,
-            introduction: introduction || user.introduction,
-            cover: cover || user.cover
-          }).then(() => res.json({ status: 'success', message: 'user profile updated successfully', }))
-        }).catch(err => console.log(err))
-    } else {
-      return res.json({ status: "error", "message": "permission denied" })
-    }
+
+
   },
 
   getFollowers: (req, res) => {
