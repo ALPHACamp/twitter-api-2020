@@ -228,6 +228,8 @@ const userController = {
       ]
     })
       .then(user => {
+        if (!user) return res.json({ status: 'error', message: '找不到此位使用者，故無法抓取他的追蹤名單' })
+
         user = user.toJSON()
 
         let followingUsers = user.Followings.map(followingUser => {
@@ -267,6 +269,8 @@ const userController = {
       ]
     })
       .then(async (user) => {
+        if (!user) return res.json({ status: 'error', message: '找不到此位使用者，故無法抓取追蹤他的使用者名單' })
+
         user = user.toJSON()
 
         let followerUsers = user.Followers.map(followerUser => {
