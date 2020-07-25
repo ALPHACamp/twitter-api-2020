@@ -107,11 +107,7 @@ const replyController = {
         console.log(err)
         res.json({ status: 'error', message: `${err}` })
       })
-  },
-
-
-
+  }
 }
-
 
 module.exports = replyController
