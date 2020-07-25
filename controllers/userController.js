@@ -285,8 +285,8 @@ const userController = {
         await Promise.all(followerUsers.map(followerUser => getFollowship(helpers.getUser(req).id, followerUser.id)))
           .then(followships => {
             followships.forEach((followship, index) => {
-              if (followship) followerUsers[index].isFollowed = true
-              else followerUsers[index].isFollowed = false
+              if (followship) followerUsers[index].isFollowedByLoginUser = true
+              else followerUsers[index].isFollowedByLoginUser = false
 
               delete followerUsers[index].Followship
             })
