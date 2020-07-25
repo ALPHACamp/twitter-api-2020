@@ -16,6 +16,7 @@ let tweetController = {
         description: r.dataValues.description.substring(0, 50),
         tweetCreatedAt: moment(r.dataValues.createdAt).fromNow(),
         userName: r.User.name,
+        userRole: req.user.role,
         userAvatar: r.User.avatar,
         userAccount: r.User.account,
         replyConut: r.Replies.length,
