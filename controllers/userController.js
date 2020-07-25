@@ -233,10 +233,14 @@ const userController = {
         user = user.toJSON()
 
         let followingUsers = user.Followings.map(followingUser => {
-          // 回傳值過濾 (role >> isAdmin, remove password)
+          // 回傳值處理 (role >> isAdmin, remove password, id >> followingId)
           followingUser.isAdmin = Boolean(Number(followingUser.role))
           delete followingUser.role
+
           delete followingUser.password
+
+          followingUser.followingId = followingUser.id
+          delete followingUser.id
 
           return followingUser
         })
@@ -274,10 +278,13 @@ const userController = {
         user = user.toJSON()
 
         let followerUsers = user.Followers.map(followerUser => {
-          // 回傳值過濾 (role >> isAdmin, remove password)
+          // 回傳值處理 (role >> isAdmin, remove password, id >> followerId)
           followerUser.isAdmin = Boolean(Number(followerUser.role))
           delete followerUser.role
           delete followerUser.password
+
+          followerUser.followerId = followerUser.id
+          delete followerUser.id
 
           return followerUser
         })
