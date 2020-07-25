@@ -10,7 +10,14 @@ const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 
 // middleware
-const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = (req, res, next) => {
+  if (helpers.ensureAuthenticated(req)) {
+    passport.authenticate('jwt', { session: false })
+    return next()
+  } else {
+    return res.json({ status: 'error', message: 'permission denied' })
+  }
+}
 
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.ensureAuthenticated(req)) {
@@ -37,7 +44,7 @@ module.exports = (app) => {
   app.delete('/api/like/:tweetId', authenticated, userController.removeLike)
   app.get('/api/following/top', authenticated, userController.getTopUsers)
 
-  app.post('/api/register', userController.register)
+  app.post('/api/users', userController.register)
   app.post('/api/login', userController.login)
 
   app.put('/api/users/:id', authenticated, cpUpload, userController.putUser)

@@ -6,6 +6,8 @@ const JwtStrategy = passportJWT.Strategy
 const moment = require('moment')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const helpers = require('../_helpers')
+
 
 const db = require('../models')
 const { User, Tweet, Reply, Like, Followship } = db
@@ -13,23 +15,23 @@ const { User, Tweet, Reply, Like, Followship } = db
 const userController = {
   register: (req, res) => {
     const { account, name, email, password, passwordConfirm } = req.body
-    const errors = []
-    if (!account && !name && !email && !password && !passwordConfirm) {
-      errors.push({ status: 'error', message: 'all columns are empty' })
-    } else if (!account) {
-      errors.push({ status: 'error', message: 'account is empty' })
-    } else if (!name) {
-      errors.push({ status: 'error', message: 'name is empty' })
-    } else if (!email) {
-      errors.push({ status: 'error', message: 'email is empty' })
-    } else if (!password) {
-      errors.push({ status: 'error', message: 'password is empty' })
-    } else if (!passwordConfirm) {
-      errors.push({ status: 'error', message: 'passwordConfirm is empty' })
-    } else if (password !== passwordConfirm) {
-      errors.push({ status: 'error', message: 'password or passwordConfirm is incorrect' })
-    }
-    if (errors.length) return res.json(...errors);
+    // const errors = []
+    // if (!account && !name && !email && !password && !passwordConfirm) {
+    //   errors.push({ status: 'error', message: 'all columns are empty' })
+    // } else if (!account) {
+    //   errors.push({ status: 'error', message: 'account is empty' })
+    // } else if (!name) {
+    //   errors.push({ status: 'error', message: 'name is empty' })
+    // } else if (!email) {
+    //   errors.push({ status: 'error', message: 'email is empty' })
+    // } else if (!password) {
+    //   errors.push({ status: 'error', message: 'password is empty' })
+    // } else if (!passwordConfirm) {
+    //   errors.push({ status: 'error', message: 'passwordConfirm is empty' })
+    // } else if (password !== passwordConfirm) {
+    //   errors.push({ status: 'error', message: 'password or passwordConfirm is incorrect' })
+    // }
+    // if (errors.length) return res.json(...errors);
 
     User.findOne({ where: { account } })
       .then(userOwnedAccount => {
@@ -106,10 +108,12 @@ const userController = {
       ]
     }).then(user => {
       return res.json({
+        account: user.account,
+        email: user.email,
         user: user,
         tweetCounts: user.Tweets.length,
       })
-    })
+    }).catch(err => console.log(err))
   },
 
   putUser: (req, res) => {
@@ -117,7 +121,7 @@ const userController = {
     const { id } = req.params
 
     //check user
-    if (req.user.id === Number(id)) {
+    if (helpers.getUser(req).id === Number(id)) {
 
       if (!req.files) {
         // user edit profile page without image
@@ -261,12 +265,11 @@ const userController = {
     }).then(user => {
       const data = user.Followers.map(r => ({
         ...r.dataValues,
-        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+        followerId: r.id,
+        isFollowing: helpers.getUser(req).Followings.map(d => d.id).includes(r.id)
       }))
-      return res.json({
-        user: data,
-      })
-    })
+      return res.json(data)
+    }).catch(err => console.log(err))
   },
 
   getFollowings: (req, res) => {
@@ -275,12 +278,11 @@ const userController = {
     }).then(user => {
       const data = user.Followings.map(r => ({
         ...r.dataValues,
-        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+        followingId: r.id,
+        isFollowing: helpers.getUser(req).Followings.map(d => d.id).includes(r.id)
       }))
-      return res.json({
-        user: data
-      })
-    })
+      return res.json(data)
+    }).catch(err => console.log(err))
   },
 
   addFollowing: (req, res) => {

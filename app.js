@@ -18,10 +18,10 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 app.use((req, res, next) => {
-  res.locals.user = helpers.getUser(req) 
+  res.locals.user = helpers.getUser(req)
   next()
 })
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+module.exports = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 require('./routes')(app)
