@@ -10,9 +10,20 @@ const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 
 // middleware
+// const authenticated = passport.authenticate('jwt', { session: false })
+
+// const authenticatedAdmin = (req, res, next) => {
+//   if (req.user) {
+//     if (req.user.isAdmin) { return next() }
+//     return res.json({ status: 'error', message: 'permission denied' })
+//   } else {
+//     return res.json({ status: 'error', message: 'permission denied' })
+//   }
+// }
+
+//for test
 const authenticated = (req, res, next) => {
   if (helpers.ensureAuthenticated(req)) {
-    passport.authenticate('jwt', { session: false })
     return next()
   } else {
     return res.json({ status: 'error', message: 'permission denied' })
