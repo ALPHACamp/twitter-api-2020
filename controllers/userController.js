@@ -151,69 +151,40 @@ const userController = {
   },
 
   putUser: (req, res) => {
-    let { account, name, email, password, passwordConfirm, introduction } = req.body
+    let { account, name, email, password, passwordConfirm, introduction, avatar, cover } = req.body
     const { id } = req.params
 
     //check user
     if (helpers.getUser(req).id === Number(id)) {
 
       if (!req.files) {
-        // user edit profile page without image
-        if (name || introduction && !account && !email && !password && !passwordConfirm) {
+        // user change password
+        if (password || passwordConfirm) {
+          if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
           return User.findByPk(id)
             .then(user => {
               user.update({
-                name: name || user.name,
-                introduction: introduction || user.introduction
-              })
-              return res.json({ status: 'success', message: 'user profile updated successfully' })
+                account,
+                name,
+                email,
+                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+              }).then(() => { return res.json({ status: 'success', message: 'user info updated successfully' }) })
             }).catch(err => console.log(err))
         }
-
-        // 不能有空白
-        if (account) account = account.replace(/\s*/g, "")
-        if (email) email = email.replace(/\s*/g, "")
-
-        // user edit account page
-        if (account || email || password || passwordConfirm || name && !introduction) {
-          return User.findByPk(id)
-            .then(user => {
-              if (account && account !== user.account) {
-                return User.findOne({ where: { account } })
-                  .then(userAccount => {
-                    if (userAccount) return res.json({ status: 'error', message: `account "${account}" is registered` })
-                  })
-              }
-
-              if (email && email !== user.email) {
-                return User.findOne({ where: { email } })
-                  .then(userEmail => {
-                    if (userEmail) return res.json({ status: 'error', message: `"email ${email}" is registered` })
-                  })
-              }
-
-              if (password || passwordConfirm) {
-                if (password !== passwordConfirm) return res.json({ status: 'error', message: 'password or passwordConfirm is incorrect' })
-                user.update({
-                  account: account || user.account,
-                  name: name || user.name,
-                  email: email || user.email,
-                  password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-                })
-                return res.json({ status: 'success', message: 'user account updated successfully' })
-              }
-
-              user.update({
-                account: account || user.account,
-                name: name || user.name,
-                email: email || user.email
-              })
-              return res.json({ status: 'success', message: 'user account updated successfully' })
+        // user doesn't change password
+        return User.findByPk(id)
+          .then(user => {
+            user.update({
+              account,
+              email,
+              name,
+              introduction,
+              avatar,
+              cover
+            }).then((user) => {
+              return res.json({ status: 'success', message: 'user info updated successfully' })
             }).catch(err => console.log(err))
-        }
-
-
-
+          }).catch(err => console.log(err))
       }
 
       if (req.files) {
@@ -224,10 +195,6 @@ const userController = {
           if (req.files.avatar) {
             imgur.upload(req.files.avatar[0].path, (err, img) => {
               if (err) return reject(err)
-              // if (err) {
-              //   console.log(`[ERROR]: ${err}`)
-              //   return res.json({ status: 'error', message: 'something wrong when uploading to imgur' })
-              // }
               imageURL.avatar = img.data.link
               resolve(imageURL)
             })
@@ -244,10 +211,6 @@ const userController = {
           if (req.files.cover) {
             imgur.upload(req.files.cover[0].path, (err, img) => {
               if (err) return reject(err)
-              // if (err) {
-              //   console.log(`[ERROR]: ${err}`)
-              //   return res.json({ status: 'error', message: 'something wrong when uploading to imgur' })
-              // }
               imageURL.cover = img.data.link
               resolve(imageURL)
             })
@@ -269,7 +232,7 @@ const userController = {
             coverURL = await uploadCoverImage
               .catch(err => console.log(err))
           }
-          console.log(avatarURL, coverURL)
+
           return User.findByPk(id)
             .then(user => {
               user.update({
@@ -277,8 +240,8 @@ const userController = {
                 introduction: introduction || user.introduction,
                 avatar: avatarURL.avatar || user.avatar,
                 cover: coverURL.cover || user.cover
-              })
-              return res.json({ status: 'success', message: 'user profile updated successfully' })
+              }).then(() => { return res.json({ status: 'success', message: 'user profile updated successfully' }) })
+
             }).catch(err => console.log(err))
         }
         // user edit profile page with image
