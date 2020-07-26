@@ -8,7 +8,6 @@ const upload = multer({ dest: 'temp/' })
 
 // passport authentication
 const authenticated = passport.authenticate('jwt', { session: false })
-// const authenticated = (req, res, next) => { next() } // 測試時，開啟這條即可，不用取消下方的 authenticated
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
     if (helpers.getUser(req).isAdmin) { return next() }
@@ -35,6 +34,8 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, userController.putUser)
 router.put('/users/:id/profile', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
+router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 
 // 需驗證的路由，一定要加 authenticated 這個 middleware，否則後面拿不到 helpers.getUser(req)（等同於 req.user）
 // tweet
