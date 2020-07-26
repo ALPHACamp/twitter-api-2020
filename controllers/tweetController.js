@@ -51,10 +51,11 @@ const tweetController = {
         tweet = tweet.toJSON()
         const isLikedByLoginUser = await getUserLike(tweet, helpers.getUser(req).id)
 
-        // 回傳值過濾 (role >> isAdmin, remove password)
+        // 回傳值過濾 (role >> isAdmin, remove password, remove UserId)
         tweet.User.isAdmin = Boolean(Number(tweet.User.role))
         delete tweet.User.role
         delete tweet.User.password
+        delete tweet.UserId
 
         return res.json({
           status: 'success',
@@ -82,10 +83,11 @@ const tweetController = {
         for (const tweet of tweets) {
           const isLikedByLoginUser = await getUserLike(tweet, helpers.getUser(req).id)
 
-          // 回傳值過濾 (role >> isAdmin, remove password)
+          // 回傳值過濾 (role >> isAdmin, remove password, remove UserId)
           tweet.User.isAdmin = Boolean(Number(tweet.User.role))
           delete tweet.User.role
           delete tweet.User.password
+          delete tweet.UserId
 
           tweetsData.push({
             status: 'success',
