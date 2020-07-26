@@ -11,6 +11,11 @@ const helpers = require('../_helpers.js')
 // JWT
 const jwt = require('jsonwebtoken')
 
+// 檢查使用者是否存在
+const checkUser = (id) => {
+  return User.findByPk(id)
+}
+
 const userController = {
   signUp: (req, res) => {
     // 初始值去除空白字元
@@ -189,8 +194,11 @@ const userController = {
       })
   },
 
-  getUserTweets: (req, res) => {
+  getUserTweets: async (req, res) => {
     const tweetsData = []
+
+    // 確認有無此使用者
+    if (!await checkUser(req.params.id)) return res.json({ status: 'error', message: '找不到此使用者的資料' })
 
     return Tweet.findAll({
       raw: true,
@@ -201,10 +209,11 @@ const userController = {
     })
       .then(tweets => {
         for (const tweet of tweets) {
-          // 回傳值過濾 (role >> isAdmin, remove password)
+          // 回傳值過濾 (role >> isAdmin, remove password, remove UserId)
           tweet.User.isAdmin = Boolean(Number(tweet.User.role))
           delete tweet.User.role
           delete tweet.User.password
+          delete tweet.UserId
 
           tweetsData.push({
             status: 'success',
