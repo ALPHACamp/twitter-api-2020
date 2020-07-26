@@ -87,7 +87,7 @@ const replyController = {
     return Reply.findByPk(req.params.reply_id, { include: [Tweet] })
       .then(reply => {
         console.log('=== reply ===', reply.toJSON())
-        const userId = Number(req.user.id)
+        const userId = helpers.getUser(req).id
         const data = reply.toJSON()
 
         // 如果使用者 = tweet 作者 => 刪除
@@ -102,6 +102,82 @@ const replyController = {
           console.log('沒有權限刪除此回覆')
           return res.json({ status: 'error', message: '沒有權限刪除此回覆' })
         }
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  },
+
+  addReplyLike: (req, res) => {
+    const userId = helpers.getUser(req).id
+    const replyId = req.params.id
+
+    return Like.findOne({ where: { UserId: userId, ReplyId: replyId } })
+      .then(like => {
+        // 使用者已按讚，不可再按讚 => 報錯
+        if (like) {
+          return res.json({ status: 'error', message: '使用者不可重覆按讚', isLikedByLoginUser: true })
+        }
+
+        return Reply.findByPk(replyId)
+          .then(reply => {
+            // like 紀錄存在且 reply 不存在 => 報錯
+            if (!reply) {
+              return res.json({ status: 'error', message: '回覆不存在，無法按讚' })
+            } else {
+              // like 紀錄存在且 reply 存在 => 更新資料，reply 的 likeCount + 1
+              return Like.create({
+                UserId: userId,
+                ReplyId: replyId
+              })
+                .then(like => {
+                  return Reply.findByPk(replyId)
+                    .then(reply => {
+                      return reply.update({
+                        likeCount: reply.likeCount + 1
+                      })
+                        .then(reply => res.json({ status: 'success', message: '使用者已給回覆一個讚', isLikedByLoginUser: true }))
+                    })
+                })
+            }
+          })
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  },
+
+  removeReplyLike: (req, res) => {
+    const userId = helpers.getUser(req).id
+    const replyId = req.params.id
+
+    return Like.findOne({ where: { UserId: userId, ReplyId: replyId } })
+      .then(like => {
+        if (!like) {
+          return Reply.findByPk(replyId)
+            .then(reply => {
+              // 沒有 like 紀錄且 reply 不存在  => 報錯
+              if (!reply) {
+                return res.json({ status: 'error', message: '回覆不存在，無法移除讚' })
+              } else {
+                // 沒有 like 紀錄且 reply 存在 => 報錯
+                return res.json({ status: 'error', message: '使用者尚未給回覆按讚，無法移除讚', isLikedByLoginUser: false })
+              }
+            })
+        }
+        // like 紀錄存在且 reply 存在 => 刪除 like 紀錄且 reply.likeCount - 1
+        return like.destroy()
+          .then(like => {
+            return Reply.findByPk(replyId)
+              .then(reply => {
+                return reply.update({
+                  likeCount: reply.likeCount - 1
+                })
+                  .then(reply => res.json({ status: 'success', message: '使用者已對回覆移除讚', isLikedByLoginUser: false }))
+              })
+          })
       })
       .catch(err => {
         console.log(err)

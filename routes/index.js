@@ -31,7 +31,8 @@ router.get('/test', authenticated, authenticatedAdmin, testController.getTestDat
 router.post('/users', userController.signUp)
 router.post('/login', userController.signIn)
 router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUser) // 上傳兩張圖片
+router.put('/users/:id', authenticated, userController.putUser)
+router.put('/users/:id/profile', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
@@ -50,5 +51,11 @@ router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyControl
 // followship
 router.post('/followships', authenticated, followshipController.postFollowship)
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship)
+
+// like
+router.post('/tweets/:id/like', authenticated, tweetController.addTweetLike)
+router.post('/tweets/:id/unlike', authenticated, tweetController.removeTweetLike)
+router.post('/replies/:id/like', authenticated, replyController.addReplyLike)
+router.post('/replies/:id/unlike', authenticated, replyController.removeReplyLike)
 
 module.exports = router
