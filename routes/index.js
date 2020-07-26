@@ -55,8 +55,8 @@ module.exports = (app) => {
   app.get('/api/users/:id/followings', authenticated, userController.getFollowings)
   app.post('/api/following/:userId', authenticated, userController.addFollowing)
   app.delete('/api/following/:userId', authenticated, userController.removeFollowing)
-  app.post('/api/like/:tweetId', authenticated, userController.addLike)
-  app.delete('/api/like/:tweetId', authenticated, userController.removeLike)
+  app.post('/api/tweets/:id/like', authenticated, userController.addLike)
+  app.post('/api/tweets/:id/unlike', authenticated, userController.removeLike)
   app.get('/api/following/top', authenticated, userController.getTopUsers)
 
   app.post('/api/users', userController.register)

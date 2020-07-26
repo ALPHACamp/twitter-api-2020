@@ -352,25 +352,25 @@ const userController = {
 
   addLike: (req, res) => {
     return Like.create({
-      UserId: req.user.id,
-      TweetId: req.params.tweetId
+      UserId: helpers.getUser(req).id,
+      TweetId: req.params.id
     })
       .then((like) => {
         res.json({ status: 'success', message: '' })
-      })
+      }).catch(err => console.log(err))
   },
   removeLike: (req, res) => {
     return Like.findOne({
       where: {
-        UserId: req.user.id,
-        TweetId: req.params.tweetId
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id
       }
     })
       .then((like) => {
         like.destroy()
           .then((like) => {
             res.json({ status: 'success', message: '' })
-          })
+          }).catch(err => console.log(err))
       })
   },
 
