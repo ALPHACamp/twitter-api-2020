@@ -5,11 +5,13 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
 const Followship = db.Followship
 const helpers = require('../_helpers.js')
 
 // JWT
 const jwt = require('jsonwebtoken')
+const replyController = require('./replyController')
 
 // 檢查使用者是否存在
 const checkUser = (id) => {
@@ -302,6 +304,33 @@ const userController = {
         console.log(err)
         res.json({ status: 'error', message: `${err}` })
       })
+  },
+
+  getRepliedTweets: (req, res) => {
+    const userId = helpers.getUser(req).id
+
+    if (userId !== Number(req.params.id)) {
+      return res.json({ status: 'error', message: '沒有權限查看其他人回覆過的所有推文' })
+    }
+
+    return Reply.findAll({
+      raw: true,
+      nest: true,
+      where: { UserId: userId },
+      include: [Tweet]
+    })
+      .then(replies => {
+        if (!replies) {
+          return res.json({ status: 'success', message: '使用者還沒有回覆任何推文' })
+        }
+
+        console.log('===replies', replies)
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+
   },
 
   getUserFollowings: (req, res) => {

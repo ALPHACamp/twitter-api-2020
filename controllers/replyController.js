@@ -18,22 +18,44 @@ const getUserLike = (reply, UserId) => {
 
 const replyController = {
   postReply: (req, res) => {
+    const userId = helpers.getUser(req).id
+    const tweetId = req.params.tweet_id
     const { comment } = req.body
 
-    if (comment.trim().length === 0) {
+    // 確認 comment 有內容
+    if (!comment || comment.trim().length === 0) {
       return res.json({ status: 'error', message: '內容不可為空白' })
     }
+
+    // 確認 comment 長度在 140 字元內
     if (comment.trim().length > 140) {
       return res.json({ status: 'error', message: '內容不可超過 140 個字元' })
     }
 
-    return Reply.create({
-      comment: comment,
-      TweetId: req.params.tweet_id,
-      UserId: helpers.getUser(req).id
-    })
-      .then(reply => {
-        res.status(200).json({ status: 'success', message: '成功建立回覆' })
+    return Tweet.findByPk(tweetId)
+      .then(tweet => {
+        // 要回覆的推文不存在 => 報錯
+        if (!tweet) {
+          return res.json({ status: 'error', message: '要回覆的推文不存在' })
+        }
+
+        // 要回覆的推文存在 => 建立推文的 reply 且 tweet.commentCount + 1
+        return Reply.create({
+          comment,
+          TweetId: tweetId,
+          UserId: userId
+        })
+          .then(reply => {
+            return Tweet.findByPk(tweetId)
+              .then(tweet => {
+                return tweet.update({
+                  commentCount: tweet.commentCount + 1
+                })
+                  .then(tweet => {
+                    return res.json({ status: 'success', message: '成功建立回覆' })
+                  })
+              })
+          })
       })
       .catch(err => {
         console.log(err)
@@ -84,22 +106,29 @@ const replyController = {
   },
 
   deleteReply: (req, res) => {
-    return Reply.findByPk(req.params.reply_id, { include: [Tweet] })
-      .then(reply => {
-        console.log('=== reply ===', reply.toJSON())
-        const userId = helpers.getUser(req).id
-        const data = reply.toJSON()
+    const userId = helpers.getUser(req).id
+    const tweetId = req.params.tweet_id
+    const replyId = req.params.reply_id
 
+    return Reply.findOne({
+      where: { TweetId: tweetId, id: replyId },
+      include: [Tweet]
+    })
+      .then(reply => {
+        // 回覆不存在 => 報錯
+        if (!reply) {
+          return res.json({ status: 'error', message: '回覆不存在，無法刪除' })
+        }
+
+        const replyData = reply.toJSON()
         // 如果使用者 = tweet 作者 => 刪除
         // 如果使用者 = reply 作者 => 刪除
-        if (userId === data.UserId || userId === data.Tweet.UserId) {
+        if (userId === replyData.UserId || userId === replyData.Tweet.UserId) {
           return reply.destroy()
             .then(reply => {
-              console.log('回覆已刪除')
               return res.json({ status: 'success', message: '回覆已刪除' })
             })
         } else {
-          console.log('沒有權限刪除此回覆')
           return res.json({ status: 'error', message: '沒有權限刪除此回覆' })
         }
       })

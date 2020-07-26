@@ -36,6 +36,7 @@ router.put('/users/:id/profile', authenticated, upload.fields([{ name: 'avatar' 
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
+router.get('/users/:id/replied_tweets', authenticated, userController.getRepliedTweets)
 
 // 需驗證的路由，一定要加 authenticated 這個 middleware，否則後面拿不到 helpers.getUser(req)（等同於 req.user）
 // tweet
