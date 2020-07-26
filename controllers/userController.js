@@ -178,14 +178,15 @@ const userController = {
       return res.json({ status: 'error', message: '不可編輯其他人的使用者資料' })
     }
 
-    if (!name) return res.json({ status: 'error', message: '名稱不可為空白' })
+    // 名稱不可為空白
+    if (!name) {
+      return res.json({ status: 'error', message: '名稱不可為空白' })
+    }
 
-    // 判斷有沒有 avatar 和 cover 圖片上傳項目
-    let { avatar, cover } = req.files
-    avatar = avatar ? avatar[0] : null
-    cover = cover ? cover[0] : null
+    // 取得上傳檔案的 metadata
+    const { avatar, cover } = req.files
 
-    // 沒有圖片上傳任務，直接更新使用者資訊
+    // 沒有圖片要上傳 => 直接更新使用者資訊
     if (!avatar && !cover) {
       return User.findByPk(userId)
         .then(user => {
@@ -196,19 +197,42 @@ const userController = {
             .then(user => {
               return res.json({ status: 'success', message: '成功更新使用者資料' })
             })
-            .catch(err => {
-              console.log(err)
-              return res.json({ status: 'error', message: `${err}` })
-            })
+        })
+        .catch(err => {
+          console.log(err)
+          res.json({ status: 'error', message: `${err}` })
         })
     }
 
+    // 檢查要上傳的圖片數量、格式和大小
+    const fileQueue = [avatar, cover]
+    fileQueue.forEach((file) => {
+      if (file) {
+        // 一個欄位只能上傳一張圖片
+        if (file.length > 1) {
+          return res.json({ status: 'error', message: `${file[0].fieldname} 只能上傳一張圖片` })
+        }
+
+        // 只接受 .png 和 .jpeg 檔案
+        if (file[0].mimetype !== 'image/png' && file[0].mimetype !== 'image/jpeg') {
+          return res.json({ status: 'error', message: `${file[0].fieldname} 欄位僅接受 .png 和 .jpeg 檔案` })
+        }
+
+        // 單個檔案大小不可超過 5 MB (5242880 bytes)
+        if (file[0].size > 5242880) {
+          return res.json({ status: 'error', message: `${file[0].fieldname} 單張圖片不可超過 5 MB` })
+        }
+      }
+    })
+
+    // 建立 avatar 和 cover 上傳任務陣列
+    // 有上傳任務 => 轉成 Promise，負責上傳到 imgur，再更新到資料庫
+    // 沒有上傳任務 => 轉成 Promise，用文字訊息 resolve
     return User.findByPk(userId)
       .then(user => {
-        // 建立 avatar 和 cover 上傳任務陣列
-        // 有上傳任務 => 轉成 Promise，負責上傳到 imgur，再更新到資料庫
-        // 沒有上傳任務 => 轉成 Promise，用文字訊息 resolve
-        const tasks = [avatar, cover].map(file => {
+        const avatarUpload = avatar ? avatar[0] : null
+        const coverUpload = cover ? cover[0] : null
+        const tasks = [avatarUpload, coverUpload].map(file => {
           if (file) {
             return new Promise((resolve, reject) => {
               imgur.setClientID(IMGUR_CLIENT_ID)
@@ -234,7 +258,7 @@ const userController = {
       .then(tasks => res.json({ status: 'success', message: '已更新使用者資料' }))
       .catch(err => {
         console.log(err)
-        res.json({ status: 'error', message: `${err}` })
+        return res.json({ status: 'error', message: `${err}` })
       })
   },
 
