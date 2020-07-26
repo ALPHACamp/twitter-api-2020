@@ -24,7 +24,6 @@ let tweetController = {
         isLiked: r.LikedUsers.map(d => d.id).includes(helpers.getUser(req).id), //測試文件中helper無給定LikedTweets而抓不到 但因需用到map函式前面不得為undefined 故先改成從推文角度出發
         loginUserRole: helpers.getUser(req).role,  //測試文件中helper無給定role而抓不到
       }))
-      console.log(data)
       return res.json(data)
     }).catch(err => console.log(err))
   },
