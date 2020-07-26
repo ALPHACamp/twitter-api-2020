@@ -128,36 +128,42 @@ const userController = {
       return res.json({ status: 'error', message: '帳號、名稱、電子郵件及密碼為必填欄位' })
     }
 
-    const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-
     // 確認 email 和 account 和其他人的不一樣
     // 如果 user.id 和 userId 一樣 => 輸入的資料和自己原有的資料一樣 => 沒有和其他人的重複 => 可以寫入
     // 如果 user.id 和 userId 不一樣 => 輸入的資料和別人的資料一樣 => 和其他人的重複 => 不可以寫入
     // 如果找不到 user，代表輸入的新 email 或 account 和原有的不同，也和別人的不同 => 可以寫入
-    User.findOne({ where: { email } })
+    return User.findOne({ where: { email } })
       .then(user => {
-        if (user && user.id !== userId) return res.json({ status: 'error', message: '電子郵件已被註冊' })
+        if (user && user.id !== userId) {
+          return res.json({ status: 'error', message: '電子郵件已被註冊' })
+        }
 
         return User.findOne({ where: { account } })
-      })
-      .then(user => {
-        if (user && user.id !== userId) return res.json({ status: 'error', message: '帳號已被其他人使用' })
-
-        return User.findByPk(userId)
           .then(user => {
-            return user.update({
-              account,
-              name,
-              email,
-              password: hashedPassword,
-              introduction
-            })
-              .then(user => res.json({ status: 'success', message: '成功更新使用者資料' }))
+            if (user && user.id !== userId) {
+              return res.json({ status: 'error', message: '帳號已被其他人使用' })
+            } else {
+              return User.findByPk(userId)
+                .then(user => {
+                  const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+
+                  return user.update({
+                    account,
+                    name,
+                    email,
+                    password: hashedPassword,
+                    introduction
+                  })
+                    .then(user => {
+                      return res.json({ status: 'success', message: '成功更新使用者資料' })
+                    })
+                })
+            }
           })
       })
       .catch(err => {
         console.log(err)
-        res.json({ status: 'error', message: `${err}` })
+        return res.json({ status: 'error', message: `${err}` })
       })
   },
 
