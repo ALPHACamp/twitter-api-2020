@@ -102,6 +102,91 @@ const tweetController = {
         console.log(err)
         return res.json({ status: 'error', message: `${err}` })
       })
+  },
+
+  addTweetLike: (req, res) => {
+    const userId = helpers.getUser(req).id
+    const tweetId = req.params.id
+
+    return Like.findOne({
+      where: {
+        UserId: userId,
+        TweetId: tweetId
+      }
+    })
+      .then(like => {
+        // 使用者已給 tweet 按讚，不可再按讚 => 報錯
+        if (like) {
+          return res.json({ status: 'error', message: '使用者不可重覆按讚', isLikedByLoginUser: true })
+        }
+
+        return Tweet.findByPk(tweetId)
+          .then(tweet => {
+            // 沒有 like 紀錄且 tweet 不存在 => 報錯
+            if (!tweet) {
+              return res.json({ status: 'error', message: '推文不存在，無法按讚' })
+            }
+
+            // 沒有 like 紀錄且 tweet 存在 => 新增 like 紀錄且 tweet.likeCount + 1
+            return Like.create({
+              UserId: userId,
+              TweetId: tweetId
+            })
+              .then(like => {
+                return tweet.update({
+                  likeCount: tweet.likeCount + 1
+                })
+                  .then(tweet => res.json({ status: 'success', message: '使用者已給推文一個讚', isLikedByLoginUser: true }))
+              })
+          })
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  },
+
+  removeTweetLike: (req, res) => {
+    const userId = helpers.getUser(req).id
+    const tweetId = req.params.id
+
+    return Like.findOne({
+      where: {
+        UserId: userId,
+        TweetId: tweetId
+      }
+    })
+      .then(like => {
+        if (!like) {
+          return Tweet.findByPk(tweetId)
+            .then(tweet => {
+              // 沒有 like 紀錄且 tweet 不存在 => 報錯
+              if (!tweet) {
+                return res.json({ status: 'error', message: '推文不存在，無法移除讚' })
+              } else {
+                // 沒有 like 紀錄且 tweet 存在 => 報錯
+                return res.json({ status: 'error', message: '使用者尚未給推文按讚，無法移除讚', isLikedByLoginUser: false })
+              }
+            })
+        }
+
+        // 有 like 紀錄且 tweet 存在 => 更新資料且 tweet.likeCount - 1
+        return like.destroy()
+          .then(like => {
+            return Tweet.findByPk(tweetId)
+              .then(tweet => {
+                // 推文的 likeCount - 1
+                return tweet.update({
+                  likeCount: tweet.likeCount - 1
+                })
+                  .then(tweet => res.json({ status: 'success', message: '使用者已對推文移除讚', isLikedByLoginUser: false }))
+              })
+          })
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
   }
 }
 

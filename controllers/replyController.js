@@ -87,7 +87,7 @@ const replyController = {
     return Reply.findByPk(req.params.reply_id, { include: [Tweet] })
       .then(reply => {
         console.log('=== reply ===', reply.toJSON())
-        const userId = Number(req.user.id)
+        const userId = helpers.getUser(req).id
         const data = reply.toJSON()
 
         // 如果使用者 = tweet 作者 => 刪除
@@ -102,6 +102,67 @@ const replyController = {
           console.log('沒有權限刪除此回覆')
           return res.json({ status: 'error', message: '沒有權限刪除此回覆' })
         }
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  },
+
+  addReplyLike: (req, res) => {
+    const userId = helpers.getUser(req).id
+    const replyId = req.params.id
+
+    return Like.findOne({ where: { UserId: userId, ReplyId: replyId } })
+      .then(like => {
+        // 使用者已按過回覆讚 => 報錯
+        if (like) {
+          return res.json({ status: 'error', message: '使用者不可重覆按讚', isLikedByLoginUser: true })
+        }
+
+        return Like.create({
+          UserId: userId,
+          ReplyId: replyId
+        })
+          .then(like => {
+            return Reply.findByPk(replyId)
+              .then(reply => {
+                // 回覆的 likeCount + 1
+                return reply.update({
+                  likeCount: reply.likeCount + 1
+                })
+                  .then(reply => res.json({ status: 'success', message: '使用者已給回覆一個讚', isLikedByLoginUser: true }))
+              })
+          })
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  },
+
+  removeReplyLike: (req, res) => {
+    const userId = helpers.getUser(req).id
+    const replyId = req.params.id
+
+    return Like.findOne({ where: { UserId: userId, ReplyId: replyId } })
+      .then(like => {
+        // 如果沒有按回覆讚 => 報錯
+        if (!like) {
+          return res.json({ status: 'error', message: '使用者尚未給回覆按讚', isLikedByLoginUser: false })
+        }
+
+        return like.destroy()
+          .then(like => {
+            return Reply.findByPk(replyId)
+              .then(reply => {
+                // reply 的 likeCount - 1
+                return reply.update({
+                  likeCount: reply.likeCount - 1
+                })
+                  .then(reply => res.json({ status: 'success', message: '使用者已對回覆移除讚', isLikedByLoginUser: false }))
+              })
+          })
       })
       .catch(err => {
         console.log(err)
