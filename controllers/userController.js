@@ -320,14 +320,14 @@ const userController = {
   },
 
   addFollowing: (req, res) => {
-    if (Number(req.user.id) !== Number(req.params.userId)) {
+    if (Number(helpers.getUser(req).id) !== Number(req.body.id)) {
       return Followship.create({
-        followerId: req.user.id,
-        followingId: req.params.userId
+        followerId: helpers.getUser(req).id,
+        followingId: req.body.id
       })
         .then((followship) => {
           res.json({ status: 'success', message: '' })
-        })
+        }).catch(err => console.log(err))
     }
     else {
       res.json({ status: 'error', message: '不能追蹤自己' })
@@ -338,8 +338,8 @@ const userController = {
   removeFollowing: (req, res) => {
     return Followship.findOne({
       where: {
-        followerId: req.user.id,
-        followingId: req.params.userId
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
       }
     })
       .then((followship) => {
@@ -347,7 +347,7 @@ const userController = {
           .then((followship) => {
             res.json({ status: 'success', message: '' })
           })
-      })
+      }).catch(err => console.log(err))
   },
 
   addLike: (req, res) => {
