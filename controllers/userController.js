@@ -383,7 +383,7 @@ const userController = {
         followerUsers = followerUsers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
 
         // 撈取「登入的使用者」是否追蹤「這位追蹤使用者(req.params.id)的人」，並刪除多餘欄位
-        await Promise.all(followerUsers.map(followerUser => getFollowship(helpers.getUser(req).id, followerUser.id)))
+        await Promise.all(followerUsers.map(followerUser => getFollowship(helpers.getUser(req).id, followerUser.followerId)))
           .then(followships => {
             followships.forEach((followship, index) => {
               if (followship) followerUsers[index].isFollowedByLoginUser = true
