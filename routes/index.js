@@ -23,9 +23,16 @@ const userController = require('../controllers/userController.js')
 const tweetController = require('../controllers/tweetController.js')
 const replyController = require('../controllers/replyController.js')
 const followshipController = require('../controllers/followshipController.js')
+const adminController = require('../controllers/adminController.js')
 
 // test
 router.get('/test', authenticated, authenticatedAdmin, testController.getTestData)
+
+// admin (無法通過 authenticatedAdmin 驗證)
+router.get('/admin/users', adminController.getAllUsers)
+router.get('/admin/tweets', adminController.getAllTweets)
+router.delete('/admin/tweets/:tweet_id', adminController.deleteTweet)
+
 
 // user
 router.post('/users', userController.signUp)

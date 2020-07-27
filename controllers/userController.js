@@ -12,7 +12,6 @@ const helpers = require('../_helpers.js')
 
 // JWT
 const jwt = require('jsonwebtoken')
-const replyController = require('./replyController')
 
 // 檢查使用者是否存在
 const checkUser = (id) => {
