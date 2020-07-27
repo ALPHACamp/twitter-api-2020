@@ -30,13 +30,14 @@ router.get('/test', authenticated, authenticatedAdmin, testController.getTestDat
 // user
 router.post('/users', userController.signUp)
 router.post('/login', userController.signIn)
-router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id/setting', authenticated, userController.putUser)
-router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 router.get('/users/:id/replied_tweets', authenticated, userController.getRepliedTweets)
+router.get('/users/:id/likes', authenticated, userController.getLikedTweets)
+router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
 
 // 需驗證的路由，一定要加 authenticated 這個 middleware，否則後面拿不到 helpers.getUser(req)（等同於 req.user）
 // tweet

@@ -6,6 +6,7 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
+const Like = db.Like
 const Followship = db.Followship
 const helpers = require('../_helpers.js')
 
@@ -316,33 +317,36 @@ const userController = {
       })
   },
 
-  getRepliedTweets: (req, res) => {
-    const replierId = req.params.id
+  getLikedTweets: (req, res) => {
+    const likerId = req.params.id
 
-    return Tweet.findAll({
+    return Like.findAll({
       raw: true,
       nest: true,
-      include: [{ model: User, as: 'Repliers', where: { id: replierId } }]
+      where: { UserId: likerId },
+      include: [User, Tweet]
     })
       .then(tweets => {
+        // 如果 tweets 是空陣列 => 找不到 tweets
         if (!tweets.length) {
-          return User.findByPk(replierId)
-            .then(replier => {
-              if (!replier) {
-                return res.json({ status: 'error', message: '使用者不存在' })
+          return User.findByPk(likerId)
+            .then(liker => {
+              // 按讚的使用者不存在 => 報錯
+              if (!liker) {
+                return res.json({ status: 'error', message: '使用者不存在，找不到按讚的推文' })
               } else {
-                return res.json({ status: 'error', message: '使用者尚未回覆任何推文' })
+                // 使用者存在，但沒有按讚的推文 => 報錯
+                return res.json({ status: 'error', message: '使用者尚未按任何推文讚' })
               }
             })
         }
 
         const tweetsData = tweets.map(tweet => {
           tweet.status = 'success'
-          tweet.message = '找到回覆的推文'
-          tweet.comment = tweet.Repliers.Reply.comment
-          tweet.Repliers.isAdmin = Boolean(Number(tweet.Repliers.role))
-          delete tweet.Repliers.role
-          delete tweet.Repliers.password
+          tweet.message = '找到按讚的推文'
+          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+          delete tweet.User.role
+          delete tweet.User.password
 
           return tweet
         })
@@ -353,7 +357,48 @@ const userController = {
         console.log(err)
         res.json({ status: 'error', message: `${err}` })
       })
+  },
 
+  getRepliedTweets: (req, res) => {
+    const replierId = req.params.id
+
+    return Reply.findAll({
+      raw: true,
+      nest: true,
+      where: { UserId: replierId },
+      include: [User, Tweet]
+    })
+      .then(tweets => {
+        // tweets 是空陣列 => 找不到 tweets
+        if (!tweets.length) {
+          return User.findByPk(replierId)
+            .then(replier => {
+              // 找不到 replier user => 報錯
+              if (!replier) {
+                return res.json({ status: 'error', message: '使用者不存在，找不到回覆的推文' })
+              } else {
+                // replier user 存在但找不到任何 tweet => 報錯
+                return res.json({ status: 'error', message: '使用者尚未回覆任何推文' })
+              }
+            })
+        }
+
+        const tweetsData = tweets.map(tweet => {
+          tweet.status = 'success'
+          tweet.message = '找到回覆的推文'
+          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+          delete tweet.User.role
+          delete tweet.User.password
+
+          return tweet
+        })
+
+        return res.json([...tweetsData])
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
   },
 
   getUserFollowings: (req, res) => {
