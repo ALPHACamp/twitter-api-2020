@@ -4,6 +4,7 @@ const User = db.User
 const Reply = db.Reply
 const Like = db.Like
 const moment = require('moment')
+const helpers = require('../_helpers')
 
 const adminController = {
 
@@ -24,10 +25,8 @@ const adminController = {
         tweetLikedCounts: user.Tweets.map(r => r.Likes.length).reduce(function (a, b) { return a + b }, 0)
       }))
       users = users.sort((a, b) => b.tweetCounts - a.tweetCounts)
-      return res.json({
-        users: users
-      })
-    })
+      return res.json(users)
+    }).catch(err => console.log(err))
   },
   deleteTweet: (req, res) => {
     if (req.user.role === 'admin') {
@@ -37,7 +36,7 @@ const adminController = {
             .then((tweet) => {
               res.json({ status: 'success', message: "成功刪除貼文" })
             })
-        })
+        }).catch(err => console.log(err))
     } else {
       res.json({ status: 'error', message: "沒有權限刪除貼文" })
     }
