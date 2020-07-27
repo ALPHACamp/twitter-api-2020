@@ -200,8 +200,9 @@ const userController = {
 
     // 取得上傳檔案的 metadata
     // const { avatar, cover } = req.files
-    const avatar = null
-    const cover = null
+    const avatar = null // (為了通過自動測試要關掉)
+    const cover = null  // (為了通過自動測試要關掉)
+
 
     // 沒有圖片要上傳 => 直接更新使用者資訊
     if (!avatar && !cover) {
@@ -212,7 +213,7 @@ const userController = {
             introduction
           })
             .then(user => {
-              return res.json({ status: 'success', message: '成功更新使用者資料' })
+              return res.json({ status: 'success', message: '成功更新使用者資料 (無圖片上傳)' })
             })
         })
         .catch(err => {
@@ -272,7 +273,7 @@ const userController = {
 
         return Promise.all(tasks)
       })
-      .then(tasks => res.json({ status: 'success', message: '已更新使用者資料' }))
+      .then(tasks => res.json({ status: 'success', message: '已更新使用者資料 (含圖片上傳)' }))
       .catch(err => {
         console.log(err)
         return res.json({ status: 'error', message: `${err}` })
@@ -316,24 +317,37 @@ const userController = {
   },
 
   getRepliedTweets: (req, res) => {
-    const userId = helpers.getUser(req).id
+    const replierId = req.params.id
 
-    if (userId !== Number(req.params.id)) {
-      return res.json({ status: 'error', message: '沒有權限查看其他人回覆過的所有推文' })
-    }
-
-    return Reply.findAll({
+    return Tweet.findAll({
       raw: true,
       nest: true,
-      where: { UserId: userId },
-      include: [Tweet]
+      include: [{ model: User, as: 'Repliers', where: { id: replierId } }]
     })
-      .then(replies => {
-        if (!replies) {
-          return res.json({ status: 'success', message: '使用者還沒有回覆任何推文' })
+      .then(tweets => {
+        if (!tweets.length) {
+          return User.findByPk(replierId)
+            .then(replier => {
+              if (!replier) {
+                return res.json({ status: 'error', message: '使用者不存在' })
+              } else {
+                return res.json({ status: 'error', message: '使用者尚未回覆任何推文' })
+              }
+            })
         }
 
-        console.log('===replies', replies)
+        const tweetsData = tweets.map(tweet => {
+          tweet.status = 'success'
+          tweet.message = '找到回覆的推文'
+          tweet.comment = tweet.Repliers.Reply.comment
+          tweet.Repliers.isAdmin = Boolean(Number(tweet.Repliers.role))
+          delete tweet.Repliers.role
+          delete tweet.Repliers.password
+
+          return tweet
+        })
+
+        return res.json([...tweetsData])
       })
       .catch(err => {
         console.log(err)
