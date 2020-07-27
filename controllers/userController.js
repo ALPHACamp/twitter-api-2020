@@ -31,30 +31,34 @@ const userController = {
     }
     if (errors.length) return res.json(...errors);
 
-    User.findOne({ where: { account } })
+    return User.findOne({ where: { account } })
       .then(userOwnedAccount => {
-        if (userOwnedAccount) {
-          return res.json({ status: 'error', message: 'this account is registered' })
-        }
+        // check account
+        if (userOwnedAccount) return res.json({ status: 'error', message: 'this account is registered' })
+      })
+      .then(() => {
+        // check email
         return User.findOne({ where: { email } })
           .then(userOwnedEmail => {
-            if (userOwnedEmail) {
-              return res.json({ status: 'error', message: 'this email is registered' })
-            }
-            if (password === checkPassword) {
-              return User.create({
-                account,
-                name,
-                email,
-                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-                role: 'user'
-              })
-            }
-            return res.json({ status: 'error', message: 'password or checkPassword is incorrect' })
+            if (userOwnedEmail) return res.json({ status: 'error', message: 'this email is registered' })
+
+          }).catch(err => console.log(err))
+      })
+      .then(() => {
+        // check password
+        if (password === checkPassword) {
+          return User.create({
+            account,
+            name,
+            email,
+            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+            role: 'user'
           })
-          .then(() => res.json({ status: 'success', message: 'register successfully' }))
-          .catch(err => console.log(err))
-      }).catch(err => console.log(err))
+        }
+        return res.json({ status: 'error', message: 'password or checkPassword is incorrect' })
+      })
+      .then(() => res.json({ status: 'success', message: 'register successfully' }))
+      .catch(err => console.log(err))
   },
 
   login: (req, res) => {
