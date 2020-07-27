@@ -13,7 +13,7 @@ let replyController = {
       return Reply.create({
         comment: req.body.comment,
         TweetId: req.params.tweet_id,
-        UserId: helpers.getUser(req).id
+        UserId: req.user.id
       })
         .then((tweet) => {
           return res.json({ status: 'success', message: '回覆成功' })

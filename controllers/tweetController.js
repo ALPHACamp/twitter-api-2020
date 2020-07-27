@@ -21,8 +21,8 @@ let tweetController = {
         userAccount: r.User.account,
         replyConut: r.Replies.length,
         likeConut: r.Likes.length,
-        isLiked: r.LikedUsers.map(d => d.id).includes(helpers.getUser(req).id), //測試文件中helper無給定LikedTweets而抓不到 但因需用到map函式前面不得為undefined 故先改成從推文角度出發
-        loginUserRole: helpers.getUser(req).role,  //測試文件中helper無給定role而抓不到
+        isLiked: r.LikedUsers.map(d => d.id).includes(req.user.id), //測試文件中helper無給定LikedTweets而抓不到 但因需用到map函式前面不得為undefined 故先改成從推文角度出發
+        loginUserRole: req.user.role,  //測試文件中helper無給定role而抓不到
       }))
       return res.json(data)
     }).catch(err => console.log(err))
@@ -37,7 +37,7 @@ let tweetController = {
         { model: User, as: 'LikedUsers' }
       ]
     }).then(tweet => {
-      const isLiked = tweet.LikedUsers.map(d => d.id).includes(helpers.getUser(req).id)
+      const isLiked = tweet.LikedUsers.map(d => d.id).includes(req.user.id)
       return res.json({
         tweet: tweet,
         description: tweet.description,
@@ -56,7 +56,7 @@ let tweetController = {
     } else {
       return Tweet.create({
         description: req.body.description,
-        UserId: helpers.getUser(req).id
+        UserId: req.user.id
       })
         .then((tweet) => {
           return res.json({ status: 'success', message: '推文成功' })

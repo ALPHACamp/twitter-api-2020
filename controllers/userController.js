@@ -155,7 +155,7 @@ const userController = {
     const { id } = req.params
 
     //check user
-    if (helpers.getUser(req).id === Number(id)) {
+    if (req.user.id === Number(id)) {
 
       if (!req.files) {
         // user change password
@@ -263,7 +263,7 @@ const userController = {
       const data = user.Followers.map(r => ({
         ...r.dataValues,
         followerId: r.id,
-        isFollowing: helpers.getUser(req).Followings.map(d => d.id).includes(r.id)
+        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
       }))
       return res.json(data)
     }).catch(err => console.log(err))
@@ -276,16 +276,16 @@ const userController = {
       const data = user.Followings.map(r => ({
         ...r.dataValues,
         followingId: r.id,
-        isFollowing: helpers.getUser(req).Followings.map(d => d.id).includes(r.id)
+        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
       }))
       return res.json(data)
     }).catch(err => console.log(err))
   },
 
   addFollowing: (req, res) => {
-    if (Number(helpers.getUser(req).id) !== Number(req.body.id)) {
+    if (Number(req.user.id) !== Number(req.body.id)) {
       return Followship.create({
-        followerId: helpers.getUser(req).id,
+        followerId: req.user.id,
         followingId: req.body.id
       })
         .then((followship) => {
@@ -301,7 +301,7 @@ const userController = {
   removeFollowing: (req, res) => {
     return Followship.findOne({
       where: {
-        followerId: helpers.getUser(req).id,
+        followerId: req.user.id,
         followingId: req.params.followingId
       }
     })
@@ -315,7 +315,7 @@ const userController = {
 
   addLike: (req, res) => {
     return Like.create({
-      UserId: helpers.getUser(req).id,
+      UserId: req.user.id,
       TweetId: req.params.id
     })
       .then((like) => {
@@ -325,7 +325,7 @@ const userController = {
   removeLike: (req, res) => {
     return Like.findOne({
       where: {
-        UserId: helpers.getUser(req).id,
+        UserId: req.user.id,
         TweetId: req.params.id
       }
     })
