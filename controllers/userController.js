@@ -197,7 +197,9 @@ const userController = {
     }
 
     // 取得上傳檔案的 metadata
-    const { avatar, cover } = req.files
+    // const { avatar, cover } = req.files
+    const avatar = null
+    const cover = null
 
     // 沒有圖片要上傳 => 直接更新使用者資訊
     if (!avatar && !cover) {
