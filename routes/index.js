@@ -31,8 +31,8 @@ router.get('/test', authenticated, authenticatedAdmin, testController.getTestDat
 router.post('/users', userController.signUp)
 router.post('/login', userController.signIn)
 router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, userController.putUser)
-router.put('/users/:id/profile', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
+router.put('/users/:id/setting', authenticated, userController.putUser)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
