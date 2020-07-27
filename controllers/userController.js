@@ -14,9 +14,9 @@ const { User, Tweet, Reply, Like, Followship } = db
 
 const userController = {
   register: (req, res) => {
-    const { account, name, email, password } = req.body
+    const { account, name, email, password, checkPassword } = req.body
     const errors = []
-    if (!account && !name && !email && !password) {
+    if (!account && !name && !email && !password && !checkPassword) {
       errors.push({ status: 'error', message: 'all columns are empty' })
     } else if (!account) {
       errors.push({ status: 'error', message: 'account is empty' })
@@ -26,6 +26,8 @@ const userController = {
       errors.push({ status: 'error', message: 'email is empty' })
     } else if (!password) {
       errors.push({ status: 'error', message: 'password is empty' })
+    } else if (!checkPassword) {
+      errors.push({ status: 'error', message: 'checkPassword is empty' })
     }
     if (errors.length) return res.json(...errors);
 
@@ -39,13 +41,16 @@ const userController = {
             if (userOwnedEmail) {
               return res.json({ status: 'error', message: 'this email is registered' })
             }
-            return User.create({
-              account,
-              name,
-              email,
-              password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-              role: 'user'
-            })
+            if (password === checkPassword) {
+              return User.create({
+                account,
+                name,
+                email,
+                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+                role: 'user'
+              })
+            }
+            return res.json({ status: 'error', message: 'password or checkPassword is incorrect' })
           })
           .then(() => res.json({ status: 'success', message: 'register successfully' }))
           .catch(err => console.log(err))
