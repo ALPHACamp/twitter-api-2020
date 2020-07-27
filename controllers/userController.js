@@ -186,10 +186,6 @@ const userController = {
           if (req.files.avatar) {
             imgur.upload(req.files.avatar[0].path, (err, img) => {
               if (err) return reject(err)
-              // if (err) {
-              //   console.log(`[ERROR]: ${err}`)
-              //   return res.json({ status: 'error', message: 'something wrong when uploading to imgur' })
-              // }
               imageURL.avatar = img.data.link
               resolve(imageURL)
             })
