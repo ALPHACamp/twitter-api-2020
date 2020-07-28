@@ -28,7 +28,7 @@ describe('# user requests', () => {
             if (err) return done(err);
             db.User.findByPk(1).then(user => {
               user.account.should.equal('User1');
-              user.email.should.equal('User1');
+              user.email.should.equal('User1@example.com');
               return done();
             })
           })
@@ -185,7 +185,7 @@ describe('# user requests', () => {
         await db.Like.create({UserId: 1, TweetId: 1})
       })
 
-      // GET /users/:id/replied_tweets - 看見某使用者發過回覆的推文
+      // GET /users/:id/likes - 看見某使用者點過的 Like 
       it(' - successfully', (done) => {
         request(app)
           .get('/api/users/1/likes')
