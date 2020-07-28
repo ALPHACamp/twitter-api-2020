@@ -39,6 +39,7 @@ module.exports = {
             ({
               UserId: Math.ceil((i + 1) / 10) + 1, // root is id 1, so start from 2
               description: faker.lorem.text().substring(0, 140), // 140 字以內
+              commentCount: 3,
               createdAt: new Date(),
               updatedAt: new Date()
             })
