@@ -10,7 +10,7 @@ const upload = multer({ dest: 'temp/' })
 const authenticated = passport.authenticate('jwt', { session: false })
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
-    if (helpers.getUser(req).isAdmin) { return next() }
+    if (helpers.getUser(req).role === '1') { return next() }
     return res.json({ status: 'error', message: '沒有權限' })
   } else {
     return res.json({ status: 'error', message: '沒有權限' })
