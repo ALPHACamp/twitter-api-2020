@@ -39,7 +39,7 @@ const replyController = {
           return res.json({ status: 'error', message: '要回覆的推文不存在' })
         }
 
-        // 要回覆的推文存在 => 建立推文的 reply 且 tweet.commentCount + 1
+        // 要回覆的推文存在 => 建立推文的 reply
         return Reply.create({
           comment,
           TweetId: tweetId,
@@ -48,9 +48,8 @@ const replyController = {
           .then(reply => {
             return Tweet.findByPk(tweetId)
               .then(tweet => {
-                return tweet.update({
-                  commentCount: tweet.commentCount + 1
-                })
+                // tweet.commentCount + 1
+                return tweet.increment('commentCount')
                   .then(tweet => {
                     return res.json({ status: 'success', message: '成功建立回覆' })
                   })
@@ -94,8 +93,6 @@ const replyController = {
         }
       })
       .then(results => {
-        console.log([...results])
-
         // 回傳每則回覆的資料
         res.json([...results])
       })
@@ -125,8 +122,15 @@ const replyController = {
         // 如果使用者 = reply 作者 => 刪除
         if (userId === replyData.UserId || userId === replyData.Tweet.UserId) {
           return reply.destroy()
-            .then(reply => {
-              return res.json({ status: 'success', message: '回覆已刪除' })
+            .then(replyl => {
+              return Tweet.findByPk(tweetId)
+                .then(tweet => {
+                  // tweet.commentCount - 1
+                  return tweet.decrement('commentCount')
+                    .then(reply => {
+                      return res.json({ status: 'success', message: '回覆已刪除' })
+                    })
+                })
             })
         } else {
           return res.json({ status: 'error', message: '沒有權限刪除此回覆' })
@@ -155,7 +159,7 @@ const replyController = {
             if (!reply) {
               return res.json({ status: 'error', message: '回覆不存在，無法按讚' })
             } else {
-              // like 紀錄存在且 reply 存在 => 更新資料，reply 的 likeCount + 1
+              // like 紀錄存在且 reply 存在 => 更新資料
               return Like.create({
                 UserId: userId,
                 ReplyId: replyId
@@ -163,9 +167,8 @@ const replyController = {
                 .then(like => {
                   return Reply.findByPk(replyId)
                     .then(reply => {
-                      return reply.update({
-                        likeCount: reply.likeCount + 1
-                      })
+                      // reply 的 likeCount + 1
+                      return reply.increment('likeCount')
                         .then(reply => res.json({ status: 'success', message: '使用者已給回覆一個讚', isLikedByLoginUser: true }))
                     })
                 })
@@ -196,14 +199,13 @@ const replyController = {
               }
             })
         }
-        // like 紀錄存在且 reply 存在 => 刪除 like 紀錄且 reply.likeCount - 1
+        // like 紀錄存在且 reply 存在 => 刪除 like 紀錄
         return like.destroy()
           .then(like => {
             return Reply.findByPk(replyId)
               .then(reply => {
-                return reply.update({
-                  likeCount: reply.likeCount - 1
-                })
+                // reply.likeCount - 1
+                return reply.decrement('likeCount')
                   .then(reply => res.json({ status: 'success', message: '使用者已對回覆移除讚', isLikedByLoginUser: false }))
               })
           })

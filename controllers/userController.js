@@ -110,8 +110,6 @@ const userController = {
         delete user.role
         delete user.password
 
-        console.log('user', user)
-
         // 使用者存在 => 回傳資料
         return res.json({
           status: 'success',
