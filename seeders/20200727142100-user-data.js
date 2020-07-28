@@ -49,7 +49,7 @@ module.exports = {
         queryInterface.bulkInsert('Replies',
           Array.from({ length: 150 }).map((d, i) =>
             ({
-              UserId: Math.floor(Math.random() * 5) + 1,
+              UserId: Math.floor(Math.random() * 5) + 2,
               TweetId: Math.ceil((i + 1) / 3),
               comment: faker.lorem.text().substring(0, 140),
               createdAt: new Date(),
