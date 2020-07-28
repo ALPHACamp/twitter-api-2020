@@ -47,7 +47,7 @@ module.exports = {
 
         // 每篇 post 有隨機 3 個留言者，每個人有 1 則留言
         queryInterface.bulkInsert('Replies',
-          Array.from({ length: 30 }).map((d, i) =>
+          Array.from({ length: 150 }).map((d, i) =>
             ({
               UserId: Math.floor(Math.random() * 5) + 1,
               TweetId: Math.ceil((i + 1) / 3),

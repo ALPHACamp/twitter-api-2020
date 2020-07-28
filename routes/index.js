@@ -37,7 +37,7 @@ const adminController = require('../controllers/adminController.js')
 // test
 router.get('/test', authenticated, adminBlocker, testController.getTestData)
 
-// admin (無法通過 authenticatedAdmin 驗證)
+// admin
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getAllUsers)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getAllTweets)
 router.delete('/admin/tweets/:tweet_id', authenticated, authenticatedAdmin, adminController.deleteTweet)
@@ -45,34 +45,34 @@ router.delete('/admin/tweets/:tweet_id', authenticated, authenticatedAdmin, admi
 // user
 router.post('/users', userController.signUp)
 router.post('/login', userController.signIn)
-router.put('/users/:id/settings', authenticated, userController.putUser)
-router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
-router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
-router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
-router.get('/users/:id/replied_tweets', authenticated, userController.getRepliedTweets)
-router.get('/users/:id/likes', authenticated, userController.getLikedTweets)
-router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
+router.put('/users/:id/settings', authenticated, adminBlocker, userController.putUser)
+router.get('/users/:id/tweets', authenticated, adminBlocker, userController.getUserTweets)
+router.get('/users/:id/followings', authenticated, adminBlocker, userController.getUserFollowings)
+router.get('/users/:id/followers', authenticated, adminBlocker, userController.getUserFollowers)
+router.get('/users/:id/replied_tweets', authenticated, adminBlocker, userController.getRepliedTweets)
+router.get('/users/:id/likes', authenticated, adminBlocker, userController.getLikedTweets)
+router.get('/users/:id', authenticated, adminBlocker, userController.getUser)
+router.put('/users/:id', authenticated, adminBlocker, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
 
 // 需驗證的路由，一定要加 authenticated 這個 middleware，否則後面拿不到 helpers.getUser(req)（等同於 req.user）
 // tweet
-router.post('/tweets', authenticated, tweetController.postTweet)
-router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
-router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets', authenticated, adminBlocker, tweetController.postTweet)
+router.get('/tweets/:tweet_id', authenticated, adminBlocker, tweetController.getTweet)
+router.get('/tweets', authenticated, adminBlocker, tweetController.getTweets)
 
 // reply
-router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
-router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
-router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.deleteReply)
+router.post('/tweets/:tweet_id/replies', authenticated, adminBlocker, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, adminBlocker, replyController.getReplies)
+router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, adminBlocker, replyController.deleteReply)
 
 // followship
-router.post('/followships', authenticated, followshipController.postFollowship)
-router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship)
+router.post('/followships', authenticated, adminBlocker, followshipController.postFollowship)
+router.delete('/followships/:followingId', authenticated, adminBlocker, followshipController.deleteFollowship)
 
 // like
-router.post('/tweets/:id/like', authenticated, tweetController.addTweetLike)
-router.post('/tweets/:id/unlike', authenticated, tweetController.removeTweetLike)
-router.post('/replies/:id/like', authenticated, replyController.addReplyLike)
-router.post('/replies/:id/unlike', authenticated, replyController.removeReplyLike)
+router.post('/tweets/:id/like', authenticated, adminBlocker, tweetController.addTweetLike)
+router.post('/tweets/:id/unlike', authenticated, adminBlocker, tweetController.removeTweetLike)
+router.post('/replies/:id/like', authenticated, adminBlocker, replyController.addReplyLike)
+router.post('/replies/:id/unlike', authenticated, adminBlocker, replyController.removeReplyLike)
 
 module.exports = router
