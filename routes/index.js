@@ -29,10 +29,9 @@ const adminController = require('../controllers/adminController.js')
 router.get('/test', authenticated, authenticatedAdmin, testController.getTestData)
 
 // admin (無法通過 authenticatedAdmin 驗證)
-router.get('/admin/users', adminController.getAllUsers)
-router.get('/admin/tweets', adminController.getAllTweets)
-router.delete('/admin/tweets/:tweet_id', adminController.deleteTweet)
-
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getAllUsers)
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getAllTweets)
+router.delete('/admin/tweets/:tweet_id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 // user
 router.post('/users', userController.signUp)
