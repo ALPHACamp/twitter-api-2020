@@ -6,6 +6,7 @@ var helpers = require('../../_helpers');
 var should = chai.should();
 var expect = chai.expect;
 const db = require('../../models')
+const passport = require('../../config/passport')
 
 describe('# admin requests', () => {
 
@@ -14,9 +15,10 @@ describe('# admin requests', () => {
     describe(' /api/admin/users', () => {
       before(async() => {
         await db.User.destroy({where: {},truncate: true})
-        this.ensureAuthenticated = sinon.stub(
-          helpers, 'ensureAuthenticated'
-        ).returns(true);
+        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
+          callback(null, {...rootUser}, null);
+          return (req,res,next)=>{};
+        });
         this.getUser = sinon.stub(
             helpers, 'getUser'
         ).returns({id: 1, Followings: [], role: 'admin'});
@@ -33,13 +35,13 @@ describe('# admin requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('array');
-            res.body[0].name.should.equal('User1');
+            res.body[0].name.should.equal('root');
             return done();
           })
       });
 
       after(async () => {
-        this.ensureAuthenticated.restore();
+        this.authenticate.restore();
         this.getUser.restore();
         await db.User.destroy({where: {},truncate: true})
       })
@@ -54,9 +56,10 @@ describe('# admin requests', () => {
       before(async() => {
         await db.User.destroy({where: {},truncate: true})
         await db.Tweet.destroy({where: {},truncate: true})
-        this.ensureAuthenticated = sinon.stub(
-          helpers, 'ensureAuthenticated'
-        ).returns(true);
+        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
+          callback(null, {...rootUser}, null);
+          return (req,res,next)=>{};
+        });
         this.getUser = sinon.stub(
             helpers, 'getUser'
         ).returns({id: 1, Followings: [], role: 'admin'});
@@ -82,7 +85,7 @@ describe('# admin requests', () => {
       });
 
       after(async () => {
-        this.ensureAuthenticated.restore();
+        this.authenticate.restore();
         this.getUser.restore();
         await db.User.destroy({where: {},truncate: true})
         await db.Tweet.destroy({where: {},truncate: true})

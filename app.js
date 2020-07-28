@@ -5,7 +5,9 @@ const app = express()
 const port = 3000
 
 // use helpers.getUser(req) to replace req.user
-// use helpers.ensureAuthenticated(req) to replace req.isAuthenticated()
+function authenticated(req, res, next){
+  // passport.authenticate('jwt', { ses...
+};
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

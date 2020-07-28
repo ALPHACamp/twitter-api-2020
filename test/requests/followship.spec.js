@@ -6,6 +6,7 @@ var helpers = require('../../_helpers');
 var should = chai.should()
 var expect = chai.expect;
 const db = require('../../models')
+const passport = require('../../config/passport')
 
 describe('# followship requests', () => {
 
@@ -15,9 +16,10 @@ describe('# followship requests', () => {
       before(async() => {
         await db.User.destroy({where: {},truncate: true})
         await db.Followship.destroy({where: {},truncate: true})
-        this.ensureAuthenticated = sinon.stub(
-          helpers, 'ensureAuthenticated'
-        ).returns(true);
+        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
+          callback(null, {...rootUser}, null);
+          return (req,res,next)=>{};
+        });
         this.getUser = sinon.stub(
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
@@ -43,7 +45,7 @@ describe('# followship requests', () => {
       });
 
       after(async () => {
-        this.ensureAuthenticated.restore();
+        this.authenticate.restore();
         this.getUser.restore();
         await db.User.destroy({where: {},truncate: true})
         await db.Followship.destroy({where: {},truncate: true})
@@ -59,9 +61,10 @@ describe('# followship requests', () => {
       before(async() => {
         await db.User.destroy({where: {},truncate: true})
         await db.Followship.destroy({where: {},truncate: true})
-        this.ensureAuthenticated = sinon.stub(
-          helpers, 'ensureAuthenticated'
-        ).returns(true);
+        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
+          callback(null, {...rootUser}, null);
+          return (req,res,next)=>{};
+        });
         this.getUser = sinon.stub(
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
@@ -86,7 +89,7 @@ describe('# followship requests', () => {
       });
 
       after(async () => {
-        this.ensureAuthenticated.restore();
+        this.authenticate.restore();
         this.getUser.restore();
         await db.User.destroy({where: {},truncate: true})
         await db.Followship.destroy({where: {},truncate: true})
