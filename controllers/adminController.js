@@ -38,7 +38,6 @@ const adminController = {
         if (!tweets.length) {
           return res.json({ status: 'error', message: '還沒有任何人建立推文' })
         } else {
-          console.log(tweets)
           const tweetsData = tweets.map(tweet => {
             tweet.status = 'success'
             tweet.message = '找到推文'

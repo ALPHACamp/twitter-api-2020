@@ -16,6 +16,15 @@ const authenticatedAdmin = (req, res, next) => {
     return res.json({ status: 'error', message: '沒有權限' })
   }
 }
+const adminBlocker = (req, res, next) => {
+  if (helpers.getUser(req)) {
+    if (helpers.getUser(req).role === '1') {
+      return res.json({ status: 'error', message: 'admin 沒有權限' })
+    } else {
+      return next()
+    }
+  }
+}
 
 // call controller
 const testController = require('../controllers/testController.js')
@@ -26,7 +35,7 @@ const followshipController = require('../controllers/followshipController.js')
 const adminController = require('../controllers/adminController.js')
 
 // test
-router.get('/test', authenticated, authenticatedAdmin, testController.getTestData)
+router.get('/test', authenticated, adminBlocker, testController.getTestData)
 
 // admin (無法通過 authenticatedAdmin 驗證)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getAllUsers)
@@ -36,7 +45,7 @@ router.delete('/admin/tweets/:tweet_id', authenticated, authenticatedAdmin, admi
 // user
 router.post('/users', userController.signUp)
 router.post('/login', userController.signIn)
-router.put('/users/:id/setting', authenticated, userController.putUser)
+router.put('/users/:id/settings', authenticated, userController.putUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
