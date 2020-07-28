@@ -129,16 +129,22 @@ const tweetController = {
               return res.json({ status: 'error', message: '推文不存在，無法按讚' })
             }
 
-            // 沒有 like 紀錄且 tweet 存在 => 新增 like 紀錄且 tweet.likeCount + 1
+            // 沒有 like 紀錄且 tweet 存在 => 新增 like 紀錄
             return Like.create({
               UserId: userId,
               TweetId: tweetId
             })
               .then(like => {
-                return tweet.update({
-                  likeCount: tweet.likeCount + 1
-                })
-                  .then(tweet => res.json({ status: 'success', message: '使用者已給推文一個讚', isLikedByLoginUser: true }))
+                // tweet likeCount 直接在資料庫內 + 1
+                return tweet.increment('likeCount')
+                  .then(tweet => {
+                    return User.findByPk(userId)
+                      .then(user => {
+                        // user likeCount 直接在資料庫內 + 1
+                        return user.increment('likeCount')
+                          .then(user => res.json({ status: 'success', message: '使用者已給推文一個讚', isLikedByLoginUser: true }))
+                      })
+                  })
               })
           })
       })
@@ -172,16 +178,21 @@ const tweetController = {
             })
         }
 
-        // 有 like 紀錄且 tweet 存在 => 更新資料且 tweet.likeCount - 1
+        // 有 like 紀錄且 tweet 存在 => 更新資料
         return like.destroy()
           .then(like => {
             return Tweet.findByPk(tweetId)
               .then(tweet => {
                 // 推文的 likeCount - 1
-                return tweet.update({
-                  likeCount: tweet.likeCount - 1
-                })
-                  .then(tweet => res.json({ status: 'success', message: '使用者已對推文移除讚', isLikedByLoginUser: false }))
+                return tweet.decrement('likeCount')
+                  .then(tweet => {
+                    return User.findByPk(userId)
+                      .then(user => {
+                        // user.likeCount - 1
+                        return user.decrement('likeCount')
+                      })
+                      .then(USER => res.json({ status: 'success', message: '使用者已對推文移除讚', isLikedByLoginUser: false }))
+                  })
               })
           })
       })
