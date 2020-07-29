@@ -22,6 +22,7 @@ module.exports = {
         queryInterface.bulkInsert('Users',
           Array.from({ length: 5 }).map((d, i) =>
             ({
+              id: i + 2,
               name: `User${i + 1}`,
               account: `test${i + 1}`,
               email: `test${i + 1}@example.com`,
@@ -37,6 +38,7 @@ module.exports = {
         queryInterface.bulkInsert('Tweets',
           Array.from({ length: 50 }).map((d, i) =>
             ({
+              id: i + 1,
               UserId: Math.ceil((i + 1) / 10) + 1, // root is id 1, so start from 2
               description: faker.lorem.text().substring(0, 140), // 140 字以內
               commentCount: 3,
@@ -49,6 +51,7 @@ module.exports = {
         queryInterface.bulkInsert('Replies',
           Array.from({ length: 150 }).map((d, i) =>
             ({
+              id: i + 1,
               UserId: Math.floor(Math.random() * 5) + 2,
               TweetId: Math.ceil((i + 1) / 3),
               comment: faker.lorem.text().substring(0, 140),
