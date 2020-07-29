@@ -103,6 +103,7 @@ const userController = {
     return User.findByPk(req.params.id, { include: [Tweet] })
       .then(user => {
         return res.json({
+          name: user.name,
           account: user.account,
           email: user.email,
           user: user,
@@ -164,7 +165,7 @@ const userController = {
     const { id } = req.params
 
     //check user
-    if (req.user.id === Number(id)) {
+    if (helpers.getUser(req).id === Number(id)) {
 
       if (!req.files) {
         // user change password
@@ -272,7 +273,7 @@ const userController = {
       const data = user.Followers.map(r => ({
         ...r.dataValues,
         followerId: r.id,
-        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+        isFollowing: helpers.getUser(req).Followings.map(d => d.id).includes(r.id)
       }))
       return res.json(data)
     }).catch(err => console.log(err))
@@ -285,16 +286,16 @@ const userController = {
       const data = user.Followings.map(r => ({
         ...r.dataValues,
         followingId: r.id,
-        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+        isFollowing: helpers.getUser(req).Followings.map(d => d.id).includes(r.id)
       }))
       return res.json(data)
     }).catch(err => console.log(err))
   },
 
   addFollowing: (req, res) => {
-    if (Number(req.user.id) !== Number(req.body.id)) {
+    if (Number(helpers.getUser(req).id) !== Number(req.body.id)) {
       return Followship.create({
-        followerId: req.user.id,
+        followerId: helpers.getUser(req).id,
         followingId: req.body.id
       })
         .then((followship) => {
@@ -310,7 +311,7 @@ const userController = {
   removeFollowing: (req, res) => {
     return Followship.findOne({
       where: {
-        followerId: req.user.id,
+        followerId: helpers.getUser(req).id,
         followingId: req.params.followingId
       }
     })
@@ -324,7 +325,7 @@ const userController = {
 
   addLike: (req, res) => {
     return Like.create({
-      UserId: req.user.id,
+      UserId: helpers.getUser(req).id,
       TweetId: req.params.id
     })
       .then((like) => {
@@ -334,7 +335,7 @@ const userController = {
   removeLike: (req, res) => {
     return Like.findOne({
       where: {
-        UserId: req.user.id,
+        UserId: helpers.getUser(req).id,
         TweetId: req.params.id
       }
     })
@@ -355,7 +356,7 @@ const userController = {
       users = users.map(user => ({
         ...user.dataValues,
         FollowerCount: user.Followers.length,
-        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+        isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
       return res.json({

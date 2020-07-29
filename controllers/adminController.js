@@ -29,7 +29,7 @@ const adminController = {
     }).catch(err => console.log(err))
   },
   deleteTweet: (req, res) => {
-    if (req.user.role === 'admin') {
+    if (helpers.getUser(req).role === 'admin') {
       return Tweet.findByPk(req.params.id)
         .then((tweet) => {
           tweet.destroy()
