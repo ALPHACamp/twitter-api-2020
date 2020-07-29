@@ -21,6 +21,9 @@ app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
   next()
 })
+function authenticated(req, res, next){
+  // passport.authenticate('jwt', { ses...
+};
 
 module.exports = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
