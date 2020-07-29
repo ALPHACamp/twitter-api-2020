@@ -44,20 +44,20 @@ const adminController = {
       .then(tweets => {
         // tweets 為空陣列 => 找不到 tweets
         if (!tweets.length) {
-          return res.json({ status: 'error', message: '還沒有任何人建立推文' })
-        } else {
-          const tweetsData = tweets.map(tweet => {
-            tweet.status = 'success'
-            tweet.message = '找到推文'
-            tweet.User.isAdmin = Boolean(Number(tweet.User.role))
-            delete tweet.User.role
-            delete tweet.User.password
-
-            return tweet
-          })
-
-          res.json([...tweetsData])
+          return res.json({ status: 'success', message: '還沒有任何人建立推文' })
         }
+
+        const tweetsData = tweets.map(tweet => {
+          tweet.status = 'success'
+          tweet.message = '找到推文'
+          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+          delete tweet.User.role
+          delete tweet.User.password
+
+          return tweet
+        })
+
+        res.json([...tweetsData])
       })
       .catch(err => {
         console.log(err)
