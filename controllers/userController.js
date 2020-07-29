@@ -9,6 +9,7 @@ const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
 const helpers = require('../_helpers.js')
+const { Op } = require("sequelize")
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -333,7 +334,7 @@ const userController = {
                 return res.json({ status: 'error', message: '使用者不存在，找不到按讚的推文' })
               } else {
                 // 使用者存在，但沒有按讚的推文 => 報錯
-                return res.json({ status: 'error', message: '使用者尚未按任何推文讚' })
+                return res.json({ status: 'success', message: '使用者尚未按任何推文讚', tweets })
               }
             })
         }
@@ -375,7 +376,7 @@ const userController = {
                 return res.json({ status: 'error', message: '使用者不存在，找不到回覆的推文' })
               } else {
                 // replier user 存在但找不到任何 tweet => 報錯
-                return res.json({ status: 'error', message: '使用者尚未回覆任何推文' })
+                return res.json({ status: 'success', message: '使用者尚未回覆任何推文', tweets })
               }
             })
         }
@@ -486,7 +487,38 @@ const userController = {
 
         return res.json(followerUsers)
       })
-  }
+  },
+
+  getTopUsers: (req, res) => {
+    return User.findAll({
+      raw: true,
+      nest: true,
+      limit: 10,
+      order: [['followerCount', 'DESC']], // follower 數量前十名的使用者
+      where: { [Op.not]: { role: "1" } } // 排除 admin 資料；即使有多個 admin 也能過濾
+    })
+      .then(users => {
+        if (!users.length) {
+          return res.json({ status: 'success', message: '尚未有使用者註冊，無法找出前 10 名使用者', users })
+        }
+
+        const usersData = users.map(user => {
+          user.status = 'success'
+          user.message = '前十大被追隨的使用者'
+          user.isAdmin = Boolean(Number(user.role))
+          delete user.role
+          delete user.password
+
+          return user
+        })
+
+        res.json([...usersData])
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({ status: 'error', message: `${err}` })
+      })
+  },
 }
 
 module.exports = userController
