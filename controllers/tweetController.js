@@ -179,7 +179,7 @@ const tweetController = {
         }
 
         // 有 like 紀錄且 tweet 存在 => 更新資料
-        return like.destroy()
+        return Like.destroy({ where: { TweetId: tweetId, UserId: userId } })
           .then(like => {
             return Tweet.findByPk(tweetId)
               .then(tweet => {

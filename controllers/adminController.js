@@ -1,14 +1,22 @@
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const helpers = require('../_helpers.js')
+const { Op } = require("sequelize")
 
 const adminController = {
   getAllUsers: (req, res) => {
     return User.findAll({
       raw: true,
       nest: true,
+      // 排除 admin 資料；即使有多個 admin 也能過濾
+      where: { [Op.not]: { role: "1" } }
     })
       .then(users => {
+        if (!users.length) {
+          return res.json({ status: 'success', message: '尚未有使用者註冊', users })
+        }
+
         const usersData = users.map(user => {
           user.status = 'success'
           user.message = '找到使用者'
@@ -36,20 +44,20 @@ const adminController = {
       .then(tweets => {
         // tweets 為空陣列 => 找不到 tweets
         if (!tweets.length) {
-          return res.json({ status: 'error', message: '還沒有任何人建立推文' })
-        } else {
-          const tweetsData = tweets.map(tweet => {
-            tweet.status = 'success'
-            tweet.message = '找到推文'
-            tweet.User.isAdmin = Boolean(Number(tweet.User.role))
-            delete tweet.User.role
-            delete tweet.User.password
-
-            return tweet
-          })
-
-          res.json([...tweetsData])
+          return res.json({ status: 'success', message: '還沒有任何人建立推文' })
         }
+
+        const tweetsData = tweets.map(tweet => {
+          tweet.status = 'success'
+          tweet.message = '找到推文'
+          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
+          delete tweet.User.role
+          delete tweet.User.password
+
+          return tweet
+        })
+
+        res.json([...tweetsData])
       })
       .catch(err => {
         console.log(err)

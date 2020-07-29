@@ -51,6 +51,7 @@ router.get('/users/:id/followings', authenticated, adminBlocker, userController.
 router.get('/users/:id/followers', authenticated, adminBlocker, userController.getUserFollowers)
 router.get('/users/:id/replied_tweets', authenticated, adminBlocker, userController.getRepliedTweets)
 router.get('/users/:id/likes', authenticated, adminBlocker, userController.getLikedTweets)
+router.get('/users/top10', authenticated, adminBlocker, userController.getTopUsers)
 router.get('/users/:id', authenticated, adminBlocker, userController.getUser)
 router.put('/users/:id', authenticated, adminBlocker, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
 
