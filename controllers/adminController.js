@@ -1,12 +1,16 @@
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const helpers = require('../_helpers.js')
+const { Op } = require("sequelize")
 
 const adminController = {
   getAllUsers: (req, res) => {
     return User.findAll({
       raw: true,
       nest: true,
+      // 不顯示 admin 資料；即使有多個 admin 也能過濾
+      where: { [Op.not]: { role: "1" } }
     })
       .then(users => {
         const usersData = users.map(user => {
