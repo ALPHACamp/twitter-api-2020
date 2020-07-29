@@ -9,10 +9,14 @@ const adminController = {
     return User.findAll({
       raw: true,
       nest: true,
-      // 不顯示 admin 資料；即使有多個 admin 也能過濾
+      // 排除 admin 資料；即使有多個 admin 也能過濾
       where: { [Op.not]: { role: "1" } }
     })
       .then(users => {
+        if (!users.length) {
+          return res.json({ status: 'success', message: '尚未有使用者註冊', users })
+        }
+
         const usersData = users.map(user => {
           user.status = 'success'
           user.message = '找到使用者'
