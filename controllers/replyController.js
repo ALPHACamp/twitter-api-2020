@@ -200,7 +200,7 @@ const replyController = {
             })
         }
         // like 紀錄存在且 reply 存在 => 刪除 like 紀錄
-        return like.destroy()
+        return Like.destroy({ where: { ReplyId: replyId, UserId: userId } })
           .then(like => {
             return Reply.findByPk(replyId)
               .then(reply => {
