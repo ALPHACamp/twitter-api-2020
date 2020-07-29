@@ -68,10 +68,8 @@ const followshipController = {
           if (!results[1]) return res.json({ status: 'error', message: '沒有此追蹤資料，故無法刪除' })
 
           const followingUser = results[0]
-          const followship = results[1]
 
-          // 刪除追蹤關係
-          return followship.destroy()
+          return Followship.destroy({ where: { followerId, followingId } })
             .then(followship => {
               // 更新 follower user 資料: 追蹤別人數量、following user 資料: 被別人追蹤數量
               return User.findByPk(followerId)
@@ -81,6 +79,7 @@ const followshipController = {
                   return res.json({ status: 'success', message: '成功刪除一組追蹤關係' })
                 })
             })
+
         })
     } catch (err) {
       console.warn(err)
