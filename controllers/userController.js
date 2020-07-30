@@ -299,6 +299,7 @@ const userController = {
 
   getUserTweets: async (req, res) => {
     const tweetsData = []
+    const loginUserId = helpers.getUser(req).id
 
     // 確認有無此使用者
     if (!await checkUser(req.params.id)) return res.json({ status: 'error', message: '找不到此使用者的資料' })
@@ -310,7 +311,7 @@ const userController = {
       order: [['createdAt', 'DESC']],
       include: [User]
     })
-      .then(tweets => {
+      .then(async (tweets) => {
         for (const tweet of tweets) {
           // 回傳值過濾 (role >> isAdmin, remove password, remove UserId)
           tweet.User.isAdmin = Boolean(Number(tweet.User.role))
@@ -318,10 +319,13 @@ const userController = {
           delete tweet.User.password
           delete tweet.UserId
 
+          const isLikedByLoginUser = await getUserLike(tweet, loginUserId)
+
           tweetsData.push({
             status: 'success',
             message: '成功找到使用者的推文資料',
-            ...tweet
+            ...tweet,
+            isLikedByLoginUser
           })
         }
 
