@@ -14,9 +14,9 @@ const { User, Tweet, Reply, Like, Followship } = db
 
 const userController = {
   register: (req, res) => {
-    const { account, name, email, password } = req.body
+    const { account, name, email, password, checkPassword } = req.body
     const errors = []
-    if (!account && !name && !email && !password) {
+    if (!account && !name && !email && !password && !checkPassword) {
       errors.push({ status: 'error', message: 'all columns are empty' })
     } else if (!account) {
       errors.push({ status: 'error', message: 'account is empty' })
@@ -26,30 +26,39 @@ const userController = {
       errors.push({ status: 'error', message: 'email is empty' })
     } else if (!password) {
       errors.push({ status: 'error', message: 'password is empty' })
+    } else if (!checkPassword) {
+      errors.push({ status: 'error', message: 'checkPassword is empty' })
     }
     if (errors.length) return res.json(...errors);
 
-    User.findOne({ where: { account } })
+    return User.findOne({ where: { account } })
       .then(userOwnedAccount => {
-        if (userOwnedAccount) {
-          return res.json({ status: 'error', message: 'this account is registered' })
-        }
+        // check account
+        if (userOwnedAccount) return res.json({ status: 'error', message: 'this account is registered' })
+      })
+      .then(() => {
+        // check email
         return User.findOne({ where: { email } })
           .then(userOwnedEmail => {
-            if (userOwnedEmail) {
-              return res.json({ status: 'error', message: 'this email is registered' })
-            }
-            return User.create({
-              account,
-              name,
-              email,
-              password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-              role: 'user'
-            })
+            if (userOwnedEmail) return res.json({ status: 'error', message: 'this email is registered' })
+
+          }).catch(err => console.log(err))
+      })
+      .then(() => {
+        // check password
+        if (password === checkPassword) {
+          return User.create({
+            account,
+            name,
+            email,
+            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+            role: 'user'
           })
-          .then(() => res.json({ status: 'success', message: 'register successfully' }))
-          .catch(err => console.log(err))
-      }).catch(err => console.log(err))
+        }
+        return res.json({ status: 'error', message: 'password or checkPassword is incorrect' })
+      })
+      .then(() => res.json({ status: 'success', message: 'register successfully' }))
+      .catch(err => console.log(err))
   },
 
   login: (req, res) => {
@@ -94,6 +103,7 @@ const userController = {
     return User.findByPk(req.params.id, { include: [Tweet] })
       .then(user => {
         return res.json({
+          name: user.name,
           account: user.account,
           email: user.email,
           user: user,
@@ -155,7 +165,7 @@ const userController = {
     const { id } = req.params
 
     //check user
-    if (req.user.id === Number(id)) {
+    if (helpers.getUser(req).id === Number(id)) {
 
       if (!req.files) {
         // user change password
@@ -263,7 +273,7 @@ const userController = {
       const data = user.Followers.map(r => ({
         ...r.dataValues,
         followerId: r.id,
-        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+        isFollowing: helpers.getUser(req).Followings.map(d => d.id).includes(r.id)
       }))
       return res.json(data)
     }).catch(err => console.log(err))
@@ -276,16 +286,16 @@ const userController = {
       const data = user.Followings.map(r => ({
         ...r.dataValues,
         followingId: r.id,
-        isFollowing: req.user.Followings.map(d => d.id).includes(r.id)
+        isFollowing: helpers.getUser(req).Followings.map(d => d.id).includes(r.id)
       }))
       return res.json(data)
     }).catch(err => console.log(err))
   },
 
   addFollowing: (req, res) => {
-    if (Number(req.user.id) !== Number(req.body.id)) {
+    if (Number(helpers.getUser(req).id) !== Number(req.body.id)) {
       return Followship.create({
-        followerId: req.user.id,
+        followerId: helpers.getUser(req).id,
         followingId: req.body.id
       })
         .then((followship) => {
@@ -301,7 +311,7 @@ const userController = {
   removeFollowing: (req, res) => {
     return Followship.findOne({
       where: {
-        followerId: req.user.id,
+        followerId: helpers.getUser(req).id,
         followingId: req.params.followingId
       }
     })
@@ -315,7 +325,7 @@ const userController = {
 
   addLike: (req, res) => {
     return Like.create({
-      UserId: req.user.id,
+      UserId: helpers.getUser(req).id,
       TweetId: req.params.id
     })
       .then((like) => {
@@ -325,7 +335,7 @@ const userController = {
   removeLike: (req, res) => {
     return Like.findOne({
       where: {
-        UserId: req.user.id,
+        UserId: helpers.getUser(req).id,
         TweetId: req.params.id
       }
     })
@@ -346,7 +356,7 @@ const userController = {
       users = users.map(user => ({
         ...user.dataValues,
         FollowerCount: user.Followers.length,
-        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+        isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
       return res.json({

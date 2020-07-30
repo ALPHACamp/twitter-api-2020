@@ -9,37 +9,16 @@ const replyController = require('../controllers/replyController.js')
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 
-// middleware
-const authenticated = passport.authenticate('jwt', { session: false })
-
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'admin') { return next() }
+  if (helpers.getUser(req)) {
+    if (helpers.getUser(req).role === 'admin') { return next() }
     return res.json({ status: 'error', message: 'permission denied' })
   } else {
     return res.json({ status: 'error', message: 'permission denied' })
   }
 }
 
-//for test
-// const authenticated = (req, res, next) => {
-//   if (helpers.ensureAuthenticated(req)) {
-//     return next()
-//   } else {
-//     return res.json({ status: 'error', message: 'permission denied' })
-//   }
-// }
-
-// const authenticatedAdmin = (req, res, next) => {
-//   if (helpers.ensureAuthenticated(req)) {
-//     if (helpers.getUser(req).role === 'admin') return next()
-//     return res.json({ status: 'error', message: 'permission denied' })
-//   } else {
-//     return res.json({ status: 'error', message: 'permission denied' })
-//   }
-// }
-
-module.exports = (app) => {
+module.exports = (app, authenticated) => {
   app.get('/', authenticated, (req, res) => res.send('Hello World!')) //postman test
   app.get('/admin', authenticated, authenticatedAdmin, (req, res) => res.send('Hello Admin!')) //postman test
   app.get('/api/tweets', authenticated, tweetController.getTweets)

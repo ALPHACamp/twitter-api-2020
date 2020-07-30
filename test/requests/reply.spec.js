@@ -6,6 +6,7 @@ var helpers = require('../../_helpers');
 var should = chai.should();
 var expect = chai.expect;
 const db = require('../../models')
+const passport = require('../../config/passport')
 
 describe('# reply requests', () => {
 
@@ -16,9 +17,10 @@ describe('# reply requests', () => {
         await db.User.destroy({where: {},truncate: true})
         await db.Tweet.destroy({where: {},truncate: true})
         await db.Reply.destroy({where: {},truncate: true})
-        this.ensureAuthenticated = sinon.stub(
-          helpers, 'ensureAuthenticated'
-        ).returns(true);
+        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
+          callback(null, {...rootUser}, null);
+          return (req,res,next)=>{};
+        });
         this.getUser = sinon.stub(
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
@@ -46,7 +48,7 @@ describe('# reply requests', () => {
       });
 
       after(async () => {
-        this.ensureAuthenticated.restore();
+        this.authenticate.restore();
         this.getUser.restore();
         await db.User.destroy({where: {},truncate: true})
         await db.Tweet.destroy({where: {},truncate: true})
@@ -64,9 +66,10 @@ describe('# reply requests', () => {
         await db.User.destroy({where: {},truncate: true})
         await db.Tweet.destroy({where: {},truncate: true})
         await db.Reply.destroy({where: {},truncate: true})
-        this.ensureAuthenticated = sinon.stub(
-          helpers, 'ensureAuthenticated'
-        ).returns(true);
+        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
+          callback(null, {...rootUser}, null);
+          return (req,res,next)=>{};
+        });
         this.getUser = sinon.stub(
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
@@ -90,7 +93,7 @@ describe('# reply requests', () => {
       });
 
       after(async () => {
-        this.ensureAuthenticated.restore();
+        this.authenticate.restore();
         this.getUser.restore();
         await db.User.destroy({where: {},truncate: true})
         await db.Tweet.destroy({where: {},truncate: true})

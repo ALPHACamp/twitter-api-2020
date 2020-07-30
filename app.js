@@ -22,7 +22,19 @@ app.use((req, res, next) => {
   next()
 })
 
+
+function authenticated(req, res, next) {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (!user) {
+      return res.status(401).json({
+        status: 'error', message: "No auth token"
+      })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
+};
+
 module.exports = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
-require('./routes')(app)
-require('./socket')
+require('./routes')(app, authenticated)
