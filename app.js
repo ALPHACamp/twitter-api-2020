@@ -1,13 +1,14 @@
 const express = require('express')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 const app = express()
 const port = 3000
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-
+app.use(cors())
 // use helpers.getUser(req) to replace req.user
 // use helpers.ensureAuthenticated(req) to replace req.isAuthenticated()
 const passport = require('./config/passport')

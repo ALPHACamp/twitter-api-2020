@@ -100,14 +100,24 @@ const userController = {
   },
 
   getUser: (req, res) => {
-    return User.findByPk(req.params.id, { include: [Tweet] })
+    return User.findByPk(req.params.id, {
+      include:
+        [Tweet,
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+    })
       .then(user => {
         return res.json({
           name: user.name,
           account: user.account,
           email: user.email,
+          userAvatar: user.avatar,
+          userIntroduction: user.introduction,
+          tweetCounts: user.Followings.length,
+          tweetFollowingCounts: user.Followings.length,
+          tweetFollowerCounts: user.Followers.length,
           user: user,
-          tweetCounts: user.Tweets.length,
         })
       }).catch(err => console.log(err))
   },
@@ -122,6 +132,13 @@ const userController = {
       ]
     }).then(user => {
       const data = user.Tweets.map(r => ({
+        description: r.dataValues.description.substring(0, 50),
+        tweetCreatedAt: moment(r.dataValues.createdAt).fromNow(),
+        userName: user.toJSON().name,
+        userAvatar: user.toJSON().avatar,
+        userAccount: user.toJSON().account,
+        replyConut: r.dataValues.Replies.length,
+        likeConut: r.dataValues.Likes.length,
         ...r.dataValues,
       }))
       return res.json(data)
@@ -134,10 +151,17 @@ const userController = {
         [{ model: Reply }, 'createdAt', 'DESC'],
       ],
       include: [
-        { model: Reply, include: [Tweet] },
+        { model: Reply, include: [{ model: Tweet, include: [Like, Reply, User] }] },
       ]
     }).then(user => {
       const data = user.Replies.map(r => ({
+        description: r.dataValues.Tweet.description.substring(0, 50),
+        tweetCreatedAt: moment(r.dataValues.Tweet.createdAt).fromNow(),
+        userName: r.dataValues.Tweet.User.name,
+        userAvatar: r.dataValues.Tweet.User.avatar,
+        userAccount: r.dataValues.Tweet.User.account,
+        replyConut: r.dataValues.Tweet.Replies.length,
+        likeConut: r.dataValues.Tweet.Likes.length,
         ...r.dataValues,
       }))
       return res.json(data)
@@ -150,10 +174,17 @@ const userController = {
         [{ model: Like }, 'createdAt', 'DESC'],
       ],
       include: [
-        { model: Like, include: [Tweet] },
+        { model: Like, include: [{ model: Tweet, include: [Like, Reply, User] }] },
       ]
     }).then(user => {
       const data = user.Likes.map(r => ({
+        description: r.dataValues.Tweet.description.substring(0, 50),
+        tweetCreatedAt: moment(r.dataValues.Tweet.createdAt).fromNow(),
+        userName: r.dataValues.Tweet.User.name,
+        userAvatar: r.dataValues.Tweet.User.avatar,
+        userAccount: r.dataValues.Tweet.User.account,
+        replyConut: r.dataValues.Tweet.Replies.length,
+        likeConut: r.dataValues.Tweet.Likes.length,
         ...r.dataValues,
       }))
       return res.json(data)
