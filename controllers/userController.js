@@ -26,6 +26,17 @@ const getFollowship = (followerId, followingId) => {
   })
 }
 
+// 撈取此使用者是否按這則推文讚 (return true or false)
+const getUserLike = (tweet, UserId) => {
+  return Like.findOne({
+    where: { TweetId: tweet.id, UserId }
+  })
+    .then(like => {
+      if (like) return true
+      return false
+    })
+}
+
 const userController = {
   signUp: (req, res) => {
     // 初始值去除空白字元
@@ -198,9 +209,9 @@ const userController = {
     }
 
     // 取得上傳檔案的 metadata
-    // const { avatar, cover } = req.files
-    const avatar = null // (為了通過自動測試要關掉)
-    const cover = null  // (為了通過自動測試要關掉)
+    const { avatar, cover } = req.files
+    // const avatar = null // (為了通過自動測試要關掉)
+    // const cover = null  // (為了通過自動測試要關掉)
 
 
     // 沒有圖片要上傳 => 直接更新使用者資訊
@@ -317,16 +328,17 @@ const userController = {
 
   getLikedTweets: (req, res) => {
     const likerId = req.params.id
+    const loginUserId = helpers.getUser(req).id
 
     return Like.findAll({
       raw: true,
       nest: true,
-      where: { UserId: likerId },
+      where: { UserId: likerId, [Op.not]: { TweetId: null } }, // 移除只按 reply 讚的紀錄
       include: [User, Tweet]
     })
-      .then(tweets => {
-        // 如果 tweets 是空陣列 => 找不到 tweets
-        if (!tweets.length) {
+      .then(likes => {
+        // 如果 likes 是空陣列 => 找不到 likes
+        if (!likes.length) {
           return User.findByPk(likerId)
             .then(liker => {
               // 按讚的使用者不存在 => 報錯
@@ -339,17 +351,23 @@ const userController = {
             })
         }
 
-        const tweetsData = tweets.map(tweet => {
-          tweet.status = 'success'
-          tweet.message = '找到按讚的推文'
-          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
-          delete tweet.User.role
-          delete tweet.User.password
+        const likesData = likes.map(async (like) => {
+          const tweetId = like.TweetId
 
-          return tweet
+          like.status = 'success'
+          like.message = '找到按讚的推文'
+          like.User.isAdmin = Boolean(Number(like.User.role))
+          like.Tweet.isLikedByLoginUser = await getUserLike(like.Tweet, loginUserId)
+          delete like.User.role
+          delete like.User.password
+
+          return like
         })
 
-        return res.json([...tweetsData])
+        return Promise.all(likesData)
+      })
+      .then(likesData => {
+        return res.json(likesData)
       })
       .catch(err => {
         console.log(err)
