@@ -1,3 +1,7 @@
+/* NOTE
+// use helpers.getUser(req) to replace req.user
+*/
+
 // modules and files
 const express = require('express')
 const router = express.Router()
@@ -7,7 +11,17 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
 // passport authentication
-const authenticated = passport.authenticate('jwt', { session: false })
+function authenticated (req, res, next) {
+  // return middleware that should have callback and set req.user manually
+  return passport.authenticate('jwt', { session: false }, (a, user, b) => {
+    if (user) {
+      req.user = user
+      return next()
+    }
+    return res.json({ status: 'error', message: ' Token 驗證失敗' })
+  })(req, res, next)
+}
+
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
     if (helpers.getUser(req).role === '1') { return next() }
