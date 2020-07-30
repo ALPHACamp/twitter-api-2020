@@ -114,10 +114,12 @@ const userController = {
     const loginUserId = helpers.getUser(req).id
     const userId = req.params.id
 
-    return User.findByPk(req.params.id)
+    return User.findOne({ where: { id: userId, [Op.not]: { role: "1" } } }) // 不顯示 admin 資料
       .then(user => {
         // 使用者不存在 => 報錯
-        if (!user) return res.json({ status: 'error', message: '找不到使用者' })
+        if (!user) {
+          return res.json({ status: 'error', message: '找不到使用者' })
+        }
 
         // 回傳值過濾 (role >> isAdmin, remove password)
         user = user.toJSON()
@@ -128,13 +130,11 @@ const userController = {
         return Promise.all([user, getFollowship(loginUserId, userId)])
       })
       .then(userData => {
+        userData[0].status = 'success'
+        userData[0].message = '找到使用者的資料'
         userData[0].isFollowedByLoginUser = userData[1] ? true : false
 
-        return res.json({
-          status: 'success',
-          message: '找到使用者的資料',
-          ...userData[0],
-        })
+        return res.json(userData[0])
       })
       .catch(err => {
         console.log(err)
@@ -520,6 +520,8 @@ const userController = {
   },
 
   getTopUsers: (req, res) => {
+    const loginUserId = helpers.getUser(req).id
+
     return User.findAll({
       raw: true,
       nest: true,
@@ -532,17 +534,23 @@ const userController = {
           return res.json({ status: 'success', message: '尚未有使用者註冊，無法找出前 10 名使用者', users })
         }
 
-        const usersData = users.map(user => {
+        const usersData = users.map(async (user) => {
+          const userId = user.id
+
           user.status = 'success'
           user.message = '前十大被追隨的使用者'
           user.isAdmin = Boolean(Number(user.role))
+          user.isFollowedByLoginUser = await getFollowship(loginUserId, userId) ? true : false
           delete user.role
           delete user.password
 
           return user
         })
 
-        res.json([...usersData])
+        return Promise.all(usersData)
+      })
+      .then(usersData => {
+        return res.json(usersData)
       })
       .catch(err => {
         console.log(err)
