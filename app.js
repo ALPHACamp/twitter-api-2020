@@ -1,8 +1,3 @@
-/* NOTE
-// use helpers.getUser(req) to replace req.user
-// use helpers.ensureAuthenticated(req) to replace req.isAuthenticated()
-*/
-
 // params
 if (process.env.NODE_ENV !== 'production') require('dotenv').config()
 const port = process.env.PORT || 3000
@@ -10,7 +5,6 @@ const port = process.env.PORT || 3000
 // modules and files
 const express = require('express')
 const cors = require('cors')
-const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const passport = require('./config/passport.js')
