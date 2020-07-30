@@ -100,7 +100,7 @@ const userController = {
           message: '登入成功',
           token: token,
           user: {
-            id: user.id, name: user.name, email: user.email, isAdmin: Boolean(Number(user.role))
+            id: user.id, name: user.name, email: user.email, account: user.account, isAdmin: Boolean(Number(user.role))
           }
         })
       })
