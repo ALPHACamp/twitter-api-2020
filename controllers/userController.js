@@ -334,7 +334,7 @@ const userController = {
       raw: true,
       nest: true,
       where: { UserId: likerId, [Op.not]: { TweetId: null } }, // 移除只按 reply 讚的紀錄
-      include: [User, Tweet]
+      include: { model: Tweet, include: { model: User } }
     })
       .then(likes => {
         // 如果 likes 是空陣列 => 找不到 likes
@@ -346,7 +346,7 @@ const userController = {
                 return res.json({ status: 'error', message: '使用者不存在，找不到按讚的推文' })
               } else {
                 // 使用者存在，但沒有按讚的推文 => 報錯
-                return res.json({ status: 'success', message: '使用者尚未按任何推文讚', tweets })
+                return res.json({ status: 'success', message: '使用者尚未按任何推文讚', likes })
               }
             })
         }
@@ -356,10 +356,10 @@ const userController = {
 
           like.status = 'success'
           like.message = '找到按讚的推文'
-          like.User.isAdmin = Boolean(Number(like.User.role))
+          like.Tweet.User.isAdmin = Boolean(Number(like.Tweet.User.role))
           like.Tweet.isLikedByLoginUser = await getUserLike(like.Tweet, loginUserId)
-          delete like.User.role
-          delete like.User.password
+          delete like.Tweet.User.role
+          delete like.Tweet.User.password
 
           return like
         })
