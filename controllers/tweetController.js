@@ -107,12 +107,12 @@ const tweetController = {
   },
 
   addTweetLike: (req, res) => {
-    const userId = helpers.getUser(req).id
+    const loginUserId = helpers.getUser(req).id
     const tweetId = req.params.id
 
     return Like.findOne({
       where: {
-        UserId: userId,
+        UserId: loginUserId,
         TweetId: tweetId
       }
     })
@@ -131,14 +131,14 @@ const tweetController = {
 
             // 沒有 like 紀錄且 tweet 存在 => 新增 like 紀錄
             return Like.create({
-              UserId: userId,
+              UserId: loginUserId,
               TweetId: tweetId
             })
               .then(like => {
                 // tweet likeCount 直接在資料庫內 + 1
                 return tweet.increment('likeCount')
                   .then(tweet => {
-                    return User.findByPk(userId)
+                    return User.findByPk(loginUserId)
                       .then(user => {
                         // user likeCount 直接在資料庫內 + 1
                         return user.increment('likeCount')
@@ -155,12 +155,12 @@ const tweetController = {
   },
 
   removeTweetLike: (req, res) => {
-    const userId = helpers.getUser(req).id
+    const loginUserId = helpers.getUser(req).id
     const tweetId = req.params.id
 
     return Like.findOne({
       where: {
-        UserId: userId,
+        UserId: loginUserId,
         TweetId: tweetId
       }
     })
@@ -179,14 +179,14 @@ const tweetController = {
         }
 
         // 有 like 紀錄且 tweet 存在 => 更新資料
-        return Like.destroy({ where: { TweetId: tweetId, UserId: userId } })
+        return Like.destroy({ where: { TweetId: tweetId, UserId: loginUserId } })
           .then(like => {
             return Tweet.findByPk(tweetId)
               .then(tweet => {
                 // 推文的 likeCount - 1
                 return tweet.decrement('likeCount')
                   .then(tweet => {
-                    return User.findByPk(userId)
+                    return User.findByPk(loginUserId)
                       .then(user => {
                         // user.likeCount - 1
                         return user.decrement('likeCount')
