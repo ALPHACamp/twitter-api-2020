@@ -334,7 +334,7 @@ const userController = {
       raw: true,
       nest: true,
       where: { UserId: likerId, [Op.not]: { TweetId: null } }, // 移除只按 reply 讚的紀錄
-      include: { model: Tweet, include: { model: User } }
+      include: { model: Tweet, include: { model: User } } // 找到推文作者資訊
     })
       .then(likes => {
         // 如果 likes 是空陣列 => 找不到 likes
@@ -377,16 +377,17 @@ const userController = {
 
   getRepliedTweets: (req, res) => {
     const replierId = req.params.id
+    const loginUserId = helpers.getUser(req).id
 
     return Reply.findAll({
       raw: true,
       nest: true,
       where: { UserId: replierId },
-      include: [User, Tweet]
+      include: { model: Tweet, include: { model: User } } // 找到推文作者資訊
     })
-      .then(tweets => {
-        // tweets 是空陣列 => 找不到 tweets
-        if (!tweets.length) {
+      .then(replies => {
+        // replies 是空陣列 => 找不到 reply
+        if (!replies.length) {
           return User.findByPk(replierId)
             .then(replier => {
               // 找不到 replier user => 報錯
@@ -394,22 +395,26 @@ const userController = {
                 return res.json({ status: 'error', message: '使用者不存在，找不到回覆的推文' })
               } else {
                 // replier user 存在但找不到任何 tweet => 報錯
-                return res.json({ status: 'success', message: '使用者尚未回覆任何推文', tweets })
+                return res.json({ status: 'success', message: '使用者尚未回覆任何推文', replies })
               }
             })
         }
 
-        const tweetsData = tweets.map(tweet => {
-          tweet.status = 'success'
-          tweet.message = '找到回覆的推文'
-          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
-          delete tweet.User.role
-          delete tweet.User.password
+        const repliesData = replies.map(async (reply) => {
+          reply.status = 'success'
+          reply.message = '找到回覆的推文'
+          reply.Tweet.User.isAdmin = Boolean(Number(reply.Tweet.User.role))
+          reply.Tweet.isLikedByLoginUser = await getUserLike(reply.Tweet, loginUserId)
+          delete reply.Tweet.User.role
+          delete reply.Tweet.User.password
 
-          return tweet
+          return reply
         })
 
-        return res.json([...tweetsData])
+        return Promise.all(repliesData)
+      })
+      .then(repliesData => {
+        return res.json(repliesData)
       })
       .catch(err => {
         console.log(err)
