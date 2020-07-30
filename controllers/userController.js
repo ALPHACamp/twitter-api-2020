@@ -111,7 +111,10 @@ const userController = {
   },
 
   getUser: (req, res) => {
-    User.findByPk(req.params.id)
+    const loginUserId = helpers.getUser(req).id
+    const userId = req.params.id
+
+    return User.findByPk(req.params.id)
       .then(user => {
         // 使用者不存在 => 報錯
         if (!user) return res.json({ status: 'error', message: '找不到使用者' })
@@ -122,11 +125,15 @@ const userController = {
         delete user.role
         delete user.password
 
-        // 使用者存在 => 回傳資料
+        return Promise.all([user, getFollowship(loginUserId, userId)])
+      })
+      .then(userData => {
+        userData[0].isFollowedByLoginUser = userData[1] ? true : false
+
         return res.json({
           status: 'success',
           message: '找到使用者的資料',
-          ...user
+          ...userData[0],
         })
       })
       .catch(err => {
