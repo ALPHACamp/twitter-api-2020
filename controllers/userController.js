@@ -26,6 +26,17 @@ const getFollowship = (followerId, followingId) => {
   })
 }
 
+// 撈取此使用者是否按這則推文讚 (return true or false)
+const getUserLike = (tweet, UserId) => {
+  return Like.findOne({
+    where: { TweetId: tweet.id, UserId }
+  })
+    .then(like => {
+      if (like) return true
+      return false
+    })
+}
+
 const userController = {
   signUp: (req, res) => {
     // 初始值去除空白字元
@@ -100,10 +111,15 @@ const userController = {
   },
 
   getUser: (req, res) => {
-    User.findByPk(req.params.id)
+    const loginUserId = helpers.getUser(req).id
+    const userId = req.params.id
+
+    return User.findOne({ where: { id: userId, [Op.not]: { role: "1" } } }) // 不顯示 admin 資料
       .then(user => {
         // 使用者不存在 => 報錯
-        if (!user) return res.json({ status: 'error', message: '找不到使用者' })
+        if (!user) {
+          return res.json({ status: 'error', message: '找不到使用者' })
+        }
 
         // 回傳值過濾 (role >> isAdmin, remove password)
         user = user.toJSON()
@@ -111,12 +127,14 @@ const userController = {
         delete user.role
         delete user.password
 
-        // 使用者存在 => 回傳資料
-        return res.json({
-          status: 'success',
-          message: '找到使用者的資料',
-          ...user
-        })
+        return Promise.all([user, getFollowship(loginUserId, userId)])
+      })
+      .then(userData => {
+        userData[0].status = 'success'
+        userData[0].message = '找到使用者的資料'
+        userData[0].isFollowedByLoginUser = userData[1] ? true : false
+
+        return res.json(userData[0])
       })
       .catch(err => {
         console.log(err)
@@ -198,9 +216,9 @@ const userController = {
     }
 
     // 取得上傳檔案的 metadata
-    // const { avatar, cover } = req.files
-    const avatar = null // (為了通過自動測試要關掉)
-    const cover = null  // (為了通過自動測試要關掉)
+    const { avatar, cover } = req.files
+    // const avatar = null // (為了通過自動測試要關掉)
+    // const cover = null  // (為了通過自動測試要關掉)
 
 
     // 沒有圖片要上傳 => 直接更新使用者資訊
@@ -317,16 +335,17 @@ const userController = {
 
   getLikedTweets: (req, res) => {
     const likerId = req.params.id
+    const loginUserId = helpers.getUser(req).id
 
     return Like.findAll({
       raw: true,
       nest: true,
-      where: { UserId: likerId },
-      include: [User, Tweet]
+      where: { UserId: likerId, [Op.not]: { TweetId: null } }, // 移除只按 reply 讚的紀錄
+      include: { model: Tweet, include: { model: User } } // 找到推文作者資訊
     })
-      .then(tweets => {
-        // 如果 tweets 是空陣列 => 找不到 tweets
-        if (!tweets.length) {
+      .then(likes => {
+        // 如果 likes 是空陣列 => 找不到 likes
+        if (!likes.length) {
           return User.findByPk(likerId)
             .then(liker => {
               // 按讚的使用者不存在 => 報錯
@@ -334,22 +353,28 @@ const userController = {
                 return res.json({ status: 'error', message: '使用者不存在，找不到按讚的推文' })
               } else {
                 // 使用者存在，但沒有按讚的推文 => 報錯
-                return res.json({ status: 'success', message: '使用者尚未按任何推文讚', tweets })
+                return res.json({ status: 'success', message: '使用者尚未按任何推文讚', likes })
               }
             })
         }
 
-        const tweetsData = tweets.map(tweet => {
-          tweet.status = 'success'
-          tweet.message = '找到按讚的推文'
-          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
-          delete tweet.User.role
-          delete tweet.User.password
+        const likesData = likes.map(async (like) => {
+          const tweetId = like.TweetId
 
-          return tweet
+          like.status = 'success'
+          like.message = '找到按讚的推文'
+          like.Tweet.User.isAdmin = Boolean(Number(like.Tweet.User.role))
+          like.Tweet.isLikedByLoginUser = await getUserLike(like.Tweet, loginUserId)
+          delete like.Tweet.User.role
+          delete like.Tweet.User.password
+
+          return like
         })
 
-        return res.json([...tweetsData])
+        return Promise.all(likesData)
+      })
+      .then(likesData => {
+        return res.json(likesData)
       })
       .catch(err => {
         console.log(err)
@@ -359,16 +384,17 @@ const userController = {
 
   getRepliedTweets: (req, res) => {
     const replierId = req.params.id
+    const loginUserId = helpers.getUser(req).id
 
     return Reply.findAll({
       raw: true,
       nest: true,
       where: { UserId: replierId },
-      include: [User, Tweet]
+      include: { model: Tweet, include: { model: User } } // 找到推文作者資訊
     })
-      .then(tweets => {
-        // tweets 是空陣列 => 找不到 tweets
-        if (!tweets.length) {
+      .then(replies => {
+        // replies 是空陣列 => 找不到 reply
+        if (!replies.length) {
           return User.findByPk(replierId)
             .then(replier => {
               // 找不到 replier user => 報錯
@@ -376,22 +402,26 @@ const userController = {
                 return res.json({ status: 'error', message: '使用者不存在，找不到回覆的推文' })
               } else {
                 // replier user 存在但找不到任何 tweet => 報錯
-                return res.json({ status: 'success', message: '使用者尚未回覆任何推文', tweets })
+                return res.json({ status: 'success', message: '使用者尚未回覆任何推文', replies })
               }
             })
         }
 
-        const tweetsData = tweets.map(tweet => {
-          tweet.status = 'success'
-          tweet.message = '找到回覆的推文'
-          tweet.User.isAdmin = Boolean(Number(tweet.User.role))
-          delete tweet.User.role
-          delete tweet.User.password
+        const repliesData = replies.map(async (reply) => {
+          reply.status = 'success'
+          reply.message = '找到回覆的推文'
+          reply.Tweet.User.isAdmin = Boolean(Number(reply.Tweet.User.role))
+          reply.Tweet.isLikedByLoginUser = await getUserLike(reply.Tweet, loginUserId)
+          delete reply.Tweet.User.role
+          delete reply.Tweet.User.password
 
-          return tweet
+          return reply
         })
 
-        return res.json([...tweetsData])
+        return Promise.all(repliesData)
+      })
+      .then(repliesData => {
+        return res.json(repliesData)
       })
       .catch(err => {
         console.log(err)
@@ -490,6 +520,8 @@ const userController = {
   },
 
   getTopUsers: (req, res) => {
+    const loginUserId = helpers.getUser(req).id
+
     return User.findAll({
       raw: true,
       nest: true,
@@ -502,17 +534,23 @@ const userController = {
           return res.json({ status: 'success', message: '尚未有使用者註冊，無法找出前 10 名使用者', users })
         }
 
-        const usersData = users.map(user => {
+        const usersData = users.map(async (user) => {
+          const userId = user.id
+
           user.status = 'success'
           user.message = '前十大被追隨的使用者'
           user.isAdmin = Boolean(Number(user.role))
+          user.isFollowedByLoginUser = await getFollowship(loginUserId, userId) ? true : false
           delete user.role
           delete user.password
 
           return user
         })
 
-        res.json([...usersData])
+        return Promise.all(usersData)
+      })
+      .then(usersData => {
+        return res.json(usersData)
       })
       .catch(err => {
         console.log(err)
