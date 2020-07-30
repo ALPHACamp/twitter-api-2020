@@ -1,0 +1,23 @@
+<div id="container">
+  <div id="user-box">
+    <div id='user-title'>Online Users</div>
+    <div id="user-list">
+      <ul id="users">
+      </ul>
+    </div>
+  </div>
+  <div id="chat-box">
+    <div id="status-box">Server: <strong id="status">-</strong> / <strong id="online">0</strong> online</div>
+    <div id="content">
+      <ul id="messages"></ul>
+    </div>
+    <div id="send-box">
+      <div id="userInfo" style="visibility:hidden;display: none;">{{userLogin.name}}</div>
+      <form id="send-form" action="">
+        <input id='userName' type="hidden" name="restaurantId" value="{{userLogin.avatar}}" />
+        <input id='userAvatar' type="hidden" name="restaurantId" value="{{userLogin.name}}" />
+        <input id="m" autocomplete="off" placeholder="please type message..." /><button>Send</button>
+      </form>
+    </div>
+  </div>
+</div>

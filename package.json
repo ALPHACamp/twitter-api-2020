@@ -17,7 +17,7 @@
     "connect-flash": "^0.1.1",
     "dotenv": "^8.2.0",
     "express": "^4.16.4",
-    "express-handlebars": "^3.0.0",
+    "express-handlebars": "^3.1.0",
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
     "imgur-node-api": "^0.1.0",
@@ -33,7 +33,8 @@
     "sequelize": "^5.8.6",
     "sequelize-cli": "^5.5.0",
     "sinon": "^7.2.3",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.3.0",
+    "socket.io": "^1.7.3"
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",
