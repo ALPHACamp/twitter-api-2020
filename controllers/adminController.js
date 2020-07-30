@@ -1,6 +1,8 @@
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 const helpers = require('../_helpers.js')
 const { Op } = require("sequelize")
 
@@ -66,16 +68,37 @@ const adminController = {
   },
 
   deleteTweet: (req, res) => {
+    const getLikedTweetUsers = (TweetId) => {
+      return Like.findAll({
+        raw: true,
+        nest: true,
+        where: { TweetId }
+      })
+    }
+
     const tweetId = req.params.tweet_id
 
     return Tweet.findByPk(tweetId)
-      .then(tweet => {
+      .then(async (tweet) => {
         // 找不到 tweet => 報錯
         if (!tweet) {
           return res.json({ status: 'error', message: '推文不存在，無法刪除' })
         } else {
-          return tweet.destroy()
-            .then(tweet => {
+          const likedTweetUsers = getLikedTweetUsers(tweetId)
+
+          // 刪除 Tweet
+          // 連同刪除 Reply
+          // 更新 User.tweetCount
+          // 刪除 User.like
+          // 更新 User.likeCount
+          await Promise.all([
+            tweet.destroy(),
+            Reply.destroy({ where: { TweetId: tweetId } }),
+            User.decrement('tweetCount', { by: 1, where: { id: tweet.UserId } }),
+            likedTweetUsers.map(like => Like.destroy({ where: { UserId: like.UserId, TweetId: like.TweetId } })),
+            likedTweetUsers.map(like => User.decrement('likeCount', { by: 1, where: { id: like.UserId } }))
+          ])
+            .then(results => {
               return res.json({ status: 'success', message: 'admin 成功刪除一則推文' })
             })
         }
