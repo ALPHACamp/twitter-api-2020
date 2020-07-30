@@ -31,6 +31,11 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(cors())
 
+// use helpers.getUser(req) to replace req.user
+function authenticated (req, res, next) {
+  // passport.authenticate('jwt', { ses...
+};
+
 // routes
 app.get('/', (req, res) => res.send('Hello World!'))
 app.use('/api', routes)
