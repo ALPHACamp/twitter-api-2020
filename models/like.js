@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     Like.belongsTo(models.User)
     Like.belongsTo(models.Tweet)
+    Like.belongsTo(models.Reply)
   };
   return Like;
 };

@@ -37,6 +37,18 @@ const getUserLike = (tweet, UserId) => {
     })
 }
 
+
+// 撈取此使用者是否按這則回覆讚 (return true or false)
+const getUserReplyLike = (reply, UserId) => {
+  return Like.findOne({
+    where: { ReplyId: reply.id, UserId }
+  })
+    .then(like => {
+      if (like) return true
+      return false
+    })
+}
+
 const userController = {
   signUp: (req, res) => {
     // 初始值去除空白字元
@@ -347,15 +359,19 @@ const userController = {
       })
   },
 
-  getLikedTweets: (req, res) => {
+  getLikedTweetsOrReplies: (req, res) => {
     const likerId = req.params.id
     const loginUserId = helpers.getUser(req).id
 
     return Like.findAll({
       raw: true,
       nest: true,
-      where: { UserId: likerId, [Op.not]: { TweetId: null } }, // 移除只按 reply 讚的紀錄
-      include: { model: Tweet, include: { model: User } } // 找到推文作者資訊
+      // where: { UserId: likerId, [Op.not]: { TweetId: null } }, // 移除只按 reply 讚的紀錄
+      where: { UserId: likerId },
+      include: [
+        { model: Tweet, include: [User] },
+        { model: Reply, include: [User] }
+      ]
     })
       .then(likes => {
         // 如果 likes 是空陣列 => 找不到 likes
@@ -364,23 +380,49 @@ const userController = {
             .then(liker => {
               // 按讚的使用者不存在 => 報錯
               if (!liker) {
-                return res.json({ status: 'error', message: '使用者不存在，找不到按讚的推文' })
+                return res.json({ status: 'error', message: '使用者不存在，找不到按讚的推文和回覆' })
               } else {
                 // 使用者存在，但沒有按讚的推文 => 報錯
-                return res.json({ status: 'success', message: '使用者尚未按任何推文讚', likes })
+                return res.json({ status: 'success', message: '使用者尚未按任何推文或回覆讚', likes })
               }
             })
         }
+
+        likes = likes.map(like => {
+          // 刪除 like 紀錄內 Tweet 不存在的部份
+          if (like.Tweet.id === null) {
+            delete like.Tweet
+          }
+          // 刪除 like 紀錄內 Reply 不存在的部份
+          if (like.Reply.id === null) {
+            delete like.Reply
+          }
+
+          return like
+        })
+
 
         const likesData = likes.map(async (like) => {
           const tweetId = like.TweetId
 
           like.status = 'success'
-          like.message = '找到按讚的推文'
-          like.Tweet.User.isAdmin = Boolean(Number(like.Tweet.User.role))
-          like.Tweet.isLikedByLoginUser = await getUserLike(like.Tweet, loginUserId)
-          delete like.Tweet.User.role
-          delete like.Tweet.User.password
+          like.message = '找到按讚的推文或回覆'
+
+          // like 紀錄內有 Tweet => 做相關處理
+          if (like.Tweet) {
+            like.Tweet.User.isAdmin = Boolean(Number(like.Tweet.User.role))
+            like.Tweet.isLikedByLoginUser = await getUserLike(like.Tweet, loginUserId)
+            delete like.Tweet.User.role
+            delete like.Tweet.User.password
+          }
+
+          // like 紀錄內有 Reply => 做相關處理
+          if (like.Reply) {
+            like.Reply.User.isAdmin = Boolean(Number(like.Reply.User.role))
+            like.Reply.isLikedByLoginUser = await getUserReplyLike(like.Reply, loginUserId)
+            delete like.Reply.User.role
+            delete like.Reply.User.password
+          }
 
           return like
         })
