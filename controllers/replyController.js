@@ -16,6 +16,12 @@ const getUserLike = (reply, UserId) => {
     })
 }
 
+const getLikedReplyUsers = (replyId) => {
+  return Like.findAll({
+    where: { ReplyId: replyId }
+  })
+}
+
 const replyController = {
   postReply: (req, res) => {
     const userId = helpers.getUser(req).id
@@ -90,11 +96,11 @@ const replyController = {
             }
           })
           return Promise.all(repliesData)
+            .then(results => {
+              // 回傳每則回覆的資料
+              res.json([...results])
+            })
         }
-      })
-      .then(results => {
-        // 回傳每則回覆的資料
-        res.json([...results])
       })
       .catch(err => {
         console.log(err)
@@ -111,30 +117,33 @@ const replyController = {
       where: { TweetId: tweetId, id: replyId },
       include: [Tweet]
     })
-      .then(reply => {
+      .then(async (reply) => {
         // 回覆不存在 => 報錯
         if (!reply) {
           return res.json({ status: 'error', message: '回覆不存在，無法刪除' })
         }
 
+        const likedReplyUsers = getLikedReplyUsers(replyId)
+
         const replyData = reply.toJSON()
-        // 如果使用者 = tweet 作者 => 刪除
-        // 如果使用者 = reply 作者 => 刪除
+
+        // 刪除 reply
+        // 相依 tweet 的 commentCount - 1
+        // 刪除 reply 的所有 like 紀錄
+        // 所有按讚 user 的 likeCount - 1
         if (userId === replyData.UserId || userId === replyData.Tweet.UserId) {
-          return reply.destroy()
-            .then(replyl => {
-              return Tweet.findByPk(tweetId)
-                .then(tweet => {
-                  // tweet.commentCount - 1
-                  return tweet.decrement('commentCount')
-                    .then(reply => {
-                      return res.json({ status: 'success', message: '回覆已刪除' })
-                    })
-                })
-            })
+          await Promise.all([
+            reply.destroy(),
+            Tweet.decrement('commentCount', { where: { id: tweetId } }),
+            Like.destroy({ where: { ReplyId: replyId } }),
+            likedReplyUsers.map(like => User.decrement('likeCount', { by: 1, where: { id: like.UserId } }))
+          ])
         } else {
           return res.json({ status: 'error', message: '沒有權限刪除此回覆' })
         }
+      })
+      .then(reply => {
+        return res.json({ status: 'success', message: '回覆已刪除' })
       })
       .catch(err => {
         console.log(err)
@@ -169,7 +178,14 @@ const replyController = {
                     .then(reply => {
                       // reply 的 likeCount + 1
                       return reply.increment('likeCount')
-                        .then(reply => res.json({ status: 'success', message: '使用者已給回覆一個讚', isLikedByLoginUser: true }))
+                        .then(reply => {
+                          return User.findByPk(userId)
+                            .then(user => {
+                              // user 的 likeCount + 1
+                              return user.increment('likeCount')
+                            })
+                            .then(reply => res.json({ status: 'success', message: '使用者已給回覆一個讚', isLikedByLoginUser: true }))
+                        })
                     })
                 })
             }
@@ -206,7 +222,14 @@ const replyController = {
               .then(reply => {
                 // reply.likeCount - 1
                 return reply.decrement('likeCount')
-                  .then(reply => res.json({ status: 'success', message: '使用者已對回覆移除讚', isLikedByLoginUser: false }))
+                  .then(reply => {
+                    return User.findByPk(userId)
+                      .then(user => {
+                        // user 的 likeCount - 1
+                        return user.decrement('likeCount')
+                      })
+                      .then(reply => res.json({ status: 'success', message: '使用者已對回覆移除讚', isLikedByLoginUser: false }))
+                  })
               })
           })
       })

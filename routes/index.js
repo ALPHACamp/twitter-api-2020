@@ -11,7 +11,7 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
 // passport authentication
-function authenticated (req, res, next) {
+function authenticated(req, res, next) {
   // return middleware that should have callback and set req.user manually
   return passport.authenticate('jwt', { session: false }, (a, user, b) => {
     if (user) {
@@ -24,7 +24,7 @@ function authenticated (req, res, next) {
 
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
-    if (helpers.getUser(req).role === '1') { return next() }
+    if (helpers.getUser(req).role === '1' || helpers.getUser(req).role === 'admin') { return next() }
     return res.json({ status: 'error', message: '沒有權限' })
   } else {
     return res.json({ status: 'error', message: '沒有權限' })

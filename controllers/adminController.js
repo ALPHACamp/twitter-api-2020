@@ -12,7 +12,7 @@ const adminController = {
       raw: true,
       nest: true,
       // 排除 admin 資料；即使有多個 admin 也能過濾
-      where: { [Op.not]: { role: "1" } }
+      // where: { [Op.not]: { role: "1" } }
     })
       .then(users => {
         if (!users.length) {
