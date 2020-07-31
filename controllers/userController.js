@@ -114,7 +114,7 @@ const userController = {
     const loginUserId = helpers.getUser(req).id
     const userId = req.params.id
 
-    return User.findOne({ where: { id: userId, [Op.not]: { role: "1" } } }) // 不顯示 admin 資料
+    return User.findOne({ where: { id: userId } })
       .then(user => {
         // 使用者不存在 => 報錯
         if (!user) {
