@@ -84,7 +84,7 @@ const adminController = {
         if (!tweet) {
           return res.json({ status: 'error', message: '推文不存在，無法刪除' })
         } else {
-          const likedTweetUsers = getLikedTweetUsers(tweetId)
+          const likedTweetUsers = await getLikedTweetUsers(tweetId)
 
           // 刪除 Tweet
           // 連同刪除 Reply
@@ -107,7 +107,53 @@ const adminController = {
         console.log(err)
         res.json({ status: 'error', message: `${err}` })
       })
-  }
+  },
+
+  ///////////////// deleteReply 僅限 admin 可用 (程式內容還需調整)
+
+  // deleteReply: (req, res) => {
+  //   const userId = helpers.getUser(req).id
+  //   const tweetId = req.params.tweet_id
+  //   const replyId = req.params.reply_id
+
+  //   return Reply.findOne({
+  //     where: { TweetId: tweetId, id: replyId },
+  //     include: [Tweet]
+  //   })
+  //     .then(async (reply) => {
+  //       // 回覆不存在 => 報錯
+  //       if (!reply) {
+  //         return res.json({ status: 'error', message: '回覆不存在，無法刪除' })
+  //       }
+
+  //       const likedReplyUsers = await getLikedReplyUsers(replyId)
+
+  //       const replyData = reply.toJSON()
+
+  //       // 刪除 reply
+  //       // 相依 tweet 的 commentCount - 1
+  //       // 刪除 reply 的所有 like 紀錄
+  //       // 所有按讚 user 的 likeCount - 1
+  //       if (userId === replyData.UserId || userId === replyData.Tweet.UserId) {
+  //         await Promise.all([
+  //           reply.destroy(),
+  //           Tweet.decrement('commentCount', { where: { id: tweetId } }),
+  //           Like.destroy({ where: { ReplyId: replyId } }),
+  //           likedReplyUsers.map(like => User.decrement('likeCount', { by: 1, where: { id: like.UserId } }))
+  //         ])
+  //       } else {
+  //         return res.json({ status: 'error', message: '沒有權限刪除此回覆' })
+  //       }
+  //     })
+  //     .then(reply => {
+  //       return res.json({ status: 'success', message: '回覆已刪除' })
+  //     })
+  //     .catch(err => {
+  //       console.log(err)
+  //       res.json({ status: 'error', message: `${err}` })
+  //     })
+  // },
+
 }
 
 module.exports = adminController

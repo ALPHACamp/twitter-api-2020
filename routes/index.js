@@ -55,6 +55,7 @@ router.get('/test', authenticated, adminBlocker, testController.getTestData)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getAllUsers)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getAllTweets)
 router.delete('/admin/tweets/:tweet_id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+// router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, authenticatedAdmin, adminController.deleteReply)
 
 // user
 router.post('/users', userController.signUp)
@@ -64,7 +65,7 @@ router.get('/users/:id/tweets', authenticated, adminBlocker, userController.getU
 router.get('/users/:id/followings', authenticated, adminBlocker, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, adminBlocker, userController.getUserFollowers)
 router.get('/users/:id/replied_tweets', authenticated, adminBlocker, userController.getRepliedTweets)
-router.get('/users/:id/likes', authenticated, adminBlocker, userController.getLikedTweets)
+router.get('/users/:id/likes', authenticated, adminBlocker, userController.getLikedTweetsOrReplies)
 router.get('/users/top10', authenticated, adminBlocker, userController.getTopUsers)
 router.get('/users/:id', authenticated, adminBlocker, userController.getUser)
 router.put('/users/:id', authenticated, adminBlocker, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
@@ -78,7 +79,7 @@ router.get('/tweets', authenticated, adminBlocker, tweetController.getTweets)
 // reply
 router.post('/tweets/:tweet_id/replies', authenticated, adminBlocker, replyController.postReply)
 router.get('/tweets/:tweet_id/replies', authenticated, adminBlocker, replyController.getReplies)
-router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, adminBlocker, replyController.deleteReply)
+
 
 // followship
 router.post('/followships', authenticated, adminBlocker, followshipController.postFollowship)
