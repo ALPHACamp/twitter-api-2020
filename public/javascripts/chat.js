@@ -1,4 +1,5 @@
-$(function () {
+document.addEventListener("DOMContentLoaded", () => {
+  let max_record
   let socket = io();
   let status = document.getElementById("status");
   let online = document.getElementById("online");
@@ -10,7 +11,7 @@ $(function () {
 
   $('form').submit(function () {
     if ($('#m').val() !== '') {
-      socket.emit('chat message', $('#m').val(), $('#userAvatar').val(), $('#userName').val())
+      socket.emit('chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
       $('#m').val('')
     } else {
       sendForm.classList.add("wrong");
@@ -65,7 +66,7 @@ $(function () {
     $('#messages').append(userMsg);
   })
 
-  socket.on('chat message', function (msg, name, avatar) {
+  socket.on('send message', function (msg, id, avatar, name) {
     const event = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
     let chatColumn = `
           <li>
@@ -79,5 +80,35 @@ $(function () {
         `
     $('#messages').append(chatColumn);
     $('#content').scrollTop($('#content')[0].scrollHeight - 50)
+
+    // if ($('#messages').children.length > max_record) {
+    //   rmMsgFromBox();
+    // }
   });
+
+  socket.on("chatRecord", function (msgs) {
+    for (let i = 0; i < msgs.length; i++) {
+      let chatColumn = `
+          <li>
+          <img src="${msgs[i].User.avatar}" alt="">
+            <div>
+              <strong>${msgs[i].User.name}</strong>
+              <p>${msgs[i].chatMessage}</p>
+              <span id='time'>${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+        </li>
+        `
+      $('#messages').append(chatColumn);
+    }
+  })
+
+  // socket.on("maxRecord", function (amount) {
+  //   max_record = amount;
+  // });
+
+
+  // function rmMsgFromBox() {
+  //   var childs = content.children;
+  //   childs[0].remove();
+  // }
 });

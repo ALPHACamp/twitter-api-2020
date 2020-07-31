@@ -14,8 +14,9 @@
     <div id="send-box">
       <div id="userInfo" style="visibility:hidden;display: none;">{{userLogin.name}}</div>
       <form id="send-form" action="">
-        <input id='userName' type="hidden" name="restaurantId" value="{{userLogin.avatar}}" />
-        <input id='userAvatar' type="hidden" name="restaurantId" value="{{userLogin.name}}" />
+        <input id='userId' type="hidden" name="userId" value="{{userLogin.id}}" />
+        <input id='userAvatar' type="hidden" name="userAvatar" value="{{userLogin.avatar}}" />
+        <input id='userName' type="hidden" name="userName" value="{{userLogin.name}}" />
         <input id="m" autocomplete="off" placeholder="please type message..." /><button>Send</button>
       </form>
     </div>

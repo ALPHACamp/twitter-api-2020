@@ -3,10 +3,11 @@ const handlebars = require('express-handlebars')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
 const app = express()
-let http = require('http').Server(app);
-let io = require('socket.io')(http);
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 const db = require('./models')
 const { User, Chat } = db
+const records = require('./record')
 
 const port = process.env.PORT || 3000
 
@@ -64,6 +65,7 @@ app.get('/chat', function (req, res) {
         account: user.toJSON().account,
       })
       let userLogin = {
+        id: user.toJSON().id,
         name: user.toJSON().name,
         avatar: user.toJSON().avatar,
         account: user.toJSON().account,
@@ -85,10 +87,14 @@ io.on('connection', function (socket) {
   })
 
   io.emit("online", onlineCount, userList)
+  // socket.emit("maxRecord", records.getMax());
+  records.get((msgs) => {
+    socket.emit("chatRecord", msgs);
+  })
 
-  socket.on('chat message', function (msg, name, avatar) {
+  socket.on('chat message', function (msg, id, avatar, name) {
     if (msg === '') return;
-    io.emit('chat message', msg, name, avatar)
+    records.push(msg, id, avatar, name)
   });
   socket.on('disconnect', () => {
     onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1;
@@ -101,4 +107,9 @@ io.on('connection', function (socket) {
     io.emit("online", onlineCount, userList)
     socket.broadcast.emit("oneLeave", socket.username)
   });
+});
+
+// 新增 Records 的事件監聽器
+records.on("new_message", (msg, id, avatar, name) => {
+  io.emit("send message", msg, id, avatar, name);
 });
