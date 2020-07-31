@@ -112,93 +112,99 @@ const replyController = {
       })
   },
 
-  addReplyLike: (req, res) => {
-    const userId = helpers.getUser(req).id
-    const replyId = req.params.id
 
-    return Like.findOne({ where: { UserId: userId, ReplyId: replyId } })
-      .then(like => {
-        // 使用者已按讚，不可再按讚 => 報錯
-        if (like) {
-          return res.json({ status: 'error', message: '使用者不可重覆按讚', isLikedByLoginUser: true })
-        }
+  /////////// 暫時拿掉下面方法
 
-        return Reply.findByPk(replyId)
-          .then(reply => {
-            // like 紀錄存在且 reply 不存在 => 報錯
-            if (!reply) {
-              return res.json({ status: 'error', message: '回覆不存在，無法按讚' })
-            } else {
-              // like 紀錄存在且 reply 存在 => 更新資料
-              return Like.create({
-                UserId: userId,
-                ReplyId: replyId
-              })
-                .then(like => {
-                  return Reply.findByPk(replyId)
-                    .then(reply => {
-                      // reply 的 likeCount + 1
-                      return reply.increment('likeCount')
-                        .then(reply => {
-                          return User.findByPk(userId)
-                            .then(user => {
-                              // user 的 likeCount + 1
-                              return user.increment('likeCount')
-                            })
-                            .then(reply => res.json({ status: 'success', message: '使用者已給回覆一個讚', isLikedByLoginUser: true }))
-                        })
-                    })
-                })
-            }
-          })
-      })
-      .catch(err => {
-        console.log(err)
-        res.json({ status: 'error', message: `${err}` })
-      })
-  },
+  // addReplyLike: (req, res) => {
+  //   const userId = helpers.getUser(req).id
+  //   const replyId = req.params.id
 
-  removeReplyLike: (req, res) => {
-    const userId = helpers.getUser(req).id
-    const replyId = req.params.id
+  //   return Like.findOne({ where: { UserId: userId, ReplyId: replyId } })
+  //     .then(like => {
+  //       // 使用者已按讚，不可再按讚 => 報錯
+  //       if (like) {
+  //         return res.json({ status: 'error', message: '使用者不可重覆按讚', isLikedByLoginUser: true })
+  //       }
 
-    return Like.findOne({ where: { UserId: userId, ReplyId: replyId } })
-      .then(like => {
-        if (!like) {
-          return Reply.findByPk(replyId)
-            .then(reply => {
-              // 沒有 like 紀錄且 reply 不存在  => 報錯
-              if (!reply) {
-                return res.json({ status: 'error', message: '回覆不存在，無法移除讚' })
-              } else {
-                // 沒有 like 紀錄且 reply 存在 => 報錯
-                return res.json({ status: 'error', message: '使用者尚未給回覆按讚，無法移除讚', isLikedByLoginUser: false })
-              }
-            })
-        }
-        // like 紀錄存在且 reply 存在 => 刪除 like 紀錄
-        return Like.destroy({ where: { ReplyId: replyId, UserId: userId } })
-          .then(like => {
-            return Reply.findByPk(replyId)
-              .then(reply => {
-                // reply.likeCount - 1
-                return reply.decrement('likeCount')
-                  .then(reply => {
-                    return User.findByPk(userId)
-                      .then(user => {
-                        // user 的 likeCount - 1
-                        return user.decrement('likeCount')
-                      })
-                      .then(reply => res.json({ status: 'success', message: '使用者已對回覆移除讚', isLikedByLoginUser: false }))
-                  })
-              })
-          })
-      })
-      .catch(err => {
-        console.log(err)
-        res.json({ status: 'error', message: `${err}` })
-      })
-  }
+  //       return Reply.findByPk(replyId)
+  //         .then(reply => {
+  //           // like 紀錄存在且 reply 不存在 => 報錯
+  //           if (!reply) {
+  //             return res.json({ status: 'error', message: '回覆不存在，無法按讚' })
+  //           } else {
+  //             // like 紀錄存在且 reply 存在 => 更新資料
+  //             return Like.create({
+  //               UserId: userId,
+  //               ReplyId: replyId
+  //             })
+  //               .then(like => {
+  //                 return Reply.findByPk(replyId)
+  //                   .then(reply => {
+  //                     // reply 的 likeCount + 1
+  //                     return reply.increment('likeCount')
+  //                       .then(reply => {
+  //                         return User.findByPk(userId)
+  //                           .then(user => {
+  //                             // user 的 likeCount + 1
+  //                             return user.increment('likeCount')
+  //                           })
+  //                           .then(reply => res.json({ status: 'success', message: '使用者已給回覆一個讚', isLikedByLoginUser: true }))
+  //                       })
+  //                   })
+  //               })
+  //           }
+  //         })
+  //     })
+  //     .catch(err => {
+  //       console.log(err)
+  //       res.json({ status: 'error', message: `${err}` })
+  //     })
+  // },
+
+
+  /////////// 暫時拿掉下面方法
+
+  // removeReplyLike: (req, res) => {
+  //   const userId = helpers.getUser(req).id
+  //   const replyId = req.params.id
+
+  //   return Like.findOne({ where: { UserId: userId, ReplyId: replyId } })
+  //     .then(like => {
+  //       if (!like) {
+  //         return Reply.findByPk(replyId)
+  //           .then(reply => {
+  //             // 沒有 like 紀錄且 reply 不存在  => 報錯
+  //             if (!reply) {
+  //               return res.json({ status: 'error', message: '回覆不存在，無法移除讚' })
+  //             } else {
+  //               // 沒有 like 紀錄且 reply 存在 => 報錯
+  //               return res.json({ status: 'error', message: '使用者尚未給回覆按讚，無法移除讚', isLikedByLoginUser: false })
+  //             }
+  //           })
+  //       }
+  //       // like 紀錄存在且 reply 存在 => 刪除 like 紀錄
+  //       return Like.destroy({ where: { ReplyId: replyId, UserId: userId } })
+  //         .then(like => {
+  //           return Reply.findByPk(replyId)
+  //             .then(reply => {
+  //               // reply.likeCount - 1
+  //               return reply.decrement('likeCount')
+  //                 .then(reply => {
+  //                   return User.findByPk(userId)
+  //                     .then(user => {
+  //                       // user 的 likeCount - 1
+  //                       return user.decrement('likeCount')
+  //                     })
+  //                     .then(reply => res.json({ status: 'success', message: '使用者已對回覆移除讚', isLikedByLoginUser: false }))
+  //                 })
+  //             })
+  //         })
+  //     })
+  //     .catch(err => {
+  //       console.log(err)
+  //       res.json({ status: 'error', message: `${err}` })
+  //     })
+  // }
 }
 
 module.exports = replyController

@@ -65,7 +65,7 @@ router.get('/users/:id/tweets', authenticated, adminBlocker, userController.getU
 router.get('/users/:id/followings', authenticated, adminBlocker, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, adminBlocker, userController.getUserFollowers)
 router.get('/users/:id/replied_tweets', authenticated, adminBlocker, userController.getRepliedTweets)
-router.get('/users/:id/likes', authenticated, adminBlocker, userController.getLikedTweetsOrReplies)
+router.get('/users/:id/likes', authenticated, adminBlocker, userController.getLikedTweets)
 router.get('/users/top10', authenticated, adminBlocker, userController.getTopUsers)
 router.get('/users/:id', authenticated, adminBlocker, userController.getUser)
 router.put('/users/:id', authenticated, adminBlocker, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUserProfile) // 上傳兩張圖片
@@ -88,7 +88,7 @@ router.delete('/followships/:followingId', authenticated, adminBlocker, followsh
 // like
 router.post('/tweets/:id/like', authenticated, adminBlocker, tweetController.addTweetLike)
 router.post('/tweets/:id/unlike', authenticated, adminBlocker, tweetController.removeTweetLike)
-router.post('/replies/:id/like', authenticated, adminBlocker, replyController.addReplyLike)
-router.post('/replies/:id/unlike', authenticated, adminBlocker, replyController.removeReplyLike)
+// router.post('/replies/:id/like', authenticated, adminBlocker, replyController.addReplyLike)
+// router.post('/replies/:id/unlike', authenticated, adminBlocker, replyController.removeReplyLike)
 
 module.exports = router
