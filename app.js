@@ -75,10 +75,32 @@ app.get('/chat', function (req, res) {
     )
 });
 
+app.get('/chat/private', function (req, res) {
+  return User.findByPk(1 + Math.ceil(Math.random() * 5), { include: Chat }) //之後用helper.get(req).id取代
+    .then(user => {
+      userList.push({
+        name: user.toJSON().name,
+        avatar: user.toJSON().avatar,
+        account: user.toJSON().account,
+      })
+      let userLogin = {
+        id: user.toJSON().id,
+        name: user.toJSON().name,
+        avatar: user.toJSON().avatar,
+        account: user.toJSON().account,
+      }
+      res.render('privateChat', { userLogin });
+    }
+    )
+});
+
 // 加入線上人數計數
 let onlineCount = 0;
 
 io.on('connection', function (socket) {
+
+  //群聊
+
   onlineCount++;
 
   socket.on('login', function (userName) {
@@ -107,6 +129,8 @@ io.on('connection', function (socket) {
     io.emit("online", onlineCount, userList)
     socket.broadcast.emit("oneLeave", socket.username)
   });
+
+  //私聊
 });
 
 // 新增 Records 的事件監聽器

@@ -32,7 +32,7 @@
     #user-list {
       background-color: rgb(243, 242, 237);
       width: 300px;
-      height: 350px;
+      height: 600px;
       border: 1px solid darkolivegreen;
       border-radius: 5px;
       overflow: auto;
@@ -77,7 +77,7 @@
     #content {
       background-color: rgb(243, 242, 237);
       width: 500px;
-      height: 350px;
+      height: 600px;
       border: 1px solid darkolivegreen;
       border-radius: 5px;
       overflow: auto;
