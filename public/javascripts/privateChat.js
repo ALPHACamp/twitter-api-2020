@@ -5,12 +5,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let userSide = document.getElementById("users");
   let sendForm = document.getElementById("send-form").childNodes[1];
   let userInfo = document.getElementById("userInfo")
+  let messages = document.getElementById("messages")
 
   socket.emit('login', userInfo.innerText)
 
   $('form').submit(function () {
     if ($('#m').val() !== '') {
-      socket.emit('chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
+      socket.emit('private chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
       $('#m').val('')
     } else {
       sendForm.classList.add("wrong");
@@ -33,17 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.on("online", function (amount, userlist) {
     online.innerText = amount;
-    let userlistColumn = ``
-    for (i = 0; i < userlist.length; i++) {
-      userlistColumn += `
-        <li>
-          <img src="${userlist[i].avatar}" alt="">
-            <strong>${userlist[i].name}</strong>
-            <strong id="user-account">${userlist[i].account}</strong>
-        </li>
-        `
-    }
-    userSide.innerHTML = userlistColumn;
     window.scrollTo(0, document.body.scrollHeight);
   });
 
@@ -85,14 +75,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // }
   });
 
-  socket.on("chatRecord", function (msgs) {
+  socket.on("privateChatRecord", function (msgs) {
+    messages.innerHTML = ''
     for (let i = 0; i < msgs.length; i++) {
       let chatColumn = `
           <li>
           <img src="${msgs[i].User.avatar}" alt="">
             <div>
               <strong>${msgs[i].User.name}</strong>
-              <p>${msgs[i].chatMessage}</p>
+              <p>${msgs[i].message}</p>
               <span id='time'>${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</span>
             </div>
         </li>
@@ -111,3 +102,12 @@ document.addEventListener("DOMContentLoaded", () => {
   //   childs[0].remove();
   // }
 });
+
+function showChatHistory(user) {
+  let socket = io();
+  let loginUserId = user.getAttribute('user-id');
+  let chatUserId = user.getAttribute('data-id')
+  socket.emit('private-Record', loginUserId, chatUserId)
+}
+
+

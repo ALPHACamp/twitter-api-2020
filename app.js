@@ -6,8 +6,10 @@ const app = express()
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const db = require('./models')
-const { User, Chat } = db
+const { User, Chat, Chatship } = db
 const records = require('./record')
+const privateRecord = require('./privateRecord')
+const { Op } = require('sequelize')
 
 const port = process.env.PORT || 3000
 
@@ -76,20 +78,24 @@ app.get('/chat', function (req, res) {
 });
 
 app.get('/chat/private', function (req, res) {
-  return User.findByPk(1 + Math.ceil(Math.random() * 5), { include: Chat }) //之後用helper.get(req).id取代
+  return User.findByPk(1, {
+    include: [
+      { model: User, as: 'Chatwith' },
+    ]
+  }) //之後用helper.get(req).id取代
     .then(user => {
-      userList.push({
-        name: user.toJSON().name,
-        avatar: user.toJSON().avatar,
-        account: user.toJSON().account,
-      })
-      let userLogin = {
+      const data = user.Chatwith.map(r => ({
+        userId: r.id,
+        userName: r.name,
+        userAvatar: r.avatar,
+        userAccount: r.account
+      }))
+      res.render('privateChat', {
+        data,
         id: user.toJSON().id,
         name: user.toJSON().name,
         avatar: user.toJSON().avatar,
-        account: user.toJSON().account,
-      }
-      res.render('privateChat', { userLogin });
+      });
     }
     )
 });
@@ -131,9 +137,27 @@ io.on('connection', function (socket) {
   });
 
   //私聊
+  socket.on('private-Record', function (loginUserId, chatUserId) {
+    Chatship.findAll({
+      where: { [Op.or]: [{ [Op.and]: [{ UserId: chatUserId }, { chatwithId: loginUserId }] }, { [Op.and]: [{ UserId: loginUserId }, { chatwithId: chatUserId }] }] },
+      raw: true, nest: true,
+      order: [['createdAt', 'ASC']],
+      include: [User]
+    }).then((msgs) => {
+      socket.emit("privateChatRecord", msgs);
+    })
+  })
+
+  socket.on('private chat message', function (msg, id, avatar, name) {
+    if (msg === '') return;
+    privateRecord.push(msg, id, avatar, name)
+  });
 });
 
 // 新增 Records 的事件監聽器
 records.on("new_message", (msg, id, avatar, name) => {
   io.emit("send message", msg, id, avatar, name);
+});
+privateRecord.on("new_message", (msg, id, avatar, name) => {
+  // io.emit("send message", msg, id, avatar, name);
 });

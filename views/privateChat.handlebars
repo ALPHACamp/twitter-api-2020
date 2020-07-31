@@ -1,8 +1,17 @@
 <div id="container">
   <div id="user-box">
-    <div id='user-title'>Online Users</div>
+    <div id='user-title'>Chat Box</div>
     <div id="user-list">
       <ul id="users">
+        {{#each data}}
+        <button data-id="{{this.userId}}" user-id="{{../id}}" onclick="showChatHistory(this)" style="width: 350px;">
+          <li style="cursor: pointer;">
+            <img src="{{this.userAvatar}}" alt="">
+            <strong>{{this.userName}}</strong>
+            <strong id="user-account">{{this.userAccount}}</strong>
+          </li>
+        </button>
+        {{/each}}
       </ul>
     </div>
   </div>
@@ -12,11 +21,11 @@
       <ul id="messages"></ul>
     </div>
     <div id="send-box">
-      <div id="userInfo" style="visibility:hidden;display: none;">{{userLogin.name}}</div>
+      <div id="userInfo" style="visibility:hidden;display: none;">{{name}}</div>
       <form id="send-form" action="">
-        <input id='userId' type="hidden" name="userId" value="{{userLogin.id}}" />
-        <input id='userAvatar' type="hidden" name="userAvatar" value="{{userLogin.avatar}}" />
-        <input id='userName' type="hidden" name="userName" value="{{userLogin.name}}" />
+        <input id='userId' type="hidden" name="userId" value="{{id}}" />
+        <input id='userAvatar' type="hidden" name="userAvatar" value="{{avatar}}" />
+        <input id='userName' type="hidden" name="userName" value="{{name}}" />
         <input id="m" autocomplete="off" placeholder="please type message..." /><button>Send</button>
       </form>
     </div>
