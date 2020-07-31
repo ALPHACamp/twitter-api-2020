@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.on('send message', function (msg, id, avatar, name) {
     const event = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
     let chatColumn = `
-          <li>
+          <li style="background:#FF6600; border-radius:30px 30px 0px 30px ">
           <img src="${avatar}" alt="">
             <div>
               <strong>${name}</strong>

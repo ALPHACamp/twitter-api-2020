@@ -3,11 +3,19 @@
 
 <head>
   <title>Socket.IO chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://kit.fontawesome.com/a470dfdd95.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <link rel="stylesheet" href="/stylesheets/chat.css">
 </head>
 
 <body>
-  {{{body}}}
+  <div class="row border" style="max-height: 1202px;">    
+    {{> leftBar}}
+    {{{body}}}
+  </div>
+  
   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="/javascripts/chat.js"></script>

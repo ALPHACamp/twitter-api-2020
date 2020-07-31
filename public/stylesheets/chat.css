@@ -6,22 +6,21 @@
 
     body {
       font: 13px Helvetica, Arial;
-      background-color: rgba(231, 230, 226, 0.911);
+      background-color: #ffffff;
     }
+
+    #left-bar a {
+      color: #1C1C1C;
+      font-weight: bolder;
+    }
+
+    #left-bar a:hover {
+      color: #FF6600;
+    }     
 
     #container {
-      top: 50px;
-      width: 850px;
-      margin: 0 auto;
       display: flex;
       flex-direction: row;
-    }
-
-    #user-box {
-      top: 50px;
-      width: 300px;
-      margin: 0 5px;
-      position: relative;
     }
 
     #user-title {
@@ -30,18 +29,12 @@
     }
 
     #user-list {
-      background-color: rgb(243, 242, 237);
-      width: 300px;
-      height: 350px;
-      border: 1px solid darkolivegreen;
-      border-radius: 5px;
+      background-color: #ffffff;
       overflow: auto;
     }
 
     #users li {
       height: 55px;
-      border: 1px solid rgba(219, 219, 219, 0.863);
-      border-radius: 5px;
       display: flex;
       align-items: center;
     }
@@ -62,51 +55,44 @@
       color: rgba(160, 158, 158, 0.815);
     }
 
-    #chat-box {
-      top: 50px;
-      width: 500px;
-      margin: 0;
-      position: relative;
-    }
-
-    #status-box {
-      text-align: right;
-      font-size: 1.6em;
+    #status-box, .title {
+      font-size: 1rem;
+      font-weight: bolder;
+      line-height: 3rem;
     }
 
     #content {
-      background-color: rgb(243, 242, 237);
-      width: 500px;
-      height: 350px;
-      border: 1px solid darkolivegreen;
-      border-radius: 5px;
+      background-color: #ffffff;
+      /* width: 500px;
+      height: 350px; */
+      /* border: 1px solid darkolivegreen; */
+      /* border-radius: 5px; */
       overflow: auto;
-      margin: 0 0 5px 0;
-    }
-
-    form {
-      border: 1px solid #000;
-      border-radius: 5px;
-      padding: 3px;
-      position: relative;
-      width: 500px;
+      /* margin: 0 0 5px 0; */
     }
 
     form input {
-      border: 0;
+      border: none;
       padding: 10px;
       width: 90%;
-      margin-right: .5%;
+      border-radius: 50px;
+      background: #F5F8FA;
     }
 
     form button {
-      width: 9%;
-      background: #f39a34;
-      border: 2px outset;
-      border-radius: 5px;
-      padding: 10px 1px 10px 1px;
+      width: 5%;
+      background: none;
       cursor: pointer;
       text-align: center;
+         fill: #FF6600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    button:focus, input:focus { 
+      outline: none; 
     }
 
     #messages {
