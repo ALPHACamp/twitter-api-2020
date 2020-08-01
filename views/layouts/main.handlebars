@@ -11,8 +11,11 @@
 </head>
 
 <body>
-  <div class="row border" style="max-height: 1202px;">    
+  
+  <div {{#if userLogin}} class="row border" style="max-height: 1202px;" {{/if}}>    
+    {{#if userLogin}}
     {{> leftBar}}
+    {{/if}}
     {{{body}}}
   </div>
   

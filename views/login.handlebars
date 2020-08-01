@@ -1,0 +1,30 @@
+<div class="container py-5">
+  <form class="w-100" action="/login" method="POST">
+    <div class="text-center mb-4">
+      <h1 class="h3 mb-3 font-weight-normal">登入Alphitter</h1>
+    </div>
+
+    <div class="form-label-group mb-2">
+      <label for="account">帳號</label>
+      <input id="account" v-model="account" name="account" type="text" class="form-control" placeholder="Account"
+        autocomplete="username" required autofocus />
+    </div>
+
+    <div class="form-label-group mb-3">
+      <label for="password">密碼</label>
+      <input id="password" v-model="password" name="password" type="password" class="form-control"
+        placeholder="Password" autocomplete="current-password" required />
+    </div>
+
+    <button class="btn btn-lg btn-primary btn-block mb-3" type="submit">登入</button>
+
+    <div class="text-center mb-3">
+      <p>
+        <router-link to="/regist">註冊Alpitter</router-link>
+      </p>
+      <p>
+        <router-link to="/admin">後台登入</router-link>
+      </p>
+    </div>
+  </form>
+</div>
