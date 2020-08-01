@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </li>
         `
     $('#messages').append(chatColumn);
-    $('#content').scrollTop($('#content')[0].scrollHeight - 50)
+    $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
 
     // if ($('#messages').children.length > max_record) {
     //   rmMsgFromBox();
@@ -64,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </li>
         `
       $('#messages').append(chatColumn);
+      $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
     }
   })
 

@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </li>
           `
     $('#messages').append(userMsg);
+    $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
   })
 
   socket.on("oneLeave", function (user) {
@@ -68,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </li>
           `
     $('#messages').append(userMsg);
+    $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
   })
 
   socket.on('send message', function (msg, id, avatar, name) {
@@ -83,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </li>
         `
     $('#messages').append(chatColumn);
-    $('#content').scrollTop($('#content')[0].scrollHeight - 50)
+    $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
 
     // if ($('#messages').children.length > max_record) {
     //   rmMsgFromBox();
@@ -103,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </li>
         `
       $('#messages').append(chatColumn);
+      $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
     }
   })
 
@@ -115,6 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
   //   var childs = content.children;
   //   childs[0].remove();
   // }
-  
+
 });
 

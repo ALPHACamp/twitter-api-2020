@@ -96,8 +96,8 @@ app.get('/logout', (req, res) => {
   res.redirect('/login')
 })
 
-app.get('/chat', function (req, res) {
-  return User.findByPk(1 + Math.ceil(Math.random() * 9), { include: Chat }) //之後用helper.get(req).id取代
+app.get('/chat', authenticator, function (req, res) {
+  return User.findByPk(helpers.getUser(req).id, { include: Chat }) //之後用helper.get(req).id取代
     .then(user => {
       userList.push({
         name: user.toJSON().name,
@@ -115,8 +115,8 @@ app.get('/chat', function (req, res) {
     )
 });
 
-app.get('/chat/private', function (req, res) {
-  return User.findByPk(2, {
+app.get('/chat/private', authenticator, function (req, res) {
+  return User.findByPk(helpers.getUser(req).id, {
     include: [
       { model: User, as: 'Chatwith' },
     ]
@@ -135,7 +135,7 @@ app.get('/chat/private', function (req, res) {
             id: user.toJSON().id,
             name: user.toJSON().name,
             avatar: user.toJSON().avatar,
-            users
+            users,
           })
         });
     }
