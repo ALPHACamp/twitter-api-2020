@@ -1,5 +1,13 @@
 const chatController = require('../controllers/chatController.js');
 
+// 透過 socket id 來找到對應的 user id
+const findUserIdBySocketId = (socketId, onlineUsers) => {
+  onlineUsers.filter(onlineUser => {
+    socketId === onlineUser.socketId
+    return onlineUser.userId
+  })
+}
+
 const chatSocket = async (io, socket, onlineUsers) => {
   // 第一次連線：傳回線上使用者清單列表，需要濾掉重複的 userId（一個使用者可能有多個 socket）
   console.log(`使用者 with socket id ${socket.id} 第一次連線`)
@@ -10,6 +18,9 @@ const chatSocket = async (io, socket, onlineUsers) => {
   onlineUsers.forEach(user => {
     if (!onlineUsersId.includes(user.userId)) onlineUsersId.push(user.userId)
   })
+
+  // 最新加入的 user 的 id
+  const newUserId = onlineUsersId[onlineUsersId.length - 1]
 
   try {
     const result = await chatController.getUsers(onlineUsersId).map(user => {
@@ -28,10 +39,34 @@ const chatSocket = async (io, socket, onlineUsers) => {
   }
 
   // === EVENT ===
+  socket.on('new-user', async () => {
+    console.log('新加入一位使用者 id =', newUserId)
+    console.log('新加入一位使用者 socket id =', socket.id)
+
+    try {
+      const userData = await chatController.getUser(newUserId)
+
+      if (!userData) {
+        console.log('查無此人')
+      } else {
+        io.emit('new-user', {
+          id: userData.id,
+          avatar: userData.avatar,
+          name: userData.name,
+          account: userData.account,
+        })
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  })
+
+  // disconnect 事件一發生，就會立即取消 socket，callback 只會執行同步程式
   socket.on('disconnect', () => {
     console.log(`一位使用者離線 with socket id ${socket.id}`)
     // 從使用者列表移除
     onlineUsers.splice(onlineUsers.findIndex(user => user.socketId === socket.id), 1)
+    io.emit('disconnect', '有人離開聊天室')
   })
 
   socket.on('send', async (obj) => {
