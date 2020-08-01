@@ -5,8 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let userInfo = document.getElementById("userInfo")
   let messages = document.getElementById("messages")
 
-  socket.emit('login', userInfo.innerText)
-
   $('#send-form').submit(function () {
     if ($('#m').val() !== '') {
       socket.emit('private chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
@@ -30,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
     status.classList.add("disconnected")
   });
 
-  socket.on('send message', function (msg, avatar, name) {
+  socket.on('send private message', function (msg, avatar, name) {
     const event = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
     let chatColumn = `
           <li>

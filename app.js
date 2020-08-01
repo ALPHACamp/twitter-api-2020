@@ -26,6 +26,7 @@ app.set('view engine', 'handlebars')
 // use helpers.getUser(req) to replace req.user
 const passport = require('./config/passport');
 const { random } = require('faker');
+const { type } = require('os')
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
 app.use(bodyParser.json())
@@ -153,14 +154,12 @@ io.on('connection', function (socket) {
 
   //群聊
 
-  onlineCount++;
-
   socket.on('login', function (userName) {
     socket.username = userName
     socket.broadcast.emit("oneLogin", socket.username)
   })
 
-  io.emit("online", onlineCount, userList)
+  io.emit("online", userList.length, userList)
   // socket.emit("maxRecord", records.getMax());
   records.get((msgs) => {
     socket.emit("chatRecord", msgs);
@@ -171,15 +170,17 @@ io.on('connection', function (socket) {
     records.push(msg, id, avatar, name)
   });
   socket.on('disconnect', () => {
-    onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1;
     userList.forEach(function (x, index) {
       if (x.name === socket.username) {
         userList.splice(index, 1);
         //找到該用戶，刪除
       }
     })
-    io.emit("online", onlineCount, userList)
-    socket.broadcast.emit("oneLeave", socket.username)
+    io.emit("online", userList.length, userList)
+    if (typeof socket.username !== 'undefined') {
+      console.log(socket.username, typeof socket.username)
+      socket.broadcast.emit("oneLeave", socket.username)
+    }
   });
 
   //私聊
@@ -206,5 +207,5 @@ records.on("new_message", (msg, id, avatar, name) => {
   io.emit("send message", msg, id, avatar, name);
 });
 privateRecord.on("new_message", (msg, avatar, name) => {
-  io.sockets.emit("send message", msg, avatar, name);
+  io.sockets.emit("send private message", msg, avatar, name);
 });
