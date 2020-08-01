@@ -1,7 +1,9 @@
 const express = require('express')
+const session = require('express-session')
 const handlebars = require('express-handlebars')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
+const flash = require('connect-flash')
 const app = express()
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
@@ -28,11 +30,23 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
 app.use(bodyParser.json())
 
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  // maxAge: 5 * 60 * 1000
+}))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(flash())
 
 app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg')
+  res.locals.error_msg = req.flash('error_msg')
+  res.locals.warning_msg = req.flash('warning_msg')
   res.locals.user = helpers.getUser(req)
+  res.locals.isAuthenticated = helpers.ensureAuthenticated(req)
   next()
 })
 
@@ -55,8 +69,32 @@ require('./routes')(app, authenticated)
 
 //chat
 
+
+const authenticator = (req, res, next) => {
+  if (helpers.ensureAuthenticated(req)) {
+    return next()
+  }
+  // req.flash('warning_msg', '請先登入才能使用')
+  res.redirect('/login')
+}
 //上線名單
 let userList = []
+
+app.get('/login', (req, res) => {
+  return res.render('login')
+})
+
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/chat',
+  failureRedirect: '/login',
+  failureFlash: true
+}))
+
+app.get('/logout', (req, res) => {
+  req.logout()
+  req.flash('success_msg', '您已經成功登出。')
+  res.redirect('/login')
+})
 
 app.get('/chat', function (req, res) {
   return User.findByPk(1 + Math.ceil(Math.random() * 9), { include: Chat }) //之後用helper.get(req).id取代

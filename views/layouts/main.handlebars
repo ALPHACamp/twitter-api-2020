@@ -13,8 +13,16 @@
 </head>
 
 <body>
-  {{{body}}}
+  
+  <div {{#if userLogin}} class="row border" style="max-height: 1202px;" {{/if}}>    
+    {{#if userLogin}}
+    {{> leftBar}}
+    {{/if}}
+    {{{body}}}
+  </div>
+
   <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+ {{!-- <script src="https://code.jquery.com/jquery-1.11.1.js"></script>--}}
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>

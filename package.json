@@ -19,7 +19,7 @@
     "events": "^3.2.0",
     "express": "^4.16.4",
     "express-handlebars": "^3.1.0",
-    "express-session": "^1.15.6",
+    "express-session": "^1.17.1",
     "faker": "^4.1.0",
     "imgur-node-api": "^0.1.0",
     "jsonwebtoken": "^8.5.1",
