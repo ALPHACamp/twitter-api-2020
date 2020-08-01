@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let userlistColumn = ``
     for (i = 0; i < userlist.length; i++) {
       userlistColumn += `
-        <li>
+        <li class="border-bottom">
           <img src="${userlist[i].avatar}" alt="">
             <strong>${userlist[i].name}</strong>
             <strong id="user-account">${userlist[i].account}</strong>
@@ -75,12 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.on('send message', function (msg, id, avatar, name) {
     const event = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
     let chatColumn = `
-          <li style="background:#FF6600; border-radius:30px 30px 0px 30px ">
+        <li style="background:#FF6600; color:#ffffff; border-radius:30px 30px 0px 30px; max-width: 75%; float:right">
           <img src="${avatar}" alt="">
             <div>
               <strong>${name}</strong>
               <p>${msg}</p>
-              <span id='time'>${event}</span>
+              <span class="text-right" id='time'>${event}</span>
             </div>
         </li>
         `
