@@ -1,5 +1,6 @@
 const db = require('../models')
 const User = db.User
+const Message = db.Message
 const { Op } = require('sequelize')
 
 const chatController = {
@@ -9,10 +10,13 @@ const chatController = {
       nest: true,
       where: { id: { [Op.in]: users } }
     })
-      .then(users => {
-        return users
-      })
-      .catch(err => console.log(err))
+  },
+
+  postMessage: (userId, message) => {
+    return Message.create({
+      userId,
+      content: message
+    })
   }
 }
 
