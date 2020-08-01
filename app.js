@@ -59,7 +59,7 @@ require('./routes')(app, authenticated)
 let userList = []
 
 app.get('/chat', function (req, res) {
-  return User.findByPk(1 + Math.ceil(Math.random() * 5), { include: Chat }) //之後用helper.get(req).id取代
+  return User.findByPk(1 + Math.ceil(Math.random() * 9), { include: Chat }) //之後用helper.get(req).id取代
     .then(user => {
       userList.push({
         name: user.toJSON().name,
@@ -78,26 +78,34 @@ app.get('/chat', function (req, res) {
 });
 
 app.get('/chat/private', function (req, res) {
-  return User.findByPk(1, {
+  return User.findByPk(2, {
     include: [
       { model: User, as: 'Chatwith' },
     ]
   }) //之後用helper.get(req).id取代
     .then(user => {
-      const data = user.Chatwith.map(r => ({
-        userId: r.id,
-        userName: r.name,
-        userAvatar: r.avatar,
-        userAccount: r.account
-      }))
-      res.render('privateChat', {
-        data,
-        id: user.toJSON().id,
-        name: user.toJSON().name,
-        avatar: user.toJSON().avatar,
-      });
+      User.findAll({ raw: true })
+        .then(users => {
+          const data = user.Chatwith.map(r => ({
+            userId: r.id,
+            userName: r.name,
+            userAvatar: r.avatar,
+            userAccount: r.account
+          }))
+          res.render('privateChat', {
+            data,
+            id: user.toJSON().id,
+            name: user.toJSON().name,
+            avatar: user.toJSON().avatar,
+            users
+          })
+        });
     }
     )
+});
+
+app.post('/chat/private', function (req, res) {
+  console.log('123')
 });
 
 // 加入線上人數計數

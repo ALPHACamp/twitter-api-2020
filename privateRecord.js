@@ -1,6 +1,6 @@
 const { EventEmitter } = require("events");
 const db = require('./models')
-const { User, Chatship } = db
+const { Chatship } = db
 
 
 let instance;

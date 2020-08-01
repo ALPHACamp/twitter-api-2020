@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.emit('login', userInfo.innerText)
 
-  $('form').submit(function () {
+  $('#send-form').submit(function () {
     if ($('#m').val() !== '') {
       socket.emit('private chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
       $('#m').val('')
