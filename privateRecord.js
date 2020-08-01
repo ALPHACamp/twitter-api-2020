@@ -11,35 +11,23 @@ class Records extends EventEmitter {
     super();
   }
 
-  push(msg, id, avatar, name) { //可加入資料庫中最多有多少筆紀錄
+  push(msg, id, chatwithId, avatar, name) { //可加入資料庫中最多有多少筆紀錄
     Chatship.create({
       message: msg,
       UserId: id,
-      // chatwithId: 2,
+      chatwithId: chatwithId,
     }).then((chat) => {
-      this.emit("new_message", msg, id, avatar, name)
+      this.emit("new_message", msg, avatar, name)
     })
   }
 
+  // setMax(max) {
+  //   MAX = max;
+  // }
 
-  get(callback) {
-    Chatship.findAll({
-      where: { [Op.or]: [{ chaterId: 1 }, { chatwithId: 1 }] },
-      raw: true, nest: true,
-      order: [['createdAt', 'ASC']],
-      include: [User]
-    }).then((msgs) => {
-      return callback(msgs)
-    })
-  }
-
-  setMax(max) {
-    MAX = max;
-  }
-
-  getMax() {
-    return MAX;
-  }
+  // getMax() {
+  //   return MAX;
+  // }
 }
 
 module.exports = (function () {

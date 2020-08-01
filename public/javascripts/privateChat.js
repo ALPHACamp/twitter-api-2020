@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let status = document.getElementById("status");
-  let online = document.getElementById("online");
-  let userSide = document.getElementById("users");
   let sendForm = document.getElementById("send-form").childNodes[1];
   let userInfo = document.getElementById("userInfo")
   let messages = document.getElementById("messages")
@@ -32,30 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     status.classList.add("disconnected")
   });
 
-  socket.on("online", function (amount, userlist) {
-    online.innerText = amount;
-    window.scrollTo(0, document.body.scrollHeight);
-  });
-
-  socket.on("oneLogin", function (user) {
-    let userMsg = `
-          <li>
-          <span>${user} 上線。</span>
-          </li>
-          `
-    $('#messages').append(userMsg);
-  })
-
-  socket.on("oneLeave", function (user) {
-    let userMsg = `
-          <li>
-          <span>${user} 離線。</span>
-          </li>
-          `
-    $('#messages').append(userMsg);
-  })
-
-  socket.on('send message', function (msg, id, avatar, name) {
+  socket.on('send message', function (msg, avatar, name) {
     const event = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
     let chatColumn = `
           <li>

@@ -4,7 +4,7 @@
     <div id="user-list">
       <ul id="users">
         {{#each data}}
-        <button data-id="{{this.userId}}" user-id="{{../id}}" onclick="showChatHistory(this)" style="width: 350px;">
+        <button data-id="{{this.userId}}" user-id="{{../id}}" onclick="showChatHistory(this)" style="width: 300px;">
           <li style="cursor: pointer;">
             <img src="{{this.userAvatar}}" alt="">
             <strong>{{this.userName}}</strong>
@@ -16,7 +16,7 @@
     </div>
   </div>
   <div id="chat-box">
-    <div id="status-box">Server: <strong id="status">-</strong> / <strong id="online">0</strong> online</div>
+    <div id="status-box">Server: <strong id="status">-</strong> </div>
     <div id="content">
       <ul id="messages"></ul>
     </div>

@@ -138,6 +138,7 @@ io.on('connection', function (socket) {
 
   //私聊
   socket.on('private-Record', function (loginUserId, chatUserId) {
+    socket.chatwithId = chatUserId
     Chatship.findAll({
       where: { [Op.or]: [{ [Op.and]: [{ UserId: chatUserId }, { chatwithId: loginUserId }] }, { [Op.and]: [{ UserId: loginUserId }, { chatwithId: chatUserId }] }] },
       raw: true, nest: true,
@@ -150,7 +151,7 @@ io.on('connection', function (socket) {
 
   socket.on('private chat message', function (msg, id, avatar, name) {
     if (msg === '') return;
-    privateRecord.push(msg, id, avatar, name)
+    privateRecord.push(msg, id, socket.chatwithId, avatar, name)
   });
 });
 
@@ -158,6 +159,6 @@ io.on('connection', function (socket) {
 records.on("new_message", (msg, id, avatar, name) => {
   io.emit("send message", msg, id, avatar, name);
 });
-privateRecord.on("new_message", (msg, id, avatar, name) => {
-  // io.emit("send message", msg, id, avatar, name);
+privateRecord.on("new_message", (msg, avatar, name) => {
+  io.sockets.emit("send message", msg, avatar, name);
 });
