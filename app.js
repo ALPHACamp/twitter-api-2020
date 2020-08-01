@@ -8,8 +8,10 @@ const app = express()
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const db = require('./models')
-const { User, Chat } = db
+const { User, Chat, Chatship } = db
 const records = require('./record')
+const privateRecord = require('./privateRecord')
+const { Op } = require('sequelize')
 
 const port = process.env.PORT || 3000
 
@@ -95,7 +97,7 @@ app.get('/logout', (req, res) => {
 })
 
 app.get('/chat', function (req, res) {
-  return User.findByPk(1 + Math.ceil(Math.random() * 5), { include: Chat }) //之後用helper.get(req).id取代
+  return User.findByPk(1 + Math.ceil(Math.random() * 9), { include: Chat }) //之後用helper.get(req).id取代
     .then(user => {
       userList.push({
         name: user.toJSON().name,
@@ -113,10 +115,44 @@ app.get('/chat', function (req, res) {
     )
 });
 
+app.get('/chat/private', function (req, res) {
+  return User.findByPk(2, {
+    include: [
+      { model: User, as: 'Chatwith' },
+    ]
+  }) //之後用helper.get(req).id取代
+    .then(user => {
+      User.findAll({ raw: true })
+        .then(users => {
+          const data = user.Chatwith.map(r => ({
+            userId: r.id,
+            userName: r.name,
+            userAvatar: r.avatar,
+            userAccount: r.account
+          }))
+          res.render('privateChat', {
+            data,
+            id: user.toJSON().id,
+            name: user.toJSON().name,
+            avatar: user.toJSON().avatar,
+            users
+          })
+        });
+    }
+    )
+});
+
+app.post('/chat/private', function (req, res) {
+  console.log('123')
+});
+
 // 加入線上人數計數
 let onlineCount = 0;
 
 io.on('connection', function (socket) {
+
+  //群聊
+
   onlineCount++;
 
   socket.on('login', function (userName) {
@@ -145,9 +181,30 @@ io.on('connection', function (socket) {
     io.emit("online", onlineCount, userList)
     socket.broadcast.emit("oneLeave", socket.username)
   });
+
+  //私聊
+  socket.on('private-Record', function (loginUserId, chatUserId) {
+    socket.chatwithId = chatUserId
+    Chatship.findAll({
+      where: { [Op.or]: [{ [Op.and]: [{ UserId: chatUserId }, { chatwithId: loginUserId }] }, { [Op.and]: [{ UserId: loginUserId }, { chatwithId: chatUserId }] }] },
+      raw: true, nest: true,
+      order: [['createdAt', 'ASC']],
+      include: [User]
+    }).then((msgs) => {
+      socket.emit("privateChatRecord", msgs);
+    })
+  })
+
+  socket.on('private chat message', function (msg, id, avatar, name) {
+    if (msg === '') return;
+    privateRecord.push(msg, id, socket.chatwithId, avatar, name)
+  });
 });
 
 // 新增 Records 的事件監聽器
 records.on("new_message", (msg, id, avatar, name) => {
   io.emit("send message", msg, id, avatar, name);
+});
+privateRecord.on("new_message", (msg, avatar, name) => {
+  io.sockets.emit("send message", msg, avatar, name);
 });

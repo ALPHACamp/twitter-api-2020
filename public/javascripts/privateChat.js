@@ -1,21 +1,15 @@
-// alert auto dismiss
-window.setTimeout(function () {
-  $(".alert").alert('close')
-}, 3000);
-
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let status = document.getElementById("status");
-  let online = document.getElementById("online");
-  let userSide = document.getElementById("users");
   let sendForm = document.getElementById("send-form").childNodes[1];
   let userInfo = document.getElementById("userInfo")
+  let messages = document.getElementById("messages")
 
   socket.emit('login', userInfo.innerText)
 
-  $('form').submit(function () {
+  $('#send-form').submit(function () {
     if ($('#m').val() !== '') {
-      socket.emit('chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
+      socket.emit('private chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
       $('#m').val('')
     } else {
       sendForm.classList.add("wrong");
@@ -36,44 +30,10 @@ document.addEventListener("DOMContentLoaded", () => {
     status.classList.add("disconnected")
   });
 
-  socket.on("online", function (amount, userlist) {
-    online.innerText = amount;
-    let userlistColumn = ``
-    for (i = 0; i < userlist.length; i++) {
-      userlistColumn += `
-        <li>
-          <img src="${userlist[i].avatar}" alt="">
-            <strong>${userlist[i].name}</strong>
-            <strong id="user-account">${userlist[i].account}</strong>
-        </li>
-        `
-    }
-    userSide.innerHTML = userlistColumn;
-    window.scrollTo(0, document.body.scrollHeight);
-  });
-
-  socket.on("oneLogin", function (user) {
-    let userMsg = `
-          <li>
-          <span>${user} 上線。</span>
-          </li>
-          `
-    $('#messages').append(userMsg);
-  })
-
-  socket.on("oneLeave", function (user) {
-    let userMsg = `
-          <li>
-          <span>${user} 離線。</span>
-          </li>
-          `
-    $('#messages').append(userMsg);
-  })
-
-  socket.on('send message', function (msg, id, avatar, name) {
+  socket.on('send message', function (msg, avatar, name) {
     const event = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
     let chatColumn = `
-          <li style="background:#FF6600; border-radius:30px 30px 0px 30px ">
+          <li>
           <img src="${avatar}" alt="">
             <div>
               <strong>${name}</strong>
@@ -90,14 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // }
   });
 
-  socket.on("chatRecord", function (msgs) {
+  socket.on("privateChatRecord", function (msgs) {
+    messages.innerHTML = ''
     for (let i = 0; i < msgs.length; i++) {
       let chatColumn = `
           <li>
           <img src="${msgs[i].User.avatar}" alt="">
             <div>
               <strong>${msgs[i].User.name}</strong>
-              <p>${msgs[i].chatMessage}</p>
+              <p>${msgs[i].message}</p>
               <span id='time'>${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</span>
             </div>
         </li>
@@ -115,6 +76,13 @@ document.addEventListener("DOMContentLoaded", () => {
   //   var childs = content.children;
   //   childs[0].remove();
   // }
-  
 });
+
+function showChatHistory(user) {
+  let socket = io();
+  let loginUserId = user.getAttribute('user-id');
+  let chatUserId = user.getAttribute('data-id')
+  socket.emit('private-Record', loginUserId, chatUserId)
+}
+
 

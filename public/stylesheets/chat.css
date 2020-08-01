@@ -30,18 +30,26 @@
 
     #user-list {
       background-color: #ffffff;
+/*       background-color: rgb(243, 242, 237);
+      width: 300px;
+      height: 600px;
+      border: 1px solid darkolivegreen;
+      border-radius: 5px; */
       overflow: auto;
     }
 
     #users li {
       height: 55px;
+/*       height: 70px;
+      border: 1px solid rgba(219, 219, 219, 0.863);
+      border-radius: 5px; */
       display: flex;
       align-items: center;
     }
 
     #users li img {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 100%;
       margin: 4px;
     }
@@ -73,6 +81,25 @@
 
     form input {
       border: none;
+/*       background-color: rgb(243, 242, 237);
+      width: 500px;
+      height: 600px;
+      border: 1px solid darkolivegreen;
+      border-radius: 5px;
+      overflow: auto;
+      margin: 0 0 5px 0; */
+    }
+
+/*     #chat-box form {
+      border: 1px solid #000;
+      border-radius: 5px;
+      padding: 3px;
+      position: relative;
+      width: 500px;
+    } */
+
+    #chat-box form input {
+/*       border: 0; */
       padding: 10px;
       width: 90%;
       border-radius: 50px;
@@ -84,12 +111,24 @@
       background: none;
       cursor: pointer;
       text-align: center;
+      fill: #FF6600;
+      border: none;
+}
+
+/*     #chat-box form button {
+      width: 9%;
+      background: #f39a34;
+      border: 2px outset;
+      border-radius: 5px;
+      padding: 10px 1px 10px 1px;
+      cursor: pointer;
+      text-align: center;
          fill: #FF6600;
       background: none;
       border: none;
       cursor: pointer;
       text-align: center;
-    }
+    } */
 
     button:focus, input:focus { 
       outline: none; 

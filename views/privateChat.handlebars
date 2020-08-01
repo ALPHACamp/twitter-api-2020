@@ -1,0 +1,75 @@
+<div id="container">
+  <div id="user-box">
+    <div class="d-flex justify-content-between" id='user-title'>Chat Box
+      <button class="mr-2" style="border:0;cursor:pointer;background:azure" type="button" data-toggle="modal"
+        data-target="#exampleModal">
+        <i class="fa fa-envelope "></i>
+      </button></div>
+    <div id="user-list">
+      <ul id="users">
+        {{#each data}}
+        <button data-id="{{this.userId}}" user-id="{{../id}}" onclick="showChatHistory(this)"
+          style="width: 298px;border:0">
+          <li style="cursor: pointer;">
+            <img src="{{this.userAvatar}}" alt="">
+            <strong>{{this.userName}}</strong>
+            <strong id="user-account">{{this.userAccount}}</strong>
+          </li>
+        </button>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+  <div id="chat-box">
+    <div id="status-box">Server: <strong id="status">-</strong> </div>
+    <div id="content">
+      <ul id="messages"></ul>
+    </div>
+    <div id="send-box">
+      <div id="userInfo" style="visibility:hidden;display: none;">{{name}}</div>
+      <form id="send-form" action="">
+        <input id='userId' type="hidden" name="userId" value="{{id}}" />
+        <input id='userAvatar' type="hidden" name="userAvatar" value="{{avatar}}" />
+        <input id='userName' type="hidden" name="userName" value="{{name}}" />
+        <input id="m" autocomplete="off" placeholder="please type message..." /><button>Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New Message</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="/chat/private" method="POST">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="exampleFormControlSelect1">Who you want to send?</label>
+            <select class="form-control" id="exampleFormControlSelect1" style="cursor: pointer;">
+              {{#each users}}
+              <option name="{{this.id}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="exampleFormControlTextarea1">What you want to say?</label>
+            <textarea class="form-control" name="message" id="exampleFormControlTextarea1" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" id="submit" name="submit" class="btn btn-primary">Send</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script src="/javascripts/privateChat.js"></script>
