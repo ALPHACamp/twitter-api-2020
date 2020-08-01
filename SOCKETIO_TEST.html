@@ -62,15 +62,32 @@
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script>
     $(function () {
-      var socket = io();
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk2MjY3MzczfQ.uIxzoMjHAFeSjgnONf211uHK3YWJGYNkg7kZ4G0SgGo'
+
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk2MjY3MzczfQ.uIxzoMjHAFeSjgnONf211uHK3YWJGYNkg7kZ4G0SgGo'
+
+      var socket = io.connect('http://localhost:3000', {
+        query: { token }
+      });
+
+      // var socket = io.connect('http://localhost:3000');
+
+
       $('form').submit(function (e) {
         e.preventDefault(); // prevents page reloading
-        socket.emit('chat message', $('#m').val());
+
+        socket.emit('send', { content: $('#m').val() });
         $('#m').val('');
         return false;
       });
-      socket.on('chat message', function (msg) {
-        $('#messages').append($('<li>').text(msg));
+
+      socket.on('message', function (obj) {
+        console.log(obj)
+        $('#messages').append($('<li>').text(obj.content));
+      });
+
+      socket.on('online-users', function (msg) {
+        console.log(msg)
       });
     });
   </script>
