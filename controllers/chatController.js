@@ -2,11 +2,9 @@ const db = require('../models')
 const User = db.User
 const { Op } = require('sequelize')
 
-// const userIds = users.map(user => user.)
-
 const chatController = {
-  getUsers: async (users) => {
-    await User.findAll({
+  getUsers: (users) => {
+    return User.findAll({
       raw: true,
       nest: true,
       where: { id: { [Op.in]: users } }
@@ -14,6 +12,7 @@ const chatController = {
       .then(users => {
         return users
       })
+      .catch(err => console.log(err))
   }
 }
 
