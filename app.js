@@ -40,13 +40,13 @@ app.use('/api', routes)
 app.use(cors())
 
 // start API web server
-app.listen(port, () => console.log(`API Web Server app listening on port ${port}!`))
+socketApp.listen(port, () => console.log(`API Web Server app listening on port ${port}!`))
 
 // Socket.io 連接埠和 listener
-const socketPort = 4000
-socketApp.listen(socketPort, () => {
-  console.log(`Socket 服務啟動 ${socketPort}`)
-})
+// const socketPort = 4000
+// socketApp.listen(socketPort, () => {
+//   console.log(`Socket 服務啟動 ${socketPort}`)
+// })
 
 require('./sockets')(io)
 
