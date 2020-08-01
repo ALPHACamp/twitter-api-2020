@@ -1,3 +1,8 @@
+// alert auto dismiss
+window.setTimeout(function () {
+  $(".alert").alert('close')
+}, 3000);
+
 document.addEventListener("DOMContentLoaded", () => {
   let max_record
   let socket = io();
@@ -111,4 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
   //   var childs = content.children;
   //   childs[0].remove();
   // }
+  
 });
+

@@ -3,6 +3,7 @@ const session = require('express-session')
 const handlebars = require('express-handlebars')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
+const flash = require('connect-flash')
 const app = express()
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
@@ -36,8 +37,12 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(flash())
 
 app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg')
+  res.locals.error_msg = req.flash('error_msg')
+  res.locals.warning_msg = req.flash('warning_msg')
   res.locals.user = helpers.getUser(req)
   res.locals.isAuthenticated = helpers.ensureAuthenticated(req)
   next()
@@ -79,11 +84,13 @@ app.get('/login', (req, res) => {
 
 app.post('/login', passport.authenticate('local', {
   successRedirect: '/chat',
-  failureRedirect: '/login'
+  failureRedirect: '/login',
+  failureFlash: true
 }))
 
 app.get('/logout', (req, res) => {
   req.logout()
+  req.flash('success_msg', '您已經成功登出。')
   res.redirect('/login')
 })
 
