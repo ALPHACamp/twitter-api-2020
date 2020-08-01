@@ -4,6 +4,8 @@ const chatSocket = async (io, socket, onlineUsers) => {
   // 第一次連線：傳回線上使用者清單列表，需要濾掉重複的 userId（一個使用者可能有多個 socket）
   console.log(`使用者 with socket id ${socket.id} 第一次連線`)
 
+  // TODO: 現在 message 總共有多少個（for 撈取歷史訊息用）
+
   const onlineUsersId = []
   onlineUsers.forEach(user => {
     if (!onlineUsersId.includes(user.userId)) onlineUsersId.push(user.userId)
@@ -20,6 +22,7 @@ const chatSocket = async (io, socket, onlineUsers) => {
     })
 
     socket.emit('online-users', result)
+    // TODO: 一開始先顯示 n 筆歷史訊息
   } catch (err) {
     console.warn(err)
   }
@@ -44,6 +47,17 @@ const chatSocket = async (io, socket, onlineUsers) => {
         time: new Date(),
         content: obj.content
       })
+    } catch (err) {
+      console.warn(err)
+    }
+  })
+
+  socket.on('old-message', async (obj) => {
+    console.log(`使用者 with socket id ${socket.id} 欲撈取歷史訊息`)
+    try {
+      // FIXME: 待與前端確認傳什麼參數、怎麼撈
+      const result = await chatController.getMessages(obj.start, obj.count)
+      socket.emit('old-message', result)
     } catch (err) {
       console.warn(err)
     }

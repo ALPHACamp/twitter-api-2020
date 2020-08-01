@@ -17,6 +17,19 @@ const chatController = {
       userId,
       content: message
     })
+  },
+
+  getMessages: (start = 0, count = 0) => {
+    const option = {
+      raw: true,
+      nest: true,
+      order: [['createdAt', 'DESC']]
+    }
+    if (count > 0) {
+      option.offset = start
+      option.limit = count
+    }
+    return Message.findAll(option)
   }
 }
 
