@@ -161,14 +161,13 @@ io.on('connection', function (socket) {
 
   socket.on('login', function (userName) {
     socket.username = userName
+    io.emit("online", userList.length, userList)
+    records.get((msgs) => {
+      socket.emit("chatRecord", msgs, userName);
+    })
     socket.broadcast.emit("oneLogin", socket.username)
   })
-
-  io.emit("online", userList.length, userList)
   // socket.emit("maxRecord", records.getMax());
-  records.get((msgs) => {
-    socket.emit("chatRecord", msgs);
-  })
 
   socket.on('chat message', function (msg, id, avatar, name) {
     if (msg === '') return;
@@ -195,7 +194,7 @@ io.on('connection', function (socket) {
       order: [['createdAt', 'ASC']],
       include: [User]
     }).then((msgs) => {
-      socket.emit("privateChatRecord", msgs, chatUserId);
+      socket.emit("privateChatRecord", msgs, chatUserId, loginUserId);
     })
   })
 

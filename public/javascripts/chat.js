@@ -118,21 +118,35 @@ document.addEventListener("DOMContentLoaded", () => {
     // }
   });
 
-  socket.on("chatRecord", function (msgs) {
+  socket.on("chatRecord", function (msgs, userName) {
+    let chatColumn = ``
     for (let i = 0; i < msgs.length; i++) {
-      let chatColumn = `
-        <li class="my-4">
+      if (userName === msgs[i].User.name) {
+        chatColumn = `
+        <li class="loginuser-message-style w-100 my-4">
+          <img src="${msgs[i].User.avatar}" alt="">
+            <div id="message-bubble">
+              <strong>${msgs[i].User.name}</strong>
+              <p class="message-text py-1">${msgs[i].chatMessage}</p>
+              <div id='time' class="text-right login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+        </li>
+        `
+      } else {
+        chatColumn = `
+        <li class="otheruser-message-style w-100 my-4">
           <img src="${msgs[i].User.avatar}" alt="">
             <div id="message-bubble">
               <strong>${msgs[i].User.name}</strong>
               <p class="message-text">${msgs[i].chatMessage}</p>
-              <div id='time' class="login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
+              <div id='time' class="text-right other-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
             </div>
         </li>
         `
+      }
       $('#messages').append(chatColumn);
-      $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
     }
+    $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
   })
 
 

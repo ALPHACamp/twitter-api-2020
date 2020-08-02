@@ -67,22 +67,36 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(notifyCounts)
   })
 
-  socket.on("privateChatRecord", function (msgs, chatUserId) {
+  socket.on("privateChatRecord", function (msgs, chatUserId, loginUserId) {
     messages.innerHTML = ''
     for (let i = 0; i < msgs.length; i++) {
-      let chatColumn = `
-          <li>
+      if (Number(loginUserId) === Number(msgs[i].User.id)) {
+        let chatColumn = `
+        <li class="loginuser-message-style w-100 my-4">
           <img src="${msgs[i].User.avatar}" alt="">
-            <div>
+            <div id="message-bubble">
               <strong>${msgs[i].User.name}</strong>
-              <p>${msgs[i].message}</p>
-              <span id='time'>${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</span>
+              <p class="message-text py-1">${msgs[i].message}</p>
+              <div id='time' class="text-right login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
             </div>
         </li>
         `
-      $('#messages').append(chatColumn);
-      $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
+        $('#messages').append(chatColumn);
+      } else {
+        let chatColumn = `
+        <li class="otheruser-message-style w-100 my-4">
+          <img src="${msgs[i].User.avatar}" alt="">
+            <div id="message-bubble">
+              <strong>${msgs[i].User.name}</strong>
+              <p class="message-text">${msgs[i].message}</p>
+              <div id='time' class="text-right other-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+        </li>
+        `
+        $('#messages').append(chatColumn);
+      }
     }
+    $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
 
     let chatWith = `
          <input id='chatwithId' type="hidden" name="userId" value=${chatUserId}>
