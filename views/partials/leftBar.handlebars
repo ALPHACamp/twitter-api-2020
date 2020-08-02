@@ -29,8 +29,8 @@
     </div>
     <div class="nav-item-wrapper d-flex mt-4">
       <a class="text-decoration-none" href="">
-        <svg class="left-bar-icon" id="Capa_1" enable-background="new 0 0 512 512" viewBox="0 0 512 512" width="24" height="22"
-          xmlns="http://www.w3.org/2000/svg">
+        <svg class="left-bar-icon" id="Capa_1" enable-background="new 0 0 512 512" viewBox="0 0 512 512" width="24"
+          height="22" xmlns="http://www.w3.org/2000/svg">
           <path
             d="m450.201 407.453c-1.505-.977-12.832-8.912-24.174-32.917-20.829-44.082-25.201-106.18-25.201-150.511 0-.193-.004-.384-.011-.576-.227-58.589-35.31-109.095-85.514-131.756v-34.657c0-31.45-25.544-57.036-56.942-57.036h-4.719c-31.398 0-56.942 25.586-56.942 57.036v34.655c-50.372 22.734-85.525 73.498-85.525 132.334 0 44.331-4.372 106.428-25.201 150.511-11.341 24.004-22.668 31.939-24.174 32.917-6.342 2.935-9.469 9.715-8.01 16.586 1.473 6.939 7.959 11.723 15.042 11.723h109.947c.614 42.141 35.008 76.238 77.223 76.238s76.609-34.097 77.223-76.238h109.947c7.082 0 13.569-4.784 15.042-11.723 1.457-6.871-1.669-13.652-8.011-16.586zm-223.502-350.417c0-14.881 12.086-26.987 26.942-26.987h4.719c14.856 0 26.942 12.106 26.942 26.987v24.917c-9.468-1.957-19.269-2.987-29.306-2.987-10.034 0-19.832 1.029-29.296 2.984v-24.914zm29.301 424.915c-25.673 0-46.614-20.617-47.223-46.188h94.445c-.608 25.57-21.549 46.188-47.222 46.188zm60.4-76.239c-.003 0-213.385 0-213.385 0 2.595-4.044 5.236-8.623 7.861-13.798 20.104-39.643 30.298-96.129 30.298-167.889 0-63.417 51.509-115.01 114.821-115.01s114.821 51.593 114.821 115.06c0 .185.003.369.01.553.057 71.472 10.25 127.755 30.298 167.286 2.625 5.176 5.267 9.754 7.861 13.798z" />
         </svg>
@@ -39,9 +39,9 @@
     </div>
     <div class="nav-item-wrapper d-flex mt-4">
       <a class="text-decoration-none" href="/chat">
-      <span class="badge badge-danger" id="public-badge" style="border-radius:50%;"> 11 </span>
-        <svg class="left-bar-icon {{#ifCond userLogin.channel  'public'}}item-active{{/ifCond}}" id="Capa_1" enable-background="new 0 0 479.058 479.058" viewBox="0 0 479.058 479.058" width="24"
-          height="22" xmlns="http://www.w3.org/2000/svg">
+        <svg class="left-bar-icon {{#ifCond userLogin.channel  'public'}}item-active{{/ifCond}}" id="Capa_1"
+          enable-background="new 0 0 479.058 479.058" viewBox="0 0 479.058 479.058" width="24" height="22"
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="m434.146 59.882h-389.234c-24.766 0-44.912 20.146-44.912 44.912v269.47c0 24.766 20.146 44.912 44.912 44.912h389.234c24.766 0 44.912-20.146 44.912-44.912v-269.47c0-24.766-20.146-44.912-44.912-44.912zm0 29.941c2.034 0 3.969.422 5.738 1.159l-200.355 173.649-200.356-173.649c1.769-.736 3.704-1.159 5.738-1.159zm0 299.411h-389.234c-8.26 0-14.971-6.71-14.971-14.971v-251.648l199.778 173.141c2.822 2.441 6.316 3.655 9.81 3.655s6.988-1.213 9.81-3.655l199.778-173.141v251.649c-.001 8.26-6.711 14.97-14.971 14.97z" />
         </svg>
@@ -49,10 +49,11 @@
       </a>
     </div>
     <div class="nav-item-wrapper d-flex mt-4">
-      <a class="text-decoration-none" href="/chat/private">
-        <span class="badge badge-danger" id="private-badge" style="border-radius:50%;"> 3 </span>
-        <svg class="left-bar-icon {{#ifCond userLogin.channel  'private'}}item-active{{/ifCond}}" id="Capa_1" enable-background="new 0 0 479.058 479.058" viewBox="0 0 479.058 479.058" width="24"
-          height="22" xmlns="http://www.w3.org/2000/svg">
+      <a onclick="refrash()" class="text-decoration-none" href="#">
+        <span class="" id="private-badge" style="border-radius:50%;"></span>
+        <svg class="left-bar-icon {{#ifCond userLogin.channel  'private'}}item-active{{/ifCond}}" id="Capa_1"
+          enable-background="new 0 0 479.058 479.058" viewBox="0 0 479.058 479.058" width="24" height="22"
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="m434.146 59.882h-389.234c-24.766 0-44.912 20.146-44.912 44.912v269.47c0 24.766 20.146 44.912 44.912 44.912h389.234c24.766 0 44.912-20.146 44.912-44.912v-269.47c0-24.766-20.146-44.912-44.912-44.912zm0 29.941c2.034 0 3.969.422 5.738 1.159l-200.355 173.649-200.356-173.649c1.769-.736 3.704-1.159 5.738-1.159zm0 299.411h-389.234c-8.26 0-14.971-6.71-14.971-14.971v-251.648l199.778 173.141c2.822 2.441 6.316 3.655 9.81 3.655s6.988-1.213 9.81-3.655l199.778-173.141v251.649c-.001 8.26-6.711 14.97-14.971 14.97z" />
         </svg>
@@ -61,7 +62,8 @@
     </div>
     <div class="nav-item-wrapper d-flex mt-4">
       <a class="text-decoration-none" href="">
-        <svg class="left-bar-icon" width="24" height="22" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="left-bar-icon" width="24" height="22" viewBox="0 0 18 21" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M9.00003 10.816C10.355 10.816 11.872 10.666 12.84 9.56001C13.654 8.63001 13.918 7.19201 13.646 5.16801C13.266 2.34301 11.529 0.656006 9.00003 0.656006C6.47103 0.656006 4.73403 2.34301 4.35403 5.17001C4.08203 7.19201 4.34603 8.63001 5.16003 9.56001C6.12803 10.667 7.64503 10.816 9.00003 10.816ZM5.84003 5.36801C6.00203 4.16801 6.62703 2.15601 9.00003 2.15601C11.373 2.15601 11.998 4.16901 12.16 5.36801C12.367 6.91801 12.217 7.99501 11.71 8.57301C11.255 9.09301 10.444 9.31601 9.00003 9.31601C7.55603 9.31601 6.74503 9.09301 6.29003 8.57301C5.78303 7.99501 5.63303 6.91701 5.84003 5.36801ZM17.28 18.236C16.403 14.71 12.998 12.246 9.00003 12.246C5.00203 12.246 1.59703 14.71 0.720027 18.236C0.548027 18.928 0.692027 19.636 1.11503 20.176C1.52303 20.696 2.15503 20.996 2.84803 20.996H15.152C15.845 20.996 16.477 20.696 16.885 20.176C17.309 19.636 17.452 18.929 17.279 18.236H17.28ZM15.704 19.252C15.578 19.412 15.388 19.498 15.152 19.498H2.84803C2.61303 19.498 2.42203 19.413 2.29603 19.252C2.15903 19.078 2.11603 18.84 2.17603 18.598C2.88603 15.743 5.69303 13.748 9.00003 13.748C12.307 13.748 15.114 15.742 15.824 18.598C15.884 18.84 15.841 19.078 15.704 19.252Z"
             fill="black" />
@@ -71,7 +73,8 @@
     </div>
     <div class="nav-item-wrapper d-flex mt-4">
       <a class="text-decoration-none" href="">
-        <svg class="left-bar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="left-bar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M12 8.20996C9.90996 8.20996 8.20996 9.90996 8.20996 12C8.20996 14.09 9.90996 15.79 12 15.79C14.09 15.79 15.79 14.09 15.79 12C15.79 9.90996 14.09 8.20996 12 8.20996ZM12 14.29C10.738 14.29 9.70996 13.264 9.70996 12C9.70996 10.736 10.74 9.70996 12 9.70996C13.26 9.70996 14.29 10.736 14.29 12C14.29 13.264 13.262 14.29 12 14.29Z"
             fill="black" />
@@ -82,12 +85,14 @@
         <span class="left-bar-title ml-3">設定</span>
       </a>
     </div>
-    <button class="mt-4 btn btn-lg btn-light btn-block rounded-pill text-white" style="background-color: #FF6600;">推文</button>
+    <button class="mt-4 btn btn-lg btn-light btn-block rounded-pill text-white"
+      style="background-color: #FF6600;">推文</button>
   </div>
   <div id="logout-button" class="nav-item-wrapper" style="max-width: 210px;">
     <div class="d-flex">
       <a class="text-decoration-none" href="/logout">
-        <svg class="left-bar-icon" width="24" height="22" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="left-bar-icon" width="24" height="22" viewBox="0 0 20 18" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M9 13L5 9M5 9L9 5M5 9H19M14 13V14C14 14.7956 13.6839 15.5587 13.1213 16.1213C12.5587 16.6839 11.7956 17 11 17H4C3.20435 17 2.44129 16.6839 1.87868 16.1213C1.31607 15.5587 1 14.7956 1 14V4C1 3.20435 1.31607 2.44129 1.87868 1.87868C2.44129 1.31607 3.20435 1 4 1H11C11.7956 1 12.5587 1.31607 13.1213 1.87868C13.6839 2.44129 14 3.20435 14 4V5"
             stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />

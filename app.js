@@ -235,6 +235,10 @@ io.on('connection', function (socket) {
       socket.join(room)
     })
   })
+
+  socket.on('refrash', function () {
+    notifyCounts = 0
+  })
 });
 
 // 新增 Records 的事件監聽器
@@ -244,7 +248,10 @@ records.on("new_message", (msg, id, avatar, name) => {
 
 privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
   io.in(room).emit("send private message", msg, avatar, name, id);
-  notifyCounts++
+  if ('wait') {
+    notifyCounts++
+  }
+  console.log(notifyCounts, typeof notifyCounts)
   io.to(chatwithId).emit("notify", notifyCounts)
 });
 

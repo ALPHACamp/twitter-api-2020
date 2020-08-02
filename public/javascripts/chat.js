@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let userSide = document.getElementById("users");
   let sendForm = document.getElementById("send-form").childNodes[1];
   let userInfo = document.getElementById("userInfo")
+  let privateBadge = document.getElementById("private-badge")
 
   socket.emit('login', $('#userName').val())
 
@@ -24,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return false;
   });
+  socket.emit('join-me', $('#userId').val())
 
   // socket.on("connect", function () {
   //   status.classList.remove("disconnected")
@@ -124,6 +126,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
+
+  socket.on('notify', function (notifyCounts) {
+    if (privateBadge.classList !== 'badge badge-danger') {
+      privateBadge.classList.add('badge')
+      privateBadge.classList.add('badge-danger')
+    }
+    console.log(privateBadge.classList)
+    privateBadge.innerText = notifyCounts
+    console.log(notifyCounts)
+  })
+
   // socket.on("maxRecord", function (amount) {
   //   max_record = amount;
   // });
@@ -135,4 +148,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // }
 
 });
+
+function refrash() {
+  let socket = io();
+  let privateBadge = document.getElementById("private-badge")
+  if (privateBadge.classList === "badge badge-danger") {
+    privateBadge.classList.remove("badge")
+    privateBadge.classList.remove("badge badge-danger")
+  }
+  socket.emit('refrash')
+  document.location.href = '/chat/private';
+}
 

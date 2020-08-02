@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let sendForm = document.getElementById("send-form");
   let messages = document.getElementById("messages")
-  let notify = document.getElementById("notify")
+  let privateBadge = document.getElementById("private-badge")
 
   $('#send-form').submit(function () {
     if ($('#text-input-area').val() !== '' && messages.innerText !== '') {
@@ -20,18 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.emit('join-me', $('#userId').val())
-
-  // socket.on("connect", function () {
-  //   status.classList.remove("disconnected")
-  //   status.innerText = `Connected`;
-  //   status.classList.add("connected")
-  // });
-
-  // socket.on("disconnect", function () {
-  //   status.classList.add("connected")
-  //   status.innerText = `Disconnected`;
-  //   status.classList.add("disconnected")
-  // });
 
   socket.on('send private message', function (msg, avatar, name, id) {
     const event = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
@@ -67,6 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on('notify', function (notifyCounts) {
+    if (privateBadge.classList !== "badge badge-danger") {
+      privateBadge.classList.add("badge")
+      privateBadge.classList.add("badge-danger")
+    }
+    console.log(privateBadge.classList)
+    privateBadge.innerText = notifyCounts
     console.log(notifyCounts)
   })
 
@@ -119,6 +113,17 @@ function showChatHistory(user) {
 
   //新增下一個樣式
 
+}
+
+function refrash() {
+  let socket = io();
+  let privateBadge = document.getElementById("private-badge")
+  if (privateBadge.classList === "badge badge-danger") {
+    privateBadge.classList.remove("badge")
+    privateBadge.classList.remove("badge-danger")
+  }
+  socket.emit('refrash')
+  document.location.href = '/chat/private';
 }
 
 
