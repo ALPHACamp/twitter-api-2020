@@ -97,30 +97,19 @@ app.get('/logout', (req, res) => {
 app.get('/chat', authenticator, function (req, res) {
   return User.findByPk(helpers.getUser(req).id, { include: Chat }) //之後用helper.get(req).id取代
     .then(user => {
-      if (!userList.map(x => x.name).includes(helpers.getUser(req).name)) {
-        userList.push({
-          name: user.toJSON().name,
-          avatar: user.toJSON().avatar,
-          account: user.toJSON().account,
-        })
-        let userLogin = {
-          id: user.toJSON().id,
-          name: user.toJSON().name,
-          avatar: user.toJSON().avatar,
-          account: user.toJSON().account,
-          channel: 'public'
-        }
-        res.render('chat', { userLogin });
-      } else {
-        let userLogin = {
-          id: user.toJSON().id,
-          name: user.toJSON().name,
-          avatar: user.toJSON().avatar,
-          account: user.toJSON().account,
-          channel: 'public'
-        }
-        res.render('chat', { userLogin });
+      userList.push({
+        name: user.toJSON().name,
+        avatar: user.toJSON().avatar,
+        account: user.toJSON().account,
+      })
+      let userLogin = {
+        id: user.toJSON().id,
+        name: user.toJSON().name,
+        avatar: user.toJSON().avatar,
+        account: user.toJSON().account,
+        channel: 'public'
       }
+      res.render('chat', { userLogin });
     })
 });
 

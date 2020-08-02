@@ -68,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.on('notify', function (notifyCounts) {
     console.log(notifyCounts)
-    notify.innerText = Number(notify.innerText) + 1
   })
 
   socket.on("privateChatRecord", function (msgs, chatUserId) {
