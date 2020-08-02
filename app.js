@@ -117,38 +117,42 @@ app.get('/chat', authenticator, function (req, res) {
 });
 
 app.get('/chat/private', authenticator, function (req, res) {
-  return User.findByPk(helpers.getUser(req).id, {
-    include: [
-      { model: User, as: 'Chatwith' },
-    ]
-  }) //之後用helper.get(req).id取代
-    .then(user => {
-      User.findAll({ raw: true })
-        .then(users => {
-          const data = user.Chatwith.map(r => ({
-            userId: r.id,
-            userName: r.name,
-            userAvatar: r.avatar,
-            userAccount: r.account
-          }))
-          res.render('privateChat', {
-            data,
-            id: user.toJSON().id,
-            name: user.toJSON().name,
-            avatar: user.toJSON().avatar,
-            users,
-          })
-        });
-    }
-    )
+  if (helpers.getUser(req).id !== 'undefined') {
+    User.findByPk(helpers.getUser(req).id, {
+      include: [
+        { model: User, as: 'Chatwith' },
+      ]
+    }) //之後用helper.get(req).id取代
+      .then(user => {
+        User.findAll({ raw: true })
+          .then(users => {
+            const data = user.Chatwith.map(r => ({
+              userId: r.id,
+              userName: r.name,
+              userAvatar: r.avatar,
+              userAccount: r.account
+            }))
+            return res.render('privateChat', {
+              data,
+              id: user.toJSON().id,
+              name: user.toJSON().name,
+              avatar: user.toJSON().avatar,
+              users,
+            })
+          });
+      }
+      )
+  }
+  else {
+    return res.redirect('/')
+  }
 });
 
 app.post('/chat/private', function (req, res) {
-  console.log('123')
+  console.log(req.body)
+  privateRecord.push(req.body.message, helpers.getUser(req).id, req.body.chatwithId, helpers.getUser(req).avatar, helpers.getUser(req).name)
+  return res.redirect('/chat/private')
 });
-
-// 加入線上人數計數
-let onlineCount = 0;
 
 io.on('connection', function (socket) {
 
@@ -178,7 +182,6 @@ io.on('connection', function (socket) {
     })
     io.emit("online", userList.length, userList)
     if (typeof socket.username !== 'undefined') {
-      console.log(socket.username, typeof socket.username)
       socket.broadcast.emit("oneLeave", socket.username)
     }
   });
@@ -186,26 +189,54 @@ io.on('connection', function (socket) {
   //私聊
   socket.on('private-Record', function (loginUserId, chatUserId) {
     socket.chatwithId = chatUserId
+    socket.loginUserId = loginUserId
     Chatship.findAll({
       where: { [Op.or]: [{ [Op.and]: [{ UserId: chatUserId }, { chatwithId: loginUserId }] }, { [Op.and]: [{ UserId: loginUserId }, { chatwithId: chatUserId }] }] },
       raw: true, nest: true,
       order: [['createdAt', 'ASC']],
       include: [User]
     }).then((msgs) => {
-      socket.emit("privateChatRecord", msgs);
+      socket.emit("privateChatRecord", msgs, chatUserId);
     })
   })
 
-  socket.on('private chat message', function (msg, id, avatar, name) {
+  socket.on('private chat message', function (msg, id, avatar, name, chatwithId, room) {
     if (msg === '') return;
-    privateRecord.push(msg, id, socket.chatwithId, avatar, name)
-  });
+    privateRecord.push(msg, id, chatwithId, avatar, name, room)
+  })
+
+  socket.on('join-me', function () {
+    console.log(io.nsps['/'].adapter.rooms)
+  }
+  )
+
+  socket.on('join-room', function (room) {
+    //leave all room and join new room
+    User.findAll({ raw: true }).then((users) => {
+      let combineRoom = []
+      let userId = users.map(user => user.id).sort()
+      for (let i = 0; i < userId.length; i++) {
+        let a2 = userId.concat();
+        a2.splice(0, i + 1);
+        for (let j = 0; j < a2.length; j++) {
+          combineRoom.push(userId[i].toString() + a2[j].toString())
+        }
+      }
+      for (let i = 0; i < combineRoom.length; i++) {
+        socket.leave(combineRoom[i])
+      }
+      socket.join(room)
+    })
+  })
 });
 
 // 新增 Records 的事件監聽器
 records.on("new_message", (msg, id, avatar, name) => {
   io.emit("send message", msg, id, avatar, name);
 });
-privateRecord.on("new_message", (msg, avatar, name) => {
-  io.sockets.emit("send private message", msg, avatar, name);
+
+privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
+  io.in(room).emit("send private message", msg, avatar, name);
+  io.to(chatwithId).emit("notify", "hello")
 });
+

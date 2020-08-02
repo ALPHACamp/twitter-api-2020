@@ -1,20 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let status = document.getElementById("status");
-  let sendForm = document.getElementById("send-form").childNodes[1];
-  let userInfo = document.getElementById("userInfo")
+  let sendForm = document.getElementById("send-form");
   let messages = document.getElementById("messages")
+  let notify = document.getElementById("notify")
 
   $('#send-form').submit(function () {
-    if ($('#m').val() !== '') {
-      socket.emit('private chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
+    if ($('#m').val() !== '' && messages.innerText !== '') {
+      let roomId = [$('#userId').val().toString(), $('#chatwithId').val().toString()].sort()
+      let room = roomId[0] + roomId[1]
+      socket.emit('private chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val(), $('#chatwithId').val(), room)
       $('#m').val('')
+    } else if (messages.innerText == '') {
+      console.log('please choos the user!')
     } else {
-      sendForm.classList.add("wrong");
-      sendForm.addEventListener('animationend', event => event.target.classList.remove('wrong'), { once: true })
+      sendForm.childNodes[3].classList.add("wrong");
+      sendForm.childNodes[3].addEventListener('animationend', event => event.target.classList.remove('wrong'), { once: true })
     }
     return false;
   });
+
+  socket.emit('join-me')
 
   socket.on("connect", function () {
     status.classList.remove("disconnected")
@@ -42,13 +48,18 @@ document.addEventListener("DOMContentLoaded", () => {
         `
     $('#messages').append(chatColumn);
     $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
-
     // if ($('#messages').children.length > max_record) {
     //   rmMsgFromBox();
     // }
   });
 
-  socket.on("privateChatRecord", function (msgs) {
+  socket.on('notify', function (notice) {
+    console.log(notice)
+    notify.innerText = Number(notify.innerText) + 1
+    console.log(notify.innerText)
+  })
+
+  socket.on("privateChatRecord", function (msgs, chatUserId) {
     messages.innerHTML = ''
     for (let i = 0; i < msgs.length; i++) {
       let chatColumn = `
@@ -64,6 +75,14 @@ document.addEventListener("DOMContentLoaded", () => {
       $('#messages').append(chatColumn);
       $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
     }
+
+    let chatWith = `
+         <input id='chatwithId' type="hidden" name="userId" value=${ chatUserId}>
+        `
+    if (typeof sendForm.children[5] !== 'undefined') {
+      sendForm.removeChild(sendForm.children[5])
+    }
+    $('#send-form').append(chatWith)
   })
 
   // socket.on("maxRecord", function (amount) {
@@ -81,7 +100,10 @@ function showChatHistory(user) {
   let socket = io();
   let loginUserId = user.getAttribute('user-id');
   let chatUserId = user.getAttribute('data-id')
-  socket.emit('private-Record', loginUserId, chatUserId)
+  let roomId = [loginUserId.toString(), chatUserId.toString()].sort()
+  let room = roomId[0] + roomId[1]
+  socket.emit('join-room', room)
+  socket.emit('private-Record', loginUserId, chatUserId, room)
 }
 
 
