@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($('#text-input-area').val() !== '' && messages.innerText !== '') {
       let roomId = [$('#userId').val().toString(), $('#chatwithId').val().toString()].sort()
       let room = roomId[0] + roomId[1]
-      console.log('send-client', room)
       socket.emit('private chat message', $('#text-input-area').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val(), $('#chatwithId').val(), room)
       $('#text-input-area').val('')
     } else if (messages.innerText == '') {
@@ -20,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return false;
   });
 
-  socket.emit('join-me')
+  socket.emit('join-me', $('#userId').val())
 
   // socket.on("connect", function () {
   //   status.classList.remove("disconnected")
@@ -67,10 +66,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // }
   });
 
-  socket.on('notify', function (notice) {
-    console.log(notice)
+  socket.on('notify', function (notifyCounts) {
+    console.log(notifyCounts)
     notify.innerText = Number(notify.innerText) + 1
-    console.log(notify.innerText)
   })
 
   socket.on("privateChatRecord", function (msgs, chatUserId) {
@@ -116,7 +114,6 @@ function showChatHistory(user) {
   let chatUserId = user.getAttribute('data-id')
   let roomId = [loginUserId.toString(), chatUserId.toString()].sort()
   let room = roomId[0] + roomId[1]
-  console.log('client', room)
   socket.emit('join-room', room)
   socket.emit('private-Record', loginUserId, chatUserId, room)
   //remove 上一個樣式

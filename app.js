@@ -77,8 +77,6 @@ const authenticator = (req, res, next) => {
   // req.flash('warning_msg', '請先登入才能使用')
   res.redirect('/login')
 }
-//上線名單
-let userList = []
 
 app.get('/login', (req, res) => {
   return res.render('login')
@@ -161,11 +159,13 @@ app.get('/chat/private', authenticator, function (req, res) {
 });
 
 app.post('/chat/private', function (req, res) {
-  console.log(req.body)
-  console.log(helpers.getUser(req).id)
   privateRecord.push(req.body.message, helpers.getUser(req).id, req.body.chatwithId, helpers.getUser(req).avatar, helpers.getUser(req).name)
   return res.redirect('/chat/private')
 });
+
+//上線名單
+let userList = []
+let notifyCounts = 0
 
 io.on('connection', function (socket) {
 
@@ -218,8 +218,9 @@ io.on('connection', function (socket) {
     privateRecord.push(msg, id, chatwithId, avatar, name, room)
   })
 
-  socket.on('join-me', function () {
-    console.log(io.nsps['/'].adapter.rooms)
+  socket.on('join-me', function (id) {
+    socket.join(id)
+    // console.log('me', io.nsps['/'].adapter.rooms)
   }
   )
   // Bug待修復 點兩次聊天室會離開不會再加回去
@@ -237,16 +238,12 @@ io.on('connection', function (socket) {
       }
       return combineRoom
     }).then((combineRoom) => {
-      console.log(combineRoom)
-      console.log('1', io.nsps['/'].adapter.rooms)
       for (let i = 0; i < combineRoom.length; i++) {
         socket.leave(combineRoom[i])
       }
       return combineRoom
     }).then((combineRoom) => {
-      console.log('2', io.nsps['/'].adapter.rooms)
       socket.join(room)
-      console.log('3', io.nsps['/'].adapter.rooms)
     })
   })
 });
@@ -258,6 +255,7 @@ records.on("new_message", (msg, id, avatar, name) => {
 
 privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
   io.in(room).emit("send private message", msg, avatar, name, id);
-  io.to(chatwithId).emit("notify", "hello")
+  notifyCounts++
+  io.to(chatwithId).emit("notify", notifyCounts)
 });
 

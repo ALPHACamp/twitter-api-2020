@@ -19,7 +19,7 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 module.exports = (app, authenticated) => {
-  app.get('/', authenticated, (req, res) => res.send('Hello World!')) //postman test
+  app.get('/', (req, res) => res.redirect('/login')) //postman test
   app.get('/admin', authenticated, authenticatedAdmin, (req, res) => res.send('Hello Admin!')) //postman test
   app.get('/api/tweets', authenticated, tweetController.getTweets)
   app.get('/api/tweets/:id', authenticated, tweetController.getTweet)
