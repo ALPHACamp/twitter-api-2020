@@ -31,14 +31,16 @@ const chatController = {
     })
   },
 
-  getMessages: (start = 0, count = 0) => {
+  getMessages: (startId = 0, count = 0) => {
     const option = {
       raw: true,
       nest: true,
       order: [['createdAt', 'DESC']]
     }
-    if (count > 0) {
-      option.offset = start
+    if (startId > 0 && count > 0) {
+      option.where = { id: { [Op.lt]: startId } }
+      option.limit = count
+    } else if (count > 0) {
       option.limit = count
     }
     return Message.findAll(option)
