@@ -240,7 +240,7 @@ records.on("new_message", (msg, id, avatar, name) => {
 
 privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
   io.in(room).emit("send private message", msg, avatar, name, id);
-  console.log(Object.values(io.sockets.adapter.rooms[room].sockets)[0])
+  // console.log(Object.values(io.sockets.adapter.rooms[room].sockets)[0])
   io.to(chatwithId).emit("notify")
 });
 
