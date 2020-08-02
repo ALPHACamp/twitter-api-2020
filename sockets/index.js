@@ -10,6 +10,7 @@ module.exports = (io) => {
   const onlineUsers = [] // 存放在線使用者資訊：{userId: xx, socketId: yy}
 
   io.use(async (socket, next) => {
+    console.log('This is io use()')
     // 檢查有無帶 token
     if (!socket.handshake.query.token) return
 
@@ -28,7 +29,7 @@ module.exports = (io) => {
       // === 給所有的 socket：傳送最新登入的使用者資訊 (不包含此 socket) ===
       const newUserId = decoded.id
       const newUser = await chatController.getUser(newUserId)
-      let result = {
+      const result = {
         id: newUser.id,
         avatar: newUser.avatar,
         name: newUser.name,
@@ -41,27 +42,7 @@ module.exports = (io) => {
       console.log()
       io.emit('new-user', result)
 
-      // === 給所有的 socket：目前上線的使用者清單 ===
-      // 撈取使用者 ID 清單（需要濾掉 socket 重複的 userId（一個使用者可能有多個 socket））
-      const onlineUsersId = []
-      onlineUsers.forEach(user => {
-        if (!onlineUsersId.includes(user.userId)) onlineUsersId.push(user.userId)
-      })
-      result = await chatController.getUsers(onlineUsersId).map(user => {
-        return {
-          id: user.id,
-          avatar: user.avatar,
-          name: user.name,
-          account: user.account
-        }
-      })
-      console.log()
-      console.log('sever send "online-users" to all sockets (use)')
-      console.log(result)
-      console.log()
-      io.emit('online-users', result)
-
-      next()
+      return next()
     })
   })
 
@@ -180,9 +161,9 @@ module.exports = (io) => {
       console.log()
       io.emit('online-users', result)
 
-      // === 給此 socket：一開始先顯示 5 筆歷史訊息 ===
+      // === 給此 socket：一開始先顯示 20 筆歷史訊息 ===
       const oldMessage = []
-      const messages = await chatController.getMessages(0, 5)
+      const messages = await chatController.getMessages(0, 20)
       await Promise.all(messages.map(message => chatController.getUser(message.userId)))
         .then(userDatas => {
           userDatas.map((userData, index) => {
