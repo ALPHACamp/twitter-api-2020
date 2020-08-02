@@ -11,13 +11,13 @@ class Records extends EventEmitter {
     super();
   }
 
-  push(msg, id, chatwithId, avatar, name) { //可加入資料庫中最多有多少筆紀錄
+  push(msg, id, chatwithId, avatar, name, room) { //可加入資料庫中最多有多少筆紀錄
     Chatship.create({
       message: msg,
       UserId: id,
       chatwithId: chatwithId,
     }).then((chat) => {
-      this.emit("new_message", msg, avatar, name)
+      this.emit("new_message", msg, id, chatwithId, avatar, name, room)
     })
   }
 

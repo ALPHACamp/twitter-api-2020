@@ -95,9 +95,9 @@
         <div class="modal-body">
           <div class="form-group">
             <label for="exampleFormControlSelect1">Who you want to send?</label>
-            <select class="form-control" id="exampleFormControlSelect1" style="cursor: pointer;">
+            <select name="chatwithId" class="form-control" id="exampleFormControlSelect1" style="cursor: pointer;">
               {{#each users}}
-              <option name="{{this.id}}">{{this.name}}</option>
+              <option value="{{this.id}}">{{this.name}}</option>
               {{/each}}
             </select>
           </div>
@@ -107,7 +107,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" id="submit" name="submit" class="btn btn-primary">Send</button>
+          <button type="submit" id="submit" class="btn btn-primary">Send</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </form>
