@@ -4,6 +4,17 @@
       box-sizing: border-box;
     }
 
+    html, body {
+      height: 100%;
+      min-height: 100%;
+    }
+
+    html, body {
+      margin: 0; 
+      height: 100%; 
+      overflow: hidden
+    }
+
     body {
       font: 13px Helvetica, Arial;
       background-color: #ffffff;
@@ -14,14 +25,24 @@
       font-weight: bolder;
     }
 
-    #left-bar a:hover {
+    #left-bar a:hover .left-bar-icon  {
+      fill: #FF6600;
+    }     
+    
+    #left-bar a:hover .left-bar-title {
       color: #FF6600;
     }     
 
-    #container {
-      display: flex;
-      flex-direction: row;
+    .item-active {
+      color: #FF6600;
+      fill:#FF6600;
     }
+
+    /* #container:after {
+      content: ”;
+display: block;
+clear: both;
+    } */
 
     #user-title {
       text-align: left;
@@ -69,51 +90,23 @@
       line-height: 3rem;
     }
 
-    #content {
-      background-color: #ffffff;
-      /* width: 500px;
-      height: 350px; */
-      /* border: 1px solid darkolivegreen; */
-      /* border-radius: 5px; */
-      overflow: auto;
-      /* margin: 0 0 5px 0; */
+    .other-user-name {
+      font-size: 1rem;
+      font-weight: bolder;
+      margin-top: 0.3rem;
+      margin-bottom: -0.4rem;
+    }    
+
+    .other-user-account {
+      font-size: 0.8rem;
+      color: rgba(160, 158, 158, 0.815);
+      margin-top: -0.4rem;
+      margin-bottom: 0.1rem;
     }
 
-    form input {
-      border: none;
-/*       background-color: rgb(243, 242, 237);
-      width: 500px;
-      height: 600px;
-      border: 1px solid darkolivegreen;
-      border-radius: 5px;
-      overflow: auto;
-      margin: 0 0 5px 0; */
+    #other-user-box {
+      line-height: 1.5rem;
     }
-
-/*     #chat-box form {
-      border: 1px solid #000;
-      border-radius: 5px;
-      padding: 3px;
-      position: relative;
-      width: 500px;
-    } */
-
-    #chat-box form input {
-/*       border: 0; */
-      padding: 10px;
-      width: 90%;
-      border-radius: 50px;
-      background: #F5F8FA;
-    }
-
-    form button {
-      width: 5%;
-      background: none;
-      cursor: pointer;
-      text-align: center;
-      fill: #FF6600;
-      border: none;
-}
 
 /*     #chat-box form button {
       width: 9%;
@@ -130,7 +123,7 @@
       text-align: center;
     } */
 
-    button:focus, input:focus { 
+    button:focus, #text-input-area:focus { 
       outline: none; 
     }
 
@@ -192,6 +185,73 @@
 
     .disconnected {
       color: rgb(143, 40, 40);
+    }
+
+    .nav-item-wrapper {
+      position: relative;
+    }
+
+    .badge {
+      position: absolute;
+      left: 6%;
+      top: -7%;
+    }
+    
+    #left-bar {
+      position: relative;
+    }
+
+    #logout-button {
+      position: fixed;
+      bottom: 0%;
+      background-color:#ffffff;
+      width: 100%;
+      padding-bottom: 1.1rem;
+    }
+
+    #chat-box {
+      position: relative;;
+    }
+
+    #text-input-area {
+      border: none;
+    }
+
+    form button {
+      width: 5%;
+      background: none;
+      cursor: pointer;
+      fill: #FF6600;
+      border: none;
+      margin: auto 0;
+    }
+
+    #input-and-button {
+      position: absolute;
+      bottom: 1.4%; 
+      background-color:#ffffff;
+    }
+
+    #users {
+      max-height: 80%;
+      overflow: auto;
+    }
+
+    #users{
+      position: absolute;
+      overflow-x: hidden;
+      height: 100%;
+      width: 100%;
+      max-height: 94%;
+    }
+
+    #messages{
+      position: absolute;
+      top: 6.5%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 83.5%;
+      margin-top: 0.3rem;
     }
 
     @keyframes wrongAnimation {

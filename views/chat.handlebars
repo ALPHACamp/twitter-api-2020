@@ -1,33 +1,35 @@
 {{!-- <div class="col-8 row border-left border-bottom p-0 m-0" id="container"> --}}
-<div class="col-3 p-0 m-0 h-100" id="user-box">
+<div class="col-3 border-left border-right p-0 m-0 h-100" id="user-box">
   <div class="d-flex ml-3" id="status-box">上線的使用者
     <div class="d-none" id="status"></div>
-    <div id="online">0</div>
+    <div id="online">&nbsp;(0)</div>
   </div>
-  <div class="" id="user-list">
-    <ul class="border-top border-bottom" id="users">
+  <div id="user-list">
+    <ul class="border-top" id="users">
     </ul>
   </div>
 </div>
-<div class="col-6 border-left p-0 m-0 h-100" style="position: relative;" id="chat-box">
-  <div class="" id="content">
-    <div class="title-wrapper border-bottom">
-      <div class="title">
-        公開聊天室
-      </div>
+<div class="col-6 p-0 m-0 h-100 w-100 border-right" id="chat-box">
+  <div class="title-wrapper border-bottom" style="background-color:#ffffff;">
+    <div class="title ml-3">
+      公開聊天室
     </div>
-    <ul class="px-3" style="max-height: 685px; overflow: auto;" id="messages">
-    </ul>
   </div>
-  <div class="py-2" id="send-box">
-    <div id="userInfo" style="visibility:hidden;display: none;">{{userLogin.name}}</div>
-    <form id="send-form" action="">
+  <ul class="border-bottom px-0 h-100 w-100" id="messages">
+  </ul>
+  <div class="w-100" id="send-box">
+    <div id="userInfo" style="visibility:hidden;display: none;">{{userLogin.name}}
+    </div>
+    <form id="send-form" action="" class="w-100">
       <input id='userId' type="hidden" name="userId" value="{{userLogin.id}}" />
       <input id='userAvatar' type="hidden" name="userAvatar" value="{{userLogin.avatar}}" />
       <input id='userName' type="hidden" name="userName" value="{{userLogin.name}}" />
-      <div class="border-top" id="input-and-button">
-        <input class="mt-2 mx-2" style="max-width: 90%;" id="m" autocomplete="off"
-          placeholder="please type message..." /><button>
+      {{!-- <div class="vertical-line" style="z-index:1; border-left:1px solid #CCD6DD; height:62.8px; position: absolute; right: -1px; bottom: 0;">
+        </div> --}}
+      <div class="w-100 d-flex nowrap" id="input-and-button">
+        <input rows="1" class="ml-2" id="text-input-area" autocomplete="off" placeholder="please type message..." style="width: 100%;padding: 10px 20px;border-radius: 50px;
+      background: #F5F8FA;"></input>
+        <button class="mx-3">
           <?xml version="1.0" encoding="iso-8859-1"?>
           <!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
           <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -49,4 +51,5 @@
     </form>
   </div>
 </div>
+
 <script src="/javascripts/chat.js"></script>

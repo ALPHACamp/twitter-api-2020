@@ -21,6 +21,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.engine('handlebars', handlebars({
   defaultLayout: 'main',
+  helpers: require('./config/handlebars-helpers')
 }))
 app.set('view engine', 'handlebars')
 // use helpers.getUser(req) to replace req.user
@@ -110,10 +111,10 @@ app.get('/chat', authenticator, function (req, res) {
         name: user.toJSON().name,
         avatar: user.toJSON().avatar,
         account: user.toJSON().account,
+        channel: 'public'
       }
       res.render('chat', { userLogin });
-    }
-    )
+    })
 });
 
 app.get('/chat/private', authenticator, function (req, res) {
@@ -132,12 +133,14 @@ app.get('/chat/private', authenticator, function (req, res) {
               userAvatar: r.avatar,
               userAccount: r.account
             }))
+            let userLogin = { channel: 'private' }
             return res.render('privateChat', {
               data,
               id: user.toJSON().id,
               name: user.toJSON().name,
               avatar: user.toJSON().avatar,
               users,
+              userLogin
             })
           });
       }

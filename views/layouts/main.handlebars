@@ -6,8 +6,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Socket.IO chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/stylesheets/privateChat.css">
-  {{!-- <link rel="stylesheet" href="/stylesheets/chat.css"> --}}
+  {{!-- <link rel="stylesheet" href="/stylesheets/privateChat.css"> --}}
+  <link rel="stylesheet" href="/stylesheets/chat.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
     integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -15,7 +15,7 @@
 
 <body>
 
-  <div {{#if userLogin}} class="row border" style="max-height: 1202px;" {{/if}}>
+  <div id="container" {{#if userLogin}} class="container row mx-auto my-auto w-100 h-100" {{/if}}>
     {{#if userLogin}}
     {{> leftBar}}
     {{/if}}
