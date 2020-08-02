@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.on("oneLogin", function (user) {
     let userMsg = `
           <li>
-          <span>${user} 上線。</span>
+          <span class="w-100">${user} 上線。</span>
           </li>
           `
     $('#messages').append(userMsg);
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.on("oneLeave", function (user) {
     let userMsg = `
           <li>
-          <span>${user} 離線。</span>
+          <span class="w-100">${user} 離線。</span>
           </li>
           `
     $('#messages').append(userMsg);
