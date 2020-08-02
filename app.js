@@ -132,12 +132,14 @@ app.get('/chat/private', authenticator, function (req, res) {
             userAvatar: r.avatar,
             userAccount: r.account
           }))
+          let userLogin = { channel: 'private' }
           res.render('privateChat', {
             data,
             id: user.toJSON().id,
             name: user.toJSON().name,
             avatar: user.toJSON().avatar,
             users,
+            userLogin
           })
         });
     }

@@ -90,6 +90,24 @@ clear: both;
       line-height: 3rem;
     }
 
+    .other-user-name {
+      font-size: 1rem;
+      font-weight: bolder;
+      margin-top: 0.3rem;
+      margin-bottom: -0.4rem;
+    }    
+
+    .other-user-account {
+      font-size: 0.8rem;
+      color: rgba(160, 158, 158, 0.815);
+      margin-top: -0.4rem;
+      margin-bottom: 0.1rem;
+    }
+
+    #other-user-box {
+      line-height: 1.5rem;
+    }
+
 /*     #chat-box form button {
       width: 9%;
       background: #f39a34;
@@ -104,8 +122,6 @@ clear: both;
       cursor: pointer;
       text-align: center;
     } */
-
-    
 
     button:focus, #text-input-area:focus { 
       outline: none; 
@@ -212,13 +228,11 @@ clear: both;
 
     #input-and-button {
       position: absolute;
-      bottom: 1.5%;   
-      /* max-width: 50%; */
-      padding-top: -0.1;
+      bottom: 1.4%; 
       background-color:#ffffff;
     }
 
-    #users, #messages {
+    #users {
       max-height: 80%;
       overflow: auto;
     }
@@ -233,11 +247,11 @@ clear: both;
 
     #messages{
       position: absolute;
-      top: 10%;
+      top: 6.5%;
+      overflow-y: auto;
       overflow-x: hidden;
-      height: 100%;
-      width: 100%;
-      max-height: 80%;
+      max-height: 83.5%;
+      margin-top: 0.3rem;
     }
 
     @keyframes wrongAnimation {
