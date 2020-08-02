@@ -1,26 +1,51 @@
-<div id="user-box" class="col-3 border-left border-right p-0 m-0 h-100">
+<div id="user-box" class="col-4 border-left border-right p-0 m-0 h-100">
   <div class="d-flex justify-content-between ml-3" id="status-box">
     <div>訊息</div>
-    <button class="mr-2" style="border:0;cursor:pointer;background:azure" type="button" data-toggle="modal"
+    <button id="create-message-btn" class="mr-3" style="border:0;cursor:pointer; background: #ffffff" type="button" data-toggle="modal"
       data-target="#exampleModal">
-      <i class="fa fa-envelope "></i>
+      <svg width="20" height="20" viewBox="0 -23 512 512" width="512pt" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="m512 371c0 11.046875-8.953125 20-20 20h-55v55c0 11.046875-8.953125 20-20 20s-20-8.953125-20-20v-55h-55c-11.046875 0-20-8.953125-20-20s8.953125-20 20-20h55v-55c0-11.046875 8.953125-20 20-20s20 8.953125 20 20v55h55c11.046875 0 20 8.953125 20 20zm0-291v211c0 11.046875-8.953125 20-20 20s-20-8.953125-20-20v-205.363281l-173.753906 108.042969c-13.027344 8.101562-27.640625 12.152343-42.246094 12.152343-14.609375 0-29.214844-4.050781-42.246094-12.152343l-173.753906-108.042969v225.363281c0 22.054688 17.945312 40 40 40h182c11.046875 0 20 8.953125 20 20s-8.953125 20-20 20h-182c-44.113281 0-80-35.886719-80-80v-231c0-44.113281 35.886719-80 80-80h352c44.113281 0 80 35.886719 80 80zm-55.671875-31.722656c-6.746094-5.183594-15.179687-8.277344-24.328125-8.277344h-352c-9.148438 0-17.582031 3.09375-24.324219 8.277344l179.203125 111.433594c13.027344 8.101562 29.214844 8.101562 42.242188 0zm0 0" />
+        </svg>
     </button>
   </div>
   <div id="user-list">
     <ul id="users" class="border-top">
       {{#each data}}
-      <button data-id="{{this.userId}}" user-id="{{../id}}" onclick="showChatHistory(this)"
-        style="width: 298px;border:0">
-        <li style="cursor: pointer;">
-          <img src="{{this.userAvatar}}" alt="">
-          <strong>{{this.userName}}</strong>
-          <strong id="user-account">{{this.userAccount}}</strong>
+      <button class="w-100" data-id="{{this.userId}}" user-id="{{../id}}" onclick="showChatHistory(this)"
+        style="border: none">
+        <li class="d-flex my-2 mb-1 w-100" style="cursor: pointer;">
+          <div class="photo-wrapper">
+            <img src="{{this.userAvatar}}" alt="" class="photo rounded-circle" style="width: 50px;
+  height: 50px; margin: 0.5rem 0.5rem 1rem 0.5rem;">
+          </div>
+          <div class="user-list-item-wrapper flex-column ml-1 w-100">
+            <div class="upper-wrapper w-100 d-flex justify-content-between align-items-center mb-1">
+              <div class="user-list-item-info d-flex">
+                <div class="user-list-name font-weight-bold">{{this.userName}}</div>
+                <div class="user-list-account">&nbsp;@{{this.userAccount}}</div>
+              </div>
+              <div class="user-list-time"></div>
+            </div>
+            <div class="user-list-text w-100 mb-2">sports 63 55 43 45 34 56 88 88 8 8 9 4 9 87 835 46 98</div>
+          </div>
+          <div class="delete-btn">
+            <img src="" alt="">
+          </div>
         </li>
       </button>
       {{/each}}
     </ul>
   </div>
 </div>
+
+{{!-- <button data-id="{{this.userId}}" user-id="{{../id}}" onclick="showChatHistory(this)" style="width: 298px;border:0">
+  <li style="cursor: pointer;">
+    <img src="{{this.userAvatar}}" alt="">
+    <strong>{{this.userName}}</strong>
+    <strong id="user-account">{{this.userAccount}}</strong>
+  </li>
+</button> --}}
 
 <div id="chat-box" class="col-6 p-0 m-0 h-100 w-100 border-right">
   <div id="other-user-box">
@@ -68,19 +93,6 @@
 
 </div>
 
-{{!-- <div id="content">
-  <ul id="messages"></ul>
-</div>
-<div id="send-box">
-  <div id="userInfo" style="visibility:hidden;display: none;">{{name}}</div>
-  <form id="send-form" action="">
-    <input id='userId' type="hidden" name="userId" value="{{id}}" />
-    <input id='userAvatar' type="hidden" name="userAvatar" value="{{avatar}}" />
-    <input id='userName' type="hidden" name="userName" value="{{name}}" />
-    <input id="m" autocomplete="off" placeholder="please type message..." /><button>Send</button>
-  </form>
-</div> --}}
-
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
   aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -106,8 +118,8 @@
             <textarea class="form-control" name="message" id="exampleFormControlTextarea1" rows="3"></textarea>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" id="submit" class="btn btn-primary">Send</button>
+        <div class="modal-footer w-100 d-flex justify-content-center" style="border: none;">
+          <button type="submit" id="submit" class="btn btn-primary w-25">Send</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </form>
