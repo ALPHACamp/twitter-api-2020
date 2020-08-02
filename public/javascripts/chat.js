@@ -91,22 +91,20 @@ document.addEventListener("DOMContentLoaded", () => {
     let chatColumn = ``
     if ($('#userId').val() === id) {
       chatColumn = `
-        <li class="loginuser-message-style w-100 my-4">
-            <div id="message-bubble">
-              <p class="message-text py-1">${msg}</p>
-              <div class="text-right login-user-time" id='time'>${event}</div>
-            </div>
-        </li>
+      <li id="login-user-item" class="d-flex flex-column align-items-end my-4">        
+          <div class="loginuser-message-style message-text">${msg}</div>
+          <div class="time login-user-time">${event}</div>
+      </li>
         `
     } else {
       chatColumn = `
-        <li class="otheruser-message-style w-100 my-4">
-          <img src="${avatar}" alt="">
-            <div id="message-bubble">
-              <p class="message-text">${msg}</p>
-              <div class="text-right other-user-time" id='time'>${event}</div>
-            </div>
-        </li>
+        <li id="other-user-item" class="d-flex justify-content-start align-items-center my-4">
+        <img src="${avatar}" alt="">
+        <div class="d-flex flex-column" style="max-width: 65%;">
+          <div class="otheruser-message-style message-text">${msg}</div>
+          <div class="time other-user-time">${event}</div>
+        </div>
+      </li>
         `
     }
     $('#messages').append(chatColumn);
@@ -122,10 +120,10 @@ document.addEventListener("DOMContentLoaded", () => {
       let chatColumn = `
         <li class="my-4">
           <img src="${msgs[i].User.avatar}" alt="">
-            <div id="message-bubble">
+            <div class="message-bubble">
               <strong>${msgs[i].User.name}</strong>
-              <p class="message-text">${msgs[i].chatMessage}</p>
-              <div id='time' class="login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
+              <div class="message-text">${msgs[i].chatMessage}</div>
+              <div class="time login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
             </div>
         </li>
         `
