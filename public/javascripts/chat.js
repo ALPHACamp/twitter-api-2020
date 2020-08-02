@@ -39,16 +39,27 @@ document.addEventListener("DOMContentLoaded", () => {
   //   status.classList.add("disconnected")
   // });
 
+  // user list
   socket.on("online", function (amount, userlist) {
     online.innerText = amount;
     let userlistColumn = ``
     for (i = 0; i < userlist.length; i++) {
-      userlistColumn += `
-        <li class="border-bottom">
-          <img src="${userlist[i].avatar}" alt="">
-            <strong>${userlist[i].name}</strong>
-            <strong id="user-account">${userlist[i].account}</strong>
-        </li>
+      userlistColumn += `        
+        <li class="d-flex border-bottom my-2 mb-1 w-100">
+        <div class="photo-wrapper">
+          <img src="${userlist[i].avatar}" alt="" class="photo rounded-circle" style="width: 50px;
+  height: 50px; margin: 0.5rem 0.5rem 1rem 0.5rem;">
+        </div>
+        <div class="user-list-item-wrapper flex-column ml-1 w-100">
+          <div class="upper-wrapper w-100 d-flex justify-content-between align-items-center mb-1">
+            <div class="user-list-item-info d-flex">
+              <div class="user-list-name font-weight-bold">${userlist[i].name}</div>
+              <div class="user-list-account">&nbsp;@${userlist[i].account}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </li>
         `
     }
     userSide.innerHTML = userlistColumn;
@@ -80,23 +91,20 @@ document.addEventListener("DOMContentLoaded", () => {
     let chatColumn = ``
     if ($('#userId').val() === id) {
       chatColumn = `
-        <li class="loginuser-message-style">
-          <img src="${avatar}" alt="">
-            <div>
-              <strong>${name}</strong>
-              <p>${msg}</p>
-              <span class="text-right" id='time'>${event}</span>
+        <li class="loginuser-message-style w-100 my-4">
+            <div id="message-bubble">
+              <p class="message-text py-1">${msg}</p>
+              <div class="text-right login-user-time" id='time'>${event}</div>
             </div>
         </li>
         `
     } else {
       chatColumn = `
-        <li class="">
+        <li class="otheruser-message-style w-100 my-4">
           <img src="${avatar}" alt="">
-            <div>
-              <strong>${name}</strong>
-              <p>${msg}</p>
-              <span class="text-right" id='time'>${event}</span>
+            <div id="message-bubble">
+              <p class="message-text">${msg}</p>
+              <div class="text-right other-user-time" id='time'>${event}</div>
             </div>
         </li>
         `
@@ -112,12 +120,12 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.on("chatRecord", function (msgs) {
     for (let i = 0; i < msgs.length; i++) {
       let chatColumn = `
-          <li>
+        <li class="my-4">
           <img src="${msgs[i].User.avatar}" alt="">
-            <div>
+            <div id="message-bubble">
               <strong>${msgs[i].User.name}</strong>
-              <p>${msgs[i].chatMessage}</p>
-              <span id='time'>${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</span>
+              <p class="message-text">${msgs[i].chatMessage}</p>
+              <div id='time' class="login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
             </div>
         </li>
         `

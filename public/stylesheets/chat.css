@@ -15,11 +15,6 @@
       overflow: hidden
     }
 
-    body {
-      font: 13px Helvetica, Arial;
-      background-color: #ffffff;
-    }
-
     #left-bar a {
       color: #1C1C1C;
       font-weight: bolder;
@@ -80,7 +75,7 @@ clear: both;
       font-size: 14px;
     }
 
-    #user-account {
+    #user-account, .user-list-text, .user-list-account {
       color: rgba(160, 158, 158, 0.815);
     }
 
@@ -123,10 +118,7 @@ clear: both;
       text-align: center;
     } */
 
-    button:focus, #text-input-area:focus { 
-      outline: none; 
-    }
-
+    
     #messages {
       list-style-type: none;
       margin: 0;
@@ -149,9 +141,30 @@ clear: both;
       word-break: normal;
     }
 
+    #message-bubble {
+      position: relative;
+      width: 100%;
+      max-width: 65%;
+    }
+
     #time {
-      font-size: 10px;
-      color: rgba(160, 158, 158, 0.815);
+      color: rgba(109, 103, 103, 0.815);
+    }
+
+    .login-user-time, .other-user-time {
+      font-size: 1px;
+    }
+
+    .login-user-time {
+      position: absolute;
+      top: 110%;
+      right: -50%;
+    }
+
+    .other-user-time {
+      position: absolute;
+      top: 135%;
+      left: -30%;
     }
 
     #messages li:nth-child(odd) {
@@ -175,9 +188,9 @@ clear: both;
       animation-iteration-count: 5;
     }
 
-    #online {
+    /* #online {
       color: rgb(93, 177, 111);
-    }
+    } */
 
     .connected {
       color: rgb(93, 177, 111);
@@ -251,7 +264,7 @@ clear: both;
       overflow-y: auto;
       overflow-x: hidden;
       max-height: 83.5%;
-      margin-top: 0.3rem;
+      margin-top: 1rem;
     }
 
     @keyframes wrongAnimation {
@@ -265,5 +278,46 @@ clear: both;
       background:#FF6600; 
       color:#ffffff; 
       border-radius:30px 30px 0px 30px; 
-      /* max-width: 75%; float:right 修改樣式*/
+      max-width: 65%; 
+      float:right;
     }
+
+    .otheruser-message-style {
+      background: rgba(160, 158, 158, 0.815);
+      color:#1C1C1C; 
+      border-radius:30px 30px 30px 0px; 
+      max-width: 65%; 
+      float: left;
+    }
+
+    .user-list-name, .user-list-account, .user-list-text, .message-text, #message-bubble {
+      font: 15px Helvetica, Arial;
+    }
+
+    .user-list-text {
+      max-width: 90%;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
+
+    button:focus, #input-and-button input:focus, #input-and-button button:focus, #create-message-btn:focus { 
+      outline: none; 
+    }
+
+    /* .otheruser-message-style {
+      position: relative;
+    }
+
+    .otheruser-message-style img {
+      position: absolute;
+      top: 5%;
+      left: 5%
+    }
+
+    #message-bubble {
+      position: absolute;
+      top: 5%;
+      left: 5%
+    } */
