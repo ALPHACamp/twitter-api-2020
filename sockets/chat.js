@@ -39,9 +39,10 @@ const chatSocket = async (io, socket, onlineUsers) => {
         account: user.account
       }
     })
-
     socket.emit('online-users', result)
-    // TODO: 一開始先顯示 n 筆歷史訊息
+
+
+    // TODO: 一開始先顯示 5 筆歷史訊息
   } catch (err) {
     console.warn(err)
   }
@@ -69,10 +70,11 @@ const chatSocket = async (io, socket, onlineUsers) => {
       console.log(`使用者 with socket id ${socket.id} 已送訊息`, obj)
 
       const userId = onlineUsers.find(user => user.socketId === socket.id).userId
-      await chatController.postMessage(userId, obj.content)
+      const message = await chatController.postMessage(userId, obj.content)
 
       // broadcast
       io.emit('message', {
+        messageId: message.id,
         id: onlineUsers.find(user => user.socketId === socket.id).userId,
         time: new Date(),
         content: obj.content
@@ -86,8 +88,25 @@ const chatSocket = async (io, socket, onlineUsers) => {
     console.log(`使用者 with socket id ${socket.id} 欲撈取歷史訊息`)
     try {
       // FIXME: 待與前端確認傳什麼參數、怎麼撈
-      const result = await chatController.getMessages(obj.start, obj.count)
-      socket.emit('old-message', result)
+      const oldMessage = []
+      const messages = await chatController.getMessages(obj.startId, obj.count)
+
+      await Promise.all(messages.map(message => chatController.getUser(message.userId)))
+        .then(userDatas => {
+          userDatas.map((userData, index) => {
+            oldMessage.push({
+              messageId: messages[index].id,
+              time: messages[index].createdAt,
+              content: messages[index].content,
+              id: messages[index].userId,
+              avatar: (userData.avatar) ? userData.avatar : '',
+              name: userData.name,
+              account: userData.account
+            })
+          })
+        })
+
+      socket.emit('old-message', oldMessage)
     } catch (err) {
       console.warn(err)
     }
