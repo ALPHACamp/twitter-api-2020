@@ -67,25 +67,20 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let i = 0; i < msgs.length; i++) {
       if (Number(loginUserId) === Number(msgs[i].User.id)) {
         let chatColumn = `
-        <li class="loginuser-message-style w-100 my-4">
-          <img src="${msgs[i].User.avatar}" alt="">
-            <div id="message-bubble">
-              <strong>${msgs[i].User.name}</strong>
-              <p class="message-text py-1">${msgs[i].message}</p>
-              <div id='time' class="text-right login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
-            </div>
+        <li id="login-user-item" class="d-flex flex-column align-items-end my-4">
+            <div class="loginuser-message-style message-text">${msgs[i].message}</div>
+            <div class="time login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
         </li>
         `
         $('#messages').append(chatColumn);
       } else {
         let chatColumn = `
-        <li class="otheruser-message-style w-100 my-4">
+        <li id="other-user-item" class="d-flex justify-content-start align-items-center my-4">
           <img src="${msgs[i].User.avatar}" alt="">
-            <div id="message-bubble">
-              <strong>${msgs[i].User.name}</strong>
-              <p class="message-text">${msgs[i].message}</p>
-              <div id='time' class="text-right other-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
-            </div>
+          <div class="d-flex flex-column" style="max-width: 65%;">
+            <div class="otheruser-message-style message-text">${msgs[i].message}</div>
+            <div class="time other-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
+          </div>
         </li>
         `
         $('#messages').append(chatColumn);
