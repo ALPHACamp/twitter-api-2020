@@ -13,10 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.emit('login', userInfo.innerText)
 
+  
+
   $('form').submit(function () {
-    if ($('#m').val() !== '') {
-      socket.emit('chat message', $('#m').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
-      $('#m').val('')
+    if ($('#text-input-area').val() !== '') {
+      socket.emit('chat message', $('#text-input-area').val(), $('#userId').val(), $('#userAvatar').val(), $('#userName').val())
+      $('#text-input-area').val('')
     } else {
       sendForm.classList.add("wrong");
       sendForm.addEventListener('animationend', event => event.target.classList.remove('wrong'), { once: true })

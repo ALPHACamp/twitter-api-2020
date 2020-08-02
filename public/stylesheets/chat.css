@@ -90,26 +90,6 @@ clear: both;
       line-height: 3rem;
     }
 
-    form input {
-      border: none;
-/*       background-color: rgb(243, 242, 237);
-      width: 500px;
-      height: 600px;
-      border: 1px solid darkolivegreen;
-      border-radius: 5px;
-      overflow: auto;
-      margin: 0 0 5px 0; */
-    }
-
-/*     #chat-box form {
-      border: 1px solid #000;
-      border-radius: 5px;
-      padding: 3px;
-      position: relative;
-      width: 500px;
-    } */
-
-
 /*     #chat-box form button {
       width: 9%;
       background: #f39a34;
@@ -125,8 +105,9 @@ clear: both;
       text-align: center;
     } */
 
+    
 
-    button:focus, input:focus { 
+    button:focus, #text-input-area:focus { 
       outline: none; 
     }
 
@@ -216,6 +197,10 @@ clear: both;
       position: relative;;
     }
 
+    #text-input-area {
+      border: none;
+    }
+
     form button {
       width: 5%;
       background: none;
@@ -226,10 +211,10 @@ clear: both;
     }
 
     #input-and-button {
-      position: fixed;
-      bottom: 0;   
+      position: absolute;
+      bottom: 1.5%;   
       /* max-width: 50%; */
-      padding-bottom: 0.7rem;
+      padding-top: -0.1;
       background-color:#ffffff;
     }
 
