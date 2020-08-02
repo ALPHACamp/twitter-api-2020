@@ -64,7 +64,7 @@
     $(function () {
       // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk2MjY3MzczfQ.uIxzoMjHAFeSjgnONf211uHK3YWJGYNkg7kZ4G0SgGo'
 
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk2MjY3MzczfQ.uIxzoMjHAFeSjgnONf211uHK3YWJGYNkg7kZ4G0SgGo'
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNTk2MzUxMDI5fQ.1LoF3OLV3Wx--p4uad26tVk_PVTzJNCmHCMEn8QoZJo'
 
       // 試驗用
       // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNTk2MzAwNTYxfQ.bo6dbNZA035leBQBKjNaV4DGuVYqNBb_u_JzPBJ0p9c'
@@ -73,6 +73,8 @@
       });
 
       // var socket = io.connect('http://localhost:3000');
+
+      socket.emit('login', {});
 
 
       $('form').submit(function (e) {
@@ -91,20 +93,21 @@
       });
 
       socket.on('online-users', function (msg) {
+        console.log('online-users')
         console.log(msg)
       });
 
       socket.on('disconnect', function () {
-        console.log('1 人已離開聊天室')
+        console.log('disconnect')
       })
 
       // 事件叫 connect，無法啟動 chat.js 裡的 socket.on 'connect' 事件，所以事件改名成 new-user
-      socket.on('new-user', function () {
-        console.log('新朋友加入聊天')
+      socket.on('new-user', function (obj) {
+        console.log('new-user')
       })
 
       socket.on('old-message', function (obj) {
-        console.log('OLD MESSAGE')
+        console.log('old-message')
         console.log(obj)
       })
     });
