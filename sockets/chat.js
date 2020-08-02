@@ -53,7 +53,7 @@ const chatSocket = async (io, socket, onlineUsers) => {
           id: userData.id,
           avatar: userData.avatar,
           name: userData.name,
-          account: userData.account,
+          account: userData.account
         })
       }
     } catch (err) {
@@ -62,11 +62,21 @@ const chatSocket = async (io, socket, onlineUsers) => {
   })
 
   // disconnect 事件一發生，就會立即取消 socket，callback 只會執行同步程式
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log(`一位使用者離線 with socket id ${socket.id}`)
     // 從使用者列表移除
-    onlineUsers.splice(onlineUsers.findIndex(user => user.socketId === socket.id), 1)
-    io.emit('disconnect', '有人離開聊天室')
+    const logoutUser = onlineUsers.splice(onlineUsers.findIndex(user => user.socketId === socket.id), 1)
+
+    // 確認 socket 中還有無此 userId 的 socket
+    if (!onlineUsers.find(user => user.userId === logoutUser[0].userId)) {
+      console.log(`userId ${logoutUser[0].userId} 沒有重複 socket，故可以移了`)
+      const userData = await chatController.getUser(logoutUser[0].userId)
+      io.emit('logout', {
+        id: userData.id,
+        name: userData.name,
+        account: userData.account
+      })
+    }
   })
 
   socket.on('send', async (obj) => {
