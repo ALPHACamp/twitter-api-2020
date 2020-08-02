@@ -43,6 +43,24 @@ const chatSocket = async (io, socket, onlineUsers) => {
 
 
     // TODO: 一開始先顯示 5 筆歷史訊息
+    const oldMessage = []
+    const messages = await chatController.getMessages(0, 5)
+
+    await Promise.all(messages.map(message => chatController.getUser(message.userId)))
+      .then(userDatas => {
+        userDatas.map((userData, index) => {
+          oldMessage.push({
+            messageId: messages[index].id,
+            time: messages[index].createdAt,
+            content: messages[index].content,
+            id: messages[index].userId,
+            avatar: (userData.avatar) ? userData.avatar : '',
+            name: userData.name,
+            account: userData.account
+          })
+        })
+      })
+    socket.emit('old-message', oldMessage)
   } catch (err) {
     console.warn(err)
   }
