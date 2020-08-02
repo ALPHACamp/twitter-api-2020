@@ -176,12 +176,12 @@ io.on('connection', function (socket) {
     records.push(msg, id, avatar, name)
   });
   socket.on('disconnect', () => {
-    userList.forEach(function (x, index) {
-      if (x.name === socket.username) {
-        userList.splice(index, 1);
-        //找到該用戶，刪除
-      }
-    })
+    console.log('name', socket.username)
+    let index = userList.map(x => x.name).indexOf(socket.username, -1)
+    console.log(index)
+    if (index !== -1) {
+      userList.splice(index, 1);
+    }
     io.emit("online", userList.length, userList)
     if (typeof socket.username !== 'undefined') {
       socket.broadcast.emit("oneLeave", socket.username)
