@@ -64,10 +64,10 @@
     $(function () {
       // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk2MjY3MzczfQ.uIxzoMjHAFeSjgnONf211uHK3YWJGYNkg7kZ4G0SgGo'
 
-      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk2MjY3MzczfQ.uIxzoMjHAFeSjgnONf211uHK3YWJGYNkg7kZ4G0SgGo'
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk2MjY3MzczfQ.uIxzoMjHAFeSjgnONf211uHK3YWJGYNkg7kZ4G0SgGo'
 
       // 試驗用
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNTk2MzAwNTYxfQ.bo6dbNZA035leBQBKjNaV4DGuVYqNBb_u_JzPBJ0p9c'
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNTk2MzAwNTYxfQ.bo6dbNZA035leBQBKjNaV4DGuVYqNBb_u_JzPBJ0p9c'
       var socket = io.connect('http://localhost:3000', {
         query: { token }
       });
@@ -78,7 +78,7 @@
       $('form').submit(function (e) {
         e.preventDefault(); // prevents page reloading
 
-        socket.emit('new-user', { content: $('#m').val() });
+        socket.emit('send', { content: $('#m').val() });
         $('#m').val('');
         return false;
       });
