@@ -154,7 +154,6 @@ app.post('/chat/private', function (req, res) {
 
 //上線名單
 let userList = []
-let notifyCounts = 0
 
 io.on('connection', function (socket) {
 
@@ -233,10 +232,6 @@ io.on('connection', function (socket) {
       socket.join(room)
     })
   })
-
-  socket.on('refrash', function () {
-    notifyCounts = 0
-  })
 });
 
 // 新增 Records 的事件監聽器
@@ -246,9 +241,7 @@ records.on("new_message", (msg, id, avatar, name) => {
 
 privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
   io.in(room).emit("send private message", msg, avatar, name, id);
-  if ('wait') {
-    notifyCounts++
-  }
-  io.to(chatwithId).emit("notify", notifyCounts)
+  console.log(Object.values(io.sockets.adapter.rooms[room].sockets)[0])
+  io.to(chatwithId).emit("notify")
 });
 

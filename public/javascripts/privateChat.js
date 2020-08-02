@@ -1,3 +1,5 @@
+let notifyCounts = 0
+
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let sendForm = document.getElementById("send-form");
@@ -54,7 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // }
   });
 
-  socket.on('notify', function (notifyCounts) {
+  socket.on('notify', function () {
+    notifyCounts++
     if (privateBadge.classList !== "badge badge-danger") {
       privateBadge.classList.add("badge")
       privateBadge.classList.add("badge-danger")
@@ -130,7 +133,7 @@ function refrash() {
     privateBadge.classList.remove("badge")
     privateBadge.classList.remove("badge-danger")
   }
-  socket.emit('refrash')
+  notifyCounts = 0
   document.location.href = '/chat/private';
 }
 

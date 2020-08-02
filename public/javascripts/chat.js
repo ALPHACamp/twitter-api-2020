@@ -3,6 +3,8 @@ window.setTimeout(function () {
   $(".alert").alert('close')
 }, 3000);
 
+let notifyCounts = 0
+
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let status = document.getElementById("status");
@@ -13,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let privateBadge = document.getElementById("private-badge")
 
   socket.emit('login', $('#userName').val())
-
 
   $('form').submit(function () {
     if ($('#text-input-area').val() !== '') {
@@ -135,14 +136,13 @@ document.addEventListener("DOMContentLoaded", () => {
   })
 
 
-  socket.on('notify', function (notifyCounts) {
+  socket.on('notify', function () {
+    notifyCounts++
     if (privateBadge.classList !== 'badge badge-danger') {
       privateBadge.classList.add('badge')
       privateBadge.classList.add('badge-danger')
     }
-    console.log(privateBadge.classList)
     privateBadge.innerText = notifyCounts
-    console.log(notifyCounts)
   })
 
   // socket.on("maxRecord", function (amount) {
@@ -164,7 +164,7 @@ function refrash() {
     privateBadge.classList.remove("badge")
     privateBadge.classList.remove("badge badge-danger")
   }
-  socket.emit('refrash')
+  notifyCounts = 0
   document.location.href = '/chat/private';
 }
 
