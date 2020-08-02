@@ -75,7 +75,7 @@ clear: both;
       font-size: 14px;
     }
 
-    #user-account, .user-list-text, .user-list-account {
+    #user-account, .user-list-text, .user-list-account,.offline-badge {
       color: rgba(160, 158, 158, 0.815);
     }
 
@@ -271,6 +271,21 @@ clear: both;
     .user-list-name, .user-list-account, .user-list-text, .message-text, .message-bubble {
       font: 15px Helvetica, Arial;
     }
+
+    .online-badge, .offline-badge {
+      background: #e2e2e6af;
+      border-radius: 30px;
+      padding: 3px 15px ;
+    } 
+
+    .online-badge{
+      background: #ffb27f;
+      color: #ffffff;
+    } 
+
+    .offline-badge {
+      background: #e6e2e2af;
+    } 
 
     .user-list-text {
       max-width: 90%;
