@@ -176,9 +176,7 @@ io.on('connection', function (socket) {
     records.push(msg, id, avatar, name)
   });
   socket.on('disconnect', () => {
-    console.log('name', socket.username)
     let index = userList.map(x => x.name).indexOf(socket.username, -1)
-    console.log(index)
     if (index !== -1) {
       userList.splice(index, 1);
     }
@@ -251,7 +249,6 @@ privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
   if ('wait') {
     notifyCounts++
   }
-  console.log(notifyCounts, typeof notifyCounts)
   io.to(chatwithId).emit("notify", notifyCounts)
 });
 
