@@ -19,10 +19,18 @@ const chatSocket = async (io, socket, onlineUsers) => {
     if (!onlineUsersId.includes(user.userId)) onlineUsersId.push(user.userId)
   })
 
-  // 最新加入的 user 的 id
-  const newUserId = onlineUsersId[onlineUsersId.length - 1]
-
   try {
+    // 傳送最新登入的使用者資訊
+    console.log('新的使用者上線囉')
+    const newUserId = onlineUsersId[onlineUsersId.length - 1]
+    const newUser = await chatController.getUser(newUserId)
+    io.emit('new-user', {
+      id: newUser.id,
+      avatar: newUser.avatar,
+      name: newUser.name,
+      account: newUser.account
+    })
+
     const result = await chatController.getUsers(onlineUsersId).map(user => {
       return {
         id: user.id,
@@ -39,31 +47,8 @@ const chatSocket = async (io, socket, onlineUsers) => {
   }
 
   // === EVENT ===
-  socket.on('new-user', async () => {
-    console.log('新加入一位使用者 id =', newUserId)
-    console.log('新加入一位使用者 socket id =', socket.id)
-
-    try {
-      const userData = await chatController.getUser(newUserId)
-
-      if (!userData) {
-        console.log('查無此人')
-      } else {
-        io.emit('new-user', {
-          id: userData.id,
-          avatar: userData.avatar,
-          name: userData.name,
-          account: userData.account
-        })
-      }
-    } catch (err) {
-      console.log(err)
-    }
-  })
-
-  // disconnect 事件一發生，就會立即取消 socket，callback 只會執行同步程式
   socket.on('disconnect', async () => {
-    console.log(`一位使用者離線 with socket id ${socket.id}`)
+    console.log(`一位使用者離線 with socket id $s{socket.id}`)
     // 從使用者列表移除
     const logoutUser = onlineUsers.splice(onlineUsers.findIndex(user => user.socketId === socket.id), 1)
 
