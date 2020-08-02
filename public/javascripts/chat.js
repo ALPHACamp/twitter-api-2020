@@ -3,6 +3,8 @@ window.setTimeout(function () {
   $(".alert").alert('close')
 }, 3000);
 
+let notifyCounts = 0
+
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let status = document.getElementById("status");
@@ -13,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let privateBadge = document.getElementById("private-badge")
 
   socket.emit('login', $('#userName').val())
-
 
   $('form').submit(function () {
     if ($('#text-input-area').val() !== '') {
@@ -115,32 +116,46 @@ document.addEventListener("DOMContentLoaded", () => {
     // }
   });
 
-  socket.on("chatRecord", function (msgs) {
+  socket.on("chatRecord", function (msgs, userName) {
+    let chatColumn = ``
     for (let i = 0; i < msgs.length; i++) {
-      let chatColumn = `
-        <li class="my-4">
+      if (userName === msgs[i].User.name) {
+        chatColumn = `
+        <li class="loginuser-message-style w-100 my-4">
+          <img src="${msgs[i].User.avatar}" alt="">
+            <div id="message-bubble">
+              <strong>${msgs[i].User.name}</strong>
+              <p class="message-text py-1">${msgs[i].chatMessage}</p>
+              <div id='time' class="text-right login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+        </li>
+        `
+      } else {
+        chatColumn = `
+        <li class="otheruser-message-style w-100 my-4">
           <img src="${msgs[i].User.avatar}" alt="">
             <div class="message-bubble">
               <strong>${msgs[i].User.name}</strong>
+
               <div class="message-text">${msgs[i].chatMessage}</div>
               <div class="time login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
             </div>
         </li>
         `
+      }
       $('#messages').append(chatColumn);
-      $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
     }
+    $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
   })
 
 
-  socket.on('notify', function (notifyCounts) {
+  socket.on('notify', function () {
+    notifyCounts++
     if (privateBadge.classList !== 'badge badge-danger') {
       privateBadge.classList.add('badge')
       privateBadge.classList.add('badge-danger')
     }
-    console.log(privateBadge.classList)
     privateBadge.innerText = notifyCounts
-    console.log(notifyCounts)
   })
 
   // socket.on("maxRecord", function (amount) {
@@ -162,7 +177,7 @@ function refrash() {
     privateBadge.classList.remove("badge")
     privateBadge.classList.remove("badge badge-danger")
   }
-  socket.emit('refrash')
+  notifyCounts = 0
   document.location.href = '/chat/private';
 }
 

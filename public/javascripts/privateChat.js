@@ -1,3 +1,5 @@
+let notifyCounts = 0
+
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let sendForm = document.getElementById("send-form");
@@ -49,7 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // }
   });
 
-  socket.on('notify', function (notifyCounts) {
+  socket.on('notify', function () {
+    notifyCounts++
     if (privateBadge.classList !== "badge badge-danger") {
       privateBadge.classList.add("badge")
       privateBadge.classList.add("badge-danger")
@@ -59,22 +62,36 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(notifyCounts)
   })
 
-  socket.on("privateChatRecord", function (msgs, chatUserId) {
+  socket.on("privateChatRecord", function (msgs, chatUserId, loginUserId) {
     messages.innerHTML = ''
     for (let i = 0; i < msgs.length; i++) {
-      let chatColumn = `
-          <li>
+      if (Number(loginUserId) === Number(msgs[i].User.id)) {
+        let chatColumn = `
+        <li class="loginuser-message-style w-100 my-4">
           <img src="${msgs[i].User.avatar}" alt="">
-            <div>
+            <div id="message-bubble">
               <strong>${msgs[i].User.name}</strong>
-              <p>${msgs[i].message}</p>
-              <span id='time'>${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</span>
+              <p class="message-text py-1">${msgs[i].message}</p>
+              <div id='time' class="text-right login-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
             </div>
         </li>
         `
-      $('#messages').append(chatColumn);
-      $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
+        $('#messages').append(chatColumn);
+      } else {
+        let chatColumn = `
+        <li class="otheruser-message-style w-100 my-4">
+          <img src="${msgs[i].User.avatar}" alt="">
+            <div id="message-bubble">
+              <strong>${msgs[i].User.name}</strong>
+              <p class="message-text">${msgs[i].message}</p>
+              <div id='time' class="text-right other-user-time">${new Date(msgs[i].createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+        </li>
+        `
+        $('#messages').append(chatColumn);
+      }
     }
+    $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
 
     let chatWith = `
          <input id='chatwithId' type="hidden" name="userId" value=${chatUserId}>
@@ -98,12 +115,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function showChatHistory(user) {
   let socket = io();
+  let chatwithName = document.getElementById("chatwithName")
+  let chatwithAccount = document.getElementById("chatwithAccount")
   let loginUserId = user.getAttribute('user-id');
   let chatUserId = user.getAttribute('data-id')
+  let chatUserName = user.getAttribute('data-name')
+  let chatUserAccont = user.getAttribute('data-account')
   let roomId = [loginUserId.toString(), chatUserId.toString()].sort()
   let room = roomId[0] + roomId[1]
   socket.emit('join-room', room)
   socket.emit('private-Record', loginUserId, chatUserId, room)
+
+  chatwithName.innerText = chatUserName
+  chatwithAccount.innerText = `@${chatUserAccont}`
+
   //remove 上一個樣式
 
   //新增下一個樣式
@@ -117,7 +142,7 @@ function refrash() {
     privateBadge.classList.remove("badge")
     privateBadge.classList.remove("badge-danger")
   }
-  socket.emit('refrash')
+  notifyCounts = 0
   document.location.href = '/chat/private';
 }
 
