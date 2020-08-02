@@ -26,25 +26,20 @@ document.addEventListener("DOMContentLoaded", () => {
     let chatColumn = ``
     if ($('#userId').val() === id) {
       chatColumn = `
-        <li class="loginuser-message-style">
-          <img src="${avatar}" alt="">
-            <div>
-              <strong>${name}</strong>
-              <p>${msg}</p>
-              <span class="text-right" id='time'>${event}</span>
-            </div>
-        </li>
+        <li id="login-user-item" class="d-flex flex-column align-items-end my-4">
+          <div class="loginuser-message-style message-text">${msg}</div>
+          <div class="time login-user-time">${event}</div>
+      </li>
         `
     } else {
       chatColumn = `
-        <li class="">
-          <img src="${avatar}" alt="">
-            <div>
-              <strong>${name}</strong>
-              <p>${msg}</p>
-              <span class="text-right" id='time'>${event}</span>
-            </div>
-        </li>
+        <li id="other-user-item" class="d-flex justify-content-start align-items-center my-4">
+        <img src="${avatar}" alt="">
+        <div class="d-flex flex-column" style="max-width: 65%;">
+          <div class="otheruser-message-style message-text">${msg}</div>
+          <div class="time other-user-time">${event}</div>
+        </div>
+      </li>
         `
     }
     $('#messages').append(chatColumn);
