@@ -12,15 +12,13 @@ const chatSocket = async (io, socket, onlineUsers) => {
   // 第一次連線：傳回線上使用者清單列表，需要濾掉重複的 userId（一個使用者可能有多個 socket）
   console.log(`使用者 with socket id ${socket.id} 第一次連線`)
 
-  // TODO: 現在 message 總共有多少個（for 撈取歷史訊息用）
-
   const onlineUsersId = []
   onlineUsers.forEach(user => {
     if (!onlineUsersId.includes(user.userId)) onlineUsersId.push(user.userId)
   })
 
   try {
-    // 傳送最新登入的使用者資訊
+    // === 1. 傳送最新登入的使用者資訊 ===
     console.log('新的使用者上線囉')
     const newUserId = onlineUsersId[onlineUsersId.length - 1]
     const newUser = await chatController.getUser(newUserId)
@@ -41,8 +39,7 @@ const chatSocket = async (io, socket, onlineUsers) => {
     })
     socket.emit('online-users', result)
 
-
-    // TODO: 一開始先顯示 5 筆歷史訊息
+    // === 2. 一開始先顯示 5 筆歷史訊息 ===
     const oldMessage = []
     const messages = await chatController.getMessages(0, 5)
 
@@ -60,14 +57,17 @@ const chatSocket = async (io, socket, onlineUsers) => {
           })
         })
       })
+
     socket.emit('old-message', oldMessage)
   } catch (err) {
     console.warn(err)
   }
 
   // === EVENT ===
+
+  // Client 離線
   socket.on('disconnect', async () => {
-    console.log(`一位使用者離線 with socket id $s{socket.id}`)
+    console.log(`一位使用者離線 with socket id ${socket.id}`)
     // 從使用者列表移除
     const logoutUser = onlineUsers.splice(onlineUsers.findIndex(user => user.socketId === socket.id), 1)
 
@@ -83,6 +83,7 @@ const chatSocket = async (io, socket, onlineUsers) => {
     }
   })
 
+  // Client 寄送訊息
   socket.on('send', async (obj) => {
     try {
       console.log(`使用者 with socket id ${socket.id} 已送訊息`, obj)
@@ -102,10 +103,11 @@ const chatSocket = async (io, socket, onlineUsers) => {
     }
   })
 
+  // Client 要撈取歷史訊息
   socket.on('old-message', async (obj) => {
     console.log(`使用者 with socket id ${socket.id} 欲撈取歷史訊息`)
     try {
-      // FIXME: 待與前端確認傳什麼參數、怎麼撈
+      // 從 message id = startId 之後，撈取 count 個
       const oldMessage = []
       const messages = await chatController.getMessages(obj.startId, obj.count)
 
