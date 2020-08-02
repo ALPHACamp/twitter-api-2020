@@ -154,7 +154,6 @@ app.post('/chat/private', function (req, res) {
 
 //上線名單
 let userList = []
-let notifyCounts = 0
 
 io.on('connection', function (socket) {
 
@@ -162,26 +161,23 @@ io.on('connection', function (socket) {
 
   socket.on('login', function (userName) {
     socket.username = userName
+    io.emit("online", userList.length, userList)
+    records.get((msgs) => {
+      socket.emit("chatRecord", msgs, userName);
+    })
     socket.broadcast.emit("oneLogin", socket.username)
   })
-
-  io.emit("online", userList.length, userList)
   // socket.emit("maxRecord", records.getMax());
-  records.get((msgs) => {
-    socket.emit("chatRecord", msgs);
-  })
 
   socket.on('chat message', function (msg, id, avatar, name) {
     if (msg === '') return;
     records.push(msg, id, avatar, name)
   });
   socket.on('disconnect', () => {
-    userList.forEach(function (x, index) {
-      if (x.name === socket.username) {
-        userList.splice(index, 1);
-        //找到該用戶，刪除
-      }
-    })
+    let index = userList.map(x => x.name).indexOf(socket.username, -1)
+    if (index !== -1) {
+      userList.splice(index, 1);
+    }
     io.emit("online", userList.length, userList)
     if (typeof socket.username !== 'undefined') {
       socket.broadcast.emit("oneLeave", socket.username)
@@ -198,7 +194,7 @@ io.on('connection', function (socket) {
       order: [['createdAt', 'ASC']],
       include: [User]
     }).then((msgs) => {
-      socket.emit("privateChatRecord", msgs, chatUserId);
+      socket.emit("privateChatRecord", msgs, chatUserId, loginUserId);
     })
   })
 
@@ -235,10 +231,6 @@ io.on('connection', function (socket) {
       socket.join(room)
     })
   })
-
-  socket.on('refrash', function () {
-    notifyCounts = 0
-  })
 });
 
 // 新增 Records 的事件監聽器
@@ -248,10 +240,7 @@ records.on("new_message", (msg, id, avatar, name) => {
 
 privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
   io.in(room).emit("send private message", msg, avatar, name, id);
-  if ('wait') {
-    notifyCounts++
-  }
-  console.log(notifyCounts, typeof notifyCounts)
-  io.to(chatwithId).emit("notify", notifyCounts)
+  // console.log(Object.values(io.sockets.adapter.rooms[room].sockets)[0])
+  io.to(chatwithId).emit("notify")
 });
 

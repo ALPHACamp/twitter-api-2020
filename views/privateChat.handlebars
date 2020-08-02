@@ -12,8 +12,8 @@
   <div id="user-list">
     <ul id="users" class="border-top">
       {{#each data}}
-      <button class="w-100" data-id="{{this.userId}}" user-id="{{../id}}" onclick="showChatHistory(this)"
-        style="border: none">
+      <button class="w-100" data-id="{{this.userId}}" user-id="{{../id}}" data-name="{{this.userName}}"
+        data-account="{{this.userAccount}}" onclick="showChatHistory(this)" style="border: none">
         <li class="d-flex my-2 mb-1 w-100" style="cursor: pointer;">
           <div class="photo-wrapper">
             <img src="{{this.userAvatar}}" alt="" class="photo rounded-circle" style="width: 50px;
@@ -43,9 +43,9 @@
 <div id="chat-box" class="col-6 p-0 m-0 h-100 w-100 border-right">
   <div id="other-user-box">
     <div class="title-wrapper border-bottom" style="background-color:#ffffff;">
-      <div class="other-user-name ml-3">Name{{ data.userName }}
+      <div id="chatwithName" class="other-user-name ml-3">Name
       </div>
-      <div class="other-user-account mt-0 ml-3">@account{{ data.account}}
+      <div id="chatwithAccount" class="other-user-account mt-0 ml-3">@account
       </div>
     </div>
   </div>
