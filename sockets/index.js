@@ -48,9 +48,13 @@ module.exports = (io) => {
 
   io.on('connect', (socket) => {
     // Client 離線
-    socket.on('disconnect', async () => {
+    socket.on('logout', async () => {
+      // 移除此 socket 連線
+      if (socket.disconnect(true)) console.log(`切斷連線 ${socket.id}`)
+
       // 從上線使用者列表移除
       const logoutUser = onlineUsers.splice(onlineUsers.findIndex(user => user.socketId === socket.id), 1)
+      console.log(onlineUsers)
 
       // === 給所有 socket：logout 使用者訊息 ===
       // 需確認 socket 中還有無此 userId 的 socket
@@ -85,7 +89,7 @@ module.exports = (io) => {
       })
 
       console.log()
-      console.log('Server send "online-users" to all sockets (disconnect)')
+      console.log('Server send "online-users" to all sockets (logout)')
       console.log(result)
       console.log()
       io.emit('online-users', result)
@@ -156,7 +160,7 @@ module.exports = (io) => {
         }
       })
       console.log()
-      console.log('sever send "online-users" to all sockets')
+      console.log('sever send "online-users" to all sockets (login)')
       console.log(result)
       console.log()
       io.emit('online-users', result)
