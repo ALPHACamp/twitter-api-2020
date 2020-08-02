@@ -167,9 +167,9 @@ clear: both;
       left: -30%;
     } */
 
-    #messages li:nth-child(odd) {
+    /* #messages li:nth-child(odd) {
       background: #eee;
-    }
+    } */
 
     #messages {
       margin-bottom: 40px;
@@ -283,7 +283,7 @@ clear: both;
     }
 
     .otheruser-message-style {
-      background: rgba(160, 158, 158, 0.815);
+      background: #EEE;
       color:#1C1C1C; 
       border-radius:30px 30px 30px 0px; 
       /* max-width: 65%;  */

@@ -103,12 +103,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function showChatHistory(user) {
   let socket = io();
+  let chatwithName = document.getElementById("chatwithName")
+  let chatwithAccount = document.getElementById("chatwithAccount")
   let loginUserId = user.getAttribute('user-id');
   let chatUserId = user.getAttribute('data-id')
+  let chatUserName = user.getAttribute('data-name')
+  let chatUserAccont = user.getAttribute('data-account')
   let roomId = [loginUserId.toString(), chatUserId.toString()].sort()
   let room = roomId[0] + roomId[1]
   socket.emit('join-room', room)
   socket.emit('private-Record', loginUserId, chatUserId, room)
+
+  chatwithName.innerText = chatUserName
+  chatwithAccount.innerText = `@${chatUserAccont}`
+
   //remove 上一個樣式
 
   //新增下一個樣式
