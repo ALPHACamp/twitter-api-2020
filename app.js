@@ -26,8 +26,6 @@ app.engine('handlebars', handlebars({
 app.set('view engine', 'handlebars')
 // use helpers.getUser(req) to replace req.user
 const passport = require('./config/passport');
-const { random } = require('faker');
-const { type } = require('os')
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
 app.use(bodyParser.json())
@@ -101,19 +99,30 @@ app.get('/logout', (req, res) => {
 app.get('/chat', authenticator, function (req, res) {
   return User.findByPk(helpers.getUser(req).id, { include: Chat }) //之後用helper.get(req).id取代
     .then(user => {
-      userList.push({
-        name: user.toJSON().name,
-        avatar: user.toJSON().avatar,
-        account: user.toJSON().account,
-      })
-      let userLogin = {
-        id: user.toJSON().id,
-        name: user.toJSON().name,
-        avatar: user.toJSON().avatar,
-        account: user.toJSON().account,
-        channel: 'public'
+      if (!userList.map(x => x.name).includes(helpers.getUser(req).name)) {
+        userList.push({
+          name: user.toJSON().name,
+          avatar: user.toJSON().avatar,
+          account: user.toJSON().account,
+        })
+        let userLogin = {
+          id: user.toJSON().id,
+          name: user.toJSON().name,
+          avatar: user.toJSON().avatar,
+          account: user.toJSON().account,
+          channel: 'public'
+        }
+        res.render('chat', { userLogin });
+      } else {
+        let userLogin = {
+          id: user.toJSON().id,
+          name: user.toJSON().name,
+          avatar: user.toJSON().avatar,
+          account: user.toJSON().account,
+          channel: 'public'
+        }
+        res.render('chat', { userLogin });
       }
-      res.render('chat', { userLogin });
     })
 });
 
@@ -153,6 +162,7 @@ app.get('/chat/private', authenticator, function (req, res) {
 
 app.post('/chat/private', function (req, res) {
   console.log(req.body)
+  console.log(helpers.getUser(req).id)
   privateRecord.push(req.body.message, helpers.getUser(req).id, req.body.chatwithId, helpers.getUser(req).avatar, helpers.getUser(req).name)
   return res.redirect('/chat/private')
 });
@@ -212,11 +222,11 @@ io.on('connection', function (socket) {
     console.log(io.nsps['/'].adapter.rooms)
   }
   )
-
+  // Bug待修復 點兩次聊天室會離開不會再加回去
   socket.on('join-room', function (room) {
     //leave all room and join new room
+    let combineRoom = []
     User.findAll({ raw: true }).then((users) => {
-      let combineRoom = []
       let userId = users.map(user => user.id).sort()
       for (let i = 0; i < userId.length; i++) {
         let a2 = userId.concat();
@@ -225,10 +235,18 @@ io.on('connection', function (socket) {
           combineRoom.push(userId[i].toString() + a2[j].toString())
         }
       }
+      return combineRoom
+    }).then((combineRoom) => {
+      console.log(combineRoom)
+      console.log('1', io.nsps['/'].adapter.rooms)
       for (let i = 0; i < combineRoom.length; i++) {
         socket.leave(combineRoom[i])
       }
+      return combineRoom
+    }).then((combineRoom) => {
+      console.log('2', io.nsps['/'].adapter.rooms)
       socket.join(room)
+      console.log('3', io.nsps['/'].adapter.rooms)
     })
   })
 });
@@ -239,7 +257,7 @@ records.on("new_message", (msg, id, avatar, name) => {
 });
 
 privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
-  io.in(room).emit("send private message", msg, avatar, name);
+  io.in(room).emit("send private message", msg, avatar, name, id);
   io.to(chatwithId).emit("notify", "hello")
 });
 

@@ -11,9 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let sendForm = document.getElementById("send-form").childNodes[1];
   let userInfo = document.getElementById("userInfo")
 
-  socket.emit('login', userInfo.innerText)
+  socket.emit('login', $('#userName').val())
 
-  
 
   $('form').submit(function () {
     if ($('#text-input-area').val() !== '') {
@@ -26,17 +25,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return false;
   });
 
-  socket.on("connect", function () {
-    status.classList.remove("disconnected")
-    status.innerText = `Connected`;
-    status.classList.add("connected")
-  });
+  // socket.on("connect", function () {
+  //   status.classList.remove("disconnected")
+  //   status.innerText = `Connected`;
+  //   status.classList.add("connected")
+  // });
 
-  socket.on("disconnect", function () {
-    status.classList.add("connected")
-    status.innerText = `Disconnected`;
-    status.classList.add("disconnected")
-  });
+  // socket.on("disconnect", function () {
+  //   status.classList.add("connected")
+  //   status.innerText = `Disconnected`;
+  //   status.classList.add("disconnected")
+  // });
 
   socket.on("online", function (amount, userlist) {
     online.innerText = amount;
@@ -76,8 +75,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.on('send message', function (msg, id, avatar, name) {
     const event = new Date().toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
-    let chatColumn = `
-        <li style="background:#FF6600; color:#ffffff; border-radius:30px 30px 0px 30px; max-width: 75%; float:right">
+    let chatColumn = ``
+    if ($('#userId').val() === id) {
+      chatColumn = `
+        <li class="loginuser-message-style">
           <img src="${avatar}" alt="">
             <div>
               <strong>${name}</strong>
@@ -86,6 +87,18 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         </li>
         `
+    } else {
+      chatColumn = `
+        <li class="">
+          <img src="${avatar}" alt="">
+            <div>
+              <strong>${name}</strong>
+              <p>${msg}</p>
+              <span class="text-right" id='time'>${event}</span>
+            </div>
+        </li>
+        `
+    }
     $('#messages').append(chatColumn);
     $('#messages').scrollTop($('#messages')[0].scrollHeight - 50)
 
