@@ -12,6 +12,18 @@ const chatController = {
     })
   },
 
+  getUser: (userId) => {
+    return User.findByPk(userId)
+      .then(user => {
+        if (!user) {
+          return
+        } else {
+          return user.toJSON()
+        }
+      })
+      .catch(err => console.log(err))
+  },
+
   postMessage: (userId, message) => {
     return Message.create({
       userId,
