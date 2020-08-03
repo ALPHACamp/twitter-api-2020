@@ -26,6 +26,7 @@ app.engine('handlebars', handlebars({
 app.set('view engine', 'handlebars')
 // use helpers.getUser(req) to replace req.user
 const passport = require('./config/passport');
+const { Sequelize } = require('./models')
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
 app.use(bodyParser.json())
@@ -126,9 +127,7 @@ app.get('/chat', authenticator, function (req, res) {
 app.get('/chat/private', authenticator, function (req, res) {
   if (helpers.getUser(req).id !== 'undefined') {
     User.findByPk(helpers.getUser(req).id, {
-      include: [
-        { model: User, as: 'Chatwith' },
-      ]
+      include: [{ model: User, as: 'Chatwith' }, Chatship], order: [[{ model: Chatship }, 'createdAt', 'DESC']]
     }) //之後用helper.get(req).id取代
       .then(user => {
         User.findAll({ raw: true })
@@ -137,7 +136,9 @@ app.get('/chat/private', authenticator, function (req, res) {
               userId: r.id,
               userName: r.name,
               userAvatar: r.avatar,
-              userAccount: r.account
+              userAccount: r.account,
+              priviewMsg: r.Chatship.message,
+              priviewTime: new Date(r.Chatship.createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
             }))
             let userLogin = { channel: 'private' }
             return res.render('privateChat', {
