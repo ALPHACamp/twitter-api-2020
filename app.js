@@ -126,14 +126,6 @@ app.get('/chat', authenticator, function (req, res) {
 
 app.get('/chat/private', authenticator, function (req, res) {
   if (helpers.getUser(req).id !== 'undefined') {
-    // Chatship.findAll({
-    //   where: { [Op.or]: [{ UserId: helpers.getUser(req).id }, { chatwithId: helpers.getUser(req).id }] },
-    //   raw: true, nest: true,
-    //   order: [['createdAt', 'ASC']],
-    //   include: [User]
-    // }).then((msgs) => {
-    //   console.log(msgs)
-    // })
     User.findByPk(helpers.getUser(req).id, {
       include: [{ model: User, as: 'Chatwith' }, { model: User, as: 'Chater' }]
     }) //之後用helper.get(req).id取代
@@ -156,9 +148,14 @@ app.get('/chat/private', authenticator, function (req, res) {
               userAccount: r.account,
             }))
             data = data.concat(chater)
+            console.log(data)
+            const set = new Set();
+            let result = data.filter(item => !set.has(item.userId) ? set.add(item.userId) : false);
+            console.log(result)
+
             let userLogin = { channel: 'private' }
             return res.render('privateChat', {
-              data,
+              data: result,
               id: user.toJSON().id,
               name: user.toJSON().name,
               avatar: user.toJSON().avatar,
