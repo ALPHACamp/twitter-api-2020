@@ -51,10 +51,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.on('notify', function (Count) {
     // console.log(socket.adapter, 'hi')
-    privateBadge.classList.remove('d-none')
-    privateBadge.classList.add("badge")
-    privateBadge.classList.add("badge-danger")
-    privateBadge.innerText = Number(Count)
+    privateBadge.classList.remove("badge")
+    privateBadge.classList.remove("badge-danger")
+    privateBadge.classList.add('d-none')
+    privateBadge.innerText = 0
+    socket.emit('inPrivatePage', $('#userId').val())
   })
 
   socket.on("privateChatRecord", function (msgs, chatUserId, loginUserId) {

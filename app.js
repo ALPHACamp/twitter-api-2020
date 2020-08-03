@@ -246,6 +246,14 @@ io.on('connection', function (socket) {
       })
     })
   })
+
+  socket.on('inPrivatePage', function (userId) {
+    User.findByPk(userId).then((user) => {
+      user.update({
+        unRead: 0
+      })
+    })
+  })
 });
 
 // 新增 Records 的事件監聽器
