@@ -10,14 +10,16 @@
     </button>
   </div>
   <div id="user-list">
-    <ul id="users" class="border-top">
+    <div class="btn-group btn-group-toggle d-flex flex-column" data-toggle="buttons">
       {{#each data}}
-      <button class="w-100" data-id="{{this.userId}}" user-id="{{../id}}" data-name="{{this.userName}}"
-        data-account="{{this.userAccount}}" onclick="showChatHistory(this)" style="border: none">
+      <label for="userPrivate-{{this.userId}}" class="btn btn-light">
+        <input id="userPrivate-{{this.userId}}" type="radio" onclick="showChatHistory(this)" name="privateUserList"
+          data-id="{{this.userId}}" user-id="{{../id}}" data-name="{{this.userName}}"
+          data-account="{{this.userAccount}}" autocomplete="off">
         <li class="d-flex my-2 mb-1 w-100" style="cursor: pointer;">
           <div class="photo-wrapper">
             <img src="{{this.userAvatar}}" alt="" class="photo rounded-circle" style="width: 50px;
-  height: 50px; margin: 0.5rem 0.5rem 1rem 0.5rem;">
+                height: 50px; margin: 0.5rem 0.5rem 1rem 0.5rem;">
           </div>
           <div class="user-list-item-wrapper flex-column ml-1 w-100">
             <div class="upper-wrapper w-100 d-flex justify-content-between align-items-center mb-1">
@@ -34,9 +36,9 @@
             <img src="" alt="">
           </div>
         </li>
-      </button>
+      </label>
       {{/each}}
-    </ul>
+    </div>
   </div>
 </div>
 
@@ -50,7 +52,7 @@
     </div>
   </div>
   <div id="content">
-    <ul class="border-bottom px-0 my-1 w-100" id="messages">
+    <ul class="px-0 my-1 w-100" id="messages">
     </ul>
   </div>
   <div class="w-100" id="send-box">

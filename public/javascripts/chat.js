@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let status = document.getElementById("status");
   let online = document.getElementById("online");
-  let userSide = document.getElementById("users");
+  let userSide = document.getElementById("user-list");
   let sendForm = document.getElementById("send-form").childNodes[1];
   let userInfo = document.getElementById("userInfo")
   let privateBadge = document.getElementById("private-badge")
@@ -41,26 +41,33 @@ document.addEventListener("DOMContentLoaded", () => {
   // user list
   socket.on("online", function (amount, userlist) {
     online.innerText = amount;
-    let userlistColumn = ``
+    let userlistColumn = `
+          <div class="btn-group btn-group-toggle d-flex flex-column" data-toggle="buttons">
+    `
     for (i = 0; i < userlist.length; i++) {
-      userlistColumn += `        
-        <li class="d-flex border-bottom my-2 mb-1 w-100">
-        <div class="photo-wrapper">
-          <img src="${userlist[i].avatar}" alt="" class="photo rounded-circle" style="width: 50px;
-  height: 50px; margin: 0.5rem 0.5rem 1rem 0.5rem;">
-        </div>
-        <div class="user-list-item-wrapper flex-column ml-1 w-100">
-          <div class="upper-wrapper w-100 d-flex justify-content-between align-items-center mb-1">
-            <div class="user-list-item-info d-flex">
-              <div class="user-list-name font-weight-bold">${userlist[i].name}</div>
-              <div class="user-list-account">&nbsp;@${userlist[i].account}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </li>
-        `
+      userlistColumn += `  
+            <label for="user-${userlist[i].id}" class="btn btn-light">
+              <input id="user-{{this.userId}}" type="radio" name="UserList" autocomplete="off">
+              <li class="d-flex my-2 mb-1 w-100" style="cursor: pointer;">
+                <div class="photo-wrapper">
+                  <img src="${userlist[i].avatar}" alt="" class="photo rounded-circle" style="width: 50px;
+                      height: 50px; margin: 0.5rem 0.5rem 1rem 0.5rem;">
+                </div>
+                <div class="user-list-item-wrapper flex-column ml-1 w-100">
+                  <div class="upper-wrapper w-100 d-flex justify-content-between align-items-center mb-1">
+                    <div class="user-list-item-info d-flex">
+                      <div class="user-list-name font-weight-bold">${userlist[i].name}</div>
+                      <div class="user-list-account">&nbsp;@${userlist[i].account}</div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </label>
+      `
     }
+    userlistColumn += `
+        </div>
+      `
     userSide.innerHTML = userlistColumn;
     window.scrollTo(0, document.body.scrollHeight);
   });

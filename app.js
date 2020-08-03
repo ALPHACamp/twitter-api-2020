@@ -105,6 +105,7 @@ app.get('/chat', authenticator, function (req, res) {
         name: user.toJSON().name,
         avatar: user.toJSON().avatar,
         account: user.toJSON().account,
+        id: user.toJSON().id,
       })
       let userLogin = {
         id: user.toJSON().id,
