@@ -94,6 +94,9 @@ app.get('/logout', (req, res) => {
   res.redirect('/login')
 })
 
+//上線名單
+let userList = []
+
 app.get('/chat', authenticator, function (req, res) {
   return User.findByPk(helpers.getUser(req).id, { include: Chat }) //之後用helper.get(req).id取代
     .then(user => {
@@ -151,9 +154,6 @@ app.post('/chat/private', function (req, res) {
   privateRecord.push(req.body.message, helpers.getUser(req).id, req.body.chatwithId, helpers.getUser(req).avatar, helpers.getUser(req).name)
   return res.redirect('/chat/private')
 });
-
-//上線名單
-let userList = []
 
 io.on('connection', function (socket) {
 
