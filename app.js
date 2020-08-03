@@ -126,20 +126,36 @@ app.get('/chat', authenticator, function (req, res) {
 
 app.get('/chat/private', authenticator, function (req, res) {
   if (helpers.getUser(req).id !== 'undefined') {
+    // Chatship.findAll({
+    //   where: { [Op.or]: [{ UserId: helpers.getUser(req).id }, { chatwithId: helpers.getUser(req).id }] },
+    //   raw: true, nest: true,
+    //   order: [['createdAt', 'ASC']],
+    //   include: [User]
+    // }).then((msgs) => {
+    //   console.log(msgs)
+    // })
     User.findByPk(helpers.getUser(req).id, {
-      include: [{ model: User, as: 'Chatwith' }, Chatship], order: [[{ model: Chatship }, 'createdAt', 'DESC']]
+      include: [{ model: User, as: 'Chatwith' }, { model: User, as: 'Chater' }]
     }) //之後用helper.get(req).id取代
       .then(user => {
+        //for post
         User.findAll({ raw: true })
           .then(users => {
-            const data = user.Chatwith.map(r => ({
+            let data = user.Chatwith.map(r => ({
               userId: r.id,
               userName: r.name,
               userAvatar: r.avatar,
               userAccount: r.account,
-              priviewMsg: r.Chatship.message,
-              priviewTime: new Date(r.Chatship.createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
+              // priviewMsg: r.Chatship.message,
+              // priviewTime: new Date(r.Chatship.createdAt).toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit' })
             }))
+            let chater = user.Chater.map(r => ({
+              userId: r.id,
+              userName: r.name,
+              userAvatar: r.avatar,
+              userAccount: r.account,
+            }))
+            data = data.concat(chater)
             let userLogin = { channel: 'private' }
             return res.render('privateChat', {
               data,
@@ -265,11 +281,11 @@ records.on("new_message", (msg, id, avatar, name) => {
 
 privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
   // Object.values(io.sockets.adapter.rooms[room].sockets)[0]
+  io.in(room).emit("send private message", msg, avatar, name, id);
   User.findByPk(chatwithId).then((user) => {
     user.update({
       unRead: user.unRead + 1
     }).then(() => {
-      io.in(room).emit("send private message", msg, avatar, name, id);
       io.to(chatwithId).emit("notify", user.unRead)
     })
   }
