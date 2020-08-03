@@ -3,8 +3,6 @@ window.setTimeout(function () {
   $(".alert").alert('close')
 }, 3000);
 
-let notifyCounts = 0
-
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let status = document.getElementById("status");
@@ -144,24 +142,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   socket.on('notify', function () {
-    notifyCounts++
-    if (privateBadge.classList !== 'badge badge-danger') {
-      privateBadge.classList.add('badge')
-      privateBadge.classList.add('badge-danger')
-    }
-    privateBadge.innerText = notifyCounts
+    privateBadge.classList.remove('d-none')
+    privateBadge.classList.add('badge')
+    privateBadge.classList.add('badge-danger')
+    // privateBadge.innerText = Number(notifyCounts)
   })
-
-  // socket.on("maxRecord", function (amount) {
-  //   max_record = amount;
-  // });
-
-
-  // function rmMsgFromBox() {
-  //   var childs = content.children;
-  //   childs[0].remove();
-  // }
-
 });
 
 function refrash() {
@@ -170,6 +155,7 @@ function refrash() {
   if (privateBadge.classList === "badge badge-danger") {
     privateBadge.classList.remove("badge")
     privateBadge.classList.remove("badge badge-danger")
+    privateBadge.classList.add('d-none')
   }
   notifyCounts = 0
   document.location.href = '/chat/private';

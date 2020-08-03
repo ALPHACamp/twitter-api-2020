@@ -1,5 +1,3 @@
-let notifyCounts = 0
-
 document.addEventListener("DOMContentLoaded", () => {
   let socket = io();
   let sendForm = document.getElementById("send-form");
@@ -52,14 +50,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on('notify', function () {
-    notifyCounts++
-    if (privateBadge.classList !== "badge badge-danger") {
-      privateBadge.classList.add("badge")
-      privateBadge.classList.add("badge-danger")
-    }
-    console.log(privateBadge.classList)
-    privateBadge.innerText = notifyCounts
-    console.log(notifyCounts)
+    privateBadge.classList.remove('d-none')
+    privateBadge.classList.add("badge")
+    privateBadge.classList.add("badge-danger")
+    // privateBadge.innerText = Number(notifyCounts)
   })
 
   socket.on("privateChatRecord", function (msgs, chatUserId, loginUserId) {
@@ -96,16 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     $('#send-form').append(chatWith)
   })
-
-  // socket.on("maxRecord", function (amount) {
-  //   max_record = amount;
-  // });
-
-
-  // function rmMsgFromBox() {
-  //   var childs = content.children;
-  //   childs[0].remove();
-  // }
 });
 
 function showChatHistory(user) {
