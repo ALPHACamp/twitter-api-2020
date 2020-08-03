@@ -98,8 +98,9 @@ app.get('/logout', (req, res) => {
 let userList = []
 
 app.get('/chat', authenticator, function (req, res) {
-  return User.findByPk(helpers.getUser(req).id, { include: Chat }) //之後用helper.get(req).id取代
-    .then(user => {
+
+  if (helpers.getUser(req).id !== 'undefined') {
+    return User.findByPk(helpers.getUser(req).id, { include: Chat }).then(user => {
       userList.push({
         name: user.toJSON().name,
         avatar: user.toJSON().avatar,
@@ -110,10 +111,15 @@ app.get('/chat', authenticator, function (req, res) {
         name: user.toJSON().name,
         avatar: user.toJSON().avatar,
         account: user.toJSON().account,
-        channel: 'public'
+        channel: 'public',
+        unRead: user.toJSON().unRead,
       }
-      res.render('chat', { userLogin });
+      res.render('chat', { userLogin, unRead: userLogin.unRead });
     })
+  } else {
+    return res.redirect('/')
+  }
+
 });
 
 app.get('/chat/private', authenticator, function (req, res) {
@@ -139,7 +145,8 @@ app.get('/chat/private', authenticator, function (req, res) {
               name: user.toJSON().name,
               avatar: user.toJSON().avatar,
               users,
-              userLogin
+              userLogin,
+              unRead: user.toJSON().unRead,
             })
           });
       }
@@ -159,8 +166,9 @@ io.on('connection', function (socket) {
 
   //群聊
 
-  socket.on('login', function (userName) {
+  socket.on('login', function (userName, userId) {
     socket.username = userName
+    socket.loginUserId = userId
     io.emit("online", userList.length, userList)
     records.get((msgs) => {
       socket.emit("chatRecord", msgs, userName);
@@ -187,7 +195,6 @@ io.on('connection', function (socket) {
   //私聊
   socket.on('private-Record', function (loginUserId, chatUserId) {
     socket.chatwithId = chatUserId
-    socket.loginUserId = loginUserId
     Chatship.findAll({
       where: { [Op.or]: [{ [Op.and]: [{ UserId: chatUserId }, { chatwithId: loginUserId }] }, { [Op.and]: [{ UserId: loginUserId }, { chatwithId: chatUserId }] }] },
       raw: true, nest: true,
@@ -231,6 +238,14 @@ io.on('connection', function (socket) {
       socket.join(room)
     })
   })
+
+  socket.on('refreshCount', function (userId) {
+    User.findByPk(userId).then((user) => {
+      user.update({
+        unRead: 0
+      })
+    })
+  })
 });
 
 // 新增 Records 的事件監聽器
@@ -239,8 +254,15 @@ records.on("new_message", (msg, id, avatar, name) => {
 });
 
 privateRecord.on("new_message", (msg, id, chatwithId, avatar, name, room) => {
-  io.in(room).emit("send private message", msg, avatar, name, id);
-  // console.log(Object.values(io.sockets.adapter.rooms[room].sockets)[0])
-  io.to(chatwithId).emit("notify")
+  // Object.values(io.sockets.adapter.rooms[room].sockets)[0]
+  User.findByPk(chatwithId).then((user) => {
+    user.update({
+      unRead: user.unRead + 1
+    }).then(() => {
+      io.in(room).emit("send private message", msg, avatar, name, id);
+      io.to(chatwithId).emit("notify", user.unRead)
+    })
+  }
+  )
 });
 

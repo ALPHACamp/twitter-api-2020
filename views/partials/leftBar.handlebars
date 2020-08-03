@@ -50,7 +50,8 @@
     </div>
     <div class="nav-item-wrapper d-flex mt-4">
       <a onclick="refrash()" class="text-decoration-none" href="#">
-        <span class="d-none" id="private-badge" style="border-radius:50%;">0</span>
+        <span class="{{#ifCond unRead 0}}d-none{{/ifCond}}{{#ifNot unRead 0}}badge badge-danger{{/ifNot}}"
+          id="private-badge" style="border-radius:50%;">{{ unRead }}</span>
         <svg class="left-bar-icon {{#ifCond userLogin.channel  'private'}}item-active{{/ifCond}}" id="Capa_1"
           enable-background="new 0 0 479.058 479.058" viewBox="0 0 479.058 479.058" width="24" height="22"
           xmlns="http://www.w3.org/2000/svg">
