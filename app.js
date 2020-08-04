@@ -8,7 +8,7 @@ const app = express()
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const db = require('./models')
-const { User, Chat, Chatship } = db
+const { User, Chat, Chatship, Userlist } = db
 const records = require('./record')
 const privateRecord = require('./privateRecord')
 const { Op } = require('sequelize')
@@ -95,18 +95,18 @@ app.get('/logout', (req, res) => {
   res.redirect('/login')
 })
 
-//上線名單
-let userList = []
 
 app.get('/chat', authenticator, function (req, res) {
 
   if (helpers.getUser(req).id !== 'undefined') {
     return User.findByPk(helpers.getUser(req).id, { include: Chat }).then(user => {
-      userList.push({
-        name: user.toJSON().name,
-        avatar: user.toJSON().avatar,
-        account: user.toJSON().account,
-        id: user.toJSON().id,
+      Userlist.create({
+        UserId: user.toJSON().id,
+        userName: user.toJSON().name,
+        userAccount: user.toJSON().account,
+        userAvatar: user.toJSON().avatar
+      }).then(() => {
+
       })
       let userLogin = {
         id: user.toJSON().id,
@@ -148,10 +148,8 @@ app.get('/chat/private', authenticator, function (req, res) {
               userAccount: r.account,
             }))
             data = data.concat(chater)
-            console.log(data)
             const set = new Set();
             let result = data.filter(item => !set.has(item.userId) ? set.add(item.userId) : false);
-            console.log(result)
 
             let userLogin = { channel: 'private' }
             return res.render('privateChat', {
@@ -184,7 +182,12 @@ io.on('connection', function (socket) {
   socket.on('login', function (userName, userId) {
     socket.username = userName
     socket.loginUserId = userId
-    io.emit("online", userList.length, userList)
+    Userlist.findAndCountAll().then((users) => {
+      const data = users.rows.map(r => ({
+        ...r.dataValues
+      }))
+      io.emit("online", users.count, data)
+    })
     records.get((msgs) => {
       socket.emit("chatRecord", msgs, userName);
     })
@@ -197,11 +200,19 @@ io.on('connection', function (socket) {
     records.push(msg, id, avatar, name)
   });
   socket.on('disconnect', () => {
-    let index = userList.map(x => x.name).indexOf(socket.username, -1)
-    if (index !== -1) {
-      userList.splice(index, 1);
+    if (typeof socket.loginUserId !== 'undefined') {
+      Userlist.findOne({ where: { UserId: socket.loginUserId } }).then((user) => {
+        user.destroy()
+          .then(() => {
+            Userlist.findAndCountAll().then((users) => {
+              const data = users.rows.map(r => ({
+                ...r.dataValues
+              }))
+              io.emit("online", users.count, data)
+            })
+          })
+      })
     }
-    io.emit("online", userList.length, userList)
     if (typeof socket.username !== 'undefined') {
       socket.broadcast.emit("oneLeave", socket.username)
     }
