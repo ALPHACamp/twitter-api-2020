@@ -1,0 +1,124 @@
+<div id="user-box" class="col-4 border-left border-right p-0 m-0 h-100">
+  <div class="d-flex justify-content-between ml-3" id="status-box">
+    <div>訊息</div>
+    <button id="create-message-btn" class="mr-3" style="border:0;cursor:pointer; background: #ffffff" type="button"
+      data-toggle="modal" data-target="#exampleModal">
+      <svg width="20" height="20" viewBox="0 -23 512 512" width="512pt" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="m512 371c0 11.046875-8.953125 20-20 20h-55v55c0 11.046875-8.953125 20-20 20s-20-8.953125-20-20v-55h-55c-11.046875 0-20-8.953125-20-20s8.953125-20 20-20h55v-55c0-11.046875 8.953125-20 20-20s20 8.953125 20 20v55h55c11.046875 0 20 8.953125 20 20zm0-291v211c0 11.046875-8.953125 20-20 20s-20-8.953125-20-20v-205.363281l-173.753906 108.042969c-13.027344 8.101562-27.640625 12.152343-42.246094 12.152343-14.609375 0-29.214844-4.050781-42.246094-12.152343l-173.753906-108.042969v225.363281c0 22.054688 17.945312 40 40 40h182c11.046875 0 20 8.953125 20 20s-8.953125 20-20 20h-182c-44.113281 0-80-35.886719-80-80v-231c0-44.113281 35.886719-80 80-80h352c44.113281 0 80 35.886719 80 80zm-55.671875-31.722656c-6.746094-5.183594-15.179687-8.277344-24.328125-8.277344h-352c-9.148438 0-17.582031 3.09375-24.324219 8.277344l179.203125 111.433594c13.027344 8.101562 29.214844 8.101562 42.242188 0zm0 0" />
+      </svg>
+    </button>
+  </div>
+  <div id="user-list">
+    <div class="btn-group btn-group-toggle d-flex flex-column" data-toggle="buttons">
+      {{#each data}}
+      <label for="userPrivate-{{this.userId}}" class="btn btn-light">
+        <input id="userPrivate-{{this.userId}}" type="radio" onclick="showChatHistory(this)" name="privateUserList"
+          data-id="{{this.userId}}" user-id="{{../id}}" data-name="{{this.userName}}"
+          data-account="{{this.userAccount}}" autocomplete="off">
+        <li class="d-flex my-2 mb-1 w-100" style="cursor: pointer;">
+          <div class="photo-wrapper">
+            <img src="{{this.userAvatar}}" alt="" class="photo rounded-circle" style="width: 50px;
+                height: 50px; margin: 0.5rem 0.5rem 1rem 0.5rem;">
+          </div>
+          <div class="user-list-item-wrapper flex-column ml-1 w-100">
+            <div class="upper-wrapper w-100 d-flex justify-content-between align-items-center mb-1">
+              <div class="user-list-item-info d-flex">
+                <div class="user-list-name font-weight-bold">{{this.userName}}</div>
+                <div class="user-list-account">&nbsp;@{{this.userAccount}}</div>
+              </div>
+              <div class="user-list-time"></div>
+            </div>
+            <div class="user-list-text w-100 mb-2"></div>
+          </div>
+          <div class="delete-btn">
+            <img src="" alt="">
+          </div>
+        </li>
+      </label>
+      {{/each}}
+    </div>
+  </div>
+</div>
+
+<div id="chat-box" class="col-6 p-0 m-0 h-100 w-100 border-right">
+  <div id="other-user-box">
+    <div class="title-wrapper border-bottom" style="background-color:#ffffff;">
+      <div id="chatwithName" class="other-user-name ml-3">Name
+      </div>
+      <div id="chatwithAccount" class="other-user-account mt-0 ml-3">@account
+      </div>
+    </div>
+  </div>
+  <div id="content">
+    <ul class="px-0 my-1 w-100" id="messages">
+    </ul>
+  </div>
+  <div class="w-100" id="send-box">
+    <div id="userInfo" style="visibility:hidden;display: none;">{{name}}
+    </div>
+    <form id="send-form" action="" class="w-100">
+      <input id='userId' type="hidden" name="userId" value="{{id}}" />
+      <input id='userAvatar' type="hidden" name="userAvatar" value="{{avatar}}" />
+      <input id='userName' type="hidden" name="userName" value="{{name}}">
+      <div class="w-100 d-flex nowrap" id="input-and-button">
+        <input rows="1" class="ml-2" id="text-input-area" autocomplete="off" placeholder="輸入訊息..." style="width: 100%;padding: 10px 20px;border-radius: 50px;
+      background: #F5F8FA;"></input>
+        <button class="mx-3">
+          <?xml version="1.0" encoding="iso-8859-1"?>
+          <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            x="0px" y="0px" viewBox="0 0 488.721 488.721" style="enable-background:new 0 0 488.721 488.721;" width="24"
+            height="22" xml:space="preserve">
+            <g>
+              <g>
+                <path d="M483.589,222.024c-5.022-10.369-13.394-18.741-23.762-23.762L73.522,11.331C48.074-0.998,17.451,9.638,5.122,35.086
+        			C-1.159,48.052-1.687,63.065,3.669,76.44l67.174,167.902L3.669,412.261c-10.463,26.341,2.409,56.177,28.75,66.639
+        			c5.956,2.366,12.303,3.595,18.712,3.624c7.754,0,15.408-1.75,22.391-5.12l386.304-186.982
+        			C485.276,278.096,495.915,247.473,483.589,222.024z M58.657,446.633c-8.484,4.107-18.691,0.559-22.798-7.925
+        			c-2.093-4.322-2.267-9.326-0.481-13.784l65.399-163.516h340.668L58.657,446.633z M100.778,227.275L35.379,63.759
+        			c-2.722-6.518-1.032-14.045,4.215-18.773c5.079-4.949,12.748-6.11,19.063-2.884l382.788,185.173H100.778z" />
+              </g>
+            </g>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">New Message</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="/chat/private" method="POST">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="exampleFormControlSelect1">Who you want to send?</label>
+            <select name="chatwithId" class="form-control" id="exampleFormControlSelect1" style="cursor: pointer;">
+              {{#each users}}
+              <option value="{{this.id}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="exampleFormControlTextarea1">What you want to say?</label>
+            <textarea class="form-control" name="message" id="exampleFormControlTextarea1" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer w-100 d-flex justify-content-center" style="border: none;">
+          <button type="submit" id="submit" class="btn btn-primary w-25">Send</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script src="/javascripts/privateChat.js"></script>

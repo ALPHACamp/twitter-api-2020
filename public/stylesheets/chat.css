@@ -1,0 +1,300 @@
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      min-height: 100%;
+    }
+
+    html, body {
+      margin: 0; 
+      height: 100%; 
+      overflow: hidden
+    }
+
+    #left-bar a {
+      color: #1C1C1C;
+      font-weight: bolder;
+    }
+
+    #left-bar a:hover .left-bar-icon  {
+      fill: #FF6600;
+    }     
+    
+    #left-bar a:hover .left-bar-title {
+      color: #FF6600;
+    }     
+
+    .item-active {
+      color: #FF6600;
+      fill:#FF6600;
+    }
+
+    /* #container:after {
+      content: ”;
+display: block;
+clear: both;
+    } */
+
+    #user-title {
+      text-align: left;
+      font-size: 1.6em;
+    }
+
+    #user-list {
+      background-color: #ffffff;
+/*       background-color: rgb(243, 242, 237);
+      width: 300px;
+      height: 600px;
+      border: 1px solid darkolivegreen;
+      border-radius: 5px; */
+      overflow: auto;
+    }
+
+    #users li {
+      height: 55px;
+/*       height: 70px;
+      border: 1px solid rgba(219, 219, 219, 0.863);
+      border-radius: 5px; */
+      display: flex;
+      align-items: center;
+    }
+
+    #users li img {
+      width: 50px;
+      height: 50px;
+      border-radius: 100%;
+      margin: 4px;
+    }
+
+    #users li strong {
+      margin: 4px;
+      font-size: 14px;
+    }
+
+    #user-account, .user-list-text, .user-list-account,.offline-badge {
+      color: rgba(160, 158, 158, 0.815);
+    }
+
+    #status-box, .title {
+      font-size: 1rem;
+      font-weight: bolder;
+      line-height: 3rem;
+    }
+
+    .other-user-name {
+      font-size: 1rem;
+      font-weight: bolder;
+      margin-top: 0.3rem;
+      margin-bottom: -0.4rem;
+    }    
+
+    .other-user-account {
+      font-size: 0.8rem;
+      color: rgba(160, 158, 158, 0.815);
+      margin-top: -0.4rem;
+      margin-bottom: 0.1rem;
+    }
+
+    #other-user-box {
+      line-height: 1.5rem;
+    }
+
+/*     #chat-box form button {
+      width: 9%;
+      background: #f39a34;
+      border: 2px outset;
+      border-radius: 5px;
+      padding: 10px 1px 10px 1px;
+      cursor: pointer;
+      text-align: center;
+         fill: #FF6600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+    } */
+
+    
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    #messages li div {
+      margin-left: 5px;
+    }
+
+    #messages li div p {
+      width: 430px;
+      word-wrap: break-word;
+      word-break: normal;
+    }
+
+    #messages {
+      margin-bottom: 40px;
+    }
+
+    #messages li img {
+      width: 40px;
+      height: 40px;
+      border-radius: 100%;
+      margin: 4px;
+    }
+
+    .wrong {
+      animation-name: wrongAnimation;
+      animation-duration: 0.2s;
+      animation-iteration-count: 5;
+    }
+
+    /* #online {
+      color: rgb(93, 177, 111);
+    } */
+
+    .connected {
+      color: rgb(93, 177, 111);
+    }
+
+    .disconnected {
+      color: rgb(143, 40, 40);
+    }
+
+    .nav-item-wrapper {
+      position: relative;
+    }
+
+    .badge {
+      position: absolute;
+      left: 6%;
+      top: -7%;
+    }
+    
+    #left-bar {
+      position: relative;
+    }
+
+    #logout-button {
+      position: fixed;
+      bottom: 0%;
+      background-color:#ffffff;
+      width: 100%;
+      padding-bottom: 1.1rem;
+    }
+
+    #chat-box {
+      position: relative;;
+    }
+
+    #text-input-area {
+      border: none;
+    }
+
+    form button {
+      width: 5%;
+      background: none;
+      cursor: pointer;
+      fill: #FF6600;
+      border: none;
+      margin: auto 0;
+    }
+
+    #input-and-button {
+      position: absolute;
+      bottom: 1.4%; 
+      background-color:#ffffff;
+    }
+
+    #users {
+      max-height: 80%;
+      overflow: auto;
+    }
+
+    #users{
+      position: absolute;
+      overflow-x: hidden;
+      height: 100%;
+      width: 100%;
+      max-height: 94%;
+    }
+
+    #messages{
+      position: absolute;
+      top: 6.5%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 83.5%;
+      margin-top: 1rem;
+    }
+
+    @keyframes wrongAnimation {
+      to {
+        border: 2px solid #f39a34;
+        border-radius: 5px;
+      }
+    }
+
+    .time {
+      color: rgba(109, 103, 103, 0.815);
+    }
+
+    .login-user-time, .other-user-time {
+      font-size: 10px;
+    }
+
+    .loginuser-message-style {
+      background:#FF6600; 
+      color:#ffffff; 
+      border: none;
+      border-radius:30px 30px 0px 30px;
+      padding: 0.5rem 1rem;
+      max-width: 65%;
+    }
+
+    .otheruser-message-style {
+      background: #eee;
+      color:#1C1C1C;
+      border-radius:30px 30px 30px 0px;
+      padding: 0.5rem 1rem;
+    }
+
+    .user-list-name, .user-list-account, .user-list-text, .message-text, .message-bubble {
+      font: 15px Helvetica, Arial;
+    }
+
+    .online-badge, .offline-badge {
+      background: #e2e2e6af;
+      border-radius: 30px;
+      padding: 3px 15px ;
+    } 
+
+    .online-badge{
+      background: #ffb27f;
+      color: #ffffff;
+    } 
+
+    .offline-badge {
+      background: #e6e2e2af;
+    } 
+
+    .user-list-text {
+      max-width: 90%;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
+
+    button:focus, #input-and-button input:focus, #input-and-button button:focus, #create-message-btn:focus { 
+      outline: none; 
+    }
