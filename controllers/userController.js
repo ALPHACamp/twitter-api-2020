@@ -2,6 +2,9 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 
 const userController = {
   register: (req, res) => {
@@ -54,6 +57,17 @@ const userController = {
           token,
           user: { id: user.id, name: user.name, email: user.email, role: user.role }
         })
+      })
+      .catch(error => res.send(String(error)))
+  },
+  getTweets: (req, res) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        Tweet.findAll({ where: { UserId: req.params.id }, include: [{ model: User, as: 'LikedUsers' }, Reply], order: [['createdAt', 'DESC']] })
+          .then(tweet => {
+            res.json({ user, tweet })
+          })
+          .catch(error => res.send(String(error)))
       })
       .catch(error => res.send(String(error)))
   }
