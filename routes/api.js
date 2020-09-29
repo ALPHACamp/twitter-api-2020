@@ -16,5 +16,6 @@ const authenticatedAdmin = (req, res, next) => {
 const userController = require('../controllers/userController.js')
 
 router.post('/users', userController.register)
+router.post('/login', userController.login)
 
 module.exports = router
