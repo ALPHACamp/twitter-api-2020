@@ -8,6 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const app = express()
 const port = 3000
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next) {

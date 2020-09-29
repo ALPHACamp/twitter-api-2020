@@ -1,5 +1,5 @@
 const apis = require('./api.js')
 
 module.exports = (app) => {
-  app.get('/api', apis)
+  app.use('/api', apis)
 }
