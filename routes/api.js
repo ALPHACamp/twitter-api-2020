@@ -16,6 +16,7 @@ const authenticatedAdmin = (req, res, next) => {
 const userController = require('../controllers/userController.js')
 
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
 
 router.post('/users', userController.register)
 router.post('/login', userController.login)

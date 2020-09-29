@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers.js')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
@@ -68,6 +69,30 @@ const userController = {
             res.json({ user, tweet })
           })
           .catch(error => res.send(String(error)))
+      })
+      .catch(error => res.send(String(error)))
+  },
+
+  getReplies: (req, res) => {
+    Reply.findAll({
+      where: { UserId: req.params.id },
+      include: [{ model: Tweet, include: [Reply, User, Like] }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(reply => {
+        const set = new Set()
+        const array = []
+        reply.forEach(r => {
+          if (!set.has(r.TweetId)) {
+            set.add(r.TweetId)
+            array.push(r)
+          }
+        })
+        const replyArray = array.map(r => ({
+          ...r.dataValues,
+          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(r.TweetId)
+        }))
+        res.json({ replyArray })
       })
       .catch(error => res.send(String(error)))
   }

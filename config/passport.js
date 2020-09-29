@@ -5,6 +5,7 @@ const JwtStrategy = passportJWT.Strategy
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Like = db.Like
 
 let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJWT.fromAuthHeaderAsBearerToken()
@@ -15,7 +16,8 @@ let strategy = new JwtStrategy(jwtOptions, (jwt_payload, next) => {
     include: [
       { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followings' },
-      { model: User, as: 'Followers' }
+      { model: User, as: 'Followers' },
+      { model: Like }
     ]
   })
     .then(user => {
