@@ -142,6 +142,18 @@ const userController = {
         }))
         res.json({ FollowerArray })
       })
+  },
+
+  getUser: (req, res) => {
+    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }] })
+      .then(user => {
+        user = {
+          ...user.dataValues,
+          isMyself: (user.id === helpers.getUser(req).id) ? true : false,
+          isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(user.id)
+        }
+        res.json({ user })
+      })
   }
 }
 
