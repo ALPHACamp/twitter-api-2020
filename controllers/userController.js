@@ -6,6 +6,7 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+const Followship = db.Followship
 
 const userController = {
   register: (req, res) => {
@@ -119,6 +120,17 @@ const userController = {
         res.json({ likeArray })
       })
       .catch(error => res.send(String(error)))
+  },
+
+  getfollowings: (req, res) => {
+    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followings' }] })
+      .then(user => {
+        const FollowArray = user.Followings.map(f => ({
+          ...f.dataValues,
+          isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
+        }))
+        res.json({ FollowArray })
+      })
   }
 }
 
