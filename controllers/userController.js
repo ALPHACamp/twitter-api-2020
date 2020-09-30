@@ -64,9 +64,17 @@ const userController = {
   getTweets: (req, res) => {
     User.findByPk(req.params.id)
       .then(user => {
-        Tweet.findAll({ where: { UserId: req.params.id }, include: [{ model: User, as: 'LikedUsers' }, Reply], order: [['createdAt', 'DESC']] })
+        Tweet.findAll({
+          where: { UserId: req.params.id },
+          include: [Reply, Like],
+          order: [['createdAt', 'DESC']]
+        })
           .then(tweet => {
-            res.json({ user, tweet })
+            const tweetArray = tweet.map(t => ({
+              ...t.dataValues,
+              isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(t.id)
+            }))
+            res.json({ user, tweetArray })
           })
           .catch(error => res.send(String(error)))
       })
