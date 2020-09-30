@@ -1,12 +1,13 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const helpers = require('../_helpers.js')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
-const Followship = db.Followship
 
 const userController = {
   register: (req, res) => {
@@ -127,6 +128,7 @@ const userController = {
         }))
         res.json(FollowingArray)
       })
+      .catch(error => res.send(String(error)))
   },
 
   getfollowers: (req, res) => {
@@ -138,6 +140,7 @@ const userController = {
         }))
         res.json(FollowerArray)
       })
+      .catch(error => res.send(String(error)))
   },
 
   getUser: (req, res) => {
@@ -150,6 +153,109 @@ const userController = {
         }
         res.json(user)
       })
+      .catch(error => res.send(String(error)))
+  },
+
+  putUser: (req, res) => {
+    if (Number(req.params.id) !== helpers.getUser(req).id) {
+      return res.json({ status: 'error', message: 'permission denied' })
+    }
+    //編輯個人資料
+    if (req.files) {
+      if (!req.body.name) {
+        return res.json({ status: 'error', message: 'Name must be filled in.' })
+      }
+      if (req.files.avatar) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(req.files.avatar[0].path, (err, img) => {
+          User.findByPk(req.params.id)
+            .then(user => {
+              user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                cover: user.cover,
+                avatar: req.files.avatar[0] ? img.data.link : null
+              })
+                .then(user => {
+                  return res.json({ status: 'success', message: 'Profile edited.' })
+                })
+                .catch(error => res.send(String(error)))
+            })
+            .catch(error => res.send(String(error)))
+        })
+      }
+      if (req.files.cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(req.files.cover[0].path, (err, img) => {
+          User.findByPk(req.params.id)
+            .then(user => {
+              user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                avatar: user.avatar,
+                cover: req.files.cover[0] ? img.data.link : null
+              })
+                .then(user => {
+                  return res.json({ status: 'success', message: 'Profile edited.' })
+                })
+                .catch(error => res.send(String(error)))
+            })
+            .catch(error => res.send(String(error)))
+        })
+      }
+      if (req.body.name) {
+        User.findByPk(req.params.id)
+          .then(user => {
+            user.update({
+              name: req.body.name
+            })
+              .then(user => {
+                return res.json({ status: 'success', message: 'Profile edited.' })
+              })
+              .catch(error => res.send(String(error)))
+          })
+          .catch(error => res.send(String(error)))
+      }
+    } else {
+      //帳戶設定
+      if (req.body.account && req.body.name && req.body.email && req.body.password && req.body.confirmPassword) {
+        if (req.body.password !== req.body.confirmPassword) {
+          return res.json({ status: 'error', message: 'Password and confirm password must be the same.' })
+        } else {
+          User.findByPk(req.params.id)
+            .then(user => {
+              user.update({
+                account: req.body.account,
+                name: req.body.name,
+                email: req.body.email,
+                password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+              })
+                .then(user => {
+                  return res.json({ status: 'success', message: 'Account settings have been updated.' })
+                })
+                .catch(error => res.send(String(error)))
+            })
+            .catch(error => res.send(String(error)))
+        }
+      } else if (!req.body.account || !req.body.name || !req.body.email) {
+        return res.json({ status: 'error', message: 'Must fill in except the password' })
+      } else {
+        User.findByPk(req.params.id)
+          .then(user => {
+            user.update({
+              account: req.body.account,
+              name: req.body.name,
+              email: req.body.email
+            })
+              .then(user => {
+                return res.json({ status: 'success', message: 'Account settings have been updated.' })
+              })
+              .catch(error => res.send(String(error)))
+          })
+          .catch(error => res.send(String(error)))
+      }
+    }
+
   }
 }
 
