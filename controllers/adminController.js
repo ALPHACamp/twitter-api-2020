@@ -40,6 +40,7 @@ const adminController = {
         }))
         res.json(tweetArray)
       })
+      .catch(error => res.send(String(error)))
   },
 
   getUsers: (req, res) => {
@@ -53,6 +54,18 @@ const adminController = {
       .then(user => {
         res.json(user)
       })
+      .catch(error => res.send(String(error)))
+  },
+
+  deleteTweet: (req, res) => {
+    Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        tweet.destroy()
+      })
+      .then(tweet => {
+        return res.json({ status: 'success', message: 'Successfully deleted.' })
+      })
+      .catch(error => res.send(String(error)))
   }
 }
 

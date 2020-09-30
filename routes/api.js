@@ -25,6 +25,7 @@ router.get('/users/:id', authenticated, userController.getUser)
 
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 router.post('/admin', adminController.login)
 router.post('/users', userController.register)
