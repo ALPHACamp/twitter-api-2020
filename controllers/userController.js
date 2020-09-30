@@ -63,21 +63,17 @@ const userController = {
       .catch(error => res.send(String(error)))
   },
   getTweets: (req, res) => {
-    User.findByPk(req.params.id)
-      .then(user => {
-        Tweet.findAll({
-          where: { UserId: req.params.id },
-          include: [Reply, Like],
-          order: [['createdAt', 'DESC']]
-        })
-          .then(tweet => {
-            const tweetArray = tweet.map(t => ({
-              ...t.dataValues,
-              isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(t.id)
-            }))
-            res.json({ user, tweetArray })
-          })
-          .catch(error => res.send(String(error)))
+    Tweet.findAll({
+      where: { UserId: req.params.id },
+      include: [Reply, Like, User],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweet => {
+        const tweetArray = tweet.map(t => ({
+          ...t.dataValues,
+          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(t.id)
+        }))
+        res.json(tweetArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -101,7 +97,7 @@ const userController = {
           ...r.dataValues,
           isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(r.TweetId)
         }))
-        res.json({ replyArray })
+        res.json(replyArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -117,7 +113,7 @@ const userController = {
           ...l.dataValues,
           isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(l.TweetId)
         }))
-        res.json({ likeArray })
+        res.json(likeArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -129,7 +125,7 @@ const userController = {
           ...f.dataValues,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
-        res.json({ FollowingArray })
+        res.json(FollowingArray)
       })
   },
 
@@ -140,7 +136,7 @@ const userController = {
           ...f.dataValues,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
-        res.json({ FollowerArray })
+        res.json(FollowerArray)
       })
   },
 
@@ -152,7 +148,7 @@ const userController = {
           isMyself: (user.id === helpers.getUser(req).id) ? true : false,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(user.id)
         }
-        res.json({ user })
+        res.json(user)
       })
   }
 }
