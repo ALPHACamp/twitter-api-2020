@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
 
 const adminController = {
   login: (req, res) => {
@@ -26,6 +27,17 @@ const adminController = {
         })
       })
       .catch(error => res.send(String(error)))
+  },
+
+  getTweets: (req, res) => {
+    Tweet.findAll({ include: [User], order: [['createdAt', 'DESC']] })
+      .then(tweet => {
+        const tweetArray = tweet.map(t => ({
+          ...t.dataValues,
+          description: t.dataValues.description.substring(0, 50)
+        }))
+        res.json(tweetArray)
+      })
   }
 }
 
