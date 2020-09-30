@@ -14,6 +14,7 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 const userController = require('../controllers/userController.js')
+const adminController = require('../controllers/adminController.js')
 
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
@@ -22,6 +23,8 @@ router.get('/users/:id/followings', authenticated, userController.getfollowings)
 router.get('/users/:id/followers', authenticated, userController.getfollowers)
 router.get('/users/:id', authenticated, userController.getUser)
 
+
+router.post('/admin', adminController.login)
 router.post('/users', userController.register)
 router.post('/login', userController.login)
 
