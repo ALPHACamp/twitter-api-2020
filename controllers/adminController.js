@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 
 const adminController = {
   login: (req, res) => {
@@ -37,6 +39,19 @@ const adminController = {
           description: t.dataValues.description.substring(0, 50)
         }))
         res.json(tweetArray)
+      })
+  },
+
+  getUsers: (req, res) => {
+    User.findAll({
+      include: [
+        Reply, Like,
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }],
+      order: [[{ model: Reply }, 'createdAt', 'DESC']]
+    })
+      .then(user => {
+        res.json(user)
       })
   }
 }

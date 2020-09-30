@@ -24,6 +24,7 @@ router.get('/users/:id/followers', authenticated, userController.getfollowers)
 router.get('/users/:id', authenticated, userController.getUser)
 
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
 router.post('/admin', adminController.login)
 router.post('/users', userController.register)
