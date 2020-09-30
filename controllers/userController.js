@@ -103,6 +103,22 @@ const userController = {
         res.json({ replyArray })
       })
       .catch(error => res.send(String(error)))
+  },
+
+  getLikes: (req, res) => {
+    Like.findAll({
+      where: { UserId: req.params.id },
+      include: [{ model: Tweet, include: [Reply, User, Like] }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(like => {
+        const likeArray = like.map(l => ({
+          ...l.dataValues,
+          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(l.TweetId)
+        }))
+        res.json({ likeArray })
+      })
+      .catch(error => res.send(String(error)))
   }
 }
 
