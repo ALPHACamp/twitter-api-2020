@@ -125,11 +125,22 @@ const userController = {
   getfollowings: (req, res) => {
     User.findByPk(req.params.id, { include: [{ model: User, as: 'Followings' }] })
       .then(user => {
-        const FollowArray = user.Followings.map(f => ({
+        const FollowingArray = user.Followings.map(f => ({
           ...f.dataValues,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
-        res.json({ FollowArray })
+        res.json({ FollowingArray })
+      })
+  },
+
+  getfollowers: (req, res) => {
+    User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }] })
+      .then(user => {
+        const FollowerArray = user.Followers.map(f => ({
+          ...f.dataValues,
+          isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
+        }))
+        res.json({ FollowerArray })
       })
   }
 }
