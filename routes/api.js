@@ -14,6 +14,7 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 const userController = require('../controllers/userController.js')
+const tweetController = require('../controllers/tweetController.js')
 
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
@@ -24,5 +25,7 @@ router.get('/users/:id', authenticated, userController.getUser)
 
 router.post('/users', userController.register)
 router.post('/login', userController.login)
+
+router.get('/tweets', authenticated, tweetController.getTweets)
 
 module.exports = router
