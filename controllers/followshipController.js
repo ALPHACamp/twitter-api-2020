@@ -1,6 +1,7 @@
 const helpers = require('../_helpers.js')
 const db = require('../models')
 const Followship = db.Followship
+const User = db.User
 
 
 const followshipController = {
@@ -35,6 +36,19 @@ const followshipController = {
         } else {
           return res.json({ status: 'error', message: '資料庫沒有相同資料' })
         }
+      })
+      .catch(error => res.send(String(error)))
+  },
+
+  topFollowers: (req, res) => {
+    User.findAll({ include: [{ model: User, as: 'Followers' }] })
+      .then(user => {
+        user = user.map(u => ({
+          ...u.dataValues,
+          isFollowed: helpers.getUser(req).Followings.map(follow => follow.id).includes(u.id)
+        }))
+        user = user.sort((a, b) => b.Followers.length - a.Followers.length)
+        return res.json(user)
       })
       .catch(error => res.send(String(error)))
   }

@@ -30,6 +30,7 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, cpUpload, userController.putUser)
 
 router.post('/followships', authenticated, followshipController.postFollowing)
+router.get('/followships/top', authenticated, followshipController.topFollowers)
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowing)
 
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
