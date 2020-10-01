@@ -15,8 +15,25 @@ const followshipController = {
             .then(() => {
               return res.json({ status: 'success', message: '追蹤成功' })
             })
+            .catch(error => res.send(String(error)))
         } else {
-          return res.json({ status: 'error', message: '已有相同資料' })
+          return res.json({ status: 'error', message: '資料庫已有相同資料' })
+        }
+      })
+      .catch(error => res.send(String(error)))
+  },
+
+  deleteFollowing: (req, res) => {
+    Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId } })
+      .then(data => {
+        if (data) {
+          data.destroy()
+            .then(() => {
+              return res.json({ status: 'success', message: '取消追蹤' })
+            })
+            .catch(error => res.send(String(error)))
+        } else {
+          return res.json({ status: 'error', message: '資料庫沒有相同資料' })
         }
       })
       .catch(error => res.send(String(error)))
