@@ -27,6 +27,20 @@ const tweetController = {
             res.json(tweet)
         })
         
+    },
+    postTweet: (req, res) => {
+        if (req.body.description.length < 1) {
+            return res.json({ status: 'error', message: 'Tweet cannot be blank.' })
+        }
+        if (req.body.description.length > 140) {
+            return res.json({ status: 'error', message: ' The word number pleases limit at 140 word including.' })
+        }
+        Tweet.create({
+            description: req.body.description,
+            UserId: req.user.id
+        }).then((tweet) => {
+            res.json(tweet)
+        })
     }
 }
 module.exports = tweetController
