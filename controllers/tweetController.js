@@ -29,7 +29,7 @@ const tweetController = {
         
     },
     postTweet: (req, res) => {
-        if (req.body.description.length < 1) {
+        if (req.body.description.trim().length === 0 || req.body.description.length < 1) {
             return res.json({ status: 'error', message: 'Tweet cannot be blank.' })
         }
         if (req.body.description.length > 140) {
