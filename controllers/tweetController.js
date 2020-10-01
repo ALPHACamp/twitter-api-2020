@@ -9,7 +9,7 @@ const Reply = db.Reply
 const tweetController = {
     getTweets: (req, res) => {
         Tweet.findAll({
-            include: [{ model: User, as: 'LikedUsers' }, Reply ],
+            include: [{ model: User, as: 'LikedUsers' }, Reply],
             order: [['createdAt', 'DESC']]
         }).then(tweet => {
             const tweetArray = tweet.map(t => ({
@@ -18,6 +18,15 @@ const tweetController = {
             }))
             res.json(tweetArray)
         })
+    },
+    getTweet: (req, res) => {
+        Tweet.findByPk(req.params.id, {
+            include: [ User, { model: Reply, include: [User] }],
+            order: [['createdAt', 'DESC']]
+        }).then(tweet => {
+            res.json(tweet)
+        })
+        
     }
 }
 module.exports = tweetController

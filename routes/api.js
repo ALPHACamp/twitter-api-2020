@@ -27,5 +27,6 @@ router.post('/users', userController.register)
 router.post('/login', userController.login)
 
 router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
 
 module.exports = router
