@@ -22,7 +22,7 @@ let replyController = {
     },
     postReply: (req, res) => {
         if (req.body.comment.trim().length === 0 || req.body.comment.length < 1) {
-            return res.json({ status: 'error', message: 'Tweet cannot be blank.' })
+            return res.json({ status: 'error', message: 'Comment cannot be blank.' })
         }
         Reply.create({
             comment: req.body.comment,
