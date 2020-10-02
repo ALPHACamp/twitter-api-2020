@@ -11,10 +11,10 @@ const Like = db.Like
 
 const userController = {
   register: (req, res) => {
-    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.confirmPassword) {
+    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
       return res.json({ status: 'error', message: 'All fields must be filled.' })
-    } else if (req.body.password !== req.body.confirmPassword) {
-      return res.json({ status: 'error', message: 'Password and confirm password must be the same.' })
+    } else if (req.body.password !== req.body.checkPassword) {
+      return res.json({ status: 'error', message: 'Password and check password must be the same.' })
     }
     User.findOne({ where: { $or: [{ email: req.body.email }, { account: req.body.account }] } })
       .then(user => {
