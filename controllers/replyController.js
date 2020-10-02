@@ -20,5 +20,18 @@ let replyController = {
             return res.json(data)
         }).catch(err => console.log(err))
     },
+    postReply: (req, res) => {
+        if (req.body.comment.trim().length === 0 || req.body.comment.length < 1) {
+            return res.json({ status: 'error', message: 'Tweet cannot be blank.' })
+        }
+        Reply.create({
+            comment: req.body.comment,
+            TweetId: req.params.tweet_id,
+            UserId: helpers.getUser(req).id
+        })
+            .then((tweet) => {
+                return res.json(tweet)
+            }).catch(err => console.log(err))
+    }
 }
 module.exports = replyController
