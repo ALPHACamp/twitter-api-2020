@@ -72,7 +72,7 @@ const userController = {
       .then(tweet => {
         const tweetArray = tweet.map(t => ({
           ...t.dataValues,
-          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(t.id)
+          isLiked: t.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
         res.json(tweetArray)
       })
@@ -96,7 +96,7 @@ const userController = {
         })
         const replyArray = array.map(r => ({
           ...r.dataValues,
-          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(r.TweetId)
+          isLiked: r.Tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
         res.json(replyArray)
       })
@@ -112,7 +112,7 @@ const userController = {
       .then(like => {
         const likeArray = like.map(l => ({
           ...l.dataValues,
-          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(l.TweetId)
+          isLiked: l.Tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
         res.json(likeArray)
       })

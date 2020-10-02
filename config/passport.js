@@ -16,8 +16,7 @@ let strategy = new JwtStrategy(jwtOptions, (jwt_payload, next) => {
     include: [
       { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followings' },
-      { model: User, as: 'Followers' },
-      { model: Like }
+      { model: User, as: 'Followers' }
     ]
   })
     .then(user => {
