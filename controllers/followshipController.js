@@ -47,7 +47,7 @@ const followshipController = {
           ...u.dataValues,
           isFollowed: helpers.getUser(req).Followings.map(follow => follow.id).includes(u.id)
         }))
-        user = user.sort((a, b) => b.Followers.length - a.Followers.length)
+        user = user.sort((a, b) => b.Followers.length - a.Followers.length).slice(0, 10)
         return res.json(user)
       })
       .catch(error => res.send(String(error)))
