@@ -5,19 +5,25 @@ const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
+const Like = db.Like
 
 const tweetController = {
-    getTweets: (req, res) => {
+    getTweets: (req, res) => { 
         Tweet.findAll({
-            include: [{ model: User, as: 'LikedUsers' }, Reply],
+            include: [User, { model: User, as: 'LikedUsers' }, Reply, Like],
             order: [['createdAt', 'DESC']]
-        }).then(tweet => {
-            const tweetArray = tweet.map(t => ({
-                ...t.dataValues,
-                description: t.dataValues.description.substring(0, 50)
+        }).then(tweets => {
+            const data = tweets.map(r => ({
+                ...r.dataValues,
+                description: r.dataValues.description.substring(0, 50),
+                userName: r.User.name,
+                userAvatar: r.User.avatar,
+                userAccount: r.User.account,
+                isLiked: r.LikedUsers.map(d => d.id).includes(helpers.getUser(req).id),
+                loginUserRole: helpers.getUser(req).role,
             }))
-            res.json(tweetArray)
-        })
+            return res.json(data)
+        }).catch(err => console.log(err))
     },
     getTweet: (req, res) => {
         Tweet.findByPk(req.params.id, {
@@ -26,7 +32,6 @@ const tweetController = {
         }).then(tweet => {
             res.json(tweet)
         })
-        
     },
     postTweet: (req, res) => {
         if (req.body.description.trim().length === 0 || req.body.description.length < 1) {
