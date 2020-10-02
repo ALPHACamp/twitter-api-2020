@@ -8,7 +8,7 @@ const Reply = db.Reply
 const Like = db.Like
 
 const tweetController = {
-    getTweets: (req, res) => { 
+    getTweets: (req, res) => {
         Tweet.findAll({
             include: [User, { model: User, as: 'LikedUsers' }, Reply, Like],
             order: [['createdAt', 'DESC']]
@@ -50,10 +50,10 @@ const tweetController = {
         }
         Tweet.create({
             description: req.body.description,
-            UserId: req.user.id
+            UserId: helpers.getUser(req).id
         }).then((tweet) => {
-            res.json(tweet)
-        })
+            return res.json(tweet)
+        }).catch(err => console.log(err))
     }
 }
 module.exports = tweetController
