@@ -16,6 +16,7 @@ const authenticatedAdmin = (req, res, next) => {
 const userController = require('../controllers/userController.js')
 const tweetController = require('../controllers/tweetController.js')
 const replyController = require('../controllers/replyController.js')
+const likeController = require('../controllers/likeController.js')
 
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
@@ -33,5 +34,7 @@ router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+
+router.post('/tweets/:id/like', authenticated, likeController.addLike)
 
 module.exports = router
