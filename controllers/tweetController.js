@@ -20,18 +20,26 @@ const tweetController = {
                 userAvatar: r.User.avatar,
                 userAccount: r.User.account,
                 isLiked: r.LikedUsers.map(d => d.id).includes(helpers.getUser(req).id),
-                loginUserRole: helpers.getUser(req).role,
             }))
             return res.json(data)
         }).catch(err => console.log(err))
     },
     getTweet: (req, res) => {
-        Tweet.findByPk(req.params.id, {
-            include: [ User, { model: Reply, include: [User] }],
-            order: [['createdAt', 'DESC']]
+        return Tweet.findByPk(req.params.id, {
+            order: [[{ model: Reply }, 'createdAt', 'DESC']],
+            include: [
+                User,
+                Like,
+                { model: Reply, include: [User] },
+                { model: User, as: 'LikedUsers' }
+            ]
         }).then(tweet => {
-            res.json(tweet)
-        })
+            const isLiked = tweet.LikedUsers.map(d => d.id).includes(helpers.getUser(req).id)
+            return res.json({
+                tweet: tweet,
+                isLiked: isLiked
+            })
+        }).catch(err => console.log(err))
     },
     postTweet: (req, res) => {
         if (req.body.description.trim().length === 0 || req.body.description.length < 1) {
