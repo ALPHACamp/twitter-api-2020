@@ -3,17 +3,18 @@ const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
+const Like = db.Like
 
 const tweetController = {
     getTweets: (req, res) => {
         Tweet.findAll({
-            include: [User, { model: User, as: 'LikedUsers' }, Reply],
+            include: [User, Like, Reply],
             order: [['createdAt', 'DESC']]
         }).then(tweets => {
             const data = tweets.map(r => ({
                 ...r.dataValues,
                 description: r.dataValues.description.substring(0, 50),
-                isLiked: r.LikedUsers.map(d => d.id).includes(helpers.getUser(req).id),
+                isLiked: r.Likes.map(d => d.UserId).includes(helpers.getUser(req).id),
             }))
             return res.json(data)
         }).catch(err => console.log(err))
