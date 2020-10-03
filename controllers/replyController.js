@@ -1,9 +1,8 @@
+const helpers = require('../_helpers')
 const db = require('../models')
 const Reply = db.Reply
 const Tweet = db.Tweet
 const User = db.User
-const Like = db.Like
-const helpers = require('../_helpers')
 
 let replyController = {
     getReplies: (req, res) => {

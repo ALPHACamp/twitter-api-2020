@@ -1,11 +1,8 @@
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers.js')
 const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
-const Like = db.Like
 
 const tweetController = {
     getTweets: (req, res) => {
