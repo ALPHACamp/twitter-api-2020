@@ -19,6 +19,9 @@ const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover'
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
+const tweetController = require('../controllers/tweetController.js')
+const replyController = require('../controllers/replyController.js')
+const likeController = require('../controllers/likeController.js')
 
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
@@ -35,5 +38,15 @@ router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminContr
 router.post('/admin', adminController.login)
 router.post('/users', userController.register)
 router.post('/login', userController.login)
+
+router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.post('/tweets', authenticated, tweetController.postTweet)
+
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+
+router.post('/tweets/:id/like', authenticated, likeController.addLike)
+router.post('/tweets/:id/unlike', authenticated, likeController.removeLike)
 
 module.exports = router
