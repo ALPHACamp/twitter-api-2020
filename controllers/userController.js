@@ -11,10 +11,10 @@ const Like = db.Like
 
 const userController = {
   register: (req, res) => {
-    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.confirmPassword) {
+    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
       return res.json({ status: 'error', message: 'All fields must be filled.' })
-    } else if (req.body.password !== req.body.confirmPassword) {
-      return res.json({ status: 'error', message: 'Password and confirm password must be the same.' })
+    } else if (req.body.password !== req.body.checkPassword) {
+      return res.json({ status: 'error', message: 'Password and check password must be the same.' })
     }
     User.findOne({ where: { $or: [{ email: req.body.email }, { account: req.body.account }] } })
       .then(user => {
@@ -72,7 +72,7 @@ const userController = {
       .then(tweet => {
         const tweetArray = tweet.map(t => ({
           ...t.dataValues,
-          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(t.id)
+          isLiked: t.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
         res.json(tweetArray)
       })
@@ -96,7 +96,7 @@ const userController = {
         })
         const replyArray = array.map(r => ({
           ...r.dataValues,
-          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(r.TweetId)
+          isLiked: r.Tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
         res.json(replyArray)
       })
@@ -112,7 +112,7 @@ const userController = {
       .then(like => {
         const likeArray = like.map(l => ({
           ...l.dataValues,
-          isLiked: helpers.getUser(req).Likes.map(tweet => tweet.TweetId).includes(l.TweetId)
+          isLiked: l.Tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
         res.json(likeArray)
       })
@@ -124,6 +124,7 @@ const userController = {
       .then(user => {
         const FollowingArray = user.Followings.map(f => ({
           ...f.dataValues,
+          followingId: f.dataValues.id,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
         res.json(FollowingArray)
@@ -136,6 +137,7 @@ const userController = {
       .then(user => {
         const FollowerArray = user.Followers.map(f => ({
           ...f.dataValues,
+          followerId: f.dataValues.id,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
         res.json(FollowerArray)

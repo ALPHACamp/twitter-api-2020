@@ -19,6 +19,7 @@ const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover'
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
+const followshipController = require('../controllers/followshipController.js')
 const tweetController = require('../controllers/tweetController.js')
 const replyController = require('../controllers/replyController.js')
 const likeController = require('../controllers/likeController.js')
@@ -30,6 +31,10 @@ router.get('/users/:id/followings', authenticated, userController.getfollowings)
 router.get('/users/:id/followers', authenticated, userController.getfollowers)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, cpUpload, userController.putUser)
+
+router.post('/followships', authenticated, followshipController.postFollowing)
+router.get('/followships/top', authenticated, followshipController.topFollowers)
+router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowing)
 
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
