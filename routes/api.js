@@ -14,6 +14,7 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 const userController = require('../controllers/userController.js')
+const adminController = require('../controllers/adminController.js')
 const tweetController = require('../controllers/tweetController.js')
 const replyController = require('../controllers/replyController.js')
 const likeController = require('../controllers/likeController.js')
