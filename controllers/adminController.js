@@ -46,12 +46,18 @@ const adminController = {
   getUsers: (req, res) => {
     User.findAll({
       include: [
-        Reply, Like,
+        Reply, Like, Tweet,
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }],
-      order: [[{ model: Reply }, 'createdAt', 'DESC']]
+        { model: User, as: 'Followings' }]
     })
       .then(user => {
+        user = user.map(u => ({
+          ...u.dataValues
+        }))
+        user = user.sort((a, b) => b.Tweets.length - a.Tweets.length)
+        user.forEach((u, index) => {
+          if (u.id === 1) { user.splice(index, 1) }
+        })
         res.json(user)
       })
       .catch(error => res.send(String(error)))
