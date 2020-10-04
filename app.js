@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const app = express()
-const port = 3000
+const port = process.env.PORT
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 // use helpers.getUser(req) to replace req.user
