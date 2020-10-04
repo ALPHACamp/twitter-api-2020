@@ -48,6 +48,9 @@ const followshipController = {
           isFollowed: helpers.getUser(req).Followings.map(follow => follow.id).includes(u.id)
         }))
         user = user.sort((a, b) => b.Followers.length - a.Followers.length).slice(0, 10)
+        user.forEach((u, index) => {
+          if (u.id === 1) { user.splice(index, 1) }
+        })
         return res.json(user)
       })
       .catch(error => res.send(String(error)))
