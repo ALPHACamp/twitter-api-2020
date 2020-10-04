@@ -14,11 +14,11 @@ const followshipController = {
         if (!data) {
           Followship.create({ followerId: helpers.getUser(req).id, followingId: req.body.id })
             .then(() => {
-              return res.json({ status: 'success', message: '追蹤成功' })
+              return res.json({ status: 'success', message: 'Follow successfully.' })
             })
             .catch(error => res.send(String(error)))
         } else {
-          return res.json({ status: 'error', message: '資料庫已有相同資料' })
+          return res.json({ status: 'error', message: 'The database already has the same data.' })
         }
       })
       .catch(error => res.send(String(error)))
@@ -30,11 +30,11 @@ const followshipController = {
         if (data) {
           data.destroy()
             .then(() => {
-              return res.json({ status: 'success', message: '取消追蹤' })
+              return res.json({ status: 'success', message: 'Unfollow successfully.' })
             })
             .catch(error => res.send(String(error)))
         } else {
-          return res.json({ status: 'error', message: '資料庫沒有相同資料' })
+          return res.json({ status: 'error', message: 'The database does not have the same data.' })
         }
       })
       .catch(error => res.send(String(error)))
