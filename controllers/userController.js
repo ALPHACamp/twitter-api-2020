@@ -10,6 +10,19 @@ const Reply = db.Reply
 const Like = db.Like
 
 const userController = {
+  getCurrentUser: (req, res) => {
+    const currentUserData = {
+      id: helpers.getUser(req).id,
+      name: helpers.getUser(req).name,
+      account: helpers.getUser(req).account,
+      email: helpers.getUser(req).email,
+      avatar: helpers.getUser(req).avatar,
+      cover: helpers.getUser(req).cover,
+      isAdmin: helpers.getUser(req).role === 'admin' ? true : false,
+    }
+    res.json(currentUserData)
+  },
+
   register: (req, res) => {
     if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
       return res.json({ status: 'error', message: 'All fields must be filled.' })

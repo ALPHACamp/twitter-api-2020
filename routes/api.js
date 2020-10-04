@@ -24,6 +24,7 @@ const tweetController = require('../controllers/tweetController.js')
 const replyController = require('../controllers/replyController.js')
 const likeController = require('../controllers/likeController.js')
 
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
 router.get('/users/:id/likes', authenticated, userController.getLikes)
