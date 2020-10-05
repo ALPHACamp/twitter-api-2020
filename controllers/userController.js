@@ -176,92 +176,187 @@ const userController = {
       return res.json({ status: 'error', message: 'permission denied' })
     }
     //編輯個人資料
-    if (req.files) {
-      if (!req.body.name) {
-        return res.json({ status: 'error', message: 'Name must be filled in.' })
-      }
-      if (req.files.avatar) {
-        imgur.setClientID(IMGUR_CLIENT_ID)
-        imgur.upload(req.files.avatar[0].path, (err, img) => {
-          User.findByPk(req.params.id)
-            .then(user => {
-              user.update({
-                name: req.body.name,
-                introduction: req.body.introduction,
-                cover: user.cover,
-                avatar: req.files.avatar[0] ? img.data.link : null
-              })
-                .then(user => {
-                  return res.json({ status: 'success', message: 'Profile edited.' })
-                })
-                .catch(error => res.send(String(error)))
-            })
-            .catch(error => res.send(String(error)))
-        })
-      }
-      if (req.files.cover) {
-        imgur.setClientID(IMGUR_CLIENT_ID)
-        imgur.upload(req.files.cover[0].path, (err, img) => {
-          User.findByPk(req.params.id)
-            .then(user => {
-              user.update({
-                name: req.body.name,
-                introduction: req.body.introduction,
-                avatar: user.avatar,
-                cover: req.files.cover[0] ? img.data.link : null
-              })
-                .then(user => {
-                  return res.json({ status: 'success', message: 'Profile edited.' })
-                })
-                .catch(error => res.send(String(error)))
-            })
-            .catch(error => res.send(String(error)))
-        })
-      }
-      if (req.body.name) {
-        User.findByPk(req.params.id)
+    if (!req.body.account && !req.body.email && !req.body.password && !req.body.checkPassword) {
+      //沒有上傳照片時
+      if (!req.files) {
+        //判斷 name 字數
+        if (req.body.name.trim().length > 50 || req.body.name.trim().length === 0) {
+          return res.json({ status: 'error', message: 'The name is required and does not exceed 50 characters.' })
+        }
+        //判斷 introduction 字數
+        if (req.body.introduction.trim().length > 160) {
+          return res.json({ status: 'error', message: 'The introduction does not exceed 160 words.' })
+        }
+        //更新 name 和 introduction
+        return User.findByPk(req.params.id)
           .then(user => {
-            user.update({
-              name: req.body.name
-            })
+            return user.update({ name: req.body.name, introduction: req.body.introduction })
+          })
+          .then(user => {
+            return res.json({ status: 'success', message: 'Profile edited.' })
+          })
+          .catch(error => res.send(String(error)))
+      }
+      //有上傳照片時
+      if (req.files) {
+        //判斷 name 字數
+        if (req.body.name.trim().length > 50 || req.body.name.trim().length === 0) {
+          return res.json({ status: 'error', message: 'The name is required and does not exceed 50 characters.' })
+        }
+        //判斷 introduction 字數
+        if (req.body.introduction.trim().length > 160) {
+          return res.json({ status: 'error', message: 'The introduction does not exceed 160 words.' })
+        }
+        //判斷有 avatar
+        if (req.files.avatar) {
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          imgur.upload(req.files.avatar[0].path, (err, img) => {
+            return User.findByPk(req.params.id)
+              .then(user => {
+                return user.update({
+                  name: req.body.name,
+                  introduction: req.body.introduction,
+                  cover: user.cover,
+                  avatar: req.files.avatar[0] ? img.data.link : null
+                })
+              })
               .then(user => {
                 return res.json({ status: 'success', message: 'Profile edited.' })
               })
               .catch(error => res.send(String(error)))
           })
+        }
+        //判斷有 cover
+        if (req.files.cover) {
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          imgur.upload(req.files.cover[0].path, (err, img) => {
+            return User.findByPk(req.params.id)
+              .then(user => {
+                return user.update({
+                  name: req.body.name,
+                  introduction: req.body.introduction,
+                  avatar: user.avatar,
+                  cover: req.files.cover[0] ? img.data.link : null
+                })
+              })
+              .then(user => {
+                return res.json({ status: 'success', message: 'Profile edited.' })
+              })
+              .catch(error => res.send(String(error)))
+          })
+        }
+      }
+      //帳戶設定
+    } else {
+      //password 和 checkPassword 不一樣
+      if (req.body.password !== req.body.checkPassword) {
+        return res.json({ status: 'error', message: 'Password and check password must be the same.' })
+      }
+      //account 或 name 或 email 沒填
+      if (req.body.account.trim().length === 0 || req.body.name.trim().length === 0 || req.body.email.trim().length === 0) {
+        return res.json({ status: 'error', message: 'Must fill in except the password' })
+      }
+      //password 和 checkPassword 沒填
+      if (req.body.password.length === 0 || req.body.checkPassword.length === 0) {
+        //搜尋資料庫是否有相同 account 和 email
+        return User.findAll({ where: { $or: [{ account: req.body.account }, { email: req.body.email }] } })
+          .then(user => {
+            //account 或 name 有重複
+            if (user.length !== 0) {
+              //先過濾是自己的情況
+              user = user.filter(u => u.id !== helpers.getUser(req).id)
+              //過濾完發現只找到自己
+              if (user.length === 0) {
+                return User.findByPk(req.params.id)
+                  .then(user => {
+                    return user.update({
+                      account: req.body.account,
+                      name: req.body.name,
+                      email: req.body.email
+                    })
+                  })
+                  .then(user => {
+                    return res.json({ status: 'success', message: 'Account settings have been updated.' })
+                  })
+                  .catch(error => res.send(String(error)))
+              }
+              if (user.length === 2) {
+                return res.json({ status: 'error', message: 'Email and account repeated.' })
+              }
+              if (user.length === 1) {
+                if (user[0].account === req.body.account && user[0].email === req.body.email) {
+                  return res.json({ status: 'error', message: 'Email and account repeated.' })
+                } else if (user[0].account === req.body.account) {
+                  return res.json({ status: 'error', message: 'Account repeated.' })
+                } else {
+                  return res.json({ status: 'error', message: 'Email repeated.' })
+                }
+              }
+            }
+            //資料庫沒有相同資料時
+            return User.findByPk(req.params.id)
+              .then(user => {
+                return user.update({
+                  account: req.body.account,
+                  name: req.body.name,
+                  email: req.body.email
+                })
+              })
+              .then(user => {
+                return res.json({ status: 'success', message: 'Account settings have been updated.' })
+              })
+              .catch(error => res.send(String(error)))
+          })
           .catch(error => res.send(String(error)))
       }
-    } else {
-      //帳戶設定
-      if (req.body.account && req.body.name && req.body.email && req.body.password && req.body.confirmPassword) {
-        if (req.body.password !== req.body.confirmPassword) {
-          return res.json({ status: 'error', message: 'Password and confirm password must be the same.' })
-        } else {
-          User.findByPk(req.params.id)
-            .then(user => {
-              user.update({
-                account: req.body.account,
-                name: req.body.name,
-                email: req.body.email,
-                password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-              })
-                .then(user => {
-                  return res.json({ status: 'success', message: 'Account settings have been updated.' })
-                })
-                .catch(error => res.send(String(error)))
-            })
-            .catch(error => res.send(String(error)))
-        }
-      } else if (!req.body.account || !req.body.name || !req.body.email) {
-        return res.json({ status: 'error', message: 'Must fill in except the password' })
-      } else {
-        User.findByPk(req.params.id)
+      //password 和 checkPassword 一樣
+      if (req.body.password === req.body.checkPassword) {
+        //搜尋資料庫是否有相同 account 和 email
+        return User.findAll({ where: { $or: [{ account: req.body.account }, { email: req.body.email }] } })
           .then(user => {
-            user.update({
-              account: req.body.account,
-              name: req.body.name,
-              email: req.body.email
-            })
+            //account 或 name 有重複
+            if (user.length !== 0) {
+              //先過濾是自己的情況
+              user = user.filter(u => u.id !== helpers.getUser(req).id)
+              //過濾完發現只找到自己
+              if (user.length === 0) {
+                return User.findByPk(req.params.id)
+                  .then(user => {
+                    return user.update({
+                      account: req.body.account,
+                      name: req.body.name,
+                      email: req.body.email,
+                      password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+                    })
+                  })
+                  .then(user => {
+                    return res.json({ status: 'success', message: 'Account settings have been updated.' })
+                  })
+                  .catch(error => res.send(String(error)))
+              }
+              if (user.length === 2) {
+                return res.json({ status: 'error', message: 'Email and account repeated.' })
+              }
+              if (user.length === 1) {
+                if (user[0].account === req.body.account && user[0].email === req.body.email) {
+                  return res.json({ status: 'error', message: 'Email and account repeated.' })
+                } else if (user[0].account === req.body.account) {
+                  return res.json({ status: 'error', message: 'Account repeated.' })
+                } else {
+                  return res.json({ status: 'error', message: 'Email repeated.' })
+                }
+              }
+            }
+            //資料庫沒有相同資料時
+            return User.findByPk(req.params.id)
+              .then(user => {
+                return user.update({
+                  account: req.body.account,
+                  name: req.body.name,
+                  email: req.body.email,
+                  password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+                })
+              })
               .then(user => {
                 return res.json({ status: 'success', message: 'Account settings have been updated.' })
               })
@@ -270,7 +365,6 @@ const userController = {
           .catch(error => res.send(String(error)))
       }
     }
-
   }
 }
 
