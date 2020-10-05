@@ -176,7 +176,7 @@ const userController = {
       return res.json({ status: 'error', message: 'permission denied' })
     }
     //編輯個人資料
-    if (!req.body.account && !req.body.email && !req.body.password && !req.body.checkPassword) {
+    if (req.body.account === undefined) {
       //沒有上傳照片時
       if (!req.files) {
         //判斷 name 字數
