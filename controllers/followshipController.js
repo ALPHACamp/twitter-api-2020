@@ -9,6 +9,9 @@ const followshipController = {
     if (helpers.getUser(req).id === Number(req.body.id)) {
       return res.json({ status: 'error', message: 'Can not follow yourself.' })
     }
+    if (req.body.id === undefined) {
+      return res.json({ status: 'error', message: 'You should enter id.' })
+    }
     Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: req.body.id } })
       .then(data => {
         if (!data) {
