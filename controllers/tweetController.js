@@ -22,10 +22,10 @@ const tweetController = {
     getTweet: (req, res) => {
         return Tweet.findByPk(req.params.id, {
             order: [[{ model: Reply }, 'createdAt', 'DESC']],
-            include: [User, Reply, { model: User, as: 'LikedUsers' }]
+            include: [User, Reply, Like]
         }).then(tweet => {
             tweet = { ...tweet.dataValues }
-            tweet.isLiked = tweet.LikedUsers.map(d => d.id).includes(helpers.getUser(req).id)
+            tweet.isLiked = tweet.Likes.map(d => d.UserId).includes(helpers.getUser(req).id)
             return res.json(tweet)
         }).catch(err => console.log(err))
     },
