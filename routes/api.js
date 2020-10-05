@@ -3,7 +3,15 @@ const router = express.Router()
 const passport = require('../config/passport.js')
 const helpers = require('../_helpers.js')
 
-const authenticated = passport.authenticate('jwt', { session: false })
+function authenticated(req, res, next) {
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err) { return next(err) }
+    if (!user) { return res.json({ status: 'error', message: "You don't have a token" }) }
+    req.user = user
+    return next()
+  })(req, res, next)
+}
+
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
     if (helpers.getUser(req).role === 'admin') return next()
