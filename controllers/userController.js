@@ -132,7 +132,7 @@ const userController = {
       .catch(error => res.send(String(error)))
   },
 
-  getfollowings: (req, res) => {
+  getFollowings: (req, res) => {
     User.findByPk(req.params.id, { include: [{ model: User, as: 'Followings' }] })
       .then(user => {
         const FollowingArray = user.Followings.map(f => ({
@@ -145,7 +145,7 @@ const userController = {
       .catch(error => res.send(String(error)))
   },
 
-  getfollowers: (req, res) => {
+  getFollowers: (req, res) => {
     User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }] })
       .then(user => {
         const FollowerArray = user.Followers.map(f => ({
@@ -178,7 +178,7 @@ const userController = {
     //編輯個人資料
     if (req.body.account === undefined) {
       //沒有上傳照片時
-      if (!req.files) {
+      if (!req.files.avatar && !req.files.cover) {
         //判斷 name 字數
         if (req.body.name.trim().length > 50 || req.body.name.trim().length === 0) {
           return res.json({ status: 'error', message: 'The name is required and does not exceed 50 characters.' })
@@ -198,7 +198,7 @@ const userController = {
           .catch(error => res.send(String(error)))
       }
       //有上傳照片時
-      if (req.files) {
+      if (req.files.avatar || req.files.cover) {
         //判斷 name 字數
         if (req.body.name.trim().length > 50 || req.body.name.trim().length === 0) {
           return res.json({ status: 'error', message: 'The name is required and does not exceed 50 characters.' })
@@ -207,44 +207,52 @@ const userController = {
         if (req.body.introduction.trim().length > 160) {
           return res.json({ status: 'error', message: 'The introduction does not exceed 160 words.' })
         }
-        //判斷有 avatar
-        if (req.files.avatar) {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          imgur.upload(req.files.avatar[0].path, (err, img) => {
-            return User.findByPk(req.params.id)
-              .then(user => {
-                return user.update({
-                  name: req.body.name,
-                  introduction: req.body.introduction,
-                  cover: user.cover,
-                  avatar: req.files.avatar[0] ? img.data.link : null
+        const avatar = new Promise((resolve, reject) => {
+          if (req.files.avatar) {
+            imgur.setClientID(IMGUR_CLIENT_ID)
+            imgur.upload(req.files.avatar[0].path, (err, img) => {
+              return User.findByPk(req.params.id)
+                .then(user => {
+                  return user.update({
+                    name: req.body.name,
+                    introduction: req.body.introduction,
+                    avatar: req.files.avatar[0] ? img.data.link : null
+                  })
                 })
-              })
-              .then(user => {
-                return res.json({ status: 'success', message: 'Profile edited.' })
-              })
-              .catch(error => res.send(String(error)))
-          })
-        }
-        //判斷有 cover
-        if (req.files.cover) {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          imgur.upload(req.files.cover[0].path, (err, img) => {
-            return User.findByPk(req.params.id)
-              .then(user => {
-                return user.update({
-                  name: req.body.name,
-                  introduction: req.body.introduction,
-                  avatar: user.avatar,
-                  cover: req.files.cover[0] ? img.data.link : null
+                .then(user => {
+                  return resolve('avatar img ok')
                 })
-              })
-              .then(user => {
-                return res.json({ status: 'success', message: 'Profile edited.' })
-              })
-              .catch(error => res.send(String(error)))
+                .catch(error => reject(String(error)))
+            })
+          } else {
+            return resolve('no avatar img')
+          }
+        })
+        const cover = new Promise((resolve, reject) => {
+          if (req.files.cover) {
+            imgur.setClientID(IMGUR_CLIENT_ID)
+            imgur.upload(req.files.cover[0].path, (err, img) => {
+              return User.findByPk(req.params.id)
+                .then(user => {
+                  return user.update({
+                    name: req.body.name,
+                    introduction: req.body.introduction,
+                    cover: req.files.cover[0] ? img.data.link : null
+                  })
+                })
+                .then(user => {
+                  return resolve('cover img ok')
+                })
+                .catch(error => reject(String(error)))
+            })
+          } else {
+            return resolve('no cover img')
+          }
+        })
+        Promise.all([cover, avatar])
+          .then(img => {
+            return res.json({ status: 'success', message: 'Profile edited.' })
           })
-        }
       }
       //帳戶設定
     } else {
