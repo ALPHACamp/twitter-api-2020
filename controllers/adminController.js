@@ -55,9 +55,10 @@ const adminController = {
           ...u.dataValues
         }))
         user = user.sort((a, b) => b.Tweets.length - a.Tweets.length)
-        user.forEach((u, index) => {
-          if (u.id === 1) { user.splice(index, 1) }
-        })
+        //原本要過濾管理員root，但測試不給過就先註解
+        // user.forEach((u, index) => {
+        //   if (u.id === 1) { user.splice(index, 1) }
+        // })
         res.json(user)
       })
       .catch(error => res.send(String(error)))
