@@ -140,6 +140,7 @@ const userController = {
           followingId: f.dataValues.id,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
+        FollowingArray.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
         res.json(FollowingArray)
       })
       .catch(error => res.send(String(error)))
@@ -153,6 +154,7 @@ const userController = {
           followerId: f.dataValues.id,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
+        FollowerArray.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
         res.json(FollowerArray)
       })
       .catch(error => res.send(String(error)))
