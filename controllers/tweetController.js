@@ -30,6 +30,9 @@ const tweetController = {
         }).catch(err => console.log(err))
     },
     postTweet: (req, res) => {
+        if (Number(req.params.id) !== helpers.getUser(req).id) {
+            return res.json({ status: 'error', message: 'permission denied'})
+        }
         if (req.body.description.trim().length === 0 || req.body.description.length < 1) {
             return res.json({ status: 'error', message: 'Tweet cannot be blank.' })
         }

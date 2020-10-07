@@ -20,6 +20,9 @@ let replyController = {
         }).catch(err => console.log(err))
     },
     postReply: (req, res) => {
+        if (Number(req.params.id) !== helpers.getUser(req).id) {
+            return res.json({ status: 'error', message: 'permission denied'})
+        }
         if (req.body.comment.trim().length === 0 || req.body.comment.length < 1) {
             return res.json({ status: 'error', message: 'Comment cannot be blank.' })
         }
