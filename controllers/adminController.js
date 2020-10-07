@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers.js')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
@@ -38,7 +39,7 @@ const adminController = {
           ...t.dataValues,
           description: t.dataValues.description.substring(0, 50)
         }))
-        res.json(tweetArray)
+        return res.json(tweetArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -59,15 +60,18 @@ const adminController = {
         // user.forEach((u, index) => {
         //   if (u.id === 1) { user.splice(index, 1) }
         // })
-        res.json(user)
+        return res.json(user)
       })
       .catch(error => res.send(String(error)))
   },
 
   deleteTweet: (req, res) => {
+    if (helpers.getUser(req).id !== 1) {
+      return res.json({ status: 'error', message: 'permission denied' })
+    }
     Tweet.findByPk(req.params.id)
       .then(tweet => {
-        tweet.destroy()
+        return tweet.destroy()
       })
       .then(tweet => {
         return res.json({ status: 'success', message: 'Successfully deleted.' })

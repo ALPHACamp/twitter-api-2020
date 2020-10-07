@@ -31,14 +31,13 @@ const followshipController = {
     Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId } })
       .then(data => {
         if (data) {
-          data.destroy()
-            .then(() => {
-              return res.json({ status: 'success', message: 'Unfollow successfully.' })
-            })
-            .catch(error => res.send(String(error)))
+          return data.destroy()
         } else {
           return res.json({ status: 'error', message: 'The database does not have the same data.' })
         }
+      })
+      .then(() => {
+        return res.json({ status: 'success', message: 'Unfollow successfully.' })
       })
       .catch(error => res.send(String(error)))
   },
