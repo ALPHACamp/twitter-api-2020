@@ -20,7 +20,7 @@ const userController = {
       cover: helpers.getUser(req).cover,
       isAdmin: helpers.getUser(req).role === 'admin' ? true : false,
     }
-    res.json(currentUserData)
+    return res.json(currentUserData)
   },
 
   register: (req, res) => {
@@ -38,21 +38,21 @@ const userController = {
             return res.json({ status: 'error', message: 'Already have the same account.' })
           }
         } else {
-          User.create({
+          return User.create({
             name: req.body.name,
             account: req.body.account,
             email: req.body.email,
             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
             role: 'user'
           })
-            .then(user => {
-              return res.json({ status: 'success', message: 'Registration success.' })
-            })
-            .catch(error => res.send(String(error)))
         }
+      })
+      .then(user => {
+        return res.json({ status: 'success', message: 'Registration success.' })
       })
       .catch(error => res.send(String(error)))
   },
+
   login: (req, res) => {
     if (!req.body.account || !req.body.password) {
       return res.json({ status: 'error', message: 'Please fill in the account and password.' })
@@ -76,6 +76,7 @@ const userController = {
       })
       .catch(error => res.send(String(error)))
   },
+
   getTweets: (req, res) => {
     Tweet.findAll({
       where: { UserId: req.params.id },
@@ -87,7 +88,7 @@ const userController = {
           ...t.dataValues,
           isLiked: t.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
-        res.json(tweetArray)
+        return res.json(tweetArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -111,7 +112,7 @@ const userController = {
           ...r.dataValues,
           isLiked: r.Tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
-        res.json(replyArray)
+        return res.json(replyArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -127,7 +128,7 @@ const userController = {
           ...l.dataValues,
           isLiked: l.Tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id)
         }))
-        res.json(likeArray)
+        return res.json(likeArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -141,7 +142,7 @@ const userController = {
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
         FollowingArray.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
-        res.json(FollowingArray)
+        return res.json(FollowingArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -155,7 +156,7 @@ const userController = {
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(f.id)
         }))
         FollowerArray.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
-        res.json(FollowerArray)
+        return res.json(FollowerArray)
       })
       .catch(error => res.send(String(error)))
   },
@@ -168,7 +169,7 @@ const userController = {
           isMyself: (user.id === helpers.getUser(req).id) ? true : false,
           isFollowed: helpers.getUser(req).Followings.map(user => user.id).includes(user.id)
         }
-        res.json(user)
+        return res.json(user)
       })
       .catch(error => res.send(String(error)))
   },
