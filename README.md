@@ -1,8 +1,8 @@
 # Simple Twitter團隊專案(Backend)
 復刻打造簡易的twitter功能
++ 前端佈署 - https://jolinhappy.github.io/twitter-project-2020-frontend/#/login
 + 前端專案 - https://github.com/jolinhappy/twitter-project-2020-frontend
 + 後端專案 - https://github.com/LIN-CHANG-YI/twitter-api-2020-backend
-+ 後端heroku - https://simple-twitter-project.herokuapp.com
 # 專案功能
 + 註冊成為一般使用者即可使用該網站
 + 一般使用者可以發佈貼文
