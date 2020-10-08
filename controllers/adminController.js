@@ -69,11 +69,21 @@ const adminController = {
     if (helpers.getUser(req).id !== 1) {
       return res.json({ status: 'error', message: 'permission denied' })
     }
-    Tweet.findByPk(req.params.id)
-      .then(tweet => {
-        return tweet.destroy()
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => tweet.destroy())
+      .then(() => {
+        return Reply.findAll({ where: { TweetId: req.params.id } })
+          .then(reply => {
+            reply.forEach(r => r.destroy())
+          })
       })
-      .then(tweet => {
+      .then(() => {
+        return Like.findAll({ where: { TweetId: req.params.id } })
+          .then(like => {
+            like.forEach(l => l.destroy())
+          })
+      })
+      .then(() => {
         return res.json({ status: 'success', message: 'Successfully deleted.' })
       })
       .catch(error => res.send(String(error)))
