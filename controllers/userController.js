@@ -8,6 +8,7 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+const Chat = db.Chat
 // const http = require('../app.js')
 // const io = require('socket.io')(http);
 
@@ -379,8 +380,9 @@ const userController = {
       }
     }
   },
-  getChatroom: (req, res) => {
-  }
+  // getChatroom: (req, res) => {
+  //   console.log('我在這理')
+  // }
 }
 
 module.exports = userController
