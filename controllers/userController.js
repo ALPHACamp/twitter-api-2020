@@ -8,6 +8,8 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+// const http = require('../app.js')
+// const io = require('socket.io')(http);
 
 const userController = {
   getCurrentUser: (req, res) => {
@@ -376,6 +378,8 @@ const userController = {
           .catch(error => res.send(String(error)))
       }
     }
+  },
+  getChatroom: (req, res) => {
   }
 }
 

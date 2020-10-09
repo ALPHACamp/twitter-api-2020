@@ -40,6 +40,7 @@ router.get('/users/:id/followings', authenticated, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, cpUpload, userController.putUser)
+// router.get('/users/chatting', authenticated, userController.getChatroom)
 
 router.post('/followships', authenticated, followshipController.postFollowing)
 router.get('/followships/top', authenticated, followshipController.topFollowers)
