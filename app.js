@@ -20,8 +20,43 @@ app.use(bodyParser.json())
 //   res.sendFile(__dirname + '/index.html');
 // })
 
+const activeUserList = [];
+
+const setUserInfo = (userId, socketId) => ({ userId, socketId });
+
+const setResultData = (isSuccess, data) => (!isSuccess ? {
+  isSuccess,
+  description: data,
+} : {
+    isSuccess,
+    ...data,
+  });
+
+const checkDuplicatedId = id => activeUserList.some(obj => obj.userId === id);
+
 io.on('connection', (socket) => {
-  console.log('a user connected')
+  console.log('a user connected', socket.id)
+
+  socket.on('login', (userId, callback) => {
+    console.log(`Client logged-in:\n userId:${userId}`);
+
+    if (checkDuplicatedId(userId)) {
+      callback(setResultData(false, 'A user with the same ID exists. Please use a different ID.'));
+    }
+
+    socket.userId = userId;
+
+    const userInfo = setUserInfo(userId, socket.id);
+    activeUserList.push(userInfo);
+
+    callback(setResultData(true, {
+      description: 'Login Success',
+      roomList: rooms.getRooms(),
+      userInfo,
+    }));
+  });
+
+
   socket.on('disconnect', () => {
     console.log('user disconnected')
   })
@@ -29,7 +64,7 @@ io.on('connection', (socket) => {
     console.log('message: ' + msg)
   })
   socket.on('chat message', (msg) => {
-    io.emit('chat message', msg, socket.id);
+    io.emit('chat message', msg, socket.id)
   })
 })
 
