@@ -35,11 +35,11 @@ io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
     io.emit('chat message', { msg: msg, id: socket.id })
   })
-  socket.on('histroy', (obj) => {
+  socket.on('history', (obj) => {
     Chat.findAll({ order: ['createAt', 'DESC'] })
     .then(chats =>{
       console.log(chats)
-      io.emit('histroy', res.json(chats))
+      io.emit('history', res.json(chats))
     })
   })
 })
