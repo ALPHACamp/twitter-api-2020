@@ -61,10 +61,10 @@ io.on('connection', (socket) => {
     console.log('user disconnected')
   })
   socket.on('chat message', (msg) => {
-    console.log('message: ' + msg)
+    console.log('message: ', { msg: msg, id: socket.id })
   })
   socket.on('chat message', (msg) => {
-    io.emit('chat message', msg, socket.id)
+    io.emit('chat message', { msg: msg, id: socket.id })
   })
 })
 
