@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
     Chat.findAll({ order: [['createdAt', 'ASC']] })
     .then(chats =>{
       console.log(toJSON(chats))
-      io.emit('history', '這裡是傳送的字串')
+      socket.emit('history', '這裡是傳送的字串')
     })
   })
 })
