@@ -23,10 +23,6 @@ io.on('connection', (socket) => {
     console.log('user disconnected')
   })
   socket.on('chat message', (msg) => {
-    // console.log('message: ', { msg: msg, id: socket.id })
-    // console.log(msg.data.userId)
-    // console.log(msg.data.message)
-    // console.log(socket.id)
     Chat.create({
       UserId: msg.data.userId,
       text: msg.data.message
@@ -35,11 +31,12 @@ io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
     io.emit('chat message', { msg: msg, id: socket.id })
   })
-  socket.emit('history', (obj) => {
-    Chat.findAll({ order: ['createAt', 'DESC'] })
+  socket.on('history', (obj) => {
+    console.log('obj:', obj)
+    Chat.findAll({ order: [['createdAt', 'ASC']] })
     .then(chats =>{
-      console.log(chats)
-      io.emit('history', res.json(chats))
+      console.log(toJSON(chats))
+      io.emit('history', '這裡是傳送的字串')
     })
   })
 })
