@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs')
 const helpers = require('../../_helpers.js')
 const { User, sequelize } = require('../../models')
 const { Op } = sequelize
+
+
 const userController = {
   signUp: async (req, res, next) => {
     try {
@@ -91,5 +93,27 @@ const userController = {
       next(error)
     }
   },
+  getUser: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      if (!id) return res.json({ status: 'error', message: 'Invalid user id.' })
+      let user = await User.findByPk(id, {
+        attributes: {
+          include: [
+            [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followerId=${id})`), 'FollowingsCount'],
+            [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${id})`), 'FollowersCount']
+          ]
+        },
+        include: { model: User, as: 'Followings' }
+      })
+      if (!user) return res.json({ status: 'error', message: 'Invalid user id.' })
+      user = user.toJSON()
+      user.isFollowed = helpers.getUser(req).Followings.includes(user.id)
+      return res.json({ status: 'success', ...user })
+    } catch (error) {
+      next(error)
+    }
+  }
 }
+
 module.exports = userController
