@@ -12,6 +12,7 @@ function authenticated(req, res, next) {
   })(req, res, next)
 };
 router.post('/users', userController.signUp)
+router.post('/signin', userController.signIn)
 router.use('/', (error, req, res, next) => {
   console.log(error)
   return res.json({
