@@ -8,6 +8,9 @@ const userController = {
   getUser: (req, res) => {
 
   },
+  getCurrentUser: (req, res) => {
+
+  },
   updateUser: (req, res) => {
 
   },
