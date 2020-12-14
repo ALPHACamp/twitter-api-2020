@@ -13,7 +13,12 @@ jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 jwtOptions.secretOrKey = 'alphacamp'
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
-  User.findByPk(jwt_payload.id).then(user => {
+  User.findByPk(jwt_payload.id, {
+    include: [
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
+  }).then(user => {
     if (!user) return next(null, false)
     return next(null, user)
   })
