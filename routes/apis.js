@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport.js')
 const userController = require('../controllers/api/userController.js')
-
+const { registerRules, validResultCheck, loginRules } = require('../middleware/validator')
 
 // wrap passport authenticate method to pass mocha test
 function authenticated(req, res, next) {
@@ -14,15 +14,9 @@ function authenticated(req, res, next) {
   })(req, res, next)
 };
 
-router.post('/users', userController.signUp)
-router.post('/signin', userController.signIn)
+router.post('/users', registerRules(), validResultCheck, userController.signUp)
+router.post('/signin', loginRules(), validResultCheck, userController.signIn)
 router.get('/users/:id', authenticated, userController.getUser)
-router.use('/', (error, req, res, next) => {
-  console.log(error)
-  return res.json({
-    status: 'error',
-    message: 'Error occurred. Please check your input or try again later.'
-  })
-})
+
 
 module.exports = router
