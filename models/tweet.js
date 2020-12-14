@@ -1,18 +1,16 @@
 'use strict'
-const {
-  Model
-} = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Tweet extends Model {
-    static associate (models) {
-    }
-  }
-  Tweet.init({
+  const Tweet = sequelize.define('Tweet', {
     UserId: DataTypes.INTEGER,
     description: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'Tweet'
   })
+  Tweet.associate = function (models) {
+    Tweet.hasMany(models.Reply)
+    Tweet.hasMany(models.Like)
+    Tweet.belongsTo(models.User)
+  }
   return Tweet
 }

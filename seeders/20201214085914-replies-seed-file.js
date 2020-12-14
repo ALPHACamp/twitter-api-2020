@@ -2,18 +2,19 @@
 const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 20 }).map((d, i) =>
+    await queryInterface.bulkInsert('Replies',
+      Array.from({ length: 40 }).map((d, i) =>
         ({
           id: i * 10 + 1,
           UserId: Math.floor(Math.random() * 3) + 1,
-          description: faker.lorem.text(),
+          TweetId: Math.floor(Math.random() * 20) * 10 + 1,
+          comment: faker.lorem.text(),
           createdAt: new Date(),
           updatedAt: new Date()
         })
       ), {})
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Tweets', null, {})
+    await queryInterface.bulkDelete('Replies', null, {})
   }
 }
