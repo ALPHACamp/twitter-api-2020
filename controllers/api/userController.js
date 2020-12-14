@@ -20,7 +20,7 @@ const userController = {
       })
 
       //check if email or account is already registered
-      let user = await User.findAll({
+      const users = await User.findAll({
         where: {
           [Op.or]: [
             { email: { [Op.eq]: email } },
@@ -28,15 +28,15 @@ const userController = {
           ]
         }
       }, { raw: true })
-
-      if (user.length > 1 ||
-        (user.length === 1 && user[0].email === email && user[0].account === account)) {
+      //As user email and account is unique, if more than one user found above, both the account and email have already been registered
+      if (users.length > 1 ||
+        (users.length === 1 && users[0].email === email && users[0].account === account)) {
         return res.json({
           status: 'error',
           message: 'The account and email have already been registered.'
         })
-      } else if (user.length === 1) {
-        user = user[0]
+      } else if (users.length === 1) {
+        const user = users[0]
         if (user.email === email) {
           return res.json({
             status: 'error',
