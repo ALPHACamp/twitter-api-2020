@@ -17,13 +17,6 @@
   "production": {
     "use_env_variable": "CLEARDB_DATABASE_URL"
   },
-  // "production": {
-  //   "username": "root",
-  //   "password": null,
-  //   "database": "database_production",
-  //   "host": "127.0.0.1",
-  //   "dialect": "mysql"
-  // },
   "travis": {
     "username": "travis",
     "database": "ac_twitter_workspace_test",
