@@ -10,6 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     role: DataTypes.STRING,
   }, {});
   User.associate = function (models) {
+    User.hasMany(models.Reply)
+    User.hasMany(models.Tweet)
     User.belongsToMany(User, {
       through: models.Followship,
       foreignKey: 'followingId',
