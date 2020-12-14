@@ -5,8 +5,6 @@ const helpers = require('../../_helpers.js')
 const { User, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
 
-console.log('@@', sequelize)
-
 const userController = {
   signUp: async (req, res, next) => {
     try {
@@ -39,15 +37,12 @@ const userController = {
         })
       } else if (user.length === 1) {
         user = user[0]
-        console.log('@@user.length === 1')
         if (user.email === email) {
-          console.log('@@ user.email === email')
           return res.json({
             status: 'error',
             message: 'The email has already been registered.'
           })
         } else {
-          console.log('@@ user.email !== email')
           return res.json({
             status: 'error',
             message: 'The account has already been registered.'

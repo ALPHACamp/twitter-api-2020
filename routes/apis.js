@@ -4,11 +4,11 @@ const passport = require('../config/passport.js')
 const userController = require('../controllers/api/userController.js')
 
 
-// use helpers.getUser(req) to replace req.user
+// wrap passport authenticate method to pass mocha test
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) return next(error)
-    if (!user) return res.json({ status: 'error', message: 'UnAuthorized' })
+    if (!user) return res.status(401).json({ status: 'error', message: 'UnAuthorized' })
     req.user = user
     return next()
   })(req, res, next)
