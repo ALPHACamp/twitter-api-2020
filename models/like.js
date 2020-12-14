@@ -1,18 +1,15 @@
 'use strict'
-const {
-  Model
-} = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class Like extends Model {
-    static associate (models) {
-    }
-  }
-  Like.init({
+  const Like = sequelize.define('Like', {
     UserId: DataTypes.INTEGER,
     TweetId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Like'
   })
+  Like.associate = function (models) {
+    Like.belongsTo(models.Tweet)
+    Like.belongsTo(models.User)
+  }
   return Like
 }
