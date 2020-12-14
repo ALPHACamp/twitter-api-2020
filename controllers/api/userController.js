@@ -45,6 +45,7 @@ const userController = {
       next(error)
     }
   },
+
   getUser: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
@@ -65,7 +66,22 @@ const userController = {
     } catch (error) {
       next(error)
     }
-  }
+  },
+
+  getUsers: async (req, res, next) => { },
+
+  getTweets: async (req, res, next) => { },
+
+  getLikeTweets: async (req, res, next) => { },
+
+  getFollowers: async (req, res, next) => { },
+
+  getFollowings: async (req, res, next) => { },
+
+  getRepliedTweets: async (req, res, next) => { },
+
+  updateProfile: async (req, res, next) => { },
+
 }
 
 module.exports = userController

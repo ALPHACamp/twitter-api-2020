@@ -1,6 +1,6 @@
 const db = require('../models')
 const User = db.User
-const { check, validationResult } = require('express-validator')
+const { check, body, validationResult } = require('express-validator')
 
 const registerRules = () => {
   return [
@@ -57,7 +57,7 @@ const profileRules = () => {
     check('introduction').isLength({ max: 140 }).withMessage('最多 100 字')
   ]
 
-  if (req.body.page === 'setting') return accountSetting
+  if (body('page') === 'setting') return accountSetting
   else return profileEdition
 }
 
