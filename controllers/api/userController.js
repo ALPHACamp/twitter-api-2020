@@ -2,9 +2,10 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
 const helpers = require('../../_helpers.js')
-const { User, sequelize } = require('../../models')
-const { Op } = sequelize
+const { User, Sequelize, sequelize } = require('../../models')
+const { Op } = Sequelize
 
+console.log('@@', sequelize)
 
 const userController = {
   signUp: async (req, res, next) => {
