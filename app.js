@@ -7,9 +7,9 @@ const session = require('express-session')
 const methodOverride = require('method-override')
 const helpers = require('./_helpers')
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
+// if (process.env.NODE_ENV !== 'production') {
+//   require('dotenv').config()
+// }
 
 const passport = require('./config/passport')
 const app = express()
@@ -46,6 +46,6 @@ app.listen(port, () => {
   console.log(`Example app listening at app listening at http://localhost:${port}`)
 })
 
-require('./routes')(app, passport)
+require('./routes')(app)
 
 module.exports = app
