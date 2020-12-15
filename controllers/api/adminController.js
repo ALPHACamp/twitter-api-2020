@@ -1,10 +1,10 @@
 const db = require('../../models')
 const User = db.User
 const Tweet = db.Tweet
-const Reply = db.Reply
-const Like = db.Like
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
+
 
 const adminController = {
 
@@ -65,7 +65,30 @@ const adminController = {
     }
   },
 
-  getUsers: async (req, res, next) => { },
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetsCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingsCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followersCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'), 'likesCount'],
+          ],
+          exclude: ['password', 'createdAt', 'updatedAt'],
+        },
+        order: [
+          [sequelize.literal('tweetsCount'), 'DESC']
+        ],
+        // limit: 10,
+        raw: true,
+        nest: true,
+      })
+      return res.json({ users })
+    } catch (error) {
+
+    }
+  },
 
 }
 
