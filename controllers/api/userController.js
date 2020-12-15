@@ -68,7 +68,33 @@ const userController = {
     }
   },
 
-  getUsers: async (req, res, next) => { },
+  getUsers: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        where: {
+          id: { [Op.ne]: helpers.getUser(req).id },
+          role: { [Op.eq]: null }
+        },
+        attributes: {
+          include: [
+            [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=User.id)`), 'FollowersCount']
+          ]
+        },
+        order: [[sequelize.literal('FollowersCount'), 'DESC']],
+        offset: req.body.startIndex || 0,
+        limit: req.body.accumulatedNum || 10
+      })
+
+      users = users.map(user => ({
+        ...user.dataValues,
+        isFollowed: helpers.getUser(req).Followings.includes(user.id)
+      }))
+
+      return res.json({ status: 'success', users })
+    } catch (error) {
+      next(error)
+    }
+  },
 
   getTweets: async (req, res, next) => { },
 
