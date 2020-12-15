@@ -24,6 +24,13 @@ module.exports = {
         type: Sequelize.TEXT
       },
       role: {
+        type: Sequelize.STRING,
+        defaultValue: 'user'
+      },
+      account: {
+        type: Sequelize.STRING
+      },
+      cover: {
         type: Sequelize.STRING
       },
       createdAt: {
