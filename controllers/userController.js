@@ -131,6 +131,11 @@ let userController = {
       return res.json(data)
     })
   },
+  getUserLikes: (req, res) => {
+    userServices.getUserLikes(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 module.exports = userController

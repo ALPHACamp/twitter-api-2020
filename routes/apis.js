@@ -37,4 +37,5 @@ router.delete('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
 //user
 router.get('/users/:id/replies', authenticated, userController.getUserReplies)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 module.exports = router

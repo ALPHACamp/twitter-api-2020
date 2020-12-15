@@ -35,6 +35,13 @@ const userServices = {
       .then(user => {
         return callback({ user })
       })
+  },
+  getUserLikes: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    User.findByPk(USERID, { include: [{ model: Tweet, as: 'LikedTweets' }] })
+      .then(user => {
+        return callback({ user })
+      })
   }
 }
 module.exports = userServices
