@@ -5,12 +5,12 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert(
       'Tweets',
-      Array.from({ length: 60 }).map((d, i) => ({
+      Array.from({ length: 50 }).map((d, i) => ({
         id: i * 10 + 1,
         description: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        UserId: Math.floor(i / 10) * 10 + 1
+        UserId: Math.floor(i / 10) * 10 + 11
       })),
       {}
     )
