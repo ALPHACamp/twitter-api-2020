@@ -84,9 +84,9 @@ const adminController = {
         raw: true,
         nest: true,
       })
-      return res.json({ users })
+      return res.json({ status: 'success', users })
     } catch (error) {
-
+      next(error)
     }
   },
 
