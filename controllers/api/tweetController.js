@@ -1,10 +1,22 @@
+const db = require('../../models')
+const Tweet = db.Tweet
 
 const tweetController = {
-  getTweets: (req, res) => {
-
+  getTweets: async (req, res) => {
+    try {
+      const tweets = await Tweet.findAll()
+      return res.json({ tweets })
+    } catch (error) {
+      console.log(error)
+    }
   },
-  getTweet: (req, res) => {
-
+  getTweet: async (req, res) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      return res.json({ tweet })
+    } catch (error) {
+      console.log(error)
+    }
   },
   addTweet: (req, res) => {
 
