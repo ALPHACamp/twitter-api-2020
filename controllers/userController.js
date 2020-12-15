@@ -113,6 +113,11 @@ let userController = {
         })
     }
   },
+  getProfile: (req, res) => {
+    userServices.getProfile(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   // getUserComments:(req,res) => {
 
   // }
