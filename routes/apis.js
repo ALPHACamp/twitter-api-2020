@@ -16,8 +16,9 @@ const authenticatedAdmin = (req, res, next) => {
 const tweetController = require('../controllers/tweetController')
 const userController = require('../controllers/userController')
 
-//登入登出
+//登入登出註冊
 router.post('/signin', userController.signIn)
+router.post('/signup', userController.signUp)
 router.get('/', authenticated, (req, res) => res.render('tweets'))
 
 //tweets
