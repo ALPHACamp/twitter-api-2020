@@ -22,5 +22,11 @@ router.get('/', authenticated, (req, res) => res.render('tweets'))
 
 //tweets
 router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.post('/tweets', authenticated, tweetController.postTweet)
+router.put('/tweets/:id', authenticated, tweetController.putTweet)
+
+
+
 
 module.exports = router
