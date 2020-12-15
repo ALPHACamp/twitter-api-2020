@@ -8,7 +8,7 @@ module.exports = {
       account: 'root',
       email: 'root@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      role: 'user',
+      role: 'admin',
       name: 'root',
       introduction: faker.lorem.text(),
       avatar: `https://loremflickr.com/320/240/men,women/?random=${Math.random() * 50}`,
