@@ -19,7 +19,7 @@ const tweetServices = {
       })
   },
   getTweet: (req, res, callback) => {
-    Tweet.findByPk(req.params.id, {
+    Tweet.findByPk(req.params.tweet_id, {
       include: [
         { model: Like, include: [User] },
         { model: Reply, include: [User] }
@@ -54,7 +54,7 @@ const tweetServices = {
             return callback({ status: 'success', message: 'Tweet was successfully to update' })
           })
       })
-  }
+  },
 }
 
 module.exports = tweetServices
