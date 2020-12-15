@@ -1,5 +1,6 @@
 const db = require('../../models')
 const User = db.User
+const Tweet = db.Tweet
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -28,7 +29,27 @@ const adminController = {
     }
   },
 
-  getTweets: async (req, res, next) => { },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }],
+        attributes: { exclude: ['updatedAt'] }
+      })
+      // change to timestamp
+      tweets.map(element => {
+        element.createdAt = element.createdAt.getTime()
+        return element
+      })
+      return res.json({ tweets })
+    } catch (error) {
+      next(error)
+    }
+  },
 
   deleteTweet: async (req, res, next) => { },
 
