@@ -20,7 +20,7 @@ const tweetController = {
     tweetServices.putTweet(req, res, data => {
       return res.json(data)
     })
-  },
+  }
 }
 
 module.exports = tweetController
