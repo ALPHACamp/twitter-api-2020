@@ -1,6 +1,15 @@
-const replyController = {
-  getReplies: (req, res) => {
+const db = require('../../models')
+const Reply = db.Reply
 
+const replyController = {
+  getReplies: async (req, res) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const replies = await Reply.findAll({ where: { TweetId } })
+      return res.json({ replies })
+    } catch (error) {
+      console.log(error)
+    }
   },
   addReply: (req, res) => {
 

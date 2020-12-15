@@ -40,3 +40,5 @@ router.get('/users/:id/followings', userController.getFollowings)
 router.get('/users/:id/followers', userController.getFollowers)
 router.post('/followships', userController.addFollowing)
 router.delete('/followships/:followingId', userController.removeFollowing)
+
+module.exports = router

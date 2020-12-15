@@ -1,4 +1,3 @@
-
 const apis = require('./apis')
 
 module.exports = (app) => {
