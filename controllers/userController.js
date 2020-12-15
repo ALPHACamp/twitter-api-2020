@@ -37,6 +37,9 @@ let userController = {
       })
     })
   },
+  // getUserComments:(req,res) => {
+
+  // }
 }
 
 module.exports = userController

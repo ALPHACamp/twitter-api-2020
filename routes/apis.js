@@ -22,13 +22,13 @@ router.get('/', authenticated, (req, res) => res.render('tweets'))
 
 //tweets
 router.get('/tweets', authenticated, tweetController.getTweets)
-router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.postTweet)
-router.put('/tweets/:id', authenticated, tweetController.putTweet)
+router.put('/tweets/:tweet_id', authenticated, tweetController.putTweet)
 
-//reply
-router.post('/reply', authenticated, replyController.postReply)
-
+//replies
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 
 module.exports = router

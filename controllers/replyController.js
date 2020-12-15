@@ -5,6 +5,11 @@ const replyController = {
     replyServices.postReply(req, res, data => {
       return res.json(data)
     })
-  }
+  },
+  getReply: (req, res) => {
+    replyServices.getReply(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 module.exports = replyController
