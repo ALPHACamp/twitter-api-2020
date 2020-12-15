@@ -72,10 +72,8 @@ const userController = {
     try {
       let users = await User.findAll({
         where: {
-          [Op.and]: [
-            { id: { [Op.ne]: helpers.getUser(req).id } },
-            { role: { [Op.ne]: 'admin' } }
-          ]
+          id: { [Op.ne]: helpers.getUser(req).id },
+          role: { [Op.eq]: null }
         },
         attributes: {
           include: [
