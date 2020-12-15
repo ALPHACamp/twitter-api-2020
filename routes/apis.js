@@ -6,7 +6,6 @@ const adminController = require('../controllers/api/adminController')
 const followshipController = require('../controllers/api/followshipController')
 const tweetController = require('../controllers/api/tweetController')
 const { registerRules, loginRules, profileRules, postTweetRules, validResultCheck } = require('../middleware/validator')
-const { authenticate } = require('../config/passport')
 
 // wrap passport authenticate method to pass mocha test
 function authenticated(req, res, next) {
@@ -35,15 +34,15 @@ router.put('/users/:id', authenticated, profileRules(), validResultCheck, userCo
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users', authenticated, userController.getUsers)
 
-router.delete('/followships/:followingId', authenticate, followshipController.deleteFollowing)
-router.post('/followships', authenticate, followshipController.addFollowing)
+router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowing)
+router.post('/followships', authenticated, followshipController.addFollowing)
 
-router.post('/tweets/:id/replies', authenticate, tweetController.replyTweet)
-router.get('/tweets/:id/replies', authenticate, tweetController.getReplies)
-router.post('/tweets/:id/like', authenticate, tweetController.likeTweet)
-router.post('/tweets/:id/unlike', authenticate, tweetController.unlikeTweet)
-router.get('/tweets/:id', authenticate, tweetController.getTweet)
-router.post('/tweets', authenticate, postTweetRules(), validResultCheck, tweetController.postTweet)
-router.get('/tweets', authenticate, tweetController.getTweets)
+router.post('/tweets/:id/replies', authenticated, tweetController.replyTweet)
+router.get('/tweets/:id/replies', authenticated, tweetController.getReplies)
+router.post('/tweets/:id/like', authenticated, tweetController.likeTweet)
+router.post('/tweets/:id/unlike', authenticated, tweetController.unlikeTweet)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.post('/tweets', authenticated, postTweetRules(), validResultCheck, tweetController.postTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
 
 module.exports = router
