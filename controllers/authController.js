@@ -31,12 +31,12 @@ const authController = {
   },
 
   register: (req, res) => {
-    const { account, name, email, password, confirmPassword } = req.body
+    const { account, name, email, password, checkPassword } = req.body
 
-    if (password !== confirmPassword) {
+    if (password !== checkPassword) {
       return res.status(409).json({
         status: 'failure',
-        message: 'Password & ConfirmPassword are different!'
+        message: 'Password & checkPassword are different!'
       })
     }
 
