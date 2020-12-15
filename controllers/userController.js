@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt-nodejs')
 const db = require('../models')
 const User = db.User
+const userServices = require('../services/userServices')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -40,6 +41,16 @@ let userController = {
   // getUserComments:(req,res) => {
 
   // }
+  likeTweet: (req, res) => {
+    userServices.likeTweet(req, res, data => {
+      return res.json(data)
+    })
+  },
+  unlikeTweet: (req, res) => {
+    userServices.unlikeTweet(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 module.exports = userController
