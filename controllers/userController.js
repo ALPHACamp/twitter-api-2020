@@ -38,7 +38,7 @@ let userController = {
     })
   },
   signUp: (req, res) => {
-    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.passwordCheck) {
+    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
       return res.json({
         status: 'error',
         message: '所有欄位皆為必填',
@@ -46,17 +46,18 @@ let userController = {
         account: req.body.account,
         email: req.body.email,
         password: req.body.password,
-        passwordCheck: req.body.passwordCheck
+        checkPassword: req.body.checkPassword,
       })
     }
-    const accountName = req.body.account.split('')
-    if (accountName[0] !== '@') {
-      return res.json({
-        status: 'error',
-        message: '帳號需為＠開頭'
-      })
-    }
-    if (req.body.password !== req.body.passwordCheck) {
+    // 需要跟AC確認account是否需要@
+    //const accountName = req.body.account.split('')
+    // if (accountName[0] !== '@') {
+    //   return res.json({
+    //     status: 'error',
+    //     message: '帳號需為＠開頭'
+    //   })
+    // }
+    if (req.body.password !== req.body.checkPassword) {
       return res.json({
         status: 'error',
         message: '兩次密碼輸入不同！',
@@ -75,7 +76,7 @@ let userController = {
               account: req.body.account,
               email: req.body.email,
               password: req.body.password,
-              passwordCheck: req.body.passwordCheck
+              checkPassword: req.body.checkPassword,
             })
           }
         })
@@ -90,7 +91,7 @@ let userController = {
                   account: req.body.account,
                   email: req.body.email,
                   password: req.body.password,
-                  passwordCheck: req.body.passwordCheck
+                  checkPassword: req.body.checkPassword
                 })
               } else {
                 User.create({

@@ -18,7 +18,7 @@ const userController = require('../controllers/userController')
 
 //登入登出註冊
 router.post('/signin', userController.signIn)
-router.post('/signup', userController.signUp)
+router.post('/users', userController.signUp)
 router.get('/', authenticated, (req, res) => res.render('tweets'))
 
 //tweets
