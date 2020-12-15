@@ -1,6 +1,5 @@
-const tweetController = require('../controllers/tweetController')
+let apis = require('./apis')
 
-module.exports = app => {
-  app.get('/', (req, res) => res.render('tweets'))
-  app.get('/tweets', tweetController.getTweets)
+module.exports = (app) => {
+  app.use('/api', apis)
 }
