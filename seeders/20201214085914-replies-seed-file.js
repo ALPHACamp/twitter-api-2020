@@ -7,10 +7,10 @@ let tens = 0
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Replies',
-      Array.from({ length: 180 }).map((d, i) =>
+      Array.from({ length: 150 }).map((d, i) =>
         ({
           id: i * 10 + 1,
-          UserId: (i % 6) + 1,
+          UserId: (i % 5) + 1,
           TweetId: i % 3 ? Number(tens - 1 + '' + digit) : Number((tens++) + '' + digit),
           comment: faker.lorem.text(),
           createdAt: new Date(),
