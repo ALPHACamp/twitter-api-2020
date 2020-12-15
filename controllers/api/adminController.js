@@ -1,6 +1,8 @@
 const db = require('../../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -51,7 +53,17 @@ const adminController = {
     }
   },
 
-  deleteTweet: async (req, res, next) => { },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
+      await tweet.destroy()
+
+      return res.json({ status: 'success', message: 'Delete successfully.' })
+    } catch (error) {
+      next(error)
+    }
+  },
 
   getUsers: async (req, res, next) => { },
 
