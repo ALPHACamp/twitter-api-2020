@@ -126,6 +126,11 @@ let userController = {
       return res.json(data)
     })
   },
+  getUserReplies: (req, res) => {
+    userServices.getUserReplies(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 module.exports = userController

@@ -10,7 +10,7 @@ const userServices = {
     const USERID = helpers.getUser(req).id
     Like.create({
       UserId: USERID,
-      TweetId: req.params.tweet_id
+      TweetId: req.params.id
     }).then(like => {
       return callback({ status: 'success', message: `Like tweet` })
     })
@@ -20,7 +20,7 @@ const userServices = {
     Like.findOne({
       where: {
         UserId: USERID,
-        TweetId: req.params.tweet_id
+        TweetId: req.params.id
       }
     }).then(like => {
       like.destroy()
@@ -28,6 +28,13 @@ const userServices = {
           return callback({ status: 'success', message: `DisLike tweet` })
         })
     })
+  },
+  getUserReplies: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    User.findByPk(USERID, { include: [{ model: Tweet, as: 'RepliedTweets' }] })
+      .then(user => {
+        return callback({ user })
+      })
   }
 }
 module.exports = userServices
