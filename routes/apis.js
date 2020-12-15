@@ -17,6 +17,7 @@ function authenticated(req, res, next) {
     return next()
   })(req, res, next)
 }
+
 function userAuthenticated(req, res, next) {
   if (helpers.getUser(req).role === 'admin') return res.status(401).json({ status: 'error', message: 'UnAuthorized' })
   return next()

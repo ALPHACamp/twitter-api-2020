@@ -55,7 +55,7 @@ const profileRules = () => {
 
   const accountSetting = registerRules()
   const profileEdition = [
-    check('introduction').isLength({ max: 140 }).withMessage('最多 100 字')
+    check('introduction').isLength({ max: 140 }).withMessage('最多 140 字')
   ]
 
   if (body('page') === 'setting') return accountSetting
