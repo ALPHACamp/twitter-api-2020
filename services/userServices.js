@@ -28,6 +28,13 @@ const userServices = {
           return callback({ status: 'success', message: `DisLike tweet` })
         })
     })
+  },
+  getUserReplies: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    User.findByPk(USERID, { include: [{ model: Tweet, as: 'RepliedTweets' }] })
+      .then(user => {
+        return callback({ user })
+      })
   }
 }
 module.exports = userServices
