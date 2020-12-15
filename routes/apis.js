@@ -16,8 +16,9 @@ const tweetController = require('../controllers/tweetController')
 const userController = require('../controllers/userController')
 const replyController = require('../controllers/replyController')
 
-//登入登出
+//登入登出註冊
 router.post('/signin', userController.signIn)
+router.post('/users', userController.signUp)
 router.get('/', authenticated, (req, res) => res.render('tweets'))
 
 //tweets

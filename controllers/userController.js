@@ -38,6 +38,81 @@ let userController = {
       })
     })
   },
+  signUp: (req, res) => {
+    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
+      return res.json({
+        status: 'error',
+        message: '所有欄位皆為必填',
+        name: req.body.name,
+        account: req.body.account,
+        email: req.body.email,
+        password: req.body.password,
+        checkPassword: req.body.checkPassword,
+      })
+    }
+    // 需要跟AC確認account是否需要@
+    //const accountName = req.body.account.split('')
+    // if (accountName[0] !== '@') {
+    //   return res.json({
+    //     status: 'error',
+    //     message: '帳號需為＠開頭'
+    //   })
+    // }
+    if (req.body.password !== req.body.checkPassword) {
+      return res.json({
+        status: 'error',
+        message: '兩次密碼輸入不同！',
+        name: req.body.name,
+        account: req.body.account,
+        email: req.body.email,
+      })
+    } else {
+      User.findOne({ where: { account: req.body.account } })
+        .then(user => {
+          if (user) {
+            return res.json({
+              status: 'error',
+              message: '此帳號已被使用，請換一組！',
+              name: req.body.name,
+              account: req.body.account,
+              email: req.body.email,
+              password: req.body.password,
+              checkPassword: req.body.checkPassword,
+            })
+          }
+        })
+        .then(user => {
+          User.findOne({ where: { email: req.body.email } })
+            .then(user => {
+              if (user) {
+                return res.json({
+                  status: 'error',
+                  message: '此信箱已註冊過！',
+                  name: req.body.name,
+                  account: req.body.account,
+                  email: req.body.email,
+                  password: req.body.password,
+                  checkPassword: req.body.checkPassword
+                })
+              } else {
+                User.create({
+                  name: req.body.name,
+                  account: req.body.account,
+                  email: req.body.email,
+                  password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
+                  role: 'User',
+                })
+                  .then(user => {
+                    return res.json({
+                      status: 'success',
+                      message: '帳號註冊成功！'
+                    })
+                  })
+              }
+            })
+        })
+    }
+  },
   // getUserComments:(req,res) => {
 
   // }
