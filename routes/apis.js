@@ -31,7 +31,7 @@ router.post('/tweets/:tweet_id/replies', authenticated, replyController.postRepl
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 //like
-router.post('/like/tweets/:tweet_id', authenticated, userController.likeTweet)
-router.delete('/like/tweets/:tweet_id', authenticated, userController.unlikeTweet)
+router.post('/tweets/:id/like', authenticated, userController.likeTweet)
+router.delete('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
 module.exports = router

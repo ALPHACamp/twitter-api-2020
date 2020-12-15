@@ -16,10 +16,8 @@ const replyServices = {
     })
   },
   getReply: (req, res, callback) => {
-    console.log('req.params.tweet_id', req.params.tweet_id)
     Reply.findAll({
-      raw: true, nest: true,
-
+      raw: true, nest: true
     }).then(reply => {
       Tweet.findByPk(req.params.tweet_id,
         {

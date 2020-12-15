@@ -10,7 +10,7 @@ const userServices = {
     const USERID = helpers.getUser(req).id
     Like.create({
       UserId: USERID,
-      TweetId: req.params.tweet_id
+      TweetId: req.params.id
     }).then(like => {
       return callback({ status: 'success', message: `Like tweet` })
     })
@@ -20,7 +20,7 @@ const userServices = {
     Like.findOne({
       where: {
         UserId: USERID,
-        TweetId: req.params.tweet_id
+        TweetId: req.params.id
       }
     }).then(like => {
       like.destroy()
