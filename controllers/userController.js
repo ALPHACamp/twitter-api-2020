@@ -123,6 +123,11 @@ let userController = {
       return res.json(data)
     })
   },
+  getTopUsers: (req, res) => {
+    userServices.getTopUsers(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   getFollowings: (req, res) => {
     userServices.getFollowings(req, res, (data) => {
       return res.json(data)

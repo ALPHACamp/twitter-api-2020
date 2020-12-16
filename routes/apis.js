@@ -30,7 +30,6 @@ const tweetController = require('../controllers/tweetController')
 const userController = require('../controllers/userController')
 const replyController = require('../controllers/replyController')
 const followshipController = require('../controllers/followshipController')
-const followshipServices = require('../services/followshipServices')
 
 //登入登出註冊
 router.post('/signin', userController.signIn)
@@ -52,6 +51,7 @@ router.post('/tweets/:id/like', authenticated, userController.likeTweet)
 router.delete('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
 //user
+router.get('/users/top', authenticated, userController.getTopUsers)
 router.get('/users/:id', authenticated, userController.getProfile)
 router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putProfile)
 router.get('/users/:id/replies', authenticated, userController.getUserReplies)
