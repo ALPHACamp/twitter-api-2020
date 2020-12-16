@@ -109,26 +109,15 @@ module.exports = {
   },
   getTopUsers: async (req, res, next) => {
     try {
-      //first promise get the users of having the highest follower count and exclude the current user since one cannot follow oneself
-      //second promise get the current user's followings
-      let [topUsers, followings] = await Promise.all([
-        sequelize.query(`
-        SELECT F.followingId, name,account,avatar
+      let topUsers = await sequelize.query(`
+        SELECT F.followingId, name,account,avatar, IF(isFollowed.followingId, true, false) AS isFollowed
         FROM Users AS U
         INNER JOIN (SELECT followingId, COUNT(followingId) AS followerCount FROM Followships WHERE followingId <> ${req.user.id} GROUP BY followingId LIMIT 10) AS F
-        ON U.id = F.followingId;`,
-          { type: QueryTypes.SELECT }),
-        sequelize.query(`
-        SELECT followingId
-        FROM Followships
-        WHERE followerId = ${req.user.id};`,
-          { type: QueryTypes.SELECT })
-      ])
-      const followingIds = followings.map(f => f.followingId)
-      topUsers = topUsers.map(u => ({
-        ...u,
-        isFollowed: followingIds.includes(u.followingId) //indicating if the current user has already followed the user from the top user list
-      }))
+        ON U.id = F.followingId
+        LEFT JOIN (SELECT followingId FROM Followships WHERE followerId = ${req.user.id} ) AS isFollowed
+        ON U.id = isFollowed.followingId
+        ORDER BY F.followingId;`,
+        { type: QueryTypes.SELECT })
       res.json(topUsers)
     } catch (err) {
       console.log(err)
