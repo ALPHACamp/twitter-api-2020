@@ -78,4 +78,33 @@ module.exports = {
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
     }
   },
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await sequelize.query(`
+        SELECT U.id, U.name, U.account, U.cover, U.avatar, IFNULL(F1.followingCount, 0) AS followingCount, IFNULL(F2.followerCount, 0) AS followerCount, IFNULL(T.tweetCount, 0) AS tweetCount, CAST(IFNULL(L.likedCount, 0) AS UNSIGNED) AS LikedCount
+        FROM Users AS U
+
+        LEFT JOIN (SELECT followerId, COUNT(followerId) AS followingCount FROM Followships GROUP BY followerId) AS F1
+        ON F1.followerId = U.id
+
+        LEFT JOIN (SELECT followingId, COUNT(followingId) AS followerCount FROM Followships GROUP BY followingId) AS F2
+        ON F2.followingId = U.id
+
+        LEFT JOIN (SELECT UserId, COUNT(UserId) AS tweetCount FROM Tweets GROUP BY UserId) AS T
+        ON T.UserId = U.id
+
+        LEFT JOIN (
+        SELECT T.UserId, SUM(L.likeCount) AS likedCount
+        FROM Tweets AS T
+        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS likeCount FROM Likes GROUP BY TweetId) AS L
+        ON T.id = L.TweetId
+        GROUP BY T.UserId) AS L
+        ON L.UserId = U.id;`,
+        { type: QueryTypes.SELECT })
+      res.json(users)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  }
 }
