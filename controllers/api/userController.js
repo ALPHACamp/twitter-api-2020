@@ -58,8 +58,7 @@ const userController = {
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followerId=${id})`), 'FollowingsCount'],
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${id})`), 'FollowersCount']
           ]
-        },
-        include: { model: User, as: 'Followings' }
+        }
       })
       if (!user) return res.json({ status: 'error', message: '查無此使用者編號' })
       user = userDataTransform(req, user.dataValues)
