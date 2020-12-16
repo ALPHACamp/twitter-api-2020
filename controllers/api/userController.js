@@ -26,8 +26,8 @@ const userController = {
 
   signIn: async (req, res, next) => {
     try {
-      const { email, password } = req.body
-      const user = await User.findOne({ where: { email }, raw: true })
+      const { account, password } = req.body
+      const user = await User.findOne({ where: { account }, raw: true })
 
       if (!bcrypt.compareSync(password, user.password)) return res.json({
         status: 'error',
