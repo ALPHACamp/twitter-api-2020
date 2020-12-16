@@ -6,7 +6,7 @@ module.exports = {
   authAdmin: (req, res, next) => {
     const user = helpers.getUser(req)
     if (user) {
-      if (user.isAdmin) return next()
+      if (user.role === 'admin') return next()
       return res.json({ status: 'failure', message: 'permission denied' })
     }
     return res.json({ status: 'failure', message: 'permission denied' })
@@ -14,7 +14,7 @@ module.exports = {
   authUser: (req, res, next) => {
     const user = helpers.getUser(req)
     if (user) {
-      if (!user.isAdmin) return next()
+      if (user.role === 'user') return next()
       return res.json({ status: 'failure', message: 'permission denied' })
     }
     return res.json({ status: 'failure', message: 'permission denied' })
