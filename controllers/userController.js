@@ -128,8 +128,13 @@ let userController = {
       return res.json(data)
     })
   },
-  getFollowers: (req, res)=> {
-    userServices.getFollowers(req, res, (data)=> {
+  getFollowers: (req, res) => {
+    userServices.getFollowers(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  getTweets: (req, res) => {
+    userServices.getTweets(req, res, (data) => {
       return res.json(data)
     })
   },

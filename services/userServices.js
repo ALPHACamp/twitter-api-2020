@@ -161,6 +161,15 @@ const userServices = {
       ])
     })
   },
+  getTweets: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    Tweet.findAll({
+      where: { UserId: USERID }
+    })
+      .then(tweets => {
+        return callback(tweets)
+      })
+  },
   likeTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
     Like.create({
