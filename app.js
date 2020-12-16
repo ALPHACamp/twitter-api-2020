@@ -8,7 +8,7 @@ const methodOverride = require('method-override')
 const app = express()
 const port = 3000
 
-let passport = require('passport')
+const passport = require('passport')
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
