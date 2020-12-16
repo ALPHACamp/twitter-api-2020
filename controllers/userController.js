@@ -109,13 +109,15 @@ module.exports = {
   },
   getTopUsers: async (req, res, next) => {
     try {
+      //get the users of having the highest follower count and exclude the current user since one cannot follow oneself
       let topUsers = await sequelize.query(`
         SELECT F.followingId, name,account,avatar
         FROM Users AS U
-        INNER JOIN (SELECT followingId, COUNT(followingId) AS followerCount FROM Followships GROUP BY followingId LIMIT 10) AS F
+        INNER JOIN (SELECT followingId, COUNT(followingId) AS followerCount FROM Followships WHERE followingId <> ${req.user.id} GROUP BY followingId LIMIT 10) AS F
         ON U.id = F.followingId;`,
         { type: QueryTypes.SELECT })
 
+      //get the current user's followings
       const followings = await sequelize.query(`
         SELECT followingId
         FROM Followships
@@ -125,7 +127,7 @@ module.exports = {
       const followingIds = followings.map(f => f.followingId)
       topUsers = topUsers.map(u => ({
         ...u,
-        isFollowed: followingIds.includes(u.followingId)
+        isFollowed: followingIds.includes(u.followingId) //indicating if the current user has already followed the user from the top user list
       }))
       res.json(topUsers)
     } catch (err) {
