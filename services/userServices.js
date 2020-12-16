@@ -126,20 +126,18 @@ const userServices = {
     }
   },
   getFollowings: (req, res, callback) => {
-    const USERID = helpers.getUser(req).id
     return Promise.all([
       Followship.findAndCountAll({
-        where: { followerId: USERID },
+        where: { followerId: req.params.id },
       }),
       User.findOne({
-        where: { id: USERID },
+        where: { id: req.params.id },
         include: [{ model: User, as: 'Followings' }]
       })
     ]).then(([followings, user]) => {
       const data = followings.rows
       return callback([
         data[0], //為了過測試使用
-        data,
         followings,
         user
       ])
@@ -195,16 +193,3 @@ const userServices = {
   }
 }
 module.exports = userServices
-
-
-// [
-//   [
-//     {
-//       followerId: 1,
-//       followingId: 2,
-//       createdAt: '2020-12-16T11:52:39.000Z',
-//       updatedAt: '2020-12-16T11:52:39.000Z'
-//     }
-//   ],
-//   { count: 1, rows: [[Object]] }
-// ]
