@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
-const helpers = require('../../_helpers.js')
 const { User, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
+const helpers = require('../../_helpers.js')
+const { userDataTransform, dateFieldsToTimestamp } = require('../../modules/controllerFunctions.js')
+
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -60,8 +62,7 @@ const userController = {
         include: { model: User, as: 'Followings' }
       })
       if (!user) return res.json({ status: 'error', message: '查無此使用者編號' })
-      user = user.toJSON()
-      user.isFollowed = helpers.getUser(req).Followings.includes(user.id)
+      user = userDataTransform(req, user.dataValues)
       return res.json({ status: 'success', ...user })
     } catch (error) {
       next(error)
@@ -85,10 +86,7 @@ const userController = {
         limit: req.body.accumulatedNum || 10
       })
 
-      users = users.map(user => ({
-        ...user.dataValues,
-        isFollowed: helpers.getUser(req).Followings.includes(user.id)
-      }))
+      users = users.map(user => userDataTransform(req, user.dataValues))
 
       return res.json({ status: 'success', users })
     } catch (error) {
