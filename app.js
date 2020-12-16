@@ -8,7 +8,7 @@ const methodOverride = require('method-override')
 const app = express()
 const port = 3000
 
-const passport = require('passport')
+let passport = require('passport')
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
@@ -25,13 +25,6 @@ app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
   next()
 })
-
-//Yating: 我不太確定這函式放在這邊的用意，目前是寫在routes檔案內
-// use helpers.getUser(req) to replace req.user
-// function authenticated(req, res, next) {
-//   // passport.authenticate('jwt', { ses...
-// };
-
 
 app.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
 
