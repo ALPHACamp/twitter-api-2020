@@ -1,5 +1,6 @@
 const db = require('../models')
 const helpers = require('../_helpers')
+const bcrypt = require('bcrypt-nodejs')
 const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
@@ -49,6 +50,24 @@ const userServices = {
       .then(user => {
         return callback([user.toJSON()])
       })
+  },
+  putSetting: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    if (req.body.password !== req.body.confirmedPassword) {
+      return callback({ status: 'error', message: 'Password is different from confirmedPassword' })
+    }
+    else {
+      return User.findByPk(USERID)
+        .then((user) => {
+          user.update({
+            account: req.body.account,
+            name: req.body.name,
+            email: req.body.email,
+            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+          })
+          return callback({ status: 'success', message: 'User infromation are updated' })
+        })
+    }
   }
 }
 module.exports = userServices

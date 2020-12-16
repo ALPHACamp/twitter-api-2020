@@ -141,6 +141,11 @@ let userController = {
       return res.json(data)
     })
   },
+  putSetting: (req, res) => {
+    userServices.putSetting(req, res, data => {
+      return res.json(data)
+    })
+  }
 }
 
 module.exports = userController
