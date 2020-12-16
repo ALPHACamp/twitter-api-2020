@@ -56,6 +56,7 @@ router.get('/users/:id', authenticated, userController.getProfile)
 router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putProfile)
 router.get('/users/:id/replies', authenticated, userController.getUserReplies)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
+routes.get('/users/:id/followers', authenticated, userController.getFollowers)
 
 //followship
 router.post('/followships', authenticated, followshipController.addFollowing)

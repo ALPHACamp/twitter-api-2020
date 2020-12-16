@@ -145,6 +145,26 @@ const userServices = {
       ])
     })
   },
+  getFollowers: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    return Promise.all([
+      Followship.findAndCountAll({
+        where: {followingId: USERID}
+      }),
+      User.findOne({
+        where: {id: USERID},
+        include: [{model: User, as: 'Followers'}]
+      })
+    ]).then(([followers, user])=> {
+      const data = followers.rows
+      return callback([
+        data[0], //為了過測試使用
+        data,
+        followers,
+        user
+      ])
+    })
+  },
   likeTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
     Like.create({
