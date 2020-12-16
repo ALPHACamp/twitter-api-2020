@@ -8,13 +8,13 @@ module.exports = (sequelize, DataTypes) => {
       name: DataTypes.STRING,
       avatar: DataTypes.STRING,
       introduction: DataTypes.TEXT,
-      isAdmin: DataTypes.BOOLEAN,
       account: DataTypes.STRING,
-      cover: DataTypes.STRING
+      cover: DataTypes.STRING,
+      role: DataTypes.STRING
     },
     {}
   )
-  User.associate = function(models) {
+  User.associate = function (models) {
     User.hasMany(models.Reply)
     User.hasMany(models.Tweet)
     User.hasMany(models.Like)

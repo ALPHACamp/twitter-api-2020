@@ -3,7 +3,9 @@ const router = express.Router()
 
 const followshipController = require('../controllers/followshipController')
 
-router.post('/', followshipController.follow)
-router.delete('/:followingId', followshipController.unfollow)
+const { authUserSelf } = require('../middleware/auth')
+
+router.post('/', authUserSelf, followshipController.follow)
+router.delete('/:followingId', authUserSelf, followshipController.unfollow)
 
 module.exports = router

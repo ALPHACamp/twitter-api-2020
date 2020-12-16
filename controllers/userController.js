@@ -1,6 +1,9 @@
+const helpers = require('../_helpers')
+
 const userController = {
   readUser: (req, res) => {
-    res.send('Hello world!')
+    console.log(helpers.getUser(req).toJSON())
+    res.send(`Hello User ${helpers.getUser(req).name}!`)
   },
   readTweets: (req, res) => {
 
