@@ -123,9 +123,6 @@ let userController = {
       return res.json(data)
     })
   },
-  // getUserComments:(req,res) => {
-
-  // }
   likeTweet: (req, res) => {
     userServices.likeTweet(req, res, data => {
       return res.json(data)
