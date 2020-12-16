@@ -62,7 +62,17 @@ module.exports = {
 
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({ status: 'success', message: '成功登入', token })
+      return res.json({
+        status: 'success',
+        message: '成功登入',
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      })
     } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
