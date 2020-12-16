@@ -26,17 +26,17 @@ const userController = {
 
   signIn: async (req, res, next) => {
     try {
-      const { email, password } = req.body
-      const user = await User.findOne({ where: { email }, raw: true })
+      const { account, password } = req.body
+      const user = await User.findOne({ where: { account }, raw: true })
 
       if (!bcrypt.compareSync(password, user.password)) return res.json({
         status: 'error',
-        message: 'Wrong email or password.'
+        message: '帳號或密碼錯誤'
       })
 
       return res.json({
         status: 'success',
-        message: 'Successfully login',
+        message: '成功登入',
         token: jwt.sign({ id: user.id }, process.env.JWT_SECRET),
         user: { id: user.id, name: user.name, email: user.email, role: user.role }
       })
