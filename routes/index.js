@@ -14,7 +14,8 @@ const { authToken, authUserRole, authAdminRole } = require('../middleware/auth')
 // routes
 // tweet
 router.post('/api/tweets', authToken, authUserRole, tweetController.createTweet)
-// router.get('/api/tweets/:id', tweetController.getTweet)
+router.get('/api/tweets', authToken, authUserRole, tweetController.getTweets)
+router.get('/api/tweets/:id', authToken, authUserRole, tweetController.getTweet)
 router.put('/api/tweets/:id', authToken, authUserRole, tweetController.updateTweet)
 router.delete('/api/tweets/:id', authToken, authUserRole, tweetController.deleteTweet)
 
