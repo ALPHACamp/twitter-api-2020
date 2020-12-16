@@ -26,6 +26,7 @@ const userServices = {
           follower: follower,
           following: following,
           user: user,
+          name: user.name,
           tweets: tweets
         })
       })
