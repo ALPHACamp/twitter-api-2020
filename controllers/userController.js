@@ -44,4 +44,28 @@ module.exports = {
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
     }
   },
+  login: async (req, res, next) => {
+    try {
+      const { account, password } = req.body
+
+      if (!account.trim() || !password.trim()) {
+        return res.json({ status: 'error', message: '帳號和密碼不可為空白' })
+      }
+
+      const user = await User.findOne({ where: { account } })
+      if (!user) {
+        return res.status(401).json({ status: 'error', message: '帳號或密碼錯誤' }) //in case of brute force attack on email
+      }
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ status: 'error', message: '帳號或密碼錯誤' })
+      }
+
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
+      return res.json({ status: 'success', message: '成功登入', token })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
 }

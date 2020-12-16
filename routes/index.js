@@ -14,6 +14,7 @@ const { authToken, authUserRole, authAdminRole } = require('../middleware/auth')
 //routes
 
 //users
+router.post('/api/login', userController.login)
 router.post('/api/users', userController.createUser)
 
 module.exports = router
