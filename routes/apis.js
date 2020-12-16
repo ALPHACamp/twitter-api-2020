@@ -58,4 +58,5 @@ router.get('/users/:id/replies', authenticated, userController.getUserReplies)
 
 //followship
 router.post('/followships', authenticated, followshipController.addFollowing)
+router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
 module.exports = router

@@ -11,9 +11,23 @@ const followshipServices = {
       followerId: USERID,
       followingId: req.body.id
     }).then(followship => {
-      callback({ status: 'success', message: ''})
+      callback({ status: 'success', message: '' })
     })
   },
+  removeFollowing: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    return Followship.findOne({
+      where: {
+        followerId: USERID,
+        followingId: req.params.followingId
+      }
+    }).then((followship)=> {
+      followship.destroy()
+      .then(followship=> {
+        callback({status: 'success', message: ''})
+      })
+    })
+  }
 }
 
 module.exports = followshipServices

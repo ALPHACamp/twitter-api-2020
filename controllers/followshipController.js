@@ -7,6 +7,13 @@ const followshipController = {
         return res.json(data)
       }
     })
+  },
+  removeFollowing: (req, res) => {
+    followshipServices.removeFollowing(req, res, (data) => {
+      if (data['status'] === 'success') {
+        return res.json(data)
+      }
+    })
   }
 }
 
