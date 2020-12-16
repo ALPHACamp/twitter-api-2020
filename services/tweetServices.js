@@ -8,7 +8,8 @@ const Like = db.Like
 const tweetServices = {
   getTweets: (req, res, callback) => {
     Tweet.findAll({
-      raw: true, nest: true, include: [
+      // raw: true, nest: true,
+      include: [
         User,
         { model: Reply, include: [User] },
         { model: Like, include: [User] }
@@ -21,12 +22,13 @@ const tweetServices = {
   getTweet: (req, res, callback) => {
     Tweet.findByPk(req.params.tweet_id, {
       include: [
+        User,
         { model: Like, include: [User] },
         { model: Reply, include: [User] }
       ]
     })
       .then(tweet => {
-        return callback({ tweet: tweet.toJSON() })
+        return callback([tweet])
       })
   },
   postTweet: (req, res, callback) => {

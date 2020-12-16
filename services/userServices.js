@@ -31,10 +31,13 @@ const userServices = {
     })
   },
   getUserReplies: (req, res, callback) => {
-    const USERID = helpers.getUser(req).id
-    User.findByPk(USERID, { include: [{ model: Tweet, as: 'RepliedTweets' }] })
+    User.findByPk(req.params.id, {
+      include: [
+        { model: Reply, include: [{ model: Tweet, as: 'RepliedTweets' }] }
+      ]
+    })
       .then(user => {
-        return callback([user.toJSON()])
+        return callback([user])
       })
   },
   getUserLikes: (req, res, callback) => {
