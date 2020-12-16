@@ -17,7 +17,7 @@ const userController = {
       })
       return res.json({
         status: 'success',
-        message: 'Successfully sign up.'
+        message: '成功註冊'
       })
     } catch (error) {
       next(error)
@@ -49,7 +49,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
-      if (!id) return res.json({ status: 'error', message: 'Invalid user id.' })
+      if (!id) return res.json({ status: 'error', message: '查無此使用者編號' })
       let user = await User.findByPk(id, {
         attributes: {
           include: [
@@ -59,7 +59,7 @@ const userController = {
         },
         include: { model: User, as: 'Followings' }
       })
-      if (!user) return res.json({ status: 'error', message: 'Invalid user id.' })
+      if (!user) return res.json({ status: 'error', message: '查無此使用者編號' })
       user = user.toJSON()
       user.isFollowed = helpers.getUser(req).Followings.includes(user.id)
       return res.json({ status: 'success', ...user })
