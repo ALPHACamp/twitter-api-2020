@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     introduction: DataTypes.TEXT,
     role: {
       type: DataTypes.STRING,
-      defaultValue: 'role'
+      defaultValue: 'user'
     },
     account: DataTypes.STRING,
     cover: DataTypes.STRING
