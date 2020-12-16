@@ -33,6 +33,13 @@ const authController = {
   register: (req, res) => {
     const { account, name, email, password, checkPassword } = req.body
 
+    if (!account || !name || !email || !password || !checkPassword) {
+      return res.status(400).json({
+        status: 'failure',
+        message: 'all fields are required'
+      })
+    }
+
     if (password !== checkPassword) {
       return res.status(409).json({
         status: 'failure',
