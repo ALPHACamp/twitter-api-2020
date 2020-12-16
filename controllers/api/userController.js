@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
-const { User, Sequelize, sequelize } = require('../../models')
+const { User, Tweet, Like, Reply, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
 const { userDataTransform, dateFieldsToTimestamp } = require('../../modules/controllerFunctions.js')
@@ -93,7 +93,27 @@ const userController = {
     }
   },
 
-  getTweets: async (req, res, next) => { },
+  getTweets: async (req, res, next) => {
+    try {
+      const UserId = Number(req.params.id)
+      if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
+      const tweets = await sequelize.query(`
+        SELECT t.*, UNIX_TIMESTAMP(t.createdAt) AS createdAt,
+          UNIX_TIMESTAMP(t.updatedAt) AS updatedAt,
+          COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
+          IF(l.UserId = ${UserId}, 1, 0) AS isLiked
+        FROM Tweets as t
+        LEFT JOIN Replies as r ON r.TweetId = t.id
+        LEFT JOIN Likes as l ON l.TweetId = t.id
+        WHERE t.UserId = ${UserId}
+        GROUP BY t.id
+        ORDER BY t.createdAt DESC;
+      `, { type: sequelize.QueryTypes.SELECT })
+      return res.json(tweets)
+    } catch (error) {
+      next(error)
+    }
+  },
 
   getLikeTweets: async (req, res, next) => { },
 
