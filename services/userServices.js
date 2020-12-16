@@ -5,8 +5,187 @@ const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
 const Like = db.Like
+const Followship = db.Followship
+const fs = require('fs')
 
 const userServices = {
+  getProfile: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    return Promise.all([
+      Followship.findAndCountAll({ where: { followerId: USERID } }),
+      Followship.findAndCountAll({ where: { followingId: USERID } }),
+      User.findOne({
+        where: { id: USERID },
+        include: [
+          { model: Tweet, as: 'LikedTweets' }
+        ]
+      }),
+      Tweet.findAll({ where: { UserId: USERID } })
+    ])
+      .then(([follower, following, user, tweets]) => {
+        callback({
+          follower: follower,
+          following: following,
+          user: user,
+          name: user.name,
+          tweets: tweets
+        })
+      })
+  },
+  putProfile: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    if (!req.body.name) {
+      callback({ status: 'error', message: '請輸入name!' })
+    }
+
+    if (req.files) {
+      if (req.files['cover'] && !req.files['avatar']) {
+        const cover = req.files['cover'][0]
+
+        fs.readFile(cover.path, (err, data) => {
+          if (err) console.log('Error: ', err)
+          fs.writeFile(`upload/${cover.originalname}`, data, () => {
+            return User.findByPk(USERID)
+              .then((user) => {
+                user.update({
+                  name: req.body.name,
+                  introduction: req.body.introduction,
+                  cover: cover ? `/upload/${cover.originalname}` : user.cover,
+                }).then((user) => {
+                  callback({ status: 'success', message: 'user was successfully to update' })
+                })
+              })
+          })
+        })
+      } else if (req.files['avatar'] && !req.files['cover']) {
+        const avatar = req.files['avatar'][0]
+
+        fs.readFile(avatar.path, (err, data) => {
+          if (err) console.log('Error: ', err)
+          fs.writeFile(`upload/${avatar.originalname}`, data, () => {
+            return User.findByPk(USERID)
+              .then((user) => {
+                user.update({
+                  name: req.body.name,
+                  introduction: req.body.introduction,
+                  avatar: avatar ? `/upload/${avatar.originalname}` : user.avatar,
+                }).then((user) => {
+                  callback({ status: 'success', message: 'user was successfully to update' })
+                })
+              })
+          })
+        })
+      } else if (req.files['avatar'] && req.files['cover']) {
+        const avatar = req.files['avatar'][0]
+        const cover = req.files['cover'][0]
+        return Promise.all([
+          fs.readFile(avatar.path, (err, data) => {
+            if (err) console.log('Error: ', err)
+            fs.writeFile(`upload/${avatar.originalname}`, data, () => {
+              return User.findByPk(USERID)
+                .then((user) => {
+                  user.update({
+                    name: req.body.name,
+                    introduction: req.body.introduction,
+                    avatar: avatar ? `/upload/${avatar.originalname}` : user.avatar,
+                  })
+                })
+            })
+          }),
+          fs.readFile(cover.path, (err, data) => {
+            if (err) console.log('Error: ', err)
+            fs.writeFile(`upload/${cover.originalname}`, data, () => {
+              return User.findByPk(USERID)
+                .then((user) => {
+                  user.update({
+                    name: req.body.name,
+                    introduction: req.body.introduction,
+                    cover: cover ? `/upload/${cover.originalname}` : user.cover,
+                  })
+                })
+            })
+          })
+        ])
+          .then((user) => {
+            callback({ status: 'success', message: 'user was successfully to update' })
+          })
+      }
+    }
+    else {
+      User.findByPk(USERID)
+        .then(user => {
+          user.update({
+            name: req.body.name,
+            introduction: req.body.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          })
+        })
+        .then((user) => {
+          callback({ status: 'success', message: 'user was successfully to update' })
+        })
+    }
+  },
+  getTopUsers: (req, res, callback) => {
+    return User.findAll({
+      include: [
+        { model: User, as: 'Followers' }
+      ]
+    }).then(users => {
+      users = users.map(user => ({
+        ...user.dataValues,
+        FollowerCount: user.Followers.length,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
+      return callback({ users: users })
+    })
+  },
+  getFollowings: (req, res, callback) => {
+    return Promise.all([
+      Followship.findAndCountAll({
+        where: { followerId: req.params.id },
+      }),
+      User.findOne({
+        where: { id: req.params.id },
+        include: [{ model: User, as: 'Followings' }]
+      })
+    ]).then(([followings, user]) => {
+      const data = followings.rows
+      return callback([
+        data[0], //為了過測試使用
+        followings,
+        user
+      ])
+    })
+  },
+  getFollowers: (req, res, callback) => {
+    return Promise.all([
+      Followship.findAndCountAll({
+        where: { followingId: req.params.id }
+      }),
+      User.findOne({
+        where: { id: req.params.id },
+        include: [{ model: User, as: 'Followers' }]
+      })
+    ]).then(([followers, user]) => {
+      const data = followers.rows
+      return callback([
+        data[0], //為了過測試使用
+        followers,
+        user
+      ])
+    })
+  },
+  getTweets: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    Tweet.findAll({
+      where: { UserId: USERID }
+    })
+      .then(tweets => {
+        return callback(tweets)
+      })
+  },
   likeTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
     Like.create({

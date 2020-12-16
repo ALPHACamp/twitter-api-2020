@@ -37,6 +37,7 @@ describe('# followship requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             db.Followship.findByPk(1).then(followship => {
+              console.log(followship)
               followship.followerId.should.equal(1);
               followship.followingId.should.equal(2);
               return done();
