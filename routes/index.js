@@ -17,4 +17,7 @@ const { authToken, authUserRole, authAdminRole } = require('../middleware/auth')
 router.post('/api/login', userController.login)
 router.post('/api/users', userController.createUser)
 
+//admin
+router.get('/api/admin/users', authToken, authAdminRole, userController.getUsers)
+
 module.exports = router
