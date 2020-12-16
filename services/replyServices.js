@@ -26,7 +26,7 @@ const replyServices = {
           ]
         })
         .then(tweet => {
-          return callback({ tweet: tweet.toJSON() })
+          return callback([tweet.toJSON()])
         })
 
     })

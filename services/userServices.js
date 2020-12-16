@@ -33,14 +33,14 @@ const userServices = {
     const USERID = helpers.getUser(req).id
     User.findByPk(USERID, { include: [{ model: Tweet, as: 'RepliedTweets' }] })
       .then(user => {
-        return callback({ user })
+        return callback([user.toJSON()])
       })
   },
   getUserLikes: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
     User.findByPk(USERID, { include: [{ model: Tweet, as: 'LikedTweets' }] })
       .then(user => {
-        return callback({ user })
+        return callback([user.toJSON()])
       })
   }
 }
