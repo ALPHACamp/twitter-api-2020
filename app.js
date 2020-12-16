@@ -18,6 +18,7 @@ app.use(session({ secret: 'itismyserect', resave: false, saveUninitialized: fals
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(flash())
+app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use((req, res, next) => {
   res.locals.success_message = req.flash('success_message')
@@ -26,21 +27,22 @@ app.use((req, res, next) => {
   next()
 })
 
+
 //Yating: 我不太確定這函式放在這邊的用意，目前是寫在routes檔案內
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next) {
   // const user = helpers.getUser(req)
   // return passport.authenticate('jwt', { session: false })
   // next()
-    passport.authenticate("jwt", { session: false }, (err, user, info) => {
-        if (!user) {
-            return res
-                .status(401)
-                .json({ status: "error", message: "No auth token" })
-        }
-        req.user = user
-        return next()
-    })(req, res, next)
+  passport.authenticate("jwt", { session: false }, (err, user, info) => {
+    if (!user) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "No auth token" })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
 };
 
 

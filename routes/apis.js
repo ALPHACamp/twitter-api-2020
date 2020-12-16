@@ -2,6 +2,9 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
 const authenticated = passport.authenticate('jwt', { session: false })
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
@@ -37,5 +40,6 @@ router.delete('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
 //user
 router.get('/users/:id', authenticated, userController.getProfile)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putProfile)
 router.get('/users/:id/replies', authenticated, userController.getUserReplies)
 module.exports = router
