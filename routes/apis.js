@@ -2,7 +2,19 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 
-const authenticated = passport.authenticate('jwt', { session: false })
+// const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = function (req, res, next) {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (!user) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No auth token' })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
+}
+
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
     if (req.user.role === 'Admin') { return next() }
@@ -33,8 +45,11 @@ router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 //like
 router.post('/tweets/:id/like', authenticated, userController.likeTweet)
-router.delete('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
+router.post('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
 //user
-router.get('/users/:id/replies', authenticated, userController.getUserReplies)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/setting', authenticated, userController.getSettingPage)
+router.put('/users/:id/setting', authenticated, userController.putSetting)
 module.exports = router

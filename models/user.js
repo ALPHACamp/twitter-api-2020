@@ -6,11 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING,
     name: DataTypes.STRING,
     avatar: DataTypes.STRING,
+    cover: DataTypes.STRING,
     introduction: DataTypes.TEXT,
     role: DataTypes.STRING,
   }, {});
   User.associate = function (models) {
-    // User.hasMany(models.Tweet)
+    User.hasMany(models.Tweet)
     User.hasMany(models.Reply)
     User.hasMany(models.Like)
     User.belongsToMany(models.Tweet, {

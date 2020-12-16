@@ -15,7 +15,7 @@ const tweetServices = {
       ]
     })
       .then(tweets => {
-        return callback({ tweets })
+        return callback(tweets)
       })
   },
   getTweet: (req, res, callback) => {

@@ -26,13 +26,6 @@ app.use((req, res, next) => {
   next()
 })
 
-//Yating: 我不太確定這函式放在這邊的用意，目前是寫在routes檔案內
-// use helpers.getUser(req) to replace req.user
-// function authenticated(req, res, next) {
-//   // passport.authenticate('jwt', { ses...
-// };
-
-
 app.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
 
 require('./routes')(app)
