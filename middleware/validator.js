@@ -36,13 +36,13 @@ const registerRules = () => {
 
 const loginRules = () => {
   return [
-    check('email').isEmail().withMessage('信箱格式錯誤'),
+    check('account').exists({ checkFalsy: true }).withMessage('帳號不可為空'),
     check('password').isLength({ min: 3, max: 8 }).withMessage('密碼錯誤：長度需界在 3-8 之間'),
-    check('email')
-      .custom(async (email) => {
-        const user = await User.findOne({ where: { email: email } })
+    check('account')
+      .custom(async (account) => {
+        const user = await User.findOne({ where: { account } })
         if (!user) {
-          throw new Error('此信箱尚未被註冊過，請先完成註冊程序')
+          throw new Error('此帳號尚未被註冊過，請先完成註冊程序')
         }
         if (user.role === 'admin') throw new Error('Unauthorized')
         return true
