@@ -24,6 +24,7 @@ const adminController = {
         status: 'success',
         message: `Successfully login. Welcome ${user.role} ${user.name}.`,
         token: jwt.sign({ id: user.id }, process.env.JWT_SECRET),
+        user: { id: user.id, name: user.name, email: user.email, role: user.role }
       })
 
     } catch (error) {
@@ -47,7 +48,7 @@ const adminController = {
         element.createdAt = element.createdAt.getTime()
         return element
       })
-      return res.json({ tweets })
+      return res.json({ status: 'success', tweets })
     } catch (error) {
       next(error)
     }
@@ -80,13 +81,14 @@ const adminController = {
           exclude: ['password', 'createdAt', 'updatedAt'],
         },
         order: [
-          [sequelize.literal('tweetsCount'), 'DESC']
+          [sequelize.literal('tweetsCount'), 'DESC'],
+          [sequelize.literal('id'), 'ASC']
         ],
         // limit: 10,
         raw: true,
         nest: true,
       })
-      return res.json({ status: 'success', users })
+      return res.json(users)
     } catch (error) {
       next(error)
     }
