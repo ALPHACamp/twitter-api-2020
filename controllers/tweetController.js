@@ -2,8 +2,6 @@ const { Tweet, User, Like, sequelize } = require('../models')
 const QueryTypes = require('sequelize')
 
 const { getUser } = require('../_helpers')
-const { NUMBER } = require('sequelize')
-// getUser(req).id
 
 module.exports = {
   createTweet: async (req, res, next) => {
@@ -16,7 +14,7 @@ module.exports = {
       if (description.length > 140) {
         return res.status(200).json({ status: 'error', message: '推文字數不可超過 140 字' })
       }
-      await Tweet.create({ description, UserId: 999 })
+      await Tweet.create({ description, UserId: getUser(req).id })
       return res.status(200).json({
         status: 'success',
         message: '新增推文成功'
@@ -54,7 +52,7 @@ module.exports = {
       if (!tweet) {
         return res.status(200).json({ status: 'error', message: '找不到推文' })
       }
-      if (tweet.UserId !== 999) {
+      if (tweet.UserId !== getUser(req).id) {
         return res.status(200).json({ status: 'error', message: '使用者非推文作者，無權限更新' })
       }
       const description = req.body.description
@@ -80,7 +78,7 @@ module.exports = {
       if (!tweet) {
         return res.status(200).json({ status: 'error', message: '找不到推文' })
       }
-      if (tweet.UserId !== 999 && getUser(req).role !== 'admin') {
+      if (tweet.UserId !== getUser(req).id && getUser(req).role !== 'admin') {
         return res
           .status(200)
           .json({ status: 'error', message: '使用者非推文作者或管理員，無法刪除' })
