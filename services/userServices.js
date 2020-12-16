@@ -42,6 +42,13 @@ const userServices = {
       .then(user => {
         return callback([user.toJSON()])
       })
+  },
+  getSettingPage: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    User.findByPk(USERID)
+      .then(user => {
+        return callback([user.toJSON()])
+      })
   }
 }
 module.exports = userServices

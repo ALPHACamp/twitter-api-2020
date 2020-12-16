@@ -136,6 +136,11 @@ let userController = {
       return res.json(data)
     })
   },
+  getSettingPage: (req, res) => {
+    userServices.getSettingPage(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 module.exports = userController

@@ -50,4 +50,5 @@ router.post('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 //user
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/setting', authenticated, userController.getSettingPage)
 module.exports = router
