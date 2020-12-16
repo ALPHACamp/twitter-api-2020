@@ -82,8 +82,8 @@ const userController = {
           ]
         },
         order: [[sequelize.literal('FollowersCount'), 'DESC']],
-        offset: req.body.startIndex || 0,
-        limit: req.body.accumulatedNum || 10
+        offset: Number(req.query.startIndex) || 0,
+        limit: Number(req.query.accumulatedNum) || 10
       })
 
       users = users.map(user => userDataTransform(req, user.dataValues))
