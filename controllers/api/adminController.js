@@ -57,7 +57,9 @@ const adminController = {
     try {
       const tweetId = req.params.id
       const tweet = await Tweet.findByPk(tweetId)
-      await tweet.destroy()
+      if (tweet) {
+        await tweet.destroy()
+      }
 
       return res.json({ status: 'success', message: 'Delete successfully.' })
     } catch (error) {
