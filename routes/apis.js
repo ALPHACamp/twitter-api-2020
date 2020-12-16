@@ -2,7 +2,9 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 
-// const authenticated = passport.authenticate('jwt', { session: false })
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
 const authenticated = function (req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (!user) {
@@ -27,6 +29,7 @@ const authenticatedAdmin = (req, res, next) => {
 const tweetController = require('../controllers/tweetController')
 const userController = require('../controllers/userController')
 const replyController = require('../controllers/replyController')
+const followshipController = require('../controllers/followshipController')
 
 //登入登出註冊
 router.post('/signin', userController.signIn)
@@ -48,8 +51,20 @@ router.post('/tweets/:id/like', authenticated, userController.likeTweet)
 router.post('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
 //user
+router.get('/users/top', authenticated, userController.getTopUsers)
+router.get('/users/:id', authenticated, userController.getProfile)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putProfile)
+router.get('/users/:id/replies', authenticated, userController.getUserReplies)
+router.get('/users/:id/followings', authenticated, userController.getFollowings)
+router.get('/users/:id/followers', authenticated, userController.getFollowers)
+router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:id/setting', authenticated, userController.getSettingPage)
 router.put('/users/:id/setting', authenticated, userController.putSetting)
+
+//followship
+router.post('/followships', authenticated, followshipController.addFollowing)
+router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
+
 module.exports = router

@@ -113,9 +113,36 @@ let userController = {
         })
     }
   },
-  // getUserComments:(req,res) => {
-
-  // }
+  getProfile: (req, res) => {
+    userServices.getProfile(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  putProfile: (req, res) => {
+    userServices.putProfile(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  getTopUsers: (req, res) => {
+    userServices.getTopUsers(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  getFollowings: (req, res) => {
+    userServices.getFollowings(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  getFollowers: (req, res) => {
+    userServices.getFollowers(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  getTweets: (req, res) => {
+    userServices.getTweets(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   likeTweet: (req, res) => {
     userServices.likeTweet(req, res, data => {
       return res.json(data)
