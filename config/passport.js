@@ -14,8 +14,11 @@ const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
     if (!user) return next(null, false)
     if (user.dataValues.role !== 'admin') {
       user = await User.findByPk(jwt_payload.id, {
-        include: { model: User, as: 'Followings' }
+        include: { model: User, as: 'Followings', attributes: ['id'], through: { attributes: [] } }
       })
+      user = user.toJSON()
+      user.Followings = user.Followings.map(following => following.id)
+      return next(null, user)
     }
     return next(null, user.toJSON())
   } catch (error) {
