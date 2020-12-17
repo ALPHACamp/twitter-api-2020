@@ -7,9 +7,9 @@ const session = require('express-session')
 const methodOverride = require('method-override')
 const helpers = require('./_helpers')
 
-// if (process.env.NODE_ENV !== 'production') {
-//   require('dotenv').config()
-// }
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 const passport = require('./config/passport')
 const app = express()

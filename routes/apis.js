@@ -28,7 +28,7 @@ router.delete('/tweets/:tweet_id/replies', replyController.removeReply)
 
 // userController
 router.post('/users', userController.signUp)
-router.post('/users', userController.signIn)
+router.post('/signin', userController.signIn)
 router.get('/users', userController.getCurrentUser)
 router.get('/users/top', userController.getTopUsers)
 router.get('/users/:id', userController.getUser)
