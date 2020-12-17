@@ -11,8 +11,8 @@ module.exports = {
             id: (UserId - 2) * 10 + i,
             UserId,
             description: faker.lorem.sentence(Math.floor(Math.random() * 11) + 5).slice(0, 140),
-            createdAt: new Date(),
-            updatedAt: new Date()
+            createdAt: new Date(2020, Math.ceil(Math.random() * 3) + 1, Math.ceil(Math.random() * 20)),
+            updatedAt: new Date(2020, Math.ceil(Math.random() * 3) + 1, Math.ceil(Math.random() * 20))
           })
         }
       }

@@ -21,8 +21,8 @@ module.exports = {
         cover: 'https://loremflickr.com/598/200/landscape/?random=' + Math.floor(Math.random() * 100),
         avatar: 'https://loremflickr.com/140/140/people/?random=' + Math.floor(Math.random() * 100),
         introduction: faker.lorem.text(),
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date(2020, 1, 1),
+        updatedAt: new Date(2020, 1, 1)
       }))])
     } catch (error) {
       console.log(error)

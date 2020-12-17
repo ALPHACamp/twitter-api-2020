@@ -12,8 +12,8 @@ module.exports = {
             TweetId,
             UserId: Math.ceil(Math.random() * 5) + 1,
             comment: faker.lorem.text(),
-            createdAt: new Date(),
-            updatedAt: new Date()
+            createdAt: new Date(2020, Math.ceil(Math.random() * 3) + 4, Math.ceil(Math.random() * 20)),
+            updatedAt: new Date(2020, Math.ceil(Math.random() * 3) + 4, Math.ceil(Math.random() * 20))
           })
         }
       }
