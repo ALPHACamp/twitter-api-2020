@@ -7,12 +7,13 @@ module.exports = {
       const tweets = []
       for (let UserId = 2; UserId <= 6; UserId++) {
         for (let i = 1; i <= 10; i++) {
+          const date = new Date(2020, Math.ceil(Math.random() * 3) + 1, Math.ceil(Math.random() * 20))
           tweets.push({
             id: (UserId - 2) * 10 + i,
             UserId,
             description: faker.lorem.sentence(Math.floor(Math.random() * 11) + 5).slice(0, 140),
-            createdAt: new Date(2020, Math.ceil(Math.random() * 3) + 1, Math.ceil(Math.random() * 20)),
-            updatedAt: new Date(2020, Math.ceil(Math.random() * 3) + 1, Math.ceil(Math.random() * 20))
+            createdAt: date,
+            updatedAt: date
           })
         }
       }

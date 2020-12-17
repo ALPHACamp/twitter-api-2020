@@ -7,13 +7,14 @@ module.exports = {
       const replies = []
       for (let TweetId = 1; TweetId <= 5 * 10; TweetId++) {
         for (let i = 1; i <= 3; i++) {
+          const date = new Date(2020, Math.ceil(Math.random() * 3) + 4, Math.ceil(Math.random() * 20))
           replies.push({
             id: (TweetId - 1) * 3 + i,
             TweetId,
             UserId: Math.ceil(Math.random() * 5) + 1,
             comment: faker.lorem.text(),
-            createdAt: new Date(2020, Math.ceil(Math.random() * 3) + 4, Math.ceil(Math.random() * 20)),
-            updatedAt: new Date(2020, Math.ceil(Math.random() * 3) + 4, Math.ceil(Math.random() * 20))
+            createdAt: date,
+            updatedAt: date
           })
         }
       }
