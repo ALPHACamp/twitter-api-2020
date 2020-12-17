@@ -115,7 +115,29 @@ const userController = {
     }
   },
 
-  getLikeTweets: async (req, res, next) => { },
+  getLikeTweets: async (req, res, next) => {
+    try {
+      const UserId = Number(req.params.id)
+      if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
+      const likedTweets = await sequelize.query(`
+          SELECT t.*, l.TweetId,
+            COUNT(r.id) AS repliesCount, 
+            (SELECT COUNT(*) FROM Likes AS l2 WHERE l2.TweetId = t.id) AS likesCount,
+            UNIX_TIMESTAMP(t.createdAt) AS createdAt,
+            UNIX_TIMESTAMP(t.updatedAt) AS updatedAt,  
+            IF(l.UserId = ${UserId}, 1, 0) AS isLiked
+          FROM Tweets as t  
+          JOIN Likes as l ON l.TweetId = t.id       
+          LEFT JOIN Replies as r ON r.TweetId = t.id
+          WHERE l.UserId = ${UserId}     
+          GROUP BY t.id
+          ORDER BY t.createdAt DESC;
+      `, { type: sequelize.QueryTypes.SELECT })
+      return res.json(likedTweets)
+    } catch (error) {
+      next(error)
+    }
+  },
 
   getFollowers: async (req, res, next) => { },
 
