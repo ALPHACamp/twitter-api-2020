@@ -26,6 +26,14 @@ const adminController = {
       return res.json(users)
     }).catch(err => console.error(err))
   },
+  readTweets: (req, res) => {
+    Tweet.findAll({
+      include: [{
+        model: User,
+        attributes: ['id', 'account', 'name', 'avatar']
+      }]
+    }).then(tweets => res.json(tweets))
+  },
   deleteTweet: (req, res) => {
 
   }
