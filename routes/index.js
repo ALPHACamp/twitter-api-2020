@@ -22,6 +22,7 @@ router.delete('/api/tweets/:id', authToken, authUserRole, tweetController.delete
 //users
 router.post('/api/login', userController.login)
 router.post('/api/users', userController.createUser)
+router.get('/api/users/top', authToken, authUserRole, userController.getTopUsers)
 
 //admin
 router.get('/api/admin/users', authToken, authAdminRole, userController.getUsers)

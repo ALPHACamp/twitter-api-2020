@@ -106,5 +106,22 @@ module.exports = {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
     }
-  }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      let topUsers = await sequelize.query(`
+        SELECT F.followingId, name,account,avatar, IF(isFollowed.followingId, true, false) AS isFollowed
+        FROM Users AS U
+        INNER JOIN (SELECT followingId, COUNT(followingId) AS followerCount FROM Followships WHERE followingId <> ${req.user.id} GROUP BY followingId LIMIT 10) AS F
+        ON U.id = F.followingId
+        LEFT JOIN (SELECT followingId FROM Followships WHERE followerId = ${req.user.id} ) AS isFollowed
+        ON U.id = isFollowed.followingId
+        ORDER BY F.followingId;`,
+        { type: QueryTypes.SELECT })
+      res.json(topUsers)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
 }
