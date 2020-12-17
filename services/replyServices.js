@@ -2,6 +2,7 @@ const db = require('../models')
 const Reply = db.Reply
 const Tweet = db.Tweet
 const User = db.User
+const Like = db.Like
 const helpers = require('../_helpers')
 
 const replyServices = {
@@ -16,19 +17,18 @@ const replyServices = {
     })
   },
   getReply: (req, res, callback) => {
-    Reply.findAll({
-      raw: true, nest: true
-    }).then(reply => {
-      Tweet.findByPk(req.params.tweet_id,
-        {
-          include: [
-            { model: Reply, include: [User] }
-          ]
+    Tweet.findByPk(req.params.tweet_id, {
+      include: [
+        User
+      ]
+    }).then(tweet => {
+      Reply.findAndCountAll({ include: [User], where: { TweetId: req.params.tweet_id } })
+        .then(replies => {
+          Like.findAndCountAll({ where: { TweetId: req.params.tweet_id } })
+            .then(likes => {
+              return callback({ tweet, replies, likes })
+            })
         })
-        .then(tweet => {
-          return callback([tweet.toJSON()])
-        })
-
     })
   }
 }

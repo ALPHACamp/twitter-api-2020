@@ -38,14 +38,17 @@ const tweetServices = {
   getTweet: (req, res, callback) => {
     Tweet.findByPk(req.params.tweet_id, {
       include: [
-        User,
-        { model: Like, include: [User] },
-        { model: Reply, include: [User] }
+        User
       ]
+    }).then(tweet => {
+      Reply.findAndCountAll({ include: [User], where: { TweetId: req.params.tweet_id } })
+        .then(replies => {
+          Like.findAndCountAll({ where: { TweetId: req.params.tweet_id } })
+            .then(likes => {
+              return callback({ tweet, replies, likes })
+            })
+        })
     })
-      .then(tweet => {
-        return callback([tweet])
-      })
   },
   postTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
