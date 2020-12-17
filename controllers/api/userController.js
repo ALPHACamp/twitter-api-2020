@@ -65,7 +65,7 @@ const userController = {
       })
       if (!user) return res.json({ status: 'error', message: '查無此使用者編號' })
       user = tagIsFollowed(req, user.toJSON())
-      return res.json({ status: 'success', ...user })
+      return res.json(user)
     } catch (error) {
       next(error)
     }
@@ -91,7 +91,7 @@ const userController = {
 
       users = users.map(user => tagIsFollowed(req, user.toJSON()))
 
-      return res.json({ status: 'success', users })
+      return res.json(users)
     } catch (error) {
       next(error)
     }
