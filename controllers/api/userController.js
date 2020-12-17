@@ -167,8 +167,8 @@ const userController = {
           through: { attributes: [] }
         }]
       })
-
-      return res.json(followers.toJSON().Followers)
+      followers = followers.toJSON().Followers.map(follower => tagIsFollowed(req, follower))
+      return res.json(followers)
     } catch (error) {
       next(error)
     }
@@ -191,7 +191,9 @@ const userController = {
         }]
       })
 
-      return res.json(followings.toJSON().Followings)
+      followings = followings.toJSON().Followings.map(following => tagIsFollowed(req, following))
+
+      return res.json(followings)
     } catch (error) {
       next(error)
     }
