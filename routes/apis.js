@@ -52,7 +52,7 @@ router.post('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
 //user
 router.get('/users/top', authenticated, userController.getTopUsers)
-router.get('/users/:id', authenticated, userController.getProfile)
+
 router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putProfile)
 router.get('/users/:id/replies', authenticated, userController.getUserReplies)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
@@ -62,7 +62,7 @@ router.get('/users/:id/replied_tweets', authenticated, userController.getUserRep
 router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:id/setting', authenticated, userController.getSettingPage)
 router.put('/users/:id/setting', authenticated, userController.putSetting)
-
+router.get('/users/:id', authenticated, userController.getProfile)
 //followship
 router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)

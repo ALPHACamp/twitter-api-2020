@@ -8,16 +8,32 @@ const Like = db.Like
 const tweetServices = {
   getTweets: (req, res, callback) => {
     Tweet.findAll({
-      // raw: true, nest: true,
       include: [
-        User,
+        User, Like,
         { model: Reply, include: [User] },
-        { model: Like, include: [User] }
+        // { model: Like, include: [User] }
       ]
+    }).then(tweets => {
+      tweets = tweets.map(r => ({
+        ...r.dataValues,
+        likeTweetCount: r.Likes.length,
+        replyTweetCount: r.Replies.length
+      }))
+
+      return callback(tweets)
+
     })
-      .then(tweets => {
-        return callback(tweets)
-      })
+    // Tweet.findAll({
+    //   // raw: true, nest: true,
+    //   include: [
+    //     User,
+    //     { model: Reply, include: [User] },
+    //     { model: Like, include: [User] }
+    //   ]
+    // })
+    //   .then(tweets => {
+    //     return callback(tweets)
+    //   })
   },
   getTweet: (req, res, callback) => {
     Tweet.findByPk(req.params.tweet_id, {

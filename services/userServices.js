@@ -10,25 +10,24 @@ const fs = require('fs')
 
 const userServices = {
   getProfile: (req, res, callback) => {
-    const USERID = helpers.getUser(req).id
     return Promise.all([
-      Followship.findAndCountAll({ where: { followerId: USERID } }),
-      Followship.findAndCountAll({ where: { followingId: USERID } }),
+      Followship.findAndCountAll({ where: { followerId: req.params.id } }),
+      Followship.findAndCountAll({ where: { followingId: req.params.id } }),
       User.findOne({
-        where: { id: USERID },
-        include: [
-          { model: Tweet, as: 'LikedTweets' }
-        ]
+        where: { id: req.params.id },
       }),
-      Tweet.findAll({ where: { UserId: USERID } })
+      Tweet.findAll({ where: { UserId: req.params.id } }),
+      Reply.findAll({ where: { UserId: req.params.id } })
     ])
-      .then(([follower, following, user, tweets]) => {
+      // .then(user => { return callback({ user }) })
+      .then(([follower, following, user, tweets, replies]) => {
         callback({
           follower: follower,
           following: following,
           user: user,
           name: user.name,
-          tweets: tweets
+          tweets: tweets,
+          replies
         })
       })
   },
@@ -178,13 +177,26 @@ const userServices = {
     })
   },
   getTweets: (req, res, callback) => {
-    const USERID = helpers.getUser(req).id
-    Tweet.findAll({
-      where: { UserId: USERID }
-    })
-      .then(tweets => {
-        return callback(tweets)
+    User.findByPk(req.params.id)
+      .then(user => {
+        Tweet.findAll({ include: [Reply, Like], where: { UserId: req.params.id } })
+          .then(tweets => {
+            tweets = tweets.map(data => ({
+              ...data.dataValues,
+              likeTweetCount: data.Likes.length,
+              replyTweetCount: data.Replies.length
+            }))
+            return callback(tweets)
+          })
       })
+    //下列方式會固定登入者才是USER
+    // const USERID = helpers.getUser(req).id
+    // Tweet.findAll({
+    //   where: { UserId: USERID }
+    // })
+    //   .then(tweets => {
+    //     return callback(tweets)
+    //   })
   },
   likeTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
@@ -210,21 +222,27 @@ const userServices = {
     })
   },
   getUserReplies: (req, res, callback) => {
-    User.findByPk(req.params.id, {
-      include: [
-        { model: Reply, include: [{ model: Tweet, as: 'RepliedTweets' }] }
-      ]
+    Reply.findAll({
+      include: [User, Tweet],
+      where: { UserId: req.params.id }
+    }).then(replies => {
+      return callback(replies)
     })
-      .then(user => {
-        return callback([user])
-      })
+
   },
   getUserLikes: (req, res, callback) => {
-    const USERID = helpers.getUser(req).id
-    User.findByPk(USERID, { include: [{ model: Tweet, as: 'LikedTweets' }] })
-      .then(user => {
-        return callback([user.toJSON()])
-      })
+    Like.findAll({
+      include: [User, { model: Tweet, include: [Like, Reply] }],
+      where: { UserId: req.params.id }
+    }).then(likes => {
+      likes = likes.map(data => ({
+        ...data.dataValues,
+        likeTweetCount: data.Tweet.dataValues.Likes.length,
+        replyTweetCount: data.Tweet.dataValues.Replies.length
+      }))
+      return callback(likes)
+    })
+
   },
   getSettingPage: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
