@@ -10,4 +10,4 @@ module.exports = (sequelize, DataTypes) => {
     Tweet.hasMany(models.Like)
   };
   return Tweet;
-};
+}; 
