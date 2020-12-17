@@ -98,8 +98,9 @@ const userController = {
       const UserId = Number(req.params.id)
       if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
       const tweets = await sequelize.query(`
-        SELECT t.*, UNIX_TIMESTAMP(t.createdAt) AS createdAt,
-          UNIX_TIMESTAMP(t.updatedAt) AS updatedAt,
+        SELECT t.*,
+          UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
+          UNIX_TIMESTAMP(t.updatedAt) * 1000 AS updatedAt,
           COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
           IF(l.UserId = ${UserId}, 1, 0) AS isLiked
         FROM Tweets as t
@@ -123,8 +124,8 @@ const userController = {
           SELECT t.*, l.TweetId,
             COUNT(r.id) AS repliesCount, 
             (SELECT COUNT(*) FROM Likes AS l2 WHERE l2.TweetId = t.id) AS likesCount,
-            UNIX_TIMESTAMP(t.createdAt) AS createdAt,
-            UNIX_TIMESTAMP(t.updatedAt) AS updatedAt,  
+            UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
+            UNIX_TIMESTAMP(t.updatedAt) * 1000 AS updatedAt,  
             IF(l.UserId = ${UserId}, 1, 0) AS isLiked
           FROM Tweets as t  
           JOIN Likes as l ON l.TweetId = t.id       
@@ -143,7 +144,40 @@ const userController = {
 
   getFollowings: async (req, res, next) => { },
 
-  getRepliedTweets: async (req, res, next) => { },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const UserId = Number(req.params.id)
+      if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
+      let replies = await Reply.findAll({
+        where: { UserId },
+        attributes: {
+          include: [
+            [sequelize.literal(`UNIX_TIMESTAMP(Reply.createdAt) * 1000`), 'createdAt'],
+            [sequelize.literal(`UNIX_TIMESTAMP(Reply.updatedAt) * 1000`), 'updatedAt'],
+          ]
+        },
+        include: [{
+          model: Tweet,
+          attributes: {
+            include: [
+              [sequelize.literal(`(SELECT COUNT(*) FROM Likes AS l WHERE l.TweetId=Tweet.id)`), 'likesCount'],
+              [sequelize.literal(`(SELECT COUNT(*) FROM Replies AS r WHERE r.TweetId=Tweet.id)`), 'repliesCount'],
+              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId=${UserId} AND l.TweetId=Tweet.id)`), 'isLiked'],
+              [sequelize.literal(`UNIX_TIMESTAMP(Tweet.createdAt) * 1000`), 'createdAt'],
+              [sequelize.literal(`UNIX_TIMESTAMP(Tweet.updatedAt) * 1000`), 'updatedAt'],
+            ]
+          },
+          include: {
+            model: User, attributes: ['account', 'name', 'avatar', 'id']
+          }
+        }]
+      })
+      replies = replies.map(reply => ({ ...reply.toJSON() }))
+      return res.json(replies)
+    } catch (error) {
+      next(error)
+    }
+  },
 
   updateProfile: async (req, res, next) => { },
 
