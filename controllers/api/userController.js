@@ -165,7 +165,7 @@ const userController = {
               [sequelize.literal(`UNIX_TIMESTAMP(User.createdAt) * 1000`), 'createdAt'],
               [sequelize.literal(`UNIX_TIMESTAMP(User.updatedAt) * 1000`), 'updatedAt'],
             ],
-            exclude: ['password', 'createdAt', 'updatedAt', 'role', 'Followship']
+            exclude: ['password', 'createdAt', 'updatedAt', 'role']
           },
           through: { attributes: [] }
         }]
@@ -177,7 +177,32 @@ const userController = {
     }
   },
 
-  getFollowings: async (req, res, next) => { },
+  getFollowings: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      if (!id) return res.json({ status: 'error', message: '查無此使用者編號' })
+      let followings = await User.findByPk(id, {
+        attributes: [],
+        include: [{
+          model: User,
+          as: 'Followings',
+          attributes: {
+            include: [
+              ['id', 'followingId'],
+              [sequelize.literal(`UNIX_TIMESTAMP(User.createdAt) * 1000`), 'createdAt'],
+              [sequelize.literal(`UNIX_TIMESTAMP(User.updatedAt) * 1000`), 'updatedAt'],
+            ],
+            exclude: ['password', 'createdAt', 'updatedAt', 'role']
+          },
+          through: { attributes: [] }
+        }]
+      })
+
+      return res.json(followings.toJSON().Followings)
+    } catch (error) {
+      next(error)
+    }
+  },
 
   getRepliedTweets: async (req, res, next) => {
     try {
