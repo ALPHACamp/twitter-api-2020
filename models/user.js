@@ -12,9 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     account: DataTypes.STRING,
     cover: DataTypes.STRING
-  },
-    {}
-  )
+  }, {})
   User.associate = function (models) {
     User.hasMany(models.Tweet)
     User.hasMany(models.Like)

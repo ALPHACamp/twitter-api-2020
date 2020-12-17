@@ -186,7 +186,6 @@ module.exports = {
         SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
         { plain: true, type: QueryTypes.SELECT }
       )
-      console.log(user)
       tweets = tweets.map(t => ({
         user,
         ...t
