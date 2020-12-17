@@ -26,11 +26,6 @@ app.engine('hbs', hbs({
 }))
 app.set('view engine', 'hbs')
 
-// use helpers.getUser(req) to replace req.user
-// function authenticated(req, res, next){
-//   // passport.authenticate('jwt', { ses...
-// }
-
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
   res.locals.error_messages = req.flash('error_messages')
