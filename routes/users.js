@@ -5,12 +5,12 @@ const userController = require('../controllers/userController')
 
 const { authUserSelf } = require('../middleware/auth')
 
-router.get('/tweets', userController.readTweets)
-router.get('/replied_tweets', userController.readRepliedTweets)
-router.get('/likes', userController.readLikes)
-router.get('/followings', userController.readFollowings)
-router.get('/followers', userController.readFollowers)
-router.get('/', userController.readUser)
-router.put('/', authUserSelf, userController.updateUser)
+router.get('/:id/tweets', userController.readTweets)
+router.get('/:id/replied_tweets', userController.readRepliedTweets)
+router.get('/:id/likes', userController.readLikes)
+router.get('/:id/followings', userController.readFollowings)
+router.get('/:id/followers', userController.readFollowers)
+router.get('/:id/', userController.readUser)
+router.put('/:id/', authUserSelf, userController.updateUser)
 
 module.exports = router
