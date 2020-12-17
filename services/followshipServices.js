@@ -5,25 +5,11 @@ const helpers = require('../_helpers')
 const followshipServices = {
   addFollowing: (req, res, callback) => {
     const USER = helpers.getUser(req)
-    // console.log('followerId:' + USER.id)
-    // console.log('followingId:' + req.body.id)
     return Followship.create({
       followerId: USER.id,
       followingId: req.body.id
     }).then(followship => {
-      // return Followship.findByPk(2)
-      //   .then(followship => {
-      //     console.log(followship)
-      //   }).then(followship => {
-          callback({ status: 'success', message: '' })
-        // })
-      // Followship.findOne({
-      //   where: { followerId: USER.id },
-      // }).then(followship => {
-      //   console.log(followship)
-      // }).then(followship => {
-      //   callback({ status: 'success', message: '' })
-      // })
+      callback({ status: 'success', message: '' })
     })
   },
   removeFollowing: (req, res, callback) => {
