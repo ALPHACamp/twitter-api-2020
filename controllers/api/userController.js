@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
+const helper = require('../../_helpers')
 const db = require('../../models')
-const { Op } = require('sequelize')
 const User = db.User
+const { Op } = require('sequelize')
 
 const userController = {
   signUp: async (req, res) => {
@@ -26,6 +27,7 @@ const userController = {
           }
         })
       }
+
       await User.create({
         account,
         name,
@@ -63,17 +65,35 @@ const userController = {
       console.log(error)
     }
   },
-  getUser: (req, res) => {
-
+  getUser: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      return res.json(user)
+    } catch (error) {
+      console.log(error)
+    }
   },
   getCurrentUser: (req, res) => {
-
+    const user = helper.getUser(req)
+    return res.json(user)
   },
   updateUser: (req, res) => {
 
   },
-  getTopUsers: (req, res) => {
-
+  getTopUsers: async (req, res) => {
+    try {
+      let users = await User.findAll({ include: [{ model: User, as: 'Followers' }] })
+      console.log('users', users)
+      users = users.map((user) => ({
+        ...user.dataValues,
+        followerCount: user.getFollowers.length,
+        isFollowed: helper.getUser(req).Followings.map((follower) => follower.id).includes(user.id)
+      }))
+      users = users.sort((a, b) => b.followerCount - a.followerCount)
+      res.json(users)
+    } catch (error) {
+      console.log(error)
+    }
   },
   getTweets: (req, res) => {
 
