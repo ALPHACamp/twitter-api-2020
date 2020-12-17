@@ -171,4 +171,30 @@ module.exports = {
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
     }
   },
+  getTweets: async (req, res, next) => {
+    try {
+      let tweets = await sequelize.query(`
+        SELECT T.*, IFNULL(L.likedCount, 0) AS likedCount, IFNULL(R.repliedCount, 0) AS repliedCount
+        FROM Tweets AS T
+        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS likedCount FROM Likes GROUP BY TweetId) AS L
+        ON L.TweetId = T.id
+        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS repliedCount FROM Replies GROUP BY TweetId) AS R
+        ON R.TweetId = T.id
+        WHERE T.UserId = ${req.params.id}`
+        , { type: QueryTypes.SELECT })
+      let user = await sequelize.query(`
+        SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
+        { plain: true, type: QueryTypes.SELECT }
+      )
+      console.log(user)
+      tweets = tweets.map(t => ({
+        user,
+        ...t
+      }))
+      res.json(tweets)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  }
 }
