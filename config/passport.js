@@ -21,7 +21,7 @@ passport.use(new JwtStrategy(jwtOptions, (jwt_payload, done) => {
     ]
   }).then(user => {
     if (!user) return done(null, false)
-    return done(null, user)
+    return done(null, user.toJSON())
   })
 }))
 
