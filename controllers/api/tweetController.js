@@ -6,7 +6,6 @@ const Reply = db.Reply
 
 const sequelize = require('sequelize')
 const helpers = require('../../_helpers.js')
-const { hacker } = require('faker')
 
 
 const tweetController = {
