@@ -11,7 +11,6 @@ const tweetServices = {
       include: [
         User, Like,
         { model: Reply, include: [User] },
-        // { model: Like, include: [User] }
       ]
     }).then(tweets => {
       tweets = tweets.map(r => ({
@@ -19,21 +18,8 @@ const tweetServices = {
         likeTweetCount: r.Likes.length,
         replyTweetCount: r.Replies.length
       }))
-
       return callback(tweets)
-
     })
-    // Tweet.findAll({
-    //   // raw: true, nest: true,
-    //   include: [
-    //     User,
-    //     { model: Reply, include: [User] },
-    //     { model: Like, include: [User] }
-    //   ]
-    // })
-    //   .then(tweets => {
-    //     return callback(tweets)
-    //   })
   },
   getTweet: (req, res, callback) => {
     Tweet.findByPk(req.params.tweet_id, {
