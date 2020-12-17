@@ -7,9 +7,9 @@ const session = require('express-session')
 const methodOverride = require('method-override')
 const helpers = require('./_helpers')
 
-// if (process.env.NODE_ENV !== 'production') {
-//   require('dotenv').config()
-// }
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 const passport = require('./config/passport')
 const app = express()
@@ -25,11 +25,6 @@ app.engine('hbs', hbs({
   extname: '.hbs'
 }))
 app.set('view engine', 'hbs')
-
-// use helpers.getUser(req) to replace req.user
-// function authenticated(req, res, next){
-//   // passport.authenticate('jwt', { ses...
-// }
 
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
