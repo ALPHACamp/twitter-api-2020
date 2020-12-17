@@ -12,7 +12,7 @@ module.exports = {
         role: 'admin',
         name: 'root',
         introduction: faker.lorem.text(),
-        avatar: 'https://loremflickr.com/320/240/men,women',
+        avatar: 'http://placeimg.com/320/240/people',
         cover: 'http://placeimg.com/640/480/cats',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -27,7 +27,7 @@ module.exports = {
           role: 'user',
           name: 'user' + (i + 1),
           introduction: faker.lorem.text(),
-          avatar: 'https://loremflickr.com/320/240/men,women',
+          avatar: 'http://placeimg.com/320/240/people',
           cover: 'http://placeimg.com/640/480/cats',
           createdAt: new Date(),
           updatedAt: new Date()
