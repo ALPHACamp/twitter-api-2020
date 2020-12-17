@@ -38,6 +38,9 @@ const tweetController = {
         return res.json({ status: 'error', message: "content didn't exist" })
       }
       const tweet = await Tweet.findByPk(req.params.id)
+      if (req.user.id !== tweet.dataValues.UserId) {
+        return res.json({ status: 'error', message: "You don't have permission to update this tweet" })
+      }
       tweet.update({
         description: req.body.description
       })
@@ -49,6 +52,9 @@ const tweetController = {
   removeTweet: async (req, res) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
+      if (req.user.id !== tweet.dataValues.UserId) {
+        return res.json({ status: 'error', message: "You don't have permission to delete this tweet" })
+      }
       tweet.destroy()
       return res.json({ status: 'success', message: 'This tweet was successfully remove' })
     } catch (error) {
