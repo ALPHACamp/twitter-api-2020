@@ -106,7 +106,7 @@ const userController = {
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
           UNIX_TIMESTAMP(t.updatedAt) * 1000 AS updatedAt,
           COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
-          IF(l.UserId = ${UserId}, 1, 0) AS isLiked
+          IF(l.UserId = ${helpers.getUser(req).id}, 1, 0) AS isLiked
         FROM Tweets as t
         LEFT JOIN Replies as r ON r.TweetId = t.id
         LEFT JOIN Likes as l ON l.TweetId = t.id
@@ -133,7 +133,7 @@ const userController = {
             include: [
               ...repliesAndLikeCount(),
               ...dateFieldsToTimestamp('Tweet'),
-              [sequelize.literal('1'), 'isLiked'],
+              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked'],
             ]
           },
           include: {
@@ -212,7 +212,7 @@ const userController = {
             include: [
               ...dateFieldsToTimestamp('Tweet'),
               ...repliesAndLikeCount(),
-              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${UserId} AND l.TweetId = Tweet.id)`), 'isLiked']
+              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked']
             ]
           },
           include: {
