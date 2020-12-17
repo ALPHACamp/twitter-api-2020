@@ -16,6 +16,11 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(routes)
 
+app.use((err, req, res, next) => {
+  console.log(err.stack)
+  return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+})
+
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
 module.exports = app

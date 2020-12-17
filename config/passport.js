@@ -9,7 +9,8 @@ jwtOptions.secretOrKey = process.env.JWT_SECRET
 
 passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
   try {
-    const user = await User.findByPk(jwt_payload.id)
+    let user = await User.findByPk(jwt_payload.id)
+    user = user.toJSON()
     if (!user) {
       return done(null, false)
     }
