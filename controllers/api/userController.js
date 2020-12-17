@@ -4,9 +4,9 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet, Like, Reply, Followship, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
-const { userDataTransform, dateFieldsToTimestamp } = require('../../modules/controllerFunctions.js')
-const followship = require('../../models/followship')
-
+const { tagIsFollowed } = require('../../modules/controllerFunctions.js')
+const userBasicExcludeFields = ['password', 'createdAt', 'updatedAt', 'role']
+const userMoreExcludeFields = [...userBasicExcludeFields, 'cover', 'introduction']
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -53,16 +53,18 @@ const userController = {
     try {
       const id = Number(req.params.id)
       if (!id) return res.json({ status: 'error', message: '查無此使用者編號' })
-      let user = await User.findByPk(id, {
+      let user = await User.findOne({
+        where: { id, role: null },
         attributes: {
           include: [
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followerId=${id})`), 'FollowingsCount'],
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${id})`), 'FollowersCount']
-          ]
+          ],
+          exclude: userBasicExcludeFields
         }
       })
       if (!user) return res.json({ status: 'error', message: '查無此使用者編號' })
-      user = userDataTransform(req, user.dataValues)
+      user = tagIsFollowed(req, user.toJSON())
       return res.json({ status: 'success', ...user })
     } catch (error) {
       next(error)
@@ -74,19 +76,20 @@ const userController = {
       let users = await User.findAll({
         where: {
           id: { [Op.ne]: helpers.getUser(req).id },
-          role: { [Op.eq]: null }
+          role: null
         },
         attributes: {
           include: [
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=User.id)`), 'FollowersCount']
-          ]
+          ],
+          exclude: userMoreExcludeFields
         },
         order: [[sequelize.literal('FollowersCount'), 'DESC']],
         offset: Number(req.query.startIndex) || 0,
         limit: Number(req.query.accumulatedNum) || 10
       })
 
-      users = users.map(user => userDataTransform(req, user.dataValues))
+      users = users.map(user => tagIsFollowed(req, user.toJSON()))
 
       return res.json({ status: 'success', users })
     } catch (error) {
@@ -160,12 +163,8 @@ const userController = {
           model: User,
           as: 'Followers',
           attributes: {
-            include: [
-              ['id', 'followerId'],
-              [sequelize.literal(`UNIX_TIMESTAMP(User.createdAt) * 1000`), 'createdAt'],
-              [sequelize.literal(`UNIX_TIMESTAMP(User.updatedAt) * 1000`), 'updatedAt'],
-            ],
-            exclude: ['password', 'createdAt', 'updatedAt', 'role']
+            include: [['id', 'followerId']],
+            exclude: userMoreExcludeFields
           },
           through: { attributes: [] }
         }]
@@ -187,12 +186,8 @@ const userController = {
           model: User,
           as: 'Followings',
           attributes: {
-            include: [
-              ['id', 'followingId'],
-              [sequelize.literal(`UNIX_TIMESTAMP(User.createdAt) * 1000`), 'createdAt'],
-              [sequelize.literal(`UNIX_TIMESTAMP(User.updatedAt) * 1000`), 'updatedAt'],
-            ],
-            exclude: ['password', 'createdAt', 'updatedAt', 'role']
+            include: [['id', 'followingId']],
+            exclude: userMoreExcludeFields
           },
           through: { attributes: [] }
         }]

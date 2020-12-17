@@ -17,6 +17,14 @@ const userDataTransform = (req, user) => {
   }
 }
 
+const tagIsFollowed = (req, user) => {
+  //user should be plain object
+  return {
+    ...user,
+    isFollowed: helpers.getUser(req).Followings.includes(user.id)
+  }
+}
+
 
 
 
@@ -26,4 +34,5 @@ const userDataTransform = (req, user) => {
 module.exports = {
   userDataTransform,
   dateFieldsToTimestamp,
+  tagIsFollowed
 }
