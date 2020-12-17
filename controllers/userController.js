@@ -2,6 +2,8 @@ const helpers = require('../_helpers')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 
 const userController = {
   readUser: (req, res) => {
@@ -24,7 +26,20 @@ const userController = {
     }).catch(err => console.error(err))
   },
   readTweets: (req, res) => {
-
+    const UserId = Number(req.params.id)
+    Tweet.findAll({
+      where: { UserId },
+      order: [['createdAt', 'DESC']],
+      include: [Reply, Like]
+    }).then(tweets => {
+      tweets = tweets.map(tweet => ({
+        ...(Object.fromEntries(Object.entries(tweet.dataValues).slice(0, 5))),
+        repliesCount: tweet.dataValues.Replies.length,
+        likesCount: tweet.dataValues.Likes.length,
+        isLike: tweet.dataValues.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+      }))
+      return res.json(tweets)
+    }).catch(err => console.error(err))
   },
   readRepliedTweets: (req, res) => {
 
