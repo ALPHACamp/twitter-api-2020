@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const { User, Tweet, Like, sequelize, Sequelize } = require('../models/index')
 const QueryTypes = Sequelize.QueryTypes
 const { isEmailValid } = require('../utils/helpers')
+const helpers = require('../_helpers')
 
 module.exports = {
   createUser: async (req, res, next) => {
@@ -119,6 +120,52 @@ module.exports = {
         ORDER BY F.followingId;`,
         { type: QueryTypes.SELECT })
       res.json(topUsers)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const user = await sequelize.query(`
+        SELECT U.id,account,name,email,avatar,cover,introduction,role, IFNULL(a.followerCount,0) AS followerCount, IFNULL(b.followingCount,0) AS followingCount, IF(c.isFollowed, true, false) AS isFollowed
+        FROM Users AS U
+
+        LEFT JOIN (
+        SELECT followingId, COUNT(followingId) AS followerCount
+        FROM Followships
+        WHERE followingId = ${req.params.id}
+        GROUP BY followingId) AS a
+        ON a.followingId = U.id
+
+        LEFT JOIN (
+        SELECT followerId, COUNT(followerId) AS followingCount
+        FROM Followships
+        WHERE followerId = ${req.params.id}
+        GROUP BY followerId) AS b
+        ON b.followerId = U.id
+
+        LEFT JOIN(
+        SELECT followingId AS isFollowed
+        FROM Followships
+        WHERE followerId = ${helpers.getUser(req).id}
+        ) AS c
+        ON c.isFollowed = U.id
+
+        WHERE U.id = ${req.params.id};`,
+        { plain: true, type: QueryTypes.SELECT })
+
+      if (!user) {
+        return res.json({ status: 'error', message: '使用者不存在' })
+      }
+      if (user.role === 'admin') {
+        return res.status(401).json({ status: 'error', message: 'Unauthorized' })
+      }
+      delete user.role //not required on frontend
+      if (helpers.getUser(req).id === Number(req.params.id)) {
+        user.isCurrentUser = true
+      }
+      res.json(user)
     } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
