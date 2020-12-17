@@ -19,6 +19,9 @@ router.get('/api/tweets/:id', authToken, authUserRole, tweetController.getTweet)
 router.put('/api/tweets/:id', authToken, authUserRole, tweetController.updateTweet)
 router.delete('/api/tweets/:id', authToken, authUserRole, tweetController.deleteTweet)
 
+// like
+router.post('/api/tweets/:id/like', authToken, authUserRole, likeController.createLike)
+router.post('/api/tweets/:id/unlike', authToken, authUserRole, likeController.deleteLike)
 
 //followship
 router.post('/api/followships', authToken, authUserRole, followshipController.createFollowship)
