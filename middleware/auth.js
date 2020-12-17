@@ -1,8 +1,15 @@
-const passport = require('passport')
+const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
 module.exports = {
-  authenticated: passport.authenticate('jwt', { session: false }),
+  authenticate: (req, res, next) => {
+    passport.authenticate('jwt', { session: false }, (err, user, info) => {
+      if (err) return next(err)
+      if (!user) return res.status(401).json({ status: 'failure', message: info.message })
+      req.user = user
+      return next()
+    })(req, res, next)
+  },
   authAdmin: (req, res, next) => {
     const user = helpers.getUser(req)
     if (user) {
