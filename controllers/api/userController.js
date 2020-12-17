@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
-const { User, Tweet, Like, Reply, Sequelize, sequelize } = require('../../models')
+const { User, Tweet, Like, Reply, Followship, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
 const { userDataTransform, dateFieldsToTimestamp } = require('../../modules/controllerFunctions.js')
+const followship = require('../../models/followship')
 
 
 const userController = {
@@ -120,27 +121,61 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
-      const likedTweets = await sequelize.query(`
-          SELECT t.*, l.TweetId,
-            COUNT(r.id) AS repliesCount, 
-            (SELECT COUNT(*) FROM Likes AS l2 WHERE l2.TweetId = t.id) AS likesCount,
-            UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
-            UNIX_TIMESTAMP(t.updatedAt) * 1000 AS updatedAt,  
-            IF(l.UserId = ${UserId}, 1, 0) AS isLiked
-          FROM Tweets as t  
-          JOIN Likes as l ON l.TweetId = t.id       
-          LEFT JOIN Replies as r ON r.TweetId = t.id
-          WHERE l.UserId = ${UserId}     
-          GROUP BY t.id
-          ORDER BY t.createdAt DESC;
-      `, { type: sequelize.QueryTypes.SELECT })
-      return res.json(likedTweets)
+      let likeTweets = await Like.findAll({
+        where: { UserId },
+        attributes: [],
+        include: [{
+          model: Tweet,
+          attributes: {
+            include: [
+              [sequelize.literal(`(SELECT COUNT(*) FROM Likes AS l WHERE l.TweetId=Tweet.id)`), 'likesCount'],
+              [sequelize.literal(`(SELECT COUNT(*) FROM Replies AS r WHERE r.TweetId=Tweet.id)`), 'repliesCount'],
+              [sequelize.literal('1'), 'isLiked'],
+              [sequelize.literal(`UNIX_TIMESTAMP(Tweet.createdAt) * 1000`), 'createdAt'],
+              [sequelize.literal(`UNIX_TIMESTAMP(Tweet.updatedAt) * 1000`), 'updatedAt'],
+            ]
+          },
+          include: {
+            model: User, attributes: ['account', 'name', 'avatar', 'id']
+          }
+        }]
+      })
+      likeTweets = likeTweets.map(like => ({
+        ...like.dataValues.Tweet.toJSON(),
+        TweetId: like.dataValues.Tweet.id
+      }))
+      return res.json(likeTweets)
     } catch (error) {
       next(error)
     }
   },
 
-  getFollowers: async (req, res, next) => { },
+  getFollowers: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      if (!id) return res.json({ status: 'error', message: '查無此使用者編號' })
+      let followers = await User.findByPk(id, {
+        attributes: [],
+        include: [{
+          model: User,
+          as: 'Followers',
+          attributes: {
+            include: [
+              ['id', 'followerId'],
+              [sequelize.literal(`UNIX_TIMESTAMP(User.createdAt) * 1000`), 'createdAt'],
+              [sequelize.literal(`UNIX_TIMESTAMP(User.updatedAt) * 1000`), 'updatedAt'],
+            ],
+            exclude: ['password', 'createdAt', 'updatedAt', 'role', 'Followship']
+          },
+          through: { attributes: [] }
+        }]
+      })
+
+      return res.json(followers.toJSON().Followers)
+    } catch (error) {
+      next(error)
+    }
+  },
 
   getFollowings: async (req, res, next) => { },
 
