@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet, Like, Reply, Followship, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
-const { tagIsFollowed } = require('../../modules/controllerFunctions.js')
+const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount } = require('../../modules/controllerFunctions.js')
 const userBasicExcludeFields = ['password', 'createdAt', 'updatedAt', 'role']
 const userMoreExcludeFields = [...userBasicExcludeFields, 'cover', 'introduction']
 
@@ -131,11 +131,9 @@ const userController = {
           model: Tweet,
           attributes: {
             include: [
-              [sequelize.literal(`(SELECT COUNT(*) FROM Likes AS l WHERE l.TweetId=Tweet.id)`), 'likesCount'],
-              [sequelize.literal(`(SELECT COUNT(*) FROM Replies AS r WHERE r.TweetId=Tweet.id)`), 'repliesCount'],
+              ...repliesAndLikeCount(),
+              ...dateFieldsToTimestamp('Tweet'),
               [sequelize.literal('1'), 'isLiked'],
-              [sequelize.literal(`UNIX_TIMESTAMP(Tweet.createdAt) * 1000`), 'createdAt'],
-              [sequelize.literal(`UNIX_TIMESTAMP(Tweet.updatedAt) * 1000`), 'updatedAt'],
             ]
           },
           include: {
@@ -205,21 +203,14 @@ const userController = {
       if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
       let replies = await Reply.findAll({
         where: { UserId },
-        attributes: {
-          include: [
-            [sequelize.literal(`UNIX_TIMESTAMP(Reply.createdAt) * 1000`), 'createdAt'],
-            [sequelize.literal(`UNIX_TIMESTAMP(Reply.updatedAt) * 1000`), 'updatedAt'],
-          ]
-        },
+        attributes: { include: dateFieldsToTimestamp('Reply') },
         include: [{
           model: Tweet,
           attributes: {
             include: [
-              [sequelize.literal(`(SELECT COUNT(*) FROM Likes AS l WHERE l.TweetId=Tweet.id)`), 'likesCount'],
-              [sequelize.literal(`(SELECT COUNT(*) FROM Replies AS r WHERE r.TweetId=Tweet.id)`), 'repliesCount'],
-              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId=${UserId} AND l.TweetId=Tweet.id)`), 'isLiked'],
-              [sequelize.literal(`UNIX_TIMESTAMP(Tweet.createdAt) * 1000`), 'createdAt'],
-              [sequelize.literal(`UNIX_TIMESTAMP(Tweet.updatedAt) * 1000`), 'updatedAt'],
+              ...dateFieldsToTimestamp('Tweet'),
+              ...repliesAndLikeCount(),
+              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${UserId} AND l.TweetId = Tweet.id)`), 'isLiked']
             ]
           },
           include: {
