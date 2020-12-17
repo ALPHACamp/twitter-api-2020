@@ -6,9 +6,10 @@ module.exports = {
       const likes = []
       //every user liked 1 ~ 7 tweets
       for (let UserId = 2; UserId <= 6; UserId++) {
-        for (let i = 1; i <= Math.floor(Math.random() * 5) + 2; i++) {
+        const startTweetId = Math.ceil(Math.random() * 40)
+        for (let i = 1; i <= Math.ceil(Math.random() * 7); i++) {
           likes.push({
-            TweetId: Math.ceil(Math.random() * 50),
+            TweetId: startTweetId + i,
             UserId,
             createdAt: new Date(),
             updatedAt: new Date()
