@@ -138,8 +138,9 @@ const userController = {
           },
           include: {
             model: User, attributes: ['account', 'name', 'avatar', 'id']
-          }
-        }]
+          },
+        }],
+        order: [[Tweet, 'createdAt', 'DESC']]
       })
       likeTweets = likeTweets.map(like => ({
         ...like.dataValues.Tweet.toJSON(),
@@ -218,7 +219,8 @@ const userController = {
           include: {
             model: User, attributes: ['account', 'name', 'avatar', 'id']
           }
-        }]
+        }],
+        order: [['createdAt', 'DESC'], [Tweet, 'createdAt', 'DESC']]
       })
       replies = replies.map(reply => ({ ...reply.toJSON() }))
       return res.json(replies)
