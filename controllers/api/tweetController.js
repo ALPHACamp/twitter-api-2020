@@ -41,7 +41,10 @@ const tweetController = {
         include: [{
           model: User,
           attributes: ['id', 'name', 'account', 'avatar']
-        }]
+        }],
+        order: [
+          [sequelize.literal('createdAt'), 'DESC'],
+        ],
       })
       replies.map(reply => {
         reply.createdAt = reply.createdAt.getTime()
@@ -109,7 +112,10 @@ const tweetController = {
             [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likesCount'],
           ],
           exclude: ['updatedAt']
-        }
+        },
+        order: [
+          [sequelize.literal('createdAt'), 'DESC'],
+        ]
       })
       const likedTweets = await Like.findAll({
         raw: true,
