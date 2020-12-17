@@ -19,8 +19,11 @@ router.get('/api/tweets/:id', authToken, authUserRole, tweetController.getTweet)
 router.put('/api/tweets/:id', authToken, authUserRole, tweetController.updateTweet)
 router.delete('/api/tweets/:id', authToken, authUserRole, tweetController.deleteTweet)
 
-// users
+//users
 router.post('/api/login', userController.login)
 router.post('/api/users', userController.createUser)
+
+//admin
+router.get('/api/admin/users', authToken, authAdminRole, userController.getUsers)
 
 module.exports = router
