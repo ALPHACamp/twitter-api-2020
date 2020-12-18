@@ -29,6 +29,7 @@ const userController = {
       return res.json(userObj)
     }).catch(next)
   },
+
   readTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     Tweet.findAll({
@@ -36,6 +37,9 @@ const userController = {
       order: [['createdAt', 'DESC']],
       include: [Reply, Like]
     }).then(tweets => {
+      if (tweets.length < 1 || tweets === undefined)
+        return res.status(404).json({ message: `tweets of user(id: ${UserId}) do not exist!` })
+
       tweets = tweets.map(tweet => ({
         ...(Object.fromEntries(Object.entries(tweet.dataValues).slice(0, 5))),
         repliesCount: tweet.dataValues.Replies.length,
@@ -45,6 +49,7 @@ const userController = {
       return res.json(tweets)
     }).catch(next)
   },
+
   readRepliedTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     Reply.findAll({
@@ -60,6 +65,9 @@ const userController = {
         ]
       }]
     }).then(replies => {
+      if (replies.length < 1 || replies === undefined)
+        return res.status(404).json({ message: `replies of user(id: ${UserId}) do not exist!` })
+
       replies = replies.map(reply => ({
         ...(Object.fromEntries(Object.entries(reply.dataValues).slice(0, 7))),
         Tweet: { ...(Object.fromEntries(Object.entries(reply.dataValues.Tweet.dataValues).slice(0, 6))) },
@@ -70,6 +78,7 @@ const userController = {
       return res.json(replies)
     }).catch(next)
   },
+
   readLikes: (req, res, next) => {
     const UserId = Number(req.params.id)
     Like.findAll({
@@ -83,6 +92,9 @@ const userController = {
         ]
       }]
     }).then(likes => {
+      if (likes.length < 1 || likes === undefined)
+        return res.status(404).json({ message: `likes of user(id: ${UserId}) do not exist!` })
+
       likes = likes.map(like => ({
         ...(Object.fromEntries(Object.entries(like.dataValues).slice(0, 5))),
         Tweet: { ...(Object.fromEntries(Object.entries(like.dataValues.Tweet.dataValues).slice(0, 6))) },
@@ -93,6 +105,7 @@ const userController = {
       return res.json(likes)
     }).catch(next)
   },
+
   readFollowings: (req, res) => {
 
   },
