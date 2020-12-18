@@ -173,10 +173,13 @@ module.exports = {
   },
   getTweets: async (req, res, next) => {
     try {
-      let user = await sequelize.query(`
-        SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
+      const user = await sequelize.query(`
+          SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
         { plain: true, type: QueryTypes.SELECT }
       )
+      if (!user) {
+        return res.json({ status: 'error', message: '使用者不存在' })
+      }
       let tweets = await sequelize.query(`
           SELECT T.*, IFNULL(L.likedCount, 0) AS likedCount, IFNULL(R.repliedCount, 0) AS repliedCount, IF(IL.isLiked, true, false) AS isLiked
           FROM Tweets AS T
