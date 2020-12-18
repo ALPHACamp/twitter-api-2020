@@ -1,6 +1,7 @@
 const db = require('../../models')
 const Tweet = db.Tweet
 const User = db.User
+const helper = require('../../_helpers')
 const tweetController = {
   getTweets: async (req, res) => {
     try {
@@ -38,9 +39,10 @@ const tweetController = {
         return res.json({ status: 'error', message: "content didn't exist" })
       }
       const tweet = await Tweet.findByPk(req.params.id)
-      if (req.user.id !== tweet.dataValues.UserId) {
+      if (helper.getUser(req).id !== tweet.dataValues.UserId) {
         return res.json({ status: 'error', message: "You don't have permission to update this tweet" })
       }
+
       tweet.update({
         description: req.body.description
       })
@@ -52,7 +54,7 @@ const tweetController = {
   removeTweet: async (req, res) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
-      if (req.user.id !== tweet.dataValues.UserId) {
+      if (helper.getUser(req).id !== tweet.dataValues.UserId) {
         return res.json({ status: 'error', message: "You don't have permission to delete this tweet" })
       }
       tweet.destroy()
