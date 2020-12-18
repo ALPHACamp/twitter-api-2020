@@ -275,4 +275,48 @@ module.exports = {
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
     }
   },
+  getFollowings: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.json({ status: 'error', message: '使用者不存在' })
+      }
+      const followings = await sequelize.query(`
+        SELECT F.followingId, U.name,U.account,U.avatar,U.introduction, IF(IFW.isFollowed, true, false) AS isFollowed
+        FROM Followships AS F
+        LEFT JOIN (SELECT id,name,account,avatar, introduction From Users) AS U
+        ON U.id = F.followingId
+        LEFT JOIN (SELECT followingId AS isFollowed FROM Followships WHERE followerId = ${helpers.getUser(req).id}) AS IFW
+        ON IFW.isFollowed = F.followingId
+        WHERE F.followerId = ${req.params.id}
+        ORDER BY F.followingId;`,
+        { type: QueryTypes.SELECT })
+      return res.json(followings)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.json({ status: 'error', message: '使用者不存在' })
+      }
+      let followers = await sequelize.query(`
+        SELECT F.followerId, U.name,U.account,U.avatar,U.introduction, IF(IFW.isFollowed, true, false) AS isFollowed
+        FROM Followships AS F
+        LEFT JOIN (SELECT id,name,account,avatar, introduction From Users) AS U
+        ON U.id = F.followerId
+        LEFT JOIN (SELECT followingId AS isFollowed FROM Followships WHERE followerId = ${helpers.getUser(req).id}) AS IFW 
+        ON IFW.isFollowed = F.followerId
+        WHERE F.followingId = ${req.params.id}
+        ORDER BY F.followerId;`,
+        { type: QueryTypes.SELECT })
+      return res.json(followers)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  }
 }
