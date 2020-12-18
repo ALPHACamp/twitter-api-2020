@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const helper = require('../../_helpers')
-const db = require('../../models')
-const User = db.User
+const imgur = require('imgur-node-api')
+const { User, Tweet, Reply, Like, Followship } = require('../../models')
 const { Op } = require('sequelize')
+
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
   signUp: async (req, res) => {
@@ -77,13 +79,43 @@ const userController = {
     const user = helper.getUser(req)
     return res.json(user)
   },
-  updateUser: (req, res) => {
+  updateUser: async (req, res) => {
+    try {
+      const userId = Number(req.params.id)
+      if (userId !== helper.getUser(req).id) {
+        return res.json({ status: 'error', message: 'Permission denied.' })
+      }
+      const user = await User.findByPk(userId)
+      if (!user) {
+        return res.json({ status: 'error', message: "This user doesn't exist." })
+      }
+      const { file } = req
+      const { email, name, password, account, introduction } = req.body
+      if (!account || !name || !email || !password) {
+        return res.json({ status: 'error', message: "Required fields didn't exist." })
+      }
 
+      if (file) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        const imgurUpload = new Promise((resolve, reject) => {
+          imgur.upload(file.path, (err, img) => {
+            if (err) {
+              return reject(err)
+            }
+            return resolve(img)
+          })
+        })
+        const img = await imgurUpload
+        // user.image = img.data.link
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
   },
   getTopUsers: async (req, res) => {
     try {
       let users = await User.findAll({ include: [{ model: User, as: 'Followers' }] })
-      console.log('users', users)
       users = users.map((user) => ({
         ...user.dataValues,
         followerCount: user.getFollowers.length,
@@ -95,26 +127,102 @@ const userController = {
       console.log(error)
     }
   },
-  getTweets: (req, res) => {
-
+  getTweets: async (req, res) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [Reply, Like],
+        order: [['createdAt', 'DESC']]
+      })
+      res.json(tweets)
+    } catch (error) {
+      console.log(error)
+    }
   },
-  getRepliedTweets: (req, res) => {
-
+  getRepliedTweets: async (req, res) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: Tweet,
+        order: [['createdAt', 'DESC']]
+      })
+      res.json(replies)
+    } catch (error) {
+      console.log(error)
+    }
   },
-  getLikedTweets: (req, res) => {
-
+  getLikedTweets: async (req, res) => {
+    try {
+      const likedTweets = await Tweet.findAll({
+        include: { model: Like, where: { UserId: req.params.id } },
+        order: [[{ model: Like }, 'createdAt', 'DESC']]
+      })
+      res.json(likedTweets)
+    } catch (error) {
+      console.log(error)
+    }
   },
-  getFollowings: (req, res) => {
-
+  getFollowings: async (req, res) => {
+    try {
+      const followings = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followings' }],
+        order: [[{ model: User, as: 'Followings' }, { model: Followship }, 'createdAt', 'DESC']]
+      })
+      res.json(followings)
+    } catch (error) {
+      console.log(error)
+    }
   },
-  getFollowers: (req, res) => {
-
+  getFollowers: async (req, res) => {
+    try {
+      const followers = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followers' }],
+        order: [[{ model: User, as: 'Followers' }, { model: Followship }, 'createdAt', 'DESC']]
+      })
+      res.json(followers)
+    } catch (error) {
+      console.log(error)
+    }
   },
-  addFollowing: (req, res) => {
-
+  addFollowing: async (req, res) => {
+    try {
+      const followingId = Number(req.params.followingId)
+      if (followingId === helper.getUser(req).id) {
+        return res.json({ status: 'error', message: 'Cannot follow yourself.' })
+      }
+      const user = await User.findByPk(followingId)
+      if (!user) {
+        return res.json({ status: 'error', message: "This user doesn't exist." })
+      }
+      const followings = await Followship.findAll({ raw: true, where: { followerId: helper.getUser(req).id } })
+      if (followings.map((user) => user.followingId).includes(followingId)) {
+        return res.json({ message: 'This user was already in follow.' })
+      }
+      await Followship.create({
+        followerId: helper.getUser(req).id,
+        followingId: followingId
+      })
+      res.json({ status: 'success', message: 'ok' })
+    } catch (error) {
+      console.log(error)
+    }
   },
-  removeFollowing: (req, res) => {
-
+  removeFollowing: async (req, res) => {
+    try {
+      const followingId = Number(req.params.followingId)
+      const user = await User.findByPk(followingId)
+      if (!user) {
+        return res.json({ status: 'error', message: "This user doesn't exist." })
+      }
+      const followings = await Followship.findAll({ raw: true, where: { followerId: helper.getUser(req).id } })
+      if (!followings.map((user) => user.followingId).includes(followingId)) {
+        return res.json({ status: 'error', message: "This user didn't exist in your following list." })
+      }
+      await Followship.destroy({ where: { followingId, followerId: helper.getUser(req).id } })
+      res.json({ status: 'success', message: 'ok' })
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
