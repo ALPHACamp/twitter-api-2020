@@ -1,14 +1,18 @@
 const db = require('../models')
 const User = db.User
 const { check, body, validationResult } = require('express-validator')
+const helpers = require('../_helpers.js')
 
 const registerRules = () => {
   return [
     check('account').exists({ checkFalsy: true }).withMessage('帳號不可為空'),
     check('name').exists({ checkFalsy: true }).withMessage('名稱不可為空'),
     check('account')
-      .custom(async (account) => {
+      .custom(async (account, { req }) => {
         const user = await User.findOne({ where: { account: account } })
+        if (helpers.getUser(req)) {
+          if (helpers.getUser(req).account === account) return true
+        }
         if (user) {
           throw new Error('此帳號已被註冊過')
         }
@@ -16,8 +20,11 @@ const registerRules = () => {
       }),
     check('email').isEmail().withMessage('信箱格式錯誤'),
     check('email')
-      .custom(async (email) => {
+      .custom(async (email, { req }) => {
         const user = await User.findOne({ where: { email: email } })
+        if (helpers.getUser(req)) {
+          if (helpers.getUser(req).email === email) return true
+        }
         if (user) {
           throw new Error('此信箱已被註冊過')
         }
@@ -36,11 +43,11 @@ const registerRules = () => {
 
 const loginRules = () => {
   return [
-    check('account').exists({ checkFalsy: true }).withMessage('帳號不可為空'),
+    check('email').exists({ checkFalsy: true }).withMessage('帳號不可為空'),
     check('password').isLength({ min: 3, max: 8 }).withMessage('密碼錯誤：長度需界在 3-8 之間'),
-    check('account')
-      .custom(async (account) => {
-        const user = await User.findOne({ where: { account } })
+    check('email')
+      .custom(async (email) => {
+        const user = await User.findOne({ where: { email } })
         if (!user) {
           throw new Error('此帳號尚未被註冊過，請先完成註冊程序')
         }
@@ -50,23 +57,29 @@ const loginRules = () => {
   ]
 }
 
-const profileRules = () => {
-  // it's for updating personal profile: there are two pages -> setting & edition
-
-  const accountSetting = registerRules()
-  const profileEdition = [
-    check('introduction').isLength({ max: 140 }).withMessage('最多 100 字')
-  ]
-
-  if (body('page') === 'setting') return accountSetting
-  else return profileEdition
+const profileRules = async (req, res, next) => {
+  try {
+    const accountSetting = () => Promise.all(registerRules().map(rule => rule.run(req)))
+    const profileEdition = () => Promise.all([
+      check('name').exists({ checkFalsy: true }).withMessage('名稱不可為空').run(req),
+      check('introduction').isLength({ max: 100 }).withMessage('最多 100 字').run(req)
+    ])
+    if (req.body.page === 'setting') {
+      await accountSetting()
+      return next()
+    }
+    await profileEdition()
+    return next()
+  } catch (error) {
+    next(error)
+  }
 }
 
 const postTweetRules = () => {
   // it's for user posting a new tweets
   return [
     check('description').notEmpty().withMessage('發文內容不可為空'),
-    check('description').isLength({ max: 140 }).withMessage('最多 140 字')
+
   ]
 }
 
