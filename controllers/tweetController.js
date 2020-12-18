@@ -59,7 +59,7 @@ const tweetController = {
     })
       .then(tweet => {
         if (!tweet) {
-          return res.json({ status: 'failure', message: 'this tweet not exist!' })
+          return res.status(404).json({ status: 'failure', message: 'this tweet not exist!' })
         }
         tweet = {
           ...Object.keys(tweet.dataValues)
