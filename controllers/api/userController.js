@@ -236,7 +236,7 @@ const userController = {
     try {
       const urlId = Number(req.params.id)
       const id = helpers.getUser(req).id
-      if (!urlId || urlId !== helpers.getUser(req).id) return res.status(401).json({ status: 'error', message: 'Unauthorized' })
+      if (!urlId || urlId !== helpers.getUser(req).id) return res.status(401).json({ status: 'error', message: '未被授權' })
       const user = await User.findByPk(id)
       const { account, email, name, password, introduction } = req.body
       const errorMessage = { status: 'error', message: '圖片上傳失敗' }

@@ -78,7 +78,7 @@ const postTweetRules = () => {
   // it's for user posting a new tweets
   return [
     check('description').notEmpty().withMessage('發文內容不可為空'),
-
+    check('description').isLength({ max: 140 }).withMessage('最多 140 字').run(req)
   ]
 }
 

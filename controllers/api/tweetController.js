@@ -68,7 +68,7 @@ const tweetController = {
     try {
       const tweetId = req.params.id
       const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) return res.status(400).json({ status: 'error', message: '沒有該則貼文' })
+      if (!tweet) return res.status(400).json({ status: 'error', message: '無此篇貼文' })
 
       const isExisting = await Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: tweetId } })
       if (!isExisting) {
