@@ -48,7 +48,7 @@ const adminController = {
         element.createdAt = element.createdAt.getTime()
         return element
       })
-      return res.json({ status: 'success', tweets })
+      return res.json(tweets)
     } catch (error) {
       next(error)
     }
