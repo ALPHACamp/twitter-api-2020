@@ -44,7 +44,6 @@ const loginRules = () => {
         if (!user) {
           throw new Error('此帳號尚未被註冊過，請先完成註冊程序')
         }
-        if (user.role === 'admin') throw new Error('Unauthorized')
         return true
       }),
   ]

@@ -28,7 +28,7 @@ function adminAuthenticated(req, res, next) {
   return next()
 }
 
-router.post('/admin/signin', adminController.signIn)
+router.post('/admin/signin', loginRules(), validResultCheck, adminController.signIn)
 router.get('/admin/tweets', authenticated, adminAuthenticated, adminController.getTweets)
 router.delete('/admin/tweets/:id', authenticated, adminAuthenticated, adminController.deleteTweet)
 router.get('/admin/users', authenticated, adminAuthenticated, adminController.getUsers)
