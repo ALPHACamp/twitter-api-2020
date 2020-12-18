@@ -153,6 +153,28 @@ const userController = {
       return res.json(followers)
     }).catch(next)
   },
+
+  readTopUsers: (req, res, next) => {
+    User.findAll({
+      where: { role: 'user' },
+      attributes: ['id', 'account', 'name', 'avatar'],
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: ['id']
+      }],
+    }).then(users => {
+      users = users.map(user => ({
+        ...Object.fromEntries(Object.entries(user.dataValues).slice(0, 4)),
+        followersCount: user.Followers.length,
+        isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(user.id)
+      }))
+      users = users.sort((a, b) => b.followersCount - a.followersCount)
+      users = users.slice(0, 10)
+      return res.json(users)
+    }).catch(next)
+  },
+
   updateUser: (req, res) => {
 
   }
