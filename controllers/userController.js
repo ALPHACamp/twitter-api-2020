@@ -16,6 +16,10 @@ const userController = {
         { model: User, as: 'Followings' },
       ]
     }).then(user => {
+      if (!user) return res.status(404).json({
+        message: `this user(id: ${id}) do not exist!`
+      })
+
       const userObj = Object.fromEntries(Object.entries(user.toJSON()).slice(0, 11))
       userObj.isSelf = (user.id === req.user.id)
       userObj.isFollowed = user.Followers.map(follower => follower.id).includes(helpers.getUser(req).id)
