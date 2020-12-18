@@ -105,6 +105,9 @@ const tweetController = {
           exclude: ['updatedAt']
         }
       })
+
+      if (!tweet) return res.status(400).json({ status: 'error', message: '沒有這則貼文' })
+
       tweet.createdAt = tweet.createdAt.getTime()
       return res.json(tweet)
     } catch (error) {
@@ -154,6 +157,7 @@ const tweetController = {
       })
       const tweets = rawTweets.map(t => ({
         ...t,
+        createdAt: t.createdAt.getTime(),
         isLiked: likedTweets.map(element => element.TweetId).includes(t.id)
       }))
 
