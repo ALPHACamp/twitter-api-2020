@@ -34,7 +34,7 @@ module.exports = {
         ON l.TweetId = t.id
 
         LEFT JOIN (SELECT TweetId, count(TweetId) AS isLiked FROM likes WHERE UserId = ${helpers.getUser(req).id} GROUP BY TweetId) as i 
-        ON i.TweetId = ${Number(req.params.id)}
+        ON i.TweetId = t.id
 
         LEFT JOIN (SELECT TweetId, count(TweetId) AS repliedCount FROM replies GROUP BY TweetId) as r 
         ON r.TweetId = t.id
