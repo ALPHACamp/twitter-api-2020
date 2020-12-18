@@ -33,7 +33,7 @@ const userController = {
       const { account, password } = req.body
       const user = await User.findOne({ where: { account }, raw: true })
 
-      if (!bcrypt.compareSync(password, user.password)) return res.json({
+      if (!bcrypt.compareSync(password, user.password)) return res.status(400).json({
         status: 'error',
         message: '帳號或密碼錯誤'
       })
@@ -53,7 +53,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
-      if (!id) return res.json({ status: 'error', message: '查無此使用者編號' })
+      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let user = await User.findOne({
         where: { id, role: null },
         attributes: {
@@ -64,7 +64,7 @@ const userController = {
           exclude: userBasicExcludeFields
         }
       })
-      if (!user) return res.json({ status: 'error', message: '查無此使用者編號' })
+      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       user = tagIsFollowed(req, user.toJSON())
       return res.json(user)
     } catch (error) {
@@ -101,7 +101,7 @@ const userController = {
   getTweets: async (req, res, next) => {
     try {
       const UserId = Number(req.params.id)
-      if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
+      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       const tweets = await sequelize.query(`
         SELECT t.*,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
@@ -124,7 +124,7 @@ const userController = {
   getLikeTweets: async (req, res, next) => {
     try {
       const UserId = Number(req.params.id)
-      if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
+      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let likeTweets = await Like.findAll({
         where: { UserId },
         attributes: [],
@@ -156,7 +156,7 @@ const userController = {
   getFollowers: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
-      if (!id) return res.json({ status: 'error', message: '查無此使用者編號' })
+      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let followers = await User.findByPk(id, {
         attributes: [],
         include: [{
@@ -179,7 +179,7 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
-      if (!id) return res.json({ status: 'error', message: '查無此使用者編號' })
+      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let followings = await User.findByPk(id, {
         attributes: [],
         include: [{
@@ -204,7 +204,7 @@ const userController = {
   getRepliedTweets: async (req, res, next) => {
     try {
       const UserId = Number(req.params.id)
-      if (!UserId) return res.json({ status: 'error', message: '查無此使用者編號' })
+      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let replies = await Reply.findAll({
         where: { UserId },
         attributes: { include: dateFieldsToTimestamp('Reply') },
@@ -244,9 +244,9 @@ const userController = {
         let { avatar, cover } = req.files
         if (avatar && cover) {
           return imgur.upload(avatar[0].path, (err, avatar) => {
-            if (err) return res.status(500).json(errorMessage)
+            if (err) return res.status(400).json(errorMessage)
             imgur.upload(cover[0].path, async (err, cover) => {
-              if (err) return res.status(500).json(errorMessage)
+              if (err) return res.status(400).json(errorMessage)
               await user.update({
                 name, introduction,
                 avatar: avatar.data.link || null,
@@ -262,7 +262,7 @@ const userController = {
 
         } else if (avatar) {
           return imgur.upload(avatar[0].path, async (err, avatar) => {
-            if (err) return res.status(500).json(errorMessage)
+            if (err) return res.status(400).json(errorMessage)
             await user.update({
               name, introduction,
               avatar: avatar.data.link || null
@@ -274,7 +274,7 @@ const userController = {
           })
         } else if (cover) {
           return imgur.upload(cover[0].path, async (err, cover) => {
-            if (err) return res.status(500).json(errorMessage)
+            if (err) return res.status(400).json(errorMessage)
             await user.update({
               name, introduction,
               cover: cover || null
