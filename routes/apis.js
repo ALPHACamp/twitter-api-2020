@@ -46,7 +46,7 @@ router.put('/users/:id', authenticated, userAuthenticated, upload.fields([{ name
 router.get('/users/:id', authenticated, userAuthenticated, userController.getUser)
 router.get('/users', authenticated, userAuthenticated, userController.getUsers)
 
-router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowing)
+router.delete('/followships/:id', authenticated, followshipController.deleteFollowing)
 router.post('/followships', authenticated, followshipController.addFollowing)
 
 router.post('/tweets/:id/replies', authenticated, userAuthenticated, tweetController.replyTweet)
