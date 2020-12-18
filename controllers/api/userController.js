@@ -105,9 +105,8 @@ const userController = {
       const user = await User.findOne({ where: { id: UserId, role: null } })
       if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let tweets = await sequelize.query(`
-        SELECT t.*,
+        SELECT t.id, t.UserId, t.description,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
-          UNIX_TIMESTAMP(t.updatedAt) * 1000 AS updatedAt,
           COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
           IF(l.UserId = ${helpers.getUser(req).id}, 1, 0) AS isLiked
         FROM Tweets as t
@@ -143,7 +142,8 @@ const userController = {
               ...repliesAndLikeCount(),
               ...dateFieldsToTimestamp('Tweet'),
               [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked'],
-            ]
+            ],
+            exclude: ['updatedAt']
           },
           include: {
             model: User, attributes: ['account', 'name', 'avatar', 'id']
@@ -223,7 +223,7 @@ const userController = {
       if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let replies = await Reply.findAll({
         where: { UserId },
-        attributes: { include: dateFieldsToTimestamp('Reply') },
+        attributes: { include: dateFieldsToTimestamp('Reply'), exclude: ['updatedAt'] },
         include: [{
           model: Tweet,
           attributes: {
@@ -231,7 +231,8 @@ const userController = {
               ...dateFieldsToTimestamp('Tweet'),
               ...repliesAndLikeCount(),
               [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked']
-            ]
+            ],
+            exclude: ['updatedAt']
           },
           include: {
             model: User, attributes: ['account', 'name', 'avatar', 'id']
