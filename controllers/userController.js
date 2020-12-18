@@ -46,7 +46,29 @@ const userController = {
     }).catch(err => console.error(err))
   },
   readRepliedTweets: (req, res) => {
-
+    const UserId = Number(req.params.id)
+    Reply.findAll({
+      where: { UserId },
+      sort: [['createdAt', 'DESC']],
+      include: [{
+        model: Tweet,
+        required: true, // INNER JOIN to select not null record
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id', 'UserId'] }
+        ]
+      }]
+    }).then(replies => {
+      replies = replies.map(reply => ({
+        ...(Object.fromEntries(Object.entries(reply.dataValues).slice(0, 7))),
+        Tweet: { ...(Object.fromEntries(Object.entries(reply.dataValues.Tweet.dataValues).slice(0, 6))) },
+        repliesCount: reply.Tweet.Replies.length,
+        likesCount: reply.Tweet.Likes.length,
+        isLike: reply.Tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+      }))
+      return res.json(replies)
+    }).catch(err => console.error(err))
   },
   readLikes: (req, res) => {
     const UserId = Number(req.params.id)
