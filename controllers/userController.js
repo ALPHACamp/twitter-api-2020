@@ -6,7 +6,7 @@ const Reply = db.Reply
 const Like = db.Like
 
 const userController = {
-  readUser: (req, res) => {
+  readUser: (req, res, next) => {
     const id = Number(req.params.id)
     User.findOne({
       where: { id },
@@ -27,9 +27,9 @@ const userController = {
       userObj.followingsCount = user.Followings.length
       userObj.followersCount = user.Followers.length
       return res.json(userObj)
-    }).catch(err => console.error(err))
+    }).catch(next)
   },
-  readTweets: (req, res) => {
+  readTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     Tweet.findAll({
       where: { UserId },
@@ -43,9 +43,9 @@ const userController = {
         isLike: tweet.dataValues.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
       }))
       return res.json(tweets)
-    }).catch(err => console.error(err))
+    }).catch(next)
   },
-  readRepliedTweets: (req, res) => {
+  readRepliedTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     Reply.findAll({
       where: { UserId },
@@ -68,9 +68,9 @@ const userController = {
         isLike: reply.Tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
       }))
       return res.json(replies)
-    }).catch(err => console.error(err))
+    }).catch(next)
   },
-  readLikes: (req, res) => {
+  readLikes: (req, res, next) => {
     const UserId = Number(req.params.id)
     Like.findAll({
       where: { UserId },
@@ -91,7 +91,7 @@ const userController = {
         isLike: like.Tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
       }))
       return res.json(likes)
-    }).catch(err => console.error(err))
+    }).catch(next)
   },
   readFollowings: (req, res) => {
 

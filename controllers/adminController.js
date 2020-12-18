@@ -5,7 +5,7 @@ const Tweet = db.Tweet
 const Like = db.Like
 
 const adminController = {
-  readUsers: (req, res) => {
+  readUsers: (req, res, next) => {
     User.findAll({
       where: { role: 'user' },
       include: [
@@ -24,17 +24,17 @@ const adminController = {
       }))
       users = users.sort((a, b) => b.tweetsCount - a.tweetsCount)
       return res.json(users)
-    }).catch(err => console.error(err))
+    }).catch(next)
   },
-  readTweets: (req, res) => {
+  readTweets: (req, res, next) => {
     Tweet.findAll({
       include: [{
         model: User,
         attributes: ['id', 'account', 'name', 'avatar']
       }]
-    }).then(tweets => res.json(tweets))
+    }).then(tweets => res.json(tweets)).catch(next)
   },
-  deleteTweet: (req, res) => {
+  deleteTweet: (req, res, next) => {
     const id = Number(req.params.id)
     Tweet.findByPk(id).then(tweet => {
       if (!tweet) return res.json({
@@ -48,7 +48,7 @@ const adminController = {
         message: `tweets/${tweet.id} is deleted successfully`,
         tweet
       }))
-    })
+    }).catch(next)
   }
 }
 
