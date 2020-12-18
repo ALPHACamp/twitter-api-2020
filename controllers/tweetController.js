@@ -25,8 +25,8 @@ const tweetController = {
               return result
             }, {}),
           isLiked: tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id),
-          repliedCount: tweet.Replies.length,
-          LikeCount: tweet.Likes.length
+          repliesCount: tweet.Replies.length,
+          likesCount: tweet.Likes.length
         }))
         return res.json(tweets)
       })
@@ -66,9 +66,10 @@ const tweetController = {
               return result
             }, {}),
           isLiked: tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id),
-          repliedCount: tweet.Replies.length,
-          LikeCount: tweet.Likes.length
+          repliesCount: tweet.Replies.length,
+          likesCount: tweet.Likes.length
         }
+
         return res.json(tweet)
       })
       .catch(next)
