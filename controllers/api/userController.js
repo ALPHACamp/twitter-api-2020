@@ -102,7 +102,7 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findByPk(UserId)
+      const user = await User.findOne({ where: { id: UserId, role: null } })
       if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let tweets = await sequelize.query(`
         SELECT t.*,
@@ -131,7 +131,7 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findByPk(UserId)
+      const user = await User.findOne({ where: { id: UserId, role: null } })
       if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let likeTweets = await Like.findAll({
         where: { UserId },
@@ -167,7 +167,7 @@ const userController = {
     try {
       const id = Number(req.params.id)
       if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findByPk(id)
+      const user = await User.findOne({ where: { id, role: null } })
       if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let followers = await User.findByPk(id, {
         attributes: [],
@@ -192,7 +192,7 @@ const userController = {
     try {
       const id = Number(req.params.id)
       if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findByPk(id)
+      const user = await User.findOne({ where: { id, role: null } })
       if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let followings = await User.findByPk(id, {
         attributes: [],
@@ -219,7 +219,7 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findByPk(UserId)
+      const user = await User.findOne({ where: { id: UserId, role: null } })
       if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let replies = await Reply.findAll({
         where: { UserId },
