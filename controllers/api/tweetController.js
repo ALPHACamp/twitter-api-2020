@@ -57,9 +57,38 @@ const tweetController = {
     }
   },
 
-  likeTweet: async (req, res, next) => { },
+  likeTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) return res.status(400).json({ status: 'error', message: '沒有該則貼文' })
 
-  unlikeTweet: async (req, res, next) => { },
+      const isExisting = await Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: tweetId } })
+      if (!isExisting) {
+        Like.create({
+          UserId: helpers.getUser(req).id,
+          TweetId: tweetId
+        })
+      }
+
+      return res.json({ status: 'success', message: '' })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
+      if (tweet) {
+        await tweet.destroy()
+      }
+      return res.json({ status: 'success', message: '' })
+    } catch (error) {
+      next(error)
+    }
+  },
 
   getTweet: async (req, res, next) => {
     try {
