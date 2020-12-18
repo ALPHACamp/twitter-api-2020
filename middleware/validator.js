@@ -46,8 +46,8 @@ const loginRules = () => {
     check('email').exists({ checkFalsy: true }).withMessage('帳號不可為空'),
     check('password').isLength({ min: 3, max: 8 }).withMessage('密碼錯誤：長度需界在 3-8 之間'),
     check('email')
-      .custom(async (account) => {
-        const user = await User.findOne({ where: { account } })
+      .custom(async (email) => {
+        const user = await User.findOne({ where: { email } })
         if (!user) {
           throw new Error('此帳號尚未被註冊過，請先完成註冊程序')
         }
