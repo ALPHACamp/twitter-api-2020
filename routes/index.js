@@ -32,6 +32,7 @@ router.post('/api/login', userController.login)
 router.post('/api/users', userController.createUser)
 router.get('/api/users/top', authToken, authUserRole, userController.getTopUsers)
 router.get('/api/users/:id', authToken, authUserRole, userController.getUser)
+router.get('/api/users/:id/tweets', authToken, authUserRole, userController.getTweets)
 //admin
 router.get('/api/admin/users', authToken, authAdminRole, userController.getUsers)
 
