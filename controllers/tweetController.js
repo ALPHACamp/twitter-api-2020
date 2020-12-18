@@ -7,7 +7,7 @@ const Reply = db.Reply
 const Like = db.Like
 
 const tweetController = {
-  readTweets: (req, res) => {
+  readTweets: (req, res, next) => {
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
       include: [
@@ -30,9 +30,9 @@ const tweetController = {
         }))
         return res.json(tweets)
       })
-      .catch(err => next(err))
+      .catch(next)
   },
-  postTweet: (req, res) => {
+  postTweet: (req, res, next) => {
     const { description } = req.body
     if (!description) {
       return res.status(400).json({ status: 'failure', message: "description didn't exist" })
@@ -46,10 +46,10 @@ const tweetController = {
         .then(tweet => {
           return res.json({ status: 'success', message: 'tweet was successfully created', tweet })
         })
-        .catch(err => next(err))
+        .catch(next)
     }
   },
-  readTweet: (req, res) => {
+  readTweet: (req, res, next) => {
     Tweet.findByPk(req.params.id, {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
@@ -71,7 +71,7 @@ const tweetController = {
         }
         return res.json(tweet)
       })
-      .catch(err => next(err))
+      .catch(next)
   }
 }
 
