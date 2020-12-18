@@ -16,7 +16,7 @@ This is a backend API for simple twitter, which is created with Node.js, express
 
 ## General Information
 
-We try to simplify demands about the Twitter website, and support most of the main functions, which includes four parts: admin, user, tweet and followship.
+We try to simplify demands about the Twitter website, and support most of the main functions, which includes four parts: Admin, User, Tweet and Followship.
 
 
 
@@ -24,7 +24,7 @@ We try to simplify demands about the Twitter website, and support most of the ma
 
 ### API document
 
-Our API detail information could be checked in the Swagger open api [link](https://app.swaggerhub.com/apis-docs/ccyang02/SimpleTwitter/1.1.1).
+Our API detail information could be checked in the Swagger openapi 3 [link](https://app.swaggerhub.com/apis-docs/ccyang02/SimpleTwitter/1.1.1).
 
 ### Sandbox server
 
@@ -34,10 +34,12 @@ We also build a sandbox server with testing data on the cloud application platfo
 
 ## Features
 
-- Admin: signin, get all tweets, delete any tweets, get data of all users and their related communities. 
-- User: signup, signin with authentication, get various information about user and update personal info.
-- Tweet: get all tweets, get tweet details, post, like, dislike, reply a tweet. 
-- Followship: follow or cancel following to a user
+| Parts      | Features                                                     |
+| ---------- | ------------------------------------------------------------ |
+| Admin      | signin, get all tweets, delete any tweets, get data of all users and their related communities |
+| User       | signup, signin with authentication, get various information about user and update personal info |
+| Tweet      | get all tweets, get tweet details, post, like, dislike, reply a tweet |
+| Followship | follow or cancel following to a user                         |
 
 
 
@@ -45,13 +47,13 @@ We also build a sandbox server with testing data on the cloud application platfo
 
 ### Getting Started
 
-- Clone repository to your local project
+- Clone repository to your local project.
 
 ```bash
 git clone https://github.com/ccyang02/twitter-api-2020.git
 ```
 
-- Install dependencies
+- Install dependencies.
 
 ```bash
 cd twitter-api-2020
@@ -69,7 +71,7 @@ npx sequelize db:seed:all
 npx sequelize db:migrate:undo:all
 ```
 
-- Setup environment variables
+- Setup environment variables.
 
 ```bash
 touch .env
@@ -79,13 +81,13 @@ touch .env
 # imgur service: https://api.imgur.com/oauth2/addclient 
 ```
 
-- Start the service and test on **http://localhost:port/**
+- Start the service and test on http://localhost:port/.
 
 ```bash
 npm run dev
 ```
 
-- Any test on [Postman](https://www.postman.com/) according to our API documents.
+- Test on [Postman](https://www.postman.com/) according to our API documents.
 
 ```
 POST /api/signin
@@ -103,6 +105,6 @@ POST /api/signin
 
 
 
-## Author
+## Inspiration
 
 Appreciate my co-work team members [Kaikai8888](https://github.com/Kaikai8888) to finish this project together.
