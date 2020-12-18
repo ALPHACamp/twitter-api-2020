@@ -45,7 +45,27 @@ const userController = {
 
   },
   readLikes: (req, res) => {
-
+    const UserId = Number(req.params.id)
+    Like.findAll({
+      where: { UserId },
+      sort: [['createdAt', 'DESC']],
+      include: [{
+        model: Tweet, include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id', 'UserId'] }
+        ]
+      }]
+    }).then(likes => {
+      likes = likes.map(like => ({
+        ...(Object.fromEntries(Object.entries(like.dataValues).slice(0, 5))),
+        Tweet: { ...(Object.fromEntries(Object.entries(like.dataValues.Tweet.dataValues).slice(0, 6))) },
+        repliesCount: like.Tweet.Replies.length,
+        likesCount: like.Tweet.Likes.length,
+        isLike: like.Tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+      }))
+      return res.json(likes)
+    }).catch(err => console.error(err))
   },
   readFollowings: (req, res) => {
 
