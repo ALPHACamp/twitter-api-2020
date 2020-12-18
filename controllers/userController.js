@@ -106,8 +106,28 @@ const userController = {
     }).catch(next)
   },
 
-  readFollowings: (req, res) => {
-
+  readFollowings: (req, res, next) => {
+    const id = Number(req.params.id)
+    User.findByPk(id, {
+      include: [{
+        model: User,
+        as: 'Followings',
+        attributes: ['id', 'account', 'name', 'avatar', 'introduction']
+      }],
+    }).then(user => {
+      if (!user) return res.status(404).json({
+        message: `this user(id: ${id}) do not exist!`
+      })
+      let followings = user.Followings
+      followings = followings.map(following => ({
+        followingId: following.id,
+        ...Object.fromEntries(Object.entries(following.dataValues).slice(1, 5)),
+        followshipCreatedAt: following.Followship.createdAt,
+        isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(following.id)
+      }))
+      followings = followings.sort((a, b) => b.followshipCreatedAt - a.followshipCreatedAt)
+      return res.json(followings)
+    }).catch(next)
   },
   readFollowers: (req, res) => {
 
