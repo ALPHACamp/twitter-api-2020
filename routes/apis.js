@@ -11,7 +11,7 @@ const userController = require('../controllers/api/userController')
 const authenticated = passport.authenticate('jwt', { session: false })
 const authenticatedAdmin = (req, res, next) => {
   if (helper.getUser) {
-    if (helper.getUser.role === 'admin') {
+    if (helper.getUser(req).role === 'admin') {
       return next()
     }
     return res.json({ status: 'error', message: 'permission denied.' })
