@@ -195,5 +195,84 @@ module.exports = {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
     }
-  }
+  },
+  updateUser: async (req, res, next) => { //編輯個人資料 name, avatar, introduction, cover
+    if (helpers.getUser(req).id !== Number(req.params.id)) {
+      return res.json({ status: 'error', message: '無權編輯' })
+    }
+    const { name, introduction } = req.body
+    if (!name.trim()) {
+      return res.json({ status: 'error', message: '名稱不能空白' })
+    }
+    try {
+      const user = await User.findByPk(req.params.id)
+      /* if req.files object contains cover or avatar, upload the image file to imgur and get the link
+       * The condition "req.files !== undefined" is for testing. Otherwise, it is not necessary. 
+       */
+      if (req.files !== undefined) {
+        if (Object.keys(req.files).length) {
+          const { uploadToImgur } = require('../utils/helpers')
+          let [cover, avatar] = [user.cover, user.avatar]
+          if (req.files.cover) {
+            cover = await uploadToImgur(req.files.cover[0].path)
+          }
+          if (req.files.avatar) {
+            avatar = await uploadToImgur(req.files.avatar[0].path)
+          }
+          await user.update({ name, introduction, cover, avatar })
+          return res.json({ status: 'success', message: '修改成功' })
+        }
+      }
+      //if req.files object is empty, update only name and introduction
+      await user.update({ name, introduction })
+      return res.json({ status: 'success', message: '修改成功' })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
+  updateUserSetting: async (req, res, next) => { //設定
+    if (helpers.getUser(req).id !== Number(req.params.id)) {
+      return res.json({ status: 'error', message: '無權編輯' })
+    }
+    const errors = []
+    //check required fields
+    const { account, name, email, password, checkPassword } = req.body
+    if (!account.trim() || !name.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) {
+      errors.push('所有欄位皆為必填')
+    }
+    //check if password matches checkPassword
+    if (password !== checkPassword) {
+      errors.push('密碼和確認密碼不相符')
+    }
+    //check if the email's format is valid
+    if (!isEmailValid(email)) {
+      errors.push('Email格式錯誤')
+    }
+    try {
+      const user = await User.findByPk(req.params.id)
+      //check duplicate email and account if the inputs are different from the original data
+      if (account !== user.account) {
+        const duplicateAccount = await User.findOne({ where: { account } })
+        if (duplicateAccount) {
+          errors.push('帳號重複')
+        }
+      }
+      if (email !== user.email) {
+        const duplicateEmail = await User.findOne({ where: { email } })
+        if (duplicateEmail) {
+          errors.push('Email已被註冊')
+        }
+      }
+      if (errors.length) {
+        return res.json({ status: 'error', message: errors })
+      }
+      const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+      await user.update({ account, name, email, password: hash })
+      return res.json({ status: 'success', message: '修改成功' })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
 }
