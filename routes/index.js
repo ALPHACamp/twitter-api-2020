@@ -31,6 +31,13 @@ router.post('/api/tweets/:id/unlike', authToken, authUserRole, likeController.de
 router.post('/api/followships', authToken, authUserRole, followshipController.createFollowship)
 router.delete('/api/followships/:id', authToken, authUserRole, followshipController.deleteFollowship)
 
+// reply
+router.post('/api/tweets/:id/replies', authToken, authUserRole, replyController.createReply)
+router.get('/api/tweets/:id/replies', authToken, authUserRole, replyController.getReplies)
+router.get('/api/replies/:id', authToken, authUserRole, replyController.getReply)
+router.put('/api/replies/:id', authToken, authUserRole, replyController.updateReply)
+router.delete('/api/replies/:id', authToken, authUserRole, replyController.deleteReply)
+
 //users
 router.post('/api/login', userController.login)
 router.post('/api/users', userController.createUser)
