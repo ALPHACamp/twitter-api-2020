@@ -31,7 +31,11 @@ const tweetServices = {
         .then(replies => {
           Like.findAndCountAll({ where: { TweetId: req.params.tweet_id } })
             .then(likes => {
-              return callback({ tweet, replies, likes })
+              return callback({ 
+                description: tweet.description,
+                replies,
+                likes
+              })
             })
         })
     })

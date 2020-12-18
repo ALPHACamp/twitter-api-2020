@@ -26,7 +26,8 @@ const replyServices = {
         .then(replies => {
           Like.findAndCountAll({ where: { TweetId: req.params.tweet_id } })
             .then(likes => {
-              return callback({ tweet, replies, likes })
+              const data = replies.rows[0]
+              return callback([data, tweet, likes, replies])
             })
         })
     })
