@@ -16,13 +16,13 @@ const adminController = {
       if (!user || !bcrypt.compareSync(password, user.password)) {
         return res.status(403).json({
           status: 'error',
-          message: 'Invalid email or password.'
+          message: '信箱和密碼錯誤。'
         })
       }
 
       return res.json({
         status: 'success',
-        message: `Successfully login. Welcome ${user.role} ${user.name}.`,
+        message: `成功登入！歡迎 ${user.role} ${user.name}.`,
         token: jwt.sign({ id: user.id }, process.env.JWT_SECRET),
         user: { id: user.id, name: user.name, email: user.email, role: user.role }
       })
@@ -62,7 +62,7 @@ const adminController = {
         await tweet.destroy()
       }
 
-      return res.json({ status: 'success', message: 'Delete successfully.' })
+      return res.json({ status: 'success', message: '刪除成功' })
     } catch (error) {
       next(error)
     }

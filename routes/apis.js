@@ -14,19 +14,19 @@ const helpers = require('../_helpers.js')
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) return next(error)
-    if (!user) return res.status(401).json({ status: 'error', message: 'UnAuthorized' })
+    if (!user) return res.status(401).json({ status: 'error', message: '未被授權' })
     req.user = user
     return next()
   })(req, res, next)
 }
 
 function userAuthenticated(req, res, next) {
-  if (helpers.getUser(req).role === 'admin') return res.status(401).json({ status: 'error', message: 'UnAuthorized' })
+  if (helpers.getUser(req).role === 'admin') return res.status(401).json({ status: 'error', message: '未被授權' })
   return next()
 }
 
 function adminAuthenticated(req, res, next) {
-  if (helpers.getUser(req).role !== 'admin') return res.status(401).json({ status: 'error', message: 'UnAuthorized' })
+  if (helpers.getUser(req).role !== 'admin') return res.status(401).json({ status: 'error', message: '未被授權' })
   return next()
 }
 
