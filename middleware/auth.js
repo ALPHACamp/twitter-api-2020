@@ -21,7 +21,7 @@ module.exports = {
   authUser: (req, res, next) => {
     const user = helpers.getUser(req)
     if (user) {
-      if (user.role === 'user') return next()
+      if (user.role !== 'admin') return next()
       return res.json({ status: 'failure', message: 'permission denied' })
     }
     return res.json({ status: 'failure', message: 'permission denied' })
