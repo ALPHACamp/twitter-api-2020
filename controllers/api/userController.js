@@ -102,7 +102,7 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const tweets = await sequelize.query(`
+      let tweets = await sequelize.query(`
         SELECT t.*,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
           UNIX_TIMESTAMP(t.updatedAt) * 1000 AS updatedAt,
@@ -115,6 +115,10 @@ const userController = {
         GROUP BY t.id
         ORDER BY t.createdAt DESC;
       `, { type: sequelize.QueryTypes.SELECT })
+      tweets = tweets.map(tweet => {
+        tweet.isLiked = tweet.isLiked ? true : false
+        return tweet
+      })
       return res.json(tweets)
     } catch (error) {
       next(error)
@@ -145,10 +149,12 @@ const userController = {
         }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
-      likeTweets = likeTweets.map(like => ({
-        ...like.dataValues.Tweet.toJSON(),
-        TweetId: like.dataValues.Tweet.id
-      }))
+      likeTweets = likeTweets.map(like => {
+        like = { ...like.dataValues.Tweet.toJSON() }
+        like.TweetId = like.id
+        like.isLiked = like.isLiked ? true : false
+        return like
+      })
       return res.json(likeTweets)
     } catch (error) {
       next(error)
@@ -225,7 +231,11 @@ const userController = {
         }],
         order: [['createdAt', 'DESC'], [Tweet, 'createdAt', 'DESC']]
       })
-      replies = replies.map(reply => ({ ...reply.toJSON() }))
+      replies = replies.map(reply => {
+        reply = { ...reply.toJSON() }
+        reply.Tweet.isLiked = reply.Tweet.isLiked ? true : false
+        return reply
+      })
       return res.json(replies)
     } catch (error) {
       next(error)
