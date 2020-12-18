@@ -48,6 +48,30 @@ const tweetController = {
         })
         .catch(err => next(err))
     }
+  },
+  readTweet: (req, res) => {
+    Tweet.findByPk(req.params.id, {
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Reply, attributes: ['TweetId'] },
+        { model: Like, attributes: ['TweetId', 'UserId'] }
+      ]
+    })
+      .then(tweet => {
+        tweet = {
+          ...Object.keys(tweet.dataValues)
+            .slice(0, 6)
+            .reduce((result, key) => {
+              result[key] = tweet[key]
+              return result
+            }, {}),
+          isLiked: tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id),
+          repliedCount: tweet.Replies.length,
+          LikeCount: tweet.Likes.length
+        }
+        return res.json(tweet)
+      })
+      .catch(err => next(err))
   }
 }
 

@@ -9,6 +9,7 @@ const { authUserSelf } = require('../middleware/auth')
 // routes for tweets
 router.get('/', tweetController.readTweets)
 router.post('/', tweetController.postTweet)
+router.get('/:id', tweetController.readTweet)
 // routes for replies
 router.get('/:id/replies', replyController.readReplies)
 router.post('/:id/replies', authUserSelf, replyController.postReply)
