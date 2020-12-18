@@ -180,7 +180,6 @@ const tweetController = {
       next(error)
     }
   },
-
 }
 
 module.exports = tweetController

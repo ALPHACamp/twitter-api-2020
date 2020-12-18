@@ -125,6 +125,8 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const user = await User.findByPk(UserId)
+      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let likeTweets = await Like.findAll({
         where: { UserId },
         attributes: [],
