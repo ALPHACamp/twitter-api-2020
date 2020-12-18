@@ -2,9 +2,8 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt-nodejs')
 const helper = require('../../_helpers')
 const imgur = require('imgur-node-api')
-const { User, Tweet, Reply, Like, Followship } = require('../../models')
 const { Op } = require('sequelize')
-
+const { User, Tweet, Reply, Like, Followship } = require('../../models')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
@@ -81,34 +80,51 @@ const userController = {
   },
   updateUser: async (req, res) => {
     try {
-      const userId = Number(req.params.id)
-      if (userId !== helper.getUser(req).id) {
+      const id = Number(req.params.id)
+      if (id !== helper.getUser(req).id) {
         return res.json({ status: 'error', message: 'Permission denied.' })
       }
-      const user = await User.findByPk(userId)
+      const user = await User.findByPk(id)
       if (!user) {
         return res.json({ status: 'error', message: "This user doesn't exist." })
       }
-      const { file } = req
       const { email, name, password, account, introduction } = req.body
       if (!account || !name || !email || !password) {
         return res.json({ status: 'error', message: "Required fields didn't exist." })
       }
 
-      if (file) {
+      let avatar = user.avatar
+      let cover = user.cover
+      if (req.files) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        const imgurUpload = new Promise((resolve, reject) => {
-          imgur.upload(file.path, (err, img) => {
-            if (err) {
-              return reject(err)
-            }
-            return resolve(img)
+        if (req.files.avatar) {
+          [avatar] = [...req.files.avatar]
+          const avatarUpload = new Promise((resolve, reject) => {
+            imgur.upload(avatar.path, (err, res) => {
+              if (err) return reject(err)
+              return resolve(res)
+            })
           })
-        })
-        const img = await imgurUpload
-        // user.image = img.data.link
+          const avatarImg = await avatarUpload
+          avatar = avatarImg.data.link
+        }
+        if (req.files.cover) {
+          [cover] = [...req.files.cover]
+          const coverUpload = new Promise((resolve, reject) => {
+            imgur.upload(cover.path, (err, res) => {
+              if (err) return reject(err)
+              return resolve(res)
+            })
+          })
+          const coverImg = await coverUpload
+          cover = coverImg.data.link
+        }
       }
 
+      await User.update({
+        name, email, password, account, introduction, avatar, cover
+      }, { where: { id } })
+      res.json({ status: 'success', message: 'ok' })
     } catch (error) {
       console.log(error)
     }

@@ -48,6 +48,9 @@ const replyController = {
       if (!reply) {
         return res.json({ status: 'error', message: "This reply doesn't exist." })
       }
+      if (reply.UserId !== helper.getUser(req).id) {
+        return res.json({ status: 'error', message: 'Permission denied.' })
+      }
       await reply.update({ comment })
       res.json({ status: 'success', message: 'ok' })
     } catch (error) {
