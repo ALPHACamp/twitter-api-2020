@@ -16,13 +16,20 @@ const tweetController = {
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) return res.status(400).json({ status: 'error', message: '無此篇貼文' })
 
-      const comment = req.body.comment
-      await Reply.create({
+      const { comment, createdTimestamp } = req.body
+      const reply = await Reply.create({
         UserId: helpers.getUser(req).id,
         TweetId: tweetId,
         comment: comment
       })
-      return res.json({ status: "success", message: "" })
+
+      if (createdTimestamp) {
+        reply.changed('createdAt', true)
+        reply.set('createdAt', new Date(parseInt(createdTimestamp)), { raw: true })
+        await reply.save({ silent: true })
+      }
+
+      return res.json({ status: 'success', message: '' })
     } catch (error) {
       next(error)
     }
@@ -118,11 +125,18 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     const { description, createdTimestamp } = req.body
     try {
-      await Tweet.create({
+      const tweet = await Tweet.create({
         UserId: helpers.getUser(req).id,
         description: description,
-        // createdAt: Date(createdTimestamp) 1608215153858 frontend
       })
+
+      if (createdTimestamp) {
+        // for add the frontend click datetime in the database
+        tweet.changed('createdAt', true)
+        tweet.set('createdAt', new Date(parseInt(createdTimestamp)), { raw: true })
+        await tweet.save({ silent: true })
+      }
+
       return res.json({ status: "success", message: "" })
     } catch (error) {
       next(error)
