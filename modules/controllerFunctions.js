@@ -1,3 +1,5 @@
+const db = require('../models')
+const User = db.User
 const helpers = require('../_helpers.js')
 const { sequelize } = require('../models')
 
@@ -23,8 +25,16 @@ const tagIsFollowed = (req, user) => {
   }
 }
 
+const getSimpleUserIncluded = () => {
+  return [{
+    model: User,
+    attributes: ['id', 'name', 'account', 'avatar']
+  }]
+}
+
 module.exports = {
   dateFieldsToTimestamp,
   tagIsFollowed,
   repliesAndLikeCount,
+  getSimpleUserIncluded
 }

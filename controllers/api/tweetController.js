@@ -6,7 +6,7 @@ const Reply = db.Reply
 
 const sequelize = require('sequelize')
 const helpers = require('../../_helpers.js')
-
+const { getSimpleUserIncluded } = require('../../modules/controllerFunctions')
 
 const tweetController = {
 
@@ -45,10 +45,7 @@ const tweetController = {
         raw: true,
         nest: true,
         where: { TweetId: tweetId },
-        include: [{
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        }],
+        include: getSimpleUserIncluded(),
         order: [
           [sequelize.literal('createdAt'), 'DESC'],
         ],
@@ -100,10 +97,7 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id, {
-        include: [{
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        }],
+        include: getSimpleUserIncluded(),
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'repliesCount'],
@@ -148,10 +142,7 @@ const tweetController = {
       const rawTweets = await Tweet.findAll({
         raw: true,
         nest: true,
-        include: [{
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        }],
+        include: getSimpleUserIncluded(),
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'repliesCount'],
