@@ -2,9 +2,18 @@ const helpers = require('../_helpers')
 
 const db = require('../models')
 const Reply = db.Reply
+const User = db.User
 
 const replyController = {
-  readReplies: (req, res) => {},
+  readReplies: (req, res, next) => {
+    let whereQuery = {}
+    whereQuery.TweetId = req.params.id
+    Reply.findAll({ order: [['createdAt', 'DESC']], where: whereQuery, include: User })
+      .then(replies => {
+        return res.json(replies)
+      })
+      .catch(next)
+  },
   postReply: (req, res, next) => {
     const { comment } = req.body
     if (!req.body.comment) {
