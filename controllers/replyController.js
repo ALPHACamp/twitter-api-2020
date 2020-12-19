@@ -11,5 +11,10 @@ const replyController = {
       return res.json(data)
     })
   },
+  getSingleReply: (req, res) => {
+    replyServices.getSingleReply(req, res, data => {
+      return res.json(data)
+    })
+  }
 }
 module.exports = replyController
