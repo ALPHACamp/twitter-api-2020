@@ -1,10 +1,12 @@
 const db = require('../../models')
 const Tweet = db.Tweet
-
+const User = db.User
+const Like = db.Like
+const helper = require('../../_helpers')
 const tweetController = {
   getTweets: async (req, res) => {
     try {
-      const tweets = await Tweet.findAll()
+      const tweets = await Tweet.findAll({ include: [User] })
       return res.json({ tweets })
     } catch (error) {
       console.log(error)
@@ -12,26 +14,100 @@ const tweetController = {
   },
   getTweet: async (req, res) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id)
+      const tweet = await Tweet.findByPk(req.params.id, { include: [User] })
       return res.json({ tweet })
     } catch (error) {
       console.log(error)
     }
   },
-  addTweet: (req, res) => {
-
+  addTweet: async (req, res) => {
+    try {
+      const description = req.body.description
+      if (!description) {
+        return res.json({ status: 'error', message: "Content didn't exist" })
+      }
+      if (description.length > 140) {
+        return res.json({ status: 'error', message: 'Word limit exceeded' })
+      }
+      await Tweet.create({
+        UserId: helper.getUser(req).id,
+        description: description
+      })
+      return res.json({ status: 'success', message: 'Tweet was successfully posted' })
+    } catch (error) {
+      console.log(error)
+    }
   },
-  updateTweet: (req, res) => {
+  updateTweet: async (req, res) => {
+    try {
+      if (!req.body.description) {
+        return res.json({ status: 'error', message: "content didn't exist" })
+      }
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (helper.getUser(req).id !== tweet.dataValues.UserId) {
+        return res.json({ status: 'error', message: 'Permission denied' })
+      }
 
+      await tweet.update({
+        description: req.body.description
+      })
+      return res.json({ status: 'success', message: 'This tweet was successfully update' })
+    } catch (error) {
+      console.log(error)
+    }
   },
-  removeTweet: (req, res) => {
-
+  removeTweet: async (req, res) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (helper.getUser(req).id !== tweet.dataValues.UserId) {
+        return res.json({ status: 'error', message: 'Permission denied' })
+      }
+      await tweet.destroy()
+      return res.json({ status: 'success', message: 'This tweet was successfully remove' })
+    } catch (error) {
+      console.log(error)
+    }
   },
-  likeTweet: (req, res) => {
-
+  likeTweet: async (req, res) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) {
+        return res.json({ status: 'error', message: "This post doesn't exist" })
+      }
+      const like = await Like.findOne({
+        where: {
+          UserId: helper.getUser(req).id,
+          TweetId: req.params.id
+        }
+      })
+      if (like) {
+        return res.json({ status: 'error', message: 'You already liked this post!' })
+      }
+      await Like.create({
+        UserId: helper.getUser(req).id,
+        TweetId: req.params.id
+      })
+      return res.json({ status: 'success', message: 'You like this post!' })
+    } catch (error) {
+      console.log(error)
+    }
   },
-  unlikeTweet: (req, res) => {
-
+  unlikeTweet: async (req, res) => {
+    try {
+      const like = await Like.findOne({
+        where: {
+          UserId: helper.getUser(req).id,
+          TweetId: req.params.id
+        }
+      })
+      if (!like) {
+        return res.json({ status: 'error', message: "This post doesn't in your liked list." })
+      }
+      await like.destroy()
+      return res.json({ status: 'success', message: 'Unlike this post successfully' })
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
