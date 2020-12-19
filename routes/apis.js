@@ -1,7 +1,9 @@
 const express = require('express')
 const passport = require('../config/passport')
 const helper = require('../_helpers')
+const multer = require('multer')
 const router = express.Router()
+const upload = multer({ dest: 'uploads/' })
 
 const adminController = require('../controllers/api/adminController')
 const tweetController = require('../controllers/api/tweetController')
@@ -10,7 +12,7 @@ const userController = require('../controllers/api/userController')
 
 const authenticated = passport.authenticate('jwt', { session: false })
 const authenticatedAdmin = (req, res, next) => {
-  if (helper.getUser) {
+  if (helper.getUser(req)) {
     if (helper.getUser(req).role === 'admin') {
       return next()
     }
@@ -36,8 +38,8 @@ router.delete('/tweets/:id/unlike', authenticated, tweetController.unlikeTweet)
 // replyController
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.addReply)
-router.put('/tweets/:tweet_id/replies', authenticated, replyController.updateReply)
-router.delete('/tweets/:tweet_id/replies', authenticated, replyController.removeReply)
+router.put('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.updateReply)
+router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.removeReply)
 
 // userController
 router.post('/users', userController.signUp)
@@ -45,13 +47,13 @@ router.post('/signin', userController.signIn)
 router.get('/users', authenticated, userController.getCurrentUser)
 router.get('/users/top', authenticated, userController.getTopUsers)
 router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, userController.updateUser)
+router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.updateUser)
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getRepliedTweets)
 router.get('/users/:id/likes', authenticated, userController.getLikedTweets)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
-router.post('/followships', authenticated, userController.addFollowing)
+router.post('/followships/:followingId', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 
 module.exports = router
