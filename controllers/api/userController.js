@@ -29,13 +29,22 @@ const userController = {
         })
       }
 
-      await User.create({
-        account,
-        name,
-        email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      const [user, created] = await User.findOrCreate({
+        where: {
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+        }
       })
-      res.json({ status: 'success', message: 'ok' })
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
+      res.json({
+        status: 'success',
+        message: 'ok',
+        token,
+        user
+      })
     } catch (error) {
       console.log(error)
     }
