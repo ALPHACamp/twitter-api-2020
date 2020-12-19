@@ -2,7 +2,7 @@ const db = require('../../models')
 const User = db.User
 const Like = db.Like
 const Tweet = db.Tweet
-
+const sequelize = require('sequelize')
 const adminController = {
   getUsers: async (req, res) => {
     try {
@@ -11,7 +11,11 @@ const adminController = {
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
           { model: Tweet, include: [Like] }
-        ]
+        ],
+        attributes: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'PostCount']
+        ],
+        order: [[sequelize.literal('PostCount'), 'DESC']]
       })
       return res.json({ users })
     } catch (error) {
