@@ -1,11 +1,9 @@
 const bcrypt = require('bcryptjs')
-const { commerce } = require('faker')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Like, Reply, sequelize, Sequelize } = require('../models/index')
+const { User, Tweet, Reply, sequelize, Sequelize } = require('../models/index')
 const QueryTypes = Sequelize.QueryTypes
 const { isEmailValid } = require('../utils/helpers')
 const helpers = require('../_helpers')
-const replyController = require('./replyController')
 
 module.exports = {
   createUser: async (req, res, next) => {
