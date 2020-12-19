@@ -13,7 +13,7 @@ const adminController = {
       const { email, password } = req.body
       const user = await User.findOne({ where: { email }, raw: true })
 
-      if (!user || !bcrypt.compareSync(password, user.password)) {
+      if (user.role !== 'admin' || !bcrypt.compareSync(password, user.password)) {
         return res.status(403).json({
           status: 'error',
           message: '信箱和密碼錯誤。'

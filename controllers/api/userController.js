@@ -33,10 +33,12 @@ const userController = {
       const { email, password } = req.body
       const user = await User.findOne({ where: { email }, raw: true })
 
-      if (!bcrypt.compareSync(password, user.password)) return res.status(400).json({
-        status: 'error',
-        message: '帳號或密碼錯誤'
-      })
+      if (user.role !== null || !bcrypt.compareSync(password, user.password)) {
+        return res.status(400).json({
+          status: 'error',
+          message: '帳號或密碼錯誤'
+        })
+      }
 
       return res.json({
         status: 'success',
