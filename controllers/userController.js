@@ -1,9 +1,11 @@
 const bcrypt = require('bcryptjs')
+const { commerce } = require('faker')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Like, sequelize, Sequelize } = require('../models/index')
+const { User, Tweet, Like, Reply, sequelize, Sequelize } = require('../models/index')
 const QueryTypes = Sequelize.QueryTypes
 const { isEmailValid } = require('../utils/helpers')
 const helpers = require('../_helpers')
+const replyController = require('./replyController')
 
 module.exports = {
   createUser: async (req, res, next) => {
@@ -275,4 +277,33 @@ module.exports = {
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
     }
   },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.json({ status: 'error', message: '使用者不存在' })
+      }
+
+      let replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [{
+          model: Tweet,
+          attributes: {
+            include: [
+              [sequelize.literal(`EXISTS(SELECT L.TweetId FROM Likes AS L WHERE L.UserId = ${helpers.getUser(req).id} AND L.TweetId = Tweet.id)`), 'isLiked']
+            ]
+          },
+          include: [{
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          }]
+        }]
+      })
+      replies = replies.map(r => ({ ...r.toJSON() }))
+      return res.json(replies)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  }
 }
