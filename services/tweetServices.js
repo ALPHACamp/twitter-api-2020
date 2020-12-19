@@ -22,23 +22,35 @@ const tweetServices = {
     })
   },
   getTweet: (req, res, callback) => {
-    Tweet.findByPk(req.params.tweet_id, {
-      include: [
-        User
-      ]
-    }).then(tweet => {
-      Reply.findAndCountAll({ include: [User], where: { TweetId: req.params.tweet_id } })
-        .then(replies => {
-          Like.findAndCountAll({ where: { TweetId: req.params.tweet_id } })
-            .then(likes => {
-              return callback({ 
-                description: tweet.description,
-                replies,
-                likes
-              })
-            })
+    return Promise.all([
+      Tweet.findByPk(req.params.tweet_id, { include: [User] }),
+      Reply.findAndCountAll({ include: [User], where: { TweetId: req.params.tweet_id } }),
+      Like.findAndCountAll({ where: { TweetId: req.params.tweet_id } })
+    ])
+      .then(([tweet, replies, likes]) => {
+        return callback({
+          description: tweet.description,
+          replies,
+          likes
         })
-    })
+      })
+    // Tweet.findByPk(req.params.tweet_id, {
+    //   include: [
+    //     User
+    //   ]
+    // }).then(tweet => {
+    //   Reply.findAndCountAll({ include: [User], where: { TweetId: req.params.tweet_id } })
+    //     .then(replies => {
+    //       Like.findAndCountAll({ where: { TweetId: req.params.tweet_id } })
+    //         .then(likes => {
+    //           return callback({ 
+    //             description: tweet.description,
+    //             replies,
+    //             likes
+    //           })
+    //         })
+    //     })
+    // })
   },
   postTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id

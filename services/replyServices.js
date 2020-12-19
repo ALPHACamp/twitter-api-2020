@@ -31,6 +31,12 @@ const replyServices = {
             })
         })
     })
+  },
+  getSingleReply: (req, res, callback) => {
+    Reply.findByPk(req.params.reply_id, { include: [User] })
+      .then(reply => {
+        return callback({ reply })
+      })
   }
 }
 module.exports = replyServices
