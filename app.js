@@ -13,7 +13,7 @@ const passport = require('passport')
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
-app.use(cors())
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(session({ secret: 'itismyserect', resave: false, saveUninitialized: false }))

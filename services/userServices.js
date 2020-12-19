@@ -268,6 +268,18 @@ const userServices = {
           return callback({ status: 'success', message: 'User infromation are updated' })
         })
     }
+  },
+  getCurrentUser: (req, res, callback) => {
+    const user = helpers.getUser(req)
+    return callback({
+      id: user.id,
+      account: user.account,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      introduction: user.introduction
+    })
   }
 }
 module.exports = userServices
