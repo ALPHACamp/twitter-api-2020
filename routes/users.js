@@ -11,7 +11,7 @@ router.get('/:id/replied_tweets', userController.readRepliedTweets)
 router.get('/:id/likes', userController.readLikes)
 router.get('/:id/followings', userController.readFollowings)
 router.get('/:id/followers', userController.readFollowers)
-router.get('/:id/', userController.readUser)
-router.put('/:id/', authUserSelf, userController.updateUser)
+router.get('/:id', userController.readUser)
+router.put('/:id', authUserSelf, userController.updateUser)
 
 module.exports = router
