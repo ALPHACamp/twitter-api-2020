@@ -33,7 +33,7 @@ let userController = {
         message: 'ok',
         token: token,
         user: {
-          id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar, introduction: user.introduction
+          id: user.id, account: user.account, name: user.name, email: user.email, role: user.role, avatar: user.avatar, introduction: user.introduction
         }
       })
     })
@@ -170,6 +170,11 @@ let userController = {
   },
   putSetting: (req, res) => {
     userServices.putSetting(req, res, data => {
+      return res.json(data)
+    })
+  },
+  getCurrentUser: (req, res) => {
+    userServices.getCurrentUser(req, res, data => {
       return res.json(data)
     })
   }
