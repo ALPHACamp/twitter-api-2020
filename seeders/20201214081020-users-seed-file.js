@@ -13,7 +13,7 @@ module.exports = {
         avatar: 'https://developers.google.com/web/tools/chrome-user-experience-report/images/logo.png',
         cover: 'https://m.dw.com/image/48396304_101.jpg',
         introduction: 'I am Groot.',
-        role: 'Admin',
+        role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -26,7 +26,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/restaurant,food/?lock=${Math.random() * 100}`,
         cover: 'https://m.dw.com/image/48396304_101.jpg',
         introduction: 'I am Groot.',
-        role: 'User',
+        role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -39,7 +39,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/restaurant,food/?lock=${Math.random() * 100}`,
         cover: 'https://m.dw.com/image/48396304_101.jpg',
         introduction: 'I am Groot.',
-        role: 'User',
+        role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -52,7 +52,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/restaurant,food/?lock=${Math.random() * 100}`,
         cover: 'https://m.dw.com/image/48396304_101.jpg',
         introduction: 'I am Groot.',
-        role: 'User',
+        role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -65,7 +65,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/restaurant,food/?lock=${Math.random() * 100}`,
         cover: 'https://m.dw.com/image/48396304_101.jpg',
         introduction: 'I am Groot.',
-        role: 'User',
+        role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -78,7 +78,7 @@ module.exports = {
         avatar: `https://loremflickr.com/320/240/restaurant,food/?lock=${Math.random() * 100}`,
         cover: 'https://m.dw.com/image/48396304_101.jpg',
         introduction: 'I am Groot.',
-        role: 'User',
+        role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
       }

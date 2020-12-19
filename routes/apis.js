@@ -4,6 +4,7 @@ const passport = require('../config/passport')
 
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
+const helpers = require('../_helpers')
 
 const authenticated = function (req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
@@ -18,14 +19,15 @@ const authenticated = function (req, res, next) {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'Admin') { return next() }
+  if (helpers.getUser(req)) {
+    if (helpers.getUser(req).role === 'admin') { return next() }
     return res.json({ status: 'error', message: 'permission denied' })
   } else {
     return res.json({ status: 'error', message: 'permission denied' })
   }
 }
 
+const adminController = require('../controllers/adminController.js')
 const tweetController = require('../controllers/tweetController')
 const userController = require('../controllers/userController')
 const replyController = require('../controllers/replyController')
@@ -67,5 +69,10 @@ router.get('/users/:id', authenticated, userController.getProfile)
 //followship
 router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
+
+// admin
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 module.exports = router
