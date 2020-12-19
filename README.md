@@ -1,6 +1,6 @@
 # Simple Twitter (backend API)
 
-This is a backend API for simple twitter, which is created with Node.js, express.js and MuSQL. 
+This is a backend API for simple twitter, which is created with Node.js, express.js and MySQL. 
 
 
 

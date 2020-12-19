@@ -70,6 +70,10 @@ const adminController = {
 
   getUsers: async (req, res, next) => {
     try {
+      const validFilterList = ['followingsCount', 'followersCount', 'likesCount'] // default=tweetsCount
+      let filter = 'tweetsCount'
+      if (req.params.filter && validFilterList.includes(req.params.filter)) filter = req.params.filter
+      console.log(filter)
       const users = await User.findAll({
         attributes: {
           include: [
@@ -81,8 +85,8 @@ const adminController = {
           exclude: ['password', 'createdAt', 'updatedAt'],
         },
         order: [
-          // [sequelize.literal('tweetsCount'), 'DESC'],
-          // [sequelize.literal('id'), 'ASC']
+          [sequelize.literal('role'), 'DESC'],
+          [sequelize.literal(filter), 'DESC'],
         ],
         // limit: 10,
         raw: true,
