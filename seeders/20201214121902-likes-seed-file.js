@@ -1,6 +1,6 @@
 'use strict';
 const { User, Tweet } = require('../models/index')
-
+const { shuffleArray } = require('../utils/helpers')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await User.findAll({ where: { role: 'user' }, attributes: ['id'] })
@@ -10,16 +10,18 @@ module.exports = {
     const tweetIds = tweets.map(t => t.id)
 
     const likes = []
-
-    for (let i = 0; i < 50; i++) {
-      const randomUser = Math.floor(Math.random() * userIds.length)
-      const randomTweet = Math.floor(Math.random() * tweetIds.length)
-      likes.push({
-        UserId: userIds[randomUser],
-        TweetId: tweetIds[randomTweet],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
+    //each user randomly likes 10 tweets
+    for (const UserId of userIds) {
+      shuffleArray(tweetIds)
+      const tweetPool = tweetIds.slice(0, 10)
+      for (const TweetId of tweetPool) {
+        likes.push({
+          UserId: UserId,
+          TweetId: TweetId,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+      }
     }
     await queryInterface.bulkInsert('Likes', likes)
   },

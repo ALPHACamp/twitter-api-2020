@@ -47,6 +47,7 @@ router.get('/api/users/:id/tweets', authToken, authUserRole, userController.getT
 router.put('/api/users/:id', authToken, authUserRole, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.updateUser) //編輯個人資料
 router.put('/api/users/:id/setting', authToken, authUserRole, userController.updateUserSetting) //設定
 router.get('/api/users/:id/replied_tweets', authToken, authUserRole, userController.getRepliedTweets)
+router.get('/api/users/:id/likes', authToken, authUserRole, userController.getLikedTweets)
 
 //admin
 router.get('/api/admin/users', authToken, authAdminRole, userController.getUsers)

@@ -175,19 +175,25 @@ module.exports = {
   },
   getTweets: async (req, res, next) => {
     try {
-      let tweets = await sequelize.query(`
-        SELECT T.*, IFNULL(L.likedCount, 0) AS likedCount, IFNULL(R.repliedCount, 0) AS repliedCount
-        FROM Tweets AS T
-        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS likedCount FROM Likes GROUP BY TweetId) AS L
-        ON L.TweetId = T.id
-        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS repliedCount FROM Replies GROUP BY TweetId) AS R
-        ON R.TweetId = T.id
-        WHERE T.UserId = ${req.params.id}`
-        , { type: QueryTypes.SELECT })
-      let user = await sequelize.query(`
-        SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
+      const user = await sequelize.query(`
+          SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
         { plain: true, type: QueryTypes.SELECT }
       )
+      if (!user) {
+        return res.json({ status: 'error', message: '使用者不存在' })
+      }
+      let tweets = await sequelize.query(`
+          SELECT T.*, IFNULL(L.likedCount, 0) AS likedCount, IFNULL(R.repliedCount, 0) AS repliedCount, IF(IL.isLiked, true, false) AS isLiked
+          FROM Tweets AS T
+          LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS likedCount FROM Likes GROUP BY TweetId) AS L
+          ON L.TweetId = T.id
+          LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS repliedCount FROM Replies GROUP BY TweetId) AS R
+          ON R.TweetId = T.id
+          LEFT JOIN (SELECT TweetId AS isLiked FROM Likes WHERE UserId = ${helpers.getUser(req).id})AS IL
+          ON IL.isLiked = T.id
+          WHERE T.UserId = ${req.params.id}`,
+        { type: QueryTypes.SELECT })
+
       tweets = tweets.map(t => ({
         user,
         ...t
@@ -301,6 +307,50 @@ module.exports = {
       })
       replies = replies.map(r => ({ ...r.toJSON() }))
       return res.json(replies)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
+  getLikedTweets: async (req, res, next) => {
+    try {
+      const user = await sequelize.query(`
+          SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
+        { plain: true, type: QueryTypes.SELECT }
+      )
+      if (!user) {
+        return res.json({ status: 'error', message: '使用者不存在' })
+      }
+      let likedTweets = await sequelize.query(`
+        SELECT T.*, IFNULL(LC.likedCount,0) AS likedCount, IFNULL(RC.repliedCount,0) AS repliedCount, IF(IL.isLiked, true, false) AS isLiked
+        FROM Likes AS L
+        LEFT JOIN (SELECT T.*, U.name,account,avatar  FROM Tweets AS T INNER JOIN (SELECT * FROM Users) AS U ON U.id = T.UserId)AS T
+        ON T.id = L.TweetId
+        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS likedCount FROM Likes GROUP BY TweetId) AS LC
+        ON LC.TweetId = L.TweetId
+        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS repliedCount FROM Replies GROUP BY TweetId) AS RC
+        ON RC.TweetId = L.TweetId
+        LEFT JOIN (SELECT TweetId AS isLiked FROM Likes WHERE UserId = ${helpers.getUser(req).id}) AS IL
+        ON IL.isLiked = L.TweetId
+        WHERE L.UserId = ${req.params.id}
+        ORDER BY T.id;`,
+        { type: QueryTypes.SELECT })
+
+      likedTweets = likedTweets.map(t => {
+        t.TweetId = t.id
+        t.user = {
+          id: t.UserId,
+          name: t.name,
+          account: t.account,
+          avatar: t.avatar
+        }
+        delete t.id
+        delete t.name
+        delete t.account
+        delete t.avatar
+        return { ...t }
+      })
+      res.json(likedTweets)
     } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
