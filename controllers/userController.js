@@ -1,4 +1,9 @@
 const helpers = require('../_helpers')
+
+const bcrypt = require('bcryptjs')
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
@@ -175,9 +180,69 @@ const userController = {
     }).catch(next)
   },
 
-  updateUser: (req, res) => {
+  updateUser: (req, res, next) => {
+    const id = Number(req.params.id)
+    const update = req.body
+    const files = req.files || {}
 
+    // if update account
+    if (Object.keys(update).includes('account')) {
+      if (!update.account || !update.name || !update.email) {
+        return res.status(400).json({
+          status: 'failure',
+          message: 'account, name, email are required'
+        })
+      }
+      if (update.password !== update.checkPassword) {
+        return res.status(409).json({
+          status: 'failure',
+          message: 'Password & checkPassword are different!'
+        })
+      }
+      return findAndUpdate(res, next, id, update)
+    }
+
+    // if update profile
+    if (files.avatar && files.cover) {
+      const imageFiles = [files.avatar[0].path, files.cover[0].path]
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      return imgur.uploadImages(imageFiles, 'File')
+        .then(imgs => findAndUpdate(res, next, id, update, imgs[0].link, imgs[1].link))
+        .catch(next)
+    }
+    if (files.avatar && !files.cover) {
+      const avatarFile = files.avatar[0].path
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      return imgur.uploadFile(avatarFile)
+        .then(img => findAndUpdate(res, next, id, update, img.data.link, null))
+        .catch(next)
+    }
+    if (!files.avatar && files.cover) {
+      const coverFile = files.cover[0].path
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      return imgur.uploadFile(coverFile)
+        .then(img => findAndUpdate(res, next, id, update, null, img.data.link))
+        .catch(next)
+    }
+    return findAndUpdate(res, next, id, update)
   }
+}
+
+function findAndUpdate(res, next, UserId, updateObj, newAvatar, newCover) {
+  User.findByPk(UserId, {
+    attributes: { exclude: ['createdAt', 'updatedAt', 'role'] }
+  }).then(user =>
+    user.update({
+      ...updateObj,
+      password: updateObj.password ? bcrypt.hashSync(updateObj.password, bcrypt.genSaltSync(10)) : user.password,
+      avatar: newAvatar ? newAvatar : user.avatar,
+      cover: newCover ? newCover : user.cover
+    }).then(user => res.json({
+      status: 'success',
+      message: `user: ${user.name} is updated successfully!`,
+      user
+    }))
+  ).catch(next)
 }
 
 module.exports = userController
