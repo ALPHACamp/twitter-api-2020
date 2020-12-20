@@ -29,6 +29,7 @@ const tweetServices = {
     ])
       .then(([tweet, replies, likes]) => {
         return callback({
+          tweet,
           description: tweet.description,
           replies,
           likes
@@ -78,6 +79,21 @@ const tweetServices = {
           })
       })
   },
+  deleteSelfTweet: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    Tweet.findByPk(req.params.tweet_id, { where: { UserId: USERID } })
+      .then(tweet => {
+        if (tweet.UserId === USERID) {
+          tweet.destroy()
+            .then(() => {
+              return callback({ status: 'success', message: 'Tweet was successfully to delete' })
+            })
+        } else {
+          return callback({ status: 'error', message: 'User error' })
+        }
+
+      })
+  }
 }
 
 module.exports = tweetServices

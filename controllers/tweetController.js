@@ -20,6 +20,11 @@ const tweetController = {
     tweetServices.putTweet(req, res, data => {
       return res.json(data)
     })
+  },
+  deleteSelfTweet: (req, res) => {
+    tweetServices.deleteSelfTweet(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 
