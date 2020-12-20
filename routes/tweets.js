@@ -12,7 +12,7 @@ router.post('/', tweetController.postTweet)
 router.get('/:id', tweetController.readTweet)
 // routes for replies
 router.get('/:id/replies', replyController.readReplies)
-router.post('/:id/replies', authUserSelf, replyController.postReply)
+router.post('/:id/replies', replyController.postReply)
 // routes for likes
 router.post('/:id/like', authUserSelf, likeController.like)
 router.post('/:id/unlike', authUserSelf, likeController.unlike)
