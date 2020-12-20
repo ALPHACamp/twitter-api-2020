@@ -37,6 +37,7 @@ const followshipController = require('../controllers/followshipController')
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
 router.get('/', authenticated, (req, res) => res.render('tweets'))
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 
 //tweets
 router.get('/tweets', authenticated, tweetController.getTweets)
@@ -57,6 +58,7 @@ router.post('/tweets/:id/like', authenticated, userController.likeTweet)
 router.post('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
 //user
+
 router.get('/users/top', authenticated, userController.getTopUsers)
 
 router.put('/users/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putProfile)

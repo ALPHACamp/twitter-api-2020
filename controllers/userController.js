@@ -20,7 +20,6 @@ let userController = {
     let password = req.body.password
 
     User.findOne({ where: { account: account } }).then(user => {
-      console.log(user)
       if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
@@ -33,7 +32,7 @@ let userController = {
         message: 'ok',
         token: token,
         user: {
-          id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar, introduction: user.introduction
+          id: user.id, account: user.account, name: user.name, email: user.email, role: user.role, avatar: user.avatar, introduction: user.introduction
         }
       })
     })
@@ -170,6 +169,11 @@ let userController = {
   },
   putSetting: (req, res) => {
     userServices.putSetting(req, res, data => {
+      return res.json(data)
+    })
+  },
+  getCurrentUser: (req, res) => {
+    userServices.getCurrentUser(req, res, data => {
       return res.json(data)
     })
   }
