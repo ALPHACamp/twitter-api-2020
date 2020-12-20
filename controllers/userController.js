@@ -128,7 +128,7 @@ module.exports = {
   getUser: async (req, res, next) => {
     try {
       const user = await sequelize.query(`
-        SELECT U.id,account,name,email,avatar,cover,introduction,role, IFNULL(a.followerCount,0) AS followerCount, IFNULL(b.followingCount,0) AS followingCount, IF(c.isFollowed, true, false) AS isFollowed
+        SELECT U.id,account,name,email,avatar,cover,introduction,role, IFNULL(a.followerCount,0) AS followerCount, IFNULL(b.followingCount,0) AS followingCount, IF(c.isFollowed, true, false) AS isFollowed, (SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = ${req.params.id}) AS tweetCount
         FROM Users AS U
 
         LEFT JOIN (
@@ -162,10 +162,7 @@ module.exports = {
         return res.status(401).json({ status: 'error', message: 'Unauthorized' })
       }
       delete user.role //not required on frontend
-      if (helpers.getUser(req).id === Number(req.params.id)) {
-        user.isCurrentUser = true
-      }
-      res.json(user)
+      return res.json(user)
     } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
