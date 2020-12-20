@@ -320,20 +320,21 @@ module.exports = {
         ORDER BY F.followerId;`,
         { type: QueryTypes.SELECT })
       return res.json(followers)
-     } catch (err) {
+    } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
-    },
-    getLikedTweets: async (req, res, next) => {
-      try {
-        const user = await sequelize.query(`
+    }
+  },
+  getLikedTweets: async (req, res, next) => {
+    try {
+      const user = await sequelize.query(`
             SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
-          { plain: true, type: QueryTypes.SELECT }
-        )
-        if (!user) {
-          return res.json({ status: 'error', message: '使用者不存在' })
-        }
-        let likedTweets = await sequelize.query(`
+        { plain: true, type: QueryTypes.SELECT }
+      )
+      if (!user) {
+        return res.json({ status: 'error', message: '使用者不存在' })
+      }
+      let likedTweets = await sequelize.query(`
           SELECT T.*, IFNULL(LC.likedCount,0) AS likedCount, IFNULL(RC.repliedCount,0) AS repliedCount, IF(IL.isLiked, true, false) AS isLiked
           FROM Likes AS L
           LEFT JOIN (SELECT T.*, U.name,account,avatar  FROM Tweets AS T INNER JOIN (SELECT * FROM Users) AS U ON U.id = T.UserId)AS T
@@ -346,29 +347,29 @@ module.exports = {
           ON IL.isLiked = L.TweetId
           WHERE L.UserId = ${req.params.id}
           ORDER BY T.id;`,
-          { type: QueryTypes.SELECT })
+        { type: QueryTypes.SELECT })
 
-        likedTweets = likedTweets.map(t => {
-          t.TweetId = t.id
-          t.user = {
-            id: t.UserId,
-            name: t.name,
-            account: t.account,
-            avatar: t.avatar
-          }
-          delete t.id
-          delete t.name
-          delete t.account
-          delete t.avatar
-          return { ...t }
-        })
-        res.json(likedTweets)
-      } catch (err) {
-        console.log(err)
-        return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
-      }
-    },
-    getRepliedTweets: async (req, res, next) => {
+      likedTweets = likedTweets.map(t => {
+        t.TweetId = t.id
+        t.user = {
+          id: t.UserId,
+          name: t.name,
+          account: t.account,
+          avatar: t.avatar
+        }
+        delete t.id
+        delete t.name
+        delete t.account
+        delete t.avatar
+        return { ...t }
+      })
+      res.json(likedTweets)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
+  getRepliedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) {
@@ -392,6 +393,18 @@ module.exports = {
       })
       replies = replies.map(r => ({ ...r.toJSON() }))
       return res.json(replies)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
+  getCurrentUser: (req, res, next) => {
+    try {
+      const { id, name, email, role } = req.user
+      const data = {
+        id, name, email, role
+      }
+      return res.json(data)
     } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
