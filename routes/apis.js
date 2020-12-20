@@ -44,11 +44,14 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.put('/tweets/:tweet_id', authenticated, tweetController.putTweet)
+router.delete('/tweets/:tweet_id', authenticated, tweetController.deleteSelfTweet)
 
 //replies
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 router.get('/replies/:reply_id', authenticated, replyController.getSingleReply)
+router.put('/replies/:reply_id', authenticated, replyController.putReply)
+router.delete('/replies/:reply_id', authenticated, replyController.deleteReply)
 
 //like
 router.post('/tweets/:id/like', authenticated, userController.likeTweet)

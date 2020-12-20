@@ -37,6 +37,34 @@ const replyServices = {
       .then(reply => {
         return callback({ reply })
       })
+  },
+  putReply: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    Reply.findByPk(req.params.reply_id, { include: [User] })
+      .then(reply => {
+        if (reply.UserId === USERID) {
+          reply.update({
+            comment: req.body.comment
+          })
+            .then(reply => { return callback({ status: 'success', message: 'Reply comment is updated' }) })
+        } else {
+          return callback({ status: 'error', message: 'User error' })
+        }
+
+      })
+  },
+  deleteReply: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    Reply.findByPk(req.params.reply_id, { include: [User] })
+      .then(reply => {
+        if (reply.UserId === USERID) {
+          reply.destroy()
+            .then(reply => { return callback({ status: 'success', message: 'Reply was been deleted' }) })
+        } else {
+          return callback({ status: 'error', message: 'User error' })
+        }
+
+      })
   }
 }
 module.exports = replyServices
