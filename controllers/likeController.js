@@ -29,7 +29,30 @@ const likeController = {
         .catch(next)
     })
   },
-  unlike: (req, res) => {}
+  unlike: (req, res, next) => {
+    Tweet.findByPk(req.params.id, {
+      include: Like
+    }).then(tweet => {
+      if (!tweet) {
+        return res.status(404).json({ status: 'failure', message: 'this tweet not exist' })
+      }
+      return Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
+        }
+      })
+        .then(like => {
+          if (!like) {
+            return res.status(409).json({ status: 'failure', message: 'unlike not exist' })
+          }
+          return like.destroy().then(unliked => {
+            res.json({ status: 'success', message: 'OK', unliked })
+          })
+        })
+        .catch(next)
+    })
+  }
 }
 
 module.exports = likeController
