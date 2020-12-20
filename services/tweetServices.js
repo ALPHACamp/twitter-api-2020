@@ -16,7 +16,8 @@ const tweetServices = {
       tweets = tweets.map(r => ({
         ...r.dataValues,
         likeTweetCount: r.Likes.length,
-        replyTweetCount: r.Replies.length
+        replyTweetCount: r.Replies.length,
+        isLiked: r.Likes.map(d => d.UserId).includes(helpers.getUser(req).id)
       }))
       return callback(tweets)
     })
