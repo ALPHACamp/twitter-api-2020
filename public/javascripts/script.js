@@ -1,22 +1,19 @@
-var socket = io()
+var socket = io({
+  query: { token: localStorage.getItem('token') }
+})
 const publicMessage = document.querySelector('.public-chat-room form')
 const privateMessage = document.querySelector('.private-chat-rooms form')
 const publicBoard = document.querySelector('.public-chat-room ul')
-
-
-console.log(socket)
-
-// socket.emit('hi', 'Hello')
 
 //public room
 publicMessage.addEventListener('submit', (e) => {
   e.preventDefault()
   const message = e.target.querySelector('input').value
-  socket.emit('chat', message)
+  socket.emit('public-message', message)
   return false
 })
 
-socket.on('chat', (anotherSocketId, message) => {
+socket.on('public-message', (anotherSocketId, message) => {
   publicBoard.insertAdjacentHTML('beforeend', `
     <li class="list-group-item">
       <strong>${anotherSocketId}:</strong>
@@ -55,4 +52,9 @@ socket.on('private-message', (anotherSocketId, message) => {
       </li>
   `)
   }
+})
+
+//error handling
+socket.on('connect_error', (error) => {
+  console.log(error.message)
 })

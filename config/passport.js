@@ -5,7 +5,10 @@ const ExtractJwt = passportJwt.ExtractJwt
 const { User } = require('../models')
 
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: ExtractJwt.fromExtractors([
+    ExtractJwt.fromAuthHeaderAsBearerToken(),
+    ExtractJwt.fromUrlQueryParameter('token')
+  ]),
   secretOrKey: process.env.JWT_SECRET
 }
 const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
@@ -22,6 +25,7 @@ const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
     }
     return next(null, user.toJSON())
   } catch (error) {
+    console.log('@@jwt_payload', jwt_payload)
     return next(error, false)
   }
 })
