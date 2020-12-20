@@ -25,7 +25,6 @@ const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
     }
     return next(null, user.toJSON())
   } catch (error) {
-    console.log('@@jwt_payload', jwt_payload)
     return next(error, false)
   }
 })

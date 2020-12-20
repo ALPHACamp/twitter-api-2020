@@ -1,7 +1,7 @@
 <div class="public-chat-room my-3">
   <h2>Public Chat Room</h2>
   <form>
-    <input class="form-control mb-3" type="text">
+    <input class="form-control mb-3" type="text" name="message">
     <button class="btn btn-primary" type="submit">submit</button>
   </form>
 
@@ -15,26 +15,21 @@
 <div class="private-chat-rooms mt-5">
   <h2>Private Messages</h2>
   <form>
+    <strong>To:</strong>
     <div class="form-group">
-      <div class="form-check">
-        {{!-- <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-        <label class="form-check-label" for="flexRadioDefault1">
-          Default radio
-        </label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-        <label class="form-check-label" for="flexRadioDefault2">
-          Default checked radio
-        </label> --}}
+      <div class="container">
+        <div class="row connected-users">
+          {{!-- 即時更新在線使用者 --}}
+        </div>
       </div>
     </div>
     <div class="form-group">
+      <label for="">訊息:</label>
       <input class="form-control mb-3" type="text" name="message">
       <button class="btn btn-primary" type="submit">submit</button>
     </div>
   </form>
   <div class="row boards">
-
+    {{!-- render by js --}}
   </div>
 </div>
