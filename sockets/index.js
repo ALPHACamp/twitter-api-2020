@@ -54,7 +54,7 @@ module.exports = (io) => {
 
     //發訊息給所有人(public聊天室)
     socket.on('public-message', (message, timestamp) => {
-      socket.emit('public-message', sender, message, timestamp)
+      io.emit('public-message', sender, message, timestamp)
       console.log(`${name} to everyone: ${message}`)
     })
     //私訊
