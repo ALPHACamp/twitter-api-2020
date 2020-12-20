@@ -21,7 +21,7 @@ module.exports = {
       Array.from({ length: 5 }).map((d, i) =>
         ({
           id: i + 1,
-          account: 'user' + (i + 1),
+          account: 'user' + (i + 1) + '@example.com',
           email: 'user' + (i + 1) + '@example.com',
           password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
           role: 'user',

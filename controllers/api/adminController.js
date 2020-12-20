@@ -2,21 +2,27 @@ const db = require('../../models')
 const User = db.User
 const Like = db.Like
 const Tweet = db.Tweet
-const sequelize = require('sequelize')
 const adminController = {
   getUsers: async (req, res) => {
     try {
-      const users = await User.findAll({
+      let users = await User.findAll({
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
           { model: Tweet, include: [Like] }
-        ],
-        attributes: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'PostCount']
-        ],
-        order: [[sequelize.literal('PostCount'), 'DESC']]
+        ]
       })
+      const countLen = (arr) => {
+        let len = 0
+        arr.forEach(ele => { len += ele.Likes.length })
+        return len
+      }
+      users = users.map(user => ({
+        ...user.dataValues,
+        tweetCount: user.Tweets.length,
+        likeCount: countLen(user.Tweets)
+      }))
+      users = users.sort((a, b) => b.tweetCount - a.tweetCount)
       return res.json({ users })
     } catch (error) {
       console.log(error)
