@@ -50,6 +50,8 @@ router.post('/tweets/:tweet_id/replies', authenticated, replyController.postRepl
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 router.get('/replies/:reply_id', authenticated, replyController.getSingleReply)
 router.put('/replies/:reply_id', authenticated, replyController.putReply)
+router.delete('/replies/:reply_id', authenticated, replyController.deleteReply)
+
 //like
 router.post('/tweets/:id/like', authenticated, userController.likeTweet)
 router.post('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
