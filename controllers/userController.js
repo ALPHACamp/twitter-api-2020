@@ -398,5 +398,16 @@ module.exports = {
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
     }
   },
+  getCurrentUser: (req, res, next) => {
+    try {
+      const { id, name, email, role } = req.user
+      const data = {
+        id, name, email, role
+      }
+      return res.json(data)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
   }
 }
