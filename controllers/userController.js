@@ -20,7 +20,6 @@ let userController = {
     let password = req.body.password
 
     User.findOne({ where: { account: account } }).then(user => {
-      console.log(user)
       if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })

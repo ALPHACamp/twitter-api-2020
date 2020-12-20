@@ -11,12 +11,12 @@ const fs = require('fs')
 const userServices = {
   getProfile: (req, res, callback) => {
     return Promise.all([
-      Followship.findAndCountAll({ where: { followerId: req.params.id } }),
       Followship.findAndCountAll({ where: { followingId: req.params.id } }),
+      Followship.findAndCountAll({ where: { followerId: req.params.id } }),
       User.findOne({
         where: { id: req.params.id },
       }),
-      Tweet.findAll({ where: { UserId: req.params.id } }),
+      Tweet.findAll({ include: [Reply, Like, User], where: { UserId: req.params.id } }),
       Reply.findAll({ where: { UserId: req.params.id } })
     ])
       // .then(user => { return callback({ user }) })
@@ -26,7 +26,13 @@ const userServices = {
           following: following,
           user: user,
           name: user.name,
-          tweets: tweets,
+          tweets: tweets.map(r => ({
+            ...r.dataValues,
+            likeTweetCount: r.Likes.length,
+            replyTweetCount: r.Replies.length,
+            isLiked: r.Likes.map(d => d.UserId).includes(helpers.getUser(req).id) || null
+          })),
+          isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id),
           replies
         })
       })
@@ -232,13 +238,14 @@ const userServices = {
   },
   getUserLikes: (req, res, callback) => {
     Like.findAll({
-      include: [User, { model: Tweet, include: [Like, Reply] }],
+      include: [User, { model: Tweet, include: [Like, Reply, User] }],
       where: { UserId: req.params.id }
     }).then(likes => {
       likes = likes.map(data => ({
         ...data.dataValues,
         likeTweetCount: data.Tweet.dataValues.Likes.length,
-        replyTweetCount: data.Tweet.dataValues.Replies.length
+        replyTweetCount: data.Tweet.dataValues.Replies.length,
+        isLiked: data.Tweet.dataValues.Likes.map(d => d.UserId).includes(helpers.getUser(req).id)
       }))
       return callback(likes)
     })
