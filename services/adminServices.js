@@ -6,11 +6,10 @@ const User = db.User
 const adminService = {
   getTweets: (req, res, callback, next) => {
     return Tweet.findAll({
-      raw: true,
-      nest: true
+      include: [User]
     })
       .then(tweets => {
-        callback({ tweets: tweets })
+        callback(tweets)
       })
       .catch(err => {
         next(err)
@@ -20,6 +19,7 @@ const adminService = {
     return User.findAll({
       attributes: {
         include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'TweetCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'), 'LikeCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)'), 'RepliesCount'],
           [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'FollowingCount'],
