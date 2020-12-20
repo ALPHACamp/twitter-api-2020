@@ -48,5 +48,6 @@ router.put('/api/users/:id', authToken, authUserRole, upload.fields([{ name: 'av
 router.put('/api/users/:id/setting', authToken, authUserRole, userController.updateUserSetting) //設定
 //admin
 router.get('/api/admin/users', authToken, authAdminRole, userController.getUsers)
+router.get('/api/admin/tweets', authToken, authAdminRole, tweetController.getTweets)
 
 module.exports = router
