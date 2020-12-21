@@ -5,7 +5,8 @@ const { sequelize } = require('../models')
 
 const dateFieldsToTimestamp = (table) => {
   return [
-    [sequelize.literal(`UNIX_TIMESTAMP(${table}.createdAt) * 1000`), 'createdAt']
+    [sequelize.literal(`UNIX_TIMESTAMP(${table}.createdAt) * 1000`), 'createdAt'],
+    [sequelize.literal(`UNIX_TIMESTAMP(${table}.updatedAt) * 1000`), 'updatedAt']
   ]
 }
 
