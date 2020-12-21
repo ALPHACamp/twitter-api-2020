@@ -7,6 +7,8 @@ const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
 const fs = require('fs')
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userServices = {
   getProfile: (req, res, callback) => {
@@ -39,76 +41,73 @@ const userServices = {
   },
   putProfile: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
+    const { files } = req || {}
+    console.log(files)
+
     if (!req.body.name) {
       callback({ status: 'error', message: '請輸入name!' })
     }
 
-    if (req.files) {
-      if (req.files['cover'] && !req.files['avatar']) {
-        const cover = req.files['cover'][0]
-
-        fs.readFile(cover.path, (err, data) => {
-          if (err) console.log('Error: ', err)
-          fs.writeFile(`upload/${cover.originalname}`, data, () => {
-            return User.findByPk(USERID)
-              .then((user) => {
-                user.update({
-                  name: req.body.name,
-                  introduction: req.body.introduction,
-                  cover: cover ? `/upload/${cover.originalname}` : user.cover,
-                }).then((user) => {
-                  callback({ status: 'success', message: 'user was successfully to update' })
-                })
+    if (files) {
+      if (files['cover'] && !files['avatar']) {
+        const cover = files['cover'][0] //==file
+        imgur.setClientID(IMGUR_CLIENT_ID);
+        imgur.upload(cover.path, (err, img) => {
+          return User.findByPk(USERID)
+            .then((user) => {
+              user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                cover: cover ? img.data.link : null
+              }).then((user) => {
+                callback({ status: 'success', message: 'user was successfully to update' })
               })
-          })
+            })
         })
       } else if (req.files['avatar'] && !req.files['cover']) {
-        const avatar = req.files['avatar'][0]
-
-        fs.readFile(avatar.path, (err, data) => {
-          if (err) console.log('Error: ', err)
-          fs.writeFile(`upload/${avatar.originalname}`, data, () => {
-            return User.findByPk(USERID)
-              .then((user) => {
-                user.update({
-                  name: req.body.name,
-                  introduction: req.body.introduction,
-                  avatar: avatar ? `/upload/${avatar.originalname}` : user.avatar,
-                }).then((user) => {
-                  callback({ status: 'success', message: 'user was successfully to update' })
-                })
+        const avatar = req.files['avatar'][0] 
+        imgur.setClientID(IMGUR_CLIENT_ID);
+        imgur.upload(avatar.path, (err, img) => {
+          return User.findByPk(USERID)
+            .then((user) => {
+              user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                avatar: avatar ? img.data.link : null
+              }).then((user) => {
+                callback({ status: 'success', message: 'user was successfully to update' })
               })
-          })
+            })
         })
       } else if (req.files['avatar'] && req.files['cover']) {
         const avatar = req.files['avatar'][0]
         const cover = req.files['cover'][0]
+        imgur.setClientID(IMGUR_CLIENT_ID)
         return Promise.all([
-          fs.readFile(avatar.path, (err, data) => {
-            if (err) console.log('Error: ', err)
-            fs.writeFile(`upload/${avatar.originalname}`, data, () => {
-              return User.findByPk(USERID)
-                .then((user) => {
-                  user.update({
-                    name: req.body.name,
-                    introduction: req.body.introduction,
-                    avatar: avatar ? `/upload/${avatar.originalname}` : user.avatar,
-                  })
+          imgur.upload(avatar.path, (err, img) => {
+            return User.findByPk(USERID)
+              .then((user) => {
+                user.update({
+                  name: req.body.name,
+                  introduction: req.body.introduction,
+                  avatar: avatar ? img.data.link : null
+                }).then((user) => {
+                  callback({ status: 'success', message: 'user was successfully to update' })
                 })
-            })
-          }),
-          fs.readFile(cover.path, (err, data) => {
-            if (err) console.log('Error: ', err)
-            fs.writeFile(`upload/${cover.originalname}`, data, () => {
-              return User.findByPk(USERID)
-                .then((user) => {
-                  user.update({
-                    name: req.body.name,
-                    introduction: req.body.introduction,
-                    cover: cover ? `/upload/${cover.originalname}` : user.cover,
-                  })
+              })
+          })
+          ,
+          imgur.upload(cover.path, (err, img) => {
+            return User.findByPk(USERID)
+              .then((user) => {
+                user.update({
+                  name: req.body.name,
+                  introduction: req.body.introduction,
+                  cover: cover ? img.data.link : null
+                }).then((user) => {
+                  callback({ status: 'success', message: 'user was successfully to update' })
                 })
-            })
+              })
           })
         ])
           .then((user) => {

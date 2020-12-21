@@ -7,9 +7,11 @@ const session = require('express-session')
 const methodOverride = require('method-override')
 const cors = require('cors')
 const app = express()
-const port = 3000
-
-const passport = require('passport')
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+const port = process.env.PORT || 3000
+const passport = require('./config/passport')
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
