@@ -13,9 +13,6 @@ const exphbs = require('express-handlebars')
 const router = require('./routes')
 const app = express()
 const port = process.env.PORT || 3000
-const http = require('http').createServer(app)
-const io = require('socket.io')(http)
-const { wrap } = require('./modules/socket.js')
 
 app.engine('hbs', exphbs({ extname: 'hbs', defaultLayout: 'main' }))
 app.set('view engine', 'hbs')
@@ -34,7 +31,8 @@ app.use(function (err, req, res, next) {
   return res.status(500).json({ status: 'error', message: `${err.stack}` })
 })
 
-io.use(wrap(passport.initialize()))
+const http = require('http').createServer(app)
+const io = require('socket.io')(http)
 require('./sockets')(io)
 
 http.listen(port, () => console.log(`Example app listening on port ${port}!`))
