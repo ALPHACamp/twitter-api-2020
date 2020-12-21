@@ -128,7 +128,7 @@ module.exports = {
   getUser: async (req, res, next) => {
     try {
       const user = await sequelize.query(`
-        SELECT U.id,account,name,email,avatar,cover,introduction,role, IFNULL(a.followerCount,0) AS followerCount, IFNULL(b.followingCount,0) AS followingCount, IF(c.isFollowed, true, false) AS isFollowed
+        SELECT U.id,account,name,email,avatar,cover,introduction,role, IFNULL(a.followerCount,0) AS followerCount, IFNULL(b.followingCount,0) AS followingCount, IF(c.isFollowed, true, false) AS isFollowed, (SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = ${req.params.id}) AS tweetCount
         FROM Users AS U
 
         LEFT JOIN (
@@ -162,10 +162,7 @@ module.exports = {
         return res.status(401).json({ status: 'error', message: 'Unauthorized' })
       }
       delete user.role //not required on frontend
-      if (helpers.getUser(req).id === Number(req.params.id)) {
-        user.isCurrentUser = true
-      }
-      res.json(user)
+      return res.json(user)
     } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
@@ -328,26 +325,26 @@ module.exports = {
   getLikedTweets: async (req, res, next) => {
     try {
       const user = await sequelize.query(`
-          SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
-      { plain: true, type: QueryTypes.SELECT }
+            SELECT id,name,account,avatar FROM Users WHERE id=${req.params.id};`,
+        { plain: true, type: QueryTypes.SELECT }
       )
       if (!user) {
         return res.json({ status: 'error', message: '使用者不存在' })
       }
       let likedTweets = await sequelize.query(`
-        SELECT T.*, IFNULL(LC.likedCount,0) AS likedCount, IFNULL(RC.repliedCount,0) AS repliedCount, IF(IL.isLiked, true, false) AS isLiked
-        FROM Likes AS L
-        LEFT JOIN (SELECT T.*, U.name,account,avatar  FROM Tweets AS T INNER JOIN (SELECT * FROM Users) AS U ON U.id = T.UserId)AS T
-        ON T.id = L.TweetId
-        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS likedCount FROM Likes GROUP BY TweetId) AS LC
-        ON LC.TweetId = L.TweetId
-        LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS repliedCount FROM Replies GROUP BY TweetId) AS RC
-        ON RC.TweetId = L.TweetId
-        LEFT JOIN (SELECT TweetId AS isLiked FROM Likes WHERE UserId = ${helpers.getUser(req).id}) AS IL
-        ON IL.isLiked = L.TweetId
-        WHERE L.UserId = ${req.params.id}
-        ORDER BY T.id;`,
-      { type: QueryTypes.SELECT })
+          SELECT T.*, IFNULL(LC.likedCount,0) AS likedCount, IFNULL(RC.repliedCount,0) AS repliedCount, IF(IL.isLiked, true, false) AS isLiked
+          FROM Likes AS L
+          LEFT JOIN (SELECT T.*, U.name,account,avatar  FROM Tweets AS T INNER JOIN (SELECT * FROM Users) AS U ON U.id = T.UserId)AS T
+          ON T.id = L.TweetId
+          LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS likedCount FROM Likes GROUP BY TweetId) AS LC
+          ON LC.TweetId = L.TweetId
+          LEFT JOIN (SELECT TweetId, COUNT(TweetId) AS repliedCount FROM Replies GROUP BY TweetId) AS RC
+          ON RC.TweetId = L.TweetId
+          LEFT JOIN (SELECT TweetId AS isLiked FROM Likes WHERE UserId = ${helpers.getUser(req).id}) AS IL
+          ON IL.isLiked = L.TweetId
+          WHERE L.UserId = ${req.params.id}
+          ORDER BY T.id;`,
+        { type: QueryTypes.SELECT })
 
       likedTweets = likedTweets.map(t => {
         t.TweetId = t.id
@@ -393,6 +390,18 @@ module.exports = {
       })
       replies = replies.map(r => ({ ...r.toJSON() }))
       return res.json(replies)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+    }
+  },
+  getCurrentUser: (req, res, next) => {
+    try {
+      const { id, name, email, role } = req.user
+      const data = {
+        id, name, email, role
+      }
+      return res.json(data)
     } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })

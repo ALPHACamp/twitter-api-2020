@@ -50,6 +50,7 @@ router.get('/api/users/:id/replied_tweets', authToken, authUserRole, userControl
 router.get('/api/users/:id/followings', authToken, authUserRole, userController.getFollowings)
 router.get('/api/users/:id/followers', authToken, authUserRole, userController.getFollowers)
 router.get('/api/users/:id/likes', authToken, authUserRole, userController.getLikedTweets)
+router.get('/api/get_current_user', authToken, authUserRole, userController.getCurrentUser)
 
 //admin
 router.get('/api/admin/users', authToken, authAdminRole, userController.getUsers)
