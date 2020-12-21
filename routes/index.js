@@ -55,5 +55,6 @@ router.get('/api/get_current_user', authToken, authUserRole, userController.getC
 //admin
 router.get('/api/admin/users', authToken, authAdminRole, userController.getUsers)
 router.get('/api/admin/tweets', authToken, authAdminRole, tweetController.getTweets)
+router.delete('/api/admin/tweets/:id', authToken, authAdminRole, tweetController.deleteTweet)
 
 module.exports = router

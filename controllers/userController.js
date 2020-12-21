@@ -315,7 +315,7 @@ module.exports = {
         ON IFW.isFollowed = F.followerId
         WHERE F.followingId = ${req.params.id}
         ORDER BY F.followerId;`,
-        { type: QueryTypes.SELECT })
+      { type: QueryTypes.SELECT })
       return res.json(followers)
     } catch (err) {
       console.log(err)
