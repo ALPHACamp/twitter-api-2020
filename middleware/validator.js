@@ -1,5 +1,6 @@
 const db = require('../models')
 const User = db.User
+const sequelize = db.sequelize
 const { check, body, validationResult } = require('express-validator')
 const helpers = require('../_helpers.js')
 
@@ -47,8 +48,8 @@ const loginRules = () => {
     check('password').isLength({ min: 3, max: 8 }).withMessage('密碼錯誤：長度需界在 3-8 之間'),
     check('email')
       .custom(async (email) => {
-        const user = await User.findOne({ where: { email } })
-        if (!user) {
+        const user = await sequelize.query(`SELECT * FROM Users WHERE BINARY Users.email = '${email}'`, { type: sequelize.QueryTypes.SELECT })
+        if (user.length === 0) {
           throw new Error('此帳號尚未被註冊過，請先完成註冊程序')
         }
         return true
