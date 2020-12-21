@@ -1,3 +1,4 @@
+const { connect } = require('../app')
 const passport = require('../config/passport')
 const { User, Sequelize } = require('../models')
 const { Op } = Sequelize
@@ -14,23 +15,30 @@ function authenticated(socket, next) {
   })(socket.request, {}, next)
 }
 
-async function getConnectedUsers(socket, rooms) {
+async function getConnectedUsers(socket, io, rooms) {
   try {
-    const connectedUserIds = []
-    rooms.forEach((_, key) => {
-      if (Number(key) && key !== socket.request.user.id) {
-        connectedUserIds.push(key)
-      }
+    const connUserSck = {}
+
+    // cause we need to update for all online users
+    // frontend will get connectedUsers data dynamically
+    // it should be remove req.user on rather frontend than backend 
+    rooms.forEach((sck, key) => {
+      if (Number(key)) connUserSck[key] = sck.values().next().value
     })
+
+    const connectedUserIds = Object.keys(connUserSck).map(Number)
     const connectedUsers = await User.findAll({
       where: { id: { [Op.in]: connectedUserIds } },
       attributes: userSelectedFields,
       raw: true
     })
-    socket.emit('update-connected-users', connectedUsers)
+
+    connectedUsers.forEach((user, i) => user.sckId = connUserSck[user.id])
+
+    await io.emit('update-connected-users', connectedUsers)
     // console.log('updated-connected-users: ', connectedUsers)
   } catch (error) {
-    socket.emit('error', '更新在線使用者時發生錯誤')
+    await io.emit('error', '更新在線使用者時發生錯誤')
   }
 }
 
@@ -46,17 +54,16 @@ module.exports = (io) => {
     //用user id 建立room, 將訊息推到使用者透過不同裝置、頁簽的連線
     socket.join(id)
 
-    //回傳目前在線的使用者資料(排除自己)
-    getConnectedUsers(socket, io.sockets.adapter.rooms)
-    socket.on('disconnect', async () => {
-      getConnectedUsers(socket, io.sockets.adapter.rooms)
-    })
+    // broadcast
+    getConnectedUsers(socket, io, io.sockets.adapter.rooms)
 
-    //發訊息給所有人(public聊天室)
-    socket.on('public-message', (message, timestamp) => {
-      io.emit('public-message', sender, message, timestamp)
+    // broadcast: public chatroom
+    socket.on('public-message', async (message, timestamp) => {
+      await io.emit('public-message', sender, message, timestamp)
       console.log(`${name} to everyone: ${message}`)
     })
+
+
     //私訊
     socket.on('private-message', async (userId, message, timestamp) => {
       try {
@@ -70,8 +77,12 @@ module.exports = (io) => {
         socket.emit('error', '發生錯誤，請稍後再試')
       }
     })
-  })
 
+    socket.on('disconnect', async () => {
+      getConnectedUsers(socket, io.sockets.adapter.rooms)
+    })
+
+  })
 }
 
 
