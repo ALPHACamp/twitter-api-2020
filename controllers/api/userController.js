@@ -63,8 +63,6 @@ const userController = {
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followerId=${id})`), 'FollowingsCount'],
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${id})`), 'FollowersCount'],
             [sequelize.literal(`(SELECT Count(*) FROM Tweets AS t WHERE t.UserId=${id})`), 'tweetsCount'],
-            [sequelize.literal(`(SELECT Count(*) FROM Replies AS r WHERE r.UserId=${id})`), 'repliesCount'],
-            [sequelize.literal(`(SELECT Count(*) FROM Likes AS l WHERE l.UserId=${id})`), 'likesCount'],
           ],
           exclude: userBasicExcludeFields
         }
