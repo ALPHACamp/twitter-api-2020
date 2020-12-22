@@ -1,3 +1,4 @@
+const sequelize = require('sequelize')
 const bcrypt = require('bcrypt-nodejs')
 const db = require('../models')
 const User = db.User
@@ -19,7 +20,14 @@ let userController = {
     let account = req.body.account
     let password = req.body.password
 
-    User.findOne({ where: { account: account } }).then(user => {
+    User.findOne({
+      where: {
+        account: db.sequelize.where(
+          db.sequelize.literal('BINARY account'),
+          `${account}`,
+        )
+      }
+    }).then(user => {
       if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
