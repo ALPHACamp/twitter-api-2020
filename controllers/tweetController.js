@@ -62,6 +62,9 @@ const tweetController = {
       ]
     })
       .then(tweet => {
+        if (!tweet) {
+          return res.status(409).json({ status: 'failure', message: 'tweet not exist' })
+        }
         tweet = {
           ...Object.keys(tweet.dataValues)
             .slice(0, 6)
