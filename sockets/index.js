@@ -14,7 +14,7 @@ function authenticated(socket, next) {
   })(socket.request, {}, next)
 }
 
-async function getConnectedUsers(socket, io, rooms) {
+async function getConnectedUsers(io, rooms) {
   try {
     const connUserSck = {}
 
@@ -47,14 +47,19 @@ async function broadcastPrevMsgs(socket) {
       nest: true,
       include: [{ model: User, attributes: userSelectedFields }],
       attributes: { exclude: ['updatedAt'] },
-      order: [[sequelize.literal('createdAt'), 'ASC']],
+      order: [[sequelize.literal('createdAt'), 'DESC']],
     })
 
-    history.map(data => {
-      data.createdAt = data.createdAt.getTime()
-      return data
+    resHistory = []
+    history.forEach(element => {
+      // flatten all the info
+      res = { ...element.User }
+      delete element.User
+      res = { ...res, ...element }
+      res.timestamp = element.createdAt.getTime()
+      resHistory.push(res)
     })
-    socket.emit('public-message', history)
+    socket.emit('public-message', resHistory)
 
   } catch (error) {
     console.error('Error on broadcastPrevMsgs: ', error)
@@ -62,14 +67,14 @@ async function broadcastPrevMsgs(socket) {
   }
 }
 
-async function getNewConnection(socket, io) {
-  try {
-    broadcastPrevMsgs(socket)
-    getConnectedUsers(socket, io, io.sockets.adapter.rooms)
-  } catch (error) {
-    console.error('Error on getNewConnection: ', error)
-    await io.emit('error', 'Internal Server Error')
-  }
+async function getMessagesFromPublic(io, message, timestamp, sender) {
+  // is this await neccessary?
+  await Chatpublic.create({
+    UserId: sender.id,
+    message: message
+  })
+  await io.emit('public-message', [{ ...sender, message, timestamp }])
+  console.log(`${id} to everyone: ${message}`)
 }
 
 module.exports = (io) => {
@@ -78,20 +83,16 @@ module.exports = (io) => {
   io.on('connection', async (socket) => {
     const { id, account, name, avatar } = socket.request.user
     const sender = { id, account, name, avatar }
-
     console.log(`a user connected (userId: ${id} name: ${name})`)
 
-    //用user id 建立room, 將訊息推到使用者透過不同裝置、頁簽的連線
     socket.join(id)
 
-    // broadcast
-    getNewConnection(socket, io)
+    // broadcast: getNewConnection
+    broadcastPrevMsgs(socket)
+    getConnectedUsers(io, io.sockets.adapter.rooms)
 
     // broadcast: public chatroom
-    socket.on('public-message', async (message, timestamp) => {
-      await io.emit('public-message', { sender, message, timestamp })
-      console.log(`${name} to everyone: ${message}`)
-    })
+    socket.on('public-message', async (message, timestamp) => getMessagesFromPublic(io, message, timestamp, sender))
 
     //私訊
     socket.on('private-message', async (userId, message, timestamp) => {
@@ -108,7 +109,7 @@ module.exports = (io) => {
     })
 
     socket.on('disconnect', async () => {
-      getConnectedUsers(socket, io.sockets.adapter.rooms)
+      getConnectedUsers(io, io.sockets.adapter.rooms)
     })
 
   })

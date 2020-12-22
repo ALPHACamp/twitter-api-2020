@@ -42,11 +42,12 @@ publicMessage.addEventListener('submit', (e) => {
 })
 
 socket.on('public-message', (public_packets) => {
+  console.log(public_packets)
   for (const packet of public_packets) {
     publicBoard.insertAdjacentHTML('beforeend', `
     <li class="list-group-item">
-      <strong class="mr-2">${packet.User.name}:</strong>${packet.message} 
-      <small class="ml-2">${moment(packet.createdAt).fromNow()}</small>
+      <strong class="mr-2">${packet.name}:</strong>${packet.message} 
+      <small class="ml-2">${moment(packet.timestamp).fromNow()}</small>
     </li>
   `)
   }
