@@ -61,7 +61,8 @@ const userController = {
         attributes: {
           include: [
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followerId=${id})`), 'FollowingsCount'],
-            [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${id})`), 'FollowersCount']
+            [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${id})`), 'FollowersCount'],
+            [sequelize.literal(`(SELECT Count(*) FROM Tweets AS t WHERE t.UserId=${id})`), 'tweetsCount'],
           ],
           exclude: userBasicExcludeFields
         }
@@ -104,10 +105,11 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const user = await User.findOne({ where: { id: UserId, role: null } })
+      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let tweets = await sequelize.query(`
-        SELECT t.*,
+        SELECT t.id, t.UserId, t.description,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
-          UNIX_TIMESTAMP(t.updatedAt) * 1000 AS updatedAt,
           COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
           IF(l.UserId = ${helpers.getUser(req).id}, 1, 0) AS isLiked
         FROM Tweets as t
@@ -131,7 +133,7 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findByPk(UserId)
+      const user = await User.findOne({ where: { id: UserId, role: null } })
       if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let likeTweets = await Like.findAll({
         where: { UserId },
@@ -143,7 +145,8 @@ const userController = {
               ...repliesAndLikeCount(),
               ...dateFieldsToTimestamp('Tweet'),
               [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked'],
-            ]
+            ],
+            exclude: ['updatedAt']
           },
           include: {
             model: User, attributes: ['account', 'name', 'avatar', 'id']
@@ -167,6 +170,8 @@ const userController = {
     try {
       const id = Number(req.params.id)
       if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const user = await User.findOne({ where: { id, role: null } })
+      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let followers = await User.findByPk(id, {
         attributes: [],
         include: [{
@@ -190,6 +195,8 @@ const userController = {
     try {
       const id = Number(req.params.id)
       if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const user = await User.findOne({ where: { id, role: null } })
+      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let followings = await User.findByPk(id, {
         attributes: [],
         include: [{
@@ -215,9 +222,11 @@ const userController = {
     try {
       const UserId = Number(req.params.id)
       if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const user = await User.findOne({ where: { id: UserId, role: null } })
+      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       let replies = await Reply.findAll({
         where: { UserId },
-        attributes: { include: dateFieldsToTimestamp('Reply') },
+        attributes: { include: dateFieldsToTimestamp('Reply'), exclude: ['updatedAt'] },
         include: [{
           model: Tweet,
           attributes: {
@@ -225,7 +234,8 @@ const userController = {
               ...dateFieldsToTimestamp('Tweet'),
               ...repliesAndLikeCount(),
               [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked']
-            ]
+            ],
+            exclude: ['updatedAt']
           },
           include: {
             model: User, attributes: ['account', 'name', 'avatar', 'id']
