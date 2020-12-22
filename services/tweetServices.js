@@ -56,13 +56,14 @@ const tweetServices = {
   },
   postTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
-    if (!req.body.description) {
+    const entryDesc = req.body.description.trim()
+    if (!entryDesc) {
       return callback({ status: 'error', message: 'Tweet is empty' })
     }
-    if (req.body.description.length <= 140) {
+    if (entryDesc.length <= 140) {
       Tweet.create({
         UserId: USERID,
-        description: req.body.description,
+        description: entryDesc,
       }).then(tweet => {
         return callback({ status: 'success', message: 'Tweet was successfully created' })
       })
