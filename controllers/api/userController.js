@@ -1,11 +1,10 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const imgur = require('imgur-node-api')
 
 const { User, Tweet, Like, Reply, Followship, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
-const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount } = require('../../modules/controllerFunctions.js')
+const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount, uploadImgur } = require('../../modules/controllerFunctions.js')
 const userBasicExcludeFields = ['password', 'createdAt', 'updatedAt', 'role']
 const userMoreExcludeFields = [...userBasicExcludeFields, 'cover', 'introduction']
 
@@ -253,7 +252,6 @@ const userController = {
       next(error)
     }
   },
-
   updateProfile: async (req, res, next) => {
     try {
       const urlId = Number(req.params.id)
@@ -261,54 +259,10 @@ const userController = {
       if (!urlId || urlId !== helpers.getUser(req).id) return res.status(401).json({ status: 'error', message: '未被授權' })
       const user = await User.findByPk(id)
       const { account, email, name, password, introduction } = req.body
-      const errorMessage = { status: 'error', message: '圖片上傳失敗' }
-      imgur.setClientID(process.env.IMGUR_CLIENT_ID)
+      let avatar, cover;
 
       if (req.files) {
-        let { avatar, cover } = req.files
-        if (avatar && cover) {
-          return imgur.upload(avatar[0].path, (err, avatar) => {
-            if (err) return res.status(400).json(errorMessage)
-            imgur.upload(cover[0].path, async (err, cover) => {
-              if (err) return res.status(400).json(errorMessage)
-              await user.update({
-                name, introduction,
-                avatar: avatar.data.link || null,
-                cover: cover.data.link || null
-              })
-              return res.json({
-                status: 'success',
-                message: '修改成功'
-              })
-
-            })
-          })
-
-        } else if (avatar) {
-          return imgur.upload(avatar[0].path, async (err, avatar) => {
-            if (err) return res.status(400).json(errorMessage)
-            await user.update({
-              name, introduction,
-              avatar: avatar.data.link || null
-            })
-            return res.json({
-              status: 'success',
-              message: '修改成功'
-            })
-          })
-        } else if (cover) {
-          return imgur.upload(cover[0].path, async (err, cover) => {
-            if (err) return res.status(400).json(errorMessage)
-            await user.update({
-              name, introduction,
-              cover: cover || null
-            })
-            return res.json({
-              status: 'success',
-              message: '修改成功'
-            })
-          })
-        }
+        [avatar, cover] = await Promise.all([uploadImgur(req.files.avatar), uploadImgur(req.files.cover)])
       }
 
       await user.update({
@@ -316,16 +270,21 @@ const userController = {
         email: email || user.dataValues.email,
         name: name || user.dataValues.name,
         password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10)) : user.dataValues.password,
-        introduction: introduction || user.dataValues.introduction
+        introduction: introduction || user.dataValues.introduction,
+        avatar: avatar || null,
+        cover: cover || null
       })
+
       return res.json({
         status: 'success',
         message: '修改成功'
       })
     } catch (error) {
+      if (error.status === 'error') return res.status(400).json(error)
       next(error)
     }
-  }
+  },
 }
 
 module.exports = userController
+
