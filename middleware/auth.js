@@ -28,7 +28,7 @@ module.exports = {
   },
   authUserSelf: (req, res, next) => {
     const userSelf = helpers.getUser(req)
-    const otherUserId = req.params.id
+    const otherUserId = Number(req.params.id)
     if (userSelf) {
       if (userSelf.id === otherUserId) return next()
       return res.json({ status: 'failure', message: 'permission denied' })

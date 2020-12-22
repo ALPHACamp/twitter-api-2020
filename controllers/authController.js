@@ -4,7 +4,7 @@ const db = require('../models')
 const User = db.User
 
 const authController = {
-  login: (req, res) => {
+  login: (req, res, next) => {
     const { account, password } = req.body
 
     if (!account || !password) {
@@ -27,10 +27,10 @@ const authController = {
         token,
         user
       })
-    })
+    }).catch(next)
   },
 
-  register: (req, res) => {
+  register: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
 
     if (!account || !name || !email || !password || !checkPassword) {
@@ -79,7 +79,7 @@ const authController = {
         status: 'success',
         message: `account: '${user.account}' is registered successfully!`
       })
-    })
+    }).catch(next)
   }
 }
 
