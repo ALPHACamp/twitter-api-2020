@@ -17,6 +17,9 @@ const tweetController = {
       ]
     })
       .then(tweets => {
+        if (!tweets) {
+          return res.status(409).json({ status: 'failure', message: 'No one post yet. ' })
+        }
         tweets = tweets.map(tweet => ({
           ...Object.keys(tweet.dataValues)
             .slice(0, 6)
@@ -74,6 +77,25 @@ const tweetController = {
         return res.json(tweet)
       })
       .catch(err => next(err))
+  },
+  updateTweet: (req, res, next) => {
+    const { description } = req.body
+    Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(409).json({ status: 'failure', message: 'tweet not exist' })
+        }
+        if (tweet.UserId !== helpers.getUser(req).id) {
+          return res.status(409).json({ status: 'failure', message: 'permission denied' })
+        }
+        return tweet
+          .update({ description: description ? description : tweet.description })
+          .then(tweet => {
+            res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
+          })
+          .catch(next)
+      })
+      .catch(next)
   }
 }
 
