@@ -10,7 +10,7 @@ const followshipController = {
     const followingId = Number(req.body.id)
     User.findByPk(followingId)
       .then(user => {
-        if (!user) {
+        if (!user || user.role === 'admin') {
           return res.status(404).json({ status: 'failure', message: 'this user not exist' })
         }
         if (followerId === followingId) {
@@ -36,7 +36,7 @@ const followshipController = {
     const followingId = req.params.followingId
     User.findByPk(followingId)
       .then(user => {
-        if (!user) {
+        if (!user || user.role === 'admin') {
           return res.status(404).json({ status: 'failure', message: 'this user not exist' })
         }
         return Followship.findOne({
