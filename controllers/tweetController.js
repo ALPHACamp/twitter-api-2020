@@ -27,13 +27,13 @@ module.exports = {
     try {
       const tweet = await sequelize.query(
         `
-        SELECT t.*, IF(isLiked, true, false) isLiked, IFNULL(l.likedCount, 0) AS likedCount, IFNULL(r.repliedCount, 0) AS repliedCount
+        SELECT t.*, IF(i.TweetId, true, false) isLiked, IFNULL(l.likedCount, 0) AS likedCount, IFNULL(r.repliedCount, 0) AS repliedCount
         FROM tweets as t
 
         LEFT JOIN (SELECT TweetId, count(TweetId) AS likedCount FROM likes GROUP BY TweetId) as l 
         ON l.TweetId = t.id
 
-        LEFT JOIN (SELECT TweetId, count(TweetId) AS isLiked FROM likes WHERE UserId = ${helpers.getUser(req).id} GROUP BY TweetId) as i 
+        LEFT JOIN (SELECT TweetId FROM likes WHERE UserId = ${helpers.getUser(req).id}) as i 
         ON i.TweetId = t.id
 
         LEFT JOIN (SELECT TweetId, count(TweetId) AS repliedCount FROM replies GROUP BY TweetId) as r 
@@ -66,26 +66,26 @@ module.exports = {
     try {
       const tweetsInfo = await sequelize.query(
         `
-        SELECT IF(isLiked, true, false) isLiked, IFNULL(l.likedCount, 0) AS likedCount, IFNULL(r.repliedCount, 0) AS repliedCount
+        SELECT IF(i.TweetId, true, false) AS isLiked, IFNULL(l.likedCount, 0) AS likedCount, IFNULL(r.repliedCount, 0) AS repliedCount
         FROM tweets as t
 
         LEFT JOIN (SELECT TweetId, count(TweetId) AS likedCount FROM likes GROUP BY TweetId) as l
         ON l.TweetId = t.id
 
-        LEFT JOIN (SELECT TweetId, count(TweetId) AS isLiked FROM likes WHERE UserId = ${helpers.getUser(req).id} GROUP BY TweetId) as i 
+        LEFT JOIN (SELECT TweetId FROM likes WHERE UserId = ${helpers.getUser(req).id}) as i 
         ON i.TweetId = t.id
 
         LEFT JOIN (SELECT TweetId, count(TweetId) AS repliedCount FROM replies GROUP BY TweetId) as r
         ON r.TweetId = t.id
 
-        ORDER BY t.updatedAt DESC
+        ORDER BY t.updatedAt DESC, t.id ASC
         `,
         { type: QueryTypes.SELECT }
       )
       const tweets = await Tweet.findAll({
         raw: true,
         nest: true,
-        order: [['updatedAt', 'DESC']],
+        order: [['updatedAt', 'DESC'], ['id', 'ASC']],
         include: [User]
       })
       // combine data
