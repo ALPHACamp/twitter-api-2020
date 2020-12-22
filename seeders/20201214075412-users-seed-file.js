@@ -21,14 +21,14 @@ module.exports = {
       Array.from({ length: 5 }).map((d, i) =>
         ({
           id: i + 1,
-          account: 'user' + (i + 1),
-          email: 'user' + (i + 1) + '@example.com',
+          account: `user${i + 1}`,
+          email: `user${i + 1}@example.com`,
           password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
           role: 'user',
-          name: 'user' + (i + 1),
+          name: faker.name.findName(),
           introduction: faker.lorem.text(),
-          avatar: 'http://placeimg.com/320/240/people',
-          cover: 'http://placeimg.com/640/480/cats',
+          avatar: `https://loremflickr.com/320/240?random=${i}`,
+          cover: 'http://loremflickr.com/640/480/cats',
           createdAt: new Date(),
           updatedAt: new Date()
         })
