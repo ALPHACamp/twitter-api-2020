@@ -140,7 +140,10 @@ const userController = {
   },
   getTopUsers: async (req, res) => {
     try {
-      let users = await User.findAll({ include: [{ model: User, as: 'Followers' }] })
+      let users = await User.findAll({
+        where: { role: 'user' },
+        include: [{ model: User, as: 'Followers' }]
+      })
       users = users.map((user) => ({
         ...user.dataValues,
         followerCount: user.getFollowers.length,
