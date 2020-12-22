@@ -1,7 +1,12 @@
 //建立socket.io連線
-var socket = io({
-  query: { token: localStorage.getItem('token') }
-})
+let socket
+try {
+  socket = io({
+    query: { token: localStorage.getItem('token') }
+  })
+} catch (error) {
+  alert('暫時無網路連線！')
+}
 
 const publicMessage = document.querySelector('.public-chat-room form')
 const privateMessage = document.querySelector('.private-chat-rooms form')
@@ -36,13 +41,15 @@ publicMessage.addEventListener('submit', (e) => {
   return false
 })
 
-socket.on('public-message', (sender, message, timestamp) => {
-  publicBoard.insertAdjacentHTML('beforeend', `
+socket.on('public-message', (public_packets) => {
+  for (const packet of public_packets) {
+    publicBoard.insertAdjacentHTML('beforeend', `
     <li class="list-group-item">
-      <strong class="mr-2">${sender.name}:</strong>${message} 
-      <small class="ml-2">${moment(timestamp).fromNow()}</small>
+      <strong class="mr-2">${packet.User.name}:</strong>${packet.message} 
+      <small class="ml-2">${moment(packet.createdAt).fromNow()}</small>
     </li>
   `)
+  }
 })
 
 //私訊

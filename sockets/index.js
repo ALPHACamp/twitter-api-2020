@@ -1,10 +1,9 @@
 const { connect } = require('../app')
 const passport = require('../config/passport')
-const { User, Sequelize } = require('../models')
+const { User, Chatpublic, sequelize, Sequelize } = require('../models')
 const { Op } = Sequelize
 const userSelectedFields = ['id', 'account', 'name', 'avatar']
 
-//functions
 function authenticated(socket, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) return next(error)
@@ -36,9 +35,40 @@ async function getConnectedUsers(socket, io, rooms) {
     connectedUsers.forEach((user, i) => user.sckId = connUserSck[user.id])
 
     await io.emit('update-connected-users', connectedUsers)
-    // console.log('updated-connected-users: ', connectedUsers)
   } catch (error) {
     await io.emit('error', '更新在線使用者時發生錯誤')
+  }
+}
+
+async function broadcastPrevMsgs(socket) {
+  try {
+    const history = await Chatpublic.findAll({
+      raw: true,
+      nest: true,
+      include: [{ model: User, attributes: userSelectedFields }],
+      attributes: { exclude: ['updatedAt'] },
+      order: [[sequelize.literal('createdAt'), 'ASC']],
+    })
+
+    history.map(data => {
+      data.createdAt = data.createdAt.getTime()
+      return data
+    })
+    socket.emit('public-message', history)
+
+  } catch (error) {
+    console.error('Error on broadcastPrevMsgs: ', error)
+    await socket.emit('error', 'Internal Server Error')
+  }
+}
+
+async function getNewConnection(socket, io) {
+  try {
+    broadcastPrevMsgs(socket)
+    getConnectedUsers(socket, io, io.sockets.adapter.rooms)
+  } catch (error) {
+    console.error('Error on getNewConnection: ', error)
+    await io.emit('error', 'Internal Server Error')
   }
 }
 
@@ -55,14 +85,13 @@ module.exports = (io) => {
     socket.join(id)
 
     // broadcast
-    getConnectedUsers(socket, io, io.sockets.adapter.rooms)
+    getNewConnection(socket, io)
 
     // broadcast: public chatroom
     socket.on('public-message', async (message, timestamp) => {
-      await io.emit('public-message', sender, message, timestamp)
+      await io.emit('public-message', { sender, message, timestamp })
       console.log(`${name} to everyone: ${message}`)
     })
-
 
     //私訊
     socket.on('private-message', async (userId, message, timestamp) => {
