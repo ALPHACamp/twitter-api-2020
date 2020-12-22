@@ -19,10 +19,11 @@ const userServices = {
         where: { id: req.params.id },
       }),
       Tweet.findAll({ include: [Reply, Like, User], where: { UserId: req.params.id } }),
-      Reply.findAll({ where: { UserId: req.params.id } })
+      Reply.findAll({ include: { model: Tweet, include: User }, where: { UserId: req.params.id } }),
+      Like.findAll({ include: [Tweet, User], where: { UserId: req.params.id } })
     ])
       // .then(user => { return callback({ user }) })
-      .then(([follower, following, user, tweets, replies]) => {
+      .then(([follower, following, user, tweets, replies, likes]) => {
         callback({
           follower: follower,
           following: following,
@@ -35,7 +36,8 @@ const userServices = {
             isLiked: r.Likes.map(d => d.UserId).includes(helpers.getUser(req).id) || null
           })),
           isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id),
-          replies
+          replies,
+          likes
         })
       })
   },
@@ -285,6 +287,7 @@ const userServices = {
       email: user.email,
       role: user.role,
       avatar: user.avatar,
+      cover: user.cover,
       introduction: user.introduction
     })
   }
