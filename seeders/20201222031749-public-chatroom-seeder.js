@@ -9,7 +9,7 @@ module.exports = {
         const date = new Date(2020, 12, 1, Math.ceil(Math.random() * 3), Math.ceil(Math.random() * 60), 0)
         chats.push({
           UserId,
-          content: faker.lorem.sentence(Math.floor(Math.random() * 11) + 5).slice(0, 140),
+          message: faker.lorem.sentence(Math.floor(Math.random() * 11) + 5).slice(0, 140),
           createdAt: date,
           updatedAt: date
         })

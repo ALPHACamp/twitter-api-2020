@@ -2,8 +2,11 @@
 module.exports = (sequelize, DataTypes) => {
   const Chatpublic = sequelize.define('Chatpublic', {
     UserId: DataTypes.INTEGER,
-    content: DataTypes.STRING
-  }, {});
+    message: DataTypes.STRING
+  }, {
+    sequelize,
+    modelName: 'Chatpublic',
+  });
   Chatpublic.associate = function (models) {
     Chatpublic.belongsTo(models.User)
   };
