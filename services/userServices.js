@@ -65,7 +65,7 @@ const userServices = {
             })
         })
       } else if (req.files['avatar'] && !req.files['cover']) {
-        const avatar = req.files['avatar'][0] 
+        const avatar = req.files['avatar'][0]
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(avatar.path, (err, img) => {
           return User.findByPk(USERID)
@@ -142,6 +142,7 @@ const userServices = {
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
+      users = users.slice(0, 10)
       return callback({ users: users })
     })
   },
