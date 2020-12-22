@@ -96,6 +96,24 @@ const tweetController = {
           .catch(next)
       })
       .catch(next)
+  },
+  deleteTweet: (req, res, next) => {
+    Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(409).json({ status: 'failure', message: 'tweet not exist' })
+        }
+        if (tweet.UserId !== helpers.getUser(req).id) {
+          return res.status(409).json({ status: 'failure', message: 'permission denied' })
+        }
+        return tweet
+          .destroy()
+          .then(tweet => {
+            res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
+          })
+          .catch(next)
+      })
+      .catch(next)
   }
 }
 

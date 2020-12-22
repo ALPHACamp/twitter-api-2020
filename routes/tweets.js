@@ -11,6 +11,7 @@ router.get('/', tweetController.readTweets)
 router.post('/', tweetController.postTweet)
 router.get('/:id', tweetController.readTweet)
 router.put('/:id', tweetController.updateTweet)
+router.delete('/:id', tweetController.deleteTweet)
 // routes for replies
 router.get('/:id/replies', replyController.readReplies)
 router.post('/:id/replies', replyController.postReply)
