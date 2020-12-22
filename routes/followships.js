@@ -5,7 +5,7 @@ const followshipController = require('../controllers/followshipController')
 
 const { authUserSelf } = require('../middleware/auth')
 
-router.post('/', authUserSelf, followshipController.follow)
-router.delete('/:followingId', authUserSelf, followshipController.unfollow)
+router.post('/', followshipController.follow)
+router.delete('/:followingId', followshipController.unfollow)
 
 module.exports = router
