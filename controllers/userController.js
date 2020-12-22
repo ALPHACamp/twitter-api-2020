@@ -14,7 +14,7 @@ const userController = {
   readUser: (req, res, next) => {
     const id = Number(req.params.id)
     User.findOne({
-      where: { id },
+      where: { id: id, role: 'user' },
       include: [
         Tweet,
         { model: User, as: 'Followers' },
@@ -72,7 +72,7 @@ const userController = {
 
       Reply.findAll({
         where: { UserId },
-        sort: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC']],
         include: [{
           model: Tweet,
           required: true, // INNER JOIN to select not null record
@@ -109,7 +109,7 @@ const userController = {
 
       Like.findAll({
         where: { UserId },
-        sort: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC']],
         include: [{
           model: Tweet, include: [
             { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
