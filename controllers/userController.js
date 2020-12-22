@@ -201,32 +201,57 @@ const userController = {
           message: 'Password & checkPassword are different!'
         })
       }
-      return findAndUpdate(res, next, id, update)
     }
 
-    // if update profile
-    if (files.avatar && files.cover) {
-      const imageFiles = [files.avatar[0].path, files.cover[0].path]
-      imgur.setClientId(IMGUR_CLIENT_ID)
-      return imgur.uploadImages(imageFiles, 'File')
-        .then(imgs => findAndUpdate(res, next, id, update, imgs[0].link, imgs[1].link))
-        .catch(next)
-    }
-    if (files.avatar && !files.cover) {
-      const avatarFile = files.avatar[0].path
-      imgur.setClientId(IMGUR_CLIENT_ID)
-      return imgur.uploadFile(avatarFile)
-        .then(img => findAndUpdate(res, next, id, update, img.data.link, null))
-        .catch(next)
-    }
-    if (!files.avatar && files.cover) {
-      const coverFile = files.cover[0].path
-      imgur.setClientId(IMGUR_CLIENT_ID)
-      return imgur.uploadFile(coverFile)
-        .then(img => findAndUpdate(res, next, id, update, null, img.data.link))
-        .catch(next)
-    }
-    return findAndUpdate(res, next, id, update)
+    User.findAll({
+      where: {
+        id: { $ne: id },
+        $or: [
+          { account: { $eq: update.account } },
+          { email: { $eq: update.email } }
+        ]
+      }
+    }).then(users => {
+      // check account and email to be unique
+      if (users.length) {
+        if (users.map(user => user.account).includes(update.account)) {
+          return res.status(409).json({
+            status: 'failure',
+            message: `account: '${update.account}' has already existed!`
+          })
+        }
+        if (users.map(user => user.email).includes(update.email)) {
+          return res.status(409).json({
+            status: 'failure',
+            message: `email: '${update.email}' has already existed!`
+          })
+        }
+      }
+
+      // if update profile
+      if (files.avatar && files.cover) {
+        const imageFiles = [files.avatar[0].path, files.cover[0].path]
+        imgur.setClientId(IMGUR_CLIENT_ID)
+        return imgur.uploadImages(imageFiles, 'File')
+          .then(imgs => findAndUpdate(res, next, id, update, imgs[0].link, imgs[1].link))
+          .catch(next)
+      }
+      if (files.avatar && !files.cover) {
+        const avatarFile = files.avatar[0].path
+        imgur.setClientId(IMGUR_CLIENT_ID)
+        return imgur.uploadFile(avatarFile)
+          .then(img => findAndUpdate(res, next, id, update, img.data.link, null))
+          .catch(next)
+      }
+      if (!files.avatar && files.cover) {
+        const coverFile = files.cover[0].path
+        imgur.setClientId(IMGUR_CLIENT_ID)
+        return imgur.uploadFile(coverFile)
+          .then(img => findAndUpdate(res, next, id, update, null, img.data.link))
+          .catch(next)
+      }
+      return findAndUpdate(res, next, id, update)
+    }).catch(next)
   }
 }
 
