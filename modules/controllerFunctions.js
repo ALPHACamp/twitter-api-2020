@@ -2,6 +2,7 @@ const db = require('../models')
 const User = db.User
 const helpers = require('../_helpers.js')
 const { sequelize } = require('../models')
+const imgur = require('imgur-node-api')
 
 const dateFieldsToTimestamp = (table) => {
   return [
@@ -31,9 +32,21 @@ const getSimpleUserIncluded = () => {
   }]
 }
 
+const uploadImgur = (file) => {
+  imgur.setClientID(process.env.IMGUR_CLIENT_ID)
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve(null)
+    imgur.upload(file[0].path, (err, img) => {
+      if (err) return reject({ status: 'error', message: '圖片上傳失敗' })
+      resolve(img.data.link)
+    })
+  })
+}
+
 module.exports = {
   dateFieldsToTimestamp,
   tagIsFollowed,
   repliesAndLikeCount,
-  getSimpleUserIncluded
+  getSimpleUserIncluded,
+  uploadImgur
 }
