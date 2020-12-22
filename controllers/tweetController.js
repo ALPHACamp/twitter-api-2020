@@ -25,12 +25,13 @@ const tweetController = {
               return result
             }, {}),
           isLiked: tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id),
-          repliesCount: tweet.Replies.length,
-          likesCount: tweet.Likes.length
+          repliedCount: tweet.Replies.length,
+          LikeCount: tweet.Likes.length,
+          isSelf: tweet.UserId === helpers.getUser(req).id
         }))
         return res.json(tweets)
       })
-      .catch(next)
+      .catch(err => next(err))
   },
   postTweet: (req, res, next) => {
     const { description } = req.body
@@ -58,9 +59,6 @@ const tweetController = {
       ]
     })
       .then(tweet => {
-        if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'this tweet not exist!' })
-        }
         tweet = {
           ...Object.keys(tweet.dataValues)
             .slice(0, 6)
@@ -69,13 +67,13 @@ const tweetController = {
               return result
             }, {}),
           isLiked: tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id),
-          repliesCount: tweet.Replies.length,
-          likesCount: tweet.Likes.length
+          repliedCount: tweet.Replies.length,
+          LikeCount: tweet.Likes.length,
+          isSelf: tweet.UserId === helpers.getUser(req).id
         }
-
         return res.json(tweet)
       })
-      .catch(next)
+      .catch(err => next(err))
   }
 }
 
