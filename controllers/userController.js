@@ -88,10 +88,12 @@ const userController = {
 
         replies = replies.map(reply => ({
           ...(Object.fromEntries(Object.entries(reply.dataValues).slice(0, 7))),
-          Tweet: { ...(Object.fromEntries(Object.entries(reply.dataValues.Tweet.dataValues).slice(0, 6))) },
-          repliesCount: reply.Tweet.Replies.length,
-          likesCount: reply.Tweet.Likes.length,
-          isLike: reply.Tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+          Tweet: {
+            ...(Object.fromEntries(Object.entries(reply.dataValues.Tweet.dataValues).slice(0, 6))),
+            repliesCount: reply.Tweet.Replies.length,
+            likesCount: reply.Tweet.Likes.length,
+            isLike: reply.Tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+          },
         }))
         return res.json(replies)
       })
@@ -121,10 +123,12 @@ const userController = {
 
         likes = likes.map(like => ({
           ...(Object.fromEntries(Object.entries(like.dataValues).slice(0, 5))),
-          Tweet: { ...(Object.fromEntries(Object.entries(like.dataValues.Tweet.dataValues).slice(0, 6))) },
-          repliesCount: like.Tweet.Replies.length,
-          likesCount: like.Tweet.Likes.length,
-          isLike: like.Tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+          Tweet: {
+            ...(Object.fromEntries(Object.entries(like.dataValues.Tweet.dataValues).slice(0, 6))),
+            repliesCount: like.Tweet.Replies.length,
+            likesCount: like.Tweet.Likes.length,
+            isLike: like.Tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+          },
         }))
         return res.json(likes)
       })
