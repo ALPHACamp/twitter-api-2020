@@ -25,12 +25,14 @@ const userController = {
         message: `this user(id: ${id}) do not exist!`
       })
 
-      const userObj = Object.fromEntries(Object.entries(user.toJSON()).slice(0, 11))
-      userObj.isSelf = (user.id === req.user.id)
-      userObj.isFollowed = user.Followers.map(follower => follower.id).includes(helpers.getUser(req).id)
-      userObj.tweetsCount = user.Tweets.length
-      userObj.followingsCount = user.Followings.length
-      userObj.followersCount = user.Followers.length
+      const userObj = {
+        ...Object.fromEntries(Object.entries(user.toJSON()).slice(0, 11)),
+        isSelf: (user.id === helpers.getUser(req).id),
+        isFollowed: user.Followers.map(follower => follower.id).includes(helpers.getUser(req).id),
+        tweetsCount: user.Tweets.length,
+        followingsCount: user.Followings.length,
+        followersCount: user.Followers.length
+      }
       return res.json(userObj)
     }).catch(next)
   },
