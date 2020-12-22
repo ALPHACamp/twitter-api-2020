@@ -56,15 +56,21 @@ const tweetServices = {
   },
   postTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
-    if (!req.body.description) {
+    const entryDesc = req.body.description.trim()
+    if (!entryDesc) {
       return callback({ status: 'error', message: 'Tweet is empty' })
     }
-    Tweet.create({
-      UserId: USERID,
-      description: req.body.description,
-    }).then(tweet => {
-      return callback({ status: 'success', message: 'Tweet was successfully created' })
-    })
+    if (entryDesc.length <= 140) {
+      Tweet.create({
+        UserId: USERID,
+        description: entryDesc,
+      }).then(tweet => {
+        return callback({ status: 'success', message: 'Tweet was successfully created' })
+      })
+    } else {
+      return callback({ status: 'error', message: 'Tweet was overed 140' })
+    }
+
   },
   putTweet: (req, res, callback) => {
     if (!req.body.description) {
