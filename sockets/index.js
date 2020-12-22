@@ -1,9 +1,9 @@
+const { connect } = require('../app')
 const passport = require('../config/passport')
-const { User, Sequelize } = require('../models')
+const { User, Chatpublic, sequelize, Sequelize } = require('../models')
 const { Op } = Sequelize
 const userSelectedFields = ['id', 'account', 'name', 'avatar']
 
-//functions
 function authenticated(socket, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) return next(error)
@@ -14,24 +14,67 @@ function authenticated(socket, next) {
   })(socket.request, {}, next)
 }
 
-async function getConnectedUsers(socket, rooms) {
+async function getConnectedUsers(io, rooms) {
   try {
-    const connectedUserIds = []
-    rooms.forEach((_, key) => {
-      if (Number(key) && key !== socket.request.user.id) {
-        connectedUserIds.push(key)
-      }
+    const connUserSck = {}
+
+    // cause we need to update for all online users
+    // frontend will get connectedUsers data dynamically
+    // it should be remove req.user on rather frontend than backend 
+    rooms.forEach((sck, key) => {
+      if (Number(key)) connUserSck[key] = sck.values().next().value
     })
+
+    const connectedUserIds = Object.keys(connUserSck).map(Number)
     const connectedUsers = await User.findAll({
       where: { id: { [Op.in]: connectedUserIds } },
       attributes: userSelectedFields,
       raw: true
     })
-    socket.emit('update-connected-users', connectedUsers)
-    // console.log('updated-connected-users: ', connectedUsers)
+
+    connectedUsers.forEach((user, i) => user.sckId = connUserSck[user.id])
+
+    await io.emit('update-connected-users', connectedUsers)
   } catch (error) {
-    socket.emit('error', '更新在線使用者時發生錯誤')
+    await io.emit('error', '更新在線使用者時發生錯誤')
   }
+}
+
+async function broadcastPrevMsgs(socket) {
+  try {
+    const history = await Chatpublic.findAll({
+      raw: true,
+      nest: true,
+      include: [{ model: User, attributes: userSelectedFields }],
+      attributes: { exclude: ['updatedAt'] },
+      order: [[sequelize.literal('createdAt'), 'DESC']],
+    })
+
+    resHistory = []
+    history.forEach(element => {
+      // flatten all the info
+      res = { ...element.User }
+      delete element.User
+      res = { ...res, ...element }
+      res.timestamp = element.createdAt.getTime()
+      resHistory.push(res)
+    })
+    socket.emit('public-message', resHistory)
+
+  } catch (error) {
+    console.error('Error on broadcastPrevMsgs: ', error)
+    await socket.emit('error', 'Internal Server Error')
+  }
+}
+
+async function getMessagesFromPublic(io, message, timestamp, sender) {
+  // is this await neccessary?
+  await Chatpublic.create({
+    UserId: sender.id,
+    message: message
+  })
+  await io.emit('public-message', [{ ...sender, message, timestamp }])
+  console.log(`${id} to everyone: ${message}`)
 }
 
 module.exports = (io) => {
@@ -40,23 +83,17 @@ module.exports = (io) => {
   io.on('connection', async (socket) => {
     const { id, account, name, avatar } = socket.request.user
     const sender = { id, account, name, avatar }
-
     console.log(`a user connected (userId: ${id} name: ${name})`)
 
-    //用user id 建立room, 將訊息推到使用者透過不同裝置、頁簽的連線
     socket.join(id)
 
-    //回傳目前在線的使用者資料(排除自己)
-    getConnectedUsers(socket, io.sockets.adapter.rooms)
-    socket.on('disconnect', async () => {
-      getConnectedUsers(socket, io.sockets.adapter.rooms)
-    })
+    // broadcast: getNewConnection
+    broadcastPrevMsgs(socket)
+    getConnectedUsers(io, io.sockets.adapter.rooms)
 
-    //發訊息給所有人(public聊天室)
-    socket.on('public-message', (message, timestamp) => {
-      io.emit('public-message', sender, message, timestamp)
-      console.log(`${name} to everyone: ${message}`)
-    })
+    // broadcast: public chatroom
+    socket.on('public-message', async (message, timestamp) => getMessagesFromPublic(io, message, timestamp, sender))
+
     //私訊
     socket.on('private-message', async (userId, message, timestamp) => {
       try {
@@ -70,8 +107,12 @@ module.exports = (io) => {
         socket.emit('error', '發生錯誤，請稍後再試')
       }
     })
-  })
 
+    socket.on('disconnect', async () => {
+      getConnectedUsers(io, io.sockets.adapter.rooms)
+    })
+
+  })
 }
 
 

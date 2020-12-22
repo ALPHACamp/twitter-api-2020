@@ -1,14 +1,25 @@
 //建立socket.io連線
-var socket = io({
-  query: { token: localStorage.getItem('token') }
-})
+let socket
+try {
+  socket = io({
+    query: { token: localStorage.getItem('token') }
+  })
+} catch (error) {
+  alert('暫時無網路連線！')
+}
 
 const publicMessage = document.querySelector('.public-chat-room form')
 const privateMessage = document.querySelector('.private-chat-rooms form')
 const publicBoard = document.querySelector('.public-chat-room ul')
 
-//即時更新在線使用者(已排除自己)
+// update online users
 socket.on('update-connected-users', (connectedUsers) => {
+
+  // exclude myself
+  connectedUsers.forEach((element, i) => {
+    if (element.sckId === socket.id) connectedUsers.splice(i, 1)
+  })
+
   const userRadios = connectedUsers.map(user => `
     <div class="form-check col-3">
       <input class="form-check-input" type="radio" name="recipient" id="${user.id}" value="${user.id}">
@@ -30,13 +41,16 @@ publicMessage.addEventListener('submit', (e) => {
   return false
 })
 
-socket.on('public-message', (sender, message, timestamp) => {
-  publicBoard.insertAdjacentHTML('beforeend', `
+socket.on('public-message', (public_packets) => {
+  console.log(public_packets)
+  for (const packet of public_packets) {
+    publicBoard.insertAdjacentHTML('beforeend', `
     <li class="list-group-item">
-      <strong class="mr-2">${sender.name}:</strong>${message} 
-      <small class="ml-2">${moment(timestamp).fromNow()}</small>
+      <strong class="mr-2">${packet.name}:</strong>${packet.message} 
+      <small class="ml-2">${moment(packet.timestamp).fromNow()}</small>
     </li>
   `)
+  }
 })
 
 //私訊
