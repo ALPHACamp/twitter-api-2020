@@ -31,7 +31,35 @@ const followshipController = {
       })
       .catch(next)
   },
-  unfollow: (req, res) => {}
+  unfollow: (req, res, next) => {
+    const followerId = helpers.getUser(req).id
+    const followingId = req.params.followingId
+    User.findByPk(followingId)
+      .then(user => {
+        if (!user) {
+          return res.status(404).json({ status: 'failure', message: 'this user not exist' })
+        }
+        return Followship.findOne({
+          where: {
+            followerId: followerId,
+            followingId: followingId
+          }
+        })
+          .then(following => {
+            if (!following) {
+              return res.status(409).json({ status: 'failure', message: 'unlike not exist' })
+            }
+            return following
+              .destroy()
+              .then(unfollow => {
+                res.json({ status: 'success', message: 'OK', unfollow })
+              })
+              .catch(next)
+          })
+          .catch(next)
+      })
+      .catch(next)
+  }
 }
 
 module.exports = followshipController
