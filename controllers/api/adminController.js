@@ -23,7 +23,7 @@ const adminController = {
         likeCount: countLen(user.Tweets)
       }))
       users = users.sort((a, b) => b.tweetCount - a.tweetCount)
-      return res.json({ users })
+      return res.json(users)
     } catch (error) {
       console.log(error)
     }
@@ -31,7 +31,7 @@ const adminController = {
   getTweets: async (req, res) => {
     try {
       const tweets = await Tweet.findAll({ include: [User] })
-      return res.json({ tweets })
+      return res.json(tweets)
     } catch (error) {
       console.log(error)
     }

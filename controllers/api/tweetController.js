@@ -2,20 +2,26 @@ const db = require('../../models')
 const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
+const Reply = db.Reply
 const helper = require('../../_helpers')
 const tweetController = {
   getTweets: async (req, res) => {
     try {
-      const tweets = await Tweet.findAll({ include: [User] })
-      return res.json({ tweets })
+      const tweets = await Tweet.findAll({
+        order: [['createdAt', 'ASC']],
+        include: [User, Reply, Like]
+      })
+      return res.json(tweets)
     } catch (error) {
       console.log(error)
     }
   },
   getTweet: async (req, res) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id, { include: [User] })
-      return res.json({ tweet })
+      const tweet = await Tweet.findByPk(req.params.id, {
+        include: [User, Reply, Like]
+      })
+      return res.json(tweet)
     } catch (error) {
       console.log(error)
     }
@@ -23,7 +29,7 @@ const tweetController = {
   addTweet: async (req, res) => {
     try {
       const description = req.body.description
-      if (!description) {
+      if (description.trim() === '') {
         return res.json({ status: 'error', message: "Content didn't exist" })
       }
       if (description.length > 140) {
@@ -31,7 +37,7 @@ const tweetController = {
       }
       await Tweet.create({
         UserId: helper.getUser(req).id,
-        description: description
+        description
       })
       return res.json({ status: 'success', message: 'Tweet was successfully posted' })
     } catch (error) {
