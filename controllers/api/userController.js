@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet, Like, Reply, Followship, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
-const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount, uploadImgur } = require('../../modules/controllerFunctions.js')
+const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount, isLiked, uploadImgur, getSimpleUserIncluded } = require('../../modules/controllerFunctions.js')
 const userBasicExcludeFields = ['password', 'createdAt', 'updatedAt', 'role']
 
 const userController = {
@@ -142,13 +142,11 @@ const userController = {
             include: [
               ...repliesAndLikeCount(),
               ...dateFieldsToTimestamp('Tweet'),
-              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked'],
+              isLiked(req)
             ],
             exclude: ['updatedAt']
           },
-          include: {
-            model: User, attributes: ['account', 'name', 'avatar', 'id']
-          },
+          include: getSimpleUserIncluded(),
         }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
@@ -231,13 +229,11 @@ const userController = {
             include: [
               ...dateFieldsToTimestamp('Tweet'),
               ...repliesAndLikeCount(),
-              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked']
+              isLiked(req)
             ],
             exclude: ['updatedAt']
           },
-          include: {
-            model: User, attributes: ['account', 'name', 'avatar', 'id']
-          }
+          include: getSimpleUserIncluded()
         }],
         order: [['createdAt', 'DESC'], [Tweet, 'createdAt', 'DESC']]
       })

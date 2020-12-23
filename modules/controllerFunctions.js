@@ -17,9 +17,12 @@ const repliesAndLikeCount = () => {
   ]
 }
 
+const isLiked = (req) => {
+  return [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked']
+}
+
 const tagIsFollowed = (req, user) => {
   //user should be plain object
-  console.log('@@', helpers.getUser(req).Followings)
   return {
     ...user,
     isFollowed: helpers.getUser(req).Followings && helpers.getUser(req).Followings.includes(user.id)
@@ -49,5 +52,6 @@ module.exports = {
   tagIsFollowed,
   repliesAndLikeCount,
   getSimpleUserIncluded,
-  uploadImgur
+  uploadImgur,
+  isLiked
 }
