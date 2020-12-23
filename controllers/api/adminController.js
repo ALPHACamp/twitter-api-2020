@@ -10,7 +10,8 @@ const adminController = {
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
           { model: Tweet, include: [Like] }
-        ]
+        ],
+        where: { role: 'user' }
       })
       const countLen = (arr) => {
         let len = 0

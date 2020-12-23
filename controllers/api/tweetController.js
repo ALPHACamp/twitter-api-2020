@@ -7,10 +7,15 @@ const helper = require('../../_helpers')
 const tweetController = {
   getTweets: async (req, res) => {
     try {
-      const tweets = await Tweet.findAll({
+      let tweets = await Tweet.findAll({
         order: [['createdAt', 'ASC']],
         include: [User, Reply, Like]
       })
+      tweets = tweets.map(tweet => ({
+        ...tweet.dataValues,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length
+      }))
       return res.json(tweets)
     } catch (error) {
       console.log(error)
@@ -18,9 +23,14 @@ const tweetController = {
   },
   getTweet: async (req, res) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id, {
+      let tweet = await Tweet.findByPk(req.params.id, {
         include: [User, Reply, Like]
       })
+      tweet = {
+        tweet,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length
+      }
       return res.json(tweet)
     } catch (error) {
       console.log(error)
