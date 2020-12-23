@@ -67,7 +67,7 @@ router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userCo
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getLikedTweets)
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
-router.post('/followships/:followingId', authenticated, authenticatedUser, userController.addFollowing)
+router.post('/followships', authenticated, authenticatedUser, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, authenticatedUser, userController.removeFollowing)
 
 module.exports = router
