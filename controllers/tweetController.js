@@ -120,7 +120,7 @@ const tweetController = {
         return tweet
           .destroy()
           .then(tweet => {
-            res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
+            res.json({ status: 'success', message: 'Tweet is delete successfully', tweet })
           })
           .catch(next)
       })
