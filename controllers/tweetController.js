@@ -20,6 +20,7 @@ const tweetController = {
         if (!tweets) {
           return res.status(409).json({ status: 'failure', message: 'No one post yet. ' })
         }
+        const userId = helpers.getUser(req).id
         tweets = tweets.map(tweet => ({
           ...Object.keys(tweet.dataValues)
             .slice(0, 6)
@@ -27,10 +28,10 @@ const tweetController = {
               result[key] = tweet[key]
               return result
             }, {}),
-          isLiked: tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id),
+          isLiked: tweet.Likes.map(l => l.UserId).includes(userId),
           repliedCount: tweet.Replies.length,
           LikeCount: tweet.Likes.length,
-          isSelf: tweet.UserId === helpers.getUser(req).id
+          isSelf: tweet.UserId === userId
         }))
         return res.json(tweets)
       })
@@ -65,6 +66,7 @@ const tweetController = {
         if (!tweet) {
           return res.status(409).json({ status: 'failure', message: 'tweet not exist' })
         }
+        const userId = helpers.getUser(req).id
         tweet = {
           ...Object.keys(tweet.dataValues)
             .slice(0, 6)
@@ -72,10 +74,10 @@ const tweetController = {
               result[key] = tweet[key]
               return result
             }, {}),
-          isLiked: tweet.Likes.map(l => l.UserId).includes(helpers.getUser(req).id),
+          isLiked: tweet.Likes.map(l => l.UserId).includes(userId),
           repliedCount: tweet.Replies.length,
           LikeCount: tweet.Likes.length,
-          isSelf: tweet.UserId === helpers.getUser(req).id
+          isSelf: tweet.UserId === userId
         }
         return res.json(tweet)
       })
