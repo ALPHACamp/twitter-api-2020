@@ -27,7 +27,10 @@ const adminController = {
         return res.json({
           status: 'success',
           message: 'ok',
-          token: token
+          token: token,
+          user: {
+            id: user.id, account: user.account, name: user.name, email: user.email, role: user.role, avatar: user.avatar, introduction: user.introduction
+          }
         })
       } else {
         return res.json({ status: 'error', message: 'Permission denied' })
