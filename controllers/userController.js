@@ -41,8 +41,7 @@ module.exports = {
       await User.create({ account, name, email, password: hash })
       return res.json({ status: 'success', message: '註冊成功' })
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   login: async (req, res, next) => {
@@ -75,8 +74,7 @@ module.exports = {
         }
       })
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getUsers: async (req, res, next) => {
@@ -104,8 +102,7 @@ module.exports = {
         { type: QueryTypes.SELECT })
       res.json(users)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getTopUsers: async (req, res, next) => {
@@ -121,8 +118,7 @@ module.exports = {
         { type: QueryTypes.SELECT })
       res.json(topUsers)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getUser: async (req, res, next) => {
@@ -164,8 +160,7 @@ module.exports = {
       delete user.role //not required on frontend
       return res.json(user)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getTweets: async (req, res, next) => {
@@ -195,8 +190,7 @@ module.exports = {
       }))
       res.json(tweets)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   updateUser: async (req, res, next) => { //編輯個人資料 name, avatar, introduction, cover
@@ -230,8 +224,7 @@ module.exports = {
       await user.update({ name, introduction })
       return res.json({ status: 'success', message: '修改成功' })
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   updateUserSetting: async (req, res, next) => { //設定
@@ -274,8 +267,7 @@ module.exports = {
       await user.update({ account, name, email, password: hash })
       return res.json({ status: 'success', message: '修改成功' })
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getFollowings: async (req, res, next) => {
@@ -296,8 +288,7 @@ module.exports = {
         { type: QueryTypes.SELECT })
       return res.json(followings)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getFollowers: async (req, res, next) => {
@@ -315,11 +306,10 @@ module.exports = {
         ON IFW.isFollowed = F.followerId
         WHERE F.followingId = ${req.params.id}
         ORDER BY F.followerId;`,
-      { type: QueryTypes.SELECT })
+        { type: QueryTypes.SELECT })
       return res.json(followers)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getLikedTweets: async (req, res, next) => {
@@ -362,8 +352,7 @@ module.exports = {
       })
       res.json(likedTweets)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getRepliedTweets: async (req, res, next) => {
@@ -391,8 +380,7 @@ module.exports = {
       replies = replies.map(r => ({ ...r.toJSON() }))
       return res.json(replies)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   },
   getCurrentUser: (req, res, next) => {
@@ -403,8 +391,7 @@ module.exports = {
       }
       return res.json(data)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+      next(err)
     }
   }
 }

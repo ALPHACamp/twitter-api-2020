@@ -17,7 +17,7 @@ app.use(bodyParser.json())
 app.use(routes)
 
 app.use((err, req, res, next) => {
-  console.log(err.stack)
+  console.log(err)
   return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
 })
 
