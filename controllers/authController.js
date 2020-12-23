@@ -80,6 +80,11 @@ const authController = {
         message: `account: '${user.account}' is registered successfully!`
       })
     }).catch(next)
+  },
+
+  getCurrentUser: (req, res, next) => {
+    const currentUser = Object.fromEntries(Object.entries(req.user).slice(0, 8))
+    return res.json(currentUser)
   }
 }
 
