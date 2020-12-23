@@ -6,7 +6,6 @@ const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
 const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount, uploadImgur } = require('../../modules/controllerFunctions.js')
 const userBasicExcludeFields = ['password', 'createdAt', 'updatedAt', 'role']
-const userMoreExcludeFields = [...userBasicExcludeFields, 'cover', 'introduction']
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -85,7 +84,7 @@ const userController = {
           include: [
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=User.id)`), 'FollowersCount']
           ],
-          exclude: userMoreExcludeFields
+          exclude: [...userBasicExcludeFields, 'cover', 'introduction']
         },
         order: [[sequelize.literal('FollowersCount'), 'DESC']],
         offset: Number(req.query.startIndex) || 0,
@@ -178,7 +177,7 @@ const userController = {
           as: 'Followers',
           attributes: {
             include: [['id', 'followerId']],
-            exclude: userMoreExcludeFields
+            exclude: [...userBasicExcludeFields, 'cover']
           },
           through: { attributes: [] }
         }]
@@ -203,7 +202,7 @@ const userController = {
           as: 'Followings',
           attributes: {
             include: [['id', 'followingId']],
-            exclude: userMoreExcludeFields
+            exclude: [...userBasicExcludeFields, 'cover']
           },
           through: { attributes: [] }
         }]
