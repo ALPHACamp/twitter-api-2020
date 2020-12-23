@@ -1,7 +1,7 @@
 const db = require('../models')
 const User = db.User
 const sequelize = db.sequelize
-const { check, body, validationResult } = require('express-validator')
+const { check, param, validationResult } = require('express-validator')
 const helpers = require('../_helpers.js')
 
 const registerRules = () => {
@@ -83,6 +83,20 @@ const postTweetRules = () => {
   ]
 }
 
+const UserRules = () => {
+  return [
+    param('id')
+      .custom(async (UserId) => {
+        const user = await User.findOne({ where: { id: UserId, role: null } })
+        if (!user) {
+          console.log(user)
+          throw new Error('查無此使用者編號')
+        }
+        return true
+      })
+  ]
+}
+
 const validResultCheck = (req, res, next) => {
   const errorResults = validationResult(req)
   if (errorResults.isEmpty()) return next()
@@ -97,6 +111,7 @@ module.exports = {
   loginRules,
   profileRules,
   postTweetRules,
+  UserRules,
   validResultCheck
 }
 
