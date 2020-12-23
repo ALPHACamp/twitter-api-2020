@@ -15,7 +15,14 @@ const replyController = {
         if (!tweet) {
           return res.status(404).json({ status: 'failure', message: 'this tweet not exist' })
         }
-        return res.json(tweet.Replies)
+        if (tweet.Replies.length < 1) {
+          return res.status(404).json({ status: 'failure', message: "this tweet doesn't have any reply" })
+        }
+        replies = tweet.Replies.map(reply => ({
+          ...reply.dataValues,
+          isSelf: reply.UserId === helpers.getUser(req).id
+        }))
+        return res.json(replies)
       })
       .catch(next)
   },
@@ -36,6 +43,60 @@ const replyController = {
         })
           .then(reply => {
             return res.json({ status: 'success', message: 'OK', reply })
+          })
+          .catch(next)
+      })
+      .catch(next)
+  },
+  updateReply: (req, res, next) => {
+    const { comment } = req.body
+    Tweet.findByPk(req.params.tweetId)
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+        }
+        return Reply.findByPk(req.params.replyId)
+          .then(reply => {
+            if (!reply) {
+              return res.status(404).json({ status: 'failure', message: 'reply not exist' })
+            }
+            if (reply.UserId !== helpers.getUser(req).id) {
+              return res.status(401).json({ status: 'failure', message: 'permission denied' })
+            }
+            if (!comment) {
+              return res.status(400).json({ status: 'failure', message: "number of words can't be less than 1" })
+            }
+            return reply
+              .update({ comment: comment })
+              .then(reply => {
+                res.json({ status: 'success', message: 'Reply is updated successfully', reply })
+              })
+              .catch(next)
+          })
+          .catch(next)
+      })
+      .catch(next)
+  },
+  deleteReply: (req, res, next) => {
+    Tweet.findByPk(req.params.tweetId)
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+        }
+        return Reply.findByPk(req.params.replyId)
+          .then(reply => {
+            if (!reply) {
+              return res.status(404).json({ status: 'failure', message: 'reply not exist' })
+            }
+            if (reply.UserId !== helpers.getUser(req).id) {
+              return res.status(401).json({ status: 'failure', message: 'permission denied' })
+            }
+            return reply
+              .destroy()
+              .then(reply => {
+                res.json({ status: 'success', message: 'Reply is delete successfully', reply })
+              })
+              .catch(next)
           })
           .catch(next)
       })
