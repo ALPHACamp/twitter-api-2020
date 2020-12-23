@@ -25,7 +25,7 @@ const followshipController = {
       if (followings && followings.includes(followingId)) return res.json({ status: 'success', message: '已追蹤' })
       const followerId = helpers.getUser(req).id
       if (followingId === followerId) return res.status(400).json({ status: 'error', message: '不能追蹤自己' })
-      const followship = await Followship.findOrCreate({ where: { followingId, followerId } })
+      await Followship.findOrCreate({ where: { followingId, followerId } })
       return res.json({ status: 'success', message: '已追蹤' })
     } catch (error) {
       next(error)
