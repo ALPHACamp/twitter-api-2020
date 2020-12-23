@@ -111,10 +111,5 @@ module.exports = (io) => {
     socket.on('disconnect', async () => {
       getConnectedUsers(io, io.sockets.adapter.rooms)
     })
-
   })
 }
-
-
-
-

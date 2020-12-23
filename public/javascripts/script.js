@@ -4,6 +4,7 @@ try {
   socket = io({
     query: { token: localStorage.getItem('token') }
   })
+  console.log('Get token on localstorage')
 } catch (error) {
   alert('暫時無網路連線！')
 }
@@ -101,3 +102,7 @@ socket.on('error', (errorMsg) => {
   console.log(errorMsg)
 })
 
+socket.on('disconnect', () => {
+  console.log('reopen socket to connect server.')
+  socket.open()
+})
