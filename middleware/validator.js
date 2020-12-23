@@ -77,7 +77,7 @@ const postTweetRules = async (req, res, next) => {
   return validResultCheck(req, res, next)
 }
 
-const UserRules = async (req, res, next) => {
+const userRules = async (req, res, next) => {
   await param('id')
     .custom(async (UserId) => {
       const user = await User.findOne({ where: { id: UserId, role: null } })
@@ -105,5 +105,5 @@ module.exports = {
   loginRules,
   profileRules,
   postTweetRules,
-  UserRules
+  userRules
 }
