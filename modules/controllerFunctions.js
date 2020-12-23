@@ -19,9 +19,10 @@ const repliesAndLikeCount = () => {
 
 const tagIsFollowed = (req, user) => {
   //user should be plain object
+  console.log('@@', helpers.getUser(req).Followings)
   return {
     ...user,
-    isFollowed: helpers.getUser(req).Followings.includes(user.id)
+    isFollowed: helpers.getUser(req).Followings && helpers.getUser(req).Followings.includes(user.id)
   }
 }
 
