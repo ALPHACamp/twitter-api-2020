@@ -41,7 +41,6 @@ module.exports = {
       await User.create({ account, name, email, password: hash })
       return res.json({ status: 'success', message: '註冊成功' })
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -75,7 +74,6 @@ module.exports = {
         }
       })
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -104,7 +102,6 @@ module.exports = {
         { type: QueryTypes.SELECT })
       res.json(users)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -121,7 +118,6 @@ module.exports = {
         { type: QueryTypes.SELECT })
       res.json(topUsers)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -164,7 +160,6 @@ module.exports = {
       delete user.role //not required on frontend
       return res.json(user)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -195,7 +190,6 @@ module.exports = {
       }))
       res.json(tweets)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -230,7 +224,6 @@ module.exports = {
       await user.update({ name, introduction })
       return res.json({ status: 'success', message: '修改成功' })
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -274,7 +267,6 @@ module.exports = {
       await user.update({ account, name, email, password: hash })
       return res.json({ status: 'success', message: '修改成功' })
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -296,7 +288,6 @@ module.exports = {
         { type: QueryTypes.SELECT })
       return res.json(followings)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -318,7 +309,6 @@ module.exports = {
         { type: QueryTypes.SELECT })
       return res.json(followers)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -362,7 +352,6 @@ module.exports = {
       })
       res.json(likedTweets)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -391,7 +380,6 @@ module.exports = {
       replies = replies.map(r => ({ ...r.toJSON() }))
       return res.json(replies)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
@@ -403,7 +391,6 @@ module.exports = {
       }
       return res.json(data)
     } catch (err) {
-      console.log(err)
       next(err)
     }
   }
