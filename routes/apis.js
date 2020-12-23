@@ -13,22 +13,24 @@ const userController = require('../controllers/api/userController')
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) return next(err)
-    if (!user) return res.json({ status: 'error', message: 'permission denied.' })
+    if (!user) {
+      return res.status(401).json({ status: 'error', message: 'permission denied.' })
+    }
     req.user = user
     return next()
   })(req, res, next)
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (helper.getUser(req).role === 'user') {
-    return res.json({ status: 'error', message: 'permission denied.' })
+  if (helper.getUser(req).role !== 'admin') {
+    return res.status(401).json({ status: 'error', message: 'permission denied.' })
   }
   return next()
 }
 
 const authenticatedUser = (req, res, next) => {
   if (helper.getUser(req).role === 'admin') {
-    return res.json({ status: 'error', message: 'permission denied.' })
+    return res.status(401).json({ status: 'error', message: 'permission denied.' })
   }
   return next()
 }
@@ -65,7 +67,7 @@ router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userCo
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getLikedTweets)
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
-router.post('/followships/:followingId', authenticated, authenticatedUser, userController.addFollowing)
+router.post('/followships', authenticated, authenticatedUser, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, authenticatedUser, userController.removeFollowing)
 
 module.exports = router
