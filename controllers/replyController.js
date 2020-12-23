@@ -64,7 +64,7 @@ const replyController = {
               return res.status(401).json({ status: 'failure', message: 'permission denied' })
             }
             if (!comment) {
-              return res.status(400).json({ status: 'failure', message: "comment didn't exist" })
+              return res.status(400).json({ status: 'failure', message: "number of words can't be less than 1" })
             }
             return reply
               .update({ comment: comment })
