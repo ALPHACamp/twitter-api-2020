@@ -98,9 +98,6 @@ const userController = {
         return res.json({ status: 'error', message: "This user doesn't exist." })
       }
       const { email, name, password, account, introduction } = req.body
-      if (!account || !name || !email || !password) {
-        return res.json({ status: 'error', message: "Required fields didn't exist." })
-      }
 
       let avatar = user.avatar
       let cover = user.cover
@@ -131,7 +128,13 @@ const userController = {
       }
 
       await User.update({
-        name, email, password, account, introduction, avatar, cover
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+        account: account || user.account,
+        introduction: introduction || user.introduction,
+        avatar,
+        cover
       }, { where: { id } })
       res.json({ status: 'success', message: 'ok' })
     } catch (error) {
@@ -181,10 +184,14 @@ const userController = {
   },
   getLikedTweets: async (req, res) => {
     try {
-      const likedTweets = await Tweet.findAll({
+      let likedTweets = await Tweet.findAll({
         include: { model: Like, where: { UserId: req.params.id } },
         order: [[{ model: Like }, 'createdAt', 'DESC']]
       })
+      likedTweets = likedTweets.map((tweet) => ({
+        ...tweet.dataValues,
+        TweetId: tweet.id
+      }))
       res.json(likedTweets)
     } catch (error) {
       console.log(error)
@@ -192,10 +199,14 @@ const userController = {
   },
   getFollowings: async (req, res) => {
     try {
-      const followings = await User.findByPk(req.params.id, {
+      let followings = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followings' }],
         order: [[{ model: User, as: 'Followings' }, { model: Followship }, 'createdAt', 'DESC']]
       })
+      followings = followings.Followings.map((user) => ({
+        ...user.dataValues,
+        followingId: user.dataValues.Followship.followingId
+      }))
       res.json(followings)
     } catch (error) {
       console.log(error)
@@ -203,10 +214,14 @@ const userController = {
   },
   getFollowers: async (req, res) => {
     try {
-      const followers = await User.findByPk(req.params.id, {
+      let followers = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followers' }],
         order: [[{ model: User, as: 'Followers' }, { model: Followship }, 'createdAt', 'DESC']]
       })
+      followers = followers.Followers.map((user) => ({
+        ...user.dataValues,
+        followerId: user.dataValues.Followship.followerId
+      }))
       res.json(followers)
     } catch (error) {
       console.log(error)

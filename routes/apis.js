@@ -13,7 +13,9 @@ const userController = require('../controllers/api/userController')
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) return next(err)
-    if (!user) return res.json({ status: 'error', message: 'permission denied.' })
+    if (!user) {
+      return res.status(401).json({ status: 'error', message: 'permission denied.' })
+    }
     req.user = user
     return next()
   })(req, res, next)
@@ -21,14 +23,14 @@ const authenticated = (req, res, next) => {
 
 const authenticatedAdmin = (req, res, next) => {
   if (helper.getUser(req).role !== 'admin') {
-    return res.json({ status: 'error', message: 'permission denied.' })
+    return res.status(401).json({ status: 'error', message: 'permission denied.' })
   }
   return next()
 }
 
 const authenticatedUser = (req, res, next) => {
-  if (helper.getUser(req).role !== 'user') {
-    return res.json({ status: 'error', message: 'permission denied.' })
+  if (helper.getUser(req).role === 'admin') {
+    return res.status(401).json({ status: 'error', message: 'permission denied.' })
   }
   return next()
 }
