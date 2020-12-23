@@ -9,11 +9,11 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const userController = {
   signUp: async (req, res) => {
     try {
-      const { account, name, email, password, passwordCheck } = req.body
+      const { account, name, email, password, checkPassword } = req.body
       if (!account || !name || !email || !password) {
         return res.json({ status: 'error', message: "Required fields didn't exist." })
       }
-      if (password !== passwordCheck) {
+      if (password !== checkPassword) {
         return res.json({ status: 'error', message: "Passwords didn't match." })
       }
       const users = await User.findAll({ raw: true, where: { [Op.or]: [{ email }, { account }] } })
