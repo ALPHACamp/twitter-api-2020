@@ -76,6 +76,7 @@ router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
 
 // admin
+router.post('/admin/signin', adminController.signIn)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
