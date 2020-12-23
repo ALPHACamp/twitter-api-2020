@@ -15,7 +15,8 @@ router.delete('/:id', tweetController.deleteTweet)
 // routes for replies
 router.get('/:id/replies', replyController.readReplies)
 router.post('/:id/replies', replyController.postReply)
-router.put('/:id/replies/:replyId', replyController.updateReply)
+router.put('/:tweetId/replies/:replyId', replyController.updateReply)
+router.delete('/:tweetId/replies/:replyId', replyController.deleteReply)
 // routes for likes
 router.post('/:id/like', likeController.like)
 router.post('/:id/unlike', likeController.unlike)
