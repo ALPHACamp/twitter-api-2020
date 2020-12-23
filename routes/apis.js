@@ -47,7 +47,7 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.addTwee
 router.put('/tweets/:id', authenticated, authenticatedUser, tweetController.updateTweet)
 router.delete('/tweets/:id', authenticated, authenticatedUser, tweetController.removeTweet)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.likeTweet)
-router.delete('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
+router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
 
 // replyController
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies)
