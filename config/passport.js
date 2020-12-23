@@ -18,7 +18,8 @@ passport.use(new JwtStrategy(jwtOptions, (jwt_payload, done) => {
       Like,
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
-    ]
+    ],
+    attributes: { exclude: ['password'] }
   }).then(user => {
     if (!user) return done(null, false)
     return done(null, user.toJSON())
