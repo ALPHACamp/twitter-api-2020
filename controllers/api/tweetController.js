@@ -6,7 +6,7 @@ const Reply = db.Reply
 
 const sequelize = require('sequelize')
 const helpers = require('../../_helpers.js')
-const { getSimpleUserIncluded } = require('../../modules/controllerFunctions')
+const { getSimpleUserIncluded } = require('../../modules/common')
 
 const tweetController = {
 

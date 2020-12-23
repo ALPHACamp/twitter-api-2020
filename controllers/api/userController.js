@@ -5,7 +5,7 @@ const helpers = require('../../_helpers.js')
 const { User, Tweet, Like, Reply, Sequelize, sequelize } = require('../../models')
 const { Op } = Sequelize
 const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount,
-  isLiked, uploadImgur, getSimpleUserIncluded } = require('../../modules/controllerFunctions.js')
+  isLiked, uploadImgur, getSimpleUserIncluded } = require('../../modules/common.js')
 
 const userBasicExcludeFields = ['password', 'createdAt', 'updatedAt', 'role']
 
