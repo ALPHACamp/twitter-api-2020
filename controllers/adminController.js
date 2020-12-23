@@ -15,6 +15,7 @@ const adminController = {
         { model: User, as: 'Followings' },
       ]
     }).then(users => {
+      if (!users) return res.status(404).json({ status: 'failure', message: `there is no users now` })
       users = users.map(user => ({
         ...(Object.fromEntries(Object.entries(user.dataValues).slice(0, 11))),
         tweetsCount: user.dataValues.Tweets.length,
@@ -37,7 +38,7 @@ const adminController = {
   deleteTweet: (req, res, next) => {
     const id = Number(req.params.id)
     Tweet.findByPk(id).then(tweet => {
-      if (!tweet) return res.json({
+      if (!tweet) return res.status(404).json({
         status: 'failure',
         message: `tweets/${id} do not exit!`,
         tweet
