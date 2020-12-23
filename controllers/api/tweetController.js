@@ -31,7 +31,7 @@ const tweetController = {
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length
       }
-      return res.json(tweet)
+      return res.json(tweet.tweet)
     } catch (error) {
       console.log(error)
     }
@@ -47,7 +47,7 @@ const tweetController = {
       }
       await Tweet.create({
         UserId: helper.getUser(req).id,
-        description
+        description: req.body.description
       })
       return res.json({ status: 'success', message: 'Tweet was successfully posted' })
     } catch (error) {

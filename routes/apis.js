@@ -20,14 +20,14 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (helper.getUser(req).role !== 'admin') {
+  if (helper.getUser(req).role === 'user') {
     return res.json({ status: 'error', message: 'permission denied.' })
   }
   return next()
 }
 
 const authenticatedUser = (req, res, next) => {
-  if (helper.getUser(req).role !== 'user') {
+  if (helper.getUser(req).role === 'admin') {
     return res.json({ status: 'error', message: 'permission denied.' })
   }
   return next()
@@ -45,7 +45,7 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.addTwee
 router.put('/tweets/:id', authenticated, authenticatedUser, tweetController.updateTweet)
 router.delete('/tweets/:id', authenticated, authenticatedUser, tweetController.removeTweet)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.likeTweet)
-router.delete('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
+router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
 
 // replyController
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies)
