@@ -76,7 +76,7 @@ const tweetServices = {
     if (!req.body.description) {
       return callback({ status: 'error', message: 'Tweet is empty' })
     }
-    Tweet.findByPk(req.params.id)
+    Tweet.findByPk(req.params.tweet_id)
       .then(tweet => {
         tweet.update({
           description: req.body.description
