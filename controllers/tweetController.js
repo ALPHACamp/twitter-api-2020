@@ -93,14 +93,19 @@ const tweetController = {
         if (tweet.UserId !== helpers.getUser(req).id) {
           return res.status(401).json({ status: 'failure', message: 'permission denied' })
         }
-        return tweet
-          .update({ description: description ? description : tweet.description })
-          .then(tweet => {
-            res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
-          })
-          .catch(next)
+        if (!description) {
+          return res.status(400).json({ status: 'failure', message: "description didn't exist" })
+        } else if (description.length > 140) {
+          return res.status(409).json({ status: 'failure', message: 'number of the words must between 1 ~ 140' })
+        } else {
+          return tweet
+            .update({ description: description })
+            .then(tweet => {
+              res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
+            })
+            .catch(next)
+        }
       })
-
       .catch(next)
   },
   deleteTweet: (req, res, next) => {
