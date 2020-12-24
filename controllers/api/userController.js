@@ -53,6 +53,20 @@ const userController = {
     }
   },
 
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const user = helpers.getUser(req)
+
+      delete user.password
+      delete user.createdAt
+      delete user.updatedAt
+
+      return res.json(user)
+    } catch {
+      next(error)
+    }
+  },
+
   getUser: async (req, res, next) => {
     try {
       const id = req.params.id
