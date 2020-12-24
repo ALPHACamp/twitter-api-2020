@@ -22,9 +22,8 @@ const followshipController = {
         }).spread((follow, created) => {
           if (!created) {
             return res.status(400).json({ message: 'Already Followed' })
-          } else {
-            return res.json({ message: `follow user ${followingId} successfully`, follow })
           }
+          return res.json({ message: `follow user ${followingId} successfully`, follow })
         })
       })
       .catch(next)

@@ -23,9 +23,8 @@ const likeController = {
         }).spread((like, created) => {
           if (!created) {
             return res.status(400).json({ message: 'Already Liked' })
-          } else {
-            return res.json({ message: `like tweet ${tweetId} successfully`, like })
           }
+          return res.json({ message: `like tweet ${tweetId} successfully`, like })
         })
       })
       .catch(next)
