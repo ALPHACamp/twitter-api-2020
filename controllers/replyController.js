@@ -52,6 +52,9 @@ const replyController = {
     const replyId = req.params.replyId
     const userId = helpers.getUser(req).id
     const { comment } = req.body
+    if (!comment) {
+      return res.status(400).json({ message: "number of words can't be less than 1" })
+    }
     Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
@@ -63,9 +66,6 @@ const replyController = {
           }
           if (reply.UserId !== userId) {
             return res.status(403).json({ message: 'permission denied' })
-          }
-          if (!comment) {
-            return res.status(400).json({ message: "number of words can't be less than 1" })
           }
           return reply.update({ comment: comment }).then(reply => {
             res.json({ status: 'success', message: 'Reply is updated successfully', reply })

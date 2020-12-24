@@ -84,6 +84,9 @@ const tweetController = {
     const tweetId = req.params.id
     const userId = helpers.getUser(req).id
     const { description } = req.body
+    if (!description || description.length > 140) {
+      return res.status(400).json({ message: 'number of the words must between 1 ~ 140' })
+    }
     Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
@@ -91,9 +94,6 @@ const tweetController = {
         }
         if (tweet.UserId !== userId) {
           return res.status(403).json({ message: 'permission denied' })
-        }
-        if (!description || description.length > 140) {
-          return res.status(400).json({ message: 'number of the words must between 1 ~ 140' })
         } else {
           return tweet.update({ description: description }).then(tweet => {
             res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
