@@ -8,19 +8,16 @@ const Like = db.Like
 
 const tweetController = {
   readTweets: (req, res, next) => {
+    const userId = helpers.getUser(req).id
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like, attributes: ['TweetId', 'UserId'] },
-        { model: Reply, attributes: ['TweetId'] }
+        { model: Like, attributes: ['UserId'] },
+        { model: Reply, attributes: ['UserId'] }
       ]
     })
       .then(tweets => {
-        if (!tweets) {
-          return res.status(404).json({ status: 'failure', message: 'No one post yet. ' })
-        }
-        const userId = helpers.getUser(req).id
         tweets = tweets.map(tweet => ({
           ...Object.keys(tweet.dataValues)
             .slice(0, 6)
@@ -35,38 +32,38 @@ const tweetController = {
         }))
         return res.json(tweets)
       })
-      .catch(err => next(err))
+      .catch(next)
   },
   postTweet: (req, res, next) => {
+    const userId = helpers.getUser(req).id
     const { description } = req.body
-    if (!description) {
-      return res.status(400).json({ status: 'failure', message: "description didn't exist" })
-    } else if (description.length > 140) {
-      return res.status(409).json({ status: 'failure', message: 'number of the words must between 1 ~ 140' })
+    if (!description || description.length > 140) {
+      return res.status(400).json({ message: 'number of the words must between 1 ~ 140' })
     } else {
       Tweet.create({
         description: description,
-        UserId: helpers.getUser(req).id
+        UserId: userId
       })
         .then(tweet => {
-          return res.json({ status: 'success', message: 'tweet was successfully created', tweet })
+          return res.json({ message: 'tweet is successfully created', tweet })
         })
         .catch(next)
     }
   },
   readTweet: (req, res, next) => {
-    Tweet.findByPk(req.params.id, {
+    const tweetId = req.params.id
+    const userId = helpers.getUser(req).id
+    Tweet.findByPk(tweetId, {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Reply, attributes: ['TweetId'] },
-        { model: Like, attributes: ['TweetId', 'UserId'] }
+        { model: Reply, attributes: ['UserId'] },
+        { model: Like, attributes: ['UserId'] }
       ]
     })
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ message: 'tweet not exist' })
         }
-        const userId = helpers.getUser(req).id
         tweet = {
           ...Object.keys(tweet.dataValues)
             .slice(0, 6)
@@ -81,48 +78,44 @@ const tweetController = {
         }
         return res.json(tweet)
       })
-      .catch(err => next(err))
+      .catch(next)
   },
   updateTweet: (req, res, next) => {
+    const tweetId = req.params.id
+    const userId = helpers.getUser(req).id
     const { description } = req.body
-    Tweet.findByPk(req.params.id)
+    if (!description || description.length > 140) {
+      return res.status(400).json({ message: 'number of the words must between 1 ~ 140' })
+    }
+    Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ message: 'tweet not exist' })
         }
-        if (tweet.UserId !== helpers.getUser(req).id) {
-          return res.status(401).json({ status: 'failure', message: 'permission denied' })
-        }
-        if (!description) {
-          return res.status(400).json({ status: 'failure', message: "description didn't exist" })
-        } else if (description.length > 140) {
-          return res.status(409).json({ status: 'failure', message: 'number of the words must between 1 ~ 140' })
+        if (tweet.UserId !== userId) {
+          return res.status(403).json({ message: 'permission denied' })
         } else {
-          return tweet
-            .update({ description: description })
-            .then(tweet => {
-              res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
-            })
-            .catch(next)
+          return tweet.update({ description }).then(tweet => {
+            res.json({ message: 'Tweet is updated successfully', tweet })
+          })
         }
       })
       .catch(next)
   },
   deleteTweet: (req, res, next) => {
-    Tweet.findByPk(req.params.id)
+    const tweetId = req.params.id
+    const userId = helpers.getUser(req).id
+    Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ message: 'tweet not exist' })
         }
-        if (tweet.UserId !== helpers.getUser(req).id) {
-          return res.status(401).json({ status: 'failure', message: 'permission denied' })
+        if (tweet.UserId !== userId) {
+          return res.status(403).json({ message: 'permission denied' })
         }
-        return tweet
-          .destroy()
-          .then(tweet => {
-            res.json({ status: 'success', message: 'Tweet is delete successfully', tweet })
-          })
-          .catch(next)
+        return tweet.destroy().then(tweet => {
+          res.json({ message: 'Tweet is delete successfully', tweet })
+        })
       })
       .catch(next)
   }
