@@ -1,4 +1,4 @@
-const { Tweet, User, Like, sequelize } = require('../models')
+const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const QueryTypes = require('sequelize')
 
 const helpers = require('../_helpers')
@@ -134,7 +134,12 @@ module.exports = {
         return res.json({ status: 'error', message: '使用者非推文作者或管理員，無法刪除' })
       }
 
-      await tweet.destroy({})
+      // delete all replies and likes belonging to the tweet
+      await Promise.all([
+        Reply.destroy({ where: { TweetId: tweet.id } }),
+        Like.destroy({ where: { TweetId: tweet.id } }),
+        tweet.destroy()
+      ])
       return res.json({
         status: 'success',
         message: '刪除推文成功'
