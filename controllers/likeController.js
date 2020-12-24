@@ -12,7 +12,7 @@ const likeController = {
     Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'this tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'this tweet not exist' })
         }
         if (tweet.UserId === userId) {
           return res.status(400).json({ status: 'failure', message: "Don't be narcissism" })
@@ -36,7 +36,7 @@ const likeController = {
     Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'this tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'this tweet not exist' })
         }
         return Like.findOne({
           where: {

@@ -18,7 +18,7 @@ const tweetController = {
     })
       .then(tweets => {
         if (!tweets) {
-          return res.status(404).json({ status: 'failure', message: 'No one post yet. ' })
+          return res.status(400).json({ status: 'failure', message: 'No one post yet. ' })
         }
         const userId = helpers.getUser(req).id
         tweets = tweets.map(tweet => ({
@@ -64,7 +64,7 @@ const tweetController = {
     })
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
         }
         const userId = helpers.getUser(req).id
         tweet = {
@@ -88,7 +88,7 @@ const tweetController = {
     Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
         }
         if (tweet.UserId !== helpers.getUser(req).id) {
           return res.status(401).json({ status: 'failure', message: 'permission denied' })
@@ -109,7 +109,7 @@ const tweetController = {
     Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
         }
         if (tweet.UserId !== helpers.getUser(req).id) {
           return res.status(401).json({ status: 'failure', message: 'permission denied' })

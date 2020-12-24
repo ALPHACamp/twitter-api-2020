@@ -13,10 +13,10 @@ const replyController = {
     })
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'this tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'this tweet not exist' })
         }
         if (tweet.Replies.length < 1) {
-          return res.status(404).json({ status: 'failure', message: "this tweet doesn't have any reply" })
+          return res.status(400).json({ status: 'failure', message: "this tweet doesn't have any reply" })
         }
         replies = tweet.Replies.map(reply => ({
           ...reply.dataValues,
@@ -34,7 +34,7 @@ const replyController = {
     return Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'this tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'this tweet not exist' })
         }
         return Reply.create({
           comment,
@@ -51,11 +51,11 @@ const replyController = {
     Tweet.findByPk(req.params.tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
         }
         return Reply.findByPk(req.params.replyId).then(reply => {
           if (!reply) {
-            return res.status(404).json({ status: 'failure', message: 'reply not exist' })
+            return res.status(400).json({ status: 'failure', message: 'reply not exist' })
           }
           if (reply.UserId !== helpers.getUser(req).id) {
             return res.status(401).json({ status: 'failure', message: 'permission denied' })
@@ -74,11 +74,11 @@ const replyController = {
     Tweet.findByPk(req.params.tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(404).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
         }
         return Reply.findByPk(req.params.replyId).then(reply => {
           if (!reply) {
-            return res.status(404).json({ status: 'failure', message: 'reply not exist' })
+            return res.status(400).json({ status: 'failure', message: 'reply not exist' })
           }
           if (reply.UserId !== helpers.getUser(req).id) {
             return res.status(401).json({ status: 'failure', message: 'permission denied' })
