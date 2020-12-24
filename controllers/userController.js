@@ -41,7 +41,7 @@ const userController = {
     User.findByPk(UserId).then(user => {
       if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
 
-      Tweet.findAll({
+      return Tweet.findAll({
         where: { UserId },
         order: [['createdAt', 'DESC']],
         include: [Reply, Like]
@@ -62,7 +62,7 @@ const userController = {
     User.findByPk(UserId).then(user => {
       if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
 
-      Reply.findAll({
+      return Reply.findAll({
         where: { UserId },
         order: [['createdAt', 'DESC']],
         include: [{
@@ -94,7 +94,7 @@ const userController = {
     User.findByPk(UserId).then(user => {
       if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
 
-      Like.findAll({
+      return Like.findAll({
         where: { UserId },
         order: [['createdAt', 'DESC']],
         include: [{
