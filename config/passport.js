@@ -21,7 +21,9 @@ passport.use(new JwtStrategy(jwtOptions, (jwt_payload, done) => {
     ],
     attributes: { exclude: ['password'] }
   }).then(user => {
-    if (!user) return done(null, false)
+    if (!user) {
+      return done(null, false)
+    }
     return done(null, user.toJSON())
   })
 }))

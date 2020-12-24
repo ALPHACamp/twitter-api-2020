@@ -37,7 +37,9 @@ const adminController = {
   deleteTweet: (req, res, next) => {
     const id = Number(req.params.id)
     Tweet.findByPk(id).then(tweet => {
-      if (!tweet) return res.status(400).json({ message: `tweets/${id} do not exit!` })
+      if (!tweet) {
+        return res.status(400).json({ message: `tweets/${id} do not exit!` })
+      }
 
       return tweet.destroy().then(tweet => res.json({
         message: `tweets/${tweet.id} is deleted successfully`,
