@@ -56,13 +56,11 @@ const userController = {
   getCurrentUser: async (req, res, next) => {
     try {
       const user = helpers.getUser(req)
-
-      delete user.password
-      delete user.createdAt
-      delete user.updatedAt
+      const removedProp = ['password', 'createdAt', 'updatedAt']
+      removedProp.forEach(property => delete user[property])
 
       return res.json(user)
-    } catch {
+    } catch (error) {
       next(error)
     }
   },
