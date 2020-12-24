@@ -16,7 +16,10 @@ function authenticated(req, res, next) {
 
     if (error) return next(error)
     if (!user) return res.status(401).json({ status: 'error', message: '未被授權' })
-    if (req.method !== 'GET' && user.id !== req.params.id) return res.status(401).json({ status: 'error', message: '您無權限修改他人資料' })
+
+    if (req.method === 'PUT' && user.id !== req.params.id) {
+      return res.status(401).json({ status: 'error', message: '您無權限修改他人資料' })
+    }
 
     req.user = user
     return next()
