@@ -13,7 +13,7 @@ const replyController = {
     })
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'failure', message: 'this tweet not exist' })
+          return res.status(400).json({ message: 'this tweet not exist' })
         }
         replies = tweet.Replies.map(reply => ({
           ...reply.dataValues,
@@ -26,12 +26,12 @@ const replyController = {
   postReply: (req, res, next) => {
     const { comment } = req.body
     if (!comment) {
-      return res.status(400).json({ status: 'failure', message: "number of the words can't be less than 1" })
+      return res.status(400).json({ message: "number of the words can't be less than 1" })
     }
     return Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'failure', message: 'this tweet not exist' })
+          return res.status(400).json({ message: 'this tweet not exist' })
         }
         return Reply.create({
           comment,
@@ -48,17 +48,17 @@ const replyController = {
     Tweet.findByPk(req.params.tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ message: 'tweet not exist' })
         }
         return Reply.findByPk(req.params.replyId).then(reply => {
           if (!reply) {
-            return res.status(400).json({ status: 'failure', message: 'reply not exist' })
+            return res.status(400).json({ message: 'reply not exist' })
           }
           if (reply.UserId !== helpers.getUser(req).id) {
-            return res.status(401).json({ status: 'failure', message: 'permission denied' })
+            return res.status(403).json({ message: 'permission denied' })
           }
           if (!comment) {
-            return res.status(400).json({ status: 'failure', message: "number of words can't be less than 1" })
+            return res.status(400).json({ message: "number of words can't be less than 1" })
           }
           return reply.update({ comment: comment }).then(reply => {
             res.json({ status: 'success', message: 'Reply is updated successfully', reply })
@@ -71,14 +71,14 @@ const replyController = {
     Tweet.findByPk(req.params.tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ message: 'tweet not exist' })
         }
         return Reply.findByPk(req.params.replyId).then(reply => {
           if (!reply) {
-            return res.status(400).json({ status: 'failure', message: 'reply not exist' })
+            return res.status(400).json({ message: 'reply not exist' })
           }
           if (reply.UserId !== helpers.getUser(req).id) {
-            return res.status(401).json({ status: 'failure', message: 'permission denied' })
+            return res.status(403).json({ message: 'permission denied' })
           }
           return reply.destroy().then(reply => {
             res.json({ status: 'success', message: 'Reply is delete successfully', reply })

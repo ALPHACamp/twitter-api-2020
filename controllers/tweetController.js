@@ -36,10 +36,8 @@ const tweetController = {
   },
   postTweet: (req, res, next) => {
     const { description } = req.body
-    if (!description) {
-      return res.status(400).json({ status: 'failure', message: "description didn't exist" })
-    } else if (description.length > 140) {
-      return res.status(409).json({ status: 'failure', message: 'number of the words must between 1 ~ 140' })
+    if (!description || description.length > 140) {
+      return res.status(400).json({ message: 'number of the words must between 1 ~ 140' })
     } else {
       Tweet.create({
         description: description,
@@ -61,7 +59,7 @@ const tweetController = {
     })
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ message: 'tweet not exist' })
         }
         const userId = helpers.getUser(req).id
         tweet = {
@@ -85,15 +83,13 @@ const tweetController = {
     Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ message: 'tweet not exist' })
         }
         if (tweet.UserId !== helpers.getUser(req).id) {
-          return res.status(401).json({ status: 'failure', message: 'permission denied' })
+          return res.status(403).json({ message: 'permission denied' })
         }
-        if (!description) {
-          return res.status(400).json({ status: 'failure', message: "description didn't exist" })
-        } else if (description.length > 140) {
-          return res.status(409).json({ status: 'failure', message: 'number of the words must between 1 ~ 140' })
+        if (!description || description.length > 140) {
+          return res.status(400).json({ message: 'number of the words must between 1 ~ 140' })
         } else {
           return tweet.update({ description: description }).then(tweet => {
             res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
@@ -106,10 +102,10 @@ const tweetController = {
     Tweet.findByPk(req.params.id)
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'failure', message: 'tweet not exist' })
+          return res.status(400).json({ message: 'tweet not exist' })
         }
         if (tweet.UserId !== helpers.getUser(req).id) {
-          return res.status(401).json({ status: 'failure', message: 'permission denied' })
+          return res.status(403).json({ message: 'permission denied' })
         }
         return tweet.destroy().then(tweet => {
           res.json({ status: 'success', message: 'Tweet is delete successfully', tweet })

@@ -11,17 +11,17 @@ const followshipController = {
     User.findByPk(followingId)
       .then(user => {
         if (!user || user.role === 'admin') {
-          return res.status(400).json({ status: 'failure', message: 'this user not exist' })
+          return res.status(400).json({ message: 'this user not exist' })
         }
         if (followerId === followingId) {
-          return res.json({ status: 'failure', message: "Don't be narcissism" })
+          return res.status(400).json({ message: "Don't be narcissism" })
         }
         return Followship.findOrCreate({
           where: { followingId, followerId },
           default: { followingId, followerId }
         }).spread((follow, created) => {
           if (!created) {
-            return res.json({ status: 'failure', message: 'Already Followed' })
+            return res.status(400).json({ message: 'Already Followed' })
           } else {
             return res.json({ status: 'success', message: 'OK', follow })
           }
@@ -35,7 +35,7 @@ const followshipController = {
     User.findByPk(followingId)
       .then(user => {
         if (!user || user.role === 'admin') {
-          return res.status(400).json({ status: 'failure', message: 'this user not exist' })
+          return res.status(400).json({ message: 'this user not exist' })
         }
         return Followship.findOne({
           where: {
@@ -44,7 +44,7 @@ const followshipController = {
           }
         }).then(following => {
           if (!following) {
-            return res.status(409).json({ status: 'failure', message: 'unlike not exist' })
+            return res.status(400).json({ message: 'unlike not exist' })
           }
           return following.destroy().then(unfollow => {
             res.json({ status: 'success', message: 'OK', unfollow })
