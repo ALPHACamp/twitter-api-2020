@@ -13,8 +13,8 @@ const tweetController = {
       order: [['createdAt', 'DESC']],
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Like, attributes: ['TweetId', 'UserId'] },
-        { model: Reply, attributes: ['TweetId'] }
+        { model: Like, attributes: ['UserId'] },
+        { model: Reply, attributes: ['UserId'] }
       ]
     })
       .then(tweets => {
@@ -56,8 +56,8 @@ const tweetController = {
     Tweet.findByPk(tweetId, {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Reply, attributes: ['TweetId'] },
-        { model: Like, attributes: ['TweetId', 'UserId'] }
+        { model: Reply, attributes: ['UserId'] },
+        { model: Like, attributes: ['UserId'] }
       ]
     })
       .then(tweet => {
