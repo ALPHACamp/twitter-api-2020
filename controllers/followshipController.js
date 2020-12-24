@@ -23,7 +23,7 @@ const followshipController = {
           if (!created) {
             return res.status(400).json({ message: 'Already Followed' })
           } else {
-            return res.json({ status: 'success', message: 'OK', follow })
+            return res.json({ message: `follow user ${followingId} successfully`, follow })
           }
         })
       })
@@ -47,7 +47,7 @@ const followshipController = {
             return res.status(400).json({ message: 'followship not exist' })
           }
           return following.destroy().then(unfollow => {
-            res.json({ status: 'success', message: 'OK', unfollow })
+            res.json({ message: `unfollow user ${followingId} successfully`, unfollow })
           })
         })
       })

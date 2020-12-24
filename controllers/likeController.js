@@ -24,7 +24,7 @@ const likeController = {
           if (!created) {
             return res.status(400).json({ message: 'Already Liked' })
           } else {
-            return res.json({ status: 'success', message: 'OK', like })
+            return res.json({ message: `like tweet ${tweetId} successfully`, like })
           }
         })
       })
@@ -48,7 +48,7 @@ const likeController = {
             return res.status(400).json({ message: 'unlike not exist' })
           }
           return like.destroy().then(unliked => {
-            res.json({ status: 'success', message: 'OK', unliked })
+            res.json({ message: `unlike tweet ${tweetId} successfully`, unliked })
           })
         })
       })

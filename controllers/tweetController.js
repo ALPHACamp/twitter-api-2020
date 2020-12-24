@@ -45,7 +45,7 @@ const tweetController = {
         UserId: userId
       })
         .then(tweet => {
-          return res.json({ status: 'success', message: 'tweet was successfully created', tweet })
+          return res.json({ message: 'tweet is successfully created', tweet })
         })
         .catch(next)
     }
@@ -96,7 +96,7 @@ const tweetController = {
           return res.status(403).json({ message: 'permission denied' })
         } else {
           return tweet.update({ description: description }).then(tweet => {
-            res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
+            res.json({ message: 'Tweet is updated successfully', tweet })
           })
         }
       })
@@ -114,7 +114,7 @@ const tweetController = {
           return res.status(403).json({ message: 'permission denied' })
         }
         return tweet.destroy().then(tweet => {
-          res.json({ status: 'success', message: 'Tweet is delete successfully', tweet })
+          res.json({ message: 'Tweet is delete successfully', tweet })
         })
       })
       .catch(next)

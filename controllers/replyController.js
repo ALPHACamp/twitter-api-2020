@@ -42,7 +42,7 @@ const replyController = {
           TweetId: req.params.id,
           UserId: userId
         }).then(reply => {
-          return res.json({ status: 'success', message: 'OK', reply })
+          return res.json({ message: 'Reply created successfully', reply })
         })
       })
       .catch(next)
@@ -68,7 +68,7 @@ const replyController = {
             return res.status(403).json({ message: 'permission denied' })
           }
           return reply.update({ comment: comment }).then(reply => {
-            res.json({ status: 'success', message: 'Reply is updated successfully', reply })
+            res.json({ message: 'Reply is updated successfully', reply })
           })
         })
       })
@@ -91,7 +91,7 @@ const replyController = {
             return res.status(403).json({ message: 'permission denied' })
           }
           return reply.destroy().then(reply => {
-            res.json({ status: 'success', message: 'Reply is delete successfully', reply })
+            res.json({ message: 'Reply is delete successfully', reply })
           })
         })
       })
