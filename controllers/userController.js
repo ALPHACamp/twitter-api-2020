@@ -21,14 +21,13 @@ const userController = {
         { model: User, as: 'Followings' },
       ]
     }).then(user => {
-      if (!user) return res.status(404).json({
-        message: `this user(id: ${id}) do not exist!`
-      })
+      if (!user) return res.status(400).json({ message: `this user(id: ${id}) do not exist!` })
 
+      const UserId = helpers.getUser(req).id
       const userObj = {
         ...Object.fromEntries(Object.entries(user.toJSON()).slice(0, 11)),
-        isSelf: (user.id === helpers.getUser(req).id),
-        isFollowed: user.Followers.map(follower => follower.id).includes(helpers.getUser(req).id),
+        isSelf: (user.id === UserId),
+        isFollowed: user.Followers.map(follower => follower.id).includes(UserId),
         tweetsCount: user.Tweets.length,
         followingsCount: user.Followings.length,
         followersCount: user.Followers.length
@@ -40,23 +39,18 @@ const userController = {
   readTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     User.findByPk(UserId).then(user => {
-      if (!user) return res.status(404).json({
-        message: `this user(id: ${UserId}) do not exist!`
-      })
+      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
 
       Tweet.findAll({
         where: { UserId },
         order: [['createdAt', 'DESC']],
         include: [Reply, Like]
       }).then(tweets => {
-        if (tweets.length < 1 || tweets === undefined)
-          return res.status(404).json({ message: `This user(id: ${UserId}) do not post any tweets!` })
-
         tweets = tweets.map(tweet => ({
           ...(Object.fromEntries(Object.entries(tweet.dataValues).slice(0, 5))),
-          repliesCount: tweet.dataValues.Replies.length,
-          likesCount: tweet.dataValues.Likes.length,
-          isLike: tweet.dataValues.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+          repliesCount: tweet.Replies.length,
+          likesCount: tweet.Likes.length,
+          isLike: tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
         }))
         return res.json(tweets)
       })
@@ -66,9 +60,7 @@ const userController = {
   readRepliedTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     User.findByPk(UserId).then(user => {
-      if (!user) return res.status(404).json({
-        message: `this user(id: ${UserId}) do not exist!`
-      })
+      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
 
       Reply.findAll({
         where: { UserId },
@@ -83,9 +75,6 @@ const userController = {
           ]
         }]
       }).then(replies => {
-        if (replies.length < 1 || replies === undefined)
-          return res.status(404).json({ message: `This user(id: ${UserId}) do not comment any replies!` })
-
         replies = replies.map(reply => ({
           ...(Object.fromEntries(Object.entries(reply.dataValues).slice(0, 7))),
           Tweet: {
@@ -103,9 +92,7 @@ const userController = {
   readLikes: (req, res, next) => {
     const UserId = Number(req.params.id)
     User.findByPk(UserId).then(user => {
-      if (!user) return res.status(404).json({
-        message: `this user(id: ${UserId}) do not exist!`
-      })
+      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
 
       Like.findAll({
         where: { UserId },
@@ -118,9 +105,6 @@ const userController = {
           ]
         }]
       }).then(likes => {
-        if (likes.length < 1 || likes === undefined)
-          return res.status(404).json({ message: `This user(id: ${UserId}) do not have any likes!` })
-
         likes = likes.map(like => ({
           ...(Object.fromEntries(Object.entries(like.dataValues).slice(0, 5))),
           Tweet: {
@@ -144,12 +128,7 @@ const userController = {
         attributes: ['id', 'account', 'name', 'avatar', 'introduction']
       }],
     }).then(user => {
-      if (!user) return res.status(404).json({
-        message: `this user(id: ${id}) do not exist!`
-      })
-      if (!user.Followings.length) return res.status(404).json({
-        message: `this user(id: ${id}) do not follow any one!`
-      })
+      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
 
       let followings = user.Followings
       followings = followings.map(following => ({
@@ -172,12 +151,7 @@ const userController = {
         attributes: ['id', 'account', 'name', 'avatar', 'introduction']
       }],
     }).then(user => {
-      if (!user) return res.status(404).json({
-        message: `this user(id: ${id}) do not exist!`
-      })
-      if (!user.Followers.length) return res.status(404).json({
-        message: `this user(id: ${id}) do not have any followers!`
-      })
+      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
 
       let followers = user.Followers
       followers = followers.map(follower => ({
