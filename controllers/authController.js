@@ -8,21 +8,17 @@ const authController = {
     const { account, password } = req.body
 
     if (!account || !password) {
-      return res.status(400).json({
-        status: 'failure',
-        message: 'all fields are required'
-      })
+      return res.status(400).json({ message: 'all fields are required' })
     }
 
     User.findOne({ where: { account } }).then(user => {
       if (!user || !bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'failure', message: 'account or password is wrong' })
+        return res.status(400).json({ message: 'account or password is wrong' })
       }
 
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' })
       return res.json({
-        status: 'success',
         message: `${user.name}, welcome!`,
         token,
         user
@@ -34,17 +30,11 @@ const authController = {
     const { account, name, email, password, checkPassword } = req.body
 
     if (!account || !name || !email || !password || !checkPassword) {
-      return res.status(400).json({
-        status: 'failure',
-        message: 'all fields are required'
-      })
+      return res.status(400).json({ message: 'all fields are required' })
     }
 
     if (password !== checkPassword) {
-      return res.status(409).json({
-        status: 'failure',
-        message: 'Password & checkPassword are different!'
-      })
+      return res.status(400).json({ message: 'Password & checkPassword are different!' })
     }
 
     User.findOrCreate({
@@ -63,22 +53,13 @@ const authController = {
     }).then(([user, created]) => {
       if (!created) {
         if (user.account === account) {
-          return res.status(409).json({
-            status: 'failure',
-            message: `account: '${account}' has already existed!`
-          })
+          return res.status(400).json({ message: `account: '${account}' has already existed!` })
         }
         if (user.email === email) {
-          return res.status(409).json({
-            status: 'failure',
-            message: `email: '${email}' has already existed!`
-          })
+          return res.status(400).json({ message: `email: '${email}' has already existed!` })
         }
       }
-      return res.json({
-        status: 'success',
-        message: `account: '${user.account}' is registered successfully!`
-      })
+      return res.json({ message: `account: '${user.account}' is registered successfully!` })
     }).catch(next)
   },
 
