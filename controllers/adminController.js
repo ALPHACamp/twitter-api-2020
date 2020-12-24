@@ -1,4 +1,3 @@
-const helpers = require('../_helpers')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
@@ -15,13 +14,12 @@ const adminController = {
         { model: User, as: 'Followings' },
       ]
     }).then(users => {
-      if (!users) return res.status(404).json({ status: 'failure', message: `there is no users now` })
       users = users.map(user => ({
         ...(Object.fromEntries(Object.entries(user.dataValues).slice(0, 11))),
-        tweetsCount: user.dataValues.Tweets.length,
-        likesCount: user.dataValues.Likes.length,
-        followersCount: user.dataValues.Followers.length,
-        followingsCount: user.dataValues.Followings.length
+        tweetsCount: user.Tweets.length,
+        likesCount: user.Likes.length,
+        followersCount: user.Followers.length,
+        followingsCount: user.Followings.length
       }))
       users = users.sort((a, b) => b.tweetsCount - a.tweetsCount)
       return res.json(users)
@@ -33,19 +31,15 @@ const adminController = {
         model: User,
         attributes: ['id', 'account', 'name', 'avatar']
       }]
-    }).then(tweets => res.json(tweets)).catch(next)
+    }).then(tweets => res.json(tweets))
+      .catch(next)
   },
   deleteTweet: (req, res, next) => {
     const id = Number(req.params.id)
     Tweet.findByPk(id).then(tweet => {
-      if (!tweet) return res.status(404).json({
-        status: 'failure',
-        message: `tweets/${id} do not exit!`,
-        tweet
-      })
+      if (!tweet) return res.status(400).json({ message: `tweets/${id} do not exit!` })
 
       return tweet.destroy().then(tweet => res.json({
-        status: 'success',
         message: `tweets/${tweet.id} is deleted successfully`,
         tweet
       }))
