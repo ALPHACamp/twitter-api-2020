@@ -21,7 +21,9 @@ const userController = {
         { model: User, as: 'Followings' },
       ]
     }).then(user => {
-      if (!user) return res.status(400).json({ message: `this user(id: ${id}) do not exist!` })
+      if (!user) {
+        return res.status(400).json({ message: `this user(id: ${id}) do not exist!` })
+      }
 
       const UserId = helpers.getUser(req).id
       const userObj = {
@@ -39,7 +41,9 @@ const userController = {
   readTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     User.findByPk(UserId).then(user => {
-      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      if (!user) {
+        return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      }
 
       return Tweet.findAll({
         where: { UserId },
@@ -60,7 +64,9 @@ const userController = {
   readRepliedTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
     User.findByPk(UserId).then(user => {
-      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      if (!user) {
+        return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      }
 
       return Reply.findAll({
         where: { UserId },
@@ -92,7 +98,9 @@ const userController = {
   readLikes: (req, res, next) => {
     const UserId = Number(req.params.id)
     User.findByPk(UserId).then(user => {
-      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      if (!user) {
+        return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      }
 
       return Like.findAll({
         where: { UserId },
@@ -128,7 +136,9 @@ const userController = {
         attributes: ['id', 'account', 'name', 'avatar', 'introduction']
       }],
     }).then(user => {
-      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      if (!user) {
+        return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      }
 
       let followings = user.Followings
       followings = followings.map(following => ({
@@ -151,7 +161,9 @@ const userController = {
         attributes: ['id', 'account', 'name', 'avatar', 'introduction']
       }],
     }).then(user => {
-      if (!user) return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      if (!user) {
+        return res.status(400).json({ message: `this user(id: ${UserId}) do not exist!` })
+      }
 
       let followers = user.Followers
       followers = followers.map(follower => ({
