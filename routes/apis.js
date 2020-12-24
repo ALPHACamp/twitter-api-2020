@@ -41,7 +41,7 @@ router.get('/admin/users', authenticated, adminAuthenticated, adminController.ge
 router.post('/users', registerRules, userController.signUp)
 router.post('/signin', loginRules, userController.signIn)
 
-router.get('/users/currentUser', authenticated, userAuthenticated, userController.getCurrentUser)
+router.get('/users/currentUser', authenticated, userController.getCurrentUser)
 router.get('/users/:id/tweets', authenticated, userAuthenticated, userRules, userController.getTweets)
 router.get('/users/:id/likes', authenticated, userAuthenticated, userRules, userController.getLikeTweets)
 router.get('/users/:id/followers', authenticated, userAuthenticated, userRules, userController.getFollowers)
