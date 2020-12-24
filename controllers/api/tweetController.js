@@ -8,7 +8,7 @@ const tweetController = {
   getTweets: async (req, res) => {
     try {
       let tweets = await Tweet.findAll({
-        order: [['createdAt', 'ASC']],
+        order: [['createdAt', 'DESC']],
         include: [User, Reply, Like]
       })
       tweets = tweets.map(tweet => ({
