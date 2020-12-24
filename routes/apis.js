@@ -7,14 +7,20 @@ const userController = require('../controllers/api/userController')
 const adminController = require('../controllers/api/adminController')
 const followshipController = require('../controllers/api/followshipController')
 const tweetController = require('../controllers/api/tweetController')
-const { registerRules, loginRules, profileRules, postTweetRules, validResultCheck } = require('../middleware/validator')
+const { registerRules, loginRules, profileRules, postTweetRules, userRules, tweetRules } = require('../middleware/validator')
 const helpers = require('../_helpers.js')
 
 // wrap passport authenticate method to pass mocha test
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
+
     if (error) return next(error)
     if (!user) return res.status(401).json({ status: 'error', message: '未被授權' })
+
+    if (req.method === 'PUT' && user.dataValues.id !== Number(req.params.id)) {
+      return res.status(401).json({ status: 'error', message: '您無權限修改他人資料' })
+    }
+
     req.user = user
     return next()
   })(req, res, next)
@@ -30,32 +36,33 @@ function adminAuthenticated(req, res, next) {
   return next()
 }
 
-router.post('/admin/signin', loginRules(), validResultCheck, adminController.signIn)
+router.post('/admin/signin', loginRules, adminController.signIn)
 router.get('/admin/tweets', authenticated, adminAuthenticated, adminController.getTweets)
 router.delete('/admin/tweets/:id', authenticated, adminAuthenticated, adminController.deleteTweet)
 router.get('/admin/users', authenticated, adminAuthenticated, adminController.getUsers)
 
-router.post('/users', registerRules(), validResultCheck, userController.signUp)
-router.post('/signin', loginRules(), validResultCheck, userController.signIn)
+router.post('/users', registerRules, userController.signUp)
+router.post('/signin', loginRules, userController.signIn)
 
-router.get('/users/:id/tweets', authenticated, userAuthenticated, userController.getTweets)
-router.get('/users/:id/likes', authenticated, userAuthenticated, userController.getLikeTweets)
-router.get('/users/:id/followers', authenticated, userAuthenticated, userController.getFollowers)
-router.get('/users/:id/followings', authenticated, userAuthenticated, userController.getFollowings)
-router.get('/users/:id/replied_tweets', authenticated, userAuthenticated, userController.getRepliedTweets)
-router.put('/users/:id', authenticated, userAuthenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), profileRules, validResultCheck, userController.updateProfile)
-router.get('/users/:id', authenticated, userAuthenticated, userController.getUser)
+router.get('/users/currentUser', authenticated, userController.getCurrentUser)
+router.get('/users/:id/tweets', authenticated, userAuthenticated, userRules, userController.getTweets)
+router.get('/users/:id/likes', authenticated, userAuthenticated, userRules, userController.getLikeTweets)
+router.get('/users/:id/followers', authenticated, userAuthenticated, userRules, userController.getFollowers)
+router.get('/users/:id/followings', authenticated, userAuthenticated, userRules, userController.getFollowings)
+router.get('/users/:id/replied_tweets', authenticated, userAuthenticated, userRules, userController.getRepliedTweets)
+router.put('/users/:id', authenticated, userAuthenticated, userRules, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), profileRules, userController.updateProfile)
+router.get('/users/:id', authenticated, userAuthenticated, userRules, userController.getUser)
 router.get('/users', authenticated, userAuthenticated, userController.getUsers)
 
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowing)
 router.post('/followships', authenticated, followshipController.addFollowing)
 
-router.post('/tweets/:id/replies', authenticated, userAuthenticated, tweetController.replyTweet)
-router.get('/tweets/:id/replies', authenticated, userAuthenticated, tweetController.getReplies)
-router.post('/tweets/:id/like', authenticated, userAuthenticated, tweetController.likeTweet)
+router.post('/tweets/:id/replies', authenticated, userAuthenticated, tweetRules, tweetController.replyTweet)
+router.get('/tweets/:id/replies', authenticated, userAuthenticated, tweetRules, tweetController.getReplies)
+router.post('/tweets/:id/like', authenticated, userAuthenticated, tweetRules, tweetController.likeTweet)
 router.post('/tweets/:id/unlike', authenticated, userAuthenticated, tweetController.unlikeTweet)
 router.get('/tweets/:id', authenticated, userAuthenticated, tweetController.getTweet)
-router.post('/tweets', authenticated, userAuthenticated, postTweetRules(), validResultCheck, tweetController.postTweet)
+router.post('/tweets', authenticated, userAuthenticated, postTweetRules, tweetController.postTweet)
 router.get('/tweets', authenticated, userAuthenticated, tweetController.getTweets)
 
 module.exports = router

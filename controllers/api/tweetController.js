@@ -1,21 +1,17 @@
 const db = require('../../models')
 const Tweet = db.Tweet
-const User = db.User
 const Like = db.Like
 const Reply = db.Reply
 
 const sequelize = require('sequelize')
 const helpers = require('../../_helpers.js')
-const { getSimpleUserIncluded } = require('../../modules/controllerFunctions')
+const { getSimpleUserIncluded } = require('../../modules/common')
 
 const tweetController = {
 
   replyTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) return res.status(400).json({ status: 'error', message: '無此篇貼文' })
-
       const { comment, createdTimestamp } = req.body
       const reply = await Reply.create({
         UserId: helpers.getUser(req).id,
@@ -38,8 +34,6 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) return res.status(400).json({ status: 'error', message: '無此篇貼文' })
 
       const replies = await Reply.findAll({
         raw: true,
@@ -64,8 +58,6 @@ const tweetController = {
   likeTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) return res.status(400).json({ status: 'error', message: '無此篇貼文' })
 
       const isExisting = await Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: tweetId } })
       if (!isExisting) {

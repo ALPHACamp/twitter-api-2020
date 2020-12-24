@@ -1,12 +1,14 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-
-const { User, Tweet, Like, Reply, Followship, Sequelize, sequelize } = require('../../models')
-const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
-const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount, uploadImgur } = require('../../modules/controllerFunctions.js')
+
+const { User, Tweet, Like, Reply, Sequelize, sequelize } = require('../../models')
+const { Op } = Sequelize
+const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount,
+  isLiked, uploadImgur, getSimpleUserIncluded } = require('../../modules/common.js')
+
 const userBasicExcludeFields = ['password', 'createdAt', 'updatedAt', 'role']
-const userMoreExcludeFields = [...userBasicExcludeFields, 'cover', 'introduction']
+
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -51,10 +53,21 @@ const userController = {
     }
   },
 
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const user = helpers.getUser(req)
+      const removedProp = ['password', 'createdAt', 'updatedAt']
+      removedProp.forEach(property => delete user[property])
+
+      return res.json(user)
+    } catch (error) {
+      next(error)
+    }
+  },
+
   getUser: async (req, res, next) => {
     try {
-      const id = Number(req.params.id)
-      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const id = req.params.id
       let user = await User.findOne({
         where: { id, role: null },
         attributes: {
@@ -66,7 +79,6 @@ const userController = {
           exclude: userBasicExcludeFields
         }
       })
-      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
       user = tagIsFollowed(req, user.toJSON())
       return res.json(user)
     } catch (error) {
@@ -85,7 +97,7 @@ const userController = {
           include: [
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=User.id)`), 'FollowersCount']
           ],
-          exclude: userMoreExcludeFields
+          exclude: [...userBasicExcludeFields, 'cover', 'introduction']
         },
         order: [[sequelize.literal('FollowersCount'), 'DESC']],
         offset: Number(req.query.startIndex) || 0,
@@ -102,10 +114,7 @@ const userController = {
 
   getTweets: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)
-      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findOne({ where: { id: UserId, role: null } })
-      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const UserId = req.params.id
       let tweets = await sequelize.query(`
         SELECT t.id, t.UserId, t.description,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
@@ -130,10 +139,7 @@ const userController = {
 
   getLikeTweets: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)
-      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findOne({ where: { id: UserId, role: null } })
-      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const UserId = req.params.id
       let likeTweets = await Like.findAll({
         where: { UserId },
         attributes: [],
@@ -143,13 +149,11 @@ const userController = {
             include: [
               ...repliesAndLikeCount(),
               ...dateFieldsToTimestamp('Tweet'),
-              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked'],
+              isLiked(req)
             ],
             exclude: ['updatedAt']
           },
-          include: {
-            model: User, attributes: ['account', 'name', 'avatar', 'id']
-          },
+          include: getSimpleUserIncluded(),
         }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
@@ -167,10 +171,7 @@ const userController = {
 
   getFollowers: async (req, res, next) => {
     try {
-      const id = Number(req.params.id)
-      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findOne({ where: { id, role: null } })
-      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const id = req.params.id
       let followers = await User.findByPk(id, {
         attributes: [],
         include: [{
@@ -178,7 +179,7 @@ const userController = {
           as: 'Followers',
           attributes: {
             include: [['id', 'followerId']],
-            exclude: userMoreExcludeFields
+            exclude: [...userBasicExcludeFields, 'cover']
           },
           through: { attributes: [] }
         }]
@@ -192,10 +193,7 @@ const userController = {
 
   getFollowings: async (req, res, next) => {
     try {
-      const id = Number(req.params.id)
-      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findOne({ where: { id, role: null } })
-      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const id = req.params.id
       let followings = await User.findByPk(id, {
         attributes: [],
         include: [{
@@ -203,7 +201,7 @@ const userController = {
           as: 'Followings',
           attributes: {
             include: [['id', 'followingId']],
-            exclude: userMoreExcludeFields
+            exclude: [...userBasicExcludeFields, 'cover']
           },
           through: { attributes: [] }
         }]
@@ -219,10 +217,7 @@ const userController = {
 
   getRepliedTweets: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)
-      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findOne({ where: { id: UserId, role: null } })
-      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
+      const UserId = req.params.id
       let replies = await Reply.findAll({
         where: { UserId },
         attributes: { include: dateFieldsToTimestamp('Reply'), exclude: ['updatedAt'] },
@@ -232,13 +227,11 @@ const userController = {
             include: [
               ...dateFieldsToTimestamp('Tweet'),
               ...repliesAndLikeCount(),
-              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked']
+              isLiked(req)
             ],
             exclude: ['updatedAt']
           },
-          include: {
-            model: User, attributes: ['account', 'name', 'avatar', 'id']
-          }
+          include: getSimpleUserIncluded()
         }],
         order: [['createdAt', 'DESC'], [Tweet, 'createdAt', 'DESC']]
       })
@@ -287,4 +280,3 @@ const userController = {
 }
 
 module.exports = userController
-
