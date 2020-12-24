@@ -95,7 +95,7 @@ const tweetController = {
         if (tweet.UserId !== userId) {
           return res.status(403).json({ message: 'permission denied' })
         } else {
-          return tweet.update({ description: description }).then(tweet => {
+          return tweet.update({ description }).then(tweet => {
             res.json({ message: 'Tweet is updated successfully', tweet })
           })
         }
