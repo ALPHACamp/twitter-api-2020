@@ -7,7 +7,9 @@ const Tweet = db.Tweet
 
 const replyController = {
   readReplies: (req, res, next) => {
-    Tweet.findByPk(req.params.id, {
+    const tweetId = req.params.id
+    const userId = helpers.getUser(req).id
+    Tweet.findByPk(tweetId, {
       include: { model: Reply, include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }] },
       order: [['createdAt', 'DESC']]
     })
@@ -17,18 +19,20 @@ const replyController = {
         }
         replies = tweet.Replies.map(reply => ({
           ...reply.dataValues,
-          isSelf: reply.UserId === helpers.getUser(req).id
+          isSelf: reply.UserId === userId
         }))
         return res.json(replies)
       })
       .catch(next)
   },
   postReply: (req, res, next) => {
+    const tweetId = req.params.id
+    const userId = helpers.getUser(req).id
     const { comment } = req.body
     if (!comment) {
       return res.status(400).json({ message: "number of the words can't be less than 1" })
     }
-    return Tweet.findByPk(req.params.id)
+    return Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
           return res.status(400).json({ message: 'this tweet not exist' })
@@ -36,7 +40,7 @@ const replyController = {
         return Reply.create({
           comment,
           TweetId: req.params.id,
-          UserId: helpers.getUser(req).id
+          UserId: userId
         }).then(reply => {
           return res.json({ status: 'success', message: 'OK', reply })
         })
@@ -44,17 +48,20 @@ const replyController = {
       .catch(next)
   },
   updateReply: (req, res, next) => {
+    const tweetId = req.params.tweetId
+    const replyId = req.params.replyId
+    const userId = helpers.getUser(req).id
     const { comment } = req.body
-    Tweet.findByPk(req.params.tweetId)
+    Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
           return res.status(400).json({ message: 'tweet not exist' })
         }
-        return Reply.findByPk(req.params.replyId).then(reply => {
+        return Reply.findByPk(replyId).then(reply => {
           if (!reply) {
             return res.status(400).json({ message: 'reply not exist' })
           }
-          if (reply.UserId !== helpers.getUser(req).id) {
+          if (reply.UserId !== userId) {
             return res.status(403).json({ message: 'permission denied' })
           }
           if (!comment) {
@@ -68,16 +75,19 @@ const replyController = {
       .catch(next)
   },
   deleteReply: (req, res, next) => {
-    Tweet.findByPk(req.params.tweetId)
+    const tweetId = req.params.tweetId
+    const replyId = req.params.replyId
+    const userId = helpers.getUser(req).id
+    Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
           return res.status(400).json({ message: 'tweet not exist' })
         }
-        return Reply.findByPk(req.params.replyId).then(reply => {
+        return Reply.findByPk(replyId).then(reply => {
           if (!reply) {
             return res.status(400).json({ message: 'reply not exist' })
           }
-          if (reply.UserId !== helpers.getUser(req).id) {
+          if (reply.UserId !== userId) {
             return res.status(403).json({ message: 'permission denied' })
           }
           return reply.destroy().then(reply => {
