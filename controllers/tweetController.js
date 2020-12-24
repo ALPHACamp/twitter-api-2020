@@ -35,7 +35,7 @@ const tweetController = {
         }))
         return res.json(tweets)
       })
-      .catch(err => next(err))
+      .catch(next)
   },
   postTweet: (req, res, next) => {
     const { description } = req.body
@@ -81,7 +81,7 @@ const tweetController = {
         }
         return res.json(tweet)
       })
-      .catch(err => next(err))
+      .catch(next)
   },
   updateTweet: (req, res, next) => {
     const { description } = req.body
@@ -98,12 +98,9 @@ const tweetController = {
         } else if (description.length > 140) {
           return res.status(409).json({ status: 'failure', message: 'number of the words must between 1 ~ 140' })
         } else {
-          return tweet
-            .update({ description: description })
-            .then(tweet => {
-              res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
-            })
-            .catch(next)
+          return tweet.update({ description: description }).then(tweet => {
+            res.json({ status: 'success', message: 'Tweet is updated successfully', tweet })
+          })
         }
       })
       .catch(next)
@@ -117,12 +114,9 @@ const tweetController = {
         if (tweet.UserId !== helpers.getUser(req).id) {
           return res.status(401).json({ status: 'failure', message: 'permission denied' })
         }
-        return tweet
-          .destroy()
-          .then(tweet => {
-            res.json({ status: 'success', message: 'Tweet is delete successfully', tweet })
-          })
-          .catch(next)
+        return tweet.destroy().then(tweet => {
+          res.json({ status: 'success', message: 'Tweet is delete successfully', tweet })
+        })
       })
       .catch(next)
   }

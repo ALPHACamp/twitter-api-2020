@@ -19,15 +19,13 @@ const followshipController = {
         return Followship.findOrCreate({
           where: { followingId, followerId },
           default: { followingId, followerId }
+        }).spread((follow, created) => {
+          if (!created) {
+            return res.json({ status: 'failure', message: 'Already Followed' })
+          } else {
+            return res.json({ status: 'success', message: 'OK', follow })
+          }
         })
-          .spread((follow, created) => {
-            if (!created) {
-              return res.json({ status: 'failure', message: 'Already Followed' })
-            } else {
-              return res.json({ status: 'success', message: 'OK', follow })
-            }
-          })
-          .catch(next)
       })
       .catch(next)
   },
@@ -44,19 +42,14 @@ const followshipController = {
             followerId: followerId,
             followingId: followingId
           }
-        })
-          .then(following => {
-            if (!following) {
-              return res.status(409).json({ status: 'failure', message: 'unlike not exist' })
-            }
-            return following
-              .destroy()
-              .then(unfollow => {
-                res.json({ status: 'success', message: 'OK', unfollow })
-              })
-              .catch(next)
+        }).then(following => {
+          if (!following) {
+            return res.status(409).json({ status: 'failure', message: 'unlike not exist' })
+          }
+          return following.destroy().then(unfollow => {
+            res.json({ status: 'success', message: 'OK', unfollow })
           })
-          .catch(next)
+        })
       })
       .catch(next)
   }
