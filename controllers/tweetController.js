@@ -17,9 +17,6 @@ const tweetController = {
       ]
     })
       .then(tweets => {
-        if (!tweets) {
-          return res.status(400).json({ status: 'failure', message: 'No one post yet. ' })
-        }
         const userId = helpers.getUser(req).id
         tweets = tweets.map(tweet => ({
           ...Object.keys(tweet.dataValues)
