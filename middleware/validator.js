@@ -1,5 +1,6 @@
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
 const sequelize = db.sequelize
 const { check, body, param, validationResult } = require('express-validator')
 const helpers = require('../_helpers.js')
@@ -82,8 +83,20 @@ const userRules = async (req, res, next) => {
     .custom(async (UserId) => {
       const user = await User.findOne({ where: { id: UserId, role: null } })
       if (!user) {
-        console.log(user)
         throw new Error('查無此使用者編號')
+      }
+      return true
+    }).run(req)
+
+  return validResultCheck(req, res, next)
+}
+
+const tweetRules = async (req, res, next) => {
+  await param('id')
+    .custom(async (tweetId) => {
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) {
+        throw new Error('無此篇貼文')
       }
       return true
     }).run(req)
@@ -105,5 +118,6 @@ module.exports = {
   loginRules,
   profileRules,
   postTweetRules,
-  userRules
+  userRules,
+  tweetRules
 }
