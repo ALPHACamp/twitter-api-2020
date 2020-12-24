@@ -15,9 +15,6 @@ const replyController = {
         if (!tweet) {
           return res.status(400).json({ status: 'failure', message: 'this tweet not exist' })
         }
-        if (tweet.Replies.length < 1) {
-          return res.status(400).json({ status: 'failure', message: "this tweet doesn't have any reply" })
-        }
         replies = tweet.Replies.map(reply => ({
           ...reply.dataValues,
           isSelf: reply.UserId === helpers.getUser(req).id
