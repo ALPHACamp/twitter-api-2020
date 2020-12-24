@@ -44,7 +44,7 @@ const followshipController = {
           }
         }).then(following => {
           if (!following) {
-            return res.status(400).json({ message: 'unlike not exist' })
+            return res.status(400).json({ message: 'followship not exist' })
           }
           return following.destroy().then(unfollow => {
             res.json({ status: 'success', message: 'OK', unfollow })
