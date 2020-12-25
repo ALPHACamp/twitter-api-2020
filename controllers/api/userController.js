@@ -100,7 +100,15 @@ const userController = {
       if (!user) {
         return res.json({ status: 'error', message: "This user doesn't exist." })
       }
-      const { email, name, password, account, introduction } = req.body
+      const { email, name, password, checkPassword, account, introduction } = req.body
+
+      if (password) {
+        if (password !== checkPassword) {
+          return res.json({
+            status: 'error', message: "Passwords didn't match."
+          })
+        }
+      }
 
       let avatar = user.avatar
       let cover = user.cover
