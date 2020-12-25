@@ -59,6 +59,9 @@ const userController = {
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'No such user found.' })
       }
+      if (user.role !== 'user') {
+        return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+      }
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: "Password didn't match." })
       }
@@ -97,7 +100,15 @@ const userController = {
       if (!user) {
         return res.json({ status: 'error', message: "This user doesn't exist." })
       }
-      const { email, name, password, account, introduction } = req.body
+      const { email, name, password, checkPassword, account, introduction } = req.body
+
+      if (password) {
+        if (password !== checkPassword) {
+          return res.json({
+            status: 'error', message: "Passwords didn't match."
+          })
+        }
+      }
 
       let avatar = user.avatar
       let cover = user.cover
@@ -205,7 +216,8 @@ const userController = {
       })
       followings = followings.Followings.map((user) => ({
         ...user.dataValues,
-        followingId: user.dataValues.Followship.followingId
+        followingId: user.dataValues.Followship.followingId,
+        isFollowed: helper.getUser(req).Followings.map((follower) => follower.id).includes(user.id)
       }))
       res.json(followings)
     } catch (error) {
@@ -220,7 +232,8 @@ const userController = {
       })
       followers = followers.Followers.map((user) => ({
         ...user.dataValues,
-        followerId: user.dataValues.Followship.followerId
+        followerId: user.dataValues.Followship.followerId,
+        isFollowed: helper.getUser(req).Followings.map((follower) => follower.id).includes(user.id)
       }))
       res.json(followers)
     } catch (error) {
