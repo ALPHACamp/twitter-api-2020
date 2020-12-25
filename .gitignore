@@ -1,5 +1,6 @@
 .DS_Store
 *.DS_Store
+.vscode
 
 # Logs
 logs
@@ -85,3 +86,9 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# alternative code
+alternatives/
+
+#temp
+temp/
