@@ -9,11 +9,11 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const userController = {
   signUp: async (req, res) => {
     try {
-      const { account, name, email, password, passwordCheck } = req.body
+      const { account, name, email, password, checkPassword } = req.body
       if (!account || !name || !email || !password) {
         return res.json({ status: 'error', message: "Required fields didn't exist." })
       }
-      if (password !== passwordCheck) {
+      if (password !== checkPassword) {
         return res.json({ status: 'error', message: "Passwords didn't match." })
       }
       const users = await User.findAll({ raw: true, where: { [Op.or]: [{ email }, { account }] } })
@@ -59,6 +59,9 @@ const userController = {
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'No such user found.' })
       }
+      if (user.role !== 'user') {
+        return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+      }
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: "Password didn't match." })
       }
@@ -97,9 +100,14 @@ const userController = {
       if (!user) {
         return res.json({ status: 'error', message: "This user doesn't exist." })
       }
-      const { email, name, password, account, introduction } = req.body
-      if (!account || !name || !email || !password) {
-        return res.json({ status: 'error', message: "Required fields didn't exist." })
+      const { email, name, password, checkPassword, account, introduction } = req.body
+
+      if (password) {
+        if (password !== checkPassword) {
+          return res.json({
+            status: 'error', message: "Passwords didn't match."
+          })
+        }
       }
 
       let avatar = user.avatar
@@ -131,7 +139,13 @@ const userController = {
       }
 
       await User.update({
-        name, email, password, account, introduction, avatar, cover
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+        account: account || user.account,
+        introduction: introduction || user.introduction,
+        avatar,
+        cover
       }, { where: { id } })
       res.json({ status: 'success', message: 'ok' })
     } catch (error) {
@@ -190,11 +204,11 @@ const userController = {
       let likedTweets = await Tweet.findAll({
         include: [
           { model: Like, where: { UserId: req.params.id }, include: [User] },
-          { model: Reply }
         ],
+          { model: Reply }
         order: [[{ model: Like }, 'createdAt', 'DESC']]
-      })
       likedTweets = likedTweets.map(likedTweet => ({
+      })
         ...likedTweet.dataValues,
         replyCount: likedTweet.Replies.length,
         likeCount: likedTweet.Likes.length,
@@ -207,10 +221,15 @@ const userController = {
   },
   getFollowings: async (req, res) => {
     try {
-      const followings = await User.findByPk(req.params.id, {
+      let followings = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followings' }],
         order: [[{ model: User, as: 'Followings' }, { model: Followship }, 'createdAt', 'DESC']]
       })
+      followings = followings.Followings.map((user) => ({
+        ...user.dataValues,
+        followingId: user.dataValues.Followship.followingId,
+        isFollowed: helper.getUser(req).Followings.map((follower) => follower.id).includes(user.id)
+      }))
       res.json(followings)
     } catch (error) {
       console.log(error)
@@ -218,10 +237,15 @@ const userController = {
   },
   getFollowers: async (req, res) => {
     try {
-      const followers = await User.findByPk(req.params.id, {
+      let followers = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followers' }],
         order: [[{ model: User, as: 'Followers' }, { model: Followship }, 'createdAt', 'DESC']]
       })
+      followers = followers.Followers.map((user) => ({
+        ...user.dataValues,
+        followerId: user.dataValues.Followship.followerId,
+        isFollowed: helper.getUser(req).Followings.map((follower) => follower.id).includes(user.id)
+      }))
       res.json(followers)
     } catch (error) {
       console.log(error)
@@ -229,7 +253,7 @@ const userController = {
   },
   addFollowing: async (req, res) => {
     try {
-      const followingId = Number(req.params.followingId)
+      const followingId = Number(req.body.id)
       if (followingId === helper.getUser(req).id) {
         return res.json({ status: 'error', message: 'Cannot follow yourself.' })
       }
