@@ -1,4 +1,3 @@
-const { connect } = require('../app')
 const passport = require('../config/passport')
 const { User, Chatpublic, sequelize, Sequelize } = require('../models')
 const { Op } = Sequelize
@@ -14,26 +13,23 @@ function authenticated(socket, next) {
   })(socket.request, {}, next)
 }
 
-async function getConnectedUsers(io, rooms) {
+async function getConnectedUsers(io, onlineUsers) {
   try {
-    const connUserSck = {}
     // cause we need to update for all online users
     // frontend will get connectedUsers data dynamically
     // it should be remove req.user on rather frontend than backend 
-    rooms.forEach((sck, key) => {
-      if (Number(key)) connUserSck[key] = Array.from(sck.values()) // sck.values().next().value
-    })
 
-    const connectedUserIds = Object.keys(connUserSck).map(Number)
+    const connectedUserIds = Object.keys(onlineUsers).map(Number)
     const connectedUsers = await User.findAll({
       where: { id: { [Op.in]: connectedUserIds } },
       attributes: userSelectedFields,
       raw: true
     })
 
-    connectedUsers.forEach((user, i) => user.sckId = connUserSck[user.id])
+    connectedUsers.forEach((user, i) => user.sckId = onlineUsers[user.id])
+    // console.log(connectedUsers)
 
-    await io.emit('update-connected-users', connectedUsers)
+    await io.to('public room').emit('update-connected-users', connectedUsers)
   } catch (error) {
     await io.emit('error', '更新在線使用者時發生錯誤')
   }
@@ -73,9 +69,10 @@ async function getMessagesFromPublic(io, message, timestamp, sender) {
     message: message
   })
   await io.emit('public-message', [{ ...sender, message, timestamp }])
-  console.log(`${id} to everyone: ${message}`)
+  console.log(`${sender.id} to everyone: ${message}`)
 }
 
+const onlineUsers = {}
 module.exports = (io) => {
   io.use(authenticated)
 
@@ -84,17 +81,28 @@ module.exports = (io) => {
     const sender = { id, account, name, avatar }
     console.log(`a user connected (userId: ${id} name: ${name})`)
 
-    socket.join(id)
+    socket.join('public room')
 
+    // prepare a dictionary to store online users key(user id) 
+    // and value(socket id) array
+    if (Object.keys(onlineUsers).includes(id)) {
+      onlineUsers[id].push(socket.id)
+    } else {
+      onlineUsers[id] = [socket.id]
+    }
+
+    console.info('[STATUS] There are %s people online.', io.of("/").sockets.size)
+    // console.log(io.of("/").in('public room').allSockets())
+    // console.log('>>>>', io.sockets.adapter)
 
     // broadcast: getNewConnection
     broadcastPrevMsgs(socket)
-    getConnectedUsers(io, io.sockets.adapter.rooms)
+    getConnectedUsers(io, onlineUsers)
 
     // broadcast: public chatroom
     socket.on('public-message', async (message, timestamp) => getMessagesFromPublic(io, message, timestamp, sender))
 
-    //私訊
+    // private
     socket.on('private-message', async (userId, message, timestamp) => {
       try {
         userId = Number(userId)
@@ -109,7 +117,8 @@ module.exports = (io) => {
     })
 
     socket.on('disconnect', async () => {
-      getConnectedUsers(io, io.sockets.adapter.rooms)
+      delete onlineUsers[id]
+      getConnectedUsers(io, onlineUsers)
     })
   })
 }
