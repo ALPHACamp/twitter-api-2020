@@ -57,14 +57,6 @@ let userController = {
         checkPassword: req.body.checkPassword,
       })
     }
-    // 需要跟AC確認account是否需要@
-    //const accountName = req.body.account.split('')
-    // if (accountName[0] !== '@') {
-    //   return res.json({
-    //     status: 'error',
-    //     message: '帳號需為＠開頭'
-    //   })
-    // }
     if (req.body.password !== req.body.checkPassword) {
       return res.json({
         status: 'error',
@@ -107,7 +99,7 @@ let userController = {
                   account: req.body.account,
                   email: req.body.email,
                   password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
-                  role: 'User',
+                  role: 'user',
                 })
                   .then(user => {
                     return res.json({
