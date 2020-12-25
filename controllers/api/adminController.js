@@ -86,7 +86,7 @@ const adminController = {
           exclude: ['password', 'createdAt', 'updatedAt'],
         },
         order: [
-          [sequelize.literal(orderBy), 'ASC'],
+          [sequelize.literal(orderBy), 'DESC'],
         ],
         // limit: 10,
         raw: true,
