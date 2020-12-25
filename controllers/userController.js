@@ -78,38 +78,40 @@ let userController = {
               password: req.body.password,
               checkPassword: req.body.checkPassword,
             })
+          } else {
+            User.findOne({ where: { email: req.body.email } })
+              .then(user => {
+                if (user) {
+                  return res.json({
+                    status: 'error',
+                    message: '此信箱已註冊過！',
+                    name: req.body.name,
+                    account: req.body.account,
+                    email: req.body.email,
+                    password: req.body.password,
+                    checkPassword: req.body.checkPassword
+                  })
+                } else {
+                  User.create({
+                    name: req.body.name,
+                    account: req.body.account,
+                    email: req.body.email,
+                    password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
+                    role: 'user',
+                    avatar: 'https://cdn.pixabay.com/photo/2018/04/18/18/56/user-3331256__340.png',
+                    cover: 'https://m.dw.com/image/48396304_101.jpg'
+                  })
+                    .then(user => {
+                      return res.json({
+                        status: 'success',
+                        message: '帳號註冊成功！'
+                      })
+                    })
+                }
+              })
           }
         })
-        .then(user => {
-          User.findOne({ where: { email: req.body.email } })
-            .then(user => {
-              if (user) {
-                return res.json({
-                  status: 'error',
-                  message: '此信箱已註冊過！',
-                  name: req.body.name,
-                  account: req.body.account,
-                  email: req.body.email,
-                  password: req.body.password,
-                  checkPassword: req.body.checkPassword
-                })
-              } else {
-                User.create({
-                  name: req.body.name,
-                  account: req.body.account,
-                  email: req.body.email,
-                  password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
-                  role: 'user',
-                })
-                  .then(user => {
-                    return res.json({
-                      status: 'success',
-                      message: '帳號註冊成功！'
-                    })
-                  })
-              }
-            })
-        })
+
     }
   },
   getProfile: (req, res) => {
