@@ -2,7 +2,38 @@ const db = require('../../models')
 const User = db.User
 const Like = db.Like
 const Tweet = db.Tweet
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt-nodejs')
 const adminController = {
+  signIn: async (req, res) => {
+    try {
+      const { email, password } = req.body
+      if (!email || !password) {
+        return res.json({ status: 'error', message: "Required fields didn't exist." })
+      }
+      const user = await User.findOne({ where: { email } })
+      if (!user) {
+        return res.status(401).json({ status: 'error', message: 'No such user found.' })
+      }
+      if (user.role !== 'admin') {
+        return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+      }
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ status: 'error', message: "Password didn't match." })
+      }
+
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
+      res.json({
+        status: 'success',
+        message: 'ok',
+        token,
+        user
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  },
   getUsers: async (req, res) => {
     try {
       let users = await User.findAll({

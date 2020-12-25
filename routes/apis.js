@@ -34,6 +34,7 @@ const authenticatedUser = (req, res, next) => {
 }
 
 // adminController
+router.post('/admin/signin', adminController.signIn)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.removeTweet)
