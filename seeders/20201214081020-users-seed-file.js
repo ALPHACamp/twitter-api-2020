@@ -23,7 +23,7 @@ module.exports = {
         email: 'user1@example.com',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
         name: 'user1',
-        avatar: `https://static.wikia.nocookie.net/despicableme/images/1/1d/Kevin_minions.png/revision/latest/top-crop/width/360/height/450?cb=20170703052012`,
+        avatar: `https://static1.funidelia.com/55463-f6_big2/3d-deco-light-kevin-minions.jpg`,
         cover: 'https://m.dw.com/image/48396304_101.jpg',
         introduction: 'I am Groot.',
         role: 'user',
