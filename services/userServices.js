@@ -138,11 +138,13 @@ const userServices = {
         { model: User, as: 'Followers' }
       ]
     }).then(users => {
+      console.log(users)
       users = users.map(user => ({
         ...user.dataValues,
         FollowerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
+      console.log('users', users)
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
       users = users.slice(0, 10)
       return callback({ users: users })
@@ -170,6 +172,7 @@ const userServices = {
       ])
     })
   },
+
   getFollowers: (req, res, callback) => {
     return Promise.all([
       Followship.findAndCountAll({
@@ -179,7 +182,7 @@ const userServices = {
         where: { id: req.params.id },
         include: [{ model: User, as: 'Followers' }]
       })
-    ]).then(([followers, user]) => {
+    ]).then(([followers, users]) => {
       const data = followers.rows
       followers.rows = followers.rows.map(d => ({
         ...d.dataValues,
@@ -188,10 +191,11 @@ const userServices = {
       return callback([
         data[0],
         followers,
-        user
+        users
       ])
     })
   },
+
   getTweets: (req, res, callback) => {
     User.findByPk(req.params.id)
       .then(user => {
