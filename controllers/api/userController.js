@@ -204,11 +204,11 @@ const userController = {
       let likedTweets = await Tweet.findAll({
         include: [
           { model: Like, where: { UserId: req.params.id }, include: [User] },
-        ],
           { model: Reply }
+        ],
         order: [[{ model: Like }, 'createdAt', 'DESC']]
-      likedTweets = likedTweets.map(likedTweet => ({
       })
+      likedTweets = likedTweets.map(likedTweet => ({
         ...likedTweet.dataValues,
         replyCount: likedTweet.Replies.length,
         likeCount: likedTweet.Likes.length,
