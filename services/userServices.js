@@ -135,7 +135,7 @@ const userServices = {
   getTopUsers: (req, res, callback) => {
     return User.findAll({
       where: {
-        role: 'User'
+        role: 'user'
       },
       include: [
         { model: User, as: 'Followers' }
