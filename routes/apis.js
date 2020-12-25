@@ -13,6 +13,8 @@ const helpers = require('../_helpers.js')
 // wrap passport authenticate method to pass mocha test
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
+    console.log('=======headers======')
+    console.log(req.headers)
 
     console.log('=======error======')
     console.log(error)
