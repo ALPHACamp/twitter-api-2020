@@ -181,7 +181,8 @@ module.exports = {
           ON R.TweetId = T.id
           LEFT JOIN (SELECT TweetId AS isLiked FROM Likes WHERE UserId = ${helpers.getUser(req).id})AS IL
           ON IL.isLiked = T.id
-          WHERE T.UserId = ${req.params.id}`,
+          WHERE T.UserId = ${req.params.id}
+          ORDER BY T.updatedAt DESC`,
         { type: QueryTypes.SELECT })
 
       tweets = tweets.map(t => ({
@@ -333,7 +334,7 @@ module.exports = {
           LEFT JOIN (SELECT TweetId AS isLiked FROM Likes WHERE UserId = ${helpers.getUser(req).id}) AS IL
           ON IL.isLiked = L.TweetId
           WHERE L.UserId = ${req.params.id}
-          ORDER BY T.id;`,
+          ORDER BY L.updatedAt DESC;`,
         { type: QueryTypes.SELECT })
 
       likedTweets = likedTweets.map(t => {
@@ -375,7 +376,8 @@ module.exports = {
             model: User,
             attributes: ['id', 'name', 'account', 'avatar']
           }]
-        }]
+        }],
+        order: [['updatedAt', 'DESC']]
       })
       replies = replies.map(r => ({ ...r.toJSON() }))
       return res.json(replies)
