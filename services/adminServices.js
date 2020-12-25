@@ -28,7 +28,8 @@ const adminService = {
       }
     })
       .then(users => {
-        callback(users)
+        const user = users.filter(user => user.dataValues.role !== 'admin')
+        callback(user)
       })
   },
 
