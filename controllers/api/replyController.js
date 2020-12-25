@@ -5,7 +5,10 @@ const replyController = {
   getReplies: async (req, res) => {
     try {
       const TweetId = req.params.tweet_id
-      const replies = await Reply.findAll({ where: { TweetId } })
+      const replies = await Reply.findAll({
+        where: { TweetId },
+        include: User
+      })
       return res.json(replies)
     } catch (error) {
       console.log(error)
