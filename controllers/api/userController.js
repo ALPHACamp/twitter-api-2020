@@ -264,8 +264,8 @@ const userController = {
         name: name || user.dataValues.name,
         password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10)) : user.dataValues.password,
         introduction: introduction || user.dataValues.introduction,
-        avatar: avatar || null,
-        cover: cover || null
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover
       })
 
       return res.json({
