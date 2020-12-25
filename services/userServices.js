@@ -183,14 +183,10 @@ const userServices = {
         include: [{ model: User, as: 'Followers' }]
       })
     ]).then(([followers, user]) => {
-
-      followers = followers.rows.map(r => ({
-        ...r.dataValues,
-        isFollowed: helpers.getUser(req).Followers.map(d => d.id).includes(user.id)
-      }))
-      console.log('followers', followers)
+      const data = followers.rows
       return callback([
-        followers[0],
+        data[0], //為了過測試使用
+        followers,
         user
       ])
     })
