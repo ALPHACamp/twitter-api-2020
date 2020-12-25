@@ -4,7 +4,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     try {
       const chats = []
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 6; i++) {
         const UserId = Math.floor(Math.random() * 5) + 2
         const date = new Date(2020, 12, 1, Math.ceil(Math.random() * 3), Math.ceil(Math.random() * 60), 0)
         chats.push({
