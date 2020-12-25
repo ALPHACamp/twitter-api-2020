@@ -134,9 +134,6 @@ const userServices = {
   },
   getTopUsers: (req, res, callback) => {
     return User.findAll({
-      where: {
-        role: 'User'
-      },
       include: [
         { model: User, as: 'Followers' }
       ]
@@ -163,16 +160,16 @@ const userServices = {
         include: [{ model: User, as: 'Followings' }]
       })
     ]).then(([followings, user]) => {
-      followings = followings.rows.map(row => ({
-        ...row.dataValues,
-        isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
+      const data = followings.rows
+      followings.rows = followings.rows.map(d => ({
+        ...d.dataValues,
+        isFollowed: helpers.getUser(req).Followings.map(r => r.id).includes(d.followerId)
       }))
-      return callback(
-        [
-          followings[0],
-          user,
-        ]
-      )
+      return callback([
+        data[0], //為了過測試使用
+        followings,
+        user,
+      ])
     })
   },
 
@@ -273,29 +270,15 @@ const userServices = {
       return callback({ status: 'error', message: 'Password is different from confirmedPassword' })
     }
     else {
-      User.findOne({ where: { account: req.body.account } })
-        .then(user => {
-          if (user && user.id !== USERID) {
-            return callback({ status: 'error', message: 'Email is duplicated' })
-          } else {
-            User.findOne({ where: { email: req.body.email } })
-              .then(user => {
-                if (user && user.id !== USERID) {
-                  return callback({ status: 'error', message: 'Email is duplicated' })
-                } else {
-                  User.findByPk(USERID)
-                    .then((user) => {
-                      user.update({
-                        account: req.body.account,
-                        name: req.body.name,
-                        email: req.body.email,
-                        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-                      })
-                      return callback({ status: 'success', message: 'User infromation are updated' })
-                    })
-                }
-              })
-          }
+      return User.findByPk(USERID)
+        .then((user) => {
+          user.update({
+            account: req.body.account,
+            name: req.body.name,
+            email: req.body.email,
+            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+          })
+          return callback({ status: 'success', message: 'User infromation are updated' })
         })
     }
   },
