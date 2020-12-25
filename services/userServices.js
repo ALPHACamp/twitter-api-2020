@@ -271,15 +271,29 @@ const userServices = {
       return callback({ status: 'error', message: 'Password is different from confirmedPassword' })
     }
     else {
-      return User.findByPk(USERID)
-        .then((user) => {
-          user.update({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          })
-          return callback({ status: 'success', message: 'User infromation are updated' })
+      User.findOne({ where: { account: req.body.account } })
+        .then(user => {
+          if (user && user.id !== USERID) {
+            return callback({ status: 'error', message: 'Email is duplicated' })
+          } else {
+            User.findOne({ where: { email: req.body.email } })
+              .then(user => {
+                if (user && user.id !== USERID) {
+                  return callback({ status: 'error', message: 'Email is duplicated' })
+                } else {
+                  User.findByPk(USERID)
+                    .then((user) => {
+                      user.update({
+                        account: req.body.account,
+                        name: req.body.name,
+                        email: req.body.email,
+                        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+                      })
+                      return callback({ status: 'success', message: 'User infromation are updated' })
+                    })
+                }
+              })
+          }
         })
     }
   },
