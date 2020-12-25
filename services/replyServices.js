@@ -8,10 +8,11 @@ const helpers = require('../_helpers')
 const replyServices = {
   postReply: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
+    const comment = req.body.comment.trim()
     Reply.create({
       UserId: USERID,
       TweetId: req.params.tweet_id,
-      comment: req.body.comment
+      comment: comment
     }).then(reply => {
       return callback({ status: 'success', message: 'Reply was successfully posted' })
     })

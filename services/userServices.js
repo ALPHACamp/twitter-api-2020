@@ -263,12 +263,12 @@ const userServices = {
     else {
       User.findOne({ where: { account: req.body.account } })
         .then(user => {
-          if (user) {
+          if (user && user.id !== USERID) {
             return callback({ status: 'error', message: 'Email is duplicated' })
           } else {
             User.findOne({ where: { email: req.body.email } })
               .then(user => {
-                if (user) {
+                if (user && user.id !== USERID) {
                   return callback({ status: 'error', message: 'Email is duplicated' })
                 } else {
                   User.findByPk(USERID)
