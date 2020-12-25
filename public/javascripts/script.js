@@ -18,7 +18,7 @@ socket.on('update-connected-users', (connectedUsers) => {
 
   // exclude myself
   connectedUsers.forEach((element, i) => {
-    if (element.sckId === socket.id) connectedUsers.splice(i, 1)
+    if (element.sckId.includes(socket.id)) connectedUsers.splice(i, 1)
   })
 
   const userRadios = connectedUsers.map(user => `
@@ -43,7 +43,7 @@ publicMessage.addEventListener('submit', (e) => {
 })
 
 socket.on('public-message', (public_packets) => {
-  console.log(public_packets)
+  // console.log(public_packets)
   for (const packet of public_packets) {
     publicBoard.insertAdjacentHTML('beforeend', `
     <li class="list-group-item">

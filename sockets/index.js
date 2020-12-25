@@ -17,12 +17,11 @@ function authenticated(socket, next) {
 async function getConnectedUsers(io, rooms) {
   try {
     const connUserSck = {}
-
     // cause we need to update for all online users
     // frontend will get connectedUsers data dynamically
     // it should be remove req.user on rather frontend than backend 
     rooms.forEach((sck, key) => {
-      if (Number(key)) connUserSck[key] = sck.values().next().value
+      if (Number(key)) connUserSck[key] = Array.from(sck.values()) // sck.values().next().value
     })
 
     const connectedUserIds = Object.keys(connUserSck).map(Number)
@@ -86,6 +85,7 @@ module.exports = (io) => {
     console.log(`a user connected (userId: ${id} name: ${name})`)
 
     socket.join(id)
+
 
     // broadcast: getNewConnection
     broadcastPrevMsgs(socket)
