@@ -45,7 +45,7 @@ const userController = {
         status: 'success',
         message: '成功登入',
         token: jwt.sign({ id: user.id }, process.env.JWT_SECRET),
-        user: { id: user.id, name: user.name, email: user.email, role: user.role }
+        user: { id: user.id, account: user.account, name: user.name, email: user.email, role: user.role }
       })
 
     } catch (error) {
