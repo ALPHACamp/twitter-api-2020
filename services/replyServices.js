@@ -9,13 +9,17 @@ const replyServices = {
   postReply: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
     const comment = req.body.comment.trim()
-    Reply.create({
-      UserId: USERID,
-      TweetId: req.params.tweet_id,
-      comment: comment
-    }).then(reply => {
-      return callback({ status: 'success', message: 'Reply was successfully posted' })
-    })
+    if (!comment) {
+      return callback({ status: 'error', message: 'Reply can not be blank' })
+    } else {
+      Reply.create({
+        UserId: USERID,
+        TweetId: req.params.tweet_id,
+        comment: comment
+      }).then(reply => {
+        return callback({ status: 'success', message: 'Reply was successfully posted' })
+      })
+    }
   },
   getReply: (req, res, callback) => {
     Tweet.findByPk(req.params.tweet_id, {
