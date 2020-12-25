@@ -13,25 +13,11 @@ const helpers = require('../_helpers.js')
 // wrap passport authenticate method to pass mocha test
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
-    console.log('=======headers======')
-    console.log(req.headers)
-
-    console.log('=======error======')
-    console.log(error)
-    console.log('=======user======')
-    console.log(user)
-    console.log('=================')
     if (error) return next(error)
-
     if (!user) return res.status(401).json({ status: 'error', message: '未被授權' })
 
     const validUserId = user.id || user.dataValues.id // for different environment
 
-    console.log('=======error======')
-    console.log(error)
-    console.log('=======user======')
-    console.log(validUserId, req.params.id, user)
-    console.log('=================')
     if (req.method === 'PUT' && validUserId !== Number(req.params.id)) {
       return res.status(401).json({ status: 'error', message: '您無權限修改他人資料' })
     }
