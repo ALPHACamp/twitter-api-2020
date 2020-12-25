@@ -59,6 +59,9 @@ const userController = {
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'No such user found.' })
       }
+      if (user.role !== 'user') {
+        return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+      }
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: "Password didn't match." })
       }
