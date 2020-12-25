@@ -45,7 +45,7 @@ const userController = {
         status: 'success',
         message: '成功登入',
         token: jwt.sign({ id: user.id }, process.env.JWT_SECRET),
-        user: { id: user.id, name: user.name, email: user.email, role: user.role }
+        user: { id: user.id, account: user.account, name: user.name, email: user.email, role: user.role }
       })
 
     } catch (error) {
@@ -68,7 +68,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const id = req.params.id
-      let user = await User.findOne({
+      const user = await User.findOne({
         where: { id, role: null },
         attributes: {
           include: [
@@ -79,8 +79,8 @@ const userController = {
           exclude: userBasicExcludeFields
         }
       })
-      user = tagIsFollowed(req, user.toJSON())
-      return res.json(user)
+      const taggedUser = tagIsFollowed(req, user.toJSON())
+      return res.json(taggedUser)
     } catch (error) {
       next(error)
     }
@@ -88,7 +88,7 @@ const userController = {
 
   getUsers: async (req, res, next) => {
     try {
-      let users = await User.findAll({
+      const users = await User.findAll({
         where: {
           id: { [Op.ne]: helpers.getUser(req).id },
           role: null
@@ -104,9 +104,9 @@ const userController = {
         limit: Number(req.query.accumulatedNum) || 10
       })
 
-      users = users.map(user => tagIsFollowed(req, user.toJSON()))
+      const taggedUsers = users.map(user => tagIsFollowed(req, user.toJSON()))
 
-      return res.json(users)
+      return res.json(taggedUsers)
     } catch (error) {
       next(error)
     }
@@ -115,7 +115,7 @@ const userController = {
   getTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      let tweets = await sequelize.query(`
+      const tweets = await sequelize.query(`
         SELECT t.id, t.UserId, t.description,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
           COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
@@ -127,11 +127,11 @@ const userController = {
         GROUP BY t.id
         ORDER BY t.createdAt DESC;
       `, { type: sequelize.QueryTypes.SELECT })
-      tweets = tweets.map(tweet => {
+      const modifiedTweets = tweets.map(tweet => {
         tweet.isLiked = tweet.isLiked ? true : false
         return tweet
       })
-      return res.json(tweets)
+      return res.json(modifiedTweets)
     } catch (error) {
       next(error)
     }
@@ -140,7 +140,7 @@ const userController = {
   getLikeTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      let likeTweets = await Like.findAll({
+      const likeTweets = await Like.findAll({
         where: { UserId },
         attributes: [],
         include: [{
@@ -157,13 +157,13 @@ const userController = {
         }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
-      likeTweets = likeTweets.map(like => {
+      const modifiedLikeTweets = likeTweets.map(like => {
         like = { ...like.dataValues.Tweet.toJSON() }
         like.TweetId = like.id
         like.isLiked = like.isLiked ? true : false
         return like
       })
-      return res.json(likeTweets)
+      return res.json(modifiedLikeTweets)
     } catch (error) {
       next(error)
     }
@@ -172,7 +172,7 @@ const userController = {
   getFollowers: async (req, res, next) => {
     try {
       const id = req.params.id
-      let followers = await User.findByPk(id, {
+      const followers = await User.findByPk(id, {
         attributes: [],
         include: [{
           model: User,
@@ -184,8 +184,8 @@ const userController = {
           through: { attributes: [] }
         }]
       })
-      followers = followers.toJSON().Followers.map(follower => tagIsFollowed(req, follower))
-      return res.json(followers)
+      const taggedFollowers = followers.toJSON().Followers.map(follower => tagIsFollowed(req, follower))
+      return res.json(taggedFollowers)
     } catch (error) {
       next(error)
     }
@@ -194,7 +194,7 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const id = req.params.id
-      let followings = await User.findByPk(id, {
+      const followings = await User.findByPk(id, {
         attributes: [],
         include: [{
           model: User,
@@ -207,9 +207,9 @@ const userController = {
         }]
       })
 
-      followings = followings.toJSON().Followings.map(following => tagIsFollowed(req, following))
+      const taggedFollowings = followings.toJSON().Followings.map(following => tagIsFollowed(req, following))
 
-      return res.json(followings)
+      return res.json(taggedFollowings)
     } catch (error) {
       next(error)
     }
@@ -218,7 +218,7 @@ const userController = {
   getRepliedTweets: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      let replies = await Reply.findAll({
+      const replies = await Reply.findAll({
         where: { UserId },
         attributes: { include: dateFieldsToTimestamp('Reply'), exclude: ['updatedAt'] },
         include: [{
@@ -235,12 +235,12 @@ const userController = {
         }],
         order: [['createdAt', 'DESC'], [Tweet, 'createdAt', 'DESC']]
       })
-      replies = replies.map(reply => {
+      const modifiedReplies = replies.map(reply => {
         reply = { ...reply.toJSON() }
         reply.Tweet.isLiked = reply.Tweet.isLiked ? true : false
         return reply
       })
-      return res.json(replies)
+      return res.json(modifiedReplies)
     } catch (error) {
       next(error)
     }
