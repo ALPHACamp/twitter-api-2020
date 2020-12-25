@@ -134,17 +134,18 @@ const userServices = {
   },
   getTopUsers: (req, res, callback) => {
     return User.findAll({
+      where: {
+        role: 'user'
+      },
       include: [
         { model: User, as: 'Followers' }
       ]
     }).then(users => {
-      console.log(users)
       users = users.map(user => ({
         ...user.dataValues,
         FollowerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
-      console.log('users', users)
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
       users = users.slice(0, 10)
       return callback({ users: users })
@@ -270,15 +271,29 @@ const userServices = {
       return callback({ status: 'error', message: 'Password is different from confirmedPassword' })
     }
     else {
-      return User.findByPk(USERID)
-        .then((user) => {
-          user.update({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          })
-          return callback({ status: 'success', message: 'User infromation are updated' })
+      User.findOne({ where: { account: req.body.account } })
+        .then(user => {
+          if (user && user.id !== USERID) {
+            return callback({ status: 'error', message: 'Email is duplicated' })
+          } else {
+            User.findOne({ where: { email: req.body.email } })
+              .then(user => {
+                if (user && user.id !== USERID) {
+                  return callback({ status: 'error', message: 'Email is duplicated' })
+                } else {
+                  User.findByPk(USERID)
+                    .then((user) => {
+                      user.update({
+                        account: req.body.account,
+                        name: req.body.name,
+                        email: req.body.email,
+                        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+                      })
+                      return callback({ status: 'success', message: 'User infromation are updated' })
+                    })
+                }
+              })
+          }
         })
     }
   },
