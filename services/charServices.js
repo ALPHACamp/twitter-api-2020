@@ -35,6 +35,20 @@ const chatServices = {
       .then(([chatUser, histroy]) => {
         return callback({ chatUser, histroy })
       })
+  },
+
+  postMessage: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    const entryMsg = req.body.text.trim()
+    if (entryMsg) {
+      Chatmessage.create({
+        UserId: USERID,
+        text: entryMsg
+      }).then(msg => { return callback({ status: 'success', message: 'add in history' }) })
+    } else {
+      return callback({ status: 'error', message: 'Msg can not be blank' })
+    }
+
   }
 }
 

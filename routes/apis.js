@@ -87,5 +87,6 @@ router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminContr
 router.get('/chatroom', authenticated, chatController.getChatRoom)
 router.post('/chatroom', authenticated, chatController.postChatRoom)
 router.delete('/chatroom', authenticated, chatController.deleteChatRoom)
+router.post('/chatroom/msg', authenticated, chatController.postMessage)
 
 module.exports = router
