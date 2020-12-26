@@ -12,7 +12,16 @@
   background: #e6ecf0;
 }
 
+.text-gray {
+ color: #666;
+}
+
+.text-larger {
+  font-size: larger;
+}
+
 /* navbar style */
+/* navbar: from vue */
 .modal-dialog {
   max-width: 600px;
 }
@@ -97,7 +106,8 @@ hr {
 .pointer {
   cursor: pointer;
 }
-/* modal-setting */
+
+/* modal-setting (from vue)*/
 textarea {
   margin: 0;
   padding: 0;
@@ -142,6 +152,23 @@ img {
   margin-right: 16px;
 }
 
+/* navbar - new setting */
+nav .fa-bell {
+  padding-right: calc(23.99px - 18.9px);
+}
+
+nav .fa-envelope {
+  padding-right: calc(23.99px - 21.6px);
+}
+
+#chat-room .nav-btn {
+  max-width: calc(100% - 2px);
+}
+
+#chat-room .btn-tweet {
+  max-width: calc(100% - 2px);
+}
+
 /* public - center */
 .center-column {
   border-left: 1px solid #e6ecf0;
@@ -165,6 +192,29 @@ img {
 
 /* message-board */
 
+
+.message-board .badge-pill {
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+
+.message-text {
+  border-radius: 1.5em 1.5em 1.5em 0;
+  padding: 0.8em;
+  max-width: 60%;
+  word-break: break-all;
+}
+
+.my-message-text {
+  border-radius: 1.5em 1.5em 0 1.5em;
+  background:#ff6600;
+  color: white;
+  position: relative;
+  right:0;
+}
+
+/* message-board: input */
 .message-form {
  padding: 10px 25px;
  border-top: 1px solid #e6ecf0;
@@ -174,24 +224,14 @@ img {
  display: flex;
 }
 
-.message-text {
-  border-radius: 1.5em 1.5em 1.5em 0;
-  padding: 0.5em;
-  max-width: 60%;
-  word-break: break-all;
-}
-
-.message-input {
-  flex-grow: 1;
-}
-
 .send-message-btn{
   flex-basis: auto;
 }
 
 .fa-location-arrow {
   transform: rotate(45deg);
-  font-size: 18px;
+  font-size: 24px;
+  color: #ff6600;
 }
 
 
