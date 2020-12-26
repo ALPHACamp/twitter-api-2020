@@ -252,10 +252,14 @@ const userController = {
 
     // if update profile
     if (files.avatar && files.cover) {
-      const imageFiles = [files.avatar[0].path, files.cover[0].path]
+      const avatarFile = files.avatar[0].path
+      const coverFile = files.cover[0].path
       imgur.setClientId(IMGUR_CLIENT_ID)
-      return imgur.uploadImages(imageFiles, 'File')
-        .then(imgs => findAndUpdate(res, next, id, update, imgs[0].link, imgs[1].link))
+      return Promise.all([
+        imgur.uploadFile(avatarFile),
+        imgur.uploadFile(coverFile)
+      ]).then(([avatar, cover]) =>
+        findAndUpdate(res, next, id, update, avatar.data.link, cover.data.link))
         .catch(next)
     }
     if (files.avatar && !files.cover) {
