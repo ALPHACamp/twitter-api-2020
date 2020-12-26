@@ -78,9 +78,9 @@ const tweetController = {
       const tweetId = req.params.id
       const tweet = await Tweet.findByPk(tweetId)
       if (tweet) {
-        await tweet.destroy()
+        await Like.destroy({ where: { UserId: helpers.getUser(req).id, TweetId: tweetId } })
       }
-      return res.json({ status: 'success', message: '' })
+      return res.json({ status: 'success', message: 'Unlike successfully.' })
     } catch (error) {
       next(error)
     }
