@@ -178,8 +178,12 @@ const userController = {
   },
 
   readTopUsers: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     User.findAll({
-      where: { role: 'user' },
+      where: {
+        id: { ne: currentUser.id },
+        role: 'user'
+      },
       attributes: ['id', 'account', 'name', 'avatar'],
       include: [{
         model: User,
@@ -190,7 +194,7 @@ const userController = {
       users = users.map(user => ({
         ...Object.fromEntries(Object.entries(user.dataValues).slice(0, 4)),
         followersCount: user.Followers.length,
-        isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(user.id)
+        isFollowed: currentUser.Followings.map(following => following.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.followersCount - a.followersCount)
       users = users.slice(0, 10)
@@ -248,10 +252,14 @@ const userController = {
 
     // if update profile
     if (files.avatar && files.cover) {
-      const imageFiles = [files.avatar[0].path, files.cover[0].path]
+      const avatarFile = files.avatar[0].path
+      const coverFile = files.cover[0].path
       imgur.setClientId(IMGUR_CLIENT_ID)
-      return imgur.uploadImages(imageFiles, 'File')
-        .then(imgs => findAndUpdate(res, next, id, update, imgs[0].link, imgs[1].link))
+      return Promise.all([
+        imgur.uploadFile(avatarFile),
+        imgur.uploadFile(coverFile)
+      ]).then(([avatar, cover]) =>
+        findAndUpdate(res, next, id, update, avatar.data.link, cover.data.link))
         .catch(next)
     }
     if (files.avatar && !files.cover) {
