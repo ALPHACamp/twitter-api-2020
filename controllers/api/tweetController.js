@@ -14,7 +14,8 @@ const tweetController = {
       tweets = tweets.map(tweet => ({
         ...tweet.dataValues,
         replyCount: tweet.Replies.length,
-        likeCount: tweet.Likes.length
+        likeCount: tweet.Likes.length,
+        isLiked: helper.getUser(req).Likes.map(like => like.dataValues.TweetId).includes(tweet.id)
       }))
       return res.json(tweets)
     } catch (error) {

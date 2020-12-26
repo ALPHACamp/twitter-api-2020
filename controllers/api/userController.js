@@ -171,11 +171,17 @@ const userController = {
   },
   getTweets: async (req, res) => {
     try {
-      const tweets = await Tweet.findAll({
+      let tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         include: [Reply, Like],
         order: [['createdAt', 'DESC']]
       })
+      tweets = tweets.map(tweet => ({
+        ...tweet.dataValues,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length,
+        isLiked: helper.getUser(req).Likes.map(like => like.dataValues.TweetId).includes(tweet.id)
+      }))
       res.json(tweets)
     } catch (error) {
       console.log(error)
@@ -196,12 +202,17 @@ const userController = {
   getLikedTweets: async (req, res) => {
     try {
       let likedTweets = await Tweet.findAll({
-        include: { model: Like, where: { UserId: req.params.id } },
+        include: [
+          { model: Like, where: { UserId: req.params.id }, include: [User] },
+          { model: Reply }
+        ],
         order: [[{ model: Like }, 'createdAt', 'DESC']]
       })
-      likedTweets = likedTweets.map((tweet) => ({
-        ...tweet.dataValues,
-        TweetId: tweet.id
+      likedTweets = likedTweets.map(likedTweet => ({
+        ...likedTweet.dataValues,
+        replyCount: likedTweet.Replies.length,
+        likeCount: likedTweet.Likes.length,
+        isLiked: helper.getUser(req).Likes.map(like => like.dataValues.TweetId).includes(likedTweet.id)
       }))
       res.json(likedTweets)
     } catch (error) {
