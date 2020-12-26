@@ -66,14 +66,22 @@ privateMessage.addEventListener('submit', (e) => {
   return false
 })
 
-socket.on('private-message', (sender, message, timestamp) => {
-  console.log(`receive PM from ${sender.name} : ${message} (${timestamp})`)
+socket.on('private-message', (sender, message, timestamp, roomId, roomUsers) => {
+  console.log(`receive PM on room ${roomId} from ${sender.name} : ${message} (${timestamp})`)
 
-  let privateRoom = document.querySelector(`#with-${sender.id}`)
+  let selfUser;
+  let otherUser;
+  roomUsers.forEach(user => {
+    if (user.socketId.includes(socket.id)) selfUser = user
+    else otherUser = user
+  })
+
+  let chatroomName = otherUser.name
+  let privateRoom = document.querySelector(`#at-room-${roomId}`)
   if (!privateRoom) {
     document.querySelector('.private-chat-rooms .boards').insertAdjacentHTML('beforeend', `
-      <div class="col private-chat-room" id="with-${sender.id}">
-        <h4>with: ${sender.name}</h4>
+      <div class="col private-chat-room" id="at-room-${roomId}">
+        <h4>at: ${chatroomName}</h4>
         <ul class="list-group board">
           <li class="list-group-item">
             <strong class="mr-2">${sender.name}:</strong>${message}            
@@ -103,6 +111,6 @@ socket.on('error', (errorMsg) => {
 })
 
 socket.on('disconnect', () => {
-  console.log('reopen socket to connect server.')
-  socket.open()
+  console.log('Fail to connect with server. Close socket...')
+  socket.close()
 })

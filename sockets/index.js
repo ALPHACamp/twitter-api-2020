@@ -1,7 +1,8 @@
 const passport = require('../config/passport')
-const { User, Chatpublic, sequelize, Sequelize } = require('../models')
+const { User, Chatpublic, Chatprivate, Channel, sequelize, Sequelize } = require('../models')
 const { Op } = Sequelize
 const userSelectedFields = ['id', 'account', 'name', 'avatar']
+const onlineUsers = {}
 
 function authenticated(socket, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
@@ -13,7 +14,7 @@ function authenticated(socket, next) {
   })(socket.request, {}, next)
 }
 
-async function getConnectedUsers(io, onlineUsers) {
+async function getConnectedUsers(io, onlineUsers, offlineUser = null) {
   try {
     // cause we need to update for all online users
     // frontend will get connectedUsers data dynamically
@@ -26,11 +27,13 @@ async function getConnectedUsers(io, onlineUsers) {
       raw: true
     })
 
-    connectedUsers.forEach((user, i) => user.sckId = onlineUsers[user.id])
-    // console.log(connectedUsers)
+    connectedUsers.forEach((user, i) => {
+      user.sckId = onlineUsers[user.id].map(socket => socket.id)
+    })
 
     await io.to('public room').emit('update-connected-users', connectedUsers)
   } catch (error) {
+    console.log(error)
     await io.emit('error', '更新在線使用者時發生錯誤')
   }
 }
@@ -72,7 +75,6 @@ async function getMessagesFromPublic(io, message, timestamp, sender) {
   console.log(`${sender.id} to everyone: ${message}`)
 }
 
-const onlineUsers = {}
 module.exports = (io) => {
   io.use(authenticated)
 
@@ -86,9 +88,9 @@ module.exports = (io) => {
     // prepare a dictionary to store online users key(user id) 
     // and value(socket id) array
     if (Object.keys(onlineUsers).includes(id)) {
-      onlineUsers[id].push(socket.id)
+      onlineUsers[id].push(socket)
     } else {
-      onlineUsers[id] = [socket.id]
+      onlineUsers[id] = [socket]
     }
 
     console.info('[STATUS] There are %s people online.', io.of("/").sockets.size)
@@ -103,22 +105,77 @@ module.exports = (io) => {
     socket.on('public-message', async (message, timestamp) => getMessagesFromPublic(io, message, timestamp, sender))
 
     // private
-    socket.on('private-message', async (userId, message, timestamp) => {
+    socket.on('private-message', async (recipientId, message, timestamp) => {
       try {
-        userId = Number(userId)
-        if (!Number(userId)) return socket.emit('error', '使用者編號無效')
-        const recipient = await User.findByPk(userId, { attributes: userSelectedFields })
-        if (!recipient) return socket.emit('error', '查無此使用者編號')
-        io.to(userId).emit('private-message', sender, message, timestamp)
-        console.log(`@@${name} PM ${userId}: ${message}`)
+        console.log('ids: ', id, recipientId)
+        // check channels between two user id if exist
+        let firstUser, secondUser;
+        if (id < recipientId) {
+          firstUser = id
+          secondUser = Number(recipientId)
+        } else {
+          firstUser = Number(recipientId)
+          secondUser = id
+        }
+
+        console.log(firstUser, secondUser)
+        const channel = await Channel.findOne({
+          where: {
+            [Op.and]: [
+              { UserOne: firstUser },
+              { UserTwo: secondUser }
+            ]
+          },
+          raw: true
+        })
+
+        const recipientUser = await User.findByPk(recipientId, {
+          attributes: userSelectedFields, raw: true
+        })
+
+        let createdChannel;
+        if (!channel) {
+          createdChannel = await Chatprivate.create({
+            UserOne: firstUser, UserTwo: secondUser
+          })
+        }
+        const roomId = channel.id || createdChannel.id
+
+        const roomUsers = [
+          {
+            id: id,
+            socketId: onlineUsers[id].map(socket => socket.id),
+            name: sender.name,
+            account: sender.account,
+            avatar: sender.avatar
+          },
+          {
+            id: recipientUser.id,
+            socketId: onlineUsers[recipientId].map(socket => socket.id),
+            name: recipientUser.name,
+            account: recipientUser.account,
+            avatar: recipientUser.avatar
+          }
+        ]
+
+        // for all user device socket should be add into the same room
+        onlineUsers[id].forEach(socket => socket.join(`room ${roomId}`))
+        onlineUsers[Number(recipientId)].forEach(socket => socket.join(`room ${roomId}`))
+
+        // console.log(roomId)
+        // console.log('>>>>', io.sockets.adapter)
+        // console.log('>>>>', onlineUsers[Number(recipientId)][0].adapter)
+
+        await io.to(`room ${roomId}`).emit('private-message', sender, message, timestamp, roomId, roomUsers)
       } catch (error) {
+        console.log(error)
         socket.emit('error', '發生錯誤，請稍後再試')
       }
     })
 
     socket.on('disconnect', async () => {
       delete onlineUsers[id]
-      getConnectedUsers(io, onlineUsers)
+      getConnectedUsers(io, onlineUsers, offlineUser = name)
     })
   })
 }
