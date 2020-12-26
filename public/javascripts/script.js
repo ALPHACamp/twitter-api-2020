@@ -9,14 +9,99 @@ try {
   alert('暫時無網路連線！')
 }
 
-const publicMessage = document.querySelector('.public-chat-room form')
+// update online users
+socket.on('update-connected-users', (connectedUsers, authUserAccount, offlineUser) => {
+  console.log('>>> ', connectedUsers, authUserAccount)
+
+  // IF WE NEED TO EXCLUDE OURSELF, THEN UNCOMMENT THE FOLLOWING CODE
+  // connectedUsers.forEach((element, i) => {
+  //   console.log('**', element)
+  //   if (element.sckId.includes(socket.id)) connectedUsers.splice(i, 1)
+  // })
+
+  document.querySelector('#connected-users-count').innerHTML = connectedUsers.length
+  document.querySelector('#hidden-user-info').className = authUserAccount
+
+  const onlineUserTabs = connectedUsers.map(user => `
+    <div class="pr-1 py-2 d-flex align-items-center connected-user">
+      <img class="user-avatar" src="${user.avatar}" alt="">
+      <span>
+        <strong>${user.name}</strong>
+        <span class="text-gray">@${user.account}</span>
+      </span>
+    </div>
+  `).join('')
+  document.querySelector('.user-panel').innerHTML = onlineUserTabs
+})
+
+// get message from public message
+socket.on('public-message', (public_packets) => {
+  // console.log(public_packets)
+  const userAccount = document.querySelector('#hidden-user-info').className
+  const publicBoard = document.querySelector('.message-board')
+  for (const packet of public_packets) {
+    if (packet.account !== userAccount) {
+      publicBoard.insertAdjacentHTML('beforeend', `
+        <div class="message-wrapper d-flex align-items-end px-3 py-2">
+          <img class="message-avatar" src="${packet.avatar}" alt="">
+          <div class="message">
+            <div class="message-text bg-gray">${packet.message}
+            </div>
+            <div class="message-time text-gray">${moment(packet.timestamp).fromNow()}</div>
+          </div>
+        </div>
+      `)
+    } else {
+      publicBoard.insertAdjacentHTML('beforeend', `
+        <div class="my-message-wrapper d-flex justify-content-end px-3 py-1">
+          <div class="message w-100">
+            <div class="d-flex justify-content-end">
+              <div class="message-text my-message-text">${packet.message}</div>
+            </div>
+            <div class="message-time text-right text-gray">${moment(packet.timestamp).fromNow()}</div>
+          </div>
+        </div>
+      `)
+    }
+  }
+})
+
+// public page
+try {
+  console.log('Detect in public page...')
+
+  // initialize public room
+  socket.emit('open-public-room', new Date().getTime())
+
+  const publicMessageBtn = document.querySelector('.send-message-btn')
+  publicMessageBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+
+    const message = document.querySelector('input[name="message"]').value
+    // console.log('[Send message] ', message)
+    socket.emit('public-message', message, new Date().getTime())
+    // console.log(e.target)
+    document.querySelector('input[name="message"]').value = ''
+  })
+} catch (error) {
+  console.log(error)
+}
+
+
+
+
+
+
+// const publicMessage = document.querySelector('.public-chat-room form')
 const privateMessage = document.querySelector('.private-chat-rooms form')
-const publicBoard = document.querySelector('.public-chat-room ul')
+// const publicBoard = document.querySelector('.public-chat-room ul')
+
 
 // initialize public message
-publicMessage.addEventListener('DOMContentLoaded', (e) => {
-  socket.emit('open-public-room', new Date().getTime())
-})
+// publicMessage.addEventListener('DOMContentLoaded', (e) => {
+//   console.log('Here!')
+//   socket.emit('open-public-room', new Date().getTime())
+// })
 
 // initialize private message
 privateMessage.addEventListener('DOMContentLoaded', (e) => {
@@ -32,46 +117,7 @@ function privateRoomOnClick(channelId) {
   socket.emit('open-private-room', channelId, new Date().getTime())
 }
 
-// update online users
-socket.on('update-connected-users', (connectedUsers) => {
-  // exclude myself
-  connectedUsers.forEach((element, i) => {
-    if (element.sckId.includes(socket.id)) connectedUsers.splice(i, 1)
-  })
 
-  const userRadios = connectedUsers.map(user => `
-    <div class="form-check col-3">
-      <input class="form-check-input" type="radio" name="recipient" id="${user.id}" value="${user.id}">
-      <label class="form-check-label" for="${user.id}">
-        ${user.name}
-      </label>
-    </div>
-  `).join('')
-  document.querySelector('.connected-users').innerHTML = userRadios
-})
-
-///發訊息給所有人(public聊天室)
-publicMessage.addEventListener('submit', (e) => {
-  e.preventDefault()
-  const message = e.target.querySelector('input').value
-  socket.emit('public-message', message, new Date().getTime())
-  console.log(e.target)
-  e.target.querySelector('input[name="message"]').value = ''
-  return false
-})
-
-// get message from public message
-socket.on('public-message', (public_packets) => {
-  // console.log(public_packets)
-  for (const packet of public_packets) {
-    publicBoard.insertAdjacentHTML('beforeend', `
-    <li class="list-group-item">
-      <strong class="mr-2">${packet.name}:</strong>${packet.message} 
-      <small class="ml-2">${moment(packet.timestamp).fromNow()}</small>
-    </li>
-  `)
-  }
-})
 
 //私訊
 privateMessage.addEventListener('submit', (e) => {
