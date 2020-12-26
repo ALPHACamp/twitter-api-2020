@@ -15,7 +15,7 @@ function authenticated(socket, next) {
   })(socket.request, {}, next)
 }
 
-async function getConnectedUsers(io, onlineUsers, offlineUser = null) {
+async function getConnectedUsers(io, onlineUsers, authUser = null, offlineUser = null) {
   try {
     // cause we need to update for all online users
     // frontend will get connectedUsers data dynamically
@@ -31,8 +31,7 @@ async function getConnectedUsers(io, onlineUsers, offlineUser = null) {
     connectedUsers.forEach((user, i) => {
       user.sckId = onlineUsers[user.id].map(socket => socket.id)
     })
-
-    await io.to('public room').emit('update-connected-users', connectedUsers)
+    await io.to('public room').emit('update-connected-users', connectedUsers, authUser.account, offlineUser)
   } catch (error) {
     console.log(error)
     await io.emit('error', '更新在線使用者時發生錯誤')
@@ -58,6 +57,8 @@ async function broadcastPublicPrevMsgs(socket) {
       res.timestamp = element.createdAt.getTime()
       resHistory.push(res)
     })
+    console.log('passsss ===================')
+    console.log(resHistory)
     socket.emit('public-message', resHistory)
 
   } catch (error) {
@@ -175,10 +176,19 @@ async function getMessageFromPrivate(io, socket, sender, recipientId, message, t
 
 async function updateRead(userId, channelId, timestamp) {
   // not sure if there no matching whether the ORM will create one or not
-  await Read.update(
-    { date: new Date(timestamp) },
-    { where: { UserId: userId, ChannelId: channelId } }
-  )
+  try {
+    const outcome = await Read.update(
+      { date: new Date(timestamp) },
+      { where: { UserId: userId, ChannelId: channelId } }
+    )
+    if (outcome[0] === 0) {
+      await Read.create({
+        UserId: userId, ChannelId: 0, date: new Date(timestamp)
+      })
+    }
+  } catch (error) {
+    console.log('Update Read model fails.....', error)
+  }
 }
 
 async function initPublicRoom(socket, sender, timestamp) {
@@ -231,7 +241,6 @@ async function initPrivateRoom(socket, sender, timestamp) {
   socket.emit('open-private-rooms', Object.values(sortedRoomDetails))
 }
 
-
 module.exports = async (io) => {
   io.use(authenticated)
 
@@ -254,6 +263,9 @@ module.exports = async (io) => {
     // console.log(io.of("/").in('public room').allSockets())
     // console.log('>>>>', io.sockets.adapter)
 
+    // broadcast: getNewConnection
+    getConnectedUsers(io, onlineUsers, authUser = sender)
+
     // personal: public chatroom initialization
     socket.on('open-public-room', async (timestamp) => initPublicRoom(socket, sender, timestamp))
     // personal: private chatroom initialization
@@ -261,9 +273,6 @@ module.exports = async (io) => {
 
     socket.on('open-private-room', async (channelId, timestamp) => updateRead(sender.id, channelId, timestamp))
     socket.on('open-private-room', async (channelId, timestamp) => broadcastPrivatePrevMsgs())
-
-    // broadcast: getNewConnection
-    getConnectedUsers(io, onlineUsers)
 
     // broadcast: public chatroom get message
     socket.on('public-message', async (message, timestamp) => getMessagesFromPublic(io, message, timestamp, sender))
