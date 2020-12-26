@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
   });
   Channel.associate = function (models) {
     Channel.hasMany(models.Chatprivate)
-    Channel.belongsTo(models.User)
   };
   return Channel;
 };
