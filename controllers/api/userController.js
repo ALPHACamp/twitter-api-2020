@@ -119,14 +119,14 @@ const userController = {
         SELECT t.id, t.UserId, t.description,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
           COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
-          IF(l.UserId = :UserId, 1, 0) AS isLiked
+          IF(l.UserId = :myId, 1, 0) AS isLiked
         FROM Tweets as t
         LEFT JOIN Replies as r ON r.TweetId = t.id
         LEFT JOIN Likes as l ON l.TweetId = t.id
-        WHERE t.UserId = ${UserId}
+        WHERE t.UserId = :targetUserId
         GROUP BY t.id
         ORDER BY t.createdAt DESC;
-      `, { type: sequelize.QueryTypes.SELECT, replacements: { UserId: helpers.getUser(req).id } })
+      `, { type: sequelize.QueryTypes.SELECT, replacements: { myId: helpers.getUser(req).id, targetUserId: UserId } })
       const modifiedTweets = tweets.map(tweet => {
         tweet.isLiked = tweet.isLiked ? true : false
         return tweet
