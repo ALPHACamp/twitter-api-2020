@@ -35,6 +35,7 @@ app.use((req, res, next) => {
 
 const db = require('./models')
 const User = db.User
+const Chat = db.Chat
 
 app.get('/chatroom', (req, res) => {
   res.render('index')
@@ -54,7 +55,6 @@ io.on('connection', socket => {
 
   io.emit('online', onlineCount)
   socket.on('send message', (msg) => {
-    console.log(msg)
     io.emit('msg', msg)
     socket.broadcast.emit('msg', msg)
   })
@@ -67,7 +67,13 @@ io.on('connection', socket => {
   })
 
   socket.on('chatting', (user) => {
-    console.log('user', user)
+    const USERID = user.id
+    User.findByPk(USERID)
+      .then(user => {
+        Chat.create({
+          UserId: USERID
+        })
+      })
     socket.broadcast.emit('newclientlogin', `${user.name} 上線`)
   })
 })
