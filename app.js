@@ -44,10 +44,6 @@ const server = require('http').Server(app)
 const io = require('socket.io')(server)
 let onlineCount = 0
 io.on('connection', socket => {
-  // console.log('socket', socket)
-  console.log('socket.rooms', socket.rooms)
-  console.log('socket.rooms.size', socket.rooms.size)
-  console.log('socket.id', socket.id)
   console.log('user connected...');
 
   onlineCount++
