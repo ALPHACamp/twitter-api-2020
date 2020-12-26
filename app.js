@@ -70,7 +70,7 @@ io.on('connection', socket => {
     const USERID = user.id
     User.findByPk(USERID)
       .then(user => {
-        Chat.findByPk(USERID)
+        Chat.findOne({ where: { UserId: USERID } })
           .then(chat => {
             if (!chat) {
               Chat.create({
