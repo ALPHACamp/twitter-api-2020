@@ -70,9 +70,16 @@ io.on('connection', socket => {
     const USERID = user.id
     User.findByPk(USERID)
       .then(user => {
-        Chat.create({
-          UserId: USERID
-        })
+        Chat.findByPk(USERID)
+          .then(chat => {
+            if (!chat) {
+              Chat.create({
+                UserId: USERID
+              })
+            } else {
+              console.log('使用者已經在線上')
+            }
+          })
       })
     socket.broadcast.emit('newclientlogin', `${user.name} 上線`)
   })
