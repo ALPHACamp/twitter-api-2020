@@ -105,7 +105,7 @@ async function getMessageFromPrivate(io, socket, sender, recipientId, message, t
 
     let createdChannel;
     if (!channel) {
-      createdChannel = await Chatprivate.create({
+      createdChannel = await Channel.create({
         UserOne: firstUser, UserTwo: secondUser
       })
     }
@@ -135,6 +135,7 @@ async function getMessageFromPrivate(io, socket, sender, recipientId, message, t
     // console.log('>>>>', io.sockets.adapter)
     // console.log('>>>>', onlineUsers[Number(recipientId)][0].adapter)
 
+    await Chatprivate.create({ ChannelId: roomId, UserId: sender.id, message: message })
     await io.to(`room ${roomId}`).emit('private-message', sender, message, timestamp, roomId, roomUsers)
   } catch (error) {
     console.log(error)
