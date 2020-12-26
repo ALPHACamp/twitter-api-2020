@@ -193,6 +193,10 @@ nav .fa-envelope {
 
 /* message-board */
 
+.message-board {
+  height: calc(100vh - 55px - 61px);
+  overflow-y: auto;
+}
 
 .message-board .badge-pill {
   font-size: 1rem;
