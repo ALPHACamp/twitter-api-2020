@@ -13,18 +13,24 @@ const publicMessage = document.querySelector('.public-chat-room form')
 const privateMessage = document.querySelector('.private-chat-rooms form')
 const publicBoard = document.querySelector('.public-chat-room ul')
 
-// initialize private message
-privateMessage.addEventListener('DOMContentLoaded', (e) => {
-  socket.emit('open-private-rooms', new Date().getTime())
-})
-socket.on('open-public-room', someData)
-
 // initialize public message
 publicMessage.addEventListener('DOMContentLoaded', (e) => {
   socket.emit('open-public-room', new Date().getTime())
 })
-socket.on('open-private-rooms', someData)
 
+// initialize private message
+privateMessage.addEventListener('DOMContentLoaded', (e) => {
+  socket.emit('open-private-rooms', new Date().getTime())
+})
+
+socket.on('open-private-rooms', sortedRoomDetails => {
+  console.log('[open-private-rooms][Get message] ', sortedRoomDetails)
+})
+
+// for handlebars to handle click private room
+function privateRoomOnClick(channelId) {
+  socket.emit('open-private-room', channelId, new Date().getTime())
+}
 
 // update online users
 socket.on('update-connected-users', (connectedUsers) => {
