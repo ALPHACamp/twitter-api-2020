@@ -1,21 +1,17 @@
 const db = require('../../models')
 const Tweet = db.Tweet
-const User = db.User
 const Like = db.Like
 const Reply = db.Reply
 
 const sequelize = require('sequelize')
 const helpers = require('../../_helpers.js')
-const { getSimpleUserIncluded } = require('../../modules/controllerFunctions')
+const { getSimpleUserIncluded, isLiked } = require('../../modules/common')
 
 const tweetController = {
 
   replyTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) return res.status(400).json({ status: 'error', message: '無此篇貼文' })
-
       const { comment, createdTimestamp } = req.body
       const reply = await Reply.create({
         UserId: helpers.getUser(req).id,
@@ -38,8 +34,6 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) return res.status(400).json({ status: 'error', message: '無此篇貼文' })
 
       const replies = await Reply.findAll({
         raw: true,
@@ -64,8 +58,6 @@ const tweetController = {
   likeTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) return res.status(400).json({ status: 'error', message: '無此篇貼文' })
 
       const isExisting = await Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: tweetId } })
       if (!isExisting) {
@@ -86,9 +78,9 @@ const tweetController = {
       const tweetId = req.params.id
       const tweet = await Tweet.findByPk(tweetId)
       if (tweet) {
-        await tweet.destroy()
+        await Like.destroy({ where: { UserId: helpers.getUser(req).id, TweetId: tweetId } })
       }
-      return res.json({ status: 'success', message: '' })
+      return res.json({ status: 'success', message: 'Unlike successfully.' })
     } catch (error) {
       next(error)
     }
@@ -102,15 +94,16 @@ const tweetController = {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'repliesCount'],
             [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likesCount'],
+            isLiked(req),
           ],
           exclude: ['updatedAt']
         }
       })
-
       if (!tweet) return res.status(400).json({ status: 'error', message: '沒有這則貼文' })
-
-      tweet.createdAt = tweet.createdAt.getTime()
-      return res.json(tweet)
+      const plainTweet = tweet.toJSON()
+      plainTweet.createdAt = plainTweet.createdAt.getTime()
+      plainTweet.isLiked = plainTweet.isLiked ? true : false
+      return res.json(plainTweet)
     } catch (error) {
       next(error)
     }

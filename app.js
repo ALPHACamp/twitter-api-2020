@@ -11,10 +11,11 @@ const cors = require('cors')
 const exphbs = require('express-handlebars')
 
 const router = require('./routes')
+const hbsHelpers = require('./config/handlebars-helpers.js')
 const app = express()
 const port = process.env.PORT || 3000
 
-app.engine('hbs', exphbs({ extname: 'hbs', defaultLayout: 'main' }))
+app.engine('hbs', exphbs({ extname: 'hbs', defaultLayout: 'main', helpers: hbsHelpers }))
 app.set('view engine', 'hbs')
 app.use(cors())
 app.use(express.static('public'))
@@ -25,6 +26,12 @@ app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use((req, res, next) => {
+  res.locals.user = req.user
+  res.locals.isAuthenticated = req.isAuthenticated()
+  res.locals.domain = process.env.DOMAIN
+  next()
+})
 app.use(router)
 app.use(function (err, req, res, next) {
   console.error(err.stack)

@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const imgur = require('imgur-node-api')
-
-const { User, Tweet, Like, Reply, Followship, Sequelize, sequelize } = require('../../models')
-const { Op } = Sequelize
 const helpers = require('../../_helpers.js')
-const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount } = require('../../modules/controllerFunctions.js')
+
+const { User, Tweet, Like, Reply, Sequelize, sequelize } = require('../../models')
+const { Op } = Sequelize
+const { tagIsFollowed, dateFieldsToTimestamp, repliesAndLikeCount,
+  isLiked, uploadImgur, getSimpleUserIncluded } = require('../../modules/common.js')
+
 const userBasicExcludeFields = ['password', 'createdAt', 'updatedAt', 'role']
-const userMoreExcludeFields = [...userBasicExcludeFields, 'cover', 'introduction']
+
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -44,9 +45,21 @@ const userController = {
         status: 'success',
         message: '成功登入',
         token: jwt.sign({ id: user.id }, process.env.JWT_SECRET),
-        user: { id: user.id, name: user.name, email: user.email, role: user.role }
+        user: { id: user.id, account: user.account, name: user.name, email: user.email, role: user.role }
       })
 
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const user = helpers.getUser(req)
+      const removedProp = ['password', 'createdAt', 'updatedAt']
+      removedProp.forEach(property => delete user[property])
+
+      return res.json(user)
     } catch (error) {
       next(error)
     }
@@ -54,21 +67,20 @@ const userController = {
 
   getUser: async (req, res, next) => {
     try {
-      const id = Number(req.params.id)
-      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      let user = await User.findOne({
+      const id = req.params.id
+      const user = await User.findOne({
         where: { id, role: null },
         attributes: {
           include: [
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followerId=${id})`), 'FollowingsCount'],
-            [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${id})`), 'FollowersCount']
+            [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${id})`), 'FollowersCount'],
+            [sequelize.literal(`(SELECT Count(*) FROM Tweets AS t WHERE t.UserId=${id})`), 'tweetsCount'],
           ],
           exclude: userBasicExcludeFields
         }
       })
-      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      user = tagIsFollowed(req, user.toJSON())
-      return res.json(user)
+      const taggedUser = tagIsFollowed(req, user.toJSON())
+      return res.json(taggedUser)
     } catch (error) {
       next(error)
     }
@@ -76,7 +88,7 @@ const userController = {
 
   getUsers: async (req, res, next) => {
     try {
-      let users = await User.findAll({
+      const users = await User.findAll({
         where: {
           id: { [Op.ne]: helpers.getUser(req).id },
           role: null
@@ -85,16 +97,16 @@ const userController = {
           include: [
             [sequelize.literal(`(SELECT Count(*) FROM Followships AS f WHERE f.followingId=User.id)`), 'FollowersCount']
           ],
-          exclude: userMoreExcludeFields
+          exclude: [...userBasicExcludeFields, 'cover', 'introduction']
         },
         order: [[sequelize.literal('FollowersCount'), 'DESC']],
         offset: Number(req.query.startIndex) || 0,
         limit: Number(req.query.accumulatedNum) || 10
       })
 
-      users = users.map(user => tagIsFollowed(req, user.toJSON()))
+      const taggedUsers = users.map(user => tagIsFollowed(req, user.toJSON()))
 
-      return res.json(users)
+      return res.json(taggedUsers)
     } catch (error) {
       next(error)
     }
@@ -102,26 +114,24 @@ const userController = {
 
   getTweets: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)
-      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      let tweets = await sequelize.query(`
-        SELECT t.*,
+      const UserId = req.params.id
+      const tweets = await sequelize.query(`
+        SELECT t.id, t.UserId, t.description,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
-          UNIX_TIMESTAMP(t.updatedAt) * 1000 AS updatedAt,
           COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
-          IF(l.UserId = ${helpers.getUser(req).id}, 1, 0) AS isLiked
+          IF(l.UserId = :myId, 1, 0) AS isLiked
         FROM Tweets as t
         LEFT JOIN Replies as r ON r.TweetId = t.id
         LEFT JOIN Likes as l ON l.TweetId = t.id
-        WHERE t.UserId = ${UserId}
+        WHERE t.UserId = :targetUserId
         GROUP BY t.id
         ORDER BY t.createdAt DESC;
-      `, { type: sequelize.QueryTypes.SELECT })
-      tweets = tweets.map(tweet => {
+      `, { type: sequelize.QueryTypes.SELECT, replacements: { myId: helpers.getUser(req).id, targetUserId: UserId } })
+      const modifiedTweets = tweets.map(tweet => {
         tweet.isLiked = tweet.isLiked ? true : false
         return tweet
       })
-      return res.json(tweets)
+      return res.json(modifiedTweets)
     } catch (error) {
       next(error)
     }
@@ -129,11 +139,8 @@ const userController = {
 
   getLikeTweets: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)
-      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      const user = await User.findByPk(UserId)
-      if (!user) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      let likeTweets = await Like.findAll({
+      const UserId = req.params.id
+      const likeTweets = await Like.findAll({
         where: { UserId },
         attributes: [],
         include: [{
@@ -142,22 +149,21 @@ const userController = {
             include: [
               ...repliesAndLikeCount(),
               ...dateFieldsToTimestamp('Tweet'),
-              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked'],
-            ]
+              isLiked(req)
+            ],
+            exclude: ['updatedAt']
           },
-          include: {
-            model: User, attributes: ['account', 'name', 'avatar', 'id']
-          },
+          include: getSimpleUserIncluded(),
         }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
-      likeTweets = likeTweets.map(like => {
+      const modifiedLikeTweets = likeTweets.map(like => {
         like = { ...like.dataValues.Tweet.toJSON() }
         like.TweetId = like.id
         like.isLiked = like.isLiked ? true : false
         return like
       })
-      return res.json(likeTweets)
+      return res.json(modifiedLikeTweets)
     } catch (error) {
       next(error)
     }
@@ -165,22 +171,21 @@ const userController = {
 
   getFollowers: async (req, res, next) => {
     try {
-      const id = Number(req.params.id)
-      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      let followers = await User.findByPk(id, {
+      const id = req.params.id
+      const followers = await User.findByPk(id, {
         attributes: [],
         include: [{
           model: User,
           as: 'Followers',
           attributes: {
             include: [['id', 'followerId']],
-            exclude: userMoreExcludeFields
+            exclude: [...userBasicExcludeFields, 'cover']
           },
           through: { attributes: [] }
         }]
       })
-      followers = followers.toJSON().Followers.map(follower => tagIsFollowed(req, follower))
-      return res.json(followers)
+      const taggedFollowers = followers.toJSON().Followers.map(follower => tagIsFollowed(req, follower))
+      return res.json(taggedFollowers)
     } catch (error) {
       next(error)
     }
@@ -188,24 +193,23 @@ const userController = {
 
   getFollowings: async (req, res, next) => {
     try {
-      const id = Number(req.params.id)
-      if (!id) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      let followings = await User.findByPk(id, {
+      const id = req.params.id
+      const followings = await User.findByPk(id, {
         attributes: [],
         include: [{
           model: User,
           as: 'Followings',
           attributes: {
             include: [['id', 'followingId']],
-            exclude: userMoreExcludeFields
+            exclude: [...userBasicExcludeFields, 'cover']
           },
           through: { attributes: [] }
         }]
       })
 
-      followings = followings.toJSON().Followings.map(following => tagIsFollowed(req, following))
+      const taggedFollowings = followings.toJSON().Followings.map(following => tagIsFollowed(req, following))
 
-      return res.json(followings)
+      return res.json(taggedFollowings)
     } catch (error) {
       next(error)
     }
@@ -213,37 +217,34 @@ const userController = {
 
   getRepliedTweets: async (req, res, next) => {
     try {
-      const UserId = Number(req.params.id)
-      if (!UserId) return res.status(400).json({ status: 'error', message: '查無此使用者編號' })
-      let replies = await Reply.findAll({
+      const UserId = req.params.id
+      const replies = await Reply.findAll({
         where: { UserId },
-        attributes: { include: dateFieldsToTimestamp('Reply') },
+        attributes: { include: dateFieldsToTimestamp('Reply'), exclude: ['updatedAt'] },
         include: [{
           model: Tweet,
           attributes: {
             include: [
               ...dateFieldsToTimestamp('Tweet'),
               ...repliesAndLikeCount(),
-              [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked']
-            ]
+              isLiked(req)
+            ],
+            exclude: ['updatedAt']
           },
-          include: {
-            model: User, attributes: ['account', 'name', 'avatar', 'id']
-          }
+          include: getSimpleUserIncluded()
         }],
         order: [['createdAt', 'DESC'], [Tweet, 'createdAt', 'DESC']]
       })
-      replies = replies.map(reply => {
+      const modifiedReplies = replies.map(reply => {
         reply = { ...reply.toJSON() }
         reply.Tweet.isLiked = reply.Tweet.isLiked ? true : false
         return reply
       })
-      return res.json(replies)
+      return res.json(modifiedReplies)
     } catch (error) {
       next(error)
     }
   },
-
   updateProfile: async (req, res, next) => {
     try {
       const urlId = Number(req.params.id)
@@ -251,54 +252,10 @@ const userController = {
       if (!urlId || urlId !== helpers.getUser(req).id) return res.status(401).json({ status: 'error', message: '未被授權' })
       const user = await User.findByPk(id)
       const { account, email, name, password, introduction } = req.body
-      const errorMessage = { status: 'error', message: '圖片上傳失敗' }
-      imgur.setClientID(process.env.IMGUR_CLIENT_ID)
+      let avatar, cover;
 
       if (req.files) {
-        let { avatar, cover } = req.files
-        if (avatar && cover) {
-          return imgur.upload(avatar[0].path, (err, avatar) => {
-            if (err) return res.status(400).json(errorMessage)
-            imgur.upload(cover[0].path, async (err, cover) => {
-              if (err) return res.status(400).json(errorMessage)
-              await user.update({
-                name, introduction,
-                avatar: avatar.data.link || null,
-                cover: cover.data.link || null
-              })
-              return res.json({
-                status: 'success',
-                message: '修改成功'
-              })
-
-            })
-          })
-
-        } else if (avatar) {
-          return imgur.upload(avatar[0].path, async (err, avatar) => {
-            if (err) return res.status(400).json(errorMessage)
-            await user.update({
-              name, introduction,
-              avatar: avatar.data.link || null
-            })
-            return res.json({
-              status: 'success',
-              message: '修改成功'
-            })
-          })
-        } else if (cover) {
-          return imgur.upload(cover[0].path, async (err, cover) => {
-            if (err) return res.status(400).json(errorMessage)
-            await user.update({
-              name, introduction,
-              cover: cover || null
-            })
-            return res.json({
-              status: 'success',
-              message: '修改成功'
-            })
-          })
-        }
+        [avatar, cover] = await Promise.all([uploadImgur(req.files.avatar), uploadImgur(req.files.cover)])
       }
 
       await user.update({
@@ -306,16 +263,20 @@ const userController = {
         email: email || user.dataValues.email,
         name: name || user.dataValues.name,
         password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10)) : user.dataValues.password,
-        introduction: introduction || user.dataValues.introduction
+        introduction: introduction || user.dataValues.introduction,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover
       })
+
       return res.json({
         status: 'success',
         message: '修改成功'
       })
     } catch (error) {
+      if (error.status === 'error') return res.status(400).json(error)
       next(error)
     }
-  }
+  },
 }
 
 module.exports = userController

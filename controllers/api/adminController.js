@@ -75,6 +75,7 @@ const adminController = {
       if (req.params.order && validFilterList.includes(req.params.order)) orderBy = req.params.order
 
       const users = await User.findAll({
+        where: { role: null },
         attributes: {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetsCount'],
@@ -85,7 +86,6 @@ const adminController = {
           exclude: ['password', 'createdAt', 'updatedAt'],
         },
         order: [
-          [sequelize.literal('role'), 'DESC'],
           [sequelize.literal(orderBy), 'DESC'],
         ],
         // limit: 10,
