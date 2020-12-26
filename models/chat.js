@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     UserId: DataTypes.INTEGER
   }, {});
   Chat.associate = function (models) {
-    Chat.hasMany(models.User)
+    Chat.belongsTo(models.User)
   };
   return Chat;
 };
