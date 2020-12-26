@@ -11,10 +11,11 @@ const cors = require('cors')
 const exphbs = require('express-handlebars')
 
 const router = require('./routes')
+const hbsHelpers = require('./config/handlebars-helpers.js')
 const app = express()
 const port = process.env.PORT || 3000
 
-app.engine('hbs', exphbs({ extname: 'hbs', defaultLayout: 'main' }))
+app.engine('hbs', exphbs({ extname: 'hbs', defaultLayout: 'main', helpers: hbsHelpers }))
 app.set('view engine', 'hbs')
 app.use(cors())
 app.use(express.static('public'))
