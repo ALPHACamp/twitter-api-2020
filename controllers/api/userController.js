@@ -81,6 +81,7 @@ const userController = {
   getUser: async (req, res) => {
     try {
       const user = await User.findByPk(req.params.id)
+      user.dataValues.isFollowed = helper.getUser(req).Followings.map((follower) => follower.id).includes(user.id)
       return res.json(user)
     } catch (error) {
       console.log(error)
