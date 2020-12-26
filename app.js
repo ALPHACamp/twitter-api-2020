@@ -48,7 +48,6 @@ io.on('connection', socket => {
 
   onlineCount++
   socket.emit('newclientconnect', { description: 'Hey, welcome!' });
-  socket.broadcast.emit('newclientconnect', { description: onlineCount + ' clients connected!' })
 
   io.emit('online', onlineCount)
   socket.on('send message', (msg) => {
@@ -58,12 +57,13 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     console.log('user disconnected')
     onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
-    io.emit("oneline", onlineCount)
-    io.sockets.emit('broadcast', onlineCount + ' clients connected!');
+    io.emit("online", onlineCount)
+    io.sockets.emit('exit', onlineCount + ' user leave');
   })
 
   socket.on('chatting', (user) => {
-    io.emit('chat', user)
+    console.log('user', user)
+    socket.broadcast.emit('newclientconnect', { description: `${user} Login` })
   })
 
 })
