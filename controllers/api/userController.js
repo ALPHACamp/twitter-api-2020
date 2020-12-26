@@ -118,7 +118,7 @@ const userController = {
       const tweets = await sequelize.query(`
         SELECT t.id, t.UserId, t.description,
           UNIX_TIMESTAMP(t.createdAt) * 1000 AS createdAt,
-          COUNT(r.id) AS repliesCount, COUNT(l.id) AS likeCount,
+          COUNT(r.id) AS repliesCount, COUNT(l.id) AS likesCount,
           IF(l.UserId = :myId, 1, 0) AS isLiked
         FROM Tweets as t
         LEFT JOIN Replies as r ON r.TweetId = t.id
