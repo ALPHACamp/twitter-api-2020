@@ -41,31 +41,35 @@ app.get('/chatroom', (req, res) => {
 })
 
 const server = require('http').Server(app)
-const io = require('socket.io')(server)
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*'
+  }
+})
 let onlineCount = 0
 io.on('connection', socket => {
   console.log('user connected...');
 
   onlineCount++
-  socket.emit('newclientconnect', { description: 'Hey, welcome!' });
 
   io.emit('online', onlineCount)
   socket.on('send message', (msg) => {
-    io.emit('msg', msg);
+    console.log(msg)
+    io.emit('msg', msg)
+    socket.broadcast.emit('msg', msg)
   })
 
   socket.on('disconnect', () => {
     console.log('user disconnected')
     onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
-    io.emit("online", onlineCount)
+    io.emit('online', onlineCount)
     io.sockets.emit('exit', onlineCount + ' user leave');
   })
 
   socket.on('chatting', (user) => {
     console.log('user', user)
-    socket.broadcast.emit('newclientconnect', { description: `${user} Login` })
+    socket.broadcast.emit('newclientlogin', `${user.name} 上線`)
   })
-
 })
 
 server.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
