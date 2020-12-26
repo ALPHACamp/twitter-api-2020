@@ -5,7 +5,7 @@ const Reply = db.Reply
 
 const sequelize = require('sequelize')
 const helpers = require('../../_helpers.js')
-const { getSimpleUserIncluded } = require('../../modules/common')
+const { getSimpleUserIncluded, isLiked } = require('../../modules/common')
 
 const tweetController = {
 
@@ -94,15 +94,16 @@ const tweetController = {
           include: [
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'repliesCount'],
             [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likesCount'],
+            isLiked(req),
           ],
           exclude: ['updatedAt']
         }
       })
-
       if (!tweet) return res.status(400).json({ status: 'error', message: '沒有這則貼文' })
-
-      tweet.createdAt = tweet.createdAt.getTime()
-      return res.json(tweet)
+      const plainTweet = tweet.toJSON()
+      plainTweet.createdAt = plainTweet.createdAt.getTime()
+      plainTweet.isLiked = plainTweet.isLiked ? true : false
+      return res.json(plainTweet)
     } catch (error) {
       next(error)
     }
