@@ -203,8 +203,9 @@ const userController = {
     try {
       let likedTweets = await Tweet.findAll({
         include: [
-          { model: Like, where: { UserId: req.params.id }, include: [User] },
-          { model: Reply }
+          { model: Like, where: { UserId: req.params.id } },
+          { model: Reply },
+          { model: User }
         ],
         order: [[{ model: Like }, 'createdAt', 'DESC']]
       })
