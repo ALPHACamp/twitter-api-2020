@@ -3,8 +3,13 @@
   padding-left: 0;
 }
 
-.container{
+.container-fluid {
+  width: calc(100% - 25px) !important;
   margin-right: 0px !important;
+}
+
+.bg-gray {
+  background: #e6ecf0;
 }
 
 /* navbar style */
@@ -158,6 +163,7 @@ img {
   padding-left: 25px;
 }
 
+/* message-board */
 
 .message-form {
  padding: 10px 25px;
@@ -166,6 +172,13 @@ img {
  bottom: 0;
  width: 100%;
  display: flex;
+}
+
+.message-text {
+  border-radius: 1.5em 1.5em 1.5em 0;
+  padding: 0.5em;
+  max-width: 60%;
+  word-break: break-all;
 }
 
 .message-input {
@@ -180,3 +193,6 @@ img {
   transform: rotate(45deg);
   font-size: 18px;
 }
+
+
+
