@@ -26,6 +26,12 @@ app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use((req, res, next) => {
+  res.locals.user = req.user
+  res.locals.isAuthenticated = req.isAuthenticated()
+  res.locals.domain = process.env.DOMAIN
+  next()
+})
 app.use(router)
 app.use(function (err, req, res, next) {
   console.error(err.stack)
