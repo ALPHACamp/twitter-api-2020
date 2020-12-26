@@ -20,6 +20,8 @@
   font-size: larger;
 }
 
+
+
 /* navbar style */
 /* navbar: from vue */
 .modal-dialog {
@@ -153,13 +155,6 @@ img {
 }
 
 /* navbar - new setting */
-nav .fa-bell {
-  padding-right: calc(23.99px - 18.9px);
-}
-
-nav .fa-envelope {
-  padding-right: calc(23.99px - 21.6px);
-}
 
 #chat-room .nav-btn {
   max-width: calc(100% - 2px);
@@ -168,6 +163,44 @@ nav .fa-envelope {
 
 #chat-room .btn-tweet {
   max-width: calc(100% - 2px);
+}
+
+/* .icon-wrapper {
+  position:relative;
+} */
+
+.bell-icon-wrapper {
+  margin-right: calc(23.99px - 18.9px);
+  position:relative;
+}
+
+.message-icon-wrapper {
+  margin-right: calc(23.99px - 21.6px);
+  position:relative;
+}
+/* nav .fa-bell {
+  margin-right: calc(23.99px - 18.9px);
+}
+
+nav .fa-envelope {
+  margin-right: calc(23.99px - 21.6px);
+} */
+
+
+.new-status-light::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    background: #ff6600;
+    border-radius: 50%;
+    position: absolute;
+    top: 2.5px;
+    right: -2.5px;
+}
+
+.bell-icon-wrapper .new-status-light::before {
+  right: calc(18.9px - 21.6px + 1.1px + 2.5px);
+  top: 3.5px;
 }
 
 /* public - center */
