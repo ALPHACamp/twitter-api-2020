@@ -75,6 +75,73 @@ async function getMessagesFromPublic(io, message, timestamp, sender) {
   console.log(`${sender.id} to everyone: ${message}`)
 }
 
+
+async function getMessageFromPrivate(io, socket, sender, recipientId, message, timestamp) {
+  try {
+    // check channels between two user id if exist
+    let firstUser, secondUser;
+    if (sender.id < recipientId) {
+      firstUser = sender.id
+      secondUser = Number(recipientId)
+    } else {
+      firstUser = Number(recipientId)
+      secondUser = sender.id
+    }
+
+    // check the channel exist or not
+    const channel = await Channel.findOne({
+      where: {
+        [Op.and]: [
+          { UserOne: firstUser },
+          { UserTwo: secondUser }
+        ]
+      },
+      raw: true
+    })
+
+    const recipientUser = await User.findByPk(recipientId, {
+      attributes: userSelectedFields, raw: true
+    })
+
+    let createdChannel;
+    if (!channel) {
+      createdChannel = await Chatprivate.create({
+        UserOne: firstUser, UserTwo: secondUser
+      })
+    }
+    const roomId = channel.id || createdChannel.id
+    const roomUsers = [
+      {
+        id: sender.id,
+        socketId: onlineUsers[sender.id].map(socket => socket.id),
+        name: sender.name,
+        account: sender.account,
+        avatar: sender.avatar
+      },
+      {
+        id: recipientUser.id,
+        socketId: onlineUsers[recipientId].map(socket => socket.id),
+        name: recipientUser.name,
+        account: recipientUser.account,
+        avatar: recipientUser.avatar
+      }
+    ]
+
+    // for all user device socket should be add into the same room
+    onlineUsers[sender.id].forEach(socket => socket.join(`room ${roomId}`))
+    onlineUsers[Number(recipientId)].forEach(socket => socket.join(`room ${roomId}`))
+
+    // console.log(roomId)
+    // console.log('>>>>', io.sockets.adapter)
+    // console.log('>>>>', onlineUsers[Number(recipientId)][0].adapter)
+
+    await io.to(`room ${roomId}`).emit('private-message', sender, message, timestamp, roomId, roomUsers)
+  } catch (error) {
+    console.log(error)
+    socket.emit('error', '發生錯誤，請稍後再試')
+  }
+}
+
 module.exports = (io) => {
   io.use(authenticated)
 
@@ -105,73 +172,7 @@ module.exports = (io) => {
     socket.on('public-message', async (message, timestamp) => getMessagesFromPublic(io, message, timestamp, sender))
 
     // private
-    socket.on('private-message', async (recipientId, message, timestamp) => {
-      try {
-        console.log('ids: ', id, recipientId)
-        // check channels between two user id if exist
-        let firstUser, secondUser;
-        if (id < recipientId) {
-          firstUser = id
-          secondUser = Number(recipientId)
-        } else {
-          firstUser = Number(recipientId)
-          secondUser = id
-        }
-
-        console.log(firstUser, secondUser)
-        const channel = await Channel.findOne({
-          where: {
-            [Op.and]: [
-              { UserOne: firstUser },
-              { UserTwo: secondUser }
-            ]
-          },
-          raw: true
-        })
-
-        const recipientUser = await User.findByPk(recipientId, {
-          attributes: userSelectedFields, raw: true
-        })
-
-        let createdChannel;
-        if (!channel) {
-          createdChannel = await Chatprivate.create({
-            UserOne: firstUser, UserTwo: secondUser
-          })
-        }
-        const roomId = channel.id || createdChannel.id
-
-        const roomUsers = [
-          {
-            id: id,
-            socketId: onlineUsers[id].map(socket => socket.id),
-            name: sender.name,
-            account: sender.account,
-            avatar: sender.avatar
-          },
-          {
-            id: recipientUser.id,
-            socketId: onlineUsers[recipientId].map(socket => socket.id),
-            name: recipientUser.name,
-            account: recipientUser.account,
-            avatar: recipientUser.avatar
-          }
-        ]
-
-        // for all user device socket should be add into the same room
-        onlineUsers[id].forEach(socket => socket.join(`room ${roomId}`))
-        onlineUsers[Number(recipientId)].forEach(socket => socket.join(`room ${roomId}`))
-
-        // console.log(roomId)
-        // console.log('>>>>', io.sockets.adapter)
-        // console.log('>>>>', onlineUsers[Number(recipientId)][0].adapter)
-
-        await io.to(`room ${roomId}`).emit('private-message', sender, message, timestamp, roomId, roomUsers)
-      } catch (error) {
-        console.log(error)
-        socket.emit('error', '發生錯誤，請稍後再試')
-      }
-    })
+    socket.on('private-message', async (recipientId, message, timestamp) => getMessageFromPrivate(io, socket, sender, recipientId, message, timestamp))
 
     socket.on('disconnect', async () => {
       delete onlineUsers[id]
