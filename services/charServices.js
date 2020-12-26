@@ -2,6 +2,7 @@ const helpers = require('../_helpers')
 const db = require('../models')
 const User = db.User
 const Chat = db.Chat
+const Chatmessage = db.Chatmessage
 
 const chatServices = {
   postChatRoom: (req, res, callback) => {
@@ -27,10 +28,12 @@ const chatServices = {
   },
 
   getChatRoom: (req, res, callback) => {
-    const USERID = helpers.getUser(req).id
-    Chat.findAll({ include: [User] })
-      .then(chatUser => {
-        return callback(chatUser)
+    return Promise.all([
+      Chat.findAll({ include: [User] }),
+      Chatmessage.findAll({ include: [User] })
+    ])
+      .then(([chatUser, histroy]) => {
+        return callback({ chatUser, histroy })
       })
   }
 }
