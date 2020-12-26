@@ -32,6 +32,8 @@ const tweetController = require('../controllers/tweetController')
 const userController = require('../controllers/userController')
 const replyController = require('../controllers/replyController')
 const followshipController = require('../controllers/followshipController')
+const chatController = require('../controllers/chatController')
+
 
 //登入登出註冊
 router.post('/signin', userController.signIn)
@@ -80,5 +82,8 @@ router.post('/admin/signin', adminController.signIn)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+
+//chat
+router.get('/chatroom', authenticated, chatController.getChatRoom)
 
 module.exports = router

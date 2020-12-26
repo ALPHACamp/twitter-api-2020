@@ -6,12 +6,14 @@ const flash = require('connect-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
 const cors = require('cors')
+
 const app = express()
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const port = process.env.PORT || 3000
-const passport = require('./config/passport')
+const passport = require('./config/passport');
+const { Model } = require('sequelize');
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
@@ -31,8 +33,42 @@ app.use((req, res, next) => {
   next()
 })
 
+const db = require('./models')
+const User = db.User
 
-app.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
+app.get('/chatroom', (req, res) => {
+  res.render('index')
+})
+
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
+let onlineCount = 0
+io.on('connection', socket => {
+  console.log('user connected...');
+
+  onlineCount++
+  socket.emit('newclientconnect', { description: 'Hey, welcome!' });
+  socket.broadcast.emit('newclientconnect', { description: onlineCount + ' clients connected!' })
+
+  io.emit('online', onlineCount)
+  socket.on('send message', (msg) => {
+    io.emit('msg', msg);
+  })
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected')
+    onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
+    io.emit("oneline", onlineCount)
+    io.sockets.emit('broadcast', onlineCount + ' clients connected!');
+  })
+
+  socket.on('chatting', (user) => {
+    io.emit('chat', user)
+  })
+
+})
+
+server.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
 
 require('./routes')(app)
 
