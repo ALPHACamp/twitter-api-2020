@@ -164,7 +164,7 @@ const userServices = {
       const data = followings.rows
       followings.rows = followings.rows.map(d => ({
         ...d.dataValues,
-        isFollowed: helpers.getUser(req).Followings.map(r => r.id).includes(d.followerId)
+        isFollowed: helpers.getUser(req).Followings.map(r => r.id).includes(d.followingId)
       }))
       return callback([
         data[0], //為了過測試使用
