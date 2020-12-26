@@ -163,6 +163,7 @@ nav .fa-envelope {
 
 #chat-room .nav-btn {
   max-width: calc(100% - 2px);
+  margin-bottom: 20px;
 }
 
 #chat-room .btn-tweet {
@@ -206,12 +207,20 @@ nav .fa-envelope {
   word-break: break-all;
 }
 
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  bottom: 1.5rem;
+}
+
 .my-message-text {
   border-radius: 1.5em 1.5em 0 1.5em;
   background:#ff6600;
   color: white;
   position: relative;
   right:0;
+  width: 60%;
 }
 
 /* message-board: input */
