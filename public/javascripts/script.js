@@ -13,9 +13,21 @@ const publicMessage = document.querySelector('.public-chat-room form')
 const privateMessage = document.querySelector('.private-chat-rooms form')
 const publicBoard = document.querySelector('.public-chat-room ul')
 
+// initialize private message
+privateMessage.addEventListener('DOMContentLoaded', (e) => {
+  socket.emit('open-private-rooms', new Date().getTime())
+})
+socket.on('open-public-room', someData)
+
+// initialize public message
+publicMessage.addEventListener('DOMContentLoaded', (e) => {
+  socket.emit('open-public-room', new Date().getTime())
+})
+socket.on('open-private-rooms', someData)
+
+
 // update online users
 socket.on('update-connected-users', (connectedUsers) => {
-
   // exclude myself
   connectedUsers.forEach((element, i) => {
     if (element.sckId.includes(socket.id)) connectedUsers.splice(i, 1)
@@ -42,6 +54,7 @@ publicMessage.addEventListener('submit', (e) => {
   return false
 })
 
+// get message from public message
 socket.on('public-message', (public_packets) => {
   // console.log(public_packets)
   for (const packet of public_packets) {
@@ -66,6 +79,7 @@ privateMessage.addEventListener('submit', (e) => {
   return false
 })
 
+// get message from private message
 socket.on('private-message', (sender, message, timestamp, roomId, roomUsers) => {
   console.log(`receive PM on room ${roomId} from ${sender.name} : ${message} (${timestamp})`)
 

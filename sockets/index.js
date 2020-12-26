@@ -143,6 +143,17 @@ async function getMessageFromPrivate(io, socket, sender, recipientId, message, t
   }
 }
 
+async function initPublicRoom(socket) {
+  // should pass all initial users online [maybe not in need]
+  socket.emit('open-public-room', someData)
+}
+
+async function initPrivateRoom(socket) {
+  // should pass all users which he connected with and all messages 
+  socket.emit('open-private-rooms', someData)
+}
+
+
 module.exports = (io) => {
   io.use(authenticated)
 
@@ -165,14 +176,21 @@ module.exports = (io) => {
     // console.log(io.of("/").in('public room').allSockets())
     // console.log('>>>>', io.sockets.adapter)
 
+    // [not yet]: personal: public chatroom initialization
+    socket.on('open-public-room', async (timestamp) => initPublicRoom())
+    // [not yet]: personal: private chatroom initialization
+    socket.on('open-private-rooms', async (timestamp) => initPrivateRoom())
+
     // broadcast: getNewConnection
-    broadcastPrevMsgs(socket)
     getConnectedUsers(io, onlineUsers)
 
-    // broadcast: public chatroom
+    // broadcast: public chatroom get message
     socket.on('public-message', async (message, timestamp) => getMessagesFromPublic(io, message, timestamp, sender))
 
-    // private
+    // personal: public chatroom initialization
+    broadcastPrevMsgs(socket)
+
+    // personal: private chatroom get message
     socket.on('private-message', async (recipientId, message, timestamp) => getMessageFromPrivate(io, socket, sender, recipientId, message, timestamp))
 
     socket.on('disconnect', async () => {
