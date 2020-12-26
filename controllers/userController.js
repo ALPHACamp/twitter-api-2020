@@ -178,8 +178,12 @@ const userController = {
   },
 
   readTopUsers: (req, res, next) => {
+    const currentUser = helpers.getUser(req)
     User.findAll({
-      where: { role: 'user' },
+      where: {
+        id: { ne: currentUser.id },
+        role: 'user'
+      },
       attributes: ['id', 'account', 'name', 'avatar'],
       include: [{
         model: User,
@@ -190,7 +194,7 @@ const userController = {
       users = users.map(user => ({
         ...Object.fromEntries(Object.entries(user.dataValues).slice(0, 4)),
         followersCount: user.Followers.length,
-        isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(user.id)
+        isFollowed: currentUser.Followings.map(following => following.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.followersCount - a.followersCount)
       users = users.slice(0, 10)

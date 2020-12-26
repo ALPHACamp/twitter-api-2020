@@ -25,8 +25,10 @@ const adminController = {
       return res.json(users)
     }).catch(next)
   },
+
   readTweets: (req, res, next) => {
     Tweet.findAll({
+      order: [['createdAt', 'DESC']],
       include: [{
         model: User,
         attributes: ['id', 'account', 'name', 'avatar']
@@ -34,6 +36,7 @@ const adminController = {
     }).then(tweets => res.json(tweets))
       .catch(next)
   },
+
   deleteTweet: (req, res, next) => {
     const id = Number(req.params.id)
     Tweet.findByPk(id).then(tweet => {
