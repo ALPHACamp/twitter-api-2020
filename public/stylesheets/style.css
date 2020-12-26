@@ -165,33 +165,21 @@ img {
   max-width: calc(100% - 2px);
 }
 
-/* .icon-wrapper {
-  position:relative;
-} */
-
 .bell-icon-wrapper {
   margin-right: calc(23.99px - 18.9px);
-  position:relative;
+  position: relative;
 }
 
 .message-icon-wrapper {
   margin-right: calc(23.99px - 21.6px);
   position:relative;
 }
-/* nav .fa-bell {
-  margin-right: calc(23.99px - 18.9px);
-}
-
-nav .fa-envelope {
-  margin-right: calc(23.99px - 21.6px);
-} */
-
 
 .new-status-light::before {
     content: "";
     width: 5px;
     height: 5px;
-    background: #ff6600;
+    background: #ff4800;
     border-radius: 50%;
     position: absolute;
     top: 2.5px;
@@ -199,8 +187,8 @@ nav .fa-envelope {
 }
 
 .bell-icon-wrapper .new-status-light::before {
-  right: calc(18.9px - 21.6px + 1.1px + 2.5px);
-  top: 3.5px;
+  right: calc(18.9px - 21.6px + 1.5px + 2.5px);
+  top: 4px;
 }
 
 /* public - center */
