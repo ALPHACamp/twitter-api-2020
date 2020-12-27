@@ -390,3 +390,21 @@ img {
 a {
   color: inherit;
 }
+
+
+/* sign in page- new setting */
+#sign-in-page {
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+}
+
+#canvas {
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+}
+
+.hide {
+  display: none;
+}
