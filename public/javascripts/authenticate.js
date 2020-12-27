@@ -1,4 +1,4 @@
-const DOMAIN = 'http://localhost:3000/'
+const DOMAIN = 'https://merry-simple-twitter.herokuapp.com/:3000/'
 const Toast = Swal.mixin({
   toast: true,
   position: 'top-end',
@@ -6,8 +6,6 @@ const Toast = Swal.mixin({
   timer: 3000
 })
 const signInForm = document.querySelector('#sign-in-form')
-// const signInPage = document.querySelector('#sign-in-page')
-// const chatRoomPage = document.querySelector('#chat-room')
 
 if (signInForm) {
   signInForm.addEventListener('submit', (event) => {
@@ -21,8 +19,6 @@ if (signInForm) {
       const { data } = result
       if (data.status !== 'success') throw (new Error('登入失敗'))
       localStorage.setItem('token', data.token)
-      // signInPage.classList.add('hide')
-      // chatRoomPage.classList.remove('hide')
       window.location.reload()
       return false
     })
