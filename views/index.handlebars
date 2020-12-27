@@ -43,6 +43,7 @@
       const content = document.getElementById("content")
 
       socket.on('online', (amount) => {
+        console.log(amount)
         online.innerText = amount;
       })
 
@@ -84,7 +85,7 @@
       })
 
       socket.on("selfmsg", (data) => {
-        content.innerHTML += ` <div class="ml-3 text-right"> ${data.msg}</div>
+        content.innerHTML += ` <div class="mr-3 text-right"> ${data.msg}</div>
         `
       })
 
