@@ -51,6 +51,24 @@ socket.on('update-connected-users', (connectedUsers, offlineUser) => {
   } catch (error) {
     console.log('not in public page cannot render connected online users')
   }
+
+  try {
+    if (offlineUser && (Number(localStorage.getItem('cid')) === 0)) {
+      const board = document.querySelector('.message-board')
+      board.insertAdjacentHTML('beforeend', `
+        <div class="user-status-wrapper d-flex justify-content-center py-2">
+      <div class="user-status badge badge-pill bg-gray font-weight-bold text-gray">${offlineUser} 下線</div>
+      `)
+
+      board.scroll({
+        top: board.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 function addUnreadNumber(className, addNumber) {
