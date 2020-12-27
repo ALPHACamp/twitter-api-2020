@@ -50,7 +50,7 @@ let onlineCount = 0
 
 io.on('connection', socket => {
   console.log('user connected...');
-
+  console.log('socket', socket.id)
   onlineCount++
 
   io.emit('online', onlineCount)
