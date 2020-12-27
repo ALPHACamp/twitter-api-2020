@@ -16,7 +16,6 @@ const passport = require('./config/passport');
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
-app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(session({ secret: 'itismyserect', resave: false, saveUninitialized: false }))
@@ -35,29 +34,44 @@ app.use((req, res, next) => {
 const db = require('./models')
 const User = db.User
 const Chat = db.Chat
+const Message = db.Message
+const helper = require('./_helpers')
 
 app.get('/chatroom', (req, res) => {
   res.render('index')
 })
 
-const server = require('http').Server(app)
-const io = require('socket.io')(server, {
+app.use(cors())
+const http = require('http').createServer(app)
+const io = require('socket.io')(http, {
   cors: {
-    origin: '*'
+    origin: ['http://localhost:8080', 'https://r05323045.github.io'],
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['my-custom-header'],
+    credentials: true
   }
 })
+
 let onlineCount = 0
 
 io.on('connection', socket => {
-  console.log('user connected...');
-  console.log('socket', socket.id)
+  console.log('user connected...')
+
   onlineCount++
 
   io.emit('online', onlineCount)
 
   socket.on('send message', (msg) => {
-    socket.broadcast.emit('msg', msg)
-    socket.emit('selfmsg', msg)
+    const USERID = msg.id
+    return Promise.all([
+      Message.create({
+        sender: USERID,
+        message: msg,
+        targetChannel: '0'
+      }),
+      socket.broadcast.emit('msg', msg),
+      socket.emit('msg', msg)
+    ])
   })
 
   socket.on('disconnect', () => {
@@ -86,7 +100,7 @@ io.on('connection', socket => {
   })
 })
 
-server.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
+http.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
 
 require('./routes')(app)
 
