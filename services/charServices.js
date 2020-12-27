@@ -2,6 +2,7 @@ const helpers = require('../_helpers')
 const db = require('../models')
 const User = db.User
 const Chat = db.Chat
+const Chatmessage = db.Chatmessage
 
 const chatServices = {
   postChatRoom: (req, res, callback) => {
@@ -27,11 +28,27 @@ const chatServices = {
   },
 
   getChatRoom: (req, res, callback) => {
-    const USERID = helpers.getUser(req).id
-    Chat.findAll({ include: [User] })
-      .then(chatUser => {
-        return callback(chatUser)
+    return Promise.all([
+      Chat.findAll({ include: [User] }),
+      Chatmessage.findAll({ include: [User] })
+    ])
+      .then(([chatUser, histroy]) => {
+        return callback({ chatUser, histroy })
       })
+  },
+
+  postMessage: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    const entryMsg = req.body.text.trim()
+    if (entryMsg) {
+      Chatmessage.create({
+        UserId: USERID,
+        text: entryMsg
+      }).then(msg => { return callback({ status: 'success', message: 'add in history' }) })
+    } else {
+      return callback({ status: 'error', message: 'Msg can not be blank' })
+    }
+
   }
 }
 

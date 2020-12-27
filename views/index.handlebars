@@ -43,6 +43,7 @@
       const content = document.getElementById("content")
 
       socket.on('online', (amount) => {
+        console.log(amount)
         online.innerText = amount;
       })
 
@@ -73,13 +74,18 @@
         formChild[1].value = ""
       })
 
-      socket.on('newclientconnect', function (data) {
+      socket.on('newclientlogin', function (data) {
         content.innerHTML += ` <div class="ml-3"> ${data.description} </div> `
 
       });
 
       socket.on("msg", (data) => {
         content.innerHTML += ` <div class="ml-3"> ${data.name} says :  ${data.msg}</div>
+        `
+      })
+
+      socket.on("selfmsg", (data) => {
+        content.innerHTML += ` <div class="mr-3 text-right"> ${data.msg}</div>
         `
       })
 
