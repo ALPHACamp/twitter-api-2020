@@ -232,6 +232,7 @@ img {
   padding: 0.8em;
   max-width: 60%;
   word-break: break-all;
+  width: fit-content;
 }
 
 .message-avatar {
@@ -251,7 +252,7 @@ img {
   color: white;
   position: relative;
   right:0;
-  width: 60%;
+  max-width: 60%;
 }
 
 /* message-board: input */
