@@ -241,6 +241,10 @@ img {
   bottom: 1.5rem;
 }
 
+.my-message-wrapper .message {
+  width: calc( 100% - 40px - 16px);
+}
+
 .my-message-text {
   border-radius: 1.5em 1.5em 0 1.5em;
   background:#ff6600;
