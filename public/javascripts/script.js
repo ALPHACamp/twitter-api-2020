@@ -117,6 +117,11 @@ socket.on('public-message', (publicPackets, readTime) => {
       `)
       }
     }
+
+    publicBoard.scroll({
+      top: publicBoard.scrollHeight,
+      behavior: 'smooth'
+    })
   }
 })
 
@@ -211,6 +216,10 @@ socket.on('private-message', (privatePackets) => {
       `)
       }
     }
+    privateBoard.scroll({
+      top: privateBoard.scrollHeight,
+      behavior: 'smooth'
+    })
   }
 })
 
