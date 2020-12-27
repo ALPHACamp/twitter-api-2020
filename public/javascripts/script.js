@@ -197,6 +197,11 @@ function checkShowFlag(packetsLength, firstPacketChannelId) {
 socket.on('private-message', (privatePackets) => {
   console.log('private: ', privatePackets)
 
+  console.log(localStorage.getItem('cid'))
+  if (Number(localStorage.getItem('cid')) === 0 || Number(localStorage.getItem('cid')) === -1) {
+    document.querySelector('#left-column-icon-private').className = 'new-status-light'
+  }
+
   const showFlag = checkShowFlag(privatePackets.length, privatePackets[0].ChannelId)
   const messageView = document.querySelector(`.message-view-${privatePackets[0].ChannelId}`)
   if (privatePackets.length === 1) {
