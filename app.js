@@ -63,7 +63,7 @@ io.on('connection', socket => {
     const USERID = msg.id
     return Promise.all([
       Message.create({
-        sender: USERID,
+        UserId: USERID,
         message: msg.message,
         targetChannel: '0'
       })
