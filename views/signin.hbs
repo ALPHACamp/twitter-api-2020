@@ -18,24 +18,25 @@
     </div>
     <div class="title">登入 Alphitter Chat</div>
   </div>
-  <form>
+  <form id="sign-in-form">
     <div class="input-container">
       <div class="input-title">帳號</div>
       <label for="Email" class="form-label"></label>
-      <input v-model="email" type="email" class="form-control" required autofocus aria-describedby="emailHelp" />
+      <input v-model="email" type="email" class="form-control" name="email" required autofocus
+        aria-describedby="emailHelp" />
       <div id="emailHelp" class="form-text"></div>
     </div>
     <div class="input-container">
       <div class="input-title">密碼</div>
 
       <label for="password" class="form-label" aria-placeholder="密碼"></label>
-      <input v-model="password" type="password" class="form-control" id="exampleInputPassword1" />
+      <input v-model="password" name="password" type="password" class="form-control" id="exampleInputPassword1"
+        required />
     </div>
+    <button type="submit" class="btn btn btn-submit" id="btn-submit">
+      登入
+    </button>
   </form>
-  <button type="submit" class="btn btn btn-submit" id="btn-submit">
-    登入
-  </button>
-
   <div class="pages-link">
     <a href="https://sean-yu-pohsiang.github.io/simple-twitter-frontend-2020/#/signin" class="link" to="/admin/signin">
       登入 Alphitter</a>

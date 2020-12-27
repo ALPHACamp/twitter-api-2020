@@ -29,6 +29,10 @@ router.get('/signin', (req, res) => {
   res.render('signin', { page: 'sign-in' })
 })
 
+router.post('/signin', (req, res) => {
+  const { email, password } = req.body
+})
+
 router.get('/', authenticated, userAuthenticated, (req, res) => {
   res.render('public', { page: 'public-chat' })
 })
