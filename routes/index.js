@@ -5,7 +5,8 @@ const chat = require('./chat.js')
 
 router.use('/api', apis)
 router.use('/chat', chat)
-router.get('/', (req, res) => res.send('Hello World!'))
+
+router.get('/', (req, res) => res.redirect('/chat'))
 
 module.exports = router
 
