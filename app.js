@@ -41,11 +41,7 @@ app.get('/chatroom', (req, res) => {
 })
 
 const server = require('http').Server(app)
-const io = require('socket.io')(server, {
-  cors: {
-    origin: '*'
-  }
-})
+const io = require('socket.io')(server)
 let onlineCount = 0
 
 io.on('connection', socket => {
