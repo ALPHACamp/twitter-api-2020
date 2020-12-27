@@ -34,6 +34,8 @@ app.use((req, res, next) => {
 const db = require('./models')
 const User = db.User
 const Chat = db.Chat
+const Message = db.Message
+const helper = require('./_helpers')
 
 app.get('/chatroom', (req, res) => {
   res.render('index')
@@ -60,6 +62,12 @@ io.on('connection', socket => {
   io.emit('online', onlineCount)
 
   socket.on('send message', (msg) => {
+    const USERID = msg.id
+    Message.create({
+      sender: USERID,
+      message: msg,
+      targetChannel: '0'
+    })
     socket.broadcast.emit('msg', msg)
     socket.emit('msg', msg)
   })
