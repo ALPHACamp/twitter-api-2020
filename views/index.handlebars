@@ -83,6 +83,11 @@
         `
       })
 
+      socket.on("selfmsg", (data) => {
+        content.innerHTML += ` <div class="ml-3 text-right"> ${data.msg}</div>
+        `
+      })
+
       socket.on('exit', () => {
         content.innerHTML += ` <div class="ml-3"> USER EXIT </div> `
       })

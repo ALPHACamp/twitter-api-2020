@@ -13,7 +13,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const port = process.env.PORT || 3000
 const passport = require('./config/passport');
-const { Model } = require('sequelize');
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
@@ -43,6 +42,7 @@ app.get('/chatroom', (req, res) => {
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
 let onlineCount = 0
+
 io.on('connection', socket => {
   console.log('user connected...');
 
@@ -51,7 +51,7 @@ io.on('connection', socket => {
 
   io.emit('online', onlineCount)
   socket.on('send message', (msg) => {
-    io.emit('msg', msg);
+    socket.broadcast.emit('msg', msg)
   })
 
   socket.on('disconnect', () => {
@@ -61,9 +61,10 @@ io.on('connection', socket => {
     io.sockets.emit('exit', onlineCount + ' user leave');
   })
 
-  socket.on('chatting', (user) => {
+  socket.on('chatting', (user, msg) => {
     console.log('user', user)
     socket.broadcast.emit('newclientconnect', { description: `${user} Login` })
+    io.emit('selfmsg', msg);
   })
 
 })
