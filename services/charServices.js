@@ -33,6 +33,7 @@ const chatServices = {
       Chatmessage.findAll({ include: [User] })
     ])
       .then(([chatUser, histroy]) => {
+
         return callback({ chatUser, histroy })
       })
   },
