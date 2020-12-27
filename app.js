@@ -13,7 +13,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const port = process.env.PORT || 3000
 const passport = require('./config/passport');
-const { Model } = require('sequelize');
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
@@ -52,12 +51,14 @@ const io = require('socket.io')(http, {
 app.use(cors())
 
 let onlineCount = 0
+
 io.on('connection', socket => {
   console.log('user connected...')
 
   onlineCount++
 
   io.emit('online', onlineCount)
+
   socket.on('send message', (msg) => {
     socket.broadcast.emit('msg', msg)
     socket.emit('msg', msg)

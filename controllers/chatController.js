@@ -15,7 +15,12 @@ const chatController = {
     chatServices.getChatRoom(req, res, data => {
       return res.json(data)
     })
-  }
+  },
+  postMessage: (req, res) => {
+    chatServices.postMessage(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 module.exports = chatController
