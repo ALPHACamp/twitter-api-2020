@@ -4,6 +4,8 @@ const { Op } = Sequelize
 const userSelectedFields = ['id', 'account', 'name', 'avatar']
 const onlineUsers = {}
 
+console.log('....... socket on')
+
 function authenticated(socket, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) return next(error)
