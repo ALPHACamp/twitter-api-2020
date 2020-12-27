@@ -8,6 +8,16 @@ const cors = require('cors')
 const app = express()
 const PORT = process.env.PORT
 
+//integrate socket server to main server
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "*",
+    credentials: true
+  }
+})
+require('./socket/socketServer')(io)
+
 require('./config/passport')
 const routes = require('./routes/index')
 
@@ -21,6 +31,4 @@ app.use((err, req, res, next) => {
   return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
 })
 
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
-
-module.exports = app
+server.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
