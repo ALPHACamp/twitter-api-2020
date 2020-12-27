@@ -74,7 +74,7 @@
         formChild[1].value = ""
       })
 
-      socket.on('newclientconnect', function (data) {
+      socket.on('newclientlogin', function (data) {
         content.innerHTML += ` <div class="ml-3"> ${data.description} </div> `
 
       });
