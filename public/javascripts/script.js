@@ -40,11 +40,17 @@ socket.on('update-connected-users', (connectedUsers, offlineUser) => {
 // get message from public message
 socket.on('public-message', (publicPackets) => {
   // console.log(publicPackets)
-  const userAccount = document.querySelector('#hidden-user-info').className
-  const publicBoard = document.querySelector('.message-board')
-  for (const packet of publicPackets) {
-    if (packet.account !== userAccount) {
-      publicBoard.insertAdjacentHTML('beforeend', `
+
+  const showFlag = checkShowFlag(publicPackets.length, 0)
+  console.log('checkShowFlag: ', showFlag)
+
+  if (showFlag) {
+    const userAccount = document.querySelector('#hidden-user-info').className
+    console.log('showFlag is true is userAccount: ', userAccount)
+    const publicBoard = document.querySelector('.message-board')
+    for (const packet of publicPackets) {
+      if (packet.account !== userAccount) {
+        publicBoard.insertAdjacentHTML('beforeend', `
         <div class="message-wrapper d-flex align-items-end px-3 py-2">
           <img class="message-avatar" src="${packet.avatar}" alt="">
           <div class="message">
@@ -54,8 +60,8 @@ socket.on('public-message', (publicPackets) => {
           </div>
         </div>
       `)
-    } else {
-      publicBoard.insertAdjacentHTML('beforeend', `
+      } else {
+        publicBoard.insertAdjacentHTML('beforeend', `
         <div class="my-message-wrapper d-flex justify-content-end px-3 py-1">
           <div class="message w-100">
             <div class="d-flex justify-content-end">
@@ -65,6 +71,7 @@ socket.on('public-message', (publicPackets) => {
           </div>
         </div>
       `)
+      }
     }
   }
 })
@@ -112,14 +119,18 @@ socket.on('open-private-rooms', sortedRoomDetails => {
   document.querySelector('.user-panel').innerHTML = privateChatroom
 })
 
+function checkShowFlag(packetsLength, firstPacketChannelId) {
+  if (packetsLength !== 1) return true
+  if (packetsLength === 1 && Number(localStorage.getItem('cid')) === firstPacketChannelId) return true
+
+  return false
+}
+
 // get message from private message
 socket.on('private-message', (privatePackets) => {
   console.log(privatePackets)
-  let showFlag = false
 
-  if (privatePackets.length === 1 && Number(localStorage.getItem('cid')) === privatePackets[0].ChannelId) showFlag = true
-
-  if (privatePackets.length !== 1) showFlag = true
+  const showFlag = checkShowFlag(privatePackets.length, privatePackets[0].ChannelId)
 
   if (showFlag) {
     const userAccount = document.querySelector('#hidden-user-info').className
@@ -164,7 +175,7 @@ try {
 
   // initialize private room
   socket.emit('open-private-rooms', new Date().getTime())
-  localStorage.setItem('cid', '0')
+  localStorage.setItem('cid', '-1')
 
   // change another chatroom
   const privateUserPanel = document.querySelector('.user-panel')

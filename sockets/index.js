@@ -4,8 +4,6 @@ const { Op } = Sequelize
 const userSelectedFields = ['id', 'account', 'name', 'avatar']
 const onlineUsers = {}
 
-console.log('....... socket on')
-
 function authenticated(socket, next) {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) return next(error)
@@ -46,7 +44,7 @@ async function broadcastPublicPrevMsgs(socket) {
       nest: true,
       include: [{ model: User, attributes: userSelectedFields }],
       attributes: { exclude: ['updatedAt'] },
-      order: [[sequelize.literal('createdAt'), 'DESC']],
+      order: [[sequelize.literal('createdAt'), 'ASC']],
     })
 
     resHistory = []

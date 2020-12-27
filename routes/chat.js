@@ -9,9 +9,5 @@ router.get('/private', (req, res) => {
   res.render('private', { page: 'private-chat' })
 })
 
-router.get('/:userId', (req, res) => {
-  res.render('private', { page: 'private-chat' })
-})
-
 
 module.exports = router
