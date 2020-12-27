@@ -63,13 +63,15 @@ io.on('connection', socket => {
 
   socket.on('send message', (msg) => {
     const USERID = msg.id
-    Message.create({
-      sender: USERID,
-      message: msg,
-      targetChannel: '0'
-    })
-    socket.broadcast.emit('msg', msg)
-    socket.emit('msg', msg)
+    return Promise.all([
+      Message.create({
+        sender: USERID,
+        message: msg,
+        targetChannel: '0'
+      }),
+      socket.broadcast.emit('msg', msg),
+      socket.emit('msg', msg)
+    ])
   })
 
   socket.on('disconnect', () => {
