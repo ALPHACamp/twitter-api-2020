@@ -2,6 +2,9 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 const helpers = require('../_helpers.js')
+const { User } = require('../models')
+const bcrypt = require('bcryptjs')
+
 
 // wrap passport authenticate method to pass mocha test
 function authenticated(req, res, next) {
@@ -29,8 +32,25 @@ router.get('/signin', (req, res) => {
   res.render('signin', { page: 'sign-in' })
 })
 
-router.post('/signin', (req, res) => {
-  const { email, password } = req.body
+router.post('/signin', async (req, res, next) => {
+  try {
+    const { email, password } = req.body
+    const user = await User.findOne({ where: { email }, raw: true })
+
+    if (user.role !== null || !bcrypt.compareSync(password, user.password)) {
+      return res.redirect('/signin')
+    }
+
+    return res.json({
+      status: 'success',
+      message: '成功登入',
+      token: jwt.sign({ id: user.id }, process.env.JWT_SECRET),
+      user: { id: user.id, account: user.account, name: user.name, email: user.email, role: user.role }
+    })
+
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.get('/', authenticated, userAuthenticated, (req, res) => {

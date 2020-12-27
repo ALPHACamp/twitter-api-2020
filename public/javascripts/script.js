@@ -4,6 +4,10 @@ try {
   socket = io({
     query: { token: localStorage.getItem('token') }
   })
+  console.log('socket:', socket)
+  if (socket.connected) {
+
+  }
   console.log('Get token on localstorage')
 } catch (error) {
   alert('暫時無網路連線！')
