@@ -180,12 +180,17 @@ socket.on('private-message', (privatePackets) => {
   console.log('private: ', privatePackets)
 
   const showFlag = checkShowFlag(privatePackets.length, privatePackets[0].ChannelId)
+  const messageView = document.querySelector(`.message-view-${privatePackets[0].ChannelId}`)
   if (privatePackets.length === 1) {
-    document.querySelector(`.message-view-${privatePackets[0].ChannelId}`).innerText = privatePackets[0].message
+    messageView.innerText = privatePackets[0].message
+    messageView.classList.add('unread-message')
   }
 
   if (showFlag) {
     socket.emit('message-read-timestamp', localStorage.getItem('cid'), new Date().getTime())
+
+    messageView.classList.remove('unread-message')
+
     const userAccount = document.querySelector('#hidden-user-info').className
     console.log('userAccount:', userAccount)
     const privateBoard = document.querySelector('.message-board')

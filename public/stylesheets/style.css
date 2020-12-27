@@ -308,3 +308,8 @@ img {
 .hidden-component {
   visibility:hidden
 }
+
+.unread-message {
+  color: blue;
+  font-weight: bold;
+}
