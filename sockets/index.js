@@ -15,7 +15,7 @@ function authenticated(socket, next) {
   })(socket.request, {}, next)
 }
 
-async function getConnectedUsers(io, onlineUsers, authUser = null, offlineUser = null) {
+async function getConnectedUsers(io, onlineUsers, offlineUser = null) {
   try {
     // cause we need to update for all online users
     // frontend will get connectedUsers data dynamically
@@ -31,7 +31,7 @@ async function getConnectedUsers(io, onlineUsers, authUser = null, offlineUser =
     connectedUsers.forEach((user, i) => {
       user.sckId = onlineUsers[user.id].map(socket => socket.id)
     })
-    await io.to('public room').emit('update-connected-users', connectedUsers, authUser.account, offlineUser)
+    await io.to('public room').emit('update-connected-users', connectedUsers, offlineUser)
   } catch (error) {
     console.log(error)
     await io.emit('error', '更新在線使用者時發生錯誤')
@@ -67,12 +67,12 @@ async function broadcastPublicPrevMsgs(socket) {
   }
 }
 
-async function broadcastPrivatePrevMsgs(socket) {
+async function broadcastPrivatePrevMsgs(socket, channelId) {
   try {
     const history = await Chatprivate.findAll({
       raw: true,
       nest: true,
-      where: { ChannelId: 1 },
+      where: { ChannelId: channelId },
       include: [{ model: User, attributes: userSelectedFields }],
       attributes: { exclude: ['updatedAt'] },
       order: [[sequelize.literal('createdAt'), 'ASC']],
@@ -86,6 +86,10 @@ async function broadcastPrivatePrevMsgs(socket) {
       res.timestamp = element.createdAt.getTime()
       resHistory.push(res)
     })
+
+    console.log('******************* private!! ******')
+    console.log(resHistory)
+
     socket.emit('private-message', resHistory)
   } catch (error) {
     console.error('Error on broadcastPrivatePrevMsgs: ', error)
@@ -167,7 +171,19 @@ async function getMessageFromPrivate(io, socket, sender, recipientId, message, t
     // console.log('>>>>', onlineUsers[Number(recipientId)][0].adapter)
 
     await Chatprivate.create({ ChannelId: roomId, UserId: sender.id, message: message })
-    await io.to(`room ${roomId}`).emit('private-message', sender, message, timestamp, roomId, roomUsers)
+    // await io.to(`room ${roomId}`).emit('private-message', sender, message, timestamp, roomId, roomUsers)
+
+    const bufferMessage = [{
+      account: sender.account,
+      name: sender.name,
+      avatar: sender.avatar,
+      ChannelId: roomId,
+      UserId: sender.id,
+      message: message,
+      timestamp: timestamp
+    }]
+
+    await io.to(`room ${roomId}`).emit('private-message', bufferMessage)
   } catch (error) {
     console.log(error)
     socket.emit('error', '發生錯誤，請稍後再試')
@@ -196,7 +212,7 @@ async function initPublicRoom(socket, sender, timestamp) {
   updateRead(sender.id, 0, timestamp)
 }
 
-async function initPrivateRoom(socket, sender, timestamp) {
+async function initPrivateRooms(socket, sender, timestamp) {
   const dataOne = await sequelize.query(`
     SELECT Channels.id AS channelId, Users.id AS uid, Users.name, Users.avatar, Users.account 
       FROM Channels 
@@ -212,8 +228,8 @@ async function initPrivateRoom(socket, sender, timestamp) {
   `, { type: sequelize.QueryTypes.SELECT, replacements: { userId: sender.id } })
 
   const channelDetails = dataOne.concat(dataTwo)
-  const channelIds = channelDetails.map(element => element.ChannelId)
-  const messages = Chatprivate.findAll({
+  const channelIds = channelDetails.map(element => element.channelId)
+  const messages = await Chatprivate.findAll({
     where: { ChannelId: channelIds },
     attributes: { exclude: ['updatedAt'] },
     order: [
@@ -224,7 +240,7 @@ async function initPrivateRoom(socket, sender, timestamp) {
 
   const sortedRoomDetails = {}
   messages.forEach(msg => {
-    sortedRoomDetails[msg.ChannelId] = { message: msg.message, time: msg.createdAt }
+    sortedRoomDetails[msg.ChannelId] = { message: msg.message, time: msg.createdAt.getTime() }
   })
 
   channelDetails.forEach(element => {
@@ -237,9 +253,15 @@ async function initPrivateRoom(socket, sender, timestamp) {
       ...sortedRoomDetails[element.channelId]
     }
   })
-
+  console.log('.......send........')
   socket.emit('open-private-rooms', Object.values(sortedRoomDetails))
 }
+
+async function initPrivateOneRoom(socket, userId, channelId, timestamp) {
+  broadcastPrivatePrevMsgs(socket, channelId)
+  updateRead(userId, channelId, timestamp)
+}
+
 
 module.exports = async (io) => {
   io.use(authenticated)
@@ -264,15 +286,14 @@ module.exports = async (io) => {
     // console.log('>>>>', io.sockets.adapter)
 
     // broadcast: getNewConnection
-    getConnectedUsers(io, onlineUsers, authUser = sender)
+    getConnectedUsers(io, onlineUsers)
 
     // personal: public chatroom initialization
     socket.on('open-public-room', async (timestamp) => initPublicRoom(socket, sender, timestamp))
     // personal: private chatroom initialization
-    socket.on('open-private-rooms', async (timestamp) => initPrivateRoom(socket, sender, timestamp))
+    socket.on('open-private-rooms', async (timestamp) => initPrivateRooms(socket, sender, timestamp))
 
-    socket.on('open-private-room', async (channelId, timestamp) => updateRead(sender.id, channelId, timestamp))
-    socket.on('open-private-room', async (channelId, timestamp) => broadcastPrivatePrevMsgs())
+    socket.on('open-private-room', async (channelId, timestamp) => initPrivateOneRoom(socket, sender.id, channelId, timestamp))
 
     // broadcast: public chatroom get message
     socket.on('public-message', async (message, timestamp) => getMessagesFromPublic(io, message, timestamp, sender))

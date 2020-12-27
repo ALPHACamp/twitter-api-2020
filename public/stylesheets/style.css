@@ -300,3 +300,6 @@ img {
   text-overflow: ellipsis;
 }
 
+.hidden-component {
+  visibility:hidden
+}

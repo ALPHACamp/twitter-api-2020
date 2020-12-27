@@ -9,20 +9,20 @@ try {
   alert('暫時無網路連線！')
 }
 
-// update online users
-socket.on('update-connected-users', (connectedUsers, authUserAccount, offlineUser) => {
-  console.log('>>> ', connectedUsers, authUserAccount)
+// update online users for public
+socket.on('update-connected-users', (connectedUsers, offlineUser) => {
+  console.log('>>> ', connectedUsers)
 
-  // IF WE NEED TO EXCLUDE OURSELF, THEN UNCOMMENT THE FOLLOWING CODE
-  // connectedUsers.forEach((element, i) => {
-  //   console.log('**', element)
-  //   if (element.sckId.includes(socket.id)) connectedUsers.splice(i, 1)
-  // })
+  let authUser;
+  connectedUsers.forEach((element, i) => {
+    if (element.sckId.includes(socket.id)) authUser = element
+  })
+  document.querySelector('#hidden-user-info').className = authUser.account
 
-  document.querySelector('#connected-users-count').innerHTML = connectedUsers.length
-  document.querySelector('#hidden-user-info').className = authUserAccount
+  try {
+    document.querySelector('#connected-users-count').innerHTML = connectedUsers.length
 
-  const onlineUserTabs = connectedUsers.map(user => `
+    const onlineUserTabs = connectedUsers.map(user => `
     <div class="pr-1 py-2 d-flex align-items-center connected-user">
       <img class="user-avatar" src="${user.avatar}" alt="">
       <span>
@@ -31,15 +31,19 @@ socket.on('update-connected-users', (connectedUsers, authUserAccount, offlineUse
       </span>
     </div>
   `).join('')
-  document.querySelector('.user-panel').innerHTML = onlineUserTabs
+    document.querySelector('.user-panel').innerHTML = onlineUserTabs
+  } catch (error) {
+    console.log('not in public page cannot render connected online users')
+  }
+
 })
 
 // get message from public message
-socket.on('public-message', (public_packets) => {
-  // console.log(public_packets)
+socket.on('public-message', (publicPackets) => {
+  // console.log(publicPackets)
   const userAccount = document.querySelector('#hidden-user-info').className
   const publicBoard = document.querySelector('.message-board')
-  for (const packet of public_packets) {
+  for (const packet of publicPackets) {
     if (packet.account !== userAccount) {
       publicBoard.insertAdjacentHTML('beforeend', `
         <div class="message-wrapper d-flex align-items-end px-3 py-2">
@@ -68,103 +72,156 @@ socket.on('public-message', (public_packets) => {
 
 // public page
 try {
+  const detector = document.querySelector('.public-middle-column')
+  if (!detector) throw Error('not in public page')
+
+  const publicMessageBtn = document.querySelector('.send-message-btn')
   console.log('Detect in public page...')
 
   // initialize public room
   socket.emit('open-public-room', new Date().getTime())
+  localStorage.setItem('cid', '0')
 
-  const publicMessageBtn = document.querySelector('.send-message-btn')
   publicMessageBtn.addEventListener('click', (e) => {
     e.preventDefault()
 
     const message = document.querySelector('input[name="message"]').value
-    // console.log('[Send message] ', message)
     socket.emit('public-message', message, new Date().getTime())
-    // console.log(e.target)
     document.querySelector('input[name="message"]').value = ''
   })
 } catch (error) {
   console.log(error)
 }
 
-
-
-
-
-
-// const publicMessage = document.querySelector('.public-chat-room form')
-const privateMessage = document.querySelector('.private-chat-rooms form')
-// const publicBoard = document.querySelector('.public-chat-room ul')
-
-
-// initialize public message
-// publicMessage.addEventListener('DOMContentLoaded', (e) => {
-//   console.log('Here!')
-//   socket.emit('open-public-room', new Date().getTime())
-// })
-
-// initialize private message
-privateMessage.addEventListener('DOMContentLoaded', (e) => {
-  socket.emit('open-private-rooms', new Date().getTime())
-})
-
 socket.on('open-private-rooms', sortedRoomDetails => {
   console.log('[open-private-rooms][Get message] ', sortedRoomDetails)
-})
-
-// for handlebars to handle click private room
-function privateRoomOnClick(channelId) {
-  socket.emit('open-private-room', channelId, new Date().getTime())
-}
-
-
-
-//私訊
-privateMessage.addEventListener('submit', (e) => {
-  e.preventDefault()
-  const formData = new FormData(privateMessage)
-  const recipientId = formData.get('recipient')
-  const message = formData.get('message')
-  socket.emit('private-message', recipientId, message, new Date().getTime())
-  e.target.querySelector('input[name=message]').value = ''
-  console.log(`PM ${recipientId}: ${message} (${new Date().getTime()})`)
-  return false
+  const privateChatroom = sortedRoomDetails.map(room => `
+      <div id="hidden-channel-info" data-userid="${room.uid}" data-channel="${room.channelId}" style="cursor: pointer">
+        <div class="py-2 d-flex align-items-center connected-user">
+          <img class="user-avatar flex-shrink-0" src="${room.avatar}" alt="">
+            <div class="user-wrapper flex-shrink-1">
+              <div>
+                <strong class="private-user-name">${room.name}</strong>
+                <span class="text-gray private-user-account">@${room.account}</span>
+                <span class="text-gray">${moment(room.time).fromNow()}</span>
+              </div>
+              <div class="message-view">${room.message}</div>
+            </div>
+        </div>
+      </div>
+  `).join('')
+  document.querySelector('.user-panel').innerHTML = privateChatroom
 })
 
 // get message from private message
-socket.on('private-message', (sender, message, timestamp, roomId, roomUsers) => {
-  console.log(`receive PM on room ${roomId} from ${sender.name} : ${message} (${timestamp})`)
+socket.on('private-message', (privatePackets) => {
+  console.log(privatePackets)
+  let showFlag = false
 
-  let selfUser;
-  let otherUser;
-  roomUsers.forEach(user => {
-    if (user.socketId.includes(socket.id)) selfUser = user
-    else otherUser = user
-  })
+  if (privatePackets.length === 1 && Number(localStorage.getItem('cid')) === privatePackets[0].ChannelId) showFlag = true
 
-  let chatroomName = otherUser.name
-  let privateRoom = document.querySelector(`#at-room-${roomId}`)
-  if (!privateRoom) {
-    document.querySelector('.private-chat-rooms .boards').insertAdjacentHTML('beforeend', `
-      <div class="col private-chat-room" id="at-room-${roomId}">
-        <h4>at: ${chatroomName}</h4>
-        <ul class="list-group board">
-          <li class="list-group-item">
-            <strong class="mr-2">${sender.name}:</strong>${message}            
-            <small class="ml-2">${moment(timestamp).fromNow()}</small>
-          </li>            
-        </ul>
+  if (privatePackets.length !== 1) showFlag = true
+
+  if (showFlag) {
+    const userAccount = document.querySelector('#hidden-user-info').className
+    console.log('userAccount:', userAccount)
+    const privateBoard = document.querySelector('.message-board')
+    for (const packet of privatePackets) {
+      if (packet.account !== userAccount) {
+        privateBoard.insertAdjacentHTML('beforeend', `
+        <div class="message-wrapper d-flex align-items-end px-3 py-2">
+          <img class="message-avatar" src="${packet.avatar}" alt="">
+          <div class="message">
+            <div class="message-text bg-gray">
+              ${packet.message}
+            </div>
+            <div class="message-time text-gray">${moment(packet.timestamp).fromNow()}</div>
+          </div>
+        </div>
+      `)
+      } else {
+        privateBoard.insertAdjacentHTML('beforeend', `
+        <div class="my-message-wrapper d-flex justify-content-end px-3 py-1">
+          <div class="message w-100">
+            <div class="d-flex justify-content-end">
+              <div class="message-text my-message-text">${packet.message}</div>
+            </div>
+            <div class="message-time text-right text-gray">${moment(packet.timestamp).fromNow()}</div>
+          </div>
+        </div>
       </div>
-    `)
-  } else {
-    privateRoom.querySelector('.board').insertAdjacentHTML('beforeend', `
-      <li class="list-group-item">
-        <strong class="mr-2">${sender.name}:</strong>${message}
-        <small class="ml-2">${moment(timestamp).fromNow()}</small> 
-      </li>
-  `)
+      `)
+      }
+    }
   }
 })
+
+// private page
+try {
+  const detector = document.querySelector('.private-middle-column')
+  if (!detector) throw Error('not in private page')
+
+  console.log('Detect in private page...')
+
+  // initialize private room
+  socket.emit('open-private-rooms', new Date().getTime())
+  localStorage.setItem('cid', '0')
+
+  // change another chatroom
+  const privateUserPanel = document.querySelector('.user-panel')
+  privateUserPanel.addEventListener('click', (event) => {
+    document.querySelector('.message-board').innerText = ''
+
+    document.querySelector('.message-form').classList.remove('hidden-component')
+
+    let target = event.target
+    while (target.id !== 'hidden-channel-info') {
+      target = target.parentElement
+    }
+
+    const channelId = target.dataset.channel
+    const recipientId = target.dataset.userid
+
+    document.querySelector('.private-room-title-userid').innerText = recipientId
+    document.querySelector('.private-room-title-username').innerText = target.querySelector('.private-user-name').innerText
+    document.querySelector('.private-room-title-account').innerText = target.querySelector('.private-user-account').innerText
+
+
+    console.log('>>> channel: ', channelId)
+    localStorage.setItem('cid', channelId)
+    // for handlebars to handle click private room
+    socket.emit('open-private-room', channelId, new Date().getTime())
+  })
+
+  const privateMessageBtn = document.querySelector('.send-message-btn')
+  privateMessageBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+
+    const message = document.querySelector('input[name="message"]').value
+    const recipientId = document.querySelector('.private-room-title-userid').innerText
+
+    console.log('[Send out private] ', recipientId, message)
+    socket.emit('private-message', recipientId, message, new Date().getTime())
+    document.querySelector('input[name="message"]').value = ''
+  })
+
+} catch (error) {
+  console.log(error)
+}
+
+
+// privateMessage.addEventListener('submit', (e) => {
+//   e.preventDefault()
+//   const formData = new FormData(privateMessage)
+//   const recipientId = formData.get('recipient')
+//   const message = formData.get('message')
+//   socket.emit('private-message', recipientId, message, new Date().getTime())
+//   e.target.querySelector('input[name=message]').value = ''
+//   console.log(`PM ${recipientId}: ${message} (${new Date().getTime()})`)
+//   return false
+// })
+
+
 
 //error handling
 //連線失敗(例如:未授權)

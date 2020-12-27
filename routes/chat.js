@@ -6,7 +6,7 @@ router.get('/', (req, res) => {
 })
 
 router.get('/private', (req, res) => {
-  res.render('private', { page: 'private-chat', home: true })
+  res.render('private', { page: 'private-chat' })
 })
 
 router.get('/:userId', (req, res) => {
