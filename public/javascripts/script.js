@@ -97,7 +97,7 @@ socket.on('public-message', (publicPackets, readTime) => {
         publicBoard.insertAdjacentHTML('beforeend', `
         <div class="message-wrapper d-flex align-items-end px-3 py-2">
           <img class="message-avatar" src="${packet.avatar}" alt="">
-          <div class="message">
+          <div class="message flex-grow-1">
             <div class="message-text bg-gray">${packet.message}
             </div>
             <div class="message-time text-gray">${moment(packet.timestamp).fromNow()}</div>
@@ -107,7 +107,7 @@ socket.on('public-message', (publicPackets, readTime) => {
       } else {
         publicBoard.insertAdjacentHTML('beforeend', `
         <div class="my-message-wrapper d-flex justify-content-end px-3 py-1">
-          <div class="message w-100">
+          <div class="message">
             <div class="d-flex justify-content-end">
               <div class="message-text my-message-text">${packet.message}</div>
             </div>
@@ -189,7 +189,7 @@ socket.on('private-message', (privatePackets) => {
         privateBoard.insertAdjacentHTML('beforeend', `
         <div class="message-wrapper d-flex align-items-end px-3 py-2">
           <img class="message-avatar" src="${packet.avatar}" alt="">
-          <div class="message">
+          <div class="message flex-grow-1">
             <div class="message-text bg-gray">
               ${packet.message}
             </div>
@@ -200,7 +200,7 @@ socket.on('private-message', (privatePackets) => {
       } else {
         privateBoard.insertAdjacentHTML('beforeend', `
         <div class="my-message-wrapper d-flex justify-content-end px-3 py-1">
-          <div class="message w-100">
+          <div class="message">
             <div class="d-flex justify-content-end">
               <div class="message-text my-message-text">${packet.message}</div>
             </div>
