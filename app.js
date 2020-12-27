@@ -39,6 +39,7 @@ app.get('/chatroom', (req, res) => {
   res.render('index')
 })
 
+app.use(cors())
 const http = require('http').createServer(app)
 const io = require('socket.io')(http, {
   cors: {
@@ -48,7 +49,6 @@ const io = require('socket.io')(http, {
     credentials: true
   }
 })
-app.use(cors())
 
 let onlineCount = 0
 
