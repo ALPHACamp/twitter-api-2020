@@ -59,34 +59,34 @@ io.on('connection', socket => {
 
   onlineCount++
 
-  io.emit('online', onlineCount)
-
   socket.on('send message', (msg) => {
     const USERID = msg.id
     return Promise.all([
       Message.create({
         sender: USERID,
-        message: msg,
+        message: msg.message,
         targetChannel: '0'
-      }),
-      socket.broadcast.emit('msg', msg),
-      socket.emit('msg', msg)
+      })
     ])
-  })
-
-  socket.on('disconnect', () => {
-    console.log('user disconnected')
-    onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
-    io.emit('online', onlineCount)
-    io.sockets.emit('exit', onlineCount + ' user leave');
+      .then(
+        socket.broadcast.emit('msg', msg),
+        socket.emit('msg', msg)
+      ).catch(error => {
+        console.log(error)
+      })
   })
 
   socket.on('chatting', (user) => {
-    const USERID = user.id
-    User.findByPk(USERID)
-      .then(user => {
-        Chat.findOne({ where: { UserId: USERID } })
-          .then(chat => {
+    socket.broadcast.emit('newclientlogin', { ...user, message: `${user.name} 上線` })
+    User.findByPk(user.id)
+      .then((user) => {
+        const USERID = user.id
+        return Promise.all([
+          Chat.findAll({ include: [User] }),
+          Chat.findOne({ where: { UserId: USERID } })
+        ])
+          .then(([chatters, chat]) => {
+            socket.emit('userOnline', chatters)
             if (!chat) {
               Chat.create({
                 UserId: USERID
@@ -94,9 +94,16 @@ io.on('connection', socket => {
             } else {
               console.log('使用者已經在線上')
             }
+          }).catch((err) => {
+            console.log(err)
           })
       })
-    socket.broadcast.emit('newclientlogin', `${user.name} 上線`)
+  })
+
+  socket.on('leave', (id) => {
+    console.log('user disconnected')
+    onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
+    io.sockets.emit('exit', onlineCount + ' user leave')
   })
 })
 
