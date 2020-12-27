@@ -18,7 +18,7 @@ const repliesAndLikeCount = () => {
 }
 
 const isLiked = (req) => {
-  return [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${req.params.id} AND l.TweetId = Tweet.id)`), 'isLiked']
+  return [sequelize.literal(`EXISTS(SELECT * FROM LIKES AS l WHERE l.UserId = ${helpers.getUser(req).id} AND l.TweetId = Tweet.id)`), 'isLiked']
 }
 
 const tagIsFollowed = (req, user) => {
