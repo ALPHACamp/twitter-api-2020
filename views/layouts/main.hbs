@@ -13,9 +13,11 @@
 </head>
 
 <body>
-
-  <div class="container-fluid" id="chat-room">
+  {{> signin}}
+  <div class="container-fluid hide" id="chat-room">
     <div class="row">
+      {{#if (eq page 'sign-in')}}
+      {{else}}
       <nav class="d-flex flex-column col-3 col-md-2 border-end no-gutters">
         <div class="logo mt-3 mb-5">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -108,6 +110,7 @@
           </span>
         </button>
       </nav>
+      {{/if}}
       <div id="hidden-user-info" class=""></div>
       {{{body}}}
     </div>
@@ -126,8 +129,12 @@
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+  <script src="/javascripts/authenticate.js"></script>
   <script src="/javascripts/script.js"></script>
+
 </body>
 
 </html>

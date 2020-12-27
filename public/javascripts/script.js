@@ -1,9 +1,25 @@
+const canvas = document.querySelector('#canvas')
+const signInPage = document.querySelector('#sign-in-page')
+const chatRoomPage = document.querySelector('#chat-room')
+const signOutBtn = document.querySelector('.sign-out-btn')
 //建立socket.io連線
 let socket
 try {
   socket = io({
     query: { token: localStorage.getItem('token') }
   })
+  console.log('socket:', socket)
+
+  setTimeout(() => {
+    console.log('after set time out: socket', socket)
+    if (socket.connected) {
+      signInPage.classList.add('hide')
+      canvas.classList.add('hide')
+    } else {
+      signInPage.classList.remove('hide')
+      canvas.classList.add('hide')
+    }
+  }, 2000)
   console.log('Get token on localstorage')
 } catch (error) {
   alert('暫時無網路連線！')
@@ -20,6 +36,19 @@ socket.on('message-unread-init', (publicUnread, privateUnread) => {
   //   document.querySelector('#left-column-icon-private').className = 'new-status-light'
   //   addUnreadNumber('.unread-count-private', privateUnread)
   // }
+})
+
+// block unAuthenticated users
+socket.on('connect', () => {
+  canvas.classList.add('hide')
+  signInPage.classList.add('hide')
+  chatRoomPage.classList.remove('hide')
+})
+
+//logout
+signOutBtn.addEventListener('click', (event) => {
+  localStorage.removeItem('token')
+  window.location.reload()
 })
 
 // update online users for public
