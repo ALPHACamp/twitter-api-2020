@@ -45,7 +45,7 @@
         <a href="{{domain}}notice"
           class="nav-btn d-flex fonSize18 align-items-center {{#if (eq page 'notice')}}active{{/if}}">
           <span class="bell-icon-wrapper mr-3">
-            <span class="new-status-light">
+            <span id="left-column-icon-message" class=""> {{!-- new-status-light --}}
               <i class="far fa-bell text-larger"></i>
             </span>
           </span>
@@ -54,20 +54,20 @@
         <a href="{{domain}}chat"
           class="nav-btn d-flex fonSize18 align-items-center {{#if (eq page 'public-chat')}}active{{/if}}">
           <span class="message-icon-wrapper mr-3">
-            <span class="new-status-light">
+            <span id="left-column-icon-public" class=""> {{!-- new-status-light --}}
               <i class="far fa-envelope text-larger"></i>
             </span>
           </span>
-          <span>公開聊天室</span>
+          <span>公開聊天室</span><span class="unread-count-public" style="color: red"></span>
         </a>
         <a href="{{domain}}chat/private"
           class="nav-btn d-flex fonSize18 align-items-center {{#if (eq page 'private-chat')}}active{{/if}}">
           <span class="message-icon-wrapper mr-3">
-            <div class="new-status-light">
+            <div id="left-column-icon-private" class=""> {{!-- new-status-light --}}
               <i class="far fa-envelope text-larger"></i>
             </div>
           </span>
-          <span>私人訊息</span>
+          <span>私人訊息</span><span class="unread-count-private" style="color: red"></span>
         </a>
         <a href="https://sean-yu-pohsiang.github.io/simple-twitter-frontend-2020/#/users/{{user.id}}"
           class="nav-btn d-flex fonSize18 align-items-center">

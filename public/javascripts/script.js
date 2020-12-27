@@ -9,15 +9,31 @@ try {
   alert('暫時無網路連線！')
 }
 
+let initUnreadMsgFlag = false
+socket.on('message-unread-init', (publicUnread, privateUnread) => {
+  if (publicUnread !== 0) {
+    document.querySelector('#left-column-icon-public').className = 'new-status-light'
+    addUnreadNumber('.unread-count-public', publicUnread)
+  }
+
+  // if (privateUnread !== 0) {
+  //   document.querySelector('#left-column-icon-private').className = 'new-status-light'
+  //   addUnreadNumber('.unread-count-private', privateUnread)
+  // }
+})
+
 // update online users for public
 socket.on('update-connected-users', (connectedUsers, offlineUser) => {
-  console.log('>>> ', connectedUsers)
-
   let authUser;
   connectedUsers.forEach((element, i) => {
     if (element.sckId.includes(socket.id)) authUser = element
   })
   document.querySelector('#hidden-user-info').className = authUser.account
+
+  if (!initUnreadMsgFlag) {
+    socket.emit('message-unread-init')
+    initUnreadMsgFlag = true
+  }
 
   try {
     document.querySelector('#connected-users-count').innerHTML = connectedUsers.length
@@ -37,14 +53,42 @@ socket.on('update-connected-users', (connectedUsers, offlineUser) => {
   }
 })
 
-// get message from public message
-socket.on('public-message', (publicPackets) => {
-  // console.log(publicPackets)
+function addUnreadNumber(className, addNumber) {
+  const unread = document.querySelector(className)
+  unread.innerText = ` (${Number(unread.innerText) + addNumber})`
+}
 
-  const showFlag = checkShowFlag(publicPackets.length, 0)
-  console.log('checkShowFlag: ', showFlag)
+// get message from public message
+socket.on('public-message', (publicPackets, readTime) => {
+
+  if (publicPackets.length !== 1) {
+    // count and handle unread number
+    const notReadNumber = publicPackets.filter(packet => packet.timestamp > readTime).length
+    if (notReadNumber > 0) {
+      document.querySelector('#left-column-icon-public').className = 'new-status-light'
+      addUnreadNumber('.unread-count-public', notReadNumber)
+    }
+    showFlag = true
+  } else {
+    if (Number(localStorage.getItem('cid')) === 0) {
+      // pass, nothing to do
+      showFlag = true
+    } else {
+      // handle unread number + 1, readTime should be undefined
+      document.querySelector('#left-column-icon-public').className = 'new-status-light'
+      addUnreadNumber('.unread-count-public', 1)
+      showFlag = false
+    }
+  }
 
   if (showFlag) {
+    // read time update
+    socket.emit('message-read-timestamp', 0, new Date().getTime())
+
+    // init unread 
+    document.querySelector('#left-column-icon-public').classList.remove('new-status-light')
+    document.querySelector('.unread-count-public').innerText = ''
+
     const userAccount = document.querySelector('#hidden-user-info').className
     console.log('showFlag is true is userAccount: ', userAccount)
     const publicBoard = document.querySelector('.message-board')
@@ -99,7 +143,7 @@ try {
   console.log(error)
 }
 
-socket.on('open-private-rooms', sortedRoomDetails => {
+socket.on('open-private-rooms', (sortedRoomDetails) => {
   console.log('[open-private-rooms][Get message] ', sortedRoomDetails)
   const privateChatroom = sortedRoomDetails.map(room => `
       <div id="hidden-channel-info" data-userid="${room.uid}" data-channel="${room.channelId}" style="cursor: pointer">
@@ -111,7 +155,7 @@ socket.on('open-private-rooms', sortedRoomDetails => {
                 <span class="text-gray private-user-account">@${room.account}</span>
                 <span class="text-gray">${moment(room.time).fromNow()}</span>
               </div>
-              <div class="message-view">${room.message}</div>
+              <div class="message-view message-view-${room.channelId}">${room.message}</div>
             </div>
         </div>
       </div>
@@ -128,11 +172,15 @@ function checkShowFlag(packetsLength, firstPacketChannelId) {
 
 // get message from private message
 socket.on('private-message', (privatePackets) => {
-  console.log(privatePackets)
+  console.log('private: ', privatePackets)
 
   const showFlag = checkShowFlag(privatePackets.length, privatePackets[0].ChannelId)
+  if (privatePackets.length === 1) {
+    document.querySelector(`.message-view-${privatePackets[0].ChannelId}`).innerText = privatePackets[0].message
+  }
 
   if (showFlag) {
+    socket.emit('message-read-timestamp', localStorage.getItem('cid'), new Date().getTime())
     const userAccount = document.querySelector('#hidden-user-info').className
     console.log('userAccount:', userAccount)
     const privateBoard = document.querySelector('.message-board')
@@ -197,7 +245,7 @@ try {
     document.querySelector('.private-room-title-account').innerText = target.querySelector('.private-user-account').innerText
 
 
-    console.log('>>> channel: ', channelId)
+    // console.log('in channel: ', channelId)
     localStorage.setItem('cid', channelId)
     // for handlebars to handle click private room
     socket.emit('open-private-room', channelId, new Date().getTime())

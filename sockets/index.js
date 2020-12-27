@@ -37,7 +37,7 @@ async function getConnectedUsers(io, onlineUsers, offlineUser = null) {
   }
 }
 
-async function broadcastPublicPrevMsgs(socket) {
+async function broadcastPublicPrevMsgs(socket, userId) {
   try {
     const history = await Chatpublic.findAll({
       raw: true,
@@ -45,6 +45,12 @@ async function broadcastPublicPrevMsgs(socket) {
       include: [{ model: User, attributes: userSelectedFields }],
       attributes: { exclude: ['updatedAt'] },
       order: [[sequelize.literal('createdAt'), 'ASC']],
+    })
+
+    const read = await Read.findOne({
+      raw: true,
+      nest: true,
+      where: { UserId: userId, ChannelId: 0 }
     })
 
     resHistory = []
@@ -57,7 +63,7 @@ async function broadcastPublicPrevMsgs(socket) {
       resHistory.push(res)
     })
 
-    socket.emit('public-message', resHistory)
+    socket.emit('public-message', resHistory, read.date.getTime())
 
   } catch (error) {
     console.error('Error on broadcastPublicPrevMsgs: ', error)
@@ -172,6 +178,8 @@ async function getMessageFromPrivate(io, socket, sender, recipientId, message, t
 async function updateRead(userId, channelId, timestamp) {
   // not sure if there no matching whether the ORM will create one or not
   try {
+    console.log('[Server Get ReadTime]: ', userId, channelId, timestamp)
+
     const outcome = await Read.update(
       { date: new Date(timestamp) },
       { where: { UserId: userId, ChannelId: channelId } }
@@ -187,8 +195,8 @@ async function updateRead(userId, channelId, timestamp) {
 }
 
 async function initPublicRoom(socket, sender, timestamp) {
-  broadcastPublicPrevMsgs(socket)
-  updateRead(sender.id, 0, timestamp)
+  broadcastPublicPrevMsgs(socket, sender.id)
+  // updateRead(sender.id, 0, timestamp)
 }
 
 async function initPrivateRooms(socket, sender, timestamp) {
@@ -232,12 +240,66 @@ async function initPrivateRooms(socket, sender, timestamp) {
       ...sortedRoomDetails[element.channelId]
     }
   })
+
   socket.emit('open-private-rooms', Object.values(sortedRoomDetails))
 }
 
 async function initPrivateOneRoom(socket, userId, channelId, timestamp) {
   broadcastPrivatePrevMsgs(socket, channelId)
-  updateRead(userId, channelId, timestamp)
+  // updateRead(userId, channelId, timestamp)
+}
+
+async function initUnreadMessages(socket, userId) {
+  // handle public unread number
+  const publicUnread = await getUnreadMessage(userId, 0, 'public')
+  const channels = await Channel.findAll({
+    where: {
+      [Op.or]: [
+        { UserOne: userId },
+        { UserTwo: userId }
+      ]
+    },
+    attributes: ['id'],
+    raw: true
+  })
+
+  console.log('User channels...', channels)
+  const privateUnread = await getUnreadMessage(userId, channels.map(c => c.id), 'private')
+
+  socket.emit('message-unread-init', publicUnread, privateUnread)
+}
+
+
+async function getUnreadMessage(userId, channelId, roomType) {
+  if (roomType === 'public') {
+    const read = await Read.findOne({ where: { UserId: userId, ChannelId: channelId }, raw: true })
+    const msgs = await Chatpublic.findAll({ raw: true, limit: 100 })
+    const unreadNumber = msgs.map(msg => msg.createdAt.getTime()).filter(time => time > read.date.getTime()).length
+    return unreadNumber
+  } else {
+    const read = await Read.findAll({
+      attributes: ['ChannelId', 'date'],
+      where: { UserId: userId, ChannelId: channelId },
+      raw: true
+    })
+    const record = {}
+    read.forEach(r => {
+      record[r.ChannelId] = r.date.getTime()
+    })
+    const msgs = await Chatprivate.findAll({
+      attributes: ['ChannelId', 'createdAt'],
+      where: { ChannelId: channelId },
+      raw: true
+    })
+
+    let unreadNumber = 0
+    msgs.forEach(m => {
+      if (m.createdAt.getTime() > record[m.ChannelId]) unreadNumber = unreadNumber + 1
+    })
+    return unreadNumber
+  }
+
+
 }
 
 
@@ -278,6 +340,10 @@ module.exports = async (io) => {
 
     // personal: private chatroom get message
     socket.on('private-message', async (recipientId, message, timestamp) => getMessageFromPrivate(io, socket, sender, recipientId, message, timestamp))
+
+    socket.on('message-read-timestamp', async (channelId, timestamp) => updateRead(sender.id, channelId, timestamp))
+
+    socket.on('message-unread-init', async () => initUnreadMessages(socket, sender.id))
 
     socket.on('disconnect', async () => {
       delete onlineUsers[id]
