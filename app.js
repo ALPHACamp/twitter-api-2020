@@ -60,7 +60,7 @@ io.on('connection', socket => {
   onlineCount++
 
   socket.on('send message', (msg) => {
-    const USERID = msg.id
+    const USERID = msg.UserId
     return Promise.all([
       Message.create({
         UserId: USERID,
@@ -77,26 +77,37 @@ io.on('connection', socket => {
   })
 
   socket.on('chatting', (user) => {
-    socket.broadcast.emit('newclientlogin', { ...user, message: `${user.name} 上線` })
-    User.findByPk(user.id)
-      .then((user) => {
-        const USERID = user.id
-        return Promise.all([
-          Chat.findAll({ include: [User] }),
-          Chat.findOne({ where: { UserId: USERID } })
-        ])
-          .then(([chatters, chat]) => {
-            socket.emit('userOnline', chatters)
-            if (!chat) {
-              Chat.create({
-                UserId: USERID
+    return Promise.all([
+      Message.create({
+        UserId: user.id,
+        message: `${user.name} 上線`,
+        targetChannel: '0'
+      })
+    ])
+      .then(data => {
+        socket.broadcast.emit('newclientlogin', { ...user, message: `${user.name} 上線` })
+        User.findByPk(user.id)
+          .then((user) => {
+            const USERID = user.id
+            return Promise.all([
+              Chat.findAll({ include: [User] }),
+              Chat.findOne({ where: { UserId: USERID } })
+            ])
+              .then(([chatters, chat]) => {
+                socket.emit('userOnline', chatters)
+                if (!chat) {
+                  Chat.create({
+                    UserId: USERID
+                  })
+                } else {
+                  console.log('使用者已經在線上')
+                }
+              }).catch((err) => {
+                console.log(err)
               })
-            } else {
-              console.log('使用者已經在線上')
-            }
-          }).catch((err) => {
-            console.log(err)
           })
+      }).catch(error => {
+        console.log(error)
       })
   })
 
