@@ -17,7 +17,6 @@ const { Model } = require('sequelize');
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
-app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(session({ secret: 'itismyserect', resave: false, saveUninitialized: false }))
@@ -41,22 +40,27 @@ app.get('/chatroom', (req, res) => {
   res.render('index')
 })
 
-const server = require('http').Server(app)
-const io = require('socket.io')(server, {
+const http = require('http').createServer(app)
+const io = require('socket.io')(http, {
   cors: {
-    origin: '*'
+    origin: ['http://localhost:8080', 'https://r05323045.github.io/twitter-api-2020-frontend'],
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['my-custom-header'],
+    credentials: true
   }
 })
+app.use(cors())
+
 let onlineCount = 0
 io.on('connection', socket => {
-  console.log('user connected...');
+  console.log('user connected...')
 
   onlineCount++
 
   io.emit('online', onlineCount)
   socket.on('send message', (msg) => {
-    io.emit('msg', msg)
     socket.broadcast.emit('msg', msg)
+    socket.emit('msg', msg)
   })
 
   socket.on('disconnect', () => {
@@ -70,15 +74,22 @@ io.on('connection', socket => {
     const USERID = user.id
     User.findByPk(USERID)
       .then(user => {
-        Chat.create({
-          UserId: USERID
-        })
+        Chat.findOne({ where: { UserId: USERID } })
+          .then(chat => {
+            if (!chat) {
+              Chat.create({
+                UserId: USERID
+              })
+            } else {
+              console.log('使用者已經在線上')
+            }
+          })
       })
     socket.broadcast.emit('newclientlogin', `${user.name} 上線`)
   })
 })
 
-server.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
+http.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
 
 require('./routes')(app)
 
