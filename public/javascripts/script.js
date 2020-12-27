@@ -35,7 +35,6 @@ socket.on('update-connected-users', (connectedUsers, offlineUser) => {
   } catch (error) {
     console.log('not in public page cannot render connected online users')
   }
-
 })
 
 // get message from public message
@@ -208,20 +207,6 @@ try {
 } catch (error) {
   console.log(error)
 }
-
-
-// privateMessage.addEventListener('submit', (e) => {
-//   e.preventDefault()
-//   const formData = new FormData(privateMessage)
-//   const recipientId = formData.get('recipient')
-//   const message = formData.get('message')
-//   socket.emit('private-message', recipientId, message, new Date().getTime())
-//   e.target.querySelector('input[name=message]').value = ''
-//   console.log(`PM ${recipientId}: ${message} (${new Date().getTime()})`)
-//   return false
-// })
-
-
 
 //error handling
 //連線失敗(例如:未授權)

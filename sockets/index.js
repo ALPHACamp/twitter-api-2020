@@ -1,4 +1,3 @@
-const { date } = require('faker')
 const passport = require('../config/passport')
 const { User, Chatpublic, Chatprivate, Channel, Read, sequelize, Sequelize } = require('../models')
 const { Op } = Sequelize
@@ -57,8 +56,7 @@ async function broadcastPublicPrevMsgs(socket) {
       res.timestamp = element.createdAt.getTime()
       resHistory.push(res)
     })
-    console.log('passsss ===================')
-    console.log(resHistory)
+
     socket.emit('public-message', resHistory)
 
   } catch (error) {
@@ -86,9 +84,6 @@ async function broadcastPrivatePrevMsgs(socket, channelId) {
       res.timestamp = element.createdAt.getTime()
       resHistory.push(res)
     })
-
-    console.log('******************* private!! ******')
-    console.log(resHistory)
 
     socket.emit('private-message', resHistory)
   } catch (error) {
@@ -141,22 +136,6 @@ async function getMessageFromPrivate(io, socket, sender, recipientId, message, t
       })
     }
     const roomId = channel.id || createdChannel.id
-    const roomUsers = [
-      {
-        id: sender.id,
-        socketId: onlineUsers[sender.id].map(socket => socket.id),
-        name: sender.name,
-        account: sender.account,
-        avatar: sender.avatar
-      },
-      {
-        id: recipientUser.id,
-        socketId: onlineUsers[recipientId].map(socket => socket.id),
-        name: recipientUser.name,
-        account: recipientUser.account,
-        avatar: recipientUser.avatar
-      }
-    ]
 
     // for all user device socket should be add into the same room
     onlineUsers[sender.id].forEach(socket => socket.join(`room ${roomId}`))
@@ -253,7 +232,6 @@ async function initPrivateRooms(socket, sender, timestamp) {
       ...sortedRoomDetails[element.channelId]
     }
   })
-  console.log('.......send........')
   socket.emit('open-private-rooms', Object.values(sortedRoomDetails))
 }
 
