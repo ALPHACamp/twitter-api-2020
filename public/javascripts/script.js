@@ -121,7 +121,12 @@ socket.on('update-connected-users', (connectedUsers, offlineUser) => {
 
 function addUnreadNumber(className, addNumber) {
   const unread = document.querySelector(className)
-  unread.innerText = ` (${Number(unread.innerText) + addNumber})`
+  if (unread.innerText.length > 0) {
+    const cnt = Number(unread.innerText.replace('(', '').replace(')', ''))
+    unread.innerText = ` (${cnt + addNumber})`
+  } else {
+    unread.innerText = ` (${addNumber})`
+  }
 }
 
 // get message from public message
