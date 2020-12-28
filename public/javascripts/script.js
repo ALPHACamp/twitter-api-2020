@@ -27,7 +27,7 @@ try {
 
 let initUnreadMsgFlag = false
 socket.on('message-unread-init', (publicUnread, privateUnread) => {
-  if (publicUnread !== 0) {
+  if (publicUnread !== 0 && Number(localStorage.getItem('cid')) !== 0) {
     document.querySelector('#left-column-icon-public').className = 'new-status-light'
     addUnreadNumber('.unread-count-public', publicUnread)
   }
@@ -51,13 +51,50 @@ signOutBtn.addEventListener('click', (event) => {
   window.location.reload()
 })
 
+let localRecordOnlineUsers = [];
 // update online users for public
 socket.on('update-connected-users', (connectedUsers, offlineUser) => {
   let authUser;
   connectedUsers.forEach((element, i) => {
     if (element.sckId.includes(socket.id)) authUser = element
   })
+
   document.querySelector('#hidden-user-info').className = authUser.account
+
+  // let currentUsers = connectedUsers.map(element => element.account)
+  // let offline = localRecordOnlineUsers.filter((e) => { return currentUsers.indexOf(e) === -1 })
+  // let online = currentUsers.filter((e) => { return localRecordOnlineUsers.indexOf(e) === -1 })
+  // console.log('offline: ', offline)
+  // console.log('online: ', online)
+  // localRecordOnlineUsers = currentUsers
+
+  // try {
+  //   const board = document.querySelector('.message-board')
+
+  //   if (offline.length > 0 && (Number(localStorage.getItem('cid')) === 0)) {
+  //     for (let offuser of offline) {
+  //       board.insertAdjacentHTML('beforeend', `
+  //       <div class="user-status-wrapper d-flex justify-content-center py-2">
+  //         <div class="user-status badge badge-pill bg-gray font-weight-bold text-gray">${offuser} 下線</div>
+  //     `)
+  //     }
+  //   }
+
+  //   if (online.length > 0 && (Number(localStorage.getItem('cid')) === 0)) {
+  //     for (let onuser of online) {
+  //       board.insertAdjacentHTML('beforeend', `
+  //       <div class="user-status-wrapper d-flex justify-content-center py-2">
+  //         <div class="user-status badge badge-pill bg-gray font-weight-bold text-gray">${onuser} 上線</div>
+  //     `)
+  //     }
+  //   }
+  //   board.scroll({
+  //     top: board.scrollHeight,
+  //     behavior: 'smooth'
+  //   })
+  // } catch (error) {
+  //   console.log(error)
+  // }
 
   if (!initUnreadMsgFlag) {
     socket.emit('message-unread-init')
@@ -80,23 +117,6 @@ socket.on('update-connected-users', (connectedUsers, offlineUser) => {
   } catch (error) {
     console.log('not in public page cannot render connected online users')
   }
-
-  // try {
-  //   if (offlineUser && (Number(localStorage.getItem('cid')) === 0)) {
-  //     const board = document.querySelector('.message-board')
-  //     board.insertAdjacentHTML('beforeend', `
-  //       <div class="user-status-wrapper d-flex justify-content-center py-2">
-  //     <div class="user-status badge badge-pill bg-gray font-weight-bold text-gray">${offlineUser} 下線</div>
-  //     `)
-
-  //     board.scroll({
-  //       top: board.scrollHeight,
-  //       behavior: 'smooth'
-  //     })
-  //   }
-  // } catch (error) {
-  //   console.log(error)
-  // }
 })
 
 function addUnreadNumber(className, addNumber) {
@@ -130,7 +150,6 @@ socket.on('public-message', (publicPackets, readTime) => {
   if (showFlag) {
     // read time update
     socket.emit('message-read-timestamp', 0, new Date().getTime())
-
     // init unread 
     document.querySelector('#left-column-icon-public').classList.remove('new-status-light')
     document.querySelector('.unread-count-public').innerText = ''
