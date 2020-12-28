@@ -4,8 +4,8 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     try {
       const channels = [
-        { UserOne: 2, UserTwo: 3, createdAt: new Date(), updatedAt: new Date() },
-        { UserOne: 2, UserTwo: 4, createdAt: new Date(), updatedAt: new Date() }
+        { id: 1, UserOne: 2, UserTwo: 3, createdAt: new Date(), updatedAt: new Date() },
+        { id: 1, UserOne: 2, UserTwo: 4, createdAt: new Date(), updatedAt: new Date() }
       ]
       await queryInterface.bulkInsert('Channels', channels)
     } catch (error) {

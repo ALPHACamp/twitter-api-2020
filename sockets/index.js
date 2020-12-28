@@ -17,7 +17,7 @@ function authenticated(socket, next) {
   })(socket.request, {}, next)
 }
 
-async function getConnectedUsers(io, onlineUsers, offlineUser = null) {
+async function getConnectedUsers(io, onlineUsers) {
   try {
     const connectedUserIds = Object.keys(onlineUsers).map(Number)
     const connectedUsers = await User.findAll({
@@ -29,7 +29,7 @@ async function getConnectedUsers(io, onlineUsers, offlineUser = null) {
     connectedUsers.forEach((user, i) => {
       user.sckId = onlineUsers[user.id].map(socket => socket.id)
     })
-    await io.to('public room').emit('update-connected-users', connectedUsers, offlineUser)
+    await io.to('public room').emit('update-connected-users', connectedUsers)
   } catch (error) {
     console.log(error)
     await io.emit('error', '更新在線使用者時發生錯誤')
@@ -103,8 +103,6 @@ async function getUnreadMessage(userId, channelId, roomType) {
     })
     return unreadNumber
   }
-
-
 }
 
 
@@ -117,7 +115,6 @@ module.exports = async (io) => {
     console.log(`a user connected (userId: ${id} name: ${name})`)
 
     socket.join('public room')
-
     // prepare a dictionary to store online users key(user id) 
     // and value(socket id) array
     if (Object.keys(onlineUsers).includes(id)) {
@@ -152,7 +149,7 @@ module.exports = async (io) => {
 
     socket.on('disconnect', async () => {
       delete onlineUsers[id]
-      getConnectedUsers(io, onlineUsers, offlineUser = name)
+      getConnectedUsers(io, onlineUsers)
     })
   })
 }
