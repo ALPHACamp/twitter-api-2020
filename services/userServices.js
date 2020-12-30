@@ -7,6 +7,7 @@ const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
 const fs = require('fs')
+const sequelize = require('sequelize')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
@@ -309,6 +310,13 @@ const userServices = {
       cover: user.cover,
       introduction: user.introduction
     })
+  },
+  getUsers: (req, res, callback, next) => {
+    return User.findAll({ where: { role: 'user' } })
+      .then(users => {
+        const user = users.filter(user => user.dataValues.role !== 'admin')
+        callback(user)
+      })
   }
 }
 module.exports = userServices

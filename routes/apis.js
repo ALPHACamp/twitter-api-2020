@@ -73,6 +73,7 @@ router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/users/:id/setting', authenticated, userController.getSettingPage)
 router.put('/users/:id/setting', authenticated, userController.putSetting)
 router.get('/users/:id', authenticated, userController.getProfile)
+router.get('/users', authenticated, userController.getUsers)
 //followship
 router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)

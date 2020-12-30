@@ -178,6 +178,11 @@ let userController = {
     userServices.getCurrentUser(req, res, data => {
       return res.json(data)
     })
+  },
+  getUsers: (req, res) => {
+    userServices.getUsers(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 
