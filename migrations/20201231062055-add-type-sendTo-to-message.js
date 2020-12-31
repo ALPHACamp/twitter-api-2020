@@ -8,7 +8,7 @@ module.exports = {
           type: Sequelize.DataTypes.STRING
         }, { transaction: t }),
         queryInterface.addColumn('Messages', 'sendTo', {
-          type: Sequelize.DataTypes.STRING
+          type: Sequelize.DataTypes.INTEGER
         }, { transaction: t })
       ])
     })
