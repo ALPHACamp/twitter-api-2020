@@ -76,6 +76,24 @@ io.on('connection', socket => {
       })
   })
 
+  socket.on('private chatroom', (msg) => {
+    const USERID = msg.UserId
+    console.log(msg)
+    return Promise.all([
+      Message.create({
+        UserId: USERID,
+        message: msg.message,
+        targetChannel: msg.targetChannel
+      })
+    ])
+      .then(
+        socket.join(msg.targetChannel),
+        io.to(msg.targetChannel).emit('private_msg', msg)
+      ).catch(error => {
+        console.log(error)
+      })
+  })
+
   socket.on('chatting', (user) => {
     return Promise.all([
       Message.create({
