@@ -89,5 +89,6 @@ router.get('/chatroom', authenticated, chatController.getChatRoom)
 // router.post('/chatroom', authenticated, chatController.postChatRoom)
 router.delete('/chatroom', authenticated, chatController.deleteChatRoom)
 router.post('/chatroom/msg', authenticated, chatController.postMessage)
+router.put('/chatroom/read', authenticated, chatController.readMessages)
 
 module.exports = router

@@ -50,6 +50,14 @@ const chatServices = {
       return callback({ status: 'error', message: 'Msg can not be blank' })
     }
 
+  },
+
+  readMessages: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    Message.update({ isRead: true }, { where: { sendTo: USERID, UserId: req.body.id } })
+      .then(() => {
+        return callback({ status: 'success', message: 'messages was successfully to read' })
+      })
   }
 }
 
