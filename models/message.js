@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     targetChannel: DataTypes.STRING,
     type: DataTypes.STRING,
     sendTo: DataTypes.INTEGER,
-    isRead: DataTypes.BOOLEAN
+    isRead: { type: DataTypes.BOOLEAN, defaultValue: 0 }
   }, {})
   Message.associate = function (models) {
     Message.belongsTo(models.User)

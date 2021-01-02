@@ -65,7 +65,9 @@ io.on('connection', socket => {
       Message.create({
         UserId: USERID,
         message: msg.message,
-        targetChannel: '0'
+        targetChannel: '0',
+        type: msg.type,
+        sencTo: 0
       })
     ])
       .then(
@@ -78,12 +80,13 @@ io.on('connection', socket => {
 
   socket.on('private chatroom', (msg) => {
     const USERID = msg.UserId
-    console.log(msg)
     return Promise.all([
       Message.create({
         UserId: USERID,
         message: msg.message,
-        targetChannel: msg.targetChannel
+        targetChannel: msg.targetChannel,
+        type: msg.type,
+        sendTo: msg.sendTo
       })
     ])
       .then(
@@ -99,7 +102,9 @@ io.on('connection', socket => {
       Message.create({
         UserId: user.id,
         message: `${user.name} 上線`,
-        targetChannel: '0'
+        targetChannel: '0',
+        type: 'userComein',
+        sendTo: 0
       })
     ])
       .then(data => {
