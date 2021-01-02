@@ -26,6 +26,11 @@ const chatController = {
       return res.json(data)
     })
   },
+  getUnreadMessages: (req, res) => {
+    chatServices.getUnreadMessages(req, res, data => {
+      return res.json(data)
+    })
+  }
 }
 
 module.exports = chatController

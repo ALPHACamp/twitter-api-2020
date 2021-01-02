@@ -79,6 +79,7 @@ io.on('connection', socket => {
   })
 
   socket.on('private chatroom', (msg) => {
+    socket.broadcast.emit('unread_msg', msg)
     const USERID = msg.UserId
     return Promise.all([
       Message.create({

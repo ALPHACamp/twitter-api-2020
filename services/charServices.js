@@ -1,5 +1,6 @@
 const helpers = require('../_helpers')
 const db = require('../models')
+const sequelize = require('sequelize')
 const User = db.User
 const Chat = db.Chat
 const Message = db.Message
@@ -57,6 +58,14 @@ const chatServices = {
     Message.update({ isRead: true }, { where: { sendTo: USERID, UserId: req.body.id } })
       .then(() => {
         return callback({ status: 'success', message: 'messages was successfully to read' })
+      })
+  },
+
+  getUnreadMessages: (req, res, callback) => {
+    const USERID = helpers.getUser(req).id
+    Message.findAll({ where: { sendTo: USERID, isRead: false } })
+      .then((data) => {
+        return callback(data)
       })
   }
 }
