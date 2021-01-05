@@ -78,7 +78,14 @@ io.on('connection', socket => {
       })
   })
 
-  socket.on('private chatroom', (msg) => {
+  socket.on('private chatroom', (channel) => {
+    socket.join(channel)
+  })
+  socket.on('leave private chatroom', (channel) => {
+    socket.leave(channel)
+  })
+
+  socket.on('private message', (msg) => {
     socket.broadcast.emit('unread_msg', msg)
     const USERID = msg.UserId
     return Promise.all([
