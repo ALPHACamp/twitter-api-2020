@@ -33,6 +33,7 @@ const userController = require('../controllers/userController')
 const replyController = require('../controllers/replyController')
 const followshipController = require('../controllers/followshipController')
 const chatController = require('../controllers/chatController')
+const subscribeController = require('../controllers/subscribeController')
 
 
 //登入登出註冊
@@ -91,5 +92,9 @@ router.delete('/chatroom', authenticated, chatController.deleteChatRoom)
 router.post('/chatroom/msg', authenticated, chatController.postMessage)
 router.put('/chatroom/read', authenticated, chatController.readMessages)
 router.get('/chatroom/unread', authenticated, chatController.getUnreadMessages)
+
+//subscribe
+router.post('/subscribes', authenticated, subscribeController.addSubscribing)
+router.delete('/subscribes/:subscribingId', authenticated, subscribeController.removeSubscribing)
 
 module.exports = router

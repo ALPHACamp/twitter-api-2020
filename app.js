@@ -42,7 +42,7 @@ app.get('/chatroom', (req, res) => {
 })
 
 app.use(cors())
-// const http = require('http').createServer(app)
+const http = require('http').createServer(app)
 // const io = require('socket.io')(http, {
 //   cors: {
 //     origin: ['http://localhost:8080', 'https://r05323045.github.io'],
@@ -149,7 +149,7 @@ app.use(cors())
 //   })
 // })
 
-// http.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
+http.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
 
 require('./routes')(app)
 
