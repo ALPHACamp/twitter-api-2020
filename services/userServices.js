@@ -7,6 +7,7 @@ const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
 const Notification = db.Notification
+const Subscribe = db.Subscribe
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
@@ -20,9 +21,10 @@ const userServices = {
       }),
       Tweet.findAll({ include: [Reply, Like, User], where: { UserId: req.params.id } }),
       Reply.findAll({ include: { model: Tweet, include: User }, where: { UserId: req.params.id } }),
-      Like.findAll({ include: [Tweet, User], where: { UserId: req.params.id } })
+      Like.findAll({ include: [Tweet, User], where: { UserId: req.params.id } }),
+      Subscribe.findAndCountAll({ where: { subscriberId: req.params.id } })
     ])
-      .then(([follower, following, user, tweets, replies, likes]) => {
+      .then(([follower, following, user, tweets, replies, likes, subscribing]) => {
         callback({
           follower: follower,
           following: following,
@@ -35,6 +37,7 @@ const userServices = {
             isLiked: r.Likes.map(d => d.UserId).includes(helpers.getUser(req).id) || null
           })),
           isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id),
+          isSubscribed: helpers.getUser(req).Subscribings.map(d => d.id).includes(user.id),
           replies,
           likes
         })
