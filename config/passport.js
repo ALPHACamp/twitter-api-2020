@@ -16,11 +16,10 @@ jwtOptions.secretOrKey = process.env.JWT_SECRET
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {
     include: [
-      // Tweet, Like, Reply,
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' },
-      // { model: Tweet, as: 'LikedTweets' },
-      // { model: Tweet, as: 'RepliedTweets' }
+      { model: User, as: 'Subscribers' },
+      { model: User, as: 'Subscribings' }
     ]
   }).then(user => {
     if (!user) return next(null, false)
