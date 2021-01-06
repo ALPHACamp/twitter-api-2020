@@ -3,6 +3,8 @@ const db = require('../models')
 const User = db.User
 const Chat = db.Chat
 const Message = db.Message
+const Subscribe = db.Subscribe
+const Notification = db.Notification
 module.exports = (io) => {
   io.on('connection', socket => {
     console.log('user connected...')
@@ -87,6 +89,35 @@ module.exports = (io) => {
             })
         }).catch(error => {
           console.log(error)
+        })
+    })
+
+    socket.on('init notification', (userId) => {
+      Subscribe.findAll({ where: { subscriberId: userId } })
+        .then(subscribings => {
+          subscribings.forEach(data => {
+            socket.join(`subscribe_${data.subscribingId}`)
+          })
+        })
+    })
+
+    socket.on('notify', (noti) => {
+      console.log(noti)
+      Subscribe.findAll({ where: { subscribingId: noti.senderId } })
+        .then(subscribers => {
+          const promises = subscribers.map((data) => {
+            return Notification.create({
+              senderId: noti.senderId,
+              messageData: noti.messageData,
+              recipientId: data.subscriberId
+            })
+          })
+          Promise.all(promises)
+            .then(data => {
+              data.forEach(d => {
+                io.to(`subscribe_${d.senderId}`).emit('get notification', d.messageData)
+              })
+            })
         })
     })
 
