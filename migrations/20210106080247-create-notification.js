@@ -14,8 +14,9 @@ module.exports = {
       recipientId: {
         type: Sequelize.INTEGER
       },
-      read: {
-        type: Sequelize.BOOLEAN
+      isRead: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false
       },
       messageData: {
         type: Sequelize.STRING

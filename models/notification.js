@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const Notification = sequelize.define('Notification', {
     senderId: DataTypes.INTEGER,
     recipientId: DataTypes.INTEGER,
-    read: DataTypes.BOOLEAN,
+    isRead: { type: DataTypes.BOOLEAN, defaultValue: false },
     messageData: DataTypes.STRING
   }, {})
   Notification.associate = function (models) {
