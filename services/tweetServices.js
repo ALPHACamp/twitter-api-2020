@@ -10,7 +10,7 @@ const tweetServices = {
     Tweet.findAll({
       include: [
         User, Like,
-        { model: Reply, include: [User] },
+        { model: Reply, include: [User] }
       ]
     }).then(tweets => {
       tweets = tweets.map(r => ({
@@ -36,23 +36,6 @@ const tweetServices = {
           likes
         })
       })
-    // Tweet.findByPk(req.params.tweet_id, {
-    //   include: [
-    //     User
-    //   ]
-    // }).then(tweet => {
-    //   Reply.findAndCountAll({ include: [User], where: { TweetId: req.params.tweet_id } })
-    //     .then(replies => {
-    //       Like.findAndCountAll({ where: { TweetId: req.params.tweet_id } })
-    //         .then(likes => {
-    //           return callback({ 
-    //             description: tweet.description,
-    //             replies,
-    //             likes
-    //           })
-    //         })
-    //     })
-    // })
   },
   postTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
@@ -70,7 +53,6 @@ const tweetServices = {
     } else {
       return callback({ status: 'error', message: 'Tweet was overed 140' })
     }
-
   },
   putTweet: (req, res, callback) => {
     if (!req.body.description) {
@@ -98,7 +80,6 @@ const tweetServices = {
         } else {
           return callback({ status: 'error', message: 'User error' })
         }
-
       })
   }
 }

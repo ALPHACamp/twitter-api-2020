@@ -6,6 +6,7 @@ const User = db.User
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
+const Notification = db.Notification
 const Subscribe = db.Subscribe
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -15,13 +16,14 @@ const userServices = {
     return Promise.all([
       Followship.findAndCountAll({ where: { followingId: req.params.id } }),
       Followship.findAndCountAll({ where: { followerId: req.params.id } }),
-      User.findOne({ where: { id: req.params.id } }),
+      User.findOne({
+        where: { id: req.params.id }
+      }),
       Tweet.findAll({ include: [Reply, Like, User], where: { UserId: req.params.id } }),
       Reply.findAll({ include: { model: Tweet, include: User }, where: { UserId: req.params.id } }),
       Like.findAll({ include: [Tweet, User], where: { UserId: req.params.id } }),
       Subscribe.findAndCountAll({ where: { subscriberId: req.params.id } })
     ])
-      // .then(user => { return callback({ user }) })
       .then(([follower, following, user, tweets, replies, likes, subscribing]) => {
         callback({
           follower: follower,
@@ -97,8 +99,7 @@ const userServices = {
                   callback({ status: 'success', message: 'user was successfully to update' })
                 })
               })
-          })
-          ,
+          }),
           imgur.upload(cover.path, (err, img) => {
             return User.findByPk(USERID)
               .then((user) => {
@@ -116,8 +117,7 @@ const userServices = {
             callback({ status: 'success', message: 'user was successfully to update' })
           })
       }
-    }
-    else {
+    } else {
       User.findByPk(USERID)
         .then(user => {
           user.update({
@@ -212,13 +212,28 @@ const userServices = {
       })
   },
   likeTweet: (req, res, callback) => {
-    const USERID = helpers.getUser(req).id
-    Like.create({
-      UserId: USERID,
-      TweetId: req.params.id
-    }).then(like => {
-      return callback({ status: 'success', message: `Like tweet` })
-    })
+    const userId = helpers.getUser(req).id
+    const userName = helpers.getUser(req).name
+    return Promise.all([
+      Like.create({
+        UserId: userId,
+        TweetId: req.params.id
+      }),
+      Tweet.findOne({
+        where: { id: req.params.id },
+        include: [User]
+      }).then(tweet => {
+        const recipientId = tweet.User.id
+        Notification.create({
+          senderId: userId,
+          recipientId: recipientId,
+          isRead: false,
+          messageData: `${userName}喜歡你的貼文`
+        })
+      })
+    ]).then(like => {
+        return callback({ status: 'success', message: `Like tweet` })
+      })
   },
   unlikeTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
@@ -241,7 +256,6 @@ const userServices = {
     }).then(replies => {
       return callback(replies)
     })
-
   },
   getUserLikes: (req, res, callback) => {
     Like.findAll({
@@ -256,7 +270,6 @@ const userServices = {
       }))
       return callback(likes)
     })
-
   },
   getSettingPage: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
@@ -269,8 +282,7 @@ const userServices = {
     const USERID = helpers.getUser(req).id
     if (req.body.password !== req.body.confirmedPassword) {
       return callback({ status: 'error', message: 'Password is different from confirmedPassword' })
-    }
-    else {
+    } else {
       User.findOne({ where: { account: req.body.account } })
         .then(user => {
           if (user && user.id !== USERID) {

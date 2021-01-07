@@ -10,7 +10,7 @@ const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
-let userController = {
+const userController = {
   signIn: (req, res) => {
     // 檢查必要資料
     if (!req.body.account || !req.body.password) {
@@ -24,7 +24,7 @@ let userController = {
       where: {
         account: db.sequelize.where(
           db.sequelize.literal('BINARY account'),
-          `${account}`,
+          `${account}`
         )
       }
     }).then(user => {
@@ -111,7 +111,6 @@ let userController = {
               })
           }
         })
-
     }
   },
   getProfile: (req, res) => {
