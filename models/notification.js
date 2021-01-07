@@ -5,7 +5,8 @@ module.exports = (sequelize, DataTypes) => {
     recipientId: DataTypes.INTEGER,
     isRead: { type: DataTypes.BOOLEAN, defaultValue: false },
     messageData: DataTypes.STRING,
-    url: DataTypes.STRING
+    url: DataTypes.STRING,
+    type: DataTypes.STRING
   }, {})
   Notification.associate = function (models) {
     // associations can be defined here
