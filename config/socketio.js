@@ -124,7 +124,7 @@ module.exports = (io) => {
         })
     })
 
-    socket.on('like notification', (noti) => {
+    socket.on('personal notification', (noti) => {
       Notification.create({
         senderId: noti.senderId,
         titleData: noti.titleData,

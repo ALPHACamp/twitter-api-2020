@@ -46,7 +46,7 @@ const tweetServices = {
     if (entryDesc.length <= 140) {
       Tweet.create({
         UserId: USERID,
-        description: entryDesc,
+        description: entryDesc
       }).then(tweet => {
         return callback({ status: 'success', message: 'Tweet was successfully created', tweetId: tweet.id })
       })
