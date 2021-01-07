@@ -93,6 +93,7 @@ module.exports = (io) => {
     })
 
     socket.on('init notification', (userId) => {
+      socket.join(`${userId}'s channel`)
       Subscribe.findAll({ where: { subscriberId: userId } })
         .then(subscribings => {
           subscribings.forEach(data => {
@@ -101,23 +102,39 @@ module.exports = (io) => {
         })
     })
 
-    socket.on('notify', (noti) => {
-      console.log(noti)
+    socket.on('tweet notification', (noti) => {
       Subscribe.findAll({ where: { subscribingId: noti.senderId } })
         .then(subscribers => {
           const promises = subscribers.map((data) => {
             return Notification.create({
               senderId: noti.senderId,
-              messageData: noti.messageData,
-              recipientId: data.subscriberId
+              titleData: noti.titleData,
+              contentData: noti.contentData,
+              recipientId: data.subscriberId,
+              url: noti.url,
+              type: noti.type
             })
           })
           Promise.all(promises)
             .then(data => {
               data.forEach(d => {
-                io.to(`subscribe_${d.senderId}`).emit('get notification', d.messageData)
+                io.to(`subscribe_${d.senderId}`).emit('get notification', d)
               })
             })
+        })
+    })
+
+    socket.on('like notification', (noti) => {
+      Notification.create({
+        senderId: noti.senderId,
+        titleData: noti.titleData,
+        contentData: noti.contentData,
+        recipientId: noti.recipientId,
+        url: noti.url,
+        type: noti.type
+      })
+        .then(data => {
+          io.to(`${noti.recipientId}'s channel`).emit('get notification', data)
         })
     })
 
