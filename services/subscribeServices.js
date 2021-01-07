@@ -1,5 +1,6 @@
 const db = require('../models')
 const Subscribe = db.Subscribe
+const Notification = db.Notification
 const helpers = require('../_helpers')
 
 const subscribeServices = {
@@ -24,6 +25,16 @@ const subscribeServices = {
         .then(subscribe => {
           callback({ status: 'success', message: 'unsubscribe!!!!!' })
         })
+    })
+  },
+  getNotifications: (req, res, callback) => {
+    const UserID = helpers.getUser(req).id
+    Notification.findAll({
+      where: {
+        recipientId: UserID
+      }
+    }).then((notifications) => {
+      callback(notifications)
     })
   }
 }
