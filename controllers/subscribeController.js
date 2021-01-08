@@ -14,11 +14,6 @@ const subscribeController = {
         return res.json(data)
       }
     })
-  },
-  getNotifications: (req, res) => {
-    subscribeServices.getNotifications(req, res, data => {
-      return res.json(data)
-    })
   }
 }
 

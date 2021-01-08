@@ -9,7 +9,7 @@ const followshipServices = {
       followerId: USER.id,
       followingId: req.body.id
     }).then(followship => {
-      callback({ status: 'success', message: '', followship: followship })
+      callback({ status: 'success', message: '' })
     })
   },
   removeFollowing: (req, res, callback) => {

@@ -92,72 +92,32 @@ module.exports = (io) => {
         })
     })
 
-    // ***
-    socket.on('init notification', (userId) => { // 使用者從前端登入時，會 init notification 開始設定 socket 的通知
-      socket.join(`${userId}'s channel`) // 加入一個只有自己的 room ，可以收到來自別人按讚、追蹤與回覆的通知
-
-      // 從資料庫找出所有訂閱的人，加入他們的 room ，可以收到來自這些人的推文通知
+    socket.on('init notification', (userId) => {
       Subscribe.findAll({ where: { subscriberId: userId } })
         .then(subscribings => {
           subscribings.forEach(data => {
             socket.join(`subscribe_${data.subscribingId}`)
           })
         })
-
-      // 從資料庫找出所有回覆過的貼文，加入這些貼文的 room ，可以收到來自這些貼文的回覆通知
-      //
-      //
-      // room 的名稱可以自己建立不用管前端， ex: socket.join(`tweet_${tweetId}`)
-      //
-      //
     })
-    // ***
 
-    socket.on('tweet notification', (noti) => { // 使用者推文時，會 emit tweet notification 回後端
+    socket.on('notify', (noti) => {
+      console.log(noti)
       Subscribe.findAll({ where: { subscribingId: noti.senderId } })
         .then(subscribers => {
           const promises = subscribers.map((data) => {
             return Notification.create({
               senderId: noti.senderId,
-              titleData: noti.titleData,
-              contentData: noti.contentData,
-              recipientId: data.subscriberId,
-              url: noti.url,
-              type: noti.type
+              messageData: noti.messageData,
+              recipientId: data.subscriberId
             })
           })
           Promise.all(promises)
             .then(data => {
               data.forEach(d => {
-                io.to(`subscribe_${d.senderId}`).emit('get notification', d) // 發送通知給在 subscribe_xx room 裡的人，只有在 room 裡的人收得到來自後端的 emit get notification
+                io.to(`subscribe_${d.senderId}`).emit('get notification', d.messageData)
               })
             })
-        })
-    })
-
-    // ***
-    socket.on('reply notification', (replies) => { // 使用者回覆別人的推文時，會 emit reply notification 回後端
-      console.log(replies)
-      // 用前端回傳的該貼文所有回覆，產生一堆通知給回覆過該貼文的人，最後再通知他們
-      //
-      //
-      //
-      //
-      //
-    })
-    // ***
-
-    socket.on('personal notification', (noti) => {
-      Notification.create({
-        senderId: noti.senderId,
-        titleData: noti.titleData,
-        contentData: noti.contentData,
-        recipientId: noti.recipientId,
-        url: noti.url,
-        type: noti.type
-      })
-        .then(data => {
-          io.to(`${noti.recipientId}'s channel`).emit('get notification', data)
         })
     })
 

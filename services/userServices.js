@@ -213,6 +213,7 @@ const userServices = {
   },
   likeTweet: (req, res, callback) => {
     const userId = helpers.getUser(req).id
+    const userName = helpers.getUser(req).name
     return Promise.all([
       Like.create({
         UserId: userId,
@@ -221,10 +222,18 @@ const userServices = {
       Tweet.findOne({
         where: { id: req.params.id },
         include: [User]
+      }).then(tweet => {
+        const recipientId = tweet.User.id
+        Notification.create({
+          senderId: userId,
+          recipientId: recipientId,
+          isRead: false,
+          messageData: `${userName}喜歡你的貼文`
+        })
       })
-    ]).then(([like, tweet]) => {
-      return callback({ status: 'success', message: 'Like tweet', tweet: tweet })
-    })
+    ]).then(like => {
+        return callback({ status: 'success', message: `Like tweet` })
+      })
   },
   unlikeTweet: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
@@ -236,7 +245,7 @@ const userServices = {
     }).then(like => {
       like.destroy()
         .then(tweet => {
-          return callback({ status: 'success', message: 'DisLike tweet' })
+          return callback({ status: 'success', message: `DisLike tweet` })
         })
     })
   },
