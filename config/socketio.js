@@ -5,6 +5,7 @@ const Chat = db.Chat
 const Message = db.Message
 const Subscribe = db.Subscribe
 const Notification = db.Notification
+const Reply = db.Reply
 module.exports = (io) => {
   io.on('connection', socket => {
     console.log('user connected...')
@@ -105,6 +106,12 @@ module.exports = (io) => {
         })
 
       // 從資料庫找出所有回覆過的貼文，加入這些貼文的 room ，可以收到來自這些貼文的回覆通知
+      Reply.findAll({ where: { UserId: userId } })
+        .then(replies => {
+          replies.forEach(data => {
+            socket.join(`tweet_${data.TweetId}`)
+          })
+        })
       //
       //
       // room 的名稱可以自己建立不用管前端， ex: socket.join(`tweet_${tweetId}`)
