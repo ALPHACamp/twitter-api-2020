@@ -1,6 +1,7 @@
 const db = require('../models')
 const Subscribe = db.Subscribe
 const Notification = db.Notification
+const User = db.User
 const helpers = require('../_helpers')
 
 const subscribeServices = {
@@ -30,11 +31,19 @@ const subscribeServices = {
   getNotifications: (req, res, callback) => {
     const UserID = helpers.getUser(req).id
     Notification.findAll({
+      include: [User],
       where: {
         recipientId: UserID
       }
     }).then((notifications) => {
-      callback(notifications)
+      notifications = notifications.map(noti => ({
+        ...noti.dataValues,
+        avatar: noti.User.avatar
+      }))
+      notifications.forEach(noti => {
+        delete noti.User
+      })
+      return callback(notifications)
     })
   }
 }
