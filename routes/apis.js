@@ -96,5 +96,6 @@ router.get('/chatroom/unread', authenticated, chatController.getUnreadMessages)
 //subscribe
 router.post('/subscribes', authenticated, subscribeController.addSubscribing)
 router.delete('/subscribes/:subscribingId', authenticated, subscribeController.removeSubscribing)
+router.get('/notifications', authenticated, subscribeController.getNotifications)
 
 module.exports = router
