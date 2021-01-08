@@ -108,7 +108,7 @@ module.exports = (io) => {
           const promises = subscribers.map((data) => {
             return Notification.create({
               senderId: noti.senderId,
-              titleData: noti.messageData,
+              messageData: noti.messageData,
               recipientId: data.subscriberId
             })
           })
