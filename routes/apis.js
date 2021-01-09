@@ -8,6 +8,9 @@ const helpers = require('../_helpers')
 
 const authenticated = function (req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (err) {
+      console.log(err)
+    }
     if (!user) {
       return res
         .status(401)
@@ -35,32 +38,31 @@ const followshipController = require('../controllers/followshipController')
 const chatController = require('../controllers/chatController')
 const subscribeController = require('../controllers/subscribeController')
 
-
-//登入登出註冊
+// 登入登出註冊
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
 router.get('/', authenticated, (req, res) => res.render('tweets'))
 router.get('/get_current_user', authenticated, userController.getCurrentUser)
 
-//tweets
+// tweets
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.put('/tweets/:tweet_id', authenticated, tweetController.putTweet)
 router.delete('/tweets/:tweet_id', authenticated, tweetController.deleteSelfTweet)
 
-//replies
+// replies
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 router.get('/replies/:reply_id', authenticated, replyController.getSingleReply)
 router.put('/replies/:reply_id', authenticated, replyController.putReply)
 router.delete('/replies/:reply_id', authenticated, replyController.deleteReply)
 
-//like
+// like
 router.post('/tweets/:id/like', authenticated, userController.likeTweet)
 router.post('/tweets/:id/unlike', authenticated, userController.unlikeTweet)
 
-//user
+// user
 
 router.get('/users/top', authenticated, userController.getTopUsers)
 
@@ -75,7 +77,7 @@ router.get('/users/:id/setting', authenticated, userController.getSettingPage)
 router.put('/users/:id/setting', authenticated, userController.putSetting)
 router.get('/users/:id', authenticated, userController.getProfile)
 router.get('/users', authenticated, userController.getUsers)
-//followship
+// followship
 router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
 
@@ -85,7 +87,7 @@ router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.g
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
-//chat
+// chat
 router.get('/chatroom', authenticated, chatController.getChatRoom)
 // router.post('/chatroom', authenticated, chatController.postChatRoom)
 router.delete('/chatroom', authenticated, chatController.deleteChatRoom)
@@ -93,9 +95,10 @@ router.post('/chatroom/msg', authenticated, chatController.postMessage)
 router.put('/chatroom/read', authenticated, chatController.readMessages)
 router.get('/chatroom/unread', authenticated, chatController.getUnreadMessages)
 
-//subscribe
+// subscribe
 router.post('/subscribes', authenticated, subscribeController.addSubscribing)
 router.delete('/subscribes/:subscribingId', authenticated, subscribeController.removeSubscribing)
+router.put('/notifications/read', authenticated, subscribeController.readNotifications)
 router.get('/notifications', authenticated, subscribeController.getNotifications)
 
 module.exports = router

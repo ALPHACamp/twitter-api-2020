@@ -45,6 +45,13 @@ const subscribeServices = {
       })
       return callback(notifications)
     })
+  },
+  readNotifications: (req, res, callback) => {
+    const USERId = req.body.id
+    Notification.update({ isRead: true }, { where: { recipientId: USERId } })
+      .then(() => {
+        return callback({ status: 'success', message: 'notifications was successfully to read' })
+      })
   }
 }
 
