@@ -40,7 +40,7 @@ const userController = {
         message: 'ok',
         token: token,
         user: {
-          id: user.id, account: user.account, name: user.name, email: user.email, role: user.role, avatar: user.avatar, introduction: user.introduction
+          id: user.id, account: user.account, name: user.name, email: user.email, role: user.role, avatar: user.avatar, cover: user.cover, introduction: user.introduction
         }
       })
     })
