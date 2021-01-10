@@ -6,7 +6,6 @@ const User = db.User
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
-const Notification = db.Notification
 const Subscribe = db.Subscribe
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -45,18 +44,20 @@ const userServices = {
   },
   putProfile: (req, res, callback) => {
     const USERID = helpers.getUser(req).id
-    const { files } = req || {}
-    console.log(files)
+    const { files } = req.files || {}
 
     if (!req.body.name) {
       callback({ status: 'error', message: '請輸入name!' })
     }
 
     if (files) {
-      if (files['cover'] && !files['avatar']) {
-        const cover = files['cover'][0] //==file
-        imgur.setClientID(IMGUR_CLIENT_ID);
+      if (files.cover && !files.avatar) {
+        const cover = files.cover[0]
+        imgur.setClientID(IMGUR_CLIENT_ID)
         imgur.upload(cover.path, (err, img) => {
+          if (err) {
+            return
+          }
           return User.findByPk(USERID)
             .then((user) => {
               user.update({
@@ -68,10 +69,13 @@ const userServices = {
               })
             })
         })
-      } else if (req.files['avatar'] && !req.files['cover']) {
-        const avatar = req.files['avatar'][0]
-        imgur.setClientID(IMGUR_CLIENT_ID);
+      } else if (req.files.avatar && !req.files.cover) {
+        const avatar = req.files.avatar[0]
+        imgur.setClientID(IMGUR_CLIENT_ID)
         imgur.upload(avatar.path, (err, img) => {
+          if (err) {
+            return
+          }
           return User.findByPk(USERID)
             .then((user) => {
               user.update({
@@ -83,32 +87,34 @@ const userServices = {
               })
             })
         })
-      } else if (req.files['avatar'] && req.files['cover']) {
-        const avatar = req.files['avatar'][0]
-        const cover = req.files['cover'][0]
+      } else if (req.files.avatar && req.files.cover) {
+        const avatar = req.files.avatar[0]
+        const cover = req.files.cover[0]
         imgur.setClientID(IMGUR_CLIENT_ID)
         return Promise.all([
           imgur.upload(avatar.path, (err, img) => {
+            if (err) {
+              return
+            }
             return User.findByPk(USERID)
               .then((user) => {
                 user.update({
                   name: req.body.name,
                   introduction: req.body.introduction,
                   avatar: avatar ? img.data.link : null
-                }).then((user) => {
-                  callback({ status: 'success', message: 'user was successfully to update' })
                 })
               })
           }),
           imgur.upload(cover.path, (err, img) => {
+            if (err) {
+              return
+            }
             return User.findByPk(USERID)
               .then((user) => {
                 user.update({
                   name: req.body.name,
                   introduction: req.body.introduction,
                   cover: cover ? img.data.link : null
-                }).then((user) => {
-                  callback({ status: 'success', message: 'user was successfully to update' })
                 })
               })
           })
@@ -154,7 +160,7 @@ const userServices = {
   getFollowings: (req, res, callback) => {
     return Promise.all([
       Followship.findAndCountAll({
-        where: { followerId: req.params.id },
+        where: { followerId: req.params.id }
       }),
       User.findOne({
         where: { id: req.params.id },
@@ -167,9 +173,9 @@ const userServices = {
         isFollowed: helpers.getUser(req).Followings.map(r => r.id).includes(d.followingId)
       }))
       return callback([
-        data[0], //為了過測試使用
+        data[0], // 為了過測試使用
         followings,
-        user,
+        user
       ])
     })
   },
