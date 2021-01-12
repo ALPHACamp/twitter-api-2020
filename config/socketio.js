@@ -109,9 +109,6 @@ module.exports = (io) => {
       Reply.findAll({ where: { UserId: userId } })
         .then(replies => {
           replies.forEach(data => {
-            console.log(data)
-            console.log('--------------')
-            console.log('data.TweetId', data.TweetId)
             socket.join(`tweet_${data.TweetId}`)
           })
         })
