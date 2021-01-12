@@ -1,4 +1,3 @@
-
 const db = require('../models')
 const User = db.User
 const Chat = db.Chat
@@ -145,27 +144,32 @@ module.exports = (io) => {
 
     // ***
     socket.on('reply notification', (replies) => { // 使用者回覆別人的推文時，會 emit reply notification 回後端
-      console.log(replies)
       const senderId = replies.userId
       const comment = replies.comment
-      replies.rows.forEach(reply => {
-        console.log('reply', reply)
+      filterreplies = replies.rows.filter((obj, pos, arr) => {
+        return arr.map(mapObj => mapObj.UserId).indexOf(obj.UserId) === pos;
+      })
+      filterreplies.forEach(reply => {
         return Promise.all([
           Tweet.findByPk(reply.TweetId, { include: [User] }),
           Reply.findOne({ where: { UserId: senderId }, include: [User] })
         ])
           .then(([tweet, replyUser]) => {
-            Notification.create({
-              senderId: senderId,
-              titleData: `${replyUser.dataValues.User.name}回覆了${tweet.User.name}的貼文`,
-              contentData: comment,
-              recipientId: `${reply.UserId}`,
-              url: `/reply_list/${reply.TweetId}`,
-              type: 'reply'
-            })
+            if (senderId !== reply.UserId) {
+              Notification.create({
+                senderId: senderId,
+                titleData: `${replyUser.dataValues.User.name}回覆了${tweet.User.name}的貼文`,
+                contentData: comment,
+                recipientId: reply.UserId,
+                url: `/reply_list/${reply.TweetId}`,
+                type: 'reply'
+              })
+            }
+          })
+          .then(() => {
+            io.to(`tweet_${reply.TweetId}`).emit('get notification')
           })
       })
-
       // 用前端回傳的該貼文所有回覆，產生一堆通知給回覆過該貼文的人，最後再通知他們
       //
       //
