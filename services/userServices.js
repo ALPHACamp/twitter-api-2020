@@ -167,16 +167,14 @@ const userServices = {
         include: [{ model: User, as: 'Followings' }]
       })
     ]).then(([followings, user]) => {
-      const data = followings.rows
-      followings.rows = followings.rows.map(d => ({
+      followings = followings.rows.map(d => ({
         ...d.dataValues,
         isFollowed: helpers.getUser(req).Followings.map(r => r.id).includes(d.followingId)
       }))
-      return callback([
-        data[0], // 為了過測試使用
-        followings,
-        user
-      ])
+      return callback(
+          followings,
+          user
+      )
     })
   },
 
@@ -190,16 +188,14 @@ const userServices = {
         include: [{ model: User, as: 'Followers' }]
       })
     ]).then(([followers, users]) => {
-      const data = followers.rows
-      followers.rows = followers.rows.map(d => ({
+      followers = followers.rows.map(d => ({
         ...d.dataValues,
         isFollowed: helpers.getUser(req).Followings.map(r => r.id).includes(d.followerId)
       }))
-      return callback([
-        data[0],
+      return callback(
         followers,
         users
-      ])
+      )
     })
   },
 
