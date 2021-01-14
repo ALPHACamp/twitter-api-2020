@@ -166,15 +166,23 @@ const userServices = {
         where: { id: req.params.id },
         include: [{ model: User, as: 'Followings' }]
       })
-    ]).then(([followings, user]) => {
+    ]).then(([followings, users]) => {
       followings = followings.rows.map(d => ({
         ...d.dataValues,
         isFollowed: helpers.getUser(req).Followings.map(r => r.id).includes(d.followingId)
       }))
-      return callback(
-          followings,
-          user
-      )
+      followings.forEach(following => {
+        users.Followings.forEach(user => {
+          if (user.id === following.followingId) {
+            following.avatar = user.avatar
+            following.id = user.id
+            following.account = user.account
+            following.introduction = user.introduction
+            following.name = user.name
+          }
+        })
+      })
+      return callback(followings)
     })
   },
 
@@ -192,10 +200,18 @@ const userServices = {
         ...d.dataValues,
         isFollowed: helpers.getUser(req).Followings.map(r => r.id).includes(d.followerId)
       }))
-      return callback(
-        followers,
-        users
-      )
+      followers.forEach(follower => {
+        users.Followers.forEach(user => {
+          if (user.id === follower.followerId) {
+            follower.avatar = user.avatar
+            follower.id = user.id
+            follower.account = user.account
+            follower.introduction = user.introduction
+            follower.name = user.name
+          }
+        })
+      })
+      return callback(followers)
     })
   },
 
