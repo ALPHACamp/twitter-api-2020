@@ -9,6 +9,8 @@ function authenticated(req, res, next){
   // passport.authenticate('jwt', { ses...
 };
 
+console.log('test')
+
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
