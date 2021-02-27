@@ -5,6 +5,7 @@ module.exports = {
     const password = '12345678'
     await queryInterface.bulkInsert('Users', [
       {
+        id : 1,
         email: 'root@example.com',
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         name: 'root',
@@ -16,11 +17,12 @@ module.exports = {
       },
       ...(Array.from({ length: 5 }).map((_, i) => 
         ({
-          email: `user${i}@example.com`,
+          id: i + 2,
+          email: `user${i + 1}@example.com`,
           password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-          name: `Johnny${i}`,
+          name: `Johnny${i + 1}`,
           avatar: null,
-          introduction: `I am Johnny${i}`,
+          introduction: `I am Johnny${i + 1}`,
           role: 'user',
           createdAt: new Date(),
           updatedAt: new Date()
