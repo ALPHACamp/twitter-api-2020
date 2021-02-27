@@ -17,7 +17,7 @@ module.exports = {
       },
       ...(Array.from({ length: 5 }).map((_, i) => 
         ({
-          id: i + 2,
+          id: 10 * (i + 1) + 1,
           email: `user${i + 1}@example.com`,
           password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
           name: `Johnny${i + 1}`,
