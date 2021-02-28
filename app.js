@@ -6,7 +6,7 @@ const express = require('express')
 const routes = require('./routes/index')
 const handlebars = require('express-handlebars')
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
