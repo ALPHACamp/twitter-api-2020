@@ -29,7 +29,7 @@ describe('# user requests', () => {
             db.User.findByPk(1).then(user => {
               user.account.should.equal('User1');
               user.email.should.equal('User1@example.com');
-              return done();
+              done();
             })
           })
       });
