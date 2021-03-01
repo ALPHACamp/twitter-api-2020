@@ -1,25 +1,23 @@
-'use strict'
+'use strict';
 const faker = require('faker')
-const bcrypt = require('bcryptjs')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    // 建立使用者
-    const users = Array.from({ length: 10 }).map((d, i) =>
-    ({
-      name: faker.name.findName(),
-      account: `user${i}`,
-      email: `user${i}@example.com`,
-      password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      avatar:`https://loremflickr.com/320/240/dog/?lock=${Math.random() * 50}`,
-      cover:`https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 50}`,
-      introduction: faker.lorem.text(),
-      role:'測試',
-      isAdmin: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    })
-    )
-    // 建立管理者
+    const bcrypt = require('bcryptjs')
+    const users = []
+    for (let i = 1; i < 16; i++) {
+      users.push({
+        name: `user${i}`,
+        account: `user${i}`,
+        email: `user${i}@example.com`,
+        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+        role: 'user',
+        introduction: faker.lorem.text(),
+        avatar: `https://loremflickr.com/320/240/corgi?lock=${Math.floor(Math.random() * 50)}`,
+        cover: `https://loremflickr.com/320/240/corgi?lock=${Math.floor(Math.random() * 50)}`,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+    }
     const admin = [{
       name: 'root',
       account: 'root',
@@ -27,18 +25,16 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
       role: 'admin',
       introduction: faker.lorem.text(),
-      avatar:`https://loremflickr.com/320/240/dog/?lock=${Math.random() * 50}`,
-      cover:`https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 50}`,
+      avatar: `https://loremflickr.com/320/240/corgi?lock=${Math.floor(Math.random() * 50)}`,
+      cover: `https://loremflickr.com/320/240/corgi?lock=${Math.floor(Math.random() * 50)}`,
       createdAt: new Date(),
       updatedAt: new Date()
     }]
-    // 將兩筆陣列相接
-    const startSeeders = users.concat(admin)
-    // 開始建立資料
-    await queryInterface.bulkInsert('Users', startSeeders)
+    const userSeeds = admin.concat(users)
+    await queryInterface.bulkInsert('Users', userSeeds)
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Users', null, {})
   }
-}
+};
