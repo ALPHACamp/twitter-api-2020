@@ -21,6 +21,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     role: {
       type: DataTypes.STRING
+    },
+    cover: {
+      type: DataTypes.STRING
     }
   }, {})
   User.associate = function (models) {
