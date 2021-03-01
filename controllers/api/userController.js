@@ -24,7 +24,19 @@ const userController = {
       })
     }
   },
-  signIn: (req, res) => { },
+  signIn: (req, res) => {
+    if (!req.body.email || !req.body.password) {
+      return res.json({ status: 'error', message: "required fields didn't exist" })
+    }
+
+    const { email, password } = req.body
+    User.findOne({ where: { email: email } }).then(user => {
+      if (!user) return res.json({ status: 'error', message: "user not found" })
+      if (!bcrypt.compareSync(password, user.password)) return res.json({ status: 'error', message: "password is not correct" })
+      return res.json({ status: 'success', message: "successfully login" })
+
+    })
+  },
   getUsers: (req, res) => { },
   getUser: (req, res) => { },
   getUserTweets: (req, res) => { },
