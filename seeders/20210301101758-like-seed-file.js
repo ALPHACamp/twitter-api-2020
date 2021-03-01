@@ -11,19 +11,18 @@ module.exports = {
     const usersId = users.map(user => user.id)
     const tweetId = tweet.map(tweet => tweet.id)
 
-    const reply = Array.from({ length: 10 }).map((item, index) =>
+    const likes = Array.from({ length: 10 }).map((item, index) =>
     ({
       UserId: usersId[index],
       TweetId: tweetId[index],
-      comment: faker.lorem.text(),
       createdAt: new Date(),
       updatedAt: new Date()
     })
     )
-    await queryInterface.bulkInsert('Replies', reply)
+    await queryInterface.bulkInsert('Likes', likes)
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Replies', null, {})
+    await queryInterface.bulkDelete('Likes', null, {})
   }
 }
