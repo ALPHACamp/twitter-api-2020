@@ -4,16 +4,16 @@ const db = require('../../models/index')
 const User = db.User
 
 module.exports = {
-  register: async (req, res) => { //body: email, password, passwordCheck
-    const { account, email, password, passwordCheck, name } = req.body
+  register: async (req, res) => { //body: email, password, checkPassword
+    const { account, email, password, checkPassword, name } = req.body
     try {
       //make sure no empty input
-      if (!account || !email || !password || !passwordCheck || !name) return res.status(400).json({ status: 'error', message:'所有欄位都是必填的!!!' })
+      if (!account || !email || !password || !checkPassword || !name) return res.status(400).json({ status: 'error', message:'所有欄位都是必填的!!!' })
       //check password confirmation
-      if (passwordCheck !== password) return res.status(400).json({ status: 'error', message:'兩次密碼輸入不同!!!', name, account, email, password, passwordCheck })
+      if (checkPassword !== password) return res.status(400).json({ status: 'error', message:'兩次密碼輸入不同!!!', name, account, email, password, checkPassword })
       //check if account used already
       const existedAccount = await User.findOne({ where: { account } }).catch((err) => console.log('existedAccount: ', err))
-      if (existedAccount) return res.status(400).json({ status: 'error', message:'此帳號已被使用!!!', name, account, email, password, passwordCheck })
+      if (existedAccount) return res.status(400).json({ status: 'error', message:'此帳號已被使用!!!', name, account, email, password, checkPassword })
       //account hasn't been used ^__^ create user
       const salt = bcrypt.genSaltSync(10)
       const hashedPassword = bcrypt.hashSync(password, salt)
@@ -31,11 +31,11 @@ module.exports = {
         case true:
           return res.json({ status: 'success', message:'成功創建帳號!!!' })
         case false: 
-          return res.status(400).json({ status: 'error', message:'創建帳號失敗，請稍後再試，有任何問題請聯繫客服人員。', name, account, email, password, passwordCheck })
+          return res.status(400).json({ status: 'error', message:'創建帳號失敗，請稍後再試，有任何問題請聯繫客服人員。', name, account, email, password, checkPassword })
       }
     } catch(err) {
       console.log('catch block: ', err)
-      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', name, account, email, password, passwordCheck })
+      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', name, account, email, password, checkPassword })
     }
   },
 
