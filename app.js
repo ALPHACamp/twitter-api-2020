@@ -3,20 +3,18 @@ const express = require('express')
 const helpers = require('./_helpers')
 const routes = require('./routes')
 const bodyParser = require('body-parser')
+const passport = require('./config/passport')
 const app = express()
 const port = 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated (req, res, next) {
-  // passport.authenticate('jwt', { ses...
-}
+
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use(passport.initialize())
 // routes
 app.use('/', routes)
 
-app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
