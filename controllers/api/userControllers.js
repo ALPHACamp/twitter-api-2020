@@ -13,18 +13,16 @@ const JwtStrategy = passportJWT.Strategy
 let userController = {
 
   signUp: (req, res) => {
-    const { account, name, email, password, passwordCheck } = req.body
+    const { account, name, email, password, checkPassword } = req.body
     if (!account || !name || !email || !password) {
       return res.json({ status: 'error', message: '所有欄位為必填' })
     }
-    if (passwordCheck !== password) {
+    if (checkPassword !== password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     } else {
       User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
         .then(user => {
-          console.log('======')
-          console.log('uesr', user)
-          console.log('======')
+          console.log('user~~~', user)
           if (user) {
             if (user.email === email) {
               return res.json({ status: 'error', message: 'email已被註冊' })
@@ -32,7 +30,7 @@ let userController = {
               return res.json({ status: 'error', message: 'account已被註冊' })
             }
           } else {
-            User.create({
+            return User.create({
               name,
               email,
               account,
@@ -41,13 +39,15 @@ let userController = {
             })
           }
         })
-        .then(res.json({ status: 'success', message: '成功註冊帳號!' }))
+        .then(user => {
+          res.json({ status: 'success', message: '成功註冊帳號!' })
+        })
+        .catch(error => res.send(error))
     }
   },
 
 
   signIn: (req, res) => {
-
     if (!req.body.account || !req.body.password) {
       return res.json({ status: 'error', message: "required fields didn't exist" })
     }
@@ -73,7 +73,23 @@ let userController = {
           }
         })
       })
-  }
+      .catch(error => res.send(error))
+  },
+
+  getCurrentUser: (req, res) => {
+    const user = helpers.getUser(req)
+    return res.json(user)
+  },
+
+  getUser: (req, res) => {
+    const id = req.params.id
+    User.findByPk(id)
+      .then(user => {
+        return res.json(user)
+      })
+  },
+
+
 }
 
 module.exports = userController
