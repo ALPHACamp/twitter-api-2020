@@ -7,5 +7,6 @@ const replyController = require('../controllers/api/replyController')
 const tweetController = require('../controllers/api/tweetController')
 const userController = require('../controllers/api/userController')
 
+router.post('/users', userController.signUp)
 
 module.exports = router
