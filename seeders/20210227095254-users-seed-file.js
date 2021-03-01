@@ -6,6 +6,7 @@ module.exports = {
     await queryInterface.bulkInsert('Users', [
       {
         id : 1,
+        account: 'root',
         email: 'root@example.com',
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         name: 'root',
@@ -18,6 +19,7 @@ module.exports = {
       ...(Array.from({ length: 5 }).map((_, i) => 
         ({
           id: 10 * (i + 1) + 1,
+          account: `user${i + 1}`,
           email: `user${i + 1}@example.com`,
           password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
           name: `Johnny${i + 1}`,
