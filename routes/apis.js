@@ -8,5 +8,6 @@ const tweetController = require('../controllers/api/tweetController')
 const userController = require('../controllers/api/userController')
 
 router.post('/users', userController.signUp)
+router.post('/users/signIn', userController.signIn)
 
 module.exports = router

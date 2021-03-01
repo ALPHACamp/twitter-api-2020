@@ -2,6 +2,11 @@ const db = require('../../models')
 const User = db.User
 const bcrypt = require('bcryptjs')
 
+//JWT
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signUp: (req, res) => {
@@ -31,10 +36,22 @@ const userController = {
 
     const { email, password } = req.body
     User.findOne({ where: { email: email } }).then(user => {
-      if (!user) return res.json({ status: 'error', message: "user not found" })
-      if (!bcrypt.compareSync(password, user.password)) return res.json({ status: 'error', message: "password is not correct" })
-      return res.json({ status: 'success', message: "successfully login" })
-
+      if (!user) return res.status(401).json({ status: 'error', message: "user not found" })
+      if (!bcrypt.compareSync(password, user.password)) return res.status(401).json({ status: 'error', message: "password is not correct" })
+      //簽發token
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, 'twitterKiller') //之後寫入dotenv
+      return res.json({
+        status: 'success',
+        message: 'ok',
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      })
     })
   },
   getUsers: (req, res) => { },
