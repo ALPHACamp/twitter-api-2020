@@ -1,6 +1,9 @@
 const express = require('express')
 const router = express.Router()
 
-router.get('/', (req, res) => res.send('test - followships'))
+const followshipController = require('../../controllers/api/followshipController')
+
+router.post('/', followshipController.follow)
+router.delete('/:followingId', followshipController.unfollow)
 
 module.exports = router

@@ -10,6 +10,8 @@ function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
 
+app.use(express.urlencoded({ extended: true }))
+
 // routes
 app.use('/', routes)
 
