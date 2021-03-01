@@ -80,8 +80,10 @@ let userController = {
     } catch (err) {
       res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後' })
     }
-
-  }
+  },
+  // getUser: (req, res) {
+  //   return User.findByPk()
+  // }
 }
 
 module.exports = userController
