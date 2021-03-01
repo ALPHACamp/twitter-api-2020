@@ -41,9 +41,6 @@ let userController = {
   },
   // 註冊
   signUp: async (req, res) => {
-    const users = await User.findAll({ raw: true, nest: true, where: { isAdmin: false } })
-    const usersId = users.map(user => user.id)
-    console.log(usersId)
     // 取回資料
     const { account, name, email, password, checkPassword } = req.body
     // 回傳user註冊資料

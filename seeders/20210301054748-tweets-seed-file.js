@@ -1,7 +1,6 @@
 'use strict'
 const faker = require('faker')
-const db = require('../models/index')
-const User = db.User
+const { User } = require('../models/index')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {

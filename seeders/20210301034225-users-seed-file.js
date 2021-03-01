@@ -6,6 +6,7 @@ module.exports = {
     // 建立使用者
     const users = Array.from({ length: 10 }).map((d, i) =>
     ({
+      id: i ,
       name: faker.name.findName(),
       account: `user${i}`,
       email: `user${i}@example.com`,
