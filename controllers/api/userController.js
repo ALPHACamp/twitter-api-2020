@@ -35,7 +35,7 @@ module.exports = {
       }
     } catch(err) {
       console.log('catch block: ', err)
-      return res.status(400).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', name, account, email, password, passwordCheck })
+      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', name, account, email, password, passwordCheck })
     }
   },
 
@@ -61,7 +61,7 @@ module.exports = {
       })
     } catch(err) {
       console.log('catch block: ', err)
-      return res.status(400).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', account, password })
+      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', account, password })
     }
   }
 }
