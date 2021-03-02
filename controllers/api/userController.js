@@ -13,93 +13,95 @@ module.exports = {
     try {
       const { id } = req.params
       //get user
-      let user = await User.findOne({ where: { id } }).catch((err) => console.log('getUser: ', err))
+      const user = await User.findOne({ where: { id }, attributes: { exclude: ['password'] } }).catch((err) => console.log('getUser: ', err))
       //check if user exists
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
-      user = user.toJSON()
-      //check role
-      const role = helpers.getUser(req).role
-      if(role === 'admin') {
-        return res.json(user)
-      } else if (role === 'user') {
-        return res.json({ ...user, password: '' })
-      }
+      return res.json(user)
 
     } catch(err) {
       console.log('catch block: ', err)
-      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
   getTweetsOfUser: async (req, res) => {
     try {
-      const { id } = req.params
-      //get user and tweets //if using raw: true with findOne, will only get one associated data
-      let user = await User.findOne({
-        where: { id, role: 'user' },
-        include: [Tweet],
-        order: [[Tweet, 'createdAt', 'DESC']]
+      const { id:UserId } = req.params
+      //get tweets //if using raw: true with findAll, will only get one associated data
+      const tweets = await Tweet.findAll({
+        where: { UserId },
+        nest: true,
+        include: [
+          //user who posted
+          { model: User, attributes: { exclude: ['password'] } },
+          //for reply count 
+          { model: Reply },
+          //for like count 
+          { model: Like }
+        ],
+        order: [['createdAt', 'DESC']]
       }).catch((err) => console.log('getTweetsOfUser: ', err))
-      // check if user exists
-      if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
-      user = user.toJSON()
-      //check role
-      const role = helpers.getUser(req).role
-      if(role === 'admin') {
-        return res.json(user)
-      } else if (role === 'user') {
-        return res.json({ ...user, password: '' })
-      }
+      // check if tweets is an array
+      if (!Array.isArray(tweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的推文。' })
+      return res.json(tweets)
 
     } catch(err) {
       console.log('catch block: ', err)
-      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
   getRepliedTweetsOfUser: async (req, res) => {
     try {
-      const { id } = req.params
-      //get user and replied tweets
-      let user = await User.findOne({
-        where: { id, role: 'user' },
-        include: [{ model: Reply, include: [Tweet] }],
-        order: [[Reply, 'createdAt', 'DESC']]
+      const { id:UserId } = req.params
+      //get replied tweets
+      const repliedTweets = await Reply.findAll({
+        where: { UserId },
+        nest: true,
+        include: [
+          //user who replies
+          { model: User, attributes: { exclude: ['password'] } },
+          { //tweet to which the reply belongs
+            model: Tweet, 
+            include: [
+              //user who posted the tweet
+              { model: User, attributes: { exclude: ['password'] } },
+              //for reply count
+              { model: Reply },
+              //for like count 
+              { model: Like }
+            ] 
+          }
+        ],
+        order: [['createdAt', 'DESC']]
       }).catch((err) => console.log('getRepliedTweetsOfUser: ', err))
-      // check if user exists
-      if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
-      user = user.toJSON()
-      //check role
-      const role = helpers.getUser(req).role
-      if(role === 'admin') {
-        return res.json(user)
-      } else if (role === 'user') {
-        return res.json({ ...user, password: '' })
-      }
+      // check if repliedTweets is an array
+      if (!Array.isArray(repliedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶回覆過的推文。' })
+      return res.json(repliedTweets)
 
     } catch(err) {
       console.log('catch block: ', err)
-      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
   getLikedTweetsOfUser: async (req, res) => {
     try {
       const { id:UserId  } = req.params
-      //get likes and tweets //if using raw: true with findAll, will only get one associated data
-      let likedTweets = await Like.findAll({
+      //get liked tweets
+      const likedTweets = await Like.findAll({
         where: { UserId },
         nest: true,
         include: [
+          { model: User, attributes: { exclude: ['password'] } },
           { 
             model: Tweet, 
             include: [
-              { model: Reply, include: [
-                { 
-                  model: User, 
-                  attributes: { exclude: ['password'] }
-                }
-              ]}, 
+              //for reply count
+              { model: Reply }, 
+              //for like count 
+              { model: Like },
+              //user who posted the tweet
               { model: User, attributes: { exclude: ['password'] } }
             ] 
           }
@@ -107,16 +109,16 @@ module.exports = {
         order: [['createdAt', 'DESC']]
       }).catch((err) => console.log('getLikedTweetsOfUser: ', err))
       // check if likedTweets is an array
-      if (!Array.isArray(likedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶喜歡過的貼文。' })
+      if (!Array.isArray(likedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶喜歡過的推文。' })
       return res.json(likedTweets)
 
     } catch(err) {
       console.log('catch block: ', err)
-      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
-  register: async (req, res) => { //body: email, password, checkPassword
+  register: async (req, res) => {
     const { account, email, password, checkPassword, name } = req.body
     try {
       //make sure no empty input
@@ -143,7 +145,7 @@ module.exports = {
         case true:
           return res.json({ status: 'success', message:'成功創建帳號!!!' })
         case false: 
-          return res.status(400).json({ status: 'error', message:'創建帳號失敗，請稍後再試，有任何問題請聯繫客服人員。', name, account, email, password, checkPassword })
+          return res.status(400).json({ status: 'error', message: '創建帳號失敗，請稍後再試，有任何問題請聯繫客服人員。', name, account, email, password, checkPassword })
       }
     } catch(err) {
       console.log('catch block: ', err)
@@ -173,7 +175,7 @@ module.exports = {
       })
     } catch(err) {
       console.log('catch block: ', err)
-      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', account, password })
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', account, password })
     }
   }
 }
