@@ -31,7 +31,6 @@ const tweetController = {
   },
 
   postTweets: (req, res) => {
-
     if (req.body.description === '') {
       return res.json({ status: 'error', message: "內容不得為空白" })
     }
@@ -40,8 +39,9 @@ const tweetController = {
     }
     Tweet.create({
       UserId: helpers.getUser(req).id,
-      description: req.body.description,
+      description: req.body.description
     })
+    return res.json({ status: 'success', message: '成功推文!' })
   }
 }
 
