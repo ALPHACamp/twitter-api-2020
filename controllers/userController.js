@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs')
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Followship, Like, Reply } = require('../models')
+const fs = require('fs')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -80,7 +83,7 @@ let userController = {
       res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後' })
     }
   },
-  // 個人資料
+  // 瀏覽個人資料
   getUser: (req, res) => {
     return Promise.all([
       Followship.findAndCountAll({ where: { followingId: req.params.id } }),
@@ -88,16 +91,69 @@ let userController = {
       Like.findAndCountAll({ where: { UserId: req.params.id } }),
       Reply.findAndCountAll({ where: { UserId: req.params.id } })
     ])
-    // 在資料庫端計算好 count 在返回
-    .then(([follower, following, LikedTweets, ReplyTweets]) => {
-      const user = req.user
-      user.dataValues.follower = follower.count
-      user.dataValues.following = following.count
-      user.dataValues.LikedTweets = LikedTweets.count
-      user.dataValues.ReplyTweets = ReplyTweets.count
-      return res.status(200).json({ user })
-    })
+      // 在資料庫端計算好 count 在返回
+      .then(([follower, following, LikedTweets, ReplyTweets]) => {
+        const user = req.user
+        user.dataValues.follower = follower.count
+        user.dataValues.following = following.count
+        user.dataValues.LikedTweets = LikedTweets.count
+        user.dataValues.ReplyTweets = ReplyTweets.count
+        return res.status(200).json({ user })
+      })
+      .catch(err => {
+        return res.status(500).json({ status: 'error', message: '個人資料-伺服器錯誤請稍後' })
+      })
+  },
+  // 編輯個人資料
+  putUser: async (req, res) => {
+    const { name, introduction } = req.body
+    const userData = introduction
+    // 判斷是不是登入使用者
+    if (Number(req.user.id) !== Number(req.params.id)) {
+      return res.json({ status: 'error', message: '無訪問權限' })
+    }
+    // 資料是否完整
+    if (!req.body.name) {
+      return res.json({ status: 'error', message: '請輸入名稱', userData })
+    }
+    // 建立上傳照片Functions
+    function myImgurUpload(uploadFile) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      return imgur.uploadFile(uploadFile)
+    }
+    try {
+      const { files } = req
+      if (files) {
+        // 撈出使用者資料
+        const user = await User.findByPk(req.params.id)
+        // 解構賦值 
+        let [cover, avatar] = [user.cover, user.avatar]
+
+        // 依序判斷 avatar & cover 是否存在 , 如果有就上傳  
+        if (req.files.cover) {
+          cover = await myImgurUpload(req.files.cover[0].path)
+        }
+        if (req.files.avatar) {
+          avatar = await myImgurUpload(req.files.cover[0].path)
+        }
+        
+        await user.update({
+          name, 
+          introduction, 
+          cover: cover.link, 
+          avatar: avatar.link
+        })
+        return res.status(200).json({ status: 'success', message: '修改成功' })
+      }
+      // 無照片
+      user.update({ name, introduction })
+      return res.status(200).json({ status: 'success', message: '修改成功' })
+
+    } catch (err) {
+      return res.status(500).json({ status: 'error', message: '編輯個人資料-伺服器錯誤請稍後' })
+    }
   }
+
 }
 
 module.exports = userController
