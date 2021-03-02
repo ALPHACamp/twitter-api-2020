@@ -1,8 +1,5 @@
 const db = require('../models')
-const Tweet = db.Tweet
-const User = db.User
-const Reply = db.Reply
-const Like = db.Like
+const { Tweet, User, Reply, Like } = db
 
 
 const adminService = {
@@ -23,7 +20,14 @@ const adminService = {
       callback({ status: 'error', message: 'codeStatus 500' })
     }
   },
-  getTweets: (req, res, callback) => { },
+  getTweets: async (req, res, callback) => {
+    try {
+      const tweets = await Tweet.findAll({ include: [{ model: User }] })
+      callback({ tweets })
+    } catch (err) {
+      callback({ status: 'error', message: 'codeStatus 500' })
+    }
+  },
   deleteTweets: (req, res, callback) => { }
 }
 

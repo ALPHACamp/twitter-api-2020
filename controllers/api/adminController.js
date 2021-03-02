@@ -7,11 +7,11 @@ const adminService = require('../../services/adminService')
 const adminController = {
   signIn: (req, res) => { },
   getUsers: (req, res) => {
-    adminService.getUsers(req, res, (data) => {
-      res.json(data)
-    })
+    adminService.getUsers(req, res, (data) => res.json(data))
   },
-  getTweets: (req, res) => { },
+  getTweets: (req, res) => {
+    adminService.getTweets(req, res, (data) => res.json(data))
+  },
   deleteTweets: (req, res) => { }
 }
 
