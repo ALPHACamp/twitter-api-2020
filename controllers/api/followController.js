@@ -1,9 +1,10 @@
 const db = require('../../models')
 const Followship = db.Followship
+const followService = require('../../services/followService')
 
-const replyController = {
+const followController = {
   addFollowing: (req, res) => { },
   removeFollowing: (req, res) => { }
 }
 
-module.exports = replyController
+module.exports = followController
