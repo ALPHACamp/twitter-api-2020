@@ -3,6 +3,7 @@ const router = express.Router()
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const userController = require('../controllers/api/userControllers')
+const tweetController = require('../controllers/api/tweetControllers')
 
 
 const authenticated = (req, res, next) => {
@@ -27,9 +28,15 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 
+
+//user
 router.get('/users/:id', authenticated, userController.getUser)
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
+
+//tweet
+router.get('/tweets/:id', tweetController.getTweet)
+router.get('/tweets', tweetController.getTweets)
 
 
 
