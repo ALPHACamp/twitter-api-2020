@@ -1,13 +1,15 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { sequelize } = require('../../models/index')
 const db = require('../../models/index')
 const helpers = require('../../_helpers')
 const User = db.User
+const Tweet = db.Tweet
 
 module.exports = {
   getUser: async (req, res) => {
-    const { id } = req.params
     try {
+      const { id } = req.params
       //get user
       let user = await User.findOne({ where: { id } }).catch((err) => console.log('getUser: ', err))
       //check if user exists
@@ -15,6 +17,32 @@ module.exports = {
       user = user.toJSON()
       //check role
       const role = helpers.getUser(req).role
+      if(role === 'admin') {
+        return res.json(user)
+      } else if (role === 'user') {
+        return res.json({ ...user, password: '' })
+      }
+
+    } catch(err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  getTweetsOfUser: async (req, res) => {
+    try {
+      const { id } = req.params
+      //get user and tweets //if using raw: true with findOne, will only get one associated data
+      let user = await User.findOne({
+        where: { id },
+        include: [Tweet],
+        order: [[Tweet, 'createdAt', 'DESC']]
+      }).catch((err) => console.log('getTweetsOfUser: ', err))
+
+      // check if user exists //it seems non-existing user with associated model returns object with null values
+      if (user.id === null) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
+      user = user.toJSON()
+      role = helpers.getUser(req).role
       if(role === 'admin') {
         return res.json(user)
       } else if (role === 'user') {
