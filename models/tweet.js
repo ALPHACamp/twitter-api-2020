@@ -1,24 +1,18 @@
-'use strict'
-const {
-  Model
-} = require('sequelize')
+
+'use strict';
 module.exports = (sequelize, DataTypes) => {
-  class Tweet extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate (models) {
-      // define association here
-    }
-  };
-  Tweet.init({
-    UserId: DataTypes.INTEGER,
+  const Tweet = sequelize.define('Tweet', {
+    // id: { type: DataTypes.INTEGER, primaryKey: true },
     description: DataTypes.TEXT
-  }, {
-    sequelize,
-    modelName: 'Tweet'
-  })
-  return Tweet
-}
+
+  }, {});
+  Tweet.associate = function (models) {
+    Tweet.hasMany(models.Reply)
+    Tweet.hasMany(models.Like)
+    Tweet.belongsTo(models.User)
+
+  };
+
+  return Tweet;
+};
+
