@@ -35,8 +35,9 @@ router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
 
 //tweet
-router.get('/tweets/:id', tweetController.getTweet)
-router.get('/tweets', tweetController.getTweets)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets', authenticated, tweetController.postTweets)
 
 
 
