@@ -1,9 +1,32 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../../models/index')
+const helpers = require('../../_helpers')
 const User = db.User
 
 module.exports = {
+  getUser: async (req, res) => {
+    const { id } = req.params
+    try {
+      //get user
+      let user = await User.findOne({ where: { id } }).catch((err) => console.log('getUser: ', err))
+      //check if user exists
+      if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
+      user = user.toJSON()
+      //check role
+      const role = helpers.getUser(req).role
+      if(role === 'admin') {
+        return res.json(user)
+      } else if (role === 'user') {
+        return res.json({ ...user, password: '' })
+      }
+
+    } catch(err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
   register: async (req, res) => { //body: email, password, checkPassword
     const { account, email, password, checkPassword, name } = req.body
     try {
