@@ -1,7 +1,6 @@
 const db = require('../models')
 const User = db.User
 const bcrypt = require('bcryptjs')
-const Followship = db.Followship
 
 //JWT
 const jwt = require('jsonwebtoken')
@@ -35,11 +34,9 @@ const userService = {
     User.findAll(
       {
         where: { role: 'user' },
-        include: [
-          { model: User, as: 'Followers' }]
+        include: [{ model: User, as: 'Followers' }]
       })
       .then(users => {
-        console.log(req.user)
         users = users.map(user => ({
           ...user.dataValues,
           FollowerCount: user.Followers.length,
