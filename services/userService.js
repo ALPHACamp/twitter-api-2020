@@ -44,7 +44,6 @@ const userService = {
           FollowerCount: user.Followers.length,
           // isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
         }))
-        console.log(users)
         users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
         callback({ users: users })
       })
