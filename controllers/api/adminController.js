@@ -2,6 +2,8 @@ const db = require('../../models')
 
 const { User, Tweet } = db
 
+// @todo - add error handling
+
 const adminController = {
   getUsers: async (req, res) => {
     const users = await User.findAll()

@@ -2,15 +2,19 @@ const db = require('../../models')
 
 const { Tweet, Reply, Like } = db
 
+// @todo - add error handling
+
 const tweetController = {
+  // @todo - add relationships
   getTweets: async (req, res) => {
     const tweets = await Tweet.findAll()
-    console.log(tweets)
+    // console.log(tweets)
     return res.json(tweets)
   },
+  // @todo - add relationships
   getTweet: async (req, res) => {
     const tweet = await Tweet.findByPk(req.params.id)
-    console.log(tweet)
+    // console.log(tweet)
     return res.json(tweet)
   },
   getReplies: async (req, res) => {
