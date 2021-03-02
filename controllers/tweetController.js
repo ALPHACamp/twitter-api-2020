@@ -8,6 +8,9 @@ let tweetController = {
     getTweets: (req, res) => {
         return Tweet.findAll({
             // where: { UserId: 1 }
+            order: [
+                ['updatedAt', 'DESC']
+            ],
             include: [User]
         }).then(tweets => {
 
