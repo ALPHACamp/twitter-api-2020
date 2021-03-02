@@ -35,13 +35,12 @@ module.exports = {
       const { id } = req.params
       //get user and tweets //if using raw: true with findOne, will only get one associated data
       let user = await User.findOne({
-        where: { id },
+        where: { id, role: 'user' },
         include: [Tweet],
         order: [[Tweet, 'createdAt', 'DESC']]
       }).catch((err) => console.log('getTweetsOfUser: ', err))
-
-      // check if user exists //it seems non-existing user with associated model returns object with null values
-      if (user.id === null) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
+      // check if user exists
+      if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
       user = user.toJSON()
       //check role
       const role = helpers.getUser(req).role
