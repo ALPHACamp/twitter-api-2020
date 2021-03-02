@@ -1,6 +1,5 @@
 'use strict'
-const bcrypt = require('bcryptjs');
-const { fake } = require('faker');
+const bcrypt = require('bcryptjs')
 const faker = require('faker')
 
 module.exports = {
