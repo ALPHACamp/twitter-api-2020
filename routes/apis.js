@@ -9,5 +9,6 @@ const userController = require('../controllers/api/userController')
 
 router.post('/users', userController.signUp)
 router.post('/users/signIn', userController.signIn)
+router.get('/users', userController.getUsers)
 
 module.exports = router

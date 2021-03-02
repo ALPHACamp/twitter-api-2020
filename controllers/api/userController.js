@@ -41,7 +41,11 @@ const userController = {
       })
     })
   },
-  getUsers: (req, res) => { },
+  getUsers: (req, res) => {
+    userService.getUsers(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   getUser: (req, res) => { },
   getUserTweets: (req, res) => { },
   getUserReplies: (req, res) => { },
