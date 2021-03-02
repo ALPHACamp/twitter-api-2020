@@ -5,7 +5,7 @@ var helpers = require('../_helpers');
 // const adminService = require('../services/adminService.js')
 
 let tweetController = {
-    getTweets: (req, res, callback) => {
+    getTweets: (req, res) => {
         return Tweet.findAll({
             // where: { UserId: 1 }
             include: [User]
@@ -15,14 +15,14 @@ let tweetController = {
         }).catch(error => console.error(error))
     },
 
-    getTweet: (req, res, callback) => {
+    getTweet: (req, res) => {
         return Tweet.findByPk(req.params.id, {
             include: [User]
         }).then(tweets => {
             return res.json(tweets)
         }).catch(error => console.error(error))
     },
-    postTweet: (req, res, callback) => {
+    postTweet: (req, res) => {
         return Tweet.create({
             description: req.body.description,
             UserId: helpers.getUser(req).id
@@ -33,11 +33,22 @@ let tweetController = {
 
             .catch(error => console.error(error))
     },
-    deleteTweet: (req, res, callback) => {
+    deleteTweet: (req, res) => {
         return Tweet.findByPk(req.params.id)
             .then(async (tweet) => {
                 await tweet.destroy()
                 return res.json({ status: 'success', message: 'Tweet was successfully deleted' })
+            })
+            .catch(error => console.error(error))
+    },
+
+    putTweet: (req, res) => {
+        return Tweet.findByPk(req.params.id)
+            .then((tweet) => {
+                tweet.update(req.body)
+                    .then((category) => {
+                        return res.json({ status: 'success', message: 'category was successfully to update', data: req.body })
+                    })
             })
             .catch(error => console.error(error))
     },
