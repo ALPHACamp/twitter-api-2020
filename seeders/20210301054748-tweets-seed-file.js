@@ -9,9 +9,9 @@ module.exports = {
     const users = await User.findAll({ raw: true, nest: true, where: { isAdmin: false } })
     const usersId = users.map(user => user.id)
    
-      const tweets = Array.from({ length: 10 }).map((item, index) =>
+      const tweets = Array.from({ length: 30 }).map((item, index) =>
       ({
-        UserId: usersId[index],
+        UserId: Math.floor(Math.random() * 8) + 1 ,
         description: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()

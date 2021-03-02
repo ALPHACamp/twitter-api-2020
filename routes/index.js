@@ -25,7 +25,10 @@ router.post('/api/users', userController.signUp)
 router.get('/api/users/:id', authenticated, userController.getUser)
 // 修改個人資料
 router.put('/api/users/:id', authenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
-
+// 使用者正在追蹤誰
+router.get('/api/users/:id/followings', userController.getFollowings)
+// 誰在追蹤這個使用者
+router.get('/api/users/:id/followers', userController.getFollowers)
 
 
 module.exports = router

@@ -11,10 +11,10 @@ module.exports = {
     const usersId = users.map(user => user.id)
     const tweetId = tweet.map(tweet => tweet.id)
 
-    const likes = Array.from({ length: 10 }).map((item, index) =>
+    const likes = Array.from({ length: 30 }).map((item, index) =>
     ({
-      UserId: usersId[index],
-      TweetId: tweetId[index],
+      UserId: Math.floor(Math.random() * 8) + 1,
+      TweetId: Math.floor(Math.random() * 8) + 1,
       createdAt: new Date(),
       updatedAt: new Date()
     })

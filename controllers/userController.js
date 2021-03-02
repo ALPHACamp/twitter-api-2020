@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Followship, Like, Reply } = require('../models')
-const fs = require('fs')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -136,11 +135,11 @@ let userController = {
         if (req.files.avatar) {
           avatar = await myImgurUpload(req.files.cover[0].path)
         }
-        
+
         await user.update({
-          name, 
-          introduction, 
-          cover: cover.link, 
+          name,
+          introduction,
+          cover: cover.link,
           avatar: avatar.link
         })
         return res.status(200).json({ status: 'success', message: '修改成功' })
@@ -152,6 +151,32 @@ let userController = {
     } catch (err) {
       return res.status(500).json({ status: 'error', message: '編輯個人資料-伺服器錯誤請稍後' })
     }
+  },
+  // 使用者正在追蹤誰
+  getFollowings: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followings' }
+      ]
+    }).then(user => {
+      const data = user.Followings.map(r => ({
+        ...r.dataValues
+      }))
+      return res.status(200).json(data)
+    })
+  },
+  // 誰在追蹤這個使用者
+  getFollowers: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followers' }
+      ]
+    }).then(user => {
+      const data = user.Followers.map(r => ({
+        ...r.dataValues
+      }))
+      return res.status(200).json(data)
+    })
   }
 
 }
