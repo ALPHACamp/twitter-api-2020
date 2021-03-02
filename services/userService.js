@@ -39,10 +39,11 @@ const userService = {
           { model: User, as: 'Followers' }]
       })
       .then(users => {
+        console.log(req.user)
         users = users.map(user => ({
           ...user.dataValues,
           FollowerCount: user.Followers.length,
-          // isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+          isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
         }))
         users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
         callback({ users: users })
