@@ -28,7 +28,15 @@ const adminService = {
       callback({ status: 'error', message: 'codeStatus 500' })
     }
   },
-  deleteTweets: (req, res, callback) => { }
+  deleteTweets: async (req, res, callback) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      await tweet.destroy()
+      callback({ status: 'success', message: '' })
+    } catch (err) {
+      callback({ status: 'error', message: 'codeStatus 500' })
+    }
+  }
 }
 
 module.exports = adminService

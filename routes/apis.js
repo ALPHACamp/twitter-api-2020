@@ -14,5 +14,6 @@ router.post('/users/signIn', userController.signIn)
 // admin
 router.get('/admin/users', adminController.getUsers)
 router.get('/admin/tweets', adminController.getTweets)
+router.delete('/admin/tweets/:id', adminController.deleteTweets)
 
 module.exports = router

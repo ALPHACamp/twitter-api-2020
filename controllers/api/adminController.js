@@ -12,7 +12,9 @@ const adminController = {
   getTweets: (req, res) => {
     adminService.getTweets(req, res, (data) => res.json(data))
   },
-  deleteTweets: (req, res) => { }
+  deleteTweets: (req, res) => {
+    adminService.deleteTweets(req, res, (data) => res.json(data))
+  }
 }
 
 module.exports = adminController
