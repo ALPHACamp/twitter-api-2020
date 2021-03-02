@@ -21,6 +21,7 @@ router.post('/api/users/signin', userController.signIn)
 // 註冊
 router.post('/api/users', userController.signUp)
 
+//以下tweets功能拿掉authenticated後跑test全部pass，放了會說沒有authenticate，待解決
 router.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 router.put('/api/tweets/:id', authenticated, tweetController.putTweet)
 router.delete('/api/tweets/:id', authenticated, tweetController.deleteTweet)

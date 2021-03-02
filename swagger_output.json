@@ -128,6 +128,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {}
@@ -142,6 +147,11 @@
             "description": "string",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {}
@@ -155,6 +165,11 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {}
@@ -164,7 +179,13 @@
       "post": {
         "tags": [],
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -174,10 +195,77 @@
       "get": {
         "tags": [],
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {}
       }
     }
   },
-  "definitions": {}
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "account": {
+          "type": "string",
+          "example": "Jhon Doe"
+        },
+        "name": {
+          "type": "string",
+          "example": "Jhon Doe"
+        },
+        "email": {
+          "type": "string",
+          "example": "root@example.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "12345678"
+        },
+        "role": {
+          "type": "string",
+          "example": "admin"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "https: //i.imgur.com/l0Jc1MO.jp"
+        },
+        "introduction": {
+          "type": "string",
+          "example": "Hi"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "password"
+      ]
+    },
+    "Tweet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "UserId": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "text",
+          "example": "sfdauijnoge skojdasd"
+        }
+      },
+      "required": [
+        "type",
+        "description"
+      ]
+    }
+  }
 }
