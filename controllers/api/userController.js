@@ -6,6 +6,7 @@ const helpers = require('../../_helpers')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
+const Like = db.Like
 
 module.exports = {
   getUser: async (req, res) => {
@@ -75,6 +76,39 @@ module.exports = {
       } else if (role === 'user') {
         return res.json({ ...user, password: '' })
       }
+
+    } catch(err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message:'伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  getLikedTweetsOfUser: async (req, res) => {
+    try {
+      const { id:UserId  } = req.params
+      //get likes and tweets //if using raw: true with findAll, will only get one associated data
+      let likedTweets = await Like.findAll({
+        where: { UserId },
+        nest: true,
+        include: [
+          { 
+            model: Tweet, 
+            include: [
+              { model: Reply, include: [
+                { 
+                  model: User, 
+                  attributes: { exclude: ['password'] }
+                }
+              ]}, 
+              { model: User, attributes: { exclude: ['password'] } }
+            ] 
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      }).catch((err) => console.log('getLikedTweetsOfUser: ', err))
+      // check if likedTweets is an array
+      if (!Array.isArray(likedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶喜歡過的貼文。' })
+      return res.json(likedTweets)
 
     } catch(err) {
       console.log('catch block: ', err)
