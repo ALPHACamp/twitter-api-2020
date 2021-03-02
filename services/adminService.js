@@ -1,5 +1,6 @@
 const db = require('../models')
 const bcrypt = require('bcryptjs')
+const sequelize = require('sequelize')
 const { Tweet, User, Reply, Like } = db
 
 //JWT
@@ -38,30 +39,40 @@ const adminService = {
         }
       })
     } catch (err) {
+      console.log(err)
       callback({ status: 'error', message: 'codeStatus 500' })
     }
   },
   getUsers: async (req, res, callback) => {
     try {
-      const users = await User.findAll({
-        where: { role: 'user' },
+      let users = await User.findAll({
         include: [
           { model: Like },
-          { model: Reply },
+          { model: Tweet },
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
+        ],
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'TweetsCount']
+          ]
+        },
+        order: [
+          [sequelize.literal('TweetsCount'), 'DESC']
         ]
       })
-      callback({ users })
+      callback(users)
     } catch (err) {
+      console.log(err)
       callback({ status: 'error', message: 'codeStatus 500' })
     }
   },
   getTweets: async (req, res, callback) => {
     try {
       const tweets = await Tweet.findAll({ include: [{ model: User }] })
-      callback({ tweets })
+      callback(tweets)
     } catch (err) {
+      console.log(err)
       callback({ status: 'error', message: 'codeStatus 500' })
     }
   },
@@ -71,6 +82,7 @@ const adminService = {
       await tweet.destroy()
       callback({ status: 'success', message: '' })
     } catch (err) {
+      console.log(err)
       callback({ status: 'error', message: 'codeStatus 500' })
     }
   }
