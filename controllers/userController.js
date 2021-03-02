@@ -1,6 +1,5 @@
 const bcrypt = require('bcryptjs')
-const db = require('../models/index')
-const User = db.User
+const { User, Followship, Like, Reply } = require('../models')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -75,15 +74,30 @@ let userController = {
           account, name, email, password: passwordBcrypt
         }).then(user => {
           return res.status(200).json({ status: 'success', message: '註冊成功' })
-        }).catch(err => res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後'}))
+        }).catch(err => res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後' }))
       }
     } catch (err) {
       res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後' })
     }
   },
-  // getUser: (req, res) {
-  //   return User.findByPk()
-  // }
+  // 個人資料
+  getUser: (req, res) => {
+    return Promise.all([
+      Followship.findAndCountAll({ where: { followingId: req.params.id } }),
+      Followship.findAndCountAll({ where: { followerId: req.params.id } }),
+      Like.findAndCountAll({ where: { UserId: req.params.id } }),
+      Reply.findAndCountAll({ where: { UserId: req.params.id } })
+    ])
+    // 在資料庫端計算好 count 在返回
+    .then(([follower, following, LikedTweets, ReplyTweets]) => {
+      const user = req.user
+      user.dataValues.follower = follower.count
+      user.dataValues.following = following.count
+      user.dataValues.LikedTweets = LikedTweets.count
+      user.dataValues.ReplyTweets = ReplyTweets.count
+      return res.status(200).json({ user })
+    })
+  }
 }
 
 module.exports = userController
