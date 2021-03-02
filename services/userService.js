@@ -31,7 +31,7 @@ const userService = {
       })
     }
   },
-  getUsers: (req, res, callback) => {
+  getTopUser: (req, res, callback) => {
     User.findAll(
       {
         where: { role: 'user' },
