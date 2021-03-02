@@ -22,6 +22,7 @@ router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
 
 router.get('/api/tweets/:id', authenticated, tweetController.getTweet)
+router.put('/api/tweets/:id', authenticated, tweetController.putTweet)
 router.delete('/api/tweets/:id', authenticated, tweetController.deleteTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 router.get('/api/tweets', authenticated, tweetController.getTweets)

@@ -31,7 +31,9 @@
     "sequelize": "^6.5.0",
     "sequelize-cli": "^6.2.0",
     "sinon": "^7.2.3",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.3.0",
+    "swagger-autogen": "^2.6.8",
+    "swagger-ui-express": "^4.1.6"
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",
