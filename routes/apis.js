@@ -10,4 +10,8 @@ const userController = require('../controllers/api/userController')
 router.post('/users', userController.signUp)
 router.post('/users/signIn', userController.signIn)
 
+
+// admin
+router.get('/admin/users', adminController.getUsers)
+
 module.exports = router
