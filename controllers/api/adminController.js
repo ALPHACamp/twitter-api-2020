@@ -1,11 +1,10 @@
-const db = require('../../models')
-const Tweet = db.Tweet
-const User = db.User
 const adminService = require('../../services/adminService')
 
 
 const adminController = {
-  signIn: (req, res) => { },
+  signIn: (req, res) => {
+    adminService.signIn(req, res, (data) => res.json(data))
+  },
   getUsers: (req, res) => {
     adminService.getUsers(req, res, (data) => res.json(data))
   },
