@@ -20,7 +20,7 @@ module.exports = {
       })
       //check if user exists
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
-      if (user.id === helpers.getUser(req).id) user.dataValues.isSelf = true
+      user.dataValues.isSelf = user.id === helpers.getUser(req).id
       return res.json(user)
 
     } catch(err) {
@@ -33,7 +33,7 @@ module.exports = {
     try {
       const { id:UserId } = req.params
       //get tweets //if using raw: true with findAll, will only get one associated data
-      const tweets = await Tweet.findAll({
+      let tweets = await Tweet.findAll({
         where: { UserId },
         nest: true,
         include: [
@@ -45,9 +45,15 @@ module.exports = {
           { model: Like }
         ],
         order: [['createdAt', 'DESC']]
-      }).catch((err) => console.log('getTweetsOfUser: ', err))
+      })
       // check if tweets is an array
-      if (!Array.isArray(tweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的推文。' })
+      if (!tweets || !Array.isArray(tweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的推文。' })
+      tweets = tweets.map(tweet => {
+        tweet.dataValues.isLiked = helpers.getUser(req).Likes.map(like => like.TweetId).includes(tweet.id)
+        tweet.dataValues.isMyTweet = helpers.getUser(req).id === tweet.User.id
+        return tweet
+      })
+
       return res.json(tweets)
 
     } catch(err) {
