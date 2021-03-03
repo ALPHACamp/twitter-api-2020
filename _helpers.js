@@ -4,5 +4,5 @@ function getUser(req) {
 }
 
 module.exports = {
-  getUser,
-};
+  getUser
+}

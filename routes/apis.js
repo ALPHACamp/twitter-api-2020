@@ -5,7 +5,6 @@ const authenticated = passport.authenticate('jwt', { session: false })
 const userController = require('../controllers/api/userController')
 const adminController = require('../controllers/api/adminController')
 
-router.post('/signin', authenticated, userController.getUser)
 
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
@@ -17,6 +16,9 @@ const authenticatedAdmin = (req, res, next) => {
     return res.json({ status: 'error', message: 'permission denied' })
   }
 }
+
+// user
+router.post('/signin', authenticated, userController.getUser)
 
 // admin
 // JWT signin
