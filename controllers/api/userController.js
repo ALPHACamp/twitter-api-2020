@@ -8,14 +8,19 @@ const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
+
 module.exports = {
   getUser: async (req, res) => {
     try {
       const { id } = req.params
       //get user
-      const user = await User.findOne({ where: { id }, attributes: { exclude: ['password'] } }).catch((err) => console.log('getUser: ', err))
+      const user = await User.findOne({ 
+        where: { id }, 
+        attributes: { exclude: ['password'] } 
+      })
       //check if user exists
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
+      if (user.id === helpers.getUser(req).id) user.dataValues.isSelf = true
       return res.json(user)
 
     } catch(err) {
