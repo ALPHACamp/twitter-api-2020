@@ -8,7 +8,6 @@ const jwt = require('jsonwebtoken')
 // const passportJWT = require('passport-jwt')
 // const ExtractJwt = passportJWT.ExtractJwt
 // const JwtStrategy = passportJWT.Strategy
-
 const userController = {
   // 登入
   signIn: (req, res) => {
