@@ -48,6 +48,7 @@ const userService = {
       })
   },
 
+  //Oscar start here
   getUser: (req, res, callback) => {
     User.findByPk(req.params.id, {
       where: { role: 'user' },
@@ -75,7 +76,19 @@ const userService = {
       })
       .catch(err => console.log(err))
   },
-  getUserReplies: (req, res, callback) => { },
+
+  getUserReplies: (req, res, callback) => {
+    Reply.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: Tweet, include: [{ model: Like }, { model: Reply }] }
+      ]
+    }).then(replies => {
+      callback(replies)
+    })
+      .catch(err => console.log(err))
+  },
+
   getUserLikes: (req, res, callback) => { },
   getFollowings: (req, res, callback) => { },
   getFollowers: (req, res, callback) => { },
