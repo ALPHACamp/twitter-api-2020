@@ -7,7 +7,7 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
-
+const Followship = db.Followship
 module.exports = {
   getUser: async (req, res) => {
     try {
@@ -24,7 +24,7 @@ module.exports = {
     }
   },
 
-  getTweetsOfUser: async (req, res) => {
+  getTweets: async (req, res) => {
     try {
       const { id:UserId } = req.params
       //get tweets //if using raw: true with findAll, will only get one associated data
@@ -51,7 +51,7 @@ module.exports = {
     }
   },
 
-  getRepliedTweetsOfUser: async (req, res) => {
+  getRepliedTweets: async (req, res) => {
     try {
       const { id:UserId } = req.params
       //get replied tweets
@@ -85,7 +85,7 @@ module.exports = {
     }
   },
 
-  getLikedTweetsOfUser: async (req, res) => {
+  getLikedTweets: async (req, res) => {
     try {
       const { id:UserId  } = req.params
       //get liked tweets
@@ -111,6 +111,26 @@ module.exports = {
       // check if likedTweets is an array
       if (!Array.isArray(likedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶喜歡過的推文。' })
       return res.json(likedTweets)
+
+    } catch(err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  getFollowings: async (req, res) => {
+    try {
+      const { id:followerId  } = req.params
+      let followings = await Followship.findAll({ where: { followerId }, include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }] })
+
+      if (!followings || !Array.isArray(followings)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追蹤名單。' })
+
+      followings = followings.map(following => {
+        followings.dataValues.isFollowed = helpers.getUser(req).Followings.map(user => user.id).includes(following.followingId)
+        return followings
+      }).sort((a, b) => b.isFollowed - a.isFollowed)
+
+      return res.json(followings)
 
     } catch(err) {
       console.log('catch block: ', err)
