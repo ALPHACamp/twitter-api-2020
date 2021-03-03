@@ -139,7 +139,17 @@ const userService = {
       .catch(err => console.log(err))
   },
 
-  getUserLikes: (req, res, callback) => { },
+  getUserLikes: (req, res, callback) => {
+    Like.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: Tweet, include: [{ model: Like }, { model: Reply }] }
+      ]
+    }).then(likes => {
+      callback(likes)
+    })
+      .catch(err => console.log(err))
+  },
   getFollowings: (req, res, callback) => { },
   getFollowers: (req, res, callback) => { }
 }

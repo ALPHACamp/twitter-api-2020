@@ -30,6 +30,7 @@ router.get('/users', authenticated, userController.getTopUser)
 router.get('/users/:id', userController.getUser)
 router.get('/users/:id/tweets', userController.getUserTweets)
 router.get('/users/:id/replied_tweets', userController.getUserReplies)
+router.get('/users/:id/likes', userController.getUserLikes)
 router.get('/users/:id/edit', userController.editUser)
 router.put('/users/:id', upload.array('avatar', 'cover'), userController.putUser)
 
