@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 'use strict'
-=======
-'use strict';
->>>>>>> b6cdbe55117f2074cca54fd76d2f33e5cec6a5be
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     account: DataTypes.STRING,
@@ -12,7 +8,6 @@ module.exports = (sequelize, DataTypes) => {
     role: DataTypes.STRING,
     avatar: DataTypes.STRING,
     introduction: DataTypes.TEXT,
-<<<<<<< HEAD
     cover: DataTypes.STRING,
     isAdmin: DataTypes.BOOLEAN
   }, {
@@ -20,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'User'
   })
   User.associate = function (models) {
-
     User.hasMany(models.Tweet)
     User.hasMany(models.Like)
     User.hasMany(models.Reply)
@@ -48,12 +42,3 @@ module.exports = (sequelize, DataTypes) => {
   }
   return User
 }
-=======
-    role: DataTypes.STRING,
-
-  }, {});
-  User.associate = function (models) {
-  };
-  return User;
-};
->>>>>>> b6cdbe55117f2074cca54fd76d2f33e5cec6a5be

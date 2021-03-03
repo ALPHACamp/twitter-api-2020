@@ -6,7 +6,7 @@
   "scripts": {
     "start": " node app.js",
     "dev": " nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "test": "standard && node my-tests.js && mocha test --exit --recursive --timeout 5000"
   },
   "author": "",
   "license": "ISC",
@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",
+    "standard": "^16.0.3",
     "supertest": "^3.4.2"
   }
 }

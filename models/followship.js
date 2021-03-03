@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Followship = sequelize.define('Followship', {
@@ -17,13 +16,3 @@ module.exports = (sequelize, DataTypes) => {
   }
   return Followship
 }
-=======
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Followship = sequelize.define('Followship', {
-  }, {});
-  Followship.associate = function (models) {
-  };
-  return Followship;
-};
->>>>>>> b6cdbe55117f2074cca54fd76d2f33e5cec6a5be

@@ -3,17 +3,17 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express')
 const routes = require('./routes/index')
-const handlebars = require('express-handlebars')
 const passport = require('./config/passport')
 const app = express()
+const path = require('path')
 const port = process.env.PORT || 3000
-app.use('/upload', express.static(__dirname + '/upload'))
+// app.use('/upload', express.static(__dirname + '/upload'))
+app.use('/upload', express.static(path.join(__dirname, '/upload')))
 
-//add swagger
+// add swagger
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json')
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile))
-
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())

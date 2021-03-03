@@ -5,15 +5,15 @@ const { User, Followship, Like, Reply } = require('../models')
 
 // JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
+// const passportJWT = require('passport-jwt')
+// const ExtractJwt = passportJWT.ExtractJwt
+// const JwtStrategy = passportJWT.Strategy
 
-let userController = {
+const userController = {
   // 登入
   signIn: (req, res) => {
     // 取得資料
-    const { account, name, email, password, checkPassword } = req.body
+    const { email, password } = req.body
     // 檢查必要資料
     if (!email || !password) {
       return res.json({ status: 'error', message: "required fields didn't exist" })
@@ -25,8 +25,8 @@ let userController = {
         return res.status(401).json({ status: 'error', message: '密碼錯誤' })
       }
       // 簽發 token
-      var payload = { id: user.id }
-      var token = jwt.sign(payload, 'alphacamp')
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, 'alphacamp')
       return res.json({
         status: 'success',
         message: 'ok',
@@ -37,7 +37,7 @@ let userController = {
       })
     })
       .catch(err => {
-        return res.status(500).json({ status: 'error', message: '伺服器錯誤請稍後' })
+        return res.status(500).json({ status: 'error', message: '伺服器錯誤請稍後', err })
       })
   },
   // 註冊
@@ -76,7 +76,7 @@ let userController = {
           account, name, email, password: passwordBcrypt
         }).then(user => {
           return res.status(200).json({ status: 'success', message: '註冊成功' })
-        }).catch(err => res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後' }))
+        }).catch(err => res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後', err }))
       }
     } catch (err) {
       res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後' })
@@ -100,7 +100,7 @@ let userController = {
         return res.status(200).json({ user })
       })
       .catch(err => {
-        return res.status(500).json({ status: 'error', message: '個人資料-伺服器錯誤請稍後' })
+        return res.status(500).json({ status: 'error', message: '個人資料-伺服器錯誤請稍後', err })
       })
   },
   // 編輯個人資料
@@ -116,19 +116,19 @@ let userController = {
       return res.json({ status: 'error', message: '請輸入名稱', userData })
     }
     // 建立上傳照片Functions
-    function myImgurUpload(uploadFile) {
+    function myImgurUpload (uploadFile) {
       imgur.setClientId(IMGUR_CLIENT_ID)
       return imgur.uploadFile(uploadFile)
     }
     try {
       const { files } = req
+      // 撈出使用者資料
+      const user = await User.findByPk(req.params.id)
       if (files) {
-        // 撈出使用者資料
-        const user = await User.findByPk(req.params.id)
-        // 解構賦值 
+        // 解構賦值
         let [cover, avatar] = [user.cover, user.avatar]
 
-        // 依序判斷 avatar & cover 是否存在 , 如果有就上傳  
+        // 依序判斷 avatar & cover 是否存在 , 如果有就上傳
         if (req.files.cover) {
           cover = await myImgurUpload(req.files.cover[0].path)
         }
@@ -147,7 +147,6 @@ let userController = {
       // 無照片
       user.update({ name, introduction })
       return res.status(200).json({ status: 'success', message: '修改成功' })
-
     } catch (err) {
       return res.status(500).json({ status: 'error', message: '編輯個人資料-伺服器錯誤請稍後' })
     }
