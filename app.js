@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const express = require('express')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
@@ -12,6 +16,7 @@ function authenticated(req, res, next) {
 
 app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use('/upload', express.static(__dirname + '/upload'))
 
 app.get('/', (req, res) => res.send('Hello World!'))
 

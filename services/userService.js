@@ -1,11 +1,14 @@
 const db = require('../models')
-const User = db.User
+const { User, Tweet, Like, Reply } = db
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 //JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const user = require('../models/user')
+const tweetService = require('./tweetService')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -46,14 +49,99 @@ const userService = {
         callback({ users: users })
       })
   },
-  getUser: (req, res, callback) => { },
-  getUserTweets: (req, res, callback) => { },
-  getUserReplies: (req, res, callback) => { },
+
+  //Oscar start here
+  getUser: (req, res, callback) => {
+    User.findByPk(req.params.id, {
+      where: { role: 'user' },
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then(user => {
+        callback(user)
+      })
+      .catch(err => console.log(err))
+  },
+
+  editUser: (req, res, callback) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        const userData = user.toJSON()
+        callback(userData)
+      })
+      .catch(err => console.log(err))
+  },
+
+  putUser: (req, res, callback) => {
+    if (!req.body.name) {
+      callback({ status: 'error', message: "Please insert a name for user!" })
+    }
+    const { file } = req
+    console.log(file)
+
+    if (file) {
+      helpers.imgurUploadPromise(file, IMGUR_CLIENT_ID)
+        .then(img => {
+          console.log(img)
+          User.findByPk(req.params.id)
+            .then(user => {
+              user.update({
+                name: req.body.name,
+                avatar: file ? img.link : user.avatar,
+                cover: file ? img.link : user.cover,
+                introduction: req.body.introduction
+              })
+              callback({ status: 'success', message: 'User profile was successfully update' })
+            })
+            .catch(err => console.log(err))
+        })
+    } else {
+      User.findByPk(req.params.id)
+        .then(user => {
+          user.update({
+            name: req.body.name,
+            avatar: user.avatar,
+            cover: user.cover,
+            introduction: req.body.introduction
+          })
+          callback({ status: 'success', message: 'User profile was successfully update' })
+        })
+        .catch(err => console.log(err))
+    }
+
+  },
+
+  getUserTweets: (req, res, callback) => {
+    Tweet.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: Like },
+        { model: Reply }
+      ]
+    })
+      .then(tweets => {
+        callback(tweets)
+      })
+      .catch(err => console.log(err))
+  },
+
+  getUserReplies: (req, res, callback) => {
+    Reply.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: Tweet, include: [{ model: Like }, { model: Reply }] }
+      ]
+    }).then(replies => {
+      callback(replies)
+    })
+      .catch(err => console.log(err))
+  },
+
   getUserLikes: (req, res, callback) => { },
   getFollowings: (req, res, callback) => { },
-  getFollowers: (req, res, callback) => { },
-  putUser: (req, res, callback) => { },
-  editUser: (req, res, callback) => { }
+  getFollowers: (req, res, callback) => { }
 }
 
 module.exports = userService

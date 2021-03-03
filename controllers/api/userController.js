@@ -46,14 +46,34 @@ const userController = {
       return res.json(data)
     })
   },
-  getUser: (req, res) => { },
-  getUserTweets: (req, res) => { },
-  getUserReplies: (req, res) => { },
+  getUser: (req, res) => {
+    userService.getUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  editUser: (req, res) => {
+    userService.editUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  putUser: (req, res) => {
+    userService.putUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  getUserTweets: (req, res) => {
+    userService.getUserTweets(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  getUserReplies: (req, res) => {
+    userService.getUserReplies(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   getUserLikes: (req, res) => { },
   getFollowings: (req, res) => { },
-  getFollowers: (req, res) => { },
-  putUser: (req, res) => { },
-  editUser: (req, res) => { }
+  getFollowers: (req, res) => { }
 }
 
 module.exports = userController

@@ -1,6 +1,10 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
+
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
 const adminController = require('../controllers/api/adminController')
 const followController = require('../controllers/api/followController')
 const likeController = require('../controllers/api/likeController')
@@ -19,9 +23,15 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
+// User
 router.post('/users', userController.signUp)
 router.post('/users/signIn', userController.signIn)
 router.get('/users', authenticated, userController.getTopUser)
+router.get('/users/:id', userController.getUser)
+router.get('/users/:id/tweets', userController.getUserTweets)
+router.get('/users/:id/replied_tweets', userController.getUserReplies)
+router.get('/users/:id/edit', userController.editUser)
+router.put('/users/:id', upload.array('avatar', 'cover'), userController.putUser)
 
 
 // admin
