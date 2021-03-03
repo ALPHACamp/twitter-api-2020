@@ -33,7 +33,9 @@ const tweetController = {
         time: formatDistanceToNow(r.createdAt, { includeSeconds: true })
       }))
       return res.status(200).json(data)
-    }).catch(error => console.error(error))
+    }).catch(error => {
+      return res.status(500).json({ status: 'error', message: '瀏覽全部推文-伺服器錯誤請稍後', error })
+    })
   },
   // 瀏覽單一推文
   getTweet: (req, res) => {
@@ -55,8 +57,11 @@ const tweetController = {
       // 留言內回覆者時間建立
       tweets.Replies.replyTime = formatDistanceToNow(tweets.Replies.createdAt, { includeSeconds: true })
       return res.json(tweets)
-    }).catch(error => console.error(error))
+    }).catch(error => {
+      return res.status(500).json({ status: 'error', message: '瀏覽單一推文-伺服器錯誤請稍後', error })
+    })
   },
+  // 新增推特
   postTweet: (req, res) => {
     return Tweet.create({
       description: req.body.description,
@@ -66,19 +71,25 @@ const tweetController = {
         return res.status(200).json({ status: 'success', message: 'Tweet was successfully created' })
       })
       .catch(error => {
-        return res.status(401).json({ status: 'error', message: '個人資料-伺服器錯誤請稍後', error })
+        return res.status(500).json({ status: 'error', message: '編輯推文-伺服器錯誤請稍後', error })
       })
   },
+  // 刪除推特
   deleteTweet: (req, res) => {
     return Tweet.findByPk(req.params.id)
       .then(async (tweet) => {
         await tweet.destroy()
         return res.status(200).json({ status: 'success', message: 'Tweet was successfully deleted' })
       })
-      .catch(error => console.error(error))
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '刪除推特-伺服器錯誤請稍後', error })
+      })
   },
-
+  // 修改推特
   putTweet: (req, res) => {
+    if (!req.body.description) {
+      return res.json({ status: 'error', message: '請輸入推文' })
+    }
     return Tweet.findByPk(req.params.id)
       .then((tweet) => {
         tweet.update(req.body)
@@ -86,7 +97,9 @@ const tweetController = {
             return res.status(200).json({ status: 'success', message: 'category was successfully to update', data: req.body })
           })
       })
-      .catch(error => console.error(error))
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '修改推特-伺服器錯誤請稍後', error })
+      })
   }
 
 }

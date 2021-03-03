@@ -41,7 +41,6 @@
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",
-    "standard": "^16.0.3",
     "supertest": "^3.4.2"
   }
 }
