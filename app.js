@@ -2,11 +2,14 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const express = require('express')
+const cors = require('cors')
 const routes = require('./routes/index')
 const passport = require('./config/passport')
 const app = express()
 const path = require('path')
 const port = process.env.PORT || 3000
+// CORS
+app.use(cors())
 // app.use('/upload', express.static(__dirname + '/upload'))
 app.use('/upload', express.static(path.join(__dirname, '/upload')))
 
