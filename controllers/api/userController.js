@@ -121,16 +121,44 @@ module.exports = {
   getFollowings: async (req, res) => {
     try {
       const { id:followerId  } = req.params
-      let followings = await Followship.findAll({ where: { followerId }, include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }] })
+      let followings = await Followship.findAll({ 
+        where: { followerId }, 
+        include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }] 
+      })
 
       if (!followings || !Array.isArray(followings)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追蹤名單。' })
 
-      followings = followings.map(following => {
-        followings.dataValues.isFollowed = helpers.getUser(req).Followings.map(user => user.id).includes(following.followingId)
-        return followings
-      }).sort((a, b) => b.isFollowed - a.isFollowed)
-
+      followings = followings.map(followship => {
+        followship.dataValues.isFollowed = helpers.getUser(req).Followings.map(user => user.id).includes(followship.followingId)
+        followship.dataValues.isSelf = helpers.getUser(req).id === followship.followingId
+        return followship
+        //if want to sort without raw: true, have to access via dataValues
+      }).sort((a, b) => b.dataValues.isFollowed - a.dataValues.isFollowed)
       return res.json(followings)
+
+    } catch(err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  getFollowers: async (req, res) => {
+    try {
+      const { id:followingId  } = req.params
+      let followers = await Followship.findAll({ 
+        where: { followingId }, 
+        include: [{ model: User, as: 'follower', attributes: { exclude: ['password'] } }] 
+      })
+
+      if (!followers || !Array.isArray(followers)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追隨者名單。' })
+
+      followers = followers.map(followship => {
+        followship.dataValues.isFollowed = helpers.getUser(req).Followings.map(user => user.id).includes(followship.followerId)
+        followship.dataValues.isSelf = helpers.getUser(req).id === followship.followerId
+        return followship
+      }).sort((a, b) => b.dataValues.isFollowed - a.dataValues.isFollowed)
+
+      return res.json(followers)
 
     } catch(err) {
       console.log('catch block: ', err)
