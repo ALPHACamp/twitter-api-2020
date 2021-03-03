@@ -51,6 +51,12 @@ const userController = {
       return res.json(data)
     })
   },
+  editUser: (req, res) => {
+    userService.editUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  putUser: (req, res) => { },
   getUserTweets: (req, res) => {
     userService.getUserTweets(req, res, (data) => {
       return res.json(data)
@@ -63,9 +69,7 @@ const userController = {
   },
   getUserLikes: (req, res) => { },
   getFollowings: (req, res) => { },
-  getFollowers: (req, res) => { },
-  putUser: (req, res) => { },
-  editUser: (req, res) => { }
+  getFollowers: (req, res) => { }
 }
 
 module.exports = userController

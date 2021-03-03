@@ -63,6 +63,17 @@ const userService = {
       .catch(err => console.log(err))
   },
 
+  editUser: (req, res, callback) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        const userData = user.toJSON()
+        callback(userData)
+      })
+      .catch(err => console.log(err))
+  },
+
+  putUser: (req, res, callback) => { },
+
   getUserTweets: (req, res, callback) => {
     Tweet.findAll({
       where: { UserId: req.params.id },
@@ -91,9 +102,7 @@ const userService = {
 
   getUserLikes: (req, res, callback) => { },
   getFollowings: (req, res, callback) => { },
-  getFollowers: (req, res, callback) => { },
-  putUser: (req, res, callback) => { },
-  editUser: (req, res, callback) => { }
+  getFollowers: (req, res, callback) => { }
 }
 
 module.exports = userService
