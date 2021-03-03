@@ -1,20 +1,35 @@
-const db = require('../models')
-const Tweet = db.Tweet
-const User = db.User
-var helpers = require('../_helpers');
-// const adminService = require('../services/adminService.js')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const helpers = require('../_helpers')
 
-let tweetController = {
-    getTweets: (req, res) => {
+const tweetController = {
+    // 瀏覽全部推文
+    getTweets: async (req, res) => {
         return Tweet.findAll({
-            // where: { UserId: 1 }
+            include: [{
+                model: User,
+                attributes: ['id', 'name', 'account', 'avatar']
+            }],
+            attributes: {
+                // 資料庫端運行計算
+                include: [
+                    [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+                    [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount']
+                ]
+            },
+            limit: 2,
+            raw: true,
+            nest: true,
             order: [
-                ['updatedAt', 'DESC']
-            ],
-            include: [User]
+                // 資料庫端進行排列
+                [sequelize.literal('createdAt'), 'DESC']
+            ]
         }).then(tweets => {
-
-            return res.json(tweets)
+            // tweets = tweets.map(r => ({
+            //   ...r,
+            //   likeCount: likeCount
+            // }))
+            console.log('---------tweets', tweets)
+            return res.status(200).json(tweets)
         }).catch(error => console.error(error))
     },
 
@@ -54,8 +69,7 @@ let tweetController = {
                     })
             })
             .catch(error => console.error(error))
-    },
+    }
 
 }
 module.exports = tweetController
-
