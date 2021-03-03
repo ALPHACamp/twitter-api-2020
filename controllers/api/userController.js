@@ -66,7 +66,7 @@ module.exports = {
     try {
       const { id:UserId } = req.params
       //get replied tweets
-      const repliedTweets = await Reply.findAll({
+      let repliedTweets = await Reply.findAll({
         where: { UserId },
         nest: true,
         include: [
@@ -85,9 +85,15 @@ module.exports = {
           }
         ],
         order: [['createdAt', 'DESC']]
-      }).catch((err) => console.log('getRepliedTweetsOfUser: ', err))
+      })
       // check if repliedTweets is an array
-      if (!Array.isArray(repliedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶回覆過的推文。' })
+      if (!repliedTweets || !Array.isArray(repliedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶回覆過的推文。' })
+      repliedTweets = repliedTweets.map(reply => {
+        const tweet = reply.Tweet.dataValues
+        tweet.isLiked = helpers.getUser(req).Likes.map(like => like.TweetId).includes(tweet.id)
+        tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
+        return reply
+      })
       return res.json(repliedTweets)
 
     } catch(err) {
