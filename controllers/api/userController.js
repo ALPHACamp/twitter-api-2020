@@ -106,7 +106,7 @@ module.exports = {
     try {
       const { id:UserId  } = req.params
       //get liked tweets
-      const likedTweets = await Like.findAll({
+      let likedTweets = await Like.findAll({
         where: { UserId },
         nest: true,
         include: [
@@ -124,9 +124,17 @@ module.exports = {
           }
         ],
         order: [['createdAt', 'DESC']]
-      }).catch((err) => console.log('getLikedTweetsOfUser: ', err))
+      })
       // check if likedTweets is an array
-      if (!Array.isArray(likedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶喜歡過的推文。' })
+      if (!likedTweets || !Array.isArray(likedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶喜歡過的推文。' })
+      likedTweets = likedTweets.map(like => {
+        const tweet = like.Tweet.dataValues
+        tweet.isLiked = helpers.getUser(req).Likes.map(myLike => myLike.TweetId).includes(tweet.id)
+        tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
+        //discard the like data part
+        return tweet
+      })
+
       return res.json(likedTweets)
 
     } catch(err) {
