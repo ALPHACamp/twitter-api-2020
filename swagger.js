@@ -6,7 +6,20 @@ const doc = {
     title: 'Twitter REST API'
   },
   definitions: {
-    AdminUser: {
+    User: {
+      id: 2,
+      account: 'user1',
+      email: 'user1@example.com',
+      password: '$2a$10$2KimfHLZKIso1yqP4ZzkfekhC4zAoz8neTfsPEcJVk2Op87rj5sC2',
+      name: 'user1',
+      avatar: 'null',
+      introduction: 'I am Jackson',
+      role: 'admin',
+      cover: 'null',
+      createdAt: '2021-03-02T02:18:21.000Z',
+      updatedAt: '2021-03-02T02:18:21.000Z'
+    },
+    FollowshipUser: {
       id: 1,
       account: 'root',
       email: 'root@example.com',
@@ -17,7 +30,13 @@ const doc = {
       role: 'admin',
       cover: 'null',
       createdAt: '2021-03-02T02:18:21.000Z',
-      updatedAt: '2021-03-02T02:18:21.000Z'
+      updatedAt: '2021-03-02T02:18:21.000Z',
+      Followship: {
+        followerId: 2,
+        followingId: 11,
+        createdAt: '2021-03-03T03:14:10.000Z',
+        updatedAt: '2021-03-03T03:14:10.000Z'
+      }
     },
     GeneralUser: {
       id: 2,
@@ -30,20 +49,26 @@ const doc = {
       role: 'user',
       cover: 'null',
       createdAt: '2021-03-02T02:18:21.000Z',
-      updatedAt: '2021-03-02T02:18:21.000Z'
+      updatedAt: '2021-03-02T02:18:21.000Z',
+      Replies: [{ $ref: '#/definitions/Reply' }],
+      Likes: [{ $ref: '#/definitions/Like' }],
+      Tweets: [{ $ref: '#/definitions/Tweet' }],
+      Followers: [],
+      Followings: [{ $ref: '#/definitions/FollowshipUser' }]
     },
     Tweet: {
       id: 1,
-      UserId: 11,
+      UserId: 2,
       description: 'Johnny1 is a handsome guy.',
       createdAt: '2021-03-02T02:18:21.000Z',
       updatedAt: '2021-03-02T02:18:21.000Z',
       Replies: [{ $ref: '#/definitions/Reply' }],
-      Likes: [{ $ref: '#/definitions/Like' }]
+      Likes: [{ $ref: '#/definitions/Like' }],
+      User: { $ref: '#/definitions/User' }
     },
     Reply: {
       id: 1,
-      UserId: 11,
+      UserId: 2,
       TweetId: 1,
       comment: 'Reply 1',
       createdAt: '2021-03-02T02:18:21.000Z',
@@ -51,7 +76,7 @@ const doc = {
     },
     Like: {
       id: 2,
-      UserId: 52,
+      UserId: 2,
       TweetId: 1,
       createdAt: '2021-03-02T12:55:19.000Z',
       updatedAt: '2021-03-02T12:55:19.000Z'

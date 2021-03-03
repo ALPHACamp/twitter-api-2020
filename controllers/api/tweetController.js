@@ -1,7 +1,7 @@
 const db = require('../../models')
 const helpers = require('../../_helpers')
 
-const { Tweet, Reply, Like } = db
+const { Tweet, Reply, Like, User } = db
 
 // @todo - add error handling
 
@@ -16,11 +16,14 @@ const tweetController = {
     */
     try {
       const tweets = await Tweet.findAll({
-        include: [Reply, Like]
+        include: [Reply, Like, User]
       })
+      if (!tweets.length) {
+        return res.status(400).json({ status: 'error', message: 'cannot find any tweet' })
+      }
       return res.status(200).json(tweets)
     } catch (err) {
-      res.status(500).json(err)
+      res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
   // @todo - add relationships
@@ -38,14 +41,15 @@ const tweetController = {
     */
     try {
       const tweet = await Tweet.findByPk(req.params.id, {
-        include: [Reply, Like]
+        include: [Reply, Like, User]
       })
+
       if (!tweet) {
         return res.status(400).json({ status: 'error', message: 'tweet doesn\'t exist' })
       }
       return res.status(200).json(tweet)
     } catch (err) {
-      return res.status(500).json(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
   getReplies: async (req, res) => {
@@ -70,7 +74,7 @@ const tweetController = {
 
       return res.status(200).json(replies)
     } catch (err) {
-      return res.status(500).json(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
   postTweet: async (req, res) => {
@@ -84,8 +88,8 @@ const tweetController = {
             required: true
       }
         #swagger.responses[200] = {
-          description: '回傳tweet物件',
-          schema: {"$ref": "#/definitions/Tweet"}
+          description: '回傳Success物件',
+          schema: {"$ref": "#/definitions/SuccessMessage"}
         }
       #swagger.responses[400] = {
         description: '沒有提供description回傳erro物件',
@@ -103,9 +107,10 @@ const tweetController = {
         UserId: userId,
         description
       })
-      return res.status(200).json(tweet)
+      // discuss return success object or tweet
+      return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
-      return res.status(500).json(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
   postReply: async (req, res) => {
@@ -119,27 +124,32 @@ const tweetController = {
             required: true
       }
         #swagger.responses[200] = {
-          description: '回傳reply物件',
-          schema: {"$ref": "#/definitions/Reply"}
+          description: '回傳Success物件',
+          schema: {"$ref": "#/definitions/SuccessMessage"}
         }
       #swagger.responses[400] = {
         description: '沒有提供comment回傳error物件',
         schema: { status: 'error', message: 'comment is required' }
       }
     */
-    const { comment } = req.body
-    const { tweetId } = req.params
-    if (!comment) {
-      return res.status(400).json({ status: 'error', message: 'comment is required' })
-    }
+    try {
+      const { comment } = req.body
+      const { tweetId } = req.params
+      if (!comment) {
+        return res.status(400).json({ status: 'error', message: 'comment is required' })
+      }
 
-    const userId = helpers.getUser(req).id
-    const reply = await Reply.create({
-      UserId: userId,
-      TweetId: tweetId,
-      comment
-    })
-    return res.json(reply)
+      const userId = helpers.getUser(req).id
+      const reply = await Reply.create({
+        UserId: userId,
+        TweetId: tweetId,
+        comment
+      })
+      // discuss return success object or reply
+      return res.status(200).json({ status: 'success', message: 'Success' })
+    } catch (err) {
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
   },
   likeTweet: async (req, res) => {
     /* #swagger.tags = ['Tweet']
@@ -175,7 +185,7 @@ const tweetController = {
       })
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
-      return res.status(500).json(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
   unlikeTweet: async (req, res) => {
@@ -203,7 +213,7 @@ const tweetController = {
       await like.destroy()
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
-      return res.status(500).json(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   }
 }

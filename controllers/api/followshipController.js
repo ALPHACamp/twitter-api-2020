@@ -27,6 +27,9 @@ const followshipController = {
     try {
       const { id } = req.body
       const userId = helpers.getUser(req).id
+      if (id === userId) {
+        return res.status(400).json({ status: 'error', message: 'You cannot follow yourself' })
+      }
       // check if user id exist or doesn't have id in req.body
       const user = await User.findByPk(id)
       if (!user) {
@@ -46,7 +49,7 @@ const followshipController = {
       })
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
-      return res.status(500).json(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
   unfollow: async (req, res) => {
@@ -64,6 +67,9 @@ const followshipController = {
     try {
       const { followingId } = req.params
       const userId = helpers.getUser(req).id
+      if (followingId === userId) {
+        return res.status(400).json({ status: 'error', message: 'You cannot unfollow yourself' })
+      }
       const follow = await Followship.findOne({
         where: { followerId: userId, followingId }
       })
@@ -73,7 +79,7 @@ const followshipController = {
       await follow.destroy()
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
-      return res.status(500).json(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   }
 }

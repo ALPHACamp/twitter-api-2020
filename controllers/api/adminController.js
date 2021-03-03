@@ -1,6 +1,6 @@
 const db = require('../../models')
 
-const { User, Tweet, Reply } = db
+const { User, Tweet, Reply, Like } = db
 
 // @todo - add error handling
 
@@ -12,12 +12,25 @@ const adminController = {
           description: '回傳陣列帶有多個user物件',
           schema: [{"$ref": "#/definitions/GeneralUser"}]
         }
+        #swagger.responses[400] = {
+          description: '找不到users回傳error物件',
+          schema: { status: 'error', message: '無法取得用戶資料' }
+        }
     */
     try {
-      const users = await User.findAll()
+      const users = await User.findAll({
+        include: [Reply, Like, Tweet,
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      })
+      if (!users.length) {
+        return res.status(400).json({ status: 'error', message: '無法取得用戶資料' })
+      }
       return res.status(200).json(users)
     } catch (err) {
-      return res.status(500).json(err)
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
   removeTweet: async (req, res) => {
@@ -48,7 +61,8 @@ const adminController = {
 
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
-      return res.status(500).json(err)
+      console.log(err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   }
 }

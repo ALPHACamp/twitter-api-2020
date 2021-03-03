@@ -196,6 +196,25 @@
               }
             }
           },
+          "400": {
+            "description": "找不到users回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無法取得用戶資料"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -281,6 +300,9 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -317,9 +339,9 @@
         ],
         "responses": {
           "200": {
-            "description": "回傳tweet物件",
+            "description": "回傳Success物件",
             "schema": {
-              "$ref": "#/definitions/Tweet"
+              "$ref": "#/definitions/SuccessMessage"
             }
           },
           "400": {
@@ -495,9 +517,9 @@
         ],
         "responses": {
           "200": {
-            "description": "回傳reply物件",
+            "description": "回傳Success物件",
             "schema": {
-              "$ref": "#/definitions/Reply"
+              "$ref": "#/definitions/SuccessMessage"
             }
           },
           "400": {
@@ -524,6 +546,9 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -748,7 +773,56 @@
     }
   },
   "definitions": {
-    "AdminUser": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 2
+        },
+        "account": {
+          "type": "string",
+          "example": "user1"
+        },
+        "email": {
+          "type": "string",
+          "example": "user1@example.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "$2a$10$2KimfHLZKIso1yqP4ZzkfekhC4zAoz8neTfsPEcJVk2Op87rj5sC2"
+        },
+        "name": {
+          "type": "string",
+          "example": "user1"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "null"
+        },
+        "introduction": {
+          "type": "string",
+          "example": "I am Jackson"
+        },
+        "role": {
+          "type": "string",
+          "example": "admin"
+        },
+        "cover": {
+          "type": "string",
+          "example": "null"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        }
+      }
+    },
+    "FollowshipUser": {
       "type": "object",
       "properties": {
         "id": {
@@ -794,6 +868,27 @@
         "updatedAt": {
           "type": "string",
           "example": "2021-03-02T02:18:21.000Z"
+        },
+        "Followship": {
+          "type": "object",
+          "properties": {
+            "followerId": {
+              "type": "number",
+              "example": 2
+            },
+            "followingId": {
+              "type": "number",
+              "example": 11
+            },
+            "createdAt": {
+              "type": "string",
+              "example": "2021-03-03T03:14:10.000Z"
+            },
+            "updatedAt": {
+              "type": "string",
+              "example": "2021-03-03T03:14:10.000Z"
+            }
+          }
         }
       }
     },
@@ -843,6 +938,35 @@
         "updatedAt": {
           "type": "string",
           "example": "2021-03-02T02:18:21.000Z"
+        },
+        "Replies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Reply"
+          }
+        },
+        "Likes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Like"
+          }
+        },
+        "Tweets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tweet"
+          }
+        },
+        "Followers": {
+          "type": "array",
+          "example": [],
+          "items": {}
+        },
+        "Followings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FollowshipUser"
+          }
         }
       }
     },
@@ -855,7 +979,7 @@
         },
         "UserId": {
           "type": "number",
-          "example": 11
+          "example": 2
         },
         "description": {
           "type": "string",
@@ -880,6 +1004,9 @@
           "items": {
             "$ref": "#/definitions/Like"
           }
+        },
+        "User": {
+          "$ref": "#/definitions/User"
         }
       }
     },
@@ -892,7 +1019,7 @@
         },
         "UserId": {
           "type": "number",
-          "example": 11
+          "example": 2
         },
         "TweetId": {
           "type": "number",
@@ -921,7 +1048,7 @@
         },
         "UserId": {
           "type": "number",
-          "example": 52
+          "example": 2
         },
         "TweetId": {
           "type": "number",
