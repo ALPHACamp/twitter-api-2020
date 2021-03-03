@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs')
 //JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
+const user = require('../models/user')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -29,7 +30,22 @@ const userService = {
       })
     }
   },
-  getUsers: (req, res, callback) => { },
+  getTopUser: (req, res, callback) => {
+    User.findAll(
+      {
+        where: { role: 'user' },
+        include: [{ model: User, as: 'Followers' }]
+      })
+      .then(users => {
+        users = users.map(user => ({
+          ...user.dataValues,
+          FollowerCount: user.Followers.length,
+          isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+        }))
+        users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
+        callback({ users: users })
+      })
+  },
   getUser: (req, res, callback) => { },
   getUserTweets: (req, res, callback) => { },
   getUserReplies: (req, res, callback) => { },
