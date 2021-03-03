@@ -85,3 +85,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# multer img store files
+temp/
+upload/

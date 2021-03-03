@@ -1,6 +1,8 @@
 const db = require('../models')
 const { User, Tweet, Like, Reply } = db
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 //JWT
 const jwt = require('jsonwebtoken')
@@ -72,7 +74,44 @@ const userService = {
       .catch(err => console.log(err))
   },
 
-  putUser: (req, res, callback) => { },
+  putUser: (req, res, callback) => {
+    if (!req.body.name) {
+      callback({ status: 'error', message: "Please insert a name for user!" })
+    }
+    const { file } = req
+    console.log(file)
+
+    if (file) {
+      helpers.imgurUploadPromise(file, IMGUR_CLIENT_ID)
+        .then(img => {
+          console.log(img)
+          User.findByPk(req.params.id)
+            .then(user => {
+              user.update({
+                name: req.body.name,
+                avatar: file ? img.link : user.avatar,
+                cover: file ? img.link : user.cover,
+                introduction: req.body.introduction
+              })
+              callback({ status: 'success', message: 'User profile was successfully update' })
+            })
+            .catch(err => console.log(err))
+        })
+    } else {
+      User.findByPk(req.params.id)
+        .then(user => {
+          user.update({
+            name: req.body.name,
+            avatar: user.avatar,
+            cover: user.cover,
+            introduction: req.body.introduction
+          })
+          callback({ status: 'success', message: 'User profile was successfully update' })
+        })
+        .catch(err => console.log(err))
+    }
+
+  },
 
   getUserTweets: (req, res, callback) => {
     Tweet.findAll({
