@@ -19,9 +19,11 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
+// User
 router.post('/users', userController.signUp)
 router.post('/users/signIn', userController.signIn)
 router.get('/users', authenticated, userController.getTopUser)
+router.get('/users/:id', userController.getUser)
 
 
 // admin

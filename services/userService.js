@@ -46,7 +46,21 @@ const userService = {
         callback({ users: users })
       })
   },
-  getUser: (req, res, callback) => { },
+
+  getUser: (req, res, callback) => {
+    User.findByPk(req.params.id, {
+      where: { role: 'user' },
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then(user => {
+        callback(user)
+      })
+      .catch(err => console.log(err))
+  },
+
   getUserTweets: (req, res, callback) => { },
   getUserReplies: (req, res, callback) => { },
   getUserLikes: (req, res, callback) => { },
