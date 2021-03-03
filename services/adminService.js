@@ -1,7 +1,7 @@
 const db = require('../models')
 const { User, Tweet } = db
 const bcrypt = require('bcryptjs')
-
+const jwt = require('jsonwebtoken')
 const adminService = {
   // 登入
   signIn: (req, res, callback) => {

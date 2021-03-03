@@ -7,15 +7,12 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userController = {
-  getUser: (req, res, callback) => {
-    // 檢查必要資料
-    if (!req.body.account || !req.body.password) {
+  getUser: (req, res) => {
+    const { account, password } = req.body
+    if (!account || !password) {
       return res.json({ status: 'error', message: "required fields didn't exist" })
     }
-    // 檢查 user 是否存在與密碼是否正確
-    let username = req.body.account
-    let password = req.body.password
-    User.findOne({ where: { account: username } }).then(user => {
+    User.findOne({ where: { account } }).then(user => {
       if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
@@ -25,12 +22,27 @@ const userController = {
       return res.json({
         status: 'success',
         message: 'ok',
-        token: token,
+        token,
         user: {
-          id: user.id, name: user.name, email: user.account, isAdmin: user.role
+          id: user.id, name: user.name, account: user.account, email: user.email, avatar: user.avatar, role: user.role
         }
       })
     })
+  },
+  signUp: (req, res) => {
+    const { account, name, email, password, passwordCheck } = req.body
+    if (!account || !password || !name || !email || !passwordCheck) {
+      return res.json({ status: 'error', message: "required fields didn't exist" })
+    }
+    User.findOne({ where: { email } }).then(user => {
+      if (user) { return res.json({ status: 'error', message: "this email already exists " }) }
+      if (password !== passwordCheck) {
+        return res.json({ status: 'error', message: "password and passwordCheck didn't match" })
+      }
+      User.create({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
+        .then(() => res.json({ status: 'success', message: "signup successfully" }))
+    })
+
   }
 }
 

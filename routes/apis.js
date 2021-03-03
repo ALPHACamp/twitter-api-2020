@@ -18,16 +18,19 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 // user
+// 註冊
+router.post('/users', userController.signUp)
+// 登入
 router.post('/signin', authenticated, userController.getUser)
 
 // admin
 // JWT signin
 router.post('/admin/signin', adminController.signIn)
-// 註冊
-router.get('/admin/users', adminController.getUsers)
-// 全部推文資料
-router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
-// 刪除一筆推文
-router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
+// // 註冊
+// router.get('/admin/users', adminController.getUsers)
+// // 全部推文資料
+// router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+// // 刪除一筆推文
+// router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
 
 module.exports = router
