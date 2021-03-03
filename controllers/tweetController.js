@@ -69,7 +69,28 @@ const tweetController = {
                     })
             })
             .catch(error => console.error(error))
-    }
+    },
 
+    postLike: (req, res) => {
+        return Like.create({
+            UserId: helpers.getUser(req).id,
+            TweetId: req.params.id
+        })
+            .then((tweet) => {
+                return res.json(tweet)
+            })
+            .catch(error => console.error(error))
+    },
+    deleteLike: (req, res) => {
+        return Like.findOne({
+            where: { UserId: helpers.getUser(req).id, TweetId: req.params.id },
+        })
+            .then(async (like) => {
+                like.destroy()
+                return res.json({ status: 'success', message: 'like was successfully deleted' })
+            })
+            .catch(error => console.error(error))
+
+    }
 }
 module.exports = tweetController

@@ -32,12 +32,19 @@ router.get('/api/users/:id/followings', userController.getFollowings)
 // 誰在追蹤這個使用者
 router.get('/api/users/:id/followers', userController.getFollowers)
 
-// 以下tweets功能拿掉authenticated後跑test全部pass，放了會說沒有authenticate，待解決
+
+// 以下功能拿掉authenticated後跑test全部pass，放了會說沒有authenticate，待解決
 
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 router.get('/api/tweets/:id', tweetController.getTweet)
 router.put('/api/tweets/:id', authenticated, tweetController.putTweet)
 router.delete('/api/tweets/:id', authenticated, tweetController.deleteTweet)
+
+
+router.post('/api/tweets/:id/like', authenticated, tweetController.postLike)
+//因為測試檔是用post不是用delete
+router.post('/api/tweets/:id/unlike', authenticated, tweetController.deleteLike)
+
 
 module.exports = router
