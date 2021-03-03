@@ -247,6 +247,76 @@
         }
       }
     },
+    "/api/tweets/{tweet_id}/replies": {
+      "post": {
+        "tags": [
+          "Tweets"
+        ],
+        "description": "add reply to specific tweet",
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "schema": {
+              "properties": {
+                "comment": {
+                  "type": "text",
+                  "example": "hahahaha"
+                }
+              }
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Tweets"
+        ],
+        "description": "get all replies of specific tweet",
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/tweets": {
       "post": {
         "tags": [
@@ -270,7 +340,7 @@
         "tags": [
           "Tweets"
         ],
-        "description": "",
+        "description": "get all tweets",
         "parameters": [
           {
             "name": "Authorization",
@@ -279,6 +349,70 @@
           }
         ],
         "responses": {}
+      }
+    },
+    "/api/replies/{id}": {
+      "delete": {
+        "tags": [
+          "replies"
+        ],
+        "description": "delete specific reply",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "replies"
+        ],
+        "description": "edit specific reply",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "schema": {
+              "properties": {
+                "comment": {
+                  "type": "text",
+                  "example": "hahahaha"
+                }
+              }
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     }
   },
@@ -356,10 +490,25 @@
           "type": "integer"
         }
       },
-      "required": [
-        "type",
-        "description"
-      ]
+      "required": []
+    },
+    "Reply": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "UserId": {
+          "type": "integer"
+        },
+        "TweetId": {
+          "type": "integer"
+        },
+        " comment": {
+          "type": "text"
+        }
+      },
+      "required": []
     }
   }
 }

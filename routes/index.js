@@ -8,6 +8,7 @@ const upload = multer({ dest: 'temp/' })
 // 驗證使用者 middleware
 const tweetController = require('../controllers/tweetController.js')
 const userController = require('../controllers/userController.js')
+const replyController = require('../controllers/replyController.js')
 // //身分認證
 const authenticated = passport.authenticate('jwt', { session: false })
 // const authenticatedAdmin = (req, res, next) => {
@@ -45,6 +46,13 @@ router.delete('/api/tweets/:id', authenticated, tweetController.deleteTweet)
 router.post('/api/tweets/:id/like', authenticated, tweetController.postLike)
 //因為測試檔是用post不是用delete
 router.post('/api/tweets/:id/unlike', authenticated, tweetController.deleteLike)
+
+
+router.post('/api/tweets/:tweet_id/replies', authenticated, tweetController.postReply)
+router.get('/api/tweets/:tweet_id/replies', authenticated, tweetController.getReplies)
+
+router.delete('/api/replies/:id', authenticated, replyController.deleteReply)
+router.put('/api/replies/:id', authenticated, replyController.putReply)
 
 
 module.exports = router

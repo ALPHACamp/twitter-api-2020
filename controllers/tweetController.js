@@ -77,7 +77,7 @@ const tweetController = {
             TweetId: req.params.id
         })
             .then((tweet) => {
-                return res.json(tweet)
+                return res.json({ status: 'success', message: 'like was successfully create' })
             })
             .catch(error => console.error(error))
     },
@@ -91,6 +91,35 @@ const tweetController = {
             })
             .catch(error => console.error(error))
 
+    },
+    getReplies: async (req, res) => {
+        return Reply.findAll({
+            where: { TweetId: req.params.tweet_id },
+            include: [{
+                model: User,
+                attributes: ['id', 'name', 'account', 'avatar']
+            }],
+            raw: true,
+            nest: true,
+            order: [
+                // 資料庫端進行排列
+                [sequelize.literal('createdAt'), 'DESC']
+            ]
+        }).then(replies => {
+            return res.status(200).json(replies)
+        }).catch(error => console.error(error))
+    },
+    postReply: async (req, res) => {
+        return Reply.create({
+            comment: req.body.comment,
+            UserId: helpers.getUser(req).id,
+            TweetId: req.params.tweet_id
+        })
+            .then((reply) => {
+                return res.json({ status: 'success', message: 'reply was successfully create' })
+            })
+            .catch(error => console.error(error))
     }
+
 }
 module.exports = tweetController
