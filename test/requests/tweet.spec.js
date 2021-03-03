@@ -10,49 +10,49 @@ const passport = require('../../config/passport')
 
 describe('# tweet requests', () => {
 
-  context('# POST ', () => {
+  // context('# POST ', () => {
 
-    describe('POST /api/tweets', () => {
-      before(async() => {
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
-          callback(null, {...rootUser}, null);
-          return (req,res,next)=>{};
-        });
-        this.getUser = sinon.stub(
-            helpers, 'getUser'
-        ).returns({id: 1, Followings: []});
-        await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
-      })
+  //   describe('POST /api/tweets', () => {
+  //     before(async() => {
+  //       await db.User.destroy({where: {},truncate: true})
+  //       await db.Tweet.destroy({where: {},truncate: true})
+  //       const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
+  //         callback(null, {...rootUser}, null);
+  //         return (req,res,next)=>{};
+  //       });
+  //       this.getUser = sinon.stub(
+  //           helpers, 'getUser'
+  //       ).returns({id: 1, Followings: []});
+  //       await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
+  //     })
 
-      // 新增推文 - POST /tweets
-      it(' - successfully', (done) => {
-        request(app)
-          .post('/api/tweets')
-          .send('description=description')
-          .set('Accept', 'application/json')
-          .expect(200)
-          .end(function(err, res) {
-            if (err) return done(err);
-            db.Tweet.findByPk(1).then(tweet => {
-              tweet.description.should.equal('description');
-              tweet.UserId.should.equal(1);
-              return done();
-            })
-          })
-      });
+  //     // 新增推文 - POST /tweets
+  //     it(' - successfully', (done) => {
+  //       request(app)
+  //         .post('/api/tweets')
+  //         .send('description=description')
+  //         .set('Accept', 'application/json')
+  //         .expect(200)
+  //         .end(function(err, res) {
+  //           if (err) return done(err);
+  //           db.Tweet.findByPk(1).then(tweet => {
+  //             tweet.description.should.equal('description');
+  //             tweet.UserId.should.equal(1);
+  //             return done();
+  //           })
+  //         })
+  //     });
 
-      after(async () => {
-        this.authenticate.restore();
-        this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-      })
+  //     after(async () => {
+  //       this.authenticate.restore();
+  //       this.getUser.restore();
+  //       await db.User.destroy({where: {},truncate: true})
+  //       await db.Tweet.destroy({where: {},truncate: true})
+  //     })
 
-    });
+  //   });
 
-  });
+  // });
 
   context('# GET ', () => {
 
