@@ -1,21 +1,23 @@
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { User, Tweet, Reply, sequelize } = require('../models')
 const formatDistanceToNow = require('date-fns/formatDistanceToNow')
 const helpers = require('../_helpers')
+const includeCountData = (req) => {
+  return [
+    [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+    [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+    [sequelize.literal(`EXISTS(SELECT * FROM LIKES WHERE LIKES.UserId = ${helpers.getUser(req).id} AND LIKES.TweetId = Tweet.id)`), 'isLiked']
+  ]
+}
+const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'avatar'] })
 
 const tweetController = {
   // 瀏覽全部推文
-  getTweets: async (req, res) => {
+  getTweets: (req, res) => {
     return Tweet.findAll({
-      include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-      ],
+      include: includeUserData(), // 使用者資料
       attributes: {
-        // 資料庫端運行計算
-        include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-          [sequelize.literal(`EXISTS(SELECT * FROM LIKES WHERE LIKES.UserId = ${helpers.getUser(req).id} AND LIKES.TweetId = Tweet.id)`), 'isLiked']
-        ],
+        // 計算數量
+        include: includeCountData(req),
         // 過濾不要資料
         exclude: ['updatedAt']
       },
@@ -33,11 +35,25 @@ const tweetController = {
       return res.status(200).json(data)
     }).catch(error => console.error(error))
   },
-
+  // 瀏覽單一推文
   getTweet: (req, res) => {
     return Tweet.findByPk(req.params.id, {
-      include: [User]
+      include: [
+        User,
+        Reply,
+        includeUserData() // 使用者資料
+      ],
+      attributes: {
+        // // 計算數量
+        include: includeCountData(req),
+        // 過濾不要資料
+        exclude: ['updatedAt']
+      },
+      raw: true,
+      nest: true
     }).then(tweets => {
+      // 留言內回覆者時間建立
+      tweets.Replies.replyTime = formatDistanceToNow(tweets.Replies.createdAt, { includeSeconds: true })
       return res.json(tweets)
     }).catch(error => console.error(error))
   },

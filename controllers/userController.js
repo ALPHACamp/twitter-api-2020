@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken')
 const userController = {
   // 登入
   signIn: (req, res) => {
+    console.log('---------OKOKOKK')
     // 取得資料
     const { email, password } = req.body
     // 檢查必要資料
