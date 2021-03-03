@@ -1,11 +1,12 @@
 const db = require('../models')
-const User = db.User
+const { User, Tweet, Like, Reply } = db
 const bcrypt = require('bcryptjs')
 
 //JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const user = require('../models/user')
+const tweetService = require('./tweetService')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -61,7 +62,19 @@ const userService = {
       .catch(err => console.log(err))
   },
 
-  getUserTweets: (req, res, callback) => { },
+  getUserTweets: (req, res, callback) => {
+    Tweet.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: Like },
+        { model: Reply }
+      ]
+    })
+      .then(tweets => {
+        callback(tweets)
+      })
+      .catch(err => console.log(err))
+  },
   getUserReplies: (req, res, callback) => { },
   getUserLikes: (req, res, callback) => { },
   getFollowings: (req, res, callback) => { },

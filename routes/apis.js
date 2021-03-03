@@ -24,6 +24,7 @@ router.post('/users', userController.signUp)
 router.post('/users/signIn', userController.signIn)
 router.get('/users', authenticated, userController.getTopUser)
 router.get('/users/:id', userController.getUser)
+router.get('/users/:id/tweets', userController.getUserTweets)
 
 
 // admin
