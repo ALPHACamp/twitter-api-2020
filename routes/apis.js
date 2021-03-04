@@ -48,4 +48,8 @@ router.post('/tweets', tweetController.postTweet)
 router.get('/tweets', tweetController.getTweets)
 router.get('/tweets/:id', tweetController.getTweet)
 
+// follow
+router.post('/followships', followController.addFollowing)
+router.delete('/followships/:followingId', followController.removeFollowing)
+
 module.exports = router
