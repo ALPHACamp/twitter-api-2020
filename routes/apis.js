@@ -12,11 +12,18 @@ const replyController = require('../controllers/api/replyController')
 const tweetController = require('../controllers/api/tweetController')
 const userController = require('../controllers/api/userController')
 
-const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = function (req, res, next) {
+  passport.authenticate('jwt', { session: false }, function (err, user, info) {
+    if (err) { return next(err) }
+    if (!user) { return res.status(401).json({ status: 'error', message: 'authentication error' }) }
+    req.user = user
+    return next()
+  })(req, res, next)
+}
 
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
-    if (req.user === 'admin') { return next() }
+    if (req.user.role === 'admin') { return next() }
     return res.json({ status: 'error', message: 'permission denied' })
   } else {
     return res.json({ status: 'error', message: 'permission denied' })
@@ -27,14 +34,14 @@ const authenticatedAdmin = (req, res, next) => {
 router.post('/users', userController.signUp)
 router.post('/users/signIn', userController.signIn)
 router.get('/users', authenticated, userController.getTopUser)
-router.get('/users/:id', userController.getUser)
-router.get('/users/:id/tweets', userController.getUserTweets)
-router.get('/users/:id/replied_tweets', userController.getUserReplies)
-router.get('/users/:id/likes', userController.getUserLikes)
-router.get('/users/:id/followings', userController.getFollowings)
-router.get('/users/:id/followers', userController.getFollowers)
-router.get('/users/:id/edit', userController.editUser)
-router.put('/users/:id', upload.any('avatar', 'cover'), userController.putUser)
+router.get('/users/:id', authenticated, userController.getUser)
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/followings', authenticated, userController.getFollowings)
+router.get('/users/:id/followers', authenticated, userController.getFollowers)
+router.get('/users/:id/edit', authenticated, userController.editUser)
+router.put('/users/:id', authenticated, upload.any('avatar', 'cover'), userController.putUser)
 
 
 // admin
