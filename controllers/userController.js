@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-const { User, Followship, Like, Reply } = require('../models')
+const { Tweet, User, Followship, Like, Reply, sequelize } = require('../models')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -11,7 +11,6 @@ const jwt = require('jsonwebtoken')
 const userController = {
   // 登入
   signIn: (req, res) => {
-    console.log('---------OKOKOKK')
     // 取得資料
     const { email, password } = req.body
     // 檢查必要資料
@@ -84,21 +83,23 @@ const userController = {
   },
   // 瀏覽個人資料
   getUser: (req, res) => {
-    return Promise.all([
-      Followship.findAndCountAll({ where: { followingId: req.params.id } }),
-      Followship.findAndCountAll({ where: { followerId: req.params.id } }),
-      Like.findAndCountAll({ where: { UserId: req.params.id } }),
-      Reply.findAndCountAll({ where: { UserId: req.params.id } })
-    ])
-      // 在資料庫端計算好 count 在返回
-      .then(([follower, following, LikedTweets, ReplyTweets]) => {
-        const user = req.user
-        user.dataValues.follower = follower.count
-        user.dataValues.following = following.count
-        user.dataValues.LikedTweets = LikedTweets.count
-        user.dataValues.ReplyTweets = ReplyTweets.count
-        return res.status(200).json({ user })
-      })
+    const userId = req.params.id
+    return User.findOne({
+      where: { id: userId },
+      attributes: {
+        include: [
+          [sequelize.literal(`(SELECT Count(*) FROM Followships WHERE Followships.followerId = ${userId})`), 'FollowingsCount'],
+          [sequelize.literal(`(SELECT Count(*) FROM Followships WHERE Followships.followingId = ${userId})`), 'FollowersCount'],
+          [sequelize.literal(`(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = ${userId})`), 'userTweetsCount'],
+          [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${userId})`), 'likedTweetsCount'],
+          [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = ${userId})`), 'replyTweetsCount'],
+        ]
+      },
+      raw: true,
+      nest: true,
+    }).then(user => {
+      return res.status(200).json({ user })
+    })
       .catch(err => {
         return res.status(500).json({ status: 'error', message: '個人資料-伺服器錯誤請稍後', err })
       })
@@ -116,7 +117,7 @@ const userController = {
       return res.json({ status: 'error', message: '請輸入名稱', userData })
     }
     // 建立上傳照片Functions
-    function myImgurUpload (uploadFile) {
+    function myImgurUpload(uploadFile) {
       imgur.setClientId(IMGUR_CLIENT_ID)
       return imgur.uploadFile(uploadFile)
     }

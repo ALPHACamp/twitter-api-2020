@@ -1,6 +1,7 @@
-const { User, Tweet, Reply, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const formatDistanceToNow = require('date-fns/formatDistanceToNow')
 const helpers = require('../_helpers')
+// 重複程式碼 
 const includeCountData = (req) => {
   return [
     [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
@@ -23,11 +24,10 @@ const tweetController = {
       },
       raw: true,
       nest: true,
-      order: [
-        // 資料庫端進行排列
-        [sequelize.literal('createdAt'), 'DESC']
-      ]
+      // 資料庫端進行排列
+      order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(tweets => {
+       // 建立推文時間距離多久
       const data = tweets.map(r => ({
         ...r,
         time: formatDistanceToNow(r.createdAt, { includeSeconds: true })
@@ -42,7 +42,6 @@ const tweetController = {
     return Tweet.findByPk(req.params.id, {
       include: [
         User,
-        Reply,
         includeUserData() // 使用者資料
       ],
       attributes: {
@@ -54,8 +53,6 @@ const tweetController = {
       raw: true,
       nest: true
     }).then(tweets => {
-      // 留言內回覆者時間建立
-      tweets.Replies.replyTime = formatDistanceToNow(tweets.Replies.createdAt, { includeSeconds: true })
       return res.json(tweets)
     }).catch(error => {
       return res.status(500).json({ status: 'error', message: '瀏覽單一推文-伺服器錯誤請稍後', error })
@@ -100,6 +97,64 @@ const tweetController = {
       .catch(error => {
         return res.status(500).json({ status: 'error', message: '修改推特-伺服器錯誤請稍後', error })
       })
+  },
+  // 新增 Like
+  postLike: (req, res) => {
+    return Like.create({
+      UserId: helpers.getUser(req).id,
+      TweetId: req.params.id
+    })
+      .then((tweet) => {
+        return res.status(200).json({ status: 'success', message: 'like was successfully create' })
+      })
+      .catch(error => console.error(error))
+  },
+  // 刪除 Like
+  deleteLike: (req, res) => {
+    return Like.findOne({
+      where: { UserId: helpers.getUser(req).id, TweetId: req.params.id },
+    })
+      .then(async (like) => {
+        await like.destroy()
+        return res.json({ status: 'success', message: 'like was successfully deleted' })
+      })
+      .catch(error => console.error(error))
+
+  },
+  // 瀏覽回覆
+  getReplies: async (req, res) => {
+    return Reply.findAll({
+      where: { TweetId: req.params.tweet_id },
+      include: [{
+        model: User,
+        attributes: ['id', 'name', 'account', 'avatar']
+      }],
+      raw: true,
+      nest: true,
+      order: [
+        // 資料庫端進行排列
+        [sequelize.literal('createdAt'), 'DESC']
+      ]
+    }).then(replies => {
+      // 建立回覆者時間距離多久
+      const data = replies.map(replies => ({
+        ...replies,
+        replyTime: formatDistanceToNow(replies.createdAt, { includeSeconds: true })
+      }))
+      return res.status(200).json(data)
+    }).catch(error => console.error(error))
+  },
+  // 新增回覆
+  postReply: async (req, res) => {
+    return Reply.create({
+      comment: req.body.comment,
+      UserId: helpers.getUser(req).id,
+      TweetId: req.params.tweet_id
+    })
+      .then((reply) => {
+        return res.json({ status: 'success', message: 'reply was successfully create' })
+      })
+      .catch(error => console.error(error))
   }
 
 }
