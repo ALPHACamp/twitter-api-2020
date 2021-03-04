@@ -25,9 +25,16 @@ const authenticatedAdmin = (req, res, next) => {
   } else {
     return res.status(401).json({ status: 'error', message: 'permission denied' })
   }
-}
+};
+
+router.post('/signin', userController.signIn);
 
 
+//followship
+router.get('/following', followshipController.getFollowing);
+router.get('/follower', followshipController.getFollower);
+router.post('/followships/:followingId', followshipController.postFollowship);
+router.delete('/followships/:followingId', followshipController.deleteFollowship);
 
 //user
 router.get('/users/:id', authenticated, userController.getUser)
@@ -40,5 +47,4 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweets)
 
 
-
-module.exports = router
+module.exports = router;
