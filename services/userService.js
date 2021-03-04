@@ -166,7 +166,6 @@ const userService = {
 
   },
   getFollowers: (req, res, callback) => {
-    // Followship.create({ followerId: 3, followingId: 1 })
     User.findByPk(req.params.id,
       {
         include: [
@@ -174,7 +173,13 @@ const userService = {
           { model: User, as: 'Followers' }
         ],
       }).then(users => {
-        users = users.Followers
+        users = users.Followers.map(user => ({
+          ...user.dataValues,
+          followerId: user.Followship.followerId,
+          followingId: user.Followship.followerId
+        }))
+        console.log(Array.isArray(users.Followers))
+        // console.log(users.Followers)
         callback(users)
       })
   }
