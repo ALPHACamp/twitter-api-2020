@@ -78,25 +78,60 @@ const userService = {
     if (!req.body.name) {
       callback({ status: 'error', message: "Please insert a name for user!" })
     }
-    const { file } = req
-    console.log(file)
+    const { files } = req
+    console.log(files)
 
-    if (file) {
-      helpers.imgurUploadPromise(file, IMGUR_CLIENT_ID)
-        .then(img => {
-          console.log(img)
-          User.findByPk(req.params.id)
-            .then(user => {
-              user.update({
-                name: req.body.name,
-                avatar: file ? img.link : user.avatar,
-                cover: file ? img.link : user.cover,
-                introduction: req.body.introduction
+    if (files) {
+      if (files.length === 1) {
+        helpers.imgurUploadPromise(files[0], IMGUR_CLIENT_ID)
+          .then(img => {
+            console.log(img)
+            if (files[0].fieldname === 'avatar') {
+              User.findByPk(req.params.id)
+                .then(user => {
+                  user.update({
+                    name: req.body.name,
+                    avatar: img.link,
+                    cover: user.cover,
+                    introduction: req.body.introduction
+                  })
+                  callback({ status: 'success', message: 'User avatar was successfully update' })
+                })
+                .catch(err => console.log(err))
+            } else {
+              User.findByPk(req.params.id)
+                .then(user => {
+                  user.update({
+                    name: req.body.name,
+                    avatar: user.avatar,
+                    cover: img.link,
+                    introduction: req.body.introduction
+                  })
+                  callback({ status: 'success', message: 'User cover was successfully update' })
+                })
+                .catch(err => console.log(err))
+            }
+          }).catch(err => console.log(err))
+      } else {
+        helpers.imgurUploadPromise(files[0], IMGUR_CLIENT_ID)
+          .then(img1 => {
+            helpers.imgurUploadPromise(files[1], IMGUR_CLIENT_ID)
+              .then(img2 => {
+                console.log(img1, img2)
+                User.findByPk(req.params.id)
+                  .then(user => {
+                    user.update({
+                      name: req.body.name,
+                      avatar: img1.link,
+                      cover: img2.link,
+                      introduction: req.body.introduction
+                    })
+                    callback({ status: 'success', message: 'User avatar & cover was successfully update' })
+                  })
+                  .catch(err => console.log(err))
               })
-              callback({ status: 'success', message: 'User profile was successfully update' })
-            })
-            .catch(err => console.log(err))
-        })
+          })
+      }
     } else {
       User.findByPk(req.params.id)
         .then(user => {
@@ -110,7 +145,6 @@ const userService = {
         })
         .catch(err => console.log(err))
     }
-
   },
 
   getUserTweets: (req, res, callback) => {
