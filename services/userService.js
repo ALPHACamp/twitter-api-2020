@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Like, Reply } = db
+const { User, Tweet, Like, Reply, Followship } = db
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -168,9 +168,51 @@ const userService = {
     }
   },
 
-  getUserLikes: (req, res, callback) => { },
-  getFollowings: (req, res, callback) => { },
-  getFollowers: (req, res, callback) => { }
+  //Wei start here
+  getUserLikes: (req, res, callback) => {
+    Like.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: Tweet, include: [{ model: Like }, { model: Reply }] }
+      ]
+    }).then(likes => {
+      callback(likes)
+    })
+      .catch(err => console.log(err))
+  },
+  getFollowings: (req, res, callback) => {
+    User.findByPk(req.params.id,
+      {
+        include: [
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ],
+      }).then(user => {
+        user = user.Followings.map(user => ({
+          ...user.dataValues,
+          followerId: user.Followship.followerId,
+          followingId: user.Followship.followingId
+        }))
+        callback(user)
+      })
+
+  },
+  getFollowers: (req, res, callback) => {
+    User.findByPk(req.params.id,
+      {
+        include: [
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ],
+      }).then(user => {
+        user = user.Followers.map(user => ({
+          ...user.dataValues,
+          followerId: user.Followship.followerId,
+          followingId: user.Followship.followingId
+        }))
+        callback(user)
+      })
+  }
 }
 
 module.exports = userService
