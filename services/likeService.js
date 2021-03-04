@@ -15,7 +15,19 @@ const likeService = {
       callback({ status: 'success', message: '' })
     })
   },
-  removeLike: (req, res, callback) => { }
+  removeLike: (req, res, callback) => {
+    const user = helper.getUser(req)
+    Like.findOne({
+      where: {
+        UserId: user.id,
+        TweetId: req.params.id
+      }
+    }).then(like => {
+      if (like === null) callback({ status: 'success', message: '' })
+      like.destroy()
+      callback({ status: 'success', message: '' })
+    })
+  }
 }
 
 module.exports = likeService

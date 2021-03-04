@@ -8,7 +8,11 @@ const likeController = {
       return res.json(data)
     })
   },
-  removeLike: (req, res) => { }
+  removeLike: (req, res) => {
+    likeService.removeLike(req, res, (data) => {
+      return res.json(data)
+    })
+  }
 }
 
 module.exports = likeController
