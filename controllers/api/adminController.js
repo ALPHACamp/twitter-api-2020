@@ -20,9 +20,10 @@ const adminController = {
     try {
       const users = await User.findAll({
         include: [Reply, Like, Tweet,
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ]
+          { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
+          { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
+        ],
+        attributes: { exclude: ['password'] }
       })
       if (!users || !Array.isArray(users)) {
         return res.status(400).json({ status: 'error', message: '無法取得用戶資料' })

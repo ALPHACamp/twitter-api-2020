@@ -842,10 +842,6 @@
           "type": "string",
           "example": "user1@example.com"
         },
-        "password": {
-          "type": "string",
-          "example": "$2a$10$2KimfHLZKIso1yqP4ZzkfekhC4zAoz8neTfsPEcJVk2Op87rj5sC2"
-        },
         "name": {
           "type": "string",
           "example": "user1"
@@ -890,10 +886,6 @@
         "email": {
           "type": "string",
           "example": "root@example.com"
-        },
-        "password": {
-          "type": "string",
-          "example": "$2a$10$2KimfHLZKIso1yqP4ZzkfekhC4zAoz8neTfsPEcJVk2Op87rj5sC2"
         },
         "name": {
           "type": "string",
@@ -960,10 +952,6 @@
         "email": {
           "type": "string",
           "example": "user1@example.com"
-        },
-        "password": {
-          "type": "string",
-          "example": "$2a$10$2KimfHLZKIso1yqP4ZzkfekhC4zAoz8neTfsPEcJVk2Op87rj5sC2"
         },
         "name": {
           "type": "string",
