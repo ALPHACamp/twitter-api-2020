@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs')
 const helpers = require('../../_helpers')
-const db = require('../../models')
-const User = db.User
+const { User, Followship, Tweet, Reply } = require('../../models')
 const Op = require('sequelize').Op
 
 // JWT
@@ -87,8 +86,34 @@ let userController = {
       .then(user => {
         return res.json(user)
       })
+      .catch(error => res.send(error))
   },
 
+  getUserTweets: (req, res) => {
+    Tweet.findAll({
+      include: [User],
+      where: {
+        UserId: req.params.id
+      }
+    }).then(tweets => {
+      const data = tweets.map(t => ({
+        ...t.dataValues
+      }))
+      return res.json(data)
+    })
+      .catch(error => res.send(error))
+  },
+
+  getReplyTweet: (req, res) => {
+    Reply.findAll({
+      include: Tweet,
+      where: {
+        UserId: req.params.id
+      }
+    }).then(data => {
+      return res.json(data)
+    })
+  }
 
 }
 
