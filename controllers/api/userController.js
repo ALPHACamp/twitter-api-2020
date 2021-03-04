@@ -54,8 +54,8 @@ const userController = {
       const tweetsNumber = tweets ? tweets.length : 0 // 使用者推文數
       const followingsNumber = followings ? followings.length : 0 // 使用者追蹤數
       const followersNumber = followers ? followers.length : 0 // 使用者跟隨數
-      const user = { id, name, account, email, avatar, cover, introduction, tweetsNumber, followingsNumber, followersNumber }
-      //isFollowed, // 是否追蹤中
+      const isFollowed = req.user.Followings.map(d => d.id).includes(users.id) // 是否追蹤中
+      const user = { id, name, account, email, avatar, cover, introduction, tweetsNumber, followingsNumber, followersNumber, isFollowed }
       return res.json({ user })
     })
   },

@@ -22,6 +22,7 @@ router.post('/users', userController.signUp)
 router.post('/signin', authenticated, userController.signIn)
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+
 // admin
 // JWT signin
 router.post('/admin/signin', adminController.signIn)
