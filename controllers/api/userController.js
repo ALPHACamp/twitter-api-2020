@@ -22,7 +22,7 @@ module.exports = {
       //check if user exists
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
       user.dataValues.isSelf = user.id === helpers.getUser(req).id
-      return res.json(user)
+      return res.status(200).json(user)
 
     } catch(err) {
       console.log('catch block: ', err)
@@ -55,7 +55,7 @@ module.exports = {
         return tweet
       })
 
-      return res.json(tweets)
+      return res.status(200).json(tweets)
 
     } catch(err) {
       console.log('catch block: ', err)
@@ -95,7 +95,7 @@ module.exports = {
         tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
         return reply
       })
-      return res.json(repliedTweets)
+      return res.status(200).json(repliedTweets)
 
     } catch(err) {
       console.log('catch block: ', err)
@@ -136,7 +136,7 @@ module.exports = {
         return tweet
       })
 
-      return res.json(likedTweets)
+      return res.status(200).json(likedTweets)
 
     } catch(err) {
       console.log('catch block: ', err)
@@ -160,7 +160,7 @@ module.exports = {
         return followship
         //if want to sort without raw: true, have to access via dataValues
       }).sort((a, b) => b.dataValues.isFollowed - a.dataValues.isFollowed)
-      return res.json(followings)
+      return res.status(200).json(followings)
 
     } catch(err) {
       console.log('catch block: ', err)
@@ -184,7 +184,7 @@ module.exports = {
         return followship
       }).sort((a, b) => b.dataValues.isFollowed - a.dataValues.isFollowed)
 
-      return res.json(followers)
+      return res.status(200).json(followers)
 
     } catch(err) {
       console.log('catch block: ', err)
@@ -242,7 +242,7 @@ module.exports = {
         avatar: avatar ? avatar.data.link : user.avatar,
         cover: cover ? cover.data.link : user.cover
       })
-      return res.json(updatedUser)
+      return res.status(200).json(updatedUser)
       
     } catch(err) {
       console.log('catch block: ', err)
@@ -354,7 +354,7 @@ module.exports = {
       // sign and send jwt
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
+      return res.status(200).json({
         status: 'success',
         message: '成功登入!!!',
         token,
