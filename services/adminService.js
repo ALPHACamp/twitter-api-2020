@@ -1,6 +1,14 @@
 const db = require('../models')
-const { User, Tweet } = db
+const { User, Tweet, Like } = db
+const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
+
+//JWT
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
 
 const adminService = {
   // 登入
@@ -56,6 +64,63 @@ const adminService = {
       })
   },
 
+  getUsers: (req, res, callback) => {
+    return User.findAll({
+      where: { role: { [Op.not]: 'admin' } },
+      include: [
+        { model: Tweet },
+        { model: Like },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then((users) => {
+        const usersData = users.map((user) => ({
+          ...user.dataValues,
+          tweetsCount: user.Tweets.length,
+          likesCount: user.likes.length,
+          followersCount: user.Followers.length,
+          followingsCount: user.Followings.length
+        }))
+          .sort((a, b) => b.tweetsCount - a.tweetsCount)
+        callback(usersData)
+      })
+  },
+
+  getTweets: (req, res, callback) => {
+    return Tweet.findAll({
+      include: [User],
+      order: [['updatedAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then((tweets) => {
+        const tweetsData = tweets.map((tweet) => ({
+          id: tweet.id,
+          description: tweet.description.slice(0, 49),
+          createdAt: tweet.createdAt,
+          updatedAt: tweet.updatedAt,
+          User: {
+            id: tweet.User.id,
+            account: tweet.user.account,
+            name: tweet.user.name,
+            avatar: tweet.user.avatar
+          }
+        }))
+        callback(tweetsData)
+      })
+  },
+
+  deleteTweet: (req, res, callback) => {
+    return Tweet.findByPk(req.params.id)
+      .then((tweet) => {
+        tweet.destroy()
+          .then((result) => {
+            callback({ status: 'success', message: '' })
+          })
+      })
+      .catch((error) => callback({ status: 'error', message: 'Delete Tweet Fail' }))
+  }
 
 }
 

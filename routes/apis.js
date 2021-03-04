@@ -4,6 +4,8 @@ const passport = require('../config/passport')
 const authenticated = passport.authenticate('jwt', { session: false })
 const userController = require('../controllers/api/userController')
 const adminController = require('../controllers/api/adminController')
+const tweetController = require('../controllers/api/tweetController')
+const tweetService = require('../services/tweetService')
 
 
 const authenticatedAdmin = (req, res, next) => {
@@ -20,10 +22,19 @@ const authenticatedAdmin = (req, res, next) => {
 // user
 router.post('/signin', authenticated, userController.getUser)
 
+
+// tweet
+router.get('/tweets', tweetController.getTweets)
+router.get('/tweets/:id', tweetController.getTweet)
+router.post('/tweets', tweetController.postTweet)
+router.post('/tweets/:id/replies', tweetController.postReply)
+router.post('/tweets/:id/like', tweetController.addLike)
+router.post('/tweets/:id/unlike', tweetController.removeLike)
+
 // admin
 // JWT signin
 router.post('/admin/signin', adminController.signIn)
-// 註冊
+// 搜尋使用者
 router.get('/admin/users', adminController.getUsers)
 // 全部推文資料
 router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
