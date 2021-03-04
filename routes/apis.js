@@ -58,5 +58,6 @@ router.post('/tweets/:id/unlike', likeController.removeLike)
 
 // Reply
 router.post('/tweets/:tweet_id/replies', replyController.postReply)
+router.get('/tweets/:tweet_id/replies', replyController.getReplies)
 
 module.exports = router

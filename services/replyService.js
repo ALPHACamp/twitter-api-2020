@@ -14,7 +14,14 @@ const replyService = {
       callback({ status: 'success', message: 'Reply was successfully created' })
     })
   },
-  getReplies: (req, res, callback) => { }
+  getReplies: (req, res, callback) => {
+    Reply.findAll({
+      where: { TweetId: req.params.tweet_id },
+      raw: true, nest: true
+    }).then(replies => {
+      callback(replies)
+    })
+  }
 }
 
 module.exports = replyService

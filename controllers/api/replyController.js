@@ -8,7 +8,11 @@ const replyController = {
       return res.json(data)
     })
   },
-  getReplies: (req, res) => { }
+  getReplies: (req, res) => {
+    replyService.getReplies(req, res, (data) => {
+      return res.json(data)
+    })
+  }
 }
 
 module.exports = replyController
