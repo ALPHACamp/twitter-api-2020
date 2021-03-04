@@ -12,8 +12,14 @@
     "https",
     "http"
   ],
+  "security": [
+    {
+      "JWT": []
+    }
+  ],
   "securityDefinitions": {
     "JWT": {
+      "description": "bearer + token",
       "type": "apiKey",
       "in": "header",
       "name": "Authorization"
@@ -137,11 +143,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {}
@@ -157,11 +158,6 @@
             "in": "path",
             "description": "string",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -200,11 +196,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
@@ -231,11 +222,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -278,11 +264,6 @@
                 }
               }
             }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
@@ -328,13 +309,7 @@
           "Tweets"
         ],
         "description": "post new tweet",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -346,13 +321,6 @@
           "Tweets"
         ],
         "description": "get all tweets",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
         "responses": {}
       }
     },
@@ -367,11 +335,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -406,11 +369,6 @@
                 }
               }
             }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
@@ -431,11 +389,6 @@
             "name": "followingId",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -458,11 +411,6 @@
         ],
         "description": "add specific followship",
         "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          },
           {
             "in": "body",
             "name": "body",
