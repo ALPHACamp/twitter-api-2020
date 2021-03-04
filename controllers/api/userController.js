@@ -1,5 +1,5 @@
 const db = require('../../models')
-const User = db.User
+const { User, Tweet, Like } = db
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -7,7 +7,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userController = {
-  getUser: (req, res) => {
+  signIn: (req, res) => {   // payLoad: { account, password }
     const { account, password } = req.body
     if (!account || !password) {
       return res.json({ status: 'error', message: "required fields didn't exist" })
@@ -17,6 +17,7 @@ const userController = {
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
       }
+      const { id, name, account, email, avatar, role } = user
       var payload = { id: user.id }
       var token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
@@ -24,7 +25,8 @@ const userController = {
         message: 'ok',
         token,
         user: {
-          id: user.id, name: user.name, account: user.account, email: user.email, avatar: user.avatar, role: user.role
+          id, name, account, email, avatar, role
+          // id: user.id, name: user.name, account: user.account, email: user.email, avatar: user.avatar, role: user.role
         }
       })
     })
@@ -42,7 +44,22 @@ const userController = {
       User.create({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
         .then(() => res.json({ status: 'success', message: "signup successfully" }))
     })
-
+  },
+  getUser: (req, res) => { //取得任一使用者資料
+    const id = req.params.id
+    return Promise.all([
+      User.findByPk(id, { raw: true }),
+      Tweet.findAll({ where: { UserId: id }, raw: true, nest: true }),
+      User.findAll({ raw: true, nest: true, include: [{ model: User, as: 'Followers', where: { id } }, { model: User, as: 'Followings', where: { id } }] })
+    ]).then(([user, tweets, followings, followers]) => {
+      console.log(followings)
+      const { id, name, account, email, avatar, cover, introduction } = user
+      const tweetsNumber = tweets ? tweets.length : 0 // 使用者推文數
+      const followingsNumber = followings ? followings.length : 0 // 使用者追蹤數
+      const followersNumber = followers ? followers.length : 0 // 使用者跟隨數
+      //isFollowed, // 是否追蹤中
+      return res.json({ id, name, account, email, avatar, cover, introduction, tweetsNumber, followingsNumber, followersNumber })
+    })
   }
 }
 

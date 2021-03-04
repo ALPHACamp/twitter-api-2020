@@ -18,10 +18,9 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 // user
-// 註冊
 router.post('/users', userController.signUp)
-// 登入
-router.post('/signin', authenticated, userController.getUser)
+router.post('/signin', authenticated, userController.signIn)
+router.get('/users/:id', authenticated, userController.getUser)
 
 // admin
 // JWT signin
