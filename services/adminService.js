@@ -15,8 +15,7 @@ const adminService = {
   signIn: (req, res, callback) => {
     // 檢查必要資料
     if (!req.body.email || !req.body.password) {
-      callback({ status: 'error', message: "required fields didn't exist" })
-      // return res.json({ status: 'error', message: "required fields didn't exist" })
+      return callback({ status: 'error', message: "required fields didn't exist" })
     }
     // 檢查 user 是否存在與密碼是否正確
     let username = req.body.email
@@ -26,20 +25,18 @@ const adminService = {
       .then((user) => {
         // 帳號不存在
         if (!user) {
-          callback({ status: 'error', message: 'no such user found' })
-          // return res.status(401).json({ status: 'error', message: 'no such user found' })
+          return callback({ status: 'error', message: 'no such user found' })
         }
 
         // 密碼錯誤
         if (!bcrypt.compareSync(password, user.password)) {
-          callback({ status: 'error', message: 'passwords did not match' })
-          // return res.status(401).json({ status: 'error', message: 'passwords did not match' })
+          return callback({ status: 'error', message: 'passwords did not match' })
         }
 
         // 簽發 token
         let payload = { id: user.id }
         let token = jwt.sign(payload, process.env.JWT_SECRET)
-        callback({
+        return callback({
           status: 'success',
           message: 'ok',
           token: token,
@@ -47,23 +44,13 @@ const adminService = {
             id: user.id,
             name: user.name,
             email: user.email,
-            isAdmin: user.isAdmin
+            role: user.role
           }
         })
-        // return res.json({
-        //   status: 'success',
-        //   message: 'ok',
-        //   token: token,
-        //   user: {
-        //     id: user.id,
-        //     name: user.name,
-        //     email: user.email,
-        //     isAdmin: user.isAdmin
-        //   }
-        // })
       })
   },
 
+  // 瀏覽 User 清單
   getUsers: (req, res, callback) => {
     return User.findAll({
       where: { role: { [Op.not]: 'admin' } },
@@ -78,15 +65,17 @@ const adminService = {
         const usersData = users.map((user) => ({
           ...user.dataValues,
           tweetsCount: user.Tweets.length,
-          likesCount: user.likes.length,
+          likesCount: user.Likes.length,
           followersCount: user.Followers.length,
           followingsCount: user.Followings.length
         }))
           .sort((a, b) => b.tweetsCount - a.tweetsCount)
+
         callback(usersData)
       })
   },
 
+  // 瀏覽 Tweet 清單
   getTweets: (req, res, callback) => {
     return Tweet.findAll({
       include: [User],
@@ -102,26 +91,27 @@ const adminService = {
           updatedAt: tweet.updatedAt,
           User: {
             id: tweet.User.id,
-            account: tweet.user.account,
-            name: tweet.user.name,
-            avatar: tweet.user.avatar
+            account: tweet.User.account,
+            name: tweet.User.name,
+            avatar: tweet.User.avatar
           }
         }))
+
         callback(tweetsData)
       })
   },
 
+  // 刪除推文
   deleteTweet: (req, res, callback) => {
     return Tweet.findByPk(req.params.id)
       .then((tweet) => {
         tweet.destroy()
           .then((result) => {
-            callback({ status: 'success', message: '' })
+            callback({ status: 'success', message: 'Delete Tweet Success' })
           })
       })
       .catch((error) => callback({ status: 'error', message: 'Delete Tweet Fail' }))
   }
-
 }
 
 module.exports = adminService
