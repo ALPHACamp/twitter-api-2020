@@ -50,7 +50,7 @@ module.exports = {
       // check if tweets is an array
       if (!tweets || !Array.isArray(tweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的推文。' })
       tweets = tweets.map(tweet => {
-        tweet.dataValues.isLiked = helpers.getUser(req).Likes.map(like => like.TweetId).includes(tweet.id)
+        tweet.dataValues.isLikedByMe = tweet.Likes.map(like => like.TweetId).includes(helpers.getUser(req).id)
         tweet.dataValues.isMyTweet = helpers.getUser(req).id === tweet.User.id
         return tweet
       })
@@ -89,12 +89,15 @@ module.exports = {
       })
       // check if repliedTweets is an array
       if (!repliedTweets || !Array.isArray(repliedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶回覆過的推文。' })
+
       repliedTweets = repliedTweets.map(reply => {
         const tweet = reply.Tweet.dataValues
-        tweet.isLiked = helpers.getUser(req).Likes.map(like => like.TweetId).includes(tweet.id)
+        //helpers.getUser(req) of test file does not query anything, so we cannot search in likes array of user
+        tweet.isLikedByMe = tweet.Likes.map(like => like.TweetId).includes(helpers.getUser(req).id)
         tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
         return reply
       })
+
       return res.status(200).json(repliedTweets)
 
     } catch(err) {
@@ -128,12 +131,13 @@ module.exports = {
       })
       // check if likedTweets is an array
       if (!likedTweets || !Array.isArray(likedTweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶喜歡過的推文。' })
+
       likedTweets = likedTweets.map(like => {
         const tweet = like.Tweet.dataValues
-        tweet.isLiked = helpers.getUser(req).Likes.map(myLike => myLike.TweetId).includes(tweet.id)
+        tweet.isLikedByMe = tweet.Likes.map(myLike => myLike.TweetId).includes(helpers.getUser(req).id)
         tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
         //discard the like data part
-        return tweet
+        return like
       })
 
       return res.status(200).json(likedTweets)
