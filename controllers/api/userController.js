@@ -17,17 +17,15 @@ const userController = {
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
       }
+      if (user.role === 'admin') { return res.json({ status: 'error', message: "admin can't signin" }) }
       const { id, name, account, email, avatar, role } = user
-      var payload = { id: user.id }
+      var payload = { id }
       var token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
         message: 'ok',
         token,
-        user: {
-          id, name, account, email, avatar, role
-          // id: user.id, name: user.name, account: user.account, email: user.email, avatar: user.avatar, role: user.role
-        }
+        user: { id, name, account, email, avatar, role }
       })
     })
   },
