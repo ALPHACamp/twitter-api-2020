@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const helpers = require('../../_helpers');
 const db = require('../../models');
 const User = db.User;
+const Followship = db.Followship;
 const Op = require('sequelize').Op;
 
 // JWT
@@ -95,11 +96,11 @@ let userController = {
       raw: true,
       nest: true,
       where: {
-        followerId: req.user.id,
+        followerId: req.params.id,
       },
     }).then((results) => {
       //result.count  //result.rows
-      res.json({ results: results, status: 'success', message: '123' });
+      res.json({ results: results, status: 'success', message: 'find following' });
     });
   },
   //回傳"跟隨使用者"的人數,ID
@@ -108,11 +109,11 @@ let userController = {
       raw: true,
       nest: true,
       where: {
-        followingId: req.user.id,
+        followingId: req.params.id,
       },
     }).then((results) => {
       //result.count  //result.rows
-      res.json({ results: results, status: 'success', message: '123' });
+      res.json({ results: results, status: 'success', message: 'find follower' });
     });
   },
 };
