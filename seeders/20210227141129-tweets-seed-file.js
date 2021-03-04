@@ -11,7 +11,7 @@ module.exports = {
           tweets.push({
             id: count === 0 ? 1 : tweetId += 10,
             UserId: 10 * (i + 1) + 1,
-            description: `Johnny${i + 1} is a handsome guy.`,
+            description: `Johnny is a handsome guy. tweetId: ${count === 0 ? 1 : tweetId += 10}`,
             createdAt: new Date(),
             updatedAt: new Date()
           })
