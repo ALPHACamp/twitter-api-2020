@@ -10,7 +10,20 @@ const tweetController = require('../controllers/tweetController.js')
 const userController = require('../controllers/userController.js')
 const replyController = require('../controllers/replyController.js')
 // //身分認證
-const authenticated = passport.authenticate('jwt', { session: false })
+// const authenticated = passport.authenticate('jwt', { session: false })
+
+const authenticated = function (req, res, next) {
+    passport.authenticate("jwt", { session: false }, (err, user, info) => {
+        if (!user) {
+            return res
+                .status(401)
+                .json({ status: "error", message: "No auth token" })
+        }
+        req.user = user
+        return next()
+    })(req, res, next)
+}
+
 // const authenticatedAdmin = (req, res, next) => {
 //   if (req.user) {
 //     if (req.user.isAdmin) { return next() }
