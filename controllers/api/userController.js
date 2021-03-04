@@ -1,5 +1,5 @@
 const db = require('../../models')
-const { User, Tweet, Like } = db
+const { User, Tweet, Like, Reply } = db
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -45,18 +45,36 @@ const userController = {
   },
   getUser: (req, res) => { //取得任一使用者資料
     const id = req.params.id
-    return Promise.all([
+    Promise.all([
       User.findByPk(id, { raw: true }),
       Tweet.findAll({ where: { UserId: id }, raw: true, nest: true }),
       User.findAll({ raw: true, nest: true, include: [{ model: User, as: 'Followers', where: { id } }, { model: User, as: 'Followings', where: { id } }] })
-    ]).then(([user, tweets, followings, followers]) => {
-      console.log(followings)
-      const { id, name, account, email, avatar, cover, introduction } = user
+    ]).then(([users, tweets, followings, followers]) => {
+      const { id, name, account, email, avatar, cover, introduction } = users
       const tweetsNumber = tweets ? tweets.length : 0 // 使用者推文數
       const followingsNumber = followings ? followings.length : 0 // 使用者追蹤數
       const followersNumber = followers ? followers.length : 0 // 使用者跟隨數
+      const user = { id, name, account, email, avatar, cover, introduction, tweetsNumber, followingsNumber, followersNumber }
       //isFollowed, // 是否追蹤中
-      return res.json({ id, name, account, email, avatar, cover, introduction, tweetsNumber, followingsNumber, followersNumber })
+      return res.json({ user })
+    })
+  },
+  getUserTweets: (req, res) => {
+    const id = req.params.id
+    Promise.all([
+      User.findByPk(id, { raw: true }),
+      Tweet.findAll({ where: { UserId: id }, raw: true, nest: true, order: [['createdAt', 'DESC']], include: [{ model: User, as: 'LikedUsers' }] })
+    ]).then(([user, tweet]) => {
+      const User = { id: user.id, name: user.name, account: user.account, avatar: user.avatar }
+      const tweets = []
+      const likesNumber = tweet.LikedUsers ? tweet.LikedUsers.length : 0 // 推文like數
+      const repliesNumber = tweet.RepliedUsers ? tweet.RepliedUsers.length : 0// 推文回覆數
+      const isLiked = req.user.LikedTweets.map(d => d.id).includes(tweet.id) // 是否按過like
+      tweet.map(t => {
+        const tweetData = { id: t.id, description: t.description, likesNumber, repliesNumber, isLiked, createdAt: t.createdAt, User }
+        tweets.push(tweetData)
+      })
+      return res.json({ tweets })
     })
   }
 }
