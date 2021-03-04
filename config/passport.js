@@ -1,7 +1,6 @@
 const passport = require('passport')
 const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
+const { User, Tweet } = db
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -11,7 +10,7 @@ const JwtStrategy = passportJWT.Strategy
 
 let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
-jwtOptions.secretOrKey = process.env.JWT_SECRET || 'twitterKiller' //之後寫入dotenv
+jwtOptions.secretOrKey = process.env.JWT_SECRET
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {
@@ -25,7 +24,7 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
     return next(null, user)
   })
 })
-passport.use(strategy)
 
+passport.use(strategy)
 
 module.exports = passport

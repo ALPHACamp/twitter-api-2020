@@ -18,7 +18,7 @@ app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/upload', express.static(__dirname + '/upload'))
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => res.send('請使用API接口'))
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
