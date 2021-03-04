@@ -37,13 +37,14 @@
   "paths": {
     "/api/users/signin": {
       "post": {
-        "tags": [],
-        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "description": "sign in account",
         "parameters": [
           {
             "in": "body",
             "name": "body",
-            "description": "sign in account",
             "required": true,
             "schema": {
               "properties": {
@@ -71,13 +72,14 @@
     },
     "/api/users": {
       "post": {
-        "tags": [],
-        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "description": "sign up account",
         "parameters": [
           {
             "in": "body",
             "name": "body",
-            "description": "sign in account",
             "required": true,
             "schema": {
               "properties": {
@@ -120,8 +122,10 @@
     },
     "/api/tweets/{id}": {
       "get": {
-        "tags": [],
-        "description": "",
+        "tags": [
+          "Tweets"
+        ],
+        "description": "get specific tweet",
         "parameters": [
           {
             "name": "id",
@@ -138,8 +142,10 @@
         "responses": {}
       },
       "put": {
-        "tags": [],
-        "description": "",
+        "tags": [
+          "Tweets"
+        ],
+        "description": "edit specific tweet",
         "parameters": [
           {
             "name": "id",
@@ -157,8 +163,10 @@
         "responses": {}
       },
       "delete": {
-        "tags": [],
-        "description": "",
+        "tags": [
+          "Tweets"
+        ],
+        "description": "delete specific tweet",
         "parameters": [
           {
             "name": "id",
@@ -175,10 +183,146 @@
         "responses": {}
       }
     },
+    "/api/tweets/{id}/like": {
+      "post": {
+        "tags": [
+          "Tweets"
+        ],
+        "description": "like specific tweet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/tweets/{id}/unlike": {
+      "post": {
+        "tags": [
+          "Tweets"
+        ],
+        "description": "unlike specific tweet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/tweets/{tweet_id}/replies": {
+      "post": {
+        "tags": [
+          "Tweets"
+        ],
+        "description": "add reply to specific tweet",
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "schema": {
+              "properties": {
+                "comment": {
+                  "type": "text",
+                  "example": "hahahaha"
+                }
+              }
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Tweets"
+        ],
+        "description": "get all replies of specific tweet",
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/tweets": {
       "post": {
-        "tags": [],
-        "description": "",
+        "tags": [
+          "Tweets"
+        ],
+        "description": "post new tweet",
         "parameters": [
           {
             "name": "Authorization",
@@ -193,8 +337,10 @@
         }
       },
       "get": {
-        "tags": [],
-        "description": "",
+        "tags": [
+          "Tweets"
+        ],
+        "description": "get all tweets",
         "parameters": [
           {
             "name": "Authorization",
@@ -203,6 +349,70 @@
           }
         ],
         "responses": {}
+      }
+    },
+    "/api/replies/{id}": {
+      "delete": {
+        "tags": [
+          "replies"
+        ],
+        "description": "delete specific reply",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "replies"
+        ],
+        "description": "edit specific reply",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "schema": {
+              "properties": {
+                "comment": {
+                  "type": "text",
+                  "example": "hahahaha"
+                }
+              }
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     }
   },
@@ -266,6 +476,39 @@
         "type",
         "description"
       ]
+    },
+    "Like": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "UserId": {
+          "type": "integer"
+        },
+        "TweetId": {
+          "type": "integer"
+        }
+      },
+      "required": []
+    },
+    "Reply": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "UserId": {
+          "type": "integer"
+        },
+        "TweetId": {
+          "type": "integer"
+        },
+        " comment": {
+          "type": "text"
+        }
+      },
+      "required": []
     }
   }
 }
