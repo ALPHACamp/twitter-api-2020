@@ -21,7 +21,7 @@ const tweetController = {
     try {
       const tweets = await Tweet.findAll({
         include: [
-          Reply,
+          { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },
           Like,
           { model: User, attributes: { exclude: ['password'] } }
         ]
@@ -56,7 +56,7 @@ const tweetController = {
     try {
       const tweet = await Tweet.findByPk(req.params.id, {
         include: [
-          Reply,
+          { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },
           Like,
           { model: User, attributes: { exclude: ['password'] } }
         ]

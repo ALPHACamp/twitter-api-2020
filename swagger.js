@@ -70,7 +70,8 @@ const doc = {
       TweetId: 1,
       comment: 'Reply 1',
       createdAt: '2021-03-02T02:18:21.000Z',
-      updatedAt: '2021-03-02T02:18:21.000Z'
+      updatedAt: '2021-03-02T02:18:21.000Z',
+      User: { $ref: '#/definitions/User' }
     },
     Like: {
       id: 2,
