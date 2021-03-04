@@ -1,5 +1,6 @@
 const db = require('../models')
 const { Tweet, Like, Reply } = db
+const helper = require('../_helpers')
 
 const tweetService = {
   postTweet: async (req, res, callback) => {
@@ -7,7 +8,8 @@ const tweetService = {
       if (!req.body.description) {
         return callback({ status: 'error', message: "content didn't exist" })
       }
-      await Tweet.create({ ...req.body })
+      const user = helper.getUser(req)
+      await Tweet.create({ UserId: user.id, description: req.body.description })
       callback({ status: 'success', message: 'tweet was successfully created' })
     } catch (err) {
       console.log(err)
