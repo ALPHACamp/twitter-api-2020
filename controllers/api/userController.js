@@ -8,6 +8,7 @@ const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
+const imgur = require('imgur-node-api')
 
 module.exports = {
   getUser: async (req, res) => {
@@ -185,6 +186,64 @@ module.exports = {
 
       return res.json(followers)
 
+    } catch(err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  putUser: async (req, res) => {
+    try {
+      const { files } = req
+      const { id } = req.params
+      let avatar = null
+      let cover = null
+
+      const updateUser = async (user, dataUpdated) => {
+        if (!user) return res.status(400).json({ status: 'error', message: '無法獲取用戶資料。' })
+        await user.update(dataUpdated)
+        return user
+      }
+
+      //normally there will be keys: 'avatar' and 'cover', otherwise files equals undefined
+      if (!files) {
+        // return res.status(400).json({ status: 'error', message: '忘了設定 input name，avatar 跟 cover。' })
+        //test does not have req.files, so it will be blocked here...still need to return 200
+        const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
+        const updatedUser = await updateUser(user, req.body)
+        return res.json(updatedUser)
+      }
+
+      // //if no files attached, req.files equals [Object: null prototype] {} (truthy value), but files.avatar equals undefined
+      if (files.avatar || files.cover) {
+        imgur.setClientID(process.env.IMGUR_CLIENT_ID)
+        const uploadingArray = []
+
+        const uploadFile = (fileKey) => {
+          const uploadImage = new Promise((resolve, rej) => {
+            //a async operation that does not return promise
+            imgur.upload(files[fileKey][0].path, (err, image) => {
+              if (fileKey === 'avatar') avatar = image
+              if (fileKey === 'cover') cover = image
+              resolve()
+            })
+          })
+          uploadingArray.push(uploadImage)
+        }
+
+        if (files.avatar) uploadFile('avatar', avatar)
+        if (files.cover) uploadFile('cover', cover)
+        await Promise.all(uploadingArray)
+      }
+
+      const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
+      const updatedUser = await updateUser(user, {
+        ...req.body,
+        avatar: avatar ? avatar.data.link : user.avatar,
+        cover: cover ? cover.data.link : user.cover
+      })
+      return res.json(updatedUser)
+      
     } catch(err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
