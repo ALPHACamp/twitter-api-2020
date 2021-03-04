@@ -56,4 +56,7 @@ router.delete('/followships/:followingId', followController.removeFollowing)
 router.post('/tweets/:id/like', likeController.addLike)
 router.post('/tweets/:id/unlike', likeController.removeLike)
 
+// Reply
+router.post('/tweets/:tweet_id/replies', replyController.postReply)
+
 module.exports = router
