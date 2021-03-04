@@ -1,5 +1,5 @@
 const db = require('../../models')
-const { User, Tweet, Like, Reply } = db
+const { User, Tweet, Like, Reply, Followship } = db
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -89,7 +89,21 @@ const userController = {
         })
         return res.json({ tweets: [replies] })
       })
+  },
+  addFollowing: (req, res) => {
+    Followship.create({
+      followerId: req.user.id,
+      followingId: req.params.followingId
+    }).then(() => res.json({ status: 'success', message: "" }))
+  },
+  removeFollowing: (req, res) => {
+    Followship.findOne({ where: { followerId: req.user.id, followingId: req.params.followingId } })
+      .then(followship => {
+        followship.destroy()
+          .then(() => res.json({ status: 'success', message: "" }))
+      })
   }
+
 }
 
 module.exports = userController
