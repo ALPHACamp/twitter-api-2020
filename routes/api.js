@@ -23,7 +23,7 @@ router.post('/signin', userController.signIn);
 //followship
 router.get('/following', followshipController.getFollowing);
 router.get('/follower', followshipController.getFollower);
-router.post('/following/:id', followshipController.postFollowship);
-router.delete('/following/:id', followshipController.deleteFollowship);
+router.post('/followships/:followingId', followshipController.postFollowship);
+router.delete('/followships/:followingId', followshipController.deleteFollowship);
 
 module.exports = router;

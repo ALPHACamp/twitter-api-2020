@@ -30,17 +30,18 @@ let followshipController = {
   },
   postFollowship: (req, res) => {
     return Followship.create({
-      followerId: req.user.id, //使用者本人
-      followingId: req.params.id, //想要追蹤的人
-    }).then((followship) =>
-      res.json({ followship: followship, status: 'success', message: 'followship was successfully created' })
-    );
+      followerId: req.user.id, //1, //使用者本人
+      followingId: req.params.followingId, //2, //想要追蹤的人
+    }).then((followship) => {
+      // console.log(followship.followerId, followship.followingId);
+      res.json({ followship: followship, status: 'success', message: 'followship was successfully created' });
+    });
   },
   deleteFollowship: (req, res) => {
     return Followship.findOne({
       where: {
-        followerId: req.user.id,
-        followingId: req.params.id,
+        followerId: req.user.id, //1,
+        followingId: req.params.followingId,
       },
     }).then((followship) => {
       followship.destroy().then((followship) => {
