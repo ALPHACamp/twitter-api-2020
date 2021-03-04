@@ -9,6 +9,7 @@ const upload = multer({ dest: 'temp/' })
 const tweetController = require('../controllers/tweetController.js')
 const userController = require('../controllers/userController.js')
 const replyController = require('../controllers/replyController.js')
+const followshipController = require('../controllers/followshipController.js')
 // //身分認證
 // const authenticated = passport.authenticate('jwt', { session: false })
 
@@ -66,6 +67,10 @@ router.get('/api/tweets/:tweet_id/replies', authenticated, tweetController.getRe
 
 router.delete('/api/replies/:id', authenticated, replyController.deleteReply)
 router.put('/api/replies/:id', authenticated, replyController.putReply)
+
+
+router.post('/api/followships', authenticated, followshipController.postFollowship)
+router.delete('/api/followships/:followingId', authenticated, followshipController.deleteFollowship)
 
 
 module.exports = router

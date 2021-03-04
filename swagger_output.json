@@ -13,6 +13,11 @@
     "http"
   ],
   "securityDefinitions": {
+    "JWT": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    },
     "api_key": {
       "type": "apiKey",
       "name": "api_key",
@@ -406,6 +411,70 @@
             "name": "Authorization",
             "in": "header",
             "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/followships/{followingId}": {
+      "delete": {
+        "tags": [
+          "followship"
+        ],
+        "description": "delete specific followship",
+        "parameters": [
+          {
+            "name": "followingId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/followships": {
+      "post": {
+        "tags": [
+          "followship"
+        ],
+        "description": "add specific followship",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "example": "1"
+                }
+              }
+            }
           }
         ],
         "responses": {
