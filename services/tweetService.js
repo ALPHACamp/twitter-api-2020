@@ -1,15 +1,32 @@
 const db = require('../models')
-const Tweet = db.Tweet
+const { Tweet, Like, Reply } = db
 
 const tweetService = {
   postTweet: (req, res, callback) => { },
   getTweets: (req, res, callback) => {
-    Tweet.findAll({ raw: true, nest: true }, { order: [['createdAt', 'DESC']] })
+    Tweet.findAll({
+      raw: true, nest: true,
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: Like },
+        { model: Reply }
+      ]
+    })
       .then(tweets => {
         callback(tweets)
       })
   },
-  getTweet: (req, res, callback) => { }
+  getTweet: (req, res, callback) => {
+    Tweet.findByPk(req.params.id,
+      {
+        include: [
+          { model: Like },
+          { model: Reply }
+        ]
+      }).then(tweet => {
+        callback(tweet)
+      })
+  }
 }
 
 module.exports = tweetService

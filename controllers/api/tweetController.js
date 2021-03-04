@@ -9,7 +9,11 @@ const tweetController = {
       return res.json(data)
     })
   },
-  getTweet: (req, res) => { }
+  getTweet: (req, res) => {
+    tweetService.getTweet(req, res, (data) => {
+      return res.json(data)
+    })
+  }
 }
 
 module.exports = tweetController
