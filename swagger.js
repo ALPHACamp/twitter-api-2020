@@ -64,7 +64,8 @@ const doc = {
       updatedAt: '2021-03-02T02:18:21.000Z',
       Replies: [{ $ref: '#/definitions/Reply' }],
       Likes: [{ $ref: '#/definitions/Like' }],
-      User: { $ref: '#/definitions/User' }
+      User: { $ref: '#/definitions/User' },
+      isLikedbyMe: false
     },
     Reply: {
       id: 1,

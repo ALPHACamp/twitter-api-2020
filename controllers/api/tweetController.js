@@ -13,15 +13,29 @@ const tweetController = {
           description: '回傳陣列帶有多個tweet物件',
           schema: [{"$ref": "#/definitions/Tweet"}]
         }
+        #swagger.responses[400] = {
+          description: '如果找不到資料回傳error物件',
+          schema: { status: 'error', message: 'cannot find any tweet' }
+        }
     */
     try {
       const tweets = await Tweet.findAll({
-        include: [Reply, Like, User]
+        include: [
+          Reply,
+          Like,
+          { model: User, attributes: { exclude: ['password'] } }
+        ]
       })
-      if (!tweets.length) {
+      if (!tweets || !Array.isArray(tweets)) {
         return res.status(400).json({ status: 'error', message: 'cannot find any tweet' })
       }
-      return res.status(200).json(tweets)
+      const tweetsData = tweets.map(tweet => {
+        const ifLike = tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+        tweet = JSON.parse(JSON.stringify(tweet))
+        return Object.assign(tweet, { isLikedbyMe: ifLike })
+      })
+
+      return res.status(200).json(tweetsData)
     } catch (err) {
       res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
@@ -41,14 +55,24 @@ const tweetController = {
     */
     try {
       const tweet = await Tweet.findByPk(req.params.id, {
-        include: [Reply, Like, User]
+        include: [
+          Reply,
+          Like,
+          { model: User, attributes: { exclude: ['password'] } }
+        ]
       })
 
       if (!tweet) {
         return res.status(400).json({ status: 'error', message: 'tweet doesn\'t exist' })
       }
-      return res.status(200).json(tweet)
+      // check if current user liked this post, if yes, isLikedbyMe = true
+      const ifLike = tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
+      const tweetData = Object.assign(tweet.toJSON(), { isLikedbyMe: ifLike })
+
+      // console.log(tweetData)
+      return res.status(200).json(tweetData)
     } catch (err) {
+      console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },

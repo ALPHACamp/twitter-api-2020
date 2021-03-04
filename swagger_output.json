@@ -146,9 +146,47 @@
         ],
         "responses": {
           "200": {
-            "description": "回傳success物件",
+            "description": "回傳success物件, toekn 以及user資料",
             "schema": {
-              "$ref": "#/definitions/SuccessMessage"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "success"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功登入!!!"
+                },
+                "token": {
+                  "type": "string",
+                  "example": "yourToken..."
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 11
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Johnny1"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "user1@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             }
           },
           "400": {
@@ -301,7 +339,23 @@
             }
           },
           "400": {
-            "description": "Bad Request"
+            "description": "如果找不到資料回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "cannot find any tweet"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -1007,6 +1061,10 @@
         },
         "User": {
           "$ref": "#/definitions/User"
+        },
+        "isLikedbyMe": {
+          "type": "boolean",
+          "example": false
         }
       }
     },

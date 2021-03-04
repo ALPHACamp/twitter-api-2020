@@ -24,9 +24,10 @@ const adminController = {
           { model: User, as: 'Followings' }
         ]
       })
-      if (!users.length) {
+      if (!users || !Array.isArray(users)) {
         return res.status(400).json({ status: 'error', message: '無法取得用戶資料' })
       }
+
       return res.status(200).json(users)
     } catch (err) {
       console.log(err)

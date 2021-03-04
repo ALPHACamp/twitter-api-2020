@@ -77,8 +77,18 @@ module.exports = {
             required: true
       }
         #swagger.responses[200] = {
-          description: '回傳success物件',
-          schema: {"$ref": "#/definitions/SuccessMessage"}
+          description: '回傳success物件, toekn 以及user資料',
+          schema: {
+            "status": "success",
+            "message": "成功登入!!!",
+            "token": "yourToken...",
+            "user": {
+              "id": 11,
+              "name": "Johnny1",
+              "email": "user1@example.com",
+              "role": "user"
+            }
+          }
         }
       #swagger.responses[400] = {
         description: '所有欄位必填, 帳號必須存在, 否則回傳error物件',
