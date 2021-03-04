@@ -152,16 +152,19 @@ const userService = {
       .catch(err => console.log(err))
   },
   getFollowings: (req, res, callback) => {
-
     User.findByPk(req.params.id,
       {
         include: [
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
         ],
-      }).then(users => {
-        users = users.Followings
-        callback(users)
+      }).then(user => {
+        user = user.Followings.map(user => ({
+          ...user.dataValues,
+          followerId: user.Followship.followerId,
+          followingId: user.Followship.followingId
+        }))
+        callback(user)
       })
 
   },
@@ -172,15 +175,13 @@ const userService = {
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
         ],
-      }).then(users => {
-        users = users.Followers.map(user => ({
+      }).then(user => {
+        user = user.Followers.map(user => ({
           ...user.dataValues,
           followerId: user.Followship.followerId,
-          followingId: user.Followship.followerId
+          followingId: user.Followship.followingId
         }))
-        console.log(Array.isArray(users.Followers))
-        // console.log(users.Followers)
-        callback(users)
+        callback(user)
       })
   }
 }
