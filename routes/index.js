@@ -7,7 +7,6 @@ const tweets = require('./api/tweets')
 const followships = require('./api/followships')
 const { checkIfAdmin, checkIfLoggedIn } = require('../utils/authenticator')
 
-
 // Jackson
 router.use('/api/users', users)
 
