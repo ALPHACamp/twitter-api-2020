@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Like, Reply } = db
+const { User, Tweet, Like, Reply, Followship } = db
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -139,6 +139,7 @@ const userService = {
       .catch(err => console.log(err))
   },
 
+  //Wei start here
   getUserLikes: (req, res, callback) => {
     Like.findAll({
       where: { UserId: req.params.id },
@@ -150,8 +151,33 @@ const userService = {
     })
       .catch(err => console.log(err))
   },
-  getFollowings: (req, res, callback) => { },
-  getFollowers: (req, res, callback) => { }
+  getFollowings: (req, res, callback) => {
+
+    User.findByPk(req.params.id,
+      {
+        include: [
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ],
+      }).then(users => {
+        users = users.Followings
+        callback(users)
+      })
+
+  },
+  getFollowers: (req, res, callback) => {
+    // Followship.create({ followerId: 3, followingId: 1 })
+    User.findByPk(req.params.id,
+      {
+        include: [
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ],
+      }).then(users => {
+        users = users.Followers
+        callback(users)
+      })
+  }
 }
 
 module.exports = userService
