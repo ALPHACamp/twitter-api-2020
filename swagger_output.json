@@ -131,6 +131,83 @@
         }
       }
     },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get specific user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "description": "edit specific user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "string",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User",
+              "properties": {}
+            }
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/api/users/{id}/followings": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get user following list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/api/users/{id}/followers": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get user follower list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/api/tweets/{id}": {
       "get": {
         "tags": [
@@ -159,6 +236,21 @@
             "description": "string",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Tweet",
+              "properties": {
+                "description": {
+                  "type": "text",
+                  "example": "hahahaha"
+                }
+              }
+            }
           }
         ],
         "responses": {}
@@ -288,11 +380,6 @@
             "name": "tweet_id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
