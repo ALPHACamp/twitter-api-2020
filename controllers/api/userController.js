@@ -155,15 +155,26 @@ const userController = {
       })
   },
   getUserFollowings: (req, res) => { // 取得 :userId 的追蹤者
-    const id = req.params.id
     Promise.all([
-      User.findOne({ where: { id }, include: [{ model: User, as: 'Followings' }] }),
-      Tweet.findAndCountAll({ where: { UserId: id } })
+      User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings' }] }),
+      Tweet.count({ where: { UserId: req.params.id } })
     ]).then(([user, tweet]) => {
-      console.log(user.Followings)
-      const tweetsNumber = tweet.count   // 使用者推文數
+      console.log(user.dataValues)
+      const tweetsNumber = tweet   // 使用者推文數
+      const { id, name, Followings } = user.dataValues
+      const followings = []
+      Followings.map(d =>
+        followings.push({
+          id: d.id,
+          name: d.name,
+          account: d.account,
+          avatar: d.avatar,
+          introduction: d.introduction,
+          isFollowed: helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
+        })
+      )
       return res.json({
-        user: { id, name: user.name, tweetsNumber }
+        user: { id, name, tweetsNumber, followings }
       })
     })
   },
