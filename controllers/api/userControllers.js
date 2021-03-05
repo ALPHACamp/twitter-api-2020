@@ -21,7 +21,6 @@ let userController = {
     } else {
       User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
         .then(user => {
-          console.log('user~~~', user)
           if (user) {
             if (user.email === email) {
               return res.json({ status: 'error', message: 'email已被註冊' })
@@ -48,7 +47,7 @@ let userController = {
 
   signIn: (req, res) => {
     if (!req.body.account || !req.body.password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
+      return res.json({ status: 'error', message: "請填寫完整資料" })
     }
 
     const account = req.body.account
@@ -63,6 +62,7 @@ let userController = {
 
         const payload = { id: user.id }
         const token = jwt.sign(payload, process.env.JWT_SECRET)
+
         return res.json({
           status: 'success',
           message: 'ok',
@@ -81,7 +81,7 @@ let userController = {
   },
 
   getUser: (req, res) => {
-    const id = req.params.id
+    const id = helpers.getUser(req).id
     User.findByPk(id)
       .then(user => {
         return res.json(user)
@@ -92,6 +92,7 @@ let userController = {
   getUserTweets: (req, res) => {
     Tweet.findAll({
       include: [User],
+      order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id
       }
@@ -107,12 +108,33 @@ let userController = {
   getReplyTweet: (req, res) => {
     Reply.findAll({
       include: Tweet,
+      order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id
       }
     }).then(data => {
       return res.json(data)
     })
+      .catch(error => res.send(error))
+  },
+
+  putUser: (req, res) => {
+
+    if (Number(req.params.id) !== helpers.getUser(req).id) {
+      return res.json({ status: 'error', message: '非已登入的使用者' })
+    }
+
+    return User.findByPk(helpers.getUser(req).id)
+      .then(user => {
+        console.log('req.body', req.body)
+        user.update({
+          name: req.body.name,
+          introduction: req.body.introduction
+        })
+          .then(user => {
+            res.json(user)
+          })
+      })
   }
 
 }

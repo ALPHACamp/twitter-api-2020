@@ -30,9 +30,10 @@ const authenticatedAdmin = (req, res, next) => {
 
 
 //user
-router.get('/users/:id/tweets', userController.getUserTweets)
-router.get('/users/:id/replied_tweets', userController.getReplyTweet)
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getReplyTweet)
 router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', authenticated, userController.putUser)
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
 
