@@ -16,7 +16,7 @@ const authenticated = passport.authenticate('jwt', { session: false })
 
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
-    if (req.user === 'admin') { return next() }
+    if (req.user.role === 'admin') { return next() }
     return res.json({ status: 'error', message: 'permission denied' })
   } else {
     return res.json({ status: 'error', message: 'permission denied' })
@@ -27,34 +27,34 @@ const authenticatedAdmin = (req, res, next) => {
 router.post('/users', userController.signUp)
 router.post('/users/signIn', userController.signIn)
 router.get('/users', authenticated, userController.getTopUser)
-router.get('/users/:id', userController.getUser)
-router.get('/users/:id/tweets', userController.getUserTweets)
-router.get('/users/:id/replied_tweets', userController.getUserReplies)
-router.get('/users/:id/likes', userController.getUserLikes)
-router.get('/users/:id/followings', userController.getFollowings)
-router.get('/users/:id/followers', userController.getFollowers)
-router.get('/users/:id/edit', userController.editUser)
-router.put('/users/:id', upload.any('avatar', 'cover'), userController.putUser)
+router.get('/users/:id', authenticated, userController.getUser)
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/followings', authenticated, userController.getFollowings)
+router.get('/users/:id/followers', authenticated, userController.getFollowers)
+router.get('/users/:id/edit', authenticated, userController.editUser)
+router.put('/users/:id', authenticated, upload.any('avatar', 'cover'), userController.putUser)
 
 
 // admin
 router.post('/admin/signin', adminController.signIn)
-router.get('/admin/users', adminController.getUsers)
-router.get('/admin/tweets', adminController.getTweets)
-router.delete('/admin/tweets/:id', adminController.deleteTweets)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweets)
 
 // tweet
-router.post('/tweets', tweetController.postTweet)
-router.get('/tweets', tweetController.getTweets)
-router.get('/tweets/:id', tweetController.getTweet)
+router.post('/tweets', authenticated, tweetController.postTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
 
 // follow
-router.post('/followships', followController.addFollowing)
-router.delete('/followships/:followingId', followController.removeFollowing)
+router.post('/followships', authenticated, followController.addFollowing)
+router.delete('/followships/:followingId', authenticated, followController.removeFollowing)
 
 // Like
-router.post('/tweets/:id/like', likeController.addLike)
-router.post('/tweets/:id/unlike', likeController.removeLike)
+router.post('/tweets/:id/like', authenticated, likeController.addLike)
+router.post('/tweets/:id/unlike', authenticated, likeController.removeLike)
 
 // Reply
 router.post('/tweets/:tweet_id/replies', replyController.postReply)
