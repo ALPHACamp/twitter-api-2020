@@ -6,9 +6,11 @@ const bodyParser = require('body-parser')
 const passport = require('./config/passport')
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json')
+const cors = require('cors')
 const app = express()
 const port = 3000
 
+app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(passport.initialize())
