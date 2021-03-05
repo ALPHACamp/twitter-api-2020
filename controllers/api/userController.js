@@ -205,9 +205,12 @@ const userController = {
     User.findAll({ include: [{ model: User, as: 'Followers' }] })
       .then(users => {
         users = users.map(user => ({
-          ...user.dataValues,
+          id: user.dataValues.id,
+          name: user.dataValues.name,
+          avatar: user.dataValues.avatar,
+          account: user.dataValues.account,
           FollowerCount: user.Followers.length,
-          isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
+          isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.dataValues.id)
         }))
         users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
         return res.json({ users })
