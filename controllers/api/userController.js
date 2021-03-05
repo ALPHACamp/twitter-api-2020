@@ -218,26 +218,25 @@ const userController = {
   },
   getUserLikes: (req, res) => {
     Like.findAll({
-      where: { UserId: req.params.id }, raw: true, nest: true,
-      include: [{ model: Tweet, include: [User, { model: User, as: 'LikedUsers' }] }]
+      where: { UserId: req.params.id }, include: [Tweet, User, { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }]
     })
       .then(async (likes) => {
-        console.log(likes)
-        const tweets = await likes.map(async (like) =>
-        ({
-          id: like.Tweet.id,
-          description: like.Tweet.description,
-          createdAt: like.Tweet.createdAt,
-          likesNumber: await Like.count({ where: { TweetId: like.Tweet.id }, raw: true }),
-          repliesNumber: await Reply.count({ where: { TweetId: like.Tweet.id }, raw: true }),
-          isLiked: like.Tweet.LikedUsers.id === helpers.getUser(req).id,
-          User: like.Tweet.User
+        const tweets = []
+        likes.map(like => {
+          const { id, description, createdAt, LikedUsers, Replies, User } = like.dataValues.Tweet
+          console.log(like.dataValues.Tweet)
+          tweets.push({
+            id,
+            description,
+            likesNumber: LikedUsers.length,
+            repliesNumber: Replies.length,
+            isLiked: helpers.getUser(req).LikedTweets.map(d => d.id).includes(id),
+            createdAt,
+            User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar }
+          })
         })
-        )
-        console.log(tweets)
         return res.json({ tweets })
       })
   }
 }
-
 module.exports = userController
