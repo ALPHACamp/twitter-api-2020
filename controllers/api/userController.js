@@ -434,10 +434,12 @@ module.exports = {
       // make sure no empty input
       if (!account || !email || !password || !checkPassword || !name) return res.status(400).json({ status: 'error', message: '所有欄位都是必填的!!!' })
       // check password confirmation
-      if (checkPassword !== password) return res.status(400).json({ status: 'error', message: '兩次密碼輸入不同!!!', name, account, email, password, checkPassword })
-      // check if account used already
+      if (checkPassword !== password) return res.status(400).json({ status: 'error', message: '兩次密碼輸入不同!!!', ...req.body })
+      // check if account and email used already
       const existedAccount = await User.findOne({ where: { account } }).catch((err) => console.log('existedAccount: ', err))
-      if (existedAccount) return res.status(400).json({ status: 'error', message: '此帳號已被使用!!!', name, account, email, password, checkPassword })
+      if (existedAccount) return res.status(400).json({ status: 'error', message: '此帳號已被使用!!!', ...req.body })
+      const existedEmail = await User.findOne({ where: { email } }).catch((err) => console.log('existedAccount: ', err))
+      if (existedEmail) return res.status(400).json({ status: 'error', message: '此信箱已被使用!!!', ...req.body })
       // account hasn't been used ^__^ create user
       const salt = bcrypt.genSaltSync(10)
       const hashedPassword = bcrypt.hashSync(password, salt)
@@ -446,9 +448,7 @@ module.exports = {
         email: email,
         password: hashedPassword,
         name: name,
-        role: 'user',
-        introduction: '',
-        avatar: ''
+        role: 'user'
       }).catch((err) => console.log('newUser: ', err))
       // if user successfully created?
       switch (!!newUser) {
