@@ -8,6 +8,7 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'admin',
       name: 'root',
+      account: '@hereComeTheBoss',
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
@@ -17,6 +18,7 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user1',
+      account: '@說好不打臉',
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
@@ -26,6 +28,7 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user2',
+      account: '@不要問你會怕',
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
@@ -35,6 +38,7 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user3',
+      account: '@你看不見我',
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
@@ -44,6 +48,7 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user4',
+      account: '@AI人工智障',
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
@@ -53,6 +58,7 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user5',
+      account: '@老爺不可以',
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
