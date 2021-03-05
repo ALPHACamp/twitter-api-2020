@@ -4,7 +4,9 @@ const passport = require('../config/passport')
 const authenticated = passport.authenticate('jwt', { session: false })
 const userController = require('../controllers/api/userController')
 const adminController = require('../controllers/api/adminController')
-
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
@@ -20,6 +22,7 @@ const authenticatedAdmin = (req, res, next) => {
 // user
 router.post('/users', userController.signUp)
 router.post('/signin', authenticated, userController.signIn)
+router.put('/users/:id', authenticated, cpUpload, userController.editUser)
 router.get('/users/topUsers', authenticated, userController.getTopUsers)
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)

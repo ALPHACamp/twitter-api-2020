@@ -5,9 +5,11 @@ const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
+const fs = require('fs')
+const imgur = require('imgur')
 
 const userController = {
-  signIn: (req, res) => {   // payLoad: { account, password }
+  signIn: (req, res) => {
     const { account, password } = req.body
     if (!account || !password) {
       return res.json({ status: 'error', message: "required fields didn't exist" })
@@ -42,6 +44,35 @@ const userController = {
       User.create({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
         .then(() => res.json({ status: 'success', message: "signup successfully" }))
     })
+  },
+  editUser: (req, res) => {
+    const { name, account, email, password, passwordCheck, cover, avatar, introduction } = req.body
+    if (!account || !password || !name || !email || !passwordCheck) {
+      return res.json({ status: 'error', message: "required fields didn't exist" })
+    }
+    if (password !== passwordCheck) {
+      return res.json({ status: 'error', message: "password and passwordCheck didn't match" })
+    }
+    const { file } = req
+
+    if (file) {
+      console.log(file)
+      imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+        .uploadFile(file.path)
+        .then((img) => {
+          console.log(img)
+          User.findByPk(req.params.id)
+            .then(user => {
+              user.cover = user.cover ? user.cover : null
+              user.avatar = user.avatar ? user.avatar : null
+              user.update({
+                name, account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)), cover, avatar, introduction,
+                cover: req.file.cover[0] ? img.data.link : user.cover,
+                avatar: req.file.avatar[0] ? img.data.link : user.avatar
+              }).then(() => res.json({ status: 'success', message: "user profiles has updated!" }))
+            })
+        })
+    }
   },
   getUser: (req, res) => { //取得任一使用者資料
     const id = req.params.id
