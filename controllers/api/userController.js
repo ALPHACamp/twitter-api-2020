@@ -12,37 +12,58 @@ const imgur = require('imgur-node-api')
 
 module.exports = {
   getUser: async (req, res) => {
+    /*  #swagger.tags = ['User']
+        #swagger.description = 'user瀏覽單一使用者'
+        #swagger.responses[200] = {
+          description: '回傳user物件',
+          schema: {"$ref": "#/definitions/UserIsSelf"}
+        }
+        #swagger.responses[400] = {
+          description: '找不到users回傳error物件',
+          schema: { status: 'error', message: '此用戶不存在。' }
+        }
+    */
     try {
       const { id } = req.params
-      //get user
-      const user = await User.findOne({ 
-        where: { id }, 
-        attributes: { exclude: ['password'] } 
+      // get user
+      const user = await User.findOne({
+        where: { id },
+        attributes: { exclude: ['password'] }
       })
-      //check if user exists
+      // check if user exists
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
       user.dataValues.isSelf = user.id === helpers.getUser(req).id
       return res.status(200).json(user)
-
-    } catch(err) {
+    } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
-  getTweets: async (req, res) => {
+  getTweets: async (req, res) => { // get user's posted tweets
+    /*  #swagger.tags = ['User']
+        #swagger.description = 'user瀏覽某一使用者發布過的所有tweets'
+        #swagger.responses[200] = {
+          description: '回傳陣列帶有多個Tweet物件',
+          schema: [{"$ref": "#/definitions/Tweet"}]
+        }
+        #swagger.responses[400] = {
+          description: '找不到tweets回傳error物件',
+          schema: { status: 'error', message: '無法獲取此用戶的推文。' }
+        }
+    */
     try {
-      const { id:UserId } = req.params
-      //get tweets //if using raw: true with findAll, will only get one associated data
+      const { id: UserId } = req.params
+      // get tweets //if using raw: true with findAll, will only get one associated data
       let tweets = await Tweet.findAll({
         where: { UserId },
         nest: true,
         include: [
-          //user who posted
+          // user who posted // do we need this? It's gonna be req.params.id
           { model: User, attributes: { exclude: ['password'] } },
-          //for reply count 
+          // for reply count
           { model: Reply },
-          //for like count 
+          // for like count
           { model: Like }
         ],
         order: [['createdAt', 'DESC']]
@@ -56,33 +77,43 @@ module.exports = {
       })
 
       return res.status(200).json(tweets)
-
-    } catch(err) {
+    } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
-  getRepliedTweets: async (req, res) => {
+  getRepliedTweets: async (req, res) => { // get user's replied tweets
+    /*  #swagger.tags = ['User']
+        #swagger.description = 'user瀏覽某一使用者回應過的所有tweets'
+        #swagger.responses[200] = {
+          description: '回傳陣列帶有多個Reply物件',
+          schema: [{"$ref": "#/definitions/RepliedTweet"}]
+        }
+        #swagger.responses[400] = {
+          description: '找不到replies回傳error物件',
+          schema: { status: 'error', message: '無法獲取此用戶回覆過的推文。' }
+        }
+    */
     try {
-      const { id:UserId } = req.params
-      //get replied tweets
+      const { id: UserId } = req.params
+      // get replied tweets
       let repliedTweets = await Reply.findAll({
         where: { UserId },
         nest: true,
         include: [
-          //user who replies
+          // user who replies
           { model: User, attributes: { exclude: ['password'] } },
-          { //tweet to which the reply belongs
-            model: Tweet, 
+          { // tweet to which the reply belongs
+            model: Tweet,
             include: [
-              //user who posted the tweet
+              // user who posted the tweet
               { model: User, attributes: { exclude: ['password'] } },
-              //for reply count
+              // for reply count
               { model: Reply },
-              //for like count 
+              // for like count
               { model: Like }
-            ] 
+            ]
           }
         ],
         order: [['createdAt', 'DESC']]
@@ -92,39 +123,49 @@ module.exports = {
 
       repliedTweets = repliedTweets.map(reply => {
         const tweet = reply.Tweet.dataValues
-        //helpers.getUser(req) of test file does not query anything, so we cannot search in likes array of user
+        // helpers.getUser(req) of test file does not query anything, so we cannot search in likes array of user
         tweet.isLikedByMe = tweet.Likes.map(like => like.TweetId).includes(helpers.getUser(req).id)
         tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
         return reply
       })
 
       return res.status(200).json(repliedTweets)
-
-    } catch(err) {
+    } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
-  getLikedTweets: async (req, res) => {
+  getLikedTweets: async (req, res) => { // get user's liked tweets
+    /*  #swagger.tags = ['User']
+        #swagger.description = 'user瀏覽某一使用者喜歡過的所有tweets'
+        #swagger.responses[200] = {
+          description: '回傳陣列帶有多個Like物件',
+          schema: [{"$ref": "#/definitions/LikedTweet"}]
+        }
+        #swagger.responses[400] = {
+          description: '找不到likes回傳error物件',
+          schema: { status: 'error', message: '無法獲取此用戶喜歡過的推文。' }
+        }
+    */
     try {
-      const { id:UserId  } = req.params
-      //get liked tweets
+      const { id: UserId } = req.params
+      // get liked tweets
       let likedTweets = await Like.findAll({
         where: { UserId },
         nest: true,
         include: [
           { model: User, attributes: { exclude: ['password'] } },
-          { 
-            model: Tweet, 
+          {
+            model: Tweet,
             include: [
-              //for reply count
-              { model: Reply }, 
-              //for like count 
+              // for reply count
+              { model: Reply },
+              // for like count
               { model: Like },
-              //user who posted the tweet
+              // user who posted the tweet
               { model: User, attributes: { exclude: ['password'] } }
-            ] 
+            ]
           }
         ],
         order: [['createdAt', 'DESC']]
@@ -136,24 +177,34 @@ module.exports = {
         const tweet = like.Tweet.dataValues
         tweet.isLikedByMe = tweet.Likes.map(myLike => myLike.TweetId).includes(helpers.getUser(req).id)
         tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
-        //discard the like data part
+        // discard the like data part
         return like
       })
 
       return res.status(200).json(likedTweets)
-
-    } catch(err) {
+    } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
-  getFollowings: async (req, res) => {
+  getFollowings: async (req, res) => { // get user's followings
+  /*  #swagger.tags = ['User']
+      #swagger.description = 'user瀏覽某一使用者所有正在追蹤的人'
+      #swagger.responses[200] = {
+        description: '回傳陣列帶有多個Followship物件',
+        schema: [{"$ref": "#/definitions/Following"}]
+      }
+      #swagger.responses[400] = {
+        description: '找不到followings回傳error物件',
+        schema: { status: 'error', message: '無法獲取此用戶的追蹤名單。' }
+      }
+  */
     try {
-      const { id:followerId  } = req.params
-      let followings = await Followship.findAll({ 
-        where: { followerId }, 
-        include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }] 
+      const { id: followerId } = req.params
+      let followings = await Followship.findAll({
+        where: { followerId },
+        include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }]
       })
 
       if (!followings || !Array.isArray(followings)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追蹤名單。' })
@@ -162,22 +213,32 @@ module.exports = {
         followship.dataValues.isFollowed = helpers.getUser(req).Followings.map(user => user.id).includes(followship.followingId)
         followship.dataValues.isSelf = helpers.getUser(req).id === followship.followingId
         return followship
-        //if want to sort without raw: true, have to access via dataValues
+        // if want to sort without raw: true, have to access via dataValues
       }).sort((a, b) => b.dataValues.isFollowed - a.dataValues.isFollowed)
       return res.status(200).json(followings)
-
-    } catch(err) {
+    } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
-  getFollowers: async (req, res) => {
+  getFollowers: async (req, res) => { // get user's followers
+    /*  #swagger.tags = ['User']
+        #swagger.description = 'user瀏覽某一使用者所有的追蹤者'
+        #swagger.responses[200] = {
+          description: '回傳陣列帶有多個Followship物件',
+          schema: [{"$ref": "#/definitions/Follower"}]
+        }
+        #swagger.responses[400] = {
+          description: '找不到followings回傳error物件',
+          schema: { status: 'error', message: '無法獲取此用戶的追蹤名單。' }
+        }
+    */
     try {
-      const { id:followingId  } = req.params
-      let followers = await Followship.findAll({ 
-        where: { followingId }, 
-        include: [{ model: User, as: 'follower', attributes: { exclude: ['password'] } }] 
+      const { id: followingId } = req.params
+      let followers = await Followship.findAll({
+        where: { followingId },
+        include: [{ model: User, as: 'follower', attributes: { exclude: ['password'] } }]
       })
 
       if (!followers || !Array.isArray(followers)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追隨者名單。' })
@@ -189,14 +250,36 @@ module.exports = {
       }).sort((a, b) => b.dataValues.isFollowed - a.dataValues.isFollowed)
 
       return res.status(200).json(followers)
-
-    } catch(err) {
+    } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
   putUser: async (req, res) => {
+    /* #swagger.tags = ['User']
+      #swagger.description = '修改使用者資訊'
+      #swagger.parameters['description'] = {
+            in: 'body',
+            type: "object",
+            description: "key=value: name=name&introduction=introduction&avatar=avatar&cover=cover",
+            schema: {
+              name: "name",
+              introduction: "introduction",
+              avatar: "img file",
+              cover: "img file"
+            },
+            required: false
+      }
+        #swagger.responses[200] = {
+          description: '回傳更新過的User物件',
+          schema: {"$ref": "#/definitions/User"}
+        }
+      #swagger.responses[400] = {
+        description: '找不到user則回傳erro物件',
+        schema: { status: 'error', message: '無法獲取用戶資料。' }
+      }
+    */
     try {
       const { files } = req
       const { id } = req.params
@@ -209,10 +292,10 @@ module.exports = {
         return user
       }
 
-      //normally there will be keys: 'avatar' and 'cover', otherwise files equals undefined
+      // normally there will be keys: 'avatar' and 'cover', otherwise files equals undefined
       if (!files) {
         // return res.status(400).json({ status: 'error', message: '忘了設定 input name，avatar 跟 cover。' })
-        //test does not have req.files, so it will be blocked here...still need to return 200
+        // test does not have req.files, so it will be blocked here...still need to return 200
         const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
         const updatedUser = await updateUser(user, req.body)
         return res.json(updatedUser)
@@ -225,7 +308,7 @@ module.exports = {
 
         const uploadFile = (fileKey) => {
           const uploadImage = new Promise((resolve, rej) => {
-            //a async operation that does not return promise
+            // a async operation that does not return promise
             imgur.upload(files[fileKey][0].path, (err, image) => {
               if (fileKey === 'avatar') avatar = image
               if (fileKey === 'cover') cover = image
@@ -247,8 +330,7 @@ module.exports = {
         cover: cover ? cover.data.link : user.cover
       })
       return res.status(200).json(updatedUser)
-      
-    } catch(err) {
+    } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
