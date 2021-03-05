@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { sequelize } = require('../../models/index')
+const { Op } = require('sequelize')
 const db = require('../../models/index')
 const helpers = require('../../_helpers')
 const User = db.User
@@ -34,6 +35,30 @@ module.exports = {
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
       user.dataValues.isSelf = user.id === helpers.getUser(req).id
       return res.status(200).json(user)
+    } catch (err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  getTopUser: async (req, res) => {
+    try {
+      const currentUser = JSON.parse(JSON.stringify(helpers.getUser(req)))
+      const followingsOfCurrentUser = currentUser.Followings.map(Following => Following.id).concat([currentUser.id])
+      let users = await User.findAll({
+        where: {
+          role: 'user',
+          [Op.not]: [{ id: followingsOfCurrentUser }]
+        },
+        include: [{ model: User, as: 'Followers' }],
+      })
+      if (!users || !Array.isArray(users)) return res.status(400).json({ status: 'error', message: '無法獲取用戶名單。' })
+      users = users.map(user => {
+        user.dataValues.followerCount = user.Followers.length
+        user.dataValues.isFollowed = false //since followings of current user are filtered out with Op.not
+        return user
+      }).sort((a, b) => b.dataValues.followerCount - a.dataValues.followerCount).splice(0, 3)
+      return res.json(users)
     } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
