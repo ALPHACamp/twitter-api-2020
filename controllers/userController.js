@@ -4,22 +4,10 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { Tweet, User, Followship, Like, Reply, sequelize } = require('../models')
 const { QueryTypes } = require('sequelize');
 const helpers = require('../_helpers')
-
-const includeCountData = (req) => {
-  return [
-    [sequelize.literal(`(SELECT Count(*) FROM Followships WHERE Followships.followerId = ${userId})`), 'FollowingsCount'],
-    [sequelize.literal(`(SELECT Count(*) FROM Followships WHERE Followships.followingId = ${userId})`), 'FollowersCount'],
-    [sequelize.literal(`(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = ${userId})`), 'userTweetsCount'],
-    [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${userId})`), 'likedTweetsCount'],
-    [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = ${userId})`), 'replyTweetsCount'],
-  ]
-}
-
 // JWT
 const jwt = require('jsonwebtoken')
-// const passportJWT = require('passport-jwt')
-// const ExtractJwt = passportJWT.ExtractJwt
-// const JwtStrategy = passportJWT.Strategy
+
+
 const userController = {
   // 登入
   signIn: (req, res) => {
@@ -43,7 +31,12 @@ const userController = {
         message: 'ok',
         token: token,
         user: {
-          id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin
+          id: user.id, 
+          account: user.account,
+          name: user.name, 
+          email: user.email, 
+          isAdmin: user.isAdmin, 
+          image: user.avatar
         }
       })
     })
@@ -93,6 +86,18 @@ const userController = {
       res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後' })
     }
   },
+  // 獲取當前用戶
+  getCurrentUser: (req, res, next) => {
+    try {
+      const user = helpers.getUser(req)
+      const attributes = ['role', 'password', 'createdAt', 'updatedAt']
+      attributes.forEach(item => delete user.dataValues[item])
+      return res.json(user)
+    } catch (error) {
+      next(error)
+    }
+  },
+
   // 瀏覽個人資料
   getUser: (req, res) => {
     const userId = req.params.id

@@ -35,6 +35,8 @@ function authenticated(req, res, next) {
 router.post('/api/users/signin', userController.signIn)
 // 註冊
 router.post('/api/users', userController.signUp)
+// 當前用戶
+router.get('/api/users/currentUser', authenticated, userController.getCurrentUser)
 // 個人資料
 router.get('/api/users/:id', authenticated, userController.getUser)
 // 修改個人資料
