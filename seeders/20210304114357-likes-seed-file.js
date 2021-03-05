@@ -34,12 +34,6 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       }, {
-        id: 51,
-        UserId: 1,
-        TweetId: 11,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }, {
         id: 61,
         UserId: 21,
         TweetId: 1,

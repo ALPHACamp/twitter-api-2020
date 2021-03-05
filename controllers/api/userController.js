@@ -118,34 +118,19 @@ const userController = {
           const isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) // 是否按過like
           tweets.push({ id, description, likesNumber, repliesNumber, isLiked, createdAt, User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar } })
         })
-        // console.log(tweets)
         return res.json({ tweets })
       })
-    // const id = req.params.id
-    // Promise.all([
-    //   User.findByPk(id, { raw: true }),
-    //   Tweet.findAll({ where: { UserId: id }, order: [['createdAt', 'DESC']], include: [Reply, User, { model: User, as: 'LikedUsers' }] })
-    // ]).then(([user, tweet]) => {
-    //   const User = { id: user.id, name: user.name, account: user.account, avatar: user.avatar }
-    //   const tweets = []
-    //   const likesNumber = tweet.LikedUsers ? tweet.LikedUsers.length : 0   // 推文like數
-    //   const repliesNumber = tweet.RepliedUsers ? tweet.RepliedUsers.length : 0  // 推文回覆數
-    //   const isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) // 是否按過like
-    //   tweet.map(t => {
-    //     const tweetData = { id: t.id, description: t.description, likesNumber, repliesNumber, isLiked, createdAt: t.createdAt, User }
-    //     tweets.push(tweetData)
-    //   })
-    //   return res.json({ tweets })
-    // })
   },
   getUserReplies: (req, res) => {
-    Reply.findAll({ where: { UserId: req.params.id }, order: [['createdAt', 'DESC']], include: [{ model: Tweet, include: [{ model: User, as: 'LikedUsers' }] }] })
-      .then((reply) => {
+    Reply.findAll({ where: { UserId: req.params.id }, order: [['createdAt', 'DESC']], include: [Tweet, { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }] })
+      .then(reply => {
         const replies = []
         reply.map(r => {
-          const likesNumber = r.Tweet.LikedUsers ? r.Tweet.LikedUsers.length : 0  // 推文like數
-          const repliesNumber = r.Tweet.RepliedUsers ? r.Tweet.RepliedUsers.length : 0  // 推文回覆數
-          const tweetData = { id: r.Tweet.id, description: r.Tweet.description, likesNumber, repliesNumber, createdAt: r.Tweet.createdAt }
+          const { id, description, createdAt, LikedUsers, Replies, User } = r.dataValues.Tweet
+          const likesNumber = LikedUsers.length // 推文like數
+          const repliesNumber = Replies.length  // 推文回覆數
+          const isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(id) // 是否按過like
+          const tweetData = { id, description, likesNumber, repliesNumber, isLiked, createdAt, User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar } }
           replies.push(tweetData)
         })
         return res.json({ tweets: [replies] })
