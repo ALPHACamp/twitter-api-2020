@@ -46,7 +46,7 @@ const userController = {
         .then(() => res.json({ status: 'success', message: "signup successfully" }))
     })
   },
-  currentUser: (req, res) => {
+  getCurrentUser: (req, res) => {
     User.findByPk(helpers.getUser(req).id).then(user => {
       const { id, name, account, avatar, role } = user
       res.json({ id, name, account, avatar, role })
@@ -60,24 +60,33 @@ const userController = {
     if (password !== passwordCheck) {
       return res.json({ status: 'error', message: "password and passwordCheck didn't match" })
     }
-    const { file } = req
-
-    if (file) {
-      console.log(file)
+    const { files } = req
+    if (files) {
+      console.log(files['cover'][0].path)//  確定程式跑到這都沒問題，可拿到 temp/0b4c8ff45edde0f788125b4db8078f6c
       imgur.setClientId(process.env.IMGUR_CLIENT_ID)
-        .uploadFile(file.path)
+      imgur.uploadFile(files['cover'][0].path)
         .then((img) => {
-          console.log(img)
-          User.findByPk(req.params.id)
+          console.log(img.data.link)
+          console.log(img.link)
+          User.findByPk(helpers.getUser(req).id)
             .then(user => {
               user.cover = user.cover ? user.cover : null
               user.avatar = user.avatar ? user.avatar : null
               user.update({
-                name, account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)), cover, avatar, introduction,
-                cover: req.file.cover[0] ? img.data.link : user.cover,
-                avatar: req.file.avatar[0] ? img.data.link : user.avatar
+                name, account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)), introduction,
+                cover: files['cover'][0] ? img.link : user.cover,
+                avatar: files['avatar'][0] ? img.link : user.avatar
               }).then(() => res.json({ status: 'success', message: "user profiles has updated!" }))
             })
+        })
+    } else {  // 以下程式也確認沒問題，可成功更新資料
+      User.findByPk(helpers.getUser(req).id)
+        .then(user => {
+          user.update({
+            name, account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)), introduction,
+            cover: user.cover ? user.cover : null,
+            avatar: user.avatar ? user.avatar : null
+          }).then(() => res.json({ status: 'success', message: "user profiles has updated!" }))
         })
     }
   },
