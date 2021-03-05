@@ -12,7 +12,18 @@
     "https",
     "http"
   ],
+  "security": [
+    {
+      "JWT": []
+    }
+  ],
   "securityDefinitions": {
+    "JWT": {
+      "description": "bearer + token",
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    },
     "api_key": {
       "type": "apiKey",
       "name": "api_key",
@@ -120,6 +131,83 @@
         }
       }
     },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get specific user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "description": "edit specific user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "string",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User",
+              "properties": {}
+            }
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/api/users/{id}/followings": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get user following list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/api/users/{id}/followers": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get user follower list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/api/tweets/{id}": {
       "get": {
         "tags": [
@@ -131,11 +219,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -155,9 +238,19 @@
             "type": "string"
           },
           {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "type": "string",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Tweet",
+              "properties": {
+                "description": {
+                  "type": "text",
+                  "example": "hahahaha"
+                }
+              }
+            }
           }
         ],
         "responses": {}
@@ -172,11 +265,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -194,11 +282,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -226,11 +309,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -273,11 +351,6 @@
                 }
               }
             }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
@@ -303,11 +376,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
@@ -323,13 +391,7 @@
           "Tweets"
         ],
         "description": "post new tweet",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -341,13 +403,6 @@
           "Tweets"
         ],
         "description": "get all tweets",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
         "responses": {}
       }
     },
@@ -362,11 +417,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -401,11 +451,6 @@
                 }
               }
             }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
@@ -413,6 +458,117 @@
             "description": "OK"
           }
         }
+      }
+    },
+    "/api/followships/{followingId}": {
+      "delete": {
+        "tags": [
+          "followship"
+        ],
+        "description": "delete specific followship",
+        "parameters": [
+          {
+            "name": "followingId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/followships": {
+      "post": {
+        "tags": [
+          "followship"
+        ],
+        "description": "add specific followship",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "example": "1"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "get all users",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/admin/tweets": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "get all tweets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/admin/tweets/{id}": {
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "admin delete specific tweet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
       }
     }
   },
