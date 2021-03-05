@@ -99,7 +99,6 @@ const userController = {
         include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }]
       })
     ]).then(([tweets, user]) => {
-      console.log(user.dataValues)
       const tweetsNumber = tweets // 使用者推文數
       const { name, account, email, avatar, cover, introduction } = user.dataValues
       const followingsNumber = user.dataValues.Followings.length // 使用者追蹤數
@@ -109,22 +108,35 @@ const userController = {
     })
   },
   getUserTweets: (req, res) => {
-    const id = req.params.id
-    Promise.all([
-      User.findByPk(id, { raw: true }),
-      Tweet.findAll({ where: { UserId: id }, raw: true, nest: true, order: [['createdAt', 'DESC']], include: [Reply, { model: User, as: 'LikedUsers' }] })
-    ]).then(([user, tweet]) => {
-      const User = { id: user.id, name: user.name, account: user.account, avatar: user.avatar }
-      const tweets = []
-      const likesNumber = tweet.LikedUsers ? tweet.LikedUsers.length : 0   // 推文like數
-      const repliesNumber = tweet.RepliedUsers ? tweet.RepliedUsers.length : 0  // 推文回覆數
-      const isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) // 是否按過like
-      tweet.map(t => {
-        const tweetData = { id: t.id, description: t.description, likesNumber, repliesNumber, isLiked, createdAt: t.createdAt, User }
-        tweets.push(tweetData)
+    Tweet.findAll({ where: { UserId: req.params.id }, order: [['createdAt', 'DESC']], include: [Reply, User, { model: User, as: 'LikedUsers' }] })
+      .then(t => {
+        const tweets = []
+        t.map(tweet => {
+          const { id, description, createdAt, User, LikedUsers, Replies } = tweet.dataValues
+          const likesNumber = LikedUsers.length   // 推文like數
+          const repliesNumber = Replies.length  // 推文回覆數
+          const isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) // 是否按過like
+          tweets.push({ id, description, likesNumber, repliesNumber, isLiked, createdAt, User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar } })
+        })
+        // console.log(tweets)
+        return res.json({ tweets })
       })
-      return res.json({ tweets })
-    })
+    // const id = req.params.id
+    // Promise.all([
+    //   User.findByPk(id, { raw: true }),
+    //   Tweet.findAll({ where: { UserId: id }, order: [['createdAt', 'DESC']], include: [Reply, User, { model: User, as: 'LikedUsers' }] })
+    // ]).then(([user, tweet]) => {
+    //   const User = { id: user.id, name: user.name, account: user.account, avatar: user.avatar }
+    //   const tweets = []
+    //   const likesNumber = tweet.LikedUsers ? tweet.LikedUsers.length : 0   // 推文like數
+    //   const repliesNumber = tweet.RepliedUsers ? tweet.RepliedUsers.length : 0  // 推文回覆數
+    //   const isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) // 是否按過like
+    //   tweet.map(t => {
+    //     const tweetData = { id: t.id, description: t.description, likesNumber, repliesNumber, isLiked, createdAt: t.createdAt, User }
+    //     tweets.push(tweetData)
+    //   })
+    //   return res.json({ tweets })
+    // })
   },
   getUserReplies: (req, res) => {
     Reply.findAll({ where: { UserId: req.params.id }, order: [['createdAt', 'DESC']], include: [{ model: Tweet, include: [{ model: User, as: 'LikedUsers' }] }] })

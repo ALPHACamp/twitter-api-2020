@@ -35,19 +35,19 @@ module.exports = {
         updatedAt: new Date()
       }, {
         id: 51,
-        UserId: 31,
+        UserId: 1,
         TweetId: 11,
         createdAt: new Date(),
         updatedAt: new Date()
       }, {
         id: 61,
-        UserId: 41,
+        UserId: 21,
         TweetId: 1,
         createdAt: new Date(),
         updatedAt: new Date()
       }, {
         id: 71,
-        UserId: 51,
+        UserId: 11,
         TweetId: 21,
         createdAt: new Date(),
         updatedAt: new Date()
