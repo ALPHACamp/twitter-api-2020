@@ -3,7 +3,6 @@ const { User, Tweet, Like, Reply, Followship } = db
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
-const user = require('../../models/user')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -139,6 +138,28 @@ const userController = {
         }))
         users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
         return res.json({ users })
+      })
+  },
+  getUserLikes: (req, res) => {
+    Like.findAll({
+      where: { UserId: req.params.id }, raw: true, nest: true,
+      include: [{ model: Tweet, include: [User, { model: User, as: 'LikedUsers' }] }]
+    })
+      .then(async (likes) => {
+        console.log(likes)
+        const tweets = await likes.map(async (like) =>
+        ({
+          id: like.Tweet.id,
+          description: like.Tweet.description,
+          createdAt: like.Tweet.createdAt,
+          likesNumber: await Like.count({ where: { TweetId: like.Tweet.id }, raw: true }),
+          repliesNumber: await Reply.count({ where: { TweetId: like.Tweet.id }, raw: true }),
+          isLiked: like.Tweet.LikedUsers.id === req.user.id,
+          User: like.Tweet.User
+        })
+        )
+        console.log(tweets)
+        return res.json({ tweets })
       })
   }
 }
