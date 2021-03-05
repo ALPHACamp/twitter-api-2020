@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -17,6 +18,7 @@ function authenticated(req, res, next) {
 app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/upload', express.static(__dirname + '/upload'))
+app.use(cors())
 
 app.get('/', (req, res) => res.send('請使用API接口'))
 
