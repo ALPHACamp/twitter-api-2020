@@ -306,10 +306,17 @@ module.exports = {
       }
     */
     try {
+      const { name, introduction } = req.body
       const { files } = req
       const { id } = req.params
+      const currentUser = helpers.getUser(req)
       let avatar = null
       let cover = null
+
+      //check if authorized
+      if (Number(id) !== currentUser.id) return res.status(400).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
+
+      if (!name) return res.status(400).json({ status: 'error', message: '名稱是必填的!!!' })
 
       const updateUser = async (user, dataUpdated) => {
         if (!user) return res.status(400).json({ status: 'error', message: '無法獲取用戶資料。' })
@@ -317,9 +324,9 @@ module.exports = {
         return user
       }
 
-      // normally there will be keys: 'avatar' and 'cover', otherwise files equals undefined
+      // (form-data)if no req.body.avatar and req.body.cover, req.files equals undefined
       if (!files) {
-        // return res.status(400).json({ status: 'error', message: '忘了設定 input name，avatar 跟 cover。' })
+        console.log(1)
         // test does not have req.files, so it will be blocked here...still need to return 200
         const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
         const updatedUser = await updateUser(user, req.body)
@@ -343,18 +350,54 @@ module.exports = {
           uploadingArray.push(uploadImage)
         }
 
-        if (files.avatar) uploadFile('avatar', avatar)
-        if (files.cover) uploadFile('cover', cover)
+        if (files.avatar) uploadFile('avatar')
+        if (files.cover) uploadFile('cover')
         await Promise.all(uploadingArray)
       }
 
       const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
       const updatedUser = await updateUser(user, {
-        ...req.body,
+        name,
+        introduction,
         avatar: avatar ? avatar.data.link : user.avatar,
         cover: cover ? cover.data.link : user.cover
       })
       return res.status(200).json(updatedUser)
+    } catch (err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  putAccount: async (req, res) => { 
+    try {
+      const { account, email, password, checkPassword, name } = req.body
+      const { id } = req.params
+      const currentUser = helpers.getUser(req)
+      //check if authorized
+      if (Number(id) !== currentUser.id) return res.status(400).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
+      if (!account || !email || !name) return res.status(400).json({ status: 'error', message: '帳戶、信箱及名稱是必填的!!!' })
+
+       //check if account email used
+      const existedAccount = await User.findOne({ where: { account, [Op.not]: [{ id: currentUser.id }] } }).catch((err) => console.log('existedAccount: ', err))
+      if (existedAccount) return res.status(400).json({ status: 'error', message: '此帳號已被使用!!!', ...req.body })
+      const existedEmail = await User.findOne({ where: { email, [Op.not]: [{ id: currentUser.id }] } }).catch((err) => console.log('existedAccount: ', err))
+      if (existedEmail) return res.status(400).json({ status: 'error', message: '此信箱已被使用!!!', ...req.body })
+
+      //check if password needed to be updated
+      if (!password) {
+        req.body.password = currentUser.password
+      } else {
+        if (password !== checkPassword) return res.status(400).json({ status: 'error', message: '兩次密碼輸入不同!!!', ...req.body })
+        req.body.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+      }
+
+      const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
+      if (!user) return res.status(400).json({ status: 'error', message: '無法獲取用戶資料。' })
+      const updatedAccount = await user.update(req.body) //password can be updated even it is filtered out
+
+      return res.status(200).json(updatedAccount)
+            
     } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
