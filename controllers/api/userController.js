@@ -137,16 +137,21 @@ const userController = {
       })
   },
   addFollowing: (req, res) => {
+    if (req.params.followingId == helpers.getUser(req).id) { return res.json({ status: 'error', message: "can't follow yourself!" }) }
     Followship.create({
       followerId: helpers.getUser(req).id,
       followingId: req.params.followingId
-    }).then(() => res.json({ status: 'success', message: "" }))
+    }).then(() => res.json({ status: 'success', message: "create followship successfully!" }))
   },
   removeFollowing: (req, res) => {
     Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId } })
       .then(followship => {
-        followship.destroy()
-          .then(() => res.json({ status: 'success', message: "" }))
+        if (followship) {
+          followship.destroy()
+            .then(() => res.json({ status: 'success', message: "remove followship successfully!" }))
+        }
+        return res.json({ status: 'error', message: `have no followship with ${req.params.followingId}` })
+
       })
   },
   getUserFollowings: (req, res) => { // 取得 :userId 的追蹤者
