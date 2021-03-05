@@ -20,13 +20,18 @@ const authenticatedAdmin = (req, res, next) => {
 // user
 router.post('/users', userController.signUp)
 router.post('/signin', authenticated, userController.signIn)
+router.get('/users/topUsers', authenticated, userController.getTopUsers)
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
+router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
+
 
 //follow
 router.post('/followships/:followingId', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
+
 // admin
 // JWT signin
 router.post('/admin/signin', adminController.signIn)

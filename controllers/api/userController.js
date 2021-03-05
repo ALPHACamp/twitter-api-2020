@@ -3,6 +3,7 @@ const { User, Tweet, Like, Reply, Followship } = db
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
+const user = require('../../models/user')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -47,14 +48,14 @@ const userController = {
     const id = req.params.id
     Promise.all([
       User.findByPk(id, { raw: true }),
-      Tweet.findAll({ where: { UserId: id }, raw: true, nest: true }),
-      User.findAll({ raw: true, nest: true, include: [{ model: User, as: 'Followers', where: { id } }, { model: User, as: 'Followings', where: { id } }] })
-    ]).then(([users, tweets, followings, followers]) => {
-      const { id, name, account, email, avatar, cover, introduction } = users
+      Tweet.findAll({ where: { UserId: id } }),
+      User.findAll({ include: [{ model: User, as: 'Followers', where: { id } }, { model: User, as: 'Followings', where: { id } }] })
+    ]).then(([user, tweets, followings, followers]) => {
+      const { id, name, account, email, avatar, cover, introduction } = user
       const tweetsNumber = tweets ? tweets.length : 0 // 使用者推文數
       const followingsNumber = followings ? followings.length : 0 // 使用者追蹤數
       const followersNumber = followers ? followers.length : 0 // 使用者跟隨數
-      const isFollowed = req.user.Followings.map(d => d.id).includes(users.id) // 是否追蹤中
+      const isFollowed = req.user.Followings.map(d => d.id).includes(user.id) // 是否追蹤中
       return res.json({ user: { id, name, account, email, avatar, cover, introduction, tweetsNumber, followingsNumber, followersNumber, isFollowed } })
     })
   },
@@ -81,7 +82,6 @@ const userController = {
       .then((reply) => {
         const replies = []
         reply.map(r => {
-          console.log(r.Tweet.LikedUsers)
           const likesNumber = r.Tweet.LikedUsers ? r.Tweet.LikedUsers.length : 0  // 推文like數
           const repliesNumber = r.Tweet.RepliedUsers ? r.Tweet.RepliedUsers.length : 0  // 推文回覆數
           const tweetData = { id: r.Tweet.id, description: r.Tweet.description, likesNumber, repliesNumber, createdAt: r.Tweet.createdAt }
@@ -102,8 +102,45 @@ const userController = {
         followship.destroy()
           .then(() => res.json({ status: 'success', message: "" }))
       })
+  },
+  getUserFollowings: (req, res) => { // 取得 :userId 的追蹤者
+    const id = req.params.id
+    Promise.all([
+      User.findOne({ where: { id }, include: [{ model: User, as: 'Followings' }] }),
+      Tweet.findAndCountAll({ where: { UserId: id } })
+    ]).then(([user, tweet]) => {
+      console.log(user.Followings)
+      const tweetsNumber = tweet.count   // 使用者推文數
+      return res.json({
+        user: { id, name: user.name, tweetsNumber }
+      })
+    })
+  },
+  getUserFollowers: (req, res) => {
+    const id = req.params.id
+    Promise.all([
+      User.findOne({ where: { id }, include: [{ model: User, as: 'Followers' }] }),
+      Tweet.findAndCountAll({ where: { UserId: id } })
+    ]).then(([user, tweet]) => {
+      console.log(user.Followers)
+      const tweetsNumber = tweet.count  // 使用者推文數
+      return res.json({
+        user: { id, name: user.name, tweetsNumber }
+      })
+    })
+  },
+  getTopUsers: (req, res) => {
+    User.findAll({ include: [{ model: User, as: 'Followers' }] })
+      .then(users => {
+        users = users.map(user => ({
+          ...user.dataValues,
+          FollowerCount: user.Followers.length,
+          isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+        }))
+        users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
+        return res.json({ users })
+      })
   }
-
 }
 
 module.exports = userController
