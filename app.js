@@ -18,6 +18,12 @@ app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/upload', express.static(__dirname + '/upload'))
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+  next()
+})
+
 app.get('/', (req, res) => res.send('請使用API接口'))
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
