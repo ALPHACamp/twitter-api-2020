@@ -207,24 +207,42 @@ const userController = {
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(user => {
-      console.log(user)
       return res.status(200).json(user)
+    })
+    .catch(err => {
+      return res.status(500).json({ status: 'error', message: 'getRepliedTweets-伺服器錯誤請稍後', err })
     })
   },
   // 看見某使用者點過的 Like 
   getLikeTweets: (req, res) => {
-    Like.findAll({
+    return Like.findAll({
       where: { UserId: req.params.id },
       raw: true,
       nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(user => {
-      console.log(user)
       return res.status(200).json(user)
     })
+      .catch(err => {
+        return res.status(500).json({ status: 'error', message: 'getLikeTweets-伺服器錯誤請稍後', err })
+      })
+  },
+  // 看見某使用者發過的推文
+  getUserTweets: (req, res) => {
+    return Tweet.findAll({
+      where: { UserId: req.params.id },
+      raw: true,
+      nest: true,
+      // 資料庫端進行排列
+      order: [[sequelize.literal('createdAt'), 'DESC']]
+    }).then(user => {
+      return res.status(200).json(user)
+    })
+      .catch(err => {
+        return res.status(500).json({ status: 'error', message: 'getUserTweets-伺服器錯誤請稍後', err })
+      })
   }
-
 }
 
 module.exports = userController
