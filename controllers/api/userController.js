@@ -93,15 +93,18 @@ const userController = {
   getUser: (req, res) => { //取得任一使用者資料
     const id = req.params.id
     Promise.all([
-      User.findByPk(id, { raw: true }),
-      Tweet.findAll({ where: { UserId: id } }),
-      User.findAll({ include: [{ model: User, as: 'Followers', where: { id } }, { model: User, as: 'Followings', where: { id } }] })
-    ]).then(([user, tweets, followings, followers]) => {
-      const { id, name, account, email, avatar, cover, introduction } = user
-      const tweetsNumber = tweets ? tweets.length : 0 // 使用者推文數
-      const followingsNumber = followings ? followings.length : 0 // 使用者追蹤數
-      const followersNumber = followers ? followers.length : 0 // 使用者跟隨數
-      const isFollowed = helpers.getUser(req).Followings.map(d => d.id).includes(user.id) // 是否追蹤中
+      Tweet.count({ where: { UserId: id } }),
+      User.findOne({
+        where: { id },
+        include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }]
+      })
+    ]).then(([tweets, user]) => {
+      console.log(user.dataValues)
+      const tweetsNumber = tweets // 使用者推文數
+      const { name, account, email, avatar, cover, introduction } = user.dataValues
+      const followingsNumber = user.dataValues.Followings.length // 使用者追蹤數
+      const followersNumber = user.dataValues.Followers.length// 使用者跟隨數
+      const isFollowed = helpers.getUser(req).Followings.map(d => d.id).includes(user.id) // 我(helpers.getUser(req))的追蹤名單中是否有這位 user.id
       return res.json({ user: { id, name, account, email, avatar, cover, introduction, tweetsNumber, followingsNumber, followersNumber, isFollowed } })
     })
   },
