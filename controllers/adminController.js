@@ -34,39 +34,36 @@ const adminController = {
   },
 
   getUsers: (req, res) => {
-    return Promise.all([
-      User.findAll({
+    return User.findAll({
+      include: [
+        //如果只要數字就下面就都不用
+        // { model: Tweet },
+        // { model: Reply },
+        // { model: Like },
+        // { model: User, as: 'Followers' },
+        // { model: User, as: 'Followings' },
+      ],
+      limit: 3,
+      attributes: {
+        // 資料庫端運行計算
         include: [
-          //如果只要數字就下面就都不用
-          // { model: Tweet },
-          // { model: Reply },
-          // { model: Like },
-          // { model: User, as: 'Followers' },
-          // { model: User, as: 'Followings' },
-        ],
-        limit: 3,
-        attributes: {
-          // 資料庫端運行計算
-          include: [
-            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'FollowerCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'FollowingCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'), 'likeCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)'), 'replyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount']
-          ]
-        },
-        raw: true,
-        nest: true,
-        order: [
-          // 依推文數進行排列
-          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'DESC']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'FollowerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'FollowingCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'), 'likeCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount']
         ]
-      }),
-    ])
-      // 在資料庫端計算好 count 在返回
-      .then((user) => {
-        return res.status(200).json(...user)
-      })
+      },
+      raw: true,
+      nest: true,
+      order: [
+        // 依推文數進行排列
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'DESC']
+      ]
+    }).then(user => {
+      // console.log(user)
+      return res.status(200).json(user)
+    })
       .catch(err => {
         return res.status(500).json({ status: 'error', message: '個人資料-伺服器錯誤請稍後', err })
       })

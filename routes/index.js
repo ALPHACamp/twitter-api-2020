@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
-
+const helpers = require('../_helpers')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
@@ -24,14 +24,21 @@ const authenticated = function (req, res, next) {
     })(req, res, next)
 }
 // 驗證管理員
-const authenticatedAdmin = (req, res, next) => {
-    // console.log(req.isAuthenticated(req))
-    if (req.user) {
-        if (req.user.isAdmin) { return next() }
-        return res.json({ status: 'error', message: 'permission denied' })
-    } else {
-        return res.json({ status: 'error', message: 'permission denied' })
-    }
+// const authenticatedAdmin = (req, res, next) => {
+//     // console.log(req.isAuthenticated(req))
+//     if (req.user) {
+//         if (req.user.isAdmin) {
+//           return next()
+//         }
+//         return res.json({ status: 'error', message: 'permission denied' })
+//     } else {
+//         return res.json({ status: 'error', message: 'permission denied' })
+//     }
+// }
+// 驗證管理員
+function authenticatedAdmin(req, res, next) {
+  if (helpers.getUser(req).role !== 'admin') return res.status(401).json({ status: 'error', message: '權限驗證失敗' })
+  return next()
 }
 
 // 登入
