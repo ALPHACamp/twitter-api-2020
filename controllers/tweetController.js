@@ -26,7 +26,6 @@ const tweetController = {
       nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']],
-      limit: 10
     }).then(tweets => {
       const set = new Set()
       const tweetsFilter = tweets.filter(item => !set.has(item.id) ? set.add(item.id) : false)
