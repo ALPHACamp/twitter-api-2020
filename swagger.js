@@ -11,22 +11,35 @@ const doc = {
       account: 'user1',
       email: 'user1@example.com',
       name: 'user1',
-      avatar: 'null',
+      avatar: 'http://placeimg.com/640/480/people',
       introduction: 'I am Jackson',
-      role: 'admin',
-      cover: 'null',
+      role: 'user',
+      cover: 'http://placeimg.com/640/480/nature',
       createdAt: '2021-03-02T02:18:21.000Z',
       updatedAt: '2021-03-02T02:18:21.000Z'
+    },
+    UserIsSelf: {
+      id: 2,
+      account: 'user1',
+      email: 'user1@example.com',
+      name: 'user1',
+      avatar: 'http://placeimg.com/640/480/people',
+      introduction: 'I am Jackson',
+      role: 'user',
+      cover: 'http://placeimg.com/640/480/nature',
+      createdAt: '2021-03-02T02:18:21.000Z',
+      updatedAt: '2021-03-02T02:18:21.000Z',
+      isSelf: true
     },
     FollowshipUser: {
       id: 1,
       account: 'root',
       email: 'root@example.com',
       name: 'root',
-      avatar: 'null',
+      avatar: 'http://placeimg.com/640/480/people',
       introduction: 'I am Jackson',
       role: 'admin',
-      cover: 'null',
+      cover: 'http://placeimg.com/640/480/nature',
       createdAt: '2021-03-02T02:18:21.000Z',
       updatedAt: '2021-03-02T02:18:21.000Z',
       Followship: {
@@ -41,10 +54,10 @@ const doc = {
       account: 'user1',
       email: 'user1@example.com',
       name: 'user1',
-      avatar: 'null',
+      avatar: 'http://placeimg.com/640/480/people',
       introduction: 'I am Johnny',
       role: 'user',
-      cover: 'null',
+      cover: 'http://placeimg.com/640/480/nature',
       createdAt: '2021-03-02T02:18:21.000Z',
       updatedAt: '2021-03-02T02:18:21.000Z',
       Replies: [{ $ref: '#/definitions/Reply' }],
@@ -62,7 +75,18 @@ const doc = {
       Replies: [{ $ref: '#/definitions/Reply' }],
       Likes: [{ $ref: '#/definitions/Like' }],
       User: { $ref: '#/definitions/User' },
-      isLikedbyMe: false
+      isLikedbyMe: false,
+      isMyTweet: true
+    },
+    RepliedTweet: {
+      id: 1,
+      UserId: 2,
+      TweetId: 1,
+      comment: 'Reply 1',
+      createdAt: '2021-03-02T02:18:21.000Z',
+      updatedAt: '2021-03-02T02:18:21.000Z',
+      User: { $ref: '#/definitions/User' },
+      Tweet: { $ref: '#/definitions/Tweet' }
     },
     Reply: {
       id: 1,
@@ -73,12 +97,61 @@ const doc = {
       updatedAt: '2021-03-02T02:18:21.000Z',
       User: { $ref: '#/definitions/User' }
     },
+    LikedTweet: {
+      id: 2,
+      UserId: 2,
+      TweetId: 1,
+      createdAt: '2021-03-02T12:55:19.000Z',
+      updatedAt: '2021-03-02T12:55:19.000Z',
+      User: { $ref: '#/definitions/User' },
+      Tweet: { $ref: '#/definitions/Tweet' }
+    },
     Like: {
       id: 2,
       UserId: 2,
       TweetId: 1,
       createdAt: '2021-03-02T12:55:19.000Z',
       updatedAt: '2021-03-02T12:55:19.000Z'
+    },
+    Following: {
+      followerId: 11,
+      followingId: 21,
+      createdAt: '2021-03-05T04:26:13.000Z',
+      updatedAt: '2021-03-05T04:26:13.000Z',
+      following: {
+        id: 21,
+        account: 'user2',
+        email: 'user2@example.com',
+        name: 'Johnny2',
+        avatar: 'http://placeimg.com/640/480/people',
+        introduction: 'I am Johnny2',
+        role: 'user',
+        cover: 'http://placeimg.com/640/480/nature',
+        createdAt: '2021-03-05T04:26:13.000Z',
+        updatedAt: '2021-03-05T04:26:13.000Z'
+      },
+      isFollowed: true,
+      isSelf: false
+    },
+    Follower: {
+      followerId: 21,
+      followingId: 11,
+      createdAt: '2021-03-05T04:26:13.000Z',
+      updatedAt: '2021-03-05T04:26:13.000Z',
+      follower: {
+        id: 21,
+        account: 'user2',
+        email: 'user2@example.com',
+        name: 'Johnny2',
+        avatar: 'http://placeimg.com/640/480/people',
+        introduction: 'I am Johnny2',
+        role: 'user',
+        cover: 'http://placeimg.com/640/480/nature',
+        createdAt: '2021-03-05T04:26:13.000Z',
+        updatedAt: '2021-03-05T04:26:13.000Z'
+      },
+      isFollowed: true,
+      isSelf: false
     },
     SuccessMessage: { status: 'success', message: 'Success' }
   }
