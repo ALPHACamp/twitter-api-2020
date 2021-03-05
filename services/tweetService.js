@@ -1,5 +1,5 @@
 const db = require('../models')
-const { Tweet, Like, Reply } = db
+const { Tweet, Like, Reply, User } = db
 const helper = require('../_helpers')
 
 const tweetService = {
@@ -19,11 +19,12 @@ const tweetService = {
   getTweets: async (req, res, callback) => {
     try {
       const tweets = await Tweet.findAll({
-        raw: true, nest: true,
+        nest: true,
         order: [['createdAt', 'DESC']],
         include: [
           { model: Like },
-          { model: Reply }
+          { model: Reply },
+          { model: User }
         ]
       })
       callback(tweets)
