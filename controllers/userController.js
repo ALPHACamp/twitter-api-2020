@@ -206,11 +206,23 @@ const userController = {
       nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
+    }).then(user => {
+      console.log(user)
+      return res.status(200).json(user)
     })
-      .then(user => {
-        console.log(user)
-        return res.status(200).json(user)
-      })
+  },
+  // 看見某使用者點過的 Like 
+  getLikeTweets: (req, res) => {
+    Like.findAll({
+      where: { UserId: req.params.id },
+      raw: true,
+      nest: true,
+      // 資料庫端進行排列
+      order: [[sequelize.literal('createdAt'), 'DESC']]
+    }).then(user => {
+      console.log(user)
+      return res.status(200).json(user)
+    })
   }
 
 }

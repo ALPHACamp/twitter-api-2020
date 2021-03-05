@@ -45,8 +45,10 @@ router.put('/api/users/:id', authenticated, upload.fields([{ name: 'avatar', max
 router.get('/api/users/:id/followings', authenticated, userController.getFollowings)
 // 誰在追蹤這個使用者
 router.get('/api/users/:id/followers', authenticated, userController.getFollowers)
-  // 看見某使用者發過回覆的推文
-  router.get('/api/users/:id/replied_tweets', authenticated, userController.getRepliedTweets)
+// 看見某使用者發過回覆的推文
+router.get('/api/users/:id/replied_tweets', authenticated, userController.getRepliedTweets)
+  // 看見某使用者點過的 Like 
+  router.get('/api/users/:id/likes', authenticated, userController.getLikeTweets)
 
 
 
