@@ -25,11 +25,13 @@ const tweetController = {
       raw: true,
       nest: true,
       // 資料庫端進行排列
-      order: [[sequelize.literal('createdAt'), 'DESC']]
+      order: [[sequelize.literal('createdAt'), 'DESC']],
+      limit: 10
     }).then(tweets => {
-     
+      const set = new Set()
+      const tweetsFilter = tweets.filter(item => !set.has(item.id) ? set.add(item.id) : false)
       // 建立推文時間距離多久
-      const data = tweets.map(r => ({
+      const data = tweetsFilter.map(r => ({
         ...r,
         time: formatDistanceToNow(r.createdAt, { includeSeconds: true }),
         isLiked: r.Likes.UserId === req.user.id
