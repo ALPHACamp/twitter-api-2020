@@ -2,6 +2,18 @@ const bcrypt = require('bcryptjs')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { Tweet, User, Followship, Like, Reply, sequelize } = require('../models')
+const { QueryTypes } = require('sequelize');
+const helpers = require('../_helpers')
+
+const includeCountData = (req) => {
+  return [
+    [sequelize.literal(`(SELECT Count(*) FROM Followships WHERE Followships.followerId = ${userId})`), 'FollowingsCount'],
+    [sequelize.literal(`(SELECT Count(*) FROM Followships WHERE Followships.followingId = ${userId})`), 'FollowersCount'],
+    [sequelize.literal(`(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = ${userId})`), 'userTweetsCount'],
+    [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${userId})`), 'likedTweetsCount'],
+    [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = ${userId})`), 'replyTweetsCount'],
+  ]
+}
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -94,11 +106,9 @@ const userController = {
           [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${userId})`), 'likedTweetsCount'],
           [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = ${userId})`), 'replyTweetsCount'],
         ]
-      },
-      raw: true,
-      nest: true,
+      }
     }).then(user => {
-      return res.status(200).json({ user })
+      return res.status(200).json(user)
     })
       .catch(err => {
         return res.status(500).json({ status: 'error', message: '個人資料-伺服器錯誤請稍後', err })
@@ -152,31 +162,36 @@ const userController = {
       return res.status(500).json({ status: 'error', message: '編輯個人資料-伺服器錯誤請稍後' })
     }
   },
-  // 使用者正在追蹤誰
-  getFollowings: (req, res) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        { model: User, as: 'Followings' }
-      ]
-    }).then(user => {
-      const data = user.Followings.map(r => ({
-        ...r.dataValues
-      }))
-      return res.status(200).json(data)
-    })
+  getFollowings: async (req, res) => {
+    try {
+      const followings = await sequelize.query(`
+      SELECT U.id, U.name, U.email, U.avatar, Followships.followingId
+      FROM Followships
+      LEFT JOIN (SELECT id, name, email, avatar FROM Users) AS U
+      ON U.id = Followships.followingId
+      WHERE Followships.followerId = ${req.params.id}
+      `,
+        { type: QueryTypes.SELECT })
+      return res.status(200).json(followings)
+    } catch (err) {
+      return res.status(500).json({ status: 'error', message: 'getFollowings-伺服器錯誤請稍後', err })
+    }
   },
   // 誰在追蹤這個使用者
-  getFollowers: (req, res) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        { model: User, as: 'Followers' }
-      ]
-    }).then(user => {
-      const data = user.Followers.map(r => ({
-        ...r.dataValues
-      }))
-      return res.status(200).json(data)
-    })
+  getFollowers: async(req, res) => {
+    try {
+      const followers = await sequelize.query(`
+      SELECT  Users.id, Users.name, Users.email, Users.avatar, Followships.followerId
+      FROM Followships
+      LEFT JOIN Users
+      ON Users.id = Followships.followerId
+      WHERE Followships.followingId = ${req.params.id}
+      `,
+        { type: QueryTypes.SELECT })
+      return res.status(200).json(followers)
+    } catch (err) {
+      return res.status(500).json({ status: 'error', message: 'getFollowers-伺服器錯誤請稍後', err })
+    }
   }
 
 }

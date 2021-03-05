@@ -53,7 +53,8 @@ const tweetController = {
       raw: true,
       nest: true
     }).then(tweets => {
-      return res.json(tweets)
+      if (!tweet) return res.status(400).json({ status: 'error', message: '沒有這則貼文' })
+      return res.status(200).json(tweets)
     }).catch(error => {
       return res.status(500).json({ status: 'error', message: '瀏覽單一推文-伺服器錯誤請稍後', error })
     })
@@ -107,7 +108,9 @@ const tweetController = {
       .then((tweet) => {
         return res.status(200).json({ status: 'success', message: 'like was successfully create' })
       })
-      .catch(error => console.error(error))
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '修改推特-伺服器錯誤請稍後', error })
+      })
   },
   // 刪除 Like
   deleteLike: (req, res) => {
