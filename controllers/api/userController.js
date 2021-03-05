@@ -7,6 +7,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 const fs = require('fs')
 const imgur = require('imgur')
+const helpers = require('../../_helpers')
 
 const userController = {
   signIn: (req, res) => {
@@ -43,6 +44,12 @@ const userController = {
       }
       User.create({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
         .then(() => res.json({ status: 'success', message: "signup successfully" }))
+    })
+  },
+  currentUser: (req, res) => {
+    User.findByPk(helpers.getUser(req).id).then(user => {
+      const { id, name, account, avatar, role } = user
+      res.json({ id, name, account, avatar, role })
     })
   },
   editUser: (req, res) => {
@@ -85,7 +92,7 @@ const userController = {
       const tweetsNumber = tweets ? tweets.length : 0 // 使用者推文數
       const followingsNumber = followings ? followings.length : 0 // 使用者追蹤數
       const followersNumber = followers ? followers.length : 0 // 使用者跟隨數
-      const isFollowed = req.user.Followings.map(d => d.id).includes(user.id) // 是否追蹤中
+      const isFollowed = helpers.getUser(req).Followings.map(d => d.id).includes(user.id) // 是否追蹤中
       return res.json({ user: { id, name, account, email, avatar, cover, introduction, tweetsNumber, followingsNumber, followersNumber, isFollowed } })
     })
   },
@@ -99,7 +106,7 @@ const userController = {
       const tweets = []
       const likesNumber = tweet.LikedUsers ? tweet.LikedUsers.length : 0   // 推文like數
       const repliesNumber = tweet.RepliedUsers ? tweet.RepliedUsers.length : 0  // 推文回覆數
-      const isLiked = req.user.LikedTweets.map(d => d.id).includes(tweet.id) // 是否按過like
+      const isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) // 是否按過like
       tweet.map(t => {
         const tweetData = { id: t.id, description: t.description, likesNumber, repliesNumber, isLiked, createdAt: t.createdAt, User }
         tweets.push(tweetData)
@@ -122,12 +129,12 @@ const userController = {
   },
   addFollowing: (req, res) => {
     Followship.create({
-      followerId: req.user.id,
+      followerId: helpers.getUser(req).id,
       followingId: req.params.followingId
     }).then(() => res.json({ status: 'success', message: "" }))
   },
   removeFollowing: (req, res) => {
-    Followship.findOne({ where: { followerId: req.user.id, followingId: req.params.followingId } })
+    Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId } })
       .then(followship => {
         followship.destroy()
           .then(() => res.json({ status: 'success', message: "" }))
@@ -165,7 +172,7 @@ const userController = {
         users = users.map(user => ({
           ...user.dataValues,
           FollowerCount: user.Followers.length,
-          isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+          isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
         }))
         users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
         return res.json({ users })
@@ -185,7 +192,7 @@ const userController = {
           createdAt: like.Tweet.createdAt,
           likesNumber: await Like.count({ where: { TweetId: like.Tweet.id }, raw: true }),
           repliesNumber: await Reply.count({ where: { TweetId: like.Tweet.id }, raw: true }),
-          isLiked: like.Tweet.LikedUsers.id === req.user.id,
+          isLiked: like.Tweet.LikedUsers.id === helpers.getUser(req).id,
           User: like.Tweet.User
         })
         )
