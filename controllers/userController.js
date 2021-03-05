@@ -31,11 +31,11 @@ const userController = {
         message: 'ok',
         token: token,
         user: {
-          id: user.id, 
+          id: user.id,
           account: user.account,
-          name: user.name, 
-          email: user.email, 
-          isAdmin: user.isAdmin, 
+          name: user.name,
+          email: user.email,
+          isAdmin: user.isAdmin,
           image: user.avatar
         }
       })
@@ -183,7 +183,7 @@ const userController = {
     }
   },
   // 誰在追蹤這個使用者
-  getFollowers: async(req, res) => {
+  getFollowers: async (req, res) => {
     try {
       const followers = await sequelize.query(`
       SELECT  Users.id, Users.name, Users.email, Users.avatar, Followships.followerId
@@ -197,6 +197,20 @@ const userController = {
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowers-伺服器錯誤請稍後', err })
     }
+  },
+  // 看見某使用者發過回覆的推文
+  getRepliedTweets: (req, res) => {
+    Reply.findAll({
+      where: { UserId: req.params.id },
+      raw: true,
+      nest: true,
+      // 資料庫端進行排列
+      order: [[sequelize.literal('createdAt'), 'DESC']]
+    })
+      .then(user => {
+        console.log(user)
+        return res.status(200).json(user)
+      })
   }
 
 }
