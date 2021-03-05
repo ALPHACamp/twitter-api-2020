@@ -2,16 +2,18 @@ const express = require('express')
 const userController = require('../../controllers/api/userController')
 const router = express.Router()
 const { checkIfUser, checkIfAdmin, checkIfLoggedIn } = require('../../utils/authenticator')
-const helpers = require('../../_helpers')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
-// test
-router.get('/test/role/user', checkIfLoggedIn, checkIfUser, (req, res) => {
-  return res.json(helpers.getUser(req))
-})
 
-router.get('/test/role/admin', checkIfLoggedIn, checkIfAdmin, (req, res) => {
-  return res.json(helpers.getUser(req))
-})
+router.put('/:id', checkIfLoggedIn, cpUpload, userController.putUser)
+router.get('/:id/followers', checkIfLoggedIn, userController.getFollowers)
+router.get('/:id/followings', checkIfLoggedIn, userController.getFollowings)
+router.get('/:id/likes', checkIfLoggedIn, userController.getLikedTweets)
+router.get('/:id/replied_tweets', checkIfLoggedIn, userController.getRepliedTweets)
+router.get('/:id/tweets', checkIfLoggedIn, userController.getTweets)
+router.get('/:id', checkIfLoggedIn, userController.getUser)
 
 // register
 router.post('/', userController.register)

@@ -2,7 +2,15 @@ const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
 module.exports = {
-  checkIfLoggedIn: passport.authenticate('jwt', { session: false }),
+  checkIfLoggedIn: (req, res, next) => {
+                            //corresponding to next(err, user, info) in conifg/passport
+    passport.authenticate('jwt', { session: false }, (err, user, info) => {
+      if (err) return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+      if (!user) return res.status(401).json({ status: 'error', message: '此用戶沒有權限。' })
+      req.user = user
+      next()
+    })(req, res, next)
+  },
 
   checkIfAdmin: (req, res, next) => {
     if (helpers.getUser(req)) {

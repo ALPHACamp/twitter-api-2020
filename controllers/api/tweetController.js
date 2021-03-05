@@ -32,7 +32,7 @@ const tweetController = {
       const tweetsData = tweets.map(tweet => {
         const ifLike = tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
         tweet = JSON.parse(JSON.stringify(tweet))
-        return Object.assign(tweet, { isLikedbyMe: ifLike })
+        return Object.assign(tweet, { isLikedByMe: ifLike })
       })
 
       return res.status(200).json(tweetsData)
@@ -65,9 +65,9 @@ const tweetController = {
       if (!tweet) {
         return res.status(400).json({ status: 'error', message: 'tweet doesn\'t exist' })
       }
-      // check if current user liked this post, if yes, isLikedbyMe = true
+      // check if current user liked this post, if yes, isLikedByMe = true
       const ifLike = tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
-      const tweetData = Object.assign(tweet.toJSON(), { isLikedbyMe: ifLike })
+      const tweetData = Object.assign(tweet.toJSON(), { isLikedByMe: ifLike })
 
       // console.log(tweetData)
       return res.status(200).json(tweetData)

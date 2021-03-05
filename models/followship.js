@@ -8,6 +8,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
     }
   }, {})
-  Followship.associate = function (models) {}
+  Followship.associate = function (models) {
+    //associate User pk with foreign key followerId (since as 'follower')
+    Followship.belongsTo(models.User, { as: 'follower' })
+    //associate User pk with foreign key followerId (since as 'following')
+    Followship.belongsTo(models.User, { as: 'following' })
+  }
   return Followship
 }

@@ -22,7 +22,7 @@ const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }]
   }).catch((err) => {
-    console.log('currentUser: ', err)
+
     return next(err, false)
   })
   if (!currentUser) return next(null, false)
