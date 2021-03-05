@@ -6,31 +6,33 @@ const includeCountData = (req) => {
   return [
     [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
     [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-    [sequelize.literal(`EXISTS(SELECT * FROM LIKES WHERE LIKES.UserId = ${helpers.getUser(req).id} AND LIKES.TweetId = Tweet.id)`), 'isLiked']
   ]
 }
 const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'avatar'] })
 
 const tweetController = {
   // 瀏覽全部推文
-  getTweets: (req, res) => {
+  getTweets: async (req, res) => {
     return Tweet.findAll({
-      include: includeUserData(), // 使用者資料
+      include: [
+        Like,
+        includeUserData(), // 使用者資料
+      ],
       attributes: {
         // 計算數量
         include: includeCountData(req),
-        // 過濾不要資料
-        exclude: ['updatedAt']
       },
       raw: true,
       nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(tweets => {
-       // 建立推文時間距離多久
+     
+      // 建立推文時間距離多久
       const data = tweets.map(r => ({
         ...r,
-        time: formatDistanceToNow(r.createdAt, { includeSeconds: true })
+        time: formatDistanceToNow(r.createdAt, { includeSeconds: true }),
+        isLiked: r.Likes.UserId === req.user.id
       }))
       return res.status(200).json(data)
     }).catch(error => {
@@ -38,23 +40,21 @@ const tweetController = {
     })
   },
   // 瀏覽單一推文
-  getTweet: (req, res) => {
+  getTweet: async (req, res) => {
     return Tweet.findByPk(req.params.id, {
       include: [
-        User,
-        includeUserData() // 使用者資料
+        User
       ],
       attributes: {
         // // 計算數量
-        include: includeCountData(req),
+        include: includeCountData(req),        
         // 過濾不要資料
         exclude: ['updatedAt']
-      },
-      raw: true,
-      nest: true
+      }
     }).then(tweets => {
-      if (!tweet) return res.status(400).json({ status: 'error', message: '沒有這則貼文' })
-      return res.status(200).json(tweets)
+      const data = tweets.toJSON()
+      data.isLiked = tweets.UserId === req.user.id
+      return res.status(200).json(data)
     }).catch(error => {
       return res.status(500).json({ status: 'error', message: '瀏覽單一推文-伺服器錯誤請稍後', error })
     })
@@ -121,7 +121,9 @@ const tweetController = {
         await like.destroy()
         return res.json({ status: 'success', message: 'like was successfully deleted' })
       })
-      .catch(error => console.error(error))
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '刪除推特-伺服器錯誤請稍後', error })
+      })
 
   },
   // 瀏覽回覆
@@ -145,7 +147,9 @@ const tweetController = {
         replyTime: formatDistanceToNow(replies.createdAt, { includeSeconds: true })
       }))
       return res.status(200).json(data)
-    }).catch(error => console.error(error))
+    }).catch(error => {
+      return res.status(500).json({ status: 'error', message: '瀏覽回覆-伺服器錯誤請稍後', error })
+    })
   },
   // 新增回覆
   postReply: async (req, res) => {
@@ -154,11 +158,12 @@ const tweetController = {
       UserId: helpers.getUser(req).id,
       TweetId: req.params.tweet_id
     })
-      .then((reply) => {
+      .then(reply => {
         return res.json({ status: 'success', message: 'reply was successfully create' })
       })
-      .catch(error => console.error(error))
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '新增回覆-伺服器錯誤請稍後', error })
+      })
   }
-
 }
 module.exports = tweetController

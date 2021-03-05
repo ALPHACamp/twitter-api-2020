@@ -36,7 +36,7 @@ const userController = {
           name: user.name,
           email: user.email,
           isAdmin: user.isAdmin,
-          image: user.avatar
+          avatar: user.avatar
         }
       })
     })
@@ -122,46 +122,38 @@ const userController = {
   // 編輯個人資料
   putUser: async (req, res) => {
     const { name, introduction } = req.body
-    const userData = introduction
-    // 判斷是不是登入使用者
-    if (Number(req.user.id) !== Number(req.params.id)) {
+    if (helpers.getUser(req).id !== Number(req.params.id)) {
       return res.json({ status: 'error', message: '無訪問權限' })
     }
-    // 資料是否完整
-    if (!req.body.name) {
-      return res.json({ status: 'error', message: '請輸入名稱', userData })
+    if (!name) {
+      return res.json({ status: 'error', message: '請輸入名稱' })
     }
-    // 建立上傳照片Functions
-    function myImgurUpload(uploadFile) {
-      imgur.setClientId(IMGUR_CLIENT_ID)
-      return imgur.uploadFile(uploadFile)
-    }
+
     try {
       const { files } = req
-      // 撈出使用者資料
       const user = await User.findByPk(req.params.id)
-      if (files) {
-        // 解構賦值
-        let [cover, avatar] = [user.cover, user.avatar]
-
-        // 依序判斷 avatar & cover 是否存在 , 如果有就上傳
-        if (req.files.cover) {
-          cover = await myImgurUpload(req.files.cover[0].path)
+      if (files !== undefined) {
+        if (Object.keys(req.files).length) {
+          // 建立上傳照片Functions
+          function myImgurUpload(uploadFile) {
+            imgur.setClientId(IMGUR_CLIENT_ID)
+            return imgur.uploadFile(uploadFile)
+          }
+          // 解構賦值
+          let [cover, avatar] = [user.cover, user.avatar]
+          //依序判斷 avatar & cover 是否存在 , 如果有就上傳
+          if (files.cover) {
+            cover = await myImgurUpload(req.files.cover[0].path)
+          }
+          if (files.avatar) {
+            avatar = await myImgurUpload(req.files.avatar[0].path)
+          }
+          await user.update({ name, introduction, cover, avatar })
+          return res.status(200).json({ status: 'success', message: '修改成功' })
         }
-        if (req.files.avatar) {
-          avatar = await myImgurUpload(req.files.cover[0].path)
-        }
-
-        await user.update({
-          name,
-          introduction,
-          cover: cover.link,
-          avatar: avatar.link
-        })
-        return res.status(200).json({ status: 'success', message: '修改成功' })
       }
       // 無照片
-      user.update({ name, introduction })
+      await user.update({ name, introduction })
       return res.status(200).json({ status: 'success', message: '修改成功' })
     } catch (err) {
       return res.status(500).json({ status: 'error', message: '編輯個人資料-伺服器錯誤請稍後' })
@@ -209,9 +201,9 @@ const userController = {
     }).then(user => {
       return res.status(200).json(user)
     })
-    .catch(err => {
-      return res.status(500).json({ status: 'error', message: 'getRepliedTweets-伺服器錯誤請稍後', err })
-    })
+      .catch(err => {
+        return res.status(500).json({ status: 'error', message: 'getRepliedTweets-伺服器錯誤請稍後', err })
+      })
   },
   // 看見某使用者點過的 Like 
   getLikeTweets: (req, res) => {
