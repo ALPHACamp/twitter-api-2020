@@ -15,19 +15,24 @@ const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    let helperGetUser = helpers.getUser(req)
+
     if (!user) {
-      return res.json({ status: "error", message: "No such user" })
+      return res.json({ status: 'error', message: 'permission denied' })
     }
-    req.user = user
-    console.log(req.user)
+
+    helperGetUser = user
+    req.user = helperGetUser
+
     return next()
   })(req, res, next)
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  console.log(req.user)
-  if (req.user) {
-    if (req.user.role === 'admin') {
+  let helperGetUser = helpers.getUser(req)
+
+  if (helperGetUser) {
+    if (helperGetUser.role === 'admin') {
       return next()
     }
     return res.json({ status: 'error', message: 'permission denied' })
@@ -70,7 +75,7 @@ router.post('/tweets/:id/like', authenticated, likeController.addLike)
 router.post('/tweets/:id/unlike', authenticated, likeController.removeLike)
 
 // Reply
-router.post('/tweets/:tweet_id/replies', replyController.postReply)
-router.get('/tweets/:tweet_id/replies', replyController.getReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
 
 module.exports = router
