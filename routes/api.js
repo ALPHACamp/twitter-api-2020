@@ -34,23 +34,28 @@ const authenticatedAdmin = (req, res, next) => {
 router.post('/signin', userController.signIn);
 
 //followship
-router.get('/following', followshipController.getFollowing);
-router.get('/follower', followshipController.getFollower);
-router.post('/followships/:followingId', followshipController.postFollowship);
-router.delete('/followships/:followingId', followshipController.deleteFollowship);
+router.post('/followships', authenticated, followshipController.postFollowship);
+router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship);
 
 //user
 router.get('/users/:id', authenticated, userController.getUser);
 router.post('/signin', userController.signIn);
 router.post('/users', userController.signUp);
 
+//user_followship
+router.get('/users/:id/followings', authenticated, userController.getFollowing);
+router.get('/users/:id/followers', authenticated, userController.getFollower);
+
+
 //tweet
 router.get('/tweets/:id', authenticated, tweetController.getTweet);
 router.get('/tweets', authenticated, tweetController.getTweets);
 router.post('/tweets', authenticated, tweetController.postTweets);
 
+
 //like
 router.post('/tweets/:id/like', authenticated, likeController.Like);
 router.post('/tweets/:id/unlike', authenticated, likeController.UnLike);
+
 
 module.exports = router;
