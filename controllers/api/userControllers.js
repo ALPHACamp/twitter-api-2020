@@ -157,8 +157,10 @@ let userController = {
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
       const files = req.files
-      let avatar = files.avatar
-      let cover = files.cover
+      // let avatar = files.avatar ? files.avatar : 'no image'
+      // let cover = files.cover ? files.cover : 'no image'
+      let avatar = user.avatar
+      let cover = user.cover
 
 
       if (password) {
@@ -168,6 +170,9 @@ let userController = {
       }
 
       if (files) {
+        avatar = files.avatar
+        cover = files.cover
+
         if (avatar && cover) {
           const acatarData = await imgur.uploadFile(avatar[0].path)
           const coverData = await imgur.uploadFile(cover[0].path)
