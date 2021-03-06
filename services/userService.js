@@ -15,11 +15,11 @@ const JwtStrategy = passportJWT.Strategy
 const userService = {
   signUp: (req, res, callback) => {
     if (req.body.checkPassword !== req.body.password) {
-      callback({ status: 'error', message: 'Password is different' })
+      callback({ status: 'error', message: 'Password is different', statusCode: 400 })
     } else {
       User.findOne({ where: { email: req.body.email } }).then(user => {
         if (user) {
-          callback({ status: 'error', message: 'Email is already exists' })
+          callback({ status: 'error', message: 'Email is already exists', statusCode: 400 })
         } else {
           User.create({
             account: req.body.account,
@@ -32,6 +32,31 @@ const userService = {
         }
       })
     }
+  },
+  signIn: (req, res, callback) => {
+    if (!req.body.email || !req.body.password) {
+      callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
+    }
+
+    const { email, password } = req.body
+    User.findOne({ where: { email: email } }).then(user => {
+      if (!user) return callback({ status: 'error', message: "user not found", statusCode: 401 })
+      if (!bcrypt.compareSync(password, user.password)) return callback({ status: 'error', message: "password is not correct", statusCode: 401 })
+      //簽發token
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET) //之後寫入dotenv
+      callback({
+        status: 'success',
+        message: 'ok',
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      })
+    })
   },
   getTopUser: (req, res, callback) => {
     User.findAll(
@@ -63,7 +88,7 @@ const userService = {
       callback(user)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 
@@ -74,14 +99,14 @@ const userService = {
       callback(userData)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 
   putUser: async (req, res, callback) => {
     try {
       if (!req.body.name) {
-        callback({ status: 'error', message: "Please insert a name for user!" })
+        callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
       }
       const { files } = req
 
@@ -133,7 +158,7 @@ const userService = {
       }
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 
@@ -149,7 +174,7 @@ const userService = {
       callback(tweets)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 
@@ -164,7 +189,7 @@ const userService = {
       callback(replies)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 

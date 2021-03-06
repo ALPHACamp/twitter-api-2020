@@ -13,21 +13,21 @@ const adminService = {
   signIn: async (req, res, callback) => {
     try {
       if (!req.body.email || !req.body.password) {
-        return res.json({ status: 'error', message: "required fields didn't exist" })
+        return res.json({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
       }
 
       const { email, password } = req.body
       const user = await User.findOne({ where: { email: email } })
 
-      if (!user) return res.status(401).json({ status: 'error', message: "user not found" })
+      if (!user) return callback({ status: 'error', message: "user not found", statusCode: 401 })
 
-      if (user.role !== 'admin') return res.status(401).json({ status: 'error', message: "Authorization denied" })
+      if (user.role !== 'admin') return callback({ status: 'error', message: "Authorization denied", statusCode: 401 })
 
-      if (!bcrypt.compareSync(password, user.password)) return res.status(401).json({ status: 'error', message: "password is not correct" })
+      if (!bcrypt.compareSync(password, user.password)) return callback({ status: 'error', message: "password is not correct" })
       //簽發token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET) //之後寫入dotenv
-      callback({
+      return callback({
         status: 'success',
         message: 'ok',
         token: token,
@@ -40,7 +40,7 @@ const adminService = {
       })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
   getUsers: async (req, res, callback) => {
@@ -64,7 +64,7 @@ const adminService = {
       callback(users)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
   getTweets: async (req, res, callback) => {
@@ -73,7 +73,7 @@ const adminService = {
       callback(tweets)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
   deleteTweets: async (req, res, callback) => {
@@ -83,7 +83,7 @@ const adminService = {
       callback({ status: 'success', message: '' })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   }
 }
