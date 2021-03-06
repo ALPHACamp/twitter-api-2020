@@ -6,14 +6,14 @@ const tweetService = {
   postTweet: async (req, res, callback) => {
     try {
       if (!req.body.description) {
-        return callback({ status: 'error', message: "content didn't exist" })
+        return callback({ status: 'error', message: "content didn't exist", statusCode: 400 })
       }
       const user = helper.getUser(req)
       await Tweet.create({ UserId: user.id, description: req.body.description })
       callback({ status: 'success', message: 'tweet was successfully created' })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
   getTweets: async (req, res, callback) => {
@@ -30,7 +30,7 @@ const tweetService = {
       callback(tweets)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
   getTweet: async (req, res, callback) => {
@@ -47,7 +47,7 @@ const tweetService = {
       callback(tweet)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   }
 }
