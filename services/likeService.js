@@ -16,7 +16,7 @@ const likeService = {
       callback({ status: 'success', message: '' })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
   removeLike: async (req, res, callback) => {
@@ -33,7 +33,7 @@ const likeService = {
       callback({ status: 'success', message: '' })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   }
 }
