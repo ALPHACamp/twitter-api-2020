@@ -11,12 +11,32 @@ const likeController = require('../controllers/api/likeController')
 const replyController = require('../controllers/api/replyController')
 const tweetController = require('../controllers/api/tweetController')
 const userController = require('../controllers/api/userController')
+const helpers = require('../_helpers')
 
-const authenticated = passport.authenticate('jwt', { session: false })
+
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    let helperGetUser = helpers.getUser(req)
+
+    if (!user) {
+      return res.json({ status: 'error', message: 'permission denied' })
+    }
+
+    helperGetUser = user
+    req.user = helperGetUser
+
+    return next()
+  })(req, res, next)
+}
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'admin') { return next() }
+
+  let helperGetUser = helpers.getUser(req)
+
+  if (helperGetUser) {
+    if (helperGetUser.role === 'admin') {
+      return next()
+    }
     return res.json({ status: 'error', message: 'permission denied' })
   } else {
     return res.json({ status: 'error', message: 'permission denied' })
@@ -25,7 +45,7 @@ const authenticatedAdmin = (req, res, next) => {
 
 // User
 router.post('/users', userController.signUp)
-router.post('/users/signIn', userController.signIn)
+router.post('/users/signin', userController.signIn)
 router.get('/users', authenticated, userController.getTopUser)
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
@@ -57,7 +77,7 @@ router.post('/tweets/:id/like', authenticated, likeController.addLike)
 router.post('/tweets/:id/unlike', authenticated, likeController.removeLike)
 
 // Reply
-router.post('/tweets/:tweet_id/replies', replyController.postReply)
-router.get('/tweets/:tweet_id/replies', replyController.getReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
 
 module.exports = router

@@ -26,7 +26,7 @@ const adminService = {
       if (!bcrypt.compareSync(password, user.password)) return res.status(401).json({ status: 'error', message: "password is not correct" })
       //簽發token
       const payload = { id: user.id }
-      const token = jwt.sign(payload, 'twitterKiller') //之後寫入dotenv
+      const token = jwt.sign(payload, process.env.JWT_SECRET) //之後寫入dotenv
       callback({
         status: 'success',
         message: 'ok',
