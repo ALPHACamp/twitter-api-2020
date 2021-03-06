@@ -222,8 +222,16 @@ const userController = {
   },
   // 看見某使用者發過的推文
   getUserTweets: (req, res) => {
+    const userId = req.params.id
     return Tweet.findAll({
-      where: { UserId: req.params.id },
+      where: { UserId: userId },
+      // include:[Reply, Like],
+      attributes: {
+        include: [
+          [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likedTweetsCount'],
+          [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyTweetsCount'],
+        ]
+      },
       raw: true,
       nest: true,
       // 資料庫端進行排列
