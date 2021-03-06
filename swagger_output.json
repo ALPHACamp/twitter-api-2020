@@ -208,6 +208,57 @@
         "responses": {}
       }
     },
+    "/api/users/{id}/replied_tweets": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get user reply tweets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/api/users/{id}/likes": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get user like list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/api/users/{id}/tweets": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "get user tweets list",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/api/tweets/{id}": {
       "get": {
         "tags": [

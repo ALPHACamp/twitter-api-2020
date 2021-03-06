@@ -20,6 +20,7 @@ const isLiked = (req) => {
 const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'avatar'] })
 
 
+
 const userController = {
   // 登入
   signIn: (req, res) => {
@@ -182,16 +183,16 @@ const userController = {
       WHERE Followships.followerId = ${req.params.id}
       `,
         { type: QueryTypes.SELECT })
-      // 預防性過濾重複資料
-      const set = new Set()
-      const followingsData = followings.filter(item => !set.has(item.id) ? set.add(item.id) : false)
-      // isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
-      const data = followingsData.map(item => ({
-        ...item,
-        isFollowed: item.followerId === req.user.id
+      const user = await User.findByPk(helpers.getUser(req).id, {
+        include: [
+          { model: User, as: 'Followings' },
+        ],
+      })
+      followingsmap = followings.map(following => ({
+        ...following,
+        isFollowed: user.Followings.map(d => d.id).includes(following.id)
       }))
-      console.log(data)
-      return res.status(200).json(data)
+      return res.status(200).json(followingsmap)
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowings-伺服器錯誤請稍後', err })
     }
@@ -207,36 +208,42 @@ const userController = {
       WHERE Followships.followingId = ${req.params.id}
       `,
         { type: QueryTypes.SELECT })
-      // 預防性過濾重複資料
-      console.log('============', req.user.toJSON())
-      const set = new Set()
-      const followersFilter = followers.filter(item => !set.has(item.id) ? set.add(item.id) : false)
-      const data = followersFilter.map(item => ({
-        ...item,
-        isFollowed: item.followerId === req.user.id
+      const user = await User.findByPk(helpers.getUser(req).id, {
+        include: [
+          { model: User, as: 'Followings' },
+        ],
+      })
+      followersmap = followers.map(follower => ({
+        ...follower,
+        isFollowed: user.Followings.map(d => d.id).includes(follower.id)
       }))
-      return res.status(200).json(data)
+
+      return res.status(200).json(followersmap)
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowers-伺服器錯誤請稍後', err })
     }
   },
   // 看見某使用者發過回覆的推文
   getRepliedTweets: (req, res) => {
+    const userId = req.params.id
     Reply.findAll({
-      include: [
-        includeUserData()
-      ],
-      where: { UserId: req.params.id },
+      where: { UserId: userId },
+      include: [Tweet, includeUserData()],
+      
+      attributes: {
+        include: includeCountData()
+      },
       raw: true,
       nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
-    }).then(user => {
-      return res.status(200).json(user)
+    }).then(reply => {
+      return res.status(200).json(reply)
     })
       .catch(err => {
-        return res.status(500).json({ status: 'error', message: 'getRepliedTweets-伺服器錯誤請稍後', err })
+        return res.status(500).json({ status: 'error', message: 'getUserTweets-伺服器錯誤請稍後', err })
       })
+
   },
   // 看見某使用者點過的 Like 
   getLikeTweets: (req, res) => {
@@ -249,6 +256,17 @@ const userController = {
         include: isLiked(req)
       },
       where: { UserId: req.params.id },
+      // include: [
+      //   {
+      //     model: Tweet,
+      //     attributes: {
+      //       include: [
+      //         [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.params.id})`), 'likedTweetsCount'],
+      //         [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = ${req.params.id})`), 'replyTweetsCount'],
+      //       ]
+      //     },
+      //   }
+      // ],
       raw: true,
       nest: true,
       // 資料庫端進行排列
@@ -291,3 +309,4 @@ const userController = {
 }
 
 module.exports = userController
+
