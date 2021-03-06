@@ -27,6 +27,7 @@ const tweetController = {
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']],
     }).then(tweets => {
+      // 預防性過濾重複資料
       const set = new Set()
       const tweetsFilter = tweets.filter(item => !set.has(item.id) ? set.add(item.id) : false)
       // 建立推文時間距離多久

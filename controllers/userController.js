@@ -225,11 +225,10 @@ const userController = {
     const userId = req.params.id
     return Tweet.findAll({
       where: { UserId: userId },
-      // include:[Reply, Like],
       attributes: {
         include: [
-          [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likedTweetsCount'],
-          [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyTweetsCount'],
+          [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount'],
+          [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
         ]
       },
       raw: true,
