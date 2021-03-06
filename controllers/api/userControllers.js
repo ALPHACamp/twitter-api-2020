@@ -135,10 +135,14 @@ let userController = {
 
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
+      const accountCheck = await User.findOne({ where: { account: req.body.account } })
       const files = req.files
       let avatar = user.avatar
       let cover = user.cover
 
+      if (accountCheck) {
+        return res.json({ status: 'error', message: '此帳號已被註冊!' })
+      }
 
       if (password) {
         if (password !== checkPassword) {
