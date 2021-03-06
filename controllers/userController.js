@@ -171,17 +171,22 @@ const userController = {
       return res.status(500).json({ status: 'error', message: '編輯個人資料-伺服器錯誤請稍後' })
     }
   },
+  // 正在追蹤誰
   getFollowings: async (req, res) => {
     try {
       const followings = await sequelize.query(`
-      SELECT U.id, U.name, U.email, U.avatar, Followships.followingId
+      SELECT U.id, U.name, U.account, U.email, U.avatar, U.introduction, Followships.followingId
       FROM Followships
-      LEFT JOIN (SELECT id, name, email, avatar FROM Users) AS U
+      LEFT JOIN (SELECT id, name, account, email, avatar, introduction FROM Users) AS U
       ON U.id = Followships.followingId
       WHERE Followships.followerId = ${req.params.id}
       `,
         { type: QueryTypes.SELECT })
-      return res.status(200).json(followings)
+      // 預防性過濾重複資料
+      const set = new Set()
+      const followingsData = followings.filter(item => !set.has(item.id) ? set.add(item.id) : false)
+
+      return res.status(200).json(followingsData)
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowings-伺服器錯誤請稍後', err })
     }
@@ -190,14 +195,21 @@ const userController = {
   getFollowers: async (req, res) => {
     try {
       const followers = await sequelize.query(`
-      SELECT  Users.id, Users.name, Users.email, Users.avatar, Followships.followerId
+      SELECT  Users.id, Users.name, Users.account, Users.email, Users.avatar, Users.introduction, Followships.followerId
       FROM Followships
       LEFT JOIN Users
       ON Users.id = Followships.followerId
       WHERE Followships.followingId = ${req.params.id}
       `,
         { type: QueryTypes.SELECT })
-      return res.status(200).json(followers)
+      // 預防性過濾重複資料
+      const set = new Set()
+      const followersFilter = followers.filter(item => !set.has(item.id) ? set.add(item.id) : false)
+      // const data = followersFilter.map(r => ({
+      //   isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
+      // }))
+      console.log(followersFilter)
+      return res.status(200).json(followersFilter)
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowers-伺服器錯誤請稍後', err })
     }
@@ -206,8 +218,8 @@ const userController = {
   getRepliedTweets: (req, res) => {
     Reply.findAll({
       include: [
-         includeUserData()
-       ],
+        includeUserData()
+      ],
       where: { UserId: req.params.id },
       raw: true,
       nest: true,
@@ -224,7 +236,7 @@ const userController = {
   getLikeTweets: (req, res) => {
     return Like.findAll({
       include: [
-       { model: Tweet, attributes: ['id', 'description'] },
+        { model: Tweet, attributes: ['id', 'description'] },
         includeUserData(),
       ],
       attributes: {
