@@ -5,6 +5,7 @@ const helpers = require('../_helpers');
 const userController = require('../controllers/api/userControllers');
 const tweetController = require('../controllers/api/tweetControllers');
 const likeController = require('../controllers/api/likeControllers');
+const followshipController = require('../controllers/api/followshipControllers');
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {

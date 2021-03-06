@@ -1,20 +1,23 @@
 const db = require('../../models');
+const helpers = require('../../_helpers');
 const Like = db.Like;
 
 let likeController = {
   Like: (req, res) => {
+    const user = helpers.getUser(req);
     return Like.create({
-      UserId: req.user.id, //1, //使用者本人
-      TweetId: req.params.followingId, //2, //想要追蹤的人
+      UserId: user.id,
+      TweetId: req.params.id,
     }).then((like) => {
-      res.json({ Like: Like, status: 'success', message: 'Like was successfully created' });
+      res.json({ status: 'success', message: 'Like was successfully created' });
     });
   },
   UnLike: (req, res) => {
+    const user = helpers.getUser(req);
     return Like.findOne({
       where: {
-        UserId: req.user.id, //1,
-        TweetId: req.params.followingId,
+        UserId: user.id,
+        TweetId: req.params.id,
       },
     }).then((Like) => {
       Like.destroy().then((like) => {
@@ -23,4 +26,4 @@ let likeController = {
     });
   },
 };
-module.exports = LikeController;
+module.exports = likeController;
