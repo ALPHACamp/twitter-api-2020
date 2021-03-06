@@ -8,6 +8,7 @@ const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
 
 
+
 const userController = {
   // 登入
   signIn: (req, res) => {
@@ -169,7 +170,18 @@ const userController = {
       WHERE Followships.followerId = ${req.params.id}
       `,
         { type: QueryTypes.SELECT })
-      return res.status(200).json(followings)
+
+      const user = await User.findByPk(helpers.getUser(req).id, {
+        include: [
+          { model: User, as: 'Followings' },
+        ],
+      })
+
+      followingsmap = followings.map(following => ({
+        ...following,
+        isFollowed: user.Followings.map(d => d.id).includes(following.id)
+      }))
+      return res.status(200).json(followingsmap)
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowings-伺服器錯誤請稍後', err })
     }
@@ -185,7 +197,19 @@ const userController = {
       WHERE Followships.followingId = ${req.params.id}
       `,
         { type: QueryTypes.SELECT })
-      return res.status(200).json(followers)
+
+      const user = await User.findByPk(helpers.getUser(req).id, {
+        include: [
+          { model: User, as: 'Followings' },
+        ],
+      })
+
+      followersmap = followers.map(follower => ({
+        ...follower,
+        isFollowed: user.Followings.map(d => d.id).includes(follower.id)
+      }))
+
+      return res.status(200).json(followersmap)
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowers-伺服器錯誤請稍後', err })
     }
