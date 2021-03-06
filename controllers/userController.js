@@ -215,24 +215,47 @@ const userController = {
     }
   },
   // 看見某使用者發過回覆的推文
-  getRepliedTweets: (req, res) => {
-    Reply.findAll({
+  getRepliedTweets: async (req, res) => {
+    return reply = await Reply.findAll({
       where: { UserId: req.params.id },
+      include: [
+        {
+          model: Tweet,
+          attributes: {
+            include: [
+              [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.params.id})`), 'likedTweetsCount'],
+              [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = ${req.params.id})`), 'replyTweetsCount'],
+            ]
+          },
+        }
+      ],
       raw: true,
       nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
-    }).then(user => {
-      return res.status(200).json(user)
+    }).then(reply => {
+      return res.status(200).json(reply)
     })
       .catch(err => {
-        return res.status(500).json({ status: 'error', message: 'getRepliedTweets-伺服器錯誤請稍後', err })
+        return res.status(500).json({ status: 'error', message: 'getUserTweets-伺服器錯誤請稍後', err })
       })
+
   },
   // 看見某使用者點過的 Like 
   getLikeTweets: (req, res) => {
     return Like.findAll({
       where: { UserId: req.params.id },
+      include: [
+        {
+          model: Tweet,
+          attributes: {
+            include: [
+              [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.params.id})`), 'likedTweetsCount'],
+              [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = ${req.params.id})`), 'replyTweetsCount'],
+            ]
+          },
+        }
+      ],
       raw: true,
       nest: true,
       // 資料庫端進行排列
@@ -248,6 +271,12 @@ const userController = {
   getUserTweets: (req, res) => {
     return Tweet.findAll({
       where: { UserId: req.params.id },
+      attributes: {
+        include: [
+          [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.params.id})`), 'likedTweetsCount'],
+          [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = ${req.params.id})`), 'replyTweetsCount'],
+        ]
+      },
       raw: true,
       nest: true,
       // 資料庫端進行排列
@@ -262,3 +291,4 @@ const userController = {
 }
 
 module.exports = userController
+
