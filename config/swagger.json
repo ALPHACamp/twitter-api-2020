@@ -1,0 +1,379 @@
+{
+  "info": {
+    "title": "TwitterKiller API",
+    "version": "1.0.0",
+    "license": {
+      "name": "ISC"
+    },
+    "description": "[Specification JSON](/api-spec)"
+  },
+  "paths": {
+    "/api/admin/signin": {
+      "post": {
+        "summary": "/api/admin/signin",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "body"
+          },
+          {
+            "name": "password",
+            "in": "body"
+          }
+        ]
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "summary": "/api/admin/users",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": []
+      }
+    },
+    "/api/admin/tweets": {
+      "get": {
+        "summary": "/api/admin/tweets",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": []
+      }
+    },
+    "/api/admin/tweets/{id}": {
+      "delete": {
+        "summary": "/api/admin/tweets/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/users": {
+      "post": {
+        "summary": "/api/users",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "body",
+            "required": true
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "required": true
+          },
+          {
+            "name": "email",
+            "in": "body",
+            "required": true
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "required": true
+          },
+          {
+            "name": "passwordCheck",
+            "in": "body",
+            "required": true
+          }
+        ]
+      },
+      "get": {
+        "summary": "/api/users",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": []
+      }
+    },
+    "/api/users/signIn": {
+      "post": {
+        "summary": "/api/users/signIn",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "body"
+          },
+          {
+            "name": "password",
+            "in": "body"
+          }
+        ]
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "summary": "/api/users/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "summary": "/api/users/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "required": true
+          },
+          {
+            "name": "introduction",
+            "in": "body"
+          },
+          {
+            "name": "avatar",
+            "in": "file"
+          },
+          {
+            "name": "cover",
+            "in": "file"
+          }
+        ]
+      }
+    },
+    "/api/users/{id}/tweets": {
+      "get": {
+        "summary": "/api/users/{id}/tweets",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/users/{id}/likes": {
+      "post": {
+        "summary": "/api/users/{id}/likes",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/users/{id}/followings": {
+      "delete": {
+        "summary": "/api/users/{id}/followings",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/users/{id}/followers": {
+      "post": {
+        "summary": "/api/users/{id}/followers",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/users/{id}/edit": {
+      "post": {
+        "summary": "/api/users/{id}/edit",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/tweets": {
+      "post": {
+        "summary": "/api/tweets",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "UserId",
+            "in": "body",
+            "required": true
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "required": true
+          }
+        ]
+      },
+      "get": {
+        "summary": "/api/tweets",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": []
+      }
+    },
+    "/api/tweets/{id}": {
+      "get": {
+        "summary": "/api/tweets/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/followships": {
+      "post": {
+        "summary": "/api/followships",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "followerId",
+            "in": "body",
+            "required": true
+          },
+          {
+            "name": "followingId",
+            "in": "body",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/followships/{followingId}": {
+      "delete": {
+        "summary": "/api/followships/{followingId}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "followingId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/tweets/{id}/like": {
+      "post": {
+        "summary": "/api/tweets/{id}/like",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/tweets/{id}/unlike": {
+      "post": {
+        "summary": "/api/tweets/{id}/unlike",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/api/tweets/{tweet_id}/replies": {
+      "post": {
+        "summary": "/api/tweets/{tweet_id}/replies",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "get": {
+        "summary": "/api/tweets/{tweet_id}/replies",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "swagger": "2.0"
+}
