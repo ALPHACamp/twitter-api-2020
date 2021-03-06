@@ -77,6 +77,7 @@ let userController = {
       .catch(error => res.send(error))
   },
 
+  //暫時還用不到，這是本來要做getUser的部分
   getCurrentUser: (req, res) => {
     const user = helpers.getUser(req)
     return res.json(user)
@@ -120,34 +121,6 @@ let userController = {
       .catch(error => res.send(error))
   },
 
-  putUserdemo: (req, res) => {
-
-    if (Number(req.params.id) !== helpers.getUser(req).id) {
-      return res.json({ status: 'error', message: '非已登入的使用者' })
-    }
-
-    const files = req.files
-
-    if (files) {
-      imgur.setClientId(IMGUR_CLIENT_ID)
-      imgur.uploadFile(files.avatar[0].path)
-      imgur.uploadFile(files.cover[0].path)
-
-
-    }
-    return User.findByPk(helpers.getUser(req).id)
-      .then(user => {
-
-        user.update({
-          name: req.body.name,
-          introduction: req.body.introduction
-        })
-          .then(user => {
-            res.json(user)
-          })
-      })
-  },
-
   putUser: async (req, res) => {
     try {
       if (Number(req.params.id) !== helpers.getUser(req).id) {
@@ -157,8 +130,6 @@ let userController = {
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
       const files = req.files
-      // let avatar = files.avatar ? files.avatar : 'no image'
-      // let cover = files.cover ? files.cover : 'no image'
       let avatar = user.avatar
       let cover = user.cover
 
