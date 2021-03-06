@@ -1,11 +1,23 @@
 const bcrypt = require('bcryptjs')
 const imgur = require('imgur')
+const formatDistanceToNow = require('date-fns/formatDistanceToNow')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { Tweet, User, Followship, Like, Reply, sequelize } = require('../models')
 const { QueryTypes } = require('sequelize');
 const helpers = require('../_helpers')
 // JWT
 const jwt = require('jsonwebtoken')
+// 重複程式碼
+const includeCountData = (req) => {
+  return [
+    [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
+    [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
+  ]
+}
+const isLiked = (req) => {
+  return [[sequelize.literal(`EXISTS(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.user.id})`), 'isLiked']]
+}
+const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'avatar'] })
 
 
 const userController = {
@@ -193,6 +205,9 @@ const userController = {
   // 看見某使用者發過回覆的推文
   getRepliedTweets: (req, res) => {
     Reply.findAll({
+      include: [
+         includeUserData()
+       ],
       where: { UserId: req.params.id },
       raw: true,
       nest: true,
@@ -208,12 +223,23 @@ const userController = {
   // 看見某使用者點過的 Like 
   getLikeTweets: (req, res) => {
     return Like.findAll({
+      include: [
+       { model: Tweet, attributes: ['id', 'description'] },
+        includeUserData(),
+      ],
+      attributes: {
+        include: isLiked(req)
+      },
       where: { UserId: req.params.id },
       raw: true,
       nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(user => {
+      console.log(user)
+      const data = user.map(user => ({
+
+      }))
       return res.status(200).json(user)
     })
       .catch(err => {
@@ -224,19 +250,21 @@ const userController = {
   getUserTweets: (req, res) => {
     const userId = req.params.id
     return Tweet.findAll({
+      include: includeUserData(),
       where: { UserId: userId },
       attributes: {
-        include: [
-          [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount'],
-          [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
-        ]
+        include: includeCountData()
       },
       raw: true,
       nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(user => {
-      return res.status(200).json(user)
+      const data = user.map(item => ({
+        ...item,
+        Time: formatDistanceToNow(item.createdAt, { includeSeconds: true }),
+      }))
+      return res.status(200).json(data)
     })
       .catch(err => {
         return res.status(500).json({ status: 'error', message: 'getUserTweets-伺服器錯誤請稍後', err })
