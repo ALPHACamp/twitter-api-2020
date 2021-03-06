@@ -100,7 +100,7 @@ let userController = {
       },
     }).then((results) => {
       //result.count  //result.rows
-      res.json({ results: results, status: 'success', message: 'find following' });
+      res.json(results.rows); //, status: 'success', message: 'find following'
     });
   },
   //回傳"跟隨使用者"的人數,ID
@@ -113,7 +113,7 @@ let userController = {
       },
     }).then((results) => {
       //result.count  //result.rows
-      res.json({ results: results, status: 'success', message: 'find follower' });
+      res.json(results.rows); //, status: 'success', message: 'find follower'
     });
   },
 };

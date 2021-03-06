@@ -218,10 +218,9 @@ describe('# user requests', () => {
           .expect(200)
           .end(function (err, res) {
             if (err) return done(err);
-
             expect(res.body).to.be.an('array');
+            // console.log('$$$$$$$$$$$', res.body);
             res.body[0].followingId.should.equal(2);
-
             return done();
           });
       });
@@ -259,7 +258,7 @@ describe('# user requests', () => {
           .expect(200)
           .end(function (err, res) {
             if (err) return done(err);
-
+            // console.log('@@@@@@@@@@@@@@@@@', res.body);
             expect(res.body).to.be.an('array');
             res.body[0].followerId.should.equal(1);
 
