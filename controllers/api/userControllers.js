@@ -160,7 +160,6 @@ let userController = {
         }
       }
 
-
       await User.update({
         account: account || user.account,
         name: name || user.name,
@@ -177,8 +176,35 @@ let userController = {
     } catch (error) {
       console.warn(error)
     }
+  },
 
-  }
+
+  //回傳"使用者跟隨"的人數,ID
+  getFollowing: (req, res) => {
+    return Followship.findAndCountAll({
+      raw: true,
+      nest: true,
+      where: {
+        followerId: req.params.id,
+      },
+    }).then((results) => {
+      //result.count  //result.rows
+      res.json(results.rows); //, status: 'success', message: 'find following'
+    });
+  },
+  //回傳"跟隨使用者"的人數,ID
+  getFollower: (req, res) => {
+    return Followship.findAndCountAll({
+      raw: true,
+      nest: true,
+      where: {
+        followingId: req.params.id,
+      },
+    }).then((results) => {
+      //result.count  //result.rows
+      res.json(results.rows); //, status: 'success', message: 'find follower'
+    });
+  },
 
 }
 

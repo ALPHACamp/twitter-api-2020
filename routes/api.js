@@ -7,6 +7,8 @@ const upload = multer({ dest: 'temp/' })
 const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 const userController = require('../controllers/api/userControllers')
 const tweetController = require('../controllers/api/tweetControllers')
+const likeController = require('../controllers/api/likeControllers');
+const followshipController = require('../controllers/api/followshipControllers');
 
 
 const authenticated = (req, res, next) => {
@@ -35,6 +37,8 @@ const authenticatedAdmin = (req, res, next) => {
 //user
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplyTweet)
+router.get('/users/:id/followings', authenticated, userController.getFollowing)
+router.get('/users/:id/followers', authenticated, userController.getFollower)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, cpUpload, userController.putUser)
 router.post('/signin', userController.signIn)
