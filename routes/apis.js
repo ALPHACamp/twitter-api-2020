@@ -13,6 +13,7 @@ const tweetController = require('../controllers/api/tweetController')
 const userController = require('../controllers/api/userController')
 const helpers = require('../_helpers')
 
+
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     let helperGetUser = helpers.getUser(req)
@@ -29,6 +30,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
+
   let helperGetUser = helpers.getUser(req)
 
   if (helperGetUser) {
@@ -43,7 +45,7 @@ const authenticatedAdmin = (req, res, next) => {
 
 // User
 router.post('/users', userController.signUp)
-router.post('/users/signIn', userController.signIn)
+router.post('/users/signin', userController.signIn)
 router.get('/users', authenticated, userController.getTopUser)
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
