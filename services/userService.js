@@ -15,11 +15,11 @@ const JwtStrategy = passportJWT.Strategy
 const userService = {
   signUp: (req, res, callback) => {
     if (req.body.checkPassword !== req.body.password) {
-      callback({ status: 'error', message: 'Password is different' })
+      callback({ status: 'error', message: 'Password is different', statusCode: 400 })
     } else {
       User.findOne({ where: { email: req.body.email } }).then(user => {
         if (user) {
-          callback({ status: 'error', message: 'Email is already exists' })
+          callback({ status: 'error', message: 'Email is already exists', statusCode: 400 })
         } else {
           User.create({
             account: req.body.account,
@@ -88,7 +88,7 @@ const userService = {
       callback(user)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 
@@ -99,14 +99,14 @@ const userService = {
       callback(userData)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 
   putUser: async (req, res, callback) => {
     try {
       if (!req.body.name) {
-        callback({ status: 'error', message: "Please insert a name for user!" })
+        callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
       }
       const { files } = req
 
@@ -158,7 +158,7 @@ const userService = {
       }
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 
@@ -174,7 +174,7 @@ const userService = {
       callback(tweets)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 
@@ -189,7 +189,7 @@ const userService = {
       callback(replies)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500' })
+      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
     }
   },
 

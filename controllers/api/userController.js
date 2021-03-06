@@ -24,46 +24,55 @@ const userController = {
   },
   getTopUser: (req, res) => {
     userService.getTopUser(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   },
   getUser: (req, res) => {
     userService.getUser(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   },
   editUser: (req, res) => {
     userService.editUser(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   },
   putUser: (req, res) => {
     userService.putUser(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   },
   getUserTweets: (req, res) => {
     userService.getUserTweets(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   },
   getUserReplies: (req, res) => {
     userService.getUserReplies(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   },
   getUserLikes: (req, res) => {
     userService.getUserLikes(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   },
   getFollowings: (req, res) => {
     userService.getFollowings(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   },
   getFollowers: (req, res) => {
     userService.getFollowers(req, res, (data) => {
+      if (data.status === 'error') return res.status(data.statusCode).json(data)
       return res.json(data)
     })
   }
