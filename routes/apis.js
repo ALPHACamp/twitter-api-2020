@@ -11,12 +11,25 @@ const likeController = require('../controllers/api/likeController')
 const replyController = require('../controllers/api/replyController')
 const tweetController = require('../controllers/api/tweetController')
 const userController = require('../controllers/api/userController')
+const helpers = require('../_helpers')
 
-const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (!user) {
+      return res.json({ status: "error", message: "No such user" })
+    }
+    req.user = user
+    console.log(req.user)
+    return next()
+  })(req, res, next)
+}
 
 const authenticatedAdmin = (req, res, next) => {
+  console.log(req.user)
   if (req.user) {
-    if (req.user.role === 'admin') { return next() }
+    if (req.user.role === 'admin') {
+      return next()
+    }
     return res.json({ status: 'error', message: 'permission denied' })
   } else {
     return res.json({ status: 'error', message: 'permission denied' })
