@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs')
 const helpers = require('../../_helpers')
 const { User, Followship, Tweet, Reply } = require('../../models')
 const Op = require('sequelize').Op
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -118,15 +120,24 @@ let userController = {
       .catch(error => res.send(error))
   },
 
-  putUser: (req, res) => {
+  putUserdemo: (req, res) => {
 
     if (Number(req.params.id) !== helpers.getUser(req).id) {
       return res.json({ status: 'error', message: '非已登入的使用者' })
     }
 
+    const files = req.files
+
+    if (files) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      imgur.uploadFile(files.avatar[0].path)
+      imgur.uploadFile(files.cover[0].path)
+
+
+    }
     return User.findByPk(helpers.getUser(req).id)
       .then(user => {
-        console.log('req.body', req.body)
+
         user.update({
           name: req.body.name,
           introduction: req.body.introduction
@@ -135,6 +146,62 @@ let userController = {
             res.json(user)
           })
       })
+  },
+
+  putUser: async (req, res) => {
+    try {
+      if (Number(req.params.id) !== helpers.getUser(req).id) {
+        return res.json({ status: 'error', message: '非已登入的使用者' })
+      }
+
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      const user = await User.findByPk(helpers.getUser(req).id)
+      const files = req.files
+      let avatar = files.avatar
+      let cover = files.cover
+
+
+      if (password) {
+        if (password !== checkPassword) {
+          return res.json({ status: 'error', message: '兩次密碼輸入不一致' })
+        }
+      }
+
+      if (files) {
+        if (avatar && cover) {
+          const acatarData = await imgur.uploadFile(avatar[0].path)
+          const coverData = await imgur.uploadFile(cover[0].path)
+          avatar = acatarData.link
+          cover = coverData.link
+        }
+        else if (avatar) {
+          const data = await imgur.uploadFile(avatar[0].path)
+          avatar = data.link
+        }
+        else if (cover) {
+          const data = await imgur.uploadFile(cover[0].path)
+          cover = data.link
+        }
+      }
+
+
+      await User.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+        introduction: introduction || user.introduction,
+        avatar: avatar || user.avatar,
+        cover: cover || user.cover,
+      }, {
+        where: { id: helpers.getUser(req).id }
+      })
+
+      return res.json({ status: 'success', message: '資料修改成功!' })
+    } catch (error) {
+      console.warn(error)
+    }
+
   }
 
 }
