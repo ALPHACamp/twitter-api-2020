@@ -175,7 +175,7 @@ const userController = {
   getFollowings: async (req, res) => {
     try {
       const followings = await sequelize.query(`
-      SELECT U.id, U.name, U.account, U.email, U.avatar, U.introduction, Followships.followingId
+      SELECT U.id, U.name, U.account, U.email, U.avatar, U.introduction, Followships.followingId , Followships.followerId
       FROM Followships
       LEFT JOIN (SELECT id, name, account, email, avatar, introduction FROM Users) AS U
       ON U.id = Followships.followingId
@@ -185,8 +185,13 @@ const userController = {
       // 預防性過濾重複資料
       const set = new Set()
       const followingsData = followings.filter(item => !set.has(item.id) ? set.add(item.id) : false)
-
-      return res.status(200).json(followingsData)
+      // isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      const data = followingsData.map(item => ({
+        ...item,
+        isFollowed: item.followerId === req.user.id
+      }))
+      console.log(data)
+      return res.status(200).json(data)
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowings-伺服器錯誤請稍後', err })
     }
@@ -195,7 +200,7 @@ const userController = {
   getFollowers: async (req, res) => {
     try {
       const followers = await sequelize.query(`
-      SELECT  Users.id, Users.name, Users.account, Users.email, Users.avatar, Users.introduction, Followships.followerId
+      SELECT  Users.id, Users.name, Users.account, Users.email, Users.avatar, Users.introduction, Followships.followerId, Followships.followingId
       FROM Followships
       LEFT JOIN Users
       ON Users.id = Followships.followerId
@@ -203,13 +208,14 @@ const userController = {
       `,
         { type: QueryTypes.SELECT })
       // 預防性過濾重複資料
+      console.log('============', req.user.toJSON())
       const set = new Set()
       const followersFilter = followers.filter(item => !set.has(item.id) ? set.add(item.id) : false)
-      // const data = followersFilter.map(r => ({
-      //   isFollowed: helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
-      // }))
-      console.log(followersFilter)
-      return res.status(200).json(followersFilter)
+      const data = followersFilter.map(item => ({
+        ...item,
+        isFollowed: item.followerId === req.user.id
+      }))
+      return res.status(200).json(data)
     } catch (err) {
       return res.status(500).json({ status: 'error', message: 'getFollowers-伺服器錯誤請稍後', err })
     }
