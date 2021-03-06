@@ -1,7 +1,7 @@
 
 const bcrypt = require('bcryptjs')
 const helpers = require('../../_helpers')
-const { User, Followship, Tweet, Reply } = require('../../models')
+const { User, Followship, Tweet, Reply, Like } = require('../../models')
 const Op = require('sequelize').Op
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -214,6 +214,15 @@ let userController = {
       res.json(results.rows); //, status: 'success', message: 'find follower'
     });
   },
+
+  getUserLikes: (req, res) => {
+    Like.findAll({
+      include: [Tweet],
+      where: { UserId: req.params.id }
+    }).then(like => {
+      return res.json(like)
+    }).catch(error => res.send(error))
+  }
 }
 
 module.exports = userController
