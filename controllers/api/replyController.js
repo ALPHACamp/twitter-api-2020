@@ -7,16 +7,18 @@ const replyController = {
     if (req.body.comment === '') {
       return res.json({ status: 'error', message: '內容不得為空白' });
     }
-    if (req.body.comment.length > 140) {
+    if (req.body.comment.length > 100) {
       return res.json({ status: 'error', message: '字數超過上限' });
     }
     Reply.create({
       comment: req.body.comment,
       UserId: helpers.getUser(req).id,
       TweetId: req.params.tweet_id,
-    }).then((reply) => {
-      res.json({ status: 'success', message: '成功回覆推文!' });
-    });
+    })
+      .then((reply) => {
+        res.json({ status: 'success', message: '成功回覆推文!' });
+      })
+      .catch((error) => console.log(error));
   },
 
   getReplies: (req, res) => {
@@ -29,10 +31,6 @@ const replyController = {
       },
     })
       .then((replies) => {
-        // const data = tweets.map((r) => ({
-        //   ...r.dataValues,
-        //   description: r.dataValues.description.substring(0, 50),
-        // }));
         return res.json(replies);
       })
       .catch((error) => console.log(error));
