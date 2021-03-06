@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 const session = require('express-session')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
-
+const cors = require('cors')
 
 
 if (process.env.NODE_ENV !== 'production') {
@@ -15,6 +15,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 
+app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }))
