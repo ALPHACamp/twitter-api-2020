@@ -1,11 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const passport = require('../config/passport');
-const helpers = require('../_helpers');
-const userController = require('../controllers/api/userControllers');
-const tweetController = require('../controllers/api/tweetControllers');
+
+const express = require('express')
+const router = express.Router()
+const passport = require('../config/passport')
+const helpers = require('../_helpers')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
+const userController = require('../controllers/api/userControllers')
+const tweetController = require('../controllers/api/tweetControllers')
 const likeController = require('../controllers/api/likeControllers');
 const followshipController = require('../controllers/api/followshipControllers');
+
+
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -38,13 +44,20 @@ router.post('/followships', authenticated, followshipController.postFollowship);
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship);
 
 //user
-router.get('/users/:id', authenticated, userController.getUser);
-router.post('/signin', userController.signIn);
-router.post('/users', userController.signUp);
+
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getReplyTweet)
+router.get('/users/:id/followings', authenticated, userController.getFollowing)
+router.get('/users/:id/followers', authenticated, userController.getFollower)
+router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', authenticated, cpUpload, userController.putUser)
+router.post('/signin', userController.signIn)
+router.post('/users', userController.signUp)
 
 //user_followship
 router.get('/users/:id/followings', authenticated, userController.getFollowing);
 router.get('/users/:id/followers', authenticated, userController.getFollower);
+
 
 
 //tweet
