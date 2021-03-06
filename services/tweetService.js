@@ -37,8 +37,13 @@ const tweetService = {
     try {
       const tweet = await Tweet.findByPk(
         req.params.id,
-        { include: [{ model: Like }, { model: Reply }] }
-      )
+        {
+          include: [
+            { model: Like },
+            { model: Reply, include: User },
+            { model: User }
+          ]
+        })
       callback(tweet)
     } catch (err) {
       console.log(err)
