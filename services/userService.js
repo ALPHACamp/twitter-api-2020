@@ -33,6 +33,31 @@ const userService = {
       })
     }
   },
+  signIn: (req, res, callback) => {
+    if (!req.body.email || !req.body.password) {
+      callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
+    }
+
+    const { email, password } = req.body
+    User.findOne({ where: { email: email } }).then(user => {
+      if (!user) return callback({ status: 'error', message: "user not found", statusCode: 401 })
+      if (!bcrypt.compareSync(password, user.password)) return callback({ status: 'error', message: "password is not correct", statusCode: 401 })
+      //簽發token
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET) //之後寫入dotenv
+      callback({
+        status: 'success',
+        message: 'ok',
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      })
+    })
+  },
   getTopUser: (req, res, callback) => {
     User.findAll(
       {
