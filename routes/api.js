@@ -4,6 +4,7 @@ const passport = require('../config/passport');
 const helpers = require('../_helpers');
 const userController = require('../controllers/api/userControllers');
 const tweetController = require('../controllers/api/tweetControllers');
+const likeController = require('../controllers/api/likeControllers');
 const followshipController = require('../controllers/api/followshipControllers');
 
 const authenticated = (req, res, next) => {
@@ -40,13 +41,21 @@ router.delete('/followships/:followingId', authenticated, followshipController.d
 router.get('/users/:id', authenticated, userController.getUser);
 router.post('/signin', userController.signIn);
 router.post('/users', userController.signUp);
+
 //user_followship
 router.get('/users/:id/followings', authenticated, userController.getFollowing);
 router.get('/users/:id/followers', authenticated, userController.getFollower);
+
 
 //tweet
 router.get('/tweets/:id', authenticated, tweetController.getTweet);
 router.get('/tweets', authenticated, tweetController.getTweets);
 router.post('/tweets', authenticated, tweetController.postTweets);
+
+
+//like
+router.post('/tweets/:id/like', authenticated, likeController.Like);
+router.post('/tweets/:id/unlike', authenticated, likeController.UnLike);
+
 
 module.exports = router;
