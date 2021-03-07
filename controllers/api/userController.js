@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { sequelize } = require('../../models/index')
+const { Op } = require('sequelize')
 const db = require('../../models/index')
 const helpers = require('../../_helpers')
 const User = db.User
@@ -25,15 +26,43 @@ module.exports = {
     */
     try {
       const { id } = req.params
+      const currentUser = helpers.getUser(req)
       // get user
-      const user = await User.findOne({
+      let user = await User.findOne({
         where: { id },
-        attributes: { exclude: ['password'] }
+        attributes: { exclude: ['password'] },
+        include: [{ model: User, as: 'Followers' }]
       })
       // check if user exists
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
-      user.dataValues.isSelf = user.id === helpers.getUser(req).id
+      user = user.toJSON()
+      user.isSelf = user.id === currentUser.id
+      user.isFollowed = user.Followers.map(Follower => Follower.id).includes(currentUser.id)
       return res.status(200).json(user)
+    } catch (err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  getTopUser: async (req, res) => {
+    try {
+      const currentUser = JSON.parse(JSON.stringify(helpers.getUser(req)))
+      const followingsOfCurrentUser = currentUser.Followings.map(Following => Following.id).concat([currentUser.id])
+      let users = await User.findAll({
+        where: {
+          role: 'user',
+          [Op.not]: [{ id: followingsOfCurrentUser }]
+        },
+        include: [{ model: User, as: 'Followers' }],
+      })
+      if (!users || !Array.isArray(users)) return res.status(400).json({ status: 'error', message: '無法獲取用戶名單。' })
+      users = users.map(user => {
+        user.dataValues.followerCount = user.Followers.length
+        user.dataValues.isFollowed = false //since followings of current user are filtered out with Op.not
+        return user
+      }).sort((a, b) => b.dataValues.followerCount - a.dataValues.followerCount).splice(0, 3)
+      return res.json(users)
     } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
@@ -208,7 +237,7 @@ module.exports = {
       })
 
       if (!followings || !Array.isArray(followings)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追蹤名單。' })
-
+      console.log(helpers.getUser(req))
       followings = followings.map(followship => {
         followship.dataValues.isFollowed = helpers.getUser(req).Followings.map(user => user.id).includes(followship.followingId)
         followship.dataValues.isSelf = helpers.getUser(req).id === followship.followingId
@@ -281,10 +310,17 @@ module.exports = {
       }
     */
     try {
+      const { name, introduction } = req.body
       const { files } = req
       const { id } = req.params
+      const currentUser = helpers.getUser(req)
       let avatar = null
       let cover = null
+
+      //check if authorized
+      if (Number(id) !== currentUser.id) return res.status(400).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
+
+      if (!name) return res.status(400).json({ status: 'error', message: '名稱是必填的!!!' })
 
       const updateUser = async (user, dataUpdated) => {
         if (!user) return res.status(400).json({ status: 'error', message: '無法獲取用戶資料。' })
@@ -292,9 +328,8 @@ module.exports = {
         return user
       }
 
-      // normally there will be keys: 'avatar' and 'cover', otherwise files equals undefined
+      // (form-data)if no req.body.avatar and req.body.cover, req.files equals undefined
       if (!files) {
-        // return res.status(400).json({ status: 'error', message: '忘了設定 input name，avatar 跟 cover。' })
         // test does not have req.files, so it will be blocked here...still need to return 200
         const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
         const updatedUser = await updateUser(user, req.body)
@@ -318,18 +353,54 @@ module.exports = {
           uploadingArray.push(uploadImage)
         }
 
-        if (files.avatar) uploadFile('avatar', avatar)
-        if (files.cover) uploadFile('cover', cover)
+        if (files.avatar) uploadFile('avatar')
+        if (files.cover) uploadFile('cover')
         await Promise.all(uploadingArray)
       }
 
       const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
       const updatedUser = await updateUser(user, {
-        ...req.body,
+        name,
+        introduction,
         avatar: avatar ? avatar.data.link : user.avatar,
         cover: cover ? cover.data.link : user.cover
       })
       return res.status(200).json(updatedUser)
+    } catch (err) {
+      console.log('catch block: ', err)
+      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+
+  putAccount: async (req, res) => { 
+    try {
+      const { account, email, password, checkPassword, name } = req.body
+      const { id } = req.params
+      const currentUser = helpers.getUser(req)
+      //check if authorized
+      if (Number(id) !== currentUser.id) return res.status(400).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
+      if (!account || !email || !name) return res.status(400).json({ status: 'error', message: '帳戶、信箱及名稱是必填的!!!' })
+
+       //check if account email used
+      const existedAccount = await User.findOne({ where: { account, [Op.not]: [{ id: currentUser.id }] } }).catch((err) => console.log('existedAccount: ', err))
+      if (existedAccount) return res.status(400).json({ status: 'error', message: '此帳號已被使用!!!', ...req.body })
+      const existedEmail = await User.findOne({ where: { email, [Op.not]: [{ id: currentUser.id }] } }).catch((err) => console.log('existedAccount: ', err))
+      if (existedEmail) return res.status(400).json({ status: 'error', message: '此信箱已被使用!!!', ...req.body })
+
+      //check if password needed to be updated
+      if (!password) {
+        req.body.password = currentUser.password
+      } else {
+        if (password !== checkPassword) return res.status(400).json({ status: 'error', message: '兩次密碼輸入不同!!!', ...req.body })
+        req.body.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+      }
+
+      const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
+      if (!user) return res.status(400).json({ status: 'error', message: '無法獲取用戶資料。' })
+      const updatedAccount = await user.update(req.body) //password can be updated even it is filtered out
+
+      return res.status(200).json(updatedAccount)
+            
     } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
@@ -366,10 +437,12 @@ module.exports = {
       // make sure no empty input
       if (!account || !email || !password || !checkPassword || !name) return res.status(400).json({ status: 'error', message: '所有欄位都是必填的!!!' })
       // check password confirmation
-      if (checkPassword !== password) return res.status(400).json({ status: 'error', message: '兩次密碼輸入不同!!!', name, account, email, password, checkPassword })
-      // check if account used already
+      if (checkPassword !== password) return res.status(400).json({ status: 'error', message: '兩次密碼輸入不同!!!', ...req.body })
+      // check if account and email used already
       const existedAccount = await User.findOne({ where: { account } }).catch((err) => console.log('existedAccount: ', err))
-      if (existedAccount) return res.status(400).json({ status: 'error', message: '此帳號已被使用!!!', name, account, email, password, checkPassword })
+      if (existedAccount) return res.status(400).json({ status: 'error', message: '此帳號已被使用!!!', ...req.body })
+      const existedEmail = await User.findOne({ where: { email } }).catch((err) => console.log('existedAccount: ', err))
+      if (existedEmail) return res.status(400).json({ status: 'error', message: '此信箱已被使用!!!', ...req.body })
       // account hasn't been used ^__^ create user
       const salt = bcrypt.genSaltSync(10)
       const hashedPassword = bcrypt.hashSync(password, salt)
@@ -378,9 +451,7 @@ module.exports = {
         email: email,
         password: hashedPassword,
         name: name,
-        role: 'user',
-        introduction: '',
-        avatar: ''
+        role: 'user'
       }).catch((err) => console.log('newUser: ', err))
       // if user successfully created?
       switch (!!newUser) {
