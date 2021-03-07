@@ -110,8 +110,8 @@ const userService = {
       }
       const { files } = req
 
-      if (files) {
-        if (files.length === 1) {
+      if (files) {    //編輯個人資料
+        if (files.length === 1) {   //單張圖片判斷圖片種類
           const img = await helpers.imgurUploadPromise(files[0], IMGUR_CLIENT_ID)
           if (files[0].fieldname === 'avatar') {
             const user = await User.findByPk(req.params.id)
@@ -122,7 +122,6 @@ const userService = {
               introduction: req.body.introduction
             })
             callback({ status: 'success', message: 'User avatar was successfully update' })
-
           } else {
             const user = await User.findByPk(req.params.id)
             await user.update({
@@ -132,9 +131,8 @@ const userService = {
               introduction: req.body.introduction
             })
             callback({ status: 'success', message: 'User cover was successfully update' })
-
           }
-        } else {
+        } else {    //兩張圖片
           const img1 = await helpers.imgurUploadPromise(files[0], IMGUR_CLIENT_ID)
           const img2 = await helpers.imgurUploadPromise(files[1], IMGUR_CLIENT_ID)
           const user = await User.findByPk(req.params.id)
@@ -146,13 +144,19 @@ const userService = {
           })
           callback({ status: 'success', message: 'User avatar & cover was successfully update' })
         }
-      } else {
+      } else {    //帳戶設定
+        if (!req.body.account || !req.body.email) {
+          return callback({ status: 'error', message: "Account or email can't be empty!", statusCode: 400 })
+        }
+        if (req.body.checkPassword !== req.body.password) {
+          return callback({ status: 'error', message: 'Password is different', statusCode: 400 })
+        }
         const user = await User.findByPk(req.params.id)
         await user.update({
-          name: req.body.name,
-          avatar: user.avatar,
-          cover: user.cover,
-          introduction: req.body.introduction
+          name: req.body.name ? req.body.name : user.name,
+          account: req.body.account ? req.body.account : user.account,
+          email: req.body.email ? req.body.email : user.email,
+          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
         })
         callback({ status: 'success', message: 'User profile was successfully update' })
       }
