@@ -872,7 +872,7 @@
         "tags": [
           "Tweet"
         ],
-        "description": "瀏覽全部tweets",
+        "description": "瀏覽全部使用者有追蹤的tweets\b\b",
         "parameters": [],
         "responses": {
           "200": {

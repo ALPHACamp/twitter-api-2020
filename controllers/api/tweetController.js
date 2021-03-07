@@ -6,7 +6,7 @@ const { Tweet, Reply, Like, User } = db
 const tweetController = {
   getTweets: async (req, res) => {
     /* #swagger.tags = ['Tweet']
-        #swagger.description = '瀏覽全部tweets'
+        #swagger.description = '瀏覽全部使用者有追蹤的tweets'
         #swagger.responses[200] = {
           description: '回傳陣列帶有多個tweet物件',
           schema: [{"$ref": "#/definitions/Tweet"}]
