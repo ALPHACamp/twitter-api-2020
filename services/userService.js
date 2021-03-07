@@ -106,7 +106,7 @@ const userService = {
   putUser: async (req, res, callback) => {
     try {
       if (!req.body.name) {
-        callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
+        return callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
       }
       const { files } = req
 
