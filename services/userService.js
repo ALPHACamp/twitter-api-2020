@@ -13,24 +13,26 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userService = {
-  signUp: (req, res, callback) => {
-    if (req.body.checkPassword !== req.body.password) {
-      callback({ status: 'error', message: 'Password is different', statusCode: 400 })
-    } else {
-      User.findOne({ where: { email: req.body.email } }).then(user => {
-        if (user) {
-          callback({ status: 'error', message: 'Email is already exists', statusCode: 400 })
-        } else {
-          User.create({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
-            callback({ status: 'success', message: 'User was successfully registered' })
-          })
-        }
+  signUp: async (req, res, callback) => {
+    try {
+      if (req.body.checkPassword !== req.body.password) {
+        callback({ status: 'error', message: 'Password is different', statusCode: 400 })
+      }
+      const user = await User.findOne({ where: { email: req.body.email } })
+
+      if (user) return callback({ status: 'error', message: 'Email is already exists', statusCode: 400 })
+
+      await User.create({
+        account: req.body.account,
+        name: req.body.name,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
       })
+      callback({ status: 'success', message: 'User was successfully registered' })
+    }
+    catch (err) {
+      console.log(err)
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
   signIn: (req, res, callback) => {
