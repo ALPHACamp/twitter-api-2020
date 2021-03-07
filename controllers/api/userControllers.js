@@ -1,9 +1,12 @@
-const bcrypt = require('bcryptjs');
-const helpers = require('../../_helpers');
-const { User, Followship, Tweet, Reply } = require('../../models');
-const Op = require('sequelize').Op;
-const imgur = require('imgur');
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
+
+const bcrypt = require('bcryptjs')
+const helpers = require('../../_helpers')
+const { User, Followship, Tweet, Reply, Like } = require('../../models')
+const Op = require('sequelize').Op
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
+
 
 // JWT
 const jwt = require('jsonwebtoken');
@@ -58,7 +61,7 @@ let userController = {
       .then((user) => {
         if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' });
         if (!bcrypt.compareSync(password, user.password)) {
-          return res.status(401).json({ status: 'error', message: 'passwords did not match' });
+          return res.status(401).json({ status: 'error', message: 'passwords did not match!' });
         }
 
         const payload = { id: user.id };
@@ -131,12 +134,17 @@ let userController = {
       if (Number(req.params.id) !== helpers.getUser(req).id) {
         return res.json({ status: 'error', message: '非已登入的使用者' });
       }
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      const user = await User.findByPk(helpers.getUser(req).id)
+      const accountCheck = await User.findOne({ where: { account: req.body.account } })
+      const files = req.files
+      let avatar = user.avatar
+      let cover = user.cover
 
-      const { account, name, email, password, checkPassword, introduction } = req.body;
-      const user = await User.findByPk(helpers.getUser(req).id);
-      const files = req.files;
-      let avatar = user.avatar;
-      let cover = user.cover;
+      if (accountCheck) {
+        return res.json({ status: 'error', message: '此帳號已被註冊!' })
+      }
+
 
       if (password) {
         if (password !== checkPassword) {
@@ -208,6 +216,19 @@ let userController = {
       res.json(results.rows); //, status: 'success', message: 'find follower'
     });
   },
-};
 
-module.exports = userController;
+  getUserLikes: (req, res) => {
+    Like.findAll({
+      include: [Tweet],
+      order: [['createdAt', 'DESC']],
+      where: { UserId: req.params.id }
+    }).then(like => {
+      return res.json(like)
+    }).catch(error => res.send(error))
+  }
+}
+
+module.exports = userController
+
+
+
