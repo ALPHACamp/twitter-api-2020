@@ -15,6 +15,9 @@ const JwtStrategy = passportJWT.Strategy
 const userService = {
   signUp: async (req, res, callback) => {
     try {
+      if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) {
+        callback({ status: 'error', message: 'input cannot be blank', statusCode: 400 })
+      }
       if (req.body.checkPassword !== req.body.password) {
         callback({ status: 'error', message: 'Password is different', statusCode: 400 })
       }
