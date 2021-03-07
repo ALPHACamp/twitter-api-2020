@@ -13,7 +13,7 @@
       "termsOfService": ""
     }
   },
-  "host": "localhost:3000",
+  "host": "twitterkiller-backend.herokuapp.com",
   "basePath": "/api",
   "schemes": [
     "https",
