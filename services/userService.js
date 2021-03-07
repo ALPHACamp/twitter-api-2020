@@ -16,10 +16,10 @@ const userService = {
   signUp: async (req, res, callback) => {
     try {
       if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) {
-        callback({ status: 'error', message: 'input cannot be blank', statusCode: 400 })
+        return callback({ status: 'error', message: 'input cannot be blank', statusCode: 400 })
       }
       if (req.body.checkPassword !== req.body.password) {
-        callback({ status: 'error', message: 'Password is different', statusCode: 400 })
+        return callback({ status: 'error', message: 'Password is different', statusCode: 400 })
       }
 
       const user = await User.findOne({ where: { email: req.body.email } })
@@ -32,8 +32,7 @@ const userService = {
         password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
       })
       callback({ status: 'success', message: 'User was successfully registered' })
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err)
       callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
@@ -41,7 +40,7 @@ const userService = {
   signIn: async (req, res, callback) => {
     try {
       if (!req.body.email || !req.body.password) {
-        callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
+        return callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
       }
 
       const { email, password } = req.body
@@ -75,12 +74,12 @@ const userService = {
           where: { role: 'user' },
           include: [{ model: User, as: 'Followers' }]
         })
-      users = await users.map(user => ({
+      users = users.map(user => ({
         ...user.dataValues,
         FollowerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(following => following.id).includes(user.id)
       }))
-      users = await users.sort((a, b) => b.FollowerCount - a.FollowerCount)
+      users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
       callback({ users: users })
     } catch (err) {
       console.log(err)
@@ -118,7 +117,7 @@ const userService = {
   putUser: async (req, res, callback) => {
     try {
       if (!req.body.name) {
-        callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
+        return callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
       }
       const { files } = req
 
@@ -229,7 +228,7 @@ const userService = {
             { model: User, as: 'Followers' }
           ],
         })
-      user = await user.Followings.map(user => ({
+      user = user.Followings.map(user => ({
         ...user.dataValues,
         followerId: user.Followship.followerId,
         followingId: user.Followship.followingId,
@@ -252,7 +251,7 @@ const userService = {
             { model: User, as: 'Followers' }
           ],
         })
-      user = await user.Followers.map(user => ({
+      user = user.Followers.map(user => ({
         ...user.dataValues,
         followerId: user.Followship.followerId,
         followingId: user.Followship.followingId,
