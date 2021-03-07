@@ -13,32 +13,24 @@ const followshipController = require('../controllers/followshipController.js')
 const adminController = require('../controllers/adminController.js')
 //身分認證
 const authenticated = function (req, res, next) {
-    passport.authenticate("jwt", { session: false }, (err, user, info) => {
-        if (!user) {
-            return res
-                .status(401)
-                .json({ status: "error", message: "No auth token" })
-        }
-        req.user = user
-        return next()
-    })(req, res, next)
+  passport.authenticate("jwt", { session: false }, (err, user, info) => {
+    if (!user) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "No auth token" })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
 }
-// 驗證管理員
-// const authenticatedAdmin = (req, res, next) => {
-//     // console.log(req.isAuthenticated(req))
-//     if (req.user) {
-//         if (req.user.isAdmin) {
-//           return next()
-//         }
-//         return res.json({ status: 'error', message: 'permission denied' })
-//     } else {
-//         return res.json({ status: 'error', message: 'permission denied' })
-//     }
-// }
+
 // 驗證管理員
 function authenticatedAdmin(req, res, next) {
-  if (helpers.getUser(req).role !== 'admin') return res.status(401).json({ status: 'error', message: '權限驗證失敗' })
-  return next()
+  if (helpers.getUser(req).role === 'admin' || helpers.getUser(req).isAdmin === true) {
+    return next()
+  } else {
+    return res.status(401).json({ status: 'error', message: '權限驗證失敗' })
+  }
 }
 
 // 登入
