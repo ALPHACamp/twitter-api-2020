@@ -2,8 +2,6 @@ const db = require('../../models')
 const helpers = require('../../_helpers')
 const { Followship, User } = db
 
-// @todo - add error handling
-
 const followshipController = {
   follow: async (req, res) => {
     /* #swagger.tags = ['Followhship']

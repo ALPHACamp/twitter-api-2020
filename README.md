@@ -2,6 +2,20 @@
 
 API server for twitter clone project.
 
+## 2020.03.07 udpate
+Update Twitter API to v 2.0.0, updates:
+
+**Add three routes:**
+1. GET /api/admin/tweets
+return a list of all the tweets in website
+2. GET /api/users/top
+return a list of all the users, sorted by followers count
+3. PUT /api/users/{id}/account
+
+**Modify one route:**
+1. GET /api/users/{id}
+add isFollowed: Boolean to response data
+
 ## Check API doc
 1. Install server dependencies
 
@@ -36,9 +50,10 @@ http://localhost:3000/api-doc
 ```
 create database ac_twitter_workspace
 ```
-4. Open up command line tool and input below commands:
+4. Open up Twitter API project command line tool and input below commands:
 
 ```
+npm install
 npx sequelize db:migrate
 npx sequelize db:seed:all
 ```
@@ -51,3 +66,4 @@ or
 
 npm run dev
 ```
+
