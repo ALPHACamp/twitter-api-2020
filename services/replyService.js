@@ -14,7 +14,7 @@ const replyService = {
       callback({ status: 'success', message: 'Reply was successfully created' })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
   getReplies: async (req, res, callback) => {
@@ -26,7 +26,7 @@ const replyService = {
       callback(replies)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   }
 }

@@ -13,33 +13,40 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userService = {
-  signUp: (req, res, callback) => {
-    if (req.body.checkPassword !== req.body.password) {
-      callback({ status: 'error', message: 'Password is different', statusCode: 400 })
-    } else {
-      User.findOne({ where: { email: req.body.email } }).then(user => {
-        if (user) {
-          callback({ status: 'error', message: 'Email is already exists', statusCode: 400 })
-        } else {
-          User.create({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
-            callback({ status: 'success', message: 'User was successfully registered' })
-          })
-        }
+  signUp: async (req, res, callback) => {
+    try {
+      if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) {
+        callback({ status: 'error', message: 'input cannot be blank', statusCode: 400 })
+      }
+      if (req.body.checkPassword !== req.body.password) {
+        callback({ status: 'error', message: 'Password is different', statusCode: 400 })
+      }
+
+      const user = await User.findOne({ where: { email: req.body.email } })
+      if (user) return callback({ status: 'error', message: 'Email is already exists', statusCode: 400 })
+
+      await User.create({
+        account: req.body.account,
+        name: req.body.name,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
       })
+      callback({ status: 'success', message: 'User was successfully registered' })
+    }
+    catch (err) {
+      console.log(err)
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
-  signIn: (req, res, callback) => {
-    if (!req.body.email || !req.body.password) {
-      callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
-    }
+  signIn: async (req, res, callback) => {
+    try {
+      if (!req.body.email || !req.body.password) {
+        callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
+      }
 
-    const { email, password } = req.body
-    User.findOne({ where: { email: email } }).then(user => {
+      const { email, password } = req.body
+      const user = await User.findOne({ where: { email: email } })
+
       if (!user) return callback({ status: 'error', message: "user not found", statusCode: 401 })
       if (!bcrypt.compareSync(password, user.password)) return callback({ status: 'error', message: "password is not correct", statusCode: 401 })
       //簽發token
@@ -56,25 +63,30 @@ const userService = {
           role: user.role
         }
       })
-    })
+    } catch (err) {
+      console.log(err)
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
+    }
   },
-  getTopUser: (req, res, callback) => {
-    User.findAll(
-      {
-        where: { role: 'user' },
-        include: [{ model: User, as: 'Followers' }]
-      })
-      .then(users => {
-        users = users.map(user => ({
-          ...user.dataValues,
-          FollowerCount: user.Followers.length,
-          isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
-        }))
-        users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
-        callback({ users: users })
-      })
+  getTopUser: async (req, res, callback) => {
+    try {
+      let users = await User.findAll(
+        {
+          where: { role: 'user' },
+          include: [{ model: User, as: 'Followers' }]
+        })
+      users = await users.map(user => ({
+        ...user.dataValues,
+        FollowerCount: user.Followers.length,
+        isFollowed: req.user.Followings.map(following => following.id).includes(user.id)
+      }))
+      users = await users.sort((a, b) => b.FollowerCount - a.FollowerCount)
+      callback({ users: users })
+    } catch (err) {
+      console.log(err)
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
+    }
   },
-
   //Oscar start here
   getUser: async (req, res, callback) => {
     try {
@@ -88,7 +100,7 @@ const userService = {
       callback(user)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
@@ -99,7 +111,7 @@ const userService = {
       callback(userData)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
@@ -162,7 +174,7 @@ const userService = {
       }
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
@@ -178,7 +190,7 @@ const userService = {
       callback(tweets)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
@@ -193,54 +205,69 @@ const userService = {
       callback(replies)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
   //Wei start here
-  getUserLikes: (req, res, callback) => {
-    Like.findAll({
-      where: { UserId: req.params.id },
-      include: [
-        { model: Tweet, include: [{ model: Like }, { model: Reply }] }
-      ]
-    }).then(likes => {
-      callback(likes)
-    })
-      .catch(err => console.log(err))
-  },
-  getFollowings: (req, res, callback) => {
-    User.findByPk(req.params.id,
-      {
+  getUserLikes: async (req, res, callback) => {
+    try {
+      const likes = await Like.findAll({
+        where: { UserId: req.params.id },
         include: [
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Followers' }
-        ],
-      }).then(user => {
-        user = user.Followings.map(user => ({
-          ...user.dataValues,
-          followerId: user.Followship.followerId,
-          followingId: user.Followship.followingId
-        }))
-        callback(user)
+          { model: Tweet, include: [{ model: Like }, { model: Reply }] }
+        ]
       })
+      callback(likes)
+    } catch (err) {
+      console.log(err)
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
+    }
+  },
+  getFollowings: async (req, res, callback) => {
+    try {
+      let user = await User.findByPk(req.params.id,
+        {
+          include: [
+            { model: User, as: 'Followings' },
+            { model: User, as: 'Followers' }
+          ],
+        })
+      user = await user.Followings.map(user => ({
+        ...user.dataValues,
+        followerId: user.Followship.followerId,
+        followingId: user.Followship.followingId,
+        isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(user.id)
+      }))
+      callback(user)
+    } catch (err) {
+      console.log(err)
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
+    }
+
 
   },
-  getFollowers: (req, res, callback) => {
-    User.findByPk(req.params.id,
-      {
-        include: [
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Followers' }
-        ],
-      }).then(user => {
-        user = user.Followers.map(user => ({
-          ...user.dataValues,
-          followerId: user.Followship.followerId,
-          followingId: user.Followship.followingId
-        }))
-        callback(user)
-      })
+  getFollowers: async (req, res, callback) => {
+    try {
+      let user = await User.findByPk(req.params.id,
+        {
+          include: [
+            { model: User, as: 'Followings' },
+            { model: User, as: 'Followers' }
+          ],
+        })
+      user = await user.Followers.map(user => ({
+        ...user.dataValues,
+        followerId: user.Followship.followerId,
+        followingId: user.Followship.followingId,
+        isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(user.id)
+      }))
+      callback(user)
+    } catch (err) {
+      console.log(err)
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
+    }
+
   }
 }
 

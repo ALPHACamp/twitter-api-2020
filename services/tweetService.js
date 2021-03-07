@@ -13,7 +13,7 @@ const tweetService = {
       callback({ status: 'success', message: 'tweet was successfully created' })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
   getTweets: async (req, res, callback) => {
@@ -30,7 +30,7 @@ const tweetService = {
       callback(tweets)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
   getTweet: async (req, res, callback) => {
@@ -47,7 +47,7 @@ const tweetService = {
       callback(tweet)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   }
 }
