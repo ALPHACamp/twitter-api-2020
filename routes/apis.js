@@ -1,7 +1,15 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
-const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = function (req, res, next) {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (!user) {
+      return res.status(401).json({ status: 'error', message: "No auth token" })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
+}
 const userController = require('../controllers/api/userController')
 const adminController = require('../controllers/api/adminController')
 const multer = require('multer')
@@ -10,7 +18,7 @@ const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover'
 
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
-    if (req.user.role) {
+    if (req.user.role === 'admin') {
       return next()
     }
     return res.json({ status: 'error', message: 'permission denied' })
@@ -22,7 +30,7 @@ const authenticatedAdmin = (req, res, next) => {
 // user
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
-router.put('/users/:id', authenticated, cpUpload, userController.editUser)
+router.put('/users/:id', authenticated, upload.single('cover'), userController.editUser)
 router.get('/users/get_current_user', authenticated, userController.getCurrentUser)
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
@@ -34,7 +42,7 @@ router.get('/topusers', authenticated, userController.getTopUsers)
 
 
 //follow
-router.post('/followships/:followingId', authenticated, userController.addFollowing)
+router.post('/followships', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 
 // admin
