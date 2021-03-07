@@ -1,11 +1,9 @@
-
-const bcrypt = require('bcryptjs')
-const helpers = require('../../_helpers')
-const { User, Followship, Tweet, Reply } = require('../../models')
-const Op = require('sequelize').Op
-const imgur = require('imgur')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-
+const bcrypt = require('bcryptjs');
+const helpers = require('../../_helpers');
+const { User, Followship, Tweet, Reply } = require('../../models');
+const Op = require('sequelize').Op;
+const imgur = require('imgur');
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
 
 // JWT
 const jwt = require('jsonwebtoken');
@@ -24,7 +22,7 @@ let userController = {
     } else {
       User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
 
-        .then(user => {
+        .then((user) => {
           if (user) {
             if (user.email === email) {
               return res.json({ status: 'error', message: 'email已被註冊' });
@@ -50,7 +48,7 @@ let userController = {
 
   signIn: (req, res) => {
     if (!req.body.account || !req.body.password) {
-      return res.json({ status: 'error', message: "請填寫完整資料" })
+      return res.json({ status: 'error', message: '請填寫完整資料' });
     }
 
     const account = req.body.account;
@@ -63,8 +61,8 @@ let userController = {
           return res.status(401).json({ status: 'error', message: 'passwords did not match' });
         }
 
-        const payload = { id: user.id }
-        const token = jwt.sign(payload, process.env.JWT_SECRET)
+        const payload = { id: user.id };
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
 
         return res.json({
           status: 'success',
@@ -89,13 +87,12 @@ let userController = {
   },
 
   getUser: (req, res) => {
-
-    const id = helpers.getUser(req).id
+    const id = helpers.getUser(req).id;
     User.findByPk(id)
-      .then(user => {
-        return res.json(user)
+      .then((user) => {
+        return res.json(user);
       })
-      .catch(error => res.send(error))
+      .catch((error) => res.send(error));
   },
 
   getUserTweets: (req, res) => {
@@ -103,15 +100,16 @@ let userController = {
       include: [User],
       order: [['createdAt', 'DESC']],
       where: {
-        UserId: req.params.id
-      }
-    }).then(tweets => {
-      const data = tweets.map(t => ({
-        ...t.dataValues
-      }))
-      return res.json(data)
+        UserId: req.params.id,
+      },
     })
-      .catch(error => res.send(error))
+      .then((tweets) => {
+        const data = tweets.map((t) => ({
+          ...t.dataValues,
+        }));
+        return res.json(data);
+      })
+      .catch((error) => res.send(error));
   },
 
   getReplyTweet: (req, res) => {
@@ -119,70 +117,70 @@ let userController = {
       include: Tweet,
       order: [['createdAt', 'DESC']],
       where: {
-        UserId: req.params.id
-      }
-    }).then(data => {
-      return res.json(data)
+        UserId: req.params.id,
+      },
     })
-      .catch(error => res.send(error))
+      .then((data) => {
+        return res.json(data);
+      })
+      .catch((error) => res.send(error));
   },
 
   putUser: async (req, res) => {
     try {
       if (Number(req.params.id) !== helpers.getUser(req).id) {
-        return res.json({ status: 'error', message: '非已登入的使用者' })
+        return res.json({ status: 'error', message: '非已登入的使用者' });
       }
 
-      const { account, name, email, password, checkPassword, introduction } = req.body
-      const user = await User.findByPk(helpers.getUser(req).id)
-      const files = req.files
-      let avatar = user.avatar
-      let cover = user.cover
-
+      const { account, name, email, password, checkPassword, introduction } = req.body;
+      const user = await User.findByPk(helpers.getUser(req).id);
+      const files = req.files;
+      let avatar = user.avatar;
+      let cover = user.cover;
 
       if (password) {
         if (password !== checkPassword) {
-          return res.json({ status: 'error', message: '兩次密碼輸入不一致' })
+          return res.json({ status: 'error', message: '兩次密碼輸入不一致' });
         }
       }
 
       if (files) {
-        avatar = files.avatar
-        cover = files.cover
+        avatar = files.avatar;
+        cover = files.cover;
 
         if (avatar && cover) {
-          const acatarData = await imgur.uploadFile(avatar[0].path)
-          const coverData = await imgur.uploadFile(cover[0].path)
-          avatar = acatarData.link
-          cover = coverData.link
-        }
-        else if (avatar) {
-          const data = await imgur.uploadFile(avatar[0].path)
-          avatar = data.link
-        }
-        else if (cover) {
-          const data = await imgur.uploadFile(cover[0].path)
-          cover = data.link
+          const acatarData = await imgur.uploadFile(avatar[0].path);
+          const coverData = await imgur.uploadFile(cover[0].path);
+          avatar = acatarData.link;
+          cover = coverData.link;
+        } else if (avatar) {
+          const data = await imgur.uploadFile(avatar[0].path);
+          avatar = data.link;
+        } else if (cover) {
+          const data = await imgur.uploadFile(cover[0].path);
+          cover = data.link;
         }
       }
 
-      await User.update({
-        account: account || user.account,
-        name: name || user.name,
-        email: email || user.email,
-        password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
-        introduction: introduction || user.introduction,
-        avatar: avatar || user.avatar,
-        cover: cover || user.cover,
-      }, {
-        where: { id: helpers.getUser(req).id }
-      })
+      await User.update(
+        {
+          account: account || user.account,
+          name: name || user.name,
+          email: email || user.email,
+          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+          introduction: introduction || user.introduction,
+          avatar: avatar || user.avatar,
+          cover: cover || user.cover,
+        },
+        {
+          where: { id: helpers.getUser(req).id },
+        }
+      );
 
-      return res.json({ status: 'success', message: '資料修改成功!' })
+      return res.json({ status: 'success', message: '資料修改成功!' });
     } catch (error) {
-      console.warn(error)
+      console.warn(error);
     }
-
   },
   //回傳"使用者跟隨"的人數,ID
   getFollowing: (req, res) => {
@@ -212,35 +210,4 @@ let userController = {
   },
 };
 
-
-  //回傳"使用者跟隨"的人數,ID
-  getFollowing: (req, res) => {
-    return Followship.findAndCountAll({
-      raw: true,
-      nest: true,
-      where: {
-        followerId: req.params.id,
-      },
-    }).then((results) => {
-      //result.count  //result.rows
-      res.json(results.rows); //, status: 'success', message: 'find following'
-    });
-  },
-  //回傳"跟隨使用者"的人數,ID
-  getFollower: (req, res) => {
-    return Followship.findAndCountAll({
-      raw: true,
-      nest: true,
-      where: {
-        followingId: req.params.id,
-      },
-    }).then((results) => {
-      //result.count  //result.rows
-      res.json(results.rows); //, status: 'success', message: 'find follower'
-    });
-  },
-
-}
-
-module.exports = userController
-
+module.exports = userController;
