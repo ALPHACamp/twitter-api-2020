@@ -10,15 +10,18 @@ const userController = require('../controllers/api/userControllers')
 const tweetController = require('../controllers/api/tweetControllers')
 const likeController = require('../controllers/api/likeControllers');
 const followshipController = require('../controllers/api/followshipControllers');
+const adminController = require('../controllers/api/adminController')
 
 
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
+
     if (err) {
       return next(err);
     }
     if (!user) {
+
       return res.status(401).json({ status: 'error', message: 'permission denied!!' });
     }
     req.user = user;
@@ -28,7 +31,7 @@ const authenticated = (req, res, next) => {
 
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
-    if (helpers.getUser(req) === 'admin') {
+    if (helpers.getUser(req).role === 'admin') {
       return next();
     }
     return res.status(401).json({ status: 'error', message: 'permission denied' });
@@ -37,7 +40,7 @@ const authenticatedAdmin = (req, res, next) => {
   }
 };
 
-router.post('/signin', userController.signIn);
+
 
 //followship
 router.post('/followships', authenticated, followshipController.postFollowship);
@@ -69,6 +72,12 @@ router.post('/tweets', authenticated, tweetController.postTweets);
 //like
 router.post('/tweets/:id/like', authenticated, likeController.Like);
 router.post('/tweets/:id/unlike', authenticated, likeController.UnLike);
+
+//admin
+router.get('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.getTweets)
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.post('/admin/signin', adminController.signIn)
 
 
 module.exports = router;

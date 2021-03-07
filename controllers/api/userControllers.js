@@ -60,7 +60,7 @@ let userController = {
       .then((user) => {
         if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' });
         if (!bcrypt.compareSync(password, user.password)) {
-          return res.status(401).json({ status: 'error', message: 'passwords did not match' });
+          return res.status(401).json({ status: 'error', message: 'passwords did not match!' });
         }
 
         const payload = { id: user.id }
@@ -218,6 +218,7 @@ let userController = {
   getUserLikes: (req, res) => {
     Like.findAll({
       include: [Tweet],
+      order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id }
     }).then(like => {
       return res.json(like)
