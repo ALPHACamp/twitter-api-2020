@@ -26,14 +26,18 @@ module.exports = {
     */
     try {
       const { id } = req.params
+      const currentUser = helpers.getUser(req)
       // get user
-      const user = await User.findOne({
+      let user = await User.findOne({
         where: { id },
-        attributes: { exclude: ['password'] }
+        attributes: { exclude: ['password'] },
+        include: [{ model: User, as: 'Followers' }]
       })
       // check if user exists
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
-      user.dataValues.isSelf = user.id === helpers.getUser(req).id
+      user = user.toJSON()
+      user.isSelf = user.id === currentUser.id
+      user.isFollowed = user.Followers.map(Follower => Follower.id).includes(currentUser.id)
       return res.status(200).json(user)
     } catch (err) {
       console.log('catch block: ', err)
@@ -233,7 +237,7 @@ module.exports = {
       })
 
       if (!followings || !Array.isArray(followings)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追蹤名單。' })
-
+      console.log(helpers.getUser(req))
       followings = followings.map(followship => {
         followship.dataValues.isFollowed = helpers.getUser(req).Followings.map(user => user.id).includes(followship.followingId)
         followship.dataValues.isSelf = helpers.getUser(req).id === followship.followingId
@@ -326,7 +330,6 @@ module.exports = {
 
       // (form-data)if no req.body.avatar and req.body.cover, req.files equals undefined
       if (!files) {
-        console.log(1)
         // test does not have req.files, so it will be blocked here...still need to return 200
         const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
         const updatedUser = await updateUser(user, req.body)
