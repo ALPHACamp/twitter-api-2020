@@ -88,7 +88,7 @@ const userService = {
       callback(user)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
@@ -99,7 +99,7 @@ const userService = {
       callback(userData)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
@@ -158,7 +158,7 @@ const userService = {
       }
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
@@ -174,7 +174,7 @@ const userService = {
       callback(tweets)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 
@@ -189,7 +189,7 @@ const userService = {
       callback(replies)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
 

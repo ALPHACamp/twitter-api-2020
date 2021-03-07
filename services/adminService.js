@@ -13,7 +13,7 @@ const adminService = {
   signIn: async (req, res, callback) => {
     try {
       if (!req.body.email || !req.body.password) {
-        return res.json({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
+        return callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
       }
 
       const { email, password } = req.body
@@ -40,7 +40,7 @@ const adminService = {
       })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
   getUsers: async (req, res, callback) => {
@@ -64,7 +64,7 @@ const adminService = {
       callback(users)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
   getTweets: async (req, res, callback) => {
@@ -73,7 +73,7 @@ const adminService = {
       callback(tweets)
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   },
   deleteTweets: async (req, res, callback) => {
@@ -83,7 +83,7 @@ const adminService = {
       callback({ status: 'success', message: '' })
     } catch (err) {
       console.log(err)
-      callback({ status: 'error', message: 'codeStatus 500', statusCode: 500 })
+      callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
   }
 }
