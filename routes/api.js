@@ -74,7 +74,7 @@ router.post('/tweets/:id/like', authenticated, likeController.Like);
 router.post('/tweets/:id/unlike', authenticated, likeController.UnLike);
 
 //admin
-router.get('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.post('/admin/signin', adminController.signIn)

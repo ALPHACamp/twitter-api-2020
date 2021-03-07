@@ -42,6 +42,8 @@ let adminController = {
   getUsers: (req, res) => {
     User.findAll({
       // include:[Like, Followship, Reply]
+    }).then(users => {
+      return res.json(users)
     })
   },
   getTweets: (req, res) => {
@@ -55,6 +57,14 @@ let adminController = {
           description: t.dataValues.description.substring(0, 50),
         }))
         return res.json(data)
+      })
+  },
+
+  deleteTweet: (req, res) => {
+    return Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        tweet.destroy()
+        return res.json({ status: 'success', messgae: '成功刪除該則推文!' })
       })
   }
 }
