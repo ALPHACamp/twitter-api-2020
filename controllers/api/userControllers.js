@@ -83,7 +83,7 @@ let userController = {
       .catch((error) => res.send(error));
   },
 
-  //暫時還用不到，這是本來要做getUser的部分
+
   getCurrentUser: (req, res) => {
     const user = helpers.getUser(req);
     return res.json(user);
