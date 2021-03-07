@@ -156,9 +156,9 @@ const userService = {
           callback({ status: 'success', message: 'User avatar & cover was successfully update' })
         }
       } else {    //帳戶設定
-        if (!req.body.account || !req.body.email) {
-          return callback({ status: 'error', message: "Account or email can't be empty!", statusCode: 400 })
-        }
+        // if (!req.body.account || !req.body.email) {
+        //   return callback({ status: 'error', message: "Account or email can't be empty!", statusCode: 400 })
+        // }
         if (req.body.checkPassword !== req.body.password) {
           return callback({ status: 'error', message: 'Password is different', statusCode: 400 })
         }
@@ -167,7 +167,8 @@ const userService = {
           name: req.body.name ? req.body.name : user.name,
           account: req.body.account ? req.body.account : user.account,
           email: req.body.email ? req.body.email : user.email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+          introduction: req.body.introduction ? req.body.introduction : user.introduction,
+          password: req.body.password ? bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null) : user.password
         })
         callback({ status: 'success', message: 'User profile was successfully update' })
       }
