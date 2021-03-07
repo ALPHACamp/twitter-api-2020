@@ -7,7 +7,7 @@ const followService = {
     try {
       const user = helper.getUser(req)
       await Followship.findOrCreate({
-        where: { followingId: req.body.id },
+        where: { followerId: user.id, followingId: req.body.id },
         defaults: {
           followerId: user.id,
           followingId: req.body.id
