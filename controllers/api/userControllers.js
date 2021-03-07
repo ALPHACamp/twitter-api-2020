@@ -90,11 +90,18 @@ let userController = {
   },
 
   getUser: (req, res) => {
-    const id = helpers.getUser(req).id;
-    User.findByPk(id)
-      .then((user) => {
-        return res.json(user);
-      })
+    const id = req.params.id
+    User.findByPk(id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    }).then((user) => {
+      user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id
+      user.dataValues.isFollowed = helpers.getUser(req).Followings.some(d => d.id === Number(id))
+
+      return res.json(user);
+    })
       .catch((error) => res.send(error));
   },
 
