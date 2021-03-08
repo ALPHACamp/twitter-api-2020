@@ -1,7 +1,8 @@
 const db = require('../models')
-const { User, Tweet, Like } = db
+const { User, Tweet, Like, Reply } = db
 const { Op } = require('sequelize')
 const bcrypt = require('bcryptjs')
+const sequelize = require('sequelize')
 
 //JWT
 const jwt = require('jsonwebtoken')
@@ -43,36 +44,59 @@ const adminService = {
           user: {
             id: user.id,
             name: user.name,
+            account: user.account,
             email: user.email,
+            avatar: user.avatar,
             role: user.role
           }
         })
       })
+      .catch((error) => callback({ status: 'error', message: 'codeStatus 500' }))
   },
 
   // 瀏覽 User 清單
   getUsers: (req, res, callback) => {
     return User.findAll({
-      where: { role: { [Op.not]: 'admin' } },
+      // where: { role: { [Op.not]: 'admin' } },
       include: [
-        { model: Tweet },
+        { model: Tweet, include: { model: Like } },
         { model: Like },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' }
       ]
     })
       .then((users) => {
-        const usersData = users.map((user) => ({
-          ...user.dataValues,
-          tweetsCount: user.Tweets.length,
-          likesCount: user.Likes.length,
-          followersCount: user.Followers.length,
-          followingsCount: user.Followings.length
-        }))
+        // 計算推文被按讚次數
+        const usersData = users.map((user) => {
+          let tweetByLike = 0
+          let tweetArray = user.Tweets.map((tweet) => {
+            return tweetByLike += tweet.Likes.length
+          })
+
+          return {
+            ...user.dataValues,
+            tweetsCount: user.Tweets.length,
+            likesCount: user.Likes.length,
+            tweetByLike: tweetByLike,
+            followersCount: user.Followers.length,
+            followingsCount: user.Followings.length
+          }
+        })
           .sort((a, b) => b.tweetsCount - a.tweetsCount)
+
+        // const usersData = users.map((user) => ({
+        //   ...user.dataValues,
+        //   tweetsCount: user.Tweets.length,
+        //   likesCount: user.Likes.length,
+        //   tweetByLike: tweetByLike,
+        //   followersCount: user.Followers.length,
+        //   followingsCount: user.Followings.length
+        // }))
+        // .sort((a, b) => b.tweetsCount - a.tweetsCount)
 
         callback(usersData)
       })
+      .catch((error) => callback({ status: 'error', message: error.message }))
   },
 
   // 瀏覽 Tweet 清單
@@ -85,29 +109,37 @@ const adminService = {
     })
       .then((tweets) => {
         const tweetsData = tweets.map((tweet) => ({
+          status: 'success',
+          message: 'ok',
           id: tweet.id,
           description: tweet.description.slice(0, 49),
           createdAt: tweet.createdAt,
           updatedAt: tweet.updatedAt,
           User: {
             id: tweet.User.id,
-            account: tweet.User.account,
             name: tweet.User.name,
+            account: tweet.User.account,
             avatar: tweet.User.avatar
           }
         }))
 
         callback(tweetsData)
       })
+      .catch((error) => callback({ status: 'error', message: 'CodeStatus 500' }))
   },
 
   // 刪除推文
   deleteTweet: (req, res, callback) => {
-    return Tweet.findByPk(req.params.id)
+    const id = req.params.tweet_id
+    return Tweet.findByPk(id)
       .then((tweet) => {
+        if (!tweet) {
+          return callback({ status: 'error', message: 'Tweet id was not exist' })
+        }
+
         tweet.destroy()
           .then((result) => {
-            callback({ status: 'success', message: 'Delete Tweet Success' })
+            return callback({ status: 'success', message: 'Delete Tweet By Admin Success' })
           })
       })
       .catch((error) => callback({ status: 'error', message: 'Delete Tweet Fail' }))

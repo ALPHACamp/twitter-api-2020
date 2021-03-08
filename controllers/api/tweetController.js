@@ -19,8 +19,44 @@ const tweetController = {
     })
   },
 
+  putTweet: (req, res) => {
+    tweetService.putTweet(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+
+  getReplies: (req, res) => {
+    tweetService.getReplies(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+
+  getRepliesCount: (req, res) => {
+    tweetService.getRepliesCount(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+
   postReply: (req, res) => {
     tweetService.postReply(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+
+  putReply: (req, res) => {
+    tweetService.putReply(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+
+  deleteReply: (req, res) => {
+    tweetService.deleteReply(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+
+  getLikes: (req, res) => {
+    tweetService.getLikes(req, res, (data) => {
       return res.json(data)
     })
   },
