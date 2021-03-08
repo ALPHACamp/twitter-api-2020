@@ -27,7 +27,8 @@ const tweetController = {
           { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },
           Like,
           { model: User, attributes: { exclude: ['password'] } }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
       if (!tweets || !Array.isArray(tweets)) {
         return res.status(400).json({ status: 'error', message: 'cannot find any tweet' })
@@ -91,7 +92,8 @@ const tweetController = {
     */
     try {
       const replies = await Reply.findAll({
-        where: { TweetId: req.params.id }
+        where: { TweetId: req.params.id },
+        order: [['createdAt', 'DESC']]
       })
       if (!replies.length) {
         return res.status(400).json({ status: 'error', message: 'tweet doesn\'t exist' })
@@ -128,11 +130,11 @@ const tweetController = {
         return res.status(400).json({ status: 'error', message: 'description is required' })
       }
       const userId = helpers.getUser(req).id
-      const tweet = await Tweet.create({
+      await Tweet.create({
         UserId: userId,
         description
       })
-      // discuss return success object or tweet
+
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
@@ -165,12 +167,12 @@ const tweetController = {
       }
 
       const userId = helpers.getUser(req).id
-      const reply = await Reply.create({
+      await Reply.create({
         UserId: userId,
         TweetId: tweetId,
         comment
       })
-      // discuss return success object or reply
+
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
