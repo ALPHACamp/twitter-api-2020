@@ -40,8 +40,6 @@ const userService = {
   },
   signIn: async (req, res, callback) => {
     try {
-      if (user.role !== 'user') return callback({ status: 'error', message: "Authorization denied", statusCode: 401 })
-
       if (!req.body.email || !req.body.password) {
         return callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
       }
@@ -50,6 +48,9 @@ const userService = {
       const user = await User.findOne({ where: { email: email } })
 
       if (!user) return callback({ status: 'error', message: "user not found", statusCode: 401 })
+
+      if (user.role !== 'user') return callback({ status: 'error', message: "Authorization denied", statusCode: 401 })
+
       if (!bcrypt.compareSync(password, user.password)) return callback({ status: 'error', message: "password is not correct", statusCode: 401 })
       //簽發token
       const payload = { id: user.id }
