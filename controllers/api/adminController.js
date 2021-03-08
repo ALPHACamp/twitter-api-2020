@@ -5,7 +5,7 @@ const { User, Tweet, Reply, Like } = db
 const adminController = {
   getUsers: async (req, res) => {
     /*  #swagger.tags = ['Admin']
-        #swagger.description = 'admin 瀏覽所有使用者，前端處理依照推文數排序'
+        #swagger.description = 'admin 瀏覽所有使用者，依照推文數排序'
         #swagger.responses[200] = {
           description: '回傳陣列帶有多個user物件',
           schema: [{"$ref": "#/definitions/GeneralUser"}]
@@ -21,11 +21,16 @@ const adminController = {
           { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
           { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
         ],
-        attributes: { exclude: ['password'] }
+        attributes: {
+          exclude: ['password']
+        },
+        order: [['createdAt', 'DESC']]
+
       })
       if (!users || !Array.isArray(users)) {
         return res.status(400).json({ status: 'error', message: '無法取得用戶資料' })
       }
+      users.sort((a, b) => b.Tweets.length - a.Tweets.length)
 
       return res.status(200).json(users)
     } catch (err) {
@@ -51,7 +56,8 @@ const adminController = {
           { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },
           Like,
           { model: User, attributes: { exclude: ['password'] } }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
       if (!tweets || !Array.isArray(tweets)) {
         return res.status(400).json({ status: 'error', message: 'cannot find any tweet' })

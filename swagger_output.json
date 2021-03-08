@@ -717,7 +717,7 @@
         "tags": [
           "Admin"
         ],
-        "description": "admin 瀏覽所有使用者，前端處理依照推文數排序",
+        "description": "admin 瀏覽所有使用者，依照推文數排序",
         "parameters": [],
         "responses": {
           "200": {
