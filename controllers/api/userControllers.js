@@ -143,13 +143,20 @@ let userController = {
       }
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
-      const accountCheck = await User.findOne({ where: { account: req.body.account } })
+      // const accountCheck = await User.findOne({ where: { account: req.body.account } })
+      const reconfirm = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
+
       const files = req.files
       let avatar = user.avatar
       let cover = user.cover
 
-      if (accountCheck) {
-        return res.json({ status: 'error', message: '此帳號已被註冊!' })
+
+      if (reconfirm) {
+        if (reconfirm.email === email) {
+          return res.json({ status: 'error', message: 'email已有人使用' });
+        } else if (reconfirm.account === account) {
+          return res.json({ status: 'error', message: 'account已有人使用' });
+        }
       }
 
 
@@ -160,6 +167,7 @@ let userController = {
       }
 
       if (files) {
+        imgur.setClientId(IMGUR_CLIENT_ID);
         avatar = files.avatar;
         cover = files.cover;
 
