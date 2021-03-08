@@ -18,9 +18,8 @@ const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     let helperGetUser = helpers.getUser(req)
 
-    if (!user) {
-      return res.json({ status: 'error', message: 'permission denied' })
-    }
+    if (!user) return res.json({ status: 'error', message: 'permission denied' })
+
     if (user.role !== 'admin') {
       helperGetUser = user
       req.user = helperGetUser
@@ -34,19 +33,16 @@ const authenticatedAdmin = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     let helperGetUser = helpers.getUser(req)
 
-    if (user) {
-      if (user.role === 'admin' || helperGetUser.role === 'admin') {
-        helperGetUser = user
-        req.user = helperGetUser
-        return next()
-      }
-      return res.json({ status: 'error', message: 'permission denied' })
-    } else {
-      return res.json({ status: 'error', message: 'permission denied' })
+    if (!user) return res.json({ status: 'error', message: 'permission denied' })
+
+    //for test
+    if (user.role === 'admin' || helperGetUser.role === 'admin') {
+      helperGetUser = user
+      req.user = helperGetUser
+      return next()
     }
+    return res.json({ status: 'error', message: 'permission denied' })
   })(req, res, next)
-
-
 }
 
 // admin

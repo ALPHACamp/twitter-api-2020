@@ -96,6 +96,7 @@ const userService = {
           { model: Tweet }
         ]
       })
+      if (!user) return callback({ status: 'error', message: 'User not found', statusCode: 400 })
       callback(user)
     } catch (err) {
       console.log(err)
