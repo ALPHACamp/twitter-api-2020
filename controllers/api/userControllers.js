@@ -229,6 +229,7 @@ let userController = {
 
   getTop10Users: (req, res) => {
     User.findAll({
+      limit: 10,
       attributes: [
         'id',
         'name',
