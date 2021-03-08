@@ -93,7 +93,8 @@ const userService = {
         where: { role: 'user' },
         include: [
           { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
+          { model: User, as: 'Followings' },
+          { model: Tweet }
         ]
       })
       callback(user)
