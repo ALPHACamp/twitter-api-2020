@@ -93,8 +93,8 @@ const userService = {
   //Oscar start here
   getUser: async (req, res, callback) => {
     try {
-      const user = await User.findByPk(req.params.id, {
-        where: { role: 'user' },
+      const user = await User.findOne({
+        where: { id: req.params.id, role: "user" },
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
@@ -109,6 +109,9 @@ const userService = {
 
   editUser: async (req, res, callback) => {
     try {
+      const loginUser = helpers.getUser(req)
+      if (loginUser.id != req.params.id) return callback({ status: 'error', message: "Authorization denied", statusCode: 401 })
+
       const user = await User.findByPk(req.params.id)
       const userData = user.toJSON()
       callback(userData)
@@ -120,6 +123,9 @@ const userService = {
 
   putUser: async (req, res, callback) => {
     try {
+      const loginUser = helpers.getUser(req)
+      if (loginUser.id != req.params.id) return callback({ status: 'error', message: "Authorization denied", statusCode: 401 })
+
       if (!req.body.name) {
         return callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
       }
