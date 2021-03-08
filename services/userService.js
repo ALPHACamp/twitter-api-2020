@@ -29,6 +29,7 @@ const userService = {
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
+        role: 'user',
         password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
       })
       callback({ status: 'success', message: 'User was successfully registered' })
@@ -39,6 +40,8 @@ const userService = {
   },
   signIn: async (req, res, callback) => {
     try {
+      if (user.role !== 'user') return callback({ status: 'error', message: "Authorization denied", statusCode: 401 })
+
       if (!req.body.email || !req.body.password) {
         return callback({ status: 'error', message: "required fields didn't exist", statusCode: 400 })
       }
