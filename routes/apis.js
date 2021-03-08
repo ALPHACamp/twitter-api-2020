@@ -7,8 +7,10 @@ const userController = require('../controllers/api/userController')
 const adminController = require('../controllers/api/adminController')
 const tweetController = require('../controllers/api/tweetController')
 const replyController = require('../controllers/api/replyController')
+const likeController = require('../controllers/api/likeController')
 
 const helpers = require('../_helpers')
+
 
 // 使用者JWT認證
 const authenticated = function (req, res, next) {
@@ -43,13 +45,10 @@ router.post('/signin', authenticated, userController.getUser)
 router.get('/tweets', authenticated, tweetController.getTweets)
 // 取得一筆推文相關資料
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
-// 取得推文按讚數、相關資訊
-router.get('/tweets/:tweet_id/likes', authenticated, tweetController.getLikes)
 // 新增推文
 router.post('/tweets', authenticated, tweetController.postTweet)
 // 修改推文
 router.put('/tweets/:tweet_id', authenticated, tweetController.putTweet)
-
 
 
 // reply
@@ -66,9 +65,12 @@ router.delete('/replies/:reply_id', authenticated, replyController.deleteReply)
 
 
 // Like
-router.post('/tweets/:tweet_id/like', authenticated, tweetController.addLike)
-// unLike
-router.post('/tweets/:tweet_id/unlike', authenticated, tweetController.removeLike)
+// 取得推文按讚數、相關資訊
+router.get('/tweets/:tweet_id/likes', authenticated, likeController.getLikes)
+// 標記喜歡
+router.post('/tweets/:tweet_id/like', authenticated, likeController.addLike)
+// 取消標記
+router.post('/tweets/:tweet_id/unlike', authenticated, likeController.removeLike)
 
 
 // admin

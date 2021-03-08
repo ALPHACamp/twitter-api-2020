@@ -12,7 +12,7 @@ const replyService = {
       include: [{ model: User, attributes: ['name', 'account'] }]
     })
       .then((replies) => {
-        callback(replies)
+        return callback(replies)
       })
       .catch((error) => callback({ status: 'error', message: 'Get Replies Fail' }))
   },
@@ -26,7 +26,7 @@ const replyService = {
       include: [{ model: User, attributes: ['name', 'account'] }]
     })
       .then((replies) => {
-        callback(replies.length)
+        return callback(replies.length)
       })
       .catch((error) => callback({ status: 'error', message: 'Get Replies Fail' }))
   },
@@ -45,7 +45,7 @@ const replyService = {
       comment: comment.trim()
     })
       .then((reply) => {
-        callback({ status: 'success', message: 'Created Reply Success' })
+        return callback({ status: 'success', message: 'Created Reply Success' })
       })
       .catch((error) => callback({ status: 'error', message: 'Post Reply Fail' }))
   },
@@ -65,7 +65,7 @@ const replyService = {
           comment: comment.trim()
         })
           .then((reply) => {
-            callback({ status: 'success', message: 'Reply was successfully to update' })
+            return callback({ status: 'success', message: 'Reply was successfully to update' })
           })
       })
       .catch((error) => callback({ status: 'error', message: 'Put Reply Fail' }))
@@ -78,12 +78,12 @@ const replyService = {
     return Reply.findByPk(id)
       .then((reply) => {
         if (!reply) {
-          callback({ status: 'error', message: 'Reply was not exist' })
+          return callback({ status: 'error', message: 'Reply was not exist' })
         }
 
         reply.destroy()
           .then((result) => {
-            callback({ status: 'success', message: 'Delete Reply Success' })
+            return callback({ status: 'success', message: 'Delete Reply Success' })
           })
       })
       .catch((error) => callback({ status: 'error', message: 'Delete Tweet Fail' }))

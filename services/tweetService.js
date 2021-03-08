@@ -12,7 +12,6 @@ const tweetService = {
     })
       .then((tweets) => {
         const tweetsData = tweets.map((tweet) => {
-
           return {
             ...tweet.dataValues,
             User: {
@@ -93,7 +92,7 @@ const tweetService = {
       description: description.trim()
     })
       .then((tweet) => {
-        callback({ status: 'success', message: 'Created Tweet success' })
+        return callback({ status: 'success', message: 'Created Tweet success' })
       })
       .catch((error) => callback({ status: 'error', message: 'Post Tweet Fail' }))
   },
@@ -116,58 +115,10 @@ const tweetService = {
           description: description.trim()
         })
           .then((tweet) => {
-            callback({ status: 'success', message: 'Tweet was successfully to update' })
+            return callback({ status: 'success', message: 'Tweet was successfully to update' })
           })
       })
       .catch((error) => callback({ status: 'error', message: 'Put Tweet Fail' }))
-  },
-
-  // 取得推文按讚數、相關資訊
-  getLikes: (req, res, callback) => {
-    const id = req.params.tweet_id
-
-    Tweet.findByPk(id, { include: [Like] })
-      .then((tweet) => {
-        const tweetData = {
-          ...tweet.dataValues,
-          likesCount: tweet.Likes.length
-        }
-        callback(tweetData)
-      })
-      .catch((error) => callback({ status: 'error', message: 'Get Tweet Fail' }))
-  },
-
-  // 標記喜歡
-  addLike: (req, res, callback) => {
-    const id = req.params.tweet_id
-
-    return Like.create({
-      UserId: helpers.getUser(req).id,
-      TweetId: id
-    })
-      .then((like) => {
-        callback({ status: 'success', message: 'AddLike Success' })
-      })
-      .catch((error) => callback({ status: 'error', message: 'AddLike To Tweet Fail' }))
-  },
-
-  // 取消標記
-  removeLike: (req, res, callback) => {
-    const id = req.params.tweet_id
-
-    return Like.findOne({
-      where: {
-        UserId: helpers.getUser(req).id,
-        TweetId: id
-      }
-    })
-      .then((like) => {
-        like.destroy()
-          .then((result) => {
-            callback({ status: 'success', message: 'RemoveLike Success' })
-          })
-      })
-      .catch((error) => callback({ status: 'error', message: 'RemoveLike To Tweet Fail' }))
   }
 }
 

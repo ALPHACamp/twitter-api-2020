@@ -23,24 +23,6 @@ const tweetController = {
     tweetService.putTweet(req, res, (data) => {
       return res.json(data)
     })
-  },
-
-  getLikes: (req, res) => {
-    tweetService.getLikes(req, res, (data) => {
-      return res.json(data)
-    })
-  },
-
-  addLike: (req, res) => {
-    tweetService.addLike(req, res, (data) => {
-      return res.json(data)
-    })
-  },
-
-  removeLike: (req, res) => {
-    tweetService.removeLike(req, res, (data) => {
-      return res.json(data)
-    })
   }
 }
 
