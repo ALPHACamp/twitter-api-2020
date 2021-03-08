@@ -6,6 +6,7 @@ const passport = require('../config/passport')
 const userController = require('../controllers/api/userController')
 const adminController = require('../controllers/api/adminController')
 const tweetController = require('../controllers/api/tweetController')
+const replyController = require('../controllers/api/replyController')
 
 const helpers = require('../_helpers')
 
@@ -42,22 +43,28 @@ router.post('/signin', authenticated, userController.getUser)
 router.get('/tweets', authenticated, tweetController.getTweets)
 // 取得一筆推文相關資料
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
-// 查詢推文的相關回覆資料
-router.get('/tweets/:tweet_id/replies', authenticated, tweetController.getReplies)
-// 查詢推文的相關回覆量
-router.get('/tweets/:tweet_id/replies/count', authenticated, tweetController.getRepliesCount)
 // 取得推文按讚數、相關資訊
 router.get('/tweets/:tweet_id/likes', authenticated, tweetController.getLikes)
 // 新增推文
 router.post('/tweets', authenticated, tweetController.postTweet)
-// 新增回覆
-router.post('/tweets/:tweet_id/replies', authenticated, tweetController.postReply)
 // 修改推文
 router.put('/tweets/:tweet_id', authenticated, tweetController.putTweet)
+
+
+
+// reply
+// 查詢推文的相關回覆資料
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies)
+// 查詢推文的相關回覆量
+router.get('/tweets/:tweet_id/replies/count', authenticated, replyController.getRepliesCount)
+// 新增回覆
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 // 修改回覆
-router.put('/replies/:reply_id', authenticated, tweetController.putReply)
+router.put('/replies/:reply_id', authenticated, replyController.putReply)
 // 刪除回覆
-router.delete('/replies/:reply_id', authenticated, tweetController.deleteReply)
+router.delete('/replies/:reply_id', authenticated, replyController.deleteReply)
+
+
 // Like
 router.post('/tweets/:tweet_id/like', authenticated, tweetController.addLike)
 // unLike
