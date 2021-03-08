@@ -20,8 +20,8 @@ const tweetService = {
               account: tweet.User.account,
               avatar: tweet.User.avatar
             },
-            replyCount: tweet.Replies.length,
-            likesCount: tweet.Likes.length,
+            likesNumber: tweet.Likes.length,
+            repliesNumber: tweet.Replies.length,
             isLiked: tweet.Likes.map((item) => item.UserId).includes(helpers.getUser(req).id)
           }
         })
@@ -65,8 +65,8 @@ const tweetService = {
             avatar: tweet.User.avatar
           },
           Replies: repliesArray,
-          replyCount: tweet.Replies.length,
-          likesCount: tweet.Likes.length,
+          likesNumber: tweet.Likes.length,
+          repliesNumber: tweet.Replies.length,
           isLiked: tweet.Likes.map((item) => item.UserId).includes(helpers.getUser(req).id)
           // isLiked: helpers.getUser(req).LikedTweets.map((item) => item.id).includes(tweet.id)
         }

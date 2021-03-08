@@ -11,7 +11,7 @@ const likeService = {
       .then((tweet) => {
         const tweetData = {
           ...tweet.dataValues,
-          likesCount: tweet.Likes.length
+          likesNumber: tweet.Likes.length
         }
         return callback(tweetData)
       })

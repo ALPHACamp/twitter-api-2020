@@ -3,7 +3,7 @@ const router = express.Router()
 const passport = require('../config/passport')
 
 // import controller
-const userController = require('../controllers/api/userController')
+// const userController = require('../controllers/api/userController')
 const adminController = require('../controllers/api/adminController')
 const tweetController = require('../controllers/api/tweetController')
 const replyController = require('../controllers/api/replyController')
@@ -40,23 +40,23 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
-// user
-router.post('/users', userController.signUp)
-router.post('/signin', userController.signIn)
-router.get('/users/get_current_user', authenticated, userController.getCurrentUser)
-router.put('/users/:id', authenticated, cpUpload, userController.editUser)
-router.get('/users/:id', authenticated, userController.getUser)
-router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
-router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
-router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
-router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
-router.get('/users/:id/likes', authenticated, userController.getUserLikes)
-router.get('/topuser', authenticated, userController.getTopUsers)
+// // user
+// router.post('/users', userController.signUp)
+// router.post('/signin', userController.signIn)
+// router.get('/users/get_current_user', authenticated, userController.getCurrentUser)
+// router.put('/users/:id', authenticated, cpUpload, userController.editUser)
+// router.get('/users/:id', authenticated, userController.getUser)
+// router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+// router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+// router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
+// router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
+// router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+// router.get('/topuser', authenticated, userController.getTopUsers)
 
 
-//follow
-router.post('/followships', authenticated, userController.addFollowing)
-router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
+// //follow
+// router.post('/followships', authenticated, userController.addFollowing)
+// router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 
 
 // tweet

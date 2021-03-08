@@ -13,8 +13,10 @@ const flash = require('connect-flash')
 const app = express()
 const port = process.env.PORT || 3000
 
-app.use(bodyParser.urlencoded({ extended: true }))  // setup bodyParser
-app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+// app.use(bodyParser.urlencoded({ extended: true }))  // setup bodyParser
+// app.use(bodyParser.json())
 app.use(methodOverride('_method'))
 // setup session and flash
 app.use(session({

@@ -15,14 +15,14 @@ const adminService = {
   // 登入
   signIn: (req, res, callback) => {
     // 檢查必要資料
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.account || !req.body.password) {
       return callback({ status: 'error', message: "required fields didn't exist" })
     }
     // 檢查 user 是否存在與密碼是否正確
-    let username = req.body.email
+    let username = req.body.account
     let password = req.body.password
 
-    User.findOne({ where: { email: username } })
+    User.findOne({ where: { account: username } })
       .then((user) => {
         // 帳號不存在
         if (!user) {
@@ -75,11 +75,11 @@ const adminService = {
 
           return {
             ...user.dataValues,
-            tweetsCount: user.Tweets.length,
-            likesCount: user.Likes.length,
-            tweetByLike: tweetByLike,
-            followersCount: user.Followers.length,
-            followingsCount: user.Followings.length
+            tweetsNumber: user.Tweets.length,
+            likesNumber: user.Likes.length,
+            gotLikesNumber: tweetByLike,
+            followingsNumber: user.Followers.length,
+            followersNumber: user.Followings.length
           }
         })
           .sort((a, b) => b.tweetsCount - a.tweetsCount)

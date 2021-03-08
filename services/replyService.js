@@ -26,7 +26,7 @@ const replyService = {
       include: [{ model: User, attributes: ['name', 'account'] }]
     })
       .then((replies) => {
-        return callback(replies.length)
+        return callback({ repliesNumber: replies.length })
       })
       .catch((error) => callback({ status: 'error', message: 'Get Replies Fail' }))
   },
