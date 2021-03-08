@@ -32,6 +32,7 @@ describe('# followship requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function (err, res) {
+            console.log('@@@@@@@', res);
             if (err) return done(err);
             db.Followship.findByPk(1).then((followship) => {
               //這裡沒create followship 所以找不到null
