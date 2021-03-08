@@ -1,5 +1,6 @@
 'use strict';
 const bcrypt = require('bcryptjs')
+const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Users', [{
@@ -11,6 +12,7 @@ module.exports = {
       account: '@hereComeTheBoss',
       createdAt: new Date(),
       updatedAt: new Date(),
+      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
     }, {
       id: 1,
@@ -21,6 +23,8 @@ module.exports = {
       account: '@說好不打臉',
       createdAt: new Date(),
       updatedAt: new Date(),
+      introduction: faker.lorem.sentence(),
+      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
     }, {
       id: 2,
@@ -31,6 +35,8 @@ module.exports = {
       account: '@不要問你會怕',
       createdAt: new Date(),
       updatedAt: new Date(),
+      introduction: faker.lorem.sentence(),
+      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
     }, {
       id: 3,
@@ -41,6 +47,8 @@ module.exports = {
       account: '@你看不見我',
       createdAt: new Date(),
       updatedAt: new Date(),
+      introduction: faker.lorem.sentence(),
+      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
     }, {
       id: 4,
@@ -51,6 +59,8 @@ module.exports = {
       account: '@AI人工智障',
       createdAt: new Date(),
       updatedAt: new Date(),
+      introduction: faker.lorem.sentence(),
+      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
     }, {
       id: 5,
@@ -61,6 +71,8 @@ module.exports = {
       account: '@老爺不可以',
       createdAt: new Date(),
       updatedAt: new Date(),
+      introduction: faker.lorem.sentence(),
+      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
     }], {})
   },

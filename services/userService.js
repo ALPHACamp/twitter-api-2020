@@ -29,6 +29,7 @@ const userService = {
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
+        role: 'user',
         password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
       })
       callback({ status: 'success', message: 'User was successfully registered' })
@@ -47,6 +48,9 @@ const userService = {
       const user = await User.findOne({ where: { email: email } })
 
       if (!user) return callback({ status: 'error', message: "user not found", statusCode: 401 })
+
+      if (user.role !== 'user') return callback({ status: 'error', message: "Authorization denied", statusCode: 401 })
+
       if (!bcrypt.compareSync(password, user.password)) return callback({ status: 'error', message: "password is not correct", statusCode: 401 })
       //簽發token
       const payload = { id: user.id }
