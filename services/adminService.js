@@ -1,13 +1,10 @@
 const db = require('../models')
 const bcrypt = require('bcryptjs')
 const sequelize = require('sequelize')
-const { Tweet, User, Reply, Like } = db
+const { Tweet, User, Like } = db
 
 //JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
 
 const adminService = {
   signIn: async (req, res, callback) => {

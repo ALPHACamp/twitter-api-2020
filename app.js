@@ -3,7 +3,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
@@ -22,8 +21,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 app.get('/', (req, res) => res.send('請使用API接口'))
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
-
 
 require('./routes')(app)
 
