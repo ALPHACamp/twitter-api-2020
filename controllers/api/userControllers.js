@@ -232,13 +232,21 @@ let userController = {
     });
   },
 
-  getUserLikes: (req, res) => {
+  getLikeTweets: (req, res) => {
     Like.findAll({
-      include: [Tweet],
+      include: [{ model: Tweet, include: [User, Reply, Like] }],
       order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id }
-    }).then(like => {
-      return res.json(like)
+    }).then(likes => {
+      const data = likes.map(d => ({
+        ...d.dataValues,
+        likeCount: d.Tweet.Likes.length,
+        ReplyCount: d.Tweet.Replies.length,
+        isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
+      }))
+      console.log('likes', likes[0].Tweet)
+
+      return res.json(data)
     }).catch(error => res.send(error))
   }
 }
