@@ -2,7 +2,7 @@ const swaggerAutogen = require('swagger-autogen')()
 
 const doc = {
   info: {
-    version: '1.0.0',
+    version: '2.0.0',
     title: 'Twitter REST API'
   },
   definitions: {
@@ -29,7 +29,8 @@ const doc = {
       cover: 'http://placeimg.com/640/480/nature',
       createdAt: '2021-03-02T02:18:21.000Z',
       updatedAt: '2021-03-02T02:18:21.000Z',
-      isSelf: true
+      isSelf: true,
+      isFollowed: false
     },
     FollowshipUser: {
       id: 1,
@@ -152,6 +153,22 @@ const doc = {
       },
       isFollowed: true,
       isSelf: false
+    },
+    TopUser: {
+      id: 41,
+      account: 'user4',
+      email: 'user4@example.com',
+      password: '$2a$10$P/pvqRxhgVuoIC6fG2yHOunYnFnkhBOIR6kdi1LWhLM96kF9/rtHK',
+      name: 'Johnny4',
+      avatar: 'http://placeimg.com/640/480/people',
+      introduction: 'I am Johnny4',
+      role: 'user',
+      cover: 'http://placeimg.com/640/480/nature',
+      createdAt: '2021-03-05T04:26:13.000Z',
+      updatedAt: '2021-03-05T04:26:13.000Z',
+      Followers: [],
+      followerCount: 5,
+      isFollowed: false
     },
     SuccessMessage: { status: 'success', message: 'Success' }
   }

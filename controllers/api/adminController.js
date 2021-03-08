@@ -2,12 +2,10 @@ const db = require('../../models')
 
 const { User, Tweet, Reply, Like } = db
 
-// @todo - add error handling
-
 const adminController = {
   getUsers: async (req, res) => {
     /*  #swagger.tags = ['Admin']
-        #swagger.description = 'admin 瀏覽所有使用者'
+        #swagger.description = 'admin 瀏覽所有使用者，前端處理依照推文數排序'
         #swagger.responses[200] = {
           description: '回傳陣列帶有多個user物件',
           schema: [{"$ref": "#/definitions/GeneralUser"}]
@@ -33,6 +31,35 @@ const adminController = {
     } catch (err) {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
+    }
+  },
+  getTweets: async (req, res) => {
+    /* #swagger.tags = ['Admin']
+        #swagger.description = '瀏覽全部tweets'
+        #swagger.responses[200] = {
+          description: '回傳陣列帶有多個tweet物件',
+          schema: [{"$ref": "#/definitions/Tweet"}]
+        }
+        #swagger.responses[400] = {
+          description: '如果找不到資料回傳error物件',
+          schema: { status: 'error', message: 'cannot find any tweet' }
+        }
+    */
+    try {
+      const tweets = await Tweet.findAll({
+        include: [
+          { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },
+          Like,
+          { model: User, attributes: { exclude: ['password'] } }
+        ]
+      })
+      if (!tweets || !Array.isArray(tweets)) {
+        return res.status(400).json({ status: 'error', message: 'cannot find any tweet' })
+      }
+
+      return res.status(200).json(tweets)
+    } catch (err) {
+      res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
   removeTweet: async (req, res) => {

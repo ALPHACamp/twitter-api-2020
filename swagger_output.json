@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.0.0",
+    "version": "2.0.0",
     "title": "Twitter REST API",
     "description": ""
   },
@@ -14,100 +14,24 @@
   "consumes": [],
   "produces": [],
   "paths": {
-    "/api/users/{id}": {
-      "put": {
-        "tags": [
-          "User"
-        ],
-        "description": "修改使用者資訊",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "description",
-            "in": "body",
-            "type": "object",
-            "description": "key=value: name=name&introduction=introduction&avatar=avatar&cover=cover",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "example": "name"
-                },
-                "introduction": {
-                  "type": "string",
-                  "example": "introduction"
-                },
-                "avatar": {
-                  "type": "string",
-                  "example": "img file"
-                },
-                "cover": {
-                  "type": "string",
-                  "example": "img file"
-                }
-              }
-            },
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "回傳更新過的User物件",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          },
-          "400": {
-            "description": "找不到user則回傳erro物件",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string",
-                  "example": "error"
-                },
-                "message": {
-                  "type": "string",
-                  "example": "無法獲取用戶資料。"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
+    "/api/users/top": {
       "get": {
         "tags": [
           "User"
         ],
-        "description": "user瀏覽單一使用者",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
+        "description": "瀏覽最多追蹤者的使用者，依照追蹤數排列，排除掉已經追蹤過的使用者",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "回傳user物件",
+            "description": "回傳陣列帶有多個User物件，User帶有followerCount",
             "schema": {
-              "$ref": "#/definitions/UserIsSelf"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TopUser"
+              },
+              "xml": {
+                "name": "main"
+              }
             }
           },
           "400": {
@@ -121,7 +45,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "此用戶不存在。"
+                  "example": "無法獲取用戶名單。"
                 }
               },
               "xml": {
@@ -413,6 +337,211 @@
         }
       }
     },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "user瀏覽單一使用者",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳user物件",
+            "schema": {
+              "$ref": "#/definitions/UserIsSelf"
+            }
+          },
+          "400": {
+            "description": "找不到users回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "此用戶不存在。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "description": "修改使用者名稱, 介紹, 大頭照, 背景照片。名稱必填",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "key=value: name=name&introduction=introduction&avatar=avatar&cover=cover",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "name"
+                },
+                "introduction": {
+                  "type": "string",
+                  "example": "introduction"
+                },
+                "avatar": {
+                  "type": "string",
+                  "example": "img file"
+                },
+                "cover": {
+                  "type": "string",
+                  "example": "img file"
+                }
+              }
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳更新過的User物件",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "如果使用者非本人則回傳沒有權限",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "沒有權限修改此用戶資料。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/account": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "description": "修改使用者帳號, email, 密碼, 名稱。帳號、信箱、名稱必填",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "key=value: account=acoount&email=email&password=password&checkPassword=checkPassword&name=name",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string",
+                  "example": "account"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "example@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "87654321"
+                },
+                "checkPassword": {
+                  "type": "string",
+                  "example": "87654321"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Jack"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳更新過的User物件",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "如果使用者非本人則回傳沒有權限",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "沒有權限修改此用戶資料。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/users/": {
       "post": {
         "tags": [
@@ -588,7 +717,7 @@
         "tags": [
           "Admin"
         ],
-        "description": "admin 瀏覽所有使用者",
+        "description": "admin 瀏覽所有使用者，前端處理依照推文數排序",
         "parameters": [],
         "responses": {
           "200": {
@@ -615,6 +744,57 @@
                 "message": {
                   "type": "string",
                   "example": "無法取得用戶資料"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/admin/tweets": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "瀏覽全部tweets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個tweet物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Tweet"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "如果找不到資料回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "cannot find any tweet"
                 }
               },
               "xml": {
@@ -692,7 +872,7 @@
         "tags": [
           "Tweet"
         ],
-        "description": "瀏覽全部tweets",
+        "description": "瀏覽全部使用者有追蹤的tweets\b\b",
         "parameters": [],
         "responses": {
           "200": {
@@ -1287,6 +1467,10 @@
         "isSelf": {
           "type": "boolean",
           "example": true
+        },
+        "isFollowed": {
+          "type": "boolean",
+          "example": false
         }
       }
     },
@@ -1744,6 +1928,68 @@
           "example": true
         },
         "isSelf": {
+          "type": "boolean",
+          "example": false
+        }
+      }
+    },
+    "TopUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 41
+        },
+        "account": {
+          "type": "string",
+          "example": "user4"
+        },
+        "email": {
+          "type": "string",
+          "example": "user4@example.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "$2a$10$P/pvqRxhgVuoIC6fG2yHOunYnFnkhBOIR6kdi1LWhLM96kF9/rtHK"
+        },
+        "name": {
+          "type": "string",
+          "example": "Johnny4"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/people"
+        },
+        "introduction": {
+          "type": "string",
+          "example": "I am Johnny4"
+        },
+        "role": {
+          "type": "string",
+          "example": "user"
+        },
+        "cover": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/nature"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-05T04:26:13.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-05T04:26:13.000Z"
+        },
+        "Followers": {
+          "type": "array",
+          "example": [],
+          "items": {}
+        },
+        "followerCount": {
+          "type": "number",
+          "example": 5
+        },
+        "isFollowed": {
           "type": "boolean",
           "example": false
         }

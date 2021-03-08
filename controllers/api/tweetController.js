@@ -3,12 +3,10 @@ const helpers = require('../../_helpers')
 
 const { Tweet, Reply, Like, User } = db
 
-// @todo - add error handling
-
 const tweetController = {
   getTweets: async (req, res) => {
     /* #swagger.tags = ['Tweet']
-        #swagger.description = '瀏覽全部tweets'
+        #swagger.description = '瀏覽全部使用者有追蹤的tweets'
         #swagger.responses[200] = {
           description: '回傳陣列帶有多個tweet物件',
           schema: [{"$ref": "#/definitions/Tweet"}]
@@ -19,7 +17,12 @@ const tweetController = {
         }
     */
     try {
+      const currentUser = JSON.parse(JSON.stringify(helpers.getUser(req)))
+      const followingIds = currentUser.Followings.map(followings => followings.id)
       const tweets = await Tweet.findAll({
+        where: {
+          UserId: followingIds // WHERE tweets.UserId IN [21,31...]
+        },
         include: [
           { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },
           Like,
@@ -40,7 +43,6 @@ const tweetController = {
       res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
-  // @todo - add relationships
   getTweet: async (req, res) => {
     /* #swagger.tags = ['Tweet']
         #swagger.description = '瀏覽單一tweet'
@@ -69,7 +71,6 @@ const tweetController = {
       const ifLike = tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
       const tweetData = Object.assign(tweet.toJSON(), { isLikedByMe: ifLike })
 
-      // console.log(tweetData)
       return res.status(200).json(tweetData)
     } catch (err) {
       console.log(err)

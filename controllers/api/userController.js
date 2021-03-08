@@ -46,6 +46,17 @@ module.exports = {
   },
 
   getTopUser: async (req, res) => {
+    /*  #swagger.tags = ['User']
+        #swagger.description = '瀏覽最多追蹤者的使用者，依照追蹤數排列，排除掉已經追蹤過的使用者'
+        #swagger.responses[200] = {
+          description: '回傳陣列帶有多個User物件，User帶有followerCount',
+          schema: [{"$ref": "#/definitions/TopUser"}]
+        }
+        #swagger.responses[400] = {
+          description: '找不到users回傳error物件',
+          schema: { status: 'error', message: '無法獲取用戶名單。' }
+        }
+    */
     try {
       const currentUser = JSON.parse(JSON.stringify(helpers.getUser(req)))
       const followingsOfCurrentUser = currentUser.Followings.map(Following => Following.id).concat([currentUser.id])
@@ -54,12 +65,12 @@ module.exports = {
           role: 'user',
           [Op.not]: [{ id: followingsOfCurrentUser }]
         },
-        include: [{ model: User, as: 'Followers' }],
+        include: [{ model: User, as: 'Followers' }]
       })
       if (!users || !Array.isArray(users)) return res.status(400).json({ status: 'error', message: '無法獲取用戶名單。' })
       users = users.map(user => {
         user.dataValues.followerCount = user.Followers.length
-        user.dataValues.isFollowed = false //since followings of current user are filtered out with Op.not
+        user.dataValues.isFollowed = false // since followings of current user are filtered out with Op.not
         return user
       }).sort((a, b) => b.dataValues.followerCount - a.dataValues.followerCount).splice(0, 3)
       return res.json(users)
@@ -285,9 +296,9 @@ module.exports = {
     }
   },
 
-  putUser: async (req, res) => {
+  putUser: async (req, res) => { // name, introduction, avatar, cover
     /* #swagger.tags = ['User']
-      #swagger.description = '修改使用者資訊'
+      #swagger.description = '修改使用者名稱, 介紹, 大頭照, 背景照片。名稱必填'
       #swagger.parameters['description'] = {
             in: 'body',
             type: "object",
@@ -305,8 +316,8 @@ module.exports = {
           schema: {"$ref": "#/definitions/User"}
         }
       #swagger.responses[400] = {
-        description: '找不到user則回傳erro物件',
-        schema: { status: 'error', message: '無法獲取用戶資料。' }
+        description: '如果使用者非本人則回傳沒有權限',
+        schema: { status: 'error', message: '沒有權限修改此用戶資料。' }
       }
     */
     try {
@@ -317,7 +328,7 @@ module.exports = {
       let avatar = null
       let cover = null
 
-      //check if authorized
+      // check if authorized
       if (Number(id) !== currentUser.id) return res.status(400).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
 
       if (!name) return res.status(400).json({ status: 'error', message: '名稱是必填的!!!' })
@@ -372,22 +383,46 @@ module.exports = {
     }
   },
 
-  putAccount: async (req, res) => { 
+  putAccount: async (req, res) => { // account, email password, name
+    /* #swagger.tags = ['User']
+      #swagger.description = '修改使用者帳號, email, 密碼, 名稱。帳號、信箱、名稱必填'
+      #swagger.parameters['description'] = {
+        in: 'body',
+        type: "object",
+        description: "key=value: account=acoount&email=email&password=password&checkPassword=checkPassword&name=name",
+        schema: {
+          account: "account",
+          email: "example@example.com",
+          password: "87654321",
+          checkPassword: "87654321",
+          name: "Jack"
+        },
+        required: true
+      }
+    #swagger.responses[200] = {
+      description: '回傳更新過的User物件',
+      schema: {"$ref": "#/definitions/User"}
+    }
+    #swagger.responses[400] = {
+      description: '如果使用者非本人則回傳沒有權限',
+      schema: { status: 'error', message: '沒有權限修改此用戶資料。' }
+    }
+  */
     try {
       const { account, email, password, checkPassword, name } = req.body
       const { id } = req.params
       const currentUser = helpers.getUser(req)
-      //check if authorized
+      // check if authorized
       if (Number(id) !== currentUser.id) return res.status(400).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
       if (!account || !email || !name) return res.status(400).json({ status: 'error', message: '帳戶、信箱及名稱是必填的!!!' })
 
-       //check if account email used
+      // check if account email used
       const existedAccount = await User.findOne({ where: { account, [Op.not]: [{ id: currentUser.id }] } }).catch((err) => console.log('existedAccount: ', err))
       if (existedAccount) return res.status(400).json({ status: 'error', message: '此帳號已被使用!!!', ...req.body })
       const existedEmail = await User.findOne({ where: { email, [Op.not]: [{ id: currentUser.id }] } }).catch((err) => console.log('existedAccount: ', err))
       if (existedEmail) return res.status(400).json({ status: 'error', message: '此信箱已被使用!!!', ...req.body })
 
-      //check if password needed to be updated
+      // check if password needed to be updated
       if (!password) {
         req.body.password = currentUser.password
       } else {
@@ -397,10 +432,9 @@ module.exports = {
 
       const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
       if (!user) return res.status(400).json({ status: 'error', message: '無法獲取用戶資料。' })
-      const updatedAccount = await user.update(req.body) //password can be updated even it is filtered out
+      const updatedAccount = await user.update(req.body) // password can be updated even it is filtered out
 
       return res.status(200).json(updatedAccount)
-            
     } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
