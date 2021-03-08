@@ -1,16 +1,11 @@
 const db = require('../models')
-const { User, Tweet, Like, Reply, Followship } = db
+const { User, Tweet, Like, Reply } = db
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 //JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const user = require('../models/user')
-const tweetService = require('./tweetService')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
 
 const userService = {
   signUp: async (req, res, callback) => {
@@ -167,9 +162,6 @@ const userService = {
           callback({ status: 'success', message: 'User avatar & cover was successfully update' })
         }
       } else {    //帳戶設定
-        // if (!req.body.account || !req.body.email) {
-        //   return callback({ status: 'error', message: "Account or email can't be empty!", statusCode: 400 })
-        // }
         if (req.body.checkPassword !== req.body.password) {
           return callback({ status: 'error', message: 'Password is different', statusCode: 400 })
         }
