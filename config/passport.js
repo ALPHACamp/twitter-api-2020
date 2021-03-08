@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
-const { User } = require('../models')
+const { User, Like } = require('../models')
 // const User = db.User
 
 let jwtOptions = {}
@@ -14,7 +14,8 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {
     include: [
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
+      { model: User, as: 'Followings' },
+      { model: Like }
     ]
   }).then(user => {
     if (!user) return next(null, false)
