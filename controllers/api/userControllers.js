@@ -83,18 +83,25 @@ let userController = {
       .catch((error) => res.send(error));
   },
 
-  //暫時還用不到，這是本來要做getUser的部分
+
   getCurrentUser: (req, res) => {
     const user = helpers.getUser(req);
     return res.json(user);
   },
 
   getUser: (req, res) => {
-    const id = helpers.getUser(req).id;
-    User.findByPk(id)
-      .then((user) => {
-        return res.json(user);
-      })
+    const id = req.params.id
+    User.findByPk(id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    }).then((user) => {
+      user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id
+      user.dataValues.isFollowed = helpers.getUser(req).Followings.some(d => d.id === Number(id))
+
+      return res.json(user);
+    })
       .catch((error) => res.send(error));
   },
 
@@ -136,13 +143,20 @@ let userController = {
       }
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
-      const accountCheck = await User.findOne({ where: { account: req.body.account } })
+      // const accountCheck = await User.findOne({ where: { account: req.body.account } })
+      const reconfirm = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
+
       const files = req.files
       let avatar = user.avatar
       let cover = user.cover
 
-      if (accountCheck) {
-        return res.json({ status: 'error', message: '此帳號已被註冊!' })
+
+      if (reconfirm) {
+        if (reconfirm.email === email) {
+          return res.json({ status: 'error', message: 'email已有人使用' });
+        } else if (reconfirm.account === account) {
+          return res.json({ status: 'error', message: 'account已有人使用' });
+        }
       }
 
 
@@ -153,6 +167,7 @@ let userController = {
       }
 
       if (files) {
+        imgur.setClientId(IMGUR_CLIENT_ID);
         avatar = files.avatar;
         cover = files.cover;
 
@@ -217,13 +232,21 @@ let userController = {
     });
   },
 
-  getUserLikes: (req, res) => {
+  getLikeTweets: (req, res) => {
     Like.findAll({
-      include: [Tweet],
+      include: [{ model: Tweet, include: [User, Reply, Like] }],
       order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id }
-    }).then(like => {
-      return res.json(like)
+    }).then(likes => {
+      const data = likes.map(d => ({
+        ...d.dataValues,
+        likeCount: d.Tweet.Likes.length,
+        ReplyCount: d.Tweet.Replies.length,
+        isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
+      }))
+      console.log('likes', likes[0].Tweet)
+
+      return res.json(data)
     }).catch(error => res.send(error))
   }
 }

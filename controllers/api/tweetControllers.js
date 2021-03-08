@@ -9,9 +9,13 @@ const tweetController = {
       order: [['createdAt', 'DESC']],
     })
       .then((tweets) => {
+
         const data = tweets.map((r) => ({
           ...r.dataValues,
           description: r.dataValues.description.substring(0, 50),
+          likeCount: r.dataValues.Likes.length,
+          ReplyCount: r.dataValues.Replies.length,
+          isLike: r.dataValues.Likes.some(d => d.UserId === helpers.getUser(req).id)
         }));
         return res.json(data);
       })
@@ -26,8 +30,8 @@ const tweetController = {
         if (!tweet) {
           return res.json({ status: 'error', message: "tweet didn't exist" });
         }
-        const data = tweet.toJSON();
-        return res.json(data);
+        tweet.dataValues.isLike = tweet.dataValues.Likes.some(d => d.UserId === helpers.getUser(req).id)
+        return res.json(tweet);
       })
       .catch((error) => console.log(error));
   },

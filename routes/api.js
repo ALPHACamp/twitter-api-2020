@@ -49,12 +49,12 @@ router.post('/followships', authenticated, followshipController.postFollowship);
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship);
 
 //user
-
+router.get('/users/currentUser', authenticated, userController.getCurrentUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplyTweet)
 router.get('/users/:id/followings', authenticated, userController.getFollowing)
 router.get('/users/:id/followers', authenticated, userController.getFollower)
-router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/likes', authenticated, userController.getLikeTweets)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, cpUpload, userController.putUser)
 router.post('/signin', userController.signIn)
