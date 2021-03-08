@@ -14,7 +14,6 @@ describe('# admin requests', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
         const rootUser = await db.User.create({ name: 'root' })
-        console.log(rootUser)
         this.authenticate = sinon.stub(passport, 'authenticate').callsFake(
           (strategy, options, callback) => {
             callback(null, { ...rootUser }, null)
