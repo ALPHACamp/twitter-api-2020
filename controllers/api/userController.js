@@ -52,33 +52,22 @@ const userController = {
       if (password !== checkPassword) {
         return res.json({ status: 'error', message: "password and passwordCheck didn't match" })
       }
-      return password = await bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      return password = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
     }
+    //上傳多張圖片
+    const user = await User.findByPk(helpers.getUser(req).id)
     const { files } = req
-    if (files) {
-      // console.log(files['cover'][0].path)//  確定程式跑到這都沒問題，可拿到 temp/0b4c8ff45edde0f788125b4db8078f6c
-      imgur.setClientId(process.env.IMGUR_CLIENT_ID)
-      imgur.uploadFile(files.path)
-        .then((img) => {
-          console.log(img.data.link)
-          console.log(img.link)
-          User.findByPk(helpers.getUser(req).id)
-            .then(user => {
-              user.cover = user.cover ? user.cover : null
-              user.avatar = user.avatar ? user.avatar : null
-              user.update({
-                name, account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null), introduction,
-                cover: files ? img.data.link : user.cover
-                // avatar: files['avatar'][0] ? img.link : user.avatar
-              }).then(() => { return res.json({ status: 'success', message: "user profiles has updated!" }) })
-            })
-        })
-    } else {  // 以下程式也確認沒問題，可成功更新資料
-      const user = await User.findByPk(helpers.getUser(req).id)
-      user.update({
-        name, account, email, password, introduction, cover: cover ? cover : null, avatar: avatar ? avatar : null,
-      }).then(() => { return res.json({ status: 'success', message: "user's profile has updated!" }) })
+    imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+    if (files.cover) {
+      var coverImg = await imgur.uploadFile(files.cover[0].path)
+      console.log(coverImg)
     }
+    if (files.avatar) {
+      var avatarImg = await imgur.uploadFile(files.avatar[0].path)
+      console.log(avatarImg)
+    }
+    user.update({ name, account, email, password, introduction, cover: coverImg.link, avatar: avatarImg.link })
+      .then(() => { return res.json({ status: 'success', message: "user's profile has updated!" }) })
   },
   getUser: async (req, res) => { //取得任一使用者資料
     const id = req.params.id

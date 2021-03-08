@@ -31,7 +31,7 @@ const authenticatedAdmin = (req, res, next) => {
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 router.get('/users/get_current_user', authenticated, userController.getCurrentUser)
-router.put('/users/:id', authenticated, upload.single('cover'), userController.editUser)
+router.put('/users/:id', authenticated, cpUpload, userController.editUser)
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
