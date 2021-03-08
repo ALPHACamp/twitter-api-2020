@@ -135,15 +135,14 @@ const userController = {
   },
   getUserFollowings: async (req, res) => { // 取得 :userId 的追蹤者
     const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings' }] })
-    const tweetsNumber = await Tweet.count({ where: { UserId: req.params.id } }) // 使用者推文數
-    const { id, name, Followings } = user.dataValues
+    const { Followings } = user.dataValues
     const followings = await Followings.map((d) => {
       let isFollowed = false
       if (Array.isArray(helpers.getUser(req).Followings)) {
         isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
       }
       return {
-        id: d.id,
+        followingId: d.id,
         name: d.name,
         account: d.account,
         avatar: d.avatar,
@@ -151,20 +150,18 @@ const userController = {
         isFollowed
       }
     })
-    if (Followings.length === 0) { return res.json([{ id, name, tweetsNumber, followings }]) }
-    else { return res.json([{ followingId: Followings[0].Followship.followingId }, { id, name, tweetsNumber, followings }]) }
+    return res.json(followings)
   },
   getUserFollowers: async (req, res) => {
     const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followers' }] })
-    const tweetsNumber = await Tweet.count({ where: { UserId: req.params.id } }) // 使用者推文數
-    const { id, name, Followers } = user.dataValues
+    const { Followers } = user.dataValues
     const followers = await Followers.map((d) => {
       let isFollowed = false
       if (Array.isArray(helpers.getUser(req).Followings)) {
         isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
       }
       return {
-        id: d.id,
+        followerId: d.id,
         name: d.name,
         account: d.account,
         avatar: d.avatar,
@@ -172,8 +169,7 @@ const userController = {
         isFollowed
       }
     })
-    if (Followers.length === 0) { return res.json([{ id, name, tweetsNumber, followers }]) }
-    else { return res.json([{ followerId: Followers[0].Followship.followerId }, { id, name, tweetsNumber, followers }]) }
+    return res.json(followers)
   },
   getTopUsers: async (req, res) => {
     let users = await User.findAll({ include: [{ model: User, as: 'Followers' }] })
