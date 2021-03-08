@@ -73,7 +73,7 @@ module.exports = {
         user.dataValues.followerCount = user.Followers.length
         user.dataValues.isFollowed = false // since followings of current user are filtered out with Op.not
         return user
-      }).sort((a, b) => b.dataValues.followerCount - a.dataValues.followerCount).splice(0, 3)
+      }).sort((a, b) => b.dataValues.followerCount - a.dataValues.followerCount).splice(0, 10)
       return res.json(users)
     } catch (err) {
       console.log('catch block: ', err)
@@ -245,7 +245,8 @@ module.exports = {
       const { id: followerId } = req.params
       let followings = await Followship.findAll({
         where: { followerId },
-        include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }]
+        include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }],
+        order: [['createdAt', 'DESC']]
       })
 
       if (!followings || !Array.isArray(followings)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追蹤名單。' })
@@ -279,7 +280,8 @@ module.exports = {
       const { id: followingId } = req.params
       let followers = await Followship.findAll({
         where: { followingId },
-        include: [{ model: User, as: 'follower', attributes: { exclude: ['password'] } }]
+        include: [{ model: User, as: 'follower', attributes: { exclude: ['password'] } }],
+        order: [['createdAt', 'DESC']]
       })
 
       if (!followers || !Array.isArray(followers)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追隨者名單。' })
