@@ -893,10 +893,97 @@
     },
     "/api/admin/login": {
       "post": {
-        "tags": [],
-        "description": "",
-        "parameters": [],
-        "responses": {}
+        "tags": [
+          "Admin"
+        ],
+        "description": "管理員登入",
+        "parameters": [
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "admin login data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string",
+                  "example": "root"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件, toekn 以及user資料",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "success"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功登入!!!"
+                },
+                "token": {
+                  "type": "string",
+                  "example": "yourToken..."
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "root"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "root@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "admin"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "所有欄位必填, 帳號必須存在, 否則回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "所有欄位都是必填的!!!"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
       }
     },
     "/api/tweets/": {

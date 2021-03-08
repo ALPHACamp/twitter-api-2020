@@ -7,15 +7,24 @@ module.exports = async (req, res, role) => {
   const { account, password } = req.body
   try {
     // check input
-    if (!account || !password) return res.status(400).json({ status: 'error', message: '所有欄位都要填!!!', account, password })
+    if (!account || !password) {
+      return res.status(400).json({ status: 'error', message: '所有欄位都要填!!!', account, password })
+    }
     // check if user exists
     let user = await User.findOne({ where: { account } }).catch((err) => console.log('existedAccount: ', err))
-    if (!user) return res.status(400).json({ status: 'error', message: '此帳號不存在!!!', account, password })
+    if (!user) {
+      return res.status(400).json({ status: 'error', message: '此帳號不存在!!!', account, password })
+    }
     user = user.toJSON()
     // check if password correct
-    if (!bcrypt.compareSync(password, user.password)) return res.status(400).json({ status: 'error', message: '密碼錯誤!!!', account, password })
+    if (!bcrypt.compareSync(password, user.password)) {
+      return res.status(400).json({ status: 'error', message: '密碼錯誤!!!', account, password })
+    }
     const loginPage = role === 'admin' ? '後台' : '前台'
-    if (user.role !== role) return res.status(403).json({ status: 'error', message: `此用戶沒有${loginPage}權限。`, account, password })
+
+    if (user.role !== role) {
+      return res.status(403).json({ status: 'error', message: `此用戶沒有${loginPage}權限。`, account, password })
+    }
     // sign and send jwt
     const payload = { id: user.id }
     const token = jwt.sign(payload, process.env.JWT_SECRET)
