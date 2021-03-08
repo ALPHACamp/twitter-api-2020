@@ -1,16 +1,11 @@
 const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const { sequelize } = require('../../models/index')
 const { Op } = require('sequelize')
 const db = require('../../models/index')
 const helpers = require('../../_helpers')
-const User = db.User
-const Tweet = db.Tweet
-const Reply = db.Reply
-const Like = db.Like
-const Followship = db.Followship
-const imgur = require('imgur-node-api')
+const imgur = require('imgur')
 const login = require('../../utils/login')
+
+const { User, Tweet, Reply, Like, Followship } = db
 
 module.exports = {
   getUser: async (req, res) => {
@@ -349,35 +344,22 @@ module.exports = {
         const updatedUser = await updateUser(user, req.body)
         return res.json(updatedUser)
       }
-
       // //if no files attached, req.files equals [Object: null prototype] {} (truthy value), but files.avatar equals undefined
       if (files.avatar || files.cover) {
-        imgur.setClientID(process.env.IMGUR_CLIENT_ID)
-        const uploadingArray = []
-
-        const uploadFile = (fileKey) => {
-          const uploadImage = new Promise((resolve, rej) => {
-            // a async operation that does not return promise
-            imgur.upload(files[fileKey][0].path, (err, image) => {
-              if (fileKey === 'avatar') avatar = image
-              if (fileKey === 'cover') cover = image
-              resolve()
-            })
-          })
-          uploadingArray.push(uploadImage)
+        imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+        if (files.avatar) {
+          avatar = await imgur.uploadFile(files.avatar[0].path)
         }
-
-        if (files.avatar) uploadFile('avatar')
-        if (files.cover) uploadFile('cover')
-        await Promise.all(uploadingArray)
+        if (files.cover) {
+          cover = await imgur.uploadFile(files.cover[0].path)
+        }
       }
-
       const user = await User.findByPk(id, { attributes: { exclude: 'password' } })
       const updatedUser = await updateUser(user, {
         name,
         introduction,
-        avatar: avatar ? avatar.data.link : user.avatar,
-        cover: cover ? cover.data.link : user.cover
+        avatar: avatar ? avatar.link : user.avatar,
+        cover: cover ? cover.link : user.cover
       })
       return res.status(200).json(updatedUser)
     } catch (err) {
@@ -420,9 +402,24 @@ module.exports = {
       if (!account || !email || !name) return res.status(400).json({ status: 'error', message: '帳戶、信箱及名稱是必填的!!!' })
 
       // check if account email used
-      const existedAccount = await User.findOne({ where: { account, [Op.not]: [{ id: currentUser.id }] } }).catch((err) => console.log('existedAccount: ', err))
+      const existedAccount = await User.findOne(
+        {
+          where: {
+            account,
+            [Op.not]: [{ id: currentUser.id }]
+          }
+        }).catch((err) => console.log('existedAccount: ', err))
+
       if (existedAccount) return res.status(400).json({ status: 'error', message: '此帳號已被使用!!!', ...req.body })
-      const existedEmail = await User.findOne({ where: { email, [Op.not]: [{ id: currentUser.id }] } }).catch((err) => console.log('existedAccount: ', err))
+
+      const existedEmail = await User.findOne(
+        {
+          where: {
+            email,
+            [Op.not]: [{ id: currentUser.id }]
+          }
+        }).catch((err) => console.log('existedAccount: ', err))
+
       if (existedEmail) return res.status(400).json({ status: 'error', message: '此信箱已被使用!!!', ...req.body })
 
       // check if password needed to be updated

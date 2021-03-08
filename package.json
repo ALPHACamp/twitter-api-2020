@@ -22,7 +22,7 @@
     "express-handlebars": "^5.2.0",
     "express-session": "^1.17.1",
     "faker": "^5.2.0",
-    "imgur-node-api": "^0.1.0",
+    "imgur": "^0.3.2",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
     "mocha": "^6.0.2",
