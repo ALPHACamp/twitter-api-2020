@@ -1,19 +1,26 @@
 const db = require('../models')
-const Followship = db.Followship
+const { Followship, User } = db
 const helper = require('../_helpers')
 
 const followService = {
   addFollowing: async (req, res, callback) => {
     try {
       const user = helper.getUser(req)
-      await Followship.findOrCreate({
-        where: { followerId: user.id, followingId: req.body.id },
-        defaults: {
-          followerId: user.id,
-          followingId: req.body.id
-        }
+      const following = await User.findOne({
+        where: { id: req.body.id }
       })
-      callback({ status: 'success', message: '' })
+      if (following.role !== 'admin') {
+        await Followship.findOrCreate({
+          where: { followerId: user.id, followingId: req.body.id },
+          defaults: {
+            followerId: user.id,
+            followingId: req.body.id
+          }
+        })
+        return callback({ status: 'success', message: '' })
+      }
+      return callback({ status: 'error', message: 'Authorization denied', statusCode: 401 })
+
     } catch (err) {
       console.log(err)
       callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })

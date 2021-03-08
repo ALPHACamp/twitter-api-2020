@@ -49,6 +49,12 @@ const authenticatedAdmin = (req, res, next) => {
 
 }
 
+// admin
+router.post('/admin/signin', adminController.signIn)
+router.get('/admin/users', authenticatedAdmin, adminController.getUsers)
+router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweets)
+
 // User
 router.post('/users', userController.signUp)
 router.post('/users/signin', userController.signIn)
@@ -61,13 +67,6 @@ router.get('/users/:id/followings', authenticated, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id/edit', authenticated, userController.editUser)
 router.put('/users/:id', authenticated, upload.any('avatar', 'cover'), userController.putUser)
-
-
-// admin
-router.post('/admin/signin', adminController.signIn)
-router.get('/admin/users', authenticatedAdmin, adminController.getUsers)
-router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
-router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweets)
 
 // tweet
 router.post('/tweets', authenticated, tweetController.postTweet)
