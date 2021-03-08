@@ -2,6 +2,14 @@
 
 API server for twitter clone project.
 
+## 2020.03.08 udpate
+Update Twitter API to v 2.1.0, updates:
+
+**Add one route:**
+1. POST /api/admin/login: 
+
+This route is for admin login. General user will be blocked. On the other hand, admin is not able to login through user login route (/api/users/login).
+
 ## 2020.03.07 udpate
 Update Twitter API to v 2.0.0, updates:
 

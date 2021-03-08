@@ -23,7 +23,7 @@ module.exports = {
 
   checkIfUser: (req, res, next) => {
     if (helpers.getUser(req)) {
-      if (helpers.getUser(req).role === 'user') return next()
+      if (helpers.getUser(req).role === 'user' || !helpers.getUser(req).role) return next()
       return res.status(403).json({ status: 'error', message: '此用戶沒有前台權限。' })
     }
     return res.status(401).json({ status: 'error', message: '登入後才能使用。' })

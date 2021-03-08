@@ -103,6 +103,37 @@ const adminController = {
   },
 
   login: async (req, res) => {
+  /* #swagger.tags = ['Admin']
+    #swagger.description = '管理員登入'
+    #swagger.parameters['description'] = {
+          in: 'body',
+          type: "object",
+          description: "admin login data",
+          schema: {
+            account: 'root',
+            password: '123456',
+          },
+          required: true
+    }
+      #swagger.responses[200] = {
+        description: '回傳success物件, toekn 以及user資料',
+        schema: {
+          "status": "success",
+          "message": "成功登入!!!",
+          "token": "yourToken...",
+          "user": {
+            "id": 1,
+            "name": "root",
+            "email": "root@example.com",
+            "role": "admin"
+          }
+        }
+      }
+    #swagger.responses[400] = {
+      description: '所有欄位必填, 帳號必須存在, 否則回傳error物件',
+      schema: { status: 'error', message: '所有欄位都是必填的!!!' }
+    }
+  */
     await login(req, res, 'admin')
   }
 }
