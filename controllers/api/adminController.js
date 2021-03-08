@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs')
 const helpers = require('../../_helpers')
-const { User, Tweet } = require('../../models')
-const jwt = require('jsonwebtoken');
+const { User, Tweet, Reply } = require('../../models')
+const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
 
 let adminController = {
@@ -41,8 +42,14 @@ let adminController = {
 
   getUsers: (req, res) => {
     User.findAll({
+
+      include: [{
+        model: Reply
+      }, [sequelize.fn('COUNT', sequelize.col('id'))]]
+
       // include:[Like, Followship, Reply]
     }).then(users => {
+      console.log('users', users)
       return res.json(users)
     })
   },
