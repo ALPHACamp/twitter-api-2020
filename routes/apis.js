@@ -21,26 +21,32 @@ const authenticated = (req, res, next) => {
     if (!user) {
       return res.json({ status: 'error', message: 'permission denied' })
     }
-
-    helperGetUser = user
-    req.user = helperGetUser
-
-    return next()
+    if (user.role !== 'admin') {
+      helperGetUser = user
+      req.user = helperGetUser
+      return next()
+    }
+    return res.json({ status: 'error', message: 'permission denied' })
   })(req, res, next)
 }
 
 const authenticatedAdmin = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    let helperGetUser = helpers.getUser(req)
 
-  let helperGetUser = helpers.getUser(req)
-
-  if (helperGetUser) {
-    if (helperGetUser.role === 'admin') {
-      return next()
+    if (user) {
+      if (user.role === 'admin' || helperGetUser.role === 'admin') {
+        helperGetUser = user
+        req.user = helperGetUser
+        return next()
+      }
+      return res.json({ status: 'error', message: 'permission denied' })
+    } else {
+      return res.json({ status: 'error', message: 'permission denied' })
     }
-    return res.json({ status: 'error', message: 'permission denied' })
-  } else {
-    return res.json({ status: 'error', message: 'permission denied' })
-  }
+  })(req, res, next)
+
+
 }
 
 // User
@@ -59,9 +65,9 @@ router.put('/users/:id', authenticated, upload.any('avatar', 'cover'), userContr
 
 // admin
 router.post('/admin/signin', adminController.signIn)
-router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
-router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
-router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweets)
+router.get('/admin/users', authenticatedAdmin, adminController.getUsers)
+router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweets)
 
 // tweet
 router.post('/tweets', authenticated, tweetController.postTweet)
