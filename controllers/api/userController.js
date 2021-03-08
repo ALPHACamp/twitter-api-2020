@@ -134,37 +134,36 @@ const userController = {
       .then(() => { return res.json({ status: 'success', message: "remove followship successfully!" }) })
   },
   getUserFollowings: async (req, res) => { // 取得 :userId 的追蹤者
-    const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings' }] })
-    const tweetsNumber = await Tweet.count({ where: { UserId: req.params.id } }) // 使用者推文數
-    const { id, name, Followings } = user.dataValues
-    const followings = await Followings.map((d) => {
+    const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings', order: [['createdAt', 'DESC']] }] })
+    const { Followings } = user.dataValues
+    let followings = await Followings.map((d) => {
       let isFollowed = false
       if (Array.isArray(helpers.getUser(req).Followings)) {
         isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
       }
       return {
-        id: d.id,
+        followingId: d.id,
         name: d.name,
         account: d.account,
         avatar: d.avatar,
         introduction: d.introduction,
+        createdAt: d.createdAt,
         isFollowed
       }
     })
-    if (Followings.length === 0) { return res.json([{ id, name, tweetsNumber, followings }]) }
-    else { return res.json([{ followingId: Followings[0].Followship.followingId }, { id, name, tweetsNumber, followings }]) }
+    followings.sort((a, b) => b.createdAt - a.createdAt)
+    return res.json(followings)
   },
   getUserFollowers: async (req, res) => {
-    const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followers' }] })
-    const tweetsNumber = await Tweet.count({ where: { UserId: req.params.id } }) // 使用者推文數
-    const { id, name, Followers } = user.dataValues
-    const followers = await Followers.map((d) => {
+    const user = await User.findOne({ where: { id: req.params.id }, order: [['createdAt', 'DESC']], include: [{ model: User, as: 'Followers' }] })
+    const { Followers } = user.dataValues
+    let followers = await Followers.map((d) => {
       let isFollowed = false
       if (Array.isArray(helpers.getUser(req).Followings)) {
         isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
       }
       return {
-        id: d.id,
+        followerId: d.id,
         name: d.name,
         account: d.account,
         avatar: d.avatar,
@@ -172,8 +171,8 @@ const userController = {
         isFollowed
       }
     })
-    if (Followers.length === 0) { return res.json([{ id, name, tweetsNumber, followers }]) }
-    else { return res.json([{ followerId: Followers[0].Followship.followerId }, { id, name, tweetsNumber, followers }]) }
+    followers.sort((a, b) => b.createdAt - a.createdAt)
+    return res.json(followers)
   },
   getTopUsers: async (req, res) => {
     let users = await User.findAll({ include: [{ model: User, as: 'Followers' }] })
@@ -196,7 +195,7 @@ const userController = {
   },
   getUserLikes: async (req, res) => {
     let likes = await Like.findAll({
-      where: { UserId: req.params.id }, include: [Tweet, User, { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }]
+      where: { UserId: req.params.id }, order: [['createdAt', 'DESC']], include: [Tweet, User, { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }]
     })
     const tweets = likes.map((like) => {
       const { id, description, createdAt, LikedUsers, Replies, User } = like.dataValues.Tweet
