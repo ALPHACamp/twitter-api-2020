@@ -10,6 +10,7 @@ const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
 const imgur = require('imgur-node-api')
+const login = require('../../utils/login')
 
 module.exports = {
   getUser: async (req, res) => {
@@ -72,7 +73,7 @@ module.exports = {
         user.dataValues.followerCount = user.Followers.length
         user.dataValues.isFollowed = false // since followings of current user are filtered out with Op.not
         return user
-      }).sort((a, b) => b.dataValues.followerCount - a.dataValues.followerCount).splice(0, 3)
+      }).sort((a, b) => b.dataValues.followerCount - a.dataValues.followerCount).splice(0, 10)
       return res.json(users)
     } catch (err) {
       console.log('catch block: ', err)
@@ -244,7 +245,8 @@ module.exports = {
       const { id: followerId } = req.params
       let followings = await Followship.findAll({
         where: { followerId },
-        include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }]
+        include: [{ model: User, as: 'following', attributes: { exclude: ['password'] } }],
+        order: [['createdAt', 'DESC']]
       })
 
       if (!followings || !Array.isArray(followings)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追蹤名單。' })
@@ -278,7 +280,8 @@ module.exports = {
       const { id: followingId } = req.params
       let followers = await Followship.findAll({
         where: { followingId },
-        include: [{ model: User, as: 'follower', attributes: { exclude: ['password'] } }]
+        include: [{ model: User, as: 'follower', attributes: { exclude: ['password'] } }],
+        order: [['createdAt', 'DESC']]
       })
 
       if (!followers || !Array.isArray(followers)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追隨者名單。' })
@@ -532,28 +535,6 @@ module.exports = {
         schema: { status: 'error', message: '所有欄位都是必填的!!!' }
       }
     */
-    const { account, password } = req.body
-    try {
-      // check input
-      if (!account || !password) return res.status(400).json({ status: 'error', message: '所有欄位都要填!!!', account, password })
-      // check if user exists
-      let user = await User.findOne({ where: { account } }).catch((err) => console.log('existedAccount: ', err))
-      if (!user) return res.status(400).json({ status: 'error', message: '此帳號不存在!!!', account, password })
-      user = user.toJSON()
-      // check if password correct
-      if (!bcrypt.compareSync(password, user.password)) return res.status(400).json({ status: 'error', message: '密碼錯誤!!!', account, password })
-      // sign and send jwt
-      const payload = { id: user.id }
-      const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.status(200).json({
-        status: 'success',
-        message: '成功登入!!!',
-        token,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role }
-      })
-    } catch (err) {
-      console.log('catch block: ', err)
-      return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。', account, password })
-    }
+    await login(req, res, 'user')
   }
 }

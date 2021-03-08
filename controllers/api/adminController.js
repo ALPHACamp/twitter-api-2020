@@ -1,6 +1,7 @@
 const db = require('../../models')
 
 const { User, Tweet, Reply, Like } = db
+const login = require('../../utils/login')
 
 const adminController = {
   getUsers: async (req, res) => {
@@ -78,9 +79,9 @@ const adminController = {
           schema: {"$ref": "#/definitions/SuccessMessage"}
         }
       #swagger.responses[400] = {
-         description: '如果找不到tweet回傳error物件',
-         schema: { status: 'error', message: 'tweet id does not exist' }
-       }
+        description: '如果找不到tweet回傳error物件',
+        schema: { status: 'error', message: 'tweet id does not exist' }
+      }
     */
     try {
       const tweet = await Tweet.findByPk(req.params.id)
@@ -99,6 +100,10 @@ const adminController = {
       console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
+  },
+
+  login: async (req, res) => {
+    await login(req, res, 'admin')
   }
 }
 
