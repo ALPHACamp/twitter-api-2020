@@ -134,9 +134,9 @@ const userController = {
       .then(() => { return res.json({ status: 'success', message: "remove followship successfully!" }) })
   },
   getUserFollowings: async (req, res) => { // 取得 :userId 的追蹤者
-    const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings' }] })
+    const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings', order: [['createdAt', 'DESC']] }] })
     const { Followings } = user.dataValues
-    const followings = await Followings.map((d) => {
+    let followings = await Followings.map((d) => {
       let isFollowed = false
       if (Array.isArray(helpers.getUser(req).Followings)) {
         isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
@@ -147,15 +147,17 @@ const userController = {
         account: d.account,
         avatar: d.avatar,
         introduction: d.introduction,
+        createdAt: d.createdAt,
         isFollowed
       }
     })
+    followings.sort((a, b) => b.createdAt - a.createdAt)
     return res.json(followings)
   },
   getUserFollowers: async (req, res) => {
-    const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followers' }] })
+    const user = await User.findOne({ where: { id: req.params.id }, order: [['createdAt', 'DESC']], include: [{ model: User, as: 'Followers' }] })
     const { Followers } = user.dataValues
-    const followers = await Followers.map((d) => {
+    let followers = await Followers.map((d) => {
       let isFollowed = false
       if (Array.isArray(helpers.getUser(req).Followings)) {
         isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
@@ -169,6 +171,7 @@ const userController = {
         isFollowed
       }
     })
+    followers.sort((a, b) => b.createdAt - a.createdAt)
     return res.json(followers)
   },
   getTopUsers: async (req, res) => {
@@ -192,7 +195,7 @@ const userController = {
   },
   getUserLikes: async (req, res) => {
     let likes = await Like.findAll({
-      where: { UserId: req.params.id }, include: [Tweet, User, { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }]
+      where: { UserId: req.params.id }, order: [['createdAt', 'DESC']], include: [Tweet, User, { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }]
     })
     const tweets = likes.map((like) => {
       const { id, description, createdAt, LikedUsers, Replies, User } = like.dataValues.Tweet
