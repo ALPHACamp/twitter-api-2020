@@ -1,12 +1,11 @@
+const bcrypt = require('bcryptjs');
+const helpers = require('../../_helpers');
+const { User, Followship, Tweet, Reply, Like } = require('../../models');
+const Op = require('sequelize').Op;
+const imgur = require('imgur');
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
 
-const bcrypt = require('bcryptjs')
-const helpers = require('../../_helpers')
-const { User, Followship, Tweet, Reply, Like } = require('../../models')
-const Op = require('sequelize').Op
-const imgur = require('imgur')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-
-
+const sequelize = require('sequelize');
 
 // JWT
 const jwt = require('jsonwebtoken');
@@ -141,6 +140,7 @@ let userController = {
       if (Number(req.params.id) !== helpers.getUser(req).id) {
         return res.json({ status: 'error', message: '非已登入的使用者' });
       }
+
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
       // const accountCheck = await User.findOne({ where: { account: req.body.account } })
@@ -158,7 +158,6 @@ let userController = {
           return res.json({ status: 'error', message: 'account已有人使用' });
         }
       }
-
 
       if (password) {
         if (password !== checkPassword) {
@@ -236,6 +235,14 @@ let userController = {
     Like.findAll({
       include: [{ model: Tweet, include: [User, Reply, Like] }],
       order: [['createdAt', 'DESC']],
+
+      where: { UserId: req.params.id },
+    })
+      .then((like) => {
+        return res.json(like);
+      })
+      .catch((error) => res.send(error));
+  },
       where: { UserId: req.params.id }
     }).then(likes => {
       const data = likes.map(d => ({
@@ -255,3 +262,24 @@ module.exports = userController
 
 
 
+  getTop10Users: (req, res) => {
+    User.findAll({
+      limit: 10,
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+          'FollowerCount',
+        ],
+      ],
+      order: [[sequelize.literal('FollowerCount'), 'DESC']],
+    }).then((result) => {
+      return res.json(result);
+    });
+  },
+};
+
+module.exports = userController;

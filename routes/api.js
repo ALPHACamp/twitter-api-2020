@@ -13,17 +13,14 @@ const tweetController = require('../controllers/api/tweetControllers');
 const likeController = require('../controllers/api/likeControllers');
 const followshipController = require('../controllers/api/followshipControllers');
 const replyController = require('../controllers/api/replyController');
-const adminController = require('../controllers/api/adminController')
-
+const adminController = require('../controllers/api/adminController');
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
-
     if (err) {
       return next(err);
     }
     if (!user) {
-
       return res.status(401).json({ status: 'error', message: 'permission denied!!' });
     }
     req.user = user;
@@ -42,13 +39,12 @@ const authenticatedAdmin = (req, res, next) => {
   }
 };
 
-
-
 //followship
 router.post('/followships', authenticated, followshipController.postFollowship);
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship);
 
 //user
+
 router.get('/users/currentUser', authenticated, userController.getCurrentUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplyTweet)
@@ -59,6 +55,7 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, cpUpload, userController.putUser)
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
+
 
 //user_followship
 router.get('/users/:id/followings', authenticated, userController.getFollowing);
@@ -77,11 +74,13 @@ router.post('/tweets/:tweet_id/replies', authenticated, replyController.postRepl
 router.post('/tweets/:id/like', authenticated, likeController.Like);
 router.post('/tweets/:id/unlike', authenticated, likeController.UnLike);
 
-
 //admin
-router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
-router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
-router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
-router.post('/admin/signin', adminController.signIn)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet);
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets);
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers);
+router.post('/admin/signin', adminController.signIn);
+
+//top10User
+router.get('/top10Users', userController.getTop10Users);
 
 module.exports = router;
