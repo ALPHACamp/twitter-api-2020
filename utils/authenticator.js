@@ -15,7 +15,7 @@ module.exports = {
     if (helpers.getUser(req)) {
       if (helpers.getUser(req).role === 'admin') return next()
       // 403 forbidden (after authorized)
-      return res.status(403).json({ status: 'error', message: '此用戶沒有管理員權限。' })
+      return res.status(403).json({ status: 'error', message: '此用戶沒有後台權限。' })
     }
     // 401 unauthorized fail login
     return res.status(401).json({ status: 'error', message: '登入後才能使用。' })
