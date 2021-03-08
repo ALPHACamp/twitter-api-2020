@@ -33,14 +33,14 @@ const ExtractJwt = passportJWT.ExtractJwt
 let opts = {}
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 opts.secretOrKey = process.env.JWT_SECRET
-passport.use(new JwtStrategy(opts, function (jwt_payload, next) {
+let jwtStrategy = new JwtStrategy(opts, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {
     include: [{ model: User, as: 'Followings' }, { model: User, as: 'Followers' }, { model: Tweet, as: 'LikedTweets' }]
   }).then(user => {
     if (!user) return next(null, false)
     return next(null, user)
   })
-}))
+})
 
-
+passport.use('jwt', jwtStrategy)
 module.exports = passport

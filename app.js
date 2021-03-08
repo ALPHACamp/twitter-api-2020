@@ -1,5 +1,4 @@
 const express = require('express')
-const exphbs = require('express-handlebars')  // 引入 handlebars
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 const helpers = require('./_helpers')
@@ -25,8 +24,8 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
-// app.use(authenticated())
 app.use(flash())
+app.use('/upload', express.static(__dirname + '/upload'))
 // 把 req.flash 放到 res.locals 裡面
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
