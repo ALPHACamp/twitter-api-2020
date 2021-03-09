@@ -11,7 +11,7 @@ module.exports = {
           {
             id: ((10 * x) + y),
             UserId: 10 * (x + 1) + 1,
-            description: faker.lorem.words(20),
+            description: faker.lorem.words(140),
             createdAt: new Date(),
             updatedAt: new Date()
           }

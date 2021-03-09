@@ -13,7 +13,7 @@ module.exports = {
             id: replyId++,
             UserId: (10 * y) + 1,
             TweetId: x,
-            comment: faker.lorem.words(20),
+            comment: faker.lorem.words(140),
             createdAt: new Date(),
             updatedAt: new Date()
           }
