@@ -1,0 +1,23 @@
+<div class="row mt-5">
+  <div class="col-md-5 m-auto">
+    <div class="card card-body  rounded-lg shadow">
+      <h1 class="text-center mt-3">登入系統</h1>
+      <form action="/users/login" method="POST">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="請輸入 Email">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="請輸入 Password">
+        </div>
+        <button type="submit" class="btn btn-danger btn-block">Login</button>
+        <a href="/authFb/facebook" class="btn btn-info btn-block">Facebook Login</a>
+        <a href="/authGoogle/google" class="btn btn-info btn-block">Google Login</a>
+      </form>
+      <p class="lead mt-4 ml-auto">
+        <a class="btn btn-success " href="/users/register">建立新帳戶</a>
+      </p>
+    </div>
+  </div>
+</div>

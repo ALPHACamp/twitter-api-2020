@@ -14,9 +14,6 @@ module.exports = {
       msg: {
         type: Sequelize.TEXT
       },
-      time: {
-        type: Sequelize.STRING
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

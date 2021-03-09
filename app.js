@@ -34,11 +34,17 @@ app.get('/chats', (req, res) => {
 
 // 建立 socket.io
 const httpserver = require('http').createServer(app)
-const io = require('socket.io')(httpserver)
+const io = require('socket.io')(httpserver, {
+  cors: {
+    origin: "*",
+    credentials: true
+  }
+})
+require('./sockets')(io)
 httpserver.listen(port, () => {
   console.log(`Example app listening on port ${port}!`)
 })
 
 app.use(routes)
-require('./sockets')(io)
+
 module.exports = app

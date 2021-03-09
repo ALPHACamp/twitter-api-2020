@@ -8,20 +8,59 @@ const helpers = require('../_helpers')
 // JWT
 const jwt = require('jsonwebtoken')
 // 重複程式碼
-const includeCountData = (req) => {
+const includeCountData = () => {
   return [
     [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
     [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
   ]
 }
 const isLiked = (req) => {
-  return [[sequelize.literal(`EXISTS(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.user.id})`), 'isLiked']]
+  return [[sequelize.literal(`EXISTS(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.user.id} AND   )`), 'isLiked']]
 }
 const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'avatar'] })
 
 
 
 const userController = {
+  // // 測試用登入
+  signInTest: (req, res) => {
+    // 取得資料
+    const { email, password } = req.body
+    // 檢查必要資料
+    if (!email || !password) {
+      return res.json({ status: 'error', message: "required fields didn't exist" })
+    }
+    // 查詢user
+    User.findOne({ where: { email } }).then(user => {
+      if (!user) return res.status(401).json({ status: 'error', message: '使用者未註冊' })
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ status: 'error', message: '密碼錯誤' })
+      }
+      // 簽發 token
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, 'alphacamp')
+      const data = {
+        status: 'success',
+        message: 'ok',
+        token: token,
+        user: {
+          id: user.id,
+          account: user.account,
+          name: user.name,
+          email: user.email,
+          isAdmin: user.isAdmin,
+          avatar: user.avatar
+        }
+      }
+      return res.render('index', data)
+    })
+      .catch(err => {
+        return res.status(500).json({ status: 'error', message: '伺服器錯誤請稍後', err })
+      })
+
+  },
+
+
   // 登入
   signIn: (req, res) => {
     // 取得資料
@@ -225,11 +264,13 @@ const userController = {
   },
   // 看見某使用者發過回覆的推文
   getRepliedTweets: (req, res) => {
-    const userId = req.params.id
     Reply.findAll({
-      where: { UserId: userId },
-      include: [Tweet, includeUserData()],
-
+      include: [
+        { model: Tweet, include: Like},
+        // Tweet, 
+        includeUserData()
+      ],
+      where: { UserId: req.params.id },
       attributes: {
         include: includeCountData()
       },
@@ -238,7 +279,13 @@ const userController = {
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(reply => {
-      return res.status(200).json(reply)
+      
+      const data = reply.map(item => ({
+        ...item,
+        isLiked: item.Tweet.Likes.UserId === req.user.id
+      }))
+      console.log(data)
+      return res.status(200).json(data)
     })
       .catch(err => {
         return res.status(500).json({ status: 'error', message: 'getUserTweets-伺服器錯誤請稍後', err })
@@ -249,21 +296,22 @@ const userController = {
   getLikeTweets: async (req, res) => {
     await Tweet.findAll({
       include: [
-        { model: Like, where: { UserId: req.params.id } },
+        Like,
         includeUserData()
       ],
       attributes: {
-        include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount']
-        ]
+        include: includeCountData()
       },
       raw: true,
       nest: true,
       order: [[{ model: Like }, 'createdAt', 'DESC']]
     }).then(user => {
-      console.log(user)
-      return res.status(200).json(user)
+      const data = user.map(item => ({
+        ...item,
+        isLiked: item.Likes.UserId === req.user.id,
+        TweetId: item.id
+      }))
+      return res.status(200).json(data)
     })
       .catch(err => {
         return res.status(500).json({ status: 'error', message: 'getLikeTweets-伺服器錯誤請稍後', err })
@@ -271,10 +319,12 @@ const userController = {
   },
   // 看見某使用者發過的推文
   getUserTweets: (req, res) => {
-    const userId = req.params.id
     return Tweet.findAll({
-      include: includeUserData(),
-      where: { UserId: userId },
+      include: [
+        Like,
+        includeUserData(),
+      ],
+      where: { UserId: req.params.id },
       attributes: {
         include: includeCountData()
       },
@@ -286,7 +336,9 @@ const userController = {
       const data = user.map(item => ({
         ...item,
         Time: formatDistanceToNow(item.createdAt, { includeSeconds: true }),
+        isLiked: item.Likes.UserId === req.user.id
       }))
+
       return res.status(200).json(data)
     })
       .catch(err => {

@@ -39,6 +39,10 @@ function authenticatedUser(req, res, next) {
     return res.status(401).json({ status: 'error', message: '權限驗證失敗' })
   }
 }
+// 測試區
+router.get('/chat', authenticated, (req, res) => res.render('index'))
+router.get('/login', (req, res) => res.render('login'))
+router.post('/users/login', userController.signInTest)
 
 // 登入
 router.post('/api/users/signin', userController.signIn)

@@ -1,12 +1,32 @@
-// 加入線上人數計數
+const jwt = require('jsonwebtoken')
+const passport = require('../config/passport')
+
+function authenticated(socket, next) {
+  passport.authenticate('jwt', { session: false }, (error, user, info) => {
+    if (error) return next(error)
+    if (!user) return next(new Error('未被授權'))
+    if (user.role === 'admin') return next(new Error('未被授權'))
+    socket.request.user = user
+    return next()
+  })(socket.request, {}, next)
+}
 
 
 module.exports = (io) => {
+  io.use(authenticated)
+
+  
   // 計算上線人數
   let onlineCount = 0
-  
   io.on('connection', async (socket) => {
     console.log('user connection')
+    console.log('開始', socket)
+
+    const token = socket.handshake.query.token
+    // const { id } = jwt.verify(token, process.env.JWT_SECRET)
+    console.log('token', socket.handshake.query.token)
+
+
 
     // 發送連線人數給網頁
     onlineCount++;
