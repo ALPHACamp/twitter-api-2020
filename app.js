@@ -11,7 +11,6 @@ const session = require('express-session')
 const cors = require('cors')
 const passport = require('./config/passport')
 const flash = require('connect-flash')
-const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 

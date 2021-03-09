@@ -90,7 +90,7 @@ const userController = {
     const { name, account, email, avatar, cover, introduction } = user.dataValues
     const followingsNumber = user.dataValues.Followings.length // 使用者追蹤數
     const followersNumber = user.dataValues.Followers.length// 使用者跟隨數
-    return res.json({ id, name, account, email, tweetsNumber, avatar, cover, introduction, followingsNumber, followersNumber, isFollowed })
+    return res.json({ id, name, account, email, tweetsNumber, avatar, cover, introduction: introduction.slice(0, 49), followingsNumber, followersNumber, isFollowed })
   },
   getUserTweets: async (req, res) => {
     const tweet = await Tweet.findAll({ where: { UserId: req.params.id }, order: [['createdAt', 'DESC']], include: [Reply, User, { model: User, as: 'LikedUsers' }] })
@@ -103,7 +103,7 @@ const userController = {
       const { id, description, createdAt, User, LikedUsers, Replies } = t.dataValues
       const likesNumber = LikedUsers.length   // 推文like數
       const repliesNumber = Replies.length  // 推文回覆數
-      tweets.push({ id, description, likesNumber, repliesNumber, isLiked, createdAt, User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar } })
+      tweets.push({ id, description: description.slice(0, 139), likesNumber, repliesNumber, isLiked, createdAt, User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar } })
     })
     return res.json(tweets)
   },
@@ -115,11 +115,11 @@ const userController = {
       if (Array.isArray(helpers.getUser(req).LikedTweets)) {
         isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(r.id) // 是否按過like
       }
-      const comment = r.dataValues.comment
+      const comment = r.dataValues.comment.slice(0, 139)
       const { id, description, createdAt, LikedUsers, Replies, User } = r.dataValues.Tweet
       const likesNumber = LikedUsers.length // 推文like數
       const repliesNumber = Replies.length  // 推文回覆數
-      const tweetData = { comment, tweetId: id, description, likesNumber, repliesNumber, isLiked, createdAt, User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar } }
+      const tweetData = { comment, tweetId: id, description: description.slice(0, 139), likesNumber, repliesNumber, isLiked, createdAt, User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar } }
       replies.push(tweetData)
     })
     return res.json(replies)
@@ -152,7 +152,7 @@ const userController = {
         name: d.name,
         account: d.account,
         avatar: d.avatar,
-        introduction: d.introduction,
+        introduction: d.introduction.slice(0, 49),
         createdAt: d.createdAt,
         isFollowed
       }
@@ -173,7 +173,7 @@ const userController = {
         name: d.name,
         account: d.account,
         avatar: d.avatar,
-        introduction: d.introduction,
+        introduction: d.introduction.slice(0, 49),
         isFollowed
       }
     })
@@ -211,7 +211,7 @@ const userController = {
       }
       return {
         TweetId: id,
-        description,
+        description: description.slice(0, 139),
         likesNumber: LikedUsers.length,
         repliesNumber: Replies.length,
         isLiked,

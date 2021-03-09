@@ -46,7 +46,7 @@ const tweetService = {
             id: reply.id,
             UserId: reply.UserId,
             TweetId: reply.TweetId,
-            comment: reply.comment,
+            comment: reply.comment.slice(0, 139),
             createdAt: reply.createdAt,
             updatedAt: reply.updatedAt,
             name: reply.User.name,
