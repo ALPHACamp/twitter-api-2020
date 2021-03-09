@@ -47,7 +47,7 @@ const userController = {
     return res.json({ id, name, account, avatar, role })
   },
   editUser: async (req, res) => {
-    const { name, account, email, password, checkPassword, cover, avatar, introduction } = req.body
+    const { name, account, email, password, checkPassword, introduction } = req.body
     if (password) {
       if (password !== checkPassword) {
         return res.json({ status: 'error', message: "password and passwordCheck didn't match" })
@@ -56,14 +56,18 @@ const userController = {
     }
     //上傳多張圖片
     const user = await User.findByPk(helpers.getUser(req).id)
+    console.log(user)
+    let coverImg = user.dataValues.cover
+    let avatarImg = user.dataValues.avatar
     const { files } = req
+    console.log(files)
     imgur.setClientId(process.env.IMGUR_CLIENT_ID)
     if (files.cover) {
-      var coverImg = await imgur.uploadFile(files.cover[0].path)
+      coverImg = await imgur.uploadFile(files.cover[0].path)
       console.log(coverImg)
     }
     if (files.avatar) {
-      var avatarImg = await imgur.uploadFile(files.avatar[0].path)
+      avatarImg = await imgur.uploadFile(files.avatar[0].path)
       console.log(avatarImg)
     }
     user.update({ name, account, email, password, introduction, cover: coverImg.link, avatar: avatarImg.link })
