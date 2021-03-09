@@ -24,7 +24,6 @@ const userService = {
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        role: 'user',
         password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
       })
       callback({ status: 'success', message: 'User was successfully registered' })
