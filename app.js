@@ -11,10 +11,16 @@ const session = require('express-session')
 const cors = require('cors')
 const passport = require('./config/passport')
 const flash = require('connect-flash')
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 
+
+
+// cors 的預設為全開放
 app.use(cors())
+
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 // app.use(bodyParser.urlencoded({ extended: true }))  // setup bodyParser
