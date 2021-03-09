@@ -141,9 +141,10 @@ let userController = {
         UserId: req.params.id,
       },
     }).then((reply) => {
+      // console.log(reply)
       const data = reply.map(r => ({
         ...r.dataValues,
-        description: r.Tweet.description.substring(0, 50),
+        // description: r.Tweet.description.substring(0, 50),
         likeCount: r.Tweet.Likes.length,
         ReplyCount: r.Tweet.Replies.length,
         isLike: r.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
@@ -163,20 +164,20 @@ let userController = {
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
       // const accountCheck = await User.findOne({ where: { account: req.body.account } })
-      const reconfirm = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
+      // const reconfirm = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
 
       const files = req.files
       let avatar = user.avatar
       let cover = user.cover
 
 
-      if (reconfirm) {
-        if (reconfirm.email === email) {
-          return res.json({ status: 'error', message: 'email已有人使用' });
-        } else if (reconfirm.account === account) {
-          return res.json({ status: 'error', message: 'account已有人使用' });
-        }
-      }
+      // if (reconfirm) {
+      //   if (reconfirm.email === email) {
+      //     return res.json({ status: 'error', message: 'email已有人使用' });
+      //   } else if (reconfirm.account === account) {
+      //     return res.json({ status: 'error', message: 'account已有人使用' });
+      //   }
+      // }
 
       if (password) {
         if (password !== checkPassword) {
@@ -255,25 +256,16 @@ let userController = {
       include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
       order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id },
-      raw: true, nest: true
     }).then(likes => {
-      // console.log(likes)
-      const data = likes.map(d => ({
-        ...d.Tweet,
-        description: d.Tweet.description.substring(0, 50),
-        likeCount: d.Tweet.Likes.length ? d.Tweet.Likes.length !== 'undefined' : 2,
-        // ReplyCount: d.Tweet.Replies.length,
-        // isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
-      }))
-      console.log(typeof (likes[0].Tweet.Likes))
-      // const data = likes.map(d => ({
-      //   ...d.dataValues.Tweet,
-      //   description: d.dataValues.Tweet.description.substring(0, 50),
-      //   likeCount: d.Tweet.Likes.length,
-      //   ReplyCount: d.Tweet.Replies.length,
-      //   isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
-      // }))
 
+      const data = likes.map(d => ({
+        ...d.dataValues,
+        // description: d.dataValues.Tweet.dataValues.description.substring(0, 50),
+        likeCount: d.Tweet.Likes.length,
+        ReplyCount: d.Tweet.Replies.length,
+        isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
+      }))
+      console.log(data)
       return res.json(data)
     }).catch(error => res.send(error))
   },
