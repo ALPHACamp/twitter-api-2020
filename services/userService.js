@@ -127,9 +127,6 @@ const userService = {
         return callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
       }
 
-      console.log(req)
-      console.log(req.body)
-
       const { files } = req
 
       if (files.length !== 0) {    //編輯個人資料
