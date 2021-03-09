@@ -87,10 +87,14 @@ const userController = {
       isFollowed = helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
     }
     const tweetsNumber = tweets // 使用者推文數
-    const { name, account, email, avatar, cover, introduction } = user.dataValues
+    const { name, account, email, avatar, cover } = user.dataValues
+    console.log(user.dataValues.introduction)
+    console.log('------')
+    console.log(user.dataValues.introduction.slice(0, 49))
+    const introduction = user.dataValues.introduction.slice(0, 49)
     const followingsNumber = user.dataValues.Followings.length // 使用者追蹤數
     const followersNumber = user.dataValues.Followers.length// 使用者跟隨數
-    return res.json({ id, name, account, email, tweetsNumber, avatar, cover, introduction: introduction.slice(0, 49), followingsNumber, followersNumber, isFollowed })
+    return res.json({ id, name, account, email, tweetsNumber, avatar, cover, introduction, followingsNumber, followersNumber, isFollowed })
   },
   getUserTweets: async (req, res) => {
     const tweet = await Tweet.findAll({ where: { UserId: req.params.id }, order: [['createdAt', 'DESC']], include: [Reply, User, { model: User, as: 'LikedUsers' }] })
@@ -143,6 +147,7 @@ const userController = {
     const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings', order: [['createdAt', 'DESC']] }] })
     const { Followings } = user.dataValues
     let followings = await Followings.map((d) => {
+      console.log()
       let isFollowed = false
       if (Array.isArray(helpers.getUser(req).Followings)) {
         isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
