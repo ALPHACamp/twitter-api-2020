@@ -40,7 +40,7 @@ module.exports = {
       user.isFollowed = user.Followers.map(Follower => Follower.id).includes(currentUser.id)
       user.followerCount = user.Followers.length
       user.followingCount = user.Followings.length
-      user.tweetCount = user.Tweets.length
+      // user.tweetCount = user.Tweets.length
       return res.status(200).json({ ...user, Followers: [], Followings: [], Tweets: [] })
     } catch (err) {
       console.log('catch block: ', err)
@@ -334,7 +334,7 @@ module.exports = {
       let cover = null
 
       // check if authorized
-      if (Number(id) !== currentUser.id) return res.status(400).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
+      if (Number(id) !== currentUser.id) return res.status(403).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
 
       if (!name) return res.status(400).json({ status: 'error', message: '名稱是必填的!!!' })
 
@@ -405,7 +405,7 @@ module.exports = {
       const { id } = req.params
       const currentUser = helpers.getUser(req)
       // check if authorized
-      if (Number(id) !== currentUser.id) return res.status(400).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
+      if (Number(id) !== currentUser.id) return res.status(403).json({ status: 'error', message: '沒有權限修改此用戶資料。' })
       if (!account || !email || !name) return res.status(400).json({ status: 'error', message: '帳戶、信箱及名稱是必填的!!!' })
 
       // check if account email used
