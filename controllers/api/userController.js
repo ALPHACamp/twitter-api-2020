@@ -86,12 +86,10 @@ const userController = {
     if (Array.isArray(helpers.getUser(req).Followings)) { // 如果helpers.getUser(req).Followings是陣列會回傳true
       isFollowed = helpers.getUser(req).Followings.map(d => d.id).includes(user.id)
     }
+    let introduction = null
+    if (user.dataValues.introduction) { introduction = user.dataValues.introduction.slice(0, 49) }
     const tweetsNumber = tweets // 使用者推文數
     const { name, account, email, avatar, cover } = user.dataValues
-    console.log(user.dataValues.introduction)
-    console.log('------')
-    console.log(user.dataValues.introduction.slice(0, 49))
-    const introduction = user.dataValues.introduction.slice(0, 49)
     const followingsNumber = user.dataValues.Followings.length // 使用者追蹤數
     const followersNumber = user.dataValues.Followers.length// 使用者跟隨數
     return res.json({ id, name, account, email, tweetsNumber, avatar, cover, introduction, followingsNumber, followersNumber, isFollowed })
@@ -143,42 +141,46 @@ const userController = {
     followship.destroy()
       .then(() => { return res.json({ status: 'success', message: "remove followship successfully!" }) })
   },
-  getUserFollowings: async (req, res) => { // 取得 :userId 的追蹤者
-    const user = await User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings', order: [['createdAt', 'DESC']] }] })
-    const { Followings } = user.dataValues
-    let followings = await Followings.map((d) => {
-      console.log()
-      let isFollowed = false
-      if (Array.isArray(helpers.getUser(req).Followings)) {
-        isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
-      }
-      return {
-        followingId: d.id,
-        name: d.name,
-        account: d.account,
-        avatar: d.avatar,
-        introduction: d.introduction.slice(0, 49),
-        createdAt: d.createdAt,
-        isFollowed
-      }
-    })
-    followings.sort((a, b) => b.createdAt - a.createdAt)
-    return res.json(followings)
+  getUserFollowings: (req, res) => { // 取得 :userId 的追蹤者
+    User.findOne({ where: { id: req.params.id }, include: [{ model: User, as: 'Followings', order: [['createdAt', 'DESC']] }] })
+      .then(user => {
+        let followings = user.Followings.map((d) => {
+          let isFollowed = false
+          if (Array.isArray(helpers.getUser(req).Followings)) {
+            isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
+          }
+          let introduction = null
+          if (d.introduction) { introduction = d.introduction.slice(0, 49) }
+          return {
+            followingId: d.id,
+            name: d.name,
+            account: d.account,
+            avatar: d.avatar,
+            introduction,
+            createdAt: d.createdAt,
+            isFollowed
+          }
+        })
+        followings.sort((a, b) => b.createdAt - a.createdAt)
+        return res.json(followings)
+      })
   },
   getUserFollowers: async (req, res) => {
     const user = await User.findOne({ where: { id: req.params.id }, order: [['createdAt', 'DESC']], include: [{ model: User, as: 'Followers' }] })
     const { Followers } = user.dataValues
-    let followers = await Followers.map((d) => {
+    let followers = Followers.map((d) => {
       let isFollowed = false
       if (Array.isArray(helpers.getUser(req).Followings)) {
         isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(d.id)
       }
+      let introduction = null
+      if (d.introduction) { introduction = d.introduction.slice(0, 49) }
       return {
         followerId: d.id,
         name: d.name,
         account: d.account,
         avatar: d.avatar,
-        introduction: d.introduction.slice(0, 49),
+        introduction,
         isFollowed
       }
     })
