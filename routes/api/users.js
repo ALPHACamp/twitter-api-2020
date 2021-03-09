@@ -6,7 +6,7 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
-router.get('/top', checkIfLoggedIn, checkIfUser, userController.getTopUser)
+router.get('/top', checkIfLoggedIn, checkIfUser, userController.getTopUsers)
 router.get('/:id/followers', checkIfLoggedIn, checkIfUser, userController.getFollowers)
 router.get('/:id/followings', checkIfLoggedIn, checkIfUser, userController.getFollowings)
 router.get('/:id/likes', checkIfLoggedIn, checkIfUser, userController.getLikedTweets)
