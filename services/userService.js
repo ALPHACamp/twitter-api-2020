@@ -218,7 +218,7 @@ const userService = {
       const likes = await Like.findAll({
         where: { UserId: req.params.id },
         include: [
-          { model: Tweet, include: [{ model: Like }, { model: Reply }] }
+          { model: Tweet, include: [{ model: User }, { model: Like }, { model: Reply }] }
         ]
       })
       callback(likes)
