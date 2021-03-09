@@ -19,6 +19,7 @@ let userController = {
     if (!account || !name || !email || !password) {
       return res.json({ status: 'error', message: '所有欄位為必填' });
     }
+
     if (checkPassword !== password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' });
     } else {
@@ -26,6 +27,7 @@ let userController = {
 
         .then((user) => {
           if (user) {
+
             if (user.email === email) {
               return res.json({ status: 'error', message: 'email已被註冊' });
             } else if (user.account === account) {
@@ -59,6 +61,9 @@ let userController = {
     User.findOne({ where: { account } })
       .then((user) => {
         if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' });
+        if (user.role !== 'user') {
+          return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+        }
         if (!bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({ status: 'error', message: 'passwords did not match!' });
         }
@@ -87,15 +92,9 @@ let userController = {
     const user = helpers.getUser(req);
     Tweet.count({ where: { UserId: helpers.getUser(req).id } })
       .then(tweets => {
-        // console.log('tweet', tweet)
-
         user.dataValues.tweetCount = tweets
         return res.json(user);
       })
-
-    // console.log(user)
-    // user.dataValues.tweetCount 
-
   },
 
   getUser: (req, res) => {
@@ -116,18 +115,21 @@ let userController = {
 
   getUserTweets: (req, res) => {
     Tweet.findAll({
-      include: [{ model: User, attributes: { exclude: ['password'] } }],
+      include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
       },
+    }).then((tweets) => {
+      const data = tweets.map((t) => ({
+        ...t.dataValues,
+        description: t.dataValues.description.substring(0, 50),
+        likeCount: t.Likes.length,
+        ReplyCount: t.Replies.length,
+        isLike: t.Likes.some(t => t.UserId === helpers.getUser(req).id)
+      }));
+      return res.json(data);
     })
-      .then((tweets) => {
-        const data = tweets.map((t) => ({
-          ...t.dataValues,
-        }));
-        return res.json(data);
-      })
       .catch((error) => res.send(error));
   },
 
@@ -252,15 +254,25 @@ let userController = {
     Like.findAll({
       include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
       order: [['createdAt', 'DESC']],
-      where: { UserId: req.params.id }
+      where: { UserId: req.params.id },
+      raw: true, nest: true
     }).then(likes => {
+      // console.log(likes)
       const data = likes.map(d => ({
-        ...d.dataValues,
+        ...d.Tweet,
         description: d.Tweet.description.substring(0, 50),
-        likeCount: d.Tweet.Likes.length,
-        ReplyCount: d.Tweet.Replies.length,
-        isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
+        likeCount: d.Tweet.Likes.length ? d.Tweet.Likes.length !== 'undefined' : 2,
+        // ReplyCount: d.Tweet.Replies.length,
+        // isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
       }))
+      console.log(typeof (likes[0].Tweet.Likes))
+      // const data = likes.map(d => ({
+      //   ...d.dataValues.Tweet,
+      //   description: d.dataValues.Tweet.description.substring(0, 50),
+      //   likeCount: d.Tweet.Likes.length,
+      //   ReplyCount: d.Tweet.Replies.length,
+      //   isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
+      // }))
 
       return res.json(data)
     }).catch(error => res.send(error))

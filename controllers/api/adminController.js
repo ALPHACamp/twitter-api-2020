@@ -7,16 +7,21 @@ const sequelize = require('sequelize')
 
 let adminController = {
   signIn: (req, res) => {
-    if (!req.body.account || !req.body.password) {
+    if (!req.body.email || !req.body.password) {
       return res.json({ status: 'error', message: "請填寫完整資料" })
     }
 
-    const account = req.body.account;
+    const email = req.body.email;
     const password = req.body.password;
 
-    User.findOne({ where: { account } })
+    User.findOne({ where: { email } })
       .then((user) => {
         if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' });
+
+        if (user.role !== 'admin') {
+          return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+        }
+
         if (!bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({ status: 'error', message: 'passwords did not match' });
         }
