@@ -35,6 +35,8 @@ const userController = {
     }
     const user = await User.findOne({ where: { email } })
     if (user) { return res.json({ status: 'error', message: "this email already exists " }) }
+    const userAccount = await User.findOne({ where: { account } })
+    if (userAccount) { return res.json({ status: 'error', message: "this account already exists " }) }
     if (password !== checkPassword) {
       return res.json({ status: 'error', message: "password and checkPassword didn't match" })
     }
