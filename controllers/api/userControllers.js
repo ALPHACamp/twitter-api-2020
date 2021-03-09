@@ -85,7 +85,17 @@ let userController = {
 
   getCurrentUser: (req, res) => {
     const user = helpers.getUser(req);
-    return res.json(user);
+    Tweet.count({ where: { UserId: helpers.getUser(req).id } })
+      .then(tweets => {
+        // console.log('tweet', tweet)
+
+        user.dataValues.tweetCount = tweets
+        return res.json(user);
+      })
+
+    // console.log(user)
+    // user.dataValues.tweetCount 
+
   },
 
   getUser: (req, res) => {
@@ -106,7 +116,7 @@ let userController = {
 
   getUserTweets: (req, res) => {
     Tweet.findAll({
-      include: [User],
+      include: [{ model: User, attributes: { exclude: ['password'] } }],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
@@ -129,9 +139,12 @@ let userController = {
         UserId: req.params.id,
       },
     }).then((reply) => {
-      console.log(reply)
       const data = reply.map(r => ({
         ...r.dataValues,
+        description: r.Tweet.description.substring(0, 50),
+        likeCount: r.Tweet.Likes.length,
+        ReplyCount: r.Tweet.Replies.length,
+        isLike: r.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
       }))
 
       return res.json(data);
@@ -237,12 +250,13 @@ let userController = {
 
   getLikeTweets: (req, res) => {
     Like.findAll({
-      include: [{ model: Tweet, include: [User, Reply, Like] }],
+      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
       order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id }
     }).then(likes => {
       const data = likes.map(d => ({
         ...d.dataValues,
+        description: d.Tweet.description.substring(0, 50),
         likeCount: d.Tweet.Likes.length,
         ReplyCount: d.Tweet.Replies.length,
         isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
