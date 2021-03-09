@@ -32,7 +32,7 @@ module.exports = async (req, res, role) => {
       status: 'success',
       message: '成功登入!!!',
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+      user: { ...user, password: '' }
     })
   } catch (err) {
     console.log('catch block: ', err)
