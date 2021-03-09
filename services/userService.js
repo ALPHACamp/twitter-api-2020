@@ -132,7 +132,7 @@ const userService = {
 
       const { files } = req
 
-      if (files) {    //編輯個人資料
+      if (files !== []) {    //編輯個人資料
         if (files.length === 1) {   //單張圖片判斷圖片種類
           const img = await helpers.imgurUploadPromise(files[0], IMGUR_CLIENT_ID)
           if (files[0].fieldname === 'avatar') {
