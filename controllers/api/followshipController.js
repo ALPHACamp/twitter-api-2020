@@ -47,6 +47,7 @@ const followshipController = {
       })
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
+      console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
@@ -77,6 +78,7 @@ const followshipController = {
       await follow.destroy()
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
+      console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   }

@@ -41,6 +41,7 @@ const tweetController = {
 
       return res.status(200).json(tweetsData)
     } catch (err) {
+      console.log(err)
       res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
@@ -101,6 +102,7 @@ const tweetController = {
 
       return res.status(200).json(replies)
     } catch (err) {
+      console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
@@ -137,6 +139,7 @@ const tweetController = {
 
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
+      console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
@@ -175,6 +178,7 @@ const tweetController = {
 
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
+      console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
@@ -212,6 +216,7 @@ const tweetController = {
       })
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
+      console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
@@ -240,6 +245,7 @@ const tweetController = {
       await like.destroy()
       return res.status(200).json({ status: 'success', message: 'Success' })
     } catch (err) {
+      console.log(err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   }
