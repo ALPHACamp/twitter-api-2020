@@ -203,41 +203,38 @@ let userController = {
       console.warn(error);
     }
   },
-  //回傳"使用者跟隨"的人數,ID
+  //回傳"使用者跟隨"的資料
   getFollowing: (req, res) => {
-    // return Followship.findAndCountAll({
-    //   raw: true,
-    //   nest: true,
-    //   where: {
-    //     followerId: req.params.id,
-    //   },
-    // }).then((results) => {
-    //   //result.count  //result.rows
-    //   res.json(results.rows); //, status: 'success', message: 'find following'
-    // });
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followings' }],
     }).then((user) => {
-      // user = user.toJSON();
       res.json(user.Followings);
     });
   },
-  //回傳"跟隨使用者"的人數,ID
+  //回傳"跟隨使用者"的資料
   getFollower: (req, res) => {
-    // return Followship.findAndCountAll({
-    //   raw: true,
-    //   nest: true,
-    //   // include: User,
-    //   where: {
-    //     followingId: req.params.id,
-    //   },
-    // }).then((results) => {
-    //   res.json(results.rows); //, status: 'success', message: 'find follower'
-    // });
     return User.findByPk(req.params.id, {
-      include: [{ model: User, as: 'Followers' }],
-    }).then((user) => {
-      // user = user.toJSON();
+      include: {
+        attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+        model: User,
+        as: 'Followers',
+      },
+    }).then(async (user) => {
+      user = user.toJSON();
+      for (follower of user.Followers) {
+        await Followship.findOne({
+          where: {
+            followerId: req.params.id, //1 , //使用者本人
+            followingId: follower.id, //3
+          },
+        }).then((result) => {
+          if (result) {
+            follower.isFollowed = 1;
+          } else {
+            follower.isFollowing = 0;
+          }
+        });
+      }
       res.json(user.Followers);
     });
   },
