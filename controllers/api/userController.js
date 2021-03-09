@@ -27,21 +27,28 @@ module.exports = {
       let user = await User.findOne({
         where: { id },
         attributes: { exclude: ['password'] },
-        include: [{ model: User, as: 'Followers' }]
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' },
+          Tweet
+        ]
       })
       // check if user exists
       if (!user) return res.status(400).json({ status: 'error', message: '此用戶不存在。' })
       user = user.toJSON()
       user.isSelf = user.id === currentUser.id
       user.isFollowed = user.Followers.map(Follower => Follower.id).includes(currentUser.id)
-      return res.status(200).json(user)
+      user.followerCount = user.Followers.length
+      user.followingCount = user.Followings.length
+      user.tweetCount = user.Tweets.length
+      return res.status(200).json({ ...user, Followers: [], Followings: [], Tweets: [] })
     } catch (err) {
       console.log('catch block: ', err)
       return res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
 
-  getTopUser: async (req, res) => {
+  getTopUsers: async (req, res) => {
     /*  #swagger.tags = ['User']
         #swagger.description = '瀏覽最多追蹤者的使用者，依照追蹤數排列，排除掉已經追蹤過的使用者'
         #swagger.responses[200] = {
