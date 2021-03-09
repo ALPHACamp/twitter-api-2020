@@ -82,25 +82,25 @@ let userController = {
       .catch((error) => res.send(error));
   },
 
-
   getCurrentUser: (req, res) => {
     const user = helpers.getUser(req);
     return res.json(user);
   },
 
   getUser: (req, res) => {
-    const id = req.params.id
+    const id = req.params.id;
     User.findByPk(id, {
       include: [
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
-    }).then((user) => {
-      user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id
-      user.dataValues.isFollowed = helpers.getUser(req).Followings.some(d => d.id === Number(id))
-
-      return res.json(user);
+        { model: User, as: 'Followings' },
+      ],
     })
+      .then((user) => {
+        user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id;
+        user.dataValues.isFollowed = helpers.getUser(req).Followings.some((d) => d.id === Number(id));
+
+        return res.json(user);
+      })
       .catch((error) => res.send(error));
   },
 
@@ -141,15 +141,14 @@ let userController = {
         return res.json({ status: 'error', message: '非已登入的使用者' });
       }
 
-      const { account, name, email, password, checkPassword, introduction } = req.body
-      const user = await User.findByPk(helpers.getUser(req).id)
+      const { account, name, email, password, checkPassword, introduction } = req.body;
+      const user = await User.findByPk(helpers.getUser(req).id);
       // const accountCheck = await User.findOne({ where: { account: req.body.account } })
-      const reconfirm = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
+      const reconfirm = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } });
 
-      const files = req.files
-      let avatar = user.avatar
-      let cover = user.cover
-
+      const files = req.files;
+      let avatar = user.avatar;
+      let cover = user.cover;
 
       if (reconfirm) {
         if (reconfirm.email === email) {
@@ -206,28 +205,40 @@ let userController = {
   },
   //回傳"使用者跟隨"的人數,ID
   getFollowing: (req, res) => {
-    return Followship.findAndCountAll({
-      raw: true,
-      nest: true,
-      where: {
-        followerId: req.params.id,
-      },
-    }).then((results) => {
-      //result.count  //result.rows
-      res.json(results.rows); //, status: 'success', message: 'find following'
+    // return Followship.findAndCountAll({
+    //   raw: true,
+    //   nest: true,
+    //   where: {
+    //     followerId: req.params.id,
+    //   },
+    // }).then((results) => {
+    //   //result.count  //result.rows
+    //   res.json(results.rows); //, status: 'success', message: 'find following'
+    // });
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followings' }],
+    }).then((user) => {
+      // user = user.toJSON();
+      res.json(user.Followings);
     });
   },
   //回傳"跟隨使用者"的人數,ID
   getFollower: (req, res) => {
-    return Followship.findAndCountAll({
-      raw: true,
-      nest: true,
-      where: {
-        followingId: req.params.id,
-      },
-    }).then((results) => {
-      //result.count  //result.rows
-      res.json(results.rows); //, status: 'success', message: 'find follower'
+    // return Followship.findAndCountAll({
+    //   raw: true,
+    //   nest: true,
+    //   // include: User,
+    //   where: {
+    //     followingId: req.params.id,
+    //   },
+    // }).then((results) => {
+    //   res.json(results.rows); //, status: 'success', message: 'find follower'
+    // });
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followers' }],
+    }).then((user) => {
+      // user = user.toJSON();
+      res.json(user.Followers);
     });
   },
 
@@ -235,32 +246,21 @@ let userController = {
     Like.findAll({
       include: [{ model: Tweet, include: [User, Reply, Like] }],
       order: [['createdAt', 'DESC']],
-
       where: { UserId: req.params.id },
     })
-      .then((like) => {
-        return res.json(like);
+      .then((likes) => {
+        const data = likes.map((d) => ({
+          ...d.dataValues,
+          likeCount: d.Tweet.Likes.length,
+          ReplyCount: d.Tweet.Replies.length,
+          isLike: d.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
+        }));
+        console.log('likes', likes[0].Tweet);
+
+        return res.json(data);
       })
       .catch((error) => res.send(error));
   },
-      where: { UserId: req.params.id }
-    }).then(likes => {
-      const data = likes.map(d => ({
-        ...d.dataValues,
-        likeCount: d.Tweet.Likes.length,
-        ReplyCount: d.Tweet.Replies.length,
-        isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
-      }))
-      console.log('likes', likes[0].Tweet)
-
-      return res.json(data)
-    }).catch(error => res.send(error))
-  }
-}
-
-module.exports = userController
-
-
 
   getTop10Users: (req, res) => {
     User.findAll({
