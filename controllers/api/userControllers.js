@@ -123,14 +123,13 @@ let userController = {
 
   getReplyTweet: (req, res) => {
     Reply.findAll({
-      include: [{ model: Tweet, include: [User, Reply, Like] }],
-
+      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
       },
     }).then((reply) => {
-
+      console.log(reply)
       const data = reply.map(r => ({
         ...r.dataValues,
       }))
@@ -240,14 +239,6 @@ let userController = {
     Like.findAll({
       include: [{ model: Tweet, include: [User, Reply, Like] }],
       order: [['createdAt', 'DESC']],
-
-      where: { UserId: req.params.id },
-    })
-      .then((like) => {
-        return res.json(like);
-      })
-      .catch((error) => res.send(error));
-  },
       where: { UserId: req.params.id }
     }).then(likes => {
       const data = likes.map(d => ({
@@ -259,12 +250,7 @@ let userController = {
 
       return res.json(data)
     }).catch(error => res.send(error))
-  }
-}
-
-module.exports = userController
-
-
+  },
 
   getTop10Users: (req, res) => {
     User.findAll({
@@ -284,6 +270,8 @@ module.exports = userController
       return res.json(result);
     });
   },
-};
+}
 
-module.exports = userController;
+module.exports = userController
+
+

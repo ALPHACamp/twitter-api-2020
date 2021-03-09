@@ -44,8 +44,8 @@ router.post('/followships', authenticated, followshipController.postFollowship);
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship);
 
 //user
-
 router.get('/users/currentUser', authenticated, userController.getCurrentUser)
+router.get('/users/top10Users', authenticated, userController.getTop10Users);
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReplyTweet)
 router.get('/users/:id/followings', authenticated, userController.getFollowing)
@@ -80,7 +80,6 @@ router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.g
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers);
 router.post('/admin/signin', adminController.signIn);
 
-//top10User
-router.get('/top10Users', userController.getTop10Users);
+
 
 module.exports = router;
