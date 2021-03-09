@@ -15,7 +15,6 @@ const adminController = {
           // [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount']
         ]
       },
-      limit: 2,
       raw: true,
       nest: true,
       order: [
@@ -43,7 +42,6 @@ const adminController = {
         // { model: User, as: 'Followers' },
         // { model: User, as: 'Followings' },
       ],
-      limit: 3,
       attributes: {
         // 資料庫端運行計算
         include: [
