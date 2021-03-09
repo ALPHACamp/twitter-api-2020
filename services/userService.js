@@ -243,6 +243,7 @@ const userService = {
         followingId: user.Followship.followingId,
         isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(user.id)
       }))
+      user = user.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       callback(user)
     } catch (err) {
       console.log(err)
@@ -266,6 +267,7 @@ const userService = {
         followingId: user.Followship.followingId,
         isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(user.id)
       }))
+      user = user.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       callback(user)
     } catch (err) {
       console.log(err)
