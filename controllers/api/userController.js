@@ -252,7 +252,7 @@ module.exports = {
       })
 
       if (!followings || !Array.isArray(followings)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的追蹤名單。' })
-      console.log(helpers.getUser(req))
+
       followings = followings.map(followship => {
         followship.dataValues.isFollowed = helpers.getUser(req).Followings.map(user => user.id).includes(followship.followingId)
         followship.dataValues.isSelf = helpers.getUser(req).id === followship.followingId

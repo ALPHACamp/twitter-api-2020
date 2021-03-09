@@ -66,6 +66,7 @@ const adminController = {
 
       return res.status(200).json(tweets)
     } catch (err) {
+      console.log(err)
       res.status(500).json({ status: 'error', message: '伺服器出錯，請聯繫客服人員，造成您的不便，敬請見諒。' })
     }
   },
