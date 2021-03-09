@@ -1,1 +1,1 @@
-module.exports = 'Hi, I am Johnny. For the past 6 monthes, I have been devoted myself to programming in ALPHA Camp. The end of this course and also our final project is approaching. I want to say thank you to my teammate, Jackson. Jackson is very supportive. Because of him, I can rest assured and  had a relaxed time in Sun-Moon lake last weekend. And also thanks to Emily and Al, my front-end partners for accomplishing this together. We really had a good time.'
+module.exports = 'I want to say thank you to my excellent teammate, Jackson. He is such a good partner.'
