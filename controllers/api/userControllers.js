@@ -124,15 +124,20 @@ let userController = {
 
   getReplyTweet: (req, res) => {
     Reply.findAll({
-      include: Tweet,
+      include: [{ model: Tweet, include: [User, Reply, Like] }],
+
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
       },
+    }).then((reply) => {
+
+      const data = reply.map(r => ({
+        ...r.dataValues,
+      }))
+
+      return res.json(data);
     })
-      .then((data) => {
-        return res.json(data);
-      })
       .catch((error) => res.send(error));
   },
 
@@ -244,7 +249,6 @@ let userController = {
         ReplyCount: d.Tweet.Replies.length,
         isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
       }))
-      console.log('likes', likes[0].Tweet)
 
       return res.json(data)
     }).catch(error => res.send(error))
