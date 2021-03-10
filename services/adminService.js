@@ -79,8 +79,8 @@ const adminService = {
       await tweet.destroy()
       const likes = await Like.findAll({ where: { TweetId: req.params.id } })
       const replies = await Reply.findAll({ where: { TweetId: req.params.id } })
-      await likes.destroy()
-      await replies.destroy()
+      if (likes.length > 0) await likes.destroy()
+      if (replies.length > 0) await replies.destroy()
       callback({ status: 'success', message: '' })
     } catch (err) {
       console.log(err)
