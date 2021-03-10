@@ -186,8 +186,71 @@
             "type": "string",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/User",
-              "properties": {}
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Jhon Doe"
+                },
+                "introduction": {
+                  "type": "string",
+                  "example": "Hi"
+                },
+                "cover": {
+                  "type": "string",
+                  "example": "https: //i.imgur.com/l0Jc1MO.jp"
+                },
+                "avatar": {
+                  "type": "string",
+                  "example": "https: //i.imgur.com/l0Jc1MO.jp"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/api/users/{id}/account": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "description": "edit user account data",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "string",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "properties": {
+                "account": {
+                  "type": "string",
+                  "example": "user"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Jason"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "test@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "12345678"
+                },
+                "checkPassword": {
+                  "type": "string",
+                  "example": "12345678"
+                }
+              }
             }
           }
         ],

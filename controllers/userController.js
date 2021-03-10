@@ -353,7 +353,7 @@ const userController = {
       ],
       raw: true,
       nest: true,
-      limit:10,
+      limit: 10,
     }).then(users => {
       // 過濾重複物件
       const set = new Set()
@@ -367,7 +367,54 @@ const userController = {
       }))
       return res.status(200).json(data)
     })
+  },
+  putUserAcoount: async (req, res) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      const currentUser = helpers.getUser(req)
+      const user = await User.findByPk(currentUser.id)
+      const errors = []
+      // 判斷所有項目都到齊
+      if (!account || !name || !email || !password || !checkPassword) {
+        return res.status(400).json({ status: 'error', message: '所有欄位都是必填' })
+      }
+      // 判斷密碼不相符
+      if (password !== checkPassword) {
+        return res.status(400).json({ status: 'error', message: '密碼與確認密碼不相符' })
+      }
+
+      //判斷有沒有修改account
+      if (user.account !== account) {
+        await User.findOne({ where: { account } }).then(user => {
+          if (user) {
+            errors.push('帳號已重複')
+          }
+        })
+      }
+      //判斷有沒有修改email
+      if (user.email !== email) {
+        await User.findOne({ where: { email } }).then(user => {
+          if (user) {
+            errors.push('信箱已重複')
+          }
+        })
+      }
+      if (errors.length) {
+        return res.status(400).json({ status: 'error', message: errors })
+      } else {
+        // 修改使用者資料
+        const passwordBcrypt = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+        user.update({
+          account, name, email, password: passwordBcrypt
+        }).then(user => {
+          return res.status(200).json({ status: 'success', message: '修改成功' })
+        }).catch(err => res.status(500).json({ status: 'error', message: '伺服器錯誤請稍後', err }))
+      }
+    } catch (err) {
+      return res.status(500).json({ status: 'error', message: 'getFollowings-伺服器錯誤請稍後', err })
+    }
   }
+
 }
 
 module.exports = userController
