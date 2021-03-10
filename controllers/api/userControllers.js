@@ -233,7 +233,6 @@ let userController = {
       include: [{ attributes: ['id', 'name', 'account', 'avatar', 'introduction'], model: User, as: 'Followings' }],
     }).then(async (user) => {
       user = user.toJSON();
-      console.log('@@@@@@@@@', user);
       for (following of user.Followings) {
         await Followship.findOne({
           where: {
