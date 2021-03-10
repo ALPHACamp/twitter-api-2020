@@ -46,7 +46,7 @@ let adminController = {
 
   getUsers: (req, res) => {
     User.findAll({
-      where: { role: 'user' },
+      // where: { role: 'user' },
       //跟隨者 跟隨中 被like的文章數  發文數
       raw: true,
       nest: true,
