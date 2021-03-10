@@ -20,6 +20,7 @@ let userController = {
     if (!account || !name || !email || !password) {
       return res.json({ status: 'error', message: '所有欄位為必填' });
     }
+
     if (checkPassword !== password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' });
     } else {
@@ -27,6 +28,7 @@ let userController = {
 
         .then((user) => {
           if (user) {
+
             if (user.email === email) {
               return res.json({ status: 'error', message: 'email已被註冊' });
             } else if (user.account === account) {
@@ -60,6 +62,9 @@ let userController = {
     User.findOne({ where: { account } })
       .then((user) => {
         if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' });
+        if (user.role !== 'user') {
+          return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+        }
         if (!bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({ status: 'error', message: 'passwords did not match!' });
         }
@@ -85,7 +90,11 @@ let userController = {
 
   getCurrentUser: (req, res) => {
     const user = helpers.getUser(req);
-    return res.json(user);
+    Tweet.count({ where: { UserId: helpers.getUser(req).id } })
+      .then(tweets => {
+        user.dataValues.tweetCount = tweets
+        return res.json(user);
+      })
   },
 
   getUser: (req, res) => {
@@ -107,32 +116,42 @@ let userController = {
 
   getUserTweets: (req, res) => {
     Tweet.findAll({
-      include: [User],
+      include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
       },
+    }).then((tweets) => {
+      const data = tweets.map((t) => ({
+        ...t.dataValues,
+        description: t.dataValues.description.substring(0, 50),
+        likeCount: t.Likes.length,
+        ReplyCount: t.Replies.length,
+        isLike: t.Likes.some(t => t.UserId === helpers.getUser(req).id)
+      }));
+      return res.json(data);
     })
-      .then((tweets) => {
-        const data = tweets.map((t) => ({
-          ...t.dataValues,
-        }));
-        return res.json(data);
-      })
       .catch((error) => res.send(error));
   },
 
   getReplyTweet: (req, res) => {
     Reply.findAll({
-      include: Tweet,
+      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
       },
+    }).then((reply) => {
+      const data = reply.map(r => ({
+        ...r.dataValues,
+        // description: r.Tweet.description.substring(0, 50),
+        likeCount: r.Tweet.Likes.length,
+        ReplyCount: r.Tweet.Replies.length,
+        isLike: r.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
+      }))
+
+      return res.json(data);
     })
-      .then((data) => {
-        return res.json(data);
-      })
       .catch((error) => res.send(error));
   },
 
@@ -142,21 +161,19 @@ let userController = {
         return res.json({ status: 'error', message: '非已登入的使用者' });
       }
 
-      const { account, name, email, password, checkPassword, introduction } = req.body;
-      const user = await User.findByPk(helpers.getUser(req).id);
-      // const accountCheck = await User.findOne({ where: { account: req.body.account } })
-      const reconfirm = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } });
 
-      const files = req.files;
-      let avatar = user.avatar;
-      let cover = user.cover;
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      const user = await User.findByPk(helpers.getUser(req).id)
 
-      if (reconfirm) {
-        if (reconfirm.email === email) {
-          return res.json({ status: 'error', message: 'email已有人使用' });
-        } else if (reconfirm.account === account) {
-          return res.json({ status: 'error', message: 'account已有人使用' });
-        }
+      if (account !== user.account) {
+        const accountCheck = await User.findOne({ where: { account: req.body.account } })
+        if (accountCheck) { return res.json({ status: 'error', message: 'account已有人使用' }) }
+      }
+
+
+      if (email !== user.email) {
+        const emailCheck = await User.findOne({ where: { email: req.body.email } })
+        if (emailCheck) { return res.json({ status: 'error', message: 'email已有人使用' }) }
       }
 
       if (password) {
@@ -164,6 +181,10 @@ let userController = {
           return res.json({ status: 'error', message: '兩次密碼輸入不一致' });
         }
       }
+
+      const files = req.files
+      let avatar = user.avatar
+      let cover = user.cover
 
       if (files) {
         imgur.setClientId(IMGUR_CLIENT_ID);
@@ -242,22 +263,21 @@ let userController = {
 
   getLikeTweets: (req, res) => {
     Like.findAll({
-      include: [{ model: Tweet, include: [User, Reply, Like] }],
+      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
       order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id },
-    })
-      .then((likes) => {
-        const data = likes.map((d) => ({
-          ...d.dataValues,
-          likeCount: d.Tweet.Likes.length,
-          ReplyCount: d.Tweet.Replies.length,
-          isLike: d.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
-        }));
-        console.log('likes', likes[0].Tweet);
+    }).then(likes => {
 
-        return res.json(data);
-      })
-      .catch((error) => res.send(error));
+      const data = likes.map(d => ({
+        ...d.dataValues,
+        // description: d.dataValues.Tweet.dataValues.description.substring(0, 50),
+        likeCount: d.Tweet.Likes.length,
+        ReplyCount: d.Tweet.Replies.length,
+        isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
+      }))
+      return res.json(data)
+    }).catch(error => res.send(error))
+
   },
 
   getTop10Users: (req, res) => {
@@ -307,6 +327,8 @@ let userController = {
         res.json(top10Users);
       });
   },
-};
+}
 
-module.exports = userController;
+module.exports = userController
+
+
