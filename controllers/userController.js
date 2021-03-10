@@ -3,22 +3,10 @@ const imgur = require('imgur')
 const formatDistanceToNow = require('date-fns/formatDistanceToNow')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { Tweet, User, Followship, Like, Reply, sequelize } = require('../models')
-const { QueryTypes } = require('sequelize');
+const { QueryTypes } = require('sequelize')
+const { includeCountData, includeUserData } = require('./common.js')
 const helpers = require('../_helpers')
-// JWT
 const jwt = require('jsonwebtoken')
-// 重複程式碼
-const includeCountData = () => {
-  return [
-    [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
-    [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-  ]
-}
-const isLiked = (req) => {
-  return [[sequelize.literal(`EXISTS(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.user.id} )`), 'isLiked']]
-}
-const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'avatar'] })
-
 
 
 const userController = {
@@ -180,7 +168,6 @@ const userController = {
     if (!name) {
       return res.json({ status: 'error', message: '請輸入名稱' })
     }
-
     try {
       const { files } = req
       const user = await User.findByPk(req.params.id)
@@ -284,7 +271,6 @@ const userController = {
         ...item,
         isLiked: item.Tweet.Likes.UserId === req.user.id
       }))
-      console.log(data)
       return res.status(200).json(data)
     })
       .catch(err => {

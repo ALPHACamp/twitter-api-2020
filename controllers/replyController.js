@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const { Reply } = require('../models')
 const helpers = require('../_helpers')
 
 
@@ -20,7 +20,6 @@ const replyController = {
   },
   // 編輯回覆
   putReply: (req, res) => {
-    console.log('---------', req.params.id)
     return Reply.findByPk(req.params.id)
       .then(async (reply) => {
         console.log(reply.toJSON())

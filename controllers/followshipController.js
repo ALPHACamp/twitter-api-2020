@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like, sequelize, Followship } = require('../models')
+const { Followship } = require('../models')
 const helpers = require('../_helpers')
 
 
@@ -19,7 +19,6 @@ const followshipController = {
   deleteFollowship: (req, res) => {
     return Followship.findOne({
       where: {
-
         followerId: helpers.getUser(req).id,
         //正在追蹤誰
         followingId: req.params.followingId,

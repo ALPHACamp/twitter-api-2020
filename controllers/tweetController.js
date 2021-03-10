@@ -1,14 +1,7 @@
 const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const formatDistanceToNow = require('date-fns/formatDistanceToNow')
 const helpers = require('../_helpers')
-// 重複程式碼 
-const includeCountData = (req) => {
-  return [
-    [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeCount'],
-    [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-  ]
-}
-const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'email', 'avatar', "isAdmin"] })
+const { includeCountData, includeUserData } = require('./common.js')
 
 const tweetController = {
   // 瀏覽全部推文
@@ -20,7 +13,7 @@ const tweetController = {
       ],
       attributes: {
         // 計算數量
-        include: includeCountData(req),
+        include: includeCountData(),
       },
       raw: true,
       nest: true,
@@ -50,7 +43,7 @@ const tweetController = {
       ],
       attributes: {
         // 計算數量
-        include: includeCountData(req),
+        include: includeCountData(),
         // 過濾不要資料
         exclude: ['updatedAt']
       }

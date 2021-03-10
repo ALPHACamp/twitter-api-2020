@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like, sequelize, Followship } = require('../models')
+const { User, Tweet, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const adminController = {
