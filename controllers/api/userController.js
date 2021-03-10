@@ -100,7 +100,6 @@ module.exports = {
       // get tweets //if using raw: true with findAll, will only get one associated data
       let tweets = await Tweet.findAll({
         where: { UserId },
-        nest: true,
         include: [
           // user who posted // do we need this? It's gonna be req.params.id
           { model: User, attributes: { exclude: ['password'] } },
@@ -114,8 +113,12 @@ module.exports = {
       // check if tweets is an array
       if (!tweets || !Array.isArray(tweets)) return res.status(400).json({ status: 'error', message: '無法獲取此用戶的推文。' })
       tweets = tweets.map(tweet => {
-        tweet.dataValues.isLikedByMe = tweet.Likes.map(like => like.TweetId).includes(helpers.getUser(req).id)
+        tweet.dataValues.isLikedByMe = tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
         tweet.dataValues.isMyTweet = helpers.getUser(req).id === tweet.User.id
+        tweet.dataValues.replyCount = tweet.Replies.length
+        tweet.dataValues.likeCount = tweet.Likes.length
+        tweet.dataValues.Replies = []
+        tweet.dataValues.Likes = []
         return tweet
       })
 
@@ -143,7 +146,6 @@ module.exports = {
       // get replied tweets
       let repliedTweets = await Reply.findAll({
         where: { UserId },
-        nest: true,
         include: [
           // user who replies
           { model: User, attributes: { exclude: ['password'] } },
@@ -167,8 +169,12 @@ module.exports = {
       repliedTweets = repliedTweets.map(reply => {
         const tweet = reply.Tweet.dataValues
         // helpers.getUser(req) of test file does not query anything, so we cannot search in likes array of user
-        tweet.isLikedByMe = tweet.Likes.map(like => like.TweetId).includes(helpers.getUser(req).id)
+        tweet.isLikedByMe = tweet.Likes.map(like => like.UserId).includes(helpers.getUser(req).id)
         tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
+        tweet.replyCount = tweet.Replies.length
+        tweet.likeCount = tweet.Likes.length
+        tweet.Replies = []
+        tweet.Likes = []
         return reply
       })
 
@@ -196,7 +202,6 @@ module.exports = {
       // get liked tweets
       let likedTweets = await Like.findAll({
         where: { UserId },
-        nest: true,
         include: [
           { model: User, attributes: { exclude: ['password'] } },
           {
@@ -218,9 +223,13 @@ module.exports = {
 
       likedTweets = likedTweets.map(like => {
         const tweet = like.Tweet.dataValues
-        tweet.isLikedByMe = tweet.Likes.map(myLike => myLike.TweetId).includes(helpers.getUser(req).id)
+        tweet.isLikedByMe = tweet.Likes.map(myLike => myLike.UserId).includes(helpers.getUser(req).id)
+        console.log(tweet.Likes)
         tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
-        // discard the like data part
+        tweet.replyCount = tweet.Replies.length
+        tweet.likeCount = tweet.Likes.length
+        tweet.Replies = []
+        tweet.Likes = []
         return like
       })
 
