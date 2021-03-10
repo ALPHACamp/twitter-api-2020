@@ -301,9 +301,6 @@ const userController = {
       })
     ]).then(([likeUser, loginUser]) => {
       const loginUserLikeData = loginUser.Likes.map(item => item.TweetId)
-      const likeUserData = likeUser.map(item => item.id)
-      const like = loginUserLikeData.filter(r => [17].includes(r)).length > 0
-      console.log(like)
       const data = likeUser.map(item => ({
         ...item,
         isLiked: loginUserLikeData.filter(r => [item.id].includes(r)).length > 0
