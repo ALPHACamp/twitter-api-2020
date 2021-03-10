@@ -296,7 +296,7 @@ let userController = {
   getTop10Users: (req, res) => {
     User.findAll({
       where: { role: 'user' },
-      limit: 10,
+      limit: 11,
       raw: true,
       nest: true,
       attributes: [
@@ -314,12 +314,18 @@ let userController = {
     })
       .then((top11Users) => {
         const user = helpers.getUser(req);
-        const top10Users = top11Users.filter((top11User) => top11User.id !== user.id); //user.id
-        return top10Users; //若沒濾掉則為11個 ,由前端顯示10筆
+        let top10Users = [];
+        if (top11Users.find((top11User) => top11User.id === user.id)) {
+          top10Users = top11Users.filter((top11User) => top11User.id !== user.id);
+        } else {
+          top11Users.pop();
+          top10Users = top11Users;
+        }
+        return top10Users;
       })
       .then(async (top10Users) => {
         const user = helpers.getUser(req);
-        // console.log(top10Users);
+
         for (top10user of top10Users) {
           await Followship.findOne({
             where: {
