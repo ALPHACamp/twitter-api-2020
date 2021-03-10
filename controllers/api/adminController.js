@@ -75,6 +75,7 @@ let adminController = {
         ],
       ],
       order: [[sequelize.literal('FollowerCount'), 'DESC']],
+
     }).then((users) => {
       console.log('users', users);
       return res.json(users);
