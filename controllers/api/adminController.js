@@ -8,7 +8,6 @@ let adminController = {
   signIn: (req, res) => {
     if (!req.body.email || !req.body.password) {
       return res.json({ status: 'error', message: '請填寫完整資料' });
-
     }
 
     const email = req.body.email;
@@ -19,7 +18,7 @@ let adminController = {
         if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' });
 
         if (user.role !== 'admin') {
-          return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+          return res.status(401).json({ status: 'error', message: 'Permission denied.' });
         }
 
         if (!bcrypt.compareSync(password, user.password)) {
@@ -77,7 +76,6 @@ let adminController = {
       order: [[sequelize.literal('FollowerCount'), 'DESC']],
 
     }).then((users) => {
-      console.log('users', users);
       return res.json(users);
     });
   },
@@ -94,25 +92,22 @@ let adminController = {
     });
   },
 
-
   deleteTweet: async (req, res) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id)
+      const tweet = await Tweet.findByPk(req.params.id);
 
       if (!tweet) {
-        return res.json({ status: 'error', message: '此則貼文不存在!' })
+        return res.json({ status: 'error', message: '此則貼文不存在!' });
       }
-      await Reply.destroy({ where: { TweetId: req.params.id } })
-      await Like.destroy({ where: { TweetId: req.params.id } })
-      await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: req.params.id } });
+      await Like.destroy({ where: { TweetId: req.params.id } });
+      await tweet.destroy();
 
-      res.json({ status: 'success', message: '成功刪除該則推文!' })
-
+      res.json({ status: 'success', message: '成功刪除該則推文!' });
     } catch (error) {
       console.warn(error);
     }
-  }
-}
-
+  },
+};
 
 module.exports = adminController;
