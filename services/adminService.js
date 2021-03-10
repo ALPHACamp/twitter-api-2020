@@ -112,7 +112,7 @@ const adminService = {
           status: 'success',
           message: 'ok',
           id: tweet.id,
-          description: tweet.description.slice(0, 139),
+          description: tweet.description.slice(0, 49),
           createdAt: tweet.createdAt,
           updatedAt: tweet.updatedAt,
           User: {
