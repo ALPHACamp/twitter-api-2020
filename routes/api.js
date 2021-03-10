@@ -43,23 +43,19 @@ const authenticatedAdmin = (req, res, next) => {
 router.post('/followships', authenticated, followshipController.postFollowship);
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship);
 
+//top10User
+router.get('/users/top10Users', userController.getTop10Users);
 //user
-
-router.get('/users/currentUser', authenticated, userController.getCurrentUser)
-router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
-router.get('/users/:id/replied_tweets', authenticated, userController.getReplyTweet)
-router.get('/users/:id/followings', authenticated, userController.getFollowing)
-router.get('/users/:id/followers', authenticated, userController.getFollower)
-router.get('/users/:id/likes', authenticated, userController.getLikeTweets)
-router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, cpUpload, userController.putUser)
-router.post('/signin', userController.signIn)
-router.post('/users', userController.signUp)
-
-
-//user_followship
+router.get('/users/currentUser', authenticated, userController.getCurrentUser);
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets);
+router.get('/users/:id/replied_tweets', authenticated, userController.getReplyTweet);
 router.get('/users/:id/followings', authenticated, userController.getFollowing);
 router.get('/users/:id/followers', authenticated, userController.getFollower);
+router.get('/users/:id/likes', authenticated, userController.getLikeTweets);
+router.get('/users/:id', authenticated, userController.getUser);
+router.put('/users/:id', authenticated, cpUpload, userController.putUser);
+router.post('/signin', userController.signIn);
+router.post('/users', userController.signUp);
 
 //tweet
 router.get('/tweets/:id', authenticated, tweetController.getTweet);
@@ -79,8 +75,5 @@ router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminContr
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets);
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers);
 router.post('/admin/signin', adminController.signIn);
-
-//top10User
-router.get('/top10Users', userController.getTop10Users);
 
 module.exports = router;
