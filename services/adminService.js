@@ -1,7 +1,7 @@
 const db = require('../models')
 const bcrypt = require('bcryptjs')
 const sequelize = require('sequelize')
-const { Tweet, User, Like } = db
+const { Tweet, User, Like, Reply } = db
 
 //JWT
 const jwt = require('jsonwebtoken')
@@ -77,6 +77,10 @@ const adminService = {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
       await tweet.destroy()
+      const likes = await Like.findAll({ where: { TweetId: req.params.id } })
+      const replies = await Reply.findAll({ where: { TweetId: req.params.id } })
+      await likes.destroy()
+      await replies.destroy()
       callback({ status: 'success', message: '' })
     } catch (err) {
       console.log(err)
