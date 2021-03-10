@@ -41,6 +41,7 @@ let userController = {
               account,
               password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
               role: 'user',
+              avatar: 'https://i.imgur.com/pU3t3DH.jpg'
             });
           }
         })
@@ -82,6 +83,7 @@ let userController = {
             email: user.email,
             account: user.account,
             role: user.role,
+            avatar: user.avatar
           },
         });
       })
