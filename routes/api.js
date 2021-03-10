@@ -43,7 +43,9 @@ const authenticatedAdmin = (req, res, next) => {
 router.post('/followships', authenticated, followshipController.postFollowship);
 router.delete('/followships/:followingId', authenticated, followshipController.deleteFollowship);
 
+
 //user
+
 router.get('/users/currentUser', authenticated, userController.getCurrentUser)
 router.get('/users/top10Users', authenticated, userController.getTop10Users);
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
@@ -56,10 +58,6 @@ router.put('/users/:id', authenticated, cpUpload, userController.putUser)
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
 
-
-//user_followship
-router.get('/users/:id/followings', authenticated, userController.getFollowing);
-router.get('/users/:id/followers', authenticated, userController.getFollower);
 
 //tweet
 router.get('/tweets/:id', authenticated, tweetController.getTweet);
@@ -79,7 +77,6 @@ router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminContr
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets);
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers);
 router.post('/admin/signin', adminController.signIn);
-
 
 
 module.exports = router;

@@ -10,6 +10,7 @@ const sequelize = require('sequelize');
 // JWT
 const jwt = require('jsonwebtoken');
 const passportJWT = require('passport-jwt');
+const user = require('../../models/user');
 const ExtractJwt = passportJWT.ExtractJwt;
 const JwtStrategy = passportJWT.Strategy;
 
@@ -87,7 +88,6 @@ let userController = {
       .catch((error) => res.send(error));
   },
 
-
   getCurrentUser: (req, res) => {
     const user = helpers.getUser(req);
     Tweet.count({ where: { UserId: helpers.getUser(req).id } })
@@ -98,18 +98,19 @@ let userController = {
   },
 
   getUser: (req, res) => {
-    const id = req.params.id
+    const id = req.params.id;
     User.findByPk(id, {
       include: [
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
-      ]
-    }).then((user) => {
-      user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id
-      user.dataValues.isFollowed = helpers.getUser(req).Followings.some(d => d.id === Number(id))
-
-      return res.json(user);
+        { model: User, as: 'Followings' },
+      ],
     })
+      .then((user) => {
+        user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id;
+        user.dataValues.isFollowed = helpers.getUser(req).Followings.some((d) => d.id === Number(id));
+
+        return res.json(user);
+      })
       .catch((error) => res.send(error));
   },
 
@@ -160,6 +161,7 @@ let userController = {
         return res.json({ status: 'error', message: '非已登入的使用者' });
       }
 
+
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
 
@@ -167,6 +169,7 @@ let userController = {
         const accountCheck = await User.findOne({ where: { account: req.body.account } })
         if (accountCheck) { return res.json({ status: 'error', message: 'account已有人使用' }) }
       }
+
 
       if (email !== user.email) {
         const emailCheck = await User.findOne({ where: { email: req.body.email } })
@@ -222,30 +225,39 @@ let userController = {
       console.warn(error);
     }
   },
-  //回傳"使用者跟隨"的人數,ID
+  //回傳"使用者跟隨"的資料
   getFollowing: (req, res) => {
-    return Followship.findAndCountAll({
-      raw: true,
-      nest: true,
-      where: {
-        followerId: req.params.id,
-      },
-    }).then((results) => {
-      //result.count  //result.rows
-      res.json(results.rows); //, status: 'success', message: 'find following'
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followings' }],
+    }).then((user) => {
+      res.json(user.Followings);
     });
   },
-  //回傳"跟隨使用者"的人數,ID
+  //回傳"跟隨使用者"的資料
   getFollower: (req, res) => {
-    return Followship.findAndCountAll({
-      raw: true,
-      nest: true,
-      where: {
-        followingId: req.params.id,
+    return User.findByPk(req.params.id, {
+      include: {
+        attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+        model: User,
+        as: 'Followers',
       },
-    }).then((results) => {
-      //result.count  //result.rows
-      res.json(results.rows); //, status: 'success', message: 'find follower'
+    }).then(async (user) => {
+      user = user.toJSON();
+      for (follower of user.Followers) {
+        await Followship.findOne({
+          where: {
+            followerId: req.params.id, //1 , //使用者本人
+            followingId: follower.id, //3
+          },
+        }).then((result) => {
+          if (result) {
+            follower.isFollowed = 1;
+          } else {
+            follower.isFollowed = 0;
+          }
+        });
+      }
+      res.json(user.Followers);
     });
   },
 
@@ -263,14 +275,16 @@ let userController = {
         ReplyCount: d.Tweet.Replies.length,
         isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
       }))
-
       return res.json(data)
     }).catch(error => res.send(error))
+
   },
 
   getTop10Users: (req, res) => {
     User.findAll({
       limit: 10,
+      raw: true,
+      nest: true,
       attributes: [
         'id',
         'name',
@@ -282,9 +296,31 @@ let userController = {
         ],
       ],
       order: [[sequelize.literal('FollowerCount'), 'DESC']],
-    }).then((result) => {
-      return res.json(result);
-    });
+    })
+      .then((top11Users) => {
+        const user = helpers.getUser(req);
+        const top10Users = top11Users.filter((top11User) => top11User.id !== user.id); //user.id
+        return top10Users; //若沒濾掉則為11個 ,由前端顯示10筆
+      })
+      .then(async (top10Users) => {
+        const user = helpers.getUser(req);
+        console.log(top10Users);
+        for (top10user of top10Users) {
+          await Followship.findOne({
+            where: {
+              followerId: user.id, //user.id , //當前使用者
+              followingId: top10user.id, //3
+            },
+          }).then((result) => {
+            if (result) {
+              top10user.isFollowed = 1;
+            } else {
+              top10user.isFollowed = 0;
+            }
+          });
+        }
+        res.json(top10Users);
+      });
   },
 }
 
