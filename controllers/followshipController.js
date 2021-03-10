@@ -3,12 +3,22 @@ const helpers = require('../_helpers')
 
 
 const followshipController = {
-
   postFollowship: (req, res) => {
+    const followings = req.user.toJSON().Followings
+    // 判斷有沒有追蹤過
+    const data = followings.map(item => Number(item.id)).includes(Number(req.body.followingId))
+    // 不能追蹤自己
+    if(Number(req.user.id) === Number(req.body.followingId)) {
+      return res.status(200).json({ status: 'error', message: '使用者不能追蹤自己' })
+    }
+    // 不能重複追蹤
+    if(data) {
+      return res.status(200).json({ status: 'error', message: '已追蹤' })
+    }
     return Followship.create({
       followerId: helpers.getUser(req).id,
       //正在追蹤誰
-      followingId: req.body.id,
+      followingId: req.body.followingId,
     })
       .then((tweet) => {
         return res.json({ status: 'success', message: 'Followship was successfully create' })
