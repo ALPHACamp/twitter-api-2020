@@ -11,6 +11,7 @@ const sequelize = require('sequelize');
 const jwt = require('jsonwebtoken');
 const passportJWT = require('passport-jwt');
 const user = require('../../models/user');
+const { set } = require('../../app');
 const ExtractJwt = passportJWT.ExtractJwt;
 const JwtStrategy = passportJWT.Strategy;
 
@@ -152,15 +153,28 @@ let userController = {
       },
     })
       .then((reply) => {
-        const data = reply.map((r) => ({
-          ...r.dataValues,
-          // description: r.Tweet.description.substring(0, 50),
-          likeCount: r.Tweet.Likes.length,
-          ReplyCount: r.Tweet.Replies.length,
-          isLike: r.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
-        }));
 
-        return res.json(data);
+        // const data = reply.map((r) => ({
+        //   ...r.dataValues,
+        //   description: r.Tweet.description.substring(0, 50),
+        //   likeCount: r.Tweet.Likes.length,
+        //   ReplyCount: r.Tweet.Replies.length,
+        //   isLike: r.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
+        // }));
+
+        const data = reply.map((r) => ({
+          ...r.Tweet.dataValues,
+          description: r.Tweet.dataValues.description.substring(0, 50),
+          likeCount: r.Tweet.dataValues.Likes.length,
+          ReplyCount: r.Tweet.dataValues.Replies.length,
+          isLike: r.Tweet.dataValues.Likes.some((t) => t.UserId === helpers.getUser(req).id),
+        }))
+
+        const set = new Set();
+        const result = data.filter(item => !set.has(item.id) ? set.add(item.id) : false);
+        // console.log(result)
+
+        return res.json(result);
       })
       .catch((error) => res.send(error));
   },
