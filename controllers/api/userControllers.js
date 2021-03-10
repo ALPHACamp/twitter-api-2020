@@ -163,27 +163,26 @@ let userController = {
 
       const { account, name, email, password, checkPassword, introduction } = req.body
       const user = await User.findByPk(helpers.getUser(req).id)
-      // const accountCheck = await User.findOne({ where: { account: req.body.account } })
-      // const reconfirm = await User.findOne({ where: { [Op.or]: [{ account }, { email }] } })
 
-      const files = req.files
-      let avatar = user.avatar
-      let cover = user.cover
+      if (account !== user.account) {
+        const accountCheck = await User.findOne({ where: { account: req.body.account } })
+        if (accountCheck) { return res.json({ status: 'error', message: 'account已有人使用' }) }
+      }
 
-
-      // if (reconfirm) {
-      //   if (reconfirm.email === email) {
-      //     return res.json({ status: 'error', message: 'email已有人使用' });
-      //   } else if (reconfirm.account === account) {
-      //     return res.json({ status: 'error', message: 'account已有人使用' });
-      //   }
-      // }
+      if (email !== user.email) {
+        const emailCheck = await User.findOne({ where: { email: req.body.email } })
+        if (emailCheck) { return res.json({ status: 'error', message: 'email已有人使用' }) }
+      }
 
       if (password) {
         if (password !== checkPassword) {
           return res.json({ status: 'error', message: '兩次密碼輸入不一致' });
         }
       }
+
+      const files = req.files
+      let avatar = user.avatar
+      let cover = user.cover
 
       if (files) {
         imgur.setClientId(IMGUR_CLIENT_ID);
