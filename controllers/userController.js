@@ -340,24 +340,32 @@ const userController = {
   },
   // 推薦前十個追蹤者
   getTopUser: (req, res) => {
-    // 撈出所有 User 與 followers 資料
     return User.findAll({
       include: { model: User, as: 'Followers' },
       attributes: {
+        exclude: ['updatedAt', 'createdAt', 'password', 'role'],
         include: [
-          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = User.id)'), 'followingIdCount']
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'FollowingCount'],
         ]
       },
-      // order: [
-      //   [sequelize.literal('followingIdCount'), 'DESC']
-      // ],
+      order: [
+        [sequelize.literal('FollowingCount'), 'DESC']
+      ],
       raw: true,
       nest: true,
-      // limit: 10
+      limit:10,
     }).then(users => {
-
-      console.log(users)
-      return res.status(200).json(users)
+      // 過濾重複物件
+      const set = new Set()
+      const tweetsFilter = users.filter(item => !set.has(item.id) ? set.add(item.id) : false)
+      // 取出 login user Followings 
+      const userFollowingData = req.user.toJSON().Followings.map(item => item.id)
+      const data = tweetsFilter.map(item => ({
+        ...item,
+        // userTop10 與 userFollowingData 做比對
+        isFollowed: userFollowingData.includes(item.id)
+      }))
+      return res.status(200).json(data)
     })
   }
 }
