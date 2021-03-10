@@ -123,7 +123,7 @@ const userController = {
         }).catch(err => res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後', err }))
       }
     } catch (err) {
-      res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後' })
+      res.status(500).json({ status: 'error', message: '註冊流程-伺服器錯誤請稍後', err })
     }
   },
   // 獲取當前用戶
@@ -133,8 +133,8 @@ const userController = {
       const attributes = ['role', 'password', 'createdAt', 'updatedAt']
       attributes.forEach(item => delete user.dataValues[item])
       return res.json(user)
-    } catch (error) {
-      next(error)
+    } catch (err) {
+      res.status(500).json({ status: 'error', message: '獲取當前用戶-伺服器錯誤請稍後', err })
     }
   },
 
@@ -195,7 +195,7 @@ const userController = {
       await user.update({ name, introduction })
       return res.status(200).json({ status: 'success', message: '修改成功' })
     } catch (err) {
-      return res.status(500).json({ status: 'error', message: '編輯個人資料-伺服器錯誤請稍後' })
+      return res.status(500).json({ status: 'error', message: '編輯個人資料-伺服器錯誤請稍後', err })
     }
   },
   // 正在追蹤誰
@@ -253,7 +253,7 @@ const userController = {
   getRepliedTweets: (req, res) => {
     Reply.findAll({
       include: [
-        { model: Tweet, include: Like},
+        { model: Tweet, include: Like },
         // Tweet, 
         includeUserData()
       ],
@@ -266,7 +266,7 @@ const userController = {
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(reply => {
-      
+
       const data = reply.map(item => ({
         ...item,
         isLiked: item.Tweet.Likes.UserId === req.user.id
@@ -279,29 +279,39 @@ const userController = {
 
   },
   // 看見某使用者點過的 Like 
-  getLikeTweets: async (req, res) => {
-    await Tweet.findAll({
-      include: [
-        Like,
-        includeUserData()
-      ],
-      attributes: {
-        include: includeCountData()
-      },
-      raw: true,
-      nest: true,
-      order: [[{ model: Like }, 'createdAt', 'DESC']]
-    }).then(user => {
-      const data = user.map(item => ({
+  getLikeTweets: (req, res) => {
+    return Promise.all([
+      Tweet.findAll({
+        include: [
+          { model: Like, where: { UserId: req.params.id } },
+          includeUserData()
+        ],
+        // where: { UserId: req.params.id },
+        attributes: {
+          include: includeCountData()
+        },
+        raw: true,
+        nest: true,
+        order: [[{ model: Like }, 'createdAt', 'DESC']]
+      }),
+      User.findByPk(req.user.id, {
+        include: [
+          { model: Like, where: { UserId: req.user.id } },
+        ],
+      })
+    ]).then(([likeUser, loginUser]) => {
+      const loginUserLikeData = loginUser.Likes.map(item => item.TweetId)
+      const likeUserData = likeUser.map(item => item.id)
+      const like = loginUserLikeData.filter(r => [17].includes(r)).length > 0
+      console.log(like)
+      const data = likeUser.map(item => ({
         ...item,
-        isLiked: item.Likes.UserId === req.user.id,
-        TweetId: item.id
+        isLiked: loginUserLikeData.filter(r => [item.id].includes(r)).length > 0
       }))
       return res.status(200).json(data)
+    }).catch(err => {
+      return res.status(500).json({ status: 'error', message: 'getLikeTweets-伺服器錯誤請稍後', err })
     })
-      .catch(err => {
-        return res.status(500).json({ status: 'error', message: 'getLikeTweets-伺服器錯誤請稍後', err })
-      })
   },
   // 看見某使用者發過的推文
   getUserTweets: (req, res) => {
@@ -331,10 +341,19 @@ const userController = {
         return res.status(500).json({ status: 'error', message: 'getUserTweets-伺服器錯誤請稍後', err })
       })
   },
-  // // 推薦前十個追蹤者
-  // getTopUser: (req, res) => {
+  // 推薦前十個追蹤者
+  getTopUser: (req, res) => {
+    // 撈出所有 User 與 followers 資料
+    return User.findAll({
+      include: { model: User, as: 'Followers' },
+      raw: true,
+      nest: true
+    }).then(users => {
 
-  // }
+      console.log(users)
+      return res.status(200).json(users)
+    })
+  }
 }
 
 module.exports = userController

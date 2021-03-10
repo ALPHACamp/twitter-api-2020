@@ -51,7 +51,7 @@ router.post('/api/users', userController.signUp)
 // 當前用戶
 router.get('/api/users/currentUser', authenticated, userController.getCurrentUser)
 // 前十個追蹤推薦
-// router.get('/api/users/top', authenticated, authenticatedUser, userController.getTopUser)
+router.get('/api/users/top', authenticated, authenticatedUser, userController.getTopUser)
 // 個人資料
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 // 修改個人資料

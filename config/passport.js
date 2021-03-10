@@ -14,7 +14,7 @@ jwtOptions.secretOrKey = process.env.JWT_SECRET
 passport.use(new JwtStrategy(jwtOptions, function (jwtPayload, next) {
   User.findByPk(jwtPayload.id, {
     include: [
-      // { model: User, as: 'Followers' },
+      { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
   }).then(user => {
