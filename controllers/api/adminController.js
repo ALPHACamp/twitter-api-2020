@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const helpers = require('../../_helpers')
-const { User, Tweet, Reply } = require('../../models')
+const { User, Tweet, Reply, Like } = require('../../models')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 
@@ -72,12 +72,22 @@ let adminController = {
       })
   },
 
-  deleteTweet: (req, res) => {
-    return Tweet.findByPk(req.params.id)
-      .then(tweet => {
-        tweet.destroy()
-        return res.json({ status: 'success', messgae: '成功刪除該則推文!' })
-      })
+  deleteTweet: async (req, res) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+
+      if (!tweet) {
+        return res.json({ status: 'error', message: '此則貼文不存在!' })
+      }
+      await Reply.destroy({ where: { TweetId: req.params.id } })
+      await Like.destroy({ where: { TweetId: req.params.id } })
+      await tweet.destroy()
+
+      res.json({ status: 'success', message: '成功刪除該則推文!' })
+
+    } catch (error) {
+      console.warn(error);
+    }
   }
 }
 

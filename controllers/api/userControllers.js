@@ -141,7 +141,6 @@ let userController = {
         UserId: req.params.id,
       },
     }).then((reply) => {
-      // console.log(reply)
       const data = reply.map(r => ({
         ...r.dataValues,
         // description: r.Tweet.description.substring(0, 50),
@@ -264,7 +263,7 @@ let userController = {
         ReplyCount: d.Tweet.Replies.length,
         isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
       }))
-      console.log(data)
+
       return res.json(data)
     }).catch(error => res.send(error))
   },
