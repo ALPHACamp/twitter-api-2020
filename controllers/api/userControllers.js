@@ -240,6 +240,7 @@ let userController = {
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followings' }],
     }).then((user) => {
+
       res.json(user.Followings);
     });
   },
