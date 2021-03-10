@@ -346,11 +346,26 @@ const userController = {
     // 撈出所有 User 與 followers 資料
     return User.findAll({
       include: { model: User, as: 'Followers' },
+      attributes: {
+        // 資料庫端運行計算
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'FollowerCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'FollowingCount'],
+        ]
+      },
       raw: true,
-      nest: true
+      nest: true,
+      limit: 10,
+      // order: [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'DESC']
+      order: [
+        // 依推文數進行排列
+        // [FollowerCount, 'DESC']
+        [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'DESC']
+        // [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'DESC']
+      ]
     }).then(users => {
 
-      console.log(users)
+      // console.log(users)
       return res.status(200).json(users)
     })
   }
