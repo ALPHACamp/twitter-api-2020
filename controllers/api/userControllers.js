@@ -116,7 +116,10 @@ let userController = {
 
   getUserTweets: (req, res) => {
     Tweet.findAll({
-      include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like],
+      include: [
+        { model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] }
+        , Like],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
@@ -136,7 +139,12 @@ let userController = {
 
   getReplyTweet: (req, res) => {
     Reply.findAll({
-      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
+      include: [{
+        model: Tweet,
+        include: [{ model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] },
+          Like]
+      }],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
@@ -263,7 +271,10 @@ let userController = {
 
   getLikeTweets: (req, res) => {
     Like.findAll({
-      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
+      include: [{
+        model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] }, Like]
+      }],
       order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id },
     }).then(likes => {

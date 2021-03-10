@@ -47,16 +47,15 @@ let adminController = {
 
   getUsers: (req, res) => {
     User.findAll({
-
-      include: [{
-        model: Reply
-      }, [sequelize.fn('COUNT', sequelize.col('id'))]]
-
+      include: {
+        model: Reply,
+        attributes: [[sequelize.fn('COUNT', sequelize.col('UserId')), 'Amount']], //[sequelize.fn('COUNT', sequelize.col('id'))],
+      },
       // include:[Like, Followship, Reply]
-    }).then(users => {
-      console.log('users', users)
-      return res.json(users)
-    })
+    }).then((users) => {
+      console.log('users', users);
+      return res.json(users);
+    });
   },
   getTweets: (req, res) => {
     Tweet.findAll({
