@@ -8,7 +8,7 @@ const includeCountData = (req) => {
     [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
   ]
 }
-const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'avatar'] })
+const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'email', 'avatar', "isAdmin"] })
 
 const tweetController = {
   // 瀏覽全部推文
@@ -45,17 +45,18 @@ const tweetController = {
   getTweet: async (req, res) => {
     return Tweet.findByPk(req.params.id, {
       include: [
-        User
+        Like,
+        includeUserData()
       ],
       attributes: {
-        // // 計算數量
-        include: includeCountData(req),        
+        // 計算數量
+        include: includeCountData(req),
         // 過濾不要資料
         exclude: ['updatedAt']
       }
     }).then(tweets => {
       const data = tweets.toJSON()
-      data.isLiked = tweets.UserId === req.user.id
+      data.isLiked = tweets.Likes.map(item => item.UserId).includes(req.user.id)
       return res.status(200).json(data)
     }).catch(error => {
       return res.status(500).json({ status: 'error', message: '瀏覽單一推文-伺服器錯誤請稍後', error })

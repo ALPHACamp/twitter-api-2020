@@ -15,7 +15,7 @@ const includeCountData = () => {
   ]
 }
 const isLiked = (req) => {
-  return [[sequelize.literal(`EXISTS(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.user.id} AND   )`), 'isLiked']]
+  return [[sequelize.literal(`EXISTS(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = ${req.user.id} )`), 'isLiked']]
 }
 const includeUserData = () => ({ model: User, attributes: ['id', 'name', 'account', 'avatar'] })
 
@@ -344,7 +344,11 @@ const userController = {
       .catch(err => {
         return res.status(500).json({ status: 'error', message: 'getUserTweets-伺服器錯誤請稍後', err })
       })
-  }
+  },
+  // // 推薦前十個追蹤者
+  // getTopUser: (req, res) => {
+
+  // }
 }
 
 module.exports = userController

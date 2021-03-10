@@ -50,6 +50,8 @@ router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
 // 當前用戶
 router.get('/api/users/currentUser', authenticated, userController.getCurrentUser)
+// 前十個追蹤推薦
+// router.get('/api/users/top', authenticated, authenticatedUser, userController.getTopUser)
 // 個人資料
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 // 修改個人資料
@@ -64,6 +66,7 @@ router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, us
 router.get('/api/users/:id/likes', authenticated, authenticatedUser, userController.getLikeTweets)
 // 看見某使用者發過的推文
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
+
 
 
 //admin
