@@ -343,8 +343,17 @@ const userController = {
     // 撈出所有 User 與 followers 資料
     return User.findAll({
       include: { model: User, as: 'Followers' },
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(*) FROM followships WHERE followships.followingId = User.id)'), 'followingIdCount']
+        ]
+      },
+      // order: [
+      //   [sequelize.literal('followingIdCount'), 'DESC']
+      // ],
       raw: true,
-      nest: true
+      nest: true,
+      // limit: 10
     }).then(users => {
 
       console.log(users)
