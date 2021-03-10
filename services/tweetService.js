@@ -14,6 +14,7 @@ const tweetService = {
         const tweetsData = tweets.map((tweet) => {
           return {
             ...tweet.dataValues,
+            description: tweet.description.slice(0, 139),
             User: {
               id: tweet.User.id,
               name: tweet.User.name,
