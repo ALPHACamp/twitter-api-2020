@@ -127,7 +127,8 @@ const userService = {
         return callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
       }
 
-      const { files } = req
+      let { files } = req
+      if (files === undefined) files = []
 
       if (files.length !== 0) {    //編輯個人資料
         if (files.length === 1) {   //單張圖片判斷圖片種類
