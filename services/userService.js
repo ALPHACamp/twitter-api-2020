@@ -57,7 +57,8 @@ const userService = {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          account: user.account
         }
       })
     } catch (err) {
@@ -125,9 +126,11 @@ const userService = {
       if (!req.body.name) {
         return callback({ status: 'error', message: "Please insert a name for user!", statusCode: 400 })
       }
-      const { files } = req
 
-      if (files) {    //編輯個人資料
+      let { files } = req
+      if (files === undefined) files = []
+
+      if (files.length !== 0) {    //編輯個人資料
         if (files.length === 1) {   //單張圖片判斷圖片種類
           const img = await helpers.imgurUploadPromise(files[0], IMGUR_CLIENT_ID)
           if (files[0].fieldname === 'avatar') {
@@ -202,7 +205,7 @@ const userService = {
       const replies = await Reply.findAll({
         where: { UserId: req.params.id },
         include: [
-          { model: Tweet, include: [{ model: Like }, { model: Reply }] }
+          { model: Tweet, include: [{ model: User }, { model: Like }, { model: Reply }] }
         ]
       })
       callback(replies)
