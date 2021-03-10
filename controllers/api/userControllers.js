@@ -293,6 +293,7 @@ let userController = {
 
   getTop10Users: (req, res) => {
     User.findAll({
+      where: { role: 'user' },
       limit: 10,
       raw: true,
       nest: true,
@@ -301,6 +302,7 @@ let userController = {
         'name',
         'account',
         'avatar',
+        'role',
         [
           sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
           'FollowerCount',
@@ -315,7 +317,7 @@ let userController = {
       })
       .then(async (top10Users) => {
         const user = helpers.getUser(req);
-        console.log(top10Users);
+        // console.log(top10Users);
         for (top10user of top10Users) {
           await Followship.findOne({
             where: {
