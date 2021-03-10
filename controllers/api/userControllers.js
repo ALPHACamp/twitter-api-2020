@@ -10,6 +10,7 @@ const sequelize = require('sequelize');
 // JWT
 const jwt = require('jsonwebtoken');
 const passportJWT = require('passport-jwt');
+const user = require('../../models/user');
 const ExtractJwt = passportJWT.ExtractJwt;
 const JwtStrategy = passportJWT.Strategy;
 
@@ -231,7 +232,7 @@ let userController = {
           if (result) {
             follower.isFollowed = 1;
           } else {
-            follower.isFollowing = 0;
+            follower.isFollowed = 0;
           }
         });
       }
@@ -262,6 +263,8 @@ let userController = {
   getTop10Users: (req, res) => {
     User.findAll({
       limit: 10,
+      raw: true,
+      nest: true,
       attributes: [
         'id',
         'name',
@@ -273,9 +276,31 @@ let userController = {
         ],
       ],
       order: [[sequelize.literal('FollowerCount'), 'DESC']],
-    }).then((result) => {
-      return res.json(result);
-    });
+    })
+      .then((top11Users) => {
+        const user = helpers.getUser(req);
+        const top10Users = top11Users.filter((top11User) => top11User.id !== user.id); //user.id
+        return top10Users; //若沒濾掉則為11個 ,由前端顯示10筆
+      })
+      .then(async (top10Users) => {
+        const user = helpers.getUser(req);
+        console.log(top10Users);
+        for (top10user of top10Users) {
+          await Followship.findOne({
+            where: {
+              followerId: user.id, //user.id , //當前使用者
+              followingId: top10user.id, //3
+            },
+          }).then((result) => {
+            if (result) {
+              top10user.isFollowed = 1;
+            } else {
+              top10user.isFollowed = 0;
+            }
+          });
+        }
+        res.json(top10Users);
+      });
   },
 };
 
