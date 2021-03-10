@@ -87,8 +87,8 @@ const userController = {
   getCurrentUser: async (req, res) => {
     try {
       const user = await User.findByPk(helpers.getUser(req).id)
-      const { id, name, account, avatar, role } = user
-      return res.json({ id, name, account, avatar, role })
+      const { id, name, account, email, avatar, role, cover, introduction } = user
+      return res.json({ id, name, account, email, avatar, role, cover, introduction })
     } catch (error) {
       console.log('error:', error)
       return res.json({ status: 'error', message: 'codeStatus 500' })
@@ -276,10 +276,9 @@ const userController = {
   },
 
   addFollowing: (req, res) => {
-    if (req.body.id === helpers.getUser(req).id) {
+    if (Number(req.body.id) === helpers.getUser(req).id) {
       return res.json({ status: 'error', message: "can't follow yourself!" })
     }
-
     return Followship.create({
       followerId: helpers.getUser(req).id,
       followingId: req.body.id
@@ -290,6 +289,7 @@ const userController = {
         console.log(error)
         return res.json({ status: 'error', message: "create followship fail!" })
       })
+
   },
 
   removeFollowing: async (req, res) => {
