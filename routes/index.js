@@ -77,7 +77,7 @@ router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminC
 
 // 瀏覽推文
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
-// 修改推文
+// 新增推文
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 // 單一推文
 router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)

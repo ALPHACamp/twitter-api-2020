@@ -15,6 +15,7 @@ const adminController = {
           // [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount']
         ]
       },
+      // limit: 10,
       raw: true,
       nest: true,
       order: [

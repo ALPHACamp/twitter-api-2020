@@ -57,6 +57,9 @@ const tweetController = {
   },
   // 新增推特
   postTweet: (req, res) => {
+    if (!req.body.description) {
+      return res.status(200).json({ status: 'error', message: "description didn't exist" })
+    }
     return Tweet.create({
       description: req.body.description,
       UserId: helpers.getUser(req).id
