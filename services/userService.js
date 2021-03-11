@@ -97,7 +97,8 @@ const userService = {
             model: Tweet, include: [
               { model: Like },
               { model: Reply }
-            ]
+            ],
+            order: ['createdAt', 'DESC']
           }
         ]
       })
