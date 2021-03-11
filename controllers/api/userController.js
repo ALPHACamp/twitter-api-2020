@@ -264,13 +264,13 @@ const userController = {
         }
 
         const comment = r.dataValues.comment.slice(0, 139)
-        const { id, description, createdAt, LikedUsers, Replies, User } = r.dataValues.Tweet
+        const { description, createdAt, LikedUsers, Replies, User } = r.dataValues.Tweet
         const showAccount = '@' + User.account
         const likesNumber = LikedUsers.length // 推文like數
         const repliesNumber = Replies.length  // 推文回覆數
         const tweetData = {
           comment,
-          tweetId: id,
+          tweetId: r.dataValues.TweetId,
           description: description.slice(0, 139),
           likesNumber,
           repliesNumber,
