@@ -93,7 +93,12 @@ const userService = {
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
-          { model: Tweet }
+          {
+            model: Tweet, include: [
+              { model: Like },
+              { model: Reply }
+            ]
+          }
         ]
       })
       if (!user) return callback({ status: 'error', message: 'User not found', statusCode: 400 })
