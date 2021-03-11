@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
-const fs = require('fs')
+const { Op } = require('sequelize')
 const imgur = require('imgur')
 const helpers = require('../../_helpers')
 
@@ -98,17 +98,18 @@ const userController = {
   editUser: async (req, res) => {
     try {
       const { name, account, email, password, checkPassword, introduction } = req.body
-
+      let newPassword = ''
       if (password) {
+        console.log(password)
         if (password !== checkPassword) {
-          return res.json({ status: 'error', message: "password and passwordCheck didn't match" })
+          return res.json({ status: 'error', message: "password and checkPassword didn't match" })
         }
-        return password = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+        newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       }
 
       //上傳多張圖片
       const user = await User.findByPk(helpers.getUser(req).id)
-      // console.log('user:', user)
+      console.log('user:', user)
       let coverImg = user.dataValues.cover
       let avatarImg = user.dataValues.avatar
       const { files } = req
@@ -130,7 +131,7 @@ const userController = {
         name,
         email,
         account,
-        password,
+        password: newPassword,
         introduction,
         cover: coverImg,
         avatar: avatarImg
@@ -224,7 +225,7 @@ const userController = {
       return res.json(tweets)
     } catch (error) {
       console.log('error:', error)
-      return res.json({ status: 'error', message: "CodeStatus 500" })
+      return res.json({ status: 'error', message: error })
     }
   },
 
@@ -397,9 +398,8 @@ const userController = {
   getTopUsers: async (req, res) => {
     try {
       let users = await User.findAll({
-        include: [{ model: User, as: 'Followers' }]
+        include: [{ model: User, as: 'Followers' }], where: [{ role: { [Op.not]: 'admin' } }]
       })
-
       users = users.map((user) => {
         let isFollowed = false
         if (Array.isArray(helpers.getUser(req).Followings)) {
