@@ -274,7 +274,7 @@ const userController = {
         const repliesNumber = Replies.length  // 推文回覆數
         const tweetData = {
           comment,
-          tweetId: r.dataValues.TweetId,
+          id: r.dataValues.TweetId,
           description: description.slice(0, 139),
           likesNumber,
           repliesNumber,
@@ -471,6 +471,7 @@ const userController = {
         const showAccount = '@' + User.account
         return {
           TweetId: id,
+          id,
           description: description.slice(0, 139),
           likesNumber: LikedUsers.length,
           repliesNumber: Replies.length,
