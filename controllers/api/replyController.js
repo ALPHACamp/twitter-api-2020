@@ -26,7 +26,6 @@ const replyController = {
       include: [User],
       order: [['createdAt', 'DESC']],
       where: {
-        UserId: helpers.getUser(req).id,
         TweetId: req.params.tweet_id,
       },
     })
