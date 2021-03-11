@@ -251,8 +251,10 @@ let userController = {
           },
         }).then((result) => {
           if (result) {
+            following.followingId = following.id;
             following.isFollowing = 1;
           } else {
+            following.followingId = following.id;
             following.isFollowing = 0;
           }
         });
@@ -278,8 +280,10 @@ let userController = {
           },
         }).then((result) => {
           if (result) {
+            follower.followerId = follower.id;
             follower.isFollowed = 1;
           } else {
+            follower.followerId = follower.id;
             follower.isFollowed = 0;
           }
         });
