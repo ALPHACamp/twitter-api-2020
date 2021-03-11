@@ -11,6 +11,7 @@ const sequelize = require('sequelize');
 const jwt = require('jsonwebtoken');
 const passportJWT = require('passport-jwt');
 const user = require('../../models/user');
+const { set } = require('../../app');
 const ExtractJwt = passportJWT.ExtractJwt;
 const JwtStrategy = passportJWT.Strategy;
 
@@ -40,6 +41,7 @@ let userController = {
               account,
               password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
               role: 'user',
+              avatar: 'https://i.imgur.com/pU3t3DH.jpg'
             });
           }
         })
@@ -81,6 +83,7 @@ let userController = {
             email: user.email,
             account: user.account,
             role: user.role,
+            avatar: user.avatar
           },
         });
       })
@@ -101,11 +104,13 @@ let userController = {
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
+        Tweet
       ],
     })
       .then((user) => {
         user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id;
         user.dataValues.isFollowed = helpers.getUser(req).Followings.some((d) => d.id === Number(id));
+        user.dataValues.tweetCount = user.dataValues.Tweets.length
 
         return res.json(user);
       })
@@ -114,7 +119,10 @@ let userController = {
 
   getUserTweets: (req, res) => {
     Tweet.findAll({
-      include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like],
+      include: [
+        { model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] }
+        , Like],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
@@ -135,7 +143,12 @@ let userController = {
 
   getReplyTweet: (req, res) => {
     Reply.findAll({
-      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
+      include: [{
+        model: Tweet,
+        include: [{ model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] },
+          Like]
+      }],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
@@ -143,14 +156,18 @@ let userController = {
     })
       .then((reply) => {
         const data = reply.map((r) => ({
-          ...r.dataValues,
-          // description: r.Tweet.description.substring(0, 50),
-          likeCount: r.Tweet.Likes.length,
-          ReplyCount: r.Tweet.Replies.length,
-          isLike: r.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
-        }));
+          ...r.Tweet.dataValues,
+          description: r.Tweet.dataValues.description.substring(0, 50),
+          likeCount: r.Tweet.dataValues.Likes.length,
+          ReplyCount: r.Tweet.dataValues.Replies.length,
+          isLike: r.Tweet.dataValues.Likes.some((t) => t.UserId === helpers.getUser(req).id),
+        }))
 
-        return res.json(data);
+        const set = new Set();
+        const result = data.filter(item => !set.has(item.id) ? set.add(item.id) : false);
+        // console.log(result)
+
+        return res.json(result);
       })
       .catch((error) => res.send(error));
   },
@@ -284,7 +301,10 @@ let userController = {
 
   getLikeTweets: (req, res) => {
     Like.findAll({
-      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
+      include: [{
+        model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] }, Like]
+      }],
       order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id },
     })
@@ -303,6 +323,7 @@ let userController = {
 
   getTop10Users: (req, res) => {
     User.findAll({
+      where: { role: 'user' },
       limit: 11,
       raw: true,
       nest: true,
@@ -311,6 +332,7 @@ let userController = {
         'name',
         'account',
         'avatar',
+        'role',
         [
           sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
           'FollowerCount',
@@ -331,6 +353,7 @@ let userController = {
       })
       .then(async (top10Users) => {
         const user = helpers.getUser(req);
+
         for (top10user of top10Users) {
           await Followship.findOne({
             where: {

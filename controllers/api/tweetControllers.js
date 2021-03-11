@@ -5,7 +5,7 @@ const { Tweet, User, Reply, Like } = db;
 const tweetController = {
   getTweets: (req, res) => {
     Tweet.findAll({
-      include: [User, Reply, Like],
+      include: [User, { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] }, Like],
       order: [['createdAt', 'DESC']],
     })
       .then((tweets) => {

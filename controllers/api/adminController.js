@@ -6,7 +6,7 @@ const sequelize = require('sequelize');
 
 let adminController = {
   signIn: (req, res) => {
-    if (!req.body.account || !req.body.password) {
+    if (!req.body.email || !req.body.password) {
       return res.json({ status: 'error', message: '請填寫完整資料' });
     }
 
@@ -74,6 +74,7 @@ let adminController = {
         ],
       ],
       order: [[sequelize.literal('TweetCount'), 'DESC']],
+
     }).then((users) => {
       return res.json(users);
     });
