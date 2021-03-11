@@ -43,15 +43,12 @@ const adminService = {
   getUsers: async (req, res, callback) => {
     try {
       let users = await User.findAll({
-        include: [
-          { model: Like },
-          { model: Tweet },
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ],
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'TweetsCount']
+            [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'TweetsCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'FollowingCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'FollowerCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes AS t1 JOIN Tweets AS t2 WHERE t2.UserId = User.id AND t2.id = t1.TweetId)'), 'LikesCount']
           ]
         },
         order: [
