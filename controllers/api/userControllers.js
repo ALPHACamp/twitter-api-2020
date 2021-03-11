@@ -104,11 +104,13 @@ let userController = {
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
+        Tweet
       ],
     })
       .then((user) => {
         user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id;
         user.dataValues.isFollowed = helpers.getUser(req).Followings.some((d) => d.id === Number(id));
+        user.dataValues.tweetCount = user.dataValues.Tweets.length
 
         return res.json(user);
       })
@@ -153,15 +155,6 @@ let userController = {
       },
     })
       .then((reply) => {
-
-        // const data = reply.map((r) => ({
-        //   ...r.dataValues,
-        //   description: r.Tweet.description.substring(0, 50),
-        //   likeCount: r.Tweet.Likes.length,
-        //   ReplyCount: r.Tweet.Replies.length,
-        //   isLike: r.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
-        // }));
-
         const data = reply.map((r) => ({
           ...r.Tweet.dataValues,
           description: r.Tweet.dataValues.description.substring(0, 50),
