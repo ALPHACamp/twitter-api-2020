@@ -45,7 +45,6 @@ router.delete('/followships/:followingId', authenticated, followshipController.d
 
 
 //user
-
 router.get('/users/currentUser', authenticated, userController.getCurrentUser)
 router.get('/users/top10Users', authenticated, userController.getTop10Users);
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)

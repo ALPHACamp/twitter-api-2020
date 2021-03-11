@@ -11,6 +11,7 @@ const sequelize = require('sequelize');
 const jwt = require('jsonwebtoken');
 const passportJWT = require('passport-jwt');
 const user = require('../../models/user');
+const { set } = require('../../app');
 const ExtractJwt = passportJWT.ExtractJwt;
 const JwtStrategy = passportJWT.Strategy;
 
@@ -28,7 +29,6 @@ let userController = {
 
         .then((user) => {
           if (user) {
-
             if (user.email === email) {
               return res.json({ status: 'error', message: 'email已被註冊' });
             } else if (user.account === account) {
@@ -41,6 +41,7 @@ let userController = {
               account,
               password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
               role: 'user',
+              avatar: 'https://i.imgur.com/pU3t3DH.jpg'
             });
           }
         })
@@ -63,7 +64,7 @@ let userController = {
       .then((user) => {
         if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' });
         if (user.role !== 'user') {
-          return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+          return res.status(401).json({ status: 'error', message: 'Permission denied.' });
         }
         if (!bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({ status: 'error', message: 'passwords did not match!' });
@@ -82,6 +83,7 @@ let userController = {
             email: user.email,
             account: user.account,
             role: user.role,
+            avatar: user.avatar
           },
         });
       })
@@ -90,11 +92,10 @@ let userController = {
 
   getCurrentUser: (req, res) => {
     const user = helpers.getUser(req);
-    Tweet.count({ where: { UserId: helpers.getUser(req).id } })
-      .then(tweets => {
-        user.dataValues.tweetCount = tweets
-        return res.json(user);
-      })
+    Tweet.count({ where: { UserId: helpers.getUser(req).id } }).then((tweets) => {
+      user.dataValues.tweetCount = tweets;
+      return res.json(user);
+    });
   },
 
   getUser: (req, res) => {
@@ -103,11 +104,13 @@ let userController = {
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
+        Tweet
       ],
     })
       .then((user) => {
         user.dataValues.isCurrentUser = Number(id) === helpers.getUser(req).id;
         user.dataValues.isFollowed = helpers.getUser(req).Followings.some((d) => d.id === Number(id));
+        user.dataValues.tweetCount = user.dataValues.Tweets.length
 
         return res.json(user);
       })
@@ -116,42 +119,56 @@ let userController = {
 
   getUserTweets: (req, res) => {
     Tweet.findAll({
-      include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like],
+      include: [
+        { model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] }
+        , Like],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
       },
-    }).then((tweets) => {
-      const data = tweets.map((t) => ({
-        ...t.dataValues,
-        description: t.dataValues.description.substring(0, 50),
-        likeCount: t.Likes.length,
-        ReplyCount: t.Replies.length,
-        isLike: t.Likes.some(t => t.UserId === helpers.getUser(req).id)
-      }));
-      return res.json(data);
     })
+      .then((tweets) => {
+        const data = tweets.map((t) => ({
+          ...t.dataValues,
+          description: t.dataValues.description.substring(0, 50),
+          likeCount: t.Likes.length,
+          ReplyCount: t.Replies.length,
+          isLike: t.Likes.some((t) => t.UserId === helpers.getUser(req).id),
+        }));
+        return res.json(data);
+      })
       .catch((error) => res.send(error));
   },
 
   getReplyTweet: (req, res) => {
     Reply.findAll({
-      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
+      include: [{
+        model: Tweet,
+        include: [{ model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] },
+          Like]
+      }],
       order: [['createdAt', 'DESC']],
       where: {
         UserId: req.params.id,
       },
-    }).then((reply) => {
-      const data = reply.map(r => ({
-        ...r.dataValues,
-        // description: r.Tweet.description.substring(0, 50),
-        likeCount: r.Tweet.Likes.length,
-        ReplyCount: r.Tweet.Replies.length,
-        isLike: r.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
-      }))
-
-      return res.json(data);
     })
+      .then((reply) => {
+        const data = reply.map((r) => ({
+          ...r.Tweet.dataValues,
+          description: r.Tweet.dataValues.description.substring(0, 50),
+          likeCount: r.Tweet.dataValues.Likes.length,
+          ReplyCount: r.Tweet.dataValues.Replies.length,
+          isLike: r.Tweet.dataValues.Likes.some((t) => t.UserId === helpers.getUser(req).id),
+        }))
+
+        const set = new Set();
+        const result = data.filter(item => !set.has(item.id) ? set.add(item.id) : false);
+        // console.log(result)
+
+        return res.json(result);
+      })
       .catch((error) => res.send(error));
   },
 
@@ -161,19 +178,21 @@ let userController = {
         return res.json({ status: 'error', message: '非已登入的使用者' });
       }
 
-
-      const { account, name, email, password, checkPassword, introduction } = req.body
-      const user = await User.findByPk(helpers.getUser(req).id)
+      const { account, name, email, password, checkPassword, introduction } = req.body;
+      const user = await User.findByPk(helpers.getUser(req).id);
 
       if (account !== user.account) {
-        const accountCheck = await User.findOne({ where: { account: req.body.account } })
-        if (accountCheck) { return res.json({ status: 'error', message: 'account已有人使用' }) }
+        const accountCheck = await User.findOne({ where: { account: req.body.account } });
+        if (accountCheck) {
+          return res.json({ status: 'error', message: 'account已有人使用' });
+        }
       }
 
-
       if (email !== user.email) {
-        const emailCheck = await User.findOne({ where: { email: req.body.email } })
-        if (emailCheck) { return res.json({ status: 'error', message: 'email已有人使用' }) }
+        const emailCheck = await User.findOne({ where: { email: req.body.email } });
+        if (emailCheck) {
+          return res.json({ status: 'error', message: 'email已有人使用' });
+        }
       }
 
       if (password) {
@@ -182,9 +201,9 @@ let userController = {
         }
       }
 
-      const files = req.files
-      let avatar = user.avatar
-      let cover = user.cover
+      const files = req.files;
+      let avatar = user.avatar;
+      let cover = user.cover;
 
       if (files) {
         imgur.setClientId(IMGUR_CLIENT_ID);
@@ -228,8 +247,25 @@ let userController = {
   //回傳"使用者跟隨"的資料
   getFollowing: (req, res) => {
     return User.findByPk(req.params.id, {
-      include: [{ model: User, as: 'Followings' }],
-    }).then((user) => {
+      include: [{ attributes: ['id', 'name', 'account', 'avatar', 'introduction'], model: User, as: 'Followings' }],
+    }).then(async (user) => {
+      user = user.toJSON();
+      for (following of user.Followings) {
+        await Followship.findOne({
+          where: {
+            followerId: req.params.id, //1 , //使用者本人
+            followingId: following.id, //3
+          },
+        }).then((result) => {
+          if (result) {
+            following.followingId = following.id;
+            following.isFollowing = 1;
+          } else {
+            following.followingId = following.id;
+            following.isFollowing = 0;
+          }
+        });
+      }
       res.json(user.Followings);
     });
   },
@@ -251,8 +287,10 @@ let userController = {
           },
         }).then((result) => {
           if (result) {
+            follower.followerId = follower.id;
             follower.isFollowed = 1;
           } else {
+            follower.followerId = follower.id;
             follower.isFollowed = 0;
           }
         });
@@ -263,26 +301,30 @@ let userController = {
 
   getLikeTweets: (req, res) => {
     Like.findAll({
-      include: [{ model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like] }],
+      include: [{
+        model: Tweet, include: [{ model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: [{ model: User, attributes: ['name', 'account', 'avatar'] }] }, Like]
+      }],
       order: [['createdAt', 'DESC']],
       where: { UserId: req.params.id },
-    }).then(likes => {
-
-      const data = likes.map(d => ({
-        ...d.dataValues,
-        // description: d.dataValues.Tweet.dataValues.description.substring(0, 50),
-        likeCount: d.Tweet.Likes.length,
-        ReplyCount: d.Tweet.Replies.length,
-        isLike: d.Tweet.Likes.some(t => t.UserId === helpers.getUser(req).id)
-      }))
-      return res.json(data)
-    }).catch(error => res.send(error))
-
+    })
+      .then((likes) => {
+        const data = likes.map((d) => ({
+          ...d.dataValues,
+          // description: d.dataValues.Tweet.dataValues.description.substring(0, 50),
+          likeCount: d.Tweet.Likes.length,
+          ReplyCount: d.Tweet.Replies.length,
+          isLike: d.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
+        }));
+        return res.json(data);
+      })
+      .catch((error) => res.send(error));
   },
 
   getTop10Users: (req, res) => {
     User.findAll({
-      limit: 10,
+      where: { role: 'user' },
+      limit: 11,
       raw: true,
       nest: true,
       attributes: [
@@ -290,6 +332,7 @@ let userController = {
         'name',
         'account',
         'avatar',
+        'role',
         [
           sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
           'FollowerCount',
@@ -299,12 +342,18 @@ let userController = {
     })
       .then((top11Users) => {
         const user = helpers.getUser(req);
-        const top10Users = top11Users.filter((top11User) => top11User.id !== user.id); //user.id
-        return top10Users; //若沒濾掉則為11個 ,由前端顯示10筆
+        let top10Users = [];
+        if (top11Users.find((top11User) => top11User.id === user.id)) {
+          top10Users = top11Users.filter((top11User) => top11User.id !== user.id);
+        } else {
+          top11Users.pop();
+          top10Users = top11Users;
+        }
+        return top10Users;
       })
       .then(async (top10Users) => {
         const user = helpers.getUser(req);
-        console.log(top10Users);
+
         for (top10user of top10Users) {
           await Followship.findOne({
             where: {
@@ -322,8 +371,6 @@ let userController = {
         res.json(top10Users);
       });
   },
-}
+};
 
-module.exports = userController
-
-
+module.exports = userController;
