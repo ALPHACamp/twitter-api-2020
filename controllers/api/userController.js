@@ -40,7 +40,7 @@ module.exports = {
       user.isFollowed = user.Followers.map(Follower => Follower.id).includes(currentUser.id)
       user.followerCount = user.Followers.length
       user.followingCount = user.Followings.length
-      // user.tweetCount = user.Tweets.length
+      user.tweetCount = user.Tweets.length
       return res.status(200).json({ ...user, Followers: [], Followings: [], Tweets: [] })
     } catch (err) {
       console.log('catch block: ', err)
