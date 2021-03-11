@@ -56,6 +56,8 @@ router.get('/api/users/top', authenticated, authenticatedUser, userController.ge
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 // 修改個人資料
 router.put('/api/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
+router.put('/api/users/:id/account', authenticated, authenticatedUser, userController.putUserAcoount)
+
 // 使用者正在追蹤誰
 router.get('/api/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
 // 誰在追蹤這個使用者
