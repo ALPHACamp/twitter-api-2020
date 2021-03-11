@@ -4,16 +4,12 @@ const { User, Followship, Tweet, Reply, Like } = require('../../models');
 const Op = require('sequelize').Op;
 const imgur = require('imgur');
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
-
 const sequelize = require('sequelize');
 
 // JWT
 const jwt = require('jsonwebtoken');
-const passportJWT = require('passport-jwt');
-const user = require('../../models/user');
 const { set } = require('../../app');
-const ExtractJwt = passportJWT.ExtractJwt;
-const JwtStrategy = passportJWT.Strategy;
+
 
 let userController = {
   signUp: (req, res) => {
@@ -157,6 +153,7 @@ let userController = {
       .then((reply) => {
         const data = reply.map((r) => ({
           ...r.Tweet.dataValues,
+          comment: r.dataValues.comment,
           description: r.Tweet.dataValues.description.substring(0, 50),
           likeCount: r.Tweet.dataValues.Likes.length,
           ReplyCount: r.Tweet.dataValues.Replies.length,

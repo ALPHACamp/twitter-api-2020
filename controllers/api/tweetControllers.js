@@ -24,7 +24,7 @@ const tweetController = {
 
   getTweet: (req, res) => {
     return Tweet.findByPk(req.params.id, {
-      include: [User, Reply, Like],
+      include: [{ model: User, attributes: { exclude: ['password'] } }, Reply, Like],
     })
       .then((tweet) => {
         if (!tweet) {
