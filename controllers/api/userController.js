@@ -259,7 +259,7 @@ const userController = {
           { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }
         ]
       })
-      console.log(helpers.getUser(req))
+
       const replies = []
       reply.map((r) => {
         let isLiked = false

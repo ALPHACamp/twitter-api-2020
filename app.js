@@ -35,6 +35,10 @@ app.use(flash())
 app.use('/upload', express.static(__dirname + '/upload'))
 // 把 req.flash 放到 res.locals 裡面
 app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", '*')
+  res.header("Access-Control-Allow-Credentials", true)
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+  res.header("Access-Control-Allow-Headers", 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json')
   res.locals.success_messages = req.flash('success_messages')
   res.locals.error_messages = req.flash('error_messages')
   res.locals.user = helpers.getUser(req)
