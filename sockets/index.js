@@ -1,36 +1,29 @@
 const jwt = require('jsonwebtoken')
 const passport = require('../config/passport')
-
-function authenticated(socket, next) {
-  passport.authenticate('jwt', { session: false }, (error, user, info) => {
-    if (error) return next(error)
-    if (!user) return next(new Error('未被授權'))
-    if (user.role === 'admin') return next(new Error('未被授權'))
-    socket.request.user = user
-    return next()
-  })(socket.request, {}, next)
-}
-
+const { Message, sequelize } = require('../models')
 
 module.exports = (io) => {
-  io.use(authenticated)
-
-  
   // 計算上線人數
   let onlineCount = 0
   io.on('connection', async (socket) => {
     console.log('user connection')
-    console.log('開始', socket)
-
-    const token = socket.handshake.query.token
-    // const { id } = jwt.verify(token, process.env.JWT_SECRET)
-    console.log('token', socket.handshake.query.token)
-
-
 
     // 發送連線人數給網頁
     onlineCount++;
     io.emit("online", onlineCount)
+
+    // 發送歷史紀錄
+    await Message.findAll({
+      // attributes: ['msg', 'time'],
+      order: [
+        // 資料庫端進行排列
+        [sequelize.literal('createdAt'), 'ASC']
+      ],
+      raw: true,
+      nest: true,
+    }).then(userMessage => {
+      socket.emit("chatRecord", userMessage)
+    })
 
     // 監聽
     socket.on("send", async (msg) => {
@@ -38,20 +31,20 @@ module.exports = (io) => {
       // 如果 msg 內容鍵值小於 2 等於是訊息傳送不完全
       // 因此我們直接 return ，終止函式執行。
       if (Object.keys(msg).length < 2) return;
-      io.emit("msg", msg)
-      // await Message.create({
-      //   name: msg.name,
-      //   msg: msg.msg,
-      //   time: msg.time
-      // }).then(user => {
-      //   const data = {
-      //     time: user.dataValues.time,
-      //     name: user.dataValues.name,
-      //     msg: user.dataValues.msg
-      //   }
-      //   io.emit("msg", data)
-      // })
-  
+
+      await Message.create({
+        UserId:'1',
+        msg: msg.msg,
+        time: msg.time
+      }).then(user => {
+        const data = {
+          time: user.dataValues.time,
+          name: user.dataValues.name,
+          msg: user.dataValues.msg
+        }
+        io.emit("msg", data)
+      })
+
     })
 
     // 離線

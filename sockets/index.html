@@ -99,32 +99,24 @@
         <!-- Chat Box-->
         <div class="col-7 px-0">
           <div id="content" class="px-4 py-5 chat-box bg-white">
-            <!-- Sender Message-->
-            <div class="media w-50 mb-3"><img
-                src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" alt="user" width="50"
-                class="rounded-circle">
-              <div class="media-body ml-3">
-                <div class="msg bg-light rounded py-2 px-3 mb-2">
-                  <p class="name text-small mb-0 text-muted">Test, which is a new approach to have</p>
+            <div id="data-panel">
+              <div class="media w-50 mb-3" id="data-panel"><img
+                  src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" alt="user" width="50"
+                  class="rounded-circle">
+                <div class="media-body ml-3">
+                  <div class="msg bg-light rounded py-2 px-3 mb-2">
+                    <p class="name text-small mb-0 text-muted">Test, which is a new approach to have</p>
+                  </div>
+                  <p class="small text-muted">12:00 PM | Aug 13</p>
                 </div>
-                <p class="small text-muted">12:00 PM | Aug 13</p>
               </div>
             </div>
-
-            <!-- Reciever Message-->
-            <div class="media w-50 ml-auto mb-3" id="data-panel">
-              <!-- <div class="media-body">
-                <div class="msg bg-primary rounded py-2 px-3 mb-2">
-                  <p class="name text-small mb-0 text-white">Apollo University, Delhi, India Test</p>
-                </div>
-                <p class="small text-muted">12:00 PM | Aug 13</p>
-              </div> -->
-            </div>
-
+            <!-- Sender Message-->
           </div>
 
           <!-- Typing area -->
           <div>
+
             <form id="send-form" class="bg-light d-flex">
               <div class="col-md-10">
                 <input type="text" name="msg" id="chat-message" placeholder="開始聊天" aria-describedby="button-addon2"
@@ -134,6 +126,7 @@
                 <input type="submit" value="送出">
               </div>
             </form>
+
           </div>
         </div>
       </div>
@@ -168,20 +161,8 @@
 
       // 使用者聊天室窗
       var content = document.getElementById("content")
-      // // 使用者名稱
-      // var nameInputBox = document.getElementById("name")
-      // var name = getCookie("name")
 
-      // sendForm2.addEventListener("submit", function (e) {
-      //   e.preventDefault();
-      //   let username = sendForm2.children[0].value;
-      //   socket.auth = { username }
-      //   socket.connect()
-      // })
 
-      // if (name) {
-      //   nameInputBox.value = name;
-      // }
 
       // 連線偵測
       socket.on("connect", function () {
@@ -199,61 +180,101 @@
 
       // 監聽Server chatRecord 資料回傳
       socket.on("chatRecord", function (msgs) {
-        for (var i = 0; i < msgs.length; i++) {
-          (function () {
-            addMsgToBox(msgs[i]);
-          })();
-        }
-      });
+        console.log("chatRecord", msgs)
+        let rawHTML = ''
+        const dataPanel = document.querySelector('#data-panel')
+        const oldHTML = dataPanel.innerHTML
+        msgs.forEach(item => {
+          rawHTML += `
+        <div class="media w-50 ml-auto mb-3" id="data-panel">
+          <div class="media w-50 ml-auto mb-3">
+            <div class="media-body">
+              <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">${item.msg}</p>
+              </div>
+              <p class="small text-muted">${item.time}</p>
+            </div>
+          </div>
+        </div>
+        `
+        })
+        dataPanel.innerHTML = oldHTML + rawHTML
+      })
 
       // 監聽Server "msg"  此為存完資料庫後送回前端訊息 再帶入 addMsgToBox 加工
-      socket.on("msg", addMsgToBox)
+      socket.on("msg", renderUsersCard)
 
       sendForm.addEventListener('submit', function onSearchFormSubmitted(event) {
         event.preventDefault()
-        const chatmessage = document.querySelector('#chat-message')
-        const message = chatmessage.value.trim().toLowerCase()
-        console.log(message)
-        renderUsersCard(message)
+        const userValue = sendForm.children[0].children[0].value
+        var message = true;
+        var formData = {
+          time: new Date().toUTCString()
+        }
+        if (userValue !== "") {
+          formData.name = '測試帳號'
+          formData.msg = userValue
+        }
+        // const chatmessage = document.querySelector('#chat-message')
+        // const message = chatmessage.value.trim().toLowerCase()
+
+
+        if (message) {
+          console.log('-======進入IF===', formData)
+          // 使用者送出聊天內容 ----> Server "send"
+          socket.emit("send", formData)
+        }
       })
+
       function renderUsersCard(data) {
+        // console.log('-======', ...data)
+        // console.log('-======最後=====', data)
+        let rawHTML = ''
         const dataPanel = document.querySelector('#data-panel')
-        let rawHTML = `
-        <div class="media-body">
-          <div class="msg bg-primary rounded py-2 px-3 mb-2">
-            <p class="name text-small mb-0 text-white">${data}</p>
+        const oldHTML = dataPanel.innerHTML
+        // data.forEach(item => {
+        rawHTML = oldHTML + `
+        <div class="media w-50 ml-auto mb-3" id="data-panel">
+          <div class="media w-50 ml-auto mb-3">
+            <div class="media-body">
+              <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">${data.msg}</p>
+              </div>
+              <p class="small text-muted">${data.time}</p>
+            </div>
           </div>
-          <p class="small text-muted">12:00 PM | Aug 13</p>
         </div>
         `
+        // })
         dataPanel.innerHTML = rawHTML
+
       }
 
-      function addMsgToBox(d) {
+      // function addMsgToBox(d) {
+      //   console.log('addMsgToBox', d)
+      //   let msgBox = document.createElement("div")
+      //   msgBox.className = "msg"
 
-        let msgBox = document.createElement("div")
-        msgBox.className = "msg"
+      //   let nameBox = document.createElement("span");
+      //   nameBox.className = "name"
 
-        let nameBox = document.createElement("span");
-        nameBox.className = "name"
+      //   const name = document.createTextNode(d.name);
+      //   const msg = document.createTextNode(d.msg);
 
-        const name = document.createTextNode(d.name);
-        const msg = document.createTextNode(d.msg);
+      //   nameBox.appendChild(name)
+      //   msgBox.appendChild(nameBox)
+      //   msgBox.appendChild(msg)
+      //   content.appendChild(msgBox)
+      //   if (content.children.length > max_record) {
+      //     rmMsgFromBox();
+      //   }
+      // }
 
-        nameBox.appendChild(name)
-        msgBox.appendChild(nameBox)
-        msgBox.appendChild(msg)
-        content.appendChild(msgBox)
-        if (content.children.length > max_record) {
-          rmMsgFromBox();
-        }
-      }
-
-      function rmMsgFromBox() {
-        console.log('rmMsgFromBox')
-        var childs = content.children;
-        childs[0].remove();
-      }
+      // function rmMsgFromBox() {
+      //   console.log('rmMsgFromBox')
+      //   var childs = content.children;
+      //   childs[0].remove();
+      // }
 
       // setCookie
       function setCookie(cname, cvalue, exdays) {
