@@ -16,6 +16,12 @@ const adminController = {
     })
   },
 
+  getUsersLight: (req, res) => {
+    adminService.getUsersLight(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+
   getTweets: (req, res) => {
     adminService.getTweets(req, res, (data) => {
       return res.json(data)

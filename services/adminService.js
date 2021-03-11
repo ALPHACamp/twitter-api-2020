@@ -99,6 +99,46 @@ const adminService = {
       .catch((error) => callback({ status: 'error', message: error.message }))
   },
 
+
+  getUsersLight: (req, res, callback) => {
+    return User.findAll({
+      // where: { role: { [Op.not]: 'admin' } },
+      include: [
+        { model: Tweet, include: { model: Like } },
+        { model: Like },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+      .then((users) => {
+        // 計算推文被按讚次數
+        const usersData = users.map((user) => {
+          let tweetByLike = 0
+          let tweetArray = user.Tweets.map((tweet) => {
+            return tweetByLike += tweet.Likes.length
+          })
+
+          return {
+            id: user.dataValues.id,
+            name: user.dataValues.name,
+            email: user.dataValues.email,
+            account: user.dataValues.account,
+            avatar: user.dataValues.avatar,
+            cover: user.dataValues.cover,
+            tweetsNumber: user.Tweets.length,
+            likesNumber: user.Likes.length,
+            gotLikesNumber: tweetByLike,
+            followingsNumber: user.Followers.length,
+            followersNumber: user.Followings.length
+          }
+        })
+          .sort((a, b) => b.tweetsCount - a.tweetsCount)
+
+        return callback(usersData)
+      })
+      .catch((error) => callback({ status: 'error', message: error }))
+  },
+
   // 瀏覽 Tweet 清單
   getTweets: (req, res, callback) => {
     return Tweet.findAll({

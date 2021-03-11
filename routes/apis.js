@@ -97,6 +97,8 @@ router.post('/tweets/:tweet_id/unlike', authenticated, likeController.removeLike
 router.post('/admin/signin', adminController.signIn)
 // 搜尋使用者
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+// 輕量資料
+router.get('/admin/users/light', authenticated, authenticatedAdmin, adminController.getUsersLight)
 // 全部推文資料
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 // 刪除一筆推文
