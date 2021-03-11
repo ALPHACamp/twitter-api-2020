@@ -12,13 +12,14 @@ const tweetService = {
     })
       .then((tweets) => {
         const tweetsData = tweets.map((tweet) => {
+          const showAccount = '@' + tweet.User.account
           return {
             ...tweet.dataValues,
             description: tweet.description.slice(0, 139),
             User: {
               id: tweet.User.id,
               name: tweet.User.name,
-              account: tweet.User.account,
+              account: showAccount,
               avatar: tweet.User.avatar
             },
             likesNumber: tweet.Likes.length,
@@ -56,13 +57,13 @@ const tweetService = {
         })
 
         // console.log('***:', helpers.getUser(req).LikedTweets[0].id)
-
+        const showAccount = '@' + tweet.User.account
         const tweetData = {
           ...tweet.dataValues,
           User: {
             id: tweet.User.id,
             name: tweet.User.name,
-            account: tweet.User.account,
+            account: showAccount,
             avatar: tweet.User.avatar
           },
           Replies: repliesArray,

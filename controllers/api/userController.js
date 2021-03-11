@@ -31,13 +31,14 @@ const userController = {
       }
 
       const { id, name, account, email, avatar, role } = user
+      const showAccount = '@' + account
       let payload = { id }
       let token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
         message: 'ok',
         token,
-        user: { id, name, account, email, avatar, role }
+        user: { id, name, account: showAccount, email, avatar, role }
       })
     }
     catch (error) {
@@ -88,7 +89,8 @@ const userController = {
     try {
       const user = await User.findByPk(helpers.getUser(req).id)
       const { id, name, account, email, avatar, role, cover, introduction } = user
-      return res.json({ id, name, account, email, avatar, role, cover, introduction })
+      const showAccount = '@' + account
+      return res.json({ id, name, account: showAccount, email, avatar, role, cover, introduction })
     } catch (error) {
       console.log('error:', error)
       return res.json({ status: 'error', message: 'codeStatus 500' })
@@ -167,13 +169,13 @@ const userController = {
       if (user.dataValues.introduction) {
         introduction = user.dataValues.introduction.slice(0, 49)
       }
-
       const tweetsNumber = tweets // 使用者推文數
       const { name, account, email, avatar, cover } = user.dataValues
+      const showAccount = '@' + account
       const followingsNumber = user.dataValues.Followings.length // 使用者追蹤數
       const followersNumber = user.dataValues.Followers.length// 使用者跟隨數
       return res.json({
-        id, name, account, email, tweetsNumber, avatar, cover, introduction, followingsNumber, followersNumber, isFollowed
+        id, name, account: showAccount, email, tweetsNumber, avatar, cover, introduction, followingsNumber, followersNumber, isFollowed
       })
     } catch (error) {
       console.log('error:', error)
@@ -204,7 +206,7 @@ const userController = {
 
         const likesNumber = LikedUsers.length   // 推文like數
         const repliesNumber = Replies.length  // 推文回覆數
-
+        const showAccount = '@' + User.account
         return tweets.push(
           {
             id,
@@ -216,7 +218,7 @@ const userController = {
             User: {
               id: User.id,
               name: User.name,
-              account: User.account,
+              account: showAccount,
               avatar: User.avatar
             }
           }
@@ -249,6 +251,7 @@ const userController = {
 
         const comment = r.dataValues.comment.slice(0, 139)
         const { id, description, createdAt, LikedUsers, Replies, User } = r.dataValues.Tweet
+        const showAccount = '@' + User.account
         const likesNumber = LikedUsers.length // 推文like數
         const repliesNumber = Replies.length  // 推文回覆數
         const tweetData = {
@@ -262,7 +265,7 @@ const userController = {
           User: {
             id: User.id,
             name: User.name,
-            account: User.account,
+            account: showAccount,
             avatar: User.avatar
           }
         }
@@ -326,6 +329,7 @@ const userController = {
       }]
     })
       .then((user) => {
+        console.log(user)
         let followings = user.Followings.map((d) => {
           let isFollowed = false
           if (Array.isArray(helpers.getUser(req).Followings)) {
@@ -336,11 +340,12 @@ const userController = {
           if (d.introduction) {
             introduction = d.introduction.slice(0, 49)
           }
-
+          const account = d.account
+          const showAccount = '@' + account
           return {
             followingId: d.id,
             name: d.name,
-            account: d.account,
+            account: showAccount,
             avatar: d.avatar,
             introduction,
             createdAt: d.createdAt,
@@ -375,11 +380,12 @@ const userController = {
         if (d.introduction) {
           introduction = d.introduction.slice(0, 49)
         }
-
+        const account = d.account
+        const showAccount = '@' + account
         return {
           followerId: d.id,
           name: d.name,
-          account: d.account,
+          account: showAccount,
           avatar: d.avatar,
           introduction,
           isFollowed
@@ -405,12 +411,12 @@ const userController = {
         if (Array.isArray(helpers.getUser(req).Followings)) {
           isFollowed = helpers.getUser(req).Followings.map(f => f.id).includes(user.dataValues.id)
         }
-
+        const showAccount = '@' + user.dataValues.account
         return {
           id: user.dataValues.id,
           name: user.dataValues.name,
           avatar: user.dataValues.avatar,
-          account: user.dataValues.account,
+          account: showAccount,
           FollowerCount: user.Followers.length,
           isFollowed
         }
@@ -444,7 +450,7 @@ const userController = {
         if (Array.isArray(helpers.getUser(req).LikedTweets)) {
           isLiked = helpers.getUser(req).LikedTweets.map(d => d.id).includes(id)
         }
-
+        const showAccount = '@' + User.account
         return {
           TweetId: id,
           description: description.slice(0, 139),
@@ -452,7 +458,7 @@ const userController = {
           repliesNumber: Replies.length,
           isLiked,
           createdAt,
-          User: { id: User.id, name: User.name, account: User.account, avatar: User.avatar }
+          User: { id: User.id, name: User.name, account: showAccount, avatar: User.avatar }
         }
       })
       return res.json(tweets)

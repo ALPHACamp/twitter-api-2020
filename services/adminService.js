@@ -33,7 +33,7 @@ const adminService = {
         if (!bcrypt.compareSync(password, user.password)) {
           return callback({ status: 'error', message: 'passwords did not match' })
         }
-
+        const showAccount = '@' + user.account
         // 簽發 token
         let payload = { id: user.id }
         let token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -44,7 +44,7 @@ const adminService = {
           user: {
             id: user.id,
             name: user.name,
-            account: user.account,
+            account: showAccount,
             email: user.email,
             avatar: user.avatar,
             role: user.role
@@ -108,20 +108,23 @@ const adminService = {
       nest: true
     })
       .then((tweets) => {
-        const tweetsData = tweets.map((tweet) => ({
-          status: 'success',
-          message: 'ok',
-          id: tweet.id,
-          description: tweet.description.slice(0, 49),
-          createdAt: tweet.createdAt,
-          updatedAt: tweet.updatedAt,
-          User: {
-            id: tweet.User.id,
-            name: tweet.User.name,
-            account: tweet.User.account,
-            avatar: tweet.User.avatar
+        const tweetsData = tweets.map((tweet) => {
+          const showAccount = '@' + tweet.User.account
+          return {
+            status: 'success',
+            message: 'ok',
+            id: tweet.id,
+            description: tweet.description.slice(0, 49),
+            createdAt: tweet.createdAt,
+            updatedAt: tweet.updatedAt,
+            User: {
+              id: tweet.User.id,
+              name: tweet.User.name,
+              account: showAccount,
+              avatar: tweet.User.avatar
+            }
           }
-        }))
+        })
 
         callback(tweetsData)
       })
