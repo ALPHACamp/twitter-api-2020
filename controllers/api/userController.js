@@ -103,16 +103,20 @@ const userController = {
       const { name, account, email, password, checkPassword, introduction } = req.body
 
       if (email) {
-        const emailExist = await User.findOne({ where: { email } })
-        if (emailExist) {
-          return res.json({ status: 'error', message: "this email already exists " })
+        if (email !== helpers.getUser(req).email) {
+          const emailExist = await User.findOne({ where: { email } })
+          if (emailExist) {
+            return res.json({ status: 'error', message: "this email already exists " })
+          }
         }
       }
 
       if (account) {
-        const accountExist = await User.findOne({ where: { account } })
-        if (accountExist) {
-          return res.json({ status: 'error', message: "this account already exists " })
+        if (account !== helpers.getUser(req).account) {
+          const accountExist = await User.findOne({ where: { account } })
+          if (accountExist) {
+            return res.json({ status: 'error', message: "this account already exists " })
+          }
         }
       }
 
@@ -147,7 +151,7 @@ const userController = {
         name,
         email,
         account,
-        password: newPassword,
+        password: newPassword ? newPassword : password,
         introduction,
         cover: coverImg,
         avatar: avatarImg
@@ -255,7 +259,7 @@ const userController = {
           { model: Tweet, include: [Reply, User, { model: User, as: 'LikedUsers' }] }
         ]
       })
-
+      console.log(helpers.getUser(req))
       const replies = []
       reply.map((r) => {
         let isLiked = false
