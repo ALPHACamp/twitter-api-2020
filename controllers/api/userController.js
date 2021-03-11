@@ -225,7 +225,7 @@ const userController = {
       return res.json(tweets)
     } catch (error) {
       console.log('error:', error)
-      return res.json({ status: 'error', message: error })
+      return res.json({ status: 'error', message: "CodeStatus 500" })
     }
   },
 
@@ -272,7 +272,7 @@ const userController = {
 
     } catch (error) {
       console.log('error:', error)
-      return res.json({ status: 'error', message: "CodeStatus 500" })
+      return res.json({ status: 'error', message: error })
     }
   },
 
