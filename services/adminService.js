@@ -51,7 +51,7 @@ const adminService = {
           }
         })
       })
-      .catch((error) => callback({ status: 'error', message: 'codeStatus 500' }))
+      .catch((error) => callback({ status: 'error', message: error }))
   },
 
   // 瀏覽 User 清單
@@ -96,7 +96,7 @@ const adminService = {
 
         callback(usersData)
       })
-      .catch((error) => callback({ status: 'error', message: error.message }))
+      .catch((error) => callback({ status: 'error', message: error }))
   },
 
 
@@ -122,7 +122,7 @@ const adminService = {
             id: user.dataValues.id,
             name: user.dataValues.name,
             email: user.dataValues.email,
-            account: user.dataValues.account,
+            account: '@' + user.dataValues.account,
             avatar: user.dataValues.avatar,
             cover: user.dataValues.cover,
             tweetsNumber: user.Tweets.length,
