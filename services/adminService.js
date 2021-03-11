@@ -29,6 +29,11 @@ const adminService = {
           return callback({ status: 'error', message: 'no such user found' })
         }
 
+        // admin only
+        if (user.role !== 'admin') {
+          return res.json({ status: 'error', message: "only for admin signin" })
+        }
+
         // 密碼錯誤
         if (!bcrypt.compareSync(password, user.password)) {
           return callback({ status: 'error', message: 'passwords did not match' })
@@ -168,7 +173,7 @@ const adminService = {
 
         callback(tweetsData)
       })
-      .catch((error) => callback({ status: 'error', message: 'CodeStatus 500' }))
+      .catch((error) => callback({ status: 'error', message: error }))
   },
 
   // 刪除推文
