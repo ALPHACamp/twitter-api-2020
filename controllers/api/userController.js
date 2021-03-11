@@ -74,6 +74,7 @@ const userController = {
         account,
         name,
         email,
+        role: 'user',
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       })
         .then((user) => res.json({ status: 'success', message: "signup successfully" }))
@@ -100,9 +101,23 @@ const userController = {
   editUser: async (req, res) => {
     try {
       const { name, account, email, password, checkPassword, introduction } = req.body
+
+      if (email) {
+        const emailExist = await User.findOne({ where: { email } })
+        if (emailExist) {
+          return res.json({ status: 'error', message: "this email already exists " })
+        }
+      }
+
+      if (account) {
+        const accountExist = await User.findOne({ where: { account } })
+        if (accountExist) {
+          return res.json({ status: 'error', message: "this account already exists " })
+        }
+      }
+
       let newPassword = ''
       if (password) {
-        console.log(password)
         if (password !== checkPassword) {
           return res.json({ status: 'error', message: "password and checkPassword didn't match" })
         }
@@ -111,7 +126,6 @@ const userController = {
 
       //上傳多張圖片
       const user = await User.findByPk(helpers.getUser(req).id)
-      console.log('user:', user)
       let coverImg = user.dataValues.cover
       let avatarImg = user.dataValues.avatar
       const { files } = req
