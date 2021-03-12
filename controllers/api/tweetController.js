@@ -38,7 +38,6 @@ const tweetController = {
         tweet = JSON.parse(JSON.stringify(tweet))
         return Object.assign(tweet, { isLikedByMe: ifLike })
       })
-
       return res.status(200).json(tweetsData)
     } catch (err) {
       console.log(err)
