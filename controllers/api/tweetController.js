@@ -58,6 +58,7 @@ const tweetController = {
       }
     */
     try {
+      // findByPk can take options.include, but not .where (both not mentioned in doc)
       const tweet = await Tweet.findByPk(req.params.id, {
         include: [
           { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },

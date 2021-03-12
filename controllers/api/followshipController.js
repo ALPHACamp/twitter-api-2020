@@ -25,7 +25,7 @@ const followshipController = {
     try {
       const { id } = req.body
       const userId = helpers.getUser(req).id
-      if (id === userId) {
+      if (Number(id) === userId) {
         return res.status(400).json({ status: 'error', message: 'You cannot follow yourself' })
       }
       // check if user id exist or doesn't have id in req.body
@@ -66,7 +66,7 @@ const followshipController = {
     try {
       const { followingId } = req.params
       const userId = helpers.getUser(req).id
-      if (followingId === userId) {
+      if (Number(followingId) === userId) {
         return res.status(400).json({ status: 'error', message: 'You cannot unfollow yourself' })
       }
       const follow = await Followship.findOne({
