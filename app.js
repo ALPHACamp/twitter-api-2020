@@ -13,7 +13,9 @@ const passport = require('./config/passport')
 const flash = require('connect-flash')
 const app = express()
 const port = process.env.PORT || 3000
-
+//setup socket.io
+const http = require('http').Server(app)
+const io = require('socket.io')(http)
 
 // cors 的預設為全開放
 app.use(cors())
@@ -45,8 +47,20 @@ app.use((req, res, next) => {
   next()
 })
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => {
+// app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html')
+})
+
+io.on('connection', (socket) => { // 建立通道
+  console.log('a user connected')
+  socket.on('chat message', (msg) => {  // server 收到 client 的訊息 (Emitting events:client往通道內丟的訊息)
+    console.log('message: ' + msg)
+    io.emit('chat message', msg) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
+  })
+})
+
+http.listen(port, () => {
   console.log(`Example app listening on http://localhost:${port}`)
 })
 
