@@ -321,15 +321,16 @@ const userController = {
       attributes: {
         include: includeCountData()
       },
-      raw: true,
-      nest: true,
+      // raw: true,
+      // nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(user => {
+      console.log(user)
       const data = user.map(item => ({
-        ...item,
+        ...item.dataValues,
         Time: formatDistanceToNow(item.createdAt, { includeSeconds: true }),
-        isLiked: item.Likes.UserId === req.user.id
+        isLiked: item.Likes.map(d => d.UserId).includes(req.user.id)
       }))
 
       return res.status(200).json(data)
