@@ -30,7 +30,7 @@ const userController = {
         return res.json({ status: 'error', message: "admin can't signin" })
       }
 
-      const { id, name, account, email, avatar, role } = user
+      const { id, name, account, email, avatar, role, cover, introduction } = user
       const showAccount = '@' + account
       let payload = { id }
       let token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -38,7 +38,7 @@ const userController = {
         status: 'success',
         message: 'ok',
         token,
-        user: { id, name, account: showAccount, email, avatar, role }
+        user: { id, name, account: showAccount, email, avatar, role, cover, introduction: introduction.slice(0, 49) }
       })
     }
     catch (error) {

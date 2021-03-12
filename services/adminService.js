@@ -80,11 +80,12 @@ const adminService = {
 
           return {
             ...user.dataValues,
+            account: '@' + user.dataValues.account,
             tweetsNumber: user.Tweets.length,
             likesNumber: user.Likes.length,
             gotLikesNumber: tweetByLike,
-            followingsNumber: user.Followers.length,
-            followersNumber: user.Followings.length
+            followingsNumber: user.Followings.length, // 追隨者
+            followersNumber: user.Followers.length // 被追隨
           }
         })
           .sort((a, b) => b.tweetsCount - a.tweetsCount)
@@ -133,8 +134,8 @@ const adminService = {
             tweetsNumber: user.Tweets.length,
             likesNumber: user.Likes.length,
             gotLikesNumber: tweetByLike,
-            followingsNumber: user.Followers.length,
-            followersNumber: user.Followings.length
+            followingsNumber: user.Followings.length, // 追隨者
+            followersNumber: user.Followers.length // 被追隨
           }
         })
           .sort((a, b) => b.tweetsCount - a.tweetsCount)
