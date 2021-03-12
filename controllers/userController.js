@@ -326,7 +326,6 @@ const userController = {
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']]
     }).then(user => {
-      console.log(user)
       const data = user.map(item => ({
         ...item.dataValues,
         Time: formatDistanceToNow(item.createdAt, { includeSeconds: true }),
