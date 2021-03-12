@@ -171,6 +171,8 @@ const userController = {
     try {
       const { files } = req
       const user = await User.findByPk(req.params.id)
+
+      console.log(files)
       if (files !== undefined) {
         if (Object.keys(req.files).length) {
           // 建立上傳照片Functions
@@ -182,19 +184,17 @@ const userController = {
           let [cover, avatar] = [user.cover, user.avatar]
           //依序判斷 avatar & cover 是否存在 , 如果有就上傳
           if (files.cover !== undefined) {
-            coverdata = await myImgurUpload(req.files.cover[0].path)
+            const coverdata = await myImgurUpload(req.files.cover[0].path)
             cover = coverdata.link
           } else {
-            cover = ''
+            cover = cover
           }
           if (files.avatar !== undefined) {
-            avatardata = await myImgurUpload(req.files.avatar[0].path)
+            const avatardata = await myImgurUpload(req.files.avatar[0].path)
             avatar = avatardata.link
           } else {
-            avatar = ''
+            avatar = avatar
           }
-          console.log(cover)
-          console.log(avatar)
           await user.update({ name, introduction, cover, avatar })
           return res.status(200).json({ status: 'success', message: '修改成功' })
         }
