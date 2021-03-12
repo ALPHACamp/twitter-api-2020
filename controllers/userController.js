@@ -187,7 +187,7 @@ const userController = {
           if (files.avatar) {
             avatar = await myImgurUpload(req.files.avatar[0].path)
           }
-          await user.update({ name, introduction, cover, avatar })
+          await user.update({ name, introduction, cover: cover.link, avatar: avatar.link })
           return res.status(200).json({ status: 'success', message: '修改成功' })
         }
       }
