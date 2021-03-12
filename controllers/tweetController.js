@@ -15,8 +15,6 @@ const tweetController = {
         // 計算數量
         include: includeCountData(),
       },
-      raw: true,
-      nest: true,
       // 資料庫端進行排列
       order: [[sequelize.literal('createdAt'), 'DESC']],
     }).then(tweets => {
@@ -25,9 +23,10 @@ const tweetController = {
       const tweetsFilter = tweets.filter(item => !set.has(item.id) ? set.add(item.id) : false)
       // 建立推文時間距離多久
       const data = tweetsFilter.map(r => ({
-        ...r,
+        ...r.dataValues,
         time: formatDistanceToNow(r.createdAt, { includeSeconds: true }),
-        isLiked: r.Likes.UserId === req.user.id
+        isLiked: r.Likes.map(d => d.UserId).includes(req.user.id)
+
       }))
       return res.status(200).json(data)
     }).catch(error => {
@@ -108,7 +107,7 @@ const tweetController = {
         return res.status(200).json({ status: 'success', message: 'like was successfully create' })
       })
       .catch(error => {
-        return res.status(500).json({ status: 'error', message: '修改推特-伺服器錯誤請稍後', error })
+        return res.status(500).json({ status: 'error', message: '推特點讚-伺服器錯誤請稍後', error })
       })
   },
   // 刪除 Like
@@ -121,7 +120,7 @@ const tweetController = {
         return res.json({ status: 'success', message: 'like was successfully deleted' })
       })
       .catch(error => {
-        return res.status(500).json({ status: 'error', message: '刪除推特-伺服器錯誤請稍後', error })
+        return res.status(500).json({ status: 'error', message: '收回讚-伺服器錯誤請稍後', error })
       })
 
   },
