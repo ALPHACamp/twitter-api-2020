@@ -1,6 +1,7 @@
 const db = require('../models')
 const { User, Tweet, Like, Reply } = db
 const bcrypt = require('bcryptjs')
+const sequelize = require('sequelize')
 const helpers = require('../_helpers')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
@@ -71,15 +72,20 @@ const userService = {
       let users = await User.findAll(
         {
           where: { role: 'user' },
-          include: [{ model: User, as: 'Followers' }]
+          attributes: {
+            include: [
+              [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'FollowerCount']
+            ]
+          },
+          order: [
+            [sequelize.literal('FollowerCount'), 'DESC']
+          ]
         })
       users = users.map(user => ({
         ...user.dataValues,
-        FollowerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(following => following.id).includes(user.id)
       }))
-      users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
-      callback({ users: users })
+      callback(users)
     } catch (err) {
       console.log(err)
       callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
@@ -236,7 +242,6 @@ const userService = {
         {
           include: [
             { model: User, as: 'Followings' },
-            { model: User, as: 'Followers' }
           ],
         })
       user = user.Followings.map(user => ({
@@ -251,15 +256,12 @@ const userService = {
       console.log(err)
       callback({ status: 'error', message: 'Internal Server Error', statusCode: 500 })
     }
-
-
   },
   getFollowers: async (req, res, callback) => {
     try {
       let user = await User.findByPk(req.params.id,
         {
           include: [
-            { model: User, as: 'Followings' },
             { model: User, as: 'Followers' }
           ],
         })
