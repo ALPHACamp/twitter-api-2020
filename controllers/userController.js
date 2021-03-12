@@ -181,13 +181,21 @@ const userController = {
           // 解構賦值
           let [cover, avatar] = [user.cover, user.avatar]
           //依序判斷 avatar & cover 是否存在 , 如果有就上傳
-          if (files.cover) {
-            cover = await myImgurUpload(req.files.cover[0].path)
+          if (files.cover !== undefined) {
+            coverdata = await myImgurUpload(req.files.cover[0].path)
+            cover = coverdata.link
+          } else {
+            cover = ''
           }
-          if (files.avatar) {
-            avatar = await myImgurUpload(req.files.avatar[0].path)
+          if (files.avatar !== undefined) {
+            avatardata = await myImgurUpload(req.files.avatar[0].path)
+            avatar = avatardata.link
+          } else {
+            avatar = ''
           }
-          await user.update({ name, introduction, cover: cover.link, avatar: avatar.link })
+          console.log(cover)
+          console.log(avatar)
+          await user.update({ name, introduction, cover, avatar })
           return res.status(200).json({ status: 'success', message: '修改成功' })
         }
       }

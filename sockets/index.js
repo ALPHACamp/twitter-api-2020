@@ -46,10 +46,14 @@ module.exports = (io) => {
   io.use(authenticated)
   // 開始連線
   io.on('connection', async (socket) => {
+
+    socket.join(privateRoom)
+
     // 計算上線人數
     let onlineCount = 0
-    // 儲存目前使用者
+    // 取出登入使用者
     const user = socket.user
+    // 儲存目前上線使用者
     let userList = []
     userList.push(user)
 
@@ -65,19 +69,6 @@ module.exports = (io) => {
     onlineCount++;
     io.emit("online", onlineCount)
 
-    // 發送歷史紀錄
-    // await Message.findAll({
-    //   // attributes: ['msg', 'time'],
-    //   order: [
-    //     // 資料庫端進行排列
-    //     [sequelize.literal('createdAt'), 'ASC']
-    //   ],
-    //   raw: true,
-    //   nest: true,
-    // }).then(userMessage => {
-    //   socket.emit("chatRecord", userMessage)
-    // })
-
     // 監聽登入資料
     socket.on('login', userData => {
       // console.log('======userData', userData)
@@ -87,29 +78,45 @@ module.exports = (io) => {
     socket.on('get-private-chat', ({ userId, userName }) => {
       // 建立房間名
       const roomName = []
+      // 建立私聊房間編號
       roomName.push(userId.toString(), user.id.toString())
       roomName.sort()
       const privateRoom = roomName[0] + roomName[1]
 
-      // 建立兩者使用者資訊陣列
+      // 將登入使用者加入 privateRoom
+      user.privateRoom = privateRoom
+
+      // 建立私聊 我 & 他 資訊陣列
       const users = [];
-      const userJoinData = userJoin(userId ,userName, privateRoom)
-      
+      const userJoinData = userJoin(Number(userId), userName, Number(privateRoom))
+
+      // 私聊對象資料
       function userJoin(userId, userName, privateRoom) {
-        const user = { userId, userName, privateRoom }
-        users.push(user);
-        return user;
+        const userPrivate = { userId, userName, privateRoom }
+        return userPrivate;
       }
 
-      console.log('====加入用戶聊天====', userJoinData)
-      
+      users.push(user);
+      users.push(userJoinData);
+      console.log('====加入用戶聊天====', users)
+
       // 將使用者分配到此房間 // 只有選擇該房間使用者聊天訊息可被看到
-      // console.log('實踐私聊頻道', privateRoom)
       socket.join(privateRoom)
 
-      // const privateRoom = userId.toString() + 
-      // console.log('======誰登入?', user)
-      // console.log('===監聽使用者進入私聊===', userId, userName)
+      // Welcome current user
+      const botName = 'ChatCord Bot'
+      socket.emit('msg', formatMessage(botName, 'Welcome to ChatCord!'))
+
+      //針對特定房間用戶連接時廣播
+      socket.broadcast.to(privateRoom).emit("msg", )
+        
+
+      // 發送用戶和房間信息
+      io.to(user.room).emit('roomUsers', {
+        room: user.room,
+        users: getRoomUsers(user.room)
+      });
+
     })
 
     // 監聽使用者送出訊息
