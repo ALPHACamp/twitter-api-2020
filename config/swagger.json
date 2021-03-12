@@ -1,0 +1,943 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "TwitterKiller.WebAPI",
+    "version": "1.0.0",
+    "license": {
+      "name": "ISC",
+      "url": ""
+    },
+    "description": "This is a Twitter project backend-WebAPI documentation",
+    "contact": {
+      "email": "TwitterKiller@example.com",
+      "termsOfService": ""
+    }
+  },
+  "host": "twitterkiller-backend.herokuapp.com",
+  "basePath": "/api",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "tags": [
+    {
+      "name": "admin",
+      "description": "Admin 權限入口",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
+    },
+    {
+      "name": "user",
+      "description": "User 相關 API",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
+    },
+    {
+      "name": "tweets",
+      "description": "推文資料相關 API",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
+    },
+    {
+      "name": "followships",
+      "description": "追蹤功能相關 API",
+      "externalDocs": {
+        "description": "",
+        "url": ""
+      }
+    }
+  ],
+  "paths": {
+    "/admin/signin": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "登入後台",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "admin account info for login",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/signIn"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "User not found or Authorization denied"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "看見站內所有的使用者",
+        "consumes": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/admin/tweets": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "看見所有的推文",
+        "consumes": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/admin/tweets/{id}": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "刪除使用者的推文",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "註冊使用者帳號",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Register an account",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/signUp"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User was successfully registered"
+          },
+          "400": {
+            "description": "Password is different or Email is already exists"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "看見所有使用者",
+        "consumes": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User was successfully registered"
+          },
+          "400": {
+            "description": "Password is different or Email is already exists"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/signIn": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "登入自己帳號",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "user account info for login",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/signIn"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "400": {
+            "description": "User not found or required fields didn't exist"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "瀏覽單個使用者頁面",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "編輯自己所有的資料",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Register an account",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/putUser"
+            }
+          },
+          {
+            "name": "avatar",
+            "in": "formData",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "name": "cover",
+            "in": "formData",
+            "required": false,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}/tweets": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "看見某使用者發過的推文",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}/replied_tweets": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "看見某使用者發過回覆的推文",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}/likes": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "看見某使用者點過的 Like",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}/followings": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "看見某使用者跟隨中的人",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}/followers": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "看見某使用者的跟隨者",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}/edit": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "進入使用者編輯頁面",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tweets": {
+      "post": {
+        "tags": [
+          "tweets"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "新增一則推文",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "post a tweet",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postTweet"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "tweets"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "瀏覽所有推文，包括推文作者(首頁）",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tweets/{id}": {
+      "get": {
+        "tags": [
+          "tweets"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "瀏覽一筆推文與回覆",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/followships": {
+      "post": {
+        "tags": [
+          "followships"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "新增追蹤紀錄",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "post a tweet",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/following"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/followships/{followingId}": {
+      "delete": {
+        "tags": [
+          "followships"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "刪除追蹤紀錄",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "followingId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tweets/{id}/like": {
+      "post": {
+        "tags": [
+          "tweets"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "喜歡一則推文",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tweets/{id}/unlike": {
+      "post": {
+        "tags": [
+          "tweets"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "取消喜歡",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/tweets/{tweet_id}/replies": {
+      "post": {
+        "tags": [
+          "tweets"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "新增一則回覆",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "post a reply",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postReply"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "tweets"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "瀏覽推文的回覆畫面",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tweet_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ApiErrorResponse": {
+      "type": "object",
+      "properties": {
+        "statusCode": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "ApiOnlyResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "signIn": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "signUp": {
+      "type": "object",
+      "required": [
+        "account",
+        "name",
+        "email",
+        "password",
+        "checkPassword"
+      ],
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "checkPassword": {
+          "type": "string"
+        }
+      }
+    },
+    "putUser": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "introduction": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "checkPassword": {
+          "type": "string"
+        }
+      }
+    },
+    "following": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        }
+      }
+    },
+    "postTweet": {
+      "type": "object",
+      "properties": {
+        "descripton": {
+          "type": "string"
+        }
+      }
+    },
+    "postReply": {
+      "type": "object",
+      "properties": {
+        "UserId": {
+          "type": "integer"
+        },
+        "TweetId": {
+          "type": "integer"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}
