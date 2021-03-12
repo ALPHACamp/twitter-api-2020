@@ -97,11 +97,12 @@ const userService = {
             model: Tweet, include: [
               { model: Like },
               { model: Reply }
-            ]
+            ],
+            order: [[{ model: Reply }, 'createdAt', 'DESC'], [{ model: Like }, 'createdAt', 'DESC']]
             // order: ['createdAt', 'DESC']
           }
         ],
-        order: [[{ model: Tweet }, 'createdAt', 'DESC'], [{ model: Reply }, 'createdAt', 'DESC'], [{ model: Like }, 'createdAt', 'DESC']]
+        order: [[{ model: Tweet }, 'createdAt', 'DESC']]
       })
       if (!user) return callback({ status: 'error', message: 'User not found', statusCode: 400 })
       callback(user)
