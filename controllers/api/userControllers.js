@@ -162,7 +162,6 @@ let userController = {
 
         const set = new Set();
         const result = data.filter(item => !set.has(item.id) ? set.add(item.id) : false);
-        // console.log(result)
 
         return res.json(result);
       })
