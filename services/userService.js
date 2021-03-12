@@ -59,7 +59,8 @@ const userService = {
           name: user.name,
           email: user.email,
           role: user.role,
-          account: user.account
+          account: user.account,
+          avatar: user.avatar
         }
       })
     } catch (err) {
