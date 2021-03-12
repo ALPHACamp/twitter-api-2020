@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Likes', {
@@ -12,7 +12,13 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       TweetId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        onDelete: 'CASCADE', // will delete child likes if parent tweet is deleted.
+        references: {
+          model: 'Tweets',
+          key: 'id',
+          as: 'TweetId'
+        }
       },
       createdAt: {
         allowNull: false,
@@ -22,9 +28,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
+    })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Likes');
+    return queryInterface.dropTable('Likes')
   }
-};
+}
