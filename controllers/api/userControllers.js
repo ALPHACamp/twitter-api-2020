@@ -307,7 +307,6 @@ let userController = {
       .then((likes) => {
         const data = likes.map((d) => ({
           ...d.dataValues,
-          // description: d.dataValues.Tweet.dataValues.description.substring(0, 50),
           likeCount: d.Tweet.Likes.length,
           ReplyCount: d.Tweet.Replies.length,
           isLike: d.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
