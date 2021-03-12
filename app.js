@@ -1,12 +1,10 @@
 const express = require('express');
 const helpers = require('./_helpers');
-
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
 const cors = require('cors')
-
 
 
 if (process.env.NODE_ENV !== 'production') {
