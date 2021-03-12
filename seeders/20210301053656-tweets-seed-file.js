@@ -19,9 +19,7 @@ module.exports = {
       tweetsList[x].id = x + 1
     }
 
-
     await queryInterface.bulkInsert('Tweets', tweetsList)
-
   },
 
   down: async (queryInterface, Sequelize) => {

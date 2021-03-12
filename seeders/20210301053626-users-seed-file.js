@@ -3,78 +3,38 @@ const bcrypt = require('bcryptjs')
 const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert('Users', [{
-      id: 99,
+    let userList = []
+    for (let i = 1; i <= 15; i++) {
+      const list = {
+        id: i,
+        email: `user${i}@example.com`,
+        password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
+        role: 'user',
+        name: `user${i}`,
+        account: `@${faker.lorem.word()}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        introduction: faker.lorem.sentence(),
+        cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
+        avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
+      }
+      userList.push(list)
+    }
+    const admin = {
+      id: 999,
       email: 'root@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'admin',
       name: 'root',
-      account: '@hereComeTheBoss',
+      account: '@Boss',
       createdAt: new Date(),
       updatedAt: new Date(),
       cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
-    }, {
-      id: 1,
-      email: 'user1@example.com',
-      password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      role: 'user',
-      name: 'user1',
-      account: '@說好不打臉',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      introduction: faker.lorem.sentence(),
-      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
-      avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
-    }, {
-      id: 2,
-      email: 'user2@example.com',
-      password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      role: 'user',
-      name: 'user2',
-      account: '@不要問你會怕',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      introduction: faker.lorem.sentence(),
-      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
-      avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
-    }, {
-      id: 3,
-      email: 'user3@example.com',
-      password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      role: 'user',
-      name: 'user3',
-      account: '@你看不見我',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      introduction: faker.lorem.sentence(),
-      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
-      avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
-    }, {
-      id: 4,
-      email: 'user4@example.com',
-      password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      role: 'user',
-      name: 'user4',
-      account: '@AI人工智障',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      introduction: faker.lorem.sentence(),
-      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
-      avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
-    }, {
-      id: 5,
-      email: 'user5@example.com',
-      password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      role: 'user',
-      name: 'user5',
-      account: '@老爺不可以',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      introduction: faker.lorem.sentence(),
-      cover: `https://loremflickr.com/520/320/banner/?lock=${Math.random() * 100}`,
-      avatar: `https://loremflickr.com/320/240/user/?lock=${Math.random() * 100}`
-    }], {})
+    }
+    userList.push(admin)
+
+    await queryInterface.bulkInsert('Users', userList)
   },
 
   down: async (queryInterface, Sequelize) => {
