@@ -12,7 +12,21 @@ const replyService = {
       include: [{ model: User, attributes: ['name', 'account'] }]
     })
       .then((replies) => {
-        return callback(replies)
+        const repliesArray = replies.map((reply) => {
+          return {
+            id: reply.id,
+            UserId: reply.UserId,
+            TweetId: reply.TweetId,
+            comment: reply.comment.slice(0, 49),
+            createdAt: reply.createdAt,
+            User: {
+              name: reply.User.name,
+              account: '@' + reply.User.account
+            }
+          }
+        })
+
+        return callback(repliesArray)
       })
       .catch((error) => callback({ status: 'error', message: 'Get Replies Fail' }))
   },
