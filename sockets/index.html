@@ -22,8 +22,8 @@
       auth: {
         token: token
       },
-      query: {
-        "my-key": "my-value"
+      query: { 
+        id: 1
       }
     });
   </script>
@@ -156,13 +156,13 @@
       socket.on("online", function (amount) {
         online.innerText = amount;
       })
-      // 監聽Server "msg"  此為存完資料庫後送回前端訊息
-      socket.on("msg", renderMsgCard)
+      // 監聽Server "message"  此為存完資料庫後送回前端訊息
+      socket.on("message", renderMsgCard)
 
-      // 監聽Server "userData" 使用者相關資訊
+      // 監聽Server "onlineUser" 使用者相關資訊
       // 儲存使用者資訊用於渲染
       let USER = []
-      socket.on("userData", function (data) {
+      socket.on("onlineUser", function (data) {
         USER = data
         renderUserCard(data)
 
@@ -177,7 +177,6 @@
           socket.emit("get-private-chat", { userId, userName })
         })
       })
-
 
       // 監聽Server chatRecord 資料回傳
       socket.on("chatRecord", function (msgs) {
@@ -220,11 +219,13 @@
           time: new Date().toUTCString()
         }
         if (userValue !== "") {
+          formData.id = USER.id
           formData.name = USER.name
           formData.msg = userValue
         }
         if (message) {
           // 使用者送出聊天內容 ----> Server "send"
+          console.log('formData', formData)
           socket.emit("send", formData)
         }
       })
@@ -310,3 +311,9 @@
 </body>
 
 </html>
+
+{
+id: 1,
+token: token,
+channel: 'publicRoom'
+}
