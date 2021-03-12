@@ -51,13 +51,12 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html')
 })
-io.on('connection', (socket) => {
+
+io.on('connection', (socket) => { // 建立通道
   console.log('a user connected')
-  socket.on('chat message', (msg) => {
-    console.log('message: ' + msg);
-  })
-  socket.on('disconnect', () => {
-    console.log('user disconnected')
+  socket.on('chat message', (msg) => {  // server 收到 client 的訊息 (Emitting events:client往通道內丟的訊息)
+    console.log('message: ' + msg)
+    io.emit('chat message', msg) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
   })
 })
 
