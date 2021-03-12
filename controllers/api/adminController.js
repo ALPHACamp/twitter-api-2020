@@ -90,14 +90,6 @@ const adminController = {
       if (!tweet) {
         return res.status(400).json({ status: 'error', message: 'tweet id does not exist' })
       }
-      // remove replies of the tweet
-      await Reply.destroy({
-        where: { TweetId: req.params.id }
-      })
-      // remove likes
-      await Like.destroy({
-        where: { TweetId: req.params.id }
-      })
 
       // remove tweet
       await tweet.destroy()
