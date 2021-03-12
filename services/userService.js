@@ -237,7 +237,8 @@ const userService = {
         where: { UserId: req.params.id },
         include: [
           { model: Tweet, include: [{ model: User }, { model: Like }, { model: Reply }] }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
       callback(likes)
     } catch (err) {
