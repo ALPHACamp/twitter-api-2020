@@ -52,7 +52,17 @@ const tweetService = {
             createdAt: reply.createdAt,
             updatedAt: reply.updatedAt,
             name: reply.User.name,
-            User: reply.User
+            User: {
+              id: reply.User.id,
+              email: reply.User.email,
+              name: reply.User.name,
+              avatar: reply.User.avatar,
+              introduction: reply.User.introduction.slice(0, 139),
+              role: reply.User.role,
+              account: '@' + reply.User.account,
+              cover: reply.User.cover,
+              createdAt: reply.User.createdAt
+            }
           }
         })
 
@@ -60,6 +70,7 @@ const tweetService = {
         const showAccount = '@' + tweet.User.account
         const tweetData = {
           ...tweet.dataValues,
+          description: tweet.dataValues.description.slice(0, 139),
           User: {
             id: tweet.User.id,
             name: tweet.User.name,
