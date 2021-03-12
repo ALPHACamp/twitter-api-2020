@@ -93,6 +93,11 @@ const adminController = {
       await Reply.destroy({
         where: { TweetId: req.params.id }
       })
+      // remove likes
+      await Like.destroy({
+        where: { TweetId: req.params.id }
+      })
+
       // remove tweet
       await tweet.destroy()
 
