@@ -18,7 +18,8 @@ const adminController = {
     */
     try {
       const users = await User.findAll({
-        include: [Reply, Like, Tweet,
+        include: [
+          Reply, Like, Tweet,
           { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
           { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
         ],

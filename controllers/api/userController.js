@@ -25,6 +25,7 @@ module.exports = {
       const currentUser = helpers.getUser(req)
       // get user
       let user = await User.findOne({
+        //role: user or [Op.not]: [{ role: 'admin' }] both fail on test
         where: { id },
         attributes: { exclude: ['password'] },
         include: [
@@ -224,7 +225,6 @@ module.exports = {
       likedTweets = likedTweets.map(like => {
         const tweet = like.Tweet.dataValues
         tweet.isLikedByMe = tweet.Likes.map(myLike => myLike.UserId).includes(helpers.getUser(req).id)
-        console.log(tweet.Likes)
         tweet.isMyTweet = helpers.getUser(req).id === tweet.User.id
         tweet.replyCount = tweet.Replies.length
         tweet.likeCount = tweet.Likes.length
