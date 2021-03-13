@@ -25,7 +25,7 @@ const io = require('socket.io')(httpServer, {
   }
 })
 
-const sio = io.listen(server)
+const sio = io.listen(httpServer)
 
 // cors 的預設為全開放
 app.use(cors())
