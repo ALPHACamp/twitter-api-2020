@@ -15,7 +15,7 @@ const userController = {
       if (!req.body.account || !req.body.password) {
         return res.json({ status: 'error', message: "required fields didn't exist" })
       }
-
+      console.log(req.body.account)
       const user = await User.findOne({
         where: { account: req.body.account }
       })
@@ -30,16 +30,21 @@ const userController = {
         return res.json({ status: 'error', message: "admin can't signin" })
       }
 
-      const { id, name, account, email, avatar, role, cover, introduction } = user
+      const { id, name, account, email, avatar, role, cover } = user
       const showAccount = '@' + account
+      const introduction = ''
+      if (user.introduction) {
+        introduction = user.introduction.slice(0, 49)
+      }
       let payload = { id }
       let token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
         message: 'ok',
         token,
-        user: { id, name, account: showAccount, email, avatar, role, cover, introduction: introduction.slice(0, 49) }
+        user: { id, name, account: showAccount, email, avatar, role, cover, introduction }
       })
+
     }
     catch (error) {
       console.log('error:', error.message)
