@@ -4,6 +4,7 @@ const { User, Chatpublic, sequelize } = require('../models')
 
 // 驗證身分
 async function authenticated(socket, next) {
+  console.log(socket.handshake)
   // 取出 token
   const token = socket.handshake.auth.token
   // console.log('token', token)
@@ -52,7 +53,8 @@ module.exports = (io) => {
     let roomName = socket.handshake.query.channel
     if (roomName !== 'publicRoom') {
       // 將兩位使用者帶入 特定Room
-      socket.join(user.roomName)
+
+      // socket.join(user.roomName)
     }
     // 將使用者帶入公開聊天Room
     socket.join(user.roomName)
