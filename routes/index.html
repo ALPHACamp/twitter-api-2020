@@ -84,9 +84,15 @@
     });
 
     //去監聽事件
-    // socket.on("allMessage", (obj) => {
-    //   console.log(obj)
-    // })
+    socket.on('add user', function (msg) {
+      console.log('前:', msg)
+      var item = document.createElement('li');
+      item.textContent = msg
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
+
     socket.on('allMessage', function (msg) {
       console.log(msg)
       var item = document.createElement('li');
@@ -101,6 +107,24 @@
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     });
+
+    // let data = {
+    //   name: 'Robby',
+    //   id: 21,
+    //   msg: 'Helloooooo~',
+    // };
+
+    // socket.emit('publicMessage', data)
+
+
+    let data2 = {
+      name: 'stan',
+      msg: '測試message',
+    };
+
+    socket.emit('startChat', data2)
+
+
   </script>
 </body>
 
