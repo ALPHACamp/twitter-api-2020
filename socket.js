@@ -22,7 +22,7 @@ module.exports = socket = (httpServer) => {
         })
       })
 
-    socket.on('self', (msg, err) => {// server 收到 client 的訊息 (Emitting events:client往通道內丟的訊息)
+    socket.on('message', (msg, err) => {// server 收到 client 的訊息 (Emitting events:client往通道內丟的訊息)
       console.log(msg)
 
       //轉發
