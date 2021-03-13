@@ -17,7 +17,7 @@
     //     query: { token }
     //   })
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjE1NDIyNzcyfQ.74orJRqM76Ih0oP5MnLFRShDqNHylgrY_6t-fv2IuTo'
-    const socket = io("http://localhost:3000", {
+    const socket = io("https://mighty-spire-48914.herokuapp.com/", {
       reconnectionDelayMax: 10000,
       auth: {
         token: token
@@ -158,7 +158,7 @@
       })
       // 監聽Server "message"  此為存完資料庫後送回前端訊息
       socket.on("message", (data) => {
-        console.log('監聽Server "message"  此為存完資料庫後送回前端訊息', data)
+        console.log('監聽Server message ', data)
         if (data.msg) {
           renderMsgCard(data)
         }
