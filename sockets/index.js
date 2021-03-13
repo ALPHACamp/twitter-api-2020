@@ -3,7 +3,6 @@ const { User, Chat, sequelize } = require('../models')
 
 // 驗證身分
 async function authenticated(socket, next) {
-
   // 取出 token
   const token = socket.handshake.auth.token
   // console.log('token', token)
@@ -25,7 +24,6 @@ async function authenticated(socket, next) {
     next()
   }
 }
-
 
 module.exports = (io) => {
   console.log('已連線')
@@ -53,7 +51,7 @@ module.exports = (io) => {
 
     // 回傳使用者資訊 渲染前端
     io.emit("onlineUser", user)
-    
+
 
     // 儲存目前上線使用者
     let userList = []
@@ -76,7 +74,6 @@ module.exports = (io) => {
       historicalRecord(user.channel)
     })
 
-
     //針對特定房間用戶連接時廣播
     function formatMessage(username, text) {
       return {
@@ -86,7 +83,6 @@ module.exports = (io) => {
       };
     }
     const botName = 'ChatCord Bot'
-    // console.log('===username', user)
     socket.broadcast.to(user.roomName).emit(
       'message',
       formatMessage(botName, `${user.name} 加入了聊天`)
@@ -95,9 +91,7 @@ module.exports = (io) => {
 
     // 監聽使用者送出訊息 送出 'message' 
     socket.on("send", async (msg) => {
-      // 如果 msg 內容鍵值小於 2 等於是訊息傳送不完全
-      // 因此我們直接 return ，終止函式執行。
-      if (Object.keys(msg).length < 2) return
+      if (Object.keys(msg).length < 0) return
       try {
         if (user.channel !== 'publicRoom') {
           await Chat.create({
@@ -131,12 +125,10 @@ module.exports = (io) => {
 
     })
 
-
-
     function historicalRecord(channelData) {
       // 發送歷史紀錄
       Chat.findAll({
-        where: { Channel: channelData },
+        where: { channel: channelData },
         order: [
           // 資料庫端進行排列
           [sequelize.literal('createdAt'), 'ASC']
@@ -148,14 +140,18 @@ module.exports = (io) => {
         raw: true,
         nest: true,
       }).then(userMessage => {
+        console.log('========歷史訊息', userMessage)
         // return userMessage
-
         if (user.channel === 'publicRoom') {
-          console.log('========publicRoom')
-          socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
+          // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
+          // socket.to(user.channel).emit("chatRecord", userMessage)
           // socket.emit("chatRecord", userMessage)
+          io.to(user.channel).emit('chatRecord', userMessage)
+          
         } else {
-          socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
+          io.to(user.channel).emit('chatRecord', userMessage)
+          // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
+          // socket.emit("chatRecord", userMessage)
         }
       })
     }
@@ -163,7 +159,6 @@ module.exports = (io) => {
     // 離線
     socket.on('disconnect', () => {
       onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
-
       // 找出誰離開
       function userLeave(id) {
         const index = userList.findIndex(user => user.socketid === id)
@@ -171,9 +166,8 @@ module.exports = (io) => {
           return userList.splice(index, 1)[0];
         }
       }
-      // 帶入 userLeave() 判斷
-      const userLeft = userLeave(user.socketid);
-
+      // 帶入 userLeave() 判斷誰離開
+      const userLeft = userLeave(user.socketid, userList);
       // 向該頻道通知誰離開
       if (userLeft) {
         io.emit("offlineUser", userLeft)
@@ -182,7 +176,6 @@ module.exports = (io) => {
           formatMessage(botName, `${userLeft.name} has left the chat`)
         )
       }
-
       io.emit("online", onlineCount)
     })
   })
