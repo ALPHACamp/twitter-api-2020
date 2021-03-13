@@ -1,0 +1,10 @@
+驗證:
+需要把 token 放進 socket.auth 
+socket.auth = { token: 'yourToken' }
+
+成功連線後:
+前端要監聽以下事件: (事件: 伺服器回傳結果)
+
+fetchMessagesFail:
+{ status: 'error', message: '獲取聊天紀錄失敗' }
+
