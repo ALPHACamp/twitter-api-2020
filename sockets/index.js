@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { User, Chatpublic, ChatPrivate, sequelize } = require('../models')
+const chatPrivate = require('../models/chatPrivate')
 
 
 // 驗證身分
@@ -57,6 +58,7 @@ module.exports = (io) => {
 
       socket.join(roomName)
       io.sockets.to(roomName).emit('message', `${user.name} has join this room`);
+      historicalRecord()
 
     })
 
@@ -85,6 +87,7 @@ module.exports = (io) => {
       formatMessage(botName, `${user.name} 加入了聊天`)
     )
 
+    // let privateChatRecord = chatPrivate.findAll({ where: channelId })
 
     // 監聽使用者送出訊息 送出 'message' 
     socket.on("send", async (msg) => {
@@ -93,6 +96,7 @@ module.exports = (io) => {
       // console.log(msg)
       if (Object.keys(msg).length < 2) return;
       try {
+        console.log(roomName)
         if (roomName) {
           await ChatPrivate.create({
             UserId: msg.id,
@@ -125,8 +129,25 @@ module.exports = (io) => {
         console.log(e)
       }
 
-
     })
+
+    function historicalRecord() {
+
+      // 發送歷史紀錄
+      ChatPrivate.findAll({
+        where: { ChannelId: roomName },
+        // attributes: ['msg', 'time'],
+        order: [
+          // 資料庫端進行排列
+          [sequelize.literal('createdAt'), 'ASC']
+        ],
+        raw: true,
+        nest: true,
+      }).then(userMessage => {
+
+        socket.emit("chatRecordPrivate", userMessage)
+      })
+    }
 
     // 離線
     socket.on('disconnect', () => {
