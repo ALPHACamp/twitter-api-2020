@@ -38,7 +38,9 @@ app.use((req, res, next) => {
 
 //建立http服務
 const http = require('http').createServer(app)
-const io = require('socket.io')(http)
+const io = require('socket.io')(http, {
+  cors: { origin: '*' }
+})
 
 // app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
 
