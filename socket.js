@@ -26,12 +26,15 @@ module.exports = socket = (httpServer) => {
       console.log(msg)
 
       //轉發
-      socket.broadcast.emit('other', { msg: msg.msg }) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
+      // socket.broadcast.emit('other', { msg: msg.msg }) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
 
       //撈自己的info
       User.findAll({ where: { id: 11 } })
         .then(user => {
           const { id, name, avatar, account, createdAt } = user[0].dataValues
+
+          socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
+
           socket.emit('self', { msg: msg.msg, id, account, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
         })
 
