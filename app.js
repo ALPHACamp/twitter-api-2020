@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 // app.use(bodyParser.urlencoded({ extended: true }))  // setup bodyParser
 // app.use(bodyParser.json())
-app.use(express.static('public'))
+// app.use(express.static('public'))
 app.use(methodOverride('_method'))
 // setup session and flash
 app.use(session({
@@ -75,7 +75,8 @@ sio.on('connection', (socket) => { // 建立連線
   console.log('a user connected')
   socket.on('message', (msg) => {// server 收到 client 的訊息 (Emitting events:client往通道內丟的訊息)
     console.log(msg)
-    socket.emit('message', msg) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
+    socket.broadcast.emit('other', msg) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
+    socket.emit('self', msg) //emit：再透過通道把msg傳給自己 
   })
 })
 
