@@ -33,8 +33,8 @@ module.exports = function (io) {
     //fetch chat history (all previous msg) and send to new socket
     let messages = await Message.findAll({
       include: [
-        { model: User, as: 'from' },
-        { model: User, as: 'to' }
+        { model: User, as: 'from', exclude: ['password'] },
+        { model: User, as: 'to', exclude: ['password'] }
       ]
     })
     if (!messages || !Array.isArray(messages)) {
@@ -75,29 +75,24 @@ module.exports = function (io) {
     })
 
     const usersInPrivateChat = []
-    const userArray = []
+    const userPromises = []
     messagePerUser.forEach((anotherUserId, msgs) => {
-      userArray.push(User.findOne({ where: { id: anotherUserId }, exclude: ['password'] }))
+      userPromises.push(User.findOne({ where: { id: anotherUserId }, exclude: ['password'] }))
       usersInPrivateChat.push({
         connected: usersInPublicChat.map(d => d.id).includes(anotherUserId),
         conversation: msgs
       })
     })
-    let userData = await Promise.all(userArray)
+    let userData = await Promise.all(userPromises)
     userData = JSON.parse(JSON.stringify(userData))
     userData.map((data, index) => {
       Object.assign(usersInPrivateChat[index], data)
     })
     socket.to(socketUserId).emit('usersInPrivateChat', usersInPrivateChat)
 
-    socket.on('privateMessage', async ({ content, toId }) => {
+    socket.on('privateMessage', async (privateMessage) => {
       console.log('someone wants to send a private message')
-      const privateMessage = {
-        content,
-        fromId: socketUserId,
-        toId
-      }
-      socket.to(toId).to(socketUserId).emit('privateMessage', privateMessage)
+      socket.to(privateMessage.toId).to(socketUserId).emit('privateMessage', privateMessage)
       await Message.create(privateMessage)
     })
 
