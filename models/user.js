@@ -40,6 +40,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followerId', // who I am following
       as: 'Followings'
     })
+    User.hasMany(models.Message, { as: 'from' })
+    User.hasMany(models.Message, { as: 'to' })
   }
   return User
 }
