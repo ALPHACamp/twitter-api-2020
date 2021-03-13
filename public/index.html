@@ -79,7 +79,7 @@
         input.value = '';
       }
     });
-    socket.on('self', function (msg) {
+    socket.on('message', function (msg) {
       var item = document.createElement('li');
       item.textContent = msg;
       messages.appendChild(item);
