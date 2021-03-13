@@ -98,12 +98,9 @@ module.exports = (io) => {
             channel: user.channel
           }).then(usermsg => {
             const data = {
-              UserId: usermsg.dataValues.UserId,
-              msg: usermsg.dataValues.message,
-              channel: user.channel
+              ...usermsg.dataValues
             }
-            // const msg = [data, user]
-            io.emit("message", { data, user})
+            io.emit("message", { ...data, ...user})
           })
         } else {
           await Chat.create({
@@ -112,11 +109,9 @@ module.exports = (io) => {
             channel: user.channel
           }).then(usermsg => {
             const data = {
-              UserId: usermsg.dataValues.UserId,
-              msg: usermsg.dataValues.message,
+              ...usermsg.dataValues
             }
-            // const msg = [data, user]
-            io.emit("message", { data, user})
+            io.emit("message", { ...data, ...user})
 
           })
         }

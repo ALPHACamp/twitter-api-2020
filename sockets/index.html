@@ -17,7 +17,8 @@
     //     query: { token }
     //   })
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjE1NDIyNzcyfQ.74orJRqM76Ih0oP5MnLFRShDqNHylgrY_6t-fv2IuTo'
-    const socket = io("https://mighty-spire-48914.herokuapp.com/", {
+    const socket = io("http://localhost:3000", {
+      // https://mighty-spire-48914.herokuapp.com/
       reconnectionDelayMax: 10000,
       auth: {
         token: token
