@@ -53,10 +53,13 @@ module.exports = (io) => {
 
     // 回傳使用者資訊 渲染前端
     io.emit("onlineUser", user)
+    
 
     // 儲存目前上線使用者
     let userList = []
     userList.push(user)
+    io.emit("allOnlineUsers", userList)
+
 
     socket.on("get-private-chat", (data) => {
       let userList = []
