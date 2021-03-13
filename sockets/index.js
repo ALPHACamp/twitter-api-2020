@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Chatpublic, sequelize } = require('../models')
+const { User, Chatpublic, ChatPrivate, sequelize } = require('../models')
 
 
 // 驗證身分
@@ -32,13 +32,13 @@ module.exports = (io) => {
 
   io.on('connection', socket => {
     // 計算上線人數
+
     let onlineCount = 0
     onlineCount++;
     io.emit("online", onlineCount)
 
     // 取出登入使用者
     const user = socket.user
-    
     user.channel = 'publicRoom'
 
     // 回傳使用者資訊 渲染前端
@@ -48,17 +48,29 @@ module.exports = (io) => {
     let userList = []
     userList.push(user)
 
+    socket.on("get-private-chat", (data) => {
+      let userList = []
+      userList.push(user.id.toString(), data.userId.toString())
+      userList.sort()
+      roomName = userList.join("plus")
+
+      socket.join(roomName)
+      io.sockets.to(roomName).emit('message', `${user.name} has join this room`);
+
+    })
+
     // 分配聊天室 先驗證
+    // console.log(socket.handshake.query)
     let roomName = socket.handshake.query.channel
     if (roomName !== 'publicRoom') {
       // 將兩位使用者帶入 特定Room
-      socket.join(user.roomName)
+      socket.join(roomName)
     }
     // 將使用者帶入公開聊天Room
-    socket.join(user.roomName)
+    // socket.join(roomName)
 
-     //針對特定房間用戶連接時廣播
-     function formatMessage(username, text) {
+    //針對特定房間用戶連接時廣播
+    function formatMessage(username, text) {
       return {
         username,
         text,
@@ -67,7 +79,7 @@ module.exports = (io) => {
     }
     const botName = 'ChatCord Bot'
     // console.log('===username', user)
-     socket.broadcast.to(user.roomName).emit(
+    socket.broadcast.to(user.roomName).emit(
       'message',
       formatMessage(botName, `${user.name} 加入了聊天`)
     )
@@ -77,18 +89,42 @@ module.exports = (io) => {
     socket.on("send", async (msg) => {
       // 如果 msg 內容鍵值小於 2 等於是訊息傳送不完全
       // 因此我們直接 return ，終止函式執行。
+      // console.log(msg)
       if (Object.keys(msg).length < 2) return;
-      await Chatpublic.create({
-        UserId: msg.id,
-        message: msg.msg,
-        time: msg.time
-      }).then(user => {
-        const data = {
-          UserId: user.dataValues.UserId,
-          msg: user.dataValues.message
+      try {
+        if (roomName) {
+          await ChatPrivate.create({
+            UserId: msg.id,
+            message: msg.msg,
+            time: msg.time,
+            channelId: roomName
+          }).then(user => {
+            const data = {
+              UserId: user.dataValues.UserId,
+              msg: user.dataValues.message,
+              roomName
+            }
+            io.emit("message", data)
+          })
+        } else {
+          await Chatpublic.create({
+            UserId: msg.id,
+            message: msg.msg,
+            time: msg.time
+          }).then(user => {
+            const data = {
+              UserId: user.dataValues.UserId,
+              msg: user.dataValues.message,
+            }
+            io.emit("message", data)
+
+          })
         }
-        io.emit("message", data)
-      })
+      } catch (e) {
+        console.log(e)
+      }
+
+
     })
 
     // 離線
@@ -97,4 +133,5 @@ module.exports = (io) => {
       io.emit("online", onlineCount)
     })
   })
+
 }
