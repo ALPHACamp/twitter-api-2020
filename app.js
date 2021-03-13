@@ -1,4 +1,5 @@
 const express = require('express')
+
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 const cors = require('cors')
@@ -12,19 +13,11 @@ const session = require('express-session')
 const passport = require('./config/passport')
 const flash = require('connect-flash')
 const app = express()
+const httpServer = require('http').createServer(app)
 const port = process.env.PORT || 3000
 //setup socket.io
 // const server = app.listen(port)
 // const io = require("socket.io")()
-const httpServer = require('http').createServer(app)
-const sio = require('socket.io')(httpServer, {
-  cors: {
-    // origin: "https://twitter-simple-one.herokuapp.com/api",
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-})
-
 // const sio = io.listen(server)
 
 // cors 的預設為全開放
@@ -63,28 +56,14 @@ app.use((req, res, next) => {
 //   res.sendFile(__dirname + '/index.html')
 // })
 
-// io.on('connection', (socket) => { // 建立通道
-//   console.log('a user connected')
-//   socket.on('chat message', (msg) => {  
-//     console.log('message: ' + msg)
-//     io.emit('chat message', msg) 
-//   })
-// })
-sio.on('connection', (socket) => { // 建立連線
-  console.log('a user connected')
-  socket.on('message', (msg, err) => {// server 收到 client 的訊息 (Emitting events:client往通道內丟的訊息)
-    console.log(msg)
-    socket.broadcast.emit('other', msg) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
-    socket.emit('self', msg) //emit：再透過通道把msg傳給自己 
-  })
-})
 
-httpServer.listen(port, () => {
+module.exports = httpServer.listen(port, () => {
   console.log(`Example app listening on http://localhost:${port}`)
 })
 
 // 引入 routes 並將 app 傳進去，讓 routes 可以用 app 這個物件來指定路由
+
+require('./socket')(httpServer)
+
 require('./routes')(app)  // 把 passport 傳入 routes
-
-
-module.exports = app
+// module.exports = app
