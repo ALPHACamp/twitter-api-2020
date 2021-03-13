@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { User, Chatpublic, ChatPrivate, sequelize } = require('../models')
-const chatPrivate = require('../models/chatPrivate')
+const chatPrivate = require('../models/chat')
 
 
 // 驗證身分
@@ -36,7 +36,6 @@ module.exports = (io) => {
   io.on('connection', socket => {
 
     // 計算上線人數
-
     let onlineCount = 0
     onlineCount++;
     io.emit("online", onlineCount)

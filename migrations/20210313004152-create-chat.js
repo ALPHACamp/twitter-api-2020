@@ -2,18 +2,18 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('ChatPrivates', {
+    await queryInterface.createTable('Chats', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      channelId: {
-        type: Sequelize.STRING
-      },
       UserId: {
         type: Sequelize.INTEGER
+      },
+      channel: {
+        type: Sequelize.STRING
       },
       message: {
         type: Sequelize.TEXT
@@ -29,6 +29,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('ChatPrivates');
+    await queryInterface.dropTable('Chats');
   }
 };
