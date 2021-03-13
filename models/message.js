@@ -17,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
   Message.init({
     fromId: DataTypes.INTEGER,
     toId: DataTypes.INTEGER,
-    content: DataTypes.TEXT
+    content: DataTypes.TEXT,
+    sendTime: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Message',
