@@ -28,9 +28,9 @@ app.use(passport.session())
 // 設定 socket.io
 
 
-app.get('/chats', (req, res) => {
-  res.sendFile(__dirname + '/sockets/index.html');
-})
+// app.get('/chats', (req, res) => {
+//   res.sendFile(__dirname + '/sockets/index.html');
+// })
 
 // 建立 socket.io
 const httpserver = require('http').createServer(app)
