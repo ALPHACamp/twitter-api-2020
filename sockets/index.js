@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Chatpublic, ChatPrivate, sequelize } = require('../models')
-const chatPrivate = require('../models/chat')
-
+const { User, Chat, sequelize } = require('../models')
 
 // 驗證身分
 async function authenticated(socket, next) {
@@ -42,9 +40,10 @@ module.exports = (io) => {
 
     // 取出登入使用者
     const user = socket.user
-    
+
     // 未點擊頭像前使用者進入 channel 都是強制切換 'publicRoom'
     user.channel = 'publicRoom'
+    historicalRecord(user.channel)
     socket.join(user.channel)
 
     // 回傳使用者資訊 渲染前端
@@ -66,7 +65,7 @@ module.exports = (io) => {
       // 切換房間
       socket.join(user.channel)
       io.sockets.to(roomName).emit('message', `${user.name} has join this room`);
-      historicalRecord()
+      historicalRecord(user.channel)
     })
 
 
@@ -93,30 +92,31 @@ module.exports = (io) => {
       if (Object.keys(msg).length < 2) return
       try {
         if (user.channel !== 'publicRoom') {
-          await ChatPrivate.create({
+          await Chat.create({
             UserId: msg.id,
             message: msg.msg,
-            time: msg.time,
-            channelId: user.channel
+            channel: user.channel
           }).then(usermsg => {
             const data = {
               UserId: usermsg.dataValues.UserId,
               msg: usermsg.dataValues.message,
               channel: user.channel
             }
-            io.emit("message", data)
+            const msg = [data, user]
+            io.emit("message", msg)
           })
         } else {
-          await Chatpublic.create({
+          await Chat.create({
             UserId: msg.id,
             message: msg.msg,
-            time: msg.time
-          }).then(user => {
+            channel: user.channel
+          }).then(usermsg => {
             const data = {
-              UserId: user.dataValues.UserId,
-              msg: user.dataValues.message,
+              UserId: usermsg.dataValues.UserId,
+              msg: usermsg.dataValues.message,
             }
-            io.emit("message", data)
+            const msg = [data, user]
+            io.emit("message", msg)
 
           })
         }
@@ -126,19 +126,24 @@ module.exports = (io) => {
 
     })
 
-    function historicalRecord() {
+
+
+    function historicalRecord(channelData) {
       // 發送歷史紀錄
-      ChatPrivate.findAll({
-        where: { ChannelId: roomName },
-        // attributes: ['msg', 'time'],
+      Chat.findAll({
+        where: { Channel: channelData },
+        // attributes: ['msg', 'time']
         order: [
           // 資料庫端進行排列
           [sequelize.literal('createdAt'), 'ASC']
         ],
+        attributes: {
+          // 過濾不要資料
+          exclude: ['updatedAt']
+        },
         raw: true,
         nest: true,
       }).then(userMessage => {
-
         socket.emit("chatRecordPrivate", userMessage)
       })
     }

@@ -158,7 +158,7 @@
       })
       // 監聽Server "message"  此為存完資料庫後送回前端訊息
       socket.on("message", (data) => {
-        console.log(data)
+        console.log('監聽Server "message"  此為存完資料庫後送回前端訊息', data)
         if (data.msg) {
           renderMsgCard(data)
         }

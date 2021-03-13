@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Tweet)
     User.hasMany(models.Like)
     User.hasMany(models.Reply)
-    User.hasMany(models.Chatpublic)
+    User.hasMany(models.Chat)
 
     User.belongsToMany(User, {
       through: models.Followship,
@@ -35,16 +35,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followerId',
       as: 'Followings'
     })
-    // User.belongsToMany(models.Tweet, {
-    //   through: models.Like,
-    //   foreignKey: 'UserId',
-    //   as: 'LikedTweets'
-    // })
-    // User.belongsToMany(models.Tweet, {
-    //   through: models.Reply,
-    //   foreignKey: 'UserId',
-    //   as: 'ReplyTweets'
-    // })
   }
   return User
 }
