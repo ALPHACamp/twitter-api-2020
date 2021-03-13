@@ -29,6 +29,6 @@ app.use('/', routes)
 // for api doc
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
-app.listen(port, () => console.log(`App listening on port ${port}!`))
+server.listen(port, () => console.log(`App listening on port ${port}!`))
 
 module.exports = app
