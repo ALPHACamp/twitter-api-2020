@@ -17,7 +17,7 @@
     //     query: { token }
     //   })
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjE1NDIyNzcyfQ.74orJRqM76Ih0oP5MnLFRShDqNHylgrY_6t-fv2IuTo'
-    const socket = io("https://mighty-spire-48914.herokuapp.com/", {
+    const socket = io("http://localhost:3000", {
       reconnectionDelayMax: 10000,
       auth: {
         token: token
@@ -282,7 +282,7 @@
           <div class="media w-50 ml-auto mb-3">
             <div class="media-body">
               <div class="msg bg-primary rounded py-2 px-3 mb-2">
-                <p class="name text-small mb-0 text-white">房間名:${data.roomName}</p>
+                <p class="name text-small mb-0 text-white">房間名:${data.channel}</p>
                 <p class="name text-small mb-0 text-white">${data.msg}</p>
               </div>
               <p class="small text-muted">${data.createdAt}</p>

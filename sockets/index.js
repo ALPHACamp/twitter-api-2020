@@ -5,7 +5,7 @@ const chatPrivate = require('../models/chatPrivate')
 
 // 驗證身分
 async function authenticated(socket, next) {
-  console.log(socket.handshake)
+
   // 取出 token
   const token = socket.handshake.auth.token
   // console.log('token', token)
@@ -22,6 +22,7 @@ async function authenticated(socket, next) {
   // 存進 socket
   if (user) {
     socket.user = user
+    socket.user.socketId = socket.id
     next()
   }
 }
@@ -33,6 +34,7 @@ module.exports = (io) => {
   io.use(authenticated)
 
   io.on('connection', socket => {
+
     // 計算上線人數
 
     let onlineCount = 0
@@ -41,7 +43,10 @@ module.exports = (io) => {
 
     // 取出登入使用者
     const user = socket.user
+    
+    // 未點擊頭像前使用者進入 channel 都是強制切換 'publicRoom'
     user.channel = 'publicRoom'
+    socket.join(user.channel)
 
     // 回傳使用者資訊 渲染前端
     io.emit("onlineUser", user)
@@ -52,25 +57,19 @@ module.exports = (io) => {
 
     socket.on("get-private-chat", (data) => {
       let userList = []
+      // 編輯房號
       userList.push(user.id.toString(), data.userId.toString())
       userList.sort()
+      // 建立房間
       roomName = userList.join("plus")
-
-      socket.join(roomName)
+      // 更換使用者頻道
+      user.channel = roomName
+      // 切換房間
+      socket.join(user.channel)
       io.sockets.to(roomName).emit('message', `${user.name} has join this room`);
       historicalRecord()
-
     })
 
-    // 分配聊天室 先驗證
-    // console.log(socket.handshake.query)
-    let roomName = socket.handshake.query.channel
-    if (roomName !== 'publicRoom') {
-      // 將兩位使用者帶入 特定Room
-      socket.join(roomName)
-    }
-    // 將使用者帶入公開聊天Room
-    // socket.join(roomName)
 
     //針對特定房間用戶連接時廣播
     function formatMessage(username, text) {
@@ -87,27 +86,24 @@ module.exports = (io) => {
       formatMessage(botName, `${user.name} 加入了聊天`)
     )
 
-    // let privateChatRecord = chatPrivate.findAll({ where: channelId })
 
     // 監聽使用者送出訊息 送出 'message' 
     socket.on("send", async (msg) => {
       // 如果 msg 內容鍵值小於 2 等於是訊息傳送不完全
       // 因此我們直接 return ，終止函式執行。
-      // console.log(msg)
-      if (Object.keys(msg).length < 2) return;
+      if (Object.keys(msg).length < 2) return
       try {
-        console.log(roomName)
-        if (roomName) {
+        if (user.channel !== 'publicRoom') {
           await ChatPrivate.create({
             UserId: msg.id,
             message: msg.msg,
             time: msg.time,
-            channelId: roomName
-          }).then(user => {
+            channelId: user.channel
+          }).then(usermsg => {
             const data = {
-              UserId: user.dataValues.UserId,
-              msg: user.dataValues.message,
-              roomName
+              UserId: usermsg.dataValues.UserId,
+              msg: usermsg.dataValues.message,
+              channel: user.channel
             }
             io.emit("message", data)
           })
@@ -132,7 +128,6 @@ module.exports = (io) => {
     })
 
     function historicalRecord() {
-
       // 發送歷史紀錄
       ChatPrivate.findAll({
         where: { ChannelId: roomName },
@@ -152,6 +147,26 @@ module.exports = (io) => {
     // 離線
     socket.on('disconnect', () => {
       onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
+
+      // 找出誰離開
+      function userLeave(id) {
+        const index = userList.findIndex(user => user.socketid === id)
+        if (index !== -1) {
+          return userList.splice(index, 1)[0];
+        }
+      }
+      // 帶入 userLeave() 判斷
+      const userLeft = userLeave(user.socketid);
+
+      // 向該頻道通知誰離開
+      if (userLeft) {
+        io.emit("offlineUser", userLeft)
+        io.to(userLeft.room).emit(
+          'message',
+          formatMessage(botName, `${userLeft.name} has left the chat`)
+        )
+      }
+
       io.emit("online", onlineCount)
     })
   })
