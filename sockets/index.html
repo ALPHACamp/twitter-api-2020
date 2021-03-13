@@ -22,7 +22,7 @@
       auth: {
         token: token
       },
-      query: { 
+      query: {
         id: 1
       }
     });
@@ -157,7 +157,13 @@
         online.innerText = amount;
       })
       // 監聽Server "message"  此為存完資料庫後送回前端訊息
-      socket.on("message", renderMsgCard)
+      socket.on("message", (data) => {
+        console.log(data)
+        if (data.msg) {
+          renderMsgCard(data)
+        }
+      })
+
 
       // 監聽Server "onlineUser" 使用者相關資訊
       // 儲存使用者資訊用於渲染
@@ -177,6 +183,7 @@
           socket.emit("get-private-chat", { userId, userName })
         })
       })
+
 
       // 監聽Server chatRecord 資料回傳
       socket.on("chatRecord", function (msgs) {
@@ -244,6 +251,7 @@
           <div class="media w-50 ml-auto mb-3">
             <div class="media-body">
               <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">房間名:${data.roomName}</p>
                 <p class="name text-small mb-0 text-white">${data.msg}</p>
               </div>
               <p class="small text-muted">${data.createdAt}</p>
@@ -307,6 +315,7 @@
 
 
     })
+
   </script>
 </body>
 
