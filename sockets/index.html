@@ -217,6 +217,37 @@
       })
 
 
+      socket.on("chatRecordPrivate", function (msgs) {
+        console.log("chatRecord", msgs)
+        let rawHTML = ''
+        const dataPanel = document.querySelector('#data-panel')
+        const oldHTML = dataPanel.innerHTML
+        msgs.forEach(item => {
+          //   <div class="media w-50 mb-3"><img src="" alt="user" width="50" class="rounded-circle">
+          //   <div class="media-body ml-3">
+          //     <div class="bg-light rounded py-2 px-3 mb-2">
+          //       <p class="text-small mb-0 text-muted">Test, which is a new approach</p>
+          //     </div>
+          //     <p class="small text-muted">12:00 PM | Aug 13</p>
+          //   </div>
+          // </div>
+          rawHTML += `
+        <div class="media w-50  mb-3" id="data-panel">
+          <div class="media w-50  mb-3">
+            <div class="media-body">
+              <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">${item.message}</p>
+              </div>
+              <p class="small text-muted">${item.createdAt}</p>
+            </div>
+          </div>
+        </div>
+        `
+        })
+        dataPanel.innerHTML = oldHTML + rawHTML
+      })
+
+
 
       sendForm.addEventListener('submit', function onSearchFormSubmitted(event) {
         event.preventDefault()
