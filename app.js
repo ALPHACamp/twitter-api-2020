@@ -25,7 +25,7 @@ const io = require('socket.io')(httpServer, {
   }
 })
 
-const sio = io.listen(httpServer)
+const sio = io.listen(server)
 
 // cors 的預設為全開放
 app.use(cors())
@@ -59,10 +59,9 @@ app.use((req, res, next) => {
 })
 
 // app.get('/', (req, res) => res.send('Hello World!'))
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html')
-  // res.json()
-})
+// app.get('/', (req, res) => {
+//   res.sendFile(__dirname + '/index.html')
+// })
 
 // io.on('connection', (socket) => { // 建立通道
 //   console.log('a user connected')
@@ -73,8 +72,9 @@ app.get('/', (req, res) => {
 // })
 sio.on('connection', (socket) => { // 建立連線
   console.log('a user connected')
-  socket.on('chat message', (msg) => {// server 收到 client 的訊息 (Emitting events:client往通道內丟的訊息)
-    console.log(msg)
+  socket.on('message', (msg, err) => {// server 收到 client 的訊息 (Emitting events:client往通道內丟的訊息)
+    // console.log(msg)
+    console.log(err)
     socket.broadcast.emit('other', msg) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
     socket.emit('self', msg) //emit：再透過通道把msg傳給自己 
   })
