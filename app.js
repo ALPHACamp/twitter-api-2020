@@ -15,10 +15,6 @@ const flash = require('connect-flash')
 const app = express()
 const httpServer = require('http').createServer(app)
 const port = process.env.PORT || 3000
-//setup socket.io
-// const server = app.listen(port)
-// const io = require("socket.io")()
-// const sio = io.listen(server)
 
 // cors 的預設為全開放
 app.use(cors())
@@ -27,7 +23,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 // app.use(bodyParser.urlencoded({ extended: true }))  // setup bodyParser
 // app.use(bodyParser.json())
-// app.use(express.static('public'))
+app.use(express.static('public'))
 app.use(methodOverride('_method'))
 // setup session and flash
 app.use(session({
@@ -61,9 +57,9 @@ module.exports = httpServer.listen(port, () => {
   console.log(`Example app listening on http://localhost:${port}`)
 })
 
-// 引入 routes 並將 app 傳進去，讓 routes 可以用 app 這個物件來指定路由
 
 require('./socket')(httpServer)
 
+// 引入 routes 並將 app 傳進去，讓 routes 可以用 app 這個物件來指定路由
 require('./routes')(app)  // 把 passport 傳入 routes
 // module.exports = app

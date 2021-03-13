@@ -32,7 +32,7 @@ const userController = {
 
       const { id, name, account, email, avatar, role, cover } = user
       const showAccount = '@' + account
-      const introduction = ''
+      let introduction = ''
       if (user.introduction) {
         introduction = user.introduction.slice(0, 49)
       }
