@@ -57,6 +57,7 @@ module.exports = (io) => {
 
       socket.join(roomName)
       io.sockets.to(roomName).emit('message', `${user.name} has join this room`);
+      historicalRecord()
 
     })
 
@@ -127,8 +128,25 @@ module.exports = (io) => {
         console.log(e)
       }
 
-
     })
+
+    function historicalRecord() {
+
+      // 發送歷史紀錄
+      ChatPrivate.findAll({
+        where: { ChannelId: roomName },
+        // attributes: ['msg', 'time'],
+        order: [
+          // 資料庫端進行排列
+          [sequelize.literal('createdAt'), 'ASC']
+        ],
+        raw: true,
+        nest: true,
+      }).then(userMessage => {
+
+        socket.emit("chatRecordPrivate", userMessage)
+      })
+    }
 
     // 離線
     socket.on('disconnect', () => {
