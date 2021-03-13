@@ -16,6 +16,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 
+
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -27,7 +28,6 @@ app.use('/upload', express.static(__dirname + '/upload'))
 app.use(flash())
 
 
-app.use(flash())
 
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
@@ -36,9 +36,15 @@ app.use((req, res, next) => {
   next()
 })
 
+//建立http服務
+const http = require('http').createServer(app)
+const io = require('socket.io')(http)
 
-app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
+// app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
 
 require('./routes')(app);
+require('./socket/socketio')(io);
+
+http.listen(port, () => console.log(`Server Started. at http://localhost:${port}`));
 
 module.exports = app;
