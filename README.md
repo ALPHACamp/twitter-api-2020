@@ -1,6 +1,8 @@
 # Twitter API
 
-API server for twitter clone project.
+API server for twitter clone project. Hosted on Heroku:
+
+https://salty-headland-68177.herokuapp.com/
 
 ## 2020.03.08 udpate
 Update Twitter API to v 2.1.0, updates:
@@ -35,8 +37,12 @@ Add isFollowed: Boolean to response data
 
 Now only returns the tweets that are followed by the user
 
+## Check API doc with Heroku
+Use below link:
 
-## Check API doc
+https://salty-headland-68177.herokuapp.com/api-doc/
+
+## Check API doc locally
 1. Install server dependencies
 
 ```
@@ -56,7 +62,7 @@ npm run dev
 
 http://localhost:3000/api-doc
 
-## Test with localhost
+## Test with local db
 
 1. Install MySQL
 

@@ -9,6 +9,16 @@ const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*'
+  }
+})
+
+// socket io server, listen to connection
+require('./socket/socketServer')(io)
+
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
