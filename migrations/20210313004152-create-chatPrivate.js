@@ -10,7 +10,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       channelId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       UserId: {
         type: Sequelize.INTEGER

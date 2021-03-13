@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { User, Chatpublic, ChatPrivate, sequelize } = require('../models')
+const chatPrivate = require('../models/chatPrivate')
 
 
 // 驗證身分
@@ -84,6 +85,7 @@ module.exports = (io) => {
       formatMessage(botName, `${user.name} 加入了聊天`)
     )
 
+    // let privateChatRecord = chatPrivate.findAll({ where: channelId })
 
     // 監聽使用者送出訊息 送出 'message' 
     socket.on("send", async (msg) => {
@@ -92,6 +94,7 @@ module.exports = (io) => {
       // console.log(msg)
       if (Object.keys(msg).length < 2) return;
       try {
+        console.log(roomName)
         if (roomName) {
           await ChatPrivate.create({
             UserId: msg.id,
