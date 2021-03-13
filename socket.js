@@ -1,5 +1,5 @@
 const db = require('./models')
-const { PublicMessage } = db
+const { PublicMessage, User } = db
 
 module.exports = socket = (httpServer) => {
   const sio = require('socket.io')(httpServer, {
@@ -15,6 +15,7 @@ module.exports = socket = (httpServer) => {
     //歷史訊息
     PublicMessage.findAll()
       .then(msg => {
+        if (!msg) return
         msg.map(m => {
           socket.emit('message', m.message) //連上線之後會出現歷史訊息
         })
@@ -26,9 +27,14 @@ module.exports = socket = (httpServer) => {
         message: msg,
         UserId: 11
       })
+      User.findAll({ where: { id: 11 } })
+        .then(user => {
+          const { id, name, avatar, createdAt } = user[0].dataValues
+          socket.emit('self', { msg, id, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
+        })
       //轉發
       socket.broadcast.emit('other', msg) // broadcast：再透過通道把msg轉發給其他聊天室的使用者 
-      socket.emit('self', msg) //emit：再透過通道把msg傳給自己 
+
     })
   })
 }
