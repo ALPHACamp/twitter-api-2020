@@ -21,6 +21,7 @@ async function authenticated(socket, next) {
   if (user) {
     socket.user = user
     socket.user.socketId = socket.id
+    console.log(user)
     next()
   }
 }
@@ -43,8 +44,12 @@ module.exports = (io) => {
 
     // 未點擊頭像前使用者進入 channel 都是強制切換 'publicRoom'
     user.channel = 'publicRoom'
-    historicalRecord(user.channel)
+
+    // 進入頻道
     socket.join(user.channel)
+
+    // 發送該頻道歷史訊息
+    historicalRecord(user.channel)
 
     // 回傳使用者資訊 渲染前端
     io.emit("onlineUser", user)
@@ -64,7 +69,7 @@ module.exports = (io) => {
       user.channel = roomName
       // 切換房間
       socket.join(user.channel)
-      io.sockets.to(roomName).emit('message', `${user.name} has join this room`);
+      // io.sockets.to(roomName).emit('message', `${user.name} has join this room`);
       historicalRecord(user.channel)
     })
 
@@ -98,9 +103,10 @@ module.exports = (io) => {
             channel: user.channel
           }).then(usermsg => {
             const data = {
-              ...usermsg.dataValues
+              ...usermsg.dataValues,
+              messageId: usermsg.id
             }
-            io.emit("message", { ...data, ...user})
+            io.emit("message", { ...data, ...user })
           })
         } else {
           await Chat.create({
@@ -109,9 +115,10 @@ module.exports = (io) => {
             channel: user.channel
           }).then(usermsg => {
             const data = {
-              ...usermsg.dataValues
+              ...usermsg.dataValues,
+              messageId: usermsg.id
             }
-            io.emit("message", { ...data, ...user})
+            io.emit("message", { ...data, ...user })
 
           })
         }
@@ -127,7 +134,6 @@ module.exports = (io) => {
       // 發送歷史紀錄
       Chat.findAll({
         where: { Channel: channelData },
-        // attributes: ['msg', 'time']
         order: [
           // 資料庫端進行排列
           [sequelize.literal('createdAt'), 'ASC']
@@ -139,7 +145,15 @@ module.exports = (io) => {
         raw: true,
         nest: true,
       }).then(userMessage => {
-        socket.emit("chatRecordPrivate", userMessage)
+        // return userMessage
+
+        if (user.channel === 'publicRoom') {
+          console.log('========publicRoom')
+          socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
+          // socket.emit("chatRecord", userMessage)
+        } else {
+          socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
+        }
       })
     }
 
