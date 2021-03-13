@@ -19,10 +19,12 @@ const server = app.listen(port)
 const httpServer = require('http').createServer()
 const io = require('socket.io')(httpServer, {
   cors: {
-    origin: ["https://twitter-simple-one.herokuapp.com/api"],
+    // origin: "https://twitter-simple-one.herokuapp.com/api",
+    origin: "*",
     methods: ["GET", "POST"]
   }
 })
+
 const sio = io.listen(server)
 
 // cors 的預設為全開放
