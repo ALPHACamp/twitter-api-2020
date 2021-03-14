@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Chat, sequelize } = require('../models')
+const { User, Chat, ChatRead, sequelize } = require('../models')
 const { authenticated, formatMessage, userLeave } = require('./utils/user')
 
 module.exports = (io) => {
@@ -37,7 +37,7 @@ module.exports = (io) => {
     // 儲存目前上線使用者
 
     userList.push(user)
-    console.log("userList", userList)
+    // console.log("userList", userList)
     io.emit("allOnlineUsers", userList)
 
 
@@ -66,45 +66,69 @@ module.exports = (io) => {
 
     // 監聽使用者送出訊息 送出 'message' 
     socket.on("send", async (msg) => {
-      // console.log(msg)
+      // console.log("sent", msg)
       if (Object.keys(msg).length < 0) return
       try {
-        if (user.channel !== 'publicRoom') {
-          await Chat.create({
-            UserId: msg.id,
-            message: msg.msg,
-            channel: user.channel,
-            avatar: msg.avatar
-          }).then(usermsg => {
-            const data = {
-              ...usermsg.dataValues,
-              messageId: usermsg.id
-            }
-            io.emit("message", { ...data, ...user })
-          })
-        } else {
-          await Chat.create({
-            UserId: msg.id,
-            message: msg.msg,
-            channel: user.channel,
-            avatar: msg.avatar
-          }).then(usermsg => {
-            const data = {
-              ...usermsg.dataValues,
-              messageId: usermsg.id
-            }
-            io.emit("message", { ...data, ...user })
-          })
-        }
+        await Chat.create({
+          UserId: user.id,
+          message: msg.msg,
+          channel: user.channel,
+          avatar: msg.avatar,
+          // read: "0"
+        }).then(usermsg => {
+          const data = {
+            ...usermsg.dataValues,
+            messageId: usermsg.id
+          }
+          io.to(user.channel).emit("message", { ...data, ...user })
+        })
+
       } catch (e) {
         console.log(e)
       }
     })
 
-    function historicalRecord(channelData) {
-      // 發送歷史紀錄
-      Chat.findAll({
+
+
+    socket.on("messageRead", async (data) => {
+      try {
+        // console.log("read", data)
+        let reviseRepeat = await ChatRead.findAll({ where: { chatId: data.id, UserId: user.id } })
+        // console.log(reviseRepeat)
+        if (reviseRepeat.length === 0) {
+          await ChatRead.create({
+            UserId: user.id,
+            ChatID: data.id
+          })
+        } else {
+
+        }
+      } catch (e) {
+        console.log(e)
+      }
+
+    })
+
+    async function historicalRecord(channelData) {
+      //發送歷史紀錄
+      // let readMessage = await Chat.findAll({
+      //   where: { channel: channelData },
+      //   include: { model: ChatRead, where: { UserId: user.id.toString() } },
+      //   order: [
+      //     // 資料庫端進行排列
+      //     [sequelize.literal('createdAt'), 'ASC']
+      //   ],
+      //   attributes: {
+      //     // 過濾不要資料
+      //     exclude: ['updatedAt']
+      //   },
+      //   raw: true,
+      //   nest: true,
+      // })
+
+      let Message = await Chat.findAll({
         where: { channel: channelData },
+        include: { model: ChatRead, },
         order: [
           // 資料庫端進行排列
           [sequelize.literal('createdAt'), 'ASC']
@@ -113,23 +137,45 @@ module.exports = (io) => {
           // 過濾不要資料
           exclude: ['updatedAt']
         },
-        raw: true,
-        nest: true,
-      }).then(userMessage => {
-        // console.log('========歷史訊息', userMessage)
-        // return userMessage
-        if (user.channel === 'publicRoom') {
-          // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
-          // socket.to(user.channel).emit("chatRecord", userMessage)
-          // socket.emit("chatRecord", userMessage)
-          io.to(user.channel).emit('chatRecord', userMessage)
-
-        } else {
-          io.to(user.channel).emit('chatRecord', userMessage)
-          // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
-          // socket.emit("chatRecord", userMessage)
-        }
+        // raw: true,
+        // nest: true,
       })
+
+      // console.log(Message)
+      // let readMessage = userMessage.filter(item => item.ChatReads.UserId === user.id.toString())
+      let readMessage = []
+      let unreadMessage = []
+      Message.map(item => {
+        let findRead = item.dataValues.ChatReads.filter(read => {
+          if (read.dataValues.UserId === user.id.toString()) {
+            return true
+          }
+        })
+        if (findRead.length > 0) {
+          // console.log(item.dataValues)
+          readMessage.push(item.dataValues)
+        } else {
+          unreadMessage.push(item.dataValues)
+        }
+
+      })
+      // console.log(item.ChatReads.filter(ChatRead => ChatRead.UserId === user.id.toString())
+      // )
+
+      // }
+      // )
+      // let unreadMessage = Message.filter(item => item.ChatReads.UserId === null)
+      // console.log(readMessage)
+      // console.log(unreadMessage)
+
+
+      let unreadNotify = unreadMessage.length
+      console.log("read", readMessage)
+      console.log("unread", unreadNotify)
+
+
+      io.to(user.channel).emit('chatRecord', { readMessage, unreadMessage })
+      // socket.to(user.channel).emit('chatRecord', readMessage);
     }
 
     // 離線
@@ -137,8 +183,9 @@ module.exports = (io) => {
       onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
 
       // 帶入 userLeave() 判斷誰離開
-      const userLeft = userLeave(user.socketid, userList);
-      console.log("有人離開了")
+      const userLeft = userLeave(user.socketId, userList);
+      console.log("有人離開了", user.name)
+
       // 向該頻道通知誰離開
       if (userLeft) {
         io.emit("offlineUser", userLeft)

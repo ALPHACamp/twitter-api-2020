@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {})
     Chat.associate = function (models) {
         Chat.belongsTo(models.User)
+        Chat.hasMany(models.ChatRead)
     }
     return Chat
 }

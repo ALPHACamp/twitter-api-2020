@@ -160,7 +160,7 @@
       })
       // 監聽Server "message"  此為存完資料庫後送回前端訊息
       socket.on("message", (data) => {
-        console.log('監聽Server message ', data)
+        console.log('監聽Server message', data)
         if (data.message) {
           renderMsgCard(data)
         }
@@ -190,10 +190,15 @@
       // 監聽Server chatRecord 資料回傳
       socket.on("chatRecord", function (msgs) {
         console.log("========chatRecord==========", msgs)
+
+        let { readMessage, unreadMessage } = msgs
+        console.log(unreadMessage)
+
+
         let rawHTML = ''
         const dataPanel = document.querySelector('#data-panel')
-        const oldHTML = dataPanel.innerHTML
-        msgs.forEach(item => {
+        // const oldHTML = dataPanel.innerHTML
+        readMessage.forEach(item => {
           //   <div class="media w-50 mb-3"><img src="" alt="user" width="50" class="rounded-circle">
           //   <div class="media-body ml-3">
           //     <div class="bg-light rounded py-2 px-3 mb-2">
@@ -215,7 +220,24 @@
         </div>
         `
         })
-        dataPanel.innerHTML = oldHTML + rawHTML
+        unreadMessage.forEach(item => {
+          socket.emit("messageRead", item)
+
+
+          rawHTML += `
+        <div class="media w-50  mb-3" id="data-panel">
+          <div class="media w-50  mb-3">
+            <div class="media-body">
+              <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">${item.message}</p>
+              </div>
+              <p class="small text-muted"></p>
+            </div>
+          </div>
+        </div>
+        `
+        })
+        dataPanel.innerHTML = rawHTML
       })
 
 
@@ -280,7 +302,7 @@
         const dataPanel = document.querySelector('#data-panel')
         const oldHTML = dataPanel.innerHTML
         // data.forEach(item => {
-        rawHTML = oldHTML + `
+        rawHTML = `
         <div class="media w-50 ml-auto mb-3" id="data-panel">
           <div class="media w-50 ml-auto mb-3">
             <div class="media-body">
@@ -294,7 +316,7 @@
         </div>
         `
         // })
-        dataPanel.innerHTML = rawHTML
+        dataPanel.innerHTML = oldHTML + rawHTML
       }
 
       // 渲染使用者
@@ -303,7 +325,7 @@
         let rawHTML = ''
         let userData = []
         const dataUserPanel = document.querySelector('#data-userPanel')
-        const oldHTML = dataUserPanel.innerHTML
+        // const oldHTML = dataUserPanel.innerHTML
         // 模擬其他使用者上線 可點擊私聊聊天
         const user2 = {
           id: 2,
@@ -315,21 +337,21 @@
           isAdmin: 0
         }
 
-        const user2Data = `
-        <br>
-        <a class="list-group-item list-group-item-action active text-white rounded-0 btn" id="user-id">
-          <div class="media" id=${user2.id}><img src="${user2.avatar}" alt="user" width="50" class="rounded-circle">
-            <div class="media-body ml-4">
-              <div class="d-flex align-items-center justify-content-between mb-1">
-                <h6 class="mb-0">${user2.name}</h6><small class="small font-weight-bold">25 Dec</small>
-              </div>
-              <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                sed
-                do eiusmod tempor incididunt ut labore.</p>
-            </div>
-          </div>
-        </a>
-        `
+        // const user2Data = `
+        // <br>
+        // <a class="list-group-item list-group-item-action active text-white rounded-0 btn" id="user-id">
+        //   <div class="media" id=${user2.id}><img src="${user2.avatar}" alt="user" width="50" class="rounded-circle">
+        //     <div class="media-body ml-4">
+        //       <div class="d-flex align-items-center justify-content-between mb-1">
+        //         <h6 class="mb-0">${user2.name}</h6><small class="small font-weight-bold">25 Dec</small>
+        //       </div>
+        //       <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+        //         sed
+        //         do eiusmod tempor incididunt ut labore.</p>
+        //     </div>
+        //   </div>
+        // </a>
+        // `
         data.forEach(item => {
           // console.log([item])
           userData.push(`
@@ -347,7 +369,7 @@
           </a>
           `)
         })
-        const userRender = rawHTML = oldHTML + user2Data + userData
+        const userRender = rawHTML = userData
         dataUserPanel.innerHTML = rawHTML
       }
 
