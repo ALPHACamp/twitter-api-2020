@@ -171,7 +171,7 @@
       // 儲存使用者資訊用於渲染
       let USER = []
       socket.on("allOnlineUsers", function (data) {
-        console.log("allOnlineUsers", data)
+        console.log("==========allOnlineUsers", data)
         USER = data
         renderUserCard(data)
 
@@ -227,14 +227,6 @@
         const dataPanel = document.querySelector('#data-panel')
         const oldHTML = dataPanel.innerHTML
         msgs.forEach(item => {
-          //   <div class="media w-50 mb-3"><img src="" alt="user" width="50" class="rounded-circle">
-          //   <div class="media-body ml-3">
-          //     <div class="bg-light rounded py-2 px-3 mb-2">
-          //       <p class="text-small mb-0 text-muted">Test, which is a new approach</p>
-          //     </div>
-          //     <p class="small text-muted">12:00 PM | Aug 13</p>
-          //   </div>
-          // </div>
           rawHTML += `
         <div class="media w-50  mb-3" id="data-panel">
           <div class="media w-50  mb-3">
@@ -333,7 +325,6 @@
         </a>
         `
         data.forEach(item => {
-          // console.log([item])
           userData.push(`
           <a class="list-group-item list-group-item-action active text-white rounded-0 btn" id="user-id">
             <div class="media" id=${item.id}><img src="${item.avatar}" alt="user" width="50" class="rounded-circle">

@@ -2,6 +2,13 @@ const jwt = require('jsonwebtoken')
 const { User, Chat, sequelize } = require('../models')
 const { authenticated, formatMessage, userLeave, getRoomUsers, getCurrentUser, userJoin, allOnlineUsersNow } = require('./utils/user')
 
+function filterData(data) {
+  const set = new Set()
+  const dataFilter = data.filter(item => !set.has(item.id) ? set.add(item.id) : false)
+  return dataFilter
+}
+
+
 module.exports = (io) => {
 
   // 驗證身分
@@ -13,12 +20,14 @@ module.exports = (io) => {
 
     // 計算上線人數
     onlineCount++
-    
+
     userJoin(socket.user, socket)
     const getUser = getCurrentUser(socket.id)
     const getUsers = getRoomUsers(socket.user)
     const botName = 'ChatCord Bot'
 
+    const test = filterData(getUsers)
+    console.log(getUsers)
     // 公共聊天歷史訊息回傳
     historicalRecord(getUser.channel)
 
@@ -29,7 +38,7 @@ module.exports = (io) => {
     io.emit("onlineUser", getUser)
 
     // 所有上線使用者資訊
-    io.emit("allOnlineUsers", getUsers)
+    io.emit("allOnlineUsers", test)
 
     // 廣播誰上線
     socket.broadcast.to(getUser.channel).emit(
@@ -121,6 +130,7 @@ module.exports = (io) => {
       // 向該頻道通知誰離開
       if (userLeft) {
         const list = allOnlineUsersNow()
+        const x = filterData(list)
         io.emit("allOnlineUsers", list)
         io.emit("offlineUser", userLeft)
         io.to(userLeft.room).emit(

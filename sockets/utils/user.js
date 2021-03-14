@@ -56,6 +56,7 @@ function userLeave(id) {
 
 // 取出 disconnect 後現在 userList 名單
 function allOnlineUsersNow() {
+  console.log('取出 disconnect 後現在 userList 名單', userList)
   return userList
 }
 
