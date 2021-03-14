@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 const http = require('http').createServer(app)
 const io = require('socket.io')(http, {
   cors: {
-    origin: "http://localhost:8080",
+    origin: ["http://localhost:8080", "https://darric-lu.github.io"],
     methods: ["GET", "POST"],
     allowedHeaders: ["my-custom-header"],
     credentials: true
