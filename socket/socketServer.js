@@ -36,8 +36,8 @@ module.exports = function (io) {
     //fetch chat history (all previous msg) and send to new socket
     let messages = await Message.findAll({
       include: [
-        { model: User, as: 'from', exclude: ['password'] },
-        { model: User, as: 'to', exclude: ['password'] }
+        { model: User, as: 'from', attributes: { exclude: ['password'] } },
+        { model: User, as: 'to', attributes: { exclude: ['password'] } }
       ]
     })
     if (!messages || !Array.isArray(messages)) {
@@ -82,7 +82,7 @@ module.exports = function (io) {
     const usersInPrivateChat = []
     const userPromises = []
     messagePerUser.forEach((anotherUserId, msgs) => {
-      userPromises.push(User.findOne({ where: { id: anotherUserId }, exclude: ['password'] }))
+      userPromises.push(User.findOne({ where: { id: anotherUserId }, attributes: { exclude: ['password'] }}))
       usersInPrivateChat.push({
         connected: usersInPublicChat.map(d => d.id).includes(anotherUserId),
         conversation: msgs
