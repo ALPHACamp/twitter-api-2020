@@ -22,7 +22,7 @@ module.exports = socket = (httpServer) => {
     // console.log(socket.rooms)
     //歷史訊息
     socket.on('messages', (msg, err) => {
-      let allMessages = []
+      const allMessages = []
       PublicMessage.findAll({
         include: User,
         raw: true,
@@ -67,9 +67,9 @@ module.exports = socket = (httpServer) => {
       User.findByPk(userId)
         .then((user) => {
           // const { name, avatar } = user
-          // socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-          // socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-          io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
+          socket.broadcast.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
+          socket.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
+          // io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
         })
     })
 
