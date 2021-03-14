@@ -1,3 +1,4 @@
+const { UniqueConstraintError } = require('sequelize')
 const { User, Message } = require('../models')
 
 
@@ -35,11 +36,17 @@ module.exports = (io) => {
     socket.on('publicMessage', (msg) => {
       console.log(msg)
       Message.create({
-        UserId: msg.id, //暫時設假數字，等前端傳來再改
+        UserId: msg.id,
         content: msg.msg
       })
+      User.findByPk(msg.id, { attributes: ['name', 'account', 'avatar'] })
+        .then(user => {
+          msg.name = user.name
+          msg.avatar = user.avatar
+          msg.account = user.account
 
-      io.emit('publicMessage', msg.msg);
+          io.emit('publicMessage', msg);
+        })
     });
 
 

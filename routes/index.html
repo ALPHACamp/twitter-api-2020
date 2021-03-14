@@ -94,7 +94,7 @@
 
 
     socket.on('history', function (msg) {
-      // console.log(msg)
+      console.log(msg)
       var item = document.createElement('li');
       item.textContent = msg;
       messages.appendChild(item);
@@ -111,7 +111,7 @@
     let data = {
       name: 'Robby',
       id: 31,
-      msg: '我好累~',
+      msg: '我好想睡~',
     };
 
     socket.emit('publicMessage', data)
@@ -119,6 +119,7 @@
 
     // let data2 = {
     //   name: 'stan',
+    //   id: 41,
     //   msg: '測試message',
     // };
 
