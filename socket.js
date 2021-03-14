@@ -52,7 +52,7 @@ module.exports = socket = (httpServer) => {
               avatar: m.avatar
             }
           })
-          socket.emit('receiveUsers', usersArray)
+          socket.emit('receiveUsers', user)
         })
       // const usersArray = users.map((m) => {
       //   return {
