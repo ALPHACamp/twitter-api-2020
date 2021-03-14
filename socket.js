@@ -90,11 +90,11 @@ module.exports = socket = (httpServer) => {
     // 下線事件
     socket.on('sendOffline', (data, err) => {
       const id = data.userId
-      const users = users.filter((item) => {
+      offLineUser = users.filter((item) => {
         return item.id != id
       })
 
-      io.sockets.emit('receiveOffline', users)
+      io.sockets.emit('receiveOffline', offLineUser)
     })
 
   })
