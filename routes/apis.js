@@ -41,24 +41,36 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 // user
+// router.post('/users', userController.signUp)
+// router.post('/signin', userController.signIn)
+// router.put('/users/:id', authenticated, cpUpload, userController.editUser)
+// router.get('/users/:id', authenticated, userController.getUser)
+// router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+// router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+// router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
+// router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
+// router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+// router.get('/topusers', authenticated, userController.getTopUsers)
+// router.get('/get_current_user', authenticated, userController.getCurrentUser)
+
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
-router.put('/users/:id', authenticated, cpUpload, userController.editUser)
-router.get('/users/:id', authenticated, userController.getUser)
-router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
-router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
-router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
-router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
-router.get('/users/:id/likes', authenticated, userController.getUserLikes)
-router.get('/topusers', authenticated, userController.getTopUsers)
-router.get('/get_current_user', authenticated, userController.getCurrentUser)
-
+router.put('/users/:id', cpUpload, userController.editUser)
+router.get('/users/:id', userController.getUser)
+router.get('/users/:id/tweets', userController.getUserTweets)
+router.get('/users/:id/replied_tweets', userController.getUserReplies)
+router.get('/users/:id/followings', userController.getUserFollowings)
+router.get('/users/:id/followers', userController.getUserFollowers)
+router.get('/users/:id/likes', userController.getUserLikes)
+router.get('/topusers', userController.getTopUsers)
+router.get('/get_current_user', userController.getCurrentUser)
 
 //follow
-router.post('/followships', authenticated, userController.addFollowing)
-router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
+router.post('/followships', userController.addFollowing)
+router.delete('/followships/:followingId', userController.removeFollowing)
 
-
+// router.post('/followships', authenticated, userController.addFollowing)
+// router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
 // tweet
 // 取得所有推文資料
 router.get('/tweets', authenticated, tweetController.getTweets)

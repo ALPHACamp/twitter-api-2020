@@ -66,9 +66,9 @@ module.exports = socket = (httpServer) => {
       //撈自己的info
       User.findByPk(userId)
         .then((user) => {
-          // const { name, avatar } = user
-          socket.broadcast.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
-          socket.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
+          const { name, avatar } = user
+          socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
           // io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
         })
     })
@@ -102,6 +102,7 @@ module.exports = socket = (httpServer) => {
 
   // // 私人聊天室
   // socket.on('sendPrivate', (data) => {
+
 
   //   // 到線上使用者資料裡面確認對方是否在線上，沒有就不讓對方傳訊息
   //   if (對方不在線上) {
