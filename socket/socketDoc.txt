@@ -35,7 +35,7 @@ usersInPublicChat: //for 公共聊天室用戶列表 //給所有人，全部人�
   }
 ]
 
-publicMessage: //格式為前端傳來，我們再傳給所有人
+publicMessageFromServer: //格式為前端傳來，我們再傳給所有人
 {
   content,
   fromId,
@@ -67,7 +67,7 @@ usersInPrivateChat: //只給 sender //裡頭包含訊息
   ]
 }
 
-privateMessage: //前端傳來，再傳給雙方
+privateMessageFromServer: //前端傳來，再傳給雙方
 {
   content,
   fromId,
@@ -95,7 +95,7 @@ userDisconnected: //前端 emit disconnect 事件後，後端會emit
 connection:
 前端 socket.connect 後發出，自動送 socket instance
 
-publicMessage: 
+publicMessageFromUser: 
 {
   content,
   fromId,
@@ -103,7 +103,7 @@ publicMessage:
   sendTime
 }
 
-privateMessage:
+privateMessageFromUser:
 {
   content,
   fromId,
