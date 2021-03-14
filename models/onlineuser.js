@@ -4,7 +4,6 @@ module.exports = (sequelize, DataTypes) => {
     UserId: DataTypes.INTEGER
   }, {});
   OnlineUser.associate = function (models) {
-    OnlineUser.hasMany(models.User)
   };
   return OnlineUser;
 };

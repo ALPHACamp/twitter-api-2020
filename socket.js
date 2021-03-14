@@ -1,5 +1,5 @@
 const db = require('./models')
-const { PublicMessage, User, OnlineUser } = db
+const { PublicMessage, User } = db
 
 
 module.exports = socket = (httpServer) => {
@@ -20,11 +20,9 @@ module.exports = socket = (httpServer) => {
     // 上線事件
     socket.on('sendOnline', (data, err) => {
       const socketId = socket.id
-      OnlineUser.create({
-        UserId: data.userId
-      })
       User.findByPk(data.userId)
         .then(user => {
+          user.status = 'online'
           const userData = {
             id: data.userId,
             name: user.name,
@@ -41,17 +39,15 @@ module.exports = socket = (httpServer) => {
 
     // 取得線上使用者
     socket.on('getUsers', () => {
-      OnlineUser.findAll({
-        include: User,
-        raw: true,
-        nest: true
+      User.findAll({
+        where: { status: 'online' }
       })
         .then(user => {
           const usersArray = user.map((m) => {
             return {
-              id: m.User.id,
-              name: m.User.name,
-              avatar: m.User.avatar
+              id: m.id,
+              name: m.name,
+              avatar: m.avatar
             }
           })
           socket.emit('receiveUsers', usersArray)
