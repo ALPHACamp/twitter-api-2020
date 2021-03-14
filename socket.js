@@ -32,7 +32,6 @@ module.exports = socket = (httpServer) => {
             allMessages.push({ text: m.message, userId: id, userName: name, userAvatar: avatar, createdAt: String(createdAt) })
           })
           socket.emit('getAllMessages', allMessages) //連上線之後，自己會出現歷史訊息
-          // socket.emit('messages', allMessages) //連上線之後，自己會出現歷史訊息
         })
     })
 
@@ -51,13 +50,13 @@ module.exports = socket = (httpServer) => {
 
     // 多人通信
     socket.on('sendPublic', (data, err) => {
-
+      const { text, userId } = data
       //撈自己的info
       User.findAll({ where: { id: data.userId } })
         .then((user) => {
-          const { id, name, avatar, account, createdAt } = user[0].dataValues
+          const { name, avatar, createdAt } = user[0].dataValues
 
-          io.sockets.emit('recievePublic', { msg: msg.msg, id, account, name, avatar, createdAt })
+          io.sockets.emit('recievePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
 
           // socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
 
