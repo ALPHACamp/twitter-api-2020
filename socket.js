@@ -66,7 +66,7 @@ module.exports = socket = (httpServer) => {
             id: data.userId,
             name: user.name,
             avatar: user.avatar,
-            socketId: socketId
+            account: user.account
           }
           users.push(userData)
         })
