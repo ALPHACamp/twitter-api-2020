@@ -93,8 +93,9 @@ module.exports = socket = (httpServer) => {
       const offLineUser = users.filter((item) => {
         return item.id != id
       })
-
-      io.sockets.emit('receiveOffline', offLineUser)
+      socket.broadcast.emit('receiveOffline', offLineUser)
+      socket.emit('receiveOffline', offLineUser)
+      // io.sockets.emit('receiveOffline', offLineUser)
     })
 
   })
