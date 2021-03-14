@@ -1,6 +1,6 @@
 const db = require('./models')
 const { PublicMessage, User } = db
-const users = []  // 目前上線的使用者資料，包含socket.id
+
 
 module.exports = socket = (httpServer) => {
   const sio = require('socket.io')(httpServer, {
@@ -11,13 +11,12 @@ module.exports = socket = (httpServer) => {
     }
   })
 
+  const users = []  // 目前上線的使用者資料，包含socket.id
 
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
-    // console.log(socket.request)
-    console.log(socket.request.session)
     console.log('a user connected')
-    socket.emit('try', socket.request.session.passport)
+
     // 上線事件
     socket.on('sendOnline', (data, err) => {
       const socketId = socket.id
@@ -72,25 +71,25 @@ module.exports = socket = (httpServer) => {
 
 
     // 多人通信
-    // socket.on('sendPublic', (data, err) => {
-    //   const { text, userId } = data
-    //   const createdAt = new Date()
-    //   //存入資料庫
-    //   PublicMessage.create({
-    //     message: text,
-    //     UserId: userId,
-    //     createdAt,
-    //     updatedAt: createdAt,
-    //   })
-    //   //撈自己的info
-    //   User.findByPk(userId)
-    //     .then((user) => {
-    //       const { name, avatar } = user
-    //       socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-    //       socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-    //       // io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
-    //     })
-    // })
+    socket.on('sendPublic', (data, err) => {
+      const { text, userId } = data
+      const createdAt = new Date()
+      //存入資料庫
+      PublicMessage.create({
+        message: text,
+        UserId: userId,
+        createdAt,
+        updatedAt: createdAt,
+      })
+      //撈自己的info
+      User.findByPk(userId)
+        .then((user) => {
+          const { name, avatar } = user
+          socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          // io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
+        })
+    })
 
 
 
@@ -107,37 +106,5 @@ module.exports = socket = (httpServer) => {
 
   })
 
-  // // 私人聊天室
-  // socket.on('joinChat', (data) => {
-  //   // console.log(socket.id)
-  //   // console.log(socket.rooms)
-  //   // socket.join("room1")
-  //   // console.log(socket.rooms)
-
-  // })
-  // socket.on('sendPrivate', (data) => {
-
-
-  //   // 到線上使用者資料裡面確認對方是否在線上，沒有就不讓對方傳訊息
-  //   if (對方不在線上) {
-  //     socket.emit('error', '對方不在線上')
-  //     // 前端再從error監聽到事件觸發，alert('對方不在線上')
-  //     return
-  //   }
-
-  //   // 到資料庫裡根據 sendUserId與receiveUserId找到對應的資料
-  //   const payLoad = {
-  //     sendUser: {
-  //       id, name, avatar, socketId
-  //     },
-  //     text: ''
-  //   }
-
-  //   // 發送給 socket.id 對應的使用者
-  //   io.to(socketId).emit('receivePrivate', data)
-  // })
 
 }
-
-
-
