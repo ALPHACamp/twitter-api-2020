@@ -8,9 +8,9 @@ module.exports = (io) => {
   io.use(authenticated)
   //擺上來，不然每次都會重製
   let onlineCount = 0
+  let userList = []
 
   io.on('connection', socket => {
-    // console.log('已連線')
     console.log("有人進來了")
     // 計算上線人數
 
@@ -20,6 +20,7 @@ module.exports = (io) => {
 
     // 取出登入使用者
     const user = socket.user
+    console.log("使用者資訊", user)
 
     // 未點擊頭像前使用者進入 channel 都是強制切換 'publicRoom'
     user.channel = 'publicRoom'
@@ -29,14 +30,14 @@ module.exports = (io) => {
 
     // 發送該頻道歷史訊息
     historicalRecord(user.channel)
-    console.log(user)
     // 回傳使用者資訊 渲染前端
     io.emit("onlineUser", user)
 
 
     // 儲存目前上線使用者
-    let userList = []
+
     userList.push(user)
+    console.log("userList", userList)
     io.emit("allOnlineUsers", userList)
 
 
@@ -65,7 +66,7 @@ module.exports = (io) => {
 
     // 監聽使用者送出訊息 送出 'message' 
     socket.on("send", async (msg) => {
-      console.log(msg)
+      // console.log(msg)
       if (Object.keys(msg).length < 0) return
       try {
         if (user.channel !== 'publicRoom') {
