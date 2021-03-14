@@ -36,7 +36,6 @@ module.exports = (io) => {
 
     // 回傳使用者資訊 渲染前端
     io.emit("onlineUser", getUser)
-    console.log("onlineUser",getUser)
 
     // 所有上線使用者資訊
     io.emit("allOnlineUsers", filterData(getUsers))
@@ -49,6 +48,7 @@ module.exports = (io) => {
 
     // 處理私人訊息
     socket.on("get-private-chat", (data) => {
+      console.log('==============', data)
       let userList = []
       // 編輯房號
       userList.push(getUser.id.toString(), data.userId.toString())
@@ -56,11 +56,11 @@ module.exports = (io) => {
       // 建立房間
       roomName = userList.join("plus")
       // 更換使用者頻道
-      user.channel = roomName
+      getUser.channel = roomName
       // 切換房間
-      socket.join(user.channel)
-      // io.sockets.to(roomName).emit('message', `${user.name} has join this room`);
-      historicalRecord(user.channel)
+      socket.join(getUser.channel)
+      io.sockets.to(roomName).emit('message', `${user.name} has join this room`)
+      historicalRecord(getUser.channel)
     })
 
 
