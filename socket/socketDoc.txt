@@ -89,6 +89,13 @@ userDisconnected: //前端 emit disconnect 事件後，後端會emit
   connected: false
 }
 
+fetchPublicSenderFail:
+fetchPrivateSenderFail: 
+{
+  status: 'error',
+  msg: '......some text'
+}
+
 =====================================================
 後端監聽事件(前端emit) (事件: 前端emit資料)
 
