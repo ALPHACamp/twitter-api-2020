@@ -31,7 +31,7 @@ module.exports = socket = (httpServer) => {
             const { id, name, avatar } = m.User
             allMessages.push({ text: m.message, userId: id, userName: name, userAvatar: avatar, createdAt: m.createdAt })
           })
-          socket.emit('messages', allMessages) //連上線之後，自己會出現歷史訊息
+          socket.emit('getAllMessages', allMessages) //連上線之後，自己會出現歷史訊息
         })
     })
 
