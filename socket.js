@@ -10,12 +10,31 @@ module.exports = socket = (httpServer) => {
     }
   })
 
-  const users = []  // 目前上線的使用者資料，包含socket.id
+
 
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
-
     console.log('a user connected')
+
+    const users = []  // 目前上線的使用者資料，包含socket.id
+    // 上線事件
+    socket.on('sendOnline', (data, err) => {
+      const socketId = socket.id
+      User.findByPk(data.userId)
+        .then(user => {
+          const userData = {
+            id: data.userId,
+            name: user.name,
+            avatar: user.avatar,
+            account: user.account
+          }
+          users.push(userData)
+          socket.broadcast.emit('receiveOnline', userData)
+          socket.emit('receiveOnline', userData)
+        })
+      // io.sockets.emit('receiveOnline', userData)
+    })
+
     //歷史訊息
     socket.on('messages', (msg, err) => {
       const allMessages = []
@@ -55,24 +74,6 @@ module.exports = socket = (httpServer) => {
           socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
           // io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
         })
-    })
-
-    // 上線事件
-    socket.on('sendOnline', (data, err) => {
-      const socketId = socket.id
-      User.findByPk(data.userId)
-        .then(user => {
-          const userData = {
-            id: data.userId,
-            name: user.name,
-            avatar: user.avatar,
-            account: user.account
-          }
-          users.push(userData)
-          socket.broadcast.emit('receiveOnline', userData)
-          socket.emit('receiveOnline', userData)
-        })
-      // io.sockets.emit('receiveOnline', userData)
     })
 
 
