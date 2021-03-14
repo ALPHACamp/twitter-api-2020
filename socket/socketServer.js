@@ -30,6 +30,7 @@ module.exports = function (io) {
   io.on('connection', async (socket) => {
     console.log('connect successfully!')
     const socketUserId = String(socket.user.id)
+    const nameSpace = io.of('/')
     //enter self room
     socket.join(socketUserId)
     //fetch chat history (all previous msg) and send to new socket
@@ -45,20 +46,21 @@ module.exports = function (io) {
     messages = JSON.parse(JSON.stringify(messages))
     console.log('all messages: ', messages)
     const publicMessageRecord = messages.filter(message => message.toId === null)
+    //only to yourself //the same as socket.emit
     socket.to(socketUserId).emit('publicMessageRecord', publicMessageRecord) 
     // fetch existing users
     const usersInPublicChat = []
     // io.of('/').sockets is a Map with socketId as key => socket as value
-    for (const [id, socket] of io.of('/').sockets) {
+    for (const [id, socket] of nameSpace.sockets) {
       // socket.user = { id, name, account, avatar }
       usersInPublicChat.push(socket.user)
     }
-    socket.emit('usersInPublicChat', usersInPublicChat) // emit user list to frontend
+    nameSpace.emit('usersInPublicChat', usersInPublicChat) // emit user list to frontend re-render user-list //to every socket 
     // listen to publicMessage, then broadcast message to all users(sockets)
-    socket.on('publicMessage', async (publicMessage) => {
+    socket.on('publicMessageFromUser', async (publicMessage) => {
       console.log('Someone wants to send a public message')
       // msg is an object = { content, fromId, toId: null }
-      socket.emit('publicMessage', publicMessage)
+      nameSpace.emit('publicMessageFromServer', publicMessage) //to every socket 
       await Message.create(publicMessage)
     })
 
@@ -91,24 +93,25 @@ module.exports = function (io) {
     userData.map((data, index) => {
       Object.assign(usersInPrivateChat[index], data)
     })
-    socket.to(socketUserId).emit('usersInPrivateChat', usersInPrivateChat)
+    socket.to(socketUserId).emit('usersInPrivateChat', usersInPrivateChat) //only to yourself
 
-    socket.on('privateMessage', async (privateMessage) => {
+    socket.on('privateMessageFromUser', async (privateMessage) => {
       console.log('someone wants to send a private message')
-      socket.to(privateMessage.toId).to(socketUserId).emit('privateMessage', privateMessage)
+      socket.to(privateMessage.toId).to(socketUserId).emit('privateMessageFromServer', privateMessage) //to sender and receiver
       await Message.create(privateMessage)
     })
 
 
-    // broadcast username to frontend when someone is connected.
-    socket.broadcast.emit('userConnected', {
+    // broadcast username to everyone except for sender when someone is connected.
+    socket.broadcast.emit('userConnected', { 
       id: socketUserId,
       username: socket.user.name,
       connected: true
     })
-    // notify users upon disconnection
+    
     socket.on('disconnect', () => {
       console.log('someone is disconnected')
+      // broadcast username to everyone except for sender upon disconnection
       socket.broadcast.emit('userDisconnected', {
         //front end use this id to toggle connected status (true => false)
         id: socketUserId,
