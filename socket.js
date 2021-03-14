@@ -11,8 +11,6 @@ module.exports = socket = (httpServer) => {
   })
 
 
-
-
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
     const users = []  // 目前上線的使用者資料，包含socket.id
@@ -70,9 +68,9 @@ module.exports = socket = (httpServer) => {
             account: user.account
           }
           users.push(userData)
+          socket.broadcast.emit('receiveOnline', userData)
+          socket.emit('receiveOnline', userData)
         })
-      socket.broadcast.emit('receiveOnline', userData)
-      socket.emit('receiveOnline', userData)
       // io.sockets.emit('receiveOnline', userData)
     })
 
