@@ -67,9 +67,11 @@ module.exports = socket = (httpServer) => {
       }
 
       users.push(userData)
-
-      io.sockets.emit('receiveOnline', userData)
+      socket.broadcast.emit('receiveOnline', userData)
+      socket.emit('receiveOnline', userData)
+      // io.sockets.emit('receiveOnline', userData)
     })
+    console.log(users)
 
     // 取得線上使用者
     socket.on('getUsers', () => {
