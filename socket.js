@@ -23,13 +23,15 @@ module.exports = socket = (httpServer) => {
 
       User.findByPk(data.userId)
         .then(user => {
+          const showAccount = '@' + user.account
           const userData = {
             id: data.userId,
             name: user.name,
             avatar: user.avatar,
-            account: user.account
+            account: showAccount
           }
-          user.update({ status: 'online' })
+          const status = 'online'
+          user.update({ status })
             .then(() => {
               socket.broadcast.emit('receiveOnline', userData)
               socket.emit('receiveOnline', userData)
