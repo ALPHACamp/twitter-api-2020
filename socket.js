@@ -51,6 +51,7 @@ module.exports = socket = (httpServer) => {
     // 多人通信
     socket.on('sendPublic', (data, err) => {
       const { text, userId } = data
+      const createdAt = new Date()
       //撈自己的info
       User.findAll({ where: { id: data.userId } })
         .then((user) => {
@@ -58,11 +59,11 @@ module.exports = socket = (httpServer) => {
           //存入資料庫
           PublicMessage.create({
             message: text,
-            UserId: userId
-          }).findAll({
-            where: { message: text }
-          }).then((msg) => {
-            io.sockets.emit('recievePublic', { text, userId, userName: name, userAvatar: avatar, createdAt: msg.createdAt })
+            UserId: userId,
+            createdAt,
+            updatedAt: createdAt,
+          }).then(() => {
+            io.sockets.emit('recievePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
             // socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
             // socket.emit('self', { msg: msg.msg, id, account, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
           })
