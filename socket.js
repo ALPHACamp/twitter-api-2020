@@ -21,7 +21,7 @@ module.exports = socket = (httpServer) => {
     socket.on('sendOnline', (data, err) => {
       const socketId = socket.id
       OnlineUser.create({
-        userId: data.userId
+        UserId: data.userId
       })
       User.findByPk(data.userId)
         .then(user => {
