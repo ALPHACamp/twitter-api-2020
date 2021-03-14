@@ -4,8 +4,8 @@ const { PublicMessage, User } = db
 module.exports = socket = (httpServer) => {
   const sio = require('socket.io')(httpServer, {
     cors: {
-      origin: "https://twitter-simple-one.herokuapp.com",
-      // origin: "*",
+      // origin: "https://twitter-simple-one.herokuapp.com",
+      origin: "*",
       methods: ["GET", "POST"]
     }
   })
