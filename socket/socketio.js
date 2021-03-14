@@ -8,13 +8,10 @@ module.exports = (io) => {
 
     console.log('user connected')
 
-    //廣播
-    // socket.emit("allMessage", fakeHistoryMsg)
-
     socket.on('startChat', (user) => {
       console.log('user', user)
       //通知所有人，有人上線
-      socket.broadcast.emit('userOnline', `${user.name}上線`)
+
 
       Message.findAll({
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar', 'role'] }],
@@ -27,6 +24,7 @@ module.exports = (io) => {
           // console.log('historyMsg', historyMsg)
           //發送歷史訊息
           socket.emit('history', historyMsg)
+          socket.broadcast.emit('userOnline', `${user.name}上線`)
 
 
         })
