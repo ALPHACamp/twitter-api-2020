@@ -78,20 +78,10 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (input.value) {
-        socket.emit('chat message', input.value);
+        socket.emit('publicMessage', input.value);
         input.value = '';
       }
     });
-
-    //去監聽事件
-    socket.on('userOnline', function (msg) {
-      console.log('前:', msg)
-      var item = document.createElement('li');
-      item.textContent = msg
-      messages.appendChild(item);
-      window.scrollTo(0, document.body.scrollHeight);
-    });
-
 
     socket.on('history', function (msg) {
       console.log(msg)
@@ -102,30 +92,20 @@
     });
 
     socket.on('publicMessage', function (msg) {
+      console.log(msg)
       var item = document.createElement('li');
-      item.textContent = msg;
+      item.textContent = msg.msg;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     });
 
-    let data = {
-      name: 'Robby',
-      id: 11,
-      msg: '我快睡著惹~',
-    };
-
-    socket.emit('startChat', data)
-
-
     // let data2 = {
     //   name: 'stan',
     //   id: 41,
-    //   msg: '測試message',
+    //   msg: '456',
     // };
 
     // socket.emit('publicMessage', data2)
-
-
   </script>
 </body>
 
