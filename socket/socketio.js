@@ -34,20 +34,22 @@ module.exports = (io) => {
 
     //聊天訊息，將訊息存入資料庫
     socket.on('publicMessage', (msg) => {
-      console.log(msg)
       Message.create({
         UserId: msg.id,
         content: msg.msg
       })
       User.findByPk(msg.id, { attributes: ['name', 'account', 'avatar'] })
         .then(user => {
+          Message.findOne({ UserId: msg.id }, { attributes: ['createdAt'] })
+            .then(time => {
+              msg.name = user.name
+              msg.avatar = user.avatar
+              msg.account = user.account
+              msg.messageOwner = ''
+              msg.time = time.dataValues.createdAt
 
-          msg.name = user.name
-          msg.avatar = user.avatar
-          msg.account = user.account
-          msg.messageOwner = ''
-
-          io.emit('publicMessage', msg);
+              io.emit('publicMessage', msg);
+            })
         })
     });
 

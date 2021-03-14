@@ -108,22 +108,22 @@
       window.scrollTo(0, document.body.scrollHeight);
     });
 
-    // let data = {
-    //   name: 'Robby',
-    //   id: 31,
-    //   msg: '我好想睡~',
-    // };
-
-    // socket.emit('publicMessage', data)
-
-
-    let data2 = {
-      name: 'stan',
-      id: 41,
-      msg: '測試message',
+    let data = {
+      name: 'Robby',
+      id: 11,
+      msg: '我快睡著惹~',
     };
 
-    socket.emit('startChat', data2)
+    socket.emit('publicMessage', data)
+
+
+    // let data2 = {
+    //   name: 'stan',
+    //   id: 41,
+    //   msg: '測試message',
+    // };
+
+    // socket.emit('startChat', data2)
 
 
   </script>
