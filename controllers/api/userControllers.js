@@ -366,6 +366,19 @@ let userController = {
         res.json(top10Users);
       });
   },
+
+  others: (req, res) => {
+    User.findAll({ attributes: ['id', 'name', 'account', 'avatar'] })
+      .then(users => {
+        users = users.map(r => ({
+          ...r.dataValues
+        }))
+        users = users.filter(m => m.id !== helpers.getUser(req).id)
+        let data = users.shift()
+
+        res.json(users)
+      })
+  }
 };
 
 module.exports = userController;

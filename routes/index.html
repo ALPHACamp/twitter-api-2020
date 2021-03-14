@@ -84,7 +84,7 @@
     });
 
     //去監聽事件
-    socket.on('add user', function (msg) {
+    socket.on('userOnline', function (msg) {
       console.log('前:', msg)
       var item = document.createElement('li');
       item.textContent = msg

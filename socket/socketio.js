@@ -13,6 +13,9 @@ module.exports = (io) => {
 
     socket.on('startChat', (user) => {
       console.log('user', user)
+      //通知所有人，有人上線
+      socket.broadcast.emit('userOnline', `${user.name}上線`)
+
       Message.findAll({
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar', 'role'] }],
         order: [['createdAt', 'ASC']]
@@ -21,11 +24,10 @@ module.exports = (io) => {
           historyMsg = historyMsg.map(m => ({
             ...m.toJSON()
           }))
-          console.log('historyMsg', historyMsg)
+          // console.log('historyMsg', historyMsg)
           //發送歷史訊息
           socket.emit('history', historyMsg)
-          //通知所有人，有人上線
-          // socket.broadcast.emit('userOnline', `${user.name}上線`)
+
 
         })
     })
@@ -41,9 +43,13 @@ module.exports = (io) => {
       })
       User.findByPk(msg.id, { attributes: ['name', 'account', 'avatar'] })
         .then(user => {
+
           msg.name = user.name
           msg.avatar = user.avatar
           msg.account = user.account
+          msg.messageOwne = ''
+
+          console.log('1234564', msg)
 
           io.emit('publicMessage', msg);
         })
