@@ -56,17 +56,18 @@ module.exports = socket = (httpServer) => {
       User.findAll({ where: { id: data.userId } })
         .then((user) => {
           const { name, avatar } = user[0].dataValues
+          socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          // io.sockets.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
           //存入資料庫
           PublicMessage.create({
             message: text,
             UserId: userId,
             createdAt,
             updatedAt: createdAt,
-          }).then(() => {
-            io.sockets.emit('recievePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-            // socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
-            // socket.emit('self', { msg: msg.msg, id, account, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
           })
+          // socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
+          // socket.emit('self', { msg: msg.msg, id, account, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
         })
     })
 
