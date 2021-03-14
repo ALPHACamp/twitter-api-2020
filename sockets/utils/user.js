@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { User, Chat, sequelize } = require('../../models')
-
+let userList = []
 
 // 驗證身分
 async function authenticated(socket, next) {
@@ -21,8 +21,42 @@ async function authenticated(socket, next) {
   if (user) {
     socket.user = user
     socket.user.socketId = socket.id
+    socket.user.channel = 'publicRoom'
     next()
   }
+}
+
+
+// 獲取現在上線所有用戶
+function getRoomUsers(room) {
+  return userList.filter(user => user.channel.length > 0)
+}
+
+//獲取當前用戶
+function getCurrentUser(id) {
+  return userList.find(user => user.socketId === id)
+}
+
+//加入用戶聊天
+function userJoin(chatUser, socket) {
+  userList.push(chatUser)
+  // 進入頻道
+  socket.join(chatUser.channel)
+  return userList
+}
+
+// 用戶離開聊天
+function userLeave(id) {
+  const index = userList.findIndex(user => user.socketId === id)
+
+  if (index !== -1) {
+    return userList.splice(index, 1)[0]
+  }
+}
+
+// 取出 disconnect 後現在 userList 名單
+function allOnlineUsersNow() {
+  return userList
 }
 
 //針對特定房間用戶連接時廣播
@@ -33,16 +67,14 @@ function formatMessage(username, text) {
   }
 }
 
-// 找出誰離開
-function userLeave(id, userList) {
-  const index = userList.findIndex(user => user.socketId === id)
-  if (index !== -1) {
-    return userList.splice(index, 1)[0];
-  }
-}
+
 
 module.exports = {
   authenticated,
   formatMessage,
-  userLeave
+  userLeave,
+  getRoomUsers,
+  userJoin,
+  getCurrentUser,
+  allOnlineUsersNow
 }

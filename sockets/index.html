@@ -171,6 +171,7 @@
       // 儲存使用者資訊用於渲染
       let USER = []
       socket.on("allOnlineUsers", function (data) {
+        console.log("allOnlineUsers", data)
         USER = data
         renderUserCard(data)
 
