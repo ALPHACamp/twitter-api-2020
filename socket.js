@@ -4,8 +4,8 @@ const { PublicMessage, User } = db
 module.exports = socket = (httpServer) => {
   const sio = require('socket.io')(httpServer, {
     cors: {
-      // origin: "https://twitter-simple-one.herokuapp.com",
-      origin: "*",
+      origin: "https://twitter-simple-one.herokuapp.com",
+      // origin: "*",
       methods: ["GET", "POST"]
     }
   })
@@ -16,7 +16,10 @@ module.exports = socket = (httpServer) => {
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
     console.log('a user connected')
-
+    // console.log(socket.id)
+    // console.log(socket.rooms)
+    // socket.join("room1")
+    // console.log(socket.rooms)
     //歷史訊息
     socket.on('messages', (msg, err) => {
       let allMessages = []
@@ -37,6 +40,7 @@ module.exports = socket = (httpServer) => {
 
     // 取得線上使用者
     socket.on('getUsers', (data, err) => {
+      console.log(data)
       const usersArray = data.map((m) => {
         return {
           id: m.id,
@@ -62,10 +66,10 @@ module.exports = socket = (httpServer) => {
       //撈自己的info
       User.findByPk(userId)
         .then((user) => {
-          const { name, avatar } = user
+          // const { name, avatar } = user
           // socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
           // socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-          io.sockets.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
         })
     })
 
@@ -96,7 +100,27 @@ module.exports = socket = (httpServer) => {
 
   })
 
-  // 私人聊天室
+  // // 私人聊天室
+  // socket.on('sendPrivate', (data) => {
+
+  //   // 到線上使用者資料裡面確認對方是否在線上，沒有就不讓對方傳訊息
+  //   if (對方不在線上) {
+  //     socket.emit('error', '對方不在線上')
+  //     // 前端再從error監聽到事件觸發，alert('對方不在線上')
+  //     return
+  //   }
+
+  //   // 到資料庫裡根據 sendUserId與receiveUserId找到對應的資料
+  //   const payLoad = {
+  //     sendUser: {
+  //       id, name, avatar, socketId
+  //     },
+  //     text: ''
+  //   }
+
+  //   // 發送給 socket.id 對應的使用者
+  //   io.to(socketId).emit('receivePrivate', data)
+  // })
 
 }
 
