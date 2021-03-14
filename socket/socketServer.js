@@ -49,12 +49,13 @@ module.exports = function (io) {
     //only to yourself //the same as socket.emit
     socket.to(socketUserId).emit('publicMessageRecord', publicMessageRecord) 
     // fetch existing users
-    const usersInPublicChat = []
+    const usersInPublicChat = new Map()
     // io.of('/').sockets is a Map with socketId as key => socket as value
     for (const [id, socket] of nameSpace.sockets) {
       // socket.user = { id, name, account, avatar }
-      usersInPublicChat.push(socket.user)
+      usersInPublicChat.set(String(socket.user.id), socket.user)
     }
+    usersInPublicChat = Array.from(usersInPublicChat).map(userMapItem => userMapItem[1])
     nameSpace.emit('usersInPublicChat', usersInPublicChat) // emit user list to frontend re-render user-list //to every socket 
     // listen to publicMessage, then broadcast message to all users(sockets)
     socket.on('publicMessageFromUser', async (publicMessage) => {
