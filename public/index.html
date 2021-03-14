@@ -75,7 +75,7 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (input.value) {
-        socket.emit('sendOnline', input.value);
+        socket.emit('getUsers', input.value);
         input.value = '';
       }
     });

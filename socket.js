@@ -22,7 +22,8 @@ module.exports = socket = (httpServer) => {
       PublicMessage.findAll({
         include: User,
         raw: true,
-        nest: true
+        nest: true,
+        order: [['createdAt', 'ASC']]
       })
         .then((msgs) => {
           if (!msgs) return
@@ -59,19 +60,21 @@ module.exports = socket = (httpServer) => {
     // 上線事件
     socket.on('sendOnline', (data, err) => {
       const socketId = socket.id
-      const userData = {
-        id: data.userId,
-        name: data.userName,
-        avatar: data.userAvatar,
-        socketId: socketId
-      }
-
-      users.push(userData)
+      User.findByPk(data.userId)
+        .then(user => {
+          const userData = {
+            id: data.userId,
+            name: user.name,
+            avatar: user.avatar,
+            socketId: socketId
+          }
+          users.push(userData)
+        })
       socket.broadcast.emit('receiveOnline', userData)
       socket.emit('receiveOnline', userData)
       // io.sockets.emit('receiveOnline', userData)
     })
-    console.log(users)
+
 
     // 取得線上使用者
     socket.on('getUsers', () => {
