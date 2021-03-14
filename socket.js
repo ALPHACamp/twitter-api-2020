@@ -31,8 +31,8 @@ module.exports = socket = (httpServer) => {
             const { id, name, avatar, createdAt } = m.User
             allMessages.push({ text: m.message, userId: id, userName: name, userAvatar: avatar, createdAt })
           })
+          socket.emit('getAllMessages', allMessages) //連上線之後，自己會出現歷史訊息
         })
-      socket.emit('getAllMessages', allMessages) //連上線之後，自己會出現歷史訊息
     })
 
     // 取得線上使用者
@@ -98,6 +98,7 @@ module.exports = socket = (httpServer) => {
   })
 
   // 私人聊天室
+
 }
 
 
