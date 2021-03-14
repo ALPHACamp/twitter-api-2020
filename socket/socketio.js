@@ -16,8 +16,10 @@ module.exports = (io) => {
       })
         .then(historyMsg => {
           historyMsg = historyMsg.map(m => ({
-            ...m.toJSON()
+            ...m.dataValues,
+            messageOwner: '',
           }))
+          console.log('historyMsg', historyMsg)
           //發送歷史訊息
           socket.emit('history', historyMsg)
           //通知所有人，有人上線
@@ -39,7 +41,9 @@ module.exports = (io) => {
           msg.avatar = user.avatar
           msg.account = user.account
           msg.messageOwner = ''
-          msg.time = new Date()
+          msg.createdAt = new Date()
+
+          console.log(msg)
 
           io.emit('publicMessage', msg);
         })
