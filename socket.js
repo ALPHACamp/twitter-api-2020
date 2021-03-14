@@ -30,8 +30,8 @@ module.exports = socket = (httpServer) => {
             avatar: user.avatar,
             account: showAccount
           }
-          const status = 'online'
-          user.update({ status })
+          const onlineStatus = 'online'
+          user.update({ status: onlineStatus })
             .then(() => {
               socket.broadcast.emit('receiveOnline', userData)
               socket.emit('receiveOnline', userData)
@@ -119,13 +119,15 @@ module.exports = socket = (httpServer) => {
       const id = data.userId
       User.findByPk(data.userId)
         .then(user => {
-          const offLineUser = {
+          const offlineUser = {
             id: user.id,
             name: user.name,
             avatar: user.avatar
           }
-          socket.broadcast.emit('receiveOffline', offLineUser)
-          socket.emit('receiveOffline', offLineUser)
+          const offlineStatus = 'offline'
+          user.update({ status: offlineStatus })
+          socket.broadcast.emit('receiveOffline', offlineUser)
+          socket.emit('receiveOffline', offlineUser)
         })
 
       // const offLineUser = users.filter((item) => {
