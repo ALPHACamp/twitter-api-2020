@@ -70,8 +70,8 @@ module.exports = socket = (httpServer) => {
           }
           users.push(userData)
         })
-      socket.broadcast.emit('receiveOnline', userData)
-      socket.emit('receiveOnline', userData)
+      socket.broadcast.emit('receiveOnline', users)
+      socket.emit('receiveOnline', users)
       // io.sockets.emit('receiveOnline', userData)
     })
 
