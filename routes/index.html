@@ -93,36 +93,36 @@
     });
 
 
-    socket.on('allMessage', function (msg) {
-      console.log(msg)
-      var item = document.createElement('li');
-      item.textContent = `${msg[0].name}:` + '  ' + `${msg[0].message}`;
-      messages.appendChild(item);
-      window.scrollTo(0, document.body.scrollHeight);
-    });
-
-    socket.on('chat message', function (msg) {
+    socket.on('history', function (msg) {
+      // console.log(msg)
       var item = document.createElement('li');
       item.textContent = msg;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     });
 
-    // let data = {
-    //   name: 'Robby',
-    //   id: 21,
-    //   msg: 'Helloooooo~',
-    // };
+    socket.on('publicMessage', function (msg) {
+      var item = document.createElement('li');
+      item.textContent = msg;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
 
-    // socket.emit('publicMessage', data)
-
-
-    let data2 = {
-      name: 'stan',
-      msg: '測試message',
+    let data = {
+      name: 'Robby',
+      id: 31,
+      msg: '我好累~',
     };
 
-    socket.emit('startChat', data2)
+    socket.emit('publicMessage', data)
+
+
+    // let data2 = {
+    //   name: 'stan',
+    //   msg: '測試message',
+    // };
+
+    // socket.emit('startChat', data2)
 
 
   </script>
