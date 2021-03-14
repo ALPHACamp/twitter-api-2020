@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Chat, sequelize } = require('../../models')
+const { User } = require('../../models')
 let userList = []
 
 // 驗證身分
@@ -56,7 +56,6 @@ function userLeave(id) {
 
 // 取出 disconnect 後現在 userList 名單
 function allOnlineUsersNow() {
-  console.log('取出 disconnect 後現在 userList 名單', userList)
   return userList
 }
 
@@ -68,6 +67,13 @@ function formatMessage(username, text) {
   }
 }
 
+// 過濾使用者資料
+function filterData(data) {
+  const set = new Set()
+  const dataFilter = data.filter(item => !set.has(item.id) ? set.add(item.id) : false)
+  return dataFilter
+}
+
 
 
 module.exports = {
@@ -77,5 +83,6 @@ module.exports = {
   getRoomUsers,
   userJoin,
   getCurrentUser,
-  allOnlineUsersNow
+  allOnlineUsersNow,
+  filterData
 }
