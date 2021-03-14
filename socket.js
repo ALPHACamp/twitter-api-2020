@@ -97,13 +97,13 @@ module.exports = socket = (httpServer) => {
   })
 
   // // 私人聊天室
-  socket.on('joinChat', (data) => {
-    // console.log(socket.id)
-    // console.log(socket.rooms)
-    // socket.join("room1")
-    // console.log(socket.rooms)
+  // socket.on('joinChat', (data) => {
+  //   // console.log(socket.id)
+  //   // console.log(socket.rooms)
+  //   // socket.join("room1")
+  //   // console.log(socket.rooms)
 
-  })
+  // })
   // socket.on('sendPrivate', (data) => {
 
 
