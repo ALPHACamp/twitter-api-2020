@@ -113,11 +113,11 @@ module.exports = (io) => {
         nest: true,
       }).then(userMessage => {
         if (user.channel === 'publicRoom') {
+          // console.log('historicalRecord', userMessage)
           // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
           // socket.to(user.channel).emit("chatRecord", userMessage)
           // socket.emit("chatRecord", userMessage)
           io.to(user.channel).emit('chatRecord', userMessage)
-
         } else {
           io.to(user.channel).emit('chatRecord', userMessage)
           // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
@@ -132,10 +132,8 @@ module.exports = (io) => {
 
       // 帶入 userLeave() 判斷誰離開
       const userLeft = userLeave(user.socketId, userList)
-      console.log('==========userLeft', userLeft)
       // 向該頻道通知誰離開
       if (userLeft) {
-        console.log('==========offlineUser', userList)
         io.emit("offlineUser", userLeft)
         io.to(userLeft.room).emit(
           'message',

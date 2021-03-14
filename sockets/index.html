@@ -189,6 +189,7 @@
 
       // 監聽Server chatRecord 資料回傳
       socket.on("chatRecord", function (msgs) {
+        console.log("========chatRecord==========")
         console.log("========chatRecord==========", msgs)
         let rawHTML = ''
         const dataPanel = document.querySelector('#data-panel')
