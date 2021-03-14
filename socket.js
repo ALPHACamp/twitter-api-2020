@@ -16,10 +16,6 @@ module.exports = socket = (httpServer) => {
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
     console.log('a user connected')
-    // console.log(socket.id)
-    // console.log(socket.rooms)
-    // socket.join("room1")
-    // console.log(socket.rooms)
     //歷史訊息
     socket.on('messages', (msg, err) => {
       const allMessages = []
@@ -38,19 +34,6 @@ module.exports = socket = (httpServer) => {
         })
     })
 
-    // 取得線上使用者
-    socket.on('getUsers', (data, err) => {
-      console.log(data)
-      const usersArray = data.map((m) => {
-        return {
-          id: m.id,
-          name: m.name,
-          avatar: m.avatar
-        }
-      })
-
-      socket.emit('recieveUsers', usersArray)
-    })
 
     // 多人通信
     socket.on('sendPublic', (data, err) => {
@@ -88,6 +71,19 @@ module.exports = socket = (httpServer) => {
       io.sockets.emit('recieveOnline', userData)
     })
 
+
+    // 取得線上使用者
+    socket.on('getUsers', () => {
+      const usersArray = users.map((m) => {
+        return {
+          id: m.id,
+          name: m.name,
+          avatar: m.avatar
+        }
+      })
+      socket.emit('recieveUsers', usersArray)
+    })
+
     // 下線事件
     socket.on('sendOffline', (data, err) => {
       const id = data.userId
@@ -101,9 +97,13 @@ module.exports = socket = (httpServer) => {
   })
 
   // // 私人聊天室
-  // socket.on('joinChat', (data) => {
+  socket.on('joinChat', (data) => {
+    // console.log(socket.id)
+    // console.log(socket.rooms)
+    // socket.join("room1")
+    // console.log(socket.rooms)
 
-  // })
+  })
   // socket.on('sendPrivate', (data) => {
 
 
