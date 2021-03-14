@@ -64,8 +64,8 @@ module.exports = socket = (httpServer) => {
         }).then(() => {
           //存入資料庫
           PublicMessage.create({
-            message: data.text,
-            UserId: data.userId,
+            message: text,
+            UserId: userId,
             createdAt: Date.now(),
             updatedAt: Date.now()
           })
