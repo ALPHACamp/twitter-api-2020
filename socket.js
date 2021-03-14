@@ -29,7 +29,7 @@ module.exports = socket = (httpServer) => {
           if (!msgs) return
           msgs.map(m => {
             const { id, name, avatar, createdAt } = m.User
-            allMessages.push({ text: m.message, userId: id, userName: name, userAvatar: avatar, createdAt })
+            allMessages.push({ text: m.message, userId: id, userName: name, userAvatar: avatar, createdAt: String(createdAt) })
           })
           socket.emit('getAllMessages', allMessages) //連上線之後，自己會出現歷史訊息
         })
