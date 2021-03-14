@@ -3,9 +3,11 @@
     "exphbs",
     "followship",
     "followships",
+    "imgur",
+    "online",
+    "recieve",
     "resave",
     "signin",
-    "imgur",
     "topusers"
   ]
 }
