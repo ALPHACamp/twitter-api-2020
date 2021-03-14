@@ -16,7 +16,6 @@ module.exports = socket = (httpServer) => {
   sio.on('connection', (socket) => { // 建立連線
     console.log('a user connected')
 
-
     // 上線事件
     socket.on('sendOnline', (data, err) => {
       const socketId = socket.id
@@ -28,12 +27,13 @@ module.exports = socket = (httpServer) => {
             avatar: user.avatar,
             account: user.account
           }
-          users.push(userData)
           socket.broadcast.emit('receiveOnline', userData)
           socket.emit('receiveOnline', userData)
+          users.push(userData)
         })
       // io.sockets.emit('receiveOnline', userData)
     })
+
 
     //歷史訊息
     socket.on('messages', (msg, err) => {
