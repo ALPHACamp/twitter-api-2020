@@ -7,7 +7,7 @@ module.exports = function (io) {
   io.use(async (socket, next) => {
     // authentication
     const token = socket.handshake.auth.token // frontend - socket.userId = 1; socket.connect()
-    console.log('token', token)
+    console.log('token:', token)
     if (!token) return next(new Error('建立連線失敗，請先登入。'))
     let userId = 0
     await jwt.verify(token, process.env.JWT_SECRET, (payload) => {
@@ -26,54 +26,91 @@ module.exports = function (io) {
   })
 
   io.on('connection', async (socket) => {
+    console.log('connect successfully!')
+    const socketUserId = String(socket.user.id)
     //enter self room
-    socket.join(socket.user.id)
+    socket.join(socketUserId)
     //fetch chat history (all previous msg) and send to new socket
-    let publicMessageRecord = await Message.findAll({
-      where: { toId: null },
-      include: { model: User, as: 'from' }
+    let messages = await Message.findAll({
+      include: [
+        { model: User, as: 'from', exclude: ['password'] },
+        { model: User, as: 'to', exclude: ['password'] }
+      ]
     })
-    if (!publicMessageRecord || !Array.isArray(publicMessageRecord)) {
-      return socket.to(socket.user.id).emit('fetchMessagesRecordFail', errorResponse('獲取聊天紀錄失敗'))
+    if (!messages || !Array.isArray(messages)) {
+      return socket.to(socketUserId).emit('fetchMessagesFail', errorResponse('獲取聊天紀錄失敗'))
     } 
-    publicMessageRecord = JSON.parse(JSON.stringify(publicMessageRecord))
-    socket.to(socket.user.id).emit('publicMessageRecord', publicMessageRecord) 
+    messages = JSON.parse(JSON.stringify(messages))
+    const publicMessageRecord = messages.filter(message => message.toId === null)
+    socket.to(socketUserId).emit('publicMessageRecord', publicMessageRecord) 
     // fetch existing users
-    const onlineUsers = []
+    const usersInPublicChat = []
     // io.of('/').sockets is a Map with socketId as key => socket as value
     for (const [id, socket] of io.of('/').sockets) {
       // socket.user = { id, name, account, avatar }
-      onlineUsers.push(socket.user)
+      usersInPublicChat.push(socket.user)
     }
-    //fetch all users
-    const allUsers = await User.findAll({ attributes: { exclude: ['password'] } })
-    if (!allUsers || !Array.isArray(allUsers)) {
-      return socket.to(socket.user.id).emit('fetchAllUsersFail', errorResponse('獲取使用者列表失敗'))
-    }
-    allUsers.map(user => {
-      user.connected = onlineUsers.map(d => d.id).includes(user.id)
-      return user
+    socket.emit('usersInPublicChat', usersInPublicChat) // emit user list to frontend
+    // listen to publicMessage, then broadcast message to all users(sockets)
+    socket.on('publicMessage', async (publicMessage) => {
+      console.log('Someone wants to send a public message')
+      // msg is an object = { content, fromId, toId: null }
+      socket.emit('publicMessage', publicMessage)
+      await Message.create(publicMessage)
     })
-    socket.emit('users', allUsers) // emit updated all user list to frontend - [{socketID: id, user: socket.user}, {}, ...]
+
+
+    //private messaging section
+    const privateMessages = messages
+      .filter(msg => msg.toId !== null)
+      .filter(msg => String(msg.toId) === socketUserId || String(msg.fromId) === socketUserId)
+    const messagePerUser = new Map()
+    privateMessages.map(msg => {
+      const anotherUserId = socketUserId === String(msg.fromId) ? String(msg.toId) : String(msg.fromId)
+      if (!messagePerUser.has(anotherUserId)) {
+        messagePerUser.set(anotherUserId, [msg])
+      } else {
+        messagePerUser.get(anotherUserId).push(msg)
+      }
+    })
+
+    const usersInPrivateChat = []
+    const userPromises = []
+    messagePerUser.forEach((anotherUserId, msgs) => {
+      userPromises.push(User.findOne({ where: { id: anotherUserId }, exclude: ['password'] }))
+      usersInPrivateChat.push({
+        connected: usersInPublicChat.map(d => d.id).includes(anotherUserId),
+        conversation: msgs
+      })
+    })
+    let userData = await Promise.all(userPromises)
+    userData = JSON.parse(JSON.stringify(userData))
+    userData.map((data, index) => {
+      Object.assign(usersInPrivateChat[index], data)
+    })
+    socket.to(socketUserId).emit('usersInPrivateChat', usersInPrivateChat)
+
+    socket.on('privateMessage', async (privateMessage) => {
+      console.log('someone wants to send a private message')
+      socket.to(privateMessage.toId).to(socketUserId).emit('privateMessage', privateMessage)
+      await Message.create(privateMessage)
+    })
+
 
     // broadcast username to frontend when someone is connected.
     socket.broadcast.emit('userConnected', {
-      username: socket.user.name
+      id: socketUserId,
+      username: socket.user.name,
+      connected: true
     })
-
-    // listen to publicMessage, then broadcast message to all users(sockets)
-    socket.on('publicMessage', async (msg) => {
-      // msg is an object = { content, fromId, toId: null }
-      socket.emit('publicMessage', msg)
-      await Message.create(msg)
-    })
-
     // notify users upon disconnection
     socket.on('disconnect', () => {
-      socket.broadcast.emit('user disconnected', {
+      console.log('someone is disconnected')
+      socket.broadcast.emit('userDisconnected', {
         //front end use this id to toggle connected status (true => false)
-        id: socket.user.id,
-        username: socket.user.name
+        id: socketUserId,
+        username: socket.user.name,
+        connected: false
       })
     })
   })
