@@ -68,7 +68,7 @@ module.exports = socket = (httpServer) => {
 
       users.add(userData)
 
-      io.sockets.emit('recieveOnline', userData)
+      io.sockets.emit('receiveOnline', userData)
     })
 
 
@@ -81,7 +81,7 @@ module.exports = socket = (httpServer) => {
           avatar: m.avatar
         }
       })
-      socket.emit('recieveUsers', usersArray)
+      socket.emit('receiveUsers', usersArray)
     })
 
     // 下線事件
