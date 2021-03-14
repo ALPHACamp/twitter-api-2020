@@ -20,9 +20,10 @@ module.exports = socket = (httpServer) => {
     // 上線事件
     socket.on('sendOnline', (data, err) => {
       const socketId = socket.id
+
       User.findByPk(data.userId)
         .then(user => {
-          user.status = 'online'
+          user.update({ status: 'online' })
           const userData = {
             id: data.userId,
             name: user.name,
@@ -32,6 +33,7 @@ module.exports = socket = (httpServer) => {
           // users.push(userData)
           socket.broadcast.emit('receiveOnline', userData)
           socket.emit('receiveOnline', userData)
+
         })
 
       // io.sockets.emit('receiveOnline', userData)
@@ -61,7 +63,6 @@ module.exports = socket = (httpServer) => {
       // })
 
     })
-
 
 
     //歷史訊息
