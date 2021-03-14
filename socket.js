@@ -23,16 +23,20 @@ module.exports = socket = (httpServer) => {
 
       User.findByPk(data.userId)
         .then(user => {
-          user.update({ status: 'online' })
           const userData = {
             id: data.userId,
             name: user.name,
             avatar: user.avatar,
             account: user.account
           }
+          user.update({ status: 'online' })
+            .then(() => {
+              socket.broadcast.emit('receiveOnline', userData)
+              socket.emit('receiveOnline', userData)
+            })
+
           // users.push(userData)
-          socket.broadcast.emit('receiveOnline', userData)
-          socket.emit('receiveOnline', userData)
+
 
         })
 
