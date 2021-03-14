@@ -10,7 +10,9 @@ module.exports = function (io) {
     console.log('token:', token)
     if (!token) return next(new Error('建立連線失敗，請先登入。'))
     let userId = 0
-    await jwt.verify(token, process.env.JWT_SECRET, (payload) => {
+    await jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+      console.log('payload: ', payload)
+      if (err) return next(new Error('建立連線失敗，認證過程失敗。'))
       if (!payload) return next(new Error('建立連線失敗，無效 token。'))
       userId = payload.id
     })
@@ -41,6 +43,7 @@ module.exports = function (io) {
       return socket.to(socketUserId).emit('fetchMessagesFail', errorResponse('獲取聊天紀錄失敗'))
     } 
     messages = JSON.parse(JSON.stringify(messages))
+    console.log('all messages: ', messages)
     const publicMessageRecord = messages.filter(message => message.toId === null)
     socket.to(socketUserId).emit('publicMessageRecord', publicMessageRecord) 
     // fetch existing users
