@@ -47,9 +47,7 @@ module.exports = (io) => {
           msg.name = user.name
           msg.avatar = user.avatar
           msg.account = user.account
-          msg.messageOwne = ''
-
-          console.log('1234564', msg)
+          msg.messageOwner = ''
 
           io.emit('publicMessage', msg);
         })
