@@ -108,7 +108,6 @@ module.exports = (io) => {
         raw: true,
         nest: true,
       }).then(userMessage => {
-        console.log('========歷史訊息', userMessage)
         // return userMessage
         if (user.channel === 'publicRoom') {
           // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
