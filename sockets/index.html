@@ -146,9 +146,10 @@
       var content = document.getElementById("content")
 
       // 連線偵測
-      socket.on("connect", function () {
+      socket.on("connect", function (message) {
         status.innerText = "Connected."
       });
+
       // 離線偵測
       socket.on("disconnect", function () {
         status.innerText = "Disconnected."
