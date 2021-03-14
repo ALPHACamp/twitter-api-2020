@@ -35,7 +35,7 @@ function formatMessage(username, text) {
 
 // 找出誰離開
 function userLeave(id, userList) {
-  const index = userList.findIndex(user => user.socketid === id)
+  const index = userList.findIndex(user => user.socketId === id)
   if (index !== -1) {
     return userList.splice(index, 1)[0];
   }

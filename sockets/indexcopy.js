@@ -18,6 +18,7 @@ module.exports = (io) => {
     io.emit("online", onlineCount)
 
     // 取出登入使用者
+    console.log("取出登入使用者", socket.user)
     const user = socket.user
 
     // 未點擊頭像前使用者進入 channel 都是強制切換 'publicRoom'
@@ -131,12 +132,12 @@ module.exports = (io) => {
       onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1
 
       // 帶入 userLeave() 判斷誰離開
-      const userLeft = userLeave(user.socketId, userList)
-      console.log('==========userLeft', userLeft)
+      const userLeft = userLeave(user.socketid, userList)
+      console.log(userLeft)
       // 向該頻道通知誰離開
       if (userLeft) {
-        console.log('==========offlineUser', userList)
         io.emit("offlineUser", userLeft)
+        console.log("測試離開",userList)
         io.to(userLeft.room).emit(
           'message',
           formatMessage(botName, `${userLeft.name} has left the chat`)
