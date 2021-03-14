@@ -1,6 +1,7 @@
 const db = require('./models')
 const { PublicMessage, User } = db
 const users = []  // 目前上線的使用者資料，包含socket.id
+
 module.exports = socket = (httpServer) => {
   const sio = require('socket.io')(httpServer, {
     cors: {
@@ -13,8 +14,10 @@ module.exports = socket = (httpServer) => {
 
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
+    // console.log(socket.request)
+    console.log(socket.request.session)
     console.log('a user connected')
-
+    socket.emit('try', socket.request.session.passport)
     // 上線事件
     socket.on('sendOnline', (data, err) => {
       const socketId = socket.id
