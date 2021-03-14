@@ -41,7 +41,7 @@ module.exports = function (io) {
       ]
     })
     if (!messages || !Array.isArray(messages)) {
-      return socket.to(socketUserId).emit('fetchMessagesFail', errorResponse('獲取聊天紀錄失敗'))
+      return socket.to(socketUserId).emit('fetchMessagesFail', errorResponse('獲取聊天紀錄失敗。'))
     } 
     messages = JSON.parse(JSON.stringify(messages))
     console.log('all messages: ', messages)
@@ -49,7 +49,7 @@ module.exports = function (io) {
     //only to yourself //the same as socket.emit
     socket.to(socketUserId).emit('publicMessageRecord', publicMessageRecord) 
     // fetch existing users
-    const usersInPublicChat = new Map()
+    let usersInPublicChat = new Map()
     // io.of('/').sockets is a Map with socketId as key => socket as value
     for (const [id, socket] of nameSpace.sockets) {
       // socket.user = { id, name, account, avatar }
@@ -60,7 +60,12 @@ module.exports = function (io) {
     // listen to publicMessage, then broadcast message to all users(sockets)
     socket.on('publicMessageFromUser', async (publicMessage) => {
       console.log('Someone wants to send a public message')
-      // msg is an object = { content, fromId, toId: null }
+      // msg is an object = { content, fromId, toId: null, sendTime }
+      let user = await User.findOne({ where: { id: publicMessage.fromId }, attributes: { exclude: ['password'] } })
+      if (!user) {
+        return socket.to(socketUserId).emit('fetchPublicSenderFail', errorResponse('獲取傳公共訊息使用者資料失敗。'))
+      }  
+      publicMessage.sender = user
       nameSpace.emit('publicMessageFromServer', publicMessage) //to every socket 
       await Message.create(publicMessage)
     })
@@ -98,6 +103,11 @@ module.exports = function (io) {
 
     socket.on('privateMessageFromUser', async (privateMessage) => {
       console.log('someone wants to send a private message')
+      let user = await User.findOne({ where: { id: privateMessage.fromId }, attributes: { exclude: ['password'] } })
+      if (!user) {
+        return socket.to(socketUserId).emit('fetchPrivateSenderFail', errorResponse('獲取私人訊息使用者資料失敗。'))
+      }  
+      privateMessage.sender = user
       socket.to(privateMessage.toId).to(socketUserId).emit('privateMessageFromServer', privateMessage) //to sender and receiver
       await Message.create(privateMessage)
     })
