@@ -59,7 +59,7 @@ module.exports = (io) => {
       getUser.channel = roomName
       // 切換房間
       socket.join(getUser.channel)
-      io.sockets.to(roomName).emit('message', `${user.name} has join this room`)
+      // io.sockets.to(roomName).emit('message', `${user.name} has join this room`)
       historicalRecord(getUser.channel)
     })
 
