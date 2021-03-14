@@ -5,7 +5,7 @@ const { authenticated, formatMessage, userLeave } = require('./utils/user')
 module.exports = (io) => {
 
   // 驗證身分
-  // io.use(authenticated)
+  io.use(authenticated)
   //擺上來，不然每次都會重製
   let onlineCount = 0
 
@@ -19,18 +19,7 @@ module.exports = (io) => {
     io.emit("online", onlineCount)
 
     // 取出登入使用者
-    // const user = socket.user
-    const user = {
-      id: 1,
-      name: 'user1',
-      account: 'Jhon Doe',
-      email: 'user1@example.com',
-      avatar: 'https://i.imgur.com/lPqM3om.jpg',
-      isAdmin: 0,
-      socketId: 'Pwv-005DMkPb7sN2AAAL',
-      channel: 'publicRoom'
-    }
-
+    const user = socket.user
 
     // 未點擊頭像前使用者進入 channel 都是強制切換 'publicRoom'
     user.channel = 'publicRoom'
@@ -96,7 +85,8 @@ module.exports = (io) => {
           await Chat.create({
             UserId: msg.id,
             message: msg.msg,
-            channel: user.channel
+            channel: user.channel,
+            avatar: msg.avatar
           }).then(usermsg => {
             const data = {
               ...usermsg.dataValues,
