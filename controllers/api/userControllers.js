@@ -307,7 +307,6 @@ let userController = {
       .then((likes) => {
         const data = likes.map((d) => ({
           ...d.dataValues,
-          // description: d.dataValues.Tweet.dataValues.description.substring(0, 50),
           likeCount: d.Tweet.Likes.length,
           ReplyCount: d.Tweet.Replies.length,
           isLike: d.Tweet.Likes.some((t) => t.UserId === helpers.getUser(req).id),
@@ -367,6 +366,19 @@ let userController = {
         res.json(top10Users);
       });
   },
+
+  others: (req, res) => {
+    User.findAll({ attributes: ['id', 'name', 'account', 'avatar'] })
+      .then(users => {
+        users = users.map(r => ({
+          ...r.dataValues
+        }))
+        users = users.filter(m => m.id !== helpers.getUser(req).id)
+        let data = users.shift()
+
+        res.json(users)
+      })
+  }
 };
 
 module.exports = userController;
