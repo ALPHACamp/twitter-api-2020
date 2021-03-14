@@ -10,11 +10,12 @@ module.exports = socket = (httpServer) => {
     }
   })
 
-  let users = []  // 目前上線的使用者資料，包含socket.id
+
 
 
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
+    const users = []  // 目前上線的使用者資料，包含socket.id
     console.log('a user connected')
     //歷史訊息
     socket.on('messages', (msg, err) => {
@@ -70,23 +71,22 @@ module.exports = socket = (httpServer) => {
           }
           users.push(userData)
         })
-      socket.broadcast.emit('receiveOnline', users)
-      socket.emit('receiveOnline', users)
+      socket.broadcast.emit('receiveOnline', userData)
+      socket.emit('receiveOnline', userData)
       // io.sockets.emit('receiveOnline', userData)
     })
 
 
     // 取得線上使用者
     socket.on('getUsers', () => {
-      console.log(users)
-      // const usersArray = users.map((m) => {
-      //   return {
-      //     id: m.id,
-      //     name: m.name,
-      //     avatar: m.avatar
-      //   }
-      // })
-      socket.emit('receiveUsers', users)
+      const usersArray = users.map((m) => {
+        return {
+          id: m.id,
+          name: m.name,
+          avatar: m.avatar
+        }
+      })
+      socket.emit('receiveUsers', usersArray)
     })
 
     // 下線事件
