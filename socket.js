@@ -66,11 +66,10 @@ module.exports = socket = (httpServer) => {
         socketId: socketId
       }
 
-      users.add(userData)
+      users.push(userData)
 
       io.sockets.emit('receiveOnline', userData)
     })
-
 
     // 取得線上使用者
     socket.on('getUsers', () => {
