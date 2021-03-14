@@ -59,14 +59,12 @@ module.exports = socket = (httpServer) => {
           PublicMessage.create({
             message: text,
             UserId: userId
-          }).then(() => {
-            PublicMessage.findAll({
-              where: { message: text }
-            }).then((msg) => {
-              io.sockets.emit('recievePublic', { text, userId, userName: name, userAvatar: avatar, createdAt: msg.createdAt })
-              // socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
-              // socket.emit('self', { msg: msg.msg, id, account, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
-            })
+          }).findAll({
+            where: { message: text }
+          }).then((msg) => {
+            io.sockets.emit('recievePublic', { text, userId, userName: name, userAvatar: avatar, createdAt: msg.createdAt })
+            // socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
+            // socket.emit('self', { msg: msg.msg, id, account, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
           })
         })
     })
