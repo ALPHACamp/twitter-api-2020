@@ -161,7 +161,7 @@
       // 監聽Server "message"  此為存完資料庫後送回前端訊息
       socket.on("message", (data) => {
         console.log('監聽Server message ', data)
-        if (data.msg) {
+        if (data.message) {
           renderMsgCard(data)
         }
       })
@@ -286,7 +286,7 @@
             <div class="media-body">
               <div class="msg bg-primary rounded py-2 px-3 mb-2">
                 <p class="name text-small mb-0 text-white">房間名:${data.channel}</p>
-                <p class="name text-small mb-0 text-white">${data.msg}</p>
+                <p class="name text-small mb-0 text-white">${data.message}</p>
               </div>
               <p class="small text-muted">${data.createdAt}</p>
             </div>
