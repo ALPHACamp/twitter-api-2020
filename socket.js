@@ -1,5 +1,5 @@
 const db = require('./models')
-const { PublicMessage, User } = db
+const { PublicMessage, User, OnlineUser } = db
 
 
 module.exports = socket = (httpServer) => {
@@ -11,7 +11,7 @@ module.exports = socket = (httpServer) => {
     }
   })
 
-  const users = []  // 目前上線的使用者資料，包含socket.id
+  // const users = []  // 目前上線的使用者資料，包含socket.id
 
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
@@ -20,6 +20,9 @@ module.exports = socket = (httpServer) => {
     // 上線事件
     socket.on('sendOnline', (data, err) => {
       const socketId = socket.id
+      OnlineUser.create({
+        userId: data.userId
+      })
       User.findByPk(data.userId)
         .then(user => {
           const userData = {
@@ -28,7 +31,7 @@ module.exports = socket = (httpServer) => {
             avatar: user.avatar,
             account: user.account
           }
-          users.push(userData)
+          // users.push(userData)
           socket.broadcast.emit('receiveOnline', userData)
           socket.emit('receiveOnline', userData)
         })
@@ -38,14 +41,29 @@ module.exports = socket = (httpServer) => {
 
     // 取得線上使用者
     socket.on('getUsers', () => {
-      const usersArray = users.map((m) => {
-        return {
-          id: m.id,
-          name: m.name,
-          avatar: m.avatar
-        }
+      OnlineUser.findAll({
+        include: User,
+        raw: true,
+        nest: true
       })
-      socket.emit('receiveUsers', usersArray)
+        .then(user => {
+          const usersArray = user.map((m) => {
+            return {
+              id: m.User.id,
+              name: m.User.name,
+              avatar: m.User.avatar
+            }
+          })
+          socket.emit('receiveUsers', usersArray)
+        })
+      // const usersArray = users.map((m) => {
+      //   return {
+      //     id: m.id,
+      //     name: m.name,
+      //     avatar: m.avatar
+      //   }
+      // })
+
     })
 
 
