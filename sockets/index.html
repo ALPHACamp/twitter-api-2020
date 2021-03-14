@@ -23,9 +23,9 @@
       auth: {
         token: token
       },
-      query: {
-        id: 1
-      }
+      // query: {
+      //   id: 1
+      // }
     });
   </script>
   <style>
@@ -146,9 +146,10 @@
       var content = document.getElementById("content")
 
       // 連線偵測
-      socket.on("connect", function () {
+      socket.on("connect", function (message) {
         status.innerText = "Connected."
       });
+
       // 離線偵測
       socket.on("disconnect", function () {
         status.innerText = "Disconnected."
@@ -160,7 +161,7 @@
       // 監聽Server "message"  此為存完資料庫後送回前端訊息
       socket.on("message", (data) => {
         console.log('監聽Server message ', data)
-        if (data.msg) {
+        if (data.message) {
           renderMsgCard(data)
         }
       })
@@ -169,7 +170,7 @@
       // 監聽Server "onlineUser" 使用者相關資訊
       // 儲存使用者資訊用於渲染
       let USER = []
-      socket.on("onlineUser", function (data) {
+      socket.on("allOnlineUsers", function (data) {
         USER = data
         renderUserCard(data)
 
@@ -261,6 +262,7 @@
           formData.id = USER.id
           formData.name = USER.name
           formData.msg = userValue
+          formData.avatar = USER.avatar
         }
         if (message) {
           // 使用者送出聊天內容 ----> Server "send"
@@ -284,7 +286,7 @@
             <div class="media-body">
               <div class="msg bg-primary rounded py-2 px-3 mb-2">
                 <p class="name text-small mb-0 text-white">房間名:${data.channel}</p>
-                <p class="name text-small mb-0 text-white">${data.msg}</p>
+                <p class="name text-small mb-0 text-white">${data.message}</p>
               </div>
               <p class="small text-muted">${data.createdAt}</p>
             </div>
@@ -297,8 +299,9 @@
 
       // 渲染使用者
       function renderUserCard(data) {
-        console.log(data)
+
         let rawHTML = ''
+        let userData = []
         const dataUserPanel = document.querySelector('#data-userPanel')
         const oldHTML = dataUserPanel.innerHTML
         // 模擬其他使用者上線 可點擊私聊聊天
@@ -327,20 +330,24 @@
           </div>
         </a>
         `
-        rawHTML = oldHTML + user2Data + `
-        <a class="list-group-item list-group-item-action active text-white rounded-0 btn" id="user-id">
-          <div class="media" id=${data.id}><img src="${data.avatar}" alt="user" width="50" class="rounded-circle">
-            <div class="media-body ml-4">
-              <div class="d-flex align-items-center justify-content-between mb-1">
-                <h6 class="mb-0">${data.name}</h6><small class="small font-weight-bold">25 Dec</small>
+        data.forEach(item => {
+          // console.log([item])
+          userData.push(`
+          <a class="list-group-item list-group-item-action active text-white rounded-0 btn" id="user-id">
+            <div class="media" id=${item.id}><img src="${item.avatar}" alt="user" width="50" class="rounded-circle">
+              <div class="media-body ml-4">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <h6 class="mb-0">${item.name}</h6><small class="small font-weight-bold">25 Dec</small>
+                </div>
+                <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                  sed
+                  do eiusmod tempor incididunt ut labore.</p>
               </div>
-              <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                sed
-                do eiusmod tempor incididunt ut labore.</p>
             </div>
-          </div>
-        </a>
-        `
+          </a>
+          `)
+        })
+        const userRender = rawHTML = oldHTML + user2Data + userData
         dataUserPanel.innerHTML = rawHTML
       }
 

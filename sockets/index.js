@@ -3,19 +3,24 @@ const { User, Chat, sequelize } = require('../models')
 const { authenticated, formatMessage, userLeave } = require('./utils/user')
 
 module.exports = (io) => {
-  console.log('已連線')
+
   // 驗證身分
   io.use(authenticated)
+  //擺上來，不然每次都會重製
+  let onlineCount = 0
+  let userList = []
 
   io.on('connection', socket => {
-
+    console.log("有人進來了")
     // 計算上線人數
-    let onlineCount = 0
+
     onlineCount++;
+    console.log("人數:", onlineCount)
     io.emit("online", onlineCount)
 
     // 取出登入使用者
     const user = socket.user
+    console.log("使用者資訊", user)
 
     // 未點擊頭像前使用者進入 channel 都是強制切換 'publicRoom'
     user.channel = 'publicRoom'
@@ -25,14 +30,14 @@ module.exports = (io) => {
 
     // 發送該頻道歷史訊息
     historicalRecord(user.channel)
-
     // 回傳使用者資訊 渲染前端
     io.emit("onlineUser", user)
 
 
     // 儲存目前上線使用者
-    let userList = []
+
     userList.push(user)
+    console.log("userList", userList)
     io.emit("allOnlineUsers", userList)
 
 
@@ -61,13 +66,15 @@ module.exports = (io) => {
 
     // 監聽使用者送出訊息 送出 'message' 
     socket.on("send", async (msg) => {
+      // console.log(msg)
       if (Object.keys(msg).length < 0) return
       try {
         if (user.channel !== 'publicRoom') {
           await Chat.create({
             UserId: msg.id,
             message: msg.msg,
-            channel: user.channel
+            channel: user.channel,
+            avatar: msg.avatar
           }).then(usermsg => {
             const data = {
               ...usermsg.dataValues,
@@ -79,7 +86,8 @@ module.exports = (io) => {
           await Chat.create({
             UserId: msg.id,
             message: msg.msg,
-            channel: user.channel
+            channel: user.channel,
+            avatar: msg.avatar
           }).then(usermsg => {
             const data = {
               ...usermsg.dataValues,
@@ -108,14 +116,14 @@ module.exports = (io) => {
         raw: true,
         nest: true,
       }).then(userMessage => {
-        console.log('========歷史訊息', userMessage)
+        // console.log('========歷史訊息', userMessage)
         // return userMessage
         if (user.channel === 'publicRoom') {
           // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
           // socket.to(user.channel).emit("chatRecord", userMessage)
           // socket.emit("chatRecord", userMessage)
           io.to(user.channel).emit('chatRecord', userMessage)
-          
+
         } else {
           io.to(user.channel).emit('chatRecord', userMessage)
           // socket.broadcast.to(user.channel).emit("chatRecord", userMessage)
@@ -130,6 +138,7 @@ module.exports = (io) => {
 
       // 帶入 userLeave() 判斷誰離開
       const userLeft = userLeave(user.socketid, userList);
+      console.log("有人離開了")
       // 向該頻道通知誰離開
       if (userLeft) {
         io.emit("offlineUser", userLeft)
