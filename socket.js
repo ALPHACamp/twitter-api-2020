@@ -60,13 +60,12 @@ module.exports = socket = (httpServer) => {
         updatedAt: createdAt,
       })
       //撈自己的info
-      // User.findAll({ where: { id: userId } })
       User.findByPk(userId)
         .then((user) => {
           const { name, avatar } = user
-          socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-          socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-          // io.sockets.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          // socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          // socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+          io.sockets.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
         })
     })
 
@@ -92,7 +91,7 @@ module.exports = socket = (httpServer) => {
         return item.id != id
       })
 
-      io.sockets.emit('sendOffline', users)
+      io.sockets.emit('receiveOffline', users)
     })
 
   })
