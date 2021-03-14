@@ -111,15 +111,25 @@ module.exports = socket = (httpServer) => {
     // 下線事件
     socket.on('sendOffline', (data, err) => {
       const id = data.userId
-      const offLineUser = users.filter((item) => {
-        return item.id != id
-      })
-      socket.broadcast.emit('receiveOffline', offLineUser)
-      socket.emit('receiveOffline', offLineUser)
-      // io.sockets.emit('receiveOffline', offLineUser)
+      User.findByPk(data.userId)
+        .then(user => {
+          const offLineUser = {
+            id: user.id,
+            name: user.name,
+            avatar: user.avatar
+          }
+          socket.broadcast.emit('receiveOffline', offLineUser)
+          socket.emit('receiveOffline', offLineUser)
+        })
+
+      // const offLineUser = users.filter((item) => {
+      //   return item.id != id
     })
 
+    // io.sockets.emit('receiveOffline', offLineUser)
   })
 
-
 }
+
+
+
