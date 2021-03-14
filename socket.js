@@ -1,6 +1,6 @@
 const db = require('./models')
 const { PublicMessage, User } = db
-
+const users = []  // 目前上線的使用者資料，包含socket.id
 module.exports = socket = (httpServer) => {
   const sio = require('socket.io')(httpServer, {
     cors: {
@@ -10,7 +10,6 @@ module.exports = socket = (httpServer) => {
     }
   })
 
-  const users = []  // 目前上線的使用者資料，包含socket.id
 
   // 公開聊天室
   sio.on('connection', (socket) => { // 建立連線
@@ -27,12 +26,26 @@ module.exports = socket = (httpServer) => {
             avatar: user.avatar,
             account: user.account
           }
+          users.push(userData)
           socket.broadcast.emit('receiveOnline', userData)
           socket.emit('receiveOnline', userData)
-          users.push(userData)
         })
+
       // io.sockets.emit('receiveOnline', userData)
     })
+
+    // 取得線上使用者
+    socket.on('getUsers', () => {
+      const usersArray = users.map((m) => {
+        return {
+          id: m.id,
+          name: m.name,
+          avatar: m.avatar
+        }
+      })
+      socket.emit('receiveUsers', usersArray)
+    })
+
 
 
     //歷史訊息
@@ -56,38 +69,27 @@ module.exports = socket = (httpServer) => {
 
 
     // 多人通信
-    socket.on('sendPublic', (data, err) => {
-      const { text, userId } = data
-      const createdAt = new Date()
-      //存入資料庫
-      PublicMessage.create({
-        message: text,
-        UserId: userId,
-        createdAt,
-        updatedAt: createdAt,
-      })
-      //撈自己的info
-      User.findByPk(userId)
-        .then((user) => {
-          const { name, avatar } = user
-          socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-          socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-          // io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
-        })
-    })
+    // socket.on('sendPublic', (data, err) => {
+    //   const { text, userId } = data
+    //   const createdAt = new Date()
+    //   //存入資料庫
+    //   PublicMessage.create({
+    //     message: text,
+    //     UserId: userId,
+    //     createdAt,
+    //     updatedAt: createdAt,
+    //   })
+    //   //撈自己的info
+    //   User.findByPk(userId)
+    //     .then((user) => {
+    //       const { name, avatar } = user
+    //       socket.broadcast.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+    //       socket.emit('receivePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
+    //       // io.sockets.emit('receivePublic', { text, userId, userName: user.name, userAvatar: user.avatar, createdAt })
+    //     })
+    // })
 
 
-    // 取得線上使用者
-    socket.on('getUsers', () => {
-      const usersArray = users.map((m) => {
-        return {
-          id: m.id,
-          name: m.name,
-          avatar: m.avatar
-        }
-      })
-      socket.emit('receiveUsers', usersArray)
-    })
 
     // 下線事件
     socket.on('sendOffline', (data, err) => {
