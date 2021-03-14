@@ -101,6 +101,9 @@ module.exports = socket = (httpServer) => {
   })
 
   // // 私人聊天室
+  // socket.on('joinChat', (data) => {
+
+  // })
   // socket.on('sendPrivate', (data) => {
 
 
