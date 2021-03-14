@@ -28,10 +28,10 @@ module.exports = socket = (httpServer) => {
         .then((msgs) => {
           if (!msgs) return
           msgs.map(m => {
-            const { id, name, avatar, createdAt } = m.User
-            allMessages.push({ text: m.message, userId: id, userName: name, userAvatar: avatar, createdAt: String(createdAt) })
+            const { id, name, avatar } = m.User
+            allMessages.push({ text: m.message, userId: id, userName: name, userAvatar: avatar, createdAt: m.createdAt })
           })
-          socket.emit('getAllMessages', allMessages) //連上線之後，自己會出現歷史訊息
+          socket.emit('messages', allMessages) //連上線之後，自己會出現歷史訊息
         })
     })
 
@@ -54,20 +54,19 @@ module.exports = socket = (httpServer) => {
       //撈自己的info
       User.findAll({ where: { id: data.userId } })
         .then((user) => {
-          const { name, avatar, createdAt } = user[0].dataValues
-
-          io.sockets.emit('recievePublic', { text, userId, userName: name, userAvatar: avatar, createdAt })
-
-          // socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
-
-          // socket.emit('self', { msg: msg.msg, id, account, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
-        }).then(() => {
+          const { name, avatar } = user[0].dataValues
           //存入資料庫
           PublicMessage.create({
             message: text,
-            UserId: userId,
-            createdAt: Date.now(),
-            updatedAt: Date.now()
+            UserId: userId
+          }).then(() => {
+            PublicMessage.findAll({
+              where: { message: text }
+            }).then((msg) => {
+              io.sockets.emit('recievePublic', { text, userId, userName: name, userAvatar: avatar, createdAt: msg.createdAt })
+              // socket.broadcast.emit('other', { msg: msg.msg, id, account, name, avatar, createdAt })
+              // socket.emit('self', { msg: msg.msg, id, account, name, avatar, createdAt }) //emit：再透過通道把msg傳給自己 
+            })
           })
         })
     })
