@@ -78,14 +78,15 @@ module.exports = socket = (httpServer) => {
 
     // 取得線上使用者
     socket.on('getUsers', () => {
-      const usersArray = users.map((m) => {
-        return {
-          id: m.id,
-          name: m.name,
-          avatar: m.avatar
-        }
-      })
-      socket.emit('receiveUsers', usersArray)
+      console.log(users)
+      // const usersArray = users.map((m) => {
+      //   return {
+      //     id: m.id,
+      //     name: m.name,
+      //     avatar: m.avatar
+      //   }
+      // })
+      socket.emit('receiveUsers', users)
     })
 
     // 下線事件
