@@ -41,13 +41,14 @@ module.exports = function (io) {
       ]
     })
     if (!messages || !Array.isArray(messages)) {
-      return socket.to(socketUserId).emit('fetchMessagesFail', errorResponse('獲取聊天紀錄失敗。'))
+      return socket.emit('fetchMessagesFail', errorResponse('獲取聊天紀錄失敗。'))
     } 
     messages = JSON.parse(JSON.stringify(messages))
     console.log('all messages: ', messages)
     const publicMessageRecord = messages.filter(message => message.toId === null)
-    //only to yourself //the same as socket.emit
-    socket.to(socketUserId).emit('publicMessageRecord', publicMessageRecord) 
+    //only to yourself
+    // socket.to(socketUserId).emit('publicMessageRecord', publicMessageRecord) does not work
+    socket.emit('publicMessageRecord', publicMessageRecord)  
     // fetch existing users
     let usersInPublicChat = new Map()
     // io.of('/').sockets is a Map with socketId as key => socket as value
@@ -60,57 +61,57 @@ module.exports = function (io) {
     // listen to publicMessage, then broadcast message to all users(sockets)
     socket.on('publicMessageFromUser', async (publicMessage) => {
       console.log('Someone wants to send a public message')
+      await Message.create(publicMessage)
       // msg is an object = { content, fromId, toId: null, sendTime }
       let user = await User.findOne({ where: { id: publicMessage.fromId }, attributes: { exclude: ['password'] } })
       if (!user) {
         return socket.to(socketUserId).emit('fetchPublicSenderFail', errorResponse('獲取傳公共訊息使用者資料失敗。'))
       }  
-      publicMessage.sender = user
+      publicMessage.from = user
       nameSpace.emit('publicMessageFromServer', publicMessage) //to every socket 
-      await Message.create(publicMessage)
     })
 
 
-    //private messaging section
-    const privateMessages = messages
-      .filter(msg => msg.toId !== null)
-      .filter(msg => String(msg.toId) === socketUserId || String(msg.fromId) === socketUserId)
-    const messagePerUser = new Map()
-    privateMessages.map(msg => {
-      const anotherUserId = socketUserId === String(msg.fromId) ? String(msg.toId) : String(msg.fromId)
-      if (!messagePerUser.has(anotherUserId)) {
-        messagePerUser.set(anotherUserId, [msg])
-      } else {
-        messagePerUser.get(anotherUserId).push(msg)
-      }
-    })
+    // //private messaging section
+    // const privateMessages = messages
+    //   .filter(msg => msg.toId !== null)
+    //   .filter(msg => String(msg.toId) === socketUserId || String(msg.fromId) === socketUserId)
+    // const messagePerUser = new Map()
+    // privateMessages.map(msg => {
+    //   const anotherUserId = socketUserId === String(msg.fromId) ? String(msg.toId) : String(msg.fromId)
+    //   if (!messagePerUser.has(anotherUserId)) {
+    //     messagePerUser.set(anotherUserId, [msg])
+    //   } else {
+    //     messagePerUser.get(anotherUserId).push(msg)
+    //   }
+    // })
 
-    const usersInPrivateChat = []
-    const userPromises = []
-    messagePerUser.forEach((anotherUserId, msgs) => {
-      userPromises.push(User.findOne({ where: { id: anotherUserId }, attributes: { exclude: ['password'] }}))
-      usersInPrivateChat.push({
-        connected: usersInPublicChat.map(d => d.id).includes(anotherUserId),
-        conversation: msgs
-      })
-    })
-    let userData = await Promise.all(userPromises)
-    userData = JSON.parse(JSON.stringify(userData))
-    userData.map((data, index) => {
-      Object.assign(usersInPrivateChat[index], data)
-    })
-    socket.to(socketUserId).emit('usersInPrivateChat', usersInPrivateChat) //only to yourself
+    // const usersInPrivateChat = []
+    // const userPromises = []
+    // messagePerUser.forEach((anotherUserId, msgs) => {
+    //   userPromises.push(User.findOne({ where: { id: anotherUserId }, attributes: { exclude: ['password'] }}))
+    //   usersInPrivateChat.push({
+    //     connected: usersInPublicChat.map(d => d.id).includes(anotherUserId),
+    //     conversation: msgs
+    //   })
+    // })
+    // let userData = await Promise.all(userPromises)
+    // userData = JSON.parse(JSON.stringify(userData))
+    // userData.map((data, index) => {
+    //   Object.assign(usersInPrivateChat[index], data)
+    // })
+    // socket.to(socketUserId).emit('usersInPrivateChat', usersInPrivateChat) //only to yourself
 
-    socket.on('privateMessageFromUser', async (privateMessage) => {
-      console.log('someone wants to send a private message')
-      let user = await User.findOne({ where: { id: privateMessage.fromId }, attributes: { exclude: ['password'] } })
-      if (!user) {
-        return socket.to(socketUserId).emit('fetchPrivateSenderFail', errorResponse('獲取私人訊息使用者資料失敗。'))
-      }  
-      privateMessage.sender = user
-      socket.to(privateMessage.toId).to(socketUserId).emit('privateMessageFromServer', privateMessage) //to sender and receiver
-      await Message.create(privateMessage)
-    })
+    // socket.on('privateMessageFromUser', async (privateMessage) => {
+    //   console.log('someone wants to send a private message')
+    //   let user = await User.findOne({ where: { id: privateMessage.fromId }, attributes: { exclude: ['password'] } })
+    //   if (!user) {
+    //     return socket.emit('fetchPrivateSenderFail', errorResponse('獲取私人訊息使用者資料失敗。'))
+    //   }  
+    //   privateMessage.sender = user
+    //   socket.to(privateMessage.toId).to(socketUserId).emit('privateMessageFromServer', privateMessage) //to sender and receiver
+    //   await Message.create(privateMessage)
+    // })
 
 
     // broadcast username to everyone except for sender when someone is connected.
