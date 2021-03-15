@@ -10,7 +10,7 @@ module.exports = {
           toId: null,
           content: 'Hi, I am new here.',
           sendTime: new Date(Date.now() - 50000000),
-          createdAT: new Date(),
+          createdAt: new Date(),
           updatedAt: new Date()
         },
         {
@@ -19,7 +19,7 @@ module.exports = {
           toId: 31,
           content: 'Johnny, do you want to marry me?',
           sendTime: new Date(Date.now() - 40000000),
-          createdAT: new Date(),
+          createdAt: new Date(),
           updatedAt: new Date()
         },
         {
@@ -28,7 +28,7 @@ module.exports = {
           toId: 11,
           content: 'fuck off',
           sendTime: new Date(Date.now() - 35000000),
-          createdAT: new Date(),
+          createdAt: new Date(),
           updatedAt: new Date()
         },
         {
@@ -37,7 +37,7 @@ module.exports = {
           toId: 11,
           content: 'When will you pay me back? You fraud!!!',
           sendTime: new Date(Date.now() - 35000000),
-          createdAT: new Date(),
+          createdAt: new Date(),
           updatedAt: new Date()
         }
     ], {})
