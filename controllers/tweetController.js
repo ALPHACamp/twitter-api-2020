@@ -1,58 +1,167 @@
-const db = require('../models')
-const Tweet = db.Tweet
-const User = db.User
-var helpers = require('../_helpers');
-// const adminService = require('../services/adminService.js')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
+const formatDistanceToNow = require('date-fns/formatDistanceToNow')
+const helpers = require('../_helpers')
+const { includeCountData, includeUserData } = require('./common.js')
 
-let tweetController = {
-    getTweets: (req, res) => {
-        return Tweet.findAll({
-            // where: { UserId: 1 }
-            include: [User]
-        }).then(tweets => {
+const tweetController = {
+  // 瀏覽全部推文
+  getTweets: async (req, res) => {
+    return Tweet.findAll({
+      include: [
+        Like,
+        includeUserData(), // 使用者資料
+      ],
+      attributes: {
+        // 計算數量
+        include: includeCountData(),
+      },
+      // 資料庫端進行排列
+      order: [[sequelize.literal('createdAt'), 'DESC']],
+    }).then(tweets => {
+      // 預防性過濾重複資料
+      const set = new Set()
+      const tweetsFilter = tweets.filter(item => !set.has(item.id) ? set.add(item.id) : false)
+      // 建立推文時間距離多久
+      const data = tweetsFilter.map(r => ({
+        ...r.dataValues,
+        time: formatDistanceToNow(r.createdAt, { includeSeconds: true }),
+        isLiked: r.Likes.map(d => d.UserId).includes(req.user.id)
 
-            return res.json(tweets)
-        }).catch(error => console.error(error))
-    },
+      }))
+      return res.status(200).json(data)
+    }).catch(error => {
+      return res.status(500).json({ status: 'error', message: '瀏覽全部推文-伺服器錯誤請稍後', error })
+    })
+  },
+  // 瀏覽單一推文
+  getTweet: async (req, res) => {
+    return Tweet.findByPk(req.params.id, {
+      include: [
+        Like,
+        includeUserData()
+      ],
+      attributes: {
+        // 計算數量
+        include: includeCountData(),
+        // 過濾不要資料
+        exclude: ['updatedAt']
+      }
+    }).then(tweets => {
+      const data = tweets.toJSON()
+      data.isLiked = tweets.Likes.map(item => item.UserId).includes(req.user.id)
+      return res.status(200).json(data)
+    }).catch(error => {
+      return res.status(500).json({ status: 'error', message: '瀏覽單一推文-伺服器錯誤請稍後', error })
+    })
+  },
+  // 新增推特
+  postTweet: (req, res) => {
+    if (!req.body.description) {
+      return res.status(200).json({ status: 'error', message: "description didn't exist" })
+    }
+    return Tweet.create({
+      description: req.body.description,
+      UserId: helpers.getUser(req).id
+    })
+      .then((category) => {
+        return res.status(200).json({ status: 'success', message: 'Tweet was successfully created' })
+      })
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '編輯推文-伺服器錯誤請稍後', error })
+      })
+  },
+  // 刪除推特
+  deleteTweet: (req, res) => {
+    return Tweet.findByPk(req.params.id)
+      .then(async (tweet) => {
+        await tweet.destroy()
+        return res.status(200).json({ status: 'success', message: 'Tweet was successfully deleted' })
+      })
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '刪除推特-伺服器錯誤請稍後', error })
+      })
+  },
+  // 修改推特
+  putTweet: (req, res) => {
+    if (!req.body.description) {
+      return res.json({ status: 'error', message: '請輸入推文' })
+    }
+    return Tweet.findByPk(req.params.id)
+      .then((tweet) => {
+        tweet.update(req.body)
+          .then((category) => {
+            return res.status(200).json({ status: 'success', message: 'category was successfully to update', data: req.body })
+          })
+      })
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '修改推特-伺服器錯誤請稍後', error })
+      })
+  },
+  // 新增 Like
+  postLike: (req, res) => {
+    return Like.create({
+      UserId: helpers.getUser(req).id,
+      TweetId: req.params.id
+    })
+      .then((tweet) => {
+        return res.status(200).json({ status: 'success', message: 'like was successfully create' })
+      })
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '推特點讚-伺服器錯誤請稍後', error })
+      })
+  },
+  // 刪除 Like
+  deleteLike: (req, res) => {
+    return Like.findOne({
+      where: { UserId: helpers.getUser(req).id, TweetId: req.params.id },
+    })
+      .then(async (like) => {
+        await like.destroy()
+        return res.json({ status: 'success', message: 'like was successfully deleted' })
+      })
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '收回讚-伺服器錯誤請稍後', error })
+      })
 
-    getTweet: (req, res) => {
-        return Tweet.findByPk(req.params.id, {
-            include: [User]
-        }).then(tweets => {
-            return res.json(tweets)
-        }).catch(error => console.error(error))
-    },
-    postTweet: (req, res) => {
-        return Tweet.create({
-            description: req.body.description,
-            UserId: helpers.getUser(req).id
-        })
-            .then((category) => {
-                return res.status(200).json({ status: 'success', message: 'Tweet was successfully created' })
-            })
-
-            .catch(error => console.error(error))
-    },
-    deleteTweet: (req, res) => {
-        return Tweet.findByPk(req.params.id)
-            .then(async (tweet) => {
-                await tweet.destroy()
-                return res.json({ status: 'success', message: 'Tweet was successfully deleted' })
-            })
-            .catch(error => console.error(error))
-    },
-
-    putTweet: (req, res) => {
-        return Tweet.findByPk(req.params.id)
-            .then((tweet) => {
-                tweet.update(req.body)
-                    .then((category) => {
-                        return res.json({ status: 'success', message: 'category was successfully to update', data: req.body })
-                    })
-            })
-            .catch(error => console.error(error))
-    },
-
+  },
+  // 瀏覽回覆
+  getReplies: async (req, res) => {
+    return Reply.findAll({
+      where: { TweetId: req.params.tweet_id },
+      include: [{
+        model: User,
+        attributes: ['id', 'name', 'account', 'avatar']
+      }],
+      raw: true,
+      nest: true,
+      order: [
+        // 資料庫端進行排列
+        [sequelize.literal('createdAt'), 'DESC']
+      ]
+    }).then(replies => {
+      // 建立回覆者時間距離多久
+      const data = replies.map(replies => ({
+        ...replies,
+        replyTime: formatDistanceToNow(replies.createdAt, { includeSeconds: true })
+      }))
+      return res.status(200).json(data)
+    }).catch(error => {
+      return res.status(500).json({ status: 'error', message: '瀏覽回覆-伺服器錯誤請稍後', error })
+    })
+  },
+  // 新增回覆
+  postReply: async (req, res) => {
+    return Reply.create({
+      comment: req.body.comment,
+      UserId: helpers.getUser(req).id,
+      TweetId: req.params.tweet_id
+    })
+      .then(reply => {
+        return res.json({ status: 'success', message: 'reply was successfully create' })
+      })
+      .catch(error => {
+        return res.status(500).json({ status: 'error', message: '新增回覆-伺服器錯誤請稍後', error })
+      })
+  }
 }
 module.exports = tweetController
-

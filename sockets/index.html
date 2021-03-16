@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Chatroom</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.1/css/all.min.css">
+  <script src="../../socket/index.css"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // const URL = "http://localhost:3000";
+    // const socket = io(URL, { autoConnect: false })
+    // var socket = io.connect('http://localhost:3000', {
+    //     query: { token }
+    //   })
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjE1NDIyNzcyfQ.74orJRqM76Ih0oP5MnLFRShDqNHylgrY_6t-fv2IuTo'
+    const socket = io("http://localhost:3000", {
+      // https://mighty-spire-48914.herokuapp.com/
+      reconnectionDelayMax: 10000,
+      auth: {
+        token: token
+      },
+      // query: {
+      //   id: 1
+      // }
+    });
+  </script>
+  <style>
+    body {
+      background-color: #74EBD5;
+      background-image: linear-gradient(90deg, #74EBD5 0%, #9FACE6 100%);
+
+      min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      width: 5px;
+      background: #f5f5f5;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      width: 1em;
+      background-color: #ddd;
+      outline: 1px solid slategrey;
+      border-radius: 1rem;
+    }
+
+    .text-small {
+      font-size: 0.9rem;
+    }
+
+    .messages-box,
+    .chat-box {
+      height: 510px;
+      overflow-y: scroll;
+    }
+
+    .rounded-lg {
+      border-radius: 0.5rem;
+    }
+
+    input::placeholder {
+      font-size: 0.9rem;
+      color: #999;
+    }
+  </style>
+</head>
+
+<body>
+  <main role="main" class="mt-5">
+    <div class="container">
+      <div class="row rounded-lg overflow-hidden shadow">
+        <!-- Users box-->
+        <div class="col-5 px-0">
+          <div class="bg-white">
+            <div class="bg-gray px-4 py-2 bg-light">
+              <p class="h5 mb-0 py-1">Recent</p>
+              <div id="status-box">Server: <span id="status">-</span> / <span id="online">0</span> online.</div>
+            </div>
+            <div class="messages-box">
+              <div class="list-group rounded-0" id="data-userPanel">
+                <!-- 目前使用者登入列表 -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 聊天室窗 -->
+        <div class="col-7 px-0">
+          <div id="content" class="px-4 py-5 chat-box bg-white">
+            <div id="data-panel">
+              <!-- 回復訊息 -->
+            </div>
+          </div>
+
+          <!-- 聊天送出表單 -->
+          <div>
+            <form id="send-form" class="bg-light d-flex">
+              <div class="col-md-10">
+                <input type="text" name="msg" id="chat-message" placeholder="開始聊天" aria-describedby="button-addon2"
+                  class="form-control rounded-0 border-0 py-4 bg-light">
+              </div>
+              <div class="col-md-2">
+                <input type="submit" value="送出">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      var max_record
+      // 顯示連線狀態
+      var status = document.getElementById("status")
+
+      // 顯示線上人數
+      var online = document.getElementById("online")
+
+      // 使用者聊天表單
+      var sendForm = document.getElementById("send-form")
+
+      // var userIdForm = document.getElementById("user-id")
+
+      // 登入輸入帳密然後連線
+      // var sendForm2 = document.getElementById("send-form2")
+
+      // 使用者聊天室窗
+      var content = document.getElementById("content")
+
+      // 連線偵測
+      socket.on("connect", function (message) {
+        status.innerText = "Connected."
+      });
+
+      // 離線偵測
+      socket.on("disconnect", function () {
+        status.innerText = "Disconnected."
+      })
+      // // 線上人數
+      socket.on("online", function (amount) {
+        online.innerText = amount;
+      })
+      // 監聽Server "message"  此為存完資料庫後送回前端訊息
+      socket.on("message", (data) => {
+        console.log('監聽Server message', data)
+        if (data.message) {
+          renderMsgCard(data)
+        }
+      })
+
+
+      // 監聽Server "onlineUser" 使用者相關資訊
+      // 儲存使用者資訊用於渲染
+      let USER = []
+      socket.on("allOnlineUsers", function (data) {
+        USER = data
+        renderUserCard(data)
+
+        // renderUserCard 渲染後 getElementById 才可抓取的到 id
+        var userIdForm = document.getElementById("user-id")
+        userIdForm.addEventListener('click', function (event) {
+          event.preventDefault()
+          const userId = userIdForm.children[0].getAttribute('id')
+          const userName = userIdForm.children[0].children[1].children[0].children[0].innerText
+          console.log(userId, userName)
+          // 使用者點擊私人聊天對象資訊 ----> 傳送 Server
+          socket.emit("get-private-chat", { userId, userName })
+        })
+      })
+
+
+      // 監聽Server chatRecord 資料回傳
+      socket.on("chatRecord", function (msgs) {
+        console.log("========chatRecord==========", msgs)
+
+        let { readMessage, unreadMessage } = msgs
+        console.log(unreadMessage)
+
+
+        let rawHTML = ''
+        const dataPanel = document.querySelector('#data-panel')
+        // const oldHTML = dataPanel.innerHTML
+        readMessage.forEach(item => {
+          //   <div class="media w-50 mb-3"><img src="" alt="user" width="50" class="rounded-circle">
+          //   <div class="media-body ml-3">
+          //     <div class="bg-light rounded py-2 px-3 mb-2">
+          //       <p class="text-small mb-0 text-muted">Test, which is a new approach</p>
+          //     </div>
+          //     <p class="small text-muted">12:00 PM | Aug 13</p>
+          //   </div>
+          // </div>
+          rawHTML += `
+        <div class="media w-50  mb-3" id="data-panel">
+          <div class="media w-50  mb-3">
+            <div class="media-body">
+              <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">${item.message}</p>
+              </div>
+              <p class="small text-muted"></p>
+            </div>
+          </div>
+        </div>
+        `
+        })
+        unreadMessage.forEach(item => {
+          socket.emit("messageRead", item)
+
+
+          rawHTML += `
+        <div class="media w-50  mb-3" id="data-panel">
+          <div class="media w-50  mb-3">
+            <div class="media-body">
+              <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">${item.message}</p>
+              </div>
+              <p class="small text-muted"></p>
+            </div>
+          </div>
+        </div>
+        `
+        })
+        dataPanel.innerHTML = rawHTML
+      })
+
+
+      socket.on("chatRecordPrivate", function (msgs) {
+        console.log("chatRecord", msgs)
+        let rawHTML = ''
+        const dataPanel = document.querySelector('#data-panel')
+        const oldHTML = dataPanel.innerHTML
+        msgs.forEach(item => {
+          //   <div class="media w-50 mb-3"><img src="" alt="user" width="50" class="rounded-circle">
+          //   <div class="media-body ml-3">
+          //     <div class="bg-light rounded py-2 px-3 mb-2">
+          //       <p class="text-small mb-0 text-muted">Test, which is a new approach</p>
+          //     </div>
+          //     <p class="small text-muted">12:00 PM | Aug 13</p>
+          //   </div>
+          // </div>
+          rawHTML += `
+        <div class="media w-50  mb-3" id="data-panel">
+          <div class="media w-50  mb-3">
+            <div class="media-body">
+              <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">${item.message}</p>
+              </div>
+              <p class="small text-muted">${item.createdAt}</p>
+            </div>
+          </div>
+        </div>
+        `
+        })
+        dataPanel.innerHTML = oldHTML + rawHTML
+      })
+
+
+
+      sendForm.addEventListener('submit', function onSearchFormSubmitted(event) {
+        event.preventDefault()
+        const userValue = sendForm.children[0].children[0].value
+        var message = true;
+        var formData = {
+          time: new Date().toUTCString()
+        }
+        if (userValue !== "") {
+          formData.id = USER.id
+          formData.name = USER.name
+          formData.msg = userValue
+          formData.avatar = USER.avatar
+        }
+        if (message) {
+          // 使用者送出聊天內容 ----> Server "send"
+          console.log('formData', formData)
+          socket.emit("send", formData)
+        }
+      })
+
+
+
+      // 渲染訊息
+      function renderMsgCard(data) {
+        console.log('-===渲染訊息===', data)
+        let rawHTML = ''
+        const dataPanel = document.querySelector('#data-panel')
+        const oldHTML = dataPanel.innerHTML
+        // data.forEach(item => {
+        rawHTML = `
+        <div class="media w-50 ml-auto mb-3" id="data-panel">
+          <div class="media w-50 ml-auto mb-3">
+            <div class="media-body">
+              <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                <p class="name text-small mb-0 text-white">房間名:${data.channel}</p>
+                <p class="name text-small mb-0 text-white">${data.message}</p>
+              </div>
+              <p class="small text-muted">${data.createdAt}</p>
+            </div>
+          </div>
+        </div>
+        `
+        // })
+        dataPanel.innerHTML = oldHTML + rawHTML
+      }
+
+      // 渲染使用者
+      function renderUserCard(data) {
+
+        let rawHTML = ''
+        let userData = []
+        const dataUserPanel = document.querySelector('#data-userPanel')
+        // const oldHTML = dataUserPanel.innerHTML
+        // 模擬其他使用者上線 可點擊私聊聊天
+        const user2 = {
+          id: 2,
+          name: 'Gabriel',
+          account: 'user2',
+          email: 'user2@example.com',
+          avatar:
+            'https://loremflickr.com/320/240/dog/?lock=4',
+          isAdmin: 0
+        }
+
+        // const user2Data = `
+        // <br>
+        // <a class="list-group-item list-group-item-action active text-white rounded-0 btn" id="user-id">
+        //   <div class="media" id=${user2.id}><img src="${user2.avatar}" alt="user" width="50" class="rounded-circle">
+        //     <div class="media-body ml-4">
+        //       <div class="d-flex align-items-center justify-content-between mb-1">
+        //         <h6 class="mb-0">${user2.name}</h6><small class="small font-weight-bold">25 Dec</small>
+        //       </div>
+        //       <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+        //         sed
+        //         do eiusmod tempor incididunt ut labore.</p>
+        //     </div>
+        //   </div>
+        // </a>
+        // `
+        data.forEach(item => {
+          // console.log([item])
+          userData.push(`
+          <a class="list-group-item list-group-item-action active text-white rounded-0 btn" id="user-id">
+            <div class="media" id=${item.id}><img src="${item.avatar}" alt="user" width="50" class="rounded-circle">
+              <div class="media-body ml-4">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <h6 class="mb-0">${item.name}</h6><small class="small font-weight-bold">25 Dec</small>
+                </div>
+                <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                  sed
+                  do eiusmod tempor incididunt ut labore.</p>
+              </div>
+            </div>
+          </a>
+          `)
+        })
+        const userRender = rawHTML = userData
+        dataUserPanel.innerHTML = rawHTML
+      }
+
+
+
+    })
+
+  </script>
+</body>
+
+</html> -->
+
+{
+id: 1,
+token: token,
+channel: 'publicRoom'
+} -->

@@ -1,0 +1,208 @@
+<body>
+  <main role="main" class="mt-5">
+    <div class="container">
+      <div class="row rounded-lg overflow-hidden shadow">
+        <!-- Users box-->
+        <div class="col-5 px-0">
+          <div class="bg-white">
+
+            <div class="bg-gray px-4 py-2 bg-light">
+              <p class="h5 mb-0 py-1">Recent</p>
+              <div id="status-box">Server: <span id="status">-</span> / <span id="online">0</span> online.</div>
+            </div>
+
+            <div class="messages-box">
+              <div class="list-group rounded-0">
+                <a class="list-group-item list-group-item-action active text-white rounded-0">
+                  <div class="media"><img
+                      src="{{ user.avatar }}" alt="user"
+                      width="50" class="rounded-circle">
+                    <div class="media-body ml-4">
+                      <div class="d-flex align-items-center justify-content-between mb-1">
+                        <h6 class="mb-0">{{ user.name }}</h6><small class="small font-weight-bold">25 Dec</small>
+                      </div>
+                      <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                        sed
+                        do eiusmod tempor incididunt ut labore.</p>
+                    </div>
+                  </div>
+                </a>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Chat Box-->
+        <div class="col-7 px-0">
+          <div id="content" class="px-4 py-5 chat-box bg-white">
+            <!-- Sender Message-->
+            <div class="media w-50 mb-3"><img
+                src="https://res.cloudinary.com/mhmd/image/upload/v1564960395/avatar_usae7z.svg" alt="user" width="50"
+                class="rounded-circle">
+              <div class="media-body ml-3">
+                <div class="msg bg-light rounded py-2 px-3 mb-2">
+                  <p class="name text-small mb-0 text-muted">Test, which is a new approach to have</p>
+                </div>
+                <p class="small text-muted">12:00 PM | Aug 13</p>
+              </div>
+            </div>
+
+            <!-- Reciever Message-->
+            <div class="media w-50 ml-auto mb-3" id="data-panel">
+              <!-- <div class="media-body">
+                <div class="msg bg-primary rounded py-2 px-3 mb-2">
+                  <p class="name text-small mb-0 text-white">Apollo University, Delhi, India Test</p>
+                </div>
+                <p class="small text-muted">12:00 PM | Aug 13</p>
+              </div> -->
+            </div>
+
+          </div>
+
+          <!-- Typing area -->
+          <div>
+            <form id="send-form" class="bg-light d-flex">
+              <div class="col-md-10">
+                <input type="text" name="msg" id="chat-message" placeholder="開始聊天" aria-describedby="button-addon2"
+                  class="form-control rounded-0 border-0 py-4 bg-light">
+              </div>
+              <div class="col-md-2">
+                <input type="submit" value="送出">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      var max_record
+      // 顯示連線狀態
+      var status = document.getElementById("status")
+
+      // 顯示線上人數
+      var online = document.getElementById("online")
+
+      // 使用者聊天表單
+      var sendForm = document.getElementById("send-form")
+
+      // 登入輸入帳密然後連線
+      // var sendForm2 = document.getElementById("send-form2")
+
+      // 使用者聊天室窗
+      var content = document.getElementById("content")
+      // // 使用者名稱
+      // var nameInputBox = document.getElementById("name")
+      // var name = getCookie("name")
+
+      // sendForm2.addEventListener("submit", function (e) {
+      //   e.preventDefault();
+      //   let username = sendForm2.children[0].value;
+      //   socket.auth = { username }
+      //   socket.connect()
+      // })
+
+      // if (name) {
+      //   nameInputBox.value = name;
+      // }
+
+      // 連線偵測
+      socket.on("connect", function () {
+        status.innerText = "Connected."
+      });
+      // 離線偵測
+      socket.on("disconnect", function () {
+        status.innerText = "Disconnected."
+      })
+
+      // // 線上人數
+      socket.on("online", function (amount) {
+        online.innerText = amount;
+      });
+
+      // 監聽Server chatRecord 資料回傳
+      socket.on("chatRecord", function (msgs) {
+        for (var i = 0; i < msgs.length; i++) {
+          (function () {
+            addMsgToBox(msgs[i]);
+          })();
+        }
+      });
+
+      // 監聽Server "msg"  此為存完資料庫後送回前端訊息 再帶入 addMsgToBox 加工
+      socket.on("msg", addMsgToBox)
+
+      sendForm.addEventListener('submit', function onSearchFormSubmitted(event) {
+        event.preventDefault()
+        const chatmessage = document.querySelector('#chat-message')
+        const message = chatmessage.value.trim().toLowerCase()
+        console.log(message)
+        renderUsersCard(message)
+      })
+      function renderUsersCard(data) {
+        const dataPanel = document.querySelector('#data-panel')
+        let rawHTML = `
+        <div class="media-body">
+          <div class="msg bg-primary rounded py-2 px-3 mb-2">
+            <p class="name text-small mb-0 text-white">${data}</p>
+          </div>
+          <p class="small text-muted">12:00 PM | Aug 13</p>
+        </div>
+        `
+        dataPanel.innerHTML = rawHTML
+      }
+
+      function addMsgToBox(d) {
+
+        let msgBox = document.createElement("div")
+        msgBox.className = "msg"
+
+        let nameBox = document.createElement("span");
+        nameBox.className = "name"
+
+        const name = document.createTextNode(d.name);
+        const msg = document.createTextNode(d.msg);
+
+        nameBox.appendChild(name)
+        msgBox.appendChild(nameBox)
+        msgBox.appendChild(msg)
+        content.appendChild(msgBox)
+        if (content.children.length > max_record) {
+          rmMsgFromBox();
+        }
+      }
+
+      function rmMsgFromBox() {
+        console.log('rmMsgFromBox')
+        var childs = content.children;
+        childs[0].remove();
+      }
+
+      // setCookie
+      function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        var expires = "expires=" + d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+      }
+
+      // 紀錄該使用者名稱於web Cookies
+      function getCookie(cname) {
+        var name = cname + "="
+        var ca = document.cookie.split(';')
+        for (var i = 0; i < ca.length; i++) {
+          var c = ca[i];
+          while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+      }
+    });
+  </script>
+</body>

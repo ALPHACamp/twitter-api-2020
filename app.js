@@ -1,27 +1,47 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-
 const express = require('express')
-const routes = require('./routes/index')
 const handlebars = require('express-handlebars')
+const cors = require('cors')
+const routes = require('./routes/index')
+const passport = require('./config/passport')
 const app = express()
+const path = require('path')
 const port = process.env.PORT || 3000
-const bodyParser = require('body-parser');
+// CORS
+app.use(cors())
+// app.use('/upload', express.static(__dirname + '/upload'))
+app.use('/upload', express.static(path.join(__dirname, '/upload')))
 
-//add swagger
-const swaggerUi = require('swagger-ui-express');
+// add swagger
+const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json')
+app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
+app.set('view engine', 'handlebars')
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
-
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(passport.initialize())
+app.use(passport.session())
+// 設定 socket.io
 
-app.listen(port, () => {
+
+app.get('/chats', (req, res) => {
+  res.sendFile(__dirname + '/sockets/index.html');
+})
+
+// 建立 socket.io
+const httpserver = require('http').createServer(app)
+const io = require('socket.io')(httpserver, {
+  cors: {
+    origin: "*",
+    credentials: true
+  }
+})
+require('./sockets')(io)
+httpserver.listen(port, () => {
   console.log(`Example app listening on port ${port}!`)
 })
 

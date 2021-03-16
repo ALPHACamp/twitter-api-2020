@@ -1,25 +1,26 @@
 const passport = require('passport')
-const db = require('../models')
-const User = db.User
+const { User } = require('../models')
 
-const jwt = require('jsonwebtoken')
+// JWT
+// const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
-let jwtOptions = {}
+const jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
-jwtOptions.secretOrKey = process.env.JWT_SECRET || 'alphacamp'
+jwtOptions.secretOrKey = process.env.JWT_SECRET
 
-let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
-    User.findByPk(jwt_payload.id, {
-        include: [
-        ]
-    }).then(user => {
-        if (!user) return next(null, false)
-        return next(null, user)
-    })
-})
-passport.use(strategy)
+passport.use(new JwtStrategy(jwtOptions, function (jwtPayload, next) {
+  User.findByPk(jwtPayload.id, {
+    include: [
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
+  }).then(user => {
+    if (!user) return next(null, false)
+    return next(null, user)
+  })
+}))
 
 module.exports = passport

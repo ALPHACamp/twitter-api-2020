@@ -8,10 +8,10 @@ module.exports = {
     const users = await User.findAll({ raw: true, nest: true, where: { role: '測試' }})
     const usersId = users.map(user => user.id)
 
-    const follows = Array.from({ length: 10 }).map((item, index) =>
+    const follows = Array.from({ length: 30 }).map((item, index) =>
     ({
-      followerId: usersId[index],
-      followingId: usersId[index+1],
+      followerId: Math.floor(Math.random() * 8) + 1,
+      followingId: Math.floor(Math.random() * 8) + 1,
       createdAt: new Date(),
       updatedAt: new Date()
     })
