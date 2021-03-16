@@ -6,7 +6,6 @@ let userList = []
 async function authenticated(socket, next) {
   // 取出 token
   const token = socket.handshake.auth.token
-  // console.log('token', token)
   // 驗證使用者
   if (!token) return
   // 驗證 token 並取出 id
@@ -72,6 +71,14 @@ function filterData(data) {
   const set = new Set()
   const dataFilter = data.filter(item => !set.has(item.id) ? set.add(item.id) : false)
   return dataFilter
+}
+
+// 找出誰離開
+function userLeave(id) {
+  const index = userList.findIndex(user => user.socketId === id)
+  if (index !== -1) {
+    return userList.splice(index, 1)[0];
+  }
 }
 
 

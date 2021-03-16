@@ -26,7 +26,7 @@ const userController = {
       }
       // 簽發 token
       const payload = { id: user.id }
-      const token = jwt.sign(payload, 'alphacamp')
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
       const data = {
         status: 'success',
         message: 'ok',

@@ -1,4 +1,4 @@
-const { Chat, sequelize } = require('../models')
+const { Chat, User, ChatRead, sequelize } = require('../models')
 const {
   authenticated,
   formatMessage,
@@ -48,7 +48,6 @@ module.exports = (io) => {
 
     // 處理私人訊息
     socket.on("get-private-chat", (data) => {
-      console.log('==============', data)
       let userList = []
       // 編輯房號
       userList.push(getUser.id.toString(), data.userId.toString())
@@ -68,42 +67,45 @@ module.exports = (io) => {
     socket.on("send", async (msg) => {
       if (Object.keys(msg).length < 0) return
       try {
-        if (getUser.channel !== 'publicRoom') {
-          await Chat.create({
-            UserId: msg.id,
-            message: msg.msg,
-            channel: getUser.channel,
-            avatar: msg.avatar
-          }).then(usermsg => {
-            const data = {
-              ...usermsg.dataValues,
-              messageId: usermsg.id
-            }
-            io.emit("message", { ...data, ...getUser })
-          })
-        } else {
-          await Chat.create({
-            UserId: msg.id,
-            message: msg.msg,
-            channel: getUser.channel,
-            avatar: msg.avatar
-          }).then(usermsg => {
-            const data = {
-              ...usermsg.dataValues,
-              messageId: usermsg.id
-            }
-            io.emit("message", { ...data, ...getUser })
-          })
-        }
+        await Chat.create({
+          UserId: getUser.id,
+          message: msg.msg,
+          channel: getUser.channel,
+          avatar: msg.avatar
+        }).then(userMsg => {
+          const data = {
+            ...userMsg.dataValues,
+            messageId: userMsg.id
+          }
+          io.to(getUser.channel).emit("message", { ...data, ...getUser })
+        })
       } catch (e) {
         console.log(e)
       }
     })
 
-    // 處理歷史紀錄
-    function historicalRecord(channelData) {
-      Chat.findAll({
+    // 未讀訊息
+    socket.on("messageRead", async (data) => {
+      try {
+        let reviseRepeat = await ChatRead.findAll({ where: { chatId: data.id, UserId: getUser.id } })
+        if (reviseRepeat.length === 0) {
+          await ChatRead.create({
+            UserId: getUser.id,
+            ChatID: data.id
+          })
+        } else {
+
+        }
+      } catch (e) {
+        console.log(e)
+      }
+
+    })
+
+    async function historicalRecord(channelData) {
+      let Message = await Chat.findAll({
         where: { channel: channelData },
+        include: { model: ChatRead },
         order: [
           // 資料庫端進行排列
           [sequelize.literal('createdAt'), 'ASC']
@@ -111,16 +113,24 @@ module.exports = (io) => {
         attributes: {
           // 過濾不要資料
           exclude: ['updatedAt']
-        },
-        raw: true,
-        nest: true,
-      }).then(userMessage => {
-        if (getUser.channel === 'publicRoom') {
-          io.to(getUser.channel).emit('chatRecord', userMessage)
-        } else {
-          io.to(getUser.channel).emit('chatRecord', userMessage)
         }
       })
+      let readMessage = []
+      let unreadMessage = []
+      Message.map(item => {
+        let findRead = item.dataValues.ChatReads.filter(read => {
+          if (read.dataValues.UserId === getUser.id.toString()) {
+            return true
+          }
+        })
+
+        if (findRead.length > 0) {
+          readMessage.push(item.dataValues)
+        } else {
+          unreadMessage.push(item.dataValues)
+        }
+      })
+      io.to(getUser.channel).emit('chatRecord', { readMessage, unreadMessage })
     }
 
     // 處理離線

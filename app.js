@@ -31,6 +31,9 @@ app.use(passport.session())
 app.get('/chats', (req, res) => {
   res.sendFile(__dirname + '/sockets/index.html');
 })
+app.get('/chatss', (req, res) => {
+  res.sendFile(__dirname + '/sockets/index2.html');
+})
 
 // 建立 socket.io
 const httpserver = require('http').createServer(app)
