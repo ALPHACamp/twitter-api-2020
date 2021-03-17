@@ -32,7 +32,7 @@ module.exports = (io) => {
 
       Message.create({
         UserId: msg.id,
-        content: msg.msg
+        content: msg.content
       })
       User.findByPk(msg.id, { attributes: ['name', 'account', 'avatar'] })
         .then(user => {
