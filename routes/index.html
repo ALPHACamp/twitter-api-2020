@@ -69,7 +69,16 @@
   <script src="/socket.io/socket.io.js"></script>
 
   <script>
-    var socket = io();
+    var socket = io({
+      reconnectionDelayMax: 10000,
+      auth: {
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTYxNTk5OTUzN30.ShAybcF01zIpYVmpuMAjexZnmC90qfZfFWw8Ys4tLrM",
+        userId: "11"
+      },
+      query: {
+        "my-key": "my-value"
+      }
+    });
 
     var messages = document.getElementById('messages');
     var form = document.getElementById('form');

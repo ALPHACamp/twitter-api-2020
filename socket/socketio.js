@@ -1,11 +1,39 @@
 const { UniqueConstraintError } = require('sequelize')
 const { User, Message } = require('../models')
+const jwt = require('jsonwebtoken')
+
+
 
 
 module.exports = (io) => {
+  io.use((socket, next) => {
+
+    const token = socket.handshake.query.auth.token
+
+    // const { decoded } = jwt.verify(token, process.env.JWT_SECRET)
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        console.log('token:', token)
+        if (err) return next('驗證失敗')
+        console.log('decoded:', decoded)
+        next()
+      })
+    }
+
+
+
+
+
+
+
+
+
+
+
+  })
 
   io.on('connection', (socket) => {
-
+    res.json(socket.decoded)
     socket.on('startChat', (user) => {
       Message.findAll({
         include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar', 'role'] }],
