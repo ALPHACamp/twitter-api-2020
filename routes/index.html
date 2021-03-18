@@ -72,12 +72,12 @@
     var socket = io({
       reconnectionDelayMax: 10000,
       auth: {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTYxNTk5OTUzN30.ShAybcF01zIpYVmpuMAjexZnmC90qfZfFWw8Ys4tLrM",
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTYxNjA4MDUzMn0.crcEecUU80OcnTks9LSpDcaMMzLJSQSp_-lO6SWiR74",
         userId: "11"
       },
-      query: {
-        "my-key": "my-value"
-      }
+      // query: {
+      //   "my-key": "my-value"
+      // }
     });
 
     var messages = document.getElementById('messages');
@@ -92,7 +92,7 @@
       }
     });
 
-    socket.on('history', function (msg) {
+    socket.on('userOnline', function (msg) {
       console.log(msg)
       var item = document.createElement('li');
       item.textContent = msg;
@@ -114,7 +114,7 @@
       content: '我好想睡',
     };
 
-    socket.emit('publicMessage', data2)
+    socket.emit('startChat', data2)
   </script>
 </body>
 
