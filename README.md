@@ -1,8 +1,29 @@
 # Twitter API
 
-API server for twitter clone project. Hosted on Heroku:
+This is backend API server for Twitter Clone - the capstone project for Alpha Camp. 
 
-https://salty-headland-68177.herokuapp.com/
+Tech stack: `Node.js` + `Express` + `MySQL`
+
+The server is deployed on `Heroku`, check the api document with this link:
+
+https://salty-headland-68177.herokuapp.com/api-doc/
+
+- Frontend github: https://github.com/tsengemily/twitter-front-end
+
+- Live Demo: https://tsengemily.github.io/twitter-front-end/
+
+You can play around at Live Demo with below accounts:
+
+```
+General User:
+account: user1@example.com
+password: 12345678
+```
+```
+Admin:
+account: root@example.com
+pasword: 12345678
+```
 
 ## 2020.03.08 udpate
 Update Twitter API to v 2.1.0, updates:
