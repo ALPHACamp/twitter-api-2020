@@ -4,9 +4,9 @@ This is backend API server for Twitter Clone - the capstone project for Alpha Ca
 
 Tech stack: `Node.js` + `Express` + `MySQL`
 
-The server is deployed on `Heroku`, check the api document with this link:
+The server is deployed on `Heroku`, 
 
-https://salty-headland-68177.herokuapp.com/api-doc/
+- API doc: https://salty-headland-68177.herokuapp.com/api-doc/
 
 - Frontend github: https://github.com/tsengemily/twitter-front-end
 
