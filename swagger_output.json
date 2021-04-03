@@ -1,0 +1,2131 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "2.0.1",
+    "title": "Twitter REST API",
+    "description": ""
+  },
+  "host": "https://salty-headland-68177.herokuapp.com/ or localhost:3000",
+  "basePath": "/",
+  "tags": [],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/api/users/top": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "瀏覽最多追蹤者的使用者，依照追蹤數排列，排除掉已經追蹤過的使用者",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個User物件，User帶有followerCount",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TopUser"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "找不到users回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無法獲取用戶名單。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/followers": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "user瀏覽某一使用者所有的追蹤者",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個Followship物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Follower"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "找不到followings回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無法獲取此用戶的追蹤名單。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/followings": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "user瀏覽某一使用者所有正在追蹤的人",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個Followship物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Following"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "找不到followings回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無法獲取此用戶的追蹤名單。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/likes": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "user瀏覽某一使用者喜歡過的所有tweets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個Like物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LikedTweet"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "找不到likes回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無法獲取此用戶喜歡過的推文。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/replied_tweets": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "user瀏覽某一使用者回應過的所有tweets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個Reply物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RepliedTweet"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "找不到replies回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無法獲取此用戶回覆過的推文。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/tweets": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "user瀏覽某一使用者發布過的所有tweets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個Tweet物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Tweet"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "找不到tweets回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無法獲取此用戶的推文。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "user瀏覽單一使用者",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳user物件",
+            "schema": {
+              "$ref": "#/definitions/UserIsSelf"
+            }
+          },
+          "400": {
+            "description": "找不到users回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "此用戶不存在。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "description": "修改使用者名稱, 介紹, 大頭照, 背景照片。名稱必填",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "key=value: name=name&introduction=introduction&avatar=avatar&cover=cover",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "name"
+                },
+                "introduction": {
+                  "type": "string",
+                  "example": "introduction"
+                },
+                "avatar": {
+                  "type": "string",
+                  "example": "img file"
+                },
+                "cover": {
+                  "type": "string",
+                  "example": "img file"
+                }
+              }
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳更新過的User物件",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "如果使用者非本人則回傳沒有權限",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "沒有權限修改此用戶資料。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/account": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "description": "修改使用者帳號, email, 密碼, 名稱。帳號、信箱、名稱必填",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "key=value: account=acoount&email=email&password=password&checkPassword=checkPassword&name=name",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string",
+                  "example": "account"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "example@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "87654321"
+                },
+                "checkPassword": {
+                  "type": "string",
+                  "example": "87654321"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Jack"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳更新過的User物件",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "如果使用者非本人則回傳沒有權限",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "沒有權限修改此用戶資料。"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "description": "使用者註冊",
+        "parameters": [
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "user registration data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string",
+                  "example": "account"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "example@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "checkPassword": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "example"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "所有欄位必填, password要等於checkPassword, 否則回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "所有欄位都是必填的!!!"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "description": "使用者登入",
+        "parameters": [
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "user registration data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string",
+                  "example": "account"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件, toekn 以及user資料",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "success"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功登入!!!"
+                },
+                "token": {
+                  "type": "string",
+                  "example": "yourToken..."
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 11
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Johnny1"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "user1@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "所有欄位必填, 帳號必須存在, 否則回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "所有欄位都是必填的!!!"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "admin 瀏覽所有使用者，依照推文數排序",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個user物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GeneralUser"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "找不到users回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "無法取得用戶資料"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/admin/tweets": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "瀏覽全部tweets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個tweet物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Tweet"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "如果找不到資料回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "cannot find any tweet"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/admin/tweets/{id}": {
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "admin 刪除單一tweet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "tweet id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "如果找不到tweet回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "tweet id does not exist"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/admin/login": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "管理員登入",
+        "parameters": [
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "admin login data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string",
+                  "example": "root"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件, toekn 以及user資料",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "success"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "成功登入!!!"
+                },
+                "token": {
+                  "type": "string",
+                  "example": "yourToken..."
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "root"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "root@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "admin"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "所有欄位必填, 帳號必須存在, 否則回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "所有欄位都是必填的!!!"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tweets/": {
+      "get": {
+        "tags": [
+          "Tweet"
+        ],
+        "description": "瀏覽全部使用者有追蹤的tweets以及自己的tweets\b\b",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個tweet物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Tweet"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "如果找不到資料回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "cannot find any tweet"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tweet"
+        ],
+        "description": "發表一篇新tweet",
+        "parameters": [
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "key=value: description=description",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "example": "description"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳Success物件",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "沒有提供description回傳erro物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "description is required"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/tweets/{id}": {
+      "get": {
+        "tags": [
+          "Tweet"
+        ],
+        "description": "瀏覽單一tweet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳tweet物件",
+            "schema": {
+              "$ref": "#/definitions/Tweet"
+            }
+          },
+          "400": {
+            "description": "找不到tweet回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "tweet id does not exist"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/tweets/{id}/replies": {
+      "get": {
+        "tags": [
+          "Tweet"
+        ],
+        "description": "瀏覽單一tweet的全部replies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳陣列帶有多個reply物件",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Reply"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "找不到tweet回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "tweet id does not exist"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/tweets/{tweetId}/replies": {
+      "post": {
+        "tags": [
+          "Tweet"
+        ],
+        "description": "針對單一tweet發布一篇新reply",
+        "parameters": [
+          {
+            "name": "tweetId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "body",
+            "type": "object",
+            "description": "key=value: comment=comment",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "comment": {
+                  "type": "string",
+                  "example": "comment"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳Success物件",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "沒有提供comment回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "comment is required"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/tweets/{tweetId}/like": {
+      "post": {
+        "tags": [
+          "Tweet"
+        ],
+        "description": "喜歡一篇tweet",
+        "parameters": [
+          {
+            "name": "tweetId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "如果tweet不存在, 或此使用者已經喜歡過此篇tweet則回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "tweet already liked by this user"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/tweets/{tweetId}/unlike": {
+      "post": {
+        "tags": [
+          "Tweet"
+        ],
+        "description": "取消喜歡一篇tweet",
+        "parameters": [
+          {
+            "name": "tweetId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "如果tweet不存在, 或沒有喜歡紀錄則回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "no liked record or tweet not exist"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/followships/": {
+      "post": {
+        "tags": [
+          "Followhship"
+        ],
+        "description": "追蹤使用者",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "body",
+            "type": "object",
+            "description": "要追蹤的人的user id",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "找不到user,沒有提供id,或已經follow過這個user了回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "user already ____FUNC____ by this user"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/followships/{followingId}": {
+      "delete": {
+        "tags": [
+          "Followhship"
+        ],
+        "description": "取消追蹤使用者",
+        "parameters": [
+          {
+            "name": "followingId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "回傳success物件",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "沒有追蹤或是找不到user id回傳error物件",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "error"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "tweet id does not exist"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 2
+        },
+        "account": {
+          "type": "string",
+          "example": "user1"
+        },
+        "email": {
+          "type": "string",
+          "example": "user1@example.com"
+        },
+        "name": {
+          "type": "string",
+          "example": "user1"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/people"
+        },
+        "introduction": {
+          "type": "string",
+          "example": "I am Jackson"
+        },
+        "role": {
+          "type": "string",
+          "example": "user"
+        },
+        "cover": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/nature"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        }
+      }
+    },
+    "UserIsSelf": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 2
+        },
+        "account": {
+          "type": "string",
+          "example": "user1"
+        },
+        "email": {
+          "type": "string",
+          "example": "user1@example.com"
+        },
+        "name": {
+          "type": "string",
+          "example": "user1"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/people"
+        },
+        "introduction": {
+          "type": "string",
+          "example": "I am Jackson"
+        },
+        "role": {
+          "type": "string",
+          "example": "user"
+        },
+        "cover": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/nature"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "isSelf": {
+          "type": "boolean",
+          "example": true
+        },
+        "isFollowed": {
+          "type": "boolean",
+          "example": false
+        }
+      }
+    },
+    "FollowshipUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "account": {
+          "type": "string",
+          "example": "root"
+        },
+        "email": {
+          "type": "string",
+          "example": "root@example.com"
+        },
+        "name": {
+          "type": "string",
+          "example": "root"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/people"
+        },
+        "introduction": {
+          "type": "string",
+          "example": "I am Jackson"
+        },
+        "role": {
+          "type": "string",
+          "example": "admin"
+        },
+        "cover": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/nature"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "Followship": {
+          "type": "object",
+          "properties": {
+            "followerId": {
+              "type": "number",
+              "example": 2
+            },
+            "followingId": {
+              "type": "number",
+              "example": 11
+            },
+            "createdAt": {
+              "type": "string",
+              "example": "2021-03-03T03:14:10.000Z"
+            },
+            "updatedAt": {
+              "type": "string",
+              "example": "2021-03-03T03:14:10.000Z"
+            }
+          }
+        }
+      }
+    },
+    "GeneralUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 2
+        },
+        "account": {
+          "type": "string",
+          "example": "user1"
+        },
+        "email": {
+          "type": "string",
+          "example": "user1@example.com"
+        },
+        "name": {
+          "type": "string",
+          "example": "user1"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/people"
+        },
+        "introduction": {
+          "type": "string",
+          "example": "I am Johnny"
+        },
+        "role": {
+          "type": "string",
+          "example": "user"
+        },
+        "cover": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/nature"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "Replies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Reply"
+          }
+        },
+        "Likes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Like"
+          }
+        },
+        "Tweets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tweet"
+          }
+        },
+        "Followers": {
+          "type": "array",
+          "example": [],
+          "items": {}
+        },
+        "Followings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FollowshipUser"
+          }
+        }
+      }
+    },
+    "Tweet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "UserId": {
+          "type": "number",
+          "example": 2
+        },
+        "description": {
+          "type": "string",
+          "example": "Johnny1 is a handsome guy."
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "Replies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Reply"
+          }
+        },
+        "Likes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Like"
+          }
+        },
+        "User": {
+          "$ref": "#/definitions/User"
+        },
+        "isLikedbyMe": {
+          "type": "boolean",
+          "example": false
+        },
+        "isMyTweet": {
+          "type": "boolean",
+          "example": true
+        }
+      }
+    },
+    "RepliedTweet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "UserId": {
+          "type": "number",
+          "example": 2
+        },
+        "TweetId": {
+          "type": "number",
+          "example": 1
+        },
+        "comment": {
+          "type": "string",
+          "example": "Reply 1"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "User": {
+          "$ref": "#/definitions/User"
+        },
+        "Tweet": {
+          "$ref": "#/definitions/Tweet"
+        }
+      }
+    },
+    "Reply": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "UserId": {
+          "type": "number",
+          "example": 2
+        },
+        "TweetId": {
+          "type": "number",
+          "example": 1
+        },
+        "comment": {
+          "type": "string",
+          "example": "Reply 1"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T02:18:21.000Z"
+        },
+        "User": {
+          "$ref": "#/definitions/User"
+        }
+      }
+    },
+    "LikedTweet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 2
+        },
+        "UserId": {
+          "type": "number",
+          "example": 2
+        },
+        "TweetId": {
+          "type": "number",
+          "example": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T12:55:19.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T12:55:19.000Z"
+        },
+        "User": {
+          "$ref": "#/definitions/User"
+        },
+        "Tweet": {
+          "$ref": "#/definitions/Tweet"
+        }
+      }
+    },
+    "Like": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 2
+        },
+        "UserId": {
+          "type": "number",
+          "example": 2
+        },
+        "TweetId": {
+          "type": "number",
+          "example": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-02T12:55:19.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-02T12:55:19.000Z"
+        }
+      }
+    },
+    "Following": {
+      "type": "object",
+      "properties": {
+        "followerId": {
+          "type": "number",
+          "example": 11
+        },
+        "followingId": {
+          "type": "number",
+          "example": 21
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-05T04:26:13.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-05T04:26:13.000Z"
+        },
+        "following": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "example": 21
+            },
+            "account": {
+              "type": "string",
+              "example": "user2"
+            },
+            "email": {
+              "type": "string",
+              "example": "user2@example.com"
+            },
+            "name": {
+              "type": "string",
+              "example": "Johnny2"
+            },
+            "avatar": {
+              "type": "string",
+              "example": "http://placeimg.com/640/480/people"
+            },
+            "introduction": {
+              "type": "string",
+              "example": "I am Johnny2"
+            },
+            "role": {
+              "type": "string",
+              "example": "user"
+            },
+            "cover": {
+              "type": "string",
+              "example": "http://placeimg.com/640/480/nature"
+            },
+            "createdAt": {
+              "type": "string",
+              "example": "2021-03-05T04:26:13.000Z"
+            },
+            "updatedAt": {
+              "type": "string",
+              "example": "2021-03-05T04:26:13.000Z"
+            }
+          }
+        },
+        "isFollowed": {
+          "type": "boolean",
+          "example": true
+        },
+        "isSelf": {
+          "type": "boolean",
+          "example": false
+        }
+      }
+    },
+    "Follower": {
+      "type": "object",
+      "properties": {
+        "followerId": {
+          "type": "number",
+          "example": 21
+        },
+        "followingId": {
+          "type": "number",
+          "example": 11
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-05T04:26:13.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-05T04:26:13.000Z"
+        },
+        "follower": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "example": 21
+            },
+            "account": {
+              "type": "string",
+              "example": "user2"
+            },
+            "email": {
+              "type": "string",
+              "example": "user2@example.com"
+            },
+            "name": {
+              "type": "string",
+              "example": "Johnny2"
+            },
+            "avatar": {
+              "type": "string",
+              "example": "http://placeimg.com/640/480/people"
+            },
+            "introduction": {
+              "type": "string",
+              "example": "I am Johnny2"
+            },
+            "role": {
+              "type": "string",
+              "example": "user"
+            },
+            "cover": {
+              "type": "string",
+              "example": "http://placeimg.com/640/480/nature"
+            },
+            "createdAt": {
+              "type": "string",
+              "example": "2021-03-05T04:26:13.000Z"
+            },
+            "updatedAt": {
+              "type": "string",
+              "example": "2021-03-05T04:26:13.000Z"
+            }
+          }
+        },
+        "isFollowed": {
+          "type": "boolean",
+          "example": true
+        },
+        "isSelf": {
+          "type": "boolean",
+          "example": false
+        }
+      }
+    },
+    "TopUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 41
+        },
+        "account": {
+          "type": "string",
+          "example": "user4"
+        },
+        "email": {
+          "type": "string",
+          "example": "user4@example.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "$2a$10$P/pvqRxhgVuoIC6fG2yHOunYnFnkhBOIR6kdi1LWhLM96kF9/rtHK"
+        },
+        "name": {
+          "type": "string",
+          "example": "Johnny4"
+        },
+        "avatar": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/people"
+        },
+        "introduction": {
+          "type": "string",
+          "example": "I am Johnny4"
+        },
+        "role": {
+          "type": "string",
+          "example": "user"
+        },
+        "cover": {
+          "type": "string",
+          "example": "http://placeimg.com/640/480/nature"
+        },
+        "createdAt": {
+          "type": "string",
+          "example": "2021-03-05T04:26:13.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "example": "2021-03-05T04:26:13.000Z"
+        },
+        "Followers": {
+          "type": "array",
+          "example": [],
+          "items": {}
+        },
+        "followerCount": {
+          "type": "number",
+          "example": 5
+        },
+        "isFollowed": {
+          "type": "boolean",
+          "example": false
+        }
+      }
+    },
+    "SuccessMessage": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "success"
+        },
+        "message": {
+          "type": "string",
+          "example": "Success"
+        }
+      }
+    }
+  }
+}

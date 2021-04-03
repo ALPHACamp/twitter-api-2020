@@ -1,0 +1,1 @@
+module.exports = 'I want to say thank you to my excellent teammate, Jackson. He is such a good partner.'

@@ -1,0 +1,121 @@
+socket.io 文件 如有雷同，純屬幸運；如不相同，才是正常
+驗證:
+需要把 token 放進 socket.auth 
+socket.auth = { token: 'yourToken' }
+
+成功連線後:
+前端要監聽以下事件: (事件: 伺服器emit資料)
+
+fetchMessagesFail: //給 sender
+{ status: 'error', message: '獲取聊天紀錄失敗' }
+
+publicMessageRecord: //用來渲染公共聊天紀錄 //給sender
+[
+  {
+    id,
+    content,
+    fromId,
+    toId: null,
+    sendTime,
+    createdAt,
+    updatedAt,
+    from: { 一個user物件，請參考之前的文件 }
+    to: { 一個user物件，請參考之前的文件 } 或是 null
+  },
+  { ... }
+]
+
+usersInPublicChat: //for 公共聊天室用戶列表 //給所有人，全部人都要重新渲染
+[
+  {
+    id,
+    name,
+    account,
+    avatar
+  }
+]
+
+publicMessageFromServer: //格式為前端傳來，我們再傳給所有人
+{
+  content,
+  fromId,
+  toId: null,
+  sendTime
+}
+
+usersInPrivateChat: //只給 sender //裡頭包含訊息
+{
+  id, 
+  name,
+  account,
+  .
+  .  // user info除了密碼之外的東西
+  connected: true or false,
+  conversation: [
+    {
+      id,
+      content,
+      fromId,
+      toId: null,
+      sendTime,
+      createdAt,
+      updatedAt,
+      from: { 一個user物件，請參考之前的文件 }
+      to: { 一個user物件，請參考之前的文件 } 
+    },
+    { ... }
+  ]
+}
+
+privateMessageFromServer: //前端傳來，再傳給雙方
+{
+  content,
+  fromId,
+  toId,
+  sendTime
+}
+
+userConnected:
+{
+  id: socketUserId,
+  username: socket.user.name,
+  connected: true
+}
+
+userDisconnected: //前端 emit disconnect 事件後，後端會emit
+{
+  id: socketUserId,
+  username: socket.user.name,
+  connected: false
+}
+
+fetchPublicSenderFail:
+fetchPrivateSenderFail: 
+{
+  status: 'error',
+  msg: '......some text'
+}
+
+=====================================================
+後端監聽事件(前端emit) (事件: 前端emit資料)
+
+connection:
+前端 socket.connect 後發出，自動送 socket instance
+
+publicMessageFromUser: 
+{
+  content,
+  fromId,
+  toId: null,
+  sendTime
+}
+
+privateMessageFromUser:
+{
+  content,
+  fromId,
+  toId,
+  sendTime
+}
+
+disconnect: 不用回傳東西
