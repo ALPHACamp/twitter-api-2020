@@ -14,8 +14,8 @@ const swaggerOptions = {
       title: "Simple Twitter API",
       description: "Simple Twitter API documentation",
       contact: {
-        name: 'user',
-        email: 'user@example.com'
+        name: 'support',
+        email: 'support@example.com'
       },
       servers: [
         'http://localhost:3000'
@@ -26,9 +26,6 @@ const swaggerOptions = {
 }
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions)
-
-
-
 
 
 
