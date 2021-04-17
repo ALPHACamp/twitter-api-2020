@@ -1,5 +1,6 @@
 const express = require('express')
 const helpers = require('./_helpers')
+const bodyParser = require('body-parser')
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
@@ -13,6 +14,9 @@ const port = 3000
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
