@@ -6,9 +6,9 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await User.findAll()
     await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 150 }).map((d, i) =>
+      Array.from({ length: 50 }).map((d, i) =>
       ({
-        UserId: users[Math.ceil(Math.random() * (users.length - 1))].id,
+        UserId: users[Math.floor(i * 0.1) + 1].id,
         description: faker.lorem.paragraph(),
         createdAt: new Date(),
         updatedAt: new Date()

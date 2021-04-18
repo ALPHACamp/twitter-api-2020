@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // Reply.belongsTo(models.Tweet)
       // define association here
-      Tweet.belongsTo(Models.User)
+      Tweet.belongsTo(models.User)
       Tweet.hasMany(models.Reply)
       Tweet.belongsToMany(models.User, {
         through: models.Like,
