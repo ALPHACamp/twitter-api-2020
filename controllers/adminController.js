@@ -1,12 +1,7 @@
 const db = require('../models')
 const User = db.User
 const bcrypt = require('bcryptjs')
-
-// JWT
 const jwt = require('jsonwebtoken')
-// const passportJWT = require('passport-jwt')
-// const ExtractJwt = passportJWT.ExtractJwt
-// const JwtStrategy = passportJWT.Strategy
 
 const adminController = {
   // 登入
@@ -22,11 +17,12 @@ const adminController = {
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'this email has not been registered!' })
       }
+      // check user role, must be admin
+      if (user.role !== 'admin') {
+        return res.status(401).json({ status: 'error', message: 'you don\'t have authority to login!' })
+      }
       // check password correct or not
-      // if (bcrypt.compareSync(password, user.password)) {
-      //   return res.status(401).json({ status: 'error', message: 'password incorrect!' })
-      // }
-      if (password !== user.password) {
+      if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'password incorrect!' })
       }
       // get token
@@ -57,7 +53,6 @@ const adminController = {
       if (users.length === 0) {
         return res.json({ message: 'db has no user!' })
       }
-      console.log('users', users)
       return res.json(users)
     } catch (e) {
       console.log(e)

@@ -1,8 +1,8 @@
 const db = require('../models')
 const User = db.User
 const passport = require('passport')
+
 // JWT
-// const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
@@ -15,7 +15,6 @@ const strategy = new JwtStrategy(jwtOptions, (jwt_payload, next) => {
   User.findByPk(jwt_payload.id, {
     include: [
       { model: db.Tweet, as: 'LikedTweets' },
-      { model: User, as: 'LikedUsers' },
       { model: User, as: 'Followings' },
       { model: User, as: 'Followers' }
     ]
