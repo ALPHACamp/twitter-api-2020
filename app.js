@@ -9,9 +9,9 @@ function authenticated(req, res, next){
   // passport.authenticate('jwt', { ses...
 }
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
 // 載入 routes
 require('./routes')(app)
+
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
