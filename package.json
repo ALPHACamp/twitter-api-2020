@@ -1,8 +1,8 @@
 {
-  "name": "test",
+  "name": "twitter-api-2020",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
