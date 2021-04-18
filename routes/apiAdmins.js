@@ -2,10 +2,9 @@ const express = require('express')
 const router = express.Router()
 
 const adminController = require('../controllers/adminController')
-const userController = require('../controllers/userController')
 
 // login
-router.post('/login', userController.login)
+router.post('/login', adminController.login)
 
 const passport = require('../config/passport')
 const authenticatedAdmin = (req, res, next) => {
