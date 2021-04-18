@@ -1,8 +1,8 @@
 // JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
+// const passportJWT = require('passport-jwt')
+// const ExtractJwt = passportJWT.ExtractJwt
+// const JwtStrategy = passportJWT.Strategy
 
 const bcrypt = require('bcryptjs')
 const db = require('../models')
@@ -20,10 +20,6 @@ const userController = {
       const user = await User.findOne({ where: { email } })
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'this email has not been registered!' })
-      }
-      // check role, must be 'admin'
-      if (user.role !== 'admin') {
-        return res.json({ status: 'error', message: 'you don\'t have authority to login!' })
       }
       // check password correct or not
       // if (bcrypt.compareSync(password, user.password)) {
