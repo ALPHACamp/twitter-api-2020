@@ -42,6 +42,30 @@ const userController = {
     } catch (e) {
       console.log(e)
     }
+  },
+  // 註冊
+  register: async (req, res) => {
+    try {
+      const { account, name, email, password, confirmPassword } = req.body
+      // check account & name & email & password & confirmPassword are required
+      if (!account || !name || !email || !password || !confirmPassword) {
+        return res.json({ status: 'error', message: 'account, name, email, password, confirmPassword are required!' })
+      }
+      // check password & confirmPassword are same
+      if (password !== confirmPassword) {
+        return res.json({ status: 'error', message: 'password & confirmPassword must be same!' })
+      }
+      // check email & account have not been used
+      const userEmail = await User.findOne({ where: { email } })
+      if (userEmail) return res.json({ status: 'error', message: 'this email has been used!' })
+      const userAccount = await User.findOne({ where: { account } })
+      if (userAccount) return res.json({ status: 'error', message: 'this account has been used!' })
+      // create user
+      await User.create({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null), role: 'user' })
+      return res.json({ status: 'success', message: 'register success!' })
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 
