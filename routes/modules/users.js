@@ -64,19 +64,14 @@ router
    *             schema:
    *               type: object
    *               properties:
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     type: object
-   *                     properties:
-   *                       status:
-   *                         type: string
-   *                         description: Response status.
-   *                         example: success
-   *                       message:
-   *                         type: string
-   *                         description: Response message.
-   *                         example: successfully registered an account
+   *                 status:
+   *                   type: string
+   *                   description: Response status.
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   description: Response message.
+   *                   example: user1 register successfully! Please login.
    */
   .post(userController.register)
 
