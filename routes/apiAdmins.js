@@ -6,8 +6,9 @@ const adminController = require('../controllers/adminController')
 // routes : login
 router.post('/login', adminController.login)
 
-// authenticatedAdmin & authenticated
+// authenticated & authenticatedAdmin
 const passport = require('../config/passport')
+const authenticated = passport.authenticate('jwt', { session: false })
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
     if (req.user.role === 'admin') {
@@ -18,9 +19,8 @@ const authenticatedAdmin = (req, res, next) => {
     return res.json({ status: 'error', message: 'you don\'t have authority to login!' })
   }
 }
-const authenticated = passport.authenticate('jwt', { session: false })
 
 // routes : after login
-router.get('/users',authenticated, adminController.getUsers)
+router.get('/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
 module.exports = router
