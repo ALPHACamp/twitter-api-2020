@@ -6,6 +6,10 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
+const db = require('./models')
+const helpers = require('./_helpers')
+
+
 const app = express()
 const port = 3000
 
@@ -14,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
+function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
 
