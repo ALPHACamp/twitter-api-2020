@@ -39,7 +39,6 @@ const tweetController = {
       console.log(error)
     }
   }
-
   ,
 
   getTweets: async (req, res) => {
@@ -50,7 +49,7 @@ const tweetController = {
         include: [User, Reply, Like],
       })
 
-      // let replyCount = await Reply.findAll({ raw: true, nest: true, where: { id: tweet.id } }).then(replies => { return replies })
+      // let replies = await Reply.findAll({ raw: true, nest: true, where: { TweedId: tweet.id } })
 
       tweets = tweets.map(tweet => ({
         id: tweet.id,
@@ -58,7 +57,7 @@ const tweetController = {
         description: tweet.description,
         createdAt: tweet.createdAt,
         updatedAt: tweet.updatedAt,
-        // replyCount: tweet.Reply,  // trying to figure out how to get the reply count
+        // replyCount: 0,  // trying to figure out how to get the reply count
         // likeCount: 0,   // trying to figure out how to get the like count
         user: {
           avatar: tweet.User.avatar,
@@ -67,6 +66,17 @@ const tweetController = {
         }
       }))
       return res.json({ status: 'success', message: 'successfully retrieved tweets data', tweets })
+    }
+    catch (error) {
+      console.log(error)
+    }
+  },
+
+  getTweet: async (req, res) => {
+    try {
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      return res.json({ status: 'success', message: 'successfully retrieved tweet data', tweet })
     }
     catch (error) {
       console.log(error)
