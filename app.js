@@ -6,8 +6,6 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
-const helpers = require('./_helpers')
-
 const app = express()
 const port = 3000
 

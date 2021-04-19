@@ -4,7 +4,7 @@ const router = express.Router()
 const helpers = require('../_helpers')
 const adminController = require('../controllers/adminController')
 
-// routes : login
+// route : login
 router.post('/login', adminController.login)
 
 // authenticated & authenticatedAdmin
