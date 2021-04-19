@@ -75,6 +75,7 @@ router
    */
   .post(userController.register)
 
+router.route('/:id').get(userController.getUser)
 router.post('/login', userController.login)
 
 module.exports = router

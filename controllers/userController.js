@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
 
 const helpers = require('../_helpers')
 const { sequelize } = require('../models')
@@ -154,6 +155,42 @@ const userController = {
     }))
 
     return res.status(200).json(users)
+  },
+  getUser: async (req, res) => {
+    let user = await User.findByPk(req.params.id, {
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'email',
+        'role',
+        'avatar',
+        'cover',
+        'introduction'
+      ],
+      include: [
+        Tweet,
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+
+    // clean up data
+    user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      account: user.account,
+      avatar: user.avatar,
+      introduction: user.introduction,
+      cover: user.cover,
+      role: user.role,
+      tweetCount: user.Tweets.length,
+      followerCount: user.Followers.length,
+      followingCount: user.Followings.length
+    }
+
+    res.status(200).json(user)
   }
 }
 
