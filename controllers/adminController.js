@@ -4,8 +4,7 @@ const Tweet = db.Tweet
 const Like = db.Like
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const _helpers = require('../_helpers')
-
+const helpers = require('../_helpers')
 
 const adminController = {
   // 登入
@@ -65,7 +64,7 @@ const adminController = {
       }
       // 計算 : 推文被 like 的數量
       const tweetsOfUser = await Tweet.findAll({
-        where: { UserId: _helpers.getUser(req) }
+        where: { UserId: helpers.getUser(req) }
       })
       const tweetIds = []
       let tweetsLikedCount = 0
@@ -83,6 +82,18 @@ const adminController = {
         followersCount: u.Followers.length
       }))
       return res.json(users)
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  // 刪除使用者的推文
+  deleteTweet: async (req, res) => {
+    try {
+      const id = req.params.id
+      const tweet = await Tweet.findByPk(id)
+      if (!tweet) return res.json({ status: 'error', message: 'this tweet doesn\'t exist!' })
+      await tweet.destroy()
+      return res.json({ status: 'success', message: 'this tweet has been deleted!'})
     } catch (e) {
       console.log(e)
     }

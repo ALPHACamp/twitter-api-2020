@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
+const helpers = require('../_helpers')
 const adminController = require('../controllers/adminController')
 
 // routes : login
@@ -10,8 +11,8 @@ router.post('/login', adminController.login)
 const passport = require('../config/passport')
 const authenticated = passport.authenticate('jwt', { session: false })
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'admin') {
+  if (helpers.getUser(req)) {
+    if (helpers.getUser(req).role === 'admin') {
       return next()
     }
     return res.json({ status: 'error', message: 'you don\'t have authority to login!' })
@@ -22,5 +23,6 @@ const authenticatedAdmin = (req, res, next) => {
 
 // routes : after login
 router.get('/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.delete('/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 module.exports = router
