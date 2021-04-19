@@ -68,11 +68,7 @@ const tweetController = {
           account: tweet.User.account
         }
       }))
-      return res.json({
-        status: 'success',
-        message: 'successfully retrieved tweets data',
-        tweets
-      })
+      return res.json(tweets)
     } catch (error) {
       console.log(error)
     }
@@ -80,13 +76,9 @@ const tweetController = {
 
   getTweet: async (req, res) => {
     try {
-      const TweetId = req.params.id
+      const TweetId = req.params.tweet_id
       const tweet = await Tweet.findByPk(TweetId)
-      return res.json({
-        status: 'success',
-        message: 'successfully retrieved tweet data',
-        tweet
-      })
+      return res.json(tweet)
     } catch (error) {
       console.log(error)
     }
