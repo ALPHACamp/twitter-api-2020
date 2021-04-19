@@ -7,27 +7,16 @@ const userController = require('../../controllers/userController')
 
 /**
  * @swagger
- * tags:
- *   name: Users
- *   description: Users related APIs.
- */
-
-/**
-* @swagger
-* /api/users:
-*   get:
-*     summary: Retrieve a list of users.
-*     description: Retrieve a list of users. User data includes id, email, password ...etc. 
-*     tags: [Users]
-*     responses:
- *       200:
- *         description: A list of user info in an array.
+ * /api/users:
+ *   get:
+ *     summary: Retrieve a list of most popular users
+ *     description: Retrieve 6 users with most followers. User data includes id, account, name, avatar, and isFollowed.
+ *     responses:
+ *       '200':
+ *         description: A JSON array of user data
  *         content:
- *           multipart/form-data:
+ *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 data:
  *                   type: array
  *                   items:
  *                     type: object
@@ -36,10 +25,6 @@ const userController = require('../../controllers/userController')
  *                         type: integer
  *                         description: The user's ID.
  *                         example: 0
- *                       email:
- *                         type: string
- *                         description: The user's email.
- *                         example: 'example@example.com'
  *                       name:
  *                         type: string
  *                         description: The user's name.
@@ -47,64 +32,48 @@ const userController = require('../../controllers/userController')
  *                       avatar:
  *                         type: string
  *                         description: The user's avatar.
- *                         example: 0.png
- *                       introduction:
- *                         type: string
- *                         description: The user's introduction.
- *                         example: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- *                       role:
- *                         type: integer
- *                         description: The user's role.
- *                         example: 0
+ *                         example: 'https://i.imgur.com/q6bwDGO.png'
  *                       account:
  *                         type: string
  *                         description: The user's account.
- *                         example: '@user'
- *                       cover:
- *                         type: string
- *                         description: The user's profile cover.
- *                         example: 00.png
-*/
+ *                         example: 'user1'
+ *                       isFollowed:
+ *                         type: boolean
+ *                         description: The user is followed by the login user.
+ *                         example: 'true'
+ *
+ */
 
 router
   .route('/')
-  .get(authenticated, (req, res) => res.send('Hello World!'))
+  .get(authenticated, userController.getTopUsers)
   /**
-  * @swagger
-  * /api/users:
-  *   post:
-  *     summary: Register an account.
-  *     description: Register an account with required fields.
-  *     tags: [Users]
-  *     consumes:
-  *       - application/x-www-form-urlencoded
-  *     parameters:
-  *     responses:
-  *       200:
-  *         description: Success.
-  *         content:
-  *           application/json:
-  *             schema:
-  *               type: object
-  *               properties:
-  *                 data:
-  *                   type: array
-  *                   items:
-  *                     type: object
-  *                     properties:
-  *                       status:
-  *                         type: string
-  *                         description: Response status.
-  *                         example: success
-  *                       message:
-  *                         type: string
-  *                         description: Response message.
-  *                         example: successfully registered an account
-  */
+   * @swagger
+   * /api/users:
+   *   post:
+   *     summary: Register an account on Simple Twitter.
+   *     description: Register an account on Simple Twitter with required fields.
+   *     consumes:
+   *       - application/x-www-form-urlencoded
+   *     parameters:
+   *     responses:
+   *       200:
+   *         description: Success.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 status:
+   *                   type: string
+   *                   description: Response status.
+   *                   example: success
+   *                 message:
+   *                   type: string
+   *                   description: Response message.
+   *                   example: user1 register successfully! Please login.
+   */
   .post(userController.register)
-
-
-
 
 router.post('/login', userController.login)
 
