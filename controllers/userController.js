@@ -2,6 +2,9 @@ const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
 
+const helpers = require('../_helpers')
+const { sequelize } = require('../models')
+
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -73,6 +76,40 @@ const userController = {
     } catch (error) {
       console.log(error)
     }
+  },
+  getTopUsers: async (req, res) => {
+    let users = await User.findAll({
+      include: { model: User, as: 'Followers' },
+      attributes: [
+        'id',
+        'name',
+        'avatar',
+        'account',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+          ),
+          'followersCount'
+        ]
+      ],
+      order: [[sequelize.literal('followersCount'), 'DESC']],
+      limit: 6
+    })
+
+    // Clean up users data
+    const followings = helpers
+      .getUser(req)
+      .Followings.map(following => following.id)
+
+    users = users.map(user => ({
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+      account: user.account,
+      isFollowed: followings.includes(user.id)
+    }))
+
+    return res.status(200).json(users)
   }
 }
 
