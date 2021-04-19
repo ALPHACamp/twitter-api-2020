@@ -30,7 +30,7 @@ const userController = {
     if (!user) {
       return res
         .status(401)
-        .json({ status: 'error', message: 'That email is not registered.' })
+        .json({ status: 'error', message: 'That account does not exist.' })
     }
 
     if (!bcrypt.compareSync(password, user.password)) {
@@ -44,12 +44,16 @@ const userController = {
     const token = jwt.sign(payload, process.env.JWT_SECRET)
     return res.json({
       status: 'success',
-      message: 'ok',
+      message: 'login successfully',
       token: token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
+        account: user.account,
+        avatar: user.avatar,
+        introduction: user.introduction,
+        cover: user.cover,
         role: user.role
       }
     })
