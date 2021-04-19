@@ -56,8 +56,44 @@ const userController = {
   },
   register: async (req, res) => {
     const { account, name, email, password, checkPassword } = req.body
+    const emailRule = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
+    const errors = []
+
+    // Before creating an account,
+    // make sure all the required fields are correct
+    if (!account || !name || !email || !password || !checkPassword) {
+      errors.push({ message: 'Please fill out all fields.' })
+    }
+    if (email.search(emailRule) === -1) {
+      errors.push({ message: 'Please enter the correct email address.' })
+    }
+    if (password !== checkPassword) {
+      errors.push({ message: 'Password and checkPassword do not match.' })
+    }
+    if (errors.length > 0) {
+      return res.json({ status: 'error', errors })
+    }
 
     try {
+      // make sure email amd account has not been used yet
+      let user = await User.findOne({ where: { email } })
+
+      if (user) {
+        return res.json({
+          status: 'error',
+          message: `A user with ${email} already exists. Choose a different address or login directly.`
+        })
+      }
+
+      user = await User.findOne({ where: { account } })
+
+      if (user) {
+        return res.json({
+          status: 'error',
+          message: `A user with account '${account}' already exists. Choose a different account or login directly.`
+        })
+      }
+
       await User.create({
         account,
         name,
@@ -66,12 +102,15 @@ const userController = {
           req.body.password,
           bcrypt.genSaltSync(10),
           null
-        )
+        ),
+        role: false,
+        avatar: 'https://i.imgur.com/q6bwDGO.png',
+        cover: 'https://i.imgur.com/1jDf2Me.png'
       })
 
-      return res.json({
+      return res.status(200).json({
         status: 'success',
-        message: `${req.body.email} register successfully! Please login.`
+        message: `${req.body.account} register successfully! Please login.`
       })
     } catch (error) {
       console.log(error)
