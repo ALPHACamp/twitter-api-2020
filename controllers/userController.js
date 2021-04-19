@@ -118,6 +118,7 @@ const userController = {
   },
   getTopUsers: async (req, res) => {
     let users = await User.findAll({
+      where: { role: 'user' },
       include: { model: User, as: 'Followers' },
       attributes: [
         'id',
