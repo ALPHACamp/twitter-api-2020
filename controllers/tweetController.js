@@ -49,7 +49,7 @@ const tweetController = {
         include: [User, Reply, Like],
       })
 
-      // let replies = await Reply.findAll({ raw: true, nest: true, where: { TweedId: tweet.id } })
+      // let replies = await tweet.Reply.findAndCountAll({ raw: true, nest: true })
 
       tweets = tweets.map(tweet => ({
         id: tweet.id,
@@ -57,8 +57,8 @@ const tweetController = {
         description: tweet.description,
         createdAt: tweet.createdAt,
         updatedAt: tweet.updatedAt,
-        // replyCount: 0,  // trying to figure out how to get the reply count
-        // likeCount: 0,   // trying to figure out how to get the like count
+        // replyCount: Reply.findAndCountAll({ where: { TweetId: tweet.id } }).count,  // trying to figure out how to get the reply count
+        // likeCount: tweet.Like.length,   // trying to figure out how to get the like count
         user: {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
