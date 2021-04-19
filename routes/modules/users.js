@@ -6,11 +6,19 @@ const { authenticated } = require('../../middleware/auth')
 const userController = require('../../controllers/userController')
 
 /**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: Users related APIs.
+ */
+
+/**
 * @swagger
 * /api/users:
 *   get:
-*     summary: Retrieve a list of users of Simple Twitter.
-*     description: Retrieve a list of users of Simple Twitter. User data includes id, email, password ...etc. 
+*     summary: Retrieve a list of users.
+*     description: Retrieve a list of users. User data includes id, email, password ...etc. 
+*     tags: [Users]
 *     responses:
  *       200:
  *         description: A list of user info in an array.
@@ -62,36 +70,37 @@ router
   .route('/')
   .get(authenticated, (req, res) => res.send('Hello World!'))
   /**
-* @swagger
-* /api/users:
-*   post:
-*     summary: Register an account on Simple Twitter.
-*     description: Register an account on Simple Twitter with required fields.
-*     consumes:
-*       - application/x-www-form-urlencoded
-*     parameters:
-*     responses:
- *       200:
- *         description: Success.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       status:
- *                         type: string
- *                         description: Response status.
- *                         example: success
- *                       message:
- *                         type: string
- *                         description: Response message.
- *                         example: successfully registered an account
-*/
+  * @swagger
+  * /api/users:
+  *   post:
+  *     summary: Register an account.
+  *     description: Register an account with required fields.
+  *     tags: [Users]
+  *     consumes:
+  *       - application/x-www-form-urlencoded
+  *     parameters:
+  *     responses:
+  *       200:
+  *         description: Success.
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 data:
+  *                   type: array
+  *                   items:
+  *                     type: object
+  *                     properties:
+  *                       status:
+  *                         type: string
+  *                         description: Response status.
+  *                         example: success
+  *                       message:
+  *                         type: string
+  *                         description: Response message.
+  *                         example: successfully registered an account
+  */
   .post(userController.register)
 
 

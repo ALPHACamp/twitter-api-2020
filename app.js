@@ -14,12 +14,12 @@ const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
     info: {
-      title: "Simple Twitter API",
+      title: 'Simple Twitter API',
       version: '1.0.0',
-      description: "Simple Twitter API documentation",
+      description: 'Simple Twitter API documentation',
       contact: {
-        name: 'support',    // dummy info
-        email: 'support@example.com'    // dummy info
+        name: 'support', // dummy info
+        email: 'support@example.com' // dummy info
       }
     },
     servers: [
@@ -45,7 +45,6 @@ app.use(bodyParser.json())
 // use swagger route
 const swaggerDocs = swaggerJsDoc(swaggerOptions)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
-
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
