@@ -104,4 +104,6 @@ router
   .route('/:id/replied_tweets')
   .get(authenticated, userController.getRepliesAndTweets)
 
+router.route('/:id/likes').get(authenticated, userController.getLikes)
+
 module.exports = router

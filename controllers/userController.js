@@ -433,6 +433,60 @@ const userController = {
     } catch (error) {
       console.log(error)
     }
+  },
+  getLikes: async (req, res) => {
+    try {
+      // Make sure user exists
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
+
+      let likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        order: [['createdAt', 'DESC']],
+        include: [{ model: Tweet, include: [Like, Reply, User] }]
+      })
+
+      let currentUserLikes = helpers.getUser(req).LikedTweets
+
+      if (currentUserLikes) {
+        currentUserLikes = currentUserLikes.map(likeTweet => likeTweet.id)
+      }
+
+      // Clean up data
+      likes = likes.map(like => {
+        const tweet = like.Tweet.toJSON()
+        return {
+          id: like.id,
+          comment: like.comment,
+          createdAt: like.createdAt,
+          isLiked: currentUserLikes
+            ? currentUserLikes.includes(like.TweetId)
+            : false,
+          TweetId: like.TweetId,
+          Tweet: {
+            description: tweet.description,
+            createdAt: tweet.createdAt,
+            User: {
+              id: tweet.User.id,
+              name: tweet.User.name,
+              account: tweet.User.account,
+              avatar: tweet.User.avatar
+            },
+            replyCount: tweet.Replies.length,
+            likeCount: tweet.Likes.length
+          }
+        }
+      })
+
+      return res.status(200).json(likes)
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
