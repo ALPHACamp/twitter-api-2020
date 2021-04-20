@@ -63,21 +63,21 @@ const adminController = {
         return res.json({ message: 'db has no user!' })
       }
       // 計算 : 推文被 like 的數量
-      const tweetsOfUser = await Tweet.findAll({
-        where: { UserId: helpers.getUser(req) }
-      })
-      const tweetIds = []
-      let tweetsLikedCount = 0
-      tweetsOfUser.forEach(tweet => tweetIds.push(tweet.id))
-      tweetIds.forEach(async (tweetId) => {
-        const [rows, count] = await Like.findAndCountAll({ where: tweetIds })
-        tweetsLikedCount += count
+      users.forEach(async (user) => {
+        const tweetsOfUser = await Tweet.findAll({
+          where: { UserId: user.id },
+          include: [{ model: User, as: 'LikedUsers' }]
+        })
+        let count = 0
+        tweetsOfUser.forEach(tweet => {
+          count += tweet.LikedUsers.length
+        })
       })
       // 加入以下資料: 使用者資料、推文數量、推文被 like 的數量、關注人數、跟隨者人數
       users = users.map(u => ({
         ...u.dataValues,
         tweetCount: u.Tweets.length,
-        tweetsLikedCount: tweetsLikedCount,
+        tweetsLikedCount: u.tweetsLikedCount,
         followingsCount: u.Followings.length,
         followersCount: u.Followers.length
       }))

@@ -1,7 +1,11 @@
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { response } = require('../app')
 
 const userController = {
   // 登入
@@ -63,6 +67,30 @@ const userController = {
       // create user
       await User.create({ account, name, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null), role: 'user' })
       return res.json({ status: 'success', message: 'register success!' })
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  // 查看單一 user 資料 (user資料、推文與回覆、跟隨中、跟隨者、喜歡的內容) => 排序依日期，最新的在前
+  // bug: 回覆未能照 createdAt 排列
+  getUser: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: Tweet, include: [Reply] },
+          { model: Tweet, as: 'LikedTweets' },
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ],
+        order: [
+          [{ model: Tweet }, 'createdAt', 'DESC'],
+          [{ model: Tweet, as: 'LikedTweets' }, 'createdAt', 'DESC'],
+          [{ model: User, as: 'Followings' }, 'createdAt', 'DESC'],
+          [{ model: User, as: 'Followers' }, 'createdAt', 'DESC']
+        ]
+      })
+      if (!user) return res.json({ message: 'can not find this user!' })
+      return res.json(user)
     } catch (e) {
       console.log(e)
     }
