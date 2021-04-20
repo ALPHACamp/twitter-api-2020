@@ -94,6 +94,17 @@ const userController = {
     } catch (e) {
       console.log(e)
     }
+  },
+  // 查看單一使用者發過的推文
+  getTweetsOfUser: async (req, res) => {
+    try {
+      const tweets = await Tweet.findAll({ where: { UserId: req.params.id }, order: [['createdAt', 'DESC']] })
+      if (!tweets) return res.json({ message: 'can not find this user!' })
+      if (tweets.length === 0) return res.json({ message: 'this user has no tweet!' })
+      return res.json(tweets)
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 
