@@ -5,15 +5,20 @@ const Reply = db.Reply
 const Like = db.Like
 
 const tweetController = {
-  // 所有推文、作者 依date排序
+  //  列出所有tweets以及資訊
   getTweets: async (req, res) => {
     try {
       let tweets = await Tweet.findAll({
+        order: [['updatedAt', 'DESC']],
         include: [User,
           { model: User, as: 'LikedUsers' }
           , { model: User, as: 'RepliedUsers' }
-        ]// 找到推問like,reply數量 作者name
+        ]
       })
+
+      if (users.length === 0) {
+        return res.json({ message: 'There is no tweets in database.' })
+      }
 
       tweets = tweets.map(t => ({
         ...t.dataValues,
