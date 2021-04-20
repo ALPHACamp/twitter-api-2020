@@ -165,15 +165,13 @@ const userController = {
         if (tweetIdArr.includes(r.TweetId)) return
         tweetIdArr.push(r.TweetId)
       })
-      console.log('tweetIdArr', tweetIdArr)
-      // 刪除重複的 tweetId
       const tweets = await Tweet.findAll({
         where: {
           [Op.or]: Array.from({ length: tweetIdArr.length }).map((_, i) => ({ id: tweetIdArr[i] }))
         },
         include: [Reply]
       })
-      console.log(Array.from({ length: tweetIdArr.length }).map((_, i) => ({ id: tweetIdArr[i] })))
+      if (tweets.length === 0) return res.json({ message: 'this user has no tweet or user does not exist!' })
       return res.json(tweets)
     } catch (e) {
       console.log(e)
