@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 
 const helpers = require('../_helpers')
 const { sequelize } = require('../models')
@@ -351,6 +353,37 @@ const userController = {
         status: 'success',
         message: 'profile update successfully'
       })
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  getTweets: async (req, res) => {
+    try {
+      // Make sure user exists
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
+
+      let tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        order: [['createdAt', 'DESC']],
+        include: [Reply, Like]
+      })
+
+      // Clean up data
+      tweets = tweets.map(tweet => ({
+        id: tweet.id,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length
+      }))
+
+      return res.status(200).json(tweets)
     } catch (error) {
       console.log(error)
     }

@@ -98,4 +98,6 @@ router
   )
 router.post('/login', userController.login)
 
+router.route('/:id/tweets').get(authenticated, userController.getTweets)
+
 module.exports = router
