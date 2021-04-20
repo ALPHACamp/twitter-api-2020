@@ -11,9 +11,9 @@ const followshipController = {
       const followerId = helpers.getUser(req).id
 
       if (Number(followingId) !== followerId) {
-        const followed = await Followship.findOne({ where: { followingId } })
+        const followship = await Followship.findOne({ where: { followingId, followerId } })
 
-        if (followed) {
+        if (followship) {
           return res.json({
             status: 'error',
             message: `already followed @${followingUser.account}`
@@ -52,8 +52,9 @@ const followshipController = {
   unfollowUser: async (req, res) => {
     try {
       const followingId = req.params.followingId
+      const followerId = helpers.getUser(req).id
       const unfollowedUser = await User.findByPk(followingId)
-      const user = await Followship.findOne({ where: { followingId } })
+      const followship = await Followship.findOne({ where: { followingId, followerId } })
 
       // 排除 unfollowedUser 不存在的狀況
       if (!unfollowedUser) {
@@ -64,14 +65,14 @@ const followshipController = {
       }
 
       // unfollowUser function 排除找不到 user 的狀況（const user = await Followship.findOne({ where: { followingId } }) ）
-      if (!user) {
+      if (!followship) {
         return res.json({
           status: 'error',
           message: 'unable to perform unfollow since you haven\'t followed this user before'
         })
       }
 
-      await user.destroy()
+      await followship.destroy()
       return res.json({
         status: 'success',
         message: `Unfollowed ${unfollowedUser.account}`
