@@ -19,5 +19,6 @@ const authenticated = passport.authenticate('jwt', { session: false })
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getTweetsOfUser)
 router.put('/users/:id', authenticated, uploadProfile, userController.putUser)
+router.get('/users/:id/replied_tweets', authenticated, userController.getRepliedTweetsOfUser)
 
 module.exports = router

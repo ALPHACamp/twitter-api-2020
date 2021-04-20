@@ -2,15 +2,15 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
-const Like = db.Like
 
 const helpers = require('../_helpers')
 
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
-const IMGUR_CLIENT_ID = 'f942201de16afbf'
-// const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
+const { Op } = require('sequelize')
 
 const uploadImg = path => {
   return new Promise((resolve, reject) => {
@@ -151,6 +151,30 @@ const userController = {
         })
       }
       return res.json({ status: 'success', message: 'profile edit success!' })
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  // 查看單一使用者發過回覆的推文
+  getRepliedTweetsOfUser: async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      const replies = await Reply.findAll({ where: { userId: id } })
+      const tweetIdArr = []
+      replies.forEach(r => {
+        if (tweetIdArr.includes(r.TweetId)) return
+        tweetIdArr.push(r.TweetId)
+      })
+      console.log('tweetIdArr', tweetIdArr)
+      // 刪除重複的 tweetId
+      const tweets = await Tweet.findAll({
+        where: {
+          [Op.or]: Array.from({ length: tweetIdArr.length }).map((_, i) => ({ id: tweetIdArr[i] }))
+        },
+        include: [Reply]
+      })
+      console.log(Array.from({ length: tweetIdArr.length }).map((_, i) => ({ id: tweetIdArr[i] })))
+      return res.json(tweets)
     } catch (e) {
       console.log(e)
     }
