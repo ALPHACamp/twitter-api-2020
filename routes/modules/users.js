@@ -100,4 +100,8 @@ router.post('/login', userController.login)
 
 router.route('/:id/tweets').get(authenticated, userController.getTweets)
 
+router
+  .route('/:id/replied_tweets')
+  .get(authenticated, userController.getRepliesAndTweets)
+
 module.exports = router
