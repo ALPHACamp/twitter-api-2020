@@ -113,6 +113,45 @@ const tweetController = {
     catch (error) {
       console.log(error)
     }
+  },
+
+  postReply: async (req, res) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
+      const UserId = helpers.getUser(req).id
+
+      if (!targetTweet) {
+        return res.json({
+          status: 'error',
+          message: 'cannot reply to a tweet that doesn\'t exist'
+        })
+      }
+
+      const tweetAuthor = await User.findOne({ where: { id: targetTweet.UserId } })
+
+      if (!req.body.comment || req.body.comment === '') {
+        return res.json({
+          status: 'error',
+          message: 'comment cannot be blank'
+        })
+      }
+
+      await Reply.create({
+        UserId,
+        TweetId,
+        comment: req.body.comment,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      return res.json({
+        status: 'success',
+        message: `successfully replied to ${tweetAuthor.account}'s tweet`
+      })
+    }
+    catch (error) {
+      console.log(error)
+    }
   }
 }
 
