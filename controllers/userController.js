@@ -191,6 +191,118 @@ const userController = {
     }
 
     res.status(200).json(user)
+  },
+  editUser: async (req, res) => {
+    const {
+      account,
+      name,
+      email,
+      password,
+      checkPassword,
+      avatar,
+      cover,
+      introduction
+    } = req.body
+    const emailRule = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
+    const errors = []
+    const userId = helpers.getUser(req).id
+    const id = req.params.id
+    // frontend should let us know users are on setting or profile page
+    const page = req.body.page
+
+    // Users can only edit their own profile
+    if (userId !== Number(id)) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: "You can not edit other's profile" })
+    }
+
+    let user = await User.findByPk(userId)
+
+    try {
+      // setting
+      if (page === 'setting') {
+        if (!account || !name || !email || !password || !checkPassword) {
+          errors.push({ message: 'Please fill out all fields.' })
+        }
+        // 要確認 email 跟 account 沒有被使用過
+        if (email.search(emailRule) === -1) {
+          errors.push({ message: 'Please enter the correct email address.' })
+        }
+        if (password !== checkPassword) {
+          errors.push({ message: 'Password and checkPassword do not match.' })
+        }
+        if (name.length > 50) {
+          errors.push({ message: 'Name can not be longer than 50 characters.' })
+        }
+        if (account.length > 50) {
+          errors.push({
+            message: 'Account can not be longer than 50 characters.'
+          })
+        }
+        if (errors.length > 0) {
+          return res.json({ status: 'error', errors })
+        }
+        // make sure email amd account has not been used yet
+        user = await User.findOne({ where: { email } })
+
+        if (user && email !== helpers.getUser(req).email) {
+          return res.json({
+            status: 'error',
+            message: `A user with ${email} already exists. Choose a different address or login directly.`
+          })
+        }
+
+        user = await User.findOne({ where: { account } })
+
+        if (user && account !== helpers.getUser(req).account) {
+          return res.json({
+            status: 'error',
+            message: `A user with account '${account}' already exists. Choose a different account or login directly.`
+          })
+        }
+
+        user = await User.findByPk(userId)
+        await user.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(
+            req.body.password,
+            bcrypt.genSaltSync(10),
+            null
+          )
+        })
+
+        return res.status(200).json({
+          status: 'success',
+          message: `${page} update successfully`
+        })
+      }
+
+      // profile
+      if (!name || name.length > 50) {
+        errors.push({
+          message: 'Name can not be empty or longer than 50 characters'
+        })
+      }
+      if (introduction) {
+        if (introduction.length > 160) {
+          errors.push({
+            message: 'Introduction can not longer than 160 characters'
+          })
+        }
+      }
+
+      await user.update({ name, introduction, avatar, cover })
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'profile update successfully'
+      })
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 

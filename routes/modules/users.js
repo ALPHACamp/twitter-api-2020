@@ -75,7 +75,11 @@ router
    */
   .post(userController.register)
 
-router.route('/:id').get(userController.getUser)
+router
+  .route('/:id')
+  .all(authenticated)
+  .get(userController.getUser)
+  .put(userController.editUser)
 router.post('/login', userController.login)
 
 module.exports = router
