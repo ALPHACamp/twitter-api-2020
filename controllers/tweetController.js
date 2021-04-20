@@ -82,6 +82,37 @@ const tweetController = {
     } catch (error) {
       console.log(error)
     }
+  },
+
+  likeTweet: async (req, res) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      await Like.create({
+        UserId,
+        TweetId: req.params.tweet_id
+      })
+      return res.json({ status: 'success' })  // 可問問看前端是否需要回傳資料
+    }
+    catch (error) {
+      console.log(error)
+    }
+  },
+
+  unlikeTweet: async (req, res) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const like = await Like.findOne({
+        where: {
+          UserId,
+          TweetId: req.params.tweet_id
+        }
+      })
+      await like.destroy()
+      return res.json({ status: 'success' })  // 可問問看前端是否需要回傳資料
+    }
+    catch (error) {
+      console.log(error)
+    }
   }
 }
 
