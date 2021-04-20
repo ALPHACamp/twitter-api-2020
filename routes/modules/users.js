@@ -5,6 +5,10 @@ const { authenticated } = require('../../middleware/auth')
 
 const userController = require('../../controllers/userController')
 
+// Upload image
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
 /**
  * @swagger
  * /api/users:
@@ -79,7 +83,19 @@ router
   .route('/:id')
   .all(authenticated)
   .get(userController.getUser)
-  .put(userController.editUser)
+  .put(
+    upload.fields([
+      {
+        name: 'avatar',
+        maxCount: 1
+      },
+      {
+        name: 'cover',
+        maxCount: 1
+      }
+    ]),
+    userController.editUser
+  )
 router.post('/login', userController.login)
 
 module.exports = router

@@ -6,6 +6,21 @@ const Tweet = db.Tweet
 const helpers = require('../_helpers')
 const { sequelize } = require('../models')
 
+// Upload image
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
+const uploadImg = path => {
+  return new Promise((resolve, reject) => {
+    imgur.upload(path, (err, img) => {
+      if (err) {
+        return reject(err)
+      }
+      resolve(img)
+    })
+  })
+}
+
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -199,16 +214,17 @@ const userController = {
       email,
       password,
       checkPassword,
-      avatar,
-      cover,
-      introduction
+      introduction,
+      page
     } = req.body
     const emailRule = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
     const errors = []
     const userId = helpers.getUser(req).id
     const id = req.params.id
-    // frontend should let us know users are on setting or profile page
-    const page = req.body.page
+    const { files } = req
+    let newAvatar
+    let newCover
+    const acceptedType = ['.png', '.jpg', '.jpeg']
 
     // Users can only edit their own profile
     if (userId !== Number(id)) {
@@ -221,16 +237,21 @@ const userController = {
 
     try {
       // setting
+
       if (page === 'setting') {
+        // Make sure all fields are filled out
         if (!account || !name || !email || !password || !checkPassword) {
-          errors.push({ message: 'Please fill out all fields.' })
+          return res.json({
+            status: 'error',
+            message: 'Please fill out all fields.'
+          })
         }
-        // 要確認 email 跟 account 沒有被使用過
-        if (email.search(emailRule) === -1) {
-          errors.push({ message: 'Please enter the correct email address.' })
-        }
+        // Make sure all fields are correct
         if (password !== checkPassword) {
           errors.push({ message: 'Password and checkPassword do not match.' })
+        }
+        if (email.search(emailRule) === -1) {
+          errors.push({ message: 'Please enter the correct email address.' })
         }
         if (name.length > 50) {
           errors.push({ message: 'Name can not be longer than 50 characters.' })
@@ -243,23 +264,18 @@ const userController = {
         if (errors.length > 0) {
           return res.json({ status: 'error', errors })
         }
-        // make sure email amd account has not been used yet
-        user = await User.findOne({ where: { email } })
+        // make sure email amd account has not been used by others yet
+        const check = { email, account }
+        for (const key in check) {
+          const value = check[key]
+          user = await User.findOne({ where: { [key]: value } })
 
-        if (user && email !== helpers.getUser(req).email) {
-          return res.json({
-            status: 'error',
-            message: `A user with ${email} already exists. Choose a different address or login directly.`
-          })
-        }
-
-        user = await User.findOne({ where: { account } })
-
-        if (user && account !== helpers.getUser(req).account) {
-          return res.json({
-            status: 'error',
-            message: `A user with account '${account}' already exists. Choose a different account or login directly.`
-          })
+          if (user && value !== helpers.getUser(req)[key]) {
+            return res.json({
+              status: 'error',
+              message: `A user with ${value} already exists. Choose a different ${key}.`
+            })
+          }
         }
 
         user = await User.findByPk(userId)
@@ -286,15 +302,50 @@ const userController = {
           message: 'Name can not be empty or longer than 50 characters'
         })
       }
+      // Introduction can be empty
       if (introduction) {
         if (introduction.length > 160) {
           errors.push({
-            message: 'Introduction can not longer than 160 characters'
+            message: 'Introduction can not be longer than 160 characters'
           })
         }
       }
+      // Check image's type
+      if (files) {
+        for (const file in files) {
+          const imgData = files[file][0]
+          const fileType = imgData.originalname
+            .substring(imgData.originalname.lastIndexOf('.'))
+            .toLowerCase()
 
-      await user.update({ name, introduction, avatar, cover })
+          if (acceptedType.indexOf(fileType) === -1) {
+            errors.push({
+              message: `${imgData.fieldname}'s image type is not accepted. Please upload the image ends with png, jpg, or jpeg.`
+            })
+          }
+        }
+      }
+
+      if (errors.length > 0) {
+        return res.json({ status: 'error', errors })
+      }
+
+      // Images saved in /temp will be removed,
+      // so we need to upload them to imgur
+      const images = {}
+      if (files) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        for (const key in files) {
+          images[key] = await uploadImg(files[key][0].path)
+        }
+      }
+
+      await user.update({
+        name,
+        introduction,
+        avatar: images.avatar ? images.avatar.data.link : user.avatar,
+        cover: images.cover ? images.cover.data.link : user.cover
+      })
 
       return res.status(200).json({
         status: 'success',
