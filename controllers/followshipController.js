@@ -29,8 +29,18 @@ const followshipController = {
 
   },
 
-  unfollowUser: (req, res) => {
+  unfollowUser: async (req, res) => {
+    try {
+      const followingId = req.params.followingId
+      const unfollowedUser = await User.findByPk(followingId)
+      const user = await Followship.findByPk(followingId)
+      await user.destroy()
+      return res.json({ status: 'success', message: `Unfollowed ${unfollowedUser.account}` })
+    }
 
+    catch (error) {
+      console.log(error)
+    }
   }
 }
 
