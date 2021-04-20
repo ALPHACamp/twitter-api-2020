@@ -493,7 +493,7 @@ const userController = {
       const id = req.params.id
       const currentUser = helpers.getUser(req)
       // Make sure user exists
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(id)
       if (!user) {
         return res.status(401).json({
           status: 'error',
@@ -502,7 +502,7 @@ const userController = {
       }
 
       let followers = (
-        await User.findByPk(req.params.id, {
+        await User.findByPk(id, {
           include: [{ model: User, as: 'Followers' }]
         })
       ).Followers
@@ -531,6 +531,53 @@ const userController = {
       })
 
       return res.status(200).json(followers)
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  getFollowings: async (req, res) => {
+    try {
+      const id = req.params.id
+      const currentUser = helpers.getUser(req)
+      // Make sure user exists
+      const user = await User.findByPk(id)
+      if (!user) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
+
+      let followings = (
+        await User.findByPk(id, {
+          include: [{ model: User, as: 'Followings' }]
+        })
+      ).Followings
+
+      let currentUserFollowings = helpers.getUser(req).Followings
+      if (currentUserFollowings) {
+        currentUserFollowings = currentUserFollowings.map(
+          following => following.id
+        )
+      }
+
+      // Clean up data
+      followings = followings.map(following => {
+        return {
+          followingId: following.id,
+          name: following.name,
+          account: following.account,
+          avatar: following.avatar,
+          introduction: following.introduction,
+          createdAt: following.createdAt,
+          isFollowing:
+            currentUserFollowings && following.id !== currentUser.id
+              ? currentUserFollowings.includes(following.id)
+              : null
+        }
+      })
+
+      return res.status(200).json(followings)
     } catch (error) {
       console.log(error)
     }
