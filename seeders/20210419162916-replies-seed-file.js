@@ -5,22 +5,20 @@ const faker = require('faker')
 module.exports = {
 
   up: async (queryInterface, Sequelize) => {
-    function fakeReplies() {
+    function fakeReplies () {
       const replies = []
-      let replyId = 1
-      let count = 0
+      let replyId = 0
 
-      for (let j = 1; j <= 60; j++) { // total 60 tweets
-        for (let i = 1; i <= 3; i++) { // 3 replies per tweet
+      for (let j = 1; j <= 60; j++) { // total 60 tweets, 3 replies per tweet
+        for (let i = 1; i <= 3; i++) {
           replies.push({
-            id: count === 0 ? 1 : replyId += 1,
+            id: replyId += 1,
             UserId: Math.floor((Math.random() * 6) + 1),
             TweetId: j,
             comment: faker.lorem.text(),
             createdAt: new Date(),
             updatedAt: new Date()
           })
-          count++
         }
       }
       return replies
@@ -34,4 +32,3 @@ module.exports = {
     await queryInterface.bulkDelete('Replies', null, {})
   }
 }
-
