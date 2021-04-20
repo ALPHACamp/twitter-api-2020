@@ -152,6 +152,34 @@ const tweetController = {
     catch (error) {
       console.log(error)
     }
+  },
+
+  getReplies: async (req, res) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
+
+      if (!targetTweet) {
+        return res.json({
+          status: 'error',
+          message: 'this tweet doesn\'t exist'
+        })
+      }
+
+      const replies = await Reply.findAll({ raw: true, nest: true, where: { TweetId } })
+      return res.json(
+        replies
+        // 因測試檔希望回傳的 res.body 是陣列，並且此陣列[0] 就是第一個 reply data，故只能將 res.json() 中的大花括號拿掉以符合測試格式。POSTMAN 測試沒問題。
+        // 取資料時要跟前端講一下串資料的方式
+
+        // status: 'success',
+        // message: `successfully retrieve replies for TweetId: ${TweetId}`
+
+      )
+    }
+    catch (error) {
+      console.log(error)
+    }
   }
 }
 

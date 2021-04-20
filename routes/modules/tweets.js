@@ -56,5 +56,6 @@ router.get('/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/:tweet_id/like', authenticated, tweetController.likeTweet)
 router.post('/:tweet_id/unlike', authenticated, tweetController.unlikeTweet)
 router.post('/:tweet_id/replies', authenticated, tweetController.postReply)
+router.get('/:tweet_id/replies', authenticated, tweetController.getReplies)
 
 module.exports = router
