@@ -79,6 +79,8 @@ router
    */
   .post(userController.register)
 
+router.post('/login', userController.login)
+
 router
   .route('/:id')
   .all(authenticated)
@@ -96,7 +98,6 @@ router
     ]),
     userController.editUser
   )
-router.post('/login', userController.login)
 
 router.route('/:id/tweets').get(authenticated, userController.getTweets)
 
