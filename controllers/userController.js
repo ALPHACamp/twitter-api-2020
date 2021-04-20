@@ -3,9 +3,23 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+
+const helpers = require('../_helpers')
+
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { response } = require('../app')
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = 'f942201de16afbf'
+// const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
+const uploadImg = path => {
+  return new Promise((resolve, reject) => {
+    imgur.upload(path, (err, img) => {
+      if (err) return reject(err)
+      return resolve(img)
+    })
+  })
+}
 
 const userController = {
   // 登入
@@ -99,9 +113,44 @@ const userController = {
   getTweetsOfUser: async (req, res) => {
     try {
       const tweets = await Tweet.findAll({ where: { UserId: req.params.id }, order: [['createdAt', 'DESC']] })
-      if (!tweets) return res.json({ message: 'can not find this user!' })
-      if (tweets.length === 0) return res.json({ message: 'this user has no tweet!' })
+      if (tweets.length === 0) return res.json({ message: 'this user has no tweet or user does not exist!' })
       return res.json(tweets)
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  // 編輯使用者自己的資料 (name、introduction、avatar、cover)
+  putUser: async (req, res) => {
+    try {
+      // 只能編輯自己的資料
+      const userId = helpers.getUser(req).id
+      const id = Number(req.params.id)
+      if (userId !== id) return res.json({ status: 'error', message: 'can not edit profile of other users!' })
+      // 處理圖片
+      const { files } = req
+      if (files) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        const imgAvatar = await uploadImg(files.avatar[0].path)
+        const imgCover = await uploadImg(files.cover[0].path)
+        console.log('imgAvatar', imgAvatar)
+        console.log('imgCover', imgCover)
+        const user = await User.findByPk(userId)
+        await user.update({
+          name: req.body.name,
+          introduction: req.body.introduction,
+          avatar: imgAvatar.data.link,
+          cover: imgCover.data.link
+        })
+      } else {
+        const user = await User.findByPk(userId)
+        user.update({
+          name: req.body.name,
+          introduction: req.body.introduction,
+          avatar: user.avatar ? user.avatar : '',
+          cover: user.cover ? user.cover : ''
+        })
+      }
+      return res.json({ status: 'success', message: 'profile edit success!' })
     } catch (e) {
       console.log(e)
     }
