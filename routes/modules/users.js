@@ -106,4 +106,6 @@ router
 
 router.route('/:id/likes').get(authenticated, userController.getLikes)
 
+router.route('/:id/followers').get(authenticated, userController.getFollowers)
+
 module.exports = router

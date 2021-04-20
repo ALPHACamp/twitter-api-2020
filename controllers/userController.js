@@ -487,6 +487,53 @@ const userController = {
     } catch (error) {
       console.log(error)
     }
+  },
+  getFollowers: async (req, res) => {
+    try {
+      const id = req.params.id
+      const currentUser = helpers.getUser(req)
+      // Make sure user exists
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
+
+      let followers = (
+        await User.findByPk(req.params.id, {
+          include: [{ model: User, as: 'Followers' }]
+        })
+      ).Followers
+
+      let currentUserFollowings = helpers.getUser(req).Followings
+      if (currentUserFollowings) {
+        currentUserFollowings = currentUserFollowings.map(
+          following => following.id
+        )
+      }
+
+      // Clean up data
+      followers = followers.map(follower => {
+        return {
+          followerId: follower.id,
+          name: follower.name,
+          account: follower.account,
+          avatar: follower.avatar,
+          introduction: follower.introduction,
+          createdAt: follower.createdAt,
+          isFollowing:
+            currentUserFollowings && follower.id !== currentUser.id
+              ? currentUserFollowings.includes(follower.id)
+              : null
+        }
+      })
+
+      return res.status(200).json(followers)
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
