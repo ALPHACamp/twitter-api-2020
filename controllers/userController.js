@@ -2,6 +2,7 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
+const Like = db.Like
 
 const helpers = require('../_helpers')
 
@@ -159,25 +160,81 @@ const userController = {
   // 查看單一使用者發過回覆的推文
   getRepliedTweetsOfUser: async (req, res) => {
     try {
-      const id = Number(req.params.id)
-      const replies = await Reply.findAll({ where: { userId: id } })
-      const tweetIdArr = []
-      replies.forEach(r => {
-        if (tweetIdArr.includes(r.TweetId)) return
-        tweetIdArr.push(r.TweetId)
+      const user = await User.findByPk(req.params.id)
+      if (!user) return res.json({ message: 'this user does not exist!' })
+      let replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet, include: [User, Reply, Like] }],
+        order: [['createdAt', 'DESC']]
       })
-      const tweets = await Tweet.findAll({
-        where: {
-          [Op.or]: Array.from({ length: tweetIdArr.length }).map((_, i) => ({ id: tweetIdArr[i] }))
-        },
-        include: [Reply]
+      if (replies.length === 0) return res.json({ message: 'this user has no reply for any tweet!' })
+      replies = replies.map(reply => {
+        const tweet = reply.Tweet
+        return {
+          id: reply.id,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          Tweet: {
+            id: tweet.id,
+            UserId: tweet.UserId,
+            description: tweet.description,
+            createdAt: tweet.createdAt,
+            User: {
+              id: tweet.User.id,
+              name: tweet.User.name,
+              account: tweet.User.account,
+              avatar: tweet.User.avatar
+            },
+            replyCount: tweet.Replies.length,
+            likeCount: tweet.Likes.length
+          }
+        }
       })
-      if (tweets.length === 0) return res.json({ message: 'this user has no tweet or user does not exist!' })
-      return res.json(tweets)
+      return res.json(replies)
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  // 查看單一使用者點過Like的推文
+  getLikedTweetsOfUser: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) return res.json({ message: 'this user does not exist!' })
+      let likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet, include: [User, Reply, Like] }],
+        order: [['createdAt', 'DESC']]
+      })
+      if (likes.length === 0) return res.json({ message: 'this user has no like for any tweet!' })
+      likes = likes.map(like => {
+        const tweet = like.Tweet
+        return {
+          id: like.id,
+          UserId: like.UserId,
+          TweetId: like.TweetId,
+          createdAt: like.createdAt,
+          Tweet: {
+            id: tweet.id,
+            UserId: tweet.UserId,
+            description: tweet.description,
+            createdAt: tweet.createdAt,
+            User: {
+              id: tweet.User.id,
+              name: tweet.User.name,
+              account: tweet.User.account,
+              avatar: tweet.User.avatar
+            },
+            replyCount: tweet.Replies.length,
+            likeCount: tweet.Likes.length
+          }
+        }
+      })
+      return res.json(likes)
     } catch (e) {
       console.log(e)
     }
   }
+
 }
 
 module.exports = userController
