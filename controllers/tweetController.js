@@ -154,6 +154,18 @@ const tweetController = {
       return res.json({ status: 'success', message: 'Like has built successfully!' })
     } catch (e) { console.log(e) }
   },
+  tweetUnlike: async (req, res) => {
+    try {
+      like = await Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.tweet_Id
+        }
+      })
+      like.destroy()
+      return res.json({ status: 'success', message: 'Like has removed successfully!' })
+    } catch (e) { console.log(e) }
+  }
 }
 
 module.exports = tweetController
