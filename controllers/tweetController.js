@@ -144,7 +144,16 @@ const tweetController = {
       return res.json({ status: 'success', message: 'Reply has built successfully!' })
 
     } catch (e) { console.log(e) }
-  }
+  },
+  tweetLike: async (req, res) => {
+    try {
+      await Like.create({
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweet_Id
+      })
+      return res.json({ status: 'success', message: 'Like has built successfully!' })
+    } catch (e) { console.log(e) }
+  },
 }
 
 module.exports = tweetController

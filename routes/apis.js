@@ -15,6 +15,7 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:tweet_Id/replies', authenticated, tweetController.getReplies)
 router.post('/tweets/:tweet_Id/replies', authenticated, tweetController.postReply)
+router.post('/tweets/:tweet_Id/like', authenticated, tweetController.tweetLike)
 router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
 
 
