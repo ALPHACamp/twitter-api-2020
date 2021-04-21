@@ -9,9 +9,11 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       account: {
-        type: Sequelize.STRING
+        unique: true,
+        type: Sequelize.STRING,
       },
       email: {
+        unique: true,
         type: Sequelize.STRING
       },
       password: {
@@ -34,11 +36,11 @@ module.exports = {
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       }
     });
   },

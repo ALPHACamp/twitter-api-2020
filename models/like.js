@@ -1,26 +1,21 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+'use strict'
 module.exports = (sequelize, DataTypes) => {
-  class Like extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-      Like.belongsTo(models.User)
-      Like.belongsTo(models.Tweet)
-    }
-  };
-  Like.init({
-    UserId: DataTypes.INTEGER,
-    TweetId: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Like',
-  });
-  return Like;
-};
+  const Like = sequelize.define(
+    'Like',
+    {
+      id: {
+        autoIncrement: true,
+        primaryKey: true,
+        type: DataTypes.INTEGER
+      },
+      UserId: DataTypes.INTEGER,
+      TweetId: DataTypes.INTEGER
+    },
+    {}
+  )
+  Like.associate = function (models) {
+    Like.belongsTo(models.User)
+    Like.belongsTo(models.Tweet)
+  }
+  return Like
+}

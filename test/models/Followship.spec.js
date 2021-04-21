@@ -15,7 +15,7 @@ const db = require('../../models')
 const FollowshipModel = require('../../models/followship')
 
 describe('# Followship Model', () => {
-  
+
   before(done => {
     done()
   })
