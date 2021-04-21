@@ -97,6 +97,37 @@ const tweetController = {
       await Tweet.create({ UserId, description })
       return res.json({ status: 'success', message: 'Tweet has built successfully!' })
     } catch (e) { console.log(e) }
+  },
+  getReplies: async (req, res) => {
+    try {
+      const tweetId = req.params.tweet_Id
+      const tweet = await Tweet.findByPk(tweetId, {
+        include: [{ model: Reply, include: [User] }],
+        order: [
+          [{ model: Reply }, 'updatedAt', 'DESC']
+        ]
+      })
+
+      if (tweet === null) {
+        return res.json({ status: 'error', message: "Can't find this tweet." })
+      }
+
+      const tweetReplies = await tweet.Replies.map(r => ({
+        id: r.id,
+        tweetId: r.TweetId,
+        comment: r.comment,
+        updatedAt: r.updatedAt,
+        User: {
+          id: r.User.id,
+          avatar: r.User.avatar,
+          name: r.User.name,
+          account: r.User.account
+        }
+      }))
+
+      return res.json(tweetReplies)
+    }
+    catch (e) { console.log(e) }
   }
 }
 
