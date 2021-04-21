@@ -232,6 +232,27 @@ const userController = {
       console.log(e)
     }
   },
+  // 查看單一使用者的跟隨者 ( user = following , show followers )
+  getFollowers: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) return res.json({ message: 'this user does not exist!' })
+      let followers = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followers' }]
+      })
+      followers = followers.Followers.map(follower => ({
+        id: follower.id,
+        account: follower.account,
+        name: follower.name,
+        introduction: follower.introduction,
+        avatar: follower.avatar
+      }))
+      if (!followers) return res.json({ message: 'this user has no follower!' })
+      return res.json(followers)
+    } catch (e) {
+      console.log(e)
+    }
+  },
   // 查看單一使用者跟隨中的人 ( user = follower , show followings )
   getFollowings: async (req, res) => {
     try {
@@ -247,7 +268,7 @@ const userController = {
         introduction: following.introduction,
         avatar: following.avatar
       }))
-      if (!followings) return res.json({ message: 'this user has no following user!' })
+      if (!followings) return res.json({ message: 'this user has no following!' })
       return res.json(followings)
     } catch (e) {
       console.log(e)
