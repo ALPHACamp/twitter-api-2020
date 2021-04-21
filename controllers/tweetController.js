@@ -17,7 +17,7 @@ const tweetController = {
       })
 
       if (tweets.length === 0) {
-        return res.json({ message: 'There is no tweets in database.' })
+        return res.json({ status: 'error', message: 'There is no tweets in database.' })
       }
 
       tweets = tweets.map(tweet => ({
@@ -47,10 +47,26 @@ const tweetController = {
       let tweet = await Tweet.findByPk(tweetId, {
         include: [User, Like, { model: Reply, include: [User] }],
         order: [
-          [{ model: Reply }, 'updateAt', 'DESC']
+          [{ model: Reply }, 'updatedAt', 'DESC']
         ]
       })
-      cleanTweet = {
+
+      if (tweet === null) {
+        return res.json({ status: 'error', message: "Can't find this tweet." })
+      }
+
+      const tweetReplies = tweet.Replies.map(r => ({
+        id: r.id,
+        comment: r.comment,
+        updatedAt: r.updatedAt,
+        User: {
+          id: r.User.id,
+          avatar: r.User.avatar,
+          name: r.User.name,
+          account: r.User.account
+        }
+      }))
+      tweet = {
         id: tweet.id,
         UserId: tweet.UserId,
         description: tweet.description,
@@ -62,24 +78,11 @@ const tweetController = {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
           account: tweet.User.account
-        },
-        Replies: tweet.Replies.map(r => ({
-          id: r.id,
-          comment: r.comment,
-          updatedAt: r.updatedAt,
-          User: {
-            id: r.User.id,
-            avatar: r.User.avatar,
-            name: r.User.name,
-            account: r.User.account
-          }
-        }))
+        }
 
       }
-      return res.json({ cleanTweet })
+      return res.json({ tweet, tweetReplies })
     } catch (e) { console.log(e) }
-
-
   }
 }
 
