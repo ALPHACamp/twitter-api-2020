@@ -5,6 +5,10 @@ const { authenticated } = require('../../middleware/auth')
 
 const userController = require('../../controllers/userController')
 
+// Upload image
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
 /**
  * @swagger
  * /api/users:
@@ -76,5 +80,34 @@ router
   .post(userController.register)
 
 router.post('/login', userController.login)
+
+router
+  .route('/:id')
+  .all(authenticated)
+  .get(userController.getUser)
+  .put(
+    upload.fields([
+      {
+        name: 'avatar',
+        maxCount: 1
+      },
+      {
+        name: 'cover',
+        maxCount: 1
+      }
+    ]),
+    userController.editUser
+  )
+
+router.route('/:id/tweets').get(authenticated, userController.getTweets)
+
+router
+  .route('/:id/replied_tweets')
+  .get(authenticated, userController.getRepliesAndTweets)
+
+router.route('/:id/likes').get(authenticated, userController.getLikes)
+
+router.route('/:id/followers').get(authenticated, userController.getFollowers)
+router.route('/:id/followings').get(authenticated, userController.getFollowings)
 
 module.exports = router
