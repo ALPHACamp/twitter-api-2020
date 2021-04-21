@@ -4,7 +4,7 @@ const Tweet = db.Tweet
 const Like = db.Like
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const helpers = require('../_helpers')
+const { sequelize } = require('../models')
 
 const adminController = {
   // 登入
@@ -47,41 +47,50 @@ const adminController = {
       console.log(e)
     }
   },
-  // 取得所有使用者資料 (使用者資料、推文數量、推文被 like 的數量、關注人數、跟隨者人數)
-  // 清單預設按推文數排序 (未完成)
+  // 取得所有使用者資料 (清單預設按推文數排序)
+  // account、name、avatar、cover、推文數量、推文被 like 的數量、關注人數、跟隨者人數
   getUsers: async (req, res) => {
     try {
       // 找出所有 user
       let users = await User.findAll({
+        where: { role: 'user' },
         include: [
-          Tweet,
+          { model: Tweet, include: [Like] },
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
-        ]
+        ],
+        attributes: {
+          include: [
+            [
+              sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetcount'
+            ]
+          ]
+        },
+        order: [[sequelize.literal('tweetcount'), 'DESC']]
       })
       // 如果沒有 user，回傳 message
       if (users.length === 0) {
         return res.json({ message: 'db has no user!' })
       }
-      // 計算 : 推文被 like 的數量
-      users.forEach(async (user) => {
-        const tweetsOfUser = await Tweet.findAll({
-          where: { UserId: user.id },
-          include: [{ model: User, as: 'LikedUsers' }]
+      // 回傳資料
+      users = users.map(user => {
+        // 計算 : 推文被 like 的數量
+        let tweetsLikedCount = 0
+        user.Tweets.forEach(tweet => {
+          tweetsLikedCount += tweet.Likes.length
         })
-        let count = 0
-        tweetsOfUser.forEach(tweet => {
-          count += tweet.LikedUsers.length
-        })
+        return {
+          id: user.id,
+          account: user.account,
+          name: user.name,
+          avatar: user.avatar,
+          cover: user.cover,
+          tweetCount: user.Tweets.length,
+          tweetsLikedCount: tweetsLikedCount,
+          followingsCount: user.Followings.length,
+          followersCount: user.Followers.length
+        }
       })
-      // 加入以下資料: 使用者資料、推文數量、推文被 like 的數量、關注人數、跟隨者人數
-      users = users.map(u => ({
-        ...u.dataValues,
-        tweetCount: u.Tweets.length,
-        tweetsLikedCount: u.tweetsLikedCount,
-        followingsCount: u.Followings.length,
-        followersCount: u.Followers.length
-      }))
       return res.json(users)
     } catch (e) {
       console.log(e)
@@ -90,11 +99,10 @@ const adminController = {
   // 刪除使用者的推文
   deleteTweet: async (req, res) => {
     try {
-      const id = req.params.id
-      const tweet = await Tweet.findByPk(id)
+      const tweet = await Tweet.findByPk(req.params.id)
       if (!tweet) return res.json({ status: 'error', message: 'this tweet doesn\'t exist!' })
       await tweet.destroy()
-      return res.json({ status: 'success', message: 'this tweet has been deleted!'})
+      return res.json({ status: 'success', message: 'this tweet has been deleted!' })
     } catch (e) {
       console.log(e)
     }
