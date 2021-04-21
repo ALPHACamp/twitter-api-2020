@@ -46,5 +46,41 @@ module.exports = {
         console.log(error)
         return res.status(500).json(data)
       })
+  },
+
+  register: (req, res) => {
+    const { email, password, name, account, checkPassword } = req.body
+
+    // all input required
+    if (!email || !password || !name || !account || !checkPassword) {
+      return res.status(400).json({ status: 'error', message: 'Please complete all fields.' })
+    }
+    // check password
+    if (checkPassword !== password) {
+      return res.status(400).json({ status: 'error', message: 'Passwords does not match.' })
+    }
+    // check if account and email used already
+    User.findOne({ where: { account: account } })
+      .then(user => {
+        if (user) {
+          return res.status(400).json({ status: 'error', message: 'account already exist.' })
+        }
+        User.findOne({ where: { email: email } })
+          .then(user => {
+            if (user) {
+              return res.status(400).json({ status: 'error', message: 'email already exist.' })
+            } else {
+              User.create({
+                email: email,
+                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+                name: name,
+                account: account
+              })
+                .then(newUser => {
+                  return res.status(201).json({ status: 'success', message: 'Registered' })
+                })
+            }
+          })
+      })
   }
 }
