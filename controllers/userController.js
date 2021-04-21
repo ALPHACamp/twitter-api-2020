@@ -11,8 +11,6 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
-const { Op } = require('sequelize')
-
 const uploadImg = path => {
   return new Promise((resolve, reject) => {
     imgur.upload(path, (err, img) => {
@@ -233,8 +231,28 @@ const userController = {
     } catch (e) {
       console.log(e)
     }
+  },
+  // 查看單一使用者跟隨中的人 ( user = follower , show followings )
+  getFollowings: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) return res.json({ message: 'this user does not exist!' })
+      let followings = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followings' }]
+      })
+      followings = followings.Followings.map(following => ({
+        id: following.id,
+        account: following.account,
+        name: following.name,
+        introduction: following.introduction,
+        avatar: following.avatar
+      }))
+      if (!followings) return res.json({ message: 'this user has no following user!' })
+      return res.json(followings)
+    } catch (e) {
+      console.log(e)
+    }
   }
-
 }
 
 module.exports = userController
