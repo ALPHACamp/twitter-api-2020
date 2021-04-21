@@ -128,6 +128,22 @@ const tweetController = {
       return res.json(tweetReplies)
     }
     catch (e) { console.log(e) }
+  },
+  postReply: async (req, res) => {
+    try {
+      const { comment } = req.body
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.tweet_Id
+
+      if (!comment) {
+        return res.json({ status: 'error', message: "It must have comment to tweet." })
+      } else if (comment.length > 140) {
+        return res.json({ status: 'error', message: "comment max length is 140 words" })
+      }
+      await Reply.create({ TweetId, UserId, comment })
+      return res.json({ status: 'success', message: 'Reply has built successfully!' })
+
+    } catch (e) { console.log(e) }
   }
 }
 
