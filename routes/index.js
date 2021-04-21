@@ -1,7 +1,7 @@
-const { authenticated, authenticatedAdmin } = require('../middleware/authenticate')
-const userController = require('../controllers/userController')
 const users = require('./modules/users')
+const admin = require('./modules/admin')
+
 module.exports = (app) => {
-  app.post('/api/users/login', userController.login)
-  app.use('/api/users', authenticated, users)
+  app.use('/api/users', users)
+  app.use('/api/admin', admin)
 }
