@@ -3,6 +3,7 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+const helpers = require('../_helpers')
 
 const tweetController = {
   //  列出所有tweets以及資訊
@@ -79,9 +80,22 @@ const tweetController = {
           name: tweet.User.name,
           account: tweet.User.account
         }
-
       }
       return res.json({ tweet, tweetReplies })
+    } catch (e) { console.log(e) }
+  },
+  postTweet: async (req, res) => {
+    try {
+      const { description } = req.body
+      const UserId = helpers.getUser(req).id
+
+      if (!description) {
+        return res.json({ status: 'error', message: "It must have description to tweet." })
+      } else if (description.length > 140) {
+        return res.json({ status: 'error', message: "Description max length is 140 words" })
+      }
+      await Tweet.create({ UserId, description })
+      return res.json({ status: 'success', message: 'Tweet has built successfully!' })
     } catch (e) { console.log(e) }
   }
 }
