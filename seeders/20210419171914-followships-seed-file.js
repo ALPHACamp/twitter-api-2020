@@ -25,7 +25,6 @@ module.exports = {
         followerId: 2,
         createdAt: new Date(),
         updatedAt: new Date()
-
       }
     ], {})
   },
