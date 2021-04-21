@@ -50,12 +50,12 @@ const tweetController = require('../../controllers/tweetController')
  *                     
  * 
  */
-router.get('/', authenticated, tweetController.getTweets)
-router.post('/', authenticated, tweetController.postTweets)
-router.get('/:tweet_id', authenticated, tweetController.getTweet)
-router.post('/:tweet_id/like', authenticated, tweetController.likeTweet)
-router.post('/:tweet_id/unlike', authenticated, tweetController.unlikeTweet)
-router.post('/:tweet_id/replies', authenticated, tweetController.postReply)
-router.get('/:tweet_id/replies', authenticated, tweetController.getReplies)
+router.get('/', tweetController.getTweets)
+router.post('/', tweetController.postTweets)
+router.get('/:tweet_id', tweetController.getTweet)
+router.post('/:tweet_id/like', tweetController.likeTweet)
+router.post('/:tweet_id/unlike', tweetController.unlikeTweet)
+router.post('/:tweet_id/replies', tweetController.postReply)
+router.get('/:tweet_id/replies', tweetController.getReplies)
 
 module.exports = router

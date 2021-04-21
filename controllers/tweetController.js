@@ -8,7 +8,7 @@ const helpers = require('../_helpers')
 const tweetController = {
   postTweets: async (req, res) => {
     try {
-      const { description } = req.body
+      let { description } = req.body
       const UserId = helpers.getUser(req).id
 
       if (!description) {
@@ -18,11 +18,9 @@ const tweetController = {
         })
       }
 
+      // 是否可請前端也做個字數不能超過 140 字元的驗證？
       if (description.length > 140) {
-        return res.json({
-          status: 'error',
-          message: 'input should be less than 140 characters'
-        })
+        description = description.substring(0, 140)
       }
 
       await Tweet.create({
@@ -78,6 +76,14 @@ const tweetController = {
     try {
       const TweetId = req.params.tweet_id
       const tweet = await Tweet.findByPk(TweetId)
+
+      if (!tweet) {
+        return res.json({
+          status: 'error',
+          message: 'cannot get tweet that doesn\'t exist'
+        })
+      }
+
       return res.json(tweet)
     } catch (error) {
       console.log(error)
@@ -87,11 +93,29 @@ const tweetController = {
   likeTweet: async (req, res) => {
     try {
       const UserId = helpers.getUser(req).id
+      const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
+
+      if (!targetTweet) {
+        return res.json({
+          status: 'error',
+          message: 'cannot like a tweet that doesn\'t exist'
+        })
+      }
+
+      const like = await Like.findOne({ where: { TweetId: req.params.tweet_id, UserId } })
+
+      if (like) {
+        return res.json({
+          status: 'error',
+          message: 'already liked this tweet'
+        })
+      }
+
       await Like.create({
         UserId,
         TweetId: req.params.tweet_id
       })
-      return res.json({ status: 'success' })  // 可問問看前端是否需要回傳資料
+      return res.json({ status: 'success' })
     }
     catch (error) {
       console.log(error)
@@ -101,14 +125,31 @@ const tweetController = {
   unlikeTweet: async (req, res) => {
     try {
       const UserId = helpers.getUser(req).id
+      const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
+
+      if (!targetTweet) {
+        return res.json({
+          status: 'error',
+          message: 'cannot unlike a tweet that doesn\'t exist'
+        })
+      }
+
       const like = await Like.findOne({
         where: {
           UserId,
           TweetId: req.params.tweet_id
         }
       })
+
+      if (!like) {
+        return res.json({
+          status: 'error',
+          message: 'you haven\'t liked this tweet before'
+        })
+      }
+
       await like.destroy()
-      return res.json({ status: 'success' })  // 可問問看前端是否需要回傳資料
+      return res.json({ status: 'success' })
     }
     catch (error) {
       console.log(error)
@@ -130,7 +171,7 @@ const tweetController = {
 
       const tweetAuthor = await User.findOne({ where: { id: targetTweet.UserId } })
 
-      if (!req.body.comment || req.body.comment === '') {
+      if (!req.body.comment.trim()) {
         return res.json({
           status: 'error',
           message: 'comment cannot be blank'
@@ -169,12 +210,6 @@ const tweetController = {
       const replies = await Reply.findAll({ raw: true, nest: true, where: { TweetId } })
       return res.json(
         replies
-        // 因測試檔希望回傳的 res.body 是陣列，並且此陣列[0] 就是第一個 reply data，故只能將 res.json() 中的大花括號拿掉以符合測試格式。POSTMAN 測試沒問題。
-        // 取資料時要跟前端講一下串資料的方式
-
-        // status: 'success',
-        // message: `successfully retrieve replies for TweetId: ${TweetId}`
-
       )
     }
     catch (error) {
