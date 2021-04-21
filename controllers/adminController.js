@@ -52,6 +52,24 @@ const adminController = {
       }
     })
     res.status(200).json(users)
+  },
+  deleteTweet: async (req, res) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+
+      if (!tweet) {
+        res
+          .status(401)
+          .json({ status: 'error', message: 'tweet does not exist' })
+      }
+
+      await tweet.destroy()
+      res
+        .status(200)
+        .json({ status: 'success', message: 'delete successfully' })
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 
