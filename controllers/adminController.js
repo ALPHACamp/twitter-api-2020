@@ -10,15 +10,15 @@ const adminController = {
   // 登入
   login: async (req, res) => {
     try {
-      const { email, password } = req.body
-      // check email & password required
-      if (!email || !password) {
-        return res.json({ status: 'error', message: 'email and password are required!' })
+      const { account, password } = req.body
+      // check account & password required
+      if (!account || !password) {
+        return res.json({ status: 'error', message: 'account and password are required!' })
       }
-      // check email & password exist
-      const user = await User.findOne({ where: { email } })
+      // check account exists or not
+      const user = await User.findOne({ where: { account } })
       if (!user) {
-        return res.status(401).json({ status: 'error', message: 'this email has not been registered!' })
+        return res.status(401).json({ status: 'error', message: 'this account has not been registered!' })
       }
       // check user role, must be admin
       if (user.role !== 'admin') {
@@ -37,6 +37,7 @@ const adminController = {
         token: token,
         user: {
           id: user.id,
+          account: user.account,
           email: user.email,
           name: user.name,
           role: user.role
