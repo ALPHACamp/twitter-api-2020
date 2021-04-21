@@ -11,18 +11,18 @@ module.exports = {
       followerId: {
         allowNull: false,
         type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
-          key: 'id'
-        }
+        // references: {
+        //   model: 'Users',
+        //   key: 'id'
+        // }
       },
       followingId: {
         allowNull: false,
         type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
-          key: 'id'
-        }
+        // references: {
+        //   model: 'Users',
+        //   key: 'id'
+        // }
       },
       createdAt: {
         allowNull: false,
