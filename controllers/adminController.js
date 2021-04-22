@@ -77,5 +77,20 @@ module.exports = {
         console.log(error)
         return res.status(500).json(data)
       })
+  },
+
+  getTweets: (req, res) => {
+    return Tweet.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']], attributes: ['id', 'description'], include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] } })
+      .then(tweets => {
+        tweets.forEach(tweet => {
+          tweet.description = tweet.description.slice(0, 50)
+        })
+        return res.status(200).json(tweets)
+      })
+      .catch(error => {
+        const data = { status: 'error', message: error.toString() }
+        console.log(error)
+        return res.status(500).json(data)
+      })
   }
 }

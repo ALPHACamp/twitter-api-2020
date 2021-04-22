@@ -7,5 +7,6 @@ router.post('/login', adminController.login)
 
 router.use(authenticated, authenticatedAdmin)
 router.get('/users', adminController.getUsers)
+router.get('/tweets', adminController.getTweets)
 
 module.exports = router
