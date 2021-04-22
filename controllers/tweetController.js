@@ -152,7 +152,7 @@ const tweetController = {
         TweetId: req.params.tweet_Id
       })
       return res.json({ status: 'success', message: 'Like has built successfully!' })
-    } catch (e) { console.log(e) }
+    } catch (e) { return res.json({ status: 'error', message: 'Failed to build a like.' }) }
   },
   tweetUnlike: async (req, res) => {
     try {
@@ -164,7 +164,7 @@ const tweetController = {
       })
       like.destroy()
       return res.json({ status: 'success', message: 'Like has removed successfully!' })
-    } catch (e) { console.log(e) }
+    } catch (e) { return res.json({ status: 'error', message: 'Failed to remove a like.' }) }
   }
 }
 
