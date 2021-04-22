@@ -19,5 +19,4 @@ router.post('/tweets/:tweet_Id/like', authenticated, tweetController.tweetLike)
 router.post('/tweets/:tweet_Id/unlike', authenticated, tweetController.tweetUnlike)
 router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
 
-
 module.exports = router
