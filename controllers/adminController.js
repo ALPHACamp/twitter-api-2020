@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const validator = require('validator')
 const db = require('../models')
 const User = db.User
 const Followship = db.Followship
@@ -86,6 +87,30 @@ module.exports = {
           tweet.description = tweet.description.slice(0, 50)
         })
         return res.status(200).json(tweets)
+      })
+      .catch(error => {
+        const data = { status: 'error', message: error.toString() }
+        console.log(error)
+        return res.status(500).json(data)
+      })
+  },
+  deleteTweet: (req, res) => {
+    const tweetId = req.params.id
+    if (!validator.isNumeric(tweetId, { no_symbols: true })) {
+      const data = { status: 'error', message: 'Wrong id format.' }
+      return res.status(400).json(data)
+    }
+    Tweet.findByPk(tweetId)
+      .then(tweet => {
+        if (!tweet) {
+          const data = { status: 'error', message: 'The tweet you want to delete does not exist.' }
+          return res.status(404).json(data)
+        }
+        tweet.destroy()
+          .then(() => {
+            const data = { status: 'success', message: 'Done.' }
+            res.status(200).json(data)
+          })
       })
       .catch(error => {
         const data = { status: 'error', message: error.toString() }
