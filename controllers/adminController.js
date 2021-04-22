@@ -2,6 +2,9 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const User = db.User
+const Followship = db.Followship
+const Tweet = db.Tweet
+const Like = db.Like
 
 module.exports = {
   login: (req, res) => {
@@ -41,6 +44,34 @@ module.exports = {
         }
       })
     })
+      .catch(error => {
+        const data = { status: 'error', message: error.toString() }
+        console.log(error)
+        return res.status(500).json(data)
+      })
+  },
+
+  getUsers: (req, res) => {
+    // TODO: 優化方向：撈使用者資料時一併把其他相關資料撈出來並排序
+    const findAllUser = User.findAll({ raw: true, nest: true, attributes: ['id', 'name', 'avatar', 'account', 'cover'] })
+    const findAllFollowship = Followship.findAll({ raw: true, nest: true, attributes: ['followingId', 'followerId'] })
+    const findAllTweet = Tweet.findAll({ raw: true, nest: true, attributes: ['UserId'] })
+    const findAllLike = Like.findAll({ raw: true, nest: true, attributes: ['UserId', 'TweetId'], include: Tweet })
+    return Promise.all([findAllUser, findAllFollowship, findAllTweet, findAllLike])
+      .then((values) => {
+        const [users, followships, tweets, likes] = values
+        users.forEach(user => {
+          const userData = user
+          userData.followerCount = followships.filter(followship => followship.followingId === user.id).length
+          userData.followingCount = followships.filter(followship => followship.followerId === user.id).length
+          userData.likedCount = likes.filter(like => like.Tweet.UserId === user.id).length
+          userData.tweetCount = tweets.filter(tweet => tweet.UserId === user.id).length
+          user = userData
+        })
+
+        users.sort((a, b) => b.tweetCount - a.tweetCount)
+        return res.status(200).json(users)
+      })
       .catch(error => {
         const data = { status: 'error', message: error.toString() }
         console.log(error)
