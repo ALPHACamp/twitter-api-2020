@@ -2,8 +2,8 @@ const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
+const Reply = db.Reply
 
-const helpers = require('../_helpers')
 const { sequelize } = require('../models')
 
 const adminController = {
@@ -58,12 +58,18 @@ const adminController = {
       const tweet = await Tweet.findByPk(req.params.id)
 
       if (!tweet) {
-        res
+        return res
           .status(401)
           .json({ status: 'error', message: 'tweet does not exist' })
       }
 
-      await tweet.destroy()
+      // Replies and likes related to this tweet must be deleted as well
+      await Promise.all([
+        Reply.destroy({ where: { TweetId: tweet.id } }),
+        Like.destroy({ where: { TweetId: tweet.id } }),
+        tweet.destroy()
+      ])
+
       res
         .status(200)
         .json({ status: 'success', message: 'delete successfully' })
