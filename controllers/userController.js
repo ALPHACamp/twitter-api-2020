@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const validator = require('validator')
 const db = require('../models')
 const User = db.User
 
@@ -10,7 +11,6 @@ module.exports = {
     if (!account || !password) {
       return res.status(400).json({ status: 'error', message: "Required fields didn't exist." })
     }
-
     // validate account and password
     User.findOne({ where: { account } }).then(user => {
       if (!user) return res.status(400).json({ status: 'error', message: 'Account does not exist.' })
@@ -51,36 +51,75 @@ module.exports = {
   register: (req, res) => {
     const { email, password, name, account, checkPassword } = req.body
 
+    const message = []
+
     // all input required
     if (!email || !password || !name || !account || !checkPassword) {
-      return res.status(400).json({ status: 'error', message: 'Please complete all fields.' })
+      message.push('Please complete all fields')
     }
     // check password
     if (checkPassword !== password) {
-      return res.status(400).json({ status: 'error', message: 'Passwords does not match.' })
+      message.push('Password does not match')
     }
+    // check email
+    if (!validator.isEmail(`${email}`)) {
+      message.push('Invalid email address')
+    }
+    // check name length <= 25
+    if (!validator.isByteLength(`${name}`, { min: 1, max: 25 })) {
+      message.push('The name field can have no more than 25 characters')
+    }
+    // check email length <= 255
+    if (!validator.isByteLength(`${email}`, { min: 1, max: 255 })) {
+      message.push('The email field can have no more than 255 characters')
+    }
+    // check account length <= 255
+    if (!validator.isByteLength(`${account}`, { min: 1, max: 255 })) {
+      message.push('The account field can have no more than 255 characters')
+    }
+    // check password length <=255
+    if (!validator.isByteLength(`${password}`, { min: 1, max: 255 })) {
+      message.push('The password field can have no more than 255 characters')
+    }
+    if (message.length !== 0) {
+      return res.status(400).json({ status: 'error', message })
+    }
+
     // check if account and email used already
-    User.findOne({ where: { account: account } })
-      .then(user => {
-        if (user) {
-          return res.status(400).json({ status: 'error', message: 'account already exist.' })
+    const findByAccount = User.findOne({ where: { account: account } })
+    const findByEmail = User.findOne({ where: { email: email } })
+    return Promise.all([findByAccount, findByEmail])
+      .then(values => {
+        const [accountUser, emailUser] = [...values]
+        if (accountUser) {
+          message.push('Account already exist')
         }
-        User.findOne({ where: { email: email } })
-          .then(user => {
-            if (user) {
-              return res.status(400).json({ status: 'error', message: 'email already exist.' })
-            } else {
-              User.create({
-                email: email,
-                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-                name: name,
-                account: account
-              })
-                .then(newUser => {
-                  return res.status(201).json({ status: 'success', message: 'Registered' })
-                })
-            }
+        if (emailUser) {
+          message.push('Email alreay exist')
+        }
+        if (message.length !== 0) {
+          return res.status(400).json({ status: 'error', message })
+        } else {
+          User.create({
+            email: email,
+            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+            name: name,
+            account: account
           })
+            .then(newUser => {
+              return res.status(200).json({ status: 'success', message: 'Registered' })
+            })
+            .catch(error => {
+              const data = { status: 'error', message: error.toString() }
+              console.log(error)
+              return res.status(500).json(data)
+            })
+        }
+      })
+      .catch(error => {
+        const data = { status: 'error', message: error.toString() }
+        console.log(error)
+        return res.status(500).json(data)
       })
   }
 }
