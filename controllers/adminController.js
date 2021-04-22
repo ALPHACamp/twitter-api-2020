@@ -76,6 +76,7 @@ const adminController = {
       users = users.map(user => {
         // 計算 : 推文被 like 的數量
         let tweetsLikedCount = 0
+        // 整理回傳資料
         user.Tweets.forEach(tweet => {
           tweetsLikedCount += tweet.Likes.length
         })

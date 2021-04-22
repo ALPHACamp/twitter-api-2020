@@ -17,13 +17,13 @@ router.post('/login', userController.login)
 router.post('/users', userController.register)
 // routes : users
 router.get('/users/:id', authenticated, userController.getUser)
-router.get('/users/:id/tweets', authenticated, userController.getTweetsOfUser)
 router.put('/users/:id', authenticated, uploadProfile, userController.putUser)
-router.get('/users/:id/replied_tweets', authenticated, userController.getRepliedTweetsOfUser)
-router.get('/users/:id/likes', authenticated, userController.getLikedTweetsOfUser)
+router.get('/users/:id/tweets', authenticated, userController.getTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getRepliedTweets)
+router.get('/users/:id/likes', authenticated, userController.getLikedTweets)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
-// route : tweets
+// routes : tweets
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
