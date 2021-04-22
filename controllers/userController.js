@@ -86,30 +86,40 @@ module.exports = {
     }
 
     // check if account and email used already
-    User.findOne({ where: { account: account } })
-      .then(user => {
-        if (user) {
+    const findByAccount = User.findOne({ where: { account: account } })
+    const findByEmail = User.findOne({ where: { email: email } })
+    return Promise.all([findByAccount, findByEmail])
+      .then(values => {
+        const [accountUser, emailUser] = [...values]
+        if (accountUser) {
           message.push('Account already exist')
         }
-        User.findOne({ where: { email: email } })
-          .then(user => {
-            if (user) {
-              message.push('Email alreay exist')
-            }
-            if (message.length !== 0) {
-              return res.status(400).json({ status: 'error', message })
-            } else {
-              User.create({
-                email: email,
-                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-                name: name,
-                account: account
-              })
-                .then(newUser => {
-                  return res.status(201).json({ status: 'success', message: 'Registered' })
-                })
-            }
+        if (emailUser) {
+          message.push('Email alreay exist')
+        }
+        if (message.length !== 0) {
+          return res.status(400).json({ status: 'error', message })
+        } else {
+          User.create({
+            email: email,
+            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+            name: name,
+            account: account
           })
+            .then(newUser => {
+              return res.status(200).json({ status: 'success', message: 'Registered' })
+            })
+            .catch(error => {
+              const data = { status: 'error', message: error.toString() }
+              console.log(error)
+              return res.status(500).json(data)
+            })
+        }
+      })
+      .catch(error => {
+        const data = { status: 'error', message: error.toString() }
+        console.log(error)
+        return res.status(500).json(data)
       })
   }
 }
