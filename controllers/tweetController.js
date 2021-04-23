@@ -35,6 +35,27 @@ module.exports = {
       })
   },
 
+  getTweet: (req, res) => {
+    Tweet.findByPk(req.params.tweetId, {
+      include: [
+        { model: User, attributes: { exclude: ['password'] } },
+        { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },
+        Like
+      ]
+    })
+      .then(tweet => {
+        tweet = tweet.toJSON()
+        tweet.replyCount = tweet.Replies.length
+        tweet.likeCount = tweet.Likes.length
+        return res.status(200).json(tweet)
+      })
+      .catch(error => {
+        const data = { status: 'error', message: error.toString() }
+        console.log(error)
+        return res.status(500).json(data)
+      })
+  },
+
   postTweet: (req, res) => {
     const { description } = req.body
 
