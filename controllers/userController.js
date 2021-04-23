@@ -89,11 +89,14 @@ const userController = {
     if (email.search(emailRule) === -1) {
       errors.push({ message: 'Please enter the correct email address.' })
     }
+    if (password.length < 6 || password.length > 12) {
+      errors.push({ message: 'Password does not meet the required length' })
+    }
     if (password !== checkPassword) {
       errors.push({ message: 'Password and checkPassword do not match.' })
     }
     if (errors.length > 0) {
-      return res.json({ status: 'error', errors })
+      return res.json({ status: 'error', errors, userInput: req.body })
     }
 
     try {
@@ -103,7 +106,8 @@ const userController = {
       if (user) {
         return res.json({
           status: 'error',
-          message: `A user with ${email} already exists. Choose a different address or login directly.`
+          message: `A user with ${email} already exists. Choose a different address or login directly.`,
+          userInput: req.body
         })
       }
 
@@ -112,7 +116,8 @@ const userController = {
       if (user) {
         return res.json({
           status: 'error',
-          message: `A user with account '${account}' already exists. Choose a different account or login directly.`
+          message: `A user with account '${account}' already exists. Choose a different account or login directly.`,
+          userInput: req.body
         })
       }
 
