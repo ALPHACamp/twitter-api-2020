@@ -408,7 +408,13 @@ const userController = {
 
       // Clean up data
       replies = replies.map(reply => {
-        const tweet = reply.Tweet.toJSON()
+        // If the tweet has been deleted,
+        // we will not show the reply
+        const tweet = reply.Tweet
+        if (!tweet) {
+          return {}
+        }
+
         return {
           id: reply.id,
           comment: reply.comment,
@@ -459,7 +465,13 @@ const userController = {
 
       // Clean up data
       likes = likes.map(like => {
-        const tweet = like.Tweet.toJSON()
+        // If the tweet has been deleted,
+        // we will not show the tweet
+        const tweet = like.Tweet
+        if (!tweet) {
+          return {}
+        }
+
         return {
           id: like.id,
           comment: like.comment,
