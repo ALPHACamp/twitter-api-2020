@@ -7,7 +7,19 @@ const uploadProfile = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'c
 
 // authenticated
 const passport = require('../config/passport')
-const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (!user) {
+      console.log(err)
+      return res.status(401).json({
+        status: 'error',
+        message: 'JWT token verification failed!'
+      })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
+}
 
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
@@ -32,7 +44,7 @@ router.post('/tweets/:tweet_Id/like', authenticated, tweetController.tweetLike)
 router.post('/tweets/:tweet_Id/unlike', authenticated, tweetController.tweetUnlike)
 router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
 // routes : followships
-router.post('/followships/:userId', authenticated, followshipController.addFollowing)
+router.post('/followships/', authenticated, followshipController.addFollowing)
 router.delete('/followships/:userId', authenticated, followshipController.removeFollowing)
 
 

@@ -56,17 +56,7 @@ const tweetController = {
         return res.json({ status: 'error', message: "Can't find this tweet." })
       }
 
-      const tweetReplies = tweet.Replies.map(r => ({
-        id: r.id,
-        comment: r.comment,
-        updatedAt: r.updatedAt,
-        User: {
-          id: r.User.id,
-          avatar: r.User.avatar,
-          name: r.User.name,
-          account: r.User.account
-        }
-      }))
+      const tweetReplies = helpers.repliesInfos(tweet)
       tweet = {
         id: tweet.id,
         UserId: tweet.UserId,
@@ -112,18 +102,7 @@ const tweetController = {
         return res.json({ status: 'error', message: "Can't find this tweet." })
       }
 
-      const tweetReplies = await tweet.Replies.map(r => ({
-        id: r.id,
-        tweetId: r.TweetId,
-        comment: r.comment,
-        updatedAt: r.updatedAt,
-        User: {
-          id: r.User.id,
-          avatar: r.User.avatar,
-          name: r.User.name,
-          account: r.User.account
-        }
-      }))
+      const tweetReplies = helpers.repliesInfos(tweet)
 
       return res.json(tweetReplies)
     }
