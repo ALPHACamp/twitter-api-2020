@@ -33,7 +33,7 @@ router.post('/tweets/:tweet_Id/like', authenticated, tweetController.tweetLike)
 router.post('/tweets/:tweet_Id/unlike', authenticated, tweetController.tweetUnlike)
 router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
 // routes : followships
-router.post('/followships/:userId', authenticated, followshipController.addFollowing)
+router.post('/followships/', authenticated, followshipController.addFollowing)
 router.delete('/followships/:userId', authenticated, followshipController.removeFollowing)
 
 module.exports = router
