@@ -18,9 +18,11 @@ const tweetController = {
         })
       }
 
-      // 是否可請前端也做個字數不能超過 140 字元的驗證？
       if (description.length > 140) {
-        description = description.substring(0, 140)
+        return res.json({
+          status: 'error',
+          message: 'input cannot be longer than 140 characters'
+        })
       }
 
       await Tweet.create({
