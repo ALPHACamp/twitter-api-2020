@@ -136,18 +136,18 @@ const userController = {
       if (!user) return res.json({ status: 'error', message: 'can not find this user!' })
       // 處理圖片
       const { files } = req
-      if (files.length > 0) {
+      if (files) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        const imgAvatar = await uploadImg(files.avatar[0].path)
-        const imgCover = await uploadImg(files.cover[0].path)
+        const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
+        const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
         await user.update({
           name: req.body.name,
           introduction: req.body.introduction,
-          avatar: imgAvatar.data.link ? imgAvatar.data.link : user.avatar,
-          cover: imgCover.data.link ? imgCover.data.link : user.cover
+          avatar: files.avatar ? imgAvatar.data.link : user.avatar,
+          cover: files.cover ? imgCover.data.link : user.cover
         })
       } else {
-        user.update({
+        await user.update({
           name: req.body.name,
           introduction: req.body.introduction,
           avatar: user.avatar ? user.avatar : defaultAvatar,
