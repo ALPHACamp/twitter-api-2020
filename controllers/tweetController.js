@@ -97,6 +97,74 @@ const tweetController = {
       await Tweet.create({ UserId, description })
       return res.json({ status: 'success', message: 'Tweet has built successfully!' })
     } catch (e) { console.log(e) }
+  },
+  getReplies: async (req, res) => {
+    try {
+      const tweetId = req.params.tweet_Id
+      const tweet = await Tweet.findByPk(tweetId, {
+        include: [{ model: Reply, include: [User] }],
+        order: [
+          [{ model: Reply }, 'updatedAt', 'DESC']
+        ]
+      })
+
+      if (tweet === null) {
+        return res.json({ status: 'error', message: "Can't find this tweet." })
+      }
+
+      const tweetReplies = await tweet.Replies.map(r => ({
+        id: r.id,
+        tweetId: r.TweetId,
+        comment: r.comment,
+        updatedAt: r.updatedAt,
+        User: {
+          id: r.User.id,
+          avatar: r.User.avatar,
+          name: r.User.name,
+          account: r.User.account
+        }
+      }))
+
+      return res.json(tweetReplies)
+    }
+    catch (e) { console.log(e) }
+  },
+  postReply: async (req, res) => {
+    try {
+      const { comment } = req.body
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.tweet_Id
+
+      if (!comment) {
+        return res.json({ status: 'error', message: "It must have comment to tweet." })
+      } else if (comment.length > 140) {
+        return res.json({ status: 'error', message: "comment max length is 140 words" })
+      }
+      await Reply.create({ TweetId, UserId, comment })
+      return res.json({ status: 'success', message: 'Reply has built successfully!' })
+
+    } catch (e) { console.log(e) }
+  },
+  tweetLike: async (req, res) => {
+    try {
+      await Like.create({
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweet_Id
+      })
+      return res.json({ status: 'success', message: 'Like has built successfully!' })
+    } catch (e) { return res.json({ status: 'error', message: 'Failed to build a like.' }) }
+  },
+  tweetUnlike: async (req, res) => {
+    try {
+      like = await Like.findOne({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.tweet_Id
+        }
+      })
+      like.destroy()
+      return res.json({ status: 'success', message: 'Like has removed successfully!' })
+    } catch (e) { return res.json({ status: 'error', message: 'Failed to remove a like.' }) }
   }
 }
 
