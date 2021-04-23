@@ -9,7 +9,7 @@ const followshipController = {
       }
       await Followship.create({
         followerId: helpers.getUser(req).id,
-        followingId: req.params.userId
+        followingId: req.body.userId
       })
       return res.json({ status: 'success', message: 'Followship has built successfully!' })
 
