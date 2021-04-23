@@ -57,5 +57,26 @@ module.exports = {
       .catch(error => {
         catchError(res, error)
       })
+  },
+
+  unfollow: (req, res) => {
+    const { followingId } = req.params
+    const followerId = req.user.id.toString()
+    if (!validator.isNumeric(followingId, { no_symbols: true })) {
+      const data = { status: 'error', message: 'Wrong id format.' }
+      return res.status(400).json(data)
+    }
+    return Followship.destroy({ where: { followerId, followingId } })
+      .then((deleteCount) => {
+        if (deleteCount === 0) {
+          const data = { status: 'error', message: 'You cannot unfollow a user you are not following.' }
+          return res.status(404).json(data)
+        }
+        const data = { status: 'success', message: 'Done.' }
+        res.status(200).json(data)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
   }
 }
