@@ -8,7 +8,7 @@ const helpers = require('../_helpers')
 const tweetController = {
   postTweets: async (req, res) => {
     try {
-      const { description } = req.body
+      let { description } = req.body
       const UserId = helpers.getUser(req).id
 
       if (!description) {
@@ -21,7 +21,7 @@ const tweetController = {
       if (description.length > 140) {
         return res.json({
           status: 'error',
-          message: 'input should be less than 140 characters'
+          message: 'input cannot be longer than 140 characters'
         })
       }
 
@@ -78,6 +78,14 @@ const tweetController = {
     try {
       const TweetId = req.params.tweet_id
       const tweet = await Tweet.findByPk(TweetId)
+
+      if (!tweet) {
+        return res.json({
+          status: 'error',
+          message: 'cannot get tweet that doesn\'t exist'
+        })
+      }
+
       return res.json(tweet)
     } catch (error) {
       console.log(error)
@@ -87,11 +95,29 @@ const tweetController = {
   likeTweet: async (req, res) => {
     try {
       const UserId = helpers.getUser(req).id
+      const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
+
+      if (!targetTweet) {
+        return res.json({
+          status: 'error',
+          message: 'cannot like a tweet that doesn\'t exist'
+        })
+      }
+
+      const like = await Like.findOne({ where: { TweetId: req.params.tweet_id, UserId } })
+
+      if (like) {
+        return res.json({
+          status: 'error',
+          message: 'already liked this tweet'
+        })
+      }
+
       await Like.create({
         UserId,
         TweetId: req.params.tweet_id
       })
-      return res.json({ status: 'success' })  // 可問問看前端是否需要回傳資料
+      return res.json({ status: 'success' })
     }
     catch (error) {
       console.log(error)
@@ -101,14 +127,92 @@ const tweetController = {
   unlikeTweet: async (req, res) => {
     try {
       const UserId = helpers.getUser(req).id
+      const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
+
+      if (!targetTweet) {
+        return res.json({
+          status: 'error',
+          message: 'cannot unlike a tweet that doesn\'t exist'
+        })
+      }
+
       const like = await Like.findOne({
         where: {
           UserId,
           TweetId: req.params.tweet_id
         }
       })
+
+      if (!like) {
+        return res.json({
+          status: 'error',
+          message: 'you haven\'t liked this tweet before'
+        })
+      }
+
       await like.destroy()
-      return res.json({ status: 'success' })  // 可問問看前端是否需要回傳資料
+      return res.json({ status: 'success' })
+    }
+    catch (error) {
+      console.log(error)
+    }
+  },
+
+  postReply: async (req, res) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
+      const UserId = helpers.getUser(req).id
+
+      if (!targetTweet) {
+        return res.json({
+          status: 'error',
+          message: 'cannot reply to a tweet that doesn\'t exist'
+        })
+      }
+
+      const tweetAuthor = await User.findOne({ where: { id: targetTweet.UserId } })
+
+      if (!req.body.comment.trim()) {
+        return res.json({
+          status: 'error',
+          message: 'comment cannot be blank'
+        })
+      }
+
+      await Reply.create({
+        UserId,
+        TweetId,
+        comment: req.body.comment,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      return res.json({
+        status: 'success',
+        message: `successfully replied to ${tweetAuthor.account}'s tweet`
+      })
+    }
+    catch (error) {
+      console.log(error)
+    }
+  },
+
+  getReplies: async (req, res) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
+
+      if (!targetTweet) {
+        return res.json({
+          status: 'error',
+          message: 'this tweet doesn\'t exist'
+        })
+      }
+
+      const replies = await Reply.findAll({ raw: true, nest: true, where: { TweetId } })
+      return res.json(
+        replies
+      )
     }
     catch (error) {
       console.log(error)
