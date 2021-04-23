@@ -1,5 +1,6 @@
 const db = require('../models')
 const helpers = require('../_helpers')
+const validator = require('validator')
 const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
@@ -15,7 +16,7 @@ module.exports = {
         const data = tweets.map(r => ({
           id: r.id,
           UserId: 1,
-          description: r.description.slice(0, 50),
+          description: r.description,
           createdAt: r.createdAt,
           updatedAt: r.updatedAt,
           replyCount: r.Replies.length,
@@ -61,6 +62,10 @@ module.exports = {
 
     if (!description) {
       return res.status(400).json({ status: 'error', message: 'Please enter description' })
+    }
+
+    if (description && !validator.isByteLength(description, { min: 0, max: 140 })) {
+      return res.status(400).json({ status: 'error', message: 'The description field can have no more than 140 characters' })
     }
     Tweet.create({
       UserId: helpers.getUser(req).id,
