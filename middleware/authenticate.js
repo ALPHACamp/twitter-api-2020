@@ -30,7 +30,7 @@ function authenticatedAdmin (req, res, next) {
 function authenticatedUser (req, res, next) {
   req.user = helpers.getUser(req)
   if (req.user) {
-    if (req.user.role === 'user') { return next() }
+    if (req.user.role !== 'admin') { return next() }
     return res.status(403).json({ status: 'error', message: 'User only. Administrator permission denied.' })
   } else {
     return res.status(401).json({ status: 'error', message: 'Permission denied.' })
