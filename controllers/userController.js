@@ -68,14 +68,14 @@ const userController = {
   // 註冊
   register: async (req, res) => {
     try {
-      const { account, name, email, password, confirmPassword } = req.body
+      const { account, name, email, password, checkPassword } = req.body
       // check account & name & email & password & confirmPassword are required
-      if (!account || !name || !email || !password || !confirmPassword) {
-        return res.json({ status: 'error', message: 'account, name, email, password, confirmPassword are required!' })
+      if (!account || !name || !email || !password || !checkPassword) {
+        return res.json({ status: 'error', message: 'account, name, email, password, checkPassword are required!' })
       }
-      // check password & confirmPassword are same
-      if (password !== confirmPassword) {
-        return res.json({ status: 'error', message: 'password & confirmPassword must be same!' })
+      // check password & checkPassword are same
+      if (password !== checkPassword) {
+        return res.json({ status: 'error', message: 'password & checkPassword must be same!' })
       }
       // check email & account have not been used
       const userEmail = await User.findOne({ where: { email } })
@@ -160,15 +160,18 @@ const userController = {
     }
   },
   // 查看單一使用者發過的推文
-  // account、name、avatar、推文內容、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
+  // 推文內容、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
   getTweets: async (req, res) => {
     try {
-      let user = await User.findByPk(req.params.id, {
-        include: [{ model: Tweet, include: [Reply, Like] }],
-        order: [[Tweet, 'createdAt', 'DESC']]
-      })
+      const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'can not find this user!' })
-      const tweets = user.Tweets.map(tweet => ({
+      let tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [Reply, Like],
+        order: [['createdAt', 'DESC']]
+      })
+      // 整理回傳資料
+      tweets = tweets.map(tweet => ({
         id: tweet.id,
         UserId: tweet.UserId,
         description: tweet.description,
@@ -177,15 +180,7 @@ const userController = {
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length
       }))
-      // 整理回傳資料
-      user = {
-        id: user.id,
-        account: user.account,
-        name: user.name,
-        avatar: user.avatar,
-        Tweets: tweets
-      }
-      return res.json(user)
+      return res.json(tweets)
     } catch (e) {
       console.log(e)
     }

@@ -5,13 +5,14 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 const uploadProfile = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
-// authenticated
-const passport = require('../config/passport')
-const authenticated = passport.authenticate('jwt', { session: false })
-
+// 載入 controller
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followshipController = require('../controllers/followshipController')
+
+// 載入 authenticated & authenticatedAdmin
+const { authenticated } = require('../middleware/auth')
+
 // routes: login & register
 router.post('/login', userController.login)
 router.post('/users', userController.register)
@@ -34,7 +35,5 @@ router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
 // routes : followships
 router.post('/followships/:userId', authenticated, followshipController.addFollowing)
 router.delete('/followships/:userId', authenticated, followshipController.removeFollowing)
-
-
 
 module.exports = router
