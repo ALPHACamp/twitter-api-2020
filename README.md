@@ -1,6 +1,6 @@
 # Simple Twitter API
 
-A RESTful API server, built with Node.js, Express, and mySQL, for [Simple Twitter](https://github.com/ivyhungtw/simple-twitter) project.
+A RESTful API server for [Simple Twitter](https://github.com/ivyhungtw/simple-twitter) project built with Node.js, Express framework, and mySQL
 
 ## Base URL
 
@@ -12,14 +12,24 @@ https://simple-twitter-api-2021.herokuapp.com/api
 
 ## API Guideline
 
-Please refer to [API Docs](https://simple-twitter-api-2021.herokuapp.com/api-docs/) for more details.
+Please refer to [API Docs](https://simple-twitter-api-2021.herokuapp.com/api-docs/) for more details. You can also test these APIs with the Swagger UI with the account below.
+
+```
+Admin
+Account: root
+Password: 12345678
+
+User
+Account: user1
+Password: 12345678
+```
 
 #### Admin related
 
-| Method | Path              | description                                                    | req.body | res.json tables |
-| ------ | ----------------- | -------------------------------------------------------------- | -------- | --------------- |
-| GET    | /admin/users      | 取得站內所有使用者資料及其社群活躍數據，，按推文數從多到少排序 | -------- | users           |
-| DELETE | /admin/tweets/:id | 刪除一筆 id 符合的推文                                         | -------- | --------        |
+| Method | Path              | description                                                  | req.body | res.json tables |
+| ------ | ----------------- | ------------------------------------------------------------ | -------- | --------------- |
+| GET    | /admin/users      | 取得站內所有使用者資料及其社群活躍數據，按推文數從多到少排序 | -------- | users           |
+| DELETE | /admin/tweets/:id | 刪除一筆 id 符合的推文                                       | -------- | --------        |
 
 #### User related
 
@@ -67,7 +77,7 @@ Please refer to [API Docs](https://simple-twitter-api-2021.herokuapp.com/api-doc
 
 ## Install Simple Twitter API
 
-Following the instruction, you can run a Simple Twitter API server on your local machine.
+By following the instruction, you can run a Simple Twitter API server on your local machine.
 
 #### Prerequisites
 
@@ -76,7 +86,7 @@ Following the instruction, you can run a Simple Twitter API server on your local
 - [MySQL v8.0.20](https://dev.mysql.com/downloads/mysql/)
 - [MySQL Workbench v8.0.20](https://dev.mysql.com/downloads/mysql/)
 
-#### Clone the repository locally
+#### Clone the repository to your local machine
 
 ```
 $ git clone https://github.com/ivyhungtw/twitter-api-2020.git
