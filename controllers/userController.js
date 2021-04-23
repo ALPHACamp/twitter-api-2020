@@ -170,6 +170,7 @@ const userController = {
         include: [Reply, Like],
         order: [['createdAt', 'DESC']]
       })
+      if (tweets.length === 0) return res.json({ message: 'this user has no tweet!' })
       // 整理回傳資料
       tweets = tweets.map(tweet => ({
         id: tweet.id,
@@ -291,7 +292,7 @@ const userController = {
       })
       // 整理回傳資料
       followers = followers.Followers.map(follower => ({
-        id: follower.id,
+        followerId: follower.id,
         account: follower.account,
         name: follower.name,
         avatar: follower.avatar,
@@ -318,7 +319,7 @@ const userController = {
       if (followings.Followings.length === 0) return res.json({ message: 'this user has no following!' })
       // 整理回傳資料
       followings = followings.Followings.map(following => ({
-        id: following.id,
+        followingId: following.id,
         account: following.account,
         name: following.name,
         avatar: following.avatar,
