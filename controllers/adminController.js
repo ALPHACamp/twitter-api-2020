@@ -69,9 +69,9 @@ const adminController = {
         order: [[sequelize.literal('tweetcount'), 'DESC']]
       })
       // 如果沒有 user，回傳 message
-      // if (users.length === 0) {
-      //   return res.json({ message: 'db has no user!' })
-      // }
+      if (users.length === 0) {
+        return res.json({ message: 'db has no user!' })
+      }
       // 回傳資料
       users = users.map(user => {
         // 計算 : 推文被 like 的數量
