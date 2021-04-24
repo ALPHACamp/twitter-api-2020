@@ -89,7 +89,7 @@ const userController = {
     if (email.search(emailRule) === -1) {
       errors.push({ message: 'Please enter the correct email address.' })
     }
-    if (password.length < 6 || password.length > 12) {
+    if (password.length < 4 || password.length > 12) {
       errors.push({ message: 'Password does not meet the required length' })
     }
     if (password !== checkPassword) {
@@ -193,11 +193,23 @@ const userController = {
       include: [
         Tweet,
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: User, as: 'Followings' },
+        { model: User, as: 'Subscribers' }
       ]
     })
 
-    // clean up data
+    // Clean up user data
+
+    // To pass the test
+    let subscriptions = helpers.getUser(req).Subscriptions
+    subscriptions = subscriptions
+      ? subscriptions.map(subscription => subscription.id)
+      : subscriptions
+
+    const followings = helpers
+      .getUser(req)
+      .Followings.map(following => following.id)
+
     user = {
       id: user.id,
       name: user.name,
@@ -209,7 +221,11 @@ const userController = {
       role: user.role,
       tweetCount: user.Tweets.length,
       followerCount: user.Followers.length,
-      followingCount: user.Followings.length
+      followingCount: user.Followings.length,
+      isFollowed: followings.includes(user.id),
+      isSubscribed: subscriptions
+        ? subscriptions.includes(user.id)
+        : subscriptions
     }
 
     res.status(200).json(user)
