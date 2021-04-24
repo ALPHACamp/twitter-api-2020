@@ -1,37 +1,14 @@
 const express = require('express')
 const router = express.Router()
 
-const helpers = require('../_helpers')
+// 載入 controller
 const adminController = require('../controllers/adminController')
+
+// 載入 authenticated & authenticatedAdmin
+const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 // route : login
 router.post('/login', adminController.login)
-
-// authenticated & authenticatedAdmin
-const passport = require('../config/passport')
-const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
-    if (!user) {
-      console.log(err)
-      return res.status(401).json({
-        status: 'error',
-        message: 'JWT token verification failed!'
-      })
-    }
-    req.user = user
-    return next()
-  })(req, res, next)
-}
-const authenticatedAdmin = (req, res, next) => {
-  if (helpers.getUser(req)) {
-    if (helpers.getUser(req).role === 'admin') {
-      return next()
-    }
-    return res.json({ status: 'error', message: 'you don\'t have authority to login!' })
-  } else {
-    return res.json({ status: 'error', message: 'you don\'t have authority to login!' })
-  }
-}
 
 // routes : after login
 router.get('/users', authenticated, authenticatedAdmin, adminController.getUsers)

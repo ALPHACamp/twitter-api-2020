@@ -10,7 +10,9 @@ if (process.env.NODE_ENV !== 'production') {
 const app = express()
 const port = process.env.PORT || 3000
 
+// 載入 cors
 app.use(cors())
+
 // 載入 bodyParser
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())

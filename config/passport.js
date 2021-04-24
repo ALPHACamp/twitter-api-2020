@@ -21,6 +21,8 @@ const strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   }).then(user => {
     if (!user) return next(null, false)
     return next(null, user)
+  }).catch(e => {
+    return next(e, false)
   })
 })
 
