@@ -4,12 +4,14 @@ const helpers = require('../_helpers')
 const followshipController = {
   addFollowing: async (req, res) => {
     try {
-      if (!helpers.getUser(req).id) {
+      const followerId = helpers.getUser(req).id
+      const followingId = req.body.id
+
+      if (!followerId || !followingId) {
         return res.json({ status: 'error', message: "Can't find followerId." })
       }
       await Followship.create({
-        followerId: helpers.getUser(req).id,
-        followingId: req.body.userId
+        followerId, followingId
       })
       return res.json({ status: 'success', message: 'Followship has built successfully!' })
 

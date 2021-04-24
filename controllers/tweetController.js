@@ -69,9 +69,10 @@ const tweetController = {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
           account: tweet.User.account
-        }
+        },
+        tweetReplies: tweetReplies
       }
-      return res.json({ tweet, tweetReplies })
+      return res.json(tweet)
     } catch (e) { console.log(e) }
   },
   postTweet: async (req, res) => {
@@ -141,7 +142,7 @@ const tweetController = {
           TweetId: req.params.tweet_Id
         }
       })
-      like.destroy()
+      await like.destroy()
       return res.json({ status: 'success', message: 'Like has removed successfully!' })
     } catch (e) { return res.json({ status: 'error', message: 'Failed to remove a like.' }) }
   }
