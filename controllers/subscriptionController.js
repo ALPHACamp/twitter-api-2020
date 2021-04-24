@@ -11,7 +11,7 @@ const subscriptionController = {
 
       // Users can not subscribe themselves
       if (Number(authorId) === subscriberId) {
-        return res.json({
+        return res.status(403).json({
           status: 'error',
           message: 'You cannot subscribe yourself.'
         })
@@ -25,14 +25,14 @@ const subscriptionController = {
       ])
       // Users can't subscribe the admin or the user that doesn't exist
       if (!author || author.role === 'admin') {
-        return res.json({
+        return res.status(403).json({
           status: 'error',
           message: `cannot subscribe an user that doesn't exist`
         })
       }
       // Users can't subscribe the same user many times without cancelling subscription
       if (subscription) {
-        return res.json({
+        return res.status(409).json({
           status: 'error',
           message: `already subscribed @${author.account}`
         })
@@ -66,7 +66,7 @@ const subscriptionController = {
 
       // Users can't unsubscribe the user that doesn't exist
       if (!author) {
-        return res.json({
+        return res.status(403).json({
           status: 'error',
           message: `cannot unsubscribe an user that doesn't exist`
         })
@@ -74,7 +74,7 @@ const subscriptionController = {
 
       // Users can't unsubscribe the user if the subscription doesn't exist
       if (!subscription) {
-        return res.json({
+        return res.status(404).json({
           status: 'error',
           message: `unable to cancel subscription since you haven't subscribed @${author.account} before`
         })
