@@ -388,7 +388,16 @@ const userController = {
   getTweets: async (req, res) => {
     try {
       // Make sure user exists or is not admin
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: Tweet,
+            order: [['createdAt', 'DESC']],
+            include: [Reply, Like]
+          }
+        ]
+      })
+
       if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
@@ -396,13 +405,8 @@ const userController = {
         })
       }
 
-      let tweets = await Tweet.findAll({
-        where: { UserId: req.params.id },
-        order: [['createdAt', 'DESC']],
-        include: [Reply, Like]
-      })
-
-      // Clean up data
+      // Clean up tweets data
+      let tweets = user.Tweets
       tweets = tweets.map(tweet => ({
         id: tweet.id,
         description: tweet.description,
@@ -419,7 +423,16 @@ const userController = {
   getRepliesAndTweets: async (req, res) => {
     try {
       // Make sure user exists or is not admin
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: Reply,
+            order: [['createdAt', 'DESC']],
+            include: [{ model: Tweet, include: [Like, Reply, User] }]
+          }
+        ]
+      })
+
       if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
@@ -427,13 +440,8 @@ const userController = {
         })
       }
 
-      let replies = await Reply.findAll({
-        where: { UserId: req.params.id },
-        order: [['createdAt', 'DESC']],
-        include: [{ model: Tweet, include: [Like, Reply, User] }]
-      })
-
       // Clean up data
+      let replies = user.Replies
       replies = replies.map(reply => {
         // If the tweet has been deleted,
         // we will not show the reply
@@ -470,19 +478,21 @@ const userController = {
   getLikes: async (req, res) => {
     try {
       // Make sure user exists or is not admin
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: Like,
+            order: [['createdAt', 'DESC']],
+            include: [{ model: Tweet, include: [Like, Reply, User] }]
+          }
+        ]
+      })
       if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
           message: 'user does not exist'
         })
       }
-
-      let likes = await Like.findAll({
-        where: { UserId: req.params.id },
-        order: [['createdAt', 'DESC']],
-        include: [{ model: Tweet, include: [Like, Reply, User] }]
-      })
 
       let currentUserLikes = helpers.getUser(req).LikedTweets
 
@@ -491,6 +501,7 @@ const userController = {
       }
 
       // Clean up data
+      let likes = user.Likes
       likes = likes.map(like => {
         // If the tweet has been deleted,
         // we will not show the tweet
@@ -532,19 +543,15 @@ const userController = {
       const id = req.params.id
       const currentUser = helpers.getUser(req)
       // Make sure user exists or is not admin
-      const user = await User.findByPk(id)
+      const user = await User.findByPk(id, {
+        include: [{ model: User, as: 'Followers' }]
+      })
       if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
           message: 'user does not exist'
         })
       }
-
-      let followers = (
-        await User.findByPk(id, {
-          include: [{ model: User, as: 'Followers' }]
-        })
-      ).Followers
 
       let currentUserFollowings = helpers.getUser(req).Followings
       if (currentUserFollowings) {
@@ -553,8 +560,12 @@ const userController = {
         )
       }
 
-      // Clean up data
+      // Clean up followers data
+      let followers = user.Followers
       followers = followers.map(follower => {
+        if (follower.role === 'admin') {
+          return {}
+        }
         return {
           followerId: follower.id,
           name: follower.name,
@@ -579,19 +590,15 @@ const userController = {
       const id = req.params.id
       const currentUser = helpers.getUser(req)
       // Make sure user exists or is not admin
-      const user = await User.findByPk(id)
+      const user = await User.findByPk(id, {
+        include: [{ model: User, as: 'Followings' }]
+      })
       if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
           message: 'user does not exist'
         })
       }
-
-      let followings = (
-        await User.findByPk(id, {
-          include: [{ model: User, as: 'Followings' }]
-        })
-      ).Followings
 
       let currentUserFollowings = helpers.getUser(req).Followings
       if (currentUserFollowings) {
@@ -600,8 +607,12 @@ const userController = {
         )
       }
 
-      // Clean up data
+      // Clean up followings data
+      let followings = user.Followings
       followings = followings.map(following => {
+        if (following.role === 'admin') {
+          return {}
+        }
         return {
           followingId: following.id,
           name: following.name,
