@@ -6,5 +6,8 @@ const router = express.Router()
 router.post('/login', adminController.login)
 
 router.use(authenticated, authenticatedAdmin)
+router.get('/users', adminController.getUsers)
+router.get('/tweets', adminController.getTweets)
+router.delete('/tweets/:id', adminController.deleteTweet)
 
 module.exports = router
