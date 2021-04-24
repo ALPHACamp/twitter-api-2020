@@ -1,5 +1,4 @@
 const db = require('../models')
-const helpers = require('../_helpers')
 const validator = require('validator')
 const Tweet = db.Tweet
 const User = db.User
@@ -22,6 +21,7 @@ module.exports = {
           replyCount: r.Replies.length,
           likeCount: r.Likes.length,
           User: {
+            id: r.User.id,
             account: r.User.account,
             name: r.User.name,
             avatar: r.User.avatar
@@ -68,7 +68,7 @@ module.exports = {
       return res.status(400).json({ status: 'error', message: 'The description field can have no more than 140 characters' })
     }
     Tweet.create({
-      UserId: helpers.getUser(req).id,
+      UserId: req.user.id,
       description: description
     })
       .then(() => {
