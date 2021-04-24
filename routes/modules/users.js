@@ -81,6 +81,8 @@ router
 
 router.post('/login', userController.login)
 
+router.route('/current_user').get(authenticated, userController.getCurrentUser)
+
 router
   .route('/:id')
   .all(authenticated)

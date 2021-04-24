@@ -598,6 +598,18 @@ const userController = {
     } catch (error) {
       console.log(error)
     }
+  },
+  getCurrentUser: async (req, res) => {
+    return res.status(200).json({
+      id: req.user.id,
+      name: req.user.name,
+      account: req.user.account,
+      email: req.user.email,
+      avatar: req.user.avatar,
+      role: req.user.role,
+      cover: req.user.cover,
+      introduction: req.user.introduction
+    })
   }
 }
 
