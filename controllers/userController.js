@@ -68,14 +68,14 @@ const userController = {
   // 註冊
   register: async (req, res) => {
     try {
-      const { account, name, email, password, confirmPassword } = req.body
+      const { account, name, email, password, checkPassword } = req.body
       // check account & name & email & password & confirmPassword are required
-      if (!account || !name || !email || !password || !confirmPassword) {
-        return res.json({ status: 'error', message: 'account, name, email, password, confirmPassword are required!' })
+      if (!account || !name || !email || !password || !checkPassword) {
+        return res.json({ status: 'error', message: 'account, name, email, password, checkPassword are required!' })
       }
-      // check password & confirmPassword are same
-      if (password !== confirmPassword) {
-        return res.json({ status: 'error', message: 'password & confirmPassword must be same!' })
+      // check password & checkPassword are same
+      if (password !== checkPassword) {
+        return res.json({ status: 'error', message: 'password & checkPassword must be same!' })
       }
       // check email & account have not been used
       const userEmail = await User.findOne({ where: { email } })
@@ -136,18 +136,18 @@ const userController = {
       if (!user) return res.json({ status: 'error', message: 'can not find this user!' })
       // 處理圖片
       const { files } = req
-      if (files.length > 0) {
+      if (files) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        const imgAvatar = await uploadImg(files.avatar[0].path)
-        const imgCover = await uploadImg(files.cover[0].path)
+        const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
+        const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
         await user.update({
           name: req.body.name,
           introduction: req.body.introduction,
-          avatar: imgAvatar.data.link ? imgAvatar.data.link : user.avatar,
-          cover: imgCover.data.link ? imgCover.data.link : user.cover
+          avatar: files.avatar ? imgAvatar.data.link : user.avatar,
+          cover: files.cover ? imgCover.data.link : user.cover
         })
       } else {
-        user.update({
+        await user.update({
           name: req.body.name,
           introduction: req.body.introduction,
           avatar: user.avatar ? user.avatar : defaultAvatar,
@@ -160,15 +160,19 @@ const userController = {
     }
   },
   // 查看單一使用者發過的推文
-  // account、name、avatar、推文內容、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
+  // 推文內容、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
   getTweets: async (req, res) => {
     try {
-      let user = await User.findByPk(req.params.id, {
-        include: [{ model: Tweet, include: [Reply, Like] }],
-        order: [[Tweet, 'createdAt', 'DESC']]
-      })
+      const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'can not find this user!' })
-      const tweets = user.Tweets.map(tweet => ({
+      let tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [Reply, Like],
+        order: [['createdAt', 'DESC']]
+      })
+      if (tweets.length === 0) return res.json({ message: 'this user has no tweet!' })
+      // 整理回傳資料
+      tweets = tweets.map(tweet => ({
         id: tweet.id,
         UserId: tweet.UserId,
         description: tweet.description,
@@ -177,15 +181,7 @@ const userController = {
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length
       }))
-      // 整理回傳資料
-      user = {
-        id: user.id,
-        account: user.account,
-        name: user.name,
-        avatar: user.avatar,
-        Tweets: tweets
-      }
-      return res.json(user)
+      return res.json(tweets)
     } catch (e) {
       console.log(e)
     }
@@ -296,7 +292,7 @@ const userController = {
       })
       // 整理回傳資料
       followers = followers.Followers.map(follower => ({
-        id: follower.id,
+        followerId: follower.id,
         account: follower.account,
         name: follower.name,
         avatar: follower.avatar,
@@ -323,7 +319,7 @@ const userController = {
       if (followings.Followings.length === 0) return res.json({ message: 'this user has no following!' })
       // 整理回傳資料
       followings = followings.Followings.map(following => ({
-        id: following.id,
+        followingId: following.id,
         account: following.account,
         name: following.name,
         avatar: following.avatar,
