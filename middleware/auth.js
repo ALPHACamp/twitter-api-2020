@@ -13,7 +13,7 @@ const authenticated = (req, res, next) => {
     }
     req.user = user
     return next()
-  })
+  })(req, res, next)
 }
 
 const authenticatedAdmin = (req, res, next) => {
