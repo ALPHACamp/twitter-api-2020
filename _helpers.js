@@ -14,7 +14,6 @@ function repliesInfos(tweet) {
   return infos
 }
 
-
 function getUser(req) {
   return req.user
 }

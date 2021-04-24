@@ -142,7 +142,7 @@ const tweetController = {
           TweetId: req.params.tweet_Id
         }
       })
-      like.destroy()
+      await like.destroy()
       return res.json({ status: 'success', message: 'Like has removed successfully!' })
     } catch (e) { return res.json({ status: 'error', message: 'Failed to remove a like.' }) }
   }
