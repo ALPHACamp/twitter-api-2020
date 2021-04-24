@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Users', [{
-      account: '@root',
+      account: 'root',
       email: "root@example.com",
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       name: 'root',
@@ -17,7 +17,7 @@ module.exports = {
     }])
     await queryInterface.bulkInsert('Users',
       Array.from({ length: 5 }).map((d, i) => ({
-        account: `@user${i + 1}`,
+        account: `user${i + 1}`,
         email: `user${i + 1}@example.com`,
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
         name: `user${i + 1}`,
