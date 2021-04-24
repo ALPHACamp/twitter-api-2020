@@ -405,6 +405,9 @@ const userController = {
         })
       }
 
+      let likes = helpers.getUser(req).LikedTweets
+      likes = likes ? likes.map(like => like.id) : null
+
       // Clean up tweets data
       let tweets = user.Tweets
       tweets = tweets.map(tweet => ({
@@ -412,7 +415,8 @@ const userController = {
         description: tweet.description,
         createdAt: tweet.createdAt,
         replyCount: tweet.Replies.length,
-        likeCount: tweet.Likes.length
+        likeCount: tweet.Likes.length,
+        isLiked: likes ? likes.includes(tweet.id) : null
       }))
 
       return res.status(200).json(tweets)
