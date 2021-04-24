@@ -66,19 +66,19 @@ module.exports = {
       message.push('Invalid email address')
     }
     // check name length <= 25
-    if (!validator.isByteLength(name, { min: 0, max: 25 })) {
+    if (name && !validator.isByteLength(name, { min: 0, max: 25 })) {
       message.push('The name field can have no more than 25 characters')
     }
     // check email length <= 255
-    if (!validator.isByteLength(email, { min: 0, max: 255 })) {
+    if (email && !validator.isByteLength(email, { min: 0, max: 255 })) {
       message.push('The email field can have no more than 255 characters')
     }
     // check account length <= 255
-    if (!validator.isByteLength(account, { min: 0, max: 255 })) {
+    if (account && !validator.isByteLength(account, { min: 0, max: 255 })) {
       message.push('The account field can have no more than 255 characters')
     }
     // check password length <=255
-    if (!validator.isByteLength(password, { min: 0, max: 255 })) {
+    if (password && !validator.isByteLength(password, { min: 0, max: 255 })) {
       message.push('The password field can have no more than 255 characters')
     }
     if (message.length !== 0) {
