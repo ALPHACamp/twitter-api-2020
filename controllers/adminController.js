@@ -97,7 +97,7 @@ module.exports = {
   deleteTweet: (req, res) => {
     const tweetId = req.params.id
     if (!validator.isNumeric(tweetId, { no_symbols: true })) {
-      const data = { status: 'error', message: 'Wrong id format.' }
+      const data = { status: 'error', message: 'id should be an integer.' }
       return res.status(400).json(data)
     }
     Tweet.findByPk(tweetId)
