@@ -198,8 +198,15 @@ const userController = {
       ]
     })
 
-    // Clean up user data
+    // User can not see profile of admin or user that doesn't exist
+    if (!user || user.role === 'admin') {
+      return res.status(404).json({
+        status: 'error',
+        message: `user doesn't exist`
+      })
+    }
 
+    // Clean up user data
     // To pass the test
     let subscriptions = helpers.getUser(req).Subscriptions
     subscriptions = subscriptions
@@ -380,9 +387,9 @@ const userController = {
   },
   getTweets: async (req, res) => {
     try {
-      // Make sure user exists
+      // Make sure user exists or is not admin
       const user = await User.findByPk(req.params.id)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
           message: 'user does not exist'
@@ -410,11 +417,10 @@ const userController = {
     }
   },
   getRepliesAndTweets: async (req, res) => {
-    //
     try {
-      // Make sure user exists
+      // Make sure user exists or is not admin
       const user = await User.findByPk(req.params.id)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
           message: 'user does not exist'
@@ -463,9 +469,9 @@ const userController = {
   },
   getLikes: async (req, res) => {
     try {
-      // Make sure user exists
+      // Make sure user exists or is not admin
       const user = await User.findByPk(req.params.id)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
           message: 'user does not exist'
@@ -525,9 +531,9 @@ const userController = {
     try {
       const id = req.params.id
       const currentUser = helpers.getUser(req)
-      // Make sure user exists
+      // Make sure user exists or is not admin
       const user = await User.findByPk(id)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
           message: 'user does not exist'
@@ -572,9 +578,9 @@ const userController = {
     try {
       const id = req.params.id
       const currentUser = helpers.getUser(req)
-      // Make sure user exists
+      // Make sure user exists or is not admin
       const user = await User.findByPk(id)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(401).json({
           status: 'error',
           message: 'user does not exist'
