@@ -1,8 +1,14 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
+
+const { catchError } = require('../utils/errorHandling')
 const db = require('../models')
+
 const User = db.User
+const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 
 module.exports = {
   login: (req, res) => {
@@ -132,5 +138,45 @@ module.exports = {
     const user = { id, name, account, email, avatar }
     user.isAdmin = req.user.role === 'admin'
     return res.status(200).json({ currentUser: user })
+  },
+
+  getUserTweets: (req, res) => {
+    const { id } = req.params
+    if (!validator.isNumeric(id, { no_symbols: true })) {
+      const data = { status: 'error', message: 'id should be an integer.' }
+      return res.status(400).json(data)
+    }
+    Tweet.findAll({
+      where: { UserId: id },
+      attributes: ['id', 'description', 'createdAt'],
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Reply, attributes: ['id'] },
+        { model: Like, attributes: ['UserId'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    }).then(tweets => {
+      if (!tweets) {
+        const data = { status: 'error', message: 'Tweet not found.' }
+        return res.status(404).json(data)
+      }
+      const userTweet = []
+      tweets.forEach(tweet => {
+        const data = {}
+        data.id = tweet.dataValues.id
+        data.description = tweet.dataValues.description
+        data.createdAt = tweet.dataValues.createdAt
+        data.replyCount = tweet.Replies.length
+        data.likeCount = tweet.Likes.length
+        data.isLiked = tweet.Likes.map(like => like.UserId).includes(req.user.id)
+        data.User = tweet.dataValues.User.dataValues
+        userTweet.push(data)
+      })
+
+      return res.status(200).json(userTweet)
+    })
+      .catch(error => {
+        catchError(res, error)
+      })
   }
 }

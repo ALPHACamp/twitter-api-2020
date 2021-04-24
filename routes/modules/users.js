@@ -10,5 +10,6 @@ router.use(authenticated)
 router.get('/current', userController.getCurrentUser)
 
 router.use(authenticatedUser)
+router.get('/:id/tweets', userController.getUserTweets)
 
 module.exports = router
