@@ -121,5 +121,16 @@ module.exports = {
         console.log(error)
         return res.status(500).json(data)
       })
+  },
+
+  getCurrentUser: (req, res) => {
+    if (!req.user) {
+      const data = { status: 'error', message: 'Current user not found.' }
+      return res.status(404).json(data)
+    }
+    const { id, name, account, email, avatar } = req.user
+    const user = { id, name, account, email, avatar }
+    user.isAdmin = req.user.role === 'admin'
+    return res.status(200).json({ currentUser: user })
   }
 }
