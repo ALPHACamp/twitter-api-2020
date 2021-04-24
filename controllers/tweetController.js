@@ -69,9 +69,10 @@ const tweetController = {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
           account: tweet.User.account
-        }
+        },
+        tweetReplies: tweetReplies
       }
-      return res.json({ tweet, tweetReplies })
+      return res.json(tweet)
     } catch (e) { console.log(e) }
   },
   postTweet: async (req, res) => {
