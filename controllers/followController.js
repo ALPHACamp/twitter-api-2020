@@ -17,7 +17,7 @@ module.exports = {
       return res.status(400).json(data)
     }
     if (!validator.isNumeric(id, { no_symbols: true })) {
-      const data = { status: 'error', message: 'Wrong id format.' }
+      const data = { status: 'error', message: 'id should be an integer.' }
       return res.status(400).json(data)
     }
     return User.findByPk(id, { raw: true })
@@ -63,7 +63,7 @@ module.exports = {
     const { followingId } = req.params
     const followerId = req.user.id.toString()
     if (!validator.isNumeric(followingId, { no_symbols: true })) {
-      const data = { status: 'error', message: 'Wrong id format.' }
+      const data = { status: 'error', message: 'id should be an integer.' }
       return res.status(400).json(data)
     }
     return Followship.destroy({ where: { followerId, followingId } })
