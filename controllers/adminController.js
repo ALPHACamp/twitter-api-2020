@@ -81,7 +81,13 @@ module.exports = {
   },
 
   getTweets: (req, res) => {
-    return Tweet.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']], attributes: ['id', 'description'], include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] } })
+    return Tweet.findAll({
+      raw: true,
+      nest: true,
+      order: [['createdAt', 'DESC']],
+      attributes: ['id', 'description', 'createdAt'],
+      include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+    })
       .then(tweets => {
         tweets.forEach(tweet => {
           tweet.description = tweet.description.slice(0, 50)
