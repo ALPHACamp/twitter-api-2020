@@ -1,13 +1,16 @@
 const { catchError } = require('../utils/errorHandling')
+const validator = require('validator')
 const db = require('../models')
 const Reply = db.Reply
 const Tweet = db.Tweet
+const User = db.User
 
 module.exports = {
   getReplies: (req, res) => {
     Reply.findAll({
       where: { TweetId: req.params.tweetId },
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      include: { model: User, attributes: { exclude: ['password'] } }
     })
       .then(replies => {
         if (!replies.length) {
@@ -34,6 +37,10 @@ module.exports = {
 
         if (!comment) {
           return res.status(400).json({ status: 'error', message: 'Write the comment before reply' })
+        }
+
+        if (comment && !validator.isByteLength(comment, { min: 0, max: 140 })) {
+          return res.status(400).json({ status: 'error', message: 'The comment field can have no more than 140 characters' })
         }
 
         Reply.create({
