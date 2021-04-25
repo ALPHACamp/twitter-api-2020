@@ -2,7 +2,7 @@
 openapi: 3.0.0
 info:
   title: "Simple Twitter API"
-  description: "This is a sample server for Simple Twitter API.  You can find out more about this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020) For this sample, you can use the api key `simple-twitter` to test the authorization filters."
+  description: "This is a sample server for Simple Twitter API.  You can find out more about this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020). For this sample, you can use the api key `simple-twitter` to test the authorization filters."
   contact:
     name: "GitHub"
     url: "https://github.com/ivyhungtw/twitter-api-2020/"
@@ -218,3 +218,14 @@ components:
           type: "integer"
       xml:
         name: "Followships"
+    Subscriptions:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        subscriberId:
+          type: "integer"
+        authorId:
+          type: "integer"
+      xml:
+        name: "Subscriptions"
