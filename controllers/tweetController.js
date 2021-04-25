@@ -77,13 +77,29 @@ const tweetController = {
   getTweet: async (req, res) => {
     try {
       const TweetId = req.params.tweet_id
-      const tweet = await Tweet.findByPk(TweetId)
+      let tweet = await Tweet.findByPk(TweetId, {
+        include: [User, Like, Reply]
+      })
 
       if (!tweet) {
         return res.json({
           status: 'error',
           message: 'cannot get tweet that doesn\'t exist'
         })
+      }
+
+      tweet = {
+        id: tweet.id,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        updatedAt: tweet.updatedAt,
+        user: {
+          id: tweet.User.id,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar
+        },
+        likesLength: tweet.Likes.length,
+        commentsLength: tweet.Replies.length
       }
 
       return res.json(tweet)
