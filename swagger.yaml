@@ -4,14 +4,13 @@ info:
   description: >-
     This is a sample server for Simple Twitter API.  You can find out more about
     this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020).
-    For this sample, you should use JWT token to test the
-    authorization filters.
+    For this sample, you should use JWT token to test the authorization filters.
   contact:
     name: GitHub
     url: 'https://github.com/ivyhungtw/twitter-api-2020/'
   version: 1.0.0
 externalDocs:
-  url: https://hackmd.io/@icaughtacode/rJmFeRSUu
+  url: 'https://hackmd.io/@icaughtacode/rJmFeRSUu'
   description: Find more info here
 servers:
   - url: 'http://localhost:3000/api'
@@ -29,7 +28,7 @@ tags:
     description: Followships related
 components:
   securitySchemes:
-    bearerAuth:            
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
@@ -119,8 +118,7 @@ components:
     UnauthorizedError:
       description: Access token is missing or invalid
 security:
-  - bearerAuth: []   
-
+  - bearerAuth: []
 paths:
   /admin/users:
     get:
@@ -204,46 +202,7 @@ paths:
           description: Bad request
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  # /users:
-  #   get:
-  #     tags:
-  #       - user
-  #     summary: Get recommended users' data
-  #     description: User can get a list of recommended users to follow.
-  #     operationId: getUsers
-  #     produces:
-  #       - application/json
-  #     responses:
-  #       '200':
-  #         description: successful operation
-  #         schema:
-  #           type: array
-  #           items:
-  #             $ref: '#/definitions/Users'
-  #           example:
-  #             users:
-  #               - id: 34
-  #                 name: user1
-  #                 avatar: 'https://i.imgur.com/q6bwDGO.png'
-  #                 account: user1
-  #                 cover: 'https://i.imgur.com/1jDf2Me.png'
-  #                 tweetCount: 10
-  #                 followerCount: 3
-  #                 followingCount: 1
-  #                 likeCount: 3
-  #               - id: 35
-  #                 name: user2
-  #                 avatar: 'https://i.imgur.com/q6bwDG2.png'
-  #                 account: user2
-  #                 cover: 'https://i.imgur.com/1jDf2M3.png'
-  #                 tweetCount: 11
-  #                 followerCount: 2
-  #                 followingCount: 4
-  #                 likeCount: 2
-  #       '400':
-  #         description: Invalid status value
-  
-  '/tweets':
+  /tweets:
     get:
       tags:
         - tweets
@@ -307,6 +266,58 @@ paths:
                           }
                       }
                     ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags:
+        - tweets
+      summary: Post a tweet.
+      description: User can post a tweet.
+      operationId: postTweets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: integer
+                  example: 1
+                description:
+                  type: string
+                  example:  "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
+      responses:
+        '200':
+          description: Ok. Successfully posted a tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "delete successfully",
+                      "tweet": {
+                        "id": 3,
+                        "UserId": 1,
+                        "description": "Fugiat quam animi earum quibusdam hic fugiat beatae quo.\nReiciendis rerum delectus repellat harum repudiandae quasi reprehenderit saepe in.\nPraesentium cumque autem atque nisi minus nihil cupiditate.\nUt consectetur omnis architecto provident aspernatur sequi aliquid atque rerum.\nVelit pariatur nam.",
+                        "createdAt": "2021-04-19T16:45:10.000Z",
+                        "updatedAt": "2021-04-19T16:45:10.000Z",
+                        "replyCount": 3,
+                        "likeCount": 0,
+                        "isLiked": false,
+                        "user": {
+                          "avatar": "https://i.imgur.com/q6bwDGO.png",
+                          "name": "root",
+                          "account": "root"
+                        }
+                      }
+                    }
         '400':
           description: Bad request.
         '401':
