@@ -361,10 +361,10 @@ const userController = {
         include: [
           {
             model: Tweet,
-            order: [['createdAt', 'DESC']],
             include: [Reply, Like]
           }
-        ]
+        ],
+        order: [[sequelize.literal('`Tweets`.`createdAt`'), 'DESC']]
       })
 
       helpers.checkUser(res, user)
@@ -392,10 +392,10 @@ const userController = {
         include: [
           {
             model: Reply,
-            order: [['createdAt', 'DESC']],
             include: [{ model: Tweet, include: [Like, Reply, User] }]
           }
-        ]
+        ],
+        order: [[sequelize.literal('`Replies`.`createdAt`'), 'DESC']]
       })
 
       helpers.checkUser(res, user)
@@ -469,8 +469,6 @@ const userController = {
           [sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']
         ]
       })
-
-      console.log('user', user.Followings[0].Followship)
 
       // Make sure user exists or is not admin
       helpers.checkUser(res, user)
