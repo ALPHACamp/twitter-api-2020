@@ -27,7 +27,7 @@ const uploadImg = path => {
 
 const userController = {
   // 登入
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     try {
       const { account, password } = req.body
       // check account & password required
@@ -64,10 +64,11 @@ const userController = {
       })
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 註冊
-  register: async (req, res) => {
+  register: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
       // check account & name & email & password & confirmPassword are required
@@ -96,11 +97,12 @@ const userController = {
       return res.json({ status: 'success', message: 'register success!' })
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 查看單一 user 資料
   // account、name、avatar、cover、推文數量、跟隨中人數、跟隨者人數
-  getUser: async (req, res) => {
+  getUser: async (req, res, next) => {
     try {
       let user = await User.findByPk(req.params.id, {
         include: [
@@ -125,10 +127,11 @@ const userController = {
       return res.json(user)
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 編輯使用者自己的資料 (name、introduction、avatar、cover)
-  putUser: async (req, res) => {
+  putUser: async (req, res, next) => {
     try {
       // 只能編輯自己的資料
       const userId = helpers.getUser(req).id
@@ -159,11 +162,12 @@ const userController = {
       return res.json({ status: 'success', message: 'profile edit success!' })
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 查看單一使用者發過的推文
   // 推文的 user部分資料、推文內容、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
-  getTweets: async (req, res) => {
+  getTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'can not find this user!' })
@@ -192,11 +196,12 @@ const userController = {
       return res.json(tweets)
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 查看單一使用者發過回覆的推文
   // user 回覆過的推文內容、推文的 user部分資料、推文的 reply、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)、回覆推文的時間(fromNow)
-  getRepliedTweets: async (req, res) => {
+  getRepliedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'this user does not exist!' })
@@ -234,11 +239,12 @@ const userController = {
       return res.json(replies)
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 查看單一使用者點過Like的推文
   // user like過的推文內容、推文的 user部分資料、推文的 reply、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
-  getLikedTweets: async (req, res) => {
+  getLikedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'this user does not exist!' })
@@ -277,11 +283,12 @@ const userController = {
       return res.json(likes)
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 查看單一使用者的跟隨者 ( user = following , show followers )
   // account、name、avatar、introduction、followshipCreatedAt、是否有追蹤自己的追隨者
-  getFollowers: async (req, res) => {
+  getFollowers: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'this user does not exist!' })
@@ -312,11 +319,12 @@ const userController = {
       return res.json(follower)
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 查看單一使用者跟隨中的人 ( user = follower , show followings )
   // account、name、avatar、introduction、followshipCreatedAt
-  getFollowings: async (req, res) => {
+  getFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'this user does not exist!' })
@@ -337,10 +345,11 @@ const userController = {
       return res.json(followings)
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 查看建議追隨名單 (跟隨者數量排列前10)
-  getTopUsers: async (req, res) => {
+  getTopUsers: async (req, res, next) => {
     try {
       const currentUser = await User.findByPk(helpers.getUser(req).id, {
         include: { model: User, as: 'Followings' }
@@ -379,6 +388,7 @@ const userController = {
       return res.json(users)
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   }
 }
