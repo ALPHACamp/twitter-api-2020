@@ -140,6 +140,52 @@ module.exports = {
     return res.status(200).json({ currentUser: user })
   },
 
+  getUser: (req, res) => {
+    const { id } = req.params
+    if (!validator.isNumeric(id, { no_symbols: true })) {
+      const data = { status: 'error', message: 'id should be an integer.' }
+      return res.status(400).json(data)
+    }
+    return User.findByPk(
+      id,
+      {
+        attributes: ['id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover', 'role'],
+        include: [
+          Tweet,
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      }
+    )
+      .then(user => {
+        if (!user) {
+          const data = { status: 'error', message: 'User not found.' }
+          return res.status(404).json(data)
+        }
+        if (user.dataValues.role === 'admin') {
+          const data = { status: 'error', message: 'Cannot view administrator.' }
+          return res.status(400).json(data)
+        }
+        const data = {
+          id: user.dataValues.id,
+          account: user.dataValues.account,
+          name: user.dataValues.name,
+          email: user.dataValues.email,
+          introduction: user.dataValues.introduction,
+          avatar: user.dataValues.avatar,
+          cover: user.dataValues.cover,
+          tweetCount: user.Tweets.length,
+          followingCount: user.Followings.length,
+          followerCount: user.Followers.length,
+          isFollowed: user.Followers.map(follower => follower.dataValues.id).includes(req.user.id)
+        }
+        return res.status(200).json(data)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
+  },
+
   getUserTweets: (req, res) => {
     const { id } = req.params
     if (!validator.isNumeric(id, { no_symbols: true })) {
@@ -175,6 +221,109 @@ module.exports = {
 
       return res.status(200).json(userTweet)
     })
+      .catch(error => {
+        catchError(res, error)
+      })
+  },
+
+  getRepliesOfTweet: (req, res) => {
+    const { id } = req.params
+    if (!validator.isNumeric(id, { no_symbols: true })) {
+      const data = { status: 'error', message: 'id should be an integer.' }
+      return res.status(400).json(data)
+    }
+    return Reply.findAll({
+      where: { UserId: id },
+      attributes: ['id', 'comment', 'createdAt'],
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: Tweet, include: [User, Reply, Like] }
+      ]
+    })
+      .then(replies => {
+        if (replies.length === 0) {
+          return res.status(200).json(null)
+        }
+        const repliesOfTweet = []
+        replies.forEach(reply => {
+          const tweet = reply.dataValues.Tweet
+          const data = {
+            ReplyId: reply.dataValues.id,
+            comment: reply.dataValues.comment,
+            createdAt: reply.dataValues.createdAt
+          }
+          if (!tweet) { // ex: tweet was deleted
+            data.Tweet = null
+          } else {
+            data.Tweet = {
+              TweetId: reply.dataValues.Tweet.dataValues.id,
+              description: reply.dataValues.Tweet.dataValues.description,
+              createdAt: reply.dataValues.Tweet.dataValues.createdAt,
+              replyCount: reply.dataValues.Tweet.dataValues.Replies.length,
+              likeCount: reply.dataValues.Tweet.dataValues.Likes.length,
+              isLiked: reply.dataValues.Tweet.dataValues.Likes
+                .map(like => like.dataValues.UserId).includes(req.user.id),
+              User: {
+                id: tweet.User.id,
+                account: tweet.User.account,
+                name: tweet.User.name,
+                avatar: tweet.User.avatar
+              }
+            }
+          }
+          repliesOfTweet.push(data)
+        })
+        return res.status(200).json(repliesOfTweet)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
+  },
+
+  getLikedTweet: (req, res) => {
+    const { id } = req.params
+    if (!validator.isNumeric(id, { no_symbols: true })) {
+      const data = { status: 'error', message: 'id should be an integer.' }
+      return res.status(400).json(data)
+    }
+    const findTweet = Tweet.findAll({
+      attributes: ['id', 'description', 'createdAt'],
+      order: [[Like, 'createdAt', 'DESC']],
+      include: [
+        User,
+        Reply,
+        { model: Like, where: { UserId: id } }
+      ]
+    })
+    const findLike = Like.findAll({ raw: true, attributes: ['TweetID', 'UserId'] })
+    return Promise.all([findTweet, findLike])
+      .then(valuse => {
+        const [tweets, likes] = valuse
+        if (tweets.length === 0) {
+          return res.status(200).json(null)
+        }
+        const likedTweets = []
+        tweets.forEach(tweet => {
+          const likedUser = likes.filter(like => like.TweetID === tweet.dataValues.id)
+            .map(like => like.UserId)
+          const data = {
+            TweetId: tweet.dataValues.id,
+            description: tweet.dataValues.description,
+            createdAt: tweet.dataValues.createdAt,
+            replyCount: tweet.dataValues.Replies.length,
+            likeCount: likedUser.length,
+            isLiked: likedUser.includes(req.user.id),
+            User: {
+              id: tweet.dataValues.User.id,
+              account: tweet.dataValues.User.account,
+              name: tweet.dataValues.User.name,
+              avatar: tweet.dataValues.User.avatar
+            }
+          }
+          likedTweets.push(data)
+        })
+        return res.status(200).json(likedTweets)
+      })
       .catch(error => {
         catchError(res, error)
       })
