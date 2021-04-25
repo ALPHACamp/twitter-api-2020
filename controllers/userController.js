@@ -224,5 +224,59 @@ module.exports = {
       .catch(error => {
         catchError(res, error)
       })
+  },
+
+  getRepliesOfTweet: (req, res) => {
+    const { id } = req.params
+    if (!validator.isNumeric(id, { no_symbols: true })) {
+      const data = { status: 'error', message: 'id should be an integer.' }
+      return res.status(400).json(data)
+    }
+    return Reply.findAll({
+      where: { UserId: id },
+      attributes: ['id', 'comment', 'createdAt'],
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: Tweet, include: [User, Reply, Like] }
+      ]
+    })
+      .then(replies => {
+        if (replies.length === 0) {
+          return res.status(200).json(null)
+        }
+        const repliesOfTweet = []
+        replies.forEach(reply => {
+          const tweet = reply.dataValues.Tweet
+          const data = {
+            ReplyId: reply.dataValues.id,
+            comment: reply.dataValues.comment,
+            createdAt: reply.dataValues.createdAt
+          }
+          if (!tweet) { // ex: tweet was deleted
+            data.Tweet = null
+          } else {
+            data.Tweet = {
+              TweetId: reply.dataValues.Tweet.dataValues.id,
+              description: reply.dataValues.Tweet.dataValues.description,
+              createdAt: reply.dataValues.Tweet.dataValues.createdAt,
+              replyCount: reply.dataValues.Tweet.dataValues.Replies.length,
+              likeCount: reply.dataValues.Tweet.dataValues.Likes.length,
+              isLiked: reply.dataValues.Tweet.dataValues.Likes
+                .map(like => like.dataValues.UserId).includes(req.user.id),
+              User: {
+                id: tweet.User.id,
+                account: tweet.User.account,
+                name: tweet.User.name,
+                avatar: tweet.User.avatar
+              }
+            }
+          }
+          repliesOfTweet.push(data)
+        })
+        return res.status(200).json(repliesOfTweet)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
   }
 }
