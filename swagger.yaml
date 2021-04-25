@@ -1,13 +1,17 @@
-swagger: "2.0"
+# basic info
+openapi: 3.0.0
 info:
-  description: "This is a sample server for Simple Twitter API.  You can find out more about this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020) For this sample, you can use the api key `simple-twitter` to test the authorization filters."
-  version: "1.0.0"
   title: "Simple Twitter API"
+  description: "This is a sample server for Simple Twitter API.  You can find out more about this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020) For this sample, you can use the api key `simple-twitter` to test the authorization filters."
   contact:
     name: "GitHub"
     url: "https://github.com/ivyhungtw/twitter-api-2020/"
-host: "simple-twitter-api-2021.herokuapp.com"
-basePath: "/api"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:3000"
+  - url: "https://simple-twitter-api-2021.herokuapp.com"
+
+# path tags
 tags:
 - name: "admin"
   description: "Admin related"
@@ -17,211 +21,79 @@ tags:
   description: "Tweets related"
 - name: "followships"
   description: "Followships related"
-schemes:
-  - "https"
-  - "http"
-paths:
-  /admin/users:
-    get:
-      tags:
-      - "admin"
-      summary: "Get all user data"
-      description: "Admin can get all user data from Simple Twitter and their social activeness data."
-      operationId: "getAdminUsers"
-      produces:
-      # - "application/xml"
-      - "application/json"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Users"
-            example:
-              users:
-                - id: 34
-                  name: user1
-                  avatar: 'https://i.imgur.com/q6bwDGO.png'
-                  account: user1
-                  cover: 'https://i.imgur.com/1jDf2Me.png'
-                  tweetCount: 10
-                  followerCount: 3
-                  followingCount: 1
-                  likeCount: 3
-                - id: 35
-                  name: user2
-                  avatar: 'https://i.imgur.com/q6bwDG2.png'
-                  account: user2
-                  cover: 'https://i.imgur.com/1jDf2M3.png'
-                  tweetCount: 11
-                  followerCount: 2
-                  followingCount: 4
-                  likeCount: 2
-              
-        "400":
-          description: "Invalid status value"
-      # security:
-      #   - {}
-      #   - bearerAuth: []
-      #   - api_key:
-      #     - simple-twitter
-            
-  /admin/users/{id}:
-    delete:
-      tags:
-      - "admin"
-      summary: "Deletes a user"
-      description: "Admin can delete a user by specifying the userId in the parameter"
-      operationId: "deleteUser"
-      produces:
-      - "application/xml"
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        description: "The id of the user you want to delete"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        "400":
-          description: "Invalid ID"
-        "404":
-          description: "User not found"
-      # security:
-      # - petstore_auth:
-      #   - "write:pets"
-      #   - "read:pets"
-  
-  /users:
-    get:
-      tags:
-      - "user"
-      summary: "Get recommended users' data"
-      description: "User can get a list of recommended users to follow."
-      operationId: "getUsers"
-      produces:
-      # - "application/xml"
-      - "application/json"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Users"
-            example:
-              users:
-                - id: 34
-                  name: user1
-                  avatar: 'https://i.imgur.com/q6bwDGO.png'
-                  account: user1
-                  cover: 'https://i.imgur.com/1jDf2Me.png'
-                  tweetCount: 10
-                  followerCount: 3
-                  followingCount: 1
-                  likeCount: 3
-                - id: 35
-                  name: user2
-                  avatar: 'https://i.imgur.com/q6bwDG2.png'
-                  account: user2
-                  cover: 'https://i.imgur.com/1jDf2M3.png'
-                  tweetCount: 11
-                  followerCount: 2
-                  followingCount: 4
-                  likeCount: 2
-              
-        "400":
-          description: "Invalid status value"
-      # security:
-      #   - {}
-      #   - bearerAuth: []
 
 
-componenets:
-  securitySchemes:
-    bearerAuth:
-      type: "HTTP"
-      scheme: "bearer"
-      bearerFormat: "JWT"
-securityDefinitions:
-  bearer_Auth: []
-  api_key:
-    type: "apiKey"
-    name: "api_key"
-    in: "header"
-
-
-definitions:
-  Users:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-      name:
-        type: "string"
-      email:
-        type: "string"
-      password:
-        type: "string"
-      avatar:
-        type: "string"
-      role:
-        type: "string"
-        default: "user"
-      introduction:
-        type: "string"
-      account:
-        type: "string"
-      cover:
-        type: "string"
-    xml:
-      name: "Users"
-  Tweets:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-      UserId:
-        type: "integer"
-      description:
-        type: "string"
-    xml:
-      name: "Category"
-  Replies:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-      userId:
-        type: "integer"
-      tweetId:
-        type: "integer"
-      comment:
-        type: "string"
-    xml:
-      name: "Replies"
-      
-  Likes:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-      userId:
-        type: "integer"
-      tweetId:
-        type: "integer"
-    xml:
-      name: "Likes"
-  Followships:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-      followerId:
-        type: "integer"
-      followingId:
-        type: "integer"
-    xml:
-      name: "Followships"
+# models
+components:
+  schemas:
+    Users:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        email:
+          type: "string"
+        password:
+          type: "string"
+        avatar:
+          type: "string"
+        role:
+          type: "string"
+          default: "user"
+        introduction:
+          type: "string"
+        account:
+          type: "string"
+        cover:
+          type: "string"
+      xml:
+        name: "Users"
+    Tweets:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        UserId:
+          type: "integer"
+        description:
+          type: "string"
+      xml:
+        name: "Category"
+    Replies:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        userId:
+          type: "integer"
+        tweetId:
+          type: "integer"
+        comment:
+          type: "string"
+      xml:
+        name: "Replies"
+        
+    Likes:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        userId:
+          type: "integer"
+        tweetId:
+          type: "integer"
+      xml:
+        name: "Likes"
+    Followships:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        followerId:
+          type: "integer"
+        followingId:
+          type: "integer"
+      xml:
+        name: "Followships"
