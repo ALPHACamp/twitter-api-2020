@@ -21,11 +21,11 @@ app.use(bodyParser.json())
 require('./routes')(app)
 
 // 設置錯誤訊息
-app.use((err, req, res) => {
-  if (err) {
-    res.status(555).json({ message: String(err) })
-  }
-})
+// app.use((err, req, res) => {
+//   if (err) {
+//     res.status(555).json({ message: String(err) })
+//   }
+// })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
