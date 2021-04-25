@@ -280,6 +280,9 @@ const userController = {
       //     }
       //   }
       // })
+      likes.map(like => {
+        console.log(like)
+      })
       likes = likes.map(like => ({
         // const tweet = like.Tweet
         id: like.id,
@@ -288,7 +291,7 @@ const userController = {
         createdAt: like.createdAt,
         fromNow: moment(like.createdAt).fromNow(),
         Tweet: {
-          id: like.Tweet.id,
+          id: like.Tweet.id || -1,
           UserId: like.Tweet.UserId,
           description: like.Tweet.description,
           createdAt: like.Tweet.createdAt,
