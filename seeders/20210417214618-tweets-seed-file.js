@@ -8,7 +8,7 @@ const tweet = require('../models/tweet')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const users = await User.findAll({ where: { role: false } })
+    const users = await User.findAll({ where: { role: 'user' } })
 
     await queryInterface.bulkInsert(
       'Tweets',
@@ -23,6 +23,9 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Tweets', null, {})
+    await queryInterface.bulkDelete('Tweets', null, {
+      where: {},
+      truncate: true
+    })
   }
 }

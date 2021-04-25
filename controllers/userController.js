@@ -23,12 +23,6 @@ const uploadImg = path => {
   })
 }
 
-// JWT
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
-
 const userController = {
   login: async (req, res) => {
     // Make sure all the fields are filled out
@@ -89,11 +83,14 @@ const userController = {
     if (email.search(emailRule) === -1) {
       errors.push({ message: 'Please enter the correct email address.' })
     }
+    if (password.length < 4 || password.length > 12) {
+      errors.push({ message: 'Password does not meet the required length' })
+    }
     if (password !== checkPassword) {
       errors.push({ message: 'Password and checkPassword do not match.' })
     }
     if (errors.length > 0) {
-      return res.json({ status: 'error', errors })
+      return res.json({ status: 'error', errors, userInput: req.body })
     }
 
     try {
@@ -103,7 +100,8 @@ const userController = {
       if (user) {
         return res.json({
           status: 'error',
-          message: `A user with ${email} already exists. Choose a different address or login directly.`
+          message: `A user with ${email} already exists. Choose a different address or login directly.`,
+          userInput: req.body
         })
       }
 
@@ -112,7 +110,8 @@ const userController = {
       if (user) {
         return res.json({
           status: 'error',
-          message: `A user with account '${account}' already exists. Choose a different account or login directly.`
+          message: `A user with account '${account}' already exists. Choose a different account or login directly.`,
+          userInput: req.body
         })
       }
 
@@ -159,9 +158,7 @@ const userController = {
     })
 
     // Clean up users data
-    const followings = helpers
-      .getUser(req)
-      .Followings.map(following => following.id)
+    const followings = helpers.getUserInfoId(req, 'Followings')
 
     users = users.map(user => ({
       id: user.id,
@@ -175,24 +172,21 @@ const userController = {
   },
   getUser: async (req, res) => {
     let user = await User.findByPk(req.params.id, {
-      attributes: [
-        'id',
-        'name',
-        'account',
-        'email',
-        'role',
-        'avatar',
-        'cover',
-        'introduction'
-      ],
       include: [
         Tweet,
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: User, as: 'Followings' },
+        { model: User, as: 'Subscribers' }
       ]
     })
 
-    // clean up data
+    // User can not see profile of admin or user that doesn't exist
+    helpers.checkUser(res, user)
+
+    // Clean up user data
+    const subscriptions = helpers.getUserInfoId(req, 'Subscriptions')
+    const followings = helpers.getUserInfoId(req, 'Followings')
+
     user = {
       id: user.id,
       name: user.name,
@@ -204,7 +198,11 @@ const userController = {
       role: user.role,
       tweetCount: user.Tweets.length,
       followerCount: user.Followers.length,
-      followingCount: user.Followings.length
+      followingCount: user.Followings.length,
+      isFollowed: followings ? followings.includes(user.id) : followings,
+      isSubscribed: subscriptions
+        ? subscriptions.includes(user.id)
+        : subscriptions
     }
 
     res.status(200).json(user)
@@ -224,8 +222,6 @@ const userController = {
     const userId = helpers.getUser(req).id
     const id = req.params.id
     const { files } = req
-    let newAvatar
-    let newCover
     const acceptedType = ['.png', '.jpg', '.jpeg']
 
     // Users can only edit their own profile
@@ -239,7 +235,6 @@ const userController = {
 
     try {
       // setting
-
       if (page === 'setting') {
         // Make sure all fields are filled out
         if (!account || !name || !email || !password || !checkPassword) {
@@ -359,28 +354,28 @@ const userController = {
   },
   getTweets: async (req, res) => {
     try {
-      // Make sure user exists
-      const user = await User.findByPk(req.params.id)
-      if (!user) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
-
-      let tweets = await Tweet.findAll({
-        where: { UserId: req.params.id },
-        order: [['createdAt', 'DESC']],
-        include: [Reply, Like]
+      // Make sure user exists or is not admin
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: Tweet,
+            order: [['createdAt', 'DESC']],
+            include: [Reply, Like]
+          }
+        ]
       })
 
-      // Clean up data
-      tweets = tweets.map(tweet => ({
+      helpers.checkUser(res, user)
+
+      // Clean up tweets data
+      const likes = helpers.getUserInfoId(req, 'LikedTweets')
+      const tweets = user.dataValues.Tweets.map(tweet => ({
         id: tweet.id,
         description: tweet.description,
         createdAt: tweet.createdAt,
         replyCount: tweet.Replies.length,
-        likeCount: tweet.Likes.length
+        likeCount: tweet.Likes.length,
+        isLiked: likes ? likes.includes(tweet.id) : null
       }))
 
       return res.status(200).json(tweets)
@@ -389,45 +384,23 @@ const userController = {
     }
   },
   getRepliesAndTweets: async (req, res) => {
-    //
     try {
-      // Make sure user exists
-      const user = await User.findByPk(req.params.id)
-      if (!user) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
-
-      let replies = await Reply.findAll({
-        where: { UserId: req.params.id },
-        order: [['createdAt', 'DESC']],
-        include: [{ model: Tweet, include: [Like, Reply, User] }]
+      // Make sure user exists or is not admin
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: Reply,
+            order: [['createdAt', 'DESC']],
+            include: [{ model: Tweet, include: [Like, Reply, User] }]
+          }
+        ]
       })
+
+      helpers.checkUser(res, user)
 
       // Clean up data
-      replies = replies.map(reply => {
-        const tweet = reply.Tweet.toJSON()
-        return {
-          id: reply.id,
-          comment: reply.comment,
-          createdAt: reply.createdAt,
-          Tweet: {
-            id: tweet.id,
-            description: tweet.description,
-            createdAt: tweet.createdAt,
-            User: {
-              id: tweet.User.id,
-              name: tweet.User.name,
-              account: tweet.User.account,
-              avatar: tweet.User.avatar
-            },
-            replyCount: tweet.Replies.length,
-            likeCount: tweet.Likes.length
-          }
-        }
-      })
+      const likes = helpers.getUserInfoId(req, 'LikedTweets')
+      const replies = helpers.getResourceInfo(user, 'Replies', likes)
 
       return res.status(200).json(replies)
     } catch (error) {
@@ -436,52 +409,21 @@ const userController = {
   },
   getLikes: async (req, res) => {
     try {
-      // Make sure user exists
-      const user = await User.findByPk(req.params.id)
-      if (!user) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
-
-      let likes = await Like.findAll({
-        where: { UserId: req.params.id },
-        order: [['createdAt', 'DESC']],
-        include: [{ model: Tweet, include: [Like, Reply, User] }]
+      // Make sure user exists or is not admin
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: Like,
+            order: [['createdAt', 'DESC']],
+            include: [{ model: Tweet, include: [Like, Reply, User] }]
+          }
+        ]
       })
-
-      let currentUserLikes = helpers.getUser(req).LikedTweets
-
-      if (currentUserLikes) {
-        currentUserLikes = currentUserLikes.map(likeTweet => likeTweet.id)
-      }
+      helpers.checkUser(res, user)
 
       // Clean up data
-      likes = likes.map(like => {
-        const tweet = like.Tweet.toJSON()
-        return {
-          id: like.id,
-          comment: like.comment,
-          createdAt: like.createdAt,
-          isLiked: currentUserLikes
-            ? currentUserLikes.includes(like.TweetId)
-            : false,
-          TweetId: like.TweetId,
-          Tweet: {
-            description: tweet.description,
-            createdAt: tweet.createdAt,
-            User: {
-              id: tweet.User.id,
-              name: tweet.User.name,
-              account: tweet.User.account,
-              avatar: tweet.User.avatar
-            },
-            replyCount: tweet.Replies.length,
-            likeCount: tweet.Likes.length
-          }
-        }
-      })
+      const currentUserLikes = helpers.getUserInfoId(req, 'LikedTweets')
+      const likes = helpers.getResourceInfo(user, 'Likes', currentUserLikes)
 
       return res.status(200).json(likes)
     } catch (error) {
@@ -490,45 +432,19 @@ const userController = {
   },
   getFollowers: async (req, res) => {
     try {
-      const id = req.params.id
-      const currentUser = helpers.getUser(req)
-      // Make sure user exists
-      const user = await User.findByPk(id)
-      if (!user) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
-
-      let followers = (
-        await User.findByPk(id, {
-          include: [{ model: User, as: 'Followers' }]
-        })
-      ).Followers
-
-      let currentUserFollowings = helpers.getUser(req).Followings
-      if (currentUserFollowings) {
-        currentUserFollowings = currentUserFollowings.map(
-          following => following.id
-        )
-      }
-
-      // Clean up data
-      followers = followers.map(follower => {
-        return {
-          followerId: follower.id,
-          name: follower.name,
-          account: follower.account,
-          avatar: follower.avatar,
-          introduction: follower.introduction,
-          createdAt: follower.createdAt,
-          isFollowing:
-            currentUserFollowings && follower.id !== currentUser.id
-              ? currentUserFollowings.includes(follower.id)
-              : null
-        }
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followers' }]
       })
+
+      helpers.checkUser(res, user)
+
+      // Clean up followers info
+      const currentUserFollowings = helpers.getUserInfoId(req, 'Followings')
+      const followers = helpers.getFollowshipInfo(
+        user,
+        'Followers',
+        currentUserFollowings
+      )
 
       return res.status(200).json(followers)
     } catch (error) {
@@ -537,45 +453,20 @@ const userController = {
   },
   getFollowings: async (req, res) => {
     try {
-      const id = req.params.id
-      const currentUser = helpers.getUser(req)
-      // Make sure user exists
-      const user = await User.findByPk(id)
-      if (!user) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
-
-      let followings = (
-        await User.findByPk(id, {
-          include: [{ model: User, as: 'Followings' }]
-        })
-      ).Followings
-
-      let currentUserFollowings = helpers.getUser(req).Followings
-      if (currentUserFollowings) {
-        currentUserFollowings = currentUserFollowings.map(
-          following => following.id
-        )
-      }
-
-      // Clean up data
-      followings = followings.map(following => {
-        return {
-          followingId: following.id,
-          name: following.name,
-          account: following.account,
-          avatar: following.avatar,
-          introduction: following.introduction,
-          createdAt: following.createdAt,
-          isFollowing:
-            currentUserFollowings && following.id !== currentUser.id
-              ? currentUserFollowings.includes(following.id)
-              : null
-        }
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followings' }]
       })
+
+      // Make sure user exists or is not admin
+      helpers.checkUser(res, user)
+
+      // Clean up followings data
+      const currentUserFollowings = helpers.getUserInfoId(req, 'Followings')
+      const followings = helpers.getFollowshipInfo(
+        user,
+        'Followings',
+        currentUserFollowings
+      )
 
       return res.status(200).json(followings)
     } catch (error) {

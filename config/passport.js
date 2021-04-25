@@ -20,7 +20,9 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
       { model: db.Tweet, as: 'RepliedTweets' },
       { model: db.Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
+      { model: User, as: 'Followings' },
+      { model: User, as: 'Subscribers' },
+      { model: User, as: 'Subscriptions' }
     ]
   }).then(user => {
     if (!user) return next(null, false)
