@@ -116,6 +116,7 @@ const userController = {
         name: user.name,
         avatar: user.avatar,
         cover: user.cover,
+        introduction: user.introduction,
         tweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
         followerCount: user.Followers.length
