@@ -29,21 +29,24 @@ module.exports = {
     Tweet.findOne({ where: { id: tweetId } })
       .then(tweet => {
         if (!tweet) {
-          return res.status(200).json({ status: 'error', message: 'Tweet doesn\'t esist' })
+          return res.status(400).json({ status: 'error', message: 'Tweet doesn\'t esist' })
         }
-      })
 
-    if (!comment) {
-      return res.status(400).json({ status: 'error', message: 'write the comment before reply' })
-    }
+        if (!comment) {
+          return res.status(400).json({ status: 'error', message: 'Write the comment before reply' })
+        }
 
-    Reply.create({
-      TweetId: tweetId,
-      UserId: req.user.id,
-      comment: comment
-    })
-      .then(() => {
-        return res.status(200).json({ status: 'success', message: 'reply tweet successfully' })
+        Reply.create({
+          TweetId: tweetId,
+          UserId: req.user.id,
+          comment: comment.trim()
+        })
+          .then(() => {
+            return res.status(200).json({ status: 'success', message: 'Reply tweet successfully' })
+          })
+          .catch(error => {
+            catchError(res, error)
+          })
       })
       .catch(error => {
         catchError(res, error)
