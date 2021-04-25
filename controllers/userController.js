@@ -256,12 +256,12 @@ module.exports = {
             data.Tweet = null
           } else {
             data.Tweet = {
-              TweetId: reply.dataValues.Tweet.dataValues.id,
-              description: reply.dataValues.Tweet.dataValues.description,
-              createdAt: reply.dataValues.Tweet.dataValues.createdAt,
-              replyCount: reply.dataValues.Tweet.dataValues.Replies.length,
-              likeCount: reply.dataValues.Tweet.dataValues.Likes.length,
-              isLiked: reply.dataValues.Tweet.dataValues.Likes
+              TweetId: tweet.dataValues.id,
+              description: tweet.dataValues.description,
+              createdAt: tweet.dataValues.createdAt,
+              replyCount: tweet.dataValues.Replies.length,
+              likeCount: tweet.dataValues.Likes.length,
+              isLiked: tweet.dataValues.Likes
                 .map(like => like.dataValues.UserId).includes(req.user.id),
               User: {
                 id: tweet.User.id,
