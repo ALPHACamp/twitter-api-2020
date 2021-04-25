@@ -231,9 +231,7 @@ paths:
       tags:
         - admin
       summary: Delete a spicific tweet.
-      description: >-
-        Admin can delete a specific tweet by speicifying
-        its id.
+      description: Admin can delete a specific tweet by speicifying its id.
       operationId: deleteTweet
       parameters:
         - name: tweet_id
@@ -262,9 +260,7 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-
-
-  '/tweets':
+  /tweets:
     get:
       tags:
         - tweets
@@ -430,4 +426,175 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-    
+  '/tweets/{tweet_id}/like':
+    post:
+      tags:
+        - tweets
+      summary: Like a spicific tweet.
+      description: User can like a specific tweet by speicifying its id.
+      operationId: likeTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to perform like with.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully liked this tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully liked this tweet"
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/tweets/{tweet_id}/unlike':
+    post:
+      tags:
+        - tweets
+      summary: Unlike a spicific tweet.
+      description: User can unlike a specific tweet by speicifying its id.
+      operationId: unlikeTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to perform unlike with.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully unliked this tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully unliked this tweet"
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/tweets/{tweet_id}/replies':
+    get:
+      tags:
+        - replies
+      summary: Get all replies of a spicific tweet.
+      description: >-
+        User can get an array of all the replies data of a specific tweet by
+        speicifying its id.
+      operationId: getReplies
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to replies from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully retrieved replies of this tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Replies'
+              examples:
+                success:
+                  value: |-
+                    [
+                        {
+                            "id": 13,
+                            "UserId": 3,
+                            "TweetId": 5,
+                            "comment": "Adipisci minus officia voluptatum totam aut et qui",
+                            "createdAt": "2021-04-19T16:45:10.000Z",
+                            "updatedAt": "2021-04-19T16:45:10.000Z"
+                        },
+                        {
+                            "id": 14,
+                            "UserId": 4,
+                            "TweetId": 5,
+                            "comment": "debitis",
+                            "createdAt": "2021-04-19T16:45:10.000Z",
+                            "updatedAt": "2021-04-19T16:45:10.000Z"
+                        },
+                        {
+                            "id": 15,
+                            "UserId": 5,
+                            "TweetId": 5,
+                            "comment": "Perferendis et consequatur.",
+                            "createdAt": "2021-04-19T16:45:10.000Z",
+                            "updatedAt": "2021-04-19T16:45:10.000Z"
+                        }
+                    ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags:
+        - replies
+      summary: Reply to a spicific tweet.
+      description: User can reply to a specific tweet by speicifying its id.
+      operationId: postReplies
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to reply to.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: integer
+                  example: 1
+                comment:
+                  type: string
+                  example: "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
+      responses:
+        '200':
+          description: Ok. Successfully replied to this tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Replies'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully replied to this tweet"
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
