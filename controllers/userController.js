@@ -23,12 +23,6 @@ const uploadImg = path => {
   })
 }
 
-// JWT
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
-
 const userController = {
   login: async (req, res) => {
     // Make sure all the fields are filled out
@@ -164,9 +158,7 @@ const userController = {
     })
 
     // Clean up users data
-    const followings = helpers
-      .getUser(req)
-      .Followings.map(following => following.id)
+    const followings = helpers.getUserInfoId(req, 'Followings')
 
     users = users.map(user => ({
       id: user.id,
@@ -180,16 +172,6 @@ const userController = {
   },
   getUser: async (req, res) => {
     let user = await User.findByPk(req.params.id, {
-      attributes: [
-        'id',
-        'name',
-        'account',
-        'email',
-        'role',
-        'avatar',
-        'cover',
-        'introduction'
-      ],
       include: [
         Tweet,
         { model: User, as: 'Followers' },
@@ -199,23 +181,11 @@ const userController = {
     })
 
     // User can not see profile of admin or user that doesn't exist
-    if (!user || user.role === 'admin') {
-      return res.status(404).json({
-        status: 'error',
-        message: `user doesn't exist`
-      })
-    }
+    helpers.checkUser(res, user)
 
     // Clean up user data
-    // To pass the test
-    let subscriptions = helpers.getUser(req).Subscriptions
-    subscriptions = subscriptions
-      ? subscriptions.map(subscription => subscription.id)
-      : subscriptions
-
-    const followings = helpers
-      .getUser(req)
-      .Followings.map(following => following.id)
+    const subscriptions = helpers.getUserInfoId(req, 'Subscriptions')
+    const followings = helpers.getUserInfoId(req, 'Followings')
 
     user = {
       id: user.id,
@@ -229,7 +199,7 @@ const userController = {
       tweetCount: user.Tweets.length,
       followerCount: user.Followers.length,
       followingCount: user.Followings.length,
-      isFollowed: followings.includes(user.id),
+      isFollowed: followings ? followings.includes(user.id) : followings,
       isSubscribed: subscriptions
         ? subscriptions.includes(user.id)
         : subscriptions
@@ -252,8 +222,6 @@ const userController = {
     const userId = helpers.getUser(req).id
     const id = req.params.id
     const { files } = req
-    let newAvatar
-    let newCover
     const acceptedType = ['.png', '.jpg', '.jpeg']
 
     // Users can only edit their own profile
@@ -267,7 +235,6 @@ const userController = {
 
     try {
       // setting
-
       if (page === 'setting') {
         // Make sure all fields are filled out
         if (!account || !name || !email || !password || !checkPassword) {
@@ -398,19 +365,11 @@ const userController = {
         ]
       })
 
-      if (!user || user.role === 'admin') {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
-
-      let likes = helpers.getUser(req).LikedTweets
-      likes = likes ? likes.map(like => like.id) : null
+      helpers.checkUser(res, user)
 
       // Clean up tweets data
-      let tweets = user.Tweets
-      tweets = tweets.map(tweet => ({
+      const likes = helpers.getUserInfoId(req, 'LikedTweets')
+      const tweets = user.dataValues.Tweets.map(tweet => ({
         id: tweet.id,
         description: tweet.description,
         createdAt: tweet.createdAt,
@@ -437,46 +396,11 @@ const userController = {
         ]
       })
 
-      if (!user || user.role === 'admin') {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
-
-      let likes = helpers.getUser(req).LikedTweets
-      likes = likes ? likes.map(like => like.id) : null
+      helpers.checkUser(res, user)
 
       // Clean up data
-      let replies = user.Replies
-      replies = replies.map(reply => {
-        // If the tweet has been deleted,
-        // we will not show the reply
-        const tweet = reply.Tweet
-        if (!tweet) {
-          return {}
-        }
-
-        return {
-          id: reply.id,
-          comment: reply.comment,
-          createdAt: reply.createdAt,
-          Tweet: {
-            id: tweet.id,
-            description: tweet.description,
-            createdAt: tweet.createdAt,
-            isLiked: likes ? likes.includes(tweet.id) : null,
-            User: {
-              id: tweet.User.id,
-              name: tweet.User.name,
-              account: tweet.User.account,
-              avatar: tweet.User.avatar
-            },
-            replyCount: tweet.Replies.length,
-            likeCount: tweet.Likes.length
-          }
-        }
-      })
+      const likes = helpers.getUserInfoId(req, 'LikedTweets')
+      const replies = helpers.getResourceInfo(user, 'Replies', likes)
 
       return res.status(200).json(replies)
     } catch (error) {
@@ -495,51 +419,11 @@ const userController = {
           }
         ]
       })
-      if (!user || user.role === 'admin') {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
-
-      let currentUserLikes = helpers.getUser(req).LikedTweets
-
-      if (currentUserLikes) {
-        currentUserLikes = currentUserLikes.map(likeTweet => likeTweet.id)
-      }
+      helpers.checkUser(res, user)
 
       // Clean up data
-      let likes = user.Likes
-      likes = likes.map(like => {
-        // If the tweet has been deleted,
-        // we will not show the tweet
-        const tweet = like.Tweet
-        if (!tweet) {
-          return {}
-        }
-
-        return {
-          id: like.id,
-          comment: like.comment,
-          createdAt: like.createdAt,
-          isLiked: currentUserLikes
-            ? currentUserLikes.includes(like.TweetId)
-            : false,
-          TweetId: like.TweetId,
-          Tweet: {
-            description: tweet.description,
-            createdAt: tweet.createdAt,
-            User: {
-              id: tweet.User.id,
-              name: tweet.User.name,
-              account: tweet.User.account,
-              avatar: tweet.User.avatar
-            },
-            replyCount: tweet.Replies.length,
-            likeCount: tweet.Likes.length
-          }
-        }
-      })
+      const currentUserLikes = helpers.getUserInfoId(req, 'LikedTweets')
+      const likes = helpers.getResourceInfo(user, 'Likes', currentUserLikes)
 
       return res.status(200).json(likes)
     } catch (error) {
@@ -548,45 +432,19 @@ const userController = {
   },
   getFollowers: async (req, res) => {
     try {
-      const id = req.params.id
-      const currentUser = helpers.getUser(req)
-      // Make sure user exists or is not admin
-      const user = await User.findByPk(id, {
+      const user = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followers' }]
       })
-      if (!user || user.role === 'admin') {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
 
-      let currentUserFollowings = helpers.getUser(req).Followings
-      if (currentUserFollowings) {
-        currentUserFollowings = currentUserFollowings.map(
-          following => following.id
-        )
-      }
+      helpers.checkUser(res, user)
 
-      // Clean up followers data
-      let followers = user.Followers
-      followers = followers.map(follower => {
-        if (follower.role === 'admin') {
-          return {}
-        }
-        return {
-          followerId: follower.id,
-          name: follower.name,
-          account: follower.account,
-          avatar: follower.avatar,
-          introduction: follower.introduction,
-          createdAt: follower.createdAt,
-          isFollowing:
-            currentUserFollowings && follower.id !== currentUser.id
-              ? currentUserFollowings.includes(follower.id)
-              : null
-        }
-      })
+      // Clean up followers info
+      const currentUserFollowings = helpers.getUserInfoId(req, 'Followings')
+      const followers = helpers.getFollowshipInfo(
+        user,
+        'Followers',
+        currentUserFollowings
+      )
 
       return res.status(200).json(followers)
     } catch (error) {
@@ -595,45 +453,20 @@ const userController = {
   },
   getFollowings: async (req, res) => {
     try {
-      const id = req.params.id
-      const currentUser = helpers.getUser(req)
-      // Make sure user exists or is not admin
-      const user = await User.findByPk(id, {
+      const user = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followings' }]
       })
-      if (!user || user.role === 'admin') {
-        return res.status(401).json({
-          status: 'error',
-          message: 'user does not exist'
-        })
-      }
 
-      let currentUserFollowings = helpers.getUser(req).Followings
-      if (currentUserFollowings) {
-        currentUserFollowings = currentUserFollowings.map(
-          following => following.id
-        )
-      }
+      // Make sure user exists or is not admin
+      helpers.checkUser(res, user)
 
       // Clean up followings data
-      let followings = user.Followings
-      followings = followings.map(following => {
-        if (following.role === 'admin') {
-          return {}
-        }
-        return {
-          followingId: following.id,
-          name: following.name,
-          account: following.account,
-          avatar: following.avatar,
-          introduction: following.introduction,
-          createdAt: following.createdAt,
-          isFollowing:
-            currentUserFollowings && following.id !== currentUser.id
-              ? currentUserFollowings.includes(following.id)
-              : null
-        }
-      })
+      const currentUserFollowings = helpers.getUserInfoId(req, 'Followings')
+      const followings = helpers.getFollowshipInfo(
+        user,
+        'Followings',
+        currentUserFollowings
+      )
 
       return res.status(200).json(followings)
     } catch (error) {
