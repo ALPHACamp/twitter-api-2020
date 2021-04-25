@@ -435,7 +435,10 @@ const userController = {
   getFollowers: async (req, res) => {
     try {
       const user = await User.findByPk(req.params.id, {
-        include: [{ model: User, as: 'Followers' }]
+        include: [{ model: User, as: 'Followers' }],
+        order: [
+          [sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']
+        ]
       })
 
       helpers.checkUser(res, user)
@@ -456,8 +459,18 @@ const userController = {
   getFollowings: async (req, res) => {
     try {
       const user = await User.findByPk(req.params.id, {
-        include: [{ model: User, as: 'Followings' }]
+        include: [
+          {
+            model: User,
+            as: 'Followings'
+          }
+        ],
+        order: [
+          [sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']
+        ]
       })
+
+      console.log('user', user.Followings[0].Followship)
 
       // Make sure user exists or is not admin
       helpers.checkUser(res, user)
