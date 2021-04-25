@@ -416,10 +416,10 @@ const userController = {
         include: [
           {
             model: Like,
-            order: [['createdAt', 'DESC']],
             include: [{ model: Tweet, include: [Like, Reply, User] }]
           }
-        ]
+        ],
+        order: [[sequelize.literal('`Likes`.`createdAt`'), 'DESC']]
       })
       helpers.checkUser(res, user)
 
