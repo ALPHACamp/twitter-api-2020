@@ -26,6 +26,12 @@ const adminController = {
             '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
           ),
           'tweetCount'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(Likes.id) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'
+          ),
+          'likeCount'
         ]
       ],
       order: [[sequelize.literal('tweetCount'), 'DESC']]
@@ -33,12 +39,6 @@ const adminController = {
 
     // Clean up data
     users = users.map(user => {
-      let likeCount = 0
-      user.Tweets.forEach(tweet => {
-        if (tweet.Likes) {
-          likeCount += tweet.Likes.length
-        }
-      })
       return {
         id: user.id,
         name: user.name,
@@ -46,9 +46,9 @@ const adminController = {
         account: user.account,
         cover: user.cover,
         tweetCount: user.dataValues.tweetCount,
+        likeCount: user.dataValues.likeCount,
         followerCount: user.Followers.length,
-        followingCount: user.Followings.length,
-        likeCount
+        followingCount: user.Followings.length
       }
     })
     res.status(200).json(users)
