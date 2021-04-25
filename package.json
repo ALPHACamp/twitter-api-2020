@@ -36,7 +36,8 @@
     "sinon": "^7.2.3",
     "sinon-chai": "^3.3.0",
     "swagger-jsdoc": "^6.1.0",
-    "swagger-ui-express": "^4.1.6"
+    "swagger-ui-express": "^4.1.6",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",
