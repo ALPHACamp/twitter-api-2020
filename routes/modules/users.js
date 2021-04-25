@@ -10,6 +10,9 @@ router.use(authenticated)
 router.get('/current', userController.getCurrentUser)
 
 router.use(authenticatedUser)
+router.get('/:id', userController.getUser)
 router.get('/:id/tweets', userController.getUserTweets)
+router.get('/:id/replied_tweets', userController.getRepliesOfTweet)
+router.get('/:id/likes', userController.getLikedTweet)
 
 module.exports = router
