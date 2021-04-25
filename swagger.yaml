@@ -1,0 +1,241 @@
+openapi: 3.0.0
+info:
+  title: Simple Twitter API
+  description: >-
+    This is a sample server for Simple Twitter API.  You can find out more about
+    this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020).
+    For this sample, you should use JWT token to test the
+    authorization filters.
+  contact:
+    name: GitHub
+    url: 'https://github.com/ivyhungtw/twitter-api-2020/'
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:3000/api'
+    description: Development server
+  - url: 'https://simple-twitter-api-2021.herokuapp.com/api'
+    description: Production server
+tags:
+  - name: admin
+    description: Admin related
+  - name: user
+    description: User related
+  - name: tweets
+    description: Tweets related
+  - name: followships
+    description: Followships related
+components:
+  securitySchemes:
+    bearerAuth:            
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Users:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        avatar:
+          type: string
+        role:
+          type: string
+          default: user
+        introduction:
+          type: string
+        account:
+          type: string
+        cover:
+          type: string
+      xml:
+        name: Users
+    Tweets:
+      type: object
+      properties:
+        id:
+          type: integer
+        UserId:
+          type: integer
+        description:
+          type: string
+      xml:
+        name: Category
+    Replies:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        tweetId:
+          type: integer
+        comment:
+          type: string
+      xml:
+        name: Replies
+    Likes:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        tweetId:
+          type: integer
+      xml:
+        name: Likes
+    Followships:
+      type: object
+      properties:
+        id:
+          type: integer
+        followerId:
+          type: integer
+        followingId:
+          type: integer
+      xml:
+        name: Followships
+    Subscriptions:
+      type: object
+      properties:
+        id:
+          type: integer
+        subscriberId:
+          type: integer
+        authorId:
+          type: integer
+      xml:
+        name: Subscriptions
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+security:
+  - bearerAuth: []   
+
+paths:
+  /admin/users:
+    get:
+      tags:
+        - admin
+      summary: Get all user data
+      description: >-
+        Admin can get all user data from Simple Twitter and their social
+        activeness data.
+      operationId: getAdminUsers
+      responses:
+        '200':
+          description: Ok. Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                        {
+                            "id": 2,
+                            "name": "user1",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user1",
+                            "isFollowed": true
+                        },
+                        {
+                            "id": 3,
+                            "name": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user2",
+                            "isFollowed": true
+                        },
+                        {
+                            "id": 3,
+                            "name": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user2",
+                            "isFollowed": true
+                        }
+                    ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/admin/users/{id}':
+    delete:
+      tags:
+        - admin
+      summary: Deletes a user
+      description: >-
+        Admin can delete a user by specifying the userId in the request
+        parameter.
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "delete successfully" 
+                    }
+        '400':
+          description: Bad request
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  # /users:
+  #   get:
+  #     tags:
+  #       - user
+  #     summary: Get recommended users' data
+  #     description: User can get a list of recommended users to follow.
+  #     operationId: getUsers
+  #     produces:
+  #       - application/json
+  #     responses:
+  #       '200':
+  #         description: successful operation
+  #         schema:
+  #           type: array
+  #           items:
+  #             $ref: '#/definitions/Users'
+  #           example:
+  #             users:
+  #               - id: 34
+  #                 name: user1
+  #                 avatar: 'https://i.imgur.com/q6bwDGO.png'
+  #                 account: user1
+  #                 cover: 'https://i.imgur.com/1jDf2Me.png'
+  #                 tweetCount: 10
+  #                 followerCount: 3
+  #                 followingCount: 1
+  #                 likeCount: 3
+  #               - id: 35
+  #                 name: user2
+  #                 avatar: 'https://i.imgur.com/q6bwDG2.png'
+  #                 account: user2
+  #                 cover: 'https://i.imgur.com/1jDf2M3.png'
+  #                 tweetCount: 11
+  #                 followerCount: 2
+  #                 followingCount: 4
+  #                 likeCount: 2
+  #       '400':
+  #         description: Invalid status value
