@@ -278,5 +278,54 @@ module.exports = {
       .catch(error => {
         catchError(res, error)
       })
+  },
+
+  getLikedTweet: (req, res) => {
+    const { id } = req.params
+    if (!validator.isNumeric(id, { no_symbols: true })) {
+      const data = { status: 'error', message: 'id should be an integer.' }
+      return res.status(400).json(data)
+    }
+    const findTweet = Tweet.findAll({
+      attributes: ['id', 'description', 'createdAt'],
+      order: [[Like, 'createdAt', 'DESC']],
+      include: [
+        User,
+        Reply,
+        { model: Like, where: { UserId: id } }
+      ]
+    })
+    const findLike = Like.findAll({ raw: true, attributes: ['TweetID', 'UserId'] })
+    return Promise.all([findTweet, findLike])
+      .then(valuse => {
+        const [tweets, likes] = valuse
+        if (tweets.length === 0) {
+          return res.status(200).json(null)
+        }
+        const likedTweets = []
+        tweets.forEach(tweet => {
+          const likedUser = likes.filter(like => like.TweetID === tweet.dataValues.id)
+            .map(like => like.UserId)
+          const data = {
+            TweetId: tweet.dataValues.id,
+            description: tweet.dataValues.description,
+            createdAt: tweet.dataValues.createdAt,
+            replyCount: tweet.dataValues.Replies.length,
+            likeCount: likedUser.length,
+            isLiked: likedUser.includes(req.user.id),
+            User: {
+              id: tweet.dataValues.User.id,
+              account: tweet.dataValues.User.account,
+              name: tweet.dataValues.User.name,
+              avatar: tweet.dataValues.User.avatar
+            }
+          }
+          likedTweets.push(data)
+        })
+        return res.status(200).json(likedTweets)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
   }
 }
