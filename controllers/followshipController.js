@@ -6,7 +6,7 @@ const helpers = require('../_helpers')
 const followshipController = {
   followUser: async (req, res) => {
     try {
-      const followingId = req.body.id
+      const followingId = req.body.followingId
       const followingUser = await User.findByPk(followingId)
       const followerId = helpers.getUser(req).id
 
