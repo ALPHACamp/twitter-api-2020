@@ -226,7 +226,45 @@ paths:
           description: Bad request
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  /tweets:
+  '/admin/tweets/{tweet_id}':
+    delete:
+      tags:
+        - admin
+      summary: Delete a spicific tweet.
+      description: >-
+        Admin can delete a specific tweet by speicifying
+        its id.
+      operationId: deleteTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully deleted data from a specific tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "successfully deleted tweet"
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+
+  '/tweets':
     get:
       tags:
         - tweets
@@ -312,7 +350,7 @@ paths:
                   example: 1
                 description:
                   type: string
-                  example:  "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
+                  example: "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
       responses:
         '200':
           description: Ok. Successfully posted a tweet.
@@ -346,3 +384,50 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/tweets/{tweet_id}':
+    get:
+      tags:
+        - tweets
+      summary: Get data of a spicific tweet.
+      description: >-
+        User can retrieve an array of data of a specific tweet by speicifying
+        its id.
+      operationId: getTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to get data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully retrieved data from a specific tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    {
+                        "id": 2,
+                        "description": "officiis et cum",
+                        "createdAt": "2021-04-19T16:45:10.000Z",
+                        "updatedAt": "2021-04-19T16:45:10.000Z",
+                        "user": {
+                            "id": 1,
+                            "name": "root",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png"
+                        },
+                        "likesLength": 1,
+                        "commentsLength": 3,
+                        "isLiked": true
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    
