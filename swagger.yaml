@@ -4,7 +4,7 @@ info:
   description: >-
     This is a sample server for Simple Twitter API.  You can find out more about
     this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020).
-    For this sample, you can use the api key `simple-twitter` to test the
+    For this sample, you should use JWT token to test the
     authorization filters.
   contact:
     name: GitHub
@@ -239,4 +239,3 @@ paths:
   #                 likeCount: 2
   #       '400':
   #         description: Invalid status value
-  
