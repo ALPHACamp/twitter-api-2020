@@ -9,7 +9,9 @@ info:
   version: "1.0.0"
 servers:
   - url: "http://localhost:3000"
+    description: Development server 
   - url: "https://simple-twitter-api-2021.herokuapp.com"
+    description: Production server
 
 # path tags
 tags:
@@ -21,6 +23,8 @@ tags:
   description: "Tweets related"
 - name: "followships"
   description: "Followships related"
+- name: "subscriptions"
+  description: "Subscriptions related"
 
 # path
 paths:
