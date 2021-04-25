@@ -213,7 +213,7 @@ const userController = {
       if (replies.length === 0) return res.json({ message: 'this user has no reply for any tweet!' })
       // 整理回傳資料
       replies = replies.map(reply => {
-        const tweet = reply.Tweet.toJSON()
+        const tweet = reply.dataValues.Tweet
         return {
           id: reply.id,
           comment: reply.comment,
@@ -256,7 +256,7 @@ const userController = {
       if (likes.length === 0) return res.json({ message: 'this user has no like for any tweet!' })
       // 整理回傳資料
       likes = likes.map(like => {
-        const tweet = like.Tweet.toJSON()
+        const tweet = like.dataValues.Tweet
         return {
           id: like.id,
           UserId: like.UserId,
