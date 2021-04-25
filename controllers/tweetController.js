@@ -54,6 +54,8 @@ const tweetController = {
         include: [User, Reply, Like]
       })
 
+      const likes = helpers.getUser(req).LikedTweets.map(like => like.id)
+
       tweets = tweets.map(tweet => ({
         id: tweet.id,
         UserId: tweet.UserId,
@@ -62,6 +64,7 @@ const tweetController = {
         updatedAt: tweet.updatedAt,
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length,
+        isLiked: likes.includes(tweet.id),
         user: {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
