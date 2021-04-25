@@ -303,6 +303,7 @@ const userController = {
           likeCount: like.Tweet.Likes.length
         }
       }))
+      console.log(likes)
       return res.json(likes)
     } catch (e) {
       console.log(e)
