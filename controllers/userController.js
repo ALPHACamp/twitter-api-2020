@@ -10,6 +10,7 @@ const moment = require('moment')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
+const sequelize = require('sequelize')
 
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const defaultAvatar = 'https://i.imgur.com/OFjWJfj.jpg'
@@ -284,21 +285,21 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'this user does not exist!' })
-      let followers = await User.findByPk(req.params.id, {
+      let follower = await User.findByPk(req.params.id, {
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
         ],
         order: [[{ model: User, as: 'Followers' }, 'createdAt', 'DESC']]
       })
-      if (followers.Followers.length === 0) return res.json({ message: 'this user has no follower!' })
+      if (follower.Followers.length === 0) return res.json({ message: 'this user has no follower!' })
       // 該使用者是否在追隨
       const followingsId = []
-      followers.Followings.forEach(following => {
+      follower.Followings.forEach(following => {
         followingsId.push(following.id)
       })
       // 整理回傳資料
-      followers = followers.Followers.map(follower => ({
+      follower = follower.Followers.map(follower => ({
         followerId: follower.id,
         account: follower.account,
         name: follower.name,
@@ -308,7 +309,7 @@ const userController = {
         isFollowing: followingsId.includes(follower.id)
       }))
 
-      return res.json(followers)
+      return res.json(follower)
     } catch (e) {
       console.log(e)
     }
@@ -334,6 +335,48 @@ const userController = {
         followshipCreatedAt: following.Followship.createdAt
       }))
       return res.json(followings)
+    } catch (e) {
+      console.log(e)
+    }
+  },
+  // 查看建議追隨名單 (跟隨者數量排列前10)
+  getTopUsers: async (req, res) => {
+    try {
+      const currentUser = await User.findByPk(helpers.getUser(req).id, {
+        include: { model: User, as: 'Followings' }
+      })
+      let users = await User.findAll({
+        where: { role: 'user' },
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ],
+        attributes: {
+          include: [
+            [
+              sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followCount'
+            ]
+          ]
+        },
+        order: [[sequelize.literal('followCount'), 'DESC']],
+        limit: 10
+      })
+      // 該使用者是否在追隨
+      const followingsId = []
+      currentUser.Followings.forEach(following => {
+        followingsId.push(following.id)
+      })
+      // 整理回傳資料
+      users = users.map(user => {
+        return {
+          id: user.id,
+          name: user.name,
+          account: user.account,
+          avatar: user.avatar,
+          isFollowing: followingsId.includes(user.id)
+        }
+      })
+      return res.json(users)
     } catch (e) {
       console.log(e)
     }
