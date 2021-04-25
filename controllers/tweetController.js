@@ -88,6 +88,8 @@ const tweetController = {
         })
       }
 
+      const likes = helpers.getUserInfoId(req, 'LikedTweets')
+
       tweet = {
         id: tweet.id,
         description: tweet.description,
@@ -99,7 +101,8 @@ const tweetController = {
           avatar: tweet.User.avatar
         },
         likesLength: tweet.Likes.length,
-        commentsLength: tweet.Replies.length
+        commentsLength: tweet.Replies.length,
+        isLiked: likes ? likes.includes(tweet.id) : null
       }
 
       return res.json(tweet)
