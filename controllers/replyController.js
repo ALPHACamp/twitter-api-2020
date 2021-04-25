@@ -12,7 +12,7 @@ module.exports = {
       .then(replies => {
         if (!replies.length) {
           return res.status(400).json({
-            status: 'error', message: 'reply doesn\'t exist'
+            status: 'error', message: 'Reply doesn\'t exist'
           })
         }
         return res.status(200).json(replies)
@@ -29,7 +29,7 @@ module.exports = {
     Tweet.findOne({ where: { id: tweetId } })
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'error', message: 'Tweet doesn\'t esist' })
+          return res.status(400).json({ status: 'error', message: 'Tweet doesn\'t exist' })
         }
 
         if (!comment) {
