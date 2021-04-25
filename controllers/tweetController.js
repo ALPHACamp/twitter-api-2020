@@ -54,8 +54,7 @@ const tweetController = {
         include: [User, Reply, Like]
       })
 
-      let likes = helpers.getUser(req).LikedTweets
-      likes = likes ? likes.map(like => like.id) : null
+      const likes = helpers.getUserInfoId(req, 'LikedTweets')
 
       tweets = tweets.map(tweet => ({
         id: tweet.id,
@@ -81,13 +80,32 @@ const tweetController = {
   getTweet: async (req, res) => {
     try {
       const TweetId = req.params.tweet_id
-      const tweet = await Tweet.findByPk(TweetId)
+      let tweet = await Tweet.findByPk(TweetId, {
+        include: [User, Like, Reply]
+      })
 
       if (!tweet) {
         return res.json({
           status: 'error',
           message: 'cannot get tweet that doesn\'t exist'
         })
+      }
+
+      const likes = helpers.getUserInfoId(req, 'LikedTweets')
+
+      tweet = {
+        id: tweet.id,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        updatedAt: tweet.updatedAt,
+        user: {
+          id: tweet.User.id,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar
+        },
+        likesLength: tweet.Likes.length,
+        commentsLength: tweet.Replies.length,
+        isLiked: likes ? likes.includes(tweet.id) : null
       }
 
       return res.json(tweet)
