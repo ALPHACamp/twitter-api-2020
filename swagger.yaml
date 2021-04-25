@@ -1,105 +1,108 @@
-# basic info
 openapi: 3.0.0
 info:
-  title: "Simple Twitter API"
-  description: "This is a sample server for Simple Twitter API.  You can find out more about this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020). For this sample, you can use the api key `simple-twitter` to test the authorization filters."
+  title: Simple Twitter API
+  description: >-
+    This is a sample server for Simple Twitter API.  You can find out more about
+    this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020).
+    For this sample, you can use the api key `simple-twitter` to test the
+    authorization filters.
   contact:
-    name: "GitHub"
-    url: "https://github.com/ivyhungtw/twitter-api-2020/"
-  version: "1.0.0"
+    name: GitHub
+    url: 'https://github.com/ivyhungtw/twitter-api-2020/'
+  version: 1.0.0
 servers:
-  - url: "http://localhost:3000"
-    description: Development server 
-  - url: "https://simple-twitter-api-2021.herokuapp.com"
+  - url: 'http://localhost:3000/api'
+    description: Development server
+  - url: 'https://simple-twitter-api-2021.herokuapp.com/api'
     description: Production server
-
-# path tags
 tags:
-- name: "admin"
-  description: "Admin related"
-- name: "user"
-  description: "User related"
-- name: "tweets"
-  description: "Tweets related"
-- name: "followships"
-  description: "Followships related"
-- name: "subscriptions"
-  description: "Subscriptions related"
-
-# path
+  - name: admin
+    description: Admin related
+  - name: user
+    description: User related
+  - name: tweets
+    description: Tweets related
+  - name: followships
+    description: Followships related
 paths:
   /admin/users:
     get:
       tags:
-      - "admin"
-      summary: "Get all user data"
-      description: "Admin can get all user data from Simple Twitter and their social activeness data."
-      operationId: "getAdminUsers"
-      produces:
-      # - "application/xml"
-      - "application/json"
+        - admin
+      summary: Get all user data
+      description: >-
+        Admin can get all user data from Simple Twitter and their social
+        activeness data.
+      operationId: getAdminUsers
       responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Users"
-            example:
-              users:
-                - id: 34
-                  name: user1
-                  avatar: 'https://i.imgur.com/q6bwDGO.png'
-                  account: user1
-                  cover: 'https://i.imgur.com/1jDf2Me.png'
-                  tweetCount: 10
-                  followerCount: 3
-                  followingCount: 1
-                  likeCount: 3
-                - id: 35
-                  name: user2
-                  avatar: 'https://i.imgur.com/q6bwDG2.png'
-                  account: user2
-                  cover: 'https://i.imgur.com/1jDf2M3.png'
-                  tweetCount: 11
-                  followerCount: 2
-                  followingCount: 4
-                  likeCount: 2
-              
-        "400":
-          description: "Invalid status value"
-      # security:
-      #   - {}
-      #   - bearerAuth: []
-      #   - api_key:
-      #     - simple-twitter
-            
-  /admin/users/{id}:
+        '200':
+          description: Ok. Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                        {
+                            "id": 2,
+                            "name": "user1",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user1",
+                            "isFollowed": true
+                        },
+                        {
+                            "id": 3,
+                            "name": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user2",
+                            "isFollowed": true
+                        },
+                        {
+                            "id": 3,
+                            "name": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user2",
+                            "isFollowed": true
+                        }
+                    ]
+        '400':
+          description: Bad request.
+  '/admin/users/{id}':
     delete:
       tags:
-      - "admin"
-      summary: "Deletes a user"
-      description: "Admin can delete a user by specifying the userId in the parameter"
-      operationId: "deleteUser"
-      produces:
-      - "application/xml"
-      - "application/json"
+        - admin
+      summary: Deletes a user
+      description: >-
+        Admin can delete a user by specifying the userId in the request
+        parameter.
+      operationId: deleteUser
       parameters:
-      - name: "id"
-        in: "path"
-        description: "The id of the user you want to delete"
-        required: true
-        type: "integer"
-        format: "int64"
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
       responses:
-        "400":
-          description: "Invalid ID"
-        "404":
-          description: "User not found"
-      # security:
-      # - petstore_auth:
-      #   - "write:pets"
-      #   - "read:pets"
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "delete successfully" 
+                    }
+        '400':
+          description: Bad request
   
   /users:
     get:
