@@ -140,6 +140,52 @@ module.exports = {
     return res.status(200).json({ currentUser: user })
   },
 
+  getUser: (req, res) => {
+    const { id } = req.params
+    if (!validator.isNumeric(id, { no_symbols: true })) {
+      const data = { status: 'error', message: 'id should be an integer.' }
+      return res.status(400).json(data)
+    }
+    return User.findByPk(
+      id,
+      {
+        attributes: ['id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover', 'role'],
+        include: [
+          Tweet,
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
+        ]
+      }
+    )
+      .then(user => {
+        if (!user) {
+          const data = { status: 'error', message: 'User not found.' }
+          return res.status(404).json(data)
+        }
+        if (user.dataValues.role === 'admin') {
+          const data = { status: 'error', message: 'Cannot view administrator.' }
+          return res.status(400).json(data)
+        }
+        const data = {
+          id: user.dataValues.id,
+          account: user.dataValues.account,
+          name: user.dataValues.name,
+          email: user.dataValues.email,
+          introduction: user.dataValues.introduction,
+          avatar: user.dataValues.avatar,
+          cover: user.dataValues.cover,
+          tweetCount: user.Tweets.length,
+          followingCount: user.Followings.length,
+          followerCount: user.Followers.length,
+          isFollowed: user.Followers.map(follower => follower.dataValues.id).includes(req.user.id)
+        }
+        return res.status(200).json(data)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
+  },
+
   getUserTweets: (req, res) => {
     const { id } = req.params
     if (!validator.isNumeric(id, { no_symbols: true })) {
