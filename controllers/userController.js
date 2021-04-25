@@ -161,14 +161,14 @@ const userController = {
     }
   },
   // 查看單一使用者發過的推文
-  // 推文內容、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
+  // 推文的 user部分資料、推文內容、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
   getTweets: async (req, res) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'can not find this user!' })
       let tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
-        include: [Reply, Like],
+        include: [User, Reply, Like],
         order: [['createdAt', 'DESC']]
       })
       if (tweets.length === 0) return res.json({ message: 'this user has no tweet!' })
@@ -179,6 +179,12 @@ const userController = {
         description: tweet.description,
         createdAt: tweet.createdAt,
         fromNow: moment(tweet.createdAt).fromNow(),
+        User: {
+          id: tweet.User.id,
+          name: tweet.User.name,
+          account: tweet.User.account,
+          avatar: tweet.User.cover
+        },
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length
       }))
