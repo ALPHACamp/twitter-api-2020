@@ -178,21 +178,29 @@ const userController = {
       })
       if (tweets.length === 0) return res.json({ message: 'this user has no tweet!' })
       // 整理回傳資料
-      tweets = tweets.map(tweet => ({
-        id: tweet.id,
-        UserId: tweet.UserId,
-        description: tweet.description,
-        createdAt: tweet.createdAt,
-        fromNow: moment(tweet.createdAt).fromNow(),
-        User: {
-          id: tweet.User.id,
-          name: tweet.User.name,
-          account: tweet.User.account,
-          avatar: tweet.User.cover
-        },
-        replyCount: tweet.Replies.length,
-        likeCount: tweet.Likes.length
-      }))
+      tweets = tweets.map(tweet => {
+        // 該使用者是否喜歡
+        const likesId = []
+        tweet.Likes.forEach(like => {
+          likesId.push(like.UserId)
+        })
+        return {
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          fromNow: moment(tweet.createdAt).fromNow(),
+          user: {
+            id: tweet.User.id,
+            name: tweet.User.name,
+            account: tweet.User.account,
+            avatar: tweet.User.cover
+          },
+          replyCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          isLiked: likesId.includes(helpers.getUser(req).id)
+        }
+      })
       return res.json(tweets)
     } catch (e) {
       console.log(e)
@@ -214,26 +222,26 @@ const userController = {
       // 整理回傳資料
       replies = replies.map(reply => {
         const tweet = reply.Tweet
+        // 該使用者是否喜歡
+        const likesId = []
+        tweet.Likes.forEach(like => {
+          likesId.push(like.UserId)
+        })
         return {
-          id: reply.id,
-          comment: reply.comment,
-          createdAt: reply.createdAt,
-          FromNow: moment(reply.createdAt).fromNow(),
-          Tweet: {
-            id: tweet.id,
-            UserId: tweet.UserId,
-            description: tweet.description,
-            createdAt: tweet.createdAt,
-            FromNow: moment(tweet.createdAt).fromNow(),
-            User: {
-              id: tweet.User.id,
-              account: tweet.User.account,
-              name: tweet.User.name,
-              avatar: tweet.User.avatar
-            },
-            replyCount: tweet.Replies.length,
-            likeCount: tweet.Likes.length
-          }
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          FromNow: moment(tweet.createdAt).fromNow(),
+          user: {
+            id: tweet.User.id,
+            account: tweet.User.account,
+            name: tweet.User.name,
+            avatar: tweet.User.avatar
+          },
+          replyCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          isLiked: likesId.includes(helpers.getUser(req).id)
         }
       })
       return res.json(replies)
@@ -257,27 +265,26 @@ const userController = {
       // 整理回傳資料
       likes = likes.map(like => {
         const tweet = like.Tweet
+        // 該使用者是否喜歡
+        const likesId = []
+        tweet.Likes.forEach(like => {
+          likesId.push(like.UserId)
+        })
         return {
-          id: like.id,
-          UserId: like.UserId,
-          TweetId: like.TweetId,
-          createdAt: like.createdAt,
-          fromNow: moment(like.createdAt).fromNow(),
-          Tweet: {
-            id: tweet.id,
-            UserId: tweet.UserId,
-            description: tweet.description,
-            createdAt: tweet.createdAt,
-            fromNow: moment(tweet.createdAt).fromNow(),
-            User: {
-              id: tweet.User.id,
-              name: tweet.User.name,
-              account: tweet.User.account,
-              avatar: tweet.User.avatar
-            },
-            replyCount: tweet.Replies.length,
-            likeCount: tweet.Likes.length
-          }
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          fromNow: moment(tweet.createdAt).fromNow(),
+          user: {
+            id: tweet.User.id,
+            name: tweet.User.name,
+            account: tweet.User.account,
+            avatar: tweet.User.avatar
+          },
+          replyCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          isLiked: likesId.includes(helpers.getUser(req).id)
         }
       })
       return res.json(likes)
@@ -333,6 +340,11 @@ const userController = {
         order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
       })
       if (followings.Followings.length === 0) return res.json({ message: 'this user has no following!' })
+      // 該使用者是否在追隨
+      const followingsId = []
+      followings.Followings.forEach(following => {
+        followingsId.push(following.id)
+      })
       // 整理回傳資料
       followings = followings.Followings.map(following => ({
         followingId: following.id,
@@ -340,7 +352,8 @@ const userController = {
         name: following.name,
         avatar: following.avatar,
         introduction: following.introduction,
-        followshipCreatedAt: following.Followship.createdAt
+        followshipCreatedAt: following.Followship.createdAt,
+        isFollowing: followingsId.includes(following.id)
       }))
       return res.json(followings)
     } catch (e) {
@@ -390,6 +403,18 @@ const userController = {
       console.log(e)
       return next(e)
     }
+  },
+  // 取得現在登入的 user 資料
+  getCurrentUser: (req, res) => {
+    return res.json({
+      id: req.user.id,
+      account: req.user.account,
+      name: req.user.name,
+      avatar: req.user.avatar,
+      cover: req.user.cover,
+      introduction: req.user.introduction,
+      role: req.user.role
+    })
   }
 }
 
