@@ -54,6 +54,7 @@ const tweetController = {
   getTweet: async (req, res) => {
     try {
       const tweetId = req.params.tweet_Id
+      const UserId = helpers.getUser(req).id
       let tweet = await Tweet.findByPk(tweetId, {
         include: [User, Like, { model: Reply, include: [User] }],
         order: [
@@ -66,6 +67,11 @@ const tweetController = {
       }
 
       const tweetReplies = helpers.repliesInfos(tweet)
+      const likes = tweet.Likes.map(Like => {
+        if (UserId === Like.UserId) {
+          return true
+        }
+      })
       tweet = {
         id: tweet.id,
         UserId: tweet.UserId,
@@ -74,6 +80,7 @@ const tweetController = {
         updatedAt: tweet.updatedAt,
         likedCount: tweet.Likes.length,
         repliedCount: tweet.Replies.length,
+        isLiked: likes ? likes.includes(true) : null,
         user: {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
