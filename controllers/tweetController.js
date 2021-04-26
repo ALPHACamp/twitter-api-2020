@@ -211,10 +211,7 @@ const tweetController = {
         updatedAt: new Date()
       })
 
-      const reply = await Reply.findAll({
-        raw: true,
-        nest: true,
-        limit: 1,
+      const reply = await Reply.findOne({
         where: { UserId, TweetId },
         order: [['createdAt', 'DESC']]
       })
@@ -222,7 +219,7 @@ const tweetController = {
       return res.json({
         status: 'success',
         message: `successfully replied to ${tweetAuthor.account}'s tweet`,
-        replyId: reply[0].id
+        replyId: reply.id
       })
     }
     catch (error) {
