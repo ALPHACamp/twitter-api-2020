@@ -429,9 +429,18 @@ paths:
     put:
       tags:
         - tweets
-      summary: Post a tweet.
+      summary: Edit a tweet.
       description: User can edit their own tweet.
       operationId: editTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to get data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
       requestBody:
         required: true
         content:
@@ -467,7 +476,7 @@ paths:
     delete:
       tags:
         - tweets
-      summary: User can delete a spicific tweet he owns.  
+      summary: Delete a spicific tweet.  
       description: User can delete a specific tweet by speicifying its id.
       operationId: userDeleteTweet
       parameters:
