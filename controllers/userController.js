@@ -256,7 +256,7 @@ module.exports = {
           return res.status(200).json(null)
         }
         const followings = user.Followings.map(following => ({
-          id: following.dataValues.id,
+          followingId: following.dataValues.id,
           name: following.dataValues.name,
           account: following.dataValues.account,
           avatar: following.dataValues.avatar,
@@ -267,7 +267,7 @@ module.exports = {
         // time O(n^2)?
         const orderedFollowings = []
         order.forEach(item => {
-          const index = followings.findIndex(following => following.id === order.followingId)
+          const index = followings.findIndex(following => following.followingId === order.followingId)
           orderedFollowings.push(followings.splice(index, 1)[0])
         })
         return res.status(200).json(orderedFollowings)
