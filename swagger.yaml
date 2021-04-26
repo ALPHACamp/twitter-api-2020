@@ -678,3 +678,103 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/tweets/{tweet_id}/{reply_id}':
+    put:
+      tags:
+        - replies
+      summary: Edit a reply to a specific tweet.
+      description: User can edit their own reply to a specific tweet by specifying the tweet id and reply id.
+      operationId: editReply
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to edit reply from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: reply_id
+          in: path
+          required: true
+          description: The id of the reply you want to edit.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: integer
+                  example: 1
+                ReplyId:
+                  type: integer
+                  example: 1
+                description:
+                  type: string
+                  example: "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
+      responses:
+        '200':
+          description: Ok. Successfully edited a tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Replies'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully edited a reply",
+                      "updatedReplyId": 1
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      tags:
+        - replies
+      summary: Delete a spicific reply.  
+      description: User can delete a specific reply by speicifying its tweetId and replyId.
+      operationId: DeleteReply
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: reply_id
+          in: path
+          required: true
+          description: The id of the reply you want to edit.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully deleted data from a specific reply.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Replies'
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "successfully deleted reply"
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
