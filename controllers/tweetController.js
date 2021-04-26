@@ -323,6 +323,55 @@ const tweetController = {
     catch (error) {
       console.log(error)
     }
+  },
+
+  editReplies: async (req, res) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const replyId = req.params.reply_id
+      const UserId = helpers.getUser(req).id
+      const reply = await Reply.findOne({
+        where: {
+          id: replyId,
+          UserId,
+          TweetId
+        }
+      })
+      const tweet = await Tweet.findOne({
+        where: { id: TweetId },
+        include: [User]
+      })
+
+      if (!reply) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'you cannot edit other user\'s reply' })
+      }
+
+      if (!req.body.comment.trim()) {
+        return res.json({
+          status: 'error',
+          message: 'comment cannot be blank'
+        })
+      }
+
+      reply.update({
+        id: reply.id,
+        UserId,
+        TweetId,
+        comment: req.body.comment,
+        createdAt: reply.createdAt,
+        updatedAt: new Date()
+      })
+
+      return res.json({
+        status: 'success',
+        message: `successfully updated your response to ${tweet.User.account}\'s tweet`
+      })
+    }
+    catch (error) {
+
+    }
   }
 }
 
