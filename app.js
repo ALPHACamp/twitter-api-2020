@@ -19,4 +19,12 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 require('./routes')(app)
 
+app.use((error, req, res, next) => {
+  console.error(error.stack)
+  res.status(500).json({
+    status: 'error',
+    message: 'Something broke!'
+  })
+})
+
 module.exports = app
