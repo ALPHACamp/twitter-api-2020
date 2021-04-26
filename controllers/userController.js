@@ -211,8 +211,8 @@ const userController = {
             account: tweet.User.account,
             avatar: tweet.User.cover
           },
-          replyCount: tweet.Replies.length,
-          likeCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          likedCount: tweet.Likes.length,
           isLiked: likesId.includes(helpers.getUser(req).id)
         }
       })
@@ -254,8 +254,8 @@ const userController = {
             name: tweet.User.name,
             avatar: tweet.User.avatar
           },
-          replyCount: tweet.Replies.length,
-          likeCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          likedCount: tweet.Likes.length,
           isLiked: likesId.includes(helpers.getUser(req).id)
         }
       })
@@ -297,8 +297,8 @@ const userController = {
             account: tweet.User.account,
             avatar: tweet.User.avatar
           },
-          replyCount: tweet.Replies.length,
-          likeCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          likedCount: tweet.Likes.length,
           isLiked: likesId.includes(helpers.getUser(req).id)
         }
       })
