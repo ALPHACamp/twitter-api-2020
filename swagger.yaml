@@ -457,22 +457,41 @@ paths:
                   value: |-
                     { 
                       "status": "success", 
-                      "message": "edit successfully",
-                      "tweet": {
-                        "id": 3,
-                        "UserId": 1,
-                        "description": "Fugiat quam animi earum quibusdam hic fugiat beatae quo.\nReiciendis rerum delectus repellat harum repudiandae quasi reprehenderit saepe in.\nPraesentium cumque autem atque nisi minus nihil cupiditate.\nUt consectetur omnis architecto provident aspernatur sequi aliquid atque rerum.\nVelit pariatur nam.",
-                        "createdAt": "2021-04-19T16:45:10.000Z",
-                        "updatedAt": "2021-04-19T16:45:10.000Z",
-                        "replyCount": 3,
-                        "likeCount": 0,
-                        "isLiked": false,
-                        "user": {
-                          "avatar": "https://i.imgur.com/q6bwDGO.png",
-                          "name": "root",
-                          "account": "root"
-                        }
-                      }
+                      "message": "successfully edited a tweet",
+                      "editedTweetId": 2
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      tags:
+        - tweets
+      summary: User can delete a spicific tweet he owns.  
+      description: User can delete a specific tweet by speicifying its id.
+      operationId: userDeleteTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully deleted data from a specific tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "successfully deleted tweet"
                     }
         '400':
           description: Bad request.
