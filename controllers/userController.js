@@ -158,7 +158,7 @@ const userController = {
           account,
           name,
           email,
-          password,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
           introduction,
           avatar: files.avatar ? imgAvatar.data.link : user.avatar,
           cover: files.cover ? imgCover.data.link : user.cover
