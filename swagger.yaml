@@ -144,7 +144,7 @@ components:
 security:
   - bearerAuth: []
 paths:
-  /admin/users:
+  '/admin/users':
     get:
       tags:
         - admin
@@ -190,42 +190,42 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  '/admin/users/{id}':
-    delete:
-      tags:
-        - admin
-      summary: Deletes a user
-      description: >-
-        Admin can delete a user by specifying the userId in the request
-        parameter.
-      operationId: deleteUser
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The id of the user you want to delete.
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-      responses:
-        '200':
-          description: Ok.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Users'
-              examples:
-                success:
-                  value: |-
-                    { 
-                      "status": "success", 
-                      "message": "delete successfully" 
-                    }
-        '400':
-          description: Bad request
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
+  # '/admin/users/{id}':
+  #   delete:
+  #     tags:
+  #       - admin
+  #     summary: Deletes a user
+  #     description: >-
+  #       Admin can delete a user by specifying the userId in the request
+  #       parameter.
+  #     operationId: deleteUser
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         required: true
+  #         description: The id of the user you want to delete.
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #           minimum: 1
+  #     responses:
+  #       '200':
+  #         description: Ok.
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Users'
+  #             examples:
+  #               success:
+  #                 value: |-
+  #                   { 
+  #                     "status": "success", 
+  #                     "message": "delete successfully" 
+  #                   }
+  #       '400':
+  #         description: Bad request
+  #       '401':
+  #         $ref: '#/components/responses/UnauthorizedError'
   '/admin/tweets/{tweet_id}':
     delete:
       tags:
@@ -260,7 +260,7 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  /tweets:
+  '/tweets':
     get:
       tags:
         - tweets
@@ -359,7 +359,7 @@ paths:
                   value: |-
                     { 
                       "status": "success", 
-                      "message": "delete successfully",
+                      "message": "successfully posted a tweet",
                       "tweet": {
                         "id": 3,
                         "UserId": 1,
@@ -421,6 +421,58 @@ paths:
                         "likesLength": 1,
                         "commentsLength": 3,
                         "isLiked": true
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    put:
+      tags:
+        - tweets
+      summary: Post a tweet.
+      description: User can edit their own tweet.
+      operationId: editTweet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: integer
+                  example: 1
+                description:
+                  type: string
+                  example: "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
+      responses:
+        '200':
+          description: Ok. Successfully edited a tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "edit successfully",
+                      "tweet": {
+                        "id": 3,
+                        "UserId": 1,
+                        "description": "Fugiat quam animi earum quibusdam hic fugiat beatae quo.\nReiciendis rerum delectus repellat harum repudiandae quasi reprehenderit saepe in.\nPraesentium cumque autem atque nisi minus nihil cupiditate.\nUt consectetur omnis architecto provident aspernatur sequi aliquid atque rerum.\nVelit pariatur nam.",
+                        "createdAt": "2021-04-19T16:45:10.000Z",
+                        "updatedAt": "2021-04-19T16:45:10.000Z",
+                        "replyCount": 3,
+                        "likeCount": 0,
+                        "isLiked": false,
+                        "user": {
+                          "avatar": "https://i.imgur.com/q6bwDGO.png",
+                          "name": "root",
+                          "account": "root"
+                        }
+                      }
                     }
         '400':
           description: Bad request.
