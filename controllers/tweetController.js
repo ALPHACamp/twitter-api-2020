@@ -249,6 +249,38 @@ const tweetController = {
     catch (error) {
       console.log(error)
     }
+  },
+
+  deleteTweet: async (req, res) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.tweet_id)
+
+      if (!tweet) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'tweet does not exist' })
+      }
+
+      if (tweet.UserId !== helpers.getUser(req).id) {
+        return res
+          .status(403)
+          .json({ status: 'error', message: 'you cannot delete other user\'s tweet' })
+      }
+
+      // Replies and likes related to this tweet must be deleted as well
+      await Promise.all([
+        Reply.destroy({ where: { TweetId: tweet.id } }),
+        Like.destroy({ where: { TweetId: tweet.id } }),
+        tweet.destroy()
+      ])
+
+      res
+        .status(200)
+        .json({ status: 'success', message: 'delete successfully' })
+
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 
