@@ -325,7 +325,7 @@ const tweetController = {
     }
   },
 
-  editReplies: async (req, res) => {
+  editReply: async (req, res) => {
     try {
       const TweetId = req.params.tweet_id
       const replyId = req.params.reply_id
@@ -372,7 +372,7 @@ const tweetController = {
     catch (error) {
 
     }
-  }
+  },
 }
 
 module.exports = tweetController
