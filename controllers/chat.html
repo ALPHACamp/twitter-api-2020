@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Chatroom</title>
+</head>
+
+<body>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h1><i class="fas fa-smile"></i> ChatRoom</h1>
+    </header>
+    <hr>
+    <main class="chat-main">
+      <div class="chat-messages">
+        <!-- put message here -->
+      </div>
+    </main>
+    <div class="chat-form-container">
+      <form id="chat-form">
+        <input id="msg" type="text" placeholder="Enter Message" required autocomplete="off" />
+        <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
+      </form>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io()
+    // message from server
+    socket.on('message', message => {
+      console.log(message)
+      outputMessage(message)
+    })
+
+    // message submit
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault()
+      // get msg text
+      const msg = e.target.elements.msg.value
+      // emit msg to server
+      socket.emit('chatMsg', msg)
+      // clear input & focus on it
+      e.target.elements.msg.value = ''
+      e.target.elements.msg.focus()
+    })
+    
+    // output message to DOM
+    function outputMessage(message) {
+      const div = document.createElement('div')
+      div.classList.add('message')
+      div.innerHTML = `
+        <p>${message.username} <span>${message.time}</span></p>
+        <p>${message.text}</p>
+        <hr>
+      `
+      document.querySelector('.chat-messages').appendChild(div)
+    }
+
+  </script>
+</body>
+
+</html>
