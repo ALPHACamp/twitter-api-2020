@@ -9,32 +9,41 @@ const tweetController = {
   //  列出所有tweets以及資訊
   getTweets: async (req, res) => {
     try {
+      const UserId = helpers.getUser(req).id
       let tweets = await Tweet.findAll({
         order: [['updatedAt', 'DESC']],
-        include: [User,
-          { model: User, as: 'LikedUsers' }
-          , { model: User, as: 'RepliedUsers' }
-        ]
+        include: [User, Like, Reply]
       })
+      // const Liked = tweets.LikedUsers
 
       if (tweets.length === 0) {
         return res.json({ status: 'error', message: 'There is no tweets in database.' })
       }
 
-      tweets = tweets.map(tweet => ({
-        id: tweet.id,
-        UserId: tweet.UserId,
-        description: tweet.description,
-        createdAt: tweet.createdAt,
-        updatedAt: tweet.updatedAt,
-        likedCount: tweet.LikedUsers.length,
-        repliedCount: tweet.RepliedUsers.length,
-        user: {
-          avatar: tweet.User.avatar,
-          name: tweet.User.name,
-          account: tweet.User.account
+      tweets = tweets.map(tweet => {
+        const likes = tweet.Likes.map(Like => {
+          if (UserId === Like.UserId) {
+            return true
+          }
+        })
+        console.log(likes)
+        return {
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          updatedAt: tweet.updatedAt,
+          likedCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          isLiked: likes ? likes.includes(true) : null
+          ,
+          user: {
+            avatar: tweet.User.avatar,
+            name: tweet.User.name,
+            account: tweet.User.account
+          }
         }
-      }))
+      })
 
       return res.json(tweets)
 
@@ -45,6 +54,7 @@ const tweetController = {
   getTweet: async (req, res) => {
     try {
       const tweetId = req.params.tweet_Id
+      const UserId = helpers.getUser(req).id
       let tweet = await Tweet.findByPk(tweetId, {
         include: [User, Like, { model: Reply, include: [User] }],
         order: [
@@ -57,6 +67,11 @@ const tweetController = {
       }
 
       const tweetReplies = helpers.repliesInfos(tweet)
+      const likes = tweet.Likes.map(Like => {
+        if (UserId === Like.UserId) {
+          return true
+        }
+      })
       tweet = {
         id: tweet.id,
         UserId: tweet.UserId,
@@ -65,6 +80,7 @@ const tweetController = {
         updatedAt: tweet.updatedAt,
         likedCount: tweet.Likes.length,
         repliedCount: tweet.Replies.length,
+        isLiked: likes ? likes.includes(true) : null,
         user: {
           avatar: tweet.User.avatar,
           name: tweet.User.name,
