@@ -855,3 +855,80 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/subscriptions':
+    post:
+      tags:
+        - subscriptions
+      summary: Subscribe a user.
+      description: User can subscribe a user by speicifying his id.
+      operationId: subscribeUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Ok. Successfully followed user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriptions'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully subscribed user",
+                      "author": {
+                        "id": 2,
+                        "name": "user1",
+                        "account": "user1",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"                        
+                      }
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/subscriptions/{authorId}':
+    delete:
+      tags:  
+        - subscriptions
+      summary: Unsubscribe a user.
+      description: User can unsubscribe a user by speicifying his id.
+      operationId: unsubscribeUser
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          description: The id of the user you want to unfollow.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully unsubscribe user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriptions'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully unsubscribe user",
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
