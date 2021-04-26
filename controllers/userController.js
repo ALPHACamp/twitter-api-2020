@@ -9,6 +9,7 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+const sequelize = db.sequelize
 
 module.exports = {
   login: (req, res) => {
@@ -179,6 +180,42 @@ module.exports = {
           followerCount: user.Followers.length,
           isFollowed: user.Followers.map(follower => follower.dataValues.id).includes(req.user.id)
         }
+        return res.status(200).json(data)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
+  },
+
+  getTopUsers: (req, res) => {
+    return User.findAll({
+      attributes: [
+        'id',
+        'account',
+        'name',
+        'avatar',
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+          'followerCount'
+        ]
+      ],
+      where: { role: 'user' },
+      include: [{ model: User, as: 'Followers' }],
+      order: [[sequelize.literal('followerCount'), 'DESC']],
+      limit: 10
+    })
+      .then((users) => {
+        if (!users) {
+          return res.status(200).json(null)
+        }
+        const data = users.map(user => ({
+          id: user.dataValues.id,
+          account: user.dataValues.account,
+          name: user.dataValues.name,
+          avatar: user.dataValues.avatar,
+          followerCount: user.dataValues.followerCount,
+          isFollowed: user.Followers.map(follower => follower.id).includes(req.user.id)
+        }))
         return res.status(200).json(data)
       })
       .catch(error => {
