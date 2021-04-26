@@ -210,9 +210,19 @@ const tweetController = {
         createdAt: new Date(),
         updatedAt: new Date()
       })
+
+      const reply = await Reply.findAll({
+        raw: true,
+        nest: true,
+        limit: 1,
+        where: { UserId, TweetId },
+        order: [['createdAt', 'DESC']]
+      })
+
       return res.json({
         status: 'success',
-        message: `successfully replied to ${tweetAuthor.account}'s tweet`
+        message: `successfully replied to ${tweetAuthor.account}'s tweet`,
+        replyId: reply[0].id
       })
     }
     catch (error) {
