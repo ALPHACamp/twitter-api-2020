@@ -345,7 +345,7 @@ const tweetController = {
       if (!reply) {
         return res
           .status(401)
-          .json({ status: 'error', message: 'you cannot edit other user\'s reply' })
+          .json({ status: 'error', message: 'this reply does not exist or belong to you' })
       }
 
       if (!req.body.comment.trim()) {
@@ -355,7 +355,7 @@ const tweetController = {
         })
       }
 
-      reply.update({
+      await reply.update({
         id: reply.id,
         UserId,
         TweetId,
@@ -366,7 +366,8 @@ const tweetController = {
 
       return res.json({
         status: 'success',
-        message: `successfully updated your response to ${tweet.User.account}\'s tweet`
+        message: `successfully updated your response to ${tweet.User.account}\'s tweet`,
+        updatedReplyId: reply.id
       })
     }
     catch (error) {
