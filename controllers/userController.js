@@ -9,6 +9,7 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+const Followship = db.Followship
 const sequelize = db.sequelize
 
 module.exports = {
@@ -217,6 +218,59 @@ module.exports = {
           isFollowed: user.Followers.map(follower => follower.id).includes(req.user.id)
         }))
         return res.status(200).json(data)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
+  },
+
+  getFollowings: (req, res) => {
+    /*
+    TODO: 優化方向：撈 followings 資料時，一併以該筆 followship 建立的時間 DESC 排序。
+    痛點：User model 和 Followship model 之間並未建立關聯。
+    */
+    const { id } = req.params
+    if (!validator.isNumeric(id, { no_symbols: true })) {
+      const data = { status: 'error', message: 'id should be an integer.' }
+      return res.status(400).json(data)
+    }
+    const findFollowingsOrderByFollowshipCreatedAtDESC = Followship.findAll({
+      raw: true,
+      attributes: ['followingId'],
+      where: { followerId: id },
+      order: [['createdAt', 'DESC']]
+    })
+    const findUserAndHisFollowings = User.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'Followings',
+          include: [{ model: User, as: 'Followers' }]
+        }
+      ]
+    })
+    return Promise.all([findFollowingsOrderByFollowshipCreatedAtDESC, findUserAndHisFollowings])
+      .then((values) => {
+        const [order, user] = values
+        if (user.Followings.length === 0) {
+          return res.status(200).json(null)
+        }
+        const followings = user.Followings.map(following => ({
+          id: following.dataValues.id,
+          name: following.dataValues.name,
+          account: following.dataValues.account,
+          avatar: following.dataValues.avatar,
+          introduction: following.dataValues.introduction,
+          ifFollowed: following.Followers.map(follower => follower.dataValues.id).includes(req.user.id)
+        }))
+        // order followings by createdAt column of followships table
+        // time O(n^2)?
+        const orderedFollowings = []
+        order.forEach(item => {
+          const index = followings.findIndex(following => following.id === order.followingId)
+          orderedFollowings.push(followings.splice(index, 1)[0])
+        })
+        return res.status(200).json(orderedFollowings)
       })
       .catch(error => {
         catchError(res, error)
