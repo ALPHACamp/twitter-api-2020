@@ -373,6 +373,42 @@ const tweetController = {
 
     }
   },
+
+  deleteReply: async (req, res) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const replyId = req.params.reply_id
+      const UserId = helpers.getUser(req).id
+      const reply = await Reply.findOne({
+        where: {
+          id: replyId,
+          UserId,
+          TweetId
+        }
+      })
+      const tweet = await Tweet.findOne({
+        where: { id: TweetId },
+        include: [User]
+      })
+
+      if (!reply) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'you cannot delete other user\'s reply' })
+      }
+
+      await reply.destroy()
+
+      return res.json({
+        status: 'success',
+        message: `successfully deleted your response to ${tweet.User.account}\'s tweet`,
+        deletedReplyId: replyId
+      })
+    }
+    catch (error) {
+
+    }
+  }
 }
 
 module.exports = tweetController
