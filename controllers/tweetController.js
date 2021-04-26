@@ -317,7 +317,8 @@ const tweetController = {
 
       return res.json({
         status: 'success',
-        message: 'successfully updated tweet'
+        message: 'successfully updated tweet',
+        editedTweetId: tweet.id
       })
     }
     catch (error) {
