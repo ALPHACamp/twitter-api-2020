@@ -63,7 +63,7 @@ const adminController = {
 
       if (!tweet) {
         return res
-          .status(204)
+          .status(200)
           .json({ status: 'error', message: 'tweet does not exist' })
       }
 

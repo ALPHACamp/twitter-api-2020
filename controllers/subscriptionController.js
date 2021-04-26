@@ -4,7 +4,7 @@ const User = db.User
 const helpers = require('../_helpers')
 
 const subscriptionController = {
-  subscribeUser: async (req, res) => {
+  subscribeUser: async (req, res, next) => {
     try {
       const authorId = req.body.id
       const subscriberId = helpers.getUser(req).id
@@ -25,7 +25,7 @@ const subscriptionController = {
       ])
       // Users can't subscribe the admin or the user that doesn't exist
       if (!author || author.role === 'admin') {
-        return res.status(403).json({
+        return res.status(200).json({
           status: 'error',
           message: `cannot subscribe an user that doesn't exist`
         })
@@ -50,11 +50,11 @@ const subscriptionController = {
         author
       })
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
 
-  unsubscribeUser: async (req, res) => {
+  unsubscribeUser: async (req, res, next) => {
     try {
       const authorId = req.params.authorId
       const [author, subscription] = await Promise.all([
@@ -66,7 +66,7 @@ const subscriptionController = {
 
       // Users can't unsubscribe the user that doesn't exist
       if (!author) {
-        return res.status(403).json({
+        return res.status(200).json({
           status: 'error',
           message: `cannot unsubscribe an user that doesn't exist`
         })
@@ -74,7 +74,7 @@ const subscriptionController = {
 
       // Users can't unsubscribe the user if the subscription doesn't exist
       if (!subscription) {
-        return res.status(404).json({
+        return res.status(200).json({
           status: 'error',
           message: `unable to cancel subscription since you haven't subscribed @${author.account} before`
         })
@@ -86,7 +86,7 @@ const subscriptionController = {
         message: `Unsubscribe @${author.account}`
       })
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   }
 }
