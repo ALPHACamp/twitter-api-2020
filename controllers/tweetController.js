@@ -60,6 +60,7 @@ const tweetController = {
         id: tweet.id,
         UserId: tweet.UserId,
         description: tweet.description,
+        slicedDescription: tweet.description.trim().slice(0, 50),
         createdAt: tweet.createdAt,
         updatedAt: tweet.updatedAt,
         replyCount: tweet.Replies.length,
