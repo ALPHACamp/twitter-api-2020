@@ -201,7 +201,7 @@ const userController = {
   },
   // 查看單一使用者發過回覆的推文
   // user 回覆過的推文內容、推文的 user部分資料、推文的 reply、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)、回覆推文的時間(fromNow)
-  getRepliedTweets: async (req, res) => {
+  getRepliedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'this user does not exist!' })
@@ -239,12 +239,12 @@ const userController = {
       return res.json(replies)
     } catch (e) {
       console.log(e)
-      // return next(e)
+      return next(e)
     }
   },
   // 查看單一使用者點過Like的推文
   // user like過的推文內容、推文的 user部分資料、推文的 reply、推文的 reply 數、推文的 like 數、推文的發布時間(fromNow)
-  getLikedTweets: async (req, res) => {
+  getLikedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ message: 'this user does not exist!' })
@@ -255,62 +255,35 @@ const userController = {
       })
       if (likes.length === 0) return res.json({ message: 'this user has no like for any tweet!' })
       // 整理回傳資料
-      // likes = likes.map(like => {
-      //   const tweet = like.Tweet
-      //   return {
-      //     id: like.id,
-      //     UserId: like.UserId,
-      //     TweetId: like.TweetId,
-      //     createdAt: like.createdAt,
-      //     fromNow: moment(like.createdAt).fromNow(),
-      //     Tweet: {
-      //       id: tweet.id,
-      //       UserId: tweet.UserId,
-      //       description: tweet.description,
-      //       createdAt: tweet.createdAt,
-      //       fromNow: moment(tweet.createdAt).fromNow(),
-      //       User: {
-      //         id: tweet.User.id,
-      //         name: tweet.User.name,
-      //         account: tweet.User.account,
-      //         avatar: tweet.User.avatar
-      //       },
-      //       replyCount: tweet.Replies.length,
-      //       likeCount: tweet.Likes.length
-      //     }
-      //   }
-      // })
-      likes.map(like => {
-        console.log(like)
-      })
-      likes = likes.map(like => ({
-        // const tweet = like.Tweet
-        id: like.id,
-        UserId: like.UserId,
-        TweetId: like.TweetId,
-        createdAt: like.createdAt,
-        fromNow: moment(like.createdAt).fromNow(),
-        Tweet: {
-          id: like.Tweet.id,
-          UserId: like.Tweet.UserId,
-          description: like.Tweet.description,
-          createdAt: like.Tweet.createdAt,
-          fromNow: moment(like.Tweet.createdAt).fromNow(),
-          User: {
-            id: like.Tweet.User.id,
-            name: like.Tweet.User.name,
-            account: like.Tweet.User.account,
-            avatar: like.Tweet.User.avatar
-          },
-          replyCount: like.Tweet.Replies.length,
-          likeCount: like.Tweet.Likes.length
+      likes = likes.map(like => {
+        const tweet = like.Tweet
+        return {
+          id: like.id,
+          UserId: like.UserId,
+          TweetId: like.TweetId,
+          createdAt: like.createdAt,
+          fromNow: moment(like.createdAt).fromNow(),
+          Tweet: {
+            id: tweet.id,
+            UserId: tweet.UserId,
+            description: tweet.description,
+            createdAt: tweet.createdAt,
+            fromNow: moment(tweet.createdAt).fromNow(),
+            User: {
+              id: tweet.User.id,
+              name: tweet.User.name,
+              account: tweet.User.account,
+              avatar: tweet.User.avatar
+            },
+            replyCount: tweet.Replies.length,
+            likeCount: tweet.Likes.length
+          }
         }
-      }))
-      console.log(likes)
+      })
       return res.json(likes)
     } catch (e) {
       console.log(e)
-      // return next(e)
+      return next(e)
     }
   },
   // 查看單一使用者的跟隨者 ( user = following , show followers )
