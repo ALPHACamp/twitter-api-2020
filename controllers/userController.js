@@ -130,7 +130,7 @@ const userController = {
       return next(e)
     }
   },
-  // 編輯使用者自己的資料 (name、introduction、avatar、cover)
+  // 編輯使用者自己的資料 (account、name、email、password、introduction、avatar、cover)
   putUser: async (req, res, next) => {
     try {
       // 只能編輯自己的資料
@@ -139,6 +139,15 @@ const userController = {
       if (userId !== id) return res.json({ status: 'error', message: 'can not edit profile of other users!' })
       const user = await User.findByPk(userId)
       if (!user) return res.json({ status: 'error', message: 'can not find this user!' })
+      // 取得編輯資料
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      // 判斷 password 是否等於 checkPassword
+      if (password !== checkPassword) return res.json({ status: 'error', message: 'password & checkPassword must be same!' })
+      // check email & account have not been used
+      const userEmail = await User.findOne({ where: { email } })
+      if (userEmail) return res.json({ status: 'error', message: 'this email has been used!' })
+      const userAccount = await User.findOne({ where: { account } })
+      if (userAccount) return res.json({ status: 'error', message: 'this account has been used!' })
       // 處理圖片
       const { files } = req
       if (files) {
@@ -146,15 +155,21 @@ const userController = {
         const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
         const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
         await user.update({
-          name: req.body.name,
-          introduction: req.body.introduction,
+          account,
+          name,
+          email,
+          password,
+          introduction,
           avatar: files.avatar ? imgAvatar.data.link : user.avatar,
           cover: files.cover ? imgCover.data.link : user.cover
         })
       } else {
         await user.update({
-          name: req.body.name,
-          introduction: req.body.introduction,
+          account,
+          name,
+          email,
+          password,
+          introduction,
           avatar: user.avatar ? user.avatar : defaultAvatar,
           cover: user.cover ? user.cover : defaultCover
         })
