@@ -51,7 +51,8 @@ const tweetController = {
   getTweets: async (req, res) => {
     try {
       let tweets = await Tweet.findAll({
-        include: [User, Reply, Like]
+        include: [User, Reply, Like],
+        order: [['createdAt', 'DESC']]
       })
 
       const likes = helpers.getUserInfoId(req, 'LikedTweets')
