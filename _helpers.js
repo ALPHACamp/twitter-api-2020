@@ -30,7 +30,7 @@ function getFollowshipInfo(user, followships, currentUserFollowings) {
       account: followship.account,
       avatar: followship.avatar,
       introduction: followship.introduction,
-      createdAt: followship.createdAt,
+      createdAt: followship.Followship.createdAt,
       isFollowing: currentUserFollowings
         ? currentUserFollowings.includes(followship.id)
         : null

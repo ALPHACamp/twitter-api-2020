@@ -361,10 +361,10 @@ const userController = {
         include: [
           {
             model: Tweet,
-            order: [['createdAt', 'DESC']],
             include: [Reply, Like]
           }
-        ]
+        ],
+        order: [[sequelize.literal('`Tweets`.`createdAt`'), 'DESC']]
       })
 
       helpers.checkUser(res, user)
@@ -392,10 +392,10 @@ const userController = {
         include: [
           {
             model: Reply,
-            order: [['createdAt', 'DESC']],
             include: [{ model: Tweet, include: [Like, Reply, User] }]
           }
-        ]
+        ],
+        order: [[sequelize.literal('`Replies`.`createdAt`'), 'DESC']]
       })
 
       helpers.checkUser(res, user)
@@ -416,10 +416,10 @@ const userController = {
         include: [
           {
             model: Like,
-            order: [['createdAt', 'DESC']],
             include: [{ model: Tweet, include: [Like, Reply, User] }]
           }
-        ]
+        ],
+        order: [[sequelize.literal('`Likes`.`createdAt`'), 'DESC']]
       })
       helpers.checkUser(res, user)
 
@@ -435,7 +435,10 @@ const userController = {
   getFollowers: async (req, res) => {
     try {
       const user = await User.findByPk(req.params.id, {
-        include: [{ model: User, as: 'Followers' }]
+        include: [{ model: User, as: 'Followers' }],
+        order: [
+          [sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']
+        ]
       })
 
       helpers.checkUser(res, user)
@@ -456,7 +459,15 @@ const userController = {
   getFollowings: async (req, res) => {
     try {
       const user = await User.findByPk(req.params.id, {
-        include: [{ model: User, as: 'Followings' }]
+        include: [
+          {
+            model: User,
+            as: 'Followings'
+          }
+        ],
+        order: [
+          [sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']
+        ]
       })
 
       // Make sure user exists or is not admin
