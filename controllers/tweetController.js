@@ -281,6 +281,48 @@ const tweetController = {
     } catch (err) {
       console.log(err)
     }
+  },
+
+  editTweet: async (req, res) => {
+    try {
+      let tweet = await Tweet.findByPk(req.params.tweet_id)
+      const { description } = req.body
+
+      if (!tweet) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'tweet does not exist' })
+      }
+
+      if (tweet.UserId !== helpers.getUser(req).id) {
+        return res
+          .status(403)
+          .json({ status: 'error', message: 'you cannot edit other user\'s tweet' })
+      }
+
+      if (description.length > 140) {
+        return res.json({
+          status: 'error',
+          message: 'input cannot be longer than 140 characters'
+        })
+      }
+
+      await tweet.update({
+        id: tweet.id,
+        UserId: tweet.UserId,
+        description,
+        createdAt: tweet.createdAt,
+        updatedAt: new Date()
+      })
+
+      return res.json({
+        status: 'success',
+        message: 'successfully updated tweet'
+      })
+    }
+    catch (error) {
+      console.log(error)
+    }
   }
 }
 
