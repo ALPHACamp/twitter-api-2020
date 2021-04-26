@@ -11,7 +11,7 @@ module.exports = {
     Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
-          return res.status(400).json({ status: 'error', message: 'Tweet doesn\'t esist' })
+          return res.status(400).json({ status: 'error', message: 'Tweet doesn\'t exist' })
         }
         Like.findOne({ where: { UserId: userId, TweetId: tweetId } })
           .then(like => {
@@ -50,7 +50,7 @@ module.exports = {
         Like.findOne({ where: { UserId: userId, TweetId: tweetId } })
           .then(like => {
             if (!like) {
-              return res.status(400).json({ status: 'error', message: 'You haven\'t like this tweet before' })
+              return res.status(400).json({ status: 'error', message: 'You haven\'t liked this tweet before' })
             }
             like.destroy()
               .then(() => {
