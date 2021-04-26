@@ -29,7 +29,7 @@ const adminController = {
         ],
         [
           sequelize.literal(
-            '(SELECT COUNT(Likes.id) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'
+            '(SELECT COUNT(DISTINCT Likes.UserId) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'
           ),
           'likeCount'
         ]
