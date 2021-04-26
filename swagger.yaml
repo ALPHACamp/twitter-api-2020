@@ -778,3 +778,80 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/followships':
+    post:
+      tags:
+        - followships
+      summary: Follow a user.
+      description: User can follow a user by speicifying his id.
+      operationId: followUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Ok. Successfully followed user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Followships'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully followed user",
+                      "followingUser": {
+                        "id": 2,
+                        "name": "user1",
+                        "account": "user1",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"                        
+                      }
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/followships/{followingId}':
+    delete:
+      tags:  
+        - followships
+      summary: Unfollow a user.
+      description: User can unfollow a user by speicifying his id.
+      operationId: unfollowUser
+      parameters:
+        - name: followingId
+          in: path
+          required: true
+          description: The id of the user you want to unfollow.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully unfollowed user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Followships'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully unfollowed user",
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
