@@ -350,7 +350,7 @@ const tweetController = {
 
       if (!reply) {
         return res
-          .status(401)
+          .status(400)
           .json({ status: 'error', message: 'this reply does not exist or belong to you' })
       }
 
@@ -397,24 +397,22 @@ const tweetController = {
           TweetId
         }
       })
-      const tweet = await Tweet.findOne({
-        where: { id: TweetId },
-        include: [User]
-      })
 
       if (!reply) {
         return res
-          .status(401)
-          .json({ status: 'error', message: 'you cannot delete other user\'s reply' })
+          .status(400)
+          .json({ status: 'error', message: 'this reply does not exist or belong to you' })
       }
 
       await reply.destroy()
 
-      return res.json({
-        status: 'success',
-        message: `successfully deleted your response to ${tweet.User.account}\'s tweet`,
-        deletedReplyId: replyId
-      })
+      return res
+        .status(200)
+        .json({
+          status: 'success',
+          message: 'successfully deleted your response',
+          deletedReplyId: replyId
+        })
     }
     catch (error) {
 
