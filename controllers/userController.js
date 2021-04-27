@@ -327,5 +327,38 @@ module.exports = {
       .catch(error => {
         catchError(res, error)
       })
+  },
+
+  getFollowers: (req, res) => {
+    const { id: followingId } = req.params
+    User.findByPk(followingId,
+      {
+        attributes: { exclude: ['password'] },
+        include: { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
+        order: [['createdAt', 'DESC']]
+      })
+      .then(followers => {
+        const follower = followers.dataValues.Followers
+        if (follower.length === 0) {
+          return res.status(400).json({ status: 'error', message: 'No followers' })
+        }
+        const data = []
+        follower.forEach(r => {
+          const followerData = {}
+          followerData.followerId = r.id
+          followerData.name = r.name
+          followerData.account = r.account
+          followerData.avatar = r.avatar
+          followerData.introduction = r.introduction
+          followerData.isFollowed = req.user.Followings.map(m => m.id).includes(r.id)
+          data.push(followerData)
+        })
+
+        return res.status(200).json(data)
+      })
+      .catch(error => {
+        catchError(res, error)
+      })
   }
+
 }
