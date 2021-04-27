@@ -190,10 +190,12 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
 
       if (!targetTweet) {
-        return res.json({
-          status: 'error',
-          message: 'cannot reply to a tweet that doesn\'t exist'
-        })
+        return res
+          .status(204)
+          .json({
+            status: 'error',
+            message: 'cannot reply to a tweet that doesn\'t exist'
+          })
       }
 
       const tweetAuthor = await User.findOne({ where: { id: targetTweet.UserId } })
@@ -234,16 +236,20 @@ const tweetController = {
       const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
 
       if (!targetTweet) {
-        return res.json({
-          status: 'error',
-          message: 'this tweet doesn\'t exist'
-        })
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: 'tweet does not exist'
+          })
       }
 
       const replies = await Reply.findAll({ raw: true, nest: true, where: { TweetId } })
-      return res.json(
-        replies
-      )
+      return res
+        .status(200)
+        .json(
+          replies
+        )
     }
     catch (error) {
       console.log(error)
@@ -256,7 +262,7 @@ const tweetController = {
 
       if (!tweet) {
         return res
-          .status(401)
+          .status(404)
           .json({ status: 'error', message: 'tweet does not exist' })
       }
 
@@ -289,7 +295,7 @@ const tweetController = {
 
       if (!tweet) {
         return res
-          .status(401)
+          .status(404)
           .json({ status: 'error', message: 'tweet does not exist' })
       }
 
@@ -300,10 +306,12 @@ const tweetController = {
       }
 
       if (description.length > 140) {
-        return res.json({
-          status: 'error',
-          message: 'input cannot be longer than 140 characters'
-        })
+        return res
+          .status(422)
+          .json({
+            status: 'error',
+            message: 'input cannot be longer than 140 characters'
+          })
       }
 
       await tweet.update({
@@ -314,11 +322,13 @@ const tweetController = {
         updatedAt: new Date()
       })
 
-      return res.json({
-        status: 'success',
-        message: 'successfully updated tweet',
-        editedTweetId: tweet.id
-      })
+      return res
+        .status(200)
+        .json({
+          status: 'success',
+          message: 'successfully updated tweet',
+          editedTweetId: tweet.id
+        })
     }
     catch (error) {
       console.log(error)
@@ -328,18 +338,14 @@ const tweetController = {
   editReply: async (req, res) => {
     try {
       const TweetId = req.params.tweet_id
-      const replyId = req.params.reply_id
+      const ReplyId = req.params.reply_id
       const UserId = helpers.getUser(req).id
       const reply = await Reply.findOne({
         where: {
-          id: replyId,
+          id: ReplyId,
           UserId,
           TweetId
         }
-      })
-      const tweet = await Tweet.findOne({
-        where: { id: TweetId },
-        include: [User]
       })
 
       if (!reply) {
@@ -349,10 +355,12 @@ const tweetController = {
       }
 
       if (!req.body.comment.trim()) {
-        return res.json({
-          status: 'error',
-          message: 'comment cannot be blank'
-        })
+        return res
+          .status(422)
+          .json({
+            status: 'error',
+            message: 'comment cannot be blank'
+          })
       }
 
       await reply.update({
@@ -364,11 +372,13 @@ const tweetController = {
         updatedAt: new Date()
       })
 
-      return res.json({
-        status: 'success',
-        message: `successfully updated your response to ${tweet.User.account}\'s tweet`,
-        updatedReplyId: reply.id
-      })
+      return res
+        .status(200)
+        .json({
+          status: 'success',
+          message: 'successfully updated your response',
+          updatedReplyId: reply.id
+        })
     }
     catch (error) {
 
