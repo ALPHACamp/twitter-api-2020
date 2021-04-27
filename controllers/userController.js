@@ -156,11 +156,11 @@ const userController = {
         const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
         const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
         await user.update({
-          account,
-          name,
-          email,
-          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-          introduction,
+          account: account ? account : user.account,
+          name: name ? name : user.name,
+          email: email ? email : user.email,
+          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+          introduction: introduction ? introduction : user.introduction,
           avatar: files.avatar ? imgAvatar.data.link : user.avatar,
           cover: files.cover ? imgCover.data.link : user.cover
         })
@@ -169,7 +169,7 @@ const userController = {
           account,
           name,
           email,
-          password,
+          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
           introduction,
           avatar: user.avatar ? user.avatar : defaultAvatar,
           cover: user.cover ? user.cover : defaultCover
