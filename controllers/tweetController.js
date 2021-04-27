@@ -6,7 +6,7 @@ const Like = db.Like
 const helpers = require('../_helpers')
 
 const tweetController = {
-  postTweets: async (req, res) => {
+  postTweets: async (req, res, next) => {
     try {
       let { description } = req.body
       const UserId = helpers.getUser(req).id
@@ -54,7 +54,7 @@ const tweetController = {
       next(error)
     }
   },
-  getTweets: async (req, res) => {
+  getTweets: async (req, res, next) => {
     try {
       let tweets = await Tweet.findAll({
         include: [User, Reply, Like],
@@ -87,7 +87,7 @@ const tweetController = {
     }
   },
 
-  getTweet: async (req, res) => {
+  getTweet: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_id
       let tweet = await Tweet.findByPk(TweetId, {
@@ -129,7 +129,7 @@ const tweetController = {
     }
   },
 
-  likeTweet: async (req, res) => {
+  likeTweet: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
       const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
@@ -168,7 +168,7 @@ const tweetController = {
     }
   },
 
-  unlikeTweet: async (req, res) => {
+  unlikeTweet: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
       const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
@@ -211,7 +211,7 @@ const tweetController = {
     }
   },
 
-  postReply: async (req, res) => {
+  postReply: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_id
       const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
@@ -258,7 +258,7 @@ const tweetController = {
     }
   },
 
-  getReplies: async (req, res) => {
+  getReplies: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_id
       const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
@@ -284,7 +284,7 @@ const tweetController = {
     }
   },
 
-  deleteTweet: async (req, res) => {
+  deleteTweet: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.tweet_id)
 
@@ -322,7 +322,7 @@ const tweetController = {
     }
   },
 
-  editTweet: async (req, res) => {
+  editTweet: async (req, res, next) => {
     try {
       let tweet = await Tweet.findByPk(req.params.tweet_id)
       const { description } = req.body
@@ -375,7 +375,7 @@ const tweetController = {
     }
   },
 
-  editReply: async (req, res) => {
+  editReply: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_id
       const ReplyId = req.params.reply_id
@@ -425,7 +425,7 @@ const tweetController = {
     }
   },
 
-  deleteReply: async (req, res) => {
+  deleteReply: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_id
       const replyId = req.params.reply_id

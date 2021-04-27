@@ -4,7 +4,7 @@ const User = db.User
 const helpers = require('../_helpers')
 
 const followshipController = {
-  followUser: async (req, res) => {
+  followUser: async (req, res, next) => {
     try {
       const followingId = req.body.id
       const followingUser = await User.findByPk(followingId)
@@ -58,7 +58,7 @@ const followshipController = {
     }
   },
 
-  unfollowUser: async (req, res) => {
+  unfollowUser: async (req, res, next) => {
     try {
       const followingId = req.params.followingId
       const followerId = helpers.getUser(req).id
