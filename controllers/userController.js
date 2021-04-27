@@ -166,11 +166,11 @@ const userController = {
         })
       } else {
         await user.update({
-          account,
-          name,
-          email,
+          account: account ? account : user.account,
+          name: name ? name : user.name,
+          email: email ? email : user.email,
           password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
-          introduction,
+          introduction: introduction ? introduction : user.introduction,
           avatar: user.avatar ? user.avatar : defaultAvatar,
           cover: user.cover ? user.cover : defaultCover
         })
