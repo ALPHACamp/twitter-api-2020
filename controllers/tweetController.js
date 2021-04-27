@@ -132,7 +132,9 @@ const tweetController = {
       const TweetId = req.params.tweet_Id
 
       if (!comment) {
-        return res.json({ status: 'error', message: "It must have comment to tweet." })
+        return res.json({ status: 'error', message: "It must have comment to reply." })
+      } else if (await Tweet.findByPk(TweetId) === null) {
+        return res.json({ status: 'error', message: "This tweetId doesn't exist." })
       } else if (comment.length > 140) {
         return res.json({ status: 'error', message: "comment max length is 140 words" })
       }
