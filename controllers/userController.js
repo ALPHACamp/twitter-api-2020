@@ -216,7 +216,6 @@ const userController = {
       // setting
       if (page === 'setting') {
         const result = await helpers.checkUserInfo(req)
-        console.log('result', result)
 
         if (!result) {
           const user = await User.findByPk(userId)
