@@ -22,7 +22,7 @@ function getFollowshipInfo(user, followships, currentUserFollowings) {
 
   return user.dataValues[followships].map(followship => {
     if (followship.role === 'admin') {
-      return {}
+      return null
     }
     return {
       [idName]: followship.id,
@@ -42,7 +42,7 @@ function getResourceInfo(user, resource, likes) {
   return user.dataValues[resource].map(el => {
     const tweet = el.Tweet
     if (!tweet) {
-      return {}
+      return null
     }
     return {
       id: el.id,
