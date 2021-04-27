@@ -27,7 +27,14 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io()
+    // const socket = io()
+
+    const socket = io({
+      auth: {
+        token: 'abc'
+      }
+    })
+
     // message from server
     socket.on('message', message => {
       outputMessage(message)

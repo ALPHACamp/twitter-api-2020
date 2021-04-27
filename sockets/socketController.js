@@ -7,9 +7,14 @@ const server = http.createServer(app)
 const io = socketIo(server)
 const formatMessage = require('../utils/messages')
 
+const authenticated = require('./auth')
+
 app.get('/', (req, res) => {
   res.sendFile( __dirname + '/chat.html')
 })
+
+// 驗證身分
+io.use(authenticated)
 
 const users = {}
 const botName = 'Chat Bot'
