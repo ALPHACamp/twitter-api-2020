@@ -158,10 +158,16 @@ const tweetController = {
   },
   tweetLike: async (req, res) => {
     try {
-      await Like.create({
-        UserId: helpers.getUser(req).id,
-        TweetId: req.params.tweet_Id
-      })
+      const TweetId = req.params.tweet_Id
+      if (await Tweet.findByPk(TweetId) === null) {
+        return res.json({ status: 'error', message: "This tweetId doesn't exist." })
+      } else {
+        await Like.create({
+          UserId: helpers.getUser(req).id,
+          TweetId: TweetId
+        })
+      }
+
       return res.json({ status: 'success', message: 'Like has built successfully!' })
     } catch (e) { return res.json({ status: 'error', message: 'Failed to build a like.' }) }
   },
