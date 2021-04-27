@@ -17,6 +17,8 @@ const { authenticated } = require('../middleware/auth')
 router.post('/login', userController.login)
 router.post('/users', userController.register)
 // routes : users
+router.get('/users/top', authenticated, userController.getTopUsers)
+router.get('/users/currentUser', authenticated, userController.getCurrentUser)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, uploadProfile, userController.putUser)
 router.get('/users/:id/tweets', authenticated, userController.getTweets)

@@ -10,9 +10,19 @@ module.exports = {
       },
       UserId: {
         type: Sequelize.INTEGER
+        // allowNull: false
+        // references: {
+        //   model: 'Users',
+        //   key: 'id'
+        // }
       },
       TweetId: {
         type: Sequelize.INTEGER
+        // allowNull: false,
+        // references: {
+        //   model: 'Tweets',
+        //   key: 'id'
+        // }
       },
       comment: {
         type: Sequelize.TEXT
