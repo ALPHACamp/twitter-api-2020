@@ -1163,7 +1163,7 @@ paths:
       tags:
         - user
       summary: Login.
-      description: User can login to Simple Twitter by speicifying his account and password.
+      description: User can login to Simple Twitter by filling out his account and password.
       operationId: login
       requestBody:
         required: true
@@ -1180,7 +1180,7 @@ paths:
                   example: 12345678
       responses:
         '200':
-          description: Ok.
+          description: Login successfully.
           content:
             application/json:
               schema:
@@ -1188,25 +1188,57 @@ paths:
               examples:
                 success:
                   value: |-
-                    { 
-                      "status": "success",
-                      "message": "login successfully",
-                      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NDUyNzY1fQ.PWVB3oa9pqmA6-sQii69BCs1bFJXlYO6yaM4hhthq7E",
-                      "user": {
-                        "id": 3,
-                        "name": "user2",
-                        "email": "user2@example.com",
-                        "account": "user2",
-                        "avatar": "https://i.imgur.com/q6bwDGO.png",
-                        "introduction": "Dignissimos repellat maxime nisi quia molestiae po",
-                        "cover": "https://i.imgur.com/1jDf2Me.png",
-                        "role": "user"
-                      }
+                    {
+                        "status": "success",
+                        "message": "login successfully",
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NDUyNzY1fQ.PWVB3oa9pqmA6-sQii69BCs1bFJXlYO6yaM4hhthq7E",
+                        "user": {
+                            "id": 3,
+                            "name": "user2",
+                            "email": "user2@example.com",
+                            "account": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "introduction": "Dignissimos repellat maxime nisi quia molestiae po",
+                            "cover": "https://i.imgur.com/1jDf2Me.png",
+                            "role": "user"
+                        }
                     }
-        '400':
-          description: Bad request.
+        '401':
+          description: Incorrect password.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "Incorrect Password"
+                    }
+        '401':
+          description: That account does not exist.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "That account does not exist."
+                    }
+        '422':
+          description: All fields are required.
+          content:
+            application/json:
+              examples:
+                error3:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "All fields are required."
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/users/current_user':
     get:
       security:
@@ -1215,11 +1247,11 @@ paths:
         - user
       summary: Get currentUser data.
       description: >-
-        Frontend can use this API route to get currentUser data.
+        Use this API route to get current login user data.
       operationId: getCurrentUser
       responses:
         '200':
-          description: Ok. Retrieved a user.
+          description: Retrieved a user.
           content:
             application/json:
               schema:
@@ -1237,57 +1269,10 @@ paths:
                       "cover": "https://i.imgur.com/1jDf2Me.png",
                       "introduction": "Maxime quo quos beatae aut quaerat rem."
                     }
-        '400':
-          description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/users':
-    post:
-      tags:
-        - user
-      summary: Register.
-      description: User can register an account for Simple Twitter by filling out required fields of personal information.
-      operationId: register
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: 
-              type: object
-              properties:
-                account:
-                  type: string
-                  example: user1
-                name:
-                  type: string
-                  example: user1
-                email:
-                  type: string
-                  example: user1@example.com
-                password:
-                  type: string
-                  example: 12345678
-                checkPassword:
-                  type: string
-                  example: 12345678
-      responses:
-        '200':
-          description: Ok.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Users'
-              examples:
-                success:
-                  value: |-
-                    {
-                      "status": "success",
-                      "message": "user1 register successfully! Please login."
-                    }
-        '400':
-          description: Bad request.
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
     get:
       security:
         - bearerAuth: []
@@ -1295,11 +1280,11 @@ paths:
         - user
       summary: Get recommended authors data
       description: >-
-        User can get recommended authors data on Simple Twitter.
+        User can get recommended authors data.
       operationId: getUsers
       responses:
         '200':
-          description: Ok. Retrieved an array of user objects.
+          description: Retrieve an array of user objects.
           content:
             application/json:
               schema:
@@ -1330,10 +1315,114 @@ paths:
                             "isFollowed": true
                         }
                     ]
-        '400':
-          description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags:
+        - user
+      summary: Register.
+      description: User can register an account for Simple Twitter by filling out required fields of personal information.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                account:
+                  type: string
+                  example: user1
+                name:
+                  type: string
+                  example: user1
+                email:
+                  type: string
+                  example: user1@example.com
+                password:
+                  type: string
+                  example: 12345678
+                checkPassword:
+                  type: string
+                  example: 12345678
+      responses:
+        '422':
+          description: Did not meet field requirements.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "errors": [
+                          {
+                              "message": "Please enter the correct email address."
+                          },
+                          {
+                              "message": "Password and checkPassword do not match."
+                          }
+                      ],
+                      "userInput": {
+                          "email": "user7@example",
+                          "password": "1234567",
+                          "name": "rrrr",
+                          "checkPassword": "12345678",
+                          "account": "user1"
+                      }
+                    }
+        '409':
+          description: A user with ${email} already exists. Choose a different address or login directly.
+          content:
+            application/json:
+              examples:
+                error1:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "A user with email 'user7@example.com' already exists. Choose a different account or login directly.",
+                      "userInput": {
+                          "email": "user7@example.com",
+                          "password": "12345678",
+                          "name": "rrrr",
+                          "checkPassword": "12345678",
+                          "account": "user1"
+                      }
+                    }
+        '409':
+          description: A user with ${account} already exists. Choose a different address or login directly.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "A user with account 'user1' already exists. Choose a different account or login directly.",
+                      "userInput": {
+                          "email": "user7@example.com",
+                          "password": "12345678",
+                          "name": "rrrr",
+                          "checkPassword": "12345678",
+                          "account": "user1"
+                      }
+                    }
+        '200':
+          description: Registered an account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "user1 register successfully! Please login."
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
   '/users/{id}':
     get:
       security:
@@ -1355,7 +1444,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Retrieved an user object.
+          description: Retrieved an user object.
           content:
             application/json:
               schema:
@@ -1378,8 +1467,17 @@ paths:
                       "isFollowed": true,
                       "isSubscribed": false
                     }
-        '400':
-          description: Bad request.
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     put:
@@ -1409,7 +1507,7 @@ paths:
               properties:
                 page:
                   type: string
-                  example: leave blank for profile, setting for setting page
+                  example: (leave blank for profile, setting for setting page)
                 account:
                   type: string
                   example: user1
@@ -1436,22 +1534,116 @@ paths:
                   example: https://i.imgur.com/1jDf2Me.png
       responses:
         '200':
-          description: Ok.
+          description: Profile/setting update successfully.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Users'
               examples:
                 success:
                   value: |-
                     {
                         "status": "success",
-                        "message": "profile update successfully"
+                        "message": "profile/setting update successfully"
                     }
-        '400':
-          description: Bad request.
+        '422':
+          description: Did not meet field requirements.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                        "status": "error",
+                        "errors": [
+                            {
+                                "message": "Please fill out all fields."
+                            },
+                            {
+                                "message": "Please enter the correct email address."
+                            },
+                            {
+                                "message": "Password and checkPassword do not match."
+                            }
+                        ],
+                        "userInput": {
+                            "email": "",
+                            "password": "12345678",
+                            "name": "rrrr",
+                            "checkPassword": "123456789",
+                            "account": "user2",
+                            "page": "setting"
+                        }
+                    }
+        '403':
+          description: You can not edit other's profile.
+          content:
+            application/json:
+              examples:
+                error1:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "You can not edit other's profile"
+                    }
+        '409':
+          description: A user with ${email} already exists. Choose a different email.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "A user with 'user1@example.com' already exists. Choose a different email.",
+                        "userInput": {
+                            "email": "user1@example.com",
+                            "password": "12345678",
+                            "name": "root",
+                            "checkPassword": "12345678",
+                            "account": "user10",
+                            "page": "setting"
+                        }
+                    }
+        '409':
+          description: A user with ${account} already exists. Choose a different account.
+          content:
+            application/json:
+              examples:
+                error3:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "A user with account 'root' already exists. Choose a different account.",
+                        "userInput": {
+                            "email": "user1@example.com",
+                            "password": "12345678",
+                            "name": "root",
+                            "checkPassword": "12345678",
+                            "account": "user10",
+                            "page": "setting"
+                        }
+                    }
+        '422':
+          description: Did not meet field length requirements.
+          content:
+            application/json:
+              examples:
+                error4:
+                  value: |-
+                    {
+                      "status": "error",
+                      "errors": [
+                          {
+                              "message": "Name can not be empty or longer than 50 characters"
+                          }
+                      ],
+                      "userInput": {
+                          "name": "Dignissimos repellat maxime nisi quia molestiae poDignissimos repellat maxime nisi quia molestiae po",
+                          "introduction": ""
+                      }
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/users/{id}/tweets':
     get:
       security:
@@ -1473,7 +1665,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Retrieved an array of tweet objects.
+          description: Retrieved an array of tweet objects.
           content:
             application/json:
               schema:
@@ -1499,10 +1691,20 @@ paths:
                           "isLiked": false
                       }
                     ]
-        '400':
-          description: Bad request.
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/users/{id}/replied_tweets':
     get:
       security:
@@ -1524,7 +1726,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Retrieved an array of tweet objects.
+          description: Retrieved an array of tweet objects.
           content:
             application/json:
               schema:
@@ -1554,10 +1756,20 @@ paths:
                           }
                       }
                     ]
-        '400':
-          description: Bad request.
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/users/{id}/likes':
     get:
       security:
@@ -1579,7 +1791,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Retrieved an array of tweet objects.
+          description: Retrieved an array of tweet objects.
           content:
             application/json:
               schema:
@@ -1608,17 +1820,27 @@ paths:
                           }
                       }
                     ]
-        '400':
-          description: Bad request.
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/users/{id}/followers':
     get:
       security:
         - bearerAuth: []
       tags:
         - user
-      summary: Get a specific user's followers data
+      summary: Get a specific user's followers data.
       description: >-
         User can get a specific user's followers data by specifying his id.
       operationId: getUserFollowers
@@ -1633,7 +1855,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Retrieved an array of user objects.
+          description: Retrieved an array of user objects.
           content:
             application/json:
               schema:
@@ -1652,10 +1874,20 @@ paths:
                           "isFollowing": false
                       }
                     ]
-        '400':
-          description: Bad request.
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/users/{id}/followings':
     get:
       security:
@@ -1670,14 +1902,14 @@ paths:
         - name: id
           in: path
           required: true
-          description: The id of the user you want to get a specific user's following authors data from.
+          description: The id of the user you want to get following authors data from.
           schema:
             type: integer
             format: int64
             minimum: 1
       responses:
         '200':
-          description: Ok. Retrieved an array of user objects.
+          description: Retrieved an array of user objects.
           content:
             application/json:
               schema:
@@ -1696,7 +1928,16 @@ paths:
                         "isFollowing": true
                       }
                     ]
-        '400':
-          description: Bad request.
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
