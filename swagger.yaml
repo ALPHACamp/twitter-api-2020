@@ -284,6 +284,7 @@ paths:
                     "tweet does not exist"
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/tweets':
     get:
       security:
@@ -400,6 +401,7 @@ paths:
           description: Input cannot be longer than 140 characters / input should not be blank.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/tweets/{tweet_id}':
     get:
       security:
@@ -483,8 +485,6 @@ paths:
           description: Ok. Successfully edited a tweet.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Tweets'
               examples:
                 success:
                   value: |-
@@ -521,33 +521,34 @@ paths:
           description: Ok. Successfully deleted tweet.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Tweets'
               examples:
                 success:
                   value: |-
                     {
                         "status": "success",
-                        "message": "successfully deleted tweet"
+                        "message": "delete successfully"
                     }
-        '400':
-          description: Bad request.
+        '200':
+          description: Tweet does not exist.
+        '403':
+          description: You cannot delete other user's tweet.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/tweets/{tweet_id}/like':
     post:
       security:
         - bearerAuth: []
       tags:
         - tweets
-      summary: Like a spicific tweet.
-      description: User can like a specific tweet by speicifying its id.
+      summary: Like a specific tweet.
+      description: User can like a specific tweet by specifying its id.
       operationId: likeTweet
       parameters:
         - name: tweet_id
           in: path
           required: true
-          description: The id of the tweet you want to perform like with.
+          description: The id of the tweet you want to like.
           schema:
             type: integer
             format: int64
@@ -557,33 +558,40 @@ paths:
           description: Ok. Successfully liked this tweet.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Tweets'
               examples:
                 success:
                   value: |-
                     { 
-                      "status": "success", 
-                      "message": "successfully liked this tweet"
+                      "status": "success"
                     }
-        '400':
-          description: Bad request.
+        '200':
+          description: Cannot like a tweet that doesn't exist.        
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot like a tweet that doesn't exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/tweets/{tweet_id}/unlike':
     post:
       security:
         - bearerAuth: []
       tags:
         - tweets
-      summary: Unlike a spicific tweet.
-      description: User can unlike a specific tweet by speicifying its id.
+      summary: Unlike a specific tweet.
+      description: User can unlike a specific tweet by specifying its id.
       operationId: unlikeTweet
       parameters:
         - name: tweet_id
           in: path
           required: true
-          description: The id of the tweet you want to perform unlike with.
+          description: The id of the tweet you want to unlike.
           schema:
             type: integer
             format: int64
@@ -593,17 +601,23 @@ paths:
           description: Ok. Successfully unliked this tweet.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Tweets'
               examples:
                 success:
                   value: |-
                     { 
-                      "status": "success", 
-                      "message": "successfully unliked this tweet"
+                      "status": "success"
                     }
-        '400':
-          description: Bad request.
+        '200':
+          description: You haven't liked this tweet before.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "you haven't liked this tweet before"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets/{tweet_id}/replies':
