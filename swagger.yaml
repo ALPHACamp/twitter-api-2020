@@ -2,19 +2,22 @@ openapi: 3.0.0
 info:
   title: Simple Twitter API
   description: >-
-    This is a sample server for Simple Twitter API.  You can find out more about
+    This is a sample server for Simple Twitter API. You can find out more about
     this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020).
-    For this sample, you should use JWT token to test the
-    authorization filters.
+    For this sample, you should use JWT token to test the authorization filters.
+    Go to `user` -> `POST /users/login` to get your token with the example user, account: user1 / password: 12345678.
   contact:
-    name: GitHub
+    name: GitHub repo
     url: 'https://github.com/ivyhungtw/twitter-api-2020/'
   version: 1.0.0
+externalDocs:
+  url: 'https://hackmd.io/@icaughtacode/rJmFeRSUu'
+  description: Find more info here - hackMD
 servers:
   - url: 'http://localhost:3000/api'
-    description: Development server
+    description: Development
   - url: 'https://simple-twitter-api-2021.herokuapp.com/api'
-    description: Production server
+    description: Production
 tags:
   - name: admin
     description: Admin related
@@ -24,9 +27,13 @@ tags:
     description: Tweets related
   - name: followships
     description: Followships related
+  - name: subscriptions
+    description: Subscriptions related
+  - name: replies
+    description: Replies related
 components:
   securitySchemes:
-    bearerAuth:            
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
@@ -53,6 +60,10 @@ components:
           type: string
         cover:
           type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
       xml:
         name: Users
     Tweets:
@@ -63,6 +74,10 @@ components:
         UserId:
           type: integer
         description:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
           type: string
       xml:
         name: Category
@@ -77,6 +92,10 @@ components:
           type: integer
         comment:
           type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
       xml:
         name: Replies
     Likes:
@@ -88,6 +107,10 @@ components:
           type: integer
         tweetId:
           type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
       xml:
         name: Likes
     Followships:
@@ -99,6 +122,10 @@ components:
           type: integer
         followingId:
           type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
       xml:
         name: Followships
     Subscriptions:
@@ -110,27 +137,1156 @@ components:
           type: integer
         authorId:
           type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
       xml:
         name: Subscriptions
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
-security:
-  - bearerAuth: []   
 
 paths:
-  /admin/users:
+  '/admin/users':
     get:
+      security:
+        - bearerAuth: []
       tags:
         - admin
-      summary: Get all user data
+      summary: Get all users data
       description: >-
-        Admin can get all user data from Simple Twitter and their social
-        activeness data.
+        Admin can get all users data from Simple Twitter including their social
+        activeness
       operationId: getAdminUsers
       responses:
         '200':
-          description: Ok. Retrieved an array of user objects.
+          description: Successfully retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                        "id": 4,
+                        "name": "user3",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "account": "user3",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "tweetCount": 10,
+                        "followerCount": 0,
+                        "followingCount": 1,
+                        "likeCount": 0
+                      },
+                      {
+                        "id": 3,
+                        "name": "user2",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "account": "user2",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "tweetCount": 10,
+                        "followerCount": 2,
+                        "followingCount": 0,
+                        "likeCount": 0
+                      },
+                      {
+                        "id": 5,
+                        "name": "user4",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "account": "user4",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "tweetCount": 10,
+                        "followerCount": 1,
+                        "followingCount": 0,
+                        "likeCount": 0
+                      }
+                    ]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  # '/admin/users/{id}':
+  #   delete:
+  #     tags:
+  #       - admin
+  #     summary: Deletes a user
+  #     description: >-
+  #       Admin can delete a user by specifying the userId in the request
+  #       parameter.
+  #     operationId: deleteUser
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         required: true
+  #         description: The id of the user you want to delete.
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #           minimum: 1
+  #     responses:
+  #       '200':
+  #         description: Ok.
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Users'
+  #             examples:
+  #               success:
+  #                 value: |-
+  #                   { 
+  #                     "status": "success", 
+  #                     "message": "delete successfully" 
+  #                   }
+  #       '400':
+  #         description: Bad request
+  #       '401':
+  #         $ref: '#/components/responses/UnauthorizedError'
+  '/admin/tweets/{tweet_id}':
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin
+      summary: Delete a specific tweet.
+      description: Admin can delete a specific tweet by specifying its id.
+      operationId: adminDeleteTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully deleted tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "delete successfully"
+                    }
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    "tweet does not exist"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/tweets':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - tweets
+      summary: Get all tweets data.
+      description: User can retrieve a list of all posted tweets.
+      operationId: getTweets
+      responses:
+        '200':
+          description: Successfully retrieved an array of tweet objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "id": 1,
+                          "UserId": 1,
+                          "description": "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus",
+                          "createdAt": "2021-04-19T16:45:10.000Z",
+                          "updatedAt": "2021-04-19T16:45:10.000Z",
+                          "replyCount": 3,
+                          "likeCount": 1,
+                          "isLiked": true,
+                          "user": {
+                              "avatar": "https://i.imgur.com/q6bwDGO.png",
+                              "name": "root",
+                              "account": "root"
+                          }
+                      },
+                      {
+                          "id": 2,
+                          "UserId": 1,
+                          "description": "officiis et cum",
+                          "createdAt": "2021-04-19T16:45:10.000Z",
+                          "updatedAt": "2021-04-19T16:45:10.000Z",
+                          "replyCount": 3,
+                          "likeCount": 1,
+                          "isLiked": true,
+                          "user": {
+                              "avatar": "https://i.imgur.com/q6bwDGO.png",
+                              "name": "root",
+                              "account": "root"
+                          }
+                      },
+                      {
+                          "id": 3,
+                          "UserId": 1,
+                          "description": "Fugiat quam animi earum quibusdam hic fugiat beatae quo.\nReiciendis rerum delectus repellat harum repudiandae quasi reprehenderit saepe in.\nPraesentium cumque autem atque nisi minus nihil cupiditate.\nUt consectetur omnis architecto provident aspernatur sequi aliquid atque rerum.\nVelit pariatur nam.",
+                          "createdAt": "2021-04-19T16:45:10.000Z",
+                          "updatedAt": "2021-04-19T16:45:10.000Z",
+                          "replyCount": 3,
+                          "likeCount": 0,
+                          "isLiked": false,
+                          "user": {
+                              "avatar": "https://i.imgur.com/q6bwDGO.png",
+                              "name": "root",
+                              "account": "root"
+                          }
+                      }
+                    ]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - tweets
+      summary: Post a tweet.
+      description: User can post a tweet.
+      operationId: postTweets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: integer
+                  example: 1
+                description:
+                  type: string
+                  example: "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
+      responses:
+        '200':
+          description: 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "successfully posted a tweet",
+                      "tweet": [
+                        {
+                          "id": 60,
+                          "UserId": 1,
+                          "description": "Ipsa quaerat.\n \rDicta officiis",
+                          "createdAt": "2021-04-27T09:09:15.000Z",
+                          "updatedAt": "2021-04-27T09:09:15.000Z"
+                        }
+                      ]
+                    }
+        '422':
+          description: Input cannot be longer than 140 characters / input should not be blank.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/tweets/{tweet_id}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - tweets
+      summary: Get data of a specific tweet.
+      description: >-
+        User can retrieve data of a specific tweet by specifying
+        its id.
+      operationId: getTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to get data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully retrieved tweet data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "id": 13,
+                      "description": "Vitae reiciendis voluptatem laudantium quis laudantium.\nIpsa et dolor et quasi suscipit totam neque nisi.",
+                      "createdAt": "2021-04-19T16:45:10.000Z",
+                      "updatedAt": "2021-04-19T16:45:10.000Z",
+                      "user": {
+                        "id": 2,
+                        "name": "user1",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png"
+                      },
+                      "likesLength": 0,
+                      "commentsLength": 4,
+                      "isLiked": false
+                    }
+        '404':
+          description: This tweet doesn't exist.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - tweets
+      summary: Edit a tweet.
+      description: User can edit their own tweet.
+      operationId: editTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to get data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: integer
+                  example: 1
+                description:
+                  type: string
+                  example: "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
+      responses:
+        '200':
+          description: Successfully edited a tweet.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully edited a tweet",
+                      "editedTweetId": 2
+                    }
+        '422':
+          description: Input cannot be longer than 140 characters.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: You cannot edit other user's tweet.
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - tweets
+      summary: Delete a specific tweet.  
+      description: User can delete a specific tweet by specifying its id.
+      operationId: userDeleteTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully deleted tweet.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "delete successfully"
+                    }
+        '200':
+          description: Tweet does not exist.
+        '403':
+          description: You cannot delete other user's tweet.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/tweets/{tweet_id}/like':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - tweets
+      summary: Like a specific tweet.
+      description: User can like a specific tweet by specifying its id.
+      operationId: likeTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to like.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Successfully liked this tweet.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success"
+                    }
+        '200':
+          description: Cannot like a tweet that doesn't exist.        
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot like a tweet that doesn't exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/tweets/{tweet_id}/unlike':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - tweets
+      summary: Unlike a specific tweet.
+      description: User can unlike a specific tweet by specifying its id.
+      operationId: unlikeTweet
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to unlike.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully unliked this tweet.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success"
+                    }
+        '200':
+          description: You haven't liked this tweet before.
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "you haven't liked this tweet before"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/tweets/{tweet_id}/replies':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - replies
+      summary: Get all replies of a specific tweet.
+      description: >-
+        User can get an array of replies data of a specific tweet by
+        specifying its id.
+      operationId: getReplies
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to get replies data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully retrieved replies of this tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Replies'
+              examples:
+                success:
+                  value: |-
+                    [
+                        {
+                            "id": 13,
+                            "UserId": 3,
+                            "TweetId": 5,
+                            "comment": "Adipisci minus officia voluptatum totam aut et qui",
+                            "createdAt": "2021-04-19T16:45:10.000Z",
+                            "updatedAt": "2021-04-19T16:45:10.000Z"
+                        },
+                        {
+                            "id": 14,
+                            "UserId": 4,
+                            "TweetId": 5,
+                            "comment": "debitis",
+                            "createdAt": "2021-04-19T16:45:10.000Z",
+                            "updatedAt": "2021-04-19T16:45:10.000Z"
+                        },
+                        {
+                            "id": 15,
+                            "UserId": 5,
+                            "TweetId": 5,
+                            "comment": "Perferendis et consequatur.",
+                            "createdAt": "2021-04-19T16:45:10.000Z",
+                            "updatedAt": "2021-04-19T16:45:10.000Z"
+                        }
+                    ]
+        '404':
+          description: This tweet doesn't exist.     
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "this tweet doesn't exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - replies
+      summary: Reply to a specific tweet.
+      description: User can reply to a specific tweet by specifying its id.
+      operationId: postReply
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to reply to.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: integer
+                  example: 1
+                comment:
+                  type: string
+                  example: "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
+      responses:
+        '200':
+          description: Successfully replied to this tweet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Replies'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully replied to this tweet"
+                    }
+        '200':
+          description: Successfully replied to this tweet.
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "cannot reply to a tweet that doesn't exist"
+                    }
+        '422':
+          description: comment cannot be blank
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "comment cannot be blank"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/tweets/{tweet_id}/replies/{reply_id}':
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - replies
+      summary: Edit your reply to a specific tweet.
+      description: User can edit their own reply to a specific tweet by specifying the tweet id and reply id.
+      operationId: editReply
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to edit reply.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: reply_id
+          in: path
+          required: true
+          description: The id of the reply you want to edit.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: integer
+                  example: 1
+                ReplyId:
+                  type: integer
+                  example: 1
+                description:
+                  type: string
+                  example: "doloribus iure deleniti veritatis ut. Excepturi expedita blanditiis fugiat"
+      responses:
+        '200':
+          description: Successfully edited a tweet.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully updated your reply",
+                      "updatedReplyId": 1
+                    }
+        '400':
+          description: This reply does not exist or belong to you.
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "This reply does not exist or belong to you"
+                    }
+        '422':
+          decription: Comment cannot be blank.
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "comment cannot be blank"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - replies
+      summary: Delete a spicific reply.  
+      description: User can delete their own reply by speicifying its tweetId and replyId.
+      operationId: deleteReply
+      parameters:
+        - name: tweet_id
+          in: path
+          required: true
+          description: The id of the tweet you want to delete reply from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: reply_id
+          in: path
+          required: true
+          description: The id of the reply you want to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully deleted your reply.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "successfully deleted reply"
+                    }
+        '400':
+          description: This reply does not exist or belong to you.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "successfully deleted reply"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/followships':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - followships
+      summary: Follow a user.
+      description: User can follow another user by speicifying his id.
+      operationId: followUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Successfully followed user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Followships'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully followed user",
+                      "followingUser": {
+                        "id": 2,
+                        "name": "user1",
+                        "account": "user1",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"                        
+                      }
+                    }
+        '200':
+          description: This user does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "this user does not exist"
+                    }
+        '409':
+          description: Already followed this user.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "already followed this user"
+                    }
+        '403':
+          description: You cannot follow yourself.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "you cannot follow yourself"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/followships/{followingId}':
+    delete:
+      security:
+        - bearerAuth: []
+      tags:  
+        - followships
+      summary: Unfollow a user.
+      description: User can unfollow an user by speicifying his id.
+      operationId: unfollowUser
+      parameters:
+        - name: followingId
+          in: path
+          required: true
+          description: The id of the user you want to unfollow.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully unfollowed user.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully unfollowed user",
+                    }
+        '200':
+          description: Cannot unfollow an user that does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "cannot unfollow an user that does not exist"
+                    }
+        '200':
+          description: Cannot unfollow an user that does not exist.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "cannot unfollow since you haven't followed this user before"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/subscriptions':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - subscriptions
+      summary: Subscribe a user.
+      description: User can subscribe an user by speicifying his id.
+      operationId: subscribeUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Successfully followed user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriptions'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "subscribed @user4",
+                      "author": {
+                          "id": 5,
+                          "name": "user4",
+                          "email": "user4@example.com",
+                          "password": "$2a$10$OqwegZokDJq4YXwoyoxoquHTCZzzo96exM4rObEvofIAlhf4Nw8Xy",
+                          "role": "user",
+                          "avatar": "https://i.imgur.com/q6bwDGO.png",
+                          "introduction": "reprehenderit dignissimos dolores",
+                          "account": "user4",
+                          "cover": "https://i.imgur.com/1jDf2Me.png",
+                          "createdAt": "2021-04-25T17:45:46.000Z",
+                          "updatedAt": "2021-04-25T17:45:46.000Z"
+                      }
+                    }
+        '403':
+          description: You cannot subscribe yourself.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "You cannot subscribe yourself."
+                    }
+        '200':
+          description: Cannot subscribe an user that doesn't exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot subscribe an user that doesn't exist"
+                    }
+        '409':
+          description: Already subscribed this user.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "already subscribed @user4"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/subscriptions/{authorId}':
+    delete:
+      security:
+        - bearerAuth: []
+      tags:  
+        - subscriptions
+      summary: Unsubscribe a user.
+      description: User can unsubscribe an user by speicifying his id.
+      operationId: unsubscribeUser
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          description: The id of the user you want to unfollow.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully unsubscribe user.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "Unsubscribe @user1"
+                    }
+        '200':
+          description: Unable to cancel subscription since you haven't subscribed this user before.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "unable to cancel subscription since you haven't subscribed @user2 before"
+                    }
+        '200':
+          description: Cannot unsubscribe an user that doesn't exist.
+          content:
+            application/json:
+              examples:
+                error1:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot unsubscribe an user that doesn't exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/users/login':
+    post:
+      tags:
+        - user
+      summary: Login.
+      description: User can login to Simple Twitter by filling out his account and password.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account:
+                  type: string
+                  example: user1
+                password:
+                  type: string
+                  example: 12345678
+      responses:
+        '200':
+          description: Login successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "login successfully",
+                        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NDUyNzY1fQ.PWVB3oa9pqmA6-sQii69BCs1bFJXlYO6yaM4hhthq7E",
+                        "user": {
+                            "id": 3,
+                            "name": "user2",
+                            "email": "user2@example.com",
+                            "account": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "introduction": "Dignissimos repellat maxime nisi quia molestiae po",
+                            "cover": "https://i.imgur.com/1jDf2Me.png",
+                            "role": "user"
+                        }
+                    }
+        '401':
+          description: Incorrect password.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "Incorrect Password"
+                    }
+        '401':
+          description: That account does not exist.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "That account does not exist."
+                    }
+        '422':
+          description: All fields are required.
+          content:
+            application/json:
+              examples:
+                error3:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "All fields are required."
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/users/current_user':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get currentUser data.
+      description: >-
+        Use this API route to get current login user data.
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Retrieved a user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "id": 14,
+                      "name": "user1",
+                      "account": "user1",
+                      "email": "user1@example.com",
+                      "avatar": "https://i.imgur.com/q6bwDGO.png",
+                      "role": "user",
+                      "cover": "https://i.imgur.com/1jDf2Me.png",
+                      "introduction": "Maxime quo quos beatae aut quaerat rem."
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/users':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get recommended authors data
+      description: >-
+        User can get recommended authors data.
+      operationId: getUsers
+      responses:
+        '200':
+          description: Retrieve an array of user objects.
           content:
             application/json:
               schema:
@@ -161,31 +1317,100 @@ paths:
                             "isFollowed": true
                         }
                     ]
-        '400':
-          description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  '/admin/users/{id}':
-    delete:
+    post:
       tags:
-        - admin
-      summary: Deletes a user
-      description: >-
-        Admin can delete a user by specifying the userId in the request
-        parameter.
-      operationId: deleteUser
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The id of the user you want to delete.
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
+        - user
+      summary: Register.
+      description: User can register an account for Simple Twitter by filling out required fields of personal information.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                account:
+                  type: string
+                  example: user1
+                name:
+                  type: string
+                  example: user1
+                email:
+                  type: string
+                  example: user1@example.com
+                password:
+                  type: string
+                  example: 12345678
+                checkPassword:
+                  type: string
+                  example: 12345678
       responses:
+        '422':
+          description: Did not meet field requirements.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "errors": [
+                          {
+                              "message": "Please enter the correct email address."
+                          },
+                          {
+                              "message": "Password and checkPassword do not match."
+                          }
+                      ],
+                      "userInput": {
+                          "email": "user7@example",
+                          "password": "1234567",
+                          "name": "rrrr",
+                          "checkPassword": "12345678",
+                          "account": "user1"
+                      }
+                    }
+        '409':
+          description: A user with ${email} already exists. Choose a different address or login directly.
+          content:
+            application/json:
+              examples:
+                error1:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "A user with email 'user7@example.com' already exists. Choose a different account or login directly.",
+                      "userInput": {
+                          "email": "user7@example.com",
+                          "password": "12345678",
+                          "name": "rrrr",
+                          "checkPassword": "12345678",
+                          "account": "user1"
+                      }
+                    }
+        '409':
+          description: A user with ${account} already exists. Choose a different address or login directly.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "A user with account 'user1' already exists. Choose a different account or login directly.",
+                      "userInput": {
+                          "email": "user7@example.com",
+                          "password": "12345678",
+                          "name": "rrrr",
+                          "checkPassword": "12345678",
+                          "account": "user1"
+                      }
+                    }
         '200':
-          description: Ok.
+          description: Registered an account.
           content:
             application/json:
               schema:
@@ -193,49 +1418,528 @@ paths:
               examples:
                 success:
                   value: |-
-                    { 
-                      "status": "success", 
-                      "message": "delete successfully" 
+                    {
+                      "status": "success",
+                      "message": "user1 register successfully! Please login."
                     }
-        '400':
-          description: Bad request
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  # /users:
-  #   get:
-  #     tags:
-  #       - user
-  #     summary: Get recommended users' data
-  #     description: User can get a list of recommended users to follow.
-  #     operationId: getUsers
-  #     produces:
-  #       - application/json
-  #     responses:
-  #       '200':
-  #         description: successful operation
-  #         schema:
-  #           type: array
-  #           items:
-  #             $ref: '#/definitions/Users'
-  #           example:
-  #             users:
-  #               - id: 34
-  #                 name: user1
-  #                 avatar: 'https://i.imgur.com/q6bwDGO.png'
-  #                 account: user1
-  #                 cover: 'https://i.imgur.com/1jDf2Me.png'
-  #                 tweetCount: 10
-  #                 followerCount: 3
-  #                 followingCount: 1
-  #                 likeCount: 3
-  #               - id: 35
-  #                 name: user2
-  #                 avatar: 'https://i.imgur.com/q6bwDG2.png'
-  #                 account: user2
-  #                 cover: 'https://i.imgur.com/1jDf2M3.png'
-  #                 tweetCount: 11
-  #                 followerCount: 2
-  #                 followingCount: 4
-  #                 likeCount: 2
-  #       '400':
-  #         description: Invalid status value
+
+  '/users/{id}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's data
+      description: >-
+        User can get a specific user's data by specifying his id.
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Retrieved an user object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "id": 24,
+                      "name": "user2",
+                      "email": "user2@example.com",
+                      "account": "user2",
+                      "avatar": "https://i.imgur.com/q6bwDGO.png",
+                      "introduction": "Accusamus harum voluptas. Nostrum incidunt fugiat ",
+                      "cover": "https://i.imgur.com/1jDf2Me.png",
+                      "role": "user",
+                      "tweetCount": 10,
+                      "followerCount": 1,
+                      "followingCount": 0,
+                      "isFollowed": true,
+                      "isSubscribed": false
+                    }
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Edit your own profile or settings data
+      description: >-
+        User can get edit their own profile or settings data.
+      operationId: editUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Your own user id.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                page:
+                  type: string
+                  example: (leave blank for profile, setting for setting page)
+                account:
+                  type: string
+                  example: user1
+                name:
+                  type: string
+                  example: user1
+                email:
+                  type: string
+                  example: user1@example.com
+                password:
+                  type: string
+                  example: 12345678
+                checkPassword:
+                  type: string
+                  example: 12345678
+                introduction:
+                  type: string
+                  example: Hi
+                avatar:
+                  type: string
+                  example: https://i.imgur.com/q6bwDGO.png
+                cover:
+                  type: string
+                  example: https://i.imgur.com/1jDf2Me.png
+      responses:
+        '200':
+          description: Profile/setting update successfully.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "profile/setting update successfully"
+                    }
+        '422':
+          description: Did not meet field requirements.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                        "status": "error",
+                        "errors": [
+                            {
+                                "message": "Please fill out all fields."
+                            },
+                            {
+                                "message": "Please enter the correct email address."
+                            },
+                            {
+                                "message": "Password and checkPassword do not match."
+                            }
+                        ],
+                        "userInput": {
+                            "email": "",
+                            "password": "12345678",
+                            "name": "rrrr",
+                            "checkPassword": "123456789",
+                            "account": "user2",
+                            "page": "setting"
+                        }
+                    }
+        '403':
+          description: You can not edit other's profile.
+          content:
+            application/json:
+              examples:
+                error1:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "You can not edit other's profile"
+                    }
+        '409':
+          description: A user with ${email} already exists. Choose a different email.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "A user with 'user1@example.com' already exists. Choose a different email.",
+                        "userInput": {
+                            "email": "user1@example.com",
+                            "password": "12345678",
+                            "name": "root",
+                            "checkPassword": "12345678",
+                            "account": "user10",
+                            "page": "setting"
+                        }
+                    }
+        '409':
+          description: A user with ${account} already exists. Choose a different account.
+          content:
+            application/json:
+              examples:
+                error3:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "A user with account 'root' already exists. Choose a different account.",
+                        "userInput": {
+                            "email": "user1@example.com",
+                            "password": "12345678",
+                            "name": "root",
+                            "checkPassword": "12345678",
+                            "account": "user10",
+                            "page": "setting"
+                        }
+                    }
+        '422':
+          description: Did not meet field length requirements.
+          content:
+            application/json:
+              examples:
+                error4:
+                  value: |-
+                    {
+                      "status": "error",
+                      "errors": [
+                          {
+                              "message": "Name can not be empty or longer than 50 characters"
+                          }
+                      ],
+                      "userInput": {
+                          "name": "Dignissimos repellat maxime nisi quia molestiae poDignissimos repellat maxime nisi quia molestiae po",
+                          "introduction": ""
+                      }
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/users/{id}/tweets':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's tweets
+      description: >-
+        User can get a specific user's tweets by specifying his id.
+      operationId: getUserTweets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get tweets data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Retrieved an array of tweet objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "id": 104,
+                          "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+                          "createdAt": "2021-04-25T14:07:36.000Z",
+                          "replyCount": 3,
+                          "likeCount": 1,
+                          "isLiked": true
+                      },
+                      {
+                          "id": 114,
+                          "description": "Ex et ratione cumque fugit.\nA consequatur harum enim impedit dolores reprehenderit unde tenetur.\nIpsa aliquid dignissimos rerum reiciendis.",
+                          "createdAt": "2021-04-25T14:07:36.000Z",
+                          "replyCount": 3,
+                          "likeCount": 0,
+                          "isLiked": false
+                      }
+                    ]
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/users/{id}/replied_tweets':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's replied tweets
+      description: >-
+        User can get a specific user's replied tweets by specifying his id.
+      operationId: getUserRepliedTweets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get replied tweets data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Retrieved an array of tweet objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "id": 314,
+                          "comment": "Voluptate qui enim magnam error dolorum voluptas e",
+                          "createdAt": "2021-04-25T14:07:36.000Z",
+                          "TweetId": 104,
+                          "Tweet": {
+                              "id": 104,
+                              "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+                              "createdAt": "2021-04-25T14:07:36.000Z",
+                              "isLiked": true,
+                              "User": {
+                                  "id": 24,
+                                  "name": "user2",
+                                  "account": "user2",
+                                  "avatar": "https://i.imgur.com/q6bwDGO.png"
+                              },
+                              "replyCount": 3,
+                              "likeCount": 1
+                          }
+                      }
+                    ]
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/users/{id}/likes':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's liked tweets
+      description: >-
+        User can get a specific user's liked tweets by specifying his id.
+      operationId: getUserLikedTweets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get liked tweets data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Retrieved an array of tweet objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "id": 4,
+                          "createdAt": "2021-04-25T14:16:45.000Z",
+                          "TweetId": 104,
+                          "Tweet": {
+                              "id": 104,
+                              "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+                              "createdAt": "2021-04-25T14:07:36.000Z",
+                              "isLiked": true,
+                              "User": {
+                                  "id": 24,
+                                  "name": "user2",
+                                  "account": "user2",
+                                  "avatar": "https://i.imgur.com/q6bwDGO.png"
+                              },
+                              "replyCount": 3,
+                              "likeCount": 1
+                          }
+                      }
+                    ]
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/users/{id}/followers':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's followers data.
+      description: >-
+        User can get a specific user's followers data by specifying his id.
+      operationId: getUserFollowers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get followers data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "followerId": 14,
+                          "name": "user1",
+                          "account": "user1",
+                          "avatar": "https://i.imgur.com/q6bwDGO.png",
+                          "introduction": "Maxime quo quos beatae aut quaerat rem.",
+                          "createdAt": "2021-04-25T14:07:35.000Z",
+                          "isFollowing": false
+                      }
+                    ]
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/users/{id}/followings':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's following authors data
+      description: >-
+        User can get a specific user's following authors data by specifying his id.
+      operationId: getUserFollowings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get following authors data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                        "followingId": 24,
+                        "name": "user2",
+                        "account": "user2",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "introduction": "Accusamus harum voluptas. Nostrum incidunt fugiat ",
+                        "createdAt": "2021-04-25T14:07:36.000Z",
+                        "isFollowing": true
+                      }
+                    ]
+        '404':
+          description: User does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "user does not exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
