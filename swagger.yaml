@@ -1151,6 +1151,15 @@ paths:
       description: >-
         User can get a specific user's data by specifying his id.
       operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
       responses:
         '200':
           description: Ok. Retrieved an user object.
@@ -1189,6 +1198,15 @@ paths:
       description: >-
         User can get edit their own profile or settings data.
       operationId: editUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Your own user id.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
       requestBody:
         required: true
         content:
@@ -1198,7 +1216,7 @@ paths:
               properties:
                 page:
                   type: string
-                  example: '' or setting
+                  example: leave blank for profile, setting for setting page
                 account:
                   type: string
                   example: user1
@@ -1237,6 +1255,57 @@ paths:
                         "status": "success",
                         "message": "profile update successfully"
                     }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/users/{id}/tweets':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's tweets
+      description: >-
+        User can get a specific user's tweets by specifying his id.
+      operationId: getUserTweets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get tweets data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Retrieved an array of tweet objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "id": 104,
+                          "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+                          "createdAt": "2021-04-25T14:07:36.000Z",
+                          "replyCount": 3,
+                          "likeCount": 1,
+                          "isLiked": true
+                      },
+                      {
+                          "id": 114,
+                          "description": "Ex et ratione cumque fugit.\nA consequatur harum enim impedit dolores reprehenderit unde tenetur.\nIpsa aliquid dignissimos rerum reiciendis.",
+                          "createdAt": "2021-04-25T14:07:36.000Z",
+                          "replyCount": 3,
+                          "likeCount": 0,
+                          "isLiked": false
+                      }
+                    ]
         '400':
           description: Bad request.
         '401':
