@@ -248,7 +248,7 @@ const userController = {
           UserId: tweet.UserId,
           description: tweet.description,
           createdAt: tweet.createdAt,
-          FromNow: moment(tweet.createdAt).fromNow(),
+          fromNow: moment(tweet.createdAt).fromNow(),
           user: {
             id: tweet.User.id,
             account: tweet.User.account,
@@ -426,6 +426,7 @@ const userController = {
       id: req.user.id,
       account: req.user.account,
       name: req.user.name,
+      email: req.user.email,
       avatar: req.user.avatar,
       cover: req.user.cover,
       introduction: req.user.introduction,
