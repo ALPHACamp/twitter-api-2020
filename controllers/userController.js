@@ -26,41 +26,156 @@ const uploadImg = path => {
 }
 
 const userController = {
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     // Make sure all the fields are filled out
     if (!req.body.account || !req.body.password) {
-      return res.json({
+      return res.status(422).json({
         status: 'error',
         message: 'All fields are required.'
       })
     }
 
-    // Check email and password
-    const account = req.body.account
-    const password = req.body.password
+    try {
+      // Check email and password
+      const { account, password } = req.body
 
-    const user = await User.findOne({ where: { account } })
+      const user = await User.findOne({ where: { account } })
 
-    if (!user) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'That account does not exist.' })
+      if (!user) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'That account does not exist.' })
+      }
+
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'Incorrect Password' })
+      }
+
+      // Sign token
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
+      return res.status(200).json({
+        status: 'success',
+        message: 'login successfully',
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          account: user.account,
+          avatar: user.avatar,
+          introduction: user.introduction,
+          cover: user.cover,
+          role: user.role
+        }
+      })
+    } catch (error) {
+      next(error)
     }
+  },
+  register: async (req, res, next) => {
+    try {
+      const result = await helpers.checkUserInfo(req)
 
-    if (!bcrypt.compareSync(password, user.password)) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'Incorrect Password' })
+      if (!result) {
+        await User.create({
+          account: req.body.account,
+          name: req.body.name,
+          email: req.body.email,
+          password: bcrypt.hashSync(
+            req.body.password,
+            bcrypt.genSaltSync(10),
+            null
+          ),
+          role: 'user',
+          avatar: 'https://i.imgur.com/q6bwDGO.png',
+          cover: 'https://i.imgur.com/1jDf2Me.png'
+        })
+
+        return res.status(200).json({
+          status: 'success',
+          message: `${req.body.account} register successfully! Please login.`
+        })
+      }
+
+      // All the required fields should be filled out correctly
+      if (result.errors) {
+        return res.status(422).json({
+          status: 'error',
+          errors: result.errors,
+          userInput: req.body
+        })
+      }
+
+      // email amd account should be unique
+      if (result.value && result.key) {
+        return res.status(409).json({
+          status: 'error',
+          message: `A user with ${result.value} already exists. Choose a different ${result.key}.`
+        })
+      }
+    } catch (error) {
+      next(error)
     }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      let users = await User.findAll({
+        where: { role: 'user' },
+        include: { model: User, as: 'Followers' },
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'account',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+            ),
+            'followersCount'
+          ]
+        ],
+        order: [[sequelize.literal('followersCount'), 'DESC']],
+        limit: 6
+      })
 
-    // Sign token
-    const payload = { id: user.id }
-    const token = jwt.sign(payload, process.env.JWT_SECRET)
-    return res.json({
-      status: 'success',
-      message: 'login successfully',
-      token: token,
-      user: {
+      // Clean up users data
+      const followings = helpers.getUserInfoId(req, 'Followings')
+
+      users = users.map(user => ({
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+        account: user.account,
+        isFollowed: followings.includes(user.id)
+      }))
+
+      return res.status(200).json(users)
+    } catch (error) {
+      next(error)
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      let user = await User.findByPk(req.params.id, {
+        include: [
+          Tweet,
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Subscribers' }
+        ]
+      })
+
+      // User can not see profile of admin or user that doesn't exist
+      helpers.checkUser(res, user)
+
+      // Clean up user data
+      const subscriptions = helpers.getUserInfoId(req, 'Subscriptions')
+      const followings = helpers.getUserInfoId(req, 'Followings')
+
+      user = {
         id: user.id,
         name: user.name,
         email: user.email,
@@ -68,168 +183,30 @@ const userController = {
         avatar: user.avatar,
         introduction: user.introduction,
         cover: user.cover,
-        role: user.role
-      }
-    })
-  },
-  register: async (req, res) => {
-    const { account, name, email, password, checkPassword } = req.body
-    const emailRule = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
-    const errors = []
-
-    // Before creating an account,
-    // make sure all the required fields are correct
-    if (!account || !name || !email || !password || !checkPassword) {
-      errors.push({ message: 'Please fill out all fields.' })
-    }
-    if (email.search(emailRule) === -1) {
-      errors.push({ message: 'Please enter the correct email address.' })
-    }
-    if (password.length < 4 || password.length > 12) {
-      errors.push({ message: 'Password does not meet the required length' })
-    }
-    if (password !== checkPassword) {
-      errors.push({ message: 'Password and checkPassword do not match.' })
-    }
-    if (errors.length > 0) {
-      return res.json({ status: 'error', errors, userInput: req.body })
-    }
-
-    try {
-      // make sure email amd account has not been used yet
-      let user = await User.findOne({ where: { email } })
-
-      if (user) {
-        return res.json({
-          status: 'error',
-          message: `A user with ${email} already exists. Choose a different address or login directly.`,
-          userInput: req.body
-        })
+        role: user.role,
+        tweetCount: user.Tweets.length,
+        followerCount: user.Followers.length,
+        followingCount: user.Followings.length,
+        isFollowed: followings ? followings.includes(user.id) : followings,
+        isSubscribed: subscriptions
+          ? subscriptions.includes(user.id)
+          : subscriptions
       }
 
-      user = await User.findOne({ where: { account } })
-
-      if (user) {
-        return res.json({
-          status: 'error',
-          message: `A user with account '${account}' already exists. Choose a different account or login directly.`,
-          userInput: req.body
-        })
-      }
-
-      await User.create({
-        account,
-        name,
-        email,
-        password: bcrypt.hashSync(
-          req.body.password,
-          bcrypt.genSaltSync(10),
-          null
-        ),
-        role: 'user',
-        avatar: 'https://i.imgur.com/q6bwDGO.png',
-        cover: 'https://i.imgur.com/1jDf2Me.png'
-      })
-
-      return res.status(200).json({
-        status: 'success',
-        message: `${req.body.account} register successfully! Please login.`
-      })
+      res.status(200).json(user)
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
-  getTopUsers: async (req, res) => {
-    let users = await User.findAll({
-      where: { role: 'user' },
-      include: { model: User, as: 'Followers' },
-      attributes: [
-        'id',
-        'name',
-        'avatar',
-        'account',
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
-          ),
-          'followersCount'
-        ]
-      ],
-      order: [[sequelize.literal('followersCount'), 'DESC']],
-      limit: 6
-    })
-
-    // Clean up users data
-    const followings = helpers.getUserInfoId(req, 'Followings')
-
-    users = users.map(user => ({
-      id: user.id,
-      name: user.name,
-      avatar: user.avatar,
-      account: user.account,
-      isFollowed: followings.includes(user.id)
-    }))
-
-    return res.status(200).json(users)
-  },
-  getUser: async (req, res) => {
-    let user = await User.findByPk(req.params.id, {
-      include: [
-        Tweet,
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
-        { model: User, as: 'Subscribers' }
-      ]
-    })
-
-    // User can not see profile of admin or user that doesn't exist
-    helpers.checkUser(res, user)
-
-    // Clean up user data
-    const subscriptions = helpers.getUserInfoId(req, 'Subscriptions')
-    const followings = helpers.getUserInfoId(req, 'Followings')
-
-    user = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      account: user.account,
-      avatar: user.avatar,
-      introduction: user.introduction,
-      cover: user.cover,
-      role: user.role,
-      tweetCount: user.Tweets.length,
-      followerCount: user.Followers.length,
-      followingCount: user.Followings.length,
-      isFollowed: followings ? followings.includes(user.id) : followings,
-      isSubscribed: subscriptions
-        ? subscriptions.includes(user.id)
-        : subscriptions
-    }
-
-    res.status(200).json(user)
-  },
-  editUser: async (req, res) => {
-    const {
-      account,
-      name,
-      email,
-      password,
-      checkPassword,
-      introduction,
-      page
-    } = req.body
-    const emailRule = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
-    const errors = []
+  editUser: async (req, res, next) => {
     const userId = helpers.getUser(req).id
     const id = req.params.id
-    const { files } = req
-    const acceptedType = ['.png', '.jpg', '.jpeg']
+    const { name, introduction, page } = req.body
 
     // Users can only edit their own profile
     if (userId !== Number(id)) {
       return res
-        .status(401)
+        .status(403)
         .json({ status: 'error', message: "You can not edit other's profile" })
     }
 
@@ -238,64 +215,52 @@ const userController = {
     try {
       // setting
       if (page === 'setting') {
-        // Make sure all fields are filled out
-        if (!account || !name || !email || !password || !checkPassword) {
-          return res.json({
+        const result = await helpers.checkUserInfo(req)
+
+        if (!result) {
+          const user = await User.findByPk(userId)
+          await user.update({
+            account: req.body.account,
+            name: req.body.name,
+            email: req.body.email,
+            password: bcrypt.hashSync(
+              req.body.password,
+              bcrypt.genSaltSync(10),
+              null
+            )
+          })
+
+          return res.status(200).json({
+            status: 'success',
+            message: `${page} update successfully`
+          })
+        }
+
+        // All the required fields should be filled out correctly
+        if (result.errors) {
+          return res.status(422).json({
             status: 'error',
-            message: 'Please fill out all fields.'
+            errors: result.errors,
+            userInput: req.body
           })
         }
-        // Make sure all fields are correct
-        if (password !== checkPassword) {
-          errors.push({ message: 'Password and checkPassword do not match.' })
-        }
-        if (email.search(emailRule) === -1) {
-          errors.push({ message: 'Please enter the correct email address.' })
-        }
-        if (name.length > 50) {
-          errors.push({ message: 'Name can not be longer than 50 characters.' })
-        }
-        if (account.length > 50) {
-          errors.push({
-            message: 'Account can not be longer than 50 characters.'
+
+        // email amd account should be unique
+        if (result.value && result.key) {
+          return res.status(409).json({
+            status: 'error',
+            message: `A user with ${result.value} already exists. Choose a different ${result.key}.`,
+            userInput: req.body
           })
         }
-        if (errors.length > 0) {
-          return res.json({ status: 'error', errors })
-        }
-        // make sure email amd account has not been used by others yet
-        const check = { email, account }
-        for (const key in check) {
-          const value = check[key]
-          user = await User.findOne({ where: { [key]: value } })
-
-          if (user && value !== helpers.getUser(req)[key]) {
-            return res.json({
-              status: 'error',
-              message: `A user with ${value} already exists. Choose a different ${key}.`
-            })
-          }
-        }
-
-        user = await User.findByPk(userId)
-        await user.update({
-          account,
-          name,
-          email,
-          password: bcrypt.hashSync(
-            req.body.password,
-            bcrypt.genSaltSync(10),
-            null
-          )
-        })
-
-        return res.status(200).json({
-          status: 'success',
-          message: `${page} update successfully`
-        })
       }
 
       // profile
+
+      const errors = []
+      const { files } = req
+      const acceptedType = ['.png', '.jpg', '.jpeg']
+
       if (!name || name.length > 50) {
         errors.push({
           message: 'Name can not be empty or longer than 50 characters'
@@ -326,7 +291,9 @@ const userController = {
       }
 
       if (errors.length > 0) {
-        return res.json({ status: 'error', errors })
+        return res
+          .status(422)
+          .json({ status: 'error', errors, userInput: req.body })
       }
 
       // Images saved in /temp will be removed,
@@ -351,10 +318,10 @@ const userController = {
         message: 'profile update successfully'
       })
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
-  getTweets: async (req, res) => {
+  getTweets: async (req, res, next) => {
     try {
       // Make sure user exists or is not admin
       const user = await User.findByPk(req.params.id, {
@@ -382,10 +349,10 @@ const userController = {
 
       return res.status(200).json(tweets)
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
-  getRepliesAndTweets: async (req, res) => {
+  getRepliesAndTweets: async (req, res, next) => {
     try {
       // Make sure user exists or is not admin
       const user = await User.findByPk(req.params.id, {
@@ -406,10 +373,10 @@ const userController = {
 
       return res.status(200).json(replies)
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
-  getLikes: async (req, res) => {
+  getLikes: async (req, res, next) => {
     try {
       // Make sure user exists or is not admin
       const user = await User.findByPk(req.params.id, {
@@ -429,10 +396,10 @@ const userController = {
 
       return res.status(200).json(likes)
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
-  getFollowers: async (req, res) => {
+  getFollowers: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followers' }],
@@ -453,10 +420,10 @@ const userController = {
 
       return res.status(200).json(followers)
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
-  getFollowings: async (req, res) => {
+  getFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [
@@ -483,7 +450,7 @@ const userController = {
 
       return res.status(200).json(followings)
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
   getCurrentUser: async (req, res) => {
