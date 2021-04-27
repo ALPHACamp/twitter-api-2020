@@ -28,10 +28,11 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     // const socket = io()
-
-    const socket = io({
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTEwOTg4fQ.tyJShNxaoI - Mubrf - 8GcpwRYCrzv5CtNrHyDzSuNY - U'
+    const socket = io("http://localhost:4000", {
+      reconnectionDelayMax: 10000,
       auth: {
-        token: 'abc'
+        token: token
       }
     })
 

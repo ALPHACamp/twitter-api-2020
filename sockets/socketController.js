@@ -14,12 +14,13 @@ app.get('/', (req, res) => {
 })
 
 // 驗證身分
-io.use(authenticated)
+// io.use(authenticated)
 
 const users = {}
 const botName = 'Chat Bot'
 // run when connect
 io.on('connection', socket => {
+  io.use(authenticated)
   // send to single user
   socket.emit('message', formatMessage(botName, 'Welcome to chat!'))
 
