@@ -5,7 +5,6 @@ const cors = require('cors')
 // const socketIo = require('socket.io')
 // const formatMessage = require('./utils/messages')
 
-
 // .env
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -37,7 +36,7 @@ app.use((err, req, res, next) => {
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 // socket server
-// const server = require('./controllers/socketController')
-// server.listen(4000, () => console.log('Server is running on 4000'))
+const server = require('./sockets/socketController')
+server.listen(4000, () => console.log('Server is running on 4000'))
 
 module.exports = app

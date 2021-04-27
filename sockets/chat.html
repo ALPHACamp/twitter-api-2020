@@ -30,11 +30,19 @@
     const socket = io()
     // message from server
     socket.on('message', message => {
-      console.log(message)
       outputMessage(message)
+    })
+    
+    const name = 'karol'
+    socket.emit('new-user', name)
+     
+    // user-connected from server
+    socket.on('user-connected', msg => {
+      outputMessage(msg)
     })
 
     // message submit
+    const chatForm = document.querySelector('#chat-form')
     chatForm.addEventListener('submit', (e) => {
       e.preventDefault()
       // get msg text
