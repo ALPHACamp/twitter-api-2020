@@ -105,6 +105,9 @@ const userController = {
   // account、name、avatar、cover、推文數量、跟隨中人數、跟隨者人數
   getUser: async (req, res, next) => {
     try {
+      const currentUser = await User.findByPk(helpers.getUser(req).id, {
+        include: { model: User, as: 'Followings' }
+      })
       let user = await User.findByPk(req.params.id, {
         include: [
           Tweet,
@@ -113,6 +116,11 @@ const userController = {
         ]
       })
       if (!user) return res.json({ message: 'can not find this user!' })
+      // 該使用者是否在追隨
+      const followingsId = []
+      currentUser.Followings.forEach(following => {
+        followingsId.push(following.id)
+      })
       // 整理回傳資料
       user = {
         id: user.id,
@@ -123,7 +131,8 @@ const userController = {
         introduction: user.introduction,
         tweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
-        followerCount: user.Followers.length
+        followerCount: user.Followers.length,
+        isFollowing: followingsId.includes(user.id)
       }
       return res.json(user)
     } catch (e) {
