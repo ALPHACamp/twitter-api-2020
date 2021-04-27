@@ -1107,4 +1107,38 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-        
+  '/users/current_user':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get currentUser data.
+      description: >-
+        Frontend can use this API route to get currentUser data.
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Ok. Retrieved a user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "id": 14,
+                      "name": "user1",
+                      "account": "user1",
+                      "email": "user1@example.com",
+                      "avatar": "https://i.imgur.com/q6bwDGO.png",
+                      "role": "user",
+                      "cover": "https://i.imgur.com/1jDf2Me.png",
+                      "introduction": "Maxime quo quos beatae aut quaerat rem."
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  
