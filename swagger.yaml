@@ -1310,3 +1310,112 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/users/{id}/replied_tweets':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's replied tweets
+      description: >-
+        User can get a specific user's replied tweets by specifying his id.
+      operationId: getUserRepliedTweets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get replied tweets data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Retrieved an array of tweet objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "id": 314,
+                          "comment": "Voluptate qui enim magnam error dolorum voluptas e",
+                          "createdAt": "2021-04-25T14:07:36.000Z",
+                          "TweetId": 104,
+                          "Tweet": {
+                              "id": 104,
+                              "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+                              "createdAt": "2021-04-25T14:07:36.000Z",
+                              "isLiked": true,
+                              "User": {
+                                  "id": 24,
+                                  "name": "user2",
+                                  "account": "user2",
+                                  "avatar": "https://i.imgur.com/q6bwDGO.png"
+                              },
+                              "replyCount": 3,
+                              "likeCount": 1
+                          }
+                      }
+                    ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/users/{id}/likes':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's liked tweets
+      description: >-
+        User can get a specific user's liked tweets by specifying his id.
+      operationId: getUserLikedTweets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get liked tweets data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Retrieved an array of tweet objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "id": 4,
+                          "createdAt": "2021-04-25T14:16:45.000Z",
+                          "TweetId": 104,
+                          "Tweet": {
+                              "id": 104,
+                              "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+                              "createdAt": "2021-04-25T14:07:36.000Z",
+                              "isLiked": true,
+                              "User": {
+                                  "id": 24,
+                                  "name": "user2",
+                                  "account": "user2",
+                                  "avatar": "https://i.imgur.com/q6bwDGO.png"
+                              },
+                              "replyCount": 3,
+                              "likeCount": 1
+                          }
+                      }
+                    ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
