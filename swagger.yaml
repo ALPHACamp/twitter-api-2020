@@ -1014,19 +1014,19 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  '/users':
+  '/users/current_user':
     get:
       security:
         - bearerAuth: []
       tags:
         - user
-      summary: Get recommended authors data
+      summary: Get currentUser data.
       description: >-
-        User can get recommended authors data on Simple Twitter.
-      operationId: getUsers
+        Frontend can use this API route to get currentUser data.
+      operationId: getCurrentUser
       responses:
         '200':
-          description: Ok. Retrieved an array of user objects.
+          description: Ok. Retrieved a user.
           content:
             application/json:
               schema:
@@ -1034,33 +1034,21 @@ paths:
               examples:
                 success:
                   value: |-
-                    [
-                        {
-                            "id": 2,
-                            "name": "user1",
-                            "avatar": "https://i.imgur.com/q6bwDGO.png",
-                            "account": "user1",
-                            "isFollowed": true
-                        },
-                        {
-                            "id": 3,
-                            "name": "user2",
-                            "avatar": "https://i.imgur.com/q6bwDGO.png",
-                            "account": "user2",
-                            "isFollowed": true
-                        },
-                        {
-                            "id": 3,
-                            "name": "user2",
-                            "avatar": "https://i.imgur.com/q6bwDGO.png",
-                            "account": "user2",
-                            "isFollowed": true
-                        }
-                    ]
+                    {
+                      "id": 14,
+                      "name": "user1",
+                      "account": "user1",
+                      "email": "user1@example.com",
+                      "avatar": "https://i.imgur.com/q6bwDGO.png",
+                      "role": "user",
+                      "cover": "https://i.imgur.com/1jDf2Me.png",
+                      "introduction": "Maxime quo quos beatae aut quaerat rem."
+                    }
         '400':
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/users':
     post:
       tags:
         - user
@@ -1107,19 +1095,65 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  '/users/current_user':
     get:
       security:
         - bearerAuth: []
       tags:
         - user
-      summary: Get currentUser data.
+      summary: Get recommended authors data
       description: >-
-        Frontend can use this API route to get currentUser data.
-      operationId: getCurrentUser
+        User can get recommended authors data on Simple Twitter.
+      operationId: getUsers
       responses:
         '200':
-          description: Ok. Retrieved a user.
+          description: Ok. Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                        {
+                            "id": 2,
+                            "name": "user1",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user1",
+                            "isFollowed": true
+                        },
+                        {
+                            "id": 3,
+                            "name": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user2",
+                            "isFollowed": true
+                        },
+                        {
+                            "id": 3,
+                            "name": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user2",
+                            "isFollowed": true
+                        }
+                    ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/users/{id}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's data
+      description: >-
+        User can get a specific user's data by specifying his id.
+      operationId: getUser
+      responses:
+        '200':
+          description: Ok. Retrieved an user object.
           content:
             application/json:
               schema:
@@ -1128,17 +1162,82 @@ paths:
                 success:
                   value: |-
                     {
-                      "id": 14,
-                      "name": "user1",
-                      "account": "user1",
-                      "email": "user1@example.com",
+                      "id": 24,
+                      "name": "user2",
+                      "email": "user2@example.com",
+                      "account": "user2",
                       "avatar": "https://i.imgur.com/q6bwDGO.png",
-                      "role": "user",
+                      "introduction": "Accusamus harum voluptas. Nostrum incidunt fugiat ",
                       "cover": "https://i.imgur.com/1jDf2Me.png",
-                      "introduction": "Maxime quo quos beatae aut quaerat rem."
+                      "role": "user",
+                      "tweetCount": 10,
+                      "followerCount": 1,
+                      "followingCount": 0,
+                      "isFollowed": true,
+                      "isSubscribed": false
                     }
         '400':
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Edit your own profile or settings data
+      description: >-
+        User can get edit their own profile or settings data.
+      operationId: editUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                page:
+                  type: string
+                  example: '' or setting
+                account:
+                  type: string
+                  example: user1
+                name:
+                  type: string
+                  example: user1
+                email:
+                  type: string
+                  example: user1@example.com
+                password:
+                  type: string
+                  example: 12345678
+                checkPassword:
+                  type: string
+                  example: 12345678
+                introduction:
+                  type: string
+                  example: Hi
+                avatar:
+                  type: string
+                  example: https://i.imgur.com/q6bwDGO.png
+                cover:
+                  type: string
+                  example: https://i.imgur.com/1jDf2Me.png
+      responses:
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "profile update successfully"
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
