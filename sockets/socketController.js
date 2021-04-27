@@ -14,31 +14,32 @@ app.get('/', (req, res) => {
 })
 
 // 驗證身分
-// io.use(authenticated)
+io.use(authenticated)
 
-const users = {}
+const users = []
+const userMsg = []
 const botName = 'Chat Bot'
 // run when connect
 io.on('connection', socket => {
-  io.use(authenticated)
   // send to single user
-  socket.emit('message', formatMessage(botName, 'Welcome to chat!'))
+  socket.emit('message', formatMessage(botName, `${socket.user.name}, Welcome to chat!`))
 
-  // listen for newUser
-  socket.on('new-user', name => {
-    users[socket.id] = name
-    console.log('users', users)
-    socket.broadcast.emit('user-connected', formatMessage(botName, `${name} has joined the chat`))
-    // listen for chatMsg
-    socket.on('chatMsg', (msg) => {
-      io.emit('message', formatMessage(name, msg))
-    })
+  // send to other users
+  socket.broadcast.emit('message', formatMessage(botName, `${socket.user.name} has joined the chat`))
+  // put userInfo to users
+  users.push(socket.user)
+
+  // listen for chat-msg
+  socket.on('chat-msg', (msg) => {
+    io.emit('message', formatMessage(socket.user.name, msg))
+    userMsg.push(formatMessage(socket.user.name, msg))
+    console.log('0', userMsg)
   })
 
   // run when client disconnect
   socket.on('disconnect', () => {
     // broadcast to everybody
-    io.emit('message', formatMessage(botName, `${users[socket.id]} has left the chat`))
+    io.emit('message', formatMessage(botName, `${socket.user.name} has left the chat`))
   })
 })
 

@@ -5,6 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Chatroom</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8'
+    const socket = io("http://localhost:4000", {
+      reconnectionDelayMax: 10000,
+      auth: {
+        token: token
+      }
+    })
+  </script>
 </head>
 
 <body>
@@ -25,28 +35,10 @@
       </form>
     </div>
   </div>
-  <script src="/socket.io/socket.io.js"></script>
   <script>
-    // const socket = io()
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTEwOTg4fQ.tyJShNxaoI - Mubrf - 8GcpwRYCrzv5CtNrHyDzSuNY - U'
-    const socket = io("http://localhost:4000", {
-      reconnectionDelayMax: 10000,
-      auth: {
-        token: token
-      }
-    })
-
     // message from server
     socket.on('message', message => {
       outputMessage(message)
-    })
-    
-    const name = 'karol'
-    socket.emit('new-user', name)
-     
-    // user-connected from server
-    socket.on('user-connected', msg => {
-      outputMessage(msg)
     })
 
     // message submit
@@ -56,7 +48,7 @@
       // get msg text
       const msg = e.target.elements.msg.value
       // emit msg to server
-      socket.emit('chatMsg', msg)
+      socket.emit('chat-msg', msg)
       // clear input & focus on it
       e.target.elements.msg.value = ''
       e.target.elements.msg.focus()
