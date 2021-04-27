@@ -19,7 +19,13 @@ app.use(bodyParser.json())
 
 // 載入 routes
 require('./routes')(app)
-
+// 設置錯誤訊息
+app.use((err, req, res, next) => {
+  if (err) {
+    res.status(555).json({ message: String(err) })
+    return next()
+  }
+})
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app

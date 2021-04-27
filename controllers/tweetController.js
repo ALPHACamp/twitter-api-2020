@@ -49,6 +49,7 @@ const tweetController = {
 
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   getTweet: async (req, res) => {
@@ -89,7 +90,10 @@ const tweetController = {
         tweetReplies: tweetReplies
       }
       return res.json(tweet)
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      return next(e)
+    }
   },
   postTweet: async (req, res) => {
     try {
@@ -103,7 +107,10 @@ const tweetController = {
       }
       await Tweet.create({ UserId, description })
       return res.json({ status: 'success', message: 'Tweet has built successfully!' })
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      return next(e)
+    }
   },
   getReplies: async (req, res) => {
     try {
@@ -123,7 +130,10 @@ const tweetController = {
 
       return res.json(tweetReplies)
     }
-    catch (e) { console.log(e) }
+    catch (e) {
+      console.log(e)
+      return next(e)
+    }
   },
   postReply: async (req, res) => {
     try {
@@ -141,7 +151,10 @@ const tweetController = {
       await Reply.create({ TweetId, UserId, comment })
       return res.json({ status: 'success', message: 'Reply has built successfully!' })
 
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      return next(e)
+    }
   },
   tweetLike: async (req, res) => {
     try {
