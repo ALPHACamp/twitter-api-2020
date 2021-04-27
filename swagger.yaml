@@ -2,21 +2,22 @@ openapi: 3.0.0
 info:
   title: Simple Twitter API
   description: >-
-    This is a sample server for Simple Twitter API.  You can find out more about
+    This is a sample server for Simple Twitter API. You can find out more about
     this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020).
     For this sample, you should use JWT token to test the authorization filters.
+    Go to user -> `POST /users/login` to get your token with the example user, account: user1 / password: 12345678.
   contact:
-    name: GitHub
+    name: GitHub repo
     url: 'https://github.com/ivyhungtw/twitter-api-2020/'
   version: 1.0.0
 externalDocs:
   url: 'https://hackmd.io/@icaughtacode/rJmFeRSUu'
-  description: Find more info here
+  description: Find more info here - hackMD
 servers:
   - url: 'http://localhost:3000/api'
-    description: Development server
+    description: Development
   - url: 'https://simple-twitter-api-2021.herokuapp.com/api'
-    description: Production server
+    description: Production
 tags:
   - name: admin
     description: Admin related
