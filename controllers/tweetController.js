@@ -12,17 +12,21 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
 
       if (!description) {
-        return res.json({
-          status: 'error',
-          message: 'input should not be blank'
-        })
+        return res
+          .status(422)
+          .json({
+            status: 'error',
+            message: 'input should not be blank'
+          })
       }
 
       if (description.length > 140) {
-        return res.json({
-          status: 'error',
-          message: 'input cannot be longer than 140 characters'
-        })
+        return res
+          .status(422)
+          .json({
+            status: 'error',
+            message: 'input cannot be longer than 140 characters'
+          })
       }
 
       await Tweet.create({
@@ -39,13 +43,15 @@ const tweetController = {
         order: [['createdAt', 'DESC']]
       })
 
-      return res.status(200).json({
-        status: 'success',
-        message: 'successfully posted a tweet',
-        tweet
-      })
+      return res
+        .status(200)
+        .json({
+          status: 'success',
+          message: 'successfully posted a tweet',
+          tweet
+        })
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
   getTweets: async (req, res) => {
@@ -73,9 +79,11 @@ const tweetController = {
           account: tweet.User.account
         }
       }))
-      return res.json(tweets)
+      return res
+        .status(200)
+        .json(tweets)
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
 
@@ -87,10 +95,12 @@ const tweetController = {
       })
 
       if (!tweet) {
-        return res.json({
-          status: 'error',
-          message: 'cannot get tweet that doesn\'t exist'
-        })
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: 'cannot get tweet that doesn\'t exist'
+          })
       }
 
       const likes = helpers.getUserInfoId(req, 'LikedTweets')
@@ -111,9 +121,11 @@ const tweetController = {
         isLiked: likes ? likes.includes(tweet.id) : null
       }
 
-      return res.json(tweet)
+      return res
+        .status(200)
+        .json(tweet)
     } catch (error) {
-      console.log(error)
+      next(error)
     }
   },
 
@@ -123,29 +135,36 @@ const tweetController = {
       const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
 
       if (!targetTweet) {
-        return res.json({
-          status: 'error',
-          message: 'cannot like a tweet that doesn\'t exist'
-        })
+        return res
+          .status(204)
+          .json({
+            status: 'error',
+            message: 'cannot like a tweet that doesn\'t exist'
+          })
       }
 
       const like = await Like.findOne({ where: { TweetId: req.params.tweet_id, UserId } })
 
       if (like) {
-        return res.json({
-          status: 'error',
-          message: 'already liked this tweet'
-        })
+        return res
+          .status(409)
+          .json({
+            status: 'error',
+            message: 'already liked this tweet'
+          })
       }
 
       await Like.create({
         UserId,
         TweetId: req.params.tweet_id
       })
-      return res.json({ status: 'success' })
+
+      return res
+        .status(200)
+        .json({ status: 'success' })
     }
     catch (error) {
-      console.log(error)
+      next(error)
     }
   },
 
@@ -155,10 +174,12 @@ const tweetController = {
       const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
 
       if (!targetTweet) {
-        return res.json({
-          status: 'error',
-          message: 'cannot unlike a tweet that doesn\'t exist'
-        })
+        return res
+          .status(204)
+          .json({
+            status: 'error',
+            message: 'cannot unlike a tweet that doesn\'t exist'
+          })
       }
 
       const like = await Like.findOne({
@@ -169,17 +190,24 @@ const tweetController = {
       })
 
       if (!like) {
-        return res.json({
-          status: 'error',
-          message: 'you haven\'t liked this tweet before'
-        })
+        return res
+          .status(409)
+          .json({
+            status: 'error',
+            message: 'you haven\'t liked this tweet before'
+          })
       }
 
       await like.destroy()
-      return res.json({ status: 'success' })
+
+      return res
+        .status(200)
+        .json({
+          status: 'success'
+        })
     }
     catch (error) {
-      console.log(error)
+      next(error)
     }
   },
 
@@ -191,7 +219,7 @@ const tweetController = {
 
       if (!targetTweet) {
         return res
-          .status(204)
+          .status(200)
           .json({
             status: 'error',
             message: 'cannot reply to a tweet that doesn\'t exist'
@@ -226,7 +254,7 @@ const tweetController = {
         })
     }
     catch (error) {
-      console.log(error)
+      next(error)
     }
   },
 
@@ -252,7 +280,7 @@ const tweetController = {
         )
     }
     catch (error) {
-      console.log(error)
+      next(error)
     }
   },
 
@@ -262,14 +290,20 @@ const tweetController = {
 
       if (!tweet) {
         return res
-          .status(404)
-          .json({ status: 'error', message: 'tweet does not exist' })
+          .status(200)
+          .json({
+            status: 'error',
+            message: 'tweet does not exist'
+          })
       }
 
       if (tweet.UserId !== helpers.getUser(req).id) {
         return res
           .status(403)
-          .json({ status: 'error', message: 'you cannot delete other user\'s tweet' })
+          .json({
+            status: 'error',
+            message: 'you cannot delete other user\'s tweet'
+          })
       }
 
       // Replies and likes related to this tweet must be deleted as well
@@ -284,7 +318,7 @@ const tweetController = {
         .json({ status: 'success', message: 'delete successfully' })
 
     } catch (err) {
-      console.log(err)
+      next(error)
     }
   },
 
@@ -295,14 +329,20 @@ const tweetController = {
 
       if (!tweet) {
         return res
-          .status(404)
-          .json({ status: 'error', message: 'tweet does not exist' })
+          .status(200)
+          .json({
+            status: 'error',
+            message: 'tweet does not exist'
+          })
       }
 
       if (tweet.UserId !== helpers.getUser(req).id) {
         return res
           .status(403)
-          .json({ status: 'error', message: 'you cannot edit other user\'s tweet' })
+          .json({
+            status: 'error',
+            message: 'you cannot edit other user\'s tweet'
+          })
       }
 
       if (description.length > 140) {
@@ -331,7 +371,7 @@ const tweetController = {
         })
     }
     catch (error) {
-      console.log(error)
+      next(error)
     }
   },
 
@@ -381,7 +421,7 @@ const tweetController = {
         })
     }
     catch (error) {
-
+      next(error)
     }
   },
 
@@ -415,7 +455,7 @@ const tweetController = {
         })
     }
     catch (error) {
-
+      next(error)
     }
   }
 }
