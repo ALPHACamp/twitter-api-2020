@@ -141,11 +141,12 @@ components:
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
-security:
-  - bearerAuth: []
+
 paths:
   '/admin/users':
     get:
+      security:
+        - bearerAuth: []
       tags:
         - admin
       summary: Get all user data
@@ -228,6 +229,8 @@ paths:
   #         $ref: '#/components/responses/UnauthorizedError'
   '/admin/tweets/{tweet_id}':
     delete:
+      security:
+        - bearerAuth: []
       tags:
         - admin
       summary: Delete a spicific tweet.
@@ -262,6 +265,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets':
     get:
+      security:
+        - bearerAuth: []
       tags:
         - tweets
       summary: Get all tweets data.
@@ -329,6 +334,8 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     post:
+      security:
+        - bearerAuth: []
       tags:
         - tweets
       summary: Post a tweet.
@@ -382,6 +389,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets/{tweet_id}':
     get:
+      security:
+        - bearerAuth: []
       tags:
         - tweets
       summary: Get data of a spicific tweet.
@@ -427,6 +436,8 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     put:
+      security:
+        - bearerAuth: []
       tags:
         - tweets
       summary: Edit a tweet.
@@ -474,6 +485,8 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     delete:
+      security:
+        - bearerAuth: []
       tags:
         - tweets
       summary: Delete a spicific tweet.  
@@ -508,6 +521,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets/{tweet_id}/like':
     post:
+      security:
+        - bearerAuth: []
       tags:
         - tweets
       summary: Like a spicific tweet.
@@ -542,6 +557,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets/{tweet_id}/unlike':
     post:
+      security:
+        - bearerAuth: []
       tags:
         - tweets
       summary: Unlike a spicific tweet.
@@ -576,6 +593,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets/{tweet_id}/replies':
     get:
+      security:
+        - bearerAuth: []
       tags:
         - replies
       summary: Get all replies of a spicific tweet.
@@ -633,6 +652,8 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     post:
+      security:
+        - bearerAuth: []
       tags:
         - replies
       summary: Reply to a spicific tweet.
@@ -680,6 +701,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets/{tweet_id}/{reply_id}':
     put:
+      security:
+        - bearerAuth: []
       tags:
         - replies
       summary: Edit a reply to a specific tweet.
@@ -738,6 +761,8 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     delete:
+      security:
+        - bearerAuth: []
       tags:
         - replies
       summary: Delete a spicific reply.  
@@ -780,6 +805,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/followships':
     post:
+      security:
+        - bearerAuth: []
       tags:
         - followships
       summary: Follow a user.
@@ -823,6 +850,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/followships/{followingId}':
     delete:
+      security:
+        - bearerAuth: []
       tags:  
         - followships
       summary: Unfollow a user.
@@ -857,6 +886,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/subscriptions':
     post:
+      security:
+        - bearerAuth: []
       tags:
         - subscriptions
       summary: Subscribe a user.
@@ -900,6 +931,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/subscriptions/{authorId}':
     delete:
+      security:
+        - bearerAuth: []
       tags:  
         - subscriptions
       summary: Unsubscribe a user.
@@ -934,7 +967,6 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/users/login':
     post:
-      post:
       tags:
         - user
       summary: Login.
@@ -984,6 +1016,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
   '/users':
     get:
+      security:
+        - bearerAuth: []
       tags:
         - user
       summary: Get recommended authors data
