@@ -199,13 +199,15 @@ const tweetController = {
       const tweetAuthor = await User.findOne({ where: { id: targetTweet.UserId } })
 
       if (!req.body.comment.trim()) {
-        return res.json({
-          status: 'error',
-          message: 'comment cannot be blank'
-        })
+        return res
+          .status(422)
+          .json({
+            status: 'error',
+            message: 'comment cannot be blank'
+          })
       }
 
-      await Reply.create({
+      const reply = await Reply.create({
         UserId,
         TweetId,
         comment: req.body.comment,
@@ -213,16 +215,13 @@ const tweetController = {
         updatedAt: new Date()
       })
 
-      const reply = await Reply.findOne({
-        where: { UserId, TweetId },
-        order: [['createdAt', 'DESC']]
-      })
-
-      return res.json({
-        status: 'success',
-        message: `successfully replied to ${tweetAuthor.account}'s tweet`,
-        replyId: reply.id
-      })
+      return res
+        .status(200)
+        .json({
+          status: 'success',
+          message: `successfully replied to ${tweetAuthor.account}'s tweet`,
+          ReplyId: reply.id
+        })
     }
     catch (error) {
       console.log(error)
