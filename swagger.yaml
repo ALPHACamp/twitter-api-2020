@@ -29,6 +29,8 @@ tags:
     description: Followships related
   - name: subscriptions
     description: Subscriptions related
+  - name: replies
+    description: Replies related
 components:
   securitySchemes:
     bearerAuth:
