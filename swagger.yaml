@@ -932,3 +932,145 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/users/login':
+    post:
+      post:
+      tags:
+        - user
+      summary: Login.
+      description: User can login to Simple Twitter by speicifying his account and password.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account:
+                  type: string
+                  example: user1
+                password:
+                  type: string
+                  example: 12345678
+      responses:
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success",
+                      "message": "login successfully",
+                      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NDUyNzY1fQ.PWVB3oa9pqmA6-sQii69BCs1bFJXlYO6yaM4hhthq7E",
+                      "user": {
+                        "id": 3,
+                        "name": "user2",
+                        "email": "user2@example.com",
+                        "account": "user2",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "introduction": "Dignissimos repellat maxime nisi quia molestiae po",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "role": "user"
+                      }
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/users':
+    get:
+      tags:
+        - user
+      summary: Get recommended authors data
+      description: >-
+        User can get recommended authors data on Simple Twitter.
+      operationId: getUsers
+      responses:
+        '200':
+          description: Ok. Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                        {
+                            "id": 2,
+                            "name": "user1",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user1",
+                            "isFollowed": true
+                        },
+                        {
+                            "id": 3,
+                            "name": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user2",
+                            "isFollowed": true
+                        },
+                        {
+                            "id": 3,
+                            "name": "user2",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "account": "user2",
+                            "isFollowed": true
+                        }
+                    ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags:
+        - user
+      summary: Register.
+      description: User can register an account for Simple Twitter by filling out required fields of personal information.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                account:
+                  type: string
+                  example: user1
+                name:
+                  type: string
+                  example: user1
+                email:
+                  type: string
+                  example: user1@example.com
+                password:
+                  type: string
+                  example: 12345678
+                checkPassword:
+                  type: string
+                  example: 12345678
+      responses:
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "user1 register successfully! Please login."
+                    }
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        
