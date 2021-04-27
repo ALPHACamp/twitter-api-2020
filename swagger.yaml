@@ -1419,3 +1419,91 @@ paths:
           description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/users/{id}/followers':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's followers data
+      description: >-
+        User can get a specific user's followers data by specifying his id.
+      operationId: getUserFollowers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get followers data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                          "followerId": 14,
+                          "name": "user1",
+                          "account": "user1",
+                          "avatar": "https://i.imgur.com/q6bwDGO.png",
+                          "introduction": "Maxime quo quos beatae aut quaerat rem.",
+                          "createdAt": "2021-04-25T14:07:35.000Z",
+                          "isFollowing": false
+                      }
+                    ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/users/{id}/followings':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Get a specific user's following authors data
+      description: >-
+        User can get a specific user's following authors data by specifying his id.
+      operationId: getUserFollowings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get a specific user's following authors data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Ok. Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                        "followingId": 24,
+                        "name": "user2",
+                        "account": "user2",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "introduction": "Accusamus harum voluptas. Nostrum incidunt fugiat ",
+                        "createdAt": "2021-04-25T14:07:36.000Z",
+                        "isFollowing": true
+                      }
+                    ]
+        '400':
+          description: Bad request.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
