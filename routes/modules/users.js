@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { authenticated } = require('../../middleware/auth')
+const { authenticated, authenticatedUser } = require('../../middleware/auth')
 
 const userController = require('../../controllers/userController')
 
@@ -23,6 +23,7 @@ router
   .all(authenticated)
   .get(userController.getUser)
   .put(
+    authenticatedUser,
     upload.fields([
       {
         name: 'avatar',
