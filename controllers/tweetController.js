@@ -49,6 +49,7 @@ const tweetController = {
 
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   getTweet: async (req, res) => {
@@ -89,7 +90,10 @@ const tweetController = {
         tweetReplies: tweetReplies
       }
       return res.json(tweet)
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      return next(e)
+    }
   },
   postTweet: async (req, res) => {
     try {
@@ -103,7 +107,10 @@ const tweetController = {
       }
       await Tweet.create({ UserId, description })
       return res.json({ status: 'success', message: 'Tweet has built successfully!' })
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      return next(e)
+    }
   },
   getReplies: async (req, res) => {
     try {
@@ -123,7 +130,10 @@ const tweetController = {
 
       return res.json(tweetReplies)
     }
-    catch (e) { console.log(e) }
+    catch (e) {
+      console.log(e)
+      return next(e)
+    }
   },
   postReply: async (req, res) => {
     try {
@@ -132,21 +142,32 @@ const tweetController = {
       const TweetId = req.params.tweet_Id
 
       if (!comment) {
-        return res.json({ status: 'error', message: "It must have comment to tweet." })
+        return res.json({ status: 'error', message: "It must have comment to reply." })
+      } else if (await Tweet.findByPk(TweetId) === null) {
+        return res.json({ status: 'error', message: "This tweetId doesn't exist." })
       } else if (comment.length > 140) {
         return res.json({ status: 'error', message: "comment max length is 140 words" })
       }
       await Reply.create({ TweetId, UserId, comment })
       return res.json({ status: 'success', message: 'Reply has built successfully!' })
 
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      return next(e)
+    }
   },
   tweetLike: async (req, res) => {
     try {
-      await Like.create({
-        UserId: helpers.getUser(req).id,
-        TweetId: req.params.tweet_Id
-      })
+      const TweetId = req.params.tweet_Id
+      if (await Tweet.findByPk(TweetId) === null) {
+        return res.json({ status: 'error', message: "This tweetId doesn't exist." })
+      } else {
+        await Like.create({
+          UserId: helpers.getUser(req).id,
+          TweetId: TweetId
+        })
+      }
+
       return res.json({ status: 'success', message: 'Like has built successfully!' })
     } catch (e) { return res.json({ status: 'error', message: 'Failed to build a like.' }) }
   },

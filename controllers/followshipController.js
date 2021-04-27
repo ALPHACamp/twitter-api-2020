@@ -15,7 +15,10 @@ const followshipController = {
       })
       return res.json({ status: 'success', message: 'Followship has built successfully!' })
 
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      return next(e)
+    }
 
   },
 
@@ -32,7 +35,10 @@ const followshipController = {
       })
       followship.destroy()
       return res.json({ status: 'success', message: 'Followship has removed successfully!' })
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      return next(e)
+    }
   }
 }
 
