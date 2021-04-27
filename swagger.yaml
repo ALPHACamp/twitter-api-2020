@@ -482,7 +482,7 @@ paths:
                   example: "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
       responses:
         '200':
-          description: Ok. Successfully edited a tweet.
+          description: Successfully edited a tweet.
           content:
             application/json:
               examples:
@@ -518,7 +518,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully deleted tweet.
+          description: Successfully deleted tweet.
           content:
             application/json:
               examples:
@@ -569,7 +569,7 @@ paths:
           content:
             application/json:
               examples:
-                success:
+                fail:
                   value: |-
                     {
                       "status": "error",
@@ -598,7 +598,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully unliked this tweet.
+          description: Successfully unliked this tweet.
           content:
             application/json:
               examples:
@@ -612,7 +612,7 @@ paths:
           content:
             application/json:
               examples:
-                success:
+                fail:
                   value: |-
                     {
                       "status": "error",
@@ -620,29 +620,30 @@ paths:
                     }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/tweets/{tweet_id}/replies':
     get:
       security:
         - bearerAuth: []
       tags:
         - replies
-      summary: Get all replies of a spicific tweet.
+      summary: Get all replies of a specific tweet.
       description: >-
-        User can get an array of all the replies data of a specific tweet by
-        speicifying its id.
+        User can get an array of replies data of a specific tweet by
+        specifying its id.
       operationId: getReplies
       parameters:
         - name: tweet_id
           in: path
           required: true
-          description: The id of the tweet you want to replies from.
+          description: The id of the tweet you want to get replies data from.
           schema:
             type: integer
             format: int64
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully retrieved replies of this tweet.
+          description: Successfully retrieved replies of this tweet.
           content:
             application/json:
               schema:
@@ -676,8 +677,17 @@ paths:
                             "updatedAt": "2021-04-19T16:45:10.000Z"
                         }
                     ]
-        '400':
-          description: Bad request.
+        '404':
+          description: This tweet doesn't exist.     
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "this tweet doesn't exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     post:
@@ -685,9 +695,9 @@ paths:
         - bearerAuth: []
       tags:
         - replies
-      summary: Reply to a spicific tweet.
-      description: User can reply to a specific tweet by speicifying its id.
-      operationId: postReplies
+      summary: Reply to a specific tweet.
+      description: User can reply to a specific tweet by specifying its id.
+      operationId: postReply
       parameters:
         - name: tweet_id
           in: path
@@ -712,7 +722,7 @@ paths:
                   example: "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
       responses:
         '200':
-          description: Ok. Successfully replied to this tweet.
+          description: Successfully replied to this tweet.
           content:
             application/json:
               schema:
@@ -724,24 +734,45 @@ paths:
                       "status": "success", 
                       "message": "successfully replied to this tweet"
                     }
-        '400':
-          description: Bad request.
+        '200':
+          description: Successfully replied to this tweet.
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "cannot reply to a tweet that doesn't exist"
+                    }
+        '422':
+          description: comment cannot be blank
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "comment cannot be blank"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  '/tweets/{tweet_id}/{reply_id}':
+
+  '/tweets/{tweet_id}/replies/{reply_id}':
     put:
       security:
         - bearerAuth: []
       tags:
         - replies
-      summary: Edit a reply to a specific tweet.
+      summary: Edit your reply to a specific tweet.
       description: User can edit their own reply to a specific tweet by specifying the tweet id and reply id.
       operationId: editReply
       parameters:
         - name: tweet_id
           in: path
           required: true
-          description: The id of the tweet you want to edit reply from.
+          description: The id of the tweet you want to edit reply.
           schema:
             type: integer
             format: int64
@@ -769,24 +800,42 @@ paths:
                   example: 1
                 description:
                   type: string
-                  example: "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
+                  example: "doloribus iure deleniti veritatis ut. Excepturi expedita blanditiis fugiat"
       responses:
         '200':
-          description: Ok. Successfully edited a tweet.
+          description: Successfully edited a tweet.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Replies'
               examples:
                 success:
                   value: |-
                     { 
                       "status": "success", 
-                      "message": "successfully edited a reply",
+                      "message": "successfully updated your reply",
                       "updatedReplyId": 1
                     }
         '400':
-          description: Bad request.
+          description: This reply does not exist or belong to you.
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "This reply does not exist or belong to you"
+                    }
+        '422':
+          decription: Comment cannot be blank.
+          content:
+            application/json:
+              examples:
+                fail:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "comment cannot be blank"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     delete:
@@ -795,13 +844,13 @@ paths:
       tags:
         - replies
       summary: Delete a spicific reply.  
-      description: User can delete a specific reply by speicifying its tweetId and replyId.
-      operationId: DeleteReply
+      description: User can delete their own reply by speicifying its tweetId and replyId.
+      operationId: deleteReply
       parameters:
         - name: tweet_id
           in: path
           required: true
-          description: The id of the tweet you want to delete.
+          description: The id of the tweet you want to delete reply from.
           schema:
             type: integer
             format: int64
@@ -809,18 +858,16 @@ paths:
         - name: reply_id
           in: path
           required: true
-          description: The id of the reply you want to edit.
+          description: The id of the reply you want to delete.
           schema:
             type: integer
             format: int64
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully deleted data from a specific reply.
+          description: Successfully deleted your reply.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Replies'
               examples:
                 success:
                   value: |-
@@ -829,9 +876,19 @@ paths:
                         "message": "successfully deleted reply"
                     }
         '400':
-          description: Bad request.
+          description: This reply does not exist or belong to you.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "successfully deleted reply"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/followships':
     post:
       security:
@@ -839,7 +896,7 @@ paths:
       tags:
         - followships
       summary: Follow a user.
-      description: User can follow a user by speicifying his id.
+      description: User can follow another user by speicifying his id.
       operationId: followUser
       requestBody:
         required: true
@@ -853,7 +910,7 @@ paths:
                   example: 2
       responses:
         '200':
-          description: Ok. Successfully followed user.
+          description: Successfully followed user.
           content:
             application/json:
               schema:
@@ -873,10 +930,42 @@ paths:
                         "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"                        
                       }
                     }
-        '400':
-          description: Bad request.
+        '200':
+          description: This user does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "this user does not exist"
+                    }
+        '409':
+          description: Already followed this user.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "already followed this user"
+                    }
+        '403':
+          description: You cannot follow yourself.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "you cannot follow yourself"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/followships/{followingId}':
     delete:
       security:
@@ -884,7 +973,7 @@ paths:
       tags:  
         - followships
       summary: Unfollow a user.
-      description: User can unfollow a user by speicifying his id.
+      description: User can unfollow an user by speicifying his id.
       operationId: unfollowUser
       parameters:
         - name: followingId
@@ -897,11 +986,9 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully unfollowed user.
+          description: Successfully unfollowed user.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Followships'
               examples:
                 success:
                   value: |-
@@ -909,10 +996,31 @@ paths:
                       "status": "success", 
                       "message": "successfully unfollowed user",
                     }
-        '400':
-          description: Bad request.
+        '200':
+          description: Cannot unfollow an user that does not exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "cannot unfollow an user that does not exist"
+                    }
+        '200':
+          description: Cannot unfollow an user that does not exist.
+          content:
+            application/json:
+              examples:
+                error2:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "cannot unfollow since you haven't followed this user before"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/subscriptions':
     post:
       security:
@@ -920,7 +1028,7 @@ paths:
       tags:
         - subscriptions
       summary: Subscribe a user.
-      description: User can subscribe a user by speicifying his id.
+      description: User can subscribe an user by speicifying his id.
       operationId: subscribeUser
       requestBody:
         required: true
@@ -934,7 +1042,7 @@ paths:
                   example: 2
       responses:
         '200':
-          description: Ok. Successfully followed user.
+          description: Successfully followed user.
           content:
             application/json:
               schema:
@@ -942,22 +1050,59 @@ paths:
               examples:
                 success:
                   value: |-
-                    { 
-                      "status": "success", 
-                      "message": "successfully subscribed user",
+                    {
+                      "status": "success",
+                      "message": "subscribed @user4",
                       "author": {
-                        "id": 2,
-                        "name": "user1",
-                        "account": "user1",
-                        "avatar": "https://i.imgur.com/q6bwDGO.png",
-                        "cover": "https://i.imgur.com/1jDf2Me.png",
-                        "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"                        
+                          "id": 5,
+                          "name": "user4",
+                          "email": "user4@example.com",
+                          "password": "$2a$10$OqwegZokDJq4YXwoyoxoquHTCZzzo96exM4rObEvofIAlhf4Nw8Xy",
+                          "role": "user",
+                          "avatar": "https://i.imgur.com/q6bwDGO.png",
+                          "introduction": "reprehenderit dignissimos dolores",
+                          "account": "user4",
+                          "cover": "https://i.imgur.com/1jDf2Me.png",
+                          "createdAt": "2021-04-25T17:45:46.000Z",
+                          "updatedAt": "2021-04-25T17:45:46.000Z"
                       }
                     }
-        '400':
-          description: Bad request.
+        '403':
+          description: You cannot subscribe yourself.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "You cannot subscribe yourself."
+                    }
+        '200':
+          description: Cannot subscribe an user that doesn't exist.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot subscribe an user that doesn't exist"
+                    }
+        '409':
+          description: Already subscribed this user.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "already subscribed @user4"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/subscriptions/{authorId}':
     delete:
       security:
@@ -965,7 +1110,7 @@ paths:
       tags:  
         - subscriptions
       summary: Unsubscribe a user.
-      description: User can unsubscribe a user by speicifying his id.
+      description: User can unsubscribe an user by speicifying his id.
       operationId: unsubscribeUser
       parameters:
         - name: authorId
@@ -978,22 +1123,41 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully unsubscribe user.
+          description: Successfully unsubscribe user.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Subscriptions'
               examples:
                 success:
                   value: |-
-                    { 
-                      "status": "success", 
-                      "message": "successfully unsubscribe user",
+                    {
+                      "status": "success",
+                      "message": "Unsubscribe @user1"
                     }
-        '400':
-          description: Bad request.
+        '200':
+          description: Unable to cancel subscription since you haven't subscribed this user before.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "unable to cancel subscription since you haven't subscribed @user2 before"
+                    }
+        '200':
+          description: Cannot unsubscribe an user that doesn't exist.
+          content:
+            application/json:
+              examples:
+                error1:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot unsubscribe an user that doesn't exist"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
   '/users/login':
     post:
       tags:
