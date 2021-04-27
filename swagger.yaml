@@ -5,7 +5,7 @@ info:
     This is a sample server for Simple Twitter API. You can find out more about
     this project at [our GitHub](https://github.com/ivyhungtw/twitter-api-2020).
     For this sample, you should use JWT token to test the authorization filters.
-    Go to user -> `POST /users/login` to get your token with the example user, account: user1 / password: 12345678.
+    Go to `user` -> `POST /users/login` to get your token with the example user, account: user1 / password: 12345678.
   contact:
     name: GitHub repo
     url: 'https://github.com/ivyhungtw/twitter-api-2020/'
@@ -27,6 +27,8 @@ tags:
     description: Tweets related
   - name: followships
     description: Followships related
+  - name: subscriptions
+    description: Subscriptions related
 components:
   securitySchemes:
     bearerAuth:
@@ -150,14 +152,14 @@ paths:
         - bearerAuth: []
       tags:
         - admin
-      summary: Get all user data
+      summary: Get all users data
       description: >-
-        Admin can get all user data from Simple Twitter and their social
-        activeness data.
+        Admin can get all users data from Simple Twitter including their social
+        activeness
       operationId: getAdminUsers
       responses:
         '200':
-          description: Ok. Retrieved an array of user objects.
+          description: Successfully retrieved an array of user objects.
           content:
             application/json:
               schema:
@@ -166,30 +168,40 @@ paths:
                 success:
                   value: |-
                     [
-                        {
-                            "id": 2,
-                            "name": "user1",
-                            "avatar": "https://i.imgur.com/q6bwDGO.png",
-                            "account": "user1",
-                            "isFollowed": true
-                        },
-                        {
-                            "id": 3,
-                            "name": "user2",
-                            "avatar": "https://i.imgur.com/q6bwDGO.png",
-                            "account": "user2",
-                            "isFollowed": true
-                        },
-                        {
-                            "id": 3,
-                            "name": "user2",
-                            "avatar": "https://i.imgur.com/q6bwDGO.png",
-                            "account": "user2",
-                            "isFollowed": true
-                        }
+                      {
+                        "id": 4,
+                        "name": "user3",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "account": "user3",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "tweetCount": 10,
+                        "followerCount": 0,
+                        "followingCount": 1,
+                        "likeCount": 0
+                      },
+                      {
+                        "id": 3,
+                        "name": "user2",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "account": "user2",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "tweetCount": 10,
+                        "followerCount": 2,
+                        "followingCount": 0,
+                        "likeCount": 0
+                      },
+                      {
+                        "id": 5,
+                        "name": "user4",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "account": "user4",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "tweetCount": 10,
+                        "followerCount": 1,
+                        "followingCount": 0,
+                        "likeCount": 0
+                      }
                     ]
-        '400':
-          description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
   # '/admin/users/{id}':
@@ -234,9 +246,9 @@ paths:
         - bearerAuth: []
       tags:
         - admin
-      summary: Delete a spicific tweet.
-      description: Admin can delete a specific tweet by speicifying its id.
-      operationId: deleteTweet
+      summary: Delete a specific tweet.
+      description: Admin can delete a specific tweet by specifying its id.
+      operationId: adminDeleteTweet
       parameters:
         - name: tweet_id
           in: path
@@ -248,7 +260,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully deleted data from a specific tweet.
+          description: Successfully deleted tweet.
           content:
             application/json:
               schema:
@@ -258,10 +270,18 @@ paths:
                   value: |-
                     {
                         "status": "success",
-                        "message": "successfully deleted tweet"
+                        "message": "delete successfully"
                     }
-        '400':
-          description: Bad request.
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweets'
+              examples:
+                success:
+                  value: |-
+                    "tweet does not exist"
         '401':
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets':
@@ -275,7 +295,7 @@ paths:
       operationId: getTweets
       responses:
         '200':
-          description: Ok. Retrieved an array of tweet objects.
+          description: Successfully retrieved an array of tweet objects.
           content:
             application/json:
               schema:
@@ -330,8 +350,6 @@ paths:
                           }
                       }
                     ]
-        '400':
-          description: Bad request.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     post:
@@ -357,7 +375,7 @@ paths:
                   example: "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
       responses:
         '200':
-          description: Ok. Successfully posted a tweet.
+          description: 
           content:
             application/json:
               schema:
@@ -365,27 +383,21 @@ paths:
               examples:
                 success:
                   value: |-
-                    { 
-                      "status": "success", 
+                    {
+                      "status": "success",
                       "message": "successfully posted a tweet",
-                      "tweet": {
-                        "id": 3,
-                        "UserId": 1,
-                        "description": "Fugiat quam animi earum quibusdam hic fugiat beatae quo.\nReiciendis rerum delectus repellat harum repudiandae quasi reprehenderit saepe in.\nPraesentium cumque autem atque nisi minus nihil cupiditate.\nUt consectetur omnis architecto provident aspernatur sequi aliquid atque rerum.\nVelit pariatur nam.",
-                        "createdAt": "2021-04-19T16:45:10.000Z",
-                        "updatedAt": "2021-04-19T16:45:10.000Z",
-                        "replyCount": 3,
-                        "likeCount": 0,
-                        "isLiked": false,
-                        "user": {
-                          "avatar": "https://i.imgur.com/q6bwDGO.png",
-                          "name": "root",
-                          "account": "root"
+                      "tweet": [
+                        {
+                          "id": 60,
+                          "UserId": 1,
+                          "description": "Ipsa quaerat.\n \rDicta officiis",
+                          "createdAt": "2021-04-27T09:09:15.000Z",
+                          "updatedAt": "2021-04-27T09:09:15.000Z"
                         }
-                      }
+                      ]
                     }
-        '400':
-          description: Bad request.
+        '422':
+          description: Input cannot be longer than 140 characters / input should not be blank.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
   '/tweets/{tweet_id}':
@@ -394,9 +406,9 @@ paths:
         - bearerAuth: []
       tags:
         - tweets
-      summary: Get data of a spicific tweet.
+      summary: Get data of a specific tweet.
       description: >-
-        User can retrieve an array of data of a specific tweet by speicifying
+        User can retrieve data of a specific tweet by specifying
         its id.
       operationId: getTweet
       parameters:
@@ -410,7 +422,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully retrieved data from a specific tweet.
+          description: Successfully retrieved tweet data.
           content:
             application/json:
               schema:
@@ -419,21 +431,21 @@ paths:
                 success:
                   value: |-
                     {
+                      "id": 13,
+                      "description": "Vitae reiciendis voluptatem laudantium quis laudantium.\nIpsa et dolor et quasi suscipit totam neque nisi.",
+                      "createdAt": "2021-04-19T16:45:10.000Z",
+                      "updatedAt": "2021-04-19T16:45:10.000Z",
+                      "user": {
                         "id": 2,
-                        "description": "officiis et cum",
-                        "createdAt": "2021-04-19T16:45:10.000Z",
-                        "updatedAt": "2021-04-19T16:45:10.000Z",
-                        "user": {
-                            "id": 1,
-                            "name": "root",
-                            "avatar": "https://i.imgur.com/q6bwDGO.png"
-                        },
-                        "likesLength": 1,
-                        "commentsLength": 3,
-                        "isLiked": true
+                        "name": "user1",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png"
+                      },
+                      "likesLength": 0,
+                      "commentsLength": 4,
+                      "isLiked": false
                     }
-        '400':
-          description: Bad request.
+        '404':
+          description: This tweet doesn't exist.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     put:
@@ -481,17 +493,19 @@ paths:
                       "message": "successfully edited a tweet",
                       "editedTweetId": 2
                     }
-        '400':
-          description: Bad request.
+        '422':
+          description: Input cannot be longer than 140 characters.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: You cannot edit other user's tweet.
     delete:
       security:
         - bearerAuth: []
       tags:
         - tweets
-      summary: Delete a spicific tweet.  
-      description: User can delete a specific tweet by speicifying its id.
+      summary: Delete a specific tweet.  
+      description: User can delete a specific tweet by specifying its id.
       operationId: userDeleteTweet
       parameters:
         - name: tweet_id
@@ -504,7 +518,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully deleted data from a specific tweet.
+          description: Ok. Successfully deleted tweet.
           content:
             application/json:
               schema:
