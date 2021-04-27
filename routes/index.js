@@ -5,13 +5,17 @@ const followships = require('./modules/followships')
 const subscriptions = require('./modules/subscriptions')
 const swagger = require('./modules/swagger')
 
-const { authenticated, authenticatedAdmin } = require('../middleware/auth')
+const {
+  authenticated,
+  authenticatedAdmin,
+  authenticatedUser
+} = require('../middleware/auth')
 
 module.exports = app => {
   app.use('/api-docs', swagger)
   app.use('/api/users', users)
   app.use('/api/admin', authenticated, authenticatedAdmin, admin)
   app.use('/api/tweets', authenticated, tweets)
-  app.use('/api/followships', authenticated, followships)
-  app.use('/api/subscriptions', authenticated, subscriptions)
+  app.use('/api/followships', authenticated, authenticatedUser, followships)
+  app.use('/api/subscriptions', authenticated, authenticatedUser, subscriptions)
 }
