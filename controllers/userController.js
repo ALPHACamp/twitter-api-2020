@@ -471,10 +471,6 @@ module.exports = {
       return res.status(403).json({ status: 'error', message: ' Unauthorized to edit user' })
     }
 
-    if (!name) {
-      return res.status(400).json({ status: 'error', message: ' Name is required' })
-    }
-
     if (name && !validator.isByteLength(name, { min: 0, max: 25 })) {
       return res.status(400).json({ status: 'error', message: 'The name field can have no more than 25 characters' })
     }
@@ -485,13 +481,13 @@ module.exports = {
 
     const imgArray = []
 
-    if (files.avatar) {
+    if (files && files.avatar) {
       imgur.setClientId(IMGUR_CLIENT_ID)
       avatar = imgur.uploadFile(files.avatar[0].path)
       imgArray.push(avatar)
     }
 
-    if (files.cover) {
+    if (files && files.cover) {
       imgur.setClientId(IMGUR_CLIENT_ID)
       cover = imgur.uploadFile(files.cover[0].path)
       imgArray.push(cover)
@@ -503,10 +499,10 @@ module.exports = {
         User.findByPk(id)
           .then(user => {
             user.update({
-              name: name,
-              introduction: introduction,
-              avatar: files.avatar ? avatar.link : user.avatar,
-              cover: files.cover ? cover.link : user.cover
+              name: name || req.user.name,
+              introduction: introduction || req.user.introduction,
+              avatar: files && files.avatar ? avatar.link : user.avatar,
+              cover: files && files.cover ? cover.link : user.cover
             })
               .then(() => {
                 return res.status(200).json({ status: 'success', message: 'Success' })
