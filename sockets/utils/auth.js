@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
-const User = require('../models').User
-// let userList = []
+const User = require('../../models').User
 
 // 驗證身分
 async function authenticated (socket, next) {

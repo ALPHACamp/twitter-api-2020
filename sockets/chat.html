@@ -10,8 +10,9 @@
 <body>
   <div class="chat-container">
     <header class="chat-header">
-      <h1><i class="fas fa-smile"></i> ChatRoom</h1>
+      <h1><i class="fas fa-smile"></i> ChatRoom <span id="user-name"></span></h1>
       <h4>user online: <span id="online">0</span></h6>
+      <h4>user list: <span id="user-list"></span></h4>
     </header>
     <hr>
     <main class="chat-main">
@@ -33,23 +34,47 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8'
     ]
     // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8'
-    const socket = io('http://localhost:4000', {
+    const socket = io('http://localhost:3000', {
       reconnectionDelayMax: 10000,
       auth: {
         token: tokens[Math.floor(Math.random() * 2)]
+        // token
       }
     })
 
-    // 'message' from server
-    socket.on('message', message => {
+    // 'userName' from server
+    socket.on('userName', name => {
+      const userName = document.getElementById('user-name')
+      userName.innerText = `for ${name}`
+    })
+
+    // 'chatMsg' from server
+    socket.on('chatMsg', message => {
       outputMessage(message)
     })
 
-    // 'online' from server
-    socket.on('online', onlineCount => {
+    // 'onlineCount' from server
+    socket.on('onlineCount', onlineCount => {
       // output onlineCount to DOM
       const online = document.getElementById('online')
       online.innerText = onlineCount
+    })
+
+    // 'userList' from server
+    socket.on('userList', users => {
+      const userList = document.getElementById('user-list')
+      let html = ''
+      users.forEach(user => {
+        html += `<span>${user.name} <span>`
+        userList.innerHTML = html
+      })
+    })
+
+    // 'historyMsg' from server
+    socket.on('historyMsg', userMsgs => {
+      userMsgs.forEach(msg => {
+        outputMessage(msg)
+      })
     })
 
     // message submit
@@ -59,7 +84,7 @@
       // get msg text
       const msg = e.target.elements.msg.value
       // emit msg to server
-      socket.emit('chat-msg', msg)
+      socket.emit('userMsg', msg)
       // clear input & focus on it
       e.target.elements.msg.value = ''
       e.target.elements.msg.focus()
