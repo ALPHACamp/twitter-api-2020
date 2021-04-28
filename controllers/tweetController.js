@@ -20,6 +20,7 @@ module.exports = {
           updatedAt: r.updatedAt,
           replyCount: r.Replies.length,
           likeCount: r.Likes.length,
+          isLiked: r.Likes.map(like => like.UserId).includes(req.user.id),
           User: {
             id: r.User.id,
             account: r.User.account,
@@ -48,6 +49,8 @@ module.exports = {
         tweet = tweet.toJSON()
         tweet.replyCount = tweet.Replies.length
         tweet.likeCount = tweet.Likes.length
+        tweet.isLiked = tweet.Likes.map(like => like.UserId).includes(req.user.id)
+        delete tweet.Likes
         return res.status(200).json(tweet)
       })
       .catch(error => {
