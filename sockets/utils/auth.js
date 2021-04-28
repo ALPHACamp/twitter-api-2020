@@ -18,7 +18,7 @@ async function authenticated (socket, next) {
     if (user) {
       socket.user = user
       socket.user.socketId = socket.id
-      // socket.user.channel = 'publicRoom'
+      socket.user.channel = 'publicRoom'
       console.log('put user into socket : success')
       next()
     }

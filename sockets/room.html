@@ -11,12 +11,7 @@
   <div class="chat-container">
     <header class="chat-header">
       <h1><i class="fas fa-smile"></i> ChatRoom <span id="user-name"></span></h1>
-      <h4>user online: <span id="online">0</span></h6>
-      <h4>user list: <span id="user-list"></span></h4>
-      <h4>private chat :</h4>
-      <div id="private-chat-user">
-        <!-- put all users here -->
-      </div>
+        <h4>user list: <span id="user-list"></span></h4>
     </header>
     <hr>
     <main class="chat-main">
@@ -25,7 +20,7 @@
       </div>
     </main>
     <div class="chat-form-container">
-      <form id="chat-form">
+      <form id="chat-form"> 
         <input id="msg" type="text" placeholder="Enter Message" required autocomplete="off" />
         <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
       </form>
@@ -33,57 +28,28 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const users = [
-      { name: 'aaa' },
-      { name: 'bbb' },
-      { name: 'ccc' }
-    ]
     // put token in socket
     const tokens = [
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjE5NTc0MTExfQ.JYrimGfC1kWbxmY01TocBbzfwHmwVIVVqNNIS1juXtE',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8'
     ]
-    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8'
     const socket = io('http://localhost:3000', {
-      reconnectionDelayMax: 10000,
+        reconnectionDelayMax: 10000,
       auth: {
         token: tokens[Math.floor(Math.random() * 2)]
         // token
       }
     })
-
-    // 'privateRoom' from server
-    socket.emit('privateRoom', )
-
-
     // 'userName' from server
     socket.on('userName', name => {
       // render users in user list
       const userName = document.getElementById('user-name')
-      userName.innerText = `for ${name}`
-      const currentUser = name
-      // render users in private chat list
-      const privateChatUser = document.getElementById('private-chat-user')
-      let html = ''
-      console.log('currentUser', currentUser)
-      const userIndex = users.findIndex(user => user.name === currentUser)
-      users.splice(userIndex, 1)
-      users.forEach(user => {
-        html += `<a href="/chat/${currentUser}-${user.name}">${user.name}</a> | `
-      })
-      privateChatUser.innerHTML = html
+      userName.innerText = `for ${name} & `
     })
 
     // 'chatMsg' from server
     socket.on('chatMsg', message => {
       outputMessage(message)
-    })
-
-    // 'onlineCount' from server
-    socket.on('onlineCount', onlineCount => {
-      // output onlineCount to DOM
-      const online = document.getElementById('online')
-      online.innerText = onlineCount
     })
 
     // 'userList' from server
@@ -115,16 +81,16 @@
       e.target.elements.msg.value = ''
       e.target.elements.msg.focus()
     })
-    
+
     // output message to DOM
     function outputMessage(message) {
       const div = document.createElement('div')
       div.classList.add('message')
       div.innerHTML = `
-        <p>${message.username} <span>${message.time}</span></p>
-        <p>${message.text}</p>
-        <hr>
-      `
+      <p>${message.username} <span>${message.time}</span></p>
+      <p>${message.text}</p>
+      <hr>
+    `
       document.querySelector('.chat-messages').appendChild(div)
     }
 

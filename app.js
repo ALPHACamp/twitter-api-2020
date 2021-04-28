@@ -34,6 +34,9 @@ app.use((err, req, res, next) => {
 app.get('/chat', (req, res) => {
   res.sendFile( __dirname + '/sockets/chat.html')
 })
+app.get('/chat/:room', (req, res) => {
+  res.sendFile( __dirname + '/sockets/room.html')
+})
 const server = http.createServer(app)
 const io = socketIo(server, {
   cors: {
