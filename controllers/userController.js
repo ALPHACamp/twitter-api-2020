@@ -565,7 +565,7 @@ module.exports = {
     const findByEmail = User.findOne({ where: { email: email } })
     return Promise.all([findByAccount, findByEmail])
       .then(values => {
-        const [accountUser, emailUser] = [...values]
+        const [accountUser, emailUser] = values
         if (accountUser) {
           message.push('Account already exist')
         }
@@ -578,10 +578,10 @@ module.exports = {
           User.findByPk(id)
             .then(user => {
               user.update({
-                email: email,
-                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-                name: name,
-                account: account
+                email: email || req.user.name,
+                password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : req.user.password,
+                name: name || req.user.name,
+                account: account || req.user.account
               })
                 .then(() => {
                   return res.status(200).json({ status: 'success', message: 'Updated successfully' })
