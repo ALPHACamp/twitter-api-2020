@@ -13,7 +13,12 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 opts.secretOrKey = process.env.JWT_SECRET
 
 passport.use(new JwtStrategy(opts, (jwtPayload, done) => {
-  User.findByPk(jwtPayload.id)
+  User.findByPk(jwtPayload.id, {
+    include: [
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
+  })
     .then(user => {
       if (!user) return done(null, false)
       return done(null, user.toJSON())
