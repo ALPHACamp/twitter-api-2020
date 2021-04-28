@@ -274,14 +274,7 @@ paths:
                         "status": "success",
                         "message": "delete successfully"
                     }
-        '200':
-          description: Ok.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Tweets'
-              examples:
-                success:
+                error:
                   value: |-
                     "tweet does not exist"
         '401':
@@ -401,6 +394,15 @@ paths:
                     }
         '422':
           description: Input cannot be longer than 140 characters / input should not be blank.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "Input cannot be longer than 140 characters / input should not be blank"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -450,6 +452,7 @@ paths:
                     }
         '404':
           description: This tweet doesn't exist.
+          
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     put:
@@ -495,12 +498,30 @@ paths:
                       "message": "successfully edited a tweet",
                       "editedTweetId": 2
                     }
-        '422':
-          description: Input cannot be longer than 140 characters.
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
         '403':
           description: You cannot edit other user's tweet.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "you cannot edit other user's tweet"
+                    }
+        '422':
+          description: Input cannot be longer than 140 characters.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "input cannot be longer than 140 characters"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
     delete:
       security:
         - bearerAuth: []
@@ -530,10 +551,23 @@ paths:
                         "status": "success",
                         "message": "delete successfully"
                     }
-        '200':
-          description: Tweet does not exist.
+                error:
+                  value: |-
+                    {
+                        "status": "success",
+                        "message": "tweet does not exist"
+                    }
         '403':
           description: You cannot delete other user's tweet.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                        "status": "error",
+                        "message": "you cannot delete other user's tweet"
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -557,7 +591,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Ok. Successfully liked this tweet.
+          description: Successfully liked this tweet.
           content:
             application/json:
               examples:
@@ -566,12 +600,7 @@ paths:
                     { 
                       "status": "success"
                     }
-        '200':
-          description: Cannot like a tweet that doesn't exist.        
-          content:
-            application/json:
-              examples:
-                fail:
+                error:
                   value: |-
                     {
                       "status": "error",
@@ -609,12 +638,7 @@ paths:
                     { 
                       "status": "success"
                     }
-        '200':
-          description: You haven't liked this tweet before.
-          content:
-            application/json:
-              examples:
-                fail:
+                error:
                   value: |-
                     {
                       "status": "error",
@@ -736,12 +760,7 @@ paths:
                       "status": "success", 
                       "message": "successfully replied to this tweet"
                     }
-        '200':
-          description: Successfully replied to this tweet.
-          content:
-            application/json:
-              examples:
-                fail:
+                error:
                   value: |-
                     { 
                       "status": "success", 
@@ -932,27 +951,11 @@ paths:
                         "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"                        
                       }
                     }
-        '200':
-          description: This user does not exist.
-          content:
-            application/json:
-              examples:
                 error:
                   value: |-
                     { 
                       "status": "success", 
                       "message": "this user does not exist"
-                    }
-        '409':
-          description: Already followed this user.
-          content:
-            application/json:
-              examples:
-                error:
-                  value: |-
-                    { 
-                      "status": "error", 
-                      "message": "already followed this user"
                     }
         '403':
           description: You cannot follow yourself.
@@ -964,6 +967,17 @@ paths:
                     { 
                       "status": "error", 
                       "message": "you cannot follow yourself"
+                    }
+        '409':
+          description: Already followed this user.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "already followed this user"
                     }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
@@ -998,22 +1012,12 @@ paths:
                       "status": "success", 
                       "message": "successfully unfollowed user",
                     }
-        '200':
-          description: Cannot unfollow an user that does not exist.
-          content:
-            application/json:
-              examples:
                 error:
                   value: |-
                     { 
                       "status": "error", 
                       "message": "cannot unfollow an user that does not exist"
                     }
-        '200':
-          description: Cannot unfollow an user that does not exist.
-          content:
-            application/json:
-              examples:
                 error2:
                   value: |-
                     { 
@@ -1069,6 +1073,12 @@ paths:
                           "updatedAt": "2021-04-25T17:45:46.000Z"
                       }
                     }
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot subscribe an user that doesn't exist"
+                    }
         '403':
           description: You cannot subscribe yourself.
           content:
@@ -1079,17 +1089,6 @@ paths:
                     {
                       "status": "error",
                       "message": "You cannot subscribe yourself."
-                    }
-        '200':
-          description: Cannot subscribe an user that doesn't exist.
-          content:
-            application/json:
-              examples:
-                error:
-                  value: |-
-                    {
-                      "status": "error",
-                      "message": "cannot subscribe an user that doesn't exist"
                     }
         '409':
           description: Already subscribed this user.
@@ -1135,22 +1134,12 @@ paths:
                       "status": "success",
                       "message": "Unsubscribe @user1"
                     }
-        '200':
-          description: Unable to cancel subscription since you haven't subscribed this user before.
-          content:
-            application/json:
-              examples:
                 error:
                   value: |-
                     {
                       "status": "error",
                       "message": "unable to cancel subscription since you haven't subscribed @user2 before"
                     }
-        '200':
-          description: Cannot unsubscribe an user that doesn't exist.
-          content:
-            application/json:
-              examples:
                 error1:
                   value: |-
                     {
@@ -1216,12 +1205,7 @@ paths:
                       "status": "error",
                       "message": "Incorrect Password"
                     }
-        '401':
-          description: That account does not exist.
-          content:
-            application/json:
-              examples:
-                error2:
+                error3:
                   value: |-
                     {
                       "status": "error",
@@ -1238,8 +1222,6 @@ paths:
                       "status": "error",
                       "message": "All fields are required."
                     }
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
 
   '/users/current_user':
     get:
@@ -1348,6 +1330,50 @@ paths:
                   type: string
                   example: 12345678
       responses:
+        '200':
+          description: Registered an account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "user1 register successfully! Please login."
+                    }
+        '409':
+          description: A user with ${email} already exists. Choose a different address or login directly.
+          content:
+            application/json:
+              examples:
+                error1:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "A user with email 'user7@example.com' already exists. Choose a different account or login directly.",
+                      "userInput": {
+                          "email": "user7@example.com",
+                          "password": "12345678",
+                          "name": "rrrr",
+                          "checkPassword": "12345678",
+                          "account": "user1"
+                      }
+                    }
+                error2:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "A user with account 'user1' already exists. Choose a different account or login directly.",
+                      "userInput": {
+                          "email": "user7@example.com",
+                          "password": "12345678",
+                          "name": "rrrr",
+                          "checkPassword": "12345678",
+                          "account": "user1"
+                      }
+                    }
         '422':
           description: Did not meet field requirements.
           content:
@@ -1372,55 +1398,6 @@ paths:
                           "checkPassword": "12345678",
                           "account": "user1"
                       }
-                    }
-        '409':
-          description: A user with ${email} already exists. Choose a different address or login directly.
-          content:
-            application/json:
-              examples:
-                error1:
-                  value: |-
-                    {
-                      "status": "error",
-                      "message": "A user with email 'user7@example.com' already exists. Choose a different account or login directly.",
-                      "userInput": {
-                          "email": "user7@example.com",
-                          "password": "12345678",
-                          "name": "rrrr",
-                          "checkPassword": "12345678",
-                          "account": "user1"
-                      }
-                    }
-        '409':
-          description: A user with ${account} already exists. Choose a different address or login directly.
-          content:
-            application/json:
-              examples:
-                error2:
-                  value: |-
-                    {
-                      "status": "error",
-                      "message": "A user with account 'user1' already exists. Choose a different account or login directly.",
-                      "userInput": {
-                          "email": "user7@example.com",
-                          "password": "12345678",
-                          "name": "rrrr",
-                          "checkPassword": "12345678",
-                          "account": "user1"
-                      }
-                    }
-        '200':
-          description: Registered an account.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Users'
-              examples:
-                success:
-                  value: |-
-                    {
-                      "status": "success",
-                      "message": "user1 register successfully! Please login."
                     }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
@@ -1546,35 +1523,6 @@ paths:
                         "status": "success",
                         "message": "profile/setting update successfully"
                     }
-        '422':
-          description: Did not meet field requirements.
-          content:
-            application/json:
-              examples:
-                error:
-                  value: |-
-                    {
-                        "status": "error",
-                        "errors": [
-                            {
-                                "message": "Please fill out all fields."
-                            },
-                            {
-                                "message": "Please enter the correct email address."
-                            },
-                            {
-                                "message": "Password and checkPassword do not match."
-                            }
-                        ],
-                        "userInput": {
-                            "email": "",
-                            "password": "12345678",
-                            "name": "rrrr",
-                            "checkPassword": "123456789",
-                            "account": "user2",
-                            "page": "setting"
-                        }
-                    }
         '403':
           description: You can not edit other's profile.
           content:
@@ -1605,11 +1553,6 @@ paths:
                             "page": "setting"
                         }
                     }
-        '409':
-          description: A user with ${account} already exists. Choose a different account.
-          content:
-            application/json:
-              examples:
                 error3:
                   value: |-
                     {
@@ -1625,10 +1568,34 @@ paths:
                         }
                     }
         '422':
-          description: Did not meet field length requirements.
+          description: Did not meet field requirements.
           content:
             application/json:
               examples:
+                error:
+                  value: |-
+                    {
+                        "status": "error",
+                        "errors": [
+                            {
+                                "message": "Please fill out all fields."
+                            },
+                            {
+                                "message": "Please enter the correct email address."
+                            },
+                            {
+                                "message": "Password and checkPassword do not match."
+                            }
+                        ],
+                        "userInput": {
+                            "email": "",
+                            "password": "12345678",
+                            "name": "rrrr",
+                            "checkPassword": "123456789",
+                            "account": "user2",
+                            "page": "setting"
+                        }
+                    }
                 error4:
                   value: |-
                     {
@@ -1642,7 +1609,7 @@ paths:
                           "name": "Dignissimos repellat maxime nisi quia molestiae poDignissimos repellat maxime nisi quia molestiae po",
                           "introduction": ""
                       }
-                    }
+                    }                
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
