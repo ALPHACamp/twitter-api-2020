@@ -424,5 +424,85 @@ module.exports = {
             catchError(res, error)
           })
       })
+  },
+
+  putAccount: (req, res) => {
+    const { email, password, name, account, checkPassword } = req.body
+    const { id } = req.params
+
+    const message = []
+
+    if (Number(id) !== req.user.id) {
+      return res.status(400).json({
+        status: 'error', message: 'Unauthorized to edit account '
+      })
+    }
+
+    // all input required
+    if (!email || !name || !account) {
+      message.push('Account, name, email are required')
+    }
+    // check password
+    if (checkPassword !== password) {
+      message.push('Password and checkPassword are not match')
+    }
+    // check email
+    if (email && !validator.isEmail(email)) {
+      message.push('Invalid email address')
+    }
+    // check name length <= 25
+    if (name && !validator.isByteLength(name, { min: 0, max: 25 })) {
+      message.push('The name field can have no more than 25 characters')
+    }
+    // check email length <= 255
+    if (email && !validator.isByteLength(email, { min: 0, max: 255 })) {
+      message.push('The email field can have no more than 255 characters')
+    }
+    // check account length <= 255
+    if (account && !validator.isByteLength(account, { min: 0, max: 255 })) {
+      message.push('The account field can have no more than 255 characters')
+    }
+    // check password length <=255
+    if (password && !validator.isByteLength(password, { min: 0, max: 255 })) {
+      message.push('The password field can have no more than 255 characters')
+    }
+    if (message.length !== 0) {
+      return res.status(400).json({ status: 'error', message })
+    }
+
+    const findByAccount = User.findOne({ where: { account: account } })
+    const findByEmail = User.findOne({ where: { email: email } })
+    return Promise.all([findByAccount, findByEmail])
+      .then(values => {
+        const [accountUser, emailUser] = [...values]
+        if (accountUser) {
+          message.push('Account already exist')
+        }
+        if (emailUser) {
+          message.push('Email alreay exist')
+        }
+        if (message.length !== 0) {
+          return res.status(400).json({ status: 'error', message })
+        } else {
+          User.findByPk(id)
+            .then(user => {
+              user.update({
+                email: email,
+                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+                name: name,
+                account: account
+              })
+                .then(() => {
+                  return res.status(200).json({ status: 'success', message: 'Updated successfully' })
+                })
+                .catch(error => {
+                  catchError(res, error)
+                })
+            })
+            .catch(error => {
+              catchError(res, error)
+            })
+        }
+      })
   }
 }

@@ -19,5 +19,6 @@ router.get('/:id/replied_tweets', userController.getRepliesOfTweet)
 router.get('/:id/likes', userController.getLikedTweet)
 router.get('/:id/followers', userController.getFollowers)
 router.put('/:id', photoUpload, userController.putUser)
+router.put('/:id/account', userController.putAccount)
 
 module.exports = router
