@@ -2,6 +2,7 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
+const Reply = db.Reply
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { sequelize } = require('../models')
@@ -99,9 +100,14 @@ const adminController = {
   // 刪除使用者的推文
   deleteTweet: async (req, res) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id)
+      const id = req.params.id
+      const tweet = await Tweet.findByPk(id)
       if (!tweet) return res.json({ status: 'error', message: 'this tweet doesn\'t exist!' })
-      await tweet.destroy()
+      Promise.all([
+        tweet.destroy(),
+        Like.destroy({ where: { TweetId: id } }),
+        Reply.destroy({ where: { TweetId: id } })
+      ])
       return res.json({ status: 'success', message: 'this tweet has been deleted!' })
     } catch (e) {
       console.log(e)
