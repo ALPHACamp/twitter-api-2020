@@ -209,7 +209,7 @@ module.exports = {
         if (!users) {
           return res.status(200).json(null)
         }
-        const data = users.map(user => ({
+        const topUsers = users.map(user => ({
           id: user.dataValues.id,
           account: user.dataValues.account,
           name: user.dataValues.name,
@@ -217,6 +217,10 @@ module.exports = {
           followerCount: user.dataValues.followerCount,
           isFollowed: user.Followers.map(follower => follower.id).includes(req.user.id)
         }))
+        const data = {
+          currentUserId: req.user.id || null,
+          topUsers
+        }
         return res.status(200).json(data)
       })
       .catch(error => {
