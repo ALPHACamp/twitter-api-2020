@@ -3,8 +3,11 @@ const jwt = require('jsonwebtoken')
 const validator = require('validator')
 
 const { catchError } = require('../utils/errorHandling')
-const db = require('../models')
 
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
+const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
@@ -359,6 +362,67 @@ module.exports = {
       .catch(error => {
         catchError(res, error)
       })
-  }
+  },
 
+  putUser: (req, res) => {
+    const { name, introduction } = req.body
+    const { id } = req.params
+    const { files } = req
+
+    let avatar = null
+    let cover = null
+
+    if (Number(id) !== req.user.id) {
+      return res.status(403).json({ status: 'error', message: ' Unauthorized to edit user' })
+    }
+
+    if (!name) {
+      return res.status(400).json({ status: 'error', message: ' Name is required' })
+    }
+
+    if (name && !validator.isByteLength(name, { min: 0, max: 25 })) {
+      return res.status(400).json({ status: 'error', message: 'The name field can have no more than 25 characters' })
+    }
+
+    if (introduction && !validator.isByteLength(introduction, { min: 0, max: 140 })) {
+      return res.status(400).json({ status: 'error', message: 'The introduction field can have no more than 140 characters' })
+    }
+
+    const imgArray = []
+
+    if (files.avatar) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      avatar = imgur.uploadFile(files.avatar[0].path)
+      imgArray.push(avatar)
+    }
+
+    if (files.cover) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      cover = imgur.uploadFile(files.cover[0].path)
+      imgArray.push(cover)
+    }
+
+    Promise.all(imgArray)
+      .then(values => {
+        const [avatar, cover] = values
+        User.findByPk(id)
+          .then(user => {
+            user.update({
+              name: name,
+              introduction: introduction,
+              avatar: files.avatar ? avatar.link : user.avatar,
+              cover: files.cover ? cover.link : user.cover
+            })
+              .then(() => {
+                return res.status(200).json({ status: 'success', message: 'Success' })
+              })
+              .catch(error => {
+                catchError(res, error)
+              })
+          })
+          .catch(error => {
+            catchError(res, error)
+          })
+      })
+  }
 }
