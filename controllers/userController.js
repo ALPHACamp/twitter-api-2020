@@ -529,10 +529,6 @@ module.exports = {
       })
     }
 
-    // all input required
-    if (!email || !name || !account) {
-      message.push('Account, name, email are required')
-    }
     // check password
     if (checkPassword !== password) {
       message.push('Password and checkPassword are not match')
