@@ -25,7 +25,7 @@ async function authenticated (socket, next) {
     }
   } catch (e) {
     console.log(e)
-    return next()
+    return next(e)
   }
 }
 
