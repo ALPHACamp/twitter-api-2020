@@ -9,7 +9,7 @@ const { sequelize } = require('../models')
 
 const adminController = {
   // 登入
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     try {
       const { account, password } = req.body
       // check account & password required
@@ -46,11 +46,12 @@ const adminController = {
       })
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 取得所有使用者資料 (清單預設按推文數排序)
   // account、name、avatar、cover、推文數量、推文被 like 的數量、關注人數、跟隨者人數
-  getUsers: async (req, res) => {
+  getUsers: async (req, res, next) => {
     try {
       // 找出所有 user
       let users = await User.findAll({
@@ -95,10 +96,11 @@ const adminController = {
       return res.json(users)
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   },
   // 刪除使用者的推文
-  deleteTweet: async (req, res) => {
+  deleteTweet: async (req, res, next) => {
     try {
       const id = req.params.id
       const tweet = await Tweet.findByPk(id)
@@ -111,6 +113,7 @@ const adminController = {
       return res.json({ status: 'success', message: 'this tweet has been deleted!' })
     } catch (e) {
       console.log(e)
+      return next(e)
     }
   }
 }
