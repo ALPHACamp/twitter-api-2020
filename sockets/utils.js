@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
-const User = require('../../models').User
+const moment = require('moment')
+const User = require('../models').User
 
 // 驗證身分
 async function authenticated (socket, next) {
@@ -18,8 +19,7 @@ async function authenticated (socket, next) {
     if (user) {
       socket.user = user
       socket.user.socketId = socket.id
-      socket.user.channel = 'publicRoom'
-      console.log('put user into socket : success')
+      // socket.user.channel = 'publicRoom'
       next()
     }
   } catch (e) {
@@ -28,4 +28,17 @@ async function authenticated (socket, next) {
   }
 }
 
-module.exports = authenticated
+function userIndex (users, userId) {
+  const index = users.findIndex(user => user.id === userId)
+  return index
+}
+
+function formatMessage (username, text) {
+  return {
+    username,
+    text,
+    time: moment().format('h:mm a')
+  }
+}
+
+module.exports = { authenticated, userIndex, formatMessage }

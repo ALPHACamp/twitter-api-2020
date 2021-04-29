@@ -92,8 +92,8 @@
     })
 
     // 'historyMsg' from server
-    socket.on('historyMsg', userMsgs => {
-      userMsgs.forEach(msg => {
+    socket.on('historyMsg', chatRecords => {
+      chatRecords.forEach(msg => {
         outputMessage(msg)
       })
     })
