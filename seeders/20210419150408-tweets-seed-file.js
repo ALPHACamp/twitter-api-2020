@@ -9,11 +9,11 @@ module.exports = {
       const tweets = []
       let tweetId = 0
 
-      for (let i = 1; i <= 6; i++) { // 6 users, 10 tweets per user
+      for (let i = 1; i <= 5; i++) { // 5 users withoot admin, 10 tweets per user
         for (let j = 1; j <= 10; j++) {
           tweets.push({
             id: tweetId += 1,
-            UserId: i,
+            UserId: i + 1,
             description: faker.lorem.text(),
             createdAt: new Date(),
             updatedAt: new Date()
