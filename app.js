@@ -8,6 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 require('./models')
 const { generateMessage } = require('./utils/message')
+const { addUser, getUser } = require('./utils/users')
 
 const app = express()
 const http = require('http')
@@ -28,23 +29,29 @@ global.io = socketio(server)
 global.io.on('connection', socket => {
   // console.log('socket', socket)
   // join
-  socket.on('join', ({ username, room }) => {
-    socket.join(room)
+  socket.on('join', async ({ username, roomId, userId }) => {
+    const user = await addUser({ socketId: socket.id, roomId, userId })
+    socket.join(user.roomId)
 
     // welcome the user when joining
-    socket.emit('message', generateMessage('Welcome!'))
+    // socket.emit('message', generateMessage('Welcome!'))
 
     // notify everyone except the user
     socket.broadcast
-      .to(room)
-      .emit('message', generateMessage(`${username} has joined!`))
+      .to(user.roomId)
+      .emit('message', generateMessage(`${username} 上線`))
   })
 
   socket.on('chat message', (msg, callback) => {
-    io.to('111').emit('chat message', generateMessage(msg))
+    const user = getUser(socket.id)
+    io.to(user.roomId).emit('chat message', generateMessage(msg))
 
     // Event Acknowledgement
     callback()
+  })
+
+  socket.on('disconnect', () => {
+    io.to().emit('message', generateMessage(`${username} 離線`))
   })
 })
 
