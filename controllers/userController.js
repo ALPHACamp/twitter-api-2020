@@ -433,12 +433,12 @@ module.exports = {
       {
         attributes: { exclude: ['password'] },
         include: { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
-        order: [['createdAt', 'DESC']]
+        order: [['Followers', Followship, 'createdAt', 'DESC']]
       })
       .then(followers => {
         const follower = followers.dataValues.Followers
         if (follower.length === 0) {
-          return res.status(400).json({ status: 'error', message: 'No followers' })
+          return res.status(200).json(null)
         }
         const data = []
         follower.forEach(r => {
@@ -529,10 +529,6 @@ module.exports = {
       })
     }
 
-    // all input required
-    if (!email || !name || !account) {
-      message.push('Account, name, email are required')
-    }
     // check password
     if (checkPassword !== password) {
       message.push('Password and checkPassword are not match')
