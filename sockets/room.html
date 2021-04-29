@@ -28,23 +28,31 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    const users = [
+      { name: 'aaa' },
+      { name: 'bbb' },
+      { name: 'ccc' }
+    ]
+    const random
     // put token in socket
     const tokens = [
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjE5NTc0MTExfQ.JYrimGfC1kWbxmY01TocBbzfwHmwVIVVqNNIS1juXtE',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNjE5Njc1NjE3fQ.VoNykDX5Gme53J2dCt6QBB_QlGQuhw2NVzNcMo_6_UU'
     ]
     const socket = io('http://localhost:3000', {
         reconnectionDelayMax: 10000,
       auth: {
-        token: tokens[Math.floor(Math.random() * 2)]
+        token: tokens[Math.floor(Math.random() * 3)]
         // token
       }
     })
-    // 'userName' from server
-    socket.on('userName', name => {
+
+    // 'userInfo' from server
+    socket.on('userInfo', user => {
       // render users in user list
       const userName = document.getElementById('user-name')
-      userName.innerText = `for ${name} & `
+      userName.innerText = `for ${user.name}`
     })
 
     // 'chatMsg' from server
@@ -63,8 +71,8 @@
     })
 
     // 'historyMsg' from server
-    socket.on('historyMsg', userMsgs => {
-      userMsgs.forEach(msg => {
+    socket.on('historyMsg', chatRecords => {
+      chatRecords.forEach(msg => {
         outputMessage(msg)
       })
     })
@@ -81,6 +89,13 @@
       e.target.elements.msg.value = ''
       e.target.elements.msg.focus()
     })
+
+    // private Room submit
+    // privateRoom
+      const user = users[0]
+      if (user) {
+        socket.emit('privateRoom', user)
+      }
 
     // output message to DOM
     function outputMessage(message) {

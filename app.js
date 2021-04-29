@@ -32,7 +32,7 @@ app.use((err, req, res, next) => {
 
 // set socket.io
 app.get('/chat', (req, res) => {
-  res.sendFile( __dirname + '/sockets/chat.html')
+  res.sendFile( __dirname + '/sockets/index.html')
 })
 app.get('/chat/:room', (req, res) => {
   res.sendFile( __dirname + '/sockets/room.html')

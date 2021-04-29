@@ -13,10 +13,11 @@
       <h1><i class="fas fa-smile"></i> ChatRoom <span id="user-name"></span></h1>
       <h4>user online: <span id="online">0</span></h6>
       <h4>user list: <span id="user-list"></span></h4>
-      <h4>private chat :</h4>
-      <div id="private-chat-user">
-        <!-- put all users here -->
-      </div>
+      <h4>private chat: </h4>
+      <form id="private-chat-form">
+        <!-- user name here -->
+        <button type="submit">GO</button>
+      </form>
     </header>
     <hr>
     <main class="chat-main">
@@ -64,7 +65,10 @@
       const userIndex = users.findIndex(user => user.name === currentUser)
       users.splice(userIndex, 1)
       users.forEach(user => {
-        html += `<a href="/chat/${currentUser}-${user.name}">${user.name}</a> | `
+        html += `<input type="radio" name="location" value="Taipei"> 台北<br>`
+        // html += `<button id="private-chat-btn"><a href="/chat/${currentUser}-${user.name}" target="_blank">${user.name}</a></button>`
+        // html += `<button type="submit" id="private-chat-btn">${user.name}</button>`
+        // html += `<a href="/chat/${currentUser}-${user.name}" id="private-chat-link" target="_blank">${user.name}</a> | `
       })
       privateChatUser.innerHTML = html
     })
@@ -111,6 +115,18 @@
       e.target.elements.msg.focus()
     })
     
+    // choose private chat person
+    const btn = document.getElementById('private-chat-btn')
+    // btn.addEventListener('click', (e) => {
+    //   console.log('0', e.target.children.innerText)
+    //   const user = users.find(user => user.name === e.target.children.innerText)
+    //   console.log('1', user)
+    //   if (user) {
+    //     console.log('2', user.name)
+    //     socket.emit('privateRoom', user)
+    //   }
+    // })
+
     // output message to DOM
     function outputMessage(message) {
       const div = document.createElement('div')
