@@ -232,52 +232,32 @@ module.exports = {
   },
 
   getFollowings: (req, res) => {
-    /*
-    TODO: 優化方向：撈 followings 資料時，一併以該筆 followship 建立的時間 DESC 排序。
-    痛點：User model 和 Followship model 之間並未建立關聯。
-    */
     const { id } = req.params
     if (!validator.isNumeric(id, { no_symbols: true })) {
       const data = { status: 'error', message: 'id should be an integer.' }
       return res.status(400).json(data)
     }
-    const findFollowingsOrderByFollowshipCreatedAtDESC = Followship.findAll({
-      raw: true,
-      attributes: ['followingId'],
-      where: { followerId: id },
-      order: [['createdAt', 'DESC']]
-    })
-    const findUserAndHisFollowings = User.findByPk(id, {
+    User.findByPk(id, {
+      attributes: ['id'],
       include: [
-        {
-          model: User,
-          as: 'Followings',
-          include: [{ model: User, as: 'Followers' }]
-        }
-      ]
+        { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }
+      ],
+      order: [['Followings', Followship, 'createdAt', 'DESC']]
     })
-    return Promise.all([findFollowingsOrderByFollowshipCreatedAtDESC, findUserAndHisFollowings])
-      .then((values) => {
-        const [order, user] = values
-        if (user.Followings.length === 0) {
+      .then(user => {
+        const followings = user.Followings
+        if (followings.length === 0) {
           return res.status(200).json(null)
         }
-        const followings = user.Followings.map(following => ({
+        const data = followings.map(following => ({
           followingId: following.dataValues.id,
           name: following.dataValues.name,
           account: following.dataValues.account,
           avatar: following.dataValues.avatar,
           introduction: following.dataValues.introduction,
-          isFollowed: true
+          isFollowed: req.user.Followings.map(following => following.id).includes(following.dataValues.id)
         }))
-        // order followings by createdAt column of followships table
-        // time O(n^2)?
-        const orderedFollowings = []
-        order.forEach(item => {
-          const index = followings.findIndex(following => following.followingId === order.followingId)
-          orderedFollowings.push(followings.splice(index, 1)[0])
-        })
-        return res.status(200).json(orderedFollowings)
+        return res.status(200).json(data)
       })
       .catch(error => {
         catchError(res, error)
