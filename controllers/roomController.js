@@ -10,7 +10,7 @@ const roomController = {
   sendMessage: async (req, res, next) => {
     const roomId = req.params.roomId
     const message = req.body.message
-    global.io.sockets.in(roomId).emit('chat message', generateMessage(input))
+    global.io.sockets.in(roomId).emit('chat message', generateMessage(message))
   }
 }
 
