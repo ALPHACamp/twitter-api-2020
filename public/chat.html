@@ -100,7 +100,7 @@
         window.scrollTo(0, document.body.scrollHeight)
       })
 
-      socket.emit('join', { username, room })
+      socket.emit('join', { username, roomId: room, userId: 100 })
     </script>
   </body>
 </html>
