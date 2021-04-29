@@ -7,14 +7,14 @@ module.exports = {
       [
         {
           id: 1,
-          UserId: 1,
+          UserId: 2,
           TweetId: 11,
           createdAt: new Date(),
           updatedAt: new Date()
         },
         {
           id: 2,
-          UserId: 2,
+          UserId: 3,
           TweetId: 21,
           createdAt: new Date(),
           updatedAt: new Date()
