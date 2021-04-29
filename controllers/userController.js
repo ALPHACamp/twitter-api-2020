@@ -232,52 +232,32 @@ module.exports = {
   },
 
   getFollowings: (req, res) => {
-    /*
-    TODO: 優化方向：撈 followings 資料時，一併以該筆 followship 建立的時間 DESC 排序。
-    痛點：User model 和 Followship model 之間並未建立關聯。
-    */
     const { id } = req.params
     if (!validator.isNumeric(id, { no_symbols: true })) {
       const data = { status: 'error', message: 'id should be an integer.' }
       return res.status(400).json(data)
     }
-    const findFollowingsOrderByFollowshipCreatedAtDESC = Followship.findAll({
-      raw: true,
-      attributes: ['followingId'],
-      where: { followerId: id },
-      order: [['createdAt', 'DESC']]
-    })
-    const findUserAndHisFollowings = User.findByPk(id, {
+    User.findByPk(id, {
+      attributes: ['id'],
       include: [
-        {
-          model: User,
-          as: 'Followings',
-          include: [{ model: User, as: 'Followers' }]
-        }
-      ]
+        { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'] }
+      ],
+      order: [['Followings', Followship, 'createdAt', 'DESC']]
     })
-    return Promise.all([findFollowingsOrderByFollowshipCreatedAtDESC, findUserAndHisFollowings])
-      .then((values) => {
-        const [order, user] = values
-        if (user.Followings.length === 0) {
+      .then(user => {
+        const followings = user.Followings
+        if (followings.length === 0) {
           return res.status(200).json(null)
         }
-        const followings = user.Followings.map(following => ({
+        const data = followings.map(following => ({
           followingId: following.dataValues.id,
           name: following.dataValues.name,
           account: following.dataValues.account,
           avatar: following.dataValues.avatar,
           introduction: following.dataValues.introduction,
-          isFollowed: following.Followers.map(follower => follower.dataValues.id).includes(req.user.id)
+          isFollowed: req.user.Followings.map(following => following.id).includes(following.dataValues.id)
         }))
-        // order followings by createdAt column of followships table
-        // time O(n^2)?
-        const orderedFollowings = []
-        order.forEach(item => {
-          const index = followings.findIndex(following => following.followingId === order.followingId)
-          orderedFollowings.push(followings.splice(index, 1)[0])
-        })
-        return res.status(200).json(orderedFollowings)
+        return res.status(200).json(data)
       })
       .catch(error => {
         catchError(res, error)
@@ -517,79 +497,68 @@ module.exports = {
       })
   },
 
-  putAccount: (req, res) => {
-    const { email, password, name, account, checkPassword } = req.body
-    const { id } = req.params
+  putAccount: async (req, res) => {
+    try {
+      const { email, password, name, account, checkPassword } = req.body
+      const { id } = req.params
+      const message = []
 
-    const message = []
+      if (Number(id) !== req.user.id) {
+        return res.status(400).json({
+          status: 'error', message: 'Unauthorized to edit account'
+        })
+      }
 
-    if (Number(id) !== req.user.id) {
-      return res.status(400).json({
-        status: 'error', message: 'Unauthorized to edit account '
-      })
-    }
+      // validate user input
+      if (checkPassword !== password) {
+        message.push('Password and checkPassword are not match')
+      }
+      if (email && !validator.isEmail(email)) {
+        message.push('Invalid email address')
+      }
+      if (name && !validator.isByteLength(name, { min: 0, max: 25 })) {
+        message.push('The name field can have no more than 25 characters')
+      }
+      if (email && !validator.isByteLength(email, { min: 0, max: 255 })) {
+        message.push('The email field can have no more than 255 characters')
+      }
+      if (account && !validator.isByteLength(account, { min: 0, max: 255 })) {
+        message.push('The account field can have no more than 255 characters')
+      }
+      if (password && !validator.isByteLength(password, { min: 0, max: 255 })) {
+        message.push('The password field can have no more than 255 characters')
+      }
+      if (message.length !== 0) {
+        return res.status(400).json({ status: 'error', message })
+      }
 
-    // check password
-    if (checkPassword !== password) {
-      message.push('Password and checkPassword are not match')
-    }
-    // check email
-    if (email && !validator.isEmail(email)) {
-      message.push('Invalid email address')
-    }
-    // check name length <= 25
-    if (name && !validator.isByteLength(name, { min: 0, max: 25 })) {
-      message.push('The name field can have no more than 25 characters')
-    }
-    // check email length <= 255
-    if (email && !validator.isByteLength(email, { min: 0, max: 255 })) {
-      message.push('The email field can have no more than 255 characters')
-    }
-    // check account length <= 255
-    if (account && !validator.isByteLength(account, { min: 0, max: 255 })) {
-      message.push('The account field can have no more than 255 characters')
-    }
-    // check password length <=255
-    if (password && !validator.isByteLength(password, { min: 0, max: 255 })) {
-      message.push('The password field can have no more than 255 characters')
-    }
-    if (message.length !== 0) {
-      return res.status(400).json({ status: 'error', message })
-    }
-
-    const findByAccount = User.findOne({ where: { account: account } })
-    const findByEmail = User.findOne({ where: { email: email } })
-    return Promise.all([findByAccount, findByEmail])
-      .then(values => {
-        const [accountUser, emailUser] = values
-        if (accountUser) {
+      if (account && account !== req.user.account) {
+        const user = await User.findOne({ where: { account: account } })
+        if (user) {
           message.push('Account already exist')
         }
-        if (emailUser) {
-          message.push('Email alreay exist')
+      }
+      if (email && email !== req.user.email) {
+        const user = await User.findOne({ where: { email: email } })
+        if (user) {
+          message.push('Email already exist')
         }
-        if (message.length !== 0) {
-          return res.status(400).json({ status: 'error', message })
-        } else {
-          User.findByPk(id)
-            .then(user => {
-              user.update({
-                email: email || req.user.name,
-                password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : req.user.password,
-                name: name || req.user.name,
-                account: account || req.user.account
-              })
-                .then(() => {
-                  return res.status(200).json({ status: 'success', message: 'Updated successfully' })
-                })
-                .catch(error => {
-                  catchError(res, error)
-                })
-            })
-            .catch(error => {
-              catchError(res, error)
-            })
-        }
+      }
+      if (message.length !== 0) {
+        return res.status(400).json({ status: 'error', message })
+      }
+
+      // update user account setting
+      const user = await User.findByPk(id)
+      await user.update({
+        email: email || req.user.email,
+        password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : req.user.password,
+        name: name || req.user.name,
+        account: account || req.user.account
       })
+      return res.status(200).json({ status: 'success', message: 'Updated successfully' })
+    } catch (error) {
+      catchError(res, error)
+    }
   }
 }
