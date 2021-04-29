@@ -3,6 +3,7 @@ const ChatRoom = db.ChatRoom
 const User = db.User
 const Message = db.Message
 const helpers = require('../_helpers')
+const { countUsers } = require('../utils/users')
 
 const { generateMessage } = require('../utils/message')
 
@@ -14,6 +15,7 @@ const roomController = {
     global.io.sockets.in(roomId).emit('chat message', generateMessage(message))
   },
   sendPublicMessage: async (req, res, next) => {
+
     try {
       // Message can not be empty
       if (!req.body.message.trim()) {
