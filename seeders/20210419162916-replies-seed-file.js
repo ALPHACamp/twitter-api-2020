@@ -9,11 +9,11 @@ module.exports = {
       const replies = []
       let replyId = 0
 
-      for (let j = 1; j <= 60; j++) { // total 60 tweets, 3 replies per tweet
+      for (let j = 1; j <= 50; j++) { // total 50 tweets, 3 users without admin randomly replies per tweet
         for (let i = 1; i <= 3; i++) {
           replies.push({
             id: replyId += 1,
-            UserId: Math.floor((Math.random() * 6) + 1),
+            UserId: Math.floor((Math.random() * 5) + 1) + 1,
             TweetId: j,
             comment: faker.lorem.text(),
             createdAt: new Date(),

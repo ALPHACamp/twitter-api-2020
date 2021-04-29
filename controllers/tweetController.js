@@ -43,9 +43,13 @@ module.exports = {
         { model: User, attributes: { exclude: ['password'] } },
         { model: Reply, include: { model: User, attributes: { exclude: ['password'] } } },
         Like
-      ]
+      ],
+      order: [[Reply, 'createdAt', 'DESC']]
     })
       .then(tweet => {
+        if (!tweet) {
+          return res.status(200).json(null)
+        }
         tweet = tweet.toJSON()
         tweet.replyCount = tweet.Replies.length
         tweet.likeCount = tweet.Likes.length
