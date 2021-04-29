@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
   )
   ChatRoom.associate = function (models) {
     ChatRoom.hasMany(models.JoinRoom)
+    ChatRoom.hasMany(models.Message)
   }
   return ChatRoom
 }
