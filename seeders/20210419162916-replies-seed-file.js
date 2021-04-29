@@ -15,7 +15,7 @@ module.exports = {
             id: replyId += 1,
             UserId: Math.floor((Math.random() * 5) + 1) + 1,
             TweetId: j,
-            comment: faker.lorem.text(),
+            comment: faker.lorem.text().slice(0, 140),
             createdAt: new Date(),
             updatedAt: new Date()
           })
