@@ -52,20 +52,15 @@
       }
     })
 
-    // 'privateRoom' from server
-    socket.emit('privateRoom', )
-
-
-    // 'userName' from server
-    socket.on('userName', name => {
+    // 'userInfo' from server
+    socket.on('userInfo', user => {
       // render users in user list
       const userName = document.getElementById('user-name')
-      userName.innerText = `for ${name}`
-      const currentUser = name
+      userName.innerText = `for ${user.name}`
       // render users in private chat list
+      const currentUser = user.name
       const privateChatUser = document.getElementById('private-chat-user')
       let html = ''
-      console.log('currentUser', currentUser)
       const userIndex = users.findIndex(user => user.name === currentUser)
       users.splice(userIndex, 1)
       users.forEach(user => {

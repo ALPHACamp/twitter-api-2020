@@ -12,7 +12,8 @@ module.exports = (io) => {
 
   // run when connect (lv2)
   io.on('connection', (socket) => {
-    socket.emit('userName', socket.user.name)
+    // emit user to frontend
+    socket.emit('userInfo', socket.user)
     const user = users.findIndex(user => user.id === socket.user.id)
     if (user === -1) {
       // user first come into the chat : put userInfo to users
