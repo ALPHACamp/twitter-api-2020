@@ -268,7 +268,7 @@ module.exports = {
           account: following.dataValues.account,
           avatar: following.dataValues.avatar,
           introduction: following.dataValues.introduction,
-          ifFollowed: following.Followers.map(follower => follower.dataValues.id).includes(req.user.id)
+          isFollowed: following.Followers.map(follower => follower.dataValues.id).includes(req.user.id)
         }))
         // order followings by createdAt column of followships table
         // time O(n^2)?
