@@ -10,8 +10,9 @@ require('./models')
 const { generateMessage } = require('./utils/message')
 
 const app = express()
-const http = require('http').Server(app)
-const io = require('socket.io')(http)
+const http = require('http')
+const socketio = require('socket.io')
+const server = http.createServer(app)
 const port = process.env.PORT || 3000
 const publicDirectoryPath = path.join(__dirname, '/public')
 
@@ -23,7 +24,9 @@ app.use(bodyParser.json())
 app.use(express.static(publicDirectoryPath))
 
 // Set up socket.io
-io.on('connection', socket => {
+global.io = socketio(server)
+global.io.on('connection', socket => {
+  // console.log('socket', socket)
   // join
   socket.on('join', ({ username, room }) => {
     socket.join(room)
@@ -45,7 +48,7 @@ io.on('connection', socket => {
   })
 })
 
-http.listen(port, () => console.log(`Example app listening on port ${port}!`))
+server.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 require('./routes')(app)
 
