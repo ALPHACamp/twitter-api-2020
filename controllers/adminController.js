@@ -105,11 +105,14 @@ const adminController = {
       const id = req.params.id
       const tweet = await Tweet.findByPk(id)
       if (!tweet) return res.json({ status: 'error', message: 'this tweet doesn\'t exist!' })
-      Promise.all([
-        tweet.destroy(),
-        Like.destroy({ where: { TweetId: id } }),
-        Reply.destroy({ where: { TweetId: id } })
-      ])
+      await tweet.destroy()
+      await Like.destroy({ where: { TweetId: id } })
+      await Reply.destroy({ where: { TweetId: id } })
+      // Promise.all([
+      //   tweet.destroy(),
+      //   Like.destroy({ where: { TweetId: id } }),
+      //   Reply.destroy({ where: { TweetId: id } })
+      // ])
       return res.json({ status: 'success', message: 'this tweet has been deleted!' })
     } catch (e) {
       console.log(e)
