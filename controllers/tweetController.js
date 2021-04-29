@@ -7,7 +7,7 @@ const helpers = require('../_helpers')
 
 const tweetController = {
   //  列出所有tweets以及資訊
-  getTweets: async (req, res) => {
+  getTweets: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
       let tweets = await Tweet.findAll({
@@ -52,7 +52,7 @@ const tweetController = {
       return next(e)
     }
   },
-  getTweet: async (req, res) => {
+  getTweet: async (req, res, next) => {
     try {
       const tweetId = req.params.tweet_Id
       const UserId = helpers.getUser(req).id
@@ -95,7 +95,7 @@ const tweetController = {
       return next(e)
     }
   },
-  postTweet: async (req, res) => {
+  postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
       const UserId = helpers.getUser(req).id
@@ -112,7 +112,7 @@ const tweetController = {
       return next(e)
     }
   },
-  getReplies: async (req, res) => {
+  getReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.tweet_Id
       const tweet = await Tweet.findByPk(tweetId, {
@@ -135,7 +135,7 @@ const tweetController = {
       return next(e)
     }
   },
-  postReply: async (req, res) => {
+  postReply: async (req, res, next) => {
     try {
       const { comment } = req.body
       const UserId = helpers.getUser(req).id
@@ -156,7 +156,7 @@ const tweetController = {
       return next(e)
     }
   },
-  tweetLike: async (req, res) => {
+  tweetLike: async (req, res, next) => {
     try {
       const TweetId = req.params.tweet_Id
       if (await Tweet.findByPk(TweetId) === null) {

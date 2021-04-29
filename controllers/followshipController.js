@@ -2,7 +2,7 @@ const db = require('../models')
 const Followship = db.Followship
 const helpers = require('../_helpers')
 const followshipController = {
-  addFollowing: async (req, res) => {
+  addFollowing: async (req, res, next) => {
     try {
       const followerId = helpers.getUser(req).id
       const followingId = req.body.id
@@ -22,7 +22,7 @@ const followshipController = {
 
   },
 
-  removeFollowing: async (req, res) => {
+  removeFollowing: async (req, res, next) => {
     try {
       if (!helpers.getUser(req).id) {
         return res.json({ status: 'error', message: "Can't find followerId." })
