@@ -59,6 +59,7 @@ const userController = {
           account: user.account,
           email: user.email,
           name: user.name,
+          avatar: user.avatar,
           role: user.role
         }
       })
@@ -104,6 +105,9 @@ const userController = {
   // account、name、avatar、cover、推文數量、跟隨中人數、跟隨者人數
   getUser: async (req, res, next) => {
     try {
+      const currentUser = await User.findByPk(helpers.getUser(req).id, {
+        include: { model: User, as: 'Followings' }
+      })
       let user = await User.findByPk(req.params.id, {
         include: [
           Tweet,
@@ -112,6 +116,11 @@ const userController = {
         ]
       })
       if (!user) return res.json({ message: 'can not find this user!' })
+      // 該使用者是否在追隨
+      const followingsId = []
+      currentUser.Followings.forEach(following => {
+        followingsId.push(following.id)
+      })
       // 整理回傳資料
       user = {
         id: user.id,
@@ -122,7 +131,8 @@ const userController = {
         introduction: user.introduction,
         tweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
-        followerCount: user.Followers.length
+        followerCount: user.Followers.length,
+        isFollowing: followingsId.includes(user.id)
       }
       return res.json(user)
     } catch (e) {
@@ -155,21 +165,21 @@ const userController = {
         const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
         const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
         await user.update({
-          account,
-          name,
-          email,
-          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-          introduction,
+          account: account ? account : user.account,
+          name: name ? name : user.name,
+          email: email ? email : user.email,
+          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+          introduction: introduction ? introduction : user.introduction,
           avatar: files.avatar ? imgAvatar.data.link : user.avatar,
           cover: files.cover ? imgCover.data.link : user.cover
         })
       } else {
         await user.update({
-          account,
-          name,
-          email,
-          password,
-          introduction,
+          account: account ? account : user.account,
+          name: name ? name : user.name,
+          email: email ? email : user.email,
+          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
+          introduction: introduction ? introduction : user.introduction,
           avatar: user.avatar ? user.avatar : defaultAvatar,
           cover: user.cover ? user.cover : defaultCover
         })
@@ -247,7 +257,7 @@ const userController = {
           UserId: tweet.UserId,
           description: tweet.description,
           createdAt: tweet.createdAt,
-          FromNow: moment(tweet.createdAt).fromNow(),
+          fromNow: moment(tweet.createdAt).fromNow(),
           user: {
             id: tweet.User.id,
             account: tweet.User.account,
@@ -425,6 +435,7 @@ const userController = {
       id: req.user.id,
       account: req.user.account,
       name: req.user.name,
+      email: req.user.email,
       avatar: req.user.avatar,
       cover: req.user.cover,
       introduction: req.user.introduction,
