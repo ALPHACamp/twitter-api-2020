@@ -81,7 +81,13 @@ module.exports = {
   },
 
   getTweets: (req, res) => {
-    return Tweet.findAll({ raw: true, nest: true, order: [['createdAt', 'DESC']], attributes: ['id', 'description'], include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] } })
+    return Tweet.findAll({
+      raw: true,
+      nest: true,
+      order: [['createdAt', 'DESC']],
+      attributes: ['id', 'description', 'createdAt'],
+      include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+    })
       .then(tweets => {
         tweets.forEach(tweet => {
           tweet.description = tweet.description.slice(0, 50)
@@ -97,7 +103,7 @@ module.exports = {
   deleteTweet: (req, res) => {
     const tweetId = req.params.id
     if (!validator.isNumeric(tweetId, { no_symbols: true })) {
-      const data = { status: 'error', message: 'Wrong id format.' }
+      const data = { status: 'error', message: 'id should be an integer.' }
       return res.status(400).json(data)
     }
     Tweet.findByPk(tweetId)
