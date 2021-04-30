@@ -76,6 +76,11 @@
         ignoreQueryPrefix: true
       })
 
+      // count users
+      socket.on('users count', count => {
+        console.log(count)
+      })
+
       socket.on('message', message => {
         console.log(message.text)
         console.log(message.createdAt)
@@ -100,7 +105,7 @@
         window.scrollTo(0, document.body.scrollHeight)
       })
 
-      socket.emit('join', { username, room })
+      socket.emit('join', { username, roomId: room, userId: 100 })
     </script>
   </body>
 </html>
