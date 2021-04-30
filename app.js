@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 require('./models')
 const { generateMessage } = require('./utils/message')
-const { addUser, getUser, removeUser } = require('./utils/users')
+const { addUser, getUser, removeUser, countUsers } = require('./utils/users')
 
 const app = express()
 const http = require('http')
@@ -42,6 +42,10 @@ global.io.on('connection', socket => {
     })
     socket.join(user.roomId)
 
+    // count users
+    const userCount = countUsers(user.roomId)
+    io.to(user.roomId).emit('users count', userCount)
+
     // welcome the user when joining
     // socket.emit('message', generateMessage('Welcome!'))
 
@@ -69,6 +73,10 @@ global.io.on('connection', socket => {
     const user = await removeUser(socket.id)
 
     if (user) {
+      // count users
+      const userCount = countUsers(user.roomId)
+      io.to(user.roomId).emit('users count', userCount)
+
       io.to(user.roomId).emit(
         'message',
         generateMessage(`${user.username} 離線`)

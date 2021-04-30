@@ -76,6 +76,11 @@
         ignoreQueryPrefix: true
       })
 
+      // count users
+      socket.on('users count', count => {
+        console.log(count)
+      })
+
       socket.on('message', message => {
         console.log(message.text)
         console.log(message.createdAt)
