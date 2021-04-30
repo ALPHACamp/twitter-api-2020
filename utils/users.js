@@ -2,14 +2,16 @@ const db = require('../models')
 const JoinRoom = db.JoinRoom
 const User = db.User
 
+const PublicRoomId = 4
 const users = []
 
 const addUser = async ({ socketId, roomId, userId, username }) => {
-  // console.log('users', users)
-  // 不該存入重複的 user & room 的組合，要加 socketId 嗎？
-  await JoinRoom.create({ UserId: userId, ChatRoomId: roomId })
   const user = { socketId, roomId, userId, username }
   users.push(user)
+  if (Number(user.roomId) === PublicRoomId) {
+    // 不該存入重複的 user & room 的組合，要加 socketId 嗎？
+    await JoinRoom.create({ UserId: userId, ChatRoomId: roomId })
+  }
   return user
 }
 
@@ -50,9 +52,14 @@ const removeUser = async socketId => {
   const index = users.findIndex(user => user.socketId === socketId)
   if (index !== -1) {
     const user = users.splice(index, 1)[0]
-    await JoinRoom.destroy({
-      where: { UserId: user.userId, ChatRoomId: user.roomId }
-    })
+
+    // Don't delete private room's record
+    if (Number(user.roomId) === PublicRoomId) {
+      await JoinRoom.destroy({
+        where: { UserId: user.userId, ChatRoomId: user.roomId }
+      })
+    }
+
     return user
   }
 }
