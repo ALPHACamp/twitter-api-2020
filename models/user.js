@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = function (models) {
     User.hasMany(models.Reply)
     User.hasMany(models.Like)
+    User.hasMany(models.Notify)
     User.hasMany(models.Tweet)
     User.belongsToMany(models.Tweet, {
       through: models.Like,
