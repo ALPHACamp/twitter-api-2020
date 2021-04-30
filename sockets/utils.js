@@ -41,4 +41,27 @@ function formatMessage (username, text) {
   }
 }
 
-module.exports = { authenticated, userIndex, formatMessage }
+async function historyMsg (channel, Chat, next) {
+  try {
+    let chatRecords = await Chat.findAll({
+      raw: true,
+      nest: true,
+      include: [User],
+      where: { channel }
+    })
+    chatRecords = chatRecords.map(record => ({
+      id: record.id,
+      text: record.message,
+      time: record.time,
+      UserId: record.UserId,
+      username: record.User.name,
+      avatar: record.User.avatar
+    }))
+    return chatRecords
+  } catch (e) {
+    console.log(e)
+    return next()
+  }
+}
+
+module.exports = { authenticated, userIndex, formatMessage, historyMsg }

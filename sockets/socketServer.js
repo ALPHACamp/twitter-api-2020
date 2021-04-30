@@ -1,7 +1,7 @@
 const db = require('../models')
 const Chat = db.Chat
 const User = db.User
-const { userIndex, authenticated, formatMessage } = require('./utils')
+const { userIndex, authenticated, formatMessage, historyMsg } = require('./utils')
 
 const users = []
 const botName = 'Chat Bot'
@@ -31,20 +31,7 @@ module.exports = (io) => {
     }
 
     // find chat records in db & emit to frontend
-    let chatRecords = await Chat.findAll({
-      raw: true,
-      nest: true,
-      include: [User],
-      where: { channel: socket.user.channel }
-    })
-    chatRecords = chatRecords.map(record => ({
-      id: record.id,
-      text: record.message,
-      time: record.time,
-      UserId: record.UserId,
-      username: record.User.name,
-      avatar: record.User.avatar
-    }))
+    const chatRecords = await historyMsg(socket.user.channel, Chat)
     socket.emit('historyMsg', chatRecords)
 
     // online count
@@ -86,37 +73,8 @@ module.exports = (io) => {
         // 切換房間
         socket.join(roomName)
         // find chat records in db & emit to frontend
-        let chatRecords = await Chat.findAll({
-          raw: true,
-          nest: true,
-          include: [User],
-          where: { channel: roomName }
-        })
-        chatRecords = chatRecords.map(record => ({
-          id: record.id,
-          text: record.message,
-          time: record.time,
-          UserId: record.UserId,
-          username: record.User.name,
-          avatar: record.User.avatar
-        }))
+        const chatRecords = await historyMsg(socket.user.channel, Chat)
         socket.emit('historyMsg', chatRecords)
-
-        // 接收前端訊息
-        // socket.on('userMsg', async (msg) => {
-        //   const msgData = formatMessage(socket.user.name, msg)
-        //   msgData.avatar = socket.user.avatar
-        //   io.to(roomName).emit('chatMsg', msgData)
-        //   // store in db
-        //   // if (msgData.text && msgData.time) {
-        //   //   await Chat.create({
-        //   //     UserId: socket.user.id,
-        //   //     message: msgData.text,
-        //   //     time: msgData.time,
-        //   //     channel: roomName
-        //   //   })
-        //   // }
-        // })
       } else {
         // 告訴前端 user 不存在
         socket.emit('findUser', `can not find user: ${username}!`)
@@ -131,7 +89,9 @@ module.exports = (io) => {
         // take userInfo to users
         users.splice(userIndex(users, socket.user.id), 1)
         // 離開聊天室訊息
-        io.emit('chatMsg', formatMessage(botName, `${socket.user.name} has left the chat`))
+        if (socket.user.channel === 'publicRoom') {
+          io.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has left the chat`))
+        }
       }
 
       // online count
