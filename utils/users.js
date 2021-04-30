@@ -30,15 +30,20 @@ const getUserInfo = async userId => {
   }
 }
 
-const countUsers = roomId => {
-  const usersId = {}
-  const filteredUsers = users.filter(user => {
-    if (!usersId[user.userId]) {
-      usersId[user.userId] = 1
+const getUsersInRoom = async roomId => {
+  const usersId = new Set()
+  users.map(user => {
+    if (!usersId.has(user.userId) && user.roomId === roomId) {
+      usersId.add(user.userId)
     }
-    return usersId[user.userId] && user.roomId === roomId
   })
-  return filteredUsers.length
+  const filteredUsers = await User.findAll({
+    attributes: ['id', 'name', 'account', 'avatar'],
+    raw: true,
+    nest: true,
+    where: { id: [...usersId] }
+  })
+  return filteredUsers
 }
 
 const removeUser = async socketId => {
@@ -69,7 +74,7 @@ const getAuthors = async userId => {
 module.exports = {
   addUser,
   getUser,
-  countUsers,
+  getUsersInRoom,
   removeUser,
   users,
   getAuthors,

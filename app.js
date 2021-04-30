@@ -12,7 +12,7 @@ const {
   addUser,
   getUser,
   removeUser,
-  countUsers,
+  getUsersInRoom,
   getAuthors,
   getUserInfo
 } = require('./utils/users')
@@ -95,8 +95,11 @@ global.io.on('connection', socket => {
     socket.join(user.roomId)
 
     // count users
-    const userCount = countUsers(user.roomId)
-    io.to(user.roomId).emit('users count', userCount)
+    const usersInRoom = await getUsersInRoom(user.roomId)
+    io.to(user.roomId).emit('users count', {
+      users: usersInRoom,
+      userCount: usersInRoom.length
+    })
 
     // welcome the user when joining
     // socket.emit('message', generateMessage('Welcome!'))
@@ -129,8 +132,11 @@ global.io.on('connection', socket => {
 
     if (user) {
       // count users
-      const userCount = countUsers(user.roomId)
-      io.to(user.roomId).emit('users count', userCount)
+      const usersInRoom = await getUsersInRoom(user.roomId)
+      io.to(user.roomId).emit('users count', {
+        users: usersInRoom,
+        userCount: usersInRoom.length
+      })
 
       io.to(user.roomId).emit(
         'message',
