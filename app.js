@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 require('./models')
 const { generateMessage } = require('./utils/message')
-const { addUser, getUser } = require('./utils/users')
+const { addUser, getUser, removeUser } = require('./utils/users')
 
 const app = express()
 const http = require('http')
@@ -24,13 +24,22 @@ app.use(bodyParser.json())
 // Set up static file
 app.use(express.static(publicDirectoryPath))
 
+// test
+const db = require('./models')
+const Message = db.Message
+
 // Set up socket.io
 global.io = socketio(server)
 global.io.on('connection', socket => {
   // console.log('socket', socket)
   // join
   socket.on('join', async ({ username, roomId, userId }) => {
-    const user = await addUser({ socketId: socket.id, roomId, userId })
+    const user = await addUser({
+      socketId: socket.id,
+      roomId,
+      userId,
+      username
+    })
     socket.join(user.roomId)
 
     // welcome the user when joining
@@ -42,16 +51,29 @@ global.io.on('connection', socket => {
       .emit('message', generateMessage(`${username} 上線`))
   })
 
-  socket.on('chat message', (msg, callback) => {
+  socket.on('chat message', async (msg, callback) => {
     const user = getUser(socket.id)
+    // 要在這裡 create 還是在 roomController 裡面？
+    await Message.create({
+      UserId: user.userId,
+      ChatRoomId: user.roomId,
+      message: msg
+    })
     io.to(user.roomId).emit('chat message', generateMessage(msg))
 
     // Event Acknowledgement
     callback()
   })
 
-  socket.on('disconnect', () => {
-    io.to().emit('message', generateMessage(`${username} 離線`))
+  socket.on('disconnect', async () => {
+    const user = await removeUser(socket.id)
+
+    if (user) {
+      io.to(user.roomId).emit(
+        'message',
+        generateMessage(`${user.username} 離線`)
+      )
+    }
   })
 })
 
