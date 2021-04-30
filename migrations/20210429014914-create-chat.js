@@ -17,6 +17,9 @@ module.exports = {
       time: {
         type: Sequelize.STRING
       },
+      channel: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

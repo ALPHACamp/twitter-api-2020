@@ -15,8 +15,6 @@ module.exports = (io) => {
   io.on('connection', async (socket) => {
     // 加入房間 (預設進入 publicRoom)
     socket.join(socket.user.channel)
-    console.log('channel', socket.user.channel)
-
     // emit user to frontend
     socket.emit('userInfo', socket.user)
     // 若使用者第一次進來聊天室，則加入 userList 並傳送系統歡迎訊息
@@ -25,29 +23,31 @@ module.exports = (io) => {
       users.push(socket.user)
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] = 1
-      // send to single user
-      socket.emit('chatMsg', formatMessage(botName, `${socket.user.name}, Welcome to chat!`))
       // send to other users
       socket.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has joined the chat`))
     } else {
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] ++
-      // find chat records in db & emit to frontend
-      let chatRecords = await Chat.findAll({
-        raw: true,
-        nest: true,
-        include: [User]
-      })
-      chatRecords = chatRecords.map(record => ({
-        id: record.id,
-        text: record.message,
-        time: record.time,
-        UserId: record.UserId,
-        username: record.User.name,
-        avatar: record.User.avatar
-      }))
-      socket.to(socket.user.channel).emit('historyMsg', chatRecords)
     }
+
+    // find chat records in db & emit to frontend
+    console.log('channel', socket.user.channel)
+    let chatRecords = await Chat.findAll({
+      raw: true,
+      nest: true,
+      include: [User],
+      where: { channel: socket.user.channel }
+    })
+    chatRecords = chatRecords.map(record => ({
+      id: record.id,
+      text: record.message,
+      time: record.time,
+      UserId: record.UserId,
+      username: record.User.name,
+      avatar: record.User.avatar
+    }))
+    socket.emit('historyMsg', chatRecords)
+    // socket.to(socket.user.channel).emit('historyMsg', chatRecords)
 
     // online count
     io.to(socket.user.channel).emit('onlineCount', users.length)
@@ -65,7 +65,8 @@ module.exports = (io) => {
         await Chat.create({
           UserId: socket.user.id,
           message: msgData.text,
-          time: msgData.time
+          time: msgData.time,
+          channel: socket.user.channel
         })
       }
     })
@@ -84,19 +85,24 @@ module.exports = (io) => {
         const roomName = userList.join('-')
         // 更換使用者頻道
         socket.user.channel = roomName
-        console.log('channel', socket.user.channel)
         // 切換房間
         socket.join(roomName)
-        // 拋出歷史訊息
-        const msg = [{
-          id: 1,
-          text: 'hello',
-          time: '10:10 am',
-          UserId: 100,
-          username: 'karol',
-          avatar: 'no'
-        }]
-        socket.to(roomName).emit('historyMsg', msg)
+        // find chat records in db & emit to frontend
+        let chatRecords = await Chat.findAll({
+          raw: true,
+          nest: true,
+          include: [User],
+          where: { channel: roomName }
+        })
+        chatRecords = chatRecords.map(record => ({
+          id: record.id,
+          text: record.message,
+          time: record.time,
+          UserId: record.UserId,
+          username: record.User.name,
+          avatar: record.User.avatar
+        }))
+        socket.to(socket.user.channel).emit('historyMsg', chatRecords)
 
         // 接收前端訊息
         // socket.on('userMsg', async (msg) => {

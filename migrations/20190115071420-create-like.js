@@ -17,7 +17,7 @@ module.exports = {
       },
       TweetId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        // allowNull: false
         // references: {
         //   model: 'Tweets',
         //   key: 'id'

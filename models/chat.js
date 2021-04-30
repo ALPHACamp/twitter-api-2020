@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     UserId: DataTypes.INTEGER,
     message: DataTypes.TEXT,
-    time: DataTypes.STRING
+    time: DataTypes.STRING,
+    channel: DataTypes.STRING
   }, {})
   Chat.associate = function(models) {
     // associations can be defined here
