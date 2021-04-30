@@ -1,5 +1,6 @@
 const db = require('../models')
 const JoinRoom = db.JoinRoom
+const User = db.User
 
 const users = []
 
@@ -12,8 +13,11 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
   return user
 }
 
-const getUser = socketId => {
-  return users.find(user => user.socketId === socketId)
+const getUser = async socketId => {
+  let user = users.find(user => user.socketId === socketId)
+  const userInfo = await User.findByPk(user.userId)
+  user = { ...user, avatar: userInfo.avatar }
+  return user
 }
 
 const countUsers = roomId => {
