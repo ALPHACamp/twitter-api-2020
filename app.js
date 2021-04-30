@@ -32,11 +32,14 @@ const Message = db.Message
 global.io = socketio(server, {
   cors: {
     origin: 'http://localhost:8080',
+    methods: ['GET', 'POST'],
+    transports: ['websocket', 'polling'],
     credentials: true
-  }
+  },
+  allowEIO3: true
 })
 global.io.on('connection', socket => {
-  // console.log('socket', socket)
+  console.log('connected!')
   // join
   socket.on('join', async ({ username, roomId, userId }) => {
     const user = await addUser({
