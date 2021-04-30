@@ -24,15 +24,15 @@ const followshipController = {
 
   removeFollowing: async (req, res, next) => {
     try {
-      if (!helpers.getUser(req).id) {
-        return res.json({ status: 'error', message: "Can't find followerId." })
-      }
       let followship = await Followship.findOne({
         where: {
           followerId: helpers.getUser(req).id,
           followingId: req.params.userId
         }
       })
+      if (followship === null) {
+        return res.json({ status: 'error', message: "Can't find followships." })
+      }
       followship.destroy()
       return res.json({ status: 'success', message: 'Followship has removed successfully!' })
     } catch (e) {

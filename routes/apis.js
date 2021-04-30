@@ -9,6 +9,7 @@ const uploadProfile = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'c
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followshipController = require('../controllers/followshipController')
+const subscriptController = require('../controllers/subscriptController')
 
 // 載入 authenticated & authenticatedAdmin
 const { authenticated } = require('../middleware/auth')
@@ -37,5 +38,8 @@ router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
 // routes : followships
 router.post('/followships/', authenticated, followshipController.addFollowing)
 router.delete('/followships/:userId', authenticated, followshipController.removeFollowing)
+//routes : subscripts
+router.post('/subscripts/', authenticated, subscriptController.addSubscript)
+router.delete('/subscripts/:userId', authenticated, subscriptController.removeSubscript)
 
 module.exports = router
