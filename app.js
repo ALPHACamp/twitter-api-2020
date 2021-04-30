@@ -71,7 +71,7 @@ global.io.on('connection', socket => {
       ChatRoomId: user.roomId,
       message: msg
     })
-    io.to(user.roomId).emit('chat message', generateMessage(msg))
+    io.to(user.roomId).emit('chat message', generateMessage(msg, user.userId))
 
     // Event Acknowledgement
     callback()
