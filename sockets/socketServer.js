@@ -17,22 +17,23 @@ module.exports = (io) => {
     socket.join(socket.user.channel)
     // emit user to frontend
     socket.emit('userInfo', socket.user)
+    // find chat records in db & emit to frontend
+    const chatRecords = await historyMsg(socket.user.channel, Chat)
+    socket.emit('historyMsg', chatRecords)
     // 若使用者第一次進來聊天室，則加入 userList 並傳送系統歡迎訊息
     if (userIndex(users, socket.user.id) === -1) {
       // put userInfo to users
       users.push(socket.user)
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] = 1
+      // 歡迎訊息
+      socket.emit('chatMsg', formatMessage(botName, `${socket.user.name}, Welcome to chat!`))
       // 加入聊天室訊息
       socket.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has joined the chat`))
     } else {
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] ++
     }
-
-    // find chat records in db & emit to frontend
-    const chatRecords = await historyMsg(socket.user.channel, Chat)
-    socket.emit('historyMsg', chatRecords)
 
     // online count
     io.to(socket.user.channel).emit('onlineCount', users.length)
