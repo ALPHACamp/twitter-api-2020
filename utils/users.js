@@ -14,10 +14,20 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
 }
 
 const getUser = async socketId => {
-  let user = users.find(user => user.socketId === socketId)
+  const user = users.find(user => user.socketId === socketId)
   const userInfo = await User.findByPk(user.userId)
-  user = { ...user, avatar: userInfo.avatar }
-  return user
+  return { ...user, avatar: userInfo.avatar }
+}
+
+const getUserInfo = async userId => {
+  const user = User.findByPk(userId)
+  if (!user) return null
+  return {
+    id: user.id,
+    account: user.account,
+    name: user.name,
+    avatar: user.avatar
+  }
 }
 
 const countUsers = roomId => {
@@ -42,4 +52,26 @@ const removeUser = async socketId => {
   }
 }
 
-module.exports = { addUser, getUser, countUsers, removeUser, users }
+const getAuthors = async userId => {
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: User,
+        as: 'Subscriptions'
+      }
+    ]
+  })
+  const subscriptions = user.dataValues.Subscriptions
+  if (!subscriptions.length) return null
+  return user.dataValues.Subscriptions.map(author => author.account)
+}
+
+module.exports = {
+  addUser,
+  getUser,
+  countUsers,
+  removeUser,
+  users,
+  getAuthors,
+  getUserInfo
+}

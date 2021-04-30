@@ -8,7 +8,14 @@ if (process.env.NODE_ENV !== 'production') {
 
 require('./models')
 const { generateMessage } = require('./utils/message')
-const { addUser, getUser, removeUser, countUsers } = require('./utils/users')
+const {
+  addUser,
+  getUser,
+  removeUser,
+  countUsers,
+  getAuthors,
+  getUserInfo
+} = require('./utils/users')
 
 const app = express()
 const http = require('http')
@@ -43,6 +50,40 @@ global.io = socketio(server, {
 })
 global.io.on('connection', socket => {
   console.log('connected!')
+  // login
+  socket.on('login', async userId => {
+    console.log('userId - login', userId)
+    const authors = await getAuthors(userId)
+    console.log('authors - login', authors)
+    if (authors) {
+      authors.forEach(account => socket.join(`# ${account}`))
+    }
+  })
+
+  // subscription
+  socket.on('subscription', account => {
+    console.log('account - subscription', account)
+    socket.join(`# ${account}`)
+  })
+
+  // cancel subscription
+  socket.on('cancel subscription', account => {
+    console.log('account - cancel subscription', account)
+    socket.leave(`# ${account}`)
+  })
+
+  // notification
+  socket.on('notification', async ({ userId, tweetId, tweet }) => {
+    console.log('info - notification', { userId, tweetId, tweet })
+    const user = await getUserInfo(userId)
+    console.log('user - notification', user)
+    if (user) {
+      socket.broadcast
+        .to(user.account)
+        .emit('notification', { ...user, tweet, tweetId })
+    }
+  })
+
   // join
   socket.on('join', async ({ username, roomId, userId }) => {
     const user = await addUser({
