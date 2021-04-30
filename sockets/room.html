@@ -10,8 +10,14 @@
 <body>
   <div class="chat-container">
     <header class="chat-header">
-      <h1><i class="fas fa-smile"></i> ChatRoom <span id="user-name"></span></h1>
+      <h1><i class="fas fa-smile"></i> ChatRoom(Private) <span id="user-name"></span></h1>
         <h4>user list: <span id="user-list"></span></h4>
+        <form id="private-chat-form">
+          <label for="user">who do you want to talk?</label>
+          <input type="text" id="user" required>
+          <button type="submit">submit</button>
+          <p id="error-msg"></p>
+        </form>
     </header>
     <hr>
     <main class="chat-main">
@@ -33,7 +39,7 @@
       { name: 'bbb' },
       { name: 'ccc' }
     ]
-    const random
+
     // put token in socket
     const tokens = [
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjE5NTc0MTExfQ.JYrimGfC1kWbxmY01TocBbzfwHmwVIVVqNNIS1juXtE',
@@ -91,11 +97,24 @@
     })
 
     // private Room submit
-    // privateRoom
-      const user = users[0]
-      if (user) {
-        socket.emit('privateRoom', user)
-      }
+    const privateChatForm = document.querySelector('#private-chat-form')
+    privateChatForm.addEventListener('submit', (e) => {
+      e.preventDefault()
+      const user = e.target.elements.user.value
+      // emit msg to server
+      socket.emit('privateUser', user)
+      // 'errorMsg' from server
+      socket.on('findUser', msg => {
+        const errorMsg = document.getElementById('error-msg')
+        errorMsg.innerText = msg
+      })
+      // 把歷史訊息印出來
+      socket.on('historyMsg', chatRecords => {
+        chatRecords.forEach(msg => {
+          outputMessage(msg)
+        })
+      })
+    }) 
 
     // output message to DOM
     function outputMessage(message) {
@@ -105,7 +124,7 @@
       <p>${message.username} <span>${message.time}</span></p>
       <p>${message.text}</p>
       <hr>
-    `
+      `
       document.querySelector('.chat-messages').appendChild(div)
     }
 

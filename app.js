@@ -34,7 +34,7 @@ app.use((err, req, res, next) => {
 app.get('/chat', (req, res) => {
   res.sendFile( __dirname + '/sockets/index.html')
 })
-app.get('/chat/:room', (req, res) => {
+app.get('/chat/room', (req, res) => {
   res.sendFile( __dirname + '/sockets/room.html')
 })
 const server = http.createServer(app)
