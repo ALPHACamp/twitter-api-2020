@@ -24,7 +24,12 @@ app.use(bodyParser.json())
 app.use(express.static(publicDirectoryPath))
 
 // Set up socket.io
-global.io = socketio(server)
+global.io = socketio(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST']
+  }
+})
 global.io.on('connection', socket => {
   // console.log('socket', socket)
   // join
