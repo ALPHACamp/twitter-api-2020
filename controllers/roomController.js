@@ -47,8 +47,16 @@ const roomController = {
       const messages = await Message.findAll({
         raw: true,
         nest: true,
+        include: [User],
         where: { ChatRoomId: roomId }
       })
+
+      const messageData = messages.map(message => ({
+        id: message.id,
+        userAvatar: message.User.avatar,
+        message: message.message,
+        createdAt: message.createdAt
+      }))
 
       // 要回傳的資料
       return res
@@ -56,7 +64,7 @@ const roomController = {
         .json({
           onlineUsersCount: onlineUsers.length,
           onlineUsers: usersData,
-          messages
+          messages: messageData
         })
     }
     catch (error) {
