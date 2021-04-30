@@ -4,8 +4,7 @@ const router = express.Router()
 const roomController = require('../../controllers/roomController')
 
 router.route('/').post(roomController.createRoom)
-router.route('/public').get(roomController.getPublicRoom)
-router.route('/public/messages').post(roomController.sendPublicMessage)
+router.route('/:roomId').get(roomController.getRoom)
 router.route('/:roomId/messages').post(roomController.sendMessage)
 
 module.exports = router
