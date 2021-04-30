@@ -52,24 +52,28 @@ const roomController = {
         createdAt: message.createdAt
       }))
 
-      return res
-        .status(200)
-        .json({
-          onlineUsersCount: onlineUsers.length + 1,
-          onlineUsers: usersData,
-          messages: messageData
-        })
-    }
-    catch (error) {
+      return res.status(200).json({
+        onlineUsersCount: onlineUsers.length + 1,
+        onlineUsers: usersData,
+        messages: messageData
+      })
+    } catch (error) {
       next(error)
     }
   },
 
   createRoom: async (req, res, next) => {
     try {
-
-    }
-    catch (error) {
+      const newRoom = await ChatRoom.create({ isPublic: false })
+      await JoinRoom.bulkCreate([
+        { UserId: req.user.id, ChatRoomId: newRoom.id },
+        { UserId: req.body.userId, ChatRoomId: newRoom.id }
+      ])
+      res.status(200).json({
+        status: 'success',
+        roomId: newRoom.id
+      })
+    } catch (error) {
       next(error)
     }
   },
@@ -98,7 +102,7 @@ const roomController = {
       }
 
       global.io.sockets
-        .in(req.body.roomId)
+        .in(req.params.roomId)
         .emit('chat message', generateMessage(message.message))
 
       res.status(200).json({
