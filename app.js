@@ -26,8 +26,8 @@ app.use(express.static(publicDirectoryPath))
 // Set up socket.io
 global.io = socketio(server, {
   cors: {
-    origin: 'http://localhost:8080',
-    methods: ['GET', 'POST']
+    origin: '*',
+    credentials: true
   }
 })
 global.io.on('connection', socket => {
