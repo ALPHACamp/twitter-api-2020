@@ -38,4 +38,4 @@ const removeUser = async socketId => {
   }
 }
 
-module.exports = { addUser, getUser, countUsers, removeUser }
+module.exports = { addUser, getUser, countUsers, removeUser, users }
