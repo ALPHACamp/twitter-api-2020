@@ -31,7 +31,10 @@ const Message = db.Message
 // Set up socket.io
 global.io = socketio(server, {
   cors: {
-    origin: 'http://localhost:8080',
+    origin: [
+      'http://localhost:8080',
+      'https://ivyhungtw.github.io/simple-twitter'
+    ],
     methods: ['GET', 'POST'],
     transports: ['websocket', 'polling'],
     credentials: true
@@ -64,14 +67,17 @@ global.io.on('connection', socket => {
   })
 
   socket.on('chat message', async (msg, callback) => {
-    const user = getUser(socket.id)
+    const user = await getUser(socket.id)
     // 要在這裡 create 還是在 roomController 裡面？
     await Message.create({
       UserId: user.userId,
       ChatRoomId: user.roomId,
       message: msg
     })
-    io.to(user.roomId).emit('chat message', generateMessage(msg, user.userId))
+    io.to(user.roomId).emit(
+      'chat message',
+      generateMessage(msg, user.userId, user.avatar)
+    )
 
     // Event Acknowledgement
     callback()
