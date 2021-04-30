@@ -15,6 +15,7 @@ module.exports = (io) => {
   io.on('connection', async (socket) => {
     // 加入房間 (預設進入 publicRoom)
     socket.join(socket.user.channel)
+    console.log('channel', socket.user.channel)
 
     // emit user to frontend
     socket.emit('userInfo', socket.user)
@@ -25,7 +26,7 @@ module.exports = (io) => {
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] = 1
       // send to single user
-      socket.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name}, Welcome to chat!`))
+      socket.emit('chatMsg', formatMessage(botName, `${socket.user.name}, Welcome to chat!`))
       // send to other users
       socket.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has joined the chat`))
     } else {
@@ -75,31 +76,43 @@ module.exports = (io) => {
       const user = await User.findOne({ where: { name: username }})
       if (user) {
         // 告訴前端 user存在
-        socket.emit('findUser', `user: ${username} has been found!`)
+        socket.emit('findUser', `user: ${username} has been found~`)
         // 建立房間
-        const roomName = `${socket.user.name}-${user.name}`
+        const userList = []
+        userList.push(username, socket.user.name)
+        userList.sort()
+        const roomName = userList.join('-')
         // 更換使用者頻道
-        socket.user.channel.push(roomName)
+        socket.user.channel = roomName
+        console.log('channel', socket.user.channel)
         // 切換房間
         socket.join(roomName)
-
         // 拋出歷史訊息
-        
+        const msg = [{
+          id: 1,
+          text: 'hello',
+          time: '10:10 am',
+          UserId: 100,
+          username: 'karol',
+          avatar: 'no'
+        }]
+        socket.to(roomName).emit('historyMsg', msg)
+
         // 接收前端訊息
-        socket.on('userMsg', async (msg) => {
-          const msgData = formatMessage(socket.user.name, msg)
-          msgData.avatar = socket.user.avatar
-          io.to(roomName).emit('chatMsg', msgData)
-          // store in db
-          // if (msgData.text && msgData.time) {
-          //   await Chat.create({
-          //     UserId: socket.user.id,
-          //     message: msgData.text,
-          //     time: msgData.time,
-          //     channel: roomName
-          //   })
-          // }
-        })
+        // socket.on('userMsg', async (msg) => {
+        //   const msgData = formatMessage(socket.user.name, msg)
+        //   msgData.avatar = socket.user.avatar
+        //   io.to(roomName).emit('chatMsg', msgData)
+        //   // store in db
+        //   // if (msgData.text && msgData.time) {
+        //   //   await Chat.create({
+        //   //     UserId: socket.user.id,
+        //   //     message: msgData.text,
+        //   //     time: msgData.time,
+        //   //     channel: roomName
+        //   //   })
+        //   // }
+        // })
       } else {
         // 告訴前端 user 不存在
         socket.emit('findUser', `can not find user: ${username}!`)

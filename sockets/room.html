@@ -62,9 +62,9 @@
     })
 
     // 'chatMsg' from server
-    socket.on('chatMsg', message => {
-      outputMessage(message)
-    })
+    // socket.on('chatMsg', message => {
+    //   outputMessage(message)
+    // })
 
     // 'userList' from server
     socket.on('userList', users => {
@@ -83,6 +83,32 @@
       })
     })
 
+    // private Room submit
+    const privateChatForm = document.querySelector('#private-chat-form')
+    privateChatForm.addEventListener('submit', (e) => {
+      e.preventDefault()
+      const username = e.target.elements.user.value
+      // emit msg to server
+      socket.emit('privateUser', username)
+      // 'errorMsg' from server
+      socket.on('findUser', msg => {
+        const errorMsg = document.getElementById('error-msg')
+        errorMsg.innerText = msg
+        if (msg.includes('~')) {
+          // 把歷史訊息印出來
+          socket.on('historyMsg', chatRecords => {
+            chatRecords.forEach(msg => {
+              outputMessage(msg)
+            })
+          })
+          // 'chatMsg' from server
+          socket.on('chatMsg', message => {
+            outputMessage(message)
+          })
+        }
+      })    
+    }) 
+
     // message submit
     const chatForm = document.querySelector('#chat-form')
     chatForm.addEventListener('submit', (e) => {
@@ -95,26 +121,6 @@
       e.target.elements.msg.value = ''
       e.target.elements.msg.focus()
     })
-
-    // private Room submit
-    const privateChatForm = document.querySelector('#private-chat-form')
-    privateChatForm.addEventListener('submit', (e) => {
-      e.preventDefault()
-      const user = e.target.elements.user.value
-      // emit msg to server
-      socket.emit('privateUser', user)
-      // 'errorMsg' from server
-      socket.on('findUser', msg => {
-        const errorMsg = document.getElementById('error-msg')
-        errorMsg.innerText = msg
-      })
-      // 把歷史訊息印出來
-      socket.on('historyMsg', chatRecords => {
-        chatRecords.forEach(msg => {
-          outputMessage(msg)
-        })
-      })
-    }) 
 
     // output message to DOM
     function outputMessage(message) {
