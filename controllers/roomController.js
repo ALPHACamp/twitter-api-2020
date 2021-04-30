@@ -12,8 +12,6 @@ const roomController = {
   getPublicRoom: async (req, res, next) => {
     try {
       // 如果用 GET /public 要怎麼埋資料傳給我？ 還要跟前端確認下
-
-      // 取到了目前在線名單，userId 不重複
       const { roomId } = req.body
       const UserId = req.user.id
       // console.log('users:', users)
@@ -38,6 +36,13 @@ const roomController = {
         where: { id: userIds }
       })
 
+      const usersData = onlineUserData.map(user => ({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar
+      }))
+
       // 過去在這間公開聊天室的所有訊息內容
       const messages = await Message.findAll({
         raw: true,
@@ -50,7 +55,7 @@ const roomController = {
         .status(200)
         .json({
           onlineUsersCount: onlineUsers.length,
-          onlineUsers: onlineUserData,
+          onlineUsers: usersData,
           messages
         })
     }
@@ -58,14 +63,23 @@ const roomController = {
       next(error)
     }
   },
-  createRoom: async (req, res, next) => { },
+
+  createRoom: async (req, res, next) => {
+    try {
+
+    }
+    catch (error) {
+      next(error)
+    }
+  },
+
   sendMessage: async (req, res, next) => {
     const roomId = req.params.roomId
     const message = req.body.message
     global.io.sockets.in(roomId).emit('chat message', generateMessage(message))
   },
-  sendPublicMessage: async (req, res, next) => {
 
+  sendPublicMessage: async (req, res, next) => {
     try {
       // Message can not be empty
       if (!req.body.message.trim()) {
