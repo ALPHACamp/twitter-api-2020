@@ -23,7 +23,7 @@ module.exports = (io) => {
       users.push(socket.user)
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] = 1
-      // send to other users
+      // 加入聊天室訊息
       socket.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has joined the chat`))
     } else {
       // 計算單一 user connection 次數
@@ -31,7 +31,6 @@ module.exports = (io) => {
     }
 
     // find chat records in db & emit to frontend
-    console.log('channel', socket.user.channel)
     let chatRecords = await Chat.findAll({
       raw: true,
       nest: true,
@@ -47,7 +46,6 @@ module.exports = (io) => {
       avatar: record.User.avatar
     }))
     socket.emit('historyMsg', chatRecords)
-    // socket.to(socket.user.channel).emit('historyMsg', chatRecords)
 
     // online count
     io.to(socket.user.channel).emit('onlineCount', users.length)
@@ -102,7 +100,7 @@ module.exports = (io) => {
           username: record.User.name,
           avatar: record.User.avatar
         }))
-        socket.to(socket.user.channel).emit('historyMsg', chatRecords)
+        socket.emit('historyMsg', chatRecords)
 
         // 接收前端訊息
         // socket.on('userMsg', async (msg) => {
@@ -132,6 +130,7 @@ module.exports = (io) => {
       if (connectionCount[socket.user.id] === 0) {
         // take userInfo to users
         users.splice(userIndex(users, socket.user.id), 1)
+        // 離開聊天室訊息
         io.emit('chatMsg', formatMessage(botName, `${socket.user.name} has left the chat`))
       }
 
