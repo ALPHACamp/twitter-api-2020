@@ -54,7 +54,7 @@ global.io.on('connection', socket => {
   // session
   socket.on('start session', async (data, userId) => {
     // test join public room
-    socket.join('4')
+    // socket.join('4')
 
     console.log('data.rooms', data.rooms)
 
