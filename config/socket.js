@@ -1,3 +1,9 @@
+const { User, Chat, Room } = require('../models/index')
+const sendErrorMsh = (error) => {
+  console.log(error)
+  return socket.emit('error', error.toString())
+}
+
 const socket = (httpServer) => {
   const options = {
     allowEIO3: true,
@@ -14,7 +20,6 @@ const socket = (httpServer) => {
 
     socket.on('connect', () => {
       console.log('客戶端開始連接')
-      console.log(socket)
     })
 
     socket.on('disconnect', () => {
@@ -28,10 +33,34 @@ const socket = (httpServer) => {
       const data = {
         id: null,
         message,
-        time: Date.now(),
+        time: new Date(),
         user: socket.user
       }
       socket.broadcast.emit('welcome', data)
+    })
+
+    socket.on('public', async (message) => {
+      try {
+        const { userId, text } = message
+        const user = await User.findByPk(userId, { raw: true, attributes: ['id', 'name', 'avatar'] })
+        const roomId = (await Room.findOne({ raw: true, where: { name: 'public' } })).id
+        const chat = (await Chat.create({
+          message: text,
+          UserId: userId,
+          RoomId: roomId
+        })).toJSON()
+        const data = {
+          id: chat.id,
+          message: chat.message,
+          time: chat.createdAt,
+          userId: user.id,
+          name: user.name,
+          avatar: user.avatar
+        }
+        socket.broadcast.emit('public', data)
+      } catch (error) {
+        sendErrorMsh(error)
+      }
     })
   })
 }
