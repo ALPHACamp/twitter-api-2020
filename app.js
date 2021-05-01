@@ -8,7 +8,14 @@ if (process.env.NODE_ENV !== 'production') {
 
 require('./models')
 const { generateMessage } = require('./utils/message')
-const { addUser, getUser, removeUser, countUsers } = require('./utils/users')
+const {
+  addUser,
+  getUser,
+  removeUser,
+  getUsersInRoom,
+  getAuthors,
+  getUserInfo
+} = require('./utils/users')
 
 const app = express()
 const http = require('http')
@@ -43,6 +50,76 @@ global.io = socketio(server, {
 })
 global.io.on('connection', socket => {
   console.log('connected!')
+
+  // session
+  socket.on('start session', async (data, userId) => {
+    // test join public room
+    socket.join('4')
+
+    console.log('data.rooms', data.rooms)
+
+    if (!data.rooms) {
+      const authors = await getAuthors(userId)
+
+      console.log('authors - start session', authors)
+
+      if (authors) {
+        const rooms = authors.map(account => {
+          socket.join(`# ${account}`)
+          return `# ${account}`
+        })
+        socket.emit('set session', { rooms })
+      }
+    } else {
+      const rooms = data.rooms
+      rooms.forEach(room => {
+        socket.join(room)
+      })
+      socket.emit('set session', { rooms })
+    }
+  })
+
+  // subscription
+  socket.on('subscription', (data, account) => {
+    console.log('account - subscription', account)
+    socket.join(`# ${account}`)
+    const rooms = data.rooms
+    // set session
+    if (rooms) {
+      rooms.push(`# ${account}`)
+      socket.emit('set session', { rooms })
+    } else {
+      socket.emit('set session', { rooms: [`# ${account}`] })
+    }
+  })
+
+  // cancel subscription
+  socket.on('cancel subscription', (data, account) => {
+    console.log('account - cancel subscription', account)
+    socket.leave(`# ${account}`)
+    const rooms = data.rooms
+    const index = rooms.findIndex(room => room === `# ${account}`)
+    // set session
+    if (index !== -1) {
+      rooms.splice(index, 1)
+      socket.emit('set session', { rooms })
+    } else {
+      socket.emit('set session', { rooms: [`# ${account}`] })
+    }
+  })
+
+  // notification
+  socket.on('notification', async ({ userId, tweetId, tweet }) => {
+    console.log('info - notification', { userId, tweetId, tweet })
+    const user = await getUserInfo(userId)
+    console.log('user - notification', user)
+    if (user) {
+      socket.broadcast
+        .to(user.account)
+        .emit('notification', { ...user, tweet, tweetId })
+    }
+  })
+
   // join
   socket.on('join', async ({ username, roomId, userId }) => {
     const user = await addUser({
@@ -54,11 +131,11 @@ global.io.on('connection', socket => {
     socket.join(user.roomId)
 
     // count users
-    const userCount = countUsers(user.roomId)
-    io.to(user.roomId).emit('users count', userCount)
-
-    // welcome the user when joining
-    // socket.emit('message', generateMessage('Welcome!'))
+    const usersInRoom = await getUsersInRoom(user.roomId)
+    io.to(user.roomId).emit('users count', {
+      users: usersInRoom,
+      userCount: usersInRoom.length
+    })
 
     // notify everyone except the user
     socket.broadcast
@@ -83,13 +160,34 @@ global.io.on('connection', socket => {
     callback()
   })
 
+  // private
+  socket.on('private chat message', async (msg, callback) => {
+    const user = await getUser(socket.id)
+    // 要在這裡 create 還是在 roomController 裡面？
+    await Message.create({
+      UserId: user.userId,
+      ChatRoomId: user.roomId,
+      message: msg
+    })
+    io.to(user.roomId).emit(
+      'private chat message',
+      generateMessage(msg, user.userId, user.avatar)
+    )
+
+    // Event Acknowledgement
+    callback()
+  })
+
   socket.on('disconnect', async () => {
     const user = await removeUser(socket.id)
 
     if (user) {
       // count users
-      const userCount = countUsers(user.roomId)
-      io.to(user.roomId).emit('users count', userCount)
+      const usersInRoom = await getUsersInRoom(user.roomId)
+      io.to(user.roomId).emit('users count', {
+        users: usersInRoom,
+        userCount: usersInRoom.length
+      })
 
       io.to(user.roomId).emit(
         'message',

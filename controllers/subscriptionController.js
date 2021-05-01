@@ -83,7 +83,8 @@ const subscriptionController = {
       await subscription.destroy()
       return res.status(200).json({
         status: 'success',
-        message: `Unsubscribe @${author.account}`
+        message: `Unsubscribe @${author.account}`,
+        account: author.account
       })
     } catch (error) {
       next(error)

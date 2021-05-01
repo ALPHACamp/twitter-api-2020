@@ -46,7 +46,7 @@ const roomController = {
 
       const messageData = messages.map(message => ({
         id: message.id,
-        userAvatar: message.User.avatar,
+        avatar: message.User.avatar,
         UserId: message.UserId,
         message: message.message,
         createdAt: message.createdAt
