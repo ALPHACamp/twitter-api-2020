@@ -121,7 +121,7 @@ const roomController = {
         raw: true,
         nest: true,
         where: {
-          UserId: req.user.id
+          UserId: helpers.getUser(req).id
         },
         attributes: ['ChatRoomId']
       })
@@ -137,7 +137,7 @@ const roomController = {
         where: {
           ChatRoomId: existingChats,
           UserId: {
-            $notLike: req.user.id
+            $notLike: helpers.getUser(req).id
           }
         },
         attributes: ['UserId']
@@ -149,7 +149,7 @@ const roomController = {
         return chat.UserId
       })
 
-      myChats.push(req.user.id, 1) // 排除掉自己與 admin
+      myChats.push(helpers.getUser(req).id, 1) // 排除掉自己與 admin
 
       // console.log(myChats)
 
