@@ -9,12 +9,8 @@ module.exports = (sequelize, DataTypes) => {
     readStatus: DataTypes.BOOLEAN
   }, {});
   Notify.associate = function (models) {
-    // associations can be defined here
     Notify.belongsTo(models.User)
     Notify.belongsTo(models.Tweet)
-    Notify.belongsTo(models.Like)
-    Notify.belongsTo(models.Followship)
-    Notify.belongsTo(models.Reply)
   };
   return Notify;
 };

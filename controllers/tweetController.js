@@ -26,7 +26,6 @@ const tweetController = {
             return true
           }
         })
-        console.log(likes)
         return {
           id: tweet.id,
           UserId: tweet.UserId,

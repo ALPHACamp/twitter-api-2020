@@ -12,15 +12,19 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       tweetId: {
+        defaultValue: 0,
         type: Sequelize.INTEGER
       },
       followingId: {
+        defaultValue: 0,
         type: Sequelize.STRING
       },
       likerId: {
+        defaultValue: 0,
         type: Sequelize.STRING
       },
       replierId: {
+        defaultValue: 0,
         type: Sequelize.STRING
       },
       readStatus: {

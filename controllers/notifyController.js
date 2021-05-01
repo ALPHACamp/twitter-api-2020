@@ -1,9 +1,43 @@
 const db = require('../models')
-const { Notify, Tweet, Subscript } = db
+const { get } = require('../routes/apis')
+const { Notify, Tweet, Subscript, User } = db
 const { getUser } = require('../_helpers')
 
 const notifyController = {
-  // getNotifies:送出所有通知
+  // getNotifies:顯示通知頁面
+  getNotifies: async (req, res, next) => {
+    try {
+      let notifies = await Notify.findAll({
+        raw: true,
+        nest: true,
+        where: {
+          userId: getUser(req).id,
+        },
+        order: [['createdAt', 'DESC']],
+        include: [{ model: Tweet, include: [User] }]
+      })
+
+      notifies = notifies.map(notify => {
+        return {
+          id: notify.id,
+          user: {
+            id: notify.Tweet.User.id,
+            account: notify.Tweet.User.account,
+            name: notify.Tweet.User.name,
+            avatar: notify.Tweet.User.avatar
+          },
+          tweet: {
+            tweetId: notify.Tweet.id,
+            description: notify.Tweet.description,
+          },
+          createdAt: notify.createdAt
+        }
+      })
+      //回傳 userName,userId,avatar,text,description
+      return res.json({ notifies })
+
+    } catch (e) { return next(e) }
+  },
   // 新增通知 tweet , follow, like,reply
   addTweetNotify: async (req, res, next) => {
     try {

@@ -14,7 +14,6 @@ module.exports = (sequelize, DataTypes) => {
     {}
   )
   Followship.associate = function (models) {
-    Followship.hasMany(models.Notify)
   }
   return Followship
 }
