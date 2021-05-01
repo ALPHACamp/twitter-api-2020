@@ -8,6 +8,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {})
   Room.associate = function (models) {
     Room.hasMany(models.Chat)
+    Room.belongsToMany(models.User, {
+      through: models.RoomRecord,
+      foreignKey: 'RoomId',
+      as: 'roomUsers'
+    })
   }
   return Room
 }
