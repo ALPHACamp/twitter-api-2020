@@ -169,13 +169,11 @@ const roomController = {
       // console.log('users:', users)
 
       if (!users) {
-        return res
-          .status(200)
-          .json({
-            status: 'error',
-            message: 'All users are in existing chats',
-            availableUsers: null
-          })
+        return res.status(200).json({
+          status: 'error',
+          message: 'All users are in existing chats',
+          availableUsers: null
+        })
       }
 
       const availableUsers = users.map(user => ({
@@ -185,13 +183,8 @@ const roomController = {
         avatar: user.avatar
       }))
 
-      return res
-        .status(200)
-        .json({
-          availableUsers
-        })
-    }
-    catch (error) {
+      return res.status(200).json(availableUsers)
+    } catch (error) {
       next(error)
     }
   },
