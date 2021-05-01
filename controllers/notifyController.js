@@ -66,7 +66,7 @@ const notifyController = {
       return next(e)
     }
   },
-  turnReaded: async (req, res, next) => {
+  haveRead: async (req, res, next) => {
     try {
       let notifies = await Notify.findAll({
         where: { userId: getUser(req).id }
