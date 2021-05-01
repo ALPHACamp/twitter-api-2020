@@ -112,6 +112,70 @@ const roomController = {
     } catch (error) {
       next(error)
     }
+  },
+
+  getRoomsByUser: async (req, res, next) => {
+    try {
+      // 找到此頁面的所有已存在聊天室
+      const currentUserChats = await JoinRoom.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.user.id }
+      })
+
+      const chatListId = await currentUserChats.map(chat => {
+        return chat.ChatRoomId
+      })
+
+      console.log('chatListId', chatListId)
+
+      const chatAttendee = await JoinRoom.findAll({
+        raw: true,
+        nest: true,
+        where: {
+          ChatRoomId: chatListId,
+          UserId: {
+            $notLike: req.user.id
+          }
+        },
+        include: [User]
+      })
+
+      console.log('chatAttendee', chatAttendee)
+
+      // 此 chatroom 最後一條訊息與時間
+      const lastMsgs = await Message.findAll({
+        raw: true,
+        nest: true,
+        where: {
+          ChatRoomId: chatListId
+        },
+        order: ['ChatRoomId']
+      })
+
+      console.log(lastMsgs)
+
+      lastMsgs.filter(msg => {
+        // 要怎麼在重複的 roomId 中取道最新的 msg
+      })
+
+      // 這個 currentUser 的 所有 private chatroom 對向的 avatar name account
+      const chatAttendeeInfo = await chatAttendee.map(user => ({
+        RoomId: user.ChatRoomId,
+        UserId: user.User.id,
+        name: user.User.name,
+        account: user.User.account,
+        avatar: user.User.avatar,
+        // lastMsgInRoom: ,
+        // lastMsgInRoomTime: 
+      }))
+      console.log('chatAttendeeInfo', chatAttendeeInfo)
+
+
+    }
+    catch (error) {
+      next(error)
+    }
   }
 }
 
