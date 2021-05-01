@@ -74,6 +74,7 @@ global.io.on('connection', socket => {
           return `# ${account}`
         })
       }
+      console.log('socket.rooms1111', socket.rooms)
 
       rooms.push(`self ${userId}`)
 
@@ -83,6 +84,8 @@ global.io.on('connection', socket => {
       rooms.forEach(room => {
         socket.join(room)
       })
+
+      console.log('socket.rooms2222', socket.rooms)
 
       console.log('rooms2222', rooms)
     }
@@ -167,11 +170,11 @@ global.io.on('connection', socket => {
     await Message.create({
       UserId: user.userId,
       ChatRoomId: user.roomId,
-      message: msg
+      message: msg.message
     })
     io.to(user.roomId).emit(
       'chat message',
-      generateMessage(msg, user.userId, user.avatar)
+      generateMessage(msg.message, user.userId, user.avatar)
     )
 
     // Event Acknowledgement
