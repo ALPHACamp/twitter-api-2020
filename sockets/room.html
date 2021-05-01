@@ -15,8 +15,9 @@
           <label for="user">who do you want to talk?</label>
           <input type="text" id="user" required>
           <button type="submit">submit</button>
-          <p id="error-msg"></p>
         </form>
+        <p id="error-msg"></p>
+        <h4>unread count: <span id="unread-count"></span></h4>
     </header>
     <hr>
     <main class="chat-main">
@@ -65,6 +66,13 @@
       outputMessage(message)
     })
 
+    // 'unreadMsgCount' from server
+    socket.on('unreadMsg', msg => {
+      const unreadCount = document.getElementById('unread-count')
+      console.log('length', msg.length)
+      unreadCount.innerText = msg.length
+    })
+
     // private Room submit
     const privateChatForm = document.querySelector('#private-chat-form')
     privateChatForm.addEventListener('submit', (e) => {
@@ -101,10 +109,6 @@
             e.target.elements.msg.value = ''
             e.target.elements.msg.focus()
           })
-          // // 'chatMsg' from server
-          // socket.on('chatMsg', message => {
-          //   outputMessage(message)
-          // })
         }
       })
     })
