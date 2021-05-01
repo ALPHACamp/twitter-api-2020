@@ -43,16 +43,6 @@ module.exports = (io) => {
     // user list
     io.to(socket.user.channel).emit('userList', users)
 
-    // 是否有未讀訊息
-    const msg = await UnreadChat.findAll({ where: { UserId: socket.user.id } })
-    if (msg.length > 0) {
-      socket.emit('unreadMsg', msg)
-    }
-    // 刪掉已讀訊息
-    socket.on('readMsg', async (msg) => {
-      await UnreadChat.destroy({ where: { UserId: socket.user.id } })
-    })
-
     // listen for userMsg
     socket.on('userMsg', async (msg) => {
       const msgData = {
@@ -70,26 +60,17 @@ module.exports = (io) => {
         time: msgData.time,
         channel: socket.user.channel
       })
+      // 發送訊息資訊給前端
       io.to(socket.user.channel).emit('chatMsg', msgData)
-      // 存到資料庫
-      if (msgData.text && msgData.time) {
-        await Chat.create({
-          UserId: socket.user.id,
-          message: msgData.text,
-          time: msgData.time,
-          channel: socket.user.channel
-        })
-      }
-      // 未讀訊息數
+      // 判斷使用者私訊的人在不在線，不在的話就把訊息存入 UnreadChat
       if (socket.user.channel !== 'publicRoom') {
         const userList = socket.user.channel.split('-')
         const userName = userList.find(user => user !== socket.user.name)
         const userOnline = users.findIndex(user => user.name === userName)
         if (userOnline === -1) {
           // 未讀訊息存入 UnreadChat
-          const user = await User.findOne({ where: { name: userName }})
+          const user = await User.findOne({ where: { name: userName } })
           const chat = await Chat.findOne({ where: { message: msgData.text, time: msgData.time } })
-          console.log('0', chat)
           await UnreadChat.create({
             ChatId: chat.id,
             UserId: user.id
@@ -121,6 +102,23 @@ module.exports = (io) => {
         // 告訴前端 user 不存在
         socket.emit('findUser', `can not find user: ${username}!`)
       }
+    })
+
+    // 是否有未讀訊息
+    const msg = await UnreadChat.findAll({
+      raw: true,
+      nest: true,
+      where: { UserId: socket.user.id },
+      attributes: ['id', 'UserId', 'ChatId']
+    })
+    if (msg.length > 0) {
+      socket.emit('unreadMsg', msg)
+    }
+    // 刪掉已讀訊息
+    socket.on('readMsg', msgs => {
+      msgs.forEach(async msg => {
+        await UnreadChat.destroy({ where: { id: msg.id } })
+      })
     })
 
     // run when client disconnect
