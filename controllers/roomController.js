@@ -7,6 +7,8 @@ const helpers = require('../_helpers')
 const { countUsers, users } = require('../utils/users')
 
 const { generateMessage } = require('../utils/message')
+const { Sequelize, sequelize } = require('../models')
+const { Op } = Sequelize
 
 const roomController = {
   getRoom: async (req, res, next) => {
@@ -109,6 +111,60 @@ const roomController = {
         status: 'success',
         message
       })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getRoomsByUser: async (req, res, next) => {
+    try {
+      const currentUserId = req.user.id
+      let joinedRooms = await JoinRoom.findAll({
+        raw: true,
+        nest: true,
+        attributes: ['ChatRoomId'],
+        where: { UserId: helpers.getUser(req).id, ChatRoomId: { $not: 4 } }
+      })
+      joinedRooms = joinedRooms.map(room => room.ChatRoomId)
+
+      let messages = await sequelize.query(
+        `
+        SELECT *            
+        FROM (
+        SELECT ChatRoomId AS cid, MAX(id) AS id
+        FROM Messages
+        WHERE ChatRoomId IN (:chatRoomIds)
+        group by ChatRoomId
+        ) AS m2
+        LEFT JOIN Messages AS m1
+        ON m1.id = m2.id
+        LEFT JOIN ChatRooms 
+        ON ChatRooms.id = m2.cid
+        JOIN JoinRooms AS j1
+        ON j1.ChatRoomId = ChatRooms.id
+        LEFT JOIN Users 
+        ON j1.UserId = Users.id
+        WHERE j1.UserId <> (:currentUserId);
+      `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: { chatRoomIds: joinedRooms, currentUserId }
+        }
+      )
+
+      messages = messages.map(message => {
+        return {
+          userId: message.UserId,
+          name: message.name,
+          account: message.account,
+          avatar: message.avatar,
+          roomId: message.cid,
+          message: message.message,
+          createdAt: message.createdAt
+        }
+      })
+
+      res.status(200).json(messages)
     } catch (error) {
       next(error)
     }
