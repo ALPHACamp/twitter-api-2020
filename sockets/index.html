@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Chatroom</title>
+</head>
+
+<body>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h1><i class="fas fa-smile"></i> ChatRoom <span id="user-name"></span></h1>
+      <h3><a href="/chat/room">go to private room</a></h3> 
+      <h4>user online: <span id="online">0</span></h6>
+        <h4>user list: <span id="user-list"></span></h4>
+    </header>
+    <hr>
+    <main class="chat-main">
+      <div class="chat-messages">
+        <!-- put message here -->
+      </div>
+    </main>
+    <div class="chat-form-container">
+      <form id="chat-form">
+        <input id="msg" type="text" placeholder="Enter Message" required autocomplete="off" />
+        <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
+      </form>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // put token in socket
+    const tokens = [
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjE5NTc0MTExfQ.JYrimGfC1kWbxmY01TocBbzfwHmwVIVVqNNIS1juXtE',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNjE5Njc1NjE3fQ.VoNykDX5Gme53J2dCt6QBB_QlGQuhw2NVzNcMo_6_UU'
+    ]
+    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NTE1MDk2fQ.-GAmQEqx7TDaM4wp1fs1q1NubYcLmP5jV2TIhR_Aet8'
+    const socket = io('http://localhost:3000', {
+      reconnectionDelayMax: 10000,
+      auth: {
+        token: tokens[Math.floor(Math.random() * 3)]
+        // token
+      }
+    })
+
+    // 'userInfo' from server
+    socket.on('userInfo', user => {
+      // render users in user list
+      const userName = document.getElementById('user-name')
+      userName.innerText = `for ${user.name}`
+    })
+
+    // 'chatMsg' from server
+    socket.on('chatMsg', message => {
+      outputMessage(message)
+    })
+
+    // 'onlineCount' from server
+    socket.on('onlineCount', onlineCount => {
+      // output onlineCount to DOM
+      const online = document.getElementById('online')
+      online.innerText = onlineCount
+    })
+
+    // 'userList' from server
+    socket.on('userList', users => {
+      const userList = document.getElementById('user-list')
+      let html = ''
+      users.forEach(user => {
+        html += `<span>${user.name} <span>`
+      })
+      userList.innerHTML = html
+    })
+
+    // 'historyMsg' from server
+    socket.on('historyMsg', chatRecords => {
+      outputHistoryMessage(chatRecords)
+    })
+
+    // message submit
+    const chatForm = document.querySelector('#chat-form')
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault()
+      // get msg text
+      const msg = e.target.elements.msg.value
+      // emit msg to server
+      socket.emit('userMsg', msg)
+      // clear input & focus on it
+      e.target.elements.msg.value = ''
+      e.target.elements.msg.focus()
+    })
+
+    // output message to DOM
+    function outputMessage(message) {
+      const div = document.createElement('div')
+      div.classList.add('message')
+      div.innerHTML = `
+        <p>${message.username} <span>${message.time}</span></p>
+        <p>${message.text}</p>
+        <hr>
+      `
+      document.querySelector('.chat-messages').appendChild(div)
+    }
+
+    // output message to DOM (for history)
+    function outputHistoryMessage(messages) {
+      messages.forEach(message => {
+        const div = document.createElement('div')
+        div.classList.add('message')
+        div.innerHTML = `
+        <p>${message.username} <span>${message.time}</span></p>
+        <p>${message.text}</p>
+        <hr>
+        `
+        document.querySelector('.chat-messages').appendChild(div)
+      })
+    }
+
+  </script>
+</body>
+
+</html>
