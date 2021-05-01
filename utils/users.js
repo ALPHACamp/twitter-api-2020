@@ -22,7 +22,7 @@ const getUser = async socketId => {
 }
 
 const getUserInfo = async userId => {
-  let user = User.findByPk(userId)
+  let user = await User.findByPk(userId)
   user = user.toJSON()
   console.log('user - getUserInfo', user)
   if (!user) return null
