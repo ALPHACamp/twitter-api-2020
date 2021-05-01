@@ -14,7 +14,8 @@ const {
   removeUser,
   getUsersInRoom,
   getAuthors,
-  getUserInfo
+  getUserInfo,
+  getOtherUser
 } = require('./utils/users')
 
 const app = express()
@@ -54,7 +55,10 @@ global.io.on('connection', socket => {
   // session
   socket.on('start session', async (data, userId) => {
     // test join public room
-    socket.join('4')
+    // socket.join('4')
+    socket.join(`self ${userId}`)
+    console.log('socket.rooms', socket.rooms)
+    console.log('userId', userId)
 
     console.log('data.rooms', data.rooms)
 
@@ -75,6 +79,7 @@ global.io.on('connection', socket => {
       rooms.forEach(room => {
         socket.join(room)
       })
+      rooms.push(`self ${userId}`)
       socket.emit('set session', { rooms })
     }
   })
@@ -162,17 +167,35 @@ global.io.on('connection', socket => {
 
   // private
   socket.on('private chat message', async (msg, callback) => {
+    console.log('msg - private chat message', msg)
     const user = await getUser(socket.id)
     // 要在這裡 create 還是在 roomController 裡面？
     await Message.create({
       UserId: user.userId,
       ChatRoomId: user.roomId,
-      message: msg
+      message: msg.message
     })
     io.to(user.roomId).emit(
       'private chat message',
-      generateMessage(msg, user.userId, user.avatar)
+      generateMessage(msg.message, user.userId, user.avatar)
     )
+
+    const otherUser = await getOtherUser(user.userId, user.roomId)
+    console.log('otherUser', otherUser)
+
+    socket.broadcast.to(`self ${otherUser}`).emit('notice from private', 1)
+
+    // notify another user
+    if (msg.newMessage) {
+      console.log('newwwwwww')
+      socket.broadcast
+        .to(`self ${otherUser}`)
+        .emit(
+          'new private chat message',
+          generateMessage(msg.message, user.userId, user.avatar)
+        )
+      console.log('done!')
+    }
 
     // Event Acknowledgement
     callback()
