@@ -7,6 +7,8 @@ const helpers = require('../_helpers')
 const { countUsers, users } = require('../utils/users')
 
 const { generateMessage } = require('../utils/message')
+const { Sequelize, sequelize } = require('../models')
+const { Op } = Sequelize
 
 const roomController = {
   getRoom: async (req, res, next) => {
@@ -116,64 +118,54 @@ const roomController = {
 
   getRoomsByUser: async (req, res, next) => {
     try {
-      // 找到此頁面的所有已存在聊天室
-      const currentUserChats = await JoinRoom.findAll({
+      const currentUserId = req.user.id
+      let joinedRooms = await JoinRoom.findAll({
         raw: true,
         nest: true,
-        where: { UserId: helpers.getUser(req).id }
+        attributes: ['ChatRoomId'],
+        where: { UserId: helpers.getUser(req).id, ChatRoomId: { $not: 4 } }
+      })
+      joinedRooms = joinedRooms.map(room => room.ChatRoomId)
+
+      let messages = await sequelize.query(
+        `
+        SELECT *            
+        FROM (
+        SELECT ChatRoomId AS cid, MAX(id) AS id
+        FROM Messages
+        WHERE ChatRoomId IN (:chatRoomIds)
+        group by ChatRoomId
+        ) AS m2
+        LEFT JOIN Messages AS m1
+        ON m1.id = m2.id
+        LEFT JOIN ChatRooms 
+        ON ChatRooms.id = m2.cid
+        JOIN JoinRooms AS j1
+        ON j1.ChatRoomId = ChatRooms.id
+        LEFT JOIN Users 
+        ON j1.UserId = Users.id
+        WHERE j1.UserId <> (:currentUserId);
+      `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: { chatRoomIds: joinedRooms, currentUserId }
+        }
+      )
+
+      messages = messages.map(message => {
+        return {
+          userId: message.UserId,
+          name: message.name,
+          account: message.account,
+          avatar: message.avatar,
+          roomId: message.cid,
+          message: message.message,
+          createdAt: message.createdAt
+        }
       })
 
-      const chatListId = await currentUserChats.map(chat => {
-        return chat.ChatRoomId
-      })
-
-      console.log('chatListId', chatListId)
-
-      const chatAttendee = await JoinRoom.findAll({
-        raw: true,
-        nest: true,
-        where: {
-          ChatRoomId: chatListId,
-          UserId: {
-            $notLike: helpers.getUser(req).id
-          }
-        },
-        include: [User]
-      })
-
-      console.log('chatAttendee', chatAttendee)
-
-      // 此 chatroom 最後一條訊息與時間
-      const lastMsgs = await Message.findAll({
-        raw: true,
-        nest: true,
-        where: {
-          ChatRoomId: chatListId
-        },
-        order: ['ChatRoomId']
-      })
-
-      console.log(lastMsgs)
-
-      lastMsgs.filter(msg => {
-        // 要怎麼在重複的 roomId 中取道最新的 msg
-      })
-
-      // 這個 currentUser 的 所有 private chatroom 對向的 avatar name account
-      const chatAttendeeInfo = await chatAttendee.map(user => ({
-        RoomId: user.ChatRoomId,
-        UserId: user.User.id,
-        name: user.User.name,
-        account: user.User.account,
-        avatar: user.User.avatar,
-        // lastMsgInRoom: ,
-        // lastMsgInRoomTime: 
-      }))
-      console.log('chatAttendeeInfo', chatAttendeeInfo)
-
-
-    }
-    catch (error) {
+      res.status(200).json(messages)
+    } catch (error) {
       next(error)
     }
   }
