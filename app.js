@@ -133,7 +133,7 @@ global.io.on('connection', socket => {
     console.log('user - notification', user)
     if (user) {
       socket.broadcast
-        .to(user.account)
+        .to(`# ${user.account}`)
         .emit('notification', { ...user, tweet, tweetId })
     }
   })
