@@ -74,8 +74,15 @@ const socket = (httpServer) => {
 
     socket.emit('welcome', '歡迎連接 socket')
 
-    socket.on('hello', (arg) => {
-      console.log('客戶端回傳訊息：', arg)
+    socket.on('hello', (message) => {
+      console.log('客戶端回傳訊息：', message)
+      const data = {
+        id: null,
+        message,
+        time: Date.now(),
+        user: socket.user
+      }
+      socket.broadcast.emit('welcome', data)
     })
   })
 }
