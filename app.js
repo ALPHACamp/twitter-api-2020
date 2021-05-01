@@ -43,7 +43,7 @@ global.io = socketio(server, {
       'http://localhost:8080',
       'https://ivyhungtw.github.io/simple-twitter'
     ],
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'DELETE'],
     transports: ['websocket', 'polling'],
     credentials: true
   },
@@ -102,15 +102,22 @@ global.io.on('connection', socket => {
   socket.on('cancel subscription', (data, account) => {
     console.log('account - cancel subscription', account)
     socket.leave(`# ${account}`)
-    const rooms = data.rooms
-    const index = rooms.findIndex(room => room === `# ${account}`)
+    let rooms = data.rooms
+    console.log('rooms - cancel subscription', rooms1)
+
+    rooms ? rooms.push(`# ${account}`) : (rooms = [`# ${account}`])
+
+    console.log('rooms - cancel subscription', rooms2)
+
+    socket.emit('set session', { rooms })
+    // const index = rooms.findIndex(room => room === `# ${account}`)
     // set session
-    if (index !== -1) {
-      rooms.splice(index, 1)
-      socket.emit('set session', { rooms })
-    } else {
-      socket.emit('set session', { rooms: [`# ${account}`] })
-    }
+    // if (index !== -1) {
+    //   rooms.splice(index, 1)
+    //   socket.emit('set session', { rooms })
+    // } else {
+    //   socket.emit('set session', { rooms: [`# ${account}`] })
+    // }
   })
 
   // notification
