@@ -199,7 +199,8 @@ global.io.on('connection', socket => {
         .to(`self ${otherUser}`)
         .emit(
           'new private chat message',
-          generateMessage(msg.message, user.userId, user.avatar)
+          generateMessage(msg.message, user.userId, user.avatar),
+          user.roomId
         )
       console.log('done!')
     }
