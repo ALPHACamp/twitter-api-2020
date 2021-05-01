@@ -10,6 +10,7 @@ const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followshipController = require('../controllers/followshipController')
 const subscriptController = require('../controllers/subscriptController')
+const { addTweetNotify } = require('../controllers/notifyController')
 
 // 載入 authenticated & authenticatedAdmin
 const { authenticated } = require('../middleware/auth')
@@ -29,7 +30,7 @@ router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
 // routes : tweets
 router.get('/tweets', authenticated, tweetController.getTweets)
-router.post('/tweets', authenticated, tweetController.postTweet)
+router.post('/tweets', authenticated, tweetController.postTweet, addTweetNotify)
 router.get('/tweets/:tweet_Id/replies', authenticated, tweetController.getReplies)
 router.post('/tweets/:tweet_Id/replies', authenticated, tweetController.postReply)
 router.post('/tweets/:tweet_Id/like', authenticated, tweetController.tweetLike)

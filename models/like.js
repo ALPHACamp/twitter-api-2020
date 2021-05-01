@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     Like.belongsTo(models.User)
     Like.belongsTo(models.Tweet)
     Like.belongsTo(models.Tweet)
-      .hasMany(model.Notify)
+    Like.hasMany(models.Notify)
   }
   return Like
 }

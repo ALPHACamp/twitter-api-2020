@@ -106,7 +106,7 @@ const tweetController = {
         return res.json({ status: 'error', message: "Description max length is 140 words" })
       }
       await Tweet.create({ UserId, description })
-      return res.json({ status: 'success', message: 'Tweet has built successfully!' })
+      return (res.json({ status: 'success', message: 'Tweet has built successfully!' }), next())
     } catch (e) {
       console.log(e)
       return next(e)
