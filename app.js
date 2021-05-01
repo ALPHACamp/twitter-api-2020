@@ -62,26 +62,32 @@ global.io.on('connection', socket => {
 
     console.log('data.rooms', data.rooms)
 
+    let rooms = []
     if (!data.rooms) {
       const authors = await getAuthors(userId)
 
       console.log('authors - start session', authors)
 
       if (authors) {
-        const rooms = authors.map(account => {
+        rooms = authors.map(account => {
           socket.join(`# ${account}`)
           return `# ${account}`
         })
-        socket.emit('set session', { rooms })
       }
+
+      rooms.push(`self ${userId}`)
+
+      console.log('rooms1111', rooms)
     } else {
-      const rooms = data.rooms
+      rooms = data.rooms
       rooms.forEach(room => {
         socket.join(room)
       })
-      rooms.push(`self ${userId}`)
-      socket.emit('set session', { rooms })
+
+      console.log('rooms2222', rooms)
     }
+
+    socket.emit('set session', { rooms })
   })
 
   // subscription
