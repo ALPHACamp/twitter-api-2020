@@ -100,11 +100,18 @@
       form.addEventListener('submit', function (e) {
         e.preventDefault()
         if (input.value) {
-          socket.emit('private chat message', input.value, () => {
-            console.log('Delivered!')
-          })
+          socket.emit(
+            'private chat message',
+            { message: input.value, newMessage: true },
+            () => {
+              console.log('Delivered!')
+            }
+          )
           input.value = ''
         }
+      })
+      socket.on('new private chat message', msg => {
+        console.log('newwwww', msg)
       })
 
       socket.on('private chat message', function (msg) {

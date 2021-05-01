@@ -79,6 +79,7 @@ const getAuthors = async userId => {
 }
 
 const getOtherUser = async (userId, roomId) => {
+  console.log('userId+roomId', userId, roomId)
   const user = await JoinRoom.findOne({
     where: { UserId: { $not: userId }, ChatRoomId: roomId }
   })
