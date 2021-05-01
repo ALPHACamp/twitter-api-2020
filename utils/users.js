@@ -78,6 +78,13 @@ const getAuthors = async userId => {
   return user.dataValues.Subscriptions.map(author => author.account)
 }
 
+const getOtherUser = async (userId, roomId) => {
+  const user = await JoinRoom.findOne({
+    where: { UserId: { $not: userId }, ChatRoomId: roomId }
+  })
+  return user.UserId
+}
+
 module.exports = {
   addUser,
   getUser,
@@ -85,5 +92,6 @@ module.exports = {
   removeUser,
   users,
   getAuthors,
-  getUserInfo
+  getUserInfo,
+  getOtherUser
 }

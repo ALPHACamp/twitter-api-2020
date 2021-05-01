@@ -14,7 +14,8 @@ const {
   removeUser,
   getUsersInRoom,
   getAuthors,
-  getUserInfo
+  getUserInfo,
+  getOtherUser
 } = require('./utils/users')
 
 const app = express()
@@ -55,6 +56,8 @@ global.io.on('connection', socket => {
   socket.on('start session', async (data, userId) => {
     // test join public room
     // socket.join('4')
+    socket.join(`self ${userId}`)
+    console.log('userId', userId)
 
     console.log('data.rooms', data.rooms)
 
@@ -173,6 +176,11 @@ global.io.on('connection', socket => {
       'private chat message',
       generateMessage(msg, user.userId, user.avatar)
     )
+
+    const otherUser = await getOtherUser(user.userId, user.roomId)
+    // console.log('otherUser', otherUser)
+
+    socket.broadcast.to(`self ${otherUser}`).emit('notice from private', 1)
 
     // Event Acknowledgement
     callback()
