@@ -50,13 +50,25 @@ global.io = socketio(server, {
 })
 global.io.on('connection', socket => {
   console.log('connected!')
-  // login
-  socket.on('login', async userId => {
-    console.log('userId - login', userId)
+
+  // session
+  socket.on('start session', async (data, userId) => {
+    console.log('data.rooms', data.rooms)
+
     const authors = await getAuthors(userId)
-    console.log('authors - login', authors)
+    console.log('authors - start session', authors)
+    // socket.rooms = authors
+
     if (authors) {
-      authors.forEach(account => socket.join(`# ${account}`))
+      const rooms = authors.map(account => {
+        socket.join(`# ${account}`)
+        return `# ${account}`
+      })
+      console.log('rooms - start session', { rooms })
+      // socket.rooms = rooms
+      console.log('socket.rooms - start session', socket.rooms)
+      // authors.forEach(account => socket.join(`# ${account}`))
+      socket.emit('set session', { rooms })
     }
   })
 
