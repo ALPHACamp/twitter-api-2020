@@ -8,13 +8,19 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      targetId: {
+      userId: {
         type: Sequelize.INTEGER
       },
-      noticeId: {
+      tweetId: {
         type: Sequelize.INTEGER
       },
-      noticeType: {
+      followingId: {
+        type: Sequelize.STRING
+      },
+      likerId: {
+        type: Sequelize.STRING
+      },
+      replierId: {
         type: Sequelize.STRING
       },
       readStatus: {
