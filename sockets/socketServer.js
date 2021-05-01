@@ -1,12 +1,12 @@
 const db = require('../models')
 const Chat = db.Chat
 const User = db.User
+const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg } = require('./utils')
 
 const users = []
 const botName = 'Chat Bot'
 const connectionCount = {}
-const unreadMsg = []
 
 module.exports = (io) => {
   // 驗證身分
@@ -19,10 +19,14 @@ module.exports = (io) => {
     // emit user to frontend
     socket.emit('userInfo', socket.user)
     // 是否有未讀訊息
-    const msg = unreadMsg.filter(msg => msg.userName === socket.user.name)
+    const msg = await UnreadChat.findAll({ where: { UserId: socket.user.id }})
     if (msg.length > 0) {
       socket.emit('unreadMsg', msg)
     }
+    // 刪掉已讀訊息
+    socket.on('readMsg', async (msg) => {
+      await UnreadChat.destroy({ where: { UserId: socket.user.id } })
+    })
     // find chat records in db & emit to frontend
     const chatRecords = await historyMsg(socket.user.channel, Chat)
     socket.emit('historyMsg', chatRecords)
@@ -54,19 +58,6 @@ module.exports = (io) => {
       const msgData = formatMessage(socket.user.name, msg)
       msgData.avatar = socket.user.avatar
       io.to(socket.user.channel).emit('chatMsg', msgData)
-      // 未讀訊息數
-      if (socket.user.channel !== 'publicRoom') {
-        const userList = socket.user.channel.split('-')
-        const userName = userList.find(user => user !== socket.user.name)
-        const userOnline = users.findIndex(user => user.name === userName)
-        if (userOnline === -1) {
-          // 未讀訊息存在 unreadMsg
-          unreadMsg.push({
-            msg: msg,
-            userName: userName
-          })
-        }
-      }
       // store in db
       if (msgData.text && msgData.time) {
         await Chat.create({
@@ -75,6 +66,22 @@ module.exports = (io) => {
           time: msgData.time,
           channel: socket.user.channel
         })
+      }
+      // 未讀訊息數
+      if (socket.user.channel !== 'publicRoom') {
+        const userList = socket.user.channel.split('-')
+        const userName = userList.find(user => user !== socket.user.name)
+        const userOnline = users.findIndex(user => user.name === userName)
+        if (userOnline === -1) {
+          // 未讀訊息存入 UnreadChat
+          const user = await User.findOne({ where: { name: userName }})
+          const chat = await Chat.findOne({ where: { message: msgData.text, time: msgData.time } })
+          console.log('0', chat)
+          await UnreadChat.create({
+            ChatId: chat.id,
+            UserId: user.id
+          })
+        }
       }
     })
 
