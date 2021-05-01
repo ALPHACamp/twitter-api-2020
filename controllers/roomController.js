@@ -120,7 +120,7 @@ const roomController = {
       const currentUserChats = await JoinRoom.findAll({
         raw: true,
         nest: true,
-        where: { UserId: req.user.id }
+        where: { UserId: helpers.getUser(req).id }
       })
 
       const chatListId = await currentUserChats.map(chat => {
@@ -135,7 +135,7 @@ const roomController = {
         where: {
           ChatRoomId: chatListId,
           UserId: {
-            $notLike: req.user.id
+            $notLike: helpers.getUser(req).id
           }
         },
         include: [User]
