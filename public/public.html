@@ -78,9 +78,8 @@
       var input = document.getElementById('input')
 
       // Options
-      const { username, room } = Qs.parse(location.search, {
-        ignoreQueryPrefix: true
-      })
+      const username = '123'
+      const room = '4'
 
       socket.emit('start session', { rooms: ['# 12'] }, 2)
       socket.on('set session', rooms => {
@@ -100,14 +99,14 @@
       form.addEventListener('submit', function (e) {
         e.preventDefault()
         if (input.value) {
-          socket.emit('private chat message', input.value, () => {
+          socket.emit('chat message', input.value, () => {
             console.log('Delivered!')
           })
           input.value = ''
         }
       })
 
-      socket.on('private chat message', function (msg) {
+      socket.on('chat message', function (msg) {
         var item = document.createElement('li')
         item.textContent = `${msg.text} - ${moment(msg.createdAt).format(
           'h:mm a'
