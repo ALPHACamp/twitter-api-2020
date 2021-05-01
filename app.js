@@ -53,35 +53,59 @@ global.io.on('connection', socket => {
 
   // session
   socket.on('start session', async (data, userId) => {
+    // test join public room
+    socket.join('4')
+
     console.log('data.rooms', data.rooms)
 
-    const authors = await getAuthors(userId)
-    console.log('authors - start session', authors)
-    // socket.rooms = authors
+    if (!data.rooms) {
+      const authors = await getAuthors(userId)
 
-    if (authors) {
-      const rooms = authors.map(account => {
-        socket.join(`# ${account}`)
-        return `# ${account}`
+      console.log('authors - start session', authors)
+
+      if (authors) {
+        const rooms = authors.map(account => {
+          socket.join(`# ${account}`)
+          return `# ${account}`
+        })
+        socket.emit('set session', { rooms })
+      }
+    } else {
+      const rooms = data.rooms
+      rooms.forEach(room => {
+        socket.join(room)
       })
-      console.log('rooms - start session', { rooms })
-      // socket.rooms = rooms
-      console.log('socket.rooms - start session', socket.rooms)
-      // authors.forEach(account => socket.join(`# ${account}`))
       socket.emit('set session', { rooms })
     }
   })
 
   // subscription
-  socket.on('subscription', account => {
+  socket.on('subscription', (data, account) => {
     console.log('account - subscription', account)
     socket.join(`# ${account}`)
+    const rooms = data.rooms
+    // set session
+    if (rooms) {
+      rooms.push(`# ${account}`)
+      socket.emit('set session', { rooms })
+    } else {
+      socket.emit('set session', { rooms: [`# ${account}`] })
+    }
   })
 
   // cancel subscription
-  socket.on('cancel subscription', account => {
+  socket.on('cancel subscription', (data, account) => {
     console.log('account - cancel subscription', account)
     socket.leave(`# ${account}`)
+    const rooms = data.rooms
+    const index = rooms.findIndex(room => room === `# ${account}`)
+    // set session
+    if (index !== -1) {
+      rooms.splice(index, 1)
+      socket.emit('set session', { rooms })
+    } else {
+      socket.emit('set session', { rooms: [`# ${account}`] })
+    }
   })
 
   // notification
@@ -113,9 +137,6 @@ global.io.on('connection', socket => {
       userCount: usersInRoom.length
     })
 
-    // welcome the user when joining
-    // socket.emit('message', generateMessage('Welcome!'))
-
     // notify everyone except the user
     socket.broadcast
       .to(user.roomId)
@@ -132,6 +153,24 @@ global.io.on('connection', socket => {
     })
     io.to(user.roomId).emit(
       'chat message',
+      generateMessage(msg, user.userId, user.avatar)
+    )
+
+    // Event Acknowledgement
+    callback()
+  })
+
+  // private
+  socket.on('private chat message', async (msg, callback) => {
+    const user = await getUser(socket.id)
+    // 要在這裡 create 還是在 roomController 裡面？
+    await Message.create({
+      UserId: user.userId,
+      ChatRoomId: user.roomId,
+      message: msg
+    })
+    io.to(user.roomId).emit(
+      'private chat message',
       generateMessage(msg, user.userId, user.avatar)
     )
 
