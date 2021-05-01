@@ -3,6 +3,7 @@ const Chat = db.Chat
 const User = db.User
 const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg } = require('./utils')
+const moment = require('moment')
 
 const users = []
 const botName = 'Chat Bot'
@@ -16,31 +17,20 @@ module.exports = (io) => {
   io.on('connection', async (socket) => {
     // 加入房間 (預設進入 publicRoom)
     socket.join(socket.user.channel)
-    // emit user to frontend
+    // 發送 user 資訊給前端
     socket.emit('userInfo', socket.user)
-    // 是否有未讀訊息
-    const msg = await UnreadChat.findAll({ where: { UserId: socket.user.id }})
-    if (msg.length > 0) {
-      socket.emit('unreadMsg', msg)
-    }
-    // 刪掉已讀訊息
-    socket.on('readMsg', async (msg) => {
-      await UnreadChat.destroy({ where: { UserId: socket.user.id } })
-    })
-    // find chat records in db & emit to frontend
+    // 找出歷史訊息，發送給前端
     const chatRecords = await historyMsg(socket.user.channel, Chat)
     socket.emit('historyMsg', chatRecords)
-    // 若使用者第一次進來聊天室，則加入 userList 並傳送系統歡迎訊息
+    // 若使用者第一次進來聊天室，則加入 users，並傳送系統歡迎訊息
     if (userIndex(users, socket.user.id) === -1) {
       // put userInfo to users
       users.push(socket.user)
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] = 1
       if (socket.user.channel === 'publicRoom') {
-        // 歡迎訊息
-        socket.emit('chatMsg', formatMessage(botName, `${socket.user.name}, Welcome to chat!`))
         // 加入聊天室訊息
-        socket.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has joined the chat`))
+        socket.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has joined the chat`, 'userOnline'))
       }
     } else {
       // 計算單一 user connection 次數
@@ -53,12 +43,35 @@ module.exports = (io) => {
     // user list
     io.to(socket.user.channel).emit('userList', users)
 
+    // 是否有未讀訊息
+    const msg = await UnreadChat.findAll({ where: { UserId: socket.user.id } })
+    if (msg.length > 0) {
+      socket.emit('unreadMsg', msg)
+    }
+    // 刪掉已讀訊息
+    socket.on('readMsg', async (msg) => {
+      await UnreadChat.destroy({ where: { UserId: socket.user.id } })
+    })
+
     // listen for userMsg
     socket.on('userMsg', async (msg) => {
-      const msgData = formatMessage(socket.user.name, msg)
-      msgData.avatar = socket.user.avatar
+      const msgData = {
+        UserId: socket.user.id,
+        username: socket.user.name,
+        avatar: socket.user.avatar,
+        text: msg,
+        time: moment().format('h:mm a'),
+        msgType: ''
+      }
+      // 存到資料庫
+      await Chat.create({
+        UserId: socket.user.id,
+        message: msgData.text,
+        time: msgData.time,
+        channel: socket.user.channel
+      })
       io.to(socket.user.channel).emit('chatMsg', msgData)
-      // store in db
+      // 存到資料庫
       if (msgData.text && msgData.time) {
         await Chat.create({
           UserId: socket.user.id,
@@ -101,7 +114,7 @@ module.exports = (io) => {
         socket.user.channel = roomName
         // 切換房間
         socket.join(roomName)
-        // find chat records in db & emit to frontend
+        // 找出歷史訊息，發送給前端
         const chatRecords = await historyMsg(socket.user.channel, Chat)
         socket.emit('historyMsg', chatRecords)
       } else {
@@ -119,7 +132,7 @@ module.exports = (io) => {
         users.splice(userIndex(users, socket.user.id), 1)
         // 離開聊天室訊息
         if (socket.user.channel === 'publicRoom') {
-          io.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has left the chat`))
+          io.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has left the chat`, 'userOffline'))
         }
       }
 

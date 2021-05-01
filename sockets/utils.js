@@ -33,11 +33,12 @@ function userIndex (users, userId) {
   return index
 }
 
-function formatMessage (username, text) {
+function formatMessage (username, text, msgType) {
   return {
     username,
     text,
-    time: moment().format('h:mm a')
+    time: moment().format('h:mm a'),
+    msgType
   }
 }
 
