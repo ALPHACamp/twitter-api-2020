@@ -10,7 +10,7 @@ const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followshipController = require('../controllers/followshipController')
 const subscriptController = require('../controllers/subscriptController')
-const { addTweetNotify, getNotifies } = require('../controllers/notifyController')
+const { addTweetNotify, getNotifies, turnReaded } = require('../controllers/notifyController')
 
 // 載入 authenticated & authenticatedAdmin
 const { authenticated } = require('../middleware/auth')
@@ -43,6 +43,6 @@ router.delete('/followships/:userId', authenticated, followshipController.remove
 router.post('/subscripts/', authenticated, subscriptController.addSubscript)
 router.delete('/subscripts/:userId', authenticated, subscriptController.removeSubscript)
 // routes : notifies
-router.get('/notifies/', authenticated, getNotifies)
+router.get('/notifies/', authenticated, getNotifies, turnReaded)
 
 module.exports = router

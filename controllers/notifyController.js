@@ -20,6 +20,7 @@ const notifyController = {
       notifies = notifies.map(notify => {
         return {
           id: notify.id,
+          readStatus: notify.readStatus,
           user: {
             id: notify.Tweet.User.id,
             account: notify.Tweet.User.account,
@@ -34,7 +35,7 @@ const notifyController = {
         }
       })
       //回傳 userName,userId,avatar,text,description
-      return res.json({ notifies })
+      return (res.json({ notifies }), next())
 
     } catch (e) { return next(e) }
   },
@@ -65,6 +66,17 @@ const notifyController = {
       return next(e)
     }
   },
+  turnReaded: async (req, res, next) => {
+    try {
+      let notifies = await Notify.findAll({
+        where: { userId: getUser(req).id }
+      })
+      console.log(notifies)
+      notifies.forEach((notify) => {
+        notify.update({ readStatus: true })
+      })
+    } catch (e) { return next(e) }
+  }
 
 }
 module.exports = notifyController
