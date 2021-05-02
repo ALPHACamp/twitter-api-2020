@@ -147,12 +147,17 @@ global.io.on('connection', socket => {
 
   // like
   socket.on('like', async data => {
+    console.log('===== receive like event =====')
+    console.log('data.userId - like', data.userId)
     await saveData({
       id: data.currentUserId,
       currentUserId: data.userId,
       type: 4
     })
     const user = await getUserInfo(data.currentUserId)
+
+    console.log('user - like', user)
+
     socket.broadcast
       .to(`self ${data.userId}`)
       .emit('notification', { ...user, type: 4 })
@@ -160,15 +165,46 @@ global.io.on('connection', socket => {
 
   // follow
   socket.on('follow', async data => {
+    console.log('===== receive follow event =====')
+    console.log('data.userId - follow', data.userId)
+
     await saveData({
       id: data.currentUserId,
       currentUserId: data.userId,
       type: 2
     })
+
     const user = await getUserInfo(data.currentUserId)
+
+    console.log('user - follow', user)
+
     socket.broadcast
       .to(`self ${data.userId}`)
       .emit('notification', { ...user, type: 4 })
+  })
+
+  // reply
+  socket.on('reply', async data => {
+    console.log('===== receive reply event =====')
+    console.log('data.userId - reply', data.userId)
+
+    await saveData({
+      id: data.currentUserId,
+      currentUserId: data.userId,
+      replyId: data.replyId,
+      type: 3
+    })
+
+    const user = await getUserInfo(data.currentUserId)
+
+    console.log('user - reply', user)
+
+    socket.broadcast.to(`self ${data.userId}`).emit('notification', {
+      ...user,
+      replyId: data.replyId,
+      reply: data.reply,
+      type: 3
+    })
   })
 
   // join

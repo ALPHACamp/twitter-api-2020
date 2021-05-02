@@ -98,6 +98,7 @@ const updateTime = async (UserId, ChatRoomId) => {
 }
 
 const saveData = async data => {
+  console.log('data - saveData', saveData)
   await Notification.create({
     UserId: data.id,
     otherUserId: data.currentUserId,
@@ -105,6 +106,7 @@ const saveData = async data => {
     ReplyId: data.replyId ? data.replyId : null,
     type: data.type
   })
+  console.log('saveData success!')
 }
 
 module.exports = {
