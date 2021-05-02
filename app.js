@@ -41,10 +41,7 @@ const Message = db.Message
 // Set up socket.io
 global.io = socketio(server, {
   cors: {
-    origin: [
-      'http://localhost:8080',
-      'https://ivyhungtw.github.io/simple-twitter'
-    ],
+    origin: ['http://localhost:8080', 'https://ivyhungtw.github.io'],
     methods: ['GET', 'POST', 'DELETE'],
     transports: ['websocket', 'polling'],
     credentials: true
