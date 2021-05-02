@@ -37,6 +37,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNjE5ODgyOTU2fQ.8ZA964EkAb0LOe86oaVrs1XYV6Qj07n2M_73u0k2jTo'
     ]
     // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjE5ODgyOTg1fQ.aJRQ8AifoaV7qo3SiR4hLQLsfsbc6tXYS6qbPYEo_Mk'
+    // https://simple-twitter-mysql.herokuapp.com/
     const socket = io('http://localhost:3000', {
       reconnectionDelayMax: 10000,
       auth: {
@@ -66,8 +67,6 @@
     socket.on('userOffline', message => {
       outputMessage(message)
     })
-
-    userOffline
 
     // 'onlineCount' from server
     socket.on('onlineCount', onlineCount => {

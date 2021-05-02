@@ -45,21 +45,22 @@ module.exports = (io) => {
 
     // listen for userMsg
     socket.on('userMsg', async (msg) => {
-      const msgData = {
+      // 存到資料庫
+      const chat = await Chat.create({
         UserId: socket.user.id,
+        message: msg,
+        time: moment().format('h:mm a'),
+        channel: socket.user.channel
+      })
+      const msgData = {
+        ChatId: chat.id,
+        UserId: chat.UserId,
         username: socket.user.name,
         avatar: socket.user.avatar,
         text: msg,
-        time: moment().format('h:mm a'),
+        time: chat.time,
         msgType: ''
       }
-      // 存到資料庫
-      await Chat.create({
-        UserId: socket.user.id,
-        message: msgData.text,
-        time: msgData.time,
-        channel: socket.user.channel
-      })
       // 發送訊息資訊給前端
       io.to(socket.user.channel).emit('chatMsg', msgData)
       // 判斷使用者私訊的人在不在線，不在的話就把訊息存入 UnreadChat
@@ -103,6 +104,11 @@ module.exports = (io) => {
         socket.emit('findUser', `can not find user: ${username}!`)
       }
     })
+
+    // 列出私人歷史訊息
+    // const allHistoryMsg = await Chat.findAll({ where: { UserId: socket.user.id }})
+    // allHistoryMsg
+    // socket.emit('')
 
     // 是否有未讀訊息
     const msg = await UnreadChat.findAll({
