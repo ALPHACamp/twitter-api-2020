@@ -116,7 +116,10 @@ global.io.on('connection', socket => {
     let rooms = data.rooms
     console.log('rooms1 - cancel subscription', rooms)
 
-    rooms ? rooms.push(`# ${account}`) : (rooms = [`# ${account}`])
+    if (rooms) {
+      const index = rooms.findIndex(room => room === `# ${account}`)
+      rooms.splice(index, 1)
+    }
 
     console.log('rooms2 - cancel subscription', rooms)
 
