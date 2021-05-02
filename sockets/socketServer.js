@@ -45,9 +45,12 @@ module.exports = (io) => {
 
     // listen for userMsg
     socket.on('userMsg', async (msg) => {
+      const userList = socket.user.channel.split('-')
+      const receivedUserId = userList.find(userId => Number(userId) !== socket.user.id)
       // 存到資料庫
       const chat = await Chat.create({
         UserId: socket.user.id,
+        receivedUserId,
         message: msg,
         time: moment().format('h:mm a'),
         channel: socket.user.channel
@@ -55,6 +58,7 @@ module.exports = (io) => {
       const msgData = {
         ChatId: chat.id,
         UserId: chat.UserId,
+        receivedUserId: chat.receivedUserId,
         username: socket.user.name,
         avatar: socket.user.avatar,
         text: msg,
@@ -66,30 +70,29 @@ module.exports = (io) => {
       // 判斷使用者私訊的人在不在線，不在的話就把訊息存入 UnreadChat
       if (socket.user.channel !== 'publicRoom') {
         const userList = socket.user.channel.split('-')
-        const userName = userList.find(user => user !== socket.user.name)
-        const userOnline = users.findIndex(user => user.name === userName)
+        const userId = userList.find(user => user !== socket.user.id)
+        const userOnline = users.findIndex(user => user.id === userId)
         if (userOnline === -1) {
           // 未讀訊息存入 UnreadChat
-          const user = await User.findOne({ where: { name: userName } })
           const chat = await Chat.findOne({ where: { message: msgData.text, time: msgData.time } })
           await UnreadChat.create({
             ChatId: chat.id,
-            UserId: user.id
+            UserId: userId
           })
         }
       }
     })
 
     // listen for privateUser
-    socket.on('privateUser', async (username) => {
+    socket.on('privateUser', async (userId) => {
       // 找出 user
-      const user = await User.findOne({ where: { name: username }})
+      const user = await User.findOne({ where: { id: userId } })
       if (user) {
         // 告訴前端 user存在
-        socket.emit('findUser', `user: ${username} has been found~`)
+        socket.emit('findUser', `userId: ${userId} has been found~`)
         // 建立房間
         const userList = []
-        userList.push(username, socket.user.name)
+        userList.push(user.id, socket.user.id)
         userList.sort()
         const roomName = userList.join('-')
         // 更換使用者頻道
@@ -101,14 +104,48 @@ module.exports = (io) => {
         socket.emit('historyMsg', chatRecords)
       } else {
         // 告訴前端 user 不存在
-        socket.emit('findUser', `can not find user: ${username}!`)
+        socket.emit('findUser', `can not find userId: ${userId}!`)
       }
     })
 
     // 列出私人歷史訊息
-    // const allHistoryMsg = await Chat.findAll({ where: { UserId: socket.user.id }})
-    // allHistoryMsg
-    // socket.emit('')
+    const allHistoryUserId = await Chat.findAll({
+      raw: true,
+      nest: true,
+      where: { receivedUserId: socket.user.id },
+      attributes: ['UserId']
+    })
+    const userIdArr = []
+    allHistoryUserId.forEach(userId => {
+      if (!userIdArr.includes(userId.UserId)) {
+        userIdArr.push(userId.UserId)
+      }
+    })
+    const historyMsgForOneUser = []
+    for (let i = 0; i < userIdArr.length; i++) {
+      let chat = await Chat.findAll({
+        raw: true,
+        nest: true,
+        where: { userId: userIdArr[i] },
+        order: [['createdAt', 'DESC']],
+        limit: 1,
+        include: [User]
+      })
+      chat = chat[0]
+      chat = {
+        id: chat.id,
+        UserId: chat.UserId,
+        receivedUserId: chat.receivedUserId,
+        text: chat.message,
+        time: chat.time,
+        channel: chat.channel,
+        username: chat.User.name,
+        account: chat.User.account,
+        avatar: chat.User.avatar
+      }
+      historyMsgForOneUser.push(chat)
+    }
+    socket.emit('historyMsgForOneUser', historyMsgForOneUser)
 
     // 是否有未讀訊息
     const msg = await UnreadChat.findAll({
