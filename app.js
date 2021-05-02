@@ -143,6 +143,7 @@ global.io.on('connection', socket => {
       username
     })
     socket.join(user.roomId)
+    await updateTime(userId, roomId)
 
     console.log('socket.rooms - join', socket.rooms)
 
@@ -218,7 +219,7 @@ global.io.on('connection', socket => {
     console.log('leaveeeeeeee!', roomId)
     if (roomId) {
       socket.leave(`${roomId}`)
-      updateTime(userId, roomId)
+      await updateTime(userId, roomId)
     }
     console.log('socket.rooms - leave', socket.rooms)
   })
