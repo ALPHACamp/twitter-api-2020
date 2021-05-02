@@ -124,6 +124,8 @@
       })
 
       socket.emit('join', { username, roomId: room, userId: 2 })
+
+      socket.emit('leave', 2, room)
     </script>
   </body>
 </html>

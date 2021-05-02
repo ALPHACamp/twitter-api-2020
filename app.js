@@ -293,7 +293,7 @@ global.io.on('connection', socket => {
     console.log('leaveeeeeeee!', roomId)
     if (roomId) {
       socket.leave(`${roomId}`)
-      await updateTime(userId, roomId)
+      await removeUser(socket.id, roomId, userId)
     }
     console.log('socket.rooms - leave', socket.rooms)
   })

@@ -52,20 +52,27 @@ const getUsersInRoom = async roomId => {
   return filteredUsers
 }
 
-const removeUser = async socketId => {
-  const index = users.findIndex(user => user.socketId === socketId)
-  if (index !== -1) {
-    const user = users.splice(index, 1)[0]
+const removeUser = async (socketId, roomId, userId) => {
+  console.log('======== removeUser =======')
+  console.log('users', users)
+  console.log(socketId, roomId, userId)
 
-    // Don't delete private room's record
-    if (Number(user.roomId) === PublicRoomId) {
-      await JoinRoom.destroy({
-        where: { UserId: user.userId, ChatRoomId: user.roomId }
-      })
-    }
+  const originalRoomId = roomId ? roomId : PublicRoomId
+  const index = users.findIndex(
+    user => user.socketId === socketId && user.roomId === originalRoomId
+  )
 
-    return user
-  }
+  if (index === -1) return null
+
+  const user = users.splice(index, 1)[0]
+  userId = userId || user.userId
+  await updateTime(userId, PublicRoomId)
+
+  // private room
+  if (roomId) return null
+
+  // public room
+  return user
 }
 
 const getAuthors = async userId => {
