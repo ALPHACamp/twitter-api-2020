@@ -30,7 +30,7 @@ module.exports = (io) => {
       connectionCount[socket.user.id] = 1
       if (socket.user.channel === 'publicRoom') {
         // 加入聊天室訊息
-        socket.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has joined the chat`, 'userOnline'))
+        socket.to(socket.user.channel).emit('userOnline', formatMessage(botName, `${socket.user.name} has joined the chat`, 'userOnline'))
       }
     } else {
       // 計算單一 user connection 次數
@@ -130,7 +130,7 @@ module.exports = (io) => {
         users.splice(userIndex(users, socket.user.id), 1)
         // 離開聊天室訊息
         if (socket.user.channel === 'publicRoom') {
-          io.to(socket.user.channel).emit('chatMsg', formatMessage(botName, `${socket.user.name} has left the chat`, 'userOffline'))
+          io.to(socket.user.channel).emit('userOffline', formatMessage(botName, `${socket.user.name} has left the chat`, 'userOffline'))
         }
       }
 

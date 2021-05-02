@@ -57,6 +57,18 @@
       outputMessage(message)
     })
 
+    // 'userOnline' from server
+    socket.on('userOnline', message => {
+      outputMessage(message)
+    })
+
+    // 'userOffline' from server
+    socket.on('userOffline', message => {
+      outputMessage(message)
+    })
+
+    userOffline
+
     // 'onlineCount' from server
     socket.on('onlineCount', onlineCount => {
       // output onlineCount to DOM
