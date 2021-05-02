@@ -269,7 +269,11 @@ global.io.on('connection', socket => {
     const otherUser = await getOtherUser(msg.userId, msg.roomId)
     console.log('otherUser', otherUser)
 
-    socket.broadcast.to(`self ${otherUser}`).emit('notice from private', 1)
+    socket.broadcast.to(`self ${otherUser}`).emit('notice from private', {
+      roomId: msg.roomId,
+      message: msg.message,
+      userId: msg.userId
+    })
 
     // notify another user
     if (msg.newMessage) {
