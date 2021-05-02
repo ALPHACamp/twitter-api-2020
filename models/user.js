@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = function (models) {
     User.hasMany(models.Reply)
     User.hasMany(models.Like)
-    User.hasMany(models.Notify)
     User.hasMany(models.Tweet)
     User.belongsToMany(models.Tweet, {
       through: models.Like,
@@ -47,6 +46,16 @@ module.exports = (sequelize, DataTypes) => {
       through: models.Subscript,
       foreignKey: 'subscriberId',
       as: 'Authors'
+    })
+    User.belongsToMany(User, {
+      through: models.Notify,
+      foreignKey: 'senderId',
+      as: 'receiverId'
+    })
+    User.belongsToMany(User, {
+      through: models.Notify,
+      foreignKey: 'receiverId',
+      as: 'senderId'
     })
   }
   return User
