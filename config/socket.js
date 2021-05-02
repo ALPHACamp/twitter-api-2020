@@ -34,7 +34,7 @@ const socket = (httpServer) => {
         user: onlineUsers.splice(index, 1)[0],
         onlineUsers
       }
-      socket.broadcast.emit('public-room-offline', data)
+      io.emit('public-room-offline', data)
     })
 
     socket.emit('welcome', '歡迎連接 socket')
@@ -48,7 +48,7 @@ const socket = (httpServer) => {
         time: new Date(),
         user: socket.user
       }
-      socket.broadcast.emit('welcome', data)
+      io.emit('welcome', data)
     })
 
     // users send messages to 'public' chat room
@@ -70,7 +70,7 @@ const socket = (httpServer) => {
           name: user.name,
           avatar: user.avatar
         }
-        socket.broadcast.emit('public', data)
+        io.emit('public', data)
       } catch (error) {
         sendErrorMsh(error)
       }
@@ -96,9 +96,7 @@ const socket = (httpServer) => {
           user,
           onlineUsers
         }
-
-        socket.emit('public-room-online', { onlineUsers })
-        socket.broadcast.emit('public-room-online', data)
+        io.emit('public-room-online', data)
       } catch (error) {
         console.log(error)
         socket.emit('error', 'Something wrong, please try again later.')
@@ -115,7 +113,7 @@ const socket = (httpServer) => {
         user: onlineUsers.splice(index, 1)[0],
         onlineUsers
       }
-      socket.broadcast.emit('public-room-offline', data)
+      io.emit('public-room-offline', data)
     })
   })
 }
