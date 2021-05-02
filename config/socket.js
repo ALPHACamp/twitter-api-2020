@@ -152,4 +152,4 @@ const socket = (httpServer) => {
   })
 }
 
-module.exports = socket
+module.exports = { socket, onlineUsers }

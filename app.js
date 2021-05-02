@@ -25,6 +25,6 @@ app.use(passport.session())
 httpServer.listen(port, () => console.log(`App listening on port ${port}!`))
 
 require('./routes')(app)
-require('./config/socket')(httpServer)
+require('./config/socket').socket(httpServer)
 
 module.exports = app

@@ -1,5 +1,6 @@
 const db = require('../models/index')
 const { catchError } = require('../utils/errorHandling')
+const { onlineUsers } = require('../config/socket')
 const Chat = db.Chat
 const User = db.User
 
@@ -24,5 +25,9 @@ module.exports = {
       .catch(error => {
         catchError(res, error)
       })
+  },
+
+  getPublicOnlineUsers: (req, res) => {
+    return res.status(200).json(onlineUsers)
   }
 }
