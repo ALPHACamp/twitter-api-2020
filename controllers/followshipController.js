@@ -13,7 +13,7 @@ const followshipController = {
       await Followship.create({
         followerId, followingId
       })
-      return res.json({ status: 'success', message: 'Followship has built successfully!' })
+      return (res.json({ status: 'success', message: 'Followship has built successfully!' }), next())
 
     } catch (e) {
       console.log(e)

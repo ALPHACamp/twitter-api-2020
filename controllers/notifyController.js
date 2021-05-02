@@ -1,6 +1,6 @@
 const db = require('../models')
 const { get } = require('../routes/apis')
-const { Notify, Tweet, Subscript, User, Reply, Like } = db
+const { Notify, Tweet, Subscript, User, Reply, Like, Followship } = db
 const { getUser } = require('../_helpers')
 
 const notifyController = {
@@ -121,7 +121,25 @@ const notifyController = {
     } catch (e) { return next(e) }
   }
   ,
-
+  //建立Follow 通知
+  addFollowNotice: async (req, res, next) => {
+    try {// 抓出Follow相關資料
+      const followship = await Followship.findAll({
+        raw: true,
+        nest: true,
+        limit: 1,
+        order: [['createdAt', 'DESC']]
+      })
+      await Notify.create({
+        receiverId: followship[0].followingId,
+        senderId: getUser(req).id,
+        objectId: followship[0].id,
+        objectType: 'followships',
+        objectText: null
+      })
+    } catch (e) { return next(e) }
+  }
+  ,
   haveRead: async (req, res, next) => {
     try {
       let notifies = await Notify.findAll({

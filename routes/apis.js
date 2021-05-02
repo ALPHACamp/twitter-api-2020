@@ -37,7 +37,7 @@ router.post('/tweets/:tweet_Id/like', authenticated, tweetController.tweetLike, 
 router.post('/tweets/:tweet_Id/unlike', authenticated, tweetController.tweetUnlike)
 router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
 // routes : followships
-router.post('/followships/', authenticated, followshipController.addFollowing)
+router.post('/followships/', authenticated, followshipController.addFollowing, notifyController.addFollowNotice)
 router.delete('/followships/:userId', authenticated, followshipController.removeFollowing)
 //routes : subscripts
 router.post('/subscripts/', authenticated, subscriptController.addSubscript)
