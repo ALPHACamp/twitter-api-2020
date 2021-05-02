@@ -1,6 +1,7 @@
 const db = require('../models')
 const JoinRoom = db.JoinRoom
 const User = db.User
+const Notification = db.Notification
 
 const PublicRoomId = 4
 const users = []
@@ -95,6 +96,16 @@ const updateTime = async (UserId, ChatRoomId) => {
   )
 }
 
+const saveData = async data => {
+  await Notification.create({
+    UserId: data.id,
+    otherUserId: data.currentUserId,
+    TweetId: data.tweetId ? data.tweetId : null,
+    ReplyId: data.replyId ? data.replyId : null,
+    type: data.type
+  })
+}
+
 module.exports = {
   addUser,
   getUser,
@@ -104,5 +115,6 @@ module.exports = {
   getAuthors,
   getUserInfo,
   getOtherUser,
-  updateTime
+  updateTime,
+  saveData
 }

@@ -16,7 +16,8 @@ const {
   getAuthors,
   getUserInfo,
   getOtherUser,
-  updateTime
+  updateTime,
+  saveData
 } = require('./utils/users')
 
 const app = express()
@@ -132,6 +133,16 @@ global.io.on('connection', socket => {
         .to(`# ${user.account}`)
         .emit('notification', { ...user, tweet, tweetId })
     }
+  })
+
+  // Tweet
+  socket.on('tweet', async (data, currentUserId) => {
+    await saveData({
+      id: data.id,
+      tweetId: data.tweetId,
+      currentUserId,
+      type: 1
+    })
   })
 
   // join
