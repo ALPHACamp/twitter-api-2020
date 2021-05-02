@@ -10,8 +10,9 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
   const user = { socketId, roomId, userId, username }
   users.push(user)
   if (Number(user.roomId) === PublicRoomId) {
-    // 不該存入重複的 user & room 的組合，要加 socketId 嗎？
-    await JoinRoom.create({ UserId: userId, ChatRoomId: roomId })
+    await JoinRoom.findOrCreate({
+      where: { UserId: userId, ChatRoomId: roomId }
+    })
   }
   return user
 }
