@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
+moment.locale('zh_TW')
 const User = require('../models').User
 
 // 驗證身分

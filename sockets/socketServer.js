@@ -4,6 +4,7 @@ const User = db.User
 const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg } = require('./utils')
 const moment = require('moment')
+moment.locale('zh_TW')
 
 const users = []
 const botName = 'Chat Bot'
@@ -20,7 +21,7 @@ module.exports = (io) => {
     // 發送 user 資訊給前端
     socket.emit('userInfo', socket.user)
     // 找出歷史訊息，發送給前端
-    const chatRecords = await historyMsg(socket.user.channel, Chat)
+    const chatRecords = await historyMsg('publicRoom', Chat)
     socket.emit('historyMsg', chatRecords)
     // 若使用者第一次進來聊天室，則加入 users，並傳送系統歡迎訊息
     if (userIndex(users, socket.user.id) === -1) {
@@ -45,12 +46,13 @@ module.exports = (io) => {
 
     // listen for userMsg
     socket.on('userMsg', async (msg) => {
+      // 找出 receivedUserId
       const userList = socket.user.channel.split('-')
       const receivedUserId = userList.find(userId => Number(userId) !== socket.user.id)
       // 存到資料庫
       const chat = await Chat.create({
         UserId: socket.user.id,
-        receivedUserId,
+        receivedUserId: receivedUserId === 'publicRoom' ? 0 : receivedUserId,
         message: msg,
         time: moment().format('h:mm a'),
         channel: socket.user.channel
@@ -67,19 +69,13 @@ module.exports = (io) => {
       }
       // 發送訊息資訊給前端
       io.to(socket.user.channel).emit('chatMsg', msgData)
-      // 判斷使用者私訊的人在不在線，不在的話就把訊息存入 UnreadChat
+      // 判斷使用者私訊的人在不在 channel，不在的話就把訊息存入 UnreadChat
       if (socket.user.channel !== 'publicRoom') {
-        const userList = socket.user.channel.split('-')
-        const userId = userList.find(user => user !== socket.user.id)
-        const userOnline = users.findIndex(user => user.id === userId)
-        if (userOnline === -1) {
-          // 未讀訊息存入 UnreadChat
-          const chat = await Chat.findOne({ where: { message: msgData.text, time: msgData.time } })
-          await UnreadChat.create({
-            ChatId: chat.id,
-            UserId: userId
-          })
-        }
+        // 未讀訊息存入 UnreadChat
+        await UnreadChat.create({
+          ChatId: chat.id,
+          UserId: receivedUserId
+        })
       }
     })
 
@@ -109,24 +105,24 @@ module.exports = (io) => {
     })
 
     // 列出私人歷史訊息
-    const allHistoryUserId = await Chat.findAll({
+    const allHistoryChannel = await Chat.findAll({
       raw: true,
       nest: true,
       where: { receivedUserId: socket.user.id },
-      attributes: ['UserId']
+      attributes: ['channel']
     })
-    const userIdArr = []
-    allHistoryUserId.forEach(userId => {
-      if (!userIdArr.includes(userId.UserId)) {
-        userIdArr.push(userId.UserId)
+    const channelArr = []
+    allHistoryChannel.forEach(channel => {
+      if (!channelArr.includes(channel.channel)) {
+        channelArr.push(channel.channel)
       }
     })
     const historyMsgForOneUser = []
-    for (let i = 0; i < userIdArr.length; i++) {
+    for (let i = 0; i < channelArr.length; i++) {
       let chat = await Chat.findAll({
         raw: true,
         nest: true,
-        where: { userId: userIdArr[i] },
+        where: { channel: channelArr[i] },
         order: [['createdAt', 'DESC']],
         limit: 1,
         include: [User]
