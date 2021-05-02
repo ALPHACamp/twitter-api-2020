@@ -17,6 +17,14 @@ const notifyController = {
         order: [['createdAt', 'DESC']],
         include: [{ model: User, as: 'Sender' }]
       })
+      //  新的通知數量
+      // let newNoticeCount = 0
+      // notifies.forEach( notify =>{
+      //   if (notify.readStatus){
+      //     newNoticeCount ++
+      //   }
+      // }) 
+
 
       notifies = notifies.map(notify => {
         return {
