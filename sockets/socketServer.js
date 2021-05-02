@@ -22,7 +22,8 @@ module.exports = (io) => {
     socket.emit('userInfo', socket.user)
     // 找出歷史訊息，發送給前端
     const chatRecords = await historyMsg('publicRoom', Chat)
-    socket.emit('historyMsg', chatRecords)
+    console.log('0', chatRecords)
+    socket.to('publicRoom').emit('historyMsg', chatRecords)
     // 若使用者第一次進來聊天室，則加入 users，並傳送系統歡迎訊息
     if (userIndex(users, socket.user.id) === -1) {
       // put userInfo to users
@@ -46,13 +47,10 @@ module.exports = (io) => {
 
     // listen for userMsg
     socket.on('userMsg', async (msg) => {
-      // 找出 receivedUserId
-      const userList = socket.user.channel.split('-')
-      const receivedUserId = userList.find(userId => Number(userId) !== socket.user.id)
       // 存到資料庫
       const chat = await Chat.create({
         UserId: socket.user.id,
-        receivedUserId: receivedUserId === 'publicRoom' ? 0 : receivedUserId,
+        receivedUserId: 0,
         message: msg,
         time: moment().format('h:mm a'),
         channel: socket.user.channel
@@ -68,14 +66,8 @@ module.exports = (io) => {
         msgType: ''
       }
       // 發送訊息資訊給前端
-      io.to(socket.user.channel).emit('chatMsg', msgData)
-      // 判斷使用者私訊的人在不在 channel，不在的話就把訊息存入 UnreadChat
-      if (socket.user.channel !== 'publicRoom') {
-        // 未讀訊息存入 UnreadChat
-        await UnreadChat.create({
-          ChatId: chat.id,
-          UserId: receivedUserId
-        })
+      if (socket.user.channel === 'publicRoom') {
+        io.to('publicRoom').emit('chatMsg', msgData)
       }
     })
 
@@ -98,6 +90,37 @@ module.exports = (io) => {
         // 找出歷史訊息，發送給前端
         const chatRecords = await historyMsg(socket.user.channel, Chat)
         socket.emit('historyMsg', chatRecords)
+        // listen for userMsg
+        socket.on('userMsg', async (msg) => {
+          // 找出 receivedUserId
+          const userList = socket.user.channel.split('-')
+          const receivedUserId = userList.find(userId => Number(userId) !== socket.user.id)
+          // 存到資料庫
+          const chat = await Chat.create({
+            UserId: socket.user.id,
+            receivedUserId,
+            message: msg,
+            time: moment().format('h:mm a'),
+            channel: socket.user.channel
+          })
+          const msgData = {
+            ChatId: chat.id,
+            UserId: chat.UserId,
+            receivedUserId: chat.receivedUserId,
+            username: socket.user.name,
+            avatar: socket.user.avatar,
+            text: msg,
+            time: chat.time,
+            msgType: ''
+          }
+          // 發送訊息資訊給前端
+          io.to(socket.user.channel).emit('chatMsg', msgData)
+          // 未讀訊息存入 UnreadChat
+          await UnreadChat.create({
+            ChatId: chat.id,
+            UserId: receivedUserId
+          })
+        })
       } else {
         // 告訴前端 user 不存在
         socket.emit('findUser', `can not find userId: ${userId}!`)
