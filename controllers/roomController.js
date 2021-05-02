@@ -199,6 +199,10 @@ const roomController = {
       })
       joinedRooms = joinedRooms.map(room => room.ChatRoomId)
 
+      if (!joinedRooms.length) {
+        return res.status(200).json([])
+      }
+
       let messages = await sequelize.query(
         `
         SELECT *            
@@ -223,6 +227,32 @@ const roomController = {
           replacements: { chatRoomIds: joinedRooms, currentUserId }
         }
       )
+
+      if (!messages.length) {
+        let chatAttendee = await JoinRoom.findAll({
+          raw: true,
+          nest: true,
+          where: {
+            ChatRoomId: joinedRooms,
+            UserId: {
+              $notLike: helpers.getUser(req).id
+            }
+          },
+          include: [User]
+        })
+        chatAttendee = chatAttendee.map(user => {
+          return {
+            userId: user.UserId,
+            name: user.User.name,
+            account: user.User.account,
+            avatar: user.User.avatar,
+            roomId: user.ChatRoomId,
+            message: null,
+            createdAt: null
+          }
+        })
+        return res.status(200).json(chatAttendee)
+      }
 
       messages = messages.map(message => {
         return {
