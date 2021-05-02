@@ -39,7 +39,7 @@ function formatMessage (username, text, msgType) {
     username,
     text,
     // time: moment().format('h:mm a'),
-    time: moment.utc().local().format('h:mm a'),
+    time: moment.utc().locale('zh_TW').utcOffset('+08:00').format('h:mm a'),
     msgType
   }
 }

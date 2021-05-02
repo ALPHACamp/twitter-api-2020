@@ -4,7 +4,6 @@ const User = db.User
 const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg } = require('./utils')
 const moment = require('moment')
-// moment.locale('zh_TW')
 
 const users = []
 const botName = 'Chat Bot'
@@ -53,8 +52,7 @@ module.exports = (io) => {
         UserId: socket.user.id,
         receivedUserId: 0,
         message: msg,
-        // time: moment().format('h:mm a'),
-        time: moment.utc().local().format('h:mm a'),
+        time: moment.utc().locale('zh_TW').utcOffset('+08:00').format('h:mm a'),
         channel: socket.user.channel
       })
       const msgData = {
@@ -102,7 +100,7 @@ module.exports = (io) => {
             UserId: socket.user.id,
             receivedUserId,
             message: msg,
-            time: moment().format('h:mm a'),
+            time: moment.utc().locale('zh_TW').utcOffset('+08:00').format('h:mm a'),
             channel: socket.user.channel
           })
           const msgData = {
