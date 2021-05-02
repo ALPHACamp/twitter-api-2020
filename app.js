@@ -158,6 +158,19 @@ global.io.on('connection', socket => {
       .emit('notification', { ...user, type: 4 })
   })
 
+  // follow
+  socket.on('follow', async data => {
+    await saveData({
+      id: data.currentUserId,
+      currentUserId: data.userId,
+      type: 2
+    })
+    const user = await getUserInfo(data.currentUserId)
+    socket.broadcast
+      .to(`self ${data.userId}`)
+      .emit('notification', { ...user, type: 4 })
+  })
+
   // join
   socket.on('join', async ({ username, roomId, userId }) => {
     const user = await addUser({
