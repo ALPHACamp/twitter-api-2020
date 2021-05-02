@@ -1,6 +1,7 @@
 const db = require('../models')
 const JoinRoom = db.JoinRoom
 const User = db.User
+const Notification = db.Notification
 
 const PublicRoomId = 4
 const users = []
@@ -9,8 +10,9 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
   const user = { socketId, roomId, userId, username }
   users.push(user)
   if (Number(user.roomId) === PublicRoomId) {
-    // 不該存入重複的 user & room 的組合，要加 socketId 嗎？
-    await JoinRoom.create({ UserId: userId, ChatRoomId: roomId })
+    await JoinRoom.findOrCreate({
+      where: { UserId: userId, ChatRoomId: roomId }
+    })
   }
   return user
 }
@@ -95,6 +97,18 @@ const updateTime = async (UserId, ChatRoomId) => {
   )
 }
 
+const saveData = async data => {
+  console.log('data - saveData', saveData)
+  await Notification.create({
+    UserId: data.id,
+    otherUserId: data.currentUserId,
+    TweetId: data.tweetId ? data.tweetId : null,
+    ReplyId: data.replyId ? data.replyId : null,
+    type: data.type
+  })
+  console.log('saveData success!')
+}
+
 module.exports = {
   addUser,
   getUser,
@@ -104,5 +118,6 @@ module.exports = {
   getAuthors,
   getUserInfo,
   getOtherUser,
-  updateTime
+  updateTime,
+  saveData
 }
