@@ -22,7 +22,9 @@ const getUser = async socketId => {
 }
 
 const getUserInfo = async userId => {
-  const user = User.findByPk(userId)
+  let user = await User.findByPk(userId)
+  user = user.toJSON()
+  console.log('user - getUserInfo', user)
   if (!user) return null
   return {
     id: user.id,
@@ -86,6 +88,13 @@ const getOtherUser = async (userId, roomId) => {
   return user.UserId
 }
 
+const updateTime = async (UserId, ChatRoomId) => {
+  await JoinRoom.update(
+    { updateAt: Date.now() },
+    { where: { UserId, ChatRoomId } }
+  )
+}
+
 module.exports = {
   addUser,
   getUser,
@@ -94,5 +103,6 @@ module.exports = {
   users,
   getAuthors,
   getUserInfo,
-  getOtherUser
+  getOtherUser,
+  updateTime
 }

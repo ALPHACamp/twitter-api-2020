@@ -169,13 +169,11 @@ const roomController = {
       // console.log('users:', users)
 
       if (!users) {
-        return res
-          .status(200)
-          .json({
-            status: 'error',
-            message: 'All users are in existing chats',
-            availableUsers: null
-          })
+        return res.status(200).json({
+          status: 'error',
+          message: 'All users are in existing chats',
+          availableUsers: null
+        })
       }
 
       const availableUsers = users.map(user => ({
@@ -185,13 +183,8 @@ const roomController = {
         avatar: user.avatar
       }))
 
-      return res
-        .status(200)
-        .json({
-          availableUsers
-        })
-    }
-    catch (error) {
+      return res.status(200).json(availableUsers)
+    } catch (error) {
       next(error)
     }
   },
@@ -244,6 +237,41 @@ const roomController = {
       })
 
       res.status(200).json(messages)
+    } catch (error) {
+      next(error)
+    }
+  },
+  countUnreadMsg: async (req, res, next) => {
+    try {
+      const currentUserId = req.user.id
+      let joinedRooms = await JoinRoom.findAll({
+        raw: true,
+        nest: true,
+        attributes: ['ChatRoomId'],
+        where: { UserId: helpers.getUser(req).id, ChatRoomId: { $not: 4 } }
+      })
+      joinedRooms = joinedRooms.map(room => room.ChatRoomId)
+
+      let unreads = await sequelize.query(
+        `
+        SELECT m1.id           
+        FROM Messages AS m2
+        LEFT JOIN Messages AS m1
+        ON m1.id = m2.id
+        LEFT JOIN ChatRooms 
+        ON ChatRooms.id = m2.ChatRoomId
+        JOIN JoinRooms AS j1
+        ON j1.ChatRoomId = ChatRooms.id
+        LEFT JOIN Users 
+        ON j1.UserId = Users.id
+        WHERE m2.createdAt > j1.updatedAt AND j1.UserId = ((:currentUserId)) AND m1.ChatRoomId IN (:chatRoomIds);
+      `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: { chatRoomIds: joinedRooms, currentUserId }
+        }
+      )
+      res.status(200).json(unreads.length)
     } catch (error) {
       next(error)
     }

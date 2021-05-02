@@ -15,7 +15,8 @@ const {
   getUsersInRoom,
   getAuthors,
   getUserInfo,
-  getOtherUser
+  getOtherUser,
+  updateTime
 } = require('./utils/users')
 
 const app = express()
@@ -43,7 +44,7 @@ global.io = socketio(server, {
       'http://localhost:8080',
       'https://ivyhungtw.github.io/simple-twitter'
     ],
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'DELETE'],
     transports: ['websocket', 'polling'],
     credentials: true
   },
@@ -62,26 +63,35 @@ global.io.on('connection', socket => {
 
     console.log('data.rooms', data.rooms)
 
+    let rooms = []
     if (!data.rooms) {
       const authors = await getAuthors(userId)
 
       console.log('authors - start session', authors)
 
       if (authors) {
-        const rooms = authors.map(account => {
+        rooms = authors.map(account => {
           socket.join(`# ${account}`)
           return `# ${account}`
         })
-        socket.emit('set session', { rooms })
       }
+      console.log('socket.rooms1111', socket.rooms)
+
+      rooms.push(`self ${userId}`)
+
+      console.log('rooms1111', rooms)
     } else {
-      const rooms = data.rooms
+      rooms = data.rooms
       rooms.forEach(room => {
         socket.join(room)
       })
-      rooms.push(`self ${userId}`)
-      socket.emit('set session', { rooms })
+
+      console.log('socket.rooms2222', socket.rooms)
+
+      console.log('rooms2222', rooms)
     }
+
+    socket.emit('set session', { rooms })
   })
 
   // subscription
@@ -102,15 +112,14 @@ global.io.on('connection', socket => {
   socket.on('cancel subscription', (data, account) => {
     console.log('account - cancel subscription', account)
     socket.leave(`# ${account}`)
-    const rooms = data.rooms
-    const index = rooms.findIndex(room => room === `# ${account}`)
-    // set session
-    if (index !== -1) {
-      rooms.splice(index, 1)
-      socket.emit('set session', { rooms })
-    } else {
-      socket.emit('set session', { rooms: [`# ${account}`] })
-    }
+    let rooms = data.rooms
+    console.log('rooms1 - cancel subscription', rooms)
+
+    rooms ? rooms.push(`# ${account}`) : (rooms = [`# ${account}`])
+
+    console.log('rooms2 - cancel subscription', rooms)
+
+    socket.emit('set session', { rooms })
   })
 
   // notification
@@ -120,7 +129,7 @@ global.io.on('connection', socket => {
     console.log('user - notification', user)
     if (user) {
       socket.broadcast
-        .to(user.account)
+        .to(`# ${user.account}`)
         .emit('notification', { ...user, tweet, tweetId })
     }
   })
@@ -134,6 +143,9 @@ global.io.on('connection', socket => {
       username
     })
     socket.join(user.roomId)
+    await updateTime(userId, roomId)
+
+    console.log('socket.rooms - join', socket.rooms)
 
     // count users
     const usersInRoom = await getUsersInRoom(user.roomId)
@@ -154,11 +166,11 @@ global.io.on('connection', socket => {
     await Message.create({
       UserId: user.userId,
       ChatRoomId: user.roomId,
-      message: msg
+      message: msg.message
     })
     io.to(user.roomId).emit(
       'chat message',
-      generateMessage(msg, user.userId, user.avatar)
+      generateMessage(msg.message, user.userId, user.avatar)
     )
 
     // Event Acknowledgement
@@ -192,13 +204,24 @@ global.io.on('connection', socket => {
         .to(`self ${otherUser}`)
         .emit(
           'new private chat message',
-          generateMessage(msg.message, user.userId, user.avatar)
+          generateMessage(msg.message, user.userId, user.avatar),
+          user.roomId
         )
       console.log('done!')
     }
 
     // Event Acknowledgement
     callback()
+  })
+
+  // user switch to other private room
+  socket.on('leave', async (userId, roomId) => {
+    console.log('leaveeeeeeee!', roomId)
+    if (roomId) {
+      socket.leave(`${roomId}`)
+      await updateTime(userId, roomId)
+    }
+    console.log('socket.rooms - leave', socket.rooms)
   })
 
   socket.on('disconnect', async () => {
