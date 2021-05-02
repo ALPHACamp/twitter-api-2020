@@ -3,6 +3,9 @@ const ChatRoom = db.ChatRoom
 const JoinRoom = db.JoinRoom
 const User = db.User
 const Message = db.Message
+const Notification = db.Notification
+const Tweet = db.Tweet
+const Reply = db.Reply
 const helpers = require('../_helpers')
 const { countUsers, users } = require('../utils/users')
 
@@ -303,6 +306,41 @@ const roomController = {
       )
       res.status(200).json(unreads.length)
     } catch (error) {
+      next(error)
+    }
+  },
+
+  getNotifications: async (req, res, next) => {
+    try {
+      let notifications = await Notification.findAll({
+        raw: true,
+        nest: true,
+        where: { otherUserId: helpers.getUser(req).id },
+        include: [User, Tweet, Reply]
+      })
+      // console.log(notifications)
+
+      if (!notifications) {
+        return res.json(null)
+      }
+
+      notifications = notifications.map(el => ({
+        userId: el.userId,
+        name: el.User.name,
+        avatar: el.User.avatar,
+        tweetId: el.Tweet.id,
+        tweet: el.Tweet.description,
+        replyId: el.Reply.id,
+        reply: el.Reply.comment,
+        type: el.type
+      }))
+      return res
+        .status(200)
+        .json(
+          notifications
+        )
+    }
+    catch (error) {
       next(error)
     }
   }

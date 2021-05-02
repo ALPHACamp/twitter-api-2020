@@ -8,6 +8,7 @@ router
   .post(roomController.createRoom)
   .get(roomController.getRoomsByUser)
 router.route('/availableUsers').get(roomController.getAvailableUsers)
+router.route('/notifications').get(roomController.getNotifications)
 router.route('/private/unread').get(roomController.countUnreadMsg)
 router.route('/:roomId').get(roomController.getRoom)
 router.route('/:roomId/messages').post(roomController.sendMessage)
