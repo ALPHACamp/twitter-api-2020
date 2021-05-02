@@ -17,7 +17,16 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
   return user
 }
 
-const getUser = async socketId => {
+const getUser = async (socketId, userId) => {
+  if (userId) {
+    const userInfo = await User.findByPk(userId)
+    return {
+      id: userInfo.id,
+      account: userInfo.account,
+      name: userInfo.name,
+      avatar: userInfo.avatar
+    }
+  }
   const user = users.find(user => user.socketId === socketId)
   const userInfo = await User.findByPk(user.userId)
   return { ...user, avatar: userInfo.avatar }

@@ -254,7 +254,7 @@ global.io.on('connection', socket => {
   // private
   socket.on('private chat message', async (msg, callback) => {
     console.log('msg - private chat message', msg)
-    const user = await getUser(socket.id)
+    const user = await getUser(socket.id, msg.userId)
     // 要在這裡 create 還是在 roomController 裡面？
     await Message.create({
       UserId: msg.userId,
