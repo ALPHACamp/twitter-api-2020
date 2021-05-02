@@ -131,7 +131,7 @@ global.io.on('connection', socket => {
     if (user) {
       socket.broadcast
         .to(`# ${user.account}`)
-        .emit('notification', { ...user, tweet, tweetId })
+        .emit('notification', { ...user, tweet, tweetId, type: 1 })
     }
   })
 
@@ -143,6 +143,19 @@ global.io.on('connection', socket => {
       currentUserId,
       type: 1
     })
+  })
+
+  // like
+  socket.on('like', async data => {
+    await saveData({
+      id: data.currentUserId,
+      currentUserId: data.userId,
+      type: 4
+    })
+    const user = await getUserInfo(data.currentUserId)
+    socket.broadcast
+      .to(`self ${data.userId}`)
+      .emit('notification', { ...user, type: 4 })
   })
 
   // join
