@@ -10,32 +10,36 @@ const notifyController = {
       let notifies = await Notify.findAll({
         raw: true,
         nest: true,
+        limit: 20,
         where: {
-          userId: getUser(req).id,
+          receiverId: getUser(req).id,
         },
         order: [['createdAt', 'DESC']],
-        include: [{ model: Tweet, include: [User] }]
+        include: [{ model: User, as: 'Sender' }]
       })
 
       notifies = notifies.map(notify => {
         return {
           id: notify.id,
           readStatus: notify.readStatus,
-          user: {
-            id: notify.Tweet.User.id,
-            account: notify.Tweet.User.account,
-            name: notify.Tweet.User.name,
-            avatar: notify.Tweet.User.avatar
+          objectId: notify.objectId,
+          objectType: notify.objectType,
+          objectText: notify.objectText,
+          createdAt: notify.createdAt,
+          Sender: {
+            id: notify.Sender.id,
+            account: notify.Sender.account,
+            name: notify.Sender.name,
+            avatar: notify.Sender.avatar
           },
-          tweet: {
-            tweetId: notify.Tweet.id,
-            description: notify.Tweet.description,
-          },
-          createdAt: notify.createdAt
+
         }
       })
-      //回傳 userName,userId,avatar,text,description
-      return (res.json({ notifies }), next())
+      if (!notifies) {
+        return res.json({ message: "There aren't notification to this User." })
+      } else {
+        return (res.json({ notifies }), next())
+      }
 
     } catch (e) { return next(e) }
   },
@@ -58,8 +62,11 @@ const notifyController = {
       // 建立notify
       if (subscripts) {
         await subscripts.forEach(subscript => Notify.create({
-          tweetId: tweet[0].id,
-          userId: subscript.subscriberId
+          receiverId: subscript.subscriberId,
+          senderId: getUser(req).id,
+          objectId: tweet[0].id,
+          objectType: 'tweets',
+          objectText: tweet[0].description
         }))
       }
     } catch (e) {
@@ -69,9 +76,8 @@ const notifyController = {
   haveRead: async (req, res, next) => {
     try {
       let notifies = await Notify.findAll({
-        where: { userId: getUser(req).id }
+        where: { receiverId: getUser(req).id }
       })
-      console.log(notifies)
       notifies.forEach((notify) => {
         notify.update({ readStatus: true })
       })

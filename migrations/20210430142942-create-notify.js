@@ -20,7 +20,7 @@ module.exports = {
       objectType: {
         type: Sequelize.STRING
       },
-      ObjectText: {
+      objectText: {
         type: Sequelize.STRING
       },
       readStatus: {
