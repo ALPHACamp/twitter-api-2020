@@ -4,7 +4,7 @@ const User = db.User
 const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg } = require('./utils')
 const moment = require('moment')
-moment.locale('zh_TW')
+// moment.locale('zh_TW')
 
 const users = []
 const botName = 'Chat Bot'
@@ -33,7 +33,7 @@ module.exports = (io) => {
       connectionCount[socket.user.id] = 1
       if (socket.user.channel === 'publicRoom') {
         // 加入聊天室訊息
-        socket.to(socket.user.channel).emit('userOnline', formatMessage(botName, `${socket.user.name} has joined the chat`, 'userOnline'))
+        socket.to(socket.user.channel).emit('userOnline', formatMessage(botName, `${socket.user.name} 上線`, 'userOnline'))
       }
     } else {
       // 計算單一 user connection 次數
@@ -53,7 +53,8 @@ module.exports = (io) => {
         UserId: socket.user.id,
         receivedUserId: 0,
         message: msg,
-        time: moment().format('h:mm a'),
+        // time: moment().format('h:mm a'),
+        time: moment.utc().local().format('h:mm a'),
         channel: socket.user.channel
       })
       const msgData = {
@@ -193,7 +194,7 @@ module.exports = (io) => {
         users.splice(userIndex(users, socket.user.id), 1)
         // 離開聊天室訊息
         if (socket.user.channel === 'publicRoom') {
-          io.to(socket.user.channel).emit('userOffline', formatMessage(botName, `${socket.user.name} has left the chat`, 'userOffline'))
+          io.to(socket.user.channel).emit('userOffline', formatMessage(botName, `${socket.user.name} 下線`, 'userOffline'))
         }
       }
 

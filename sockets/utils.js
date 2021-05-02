@@ -38,7 +38,8 @@ function formatMessage (username, text, msgType) {
   return {
     username,
     text,
-    time: moment().format('h:mm a'),
+    // time: moment().format('h:mm a'),
+    time: moment.utc().local().format('h:mm a'),
     msgType
   }
 }
