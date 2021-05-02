@@ -102,7 +102,12 @@
         if (input.value) {
           socket.emit(
             'private chat message',
-            { message: input.value, newMessage: false },
+            {
+              message: input.value,
+              newMessage: false,
+              roomId: room,
+              userId: 2
+            },
             () => {
               console.log('Delivered!')
             }
@@ -124,6 +129,8 @@
       })
 
       socket.emit('join', { username, roomId: room, userId: 2 })
+
+      // socket.emit('leave', 2, room)
     </script>
   </body>
 </html>

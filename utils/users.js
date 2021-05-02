@@ -17,7 +17,16 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
   return user
 }
 
-const getUser = async socketId => {
+const getUser = async (socketId, userId) => {
+  if (userId) {
+    const userInfo = await User.findByPk(userId)
+    return {
+      id: userInfo.id,
+      account: userInfo.account,
+      name: userInfo.name,
+      avatar: userInfo.avatar
+    }
+  }
   const user = users.find(user => user.socketId === socketId)
   const userInfo = await User.findByPk(user.userId)
   return { ...user, avatar: userInfo.avatar }
@@ -26,7 +35,7 @@ const getUser = async socketId => {
 const getUserInfo = async userId => {
   let user = await User.findByPk(userId)
   user = user.toJSON()
-  console.log('user - getUserInfo', user)
+
   if (!user) return null
   return {
     id: user.id,
@@ -52,20 +61,23 @@ const getUsersInRoom = async roomId => {
   return filteredUsers
 }
 
-const removeUser = async socketId => {
-  const index = users.findIndex(user => user.socketId === socketId)
-  if (index !== -1) {
-    const user = users.splice(index, 1)[0]
+const removeUser = async (socketId, roomId, userId) => {
+  const originalRoomId = roomId ? roomId : PublicRoomId
+  const index = users.findIndex(
+    user => user.socketId === socketId && user.roomId === originalRoomId
+  )
 
-    // Don't delete private room's record
-    if (Number(user.roomId) === PublicRoomId) {
-      await JoinRoom.destroy({
-        where: { UserId: user.userId, ChatRoomId: user.roomId }
-      })
-    }
+  if (index === -1) return null
 
-    return user
-  }
+  const user = users.splice(index, 1)[0]
+  userId = userId || user.userId
+  await updateTime(userId, PublicRoomId)
+
+  // private room
+  if (roomId) return null
+
+  // public room
+  return user
 }
 
 const getAuthors = async userId => {
@@ -83,7 +95,6 @@ const getAuthors = async userId => {
 }
 
 const getOtherUser = async (userId, roomId) => {
-  console.log('userId+roomId', userId, roomId)
   const user = await JoinRoom.findOne({
     where: { UserId: { $not: userId }, ChatRoomId: roomId }
   })
@@ -98,7 +109,6 @@ const updateTime = async (UserId, ChatRoomId) => {
 }
 
 const saveData = async data => {
-  console.log('data - saveData', saveData)
   await Notification.create({
     UserId: data.id,
     otherUserId: data.currentUserId,
@@ -106,7 +116,6 @@ const saveData = async data => {
     ReplyId: data.replyId ? data.replyId : null,
     type: data.type
   })
-  console.log('saveData success!')
 }
 
 module.exports = {
