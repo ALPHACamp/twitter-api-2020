@@ -148,7 +148,7 @@ const tweetController = {
         return res.json({ status: 'error', message: "comment max length is 140 words" })
       }
       await Reply.create({ TweetId, UserId, comment })
-      return res.json({ status: 'success', message: 'Reply has built successfully!' })
+      return (res.json({ status: 'success', message: 'Reply has built successfully!' }), next())
 
     } catch (e) {
       console.log(e)
