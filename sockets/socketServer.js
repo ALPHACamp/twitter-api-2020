@@ -44,10 +44,13 @@ module.exports = (io) => {
     io.to(socket.user.channel).emit('userList', users)
 
     // listen for userMsg
-    socket.on('userMsg', async (msg) => {
+    socket.on('userMsg', async (msg) => { 
+      const userList = socket.user.channel.split('-')
+      const receivedUserId = userList.find(user => user !== socket.user.id)
       // 存到資料庫
       const chat = await Chat.create({
         UserId: socket.user.id,
+        receivedUserId,
         message: msg,
         time: moment().format('h:mm a'),
         channel: socket.user.channel
@@ -55,6 +58,7 @@ module.exports = (io) => {
       const msgData = {
         ChatId: chat.id,
         UserId: chat.UserId,
+        receivedUserId: chat.receivedUserId,
         username: socket.user.name,
         avatar: socket.user.avatar,
         text: msg,
@@ -89,7 +93,7 @@ module.exports = (io) => {
         socket.emit('findUser', `user: ${username} has been found~`)
         // 建立房間
         const userList = []
-        userList.push(username, socket.user.name)
+        userList.push(user.id, socket.user.id)
         userList.sort()
         const roomName = userList.join('-')
         // 更換使用者頻道
@@ -106,8 +110,8 @@ module.exports = (io) => {
     })
 
     // 列出私人歷史訊息
-    // const allHistoryMsg = await Chat.findAll({ where: { UserId: socket.user.id }})
-    // allHistoryMsg
+    const allHistoryMsg = await Chat.findAll({ where: { receivedUserId: socket.user.id } })
+    // allHistoryMsg.
     // socket.emit('')
 
     // 是否有未讀訊息

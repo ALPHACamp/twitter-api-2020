@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
     },
     UserId: DataTypes.INTEGER,
+    receivedUserId: DataTypes.INTEGER,
     message: DataTypes.TEXT,
     time: DataTypes.STRING,
     channel: DataTypes.STRING
