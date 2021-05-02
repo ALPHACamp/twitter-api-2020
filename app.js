@@ -6,10 +6,12 @@ const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 const session = require('express-session')
 const cors = require('cors')
+const http = require('http')
 
 const passport = require('./config/passport')
 
 const app = express()
+const httpServer = http.createServer(app)
 const port = process.env.PORT
 
 app.use(cors())
@@ -20,8 +22,9 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUniniti
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.listen(port, () => console.log(`App listening on port ${port}!`))
+httpServer.listen(port, () => console.log(`App listening on port ${port}!`))
 
 require('./routes')(app)
+require('./config/socket').socket(httpServer)
 
 module.exports = app
