@@ -31,10 +31,10 @@ const socket = (httpServer) => {
       const index = onlineUsers.findIndex(user => user.id === userId)
       if (index < 0) { return }
       const data = {
-        user: onlineUsers.splice(index, 1)[0],
+        offline: onlineUsers.splice(index, 1)[0],
         onlineUsers
       }
-      io.emit('public-room-offline', data)
+      io.emit('public-room-online', data)
     })
 
     socket.emit('welcome', '歡迎連接 socket')
@@ -93,7 +93,7 @@ const socket = (httpServer) => {
         user.socketId = socket.id
         onlineUsers.push(user)
         const data = {
-          user,
+          online: user,
           onlineUsers
         }
         io.emit('public-room-online', data)
@@ -110,10 +110,10 @@ const socket = (httpServer) => {
       const index = onlineUsers.findIndex(user => user.id === userId)
       if (index < 0) { return }
       const data = {
-        user: onlineUsers.splice(index, 1)[0],
+        offline: onlineUsers.splice(index, 1)[0],
         onlineUsers
       }
-      io.emit('public-room-offline', data)
+      io.emit('public-room-online', data)
     })
   })
 }
