@@ -26,7 +26,7 @@ const socket = (httpServer) => {
     // users inform server that them are offline
     socket.on('disconnect', () => {
       console.log('客戶端停止連接')
-      if (socket.user) { return }
+      if (!socket.user) { return }
       const userId = socket.user.id
       if (!userId) { return }
       const index = onlineUsers.findIndex(user => user.id === userId)
