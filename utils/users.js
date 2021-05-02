@@ -105,7 +105,7 @@ const updateTime = async (UserId, ChatRoomId) => {
 }
 
 const saveData = async data => {
-  console.log('data - saveData', saveData)
+  console.log('data - saveData', data)
   await Notification.create({
     UserId: data.id,
     otherUserId: data.currentUserId,

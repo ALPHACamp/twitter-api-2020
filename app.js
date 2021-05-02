@@ -140,6 +140,7 @@ global.io.on('connection', socket => {
 
   // Tweet
   socket.on('tweet', async (data, currentUserId) => {
+    console.log(`====== Receive tweet event from ${currentUserId}`)
     await saveData({
       id: data.id,
       tweetId: data.tweetId,
