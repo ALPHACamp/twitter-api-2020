@@ -9,7 +9,7 @@ const socket = (httpServer) => {
   const options = {
     allowEIO3: true,
     cors: {
-      origin: 'http://localhost:8080',
+      origin: ['http://localhost:8080', 'https://tingchun0113.github.io'],
       methods: ['GET', 'POST'],
       credentials: true
     }
