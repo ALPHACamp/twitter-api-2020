@@ -102,7 +102,7 @@
         if (input.value) {
           socket.emit(
             'private chat message',
-            { message: input.value, newMessage: true },
+            { message: input.value, newMessage: false },
             () => {
               console.log('Delivered!')
             }

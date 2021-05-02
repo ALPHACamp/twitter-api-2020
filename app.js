@@ -119,14 +119,6 @@ global.io.on('connection', socket => {
     console.log('rooms2 - cancel subscription', rooms)
 
     socket.emit('set session', { rooms })
-    // const index = rooms.findIndex(room => room === `# ${account}`)
-    // set session
-    // if (index !== -1) {
-    //   rooms.splice(index, 1)
-    //   socket.emit('set session', { rooms })
-    // } else {
-    //   socket.emit('set session', { rooms: [`# ${account}`] })
-    // }
   })
 
   // notification
@@ -150,6 +142,8 @@ global.io.on('connection', socket => {
       username
     })
     socket.join(user.roomId)
+
+    console.log('socket.rooms - join', socket.rooms)
 
     // count users
     const usersInRoom = await getUsersInRoom(user.roomId)
@@ -216,6 +210,15 @@ global.io.on('connection', socket => {
 
     // Event Acknowledgement
     callback()
+  })
+
+  // user switch to other private room
+  socket.on('leave', async roomId => {
+    console.log('leaveeeeeeee!', roomId)
+    if (roomId) {
+      socket.leave(`${roomId}`)
+    }
+    console.log('socket.rooms - leave', socket.rooms)
   })
 
   socket.on('disconnect', async () => {
