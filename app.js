@@ -256,17 +256,17 @@ global.io.on('connection', socket => {
     const user = await getUser(socket.id)
     // 要在這裡 create 還是在 roomController 裡面？
     await Message.create({
-      UserId: user.userId,
+      UserId: msg.userId,
       ChatRoomId: msg.roomId,
       message: msg.message
     })
     console.log('msg.roomId - private chat message', msg.roomId)
     io.to(msg.roomId).emit(
       'private chat message',
-      generateMessage(msg.message, user.userId, user.avatar)
+      generateMessage(msg.message, msg.userId, user.avatar)
     )
 
-    const otherUser = await getOtherUser(user.userId, msg.roomId)
+    const otherUser = await getOtherUser(msg.userId, msg.roomId)
     console.log('otherUser', otherUser)
 
     socket.broadcast.to(`self ${otherUser}`).emit('notice from private', 1)
@@ -278,7 +278,7 @@ global.io.on('connection', socket => {
         .to(`self ${otherUser}`)
         .emit(
           'new private chat message',
-          generateMessage(msg.message, user.userId, user.avatar),
+          generateMessage(msg.message, msg.userId, user.avatar),
           msg.roomId
         )
       console.log('done!', msg.roomId)
