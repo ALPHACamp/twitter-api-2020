@@ -106,7 +106,8 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const currentUser = await User.findByPk(helpers.getUser(req).id, {
-        include: { model: User, as: 'Followings' }
+        include: [{ model: User, as: 'Followings' },
+        { model: User, as: 'Authors' }]
       })
       let user = await User.findByPk(req.params.id, {
         include: [
@@ -121,6 +122,12 @@ const userController = {
       currentUser.Followings.forEach(following => {
         followingsId.push(following.id)
       })
+      // 該使用者是否有訂閱
+      const authorsId = []
+      currentUser.Authors.forEach(author => {
+        authorsId.push(author.id)
+      })
+
       // 整理回傳資料
       user = {
         id: user.id,
@@ -132,7 +139,8 @@ const userController = {
         tweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
         followerCount: user.Followers.length,
-        isFollowing: followingsId.includes(user.id)
+        isFollowing: followingsId.includes(user.id),
+        isSubscript: authorsId.includes(user.id)
       }
       return res.json(user)
     } catch (e) {

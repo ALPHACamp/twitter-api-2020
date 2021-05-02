@@ -1,21 +1,31 @@
-'use strict'
+'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Replies', {
+    return queryInterface.createTable('Notifies', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      UserId: {
+      receiverId: {
         type: Sequelize.INTEGER
       },
-      TweetId: {
+      senderId: {
         type: Sequelize.INTEGER
       },
-      comment: {
-        type: Sequelize.TEXT
+      objectId: {
+        type: Sequelize.INTEGER
+      },
+      objectType: {
+        type: Sequelize.STRING
+      },
+      objectText: {
+        type: Sequelize.STRING
+      },
+      readStatus: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,
@@ -25,9 +35,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    })
+    });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Replies')
+    return queryInterface.dropTable('Notifies');
   }
-}
+};
