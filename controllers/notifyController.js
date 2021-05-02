@@ -1,6 +1,6 @@
 const db = require('../models')
 const { get } = require('../routes/apis')
-const { Notify, Tweet, Subscript, User, Reply } = db
+const { Notify, Tweet, Subscript, User, Reply, Like } = db
 const { getUser } = require('../_helpers')
 
 const notifyController = {
@@ -43,7 +43,7 @@ const notifyController = {
 
     } catch (e) { return next(e) }
   },
-  // 新增通知 tweet 
+  // 建立 tweet 通知 
   addTweetNotice: async (req, res, next) => {
     try {
       // 抓出新建立的tweet
@@ -84,7 +84,7 @@ const notifyController = {
         order: [['createdAt', 'DESC']],
         include: [Tweet]
       })
-      // 當回覆者跟作者相同則不建立
+      // 建立Notify , 當回覆者跟作者相同則不建立
       if (reply[0].Tweet.UserId !== getUser(req).id) {
         await Notify.create({
           receiverId: reply[0].Tweet.UserId,
@@ -97,6 +97,31 @@ const notifyController = {
     } catch (e) { return next(e) }
   }
   ,
+  // 建立 Like 通知
+  addLikeNotice: async (req, res, next) => {
+    try {
+      // 抓出Like相關資料
+      const like = await Like.findAll({
+        raw: true,
+        nest: true,
+        limit: 1,
+        order: [['createdAt', 'DESC']],
+        include: [Tweet]
+      })
+      // 建立Notify , 當Like者跟作者相同則不建立
+      if (like[0].Tweet.UserId !== getUser(req).id) {
+        await Notify.create({
+          receiverId: like[0].Tweet.UserId,
+          senderId: getUser(req).id,
+          objectId: like[0].id,
+          objectType: 'likes',
+          objectText: null
+        })
+      }
+    } catch (e) { return next(e) }
+  }
+  ,
+
   haveRead: async (req, res, next) => {
     try {
       let notifies = await Notify.findAll({

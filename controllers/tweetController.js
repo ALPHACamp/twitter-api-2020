@@ -167,7 +167,7 @@ const tweetController = {
         })
       }
 
-      return res.json({ status: 'success', message: 'Like has built successfully!' })
+      return (res.json({ status: 'success', message: 'Like has built successfully!' }), next())
     } catch (e) { return res.json({ status: 'error', message: 'Failed to build a like.' }) }
   },
   tweetUnlike: async (req, res) => {
