@@ -49,23 +49,15 @@ global.io = socketio(server, {
   allowEIO3: true
 })
 global.io.on('connection', socket => {
-  console.log('connected!')
-
   // session
   socket.on('start session', async (data, userId) => {
     // test join public room
     // socket.join('4')
     socket.join(`self ${userId}`)
-    console.log('socket.rooms', socket.rooms)
-    console.log('userId', userId)
-
-    console.log('data.rooms', data.rooms)
 
     let rooms = []
     if (!data.rooms) {
       const authors = await getAuthors(userId)
-
-      console.log('authors - start session', authors)
 
       if (authors) {
         rooms = authors.map(account => {
@@ -73,20 +65,13 @@ global.io.on('connection', socket => {
           return `# ${account}`
         })
       }
-      console.log('socket.rooms1111', socket.rooms)
 
       rooms.push(`self ${userId}`)
-
-      console.log('rooms1111', rooms)
     } else {
       rooms = data.rooms
       rooms.forEach(room => {
         socket.join(room)
       })
-
-      console.log('socket.rooms2222', socket.rooms)
-
-      console.log('rooms2222', rooms)
     }
 
     socket.emit('set session', { rooms })
@@ -94,7 +79,6 @@ global.io.on('connection', socket => {
 
   // subscription
   socket.on('subscription', (data, account) => {
-    console.log('account - subscription', account)
     socket.join(`# ${account}`)
     const rooms = data.rooms
     // set session
@@ -108,26 +92,21 @@ global.io.on('connection', socket => {
 
   // cancel subscription
   socket.on('cancel subscription', (data, account) => {
-    console.log('account - cancel subscription', account)
     socket.leave(`# ${account}`)
     let rooms = data.rooms
-    console.log('rooms1 - cancel subscription', rooms)
 
     if (rooms) {
       const index = rooms.findIndex(room => room === `# ${account}`)
       rooms.splice(index, 1)
     }
 
-    console.log('rooms2 - cancel subscription', rooms)
-
     socket.emit('set session', { rooms })
   })
 
   // notification
   socket.on('notification', async ({ userId, tweetId, tweet }) => {
-    console.log('info - notification', { userId, tweetId, tweet })
     const user = await getUserInfo(userId)
-    console.log('user - notification', user)
+
     if (user) {
       socket.broadcast
         .to(`# ${user.account}`)
@@ -137,7 +116,6 @@ global.io.on('connection', socket => {
 
   // Tweet
   socket.on('tweet', async (data, currentUserId) => {
-    console.log(`====== Receive tweet event from ${currentUserId}`)
     await saveData({
       id: data.id,
       tweetId: data.tweetId,
@@ -148,16 +126,12 @@ global.io.on('connection', socket => {
 
   // like
   socket.on('like', async data => {
-    console.log('===== receive like event =====')
-    console.log('data.userId - like', data.userId)
     await saveData({
       id: data.currentUserId,
       currentUserId: data.userId,
       type: 4
     })
     const user = await getUserInfo(data.currentUserId)
-
-    console.log('user - like', user)
 
     socket.broadcast
       .to(`self ${data.userId}`)
@@ -166,9 +140,6 @@ global.io.on('connection', socket => {
 
   // follow
   socket.on('follow', async data => {
-    console.log('===== receive follow event =====')
-    console.log('data.userId - follow', data.userId)
-
     await saveData({
       id: data.currentUserId,
       currentUserId: data.userId,
@@ -177,8 +148,6 @@ global.io.on('connection', socket => {
 
     const user = await getUserInfo(data.currentUserId)
 
-    console.log('user - follow', user)
-
     socket.broadcast
       .to(`self ${data.userId}`)
       .emit('notification', { ...user, type: 4 })
@@ -186,9 +155,6 @@ global.io.on('connection', socket => {
 
   // reply
   socket.on('reply', async data => {
-    console.log('===== receive reply event =====')
-    console.log('data.userId - reply', data.userId)
-
     await saveData({
       id: data.currentUserId,
       currentUserId: data.userId,
@@ -197,8 +163,6 @@ global.io.on('connection', socket => {
     })
 
     const user = await getUserInfo(data.currentUserId)
-
-    console.log('user - reply', user)
 
     socket.broadcast.to(`self ${data.userId}`).emit('notification', {
       ...user,
@@ -218,8 +182,6 @@ global.io.on('connection', socket => {
     })
     socket.join(user.roomId)
     await updateTime(userId, roomId)
-
-    console.log('socket.rooms - join', socket.rooms)
 
     // count users
     const usersInRoom = await getUsersInRoom(user.roomId)
@@ -253,7 +215,6 @@ global.io.on('connection', socket => {
 
   // private
   socket.on('private chat message', async (msg, callback) => {
-    console.log('msg - private chat message', msg)
     const user = await getUser(socket.id, msg.userId)
     // 要在這裡 create 還是在 roomController 裡面？
     await Message.create({
@@ -261,14 +222,12 @@ global.io.on('connection', socket => {
       ChatRoomId: msg.roomId,
       message: msg.message
     })
-    console.log('msg.roomId - private chat message', msg.roomId)
     io.to(msg.roomId).emit(
       'private chat message',
       generateMessage(msg.message, msg.userId, user.avatar)
     )
 
     const otherUser = await getOtherUser(msg.userId, msg.roomId)
-    console.log('otherUser', otherUser)
 
     socket.broadcast.to(`self ${otherUser}`).emit('notice from private', {
       roomId: msg.roomId,
@@ -278,7 +237,6 @@ global.io.on('connection', socket => {
 
     // notify another user
     if (msg.newMessage) {
-      console.log('newwwwwww')
       socket.broadcast
         .to(`self ${otherUser}`)
         .emit(
@@ -286,7 +244,6 @@ global.io.on('connection', socket => {
           generateMessage(msg.message, msg.userId, user.avatar),
           msg.roomId
         )
-      console.log('done!', msg.roomId)
     }
 
     // Event Acknowledgement
@@ -295,12 +252,10 @@ global.io.on('connection', socket => {
 
   // user switch to other private room
   socket.on('leave', async (userId, roomId) => {
-    console.log('leaveeeeeeee!', roomId)
     if (roomId) {
       socket.leave(`${roomId}`)
       await removeUser(socket.id, roomId, userId)
     }
-    console.log('socket.rooms - leave', socket.rooms)
   })
 
   socket.on('disconnect', async () => {
