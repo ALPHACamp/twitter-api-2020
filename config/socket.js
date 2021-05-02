@@ -46,20 +46,6 @@ const socket = (httpServer) => {
       io.emit('public-room-online', data)
     })
 
-    socket.emit('welcome', '歡迎連接 socket')
-
-    // users send messages to 'hello' chat room
-    socket.on('hello', (message) => {
-      console.log('客戶端回傳訊息：', message)
-      const data = {
-        id: null,
-        message,
-        time: new Date(),
-        user: socket.user
-      }
-      io.emit('welcome', data)
-    })
-
     // users send messages to 'public' chat room
     socket.on('public', async (message) => {
       try {
