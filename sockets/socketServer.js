@@ -22,8 +22,7 @@ module.exports = (io) => {
     socket.emit('userInfo', socket.user)
     // 找出歷史訊息，發送給前端
     const chatRecords = await historyMsg('publicRoom', Chat)
-    console.log('0', chatRecords)
-    socket.to('publicRoom').emit('historyMsg', chatRecords)
+    io.to('publicRoom').emit('historyMsg', chatRecords)
     // 若使用者第一次進來聊天室，則加入 users，並傳送系統歡迎訊息
     if (userIndex(users, socket.user.id) === -1) {
       // put userInfo to users
