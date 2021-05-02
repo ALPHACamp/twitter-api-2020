@@ -11,7 +11,6 @@ module.exports = {
       order: [['createdAt', 'ASC']]
     })
       .then(chat => {
-        console.log(chat[0])
         const data = chat.map(chat => ({
           id: chat.dataValues.id,
           message: chat.dataValues.message,

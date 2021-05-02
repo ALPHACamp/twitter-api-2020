@@ -1,4 +1,5 @@
 const { User, Chat, Room } = require('../models/index')
+const onlineUsers = [] // online users in public chat room
 const sendErrorMsh = (error) => {
   console.log(error)
   return socket.emit('error', error.toString())
@@ -22,12 +23,23 @@ const socket = (httpServer) => {
       console.log('客戶端開始連接')
     })
 
+    // users inform server that them are offline
     socket.on('disconnect', () => {
       console.log('客戶端停止連接')
+      const userId = socket.user.id
+      if (!userId) { return }
+      const index = onlineUsers.findIndex(user => user.id === userId)
+      if (index < 0) { return }
+      const data = {
+        user: onlineUsers.splice(index, 1)[0],
+        onlineUsers
+      }
+      socket.broadcast.emit('public-room-offline', data)
     })
 
     socket.emit('welcome', '歡迎連接 socket')
 
+    // users send messages to 'hello' chat room
     socket.on('hello', (message) => {
       console.log('客戶端回傳訊息：', message)
       const data = {
@@ -39,6 +51,7 @@ const socket = (httpServer) => {
       socket.broadcast.emit('welcome', data)
     })
 
+    // users send messages to 'public' chat room
     socket.on('public', async (message) => {
       try {
         const { userId, text } = message
@@ -61,6 +74,48 @@ const socket = (httpServer) => {
       } catch (error) {
         sendErrorMsh(error)
       }
+    })
+
+    // users inform server that them are online
+    socket.on('public-room-online', async (userId) => {
+      try {
+        if (!userId) {
+          socket.emit('error', 'No id.')
+          return
+        }
+        let user = await User.findByPk(userId, { attributes: ['id', 'name', 'avatar'] })
+        if (!user) {
+          socket.emit('error', 'User not found.')
+          return
+        }
+        user = user.toJSON()
+        socket.user = user
+        user.socketId = socket.id
+        onlineUsers.push(user)
+        const data = {
+          user,
+          onlineUsers
+        }
+
+        socket.emit('public-room-online', { onlineUsers })
+        socket.broadcast.emit('public-room-online', data)
+      } catch (error) {
+        console.log(error)
+        socket.emit('error', 'Something wrong, please try again later.')
+      }
+    })
+
+    // users inform server that them want to be setted as offline
+    socket.on('public-room-offline', (userId) => {
+      console.log('客戶端停止連接')
+      if (!userId) { return }
+      const index = onlineUsers.findIndex(user => user.id === userId)
+      if (index < 0) { return }
+      const data = {
+        user: onlineUsers.splice(index, 1)[0],
+        onlineUsers
+      }
+      socket.broadcast.emit('public-room-offline', data)
     })
   })
 }
