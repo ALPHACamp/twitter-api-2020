@@ -9,6 +9,8 @@ const uploadProfile = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'c
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followshipController = require('../controllers/followshipController')
+const subscriptController = require('../controllers/subscriptController')
+const notifyController = require('../controllers/notifyController')
 
 // 載入 authenticated & authenticatedAdmin
 const { authenticated } = require('../middleware/auth')
@@ -28,14 +30,19 @@ router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
 // routes : tweets
 router.get('/tweets', authenticated, tweetController.getTweets)
-router.post('/tweets', authenticated, tweetController.postTweet)
+router.post('/tweets', authenticated, tweetController.postTweet, notifyController.addTweetNotice)
 router.get('/tweets/:tweet_Id/replies', authenticated, tweetController.getReplies)
-router.post('/tweets/:tweet_Id/replies', authenticated, tweetController.postReply)
-router.post('/tweets/:tweet_Id/like', authenticated, tweetController.tweetLike)
+router.post('/tweets/:tweet_Id/replies', authenticated, tweetController.postReply, notifyController.addReplyNotice)
+router.post('/tweets/:tweet_Id/like', authenticated, tweetController.tweetLike, notifyController.addLikeNotice)
 router.post('/tweets/:tweet_Id/unlike', authenticated, tweetController.tweetUnlike)
 router.get('/tweets/:tweet_Id', authenticated, tweetController.getTweet)
 // routes : followships
-router.post('/followships/', authenticated, followshipController.addFollowing)
+router.post('/followships/', authenticated, followshipController.addFollowing, notifyController.addFollowNotice)
 router.delete('/followships/:userId', authenticated, followshipController.removeFollowing)
+//routes : subscripts
+router.post('/subscripts/', authenticated, subscriptController.addSubscript)
+router.delete('/subscripts/:userId', authenticated, subscriptController.removeSubscript)
+// routes : notifies
+router.get('/notifies/', authenticated, notifyController.getNotifies, notifyController.haveRead)
 
 module.exports = router
