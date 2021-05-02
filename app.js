@@ -15,7 +15,8 @@ const {
   getUsersInRoom,
   getAuthors,
   getUserInfo,
-  getOtherUser
+  getOtherUser,
+  updateTime
 } = require('./utils/users')
 
 const app = express()
@@ -213,10 +214,11 @@ global.io.on('connection', socket => {
   })
 
   // user switch to other private room
-  socket.on('leave', async roomId => {
+  socket.on('leave', async (userId, roomId) => {
     console.log('leaveeeeeeee!', roomId)
     if (roomId) {
       socket.leave(`${roomId}`)
+      updateTime(userId, roomId)
     }
     console.log('socket.rooms - leave', socket.rooms)
   })

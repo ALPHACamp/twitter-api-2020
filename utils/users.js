@@ -88,6 +88,13 @@ const getOtherUser = async (userId, roomId) => {
   return user.UserId
 }
 
+const updateTime = async (UserId, ChatRoomId) => {
+  await JoinRoom.update(
+    { updateAt: Date.now() },
+    { where: { UserId, ChatRoomId } }
+  )
+}
+
 module.exports = {
   addUser,
   getUser,
@@ -96,5 +103,6 @@ module.exports = {
   users,
   getAuthors,
   getUserInfo,
-  getOtherUser
+  getOtherUser,
+  updateTime
 }
