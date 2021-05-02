@@ -29,10 +29,18 @@ const socket = (httpServer) => {
       if (!socket.user) { return }
       const userId = socket.user.id
       if (!userId) { return }
-      const index = onlineUsers.findIndex(user => user.id === userId)
-      if (index < 0) { return }
+      const onlinedIndex = onlineUsers.findIndex(user => user.id === userId)
+      if (onlinedIndex < 0) { return }
+
+      const user = onlineUsers[onlinedIndex]
+      const socketIdIndex = user.socketId.indexOf(socket.id)
+      if (socketIdIndex < 0) { return }
+      user.socketId.splice(socketIdIndex, 1)
+
+      if (user.socketId.length > 0) { return }
+
       const data = {
-        offline: onlineUsers.splice(index, 1)[0],
+        offline: onlineUsers.splice(onlinedIndex, 1)[0],
         onlineUsers
       }
       io.emit('public-room-online', data)
@@ -84,15 +92,31 @@ const socket = (httpServer) => {
           socket.emit('error', 'No id.')
           return
         }
+
         let user = await User.findByPk(userId, { attributes: ['id', 'name', 'avatar'] })
         if (!user) {
           socket.emit('error', 'User not found.')
           return
         }
+
         user = user.toJSON()
         socket.user = user
-        user.socketId = socket.id
+        user.socketId = [socket.id]
+
+        const onlinedIndex = onlineUsers.findIndex(user => user.id === userId)
+        if (onlinedIndex >= 0) {
+          if (onlineUsers[onlinedIndex].socketId.includes(socket.id)) {
+            console.log('same socket id')
+            return
+          } else {
+            onlineUsers[onlinedIndex].socketId.push(socket.id)
+            console.log('different socket id')
+            console.log(onlineUsers[onlinedIndex])
+            return
+          }
+        }
         onlineUsers.push(user)
+
         const data = {
           online: user,
           onlineUsers
@@ -107,11 +131,20 @@ const socket = (httpServer) => {
     // users inform server that them want to be setted as offline
     socket.on('public-room-offline', (userId) => {
       console.log('客戶端停止連接')
+      userId = userId || socket.user.id
       if (!userId) { return }
-      const index = onlineUsers.findIndex(user => user.id === userId)
-      if (index < 0) { return }
+      const onlinedIndex = onlineUsers.findIndex(user => user.id === userId)
+      if (onlinedIndex < 0) { return }
+
+      const user = onlineUsers[onlinedIndex]
+      const socketIdIndex = user.socketId.indexOf(socket.id)
+      if (socketIdIndex < 0) { return }
+      user.socketId.splice(socketIdIndex, 1)
+
+      if (user.socketId.length > 0) { return }
+
       const data = {
-        offline: onlineUsers.splice(index, 1)[0],
+        offline: onlineUsers.splice(onlinedIndex, 1)[0],
         onlineUsers
       }
       io.emit('public-room-online', data)
