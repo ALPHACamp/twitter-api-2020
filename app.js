@@ -139,7 +139,7 @@ global.io.on('connection', socket => {
 
     if (user) {
       // Save to subscribers' notifications
-      const subscribers = getSubscribers(userId)
+      const subscribers = await getSubscribers(userId)
       if (subscribers) {
         await Promise.all(
           subscribers.map(subscriber => {

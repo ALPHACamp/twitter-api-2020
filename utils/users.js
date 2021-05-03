@@ -202,14 +202,18 @@ const saveData = async data => {
   })
 }
 
-const getSubscribers = userId => {
+const getSubscribers = async userId => {
   console.log('---- getSubscribers function ----')
   console.log('userId', userId)
 
-  const subscribers = req.user.Subscribers
+  const user = await User.findByPk(userId, {
+    include: [{ model: User, as: 'Subscribers' }]
+  })
+
+  const subscribers = user.dataValues.Subscribers
   console.log('subscribers', subscribers)
   if (subscribers) {
-    return subscribers.map(user => user.subscriberId)
+    return subscribers.map(user => user.id)
   }
   return null
 }
