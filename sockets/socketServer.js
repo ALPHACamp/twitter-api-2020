@@ -78,7 +78,8 @@ module.exports = (io) => {
         if (userCount <= 1) {
           await UnreadChat.create({
             ChatId: chat.id,
-            UserId: receivedUserId
+            UserId: receivedUserId,
+            channel: socket.user.channel
           })
         }
       }
