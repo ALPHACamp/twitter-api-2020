@@ -166,12 +166,19 @@ global.io.on('connection', socket => {
     console.log('===== receive like =====')
     console.log('data', data)
 
+    if (data.userId) {
+      data.userId = Number(data.userId)
+    }
+
     await saveData({
       id: data.currentUserId,
       currentUserId: data.userId,
       type: 4
     })
     const user = await getUserInfo(data.currentUserId)
+    console.log('user', user)
+
+    console.log(`broadcast to self ${data.userId}`)
 
     socket.broadcast
       .to(`self ${data.userId}`)
@@ -183,6 +190,10 @@ global.io.on('connection', socket => {
     console.log('===== receive follow =====')
     console.log('data', data)
 
+    if (data.userId) {
+      data.userId = Number(data.userId)
+    }
+
     await saveData({
       id: data.currentUserId,
       currentUserId: data.userId,
@@ -190,16 +201,23 @@ global.io.on('connection', socket => {
     })
 
     const user = await getUserInfo(data.currentUserId)
+    console.log('user', user)
+
+    console.log(`broadcast to self ${data.userId}`)
 
     socket.broadcast
       .to(`self ${data.userId}`)
-      .emit('notification', { ...user, type: 4 })
+      .emit('notification', { ...user, type: 2 })
   })
 
   // reply
   socket.on('reply', async data => {
     console.log('===== receive reply =====')
     console.log('data', data)
+
+    if (data.userId) {
+      data.userId = Number(data.userId)
+    }
 
     await saveData({
       id: data.currentUserId,
@@ -209,6 +227,9 @@ global.io.on('connection', socket => {
     })
 
     const user = await getUserInfo(data.currentUserId)
+    console.log('user', user)
+
+    console.log(`broadcast to self ${data.userId}`)
 
     socket.broadcast.to(`self ${data.userId}`).emit('notification', {
       ...user,
