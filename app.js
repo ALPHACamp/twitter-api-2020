@@ -146,6 +146,7 @@ global.io.on('connection', socket => {
             return saveData({
               id: userId,
               currentUserId: subscriber,
+              tweetId: tweetId,
               type: 1
             })
           })
