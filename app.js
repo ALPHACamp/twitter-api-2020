@@ -151,12 +151,14 @@ global.io.on('connection', socket => {
     console.log('data', data)
     console.log('currentUserId', currentUserId)
 
-    await saveData({
-      id: data.id,
-      tweetId: data.tweetId,
-      currentUserId,
-      type: 1
-    })
+    if (data.tweetId) {
+      await saveData({
+        id: data.id,
+        tweetId: data.tweetId,
+        currentUserId,
+        type: 1
+      })
+    }
   })
 
   // like
@@ -230,6 +232,9 @@ global.io.on('connection', socket => {
       username
     })
     socket.join(user.roomId)
+    console.log('socket.rooms', socket.rooms)
+    // reset session
+
     await updateTime(userId, roomId)
 
     if (roomId === 4) {
