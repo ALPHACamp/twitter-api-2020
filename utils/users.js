@@ -183,11 +183,10 @@ const saveData = async data => {
       type: data.type
     }
   })
-  console.log('checkData', checkData)
 
   if (checkData) {
-    checkData.updatedAt = Date.now()
-    return await checkData.save()
+    console.log('checkData', checkData.toJSON())
+    return await checkData.update({ updatedAt: Date.now() })
   }
 
   await Notification.create({
