@@ -280,7 +280,7 @@ const roomController = {
         nest: true,
         where: { otherUserId: helpers.getUser(req).id },
         include: [User, Tweet, Reply],
-        order: [['createdAt', 'DESC']]
+        order: [['updatedAt', 'DESC']]
       })
       // console.log(notifications)
 
