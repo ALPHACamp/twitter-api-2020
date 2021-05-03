@@ -155,7 +155,7 @@ const updateTime = async (UserId, ChatRoomId) => {
   console.log('ChatRoomId', ChatRoomId)
 
   await JoinRoom.update(
-    { updateAt: Date.now() },
+    { updatedAt: Date.now() },
     { where: { UserId, ChatRoomId } }
   )
 
@@ -165,6 +165,30 @@ const updateTime = async (UserId, ChatRoomId) => {
 const saveData = async data => {
   console.log('---- saveData function ----')
   console.log('data', data)
+
+  if (data.type === 1 || data.type === 3) {
+    return await Notification.findOrCreate({
+      UserId: data.id,
+      otherUserId: data.currentUserId,
+      TweetId: data.tweetId ? data.tweetId : null,
+      ReplyId: data.replyId ? data.replyId : null,
+      type: data.type
+    })
+  }
+
+  const checkData = await Notification.findOne({
+    where: {
+      UserId: data.id,
+      otherUserId: data.currentUserId,
+      type: data.type
+    }
+  })
+  console.log('checkData', checkData)
+
+  if (checkData) {
+    checkData.updatedAt = Date.now()
+    return await checkData.save()
+  }
 
   await Notification.create({
     UserId: data.id,
