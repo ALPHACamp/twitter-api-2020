@@ -202,6 +202,18 @@ const saveData = async data => {
   })
 }
 
+const getSubscribers = userId => {
+  console.log('---- getSubscribers function ----')
+  console.log('userId', userId)
+
+  const subscribers = req.user.Subscribers
+  console.log('subscribers', subscribers)
+  if (subscribers) {
+    return subscribers.map(user => user.subscriberId)
+  }
+  return null
+}
+
 module.exports = {
   addUser,
   getUser,
@@ -212,5 +224,6 @@ module.exports = {
   getUserInfo,
   getOtherUser,
   updateTime,
-  saveData
+  saveData,
+  getSubscribers
 }

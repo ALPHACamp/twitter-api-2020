@@ -17,7 +17,8 @@ const {
   getUserInfo,
   getOtherUser,
   updateTime,
-  saveData
+  saveData,
+  getSubscribers
 } = require('./utils/users')
 
 const app = express()
@@ -137,6 +138,19 @@ global.io.on('connection', socket => {
     console.log('user', user)
 
     if (user) {
+      // Save to subscribers' notifications
+      const subscribers = getSubscribers(userId)
+      if (subscribers) {
+        await Promise.all(
+          subscribers.map(subscriber => {
+            return saveData({
+              id: userId,
+              currentUserId: subscriber,
+              type: 1
+            })
+          })
+        )
+      }
       console.log(`notify users in # ${user.account} channel`)
 
       socket.broadcast
@@ -146,20 +160,20 @@ global.io.on('connection', socket => {
   })
 
   // Tweet
-  socket.on('tweet', async (data, currentUserId) => {
-    console.log('===== receive tweet =====')
-    console.log('data', data)
-    console.log('currentUserId', currentUserId)
+  // socket.on('tweet', async (data, currentUserId) => {
+  //   console.log('===== receive tweet =====')
+  //   console.log('data', data)
+  //   console.log('currentUserId', currentUserId)
 
-    if (data.tweetId) {
-      await saveData({
-        id: data.id,
-        tweetId: data.tweetId,
-        currentUserId,
-        type: 1
-      })
-    }
-  })
+  //   if (data.tweetId) {
+  //     await saveData({
+  //       id: data.id,
+  //       tweetId: data.tweetId,
+  //       currentUserId,
+  //       type: 1
+  //     })
+  //   }
+  // })
 
   // like
   socket.on('like', async data => {
