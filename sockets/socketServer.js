@@ -108,16 +108,7 @@ module.exports = (io) => {
         io.emit('onlineCount', publicUsers.length)
         io.emit('userList', publicUsers)
         // 刪掉已讀訊息
-        const msgs = await UnreadChat.findAll({
-          raw: true,
-          nest: true,
-          where: { UserId: socket.user.id, channel: socket.user.channel },
-          include: [Chat]
-        })
-        // const readMsg = msgs.filter(msg => msg.Chat.channel === socket.user.channel)
-        // if (readMsg.length > 0) {
-        //   await readMsg.destroy()
-        // }
+        await UnreadChat.destroy({ where: { UserId: socket.user.id, channel: socket.user.channel } })
         // 找出歷史訊息，發送給前端
         const chatRecords = await historyMsg(socket.user.channel, Chat)
         socket.emit('privateHistoryMsg', chatRecords)
