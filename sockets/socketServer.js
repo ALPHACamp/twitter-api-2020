@@ -2,7 +2,7 @@ const db = require('../models')
 const Chat = db.Chat
 const User = db.User
 const UnreadChat = db.UnreadChat
-const { userIndex, authenticated, formatMessage, historyMsg } = require('./utils')
+const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers } = require('./utils')
 const moment = require('moment')
 
 const users = []
@@ -36,9 +36,8 @@ module.exports = (io) => {
     }
 
     // online count & user list
-    const publicUsers = users.filter(user => user.channel === 'publicRoom')
-    io.emit('onlineCount', publicUsers.length)
-    io.emit('userList', publicUsers)
+    io.emit('onlineCount', getPublicUsers(users).length)
+    io.emit('userList', getPublicUsers(users))
 
     // listen for userMsg
     socket.on('userMsg', async (msg) => {
@@ -77,6 +76,15 @@ module.exports = (io) => {
             channel: socket.user.channel
           })
         }
+        // 傳送未讀訊息給前端
+        const msg = await UnreadChat.findAll({
+          raw: true,
+          nest: true,
+          where: { UserId: receivedUserId },
+          attributes: ['id', 'UserId', 'ChatId', 'channel']
+        })
+        const id = Number(receivedUserId)
+        socket.to('publicRoom').emit('unreadMsg', { msg, id })
       }
     })
 
@@ -100,11 +108,21 @@ module.exports = (io) => {
         const index = users.findIndex(user => user.id === socket.user.id)
         users[index].channel = roomName
         // online count & user list
-        const publicUsers = users.filter(user => user.channel === 'publicRoom')
-        io.emit('onlineCount', publicUsers.length)
-        io.emit('userList', publicUsers)
+        io.emit('onlineCount', getPublicUsers(users).length)
+        io.emit('userList', getPublicUsers(users))
         // 刪掉已讀訊息
         await UnreadChat.destroy({ where: { UserId: socket.user.id, channel: socket.user.channel } })
+        // 更新未讀訊息給前端
+        const msg = await UnreadChat.findAll({
+          raw: true,
+          nest: true,
+          where: { UserId: socket.user.id },
+          attributes: ['id', 'UserId', 'ChatId', 'channel']
+        })
+        const id = socket.user.id
+        console.log('msg', msg)
+        socket.emit('unreadMsg', { msg, id })
+        console.log('===================')
         // 找出歷史訊息，發送給前端
         const chatRecords = await historyMsg(socket.user.channel, Chat)
         socket.emit('privateHistoryMsg', chatRecords)
@@ -160,9 +178,8 @@ module.exports = (io) => {
       where: { UserId: socket.user.id },
       attributes: ['id', 'UserId', 'ChatId']
     })
-    if (msg.length > 0) {
-      socket.emit('unreadMsg', msg)
-    }
+    // console.log('msg', msg)
+    socket.emit('unreadMsg', msg)
 
     // run when client disconnect
     socket.on('disconnect', () => {
@@ -178,9 +195,8 @@ module.exports = (io) => {
       }
 
       // online count & user list
-      const publicUsers = users.filter(user => user.channel === 'publicRoom')
-      io.emit('onlineCount', publicUsers.length)
-      io.emit('userList', publicUsers)
+      io.emit('onlineCount', getPublicUsers(users).length)
+      io.emit('userList', getPublicUsers(users))
     })
   })
 }

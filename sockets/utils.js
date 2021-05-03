@@ -67,4 +67,8 @@ async function historyMsg (channel, Chat, next) {
   }
 }
 
-module.exports = { authenticated, userIndex, formatMessage, historyMsg }
+function getPublicUsers (users) {
+  return users.filter(user => user.channel === 'publicRoom')
+}
+
+module.exports = { authenticated, userIndex, formatMessage, historyMsg, getPublicUsers }

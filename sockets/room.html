@@ -49,7 +49,7 @@
     // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjE5ODgyOTg1fQ.aJRQ8AifoaV7qo3SiR4hLQLsfsbc6tXYS6qbPYEo_Mk'
     // https://simple-twitter-mysql.herokuapp.com/
     // http://localhost:3000
-    const socket = io('https://simple-twitter-mysql.herokuapp.com/', {
+    const socket = io('http://localhost:3000', {
       reconnectionDelayMax: 10000,
       auth: {
         token: tokens[Math.floor(Math.random() * 3)]
@@ -57,25 +57,32 @@
       }
     })
 
+    let currentUser = []
     // 'userInfo' from server
     socket.on('userInfo', user => {
       // render users in user list
       const userName = document.getElementById('user-name')
       userName.innerText = `for ${user.name}`
+      // currentUser
+      currentUser = user
     })
-
+ 
     // 'chatMsg' from server
     socket.on('privateChatMsg', message => {
       outputMessage(message)
     })
 
+    let count = 0
     // 'unreadMsgCount' from server
-    const unreadMsg = []
-    socket.on('unreadMsg', msg => {
+    socket.on('unreadMsg', ({msg, id}) => {
       const unreadCount = document.getElementById('unread-count')
-      unreadCount.innerText = msg.length
-      unreadMsg.push(...msg)
+      if (currentUser.id === id) {
+        count = msg.length     
+      }  
+      unreadCount.innerText = count
     })
+
+    
 
     // private Room submit
     const privateChatForm = document.querySelector('#private-chat-form')
