@@ -39,7 +39,7 @@
     // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjE5ODgyOTg1fQ.aJRQ8AifoaV7qo3SiR4hLQLsfsbc6tXYS6qbPYEo_Mk'
     // https://simple-twitter-mysql.herokuapp.com/
     // http://localhost:3000
-    const socket = io('http://localhost:3000', {
+    const socket = io('https://simple-twitter-mysql.herokuapp.com/', {
       reconnectionDelayMax: 10000,
       auth: {
         token: tokens[Math.floor(Math.random() * 3)]

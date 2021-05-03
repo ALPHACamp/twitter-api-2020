@@ -120,9 +120,7 @@ module.exports = (io) => {
           attributes: ['id', 'UserId', 'ChatId', 'channel']
         })
         const id = socket.user.id
-        console.log('msg', msg)
         socket.emit('unreadMsg', { msg, id })
-        console.log('===================')
         // 找出歷史訊息，發送給前端
         const chatRecords = await historyMsg(socket.user.channel, Chat)
         socket.emit('privateHistoryMsg', chatRecords)
@@ -178,7 +176,6 @@ module.exports = (io) => {
       where: { UserId: socket.user.id },
       attributes: ['id', 'UserId', 'ChatId']
     })
-    // console.log('msg', msg)
     socket.emit('unreadMsg', msg)
 
     // run when client disconnect
