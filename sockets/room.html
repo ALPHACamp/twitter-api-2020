@@ -17,7 +17,7 @@
           <button type="submit">submit</button>
         </form>
         <p id="error-msg"></p>
-        <h4>unread count: <span id="unread-count"></span><button id="read-btn">read message</button></h4>
+        <h4>unread count: <span id="unread-count"></span></h4>
     </header>
     <hr>
     <main class="chat-main">
@@ -116,13 +116,6 @@
         }
       })
     })
-
-    // read unreadMsg
-    const readBtn = document.getElementById('read-btn')
-    readBtn.addEventListener('click', (e) => {
-      socket.emit('readMsg', unreadMsg)
-    })
-
 
     // output message to DOM
     function outputMessage(message) {

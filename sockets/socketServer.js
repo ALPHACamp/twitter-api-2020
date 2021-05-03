@@ -17,7 +17,6 @@ module.exports = (io) => {
   io.on('connection', async (socket) => {
     // 加入房間 (預設進入 publicRoom)
     socket.join(socket.user.channel)
-    console.log('c', io.sockets.adapter.rooms['publicRoom'])
     // 發送 user 資訊給前端
     socket.emit('userInfo', socket.user)
     // 找出歷史訊息，發送給前端
@@ -75,10 +74,13 @@ module.exports = (io) => {
       } else {
         io.to(socket.user.channel).emit('privateChatMsg', msgData)
         // 未讀訊息存入 UnreadChat
-        await UnreadChat.create({
-          ChatId: chat.id,
-          UserId: receivedUserId
-        })
+        const userCount = users.filter(user => user.channel === socket.user.channel).length
+        if (userCount <= 1) {
+          await UnreadChat.create({
+            ChatId: chat.id,
+            UserId: receivedUserId
+          })
+        }
       }
     })
 
@@ -94,10 +96,28 @@ module.exports = (io) => {
         userList.push(user.id, socket.user.id)
         userList.sort()
         const roomName = userList.join('-')
-        // 更換使用者頻道
-        socket.user.channel = roomName
         // 切換房間
         socket.join(roomName)
+        // 更換使用者頻道
+        socket.user.channel = roomName
+        // 改變 users 裡面的 channel
+        const index = users.findIndex(user => user.id === socket.user.id)
+        users[index].channel = roomName
+        // online count & user list
+        const publicUsers = users.filter(user => user.channel === 'publicRoom')
+        io.emit('onlineCount', publicUsers.length)
+        io.emit('userList', publicUsers)
+        // 刪掉已讀訊息
+        const msgs = await UnreadChat.findAll({
+          raw: true,
+          nest: true,
+          where: { UserId: socket.user.id, channel: socket.user.channel },
+          include: [Chat]
+        })
+        // const readMsg = msgs.filter(msg => msg.Chat.channel === socket.user.channel)
+        // if (readMsg.length > 0) {
+        //   await readMsg.destroy()
+        // }
         // 找出歷史訊息，發送給前端
         const chatRecords = await historyMsg(socket.user.channel, Chat)
         socket.emit('privateHistoryMsg', chatRecords)
@@ -156,12 +176,6 @@ module.exports = (io) => {
     if (msg.length > 0) {
       socket.emit('unreadMsg', msg)
     }
-    // 刪掉已讀訊息
-    socket.on('readMsg', msgs => {
-      msgs.forEach(async msg => {
-        await UnreadChat.destroy({ where: { id: msg.id } })
-      })
-    })
 
     // run when client disconnect
     socket.on('disconnect', () => {
@@ -176,11 +190,10 @@ module.exports = (io) => {
         }
       }
 
-      // online count
-      io.emit('onlineCount', users.length)
-
-      // user list
-      io.emit('userList', users)
+      // online count & user list
+      const publicUsers = users.filter(user => user.channel === 'publicRoom')
+      io.emit('onlineCount', publicUsers.length)
+      io.emit('userList', publicUsers)
     })
   })
 }
