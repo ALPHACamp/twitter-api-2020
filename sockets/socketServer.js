@@ -28,22 +28,17 @@ module.exports = (io) => {
       users.push(socket.user)
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] = 1
-      if (socket.user.channel === 'publicRoom') {
-        // 加入聊天室訊息
-        socket.to(socket.user.channel).emit('userOnline', formatMessage(botName, `${socket.user.name} 上線`, 'userOnline'))
-      }
+      // 加入聊天室訊息
+      socket.to(socket.user.channel).emit('userOnline', formatMessage(botName, `${socket.user.name} 上線`, 'userOnline'))
     } else {
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] ++
     }
 
-
-
-    // online count
-    io.to(socket.user.channel).emit('onlineCount', users.length)
-
-    // user list
-    io.to(socket.user.channel).emit('userList', users)
+    // online count & user list
+    const publicUsers = users.filter(user => user.channel === 'publicRoom')
+    io.emit('onlineCount', publicUsers.length)
+    io.emit('userList', publicUsers)
 
     // listen for userMsg
     socket.on('userMsg', async (msg) => {
