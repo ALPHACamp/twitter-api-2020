@@ -60,6 +60,7 @@ global.io.on('connection', socket => {
     let rooms = []
     if (userId) {
       socket.join(`self ${userId}`)
+      socket.join(`4`)
       console.log('socket.rooms1-1', socket.rooms)
 
       if (!data.rooms || !data.rooms.length) {
@@ -75,6 +76,7 @@ global.io.on('connection', socket => {
         console.log('socket.rooms1-2', socket.rooms)
 
         rooms.push(`self ${userId}`)
+        rooms.push(`4`)
         console.log('rooms1 - start session', rooms)
       } else {
         rooms = data.rooms
