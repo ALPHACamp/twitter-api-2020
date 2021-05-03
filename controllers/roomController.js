@@ -71,6 +71,10 @@ const roomController = {
 
   createRoom: async (req, res, next) => {
     try {
+      console.log('==== POST /api/rooms ====')
+      console.log('req.body.userId', req.body.userId)
+      console.log('req.body', req.body)
+
       const newRoom = await ChatRoom.create({ isPublic: false })
       await JoinRoom.bulkCreate([
         { UserId: req.user.id, ChatRoomId: newRoom.id },
