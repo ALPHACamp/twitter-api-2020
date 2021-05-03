@@ -17,14 +17,12 @@ module.exports = (io) => {
   io.on('connection', async (socket) => {
     // 加入房間 (預設進入 publicRoom)
     socket.join(socket.user.channel)
-    console.log('0', socket.user.channel)
+    console.log('c', io.sockets.adapter.rooms['publicRoom'])
     // 發送 user 資訊給前端
     socket.emit('userInfo', socket.user)
     // 找出歷史訊息，發送給前端
-    if (socket.user.channel === 'publicRoom') {
-      const chatRecords = await historyMsg('publicRoom', Chat)
-      socket.emit('historyMsg', chatRecords)
-    }
+    const chatRecords = await historyMsg(socket.user.channel, Chat)
+    socket.emit('historyMsg', chatRecords)
     // 若使用者第一次進來聊天室，則加入 users，並傳送系統歡迎訊息
     if (userIndex(users, socket.user.id) === -1) {
       // put userInfo to users
@@ -39,6 +37,8 @@ module.exports = (io) => {
       // 計算單一 user connection 次數
       connectionCount[socket.user.id] ++
     }
+
+
 
     // online count
     io.to(socket.user.channel).emit('onlineCount', users.length)
@@ -74,6 +74,11 @@ module.exports = (io) => {
         io.to(socket.user.channel).emit('chatMsg', msgData)
       } else {
         io.to(socket.user.channel).emit('privateChatMsg', msgData)
+        // 未讀訊息存入 UnreadChat
+        await UnreadChat.create({
+          ChatId: chat.id,
+          UserId: receivedUserId
+        })
       }
     })
 
