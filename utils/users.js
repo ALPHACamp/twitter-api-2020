@@ -168,11 +168,13 @@ const saveData = async data => {
 
   if (data.type === 1 || data.type === 3) {
     return await Notification.findOrCreate({
-      UserId: data.id,
-      otherUserId: data.currentUserId,
-      TweetId: data.tweetId ? data.tweetId : null,
-      ReplyId: data.replyId ? data.replyId : null,
-      type: data.type
+      where: {
+        UserId: data.id,
+        otherUserId: data.currentUserId,
+        TweetId: data.tweetId ? data.tweetId : null,
+        ReplyId: data.replyId ? data.replyId : null,
+        type: data.type
+      }
     })
   }
 
@@ -186,7 +188,9 @@ const saveData = async data => {
 
   if (checkData) {
     console.log('checkData', checkData.toJSON())
-    return await checkData.update({ updatedAt: Date.now() })
+    checkData.changed('updatedAt', true)
+    return await checkData.save()
+    // return await checkData.update({ updatedAt: Date.now() })
   }
 
   await Notification.create({
