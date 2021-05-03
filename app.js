@@ -51,29 +51,28 @@ global.io = socketio(server, {
 global.io.on('connection', socket => {
   // session
   socket.on('start session', async (data, userId) => {
-    // test join public room
-    // socket.join('4')
-    socket.join(`self ${userId}`)
-
     let rooms = []
-    if (!data.rooms) {
-      const authors = await getAuthors(userId)
+    if (userId) {
+      socket.join(`self ${userId}`)
 
-      if (authors) {
-        rooms = authors.map(account => {
-          socket.join(`# ${account}`)
-          return `# ${account}`
+      if (!data.rooms) {
+        const authors = await getAuthors(userId)
+
+        if (authors) {
+          rooms = authors.map(account => {
+            socket.join(`# ${account}`)
+            return `# ${account}`
+          })
+        }
+
+        rooms.push(`self ${userId}`)
+      } else {
+        rooms = data.rooms
+        rooms.forEach(room => {
+          socket.join(room)
         })
       }
-
-      rooms.push(`self ${userId}`)
-    } else {
-      rooms = data.rooms
-      rooms.forEach(room => {
-        socket.join(room)
-      })
     }
-
     socket.emit('set session', { rooms })
   })
 
