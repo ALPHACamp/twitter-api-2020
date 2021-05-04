@@ -2,9 +2,9 @@ const db = require('../models')
 const Chat = db.Chat
 const User = db.User
 const UnreadChat = db.UnreadChat
-const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers } = require('./utils')
+const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers, historyMsgForOneUser } = require('./utils')
 const moment = require('moment')
-const { Op } = require('sequelize')
+
 
 const users = []
 const botName = 'Chat Bot'
@@ -67,7 +67,12 @@ module.exports = (io) => {
       if (socket.user.channel === 'publicRoom') {
         io.to(socket.user.channel).emit('chatMsg', msgData)
       } else {
+        // 訊息發送給前端
         io.to(socket.user.channel).emit('privateChatMsg', msgData)
+        // 更新歷史訊息列表
+        const historyMsgList = await historyMsgForOneUser(socket.user.id)
+        console.log('傳訊息', historyMsgList)
+        socket.emit('historyMsgForOneUser', historyMsgList)
         // 未讀訊息存入 UnreadChat
         const userCount = users.filter(user => user.channel === socket.user.channel).length
         if (userCount <= 1) {
@@ -111,6 +116,10 @@ module.exports = (io) => {
         // online count & user list
         io.emit('onlineCount', getPublicUsers(users).length)
         io.emit('userList', getPublicUsers(users))
+        // 更新歷史訊息列表
+        const historyMsgList = await historyMsgForOneUser(socket.user.id)
+        console.log('建立頻道', historyMsgList)
+        socket.emit('historyMsgForOneUser', historyMsgList)
         // 刪掉已讀訊息
         await UnreadChat.destroy({ where: { UserId: socket.user.id, channel: socket.user.channel } })
         // 更新未讀訊息給前端
@@ -131,46 +140,10 @@ module.exports = (io) => {
       }
     })
 
-    // 列出私人歷史訊息
-    const allHistoryChannel = await Chat.findAll({
-      raw: true,
-      nest: true,
-      where: { [Op.or]: [{ UserId: socket.user.id }, { receivedUserId: socket.user.id }] },
-      attributes: ['channel']
-    })
-    const channelArr = []
-    allHistoryChannel.forEach(channel => {
-      if (!channelArr.includes(channel.channel)) {
-        channelArr.push(channel.channel)
-      }
-    })
-    // 把時間倒過來排
-    channelArr.reverse()
-    const historyMsgForOneUser = []
-    for (let i = 0; i < channelArr.length; i++) {
-      let chat = await Chat.findAll({
-        raw: true,
-        nest: true,
-        where: { channel: channelArr[i] },
-        order: [['createdAt', 'DESC']],
-        limit: 1,
-        include: [User]
-      })
-      chat = chat[0]
-      chat = {
-        id: chat.id,
-        UserId: chat.UserId,
-        receivedUserId: chat.receivedUserId,
-        text: chat.message,
-        time: chat.time,
-        channel: chat.channel,
-        username: chat.User.name,
-        account: chat.User.account,
-        avatar: chat.User.avatar
-      }
-      historyMsgForOneUser.push(chat)
-    }
-    socket.emit('historyMsgForOneUser', historyMsgForOneUser)
+    // 更新歷史訊息列表
+    const historyMsgList = await historyMsgForOneUser(socket.user.id)
+    console.log('連線上', historyMsgList)
+    socket.emit('historyMsgForOneUser', historyMsgList)
 
     // 是否有未讀訊息
     const msg = await UnreadChat.findAll({
