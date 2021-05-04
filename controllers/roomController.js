@@ -13,6 +13,8 @@ const { generateMessage } = require('../utils/message')
 const { Sequelize, sequelize } = require('../models')
 const { Op } = Sequelize
 
+const publicRoom = 4
+
 const roomController = {
   getRoom: async (req, res, next) => {
     try {
@@ -69,6 +71,49 @@ const roomController = {
 
   createRoom: async (req, res, next) => {
     try {
+      console.log('==== POST /api/rooms ====')
+      console.log('req.body.userId', req.body.userId)
+      console.log('req.body', req.body)
+
+      const currentUserId = req.user.id
+      const otherUserId = req.body.userId
+
+      const checkRoom = await sequelize.query(
+        `
+        SELECT j1.ChatRoomId
+        FROM JoinRooms j1
+        INNER JOIN JoinRooms j2
+        ON j1.ChatRoomId = j2.ChatRoomId
+        WHERE j1.UserId <> j2.UserId AND j1.UserId = (:otherUserId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom);
+      `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: {
+            currentUserId,
+            otherUserId,
+            publicRoom
+          }
+        }
+      )
+
+      console.log('checkRoom', checkRoom)
+
+      if (checkRoom.length) {
+        await JoinRoom.update(
+          { createdAt: Date.now(), updatedAt: Date.now() },
+          {
+            where: {
+              UserId: [currentUserId, otherUserId],
+              ChatRoomId: checkRoom[0].ChatRoomId
+            }
+          }
+        )
+        return res.status(200).json({
+          status: 'success',
+          roomId: checkRoom[0].ChatRoomId
+        })
+      }
+
       const newRoom = await ChatRoom.create({ isPublic: false })
       await JoinRoom.bulkCreate([
         { UserId: req.user.id, ChatRoomId: newRoom.id },
@@ -84,55 +129,32 @@ const roomController = {
   },
   getAvailableUsers: async (req, res, next) => {
     try {
-      // 因為沒有改變資料結構，一個聊天室有兩筆資料(user A && user B)，因此撈資料都需要在同一 table 撈兩次來過濾
-      let existingChats = await JoinRoom.findAll({
-        raw: true,
-        nest: true,
-        where: {
-          UserId: helpers.getUser(req).id
-        },
-        attributes: ['ChatRoomId']
-      })
+      const currentUserId = req.user.id
 
-      existingChats = await existingChats.map(chat => {
-        return chat.ChatRoomId
-      })
-      // console.log('existingChats:', existingChats)
-
-      let myChats = await JoinRoom.findAll({
-        raw: true,
-        nest: true,
-        where: {
-          ChatRoomId: existingChats,
-          UserId: {
-            $notLike: helpers.getUser(req).id
-          }
-        },
-        attributes: ['UserId']
-      })
-
-      // console.log('myChats:', myChats)
-
-      myChats = myChats.map(chat => {
-        return chat.UserId
-      })
-
-      myChats.push(helpers.getUser(req).id, 1) // 排除掉自己與 admin
-
-      // console.log(myChats)
-
-      // 先抓所有使用者，並排除自己
-      const users = await User.findAll({
-        raw: true,
-        nest: true,
-        where: {
-          id: {
-            $notIn: myChats
-          }
+      const users = await sequelize.query(
+        `
+        SELECT *
+        FROM Users
+        WHERE id not in (
+        SELECT j1.UserId
+        FROM JoinRooms j1
+        INNER JOIN JoinRooms j2
+        ON j1.ChatRoomId = j2.ChatRoomId
+        INNER JOIN (
+        SELECT ChatRoomId AS cid, MAX(id) AS id
+        FROM Messages
+        GROUP BY ChatRoomId
+        ) AS msg
+        ON msg.cid = j1.ChatRoomId
+        WHERE j1.UserId <> j2.UserId AND j1.UserId <> (:currentUserId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom)
+        ) 
+        AND role = 'user'
+      `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: { currentUserId, publicRoom }
         }
-      })
-
-      // console.log('users:', users)
+      )
 
       if (!users) {
         return res.status(200).json({
@@ -161,7 +183,10 @@ const roomController = {
         raw: true,
         nest: true,
         attributes: ['ChatRoomId'],
-        where: { UserId: helpers.getUser(req).id, ChatRoomId: { $not: 4 } }
+        where: {
+          UserId: helpers.getUser(req).id,
+          ChatRoomId: { $not: publicRoom }
+        }
       })
       joinedRooms = joinedRooms.map(room => room.ChatRoomId)
 
@@ -244,7 +269,10 @@ const roomController = {
         raw: true,
         nest: true,
         attributes: ['ChatRoomId'],
-        where: { UserId: helpers.getUser(req).id, ChatRoomId: { $not: 4 } }
+        where: {
+          UserId: helpers.getUser(req).id,
+          ChatRoomId: { $not: publicRoom }
+        }
       })
       joinedRooms = joinedRooms.map(room => room.ChatRoomId)
 
@@ -280,7 +308,7 @@ const roomController = {
         nest: true,
         where: { otherUserId: helpers.getUser(req).id },
         include: [User, Tweet, Reply],
-        order: [['createdAt', 'DESC']]
+        order: [['updatedAt', 'DESC']]
       })
       // console.log(notifications)
 
