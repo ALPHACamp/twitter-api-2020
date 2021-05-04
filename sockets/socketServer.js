@@ -4,6 +4,7 @@ const User = db.User
 const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers } = require('./utils')
 const moment = require('moment')
+const { Op } = require('sequelize')
 
 const users = []
 const botName = 'Chat Bot'
@@ -134,7 +135,7 @@ module.exports = (io) => {
     const allHistoryChannel = await Chat.findAll({
       raw: true,
       nest: true,
-      where: { receivedUserId: socket.user.id },
+      where: { [Op.or]: [{ UserId: socket.user.id }, { receivedUserId: socket.user.id }] },
       attributes: ['channel']
     })
     const channelArr = []
@@ -143,6 +144,8 @@ module.exports = (io) => {
         channelArr.push(channel.channel)
       }
     })
+    // 把時間倒過來排
+    channelArr.reverse()
     const historyMsgForOneUser = []
     for (let i = 0; i < channelArr.length; i++) {
       let chat = await Chat.findAll({
