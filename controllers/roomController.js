@@ -75,6 +75,45 @@ const roomController = {
       console.log('req.body.userId', req.body.userId)
       console.log('req.body', req.body)
 
+      const currentUserId = req.user.id
+      const otherUserId = req.body.userId
+
+      const checkRoom = await sequelize.query(
+        `
+        SELECT j1.ChatRoomId
+        FROM JoinRooms j1
+        INNER JOIN JoinRooms j2
+        ON j1.ChatRoomId = j2.ChatRoomId
+        WHERE j1.UserId <> j2.UserId AND j1.UserId = (:otherUserId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom);
+      `,
+        {
+          type: Sequelize.QueryTypes.SELECT,
+          replacements: {
+            currentUserId,
+            otherUserId,
+            publicRoom
+          }
+        }
+      )
+
+      console.log('checkRoom', checkRoom)
+
+      if (checkRoom.length) {
+        await JoinRoom.update(
+          { createdAt: Date.now(), updatedAt: Date.now() },
+          {
+            where: {
+              UserId: [currentUserId, otherUserId],
+              ChatRoomId: checkRoom[0].ChatRoomId
+            }
+          }
+        )
+        return res.status(200).json({
+          status: 'success',
+          roomId: checkRoom[0].ChatRoomId
+        })
+      }
+
       const newRoom = await ChatRoom.create({ isPublic: false })
       await JoinRoom.bulkCreate([
         { UserId: req.user.id, ChatRoomId: newRoom.id },
