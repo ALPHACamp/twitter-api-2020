@@ -14,7 +14,7 @@ router
   .get(authenticated, userController.getTopUsers)
   .post(userController.register)
 
-router.post('/login', userController.login)
+router.route('/login').post(userController.login)
 
 router.route('/current_user').get(authenticated, userController.getCurrentUser)
 
