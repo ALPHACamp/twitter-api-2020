@@ -31,6 +31,8 @@ tags:
     description: Subscriptions related
   - name: replies
     description: Replies related
+  - name: rooms
+    description: Chatroom related
 components:
   securitySchemes:
     bearerAuth:
@@ -1908,5 +1910,251 @@ paths:
                       "status": "error",
                       "message": "user does not exist"
                     }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  
+  '/rooms':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - rooms
+      summary: Get data of user's chatroom page
+      description: >-
+        User can get data of their chatroom page.
+      operationId: getChatRoomByUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to get following authors data from.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Retrieved an array of user objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                error:
+                  value: |-
+                    [
+                      {
+                        "userId": 3,
+                        "name": "user2",
+                        "account": "user2",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "roomId": 2,
+                        "message": "null",
+                        "createdAt": "null"
+                      }
+                    ]
+                success:
+                  value: |-
+                    [
+                      {
+                        "userId": 3,
+                        "name": "user2",
+                        "account": "user2",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "roomId": 2,
+                        "message": "test",
+                        "createdAt": "2021-04-19T16:45:10.000Z"
+                      }
+                    ]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - rooms
+      summary: Create a chatroom with a user.
+      description: >-
+        User can start a chatroom with a user.
+      operationId: createRoom
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                userId:
+                  type: string
+                  example: 2
+      responses:
+        '200':
+          description: Found room
+          content:
+            application/json:
+              examples:
+                newRoom:
+                  value: |-
+                    [
+                      {
+                        "status": "success",
+                        "roomId": 1
+                      }
+                    ]
+                existingRoom:
+                  value: |-
+                    [
+                      {
+                        "status": "success",
+                        "roomId": 2
+                      }
+                    ]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/rooms/availableUsers':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - rooms
+      summary: Get available users data of chatroom page.
+      description: >-
+        User can get available users (which you haven't chat before) data of chatroom page.
+      operationId: getAvailableUsers
+      responses:
+        '200':
+          description: Available users data.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    [
+                      {
+                        "status": "error",
+                        "message": "All users are in existing chats",
+                        "availableUsers": "null"
+                      }
+                    ]
+                success:
+                  value: |-
+                    [
+                      {
+                        "id": 2,
+                        "name": user2,
+                        "account": user2,
+                        "avatar": "https://i.imgur.com/q6bwDGO.png"
+                      }
+                    ]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/rooms/notifications':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - rooms
+      summary: Get updates from the user you subscribed.
+      description: >-
+        User can get update notifications from the users they subscribed.
+      operationId: getNotifications
+      responses:
+        '200':
+          description: Notifications data.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    "null"
+                success:
+                  value: |-
+                    [
+                      {
+                        "userId": 2,
+                        "name": "user2",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "tweetId": 3,
+                        "tweet": "testseatecerasecre",
+                        "replyId": 6,
+                        "reply": "ee2234333",
+                        "type": 1
+                      }
+                    ]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  
+  '/rooms/private/unread':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - rooms
+      summary: Get unread messages counts from private chats.
+      description: >-
+        User can get unread messages counts from private chats.
+      operationId: getUnreadMsg
+      responses:
+        '200':
+          description: Unread message count.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: 2
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  '/rooms/{roomId}':
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - rooms
+      summary: Get data from public chatroom.
+      description: >-
+        User can get data from public chatroom.
+      operationId: getPublicRoom
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          description: The room id of public chat is 1.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Public chat room data.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    [
+                      {
+                        "onlineUsersCount": 2,
+                        "onlineUsers": [
+                          {
+                            "id": 100,
+                            "name": "test",
+                            "account": "test",
+                            "avatar": "https://i.imgur.com/q6bwDGO.png"
+                          }
+                        ],
+                        "messages": [
+                          {
+                            "id": 5,
+                            "avatar": "https://i.imgur.com/q6bwDGO.png",
+                            "UserId": 2,
+                            "message": "happysersaersr",
+                            "createdAt": "2021-04-30T12:58:18.000Z"
+                          }
+                        ]
+                      }
+                    ]
         '401':
           $ref: '#/components/responses/UnauthorizedError'
