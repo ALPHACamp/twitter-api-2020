@@ -101,8 +101,8 @@ const roomController = {
         FROM JoinRooms j1
         INNER JOIN JoinRooms j2
         ON j1.ChatRoomId = j2.ChatRoomId
-        WHERE j1.UserId <> j2.UserId AND j1.UserId <> (:currentUserId) AND j1.ChatRoomId <> (:publicRoom)
-        )
+        WHERE j1.UserId <> j2.UserId AND j1.UserId <> (:currentUserId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom)
+        ) 
         AND role = 'user'
       `,
         {
