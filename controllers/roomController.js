@@ -140,6 +140,12 @@ const roomController = {
         FROM JoinRooms j1
         INNER JOIN JoinRooms j2
         ON j1.ChatRoomId = j2.ChatRoomId
+        INNER JOIN (
+        SELECT ChatRoomId AS cid, MAX(id) AS id
+        FROM Messages
+        GROUP BY ChatRoomId
+        ) AS msg
+        ON msg.cid = j1.ChatRoomId
         WHERE j1.UserId <> j2.UserId AND j1.UserId <> (:currentUserId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom)
         ) 
         AND role = 'user'
