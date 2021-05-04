@@ -4,6 +4,7 @@ moment.locale('zh_TW')
 const { Op } = require('sequelize')
 const User = require('../models').User
 const Chat = require('../models').Chat
+const UnreadChat = require('../models').UnreadChat
 
 // 驗證身分
 async function authenticated (socket, next) {
@@ -120,4 +121,14 @@ async function historyMsgForOneUser (id) {
   return historyMsgForOneUser
 }
 
-module.exports = { authenticated, userIndex, formatMessage, historyMsg, getPublicUsers, historyMsgForOneUser }
+async function getUnreadMsg (id) {
+  const msg = await UnreadChat.findAll({
+    raw: true,
+    nest: true,
+    where: { UserId: id },
+    attributes: ['id', 'UserId', 'ChatId', 'channel']
+  })
+  return msg
+}
+
+module.exports = { authenticated, userIndex, formatMessage, historyMsg, getPublicUsers, historyMsgForOneUser, getUnreadMsg }

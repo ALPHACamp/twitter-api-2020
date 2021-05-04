@@ -2,9 +2,8 @@ const db = require('../models')
 const Chat = db.Chat
 const User = db.User
 const UnreadChat = db.UnreadChat
-const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers, historyMsgForOneUser } = require('./utils')
+const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers, historyMsgForOneUser, getUnreadMsg } = require('./utils')
 const moment = require('moment')
-
 
 const users = []
 const botName = 'Chat Bot'
@@ -71,9 +70,8 @@ module.exports = (io) => {
         io.to(socket.user.channel).emit('privateChatMsg', msgData)
         // 更新歷史訊息列表
         const historyMsgList = await historyMsgForOneUser(socket.user.id)
-        console.log('傳訊息', historyMsgList)
         socket.emit('historyMsgForOneUser', historyMsgList)
-        // 未讀訊息存入 UnreadChat
+        // 如果對方不在channel裡，未讀訊息存入 UnreadChat
         const userCount = users.filter(user => user.channel === socket.user.channel).length
         if (userCount <= 1) {
           await UnreadChat.create({
@@ -82,13 +80,8 @@ module.exports = (io) => {
             channel: socket.user.channel
           })
         }
-        // 傳送未讀訊息給前端
-        const msg = await UnreadChat.findAll({
-          raw: true,
-          nest: true,
-          where: { UserId: receivedUserId },
-          attributes: ['id', 'UserId', 'ChatId', 'channel']
-        })
+        // 更新未讀訊息給前端
+        const msg = await getUnreadMsg(receivedUserId)
         const id = Number(receivedUserId)
         socket.to('publicRoom').emit('unreadMsg', { msg, id })
       }
@@ -118,17 +111,11 @@ module.exports = (io) => {
         io.emit('userList', getPublicUsers(users))
         // 更新歷史訊息列表
         const historyMsgList = await historyMsgForOneUser(socket.user.id)
-        console.log('建立頻道', historyMsgList)
         socket.emit('historyMsgForOneUser', historyMsgList)
         // 刪掉已讀訊息
         await UnreadChat.destroy({ where: { UserId: socket.user.id, channel: socket.user.channel } })
         // 更新未讀訊息給前端
-        const msg = await UnreadChat.findAll({
-          raw: true,
-          nest: true,
-          where: { UserId: socket.user.id },
-          attributes: ['id', 'UserId', 'ChatId', 'channel']
-        })
+        const msg = await getUnreadMsg(socket.user.id)
         const id = socket.user.id
         socket.emit('unreadMsg', { msg, id })
         // 找出歷史訊息，發送給前端
@@ -142,17 +129,12 @@ module.exports = (io) => {
 
     // 更新歷史訊息列表
     const historyMsgList = await historyMsgForOneUser(socket.user.id)
-    console.log('連線上', historyMsgList)
     socket.emit('historyMsgForOneUser', historyMsgList)
 
-    // 是否有未讀訊息
-    const msg = await UnreadChat.findAll({
-      raw: true,
-      nest: true,
-      where: { UserId: socket.user.id },
-      attributes: ['id', 'UserId', 'ChatId']
-    })
-    socket.emit('unreadMsg', msg)
+    // 更新未讀訊息
+    const msg = await getUnreadMsg(socket.user.id)
+    const id = socket.user.id
+    socket.emit('unreadMsg', { msg, id })
 
     // run when client disconnect
     socket.on('disconnect', () => {
