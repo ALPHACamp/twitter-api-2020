@@ -9,10 +9,10 @@ module.exports = (io) => {
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token
-      console.log('token', token)
+      // console.log('token', token)
       if (!token) return
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
-      console.log('decoded', decoded)
+      // console.log('decoded', decoded)
       const user = await User.findByPk(decoded.id)
       socket.user = user
       next()
@@ -34,7 +34,7 @@ module.exports = (io) => {
             ...m.dataValues,
             messageOwner: '',
           }))
-          console.log('socket=====', socket.user.name)
+          // console.log('socket=====', socket.user.name)
           //發送歷史訊息
           socket.emit('history', historyMsg)
           //通知所有人，有人上線
