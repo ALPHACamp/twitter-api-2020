@@ -14,7 +14,7 @@ const adminController = {
       const { account, password } = req.body
       // check account & password required
       if (!account || !password) {
-        return res.json({ status: 'error', message: 'account and password are required!' })
+        return res.status(400).json({ status: 'error', message: 'account and password are required!' })
       }
       // check account exists or not
       const user = await User.findOne({ where: { account } })
@@ -32,7 +32,7 @@ const adminController = {
       // get token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
+      return res.status(200).json({
         status: 'success',
         message: 'ok',
         token: token,
@@ -72,7 +72,7 @@ const adminController = {
       })
       // 如果沒有 user，回傳 message
       if (users.length === 0) {
-        return res.json({ message: 'db has no user!' })
+        return res.status(200).json({ message: 'db has no user!' })
       }
       // 回傳資料
       users = users.map(user => {
@@ -93,7 +93,7 @@ const adminController = {
           followersCount: user.Followers.length
         }
       })
-      return res.json(users)
+      return res.status(200).json(users)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -104,16 +104,16 @@ const adminController = {
     try {
       const id = req.params.id
       const tweet = await Tweet.findByPk(id)
-      if (!tweet) return res.json({ status: 'error', message: 'this tweet doesn\'t exist!' })
-      await tweet.destroy()
-      await Like.destroy({ where: { TweetId: id } })
-      await Reply.destroy({ where: { TweetId: id } })
-      // Promise.all([
-      //   tweet.destroy(),
-      //   Like.destroy({ where: { TweetId: id } }),
-      //   Reply.destroy({ where: { TweetId: id } })
-      // ])
-      return res.json({ status: 'success', message: 'this tweet has been deleted!' })
+      if (!tweet) { return res.status(401).json({ status: 'error', message: 'this tweet doesn\'t exist!' }) }
+      // await tweet.destroy()
+      // await Like.destroy({ where: { TweetId: id } })
+      // await Reply.destroy({ where: { TweetId: id } })
+      Promise.all([
+        tweet.destroy(),
+        Like.destroy({ where: { TweetId: id } }),
+        Reply.destroy({ where: { TweetId: id } })
+      ])
+      return res.status(200).json({ status: 'success', message: 'this tweet has been deleted!' })
     } catch (e) {
       console.log(e)
       return next(e)
