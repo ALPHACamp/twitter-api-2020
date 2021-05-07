@@ -71,7 +71,7 @@ const adminController = {
         order: [[sequelize.literal('tweetcount'), 'DESC']]
       })
       // 如果沒有 user，回傳 message
-      if (users.length === 0) {
+      if (!users.length) {
         return res.status(200).json({ message: 'db has no user!' })
       }
       // 回傳資料
@@ -105,9 +105,7 @@ const adminController = {
       const id = req.params.id
       const tweet = await Tweet.findByPk(id)
       if (!tweet) { return res.status(401).json({ status: 'error', message: 'this tweet doesn\'t exist!' }) }
-      // await tweet.destroy()
-      // await Like.destroy({ where: { TweetId: id } })
-      // await Reply.destroy({ where: { TweetId: id } })
+      // 刪除相關資料
       Promise.all([
         tweet.destroy(),
         Like.destroy({ where: { TweetId: id } }),

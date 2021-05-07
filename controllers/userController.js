@@ -108,12 +108,6 @@ const userController = {
   // account、name、avatar、cover、推文數量、跟隨中人數、跟隨者人數
   getUser: async (req, res, next) => {
     try {
-      const currentUser = await User.findByPk(helpers.getUser(req).id, {
-        include: [
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Authors' }
-        ]
-      })
       let user = await User.findByPk(req.params.id, {
         include: [
           Tweet,
@@ -123,12 +117,9 @@ const userController = {
       })
       if (!user) { return res.status(404).json({ message: 'can not find this user!' }) }
       // 現在使用者是否在追隨
-      const followings = currentUser.Followings.map(following => following.id)
-      // 該使用者是否有訂閱
-      const authorsId = []
-      currentUser.Authors.forEach(author => {
-        authorsId.push(author.id)
-      })
+      const followings = helpers.getUser(req).Followings.map(following => following.id)
+      // 現在使用者是否有訂閱
+      const authors = helpers.getUser(req).Authors.map(author => author.id)
 
       // 整理回傳資料
       user = {
@@ -142,9 +133,10 @@ const userController = {
         followingCount: user.Followings.length,
         followerCount: user.Followers.length,
         isFollowing: followings.includes(user.id),
-        isSubscript: authorsId.includes(user.id)
+        isSubscript: authors.includes(user.id)
       }
       return res.status(200).json(user)
+
     } catch (e) {
       console.log(e)
       return next(e)
@@ -157,43 +149,30 @@ const userController = {
       const userId = helpers.getUser(req).id
       const id = Number(req.params.id)
       if (userId !== id) { return res.status(403).json({ status: 'error', message: 'can not edit profile of other users!' }) }
-      const user = await User.findByPk(userId)
-      if (!user) { return res.status(401).json({ status: 'error', message: 'can not find this user!' }) }
       // 取得編輯資料
       const { account, name, email, password, checkPassword, introduction } = req.body
       // 判斷 password 是否等於 checkPassword
-      if (password !== checkPassword) return res.status(400).json({ status: 'error', message: 'password & checkPassword must be same!' })
-      // check email & account have not been used
-      const userEmail = await User.findOne({ where: { email } })
-      if (userEmail) return res.json({ status: 'error', message: 'this email has been used!' })
-      const userAccount = await User.findOne({ where: { account } })
-      if (userAccount) return res.json({ status: 'error', message: 'this account has been used!' })
+      if (password !== checkPassword) { return res.status(400).json({ status: 'error', message: 'password & checkPassword must be same!' }) }
+      // 確認 email & account 沒有被使用
+      const users = await User.findAll({
+        where: {
+          [Op.or]: [{ email }, { account }],
+          [Op.not]: [{ id: userId }]
+        }
+      })
+      if (users.length) { return res.status(409).json({ status: 'error', message: 'this account or email has been used!' }) }
+      // 找出使用者
+      const user = await User.findByPk(userId)
+      // 整理更新資料
+      const updateData = { account, name, email, password, introduction }
       // 處理圖片
       const { files } = req
-      if (files) {
-        imgur.setClientID(IMGUR_CLIENT_ID)
-        const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
-        const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
-        await user.update({
-          account: account ? account : user.account,
-          name: name ? name : user.name,
-          email: email ? email : user.email,
-          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
-          introduction: introduction ? introduction : user.introduction,
-          avatar: files.avatar ? imgAvatar.data.link : user.avatar,
-          cover: files.cover ? imgCover.data.link : user.cover
-        })
-      } else {
-        await user.update({
-          account: account ? account : user.account,
-          name: name ? name : user.name,
-          email: email ? email : user.email,
-          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
-          introduction: introduction ? introduction : user.introduction,
-          avatar: user.avatar ? user.avatar : defaultAvatar,
-          cover: user.cover ? user.cover : defaultCover
-        })
-      }
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
+      const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
+      updateData.avatar = files.avatar ? imgAvatar.data.link : user.avatar
+      updateData.cover = files.cover ? imgCover.data.link : user.cover
+      await user.update(updateData)
       return res.status(200).json({ status: 'success', message: 'profile edit success!' })
     } catch (e) {
       console.log(e)
@@ -211,14 +190,11 @@ const userController = {
         include: [User, Reply, Like],
         order: [['createdAt', 'DESC']]
       })
-      if (tweets.length === 0) { return res.status(200).json({ message: 'this user has no tweet!' }) }
+      if (!tweets.length) { return res.status(200).json({ message: 'this user has no tweet!' }) }
       // 整理回傳資料
       tweets = tweets.map(tweet => {
         // 該使用者是否喜歡
-        const likesId = []
-        tweet.Likes.forEach(like => {
-          likesId.push(like.UserId)
-        })
+        const likeId = tweet.Likes.map(like => like.UserId)
         return {
           id: tweet.id,
           UserId: tweet.UserId,
@@ -233,7 +209,7 @@ const userController = {
           },
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
-          isLiked: likesId.includes(helpers.getUser(req).id)
+          isLiked: likeId.includes(helpers.getUser(req).id)
         }
       })
       return res.status(200).json(tweets)
@@ -253,15 +229,12 @@ const userController = {
         include: [{ model: Tweet, include: [User, Reply, Like] }],
         order: [['createdAt', 'DESC']]
       })
-      if (replies.length === 0) { return res.status(200).json({ message: 'this user has no reply for any tweet!' }) }
+      if (!replies.length) { return res.status(200).json({ message: 'this user has no reply for any tweet!' }) }
       // 整理回傳資料
       replies = replies.map(reply => {
         const tweet = reply.Tweet
         // 該使用者是否喜歡
-        const likesId = []
-        tweet.Likes.forEach(like => {
-          likesId.push(like.UserId)
-        })
+        const likeId = tweet.Likes.map(like => like.UserId)
         return {
           id: tweet.id,
           UserId: tweet.UserId,
@@ -276,7 +249,7 @@ const userController = {
           },
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
-          isLiked: likesId.includes(helpers.getUser(req).id)
+          isLiked: likeId.includes(helpers.getUser(req).id)
         }
       })
       return res.status(200).json(replies)
@@ -296,15 +269,10 @@ const userController = {
         include: [{ model: Tweet, include: [User, Reply, Like] }],
         order: [['createdAt', 'DESC']]
       })
-      if (likes.length === 0) { return res.status(200).findByPkjson({ message: 'this user has no like for any tweet!' }) }
+      if (!likes.length) { return res.status(200).json({ message: 'this user has no like for any tweet!' }) }
       // 整理回傳資料
       likes = likes.map(like => {
         const tweet = like.Tweet
-        // 該使用者是否喜歡
-        const likesId = []
-        tweet.Likes.forEach(like => {
-          likesId.push(like.UserId)
-        })
         return {
           id: tweet.id,
           UserId: tweet.UserId,
@@ -319,7 +287,7 @@ const userController = {
           },
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
-          isLiked: likesId.includes(helpers.getUser(req).id)
+          isLiked: true
         }
       })
       return res.status(200).json(likes)
@@ -341,12 +309,9 @@ const userController = {
         ],
         order: [[{ model: User, as: 'Followers' }, 'createdAt', 'DESC']]
       })
-      if (follower.Followers.length === 0) return res.status(200).json({ message: 'this user has no follower!' })
-      // 該使用者是否在追隨
-      const followingsId = []
-      follower.Followings.forEach(following => {
-        followingsId.push(following.id)
-      })
+      if (!follower.Followers.length) return res.status(200).json({ message: 'this user has no follower!' })
+      // 現在使用者是否在追隨
+      const followingsId = helpers.getUser(req).Followings.map(following => following.id)
       // 整理回傳資料
       follower = follower.Followers.map(follower => ({
         followerId: follower.id,
@@ -374,12 +339,9 @@ const userController = {
         include: [{ model: User, as: 'Followings' }],
         order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
       })
-      if (followings.Followings.length === 0) { return res.status(200).json({ message: 'this user has no following!' }) }
-      // 該使用者是否在追隨
-      const followingsId = []
-      followings.Followings.forEach(following => {
-        followingsId.push(following.id)
-      })
+      if (!followings.Followings.length) { return res.status(200).json({ message: 'this user has no following!' }) }
+      // 現在使用者是否在追隨
+      const followingsId = helpers.getUser(req).Followings.map(following => following.id)
       // 整理回傳資料
       followings = followings.Followings.map(following => ({
         followingId: following.id,
@@ -399,9 +361,6 @@ const userController = {
   // 查看建議追隨名單 (跟隨者數量排列前10)
   getTopUsers: async (req, res, next) => {
     try {
-      const currentUser = await User.findByPk(helpers.getUser(req).id, {
-        include: { model: User, as: 'Followings' }
-      })
       let users = await User.findAll({
         where: { role: 'user' },
         include: [
@@ -418,11 +377,8 @@ const userController = {
         order: [[sequelize.literal('followCount'), 'DESC']],
         limit: 10
       })
-      // 該使用者是否在追隨
-      const followingsId = []
-      currentUser.Followings.forEach(following => {
-        followingsId.push(following.id)
-      })
+      // 現在使用者是否在追隨
+      const followingsId = helpers.getUser(req).Followings.map(following => following.id)
       // 整理回傳資料
       users = users.map(user => {
         return {
