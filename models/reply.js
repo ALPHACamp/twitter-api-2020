@@ -8,9 +8,18 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         type: DataTypes.INTEGER
       },
-      UserId: DataTypes.INTEGER,
-      TweetId: DataTypes.INTEGER,
-      comment: DataTypes.STRING
+      UserId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      TweetId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      comment: {
+        type: DataTypes.STRING,
+        allowNull: false
+      }
     },
     {}
   )

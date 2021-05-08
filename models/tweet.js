@@ -3,8 +3,14 @@ module.exports = (sequelize, DataTypes) => {
   const Tweet = sequelize.define(
     'Tweet',
     {
-      UserId: DataTypes.INTEGER,
-      description: DataTypes.STRING
+      UserId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      description: {
+        type: DataTypes.STRING,
+        allowNull: false
+      }
     },
     {}
   )
