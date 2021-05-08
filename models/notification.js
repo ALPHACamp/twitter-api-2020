@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     'Notification',
     {
       UserId: DataTypes.INTEGER,
-      otherUserId: DataTypes.INTEGER,
+      receiverId: DataTypes.INTEGER,
       TweetId: DataTypes.INTEGER,
       ReplyId: DataTypes.INTEGER,
       type: DataTypes.INTEGER

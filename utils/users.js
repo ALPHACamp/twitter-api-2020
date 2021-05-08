@@ -170,7 +170,7 @@ const saveData = async data => {
     return await Notification.findOrCreate({
       where: {
         UserId: data.id,
-        otherUserId: data.currentUserId,
+        receiverId: data.currentUserId,
         TweetId: data.tweetId ? data.tweetId : null,
         ReplyId: data.replyId ? data.replyId : null,
         type: data.type
@@ -181,7 +181,7 @@ const saveData = async data => {
   const checkData = await Notification.findOne({
     where: {
       UserId: data.id,
-      otherUserId: data.currentUserId,
+      receiverId: data.currentUserId,
       type: data.type
     }
   })
@@ -195,7 +195,7 @@ const saveData = async data => {
 
   await Notification.create({
     UserId: data.id,
-    otherUserId: data.currentUserId,
+    receiverId: data.currentUserId,
     TweetId: data.tweetId ? data.tweetId : null,
     ReplyId: data.replyId ? data.replyId : null,
     type: data.type
