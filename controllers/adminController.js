@@ -67,12 +67,7 @@ const adminController = {
           .json({ status: 'error', message: 'tweet does not exist' })
       }
 
-      // Replies and likes related to this tweet must be deleted as well
-      await Promise.all([
-        Reply.destroy({ where: { TweetId: tweet.id } }),
-        Like.destroy({ where: { TweetId: tweet.id } }),
-        tweet.destroy()
-      ])
+      await tweet.destroy()
 
       res
         .status(200)

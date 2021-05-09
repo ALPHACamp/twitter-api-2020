@@ -3,7 +3,10 @@ module.exports = (sequelize, DataTypes) => {
   const JoinRoom = sequelize.define(
     'JoinRoom',
     {
-      UserId: DataTypes.INTEGER
+      UserId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      }
     },
     {}
   )

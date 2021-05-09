@@ -76,7 +76,7 @@ const roomController = {
       console.log('req.body', req.body)
 
       const currentUserId = req.user.id
-      const otherUserId = req.body.userId
+      const receiverId = req.body.userId
 
       const checkRoom = await sequelize.query(
         `
@@ -84,13 +84,13 @@ const roomController = {
         FROM JoinRooms j1
         INNER JOIN JoinRooms j2
         ON j1.ChatRoomId = j2.ChatRoomId
-        WHERE j1.UserId <> j2.UserId AND j1.UserId = (:otherUserId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom);
+        WHERE j1.UserId <> j2.UserId AND j1.UserId = (:receiverId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom);
       `,
         {
           type: Sequelize.QueryTypes.SELECT,
           replacements: {
             currentUserId,
-            otherUserId,
+            receiverId,
             publicRoom
           }
         }
@@ -103,7 +103,7 @@ const roomController = {
           { createdAt: Date.now(), updatedAt: Date.now() },
           {
             where: {
-              UserId: [currentUserId, otherUserId],
+              UserId: [currentUserId, receiverId],
               ChatRoomId: checkRoom[0].ChatRoomId
             }
           }
@@ -306,7 +306,7 @@ const roomController = {
       let notifications = await Notification.findAll({
         raw: true,
         nest: true,
-        where: { otherUserId: helpers.getUser(req).id },
+        where: { receiverId: helpers.getUser(req).id },
         include: [User, Tweet, Reply],
         order: [['updatedAt', 'DESC']]
       })
