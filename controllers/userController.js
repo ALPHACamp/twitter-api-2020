@@ -11,15 +11,16 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const sequelize = require('sequelize')
+const { Op } = require('sequelize')
 
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-const defaultAvatar = 'https://i.imgur.com/OFjWJfj.jpg'
-const defaultCover = 'https://i.imgur.com/QznpNwS.jpeg'
 
 const uploadImg = path => {
   return new Promise((resolve, reject) => {
     imgur.upload(path, (err, img) => {
-      if (err) return reject(err)
+      if (err) {
+        return reject(err)
+      }
       return resolve(img)
     })
   })
@@ -30,27 +31,27 @@ const userController = {
   login: async (req, res, next) => {
     try {
       const { account, password } = req.body
-      // check account & password required
+      // 確認 account & password必填
       if (!account || !password) {
-        return res.json({ status: 'error', message: 'account and password are required!' })
+        return res.status(400).json({ status: 'error', message: 'account and password are required!' })
       }
-      // check account exists or not
+      // 確認 account 是否已存在資料庫
       const user = await User.findOne({ where: { account } })
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'this account has not been registered!' })
       }
-      // check user role, must be user
+      // 確認使用者的 role, 必須是 'user'
       if (user.role !== 'user') {
-        return res.status(401).json({ status: 'error', message: 'you don\'t have authority to login!' })
+        return res.status(403).json({ status: 'error', message: 'you don\'t have authority to login!' })
       }
-      // check password correct or not
+      // 確認 password 是否正確
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'password incorrect!' })
       }
-      // get token
+      // 回傳使用者資訊和 token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
+      return res.status(200).json({
         status: 'success',
         message: 'ok',
         token: token,
@@ -72,30 +73,34 @@ const userController = {
   register: async (req, res, next) => {
     try {
       const { account, name, email, password, checkPassword } = req.body
-      // check account & name & email & password & confirmPassword are required
+      // 確認 account & name & email & password & checkPassword 必填
       if (!account || !name || !email || !password || !checkPassword) {
-        return res.json({ status: 'error', message: 'account, name, email, password, checkPassword are required!' })
+        return res.status(400).json({ status: 'error', message: 'account, name, email, password, checkPassword are required!' })
       }
-      // check password & checkPassword are same
+      // 確認 password & checkPassword 相同
       if (password !== checkPassword) {
-        return res.json({ status: 'error', message: 'password & checkPassword must be same!' })
+        return res.status(400).json({ status: 'error', message: 'password & checkPassword must be same!' })
       }
-      // check email & account have not been used
-      const userEmail = await User.findOne({ where: { email } })
-      if (userEmail) return res.json({ status: 'error', message: 'this email has been used!' })
-      const userAccount = await User.findOne({ where: { account } })
-      if (userAccount) return res.json({ status: 'error', message: 'this account has been used!' })
-      // create user
+      // 確認 email 格式正確
+      const emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
+      if (!emailRule.test(email)) {
+        return res.status(400).json({ status: 'error', message: 'email format is incorrect!' })
+      }
+      // 確認 email & account 沒有被使用
+      const user = await User.findAll({
+        where: { [Op.or]: [{ email }, { account }] }
+      })
+      console.log('user', user)
+      if (user.length) { return res.status(409).json({ status: 'error', message: 'this account or email has been used!' }) }
+      // 新增 user
       await User.create({
         account,
         name,
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-        role: 'user',
-        avatar: defaultAvatar,
-        cover: defaultCover
+        role: 'user'
       })
-      return res.json({ status: 'success', message: 'register success!' })
+      return res.status(200).json({ status: 'success', message: 'register success!' })
     } catch (e) {
       console.log(e)
       return next(e)
@@ -105,10 +110,6 @@ const userController = {
   // account、name、avatar、cover、推文數量、跟隨中人數、跟隨者人數
   getUser: async (req, res, next) => {
     try {
-      const currentUser = await User.findByPk(helpers.getUser(req).id, {
-        include: [{ model: User, as: 'Followings' },
-        { model: User, as: 'Authors' }]
-      })
       let user = await User.findByPk(req.params.id, {
         include: [
           Tweet,
@@ -116,17 +117,11 @@ const userController = {
           { model: User, as: 'Followers' }
         ]
       })
-      if (!user) return res.json({ message: 'can not find this user!' })
-      // 該使用者是否在追隨
-      const followingsId = []
-      currentUser.Followings.forEach(following => {
-        followingsId.push(following.id)
-      })
-      // 該使用者是否有訂閱
-      const authorsId = []
-      currentUser.Authors.forEach(author => {
-        authorsId.push(author.id)
-      })
+      if (!user) { return res.status(404).json({ message: 'can not find this user!' }) }
+      // 現在使用者是否在追隨
+      const followings = helpers.getUser(req).Followings.map(following => following.id)
+      // 現在使用者是否有訂閱
+      const authors = helpers.getUser(req).Authors.map(author => author.id)
 
       // 整理回傳資料
       user = {
@@ -139,10 +134,10 @@ const userController = {
         tweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
         followerCount: user.Followers.length,
-        isFollowing: followingsId.includes(user.id),
-        isSubscript: authorsId.includes(user.id)
+        isFollowing: followings.includes(user.id),
+        isSubscript: authors.includes(user.id)
       }
-      return res.json(user)
+      return res.status(200).json(user)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -154,45 +149,32 @@ const userController = {
       // 只能編輯自己的資料
       const userId = helpers.getUser(req).id
       const id = Number(req.params.id)
-      if (userId !== id) return res.json({ status: 'error', message: 'can not edit profile of other users!' })
-      const user = await User.findByPk(userId)
-      if (!user) return res.json({ status: 'error', message: 'can not find this user!' })
+      if (userId !== id) { return res.status(403).json({ status: 'error', message: 'can not edit profile of other users!' }) }
       // 取得編輯資料
       const { account, name, email, password, checkPassword, introduction } = req.body
       // 判斷 password 是否等於 checkPassword
-      if (password !== checkPassword) return res.json({ status: 'error', message: 'password & checkPassword must be same!' })
-      // check email & account have not been used
-      const userEmail = await User.findOne({ where: { email } })
-      if (userEmail) return res.json({ status: 'error', message: 'this email has been used!' })
-      const userAccount = await User.findOne({ where: { account } })
-      if (userAccount) return res.json({ status: 'error', message: 'this account has been used!' })
+      if (password !== checkPassword) { return res.status(400).json({ status: 'error', message: 'password & checkPassword must be same!' }) }
+      // 確認 email & account 沒有被使用
+      const users = await User.findAll({
+        where: {
+          [Op.or]: [{ email }, { account }],
+          [Op.not]: [{ id: userId }]
+        }
+      })
+      if (users.length) { return res.status(409).json({ status: 'error', message: 'this account or email has been used!' }) }
+      // 找出使用者
+      const user = await User.findByPk(userId)
+      // 整理更新資料
+      const updateData = { account, name, email, password, introduction }
       // 處理圖片
       const { files } = req
-      if (files) {
-        imgur.setClientID(IMGUR_CLIENT_ID)
-        const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
-        const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
-        await user.update({
-          account: account ? account : user.account,
-          name: name ? name : user.name,
-          email: email ? email : user.email,
-          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
-          introduction: introduction ? introduction : user.introduction,
-          avatar: files.avatar ? imgAvatar.data.link : user.avatar,
-          cover: files.cover ? imgCover.data.link : user.cover
-        })
-      } else {
-        await user.update({
-          account: account ? account : user.account,
-          name: name ? name : user.name,
-          email: email ? email : user.email,
-          password: password ? bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) : user.password,
-          introduction: introduction ? introduction : user.introduction,
-          avatar: user.avatar ? user.avatar : defaultAvatar,
-          cover: user.cover ? user.cover : defaultCover
-        })
-      }
-      return res.json({ status: 'success', message: 'profile edit success!' })
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
+      const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
+      updateData.avatar = files.avatar ? imgAvatar.data.link : user.avatar
+      updateData.cover = files.cover ? imgCover.data.link : user.cover
+      await user.update(updateData)
+      return res.status(200).json({ status: 'success', message: 'profile edit success!' })
     } catch (e) {
       console.log(e)
       return next(e)
@@ -203,20 +185,17 @@ const userController = {
   getTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      if (!user) return res.json({ message: 'can not find this user!' })
+      if (!user) return res.status(401).json({ message: 'can not find this user!' })
       let tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         include: [User, Reply, Like],
         order: [['createdAt', 'DESC']]
       })
-      if (tweets.length === 0) return res.json({ message: 'this user has no tweet!' })
+      if (!tweets.length) { return res.status(200).json({ message: 'this user has no tweet!' }) }
       // 整理回傳資料
       tweets = tweets.map(tweet => {
         // 該使用者是否喜歡
-        const likesId = []
-        tweet.Likes.forEach(like => {
-          likesId.push(like.UserId)
-        })
+        const likeId = tweet.Likes.map(like => like.UserId)
         return {
           id: tweet.id,
           UserId: tweet.UserId,
@@ -231,10 +210,10 @@ const userController = {
           },
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
-          isLiked: likesId.includes(helpers.getUser(req).id)
+          isLiked: likeId.includes(helpers.getUser(req).id)
         }
       })
-      return res.json(tweets)
+      return res.status(200).json(tweets)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -245,21 +224,18 @@ const userController = {
   getRepliedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      if (!user) return res.json({ message: 'this user does not exist!' })
+      if (!user) return res.status(401).json({ message: 'this user does not exist!' })
       let replies = await Reply.findAll({
         where: { UserId: req.params.id },
         include: [{ model: Tweet, include: [User, Reply, Like] }],
         order: [['createdAt', 'DESC']]
       })
-      if (replies.length === 0) return res.json({ message: 'this user has no reply for any tweet!' })
+      if (!replies.length) { return res.status(200).json({ message: 'this user has no reply for any tweet!' }) }
       // 整理回傳資料
       replies = replies.map(reply => {
         const tweet = reply.Tweet
         // 該使用者是否喜歡
-        const likesId = []
-        tweet.Likes.forEach(like => {
-          likesId.push(like.UserId)
-        })
+        const likeId = tweet.Likes.map(like => like.UserId)
         return {
           id: tweet.id,
           UserId: tweet.UserId,
@@ -274,10 +250,10 @@ const userController = {
           },
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
-          isLiked: likesId.includes(helpers.getUser(req).id)
+          isLiked: likeId.includes(helpers.getUser(req).id)
         }
       })
-      return res.json(replies)
+      return res.status(200).json(replies)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -288,21 +264,16 @@ const userController = {
   getLikedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      if (!user) return res.json({ message: 'this user does not exist!' })
+      if (!user) { return res.status(401).json({ message: 'this user does not exist!' }) }
       let likes = await Like.findAll({
         where: { UserId: req.params.id },
         include: [{ model: Tweet, include: [User, Reply, Like] }],
         order: [['createdAt', 'DESC']]
       })
-      if (likes.length === 0) return res.json({ message: 'this user has no like for any tweet!' })
+      if (!likes.length) { return res.status(200).json({ message: 'this user has no like for any tweet!' }) }
       // 整理回傳資料
       likes = likes.map(like => {
         const tweet = like.Tweet
-        // 該使用者是否喜歡
-        const likesId = []
-        tweet.Likes.forEach(like => {
-          likesId.push(like.UserId)
-        })
         return {
           id: tweet.id,
           UserId: tweet.UserId,
@@ -317,10 +288,10 @@ const userController = {
           },
           repliedCount: tweet.Replies.length,
           likedCount: tweet.Likes.length,
-          isLiked: likesId.includes(helpers.getUser(req).id)
+          isLiked: true
         }
       })
-      return res.json(likes)
+      return res.status(200).json(likes)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -331,7 +302,7 @@ const userController = {
   getFollowers: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      if (!user) return res.json({ message: 'this user does not exist!' })
+      if (!user) return res.status(401).json({ message: 'this user does not exist!' })
       let follower = await User.findByPk(req.params.id, {
         include: [
           { model: User, as: 'Followers' },
@@ -339,12 +310,9 @@ const userController = {
         ],
         order: [[{ model: User, as: 'Followers' }, 'createdAt', 'DESC']]
       })
-      if (follower.Followers.length === 0) return res.json({ message: 'this user has no follower!' })
-      // 該使用者是否在追隨
-      const followingsId = []
-      follower.Followings.forEach(following => {
-        followingsId.push(following.id)
-      })
+      if (!follower.Followers.length) return res.status(200).json({ message: 'this user has no follower!' })
+      // 現在使用者是否在追隨
+      const followingsId = helpers.getUser(req).Followings.map(following => following.id)
       // 整理回傳資料
       follower = follower.Followers.map(follower => ({
         followerId: follower.id,
@@ -356,7 +324,7 @@ const userController = {
         isFollowing: followingsId.includes(follower.id)
       }))
 
-      return res.json(follower)
+      return res.status(200).json(follower)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -367,17 +335,14 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      if (!user) return res.json({ message: 'this user does not exist!' })
+      if (!user) { return res.status(401).json({ message: 'this user does not exist!' }) }
       let followings = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followings' }],
         order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
       })
-      if (followings.Followings.length === 0) return res.json({ message: 'this user has no following!' })
-      // 該使用者是否在追隨
-      const followingsId = []
-      followings.Followings.forEach(following => {
-        followingsId.push(following.id)
-      })
+      if (!followings.Followings.length) { return res.status(200).json({ message: 'this user has no following!' }) }
+      // 現在使用者是否在追隨
+      const followingsId = helpers.getUser(req).Followings.map(following => following.id)
       // 整理回傳資料
       followings = followings.Followings.map(following => ({
         followingId: following.id,
@@ -388,7 +353,7 @@ const userController = {
         followshipCreatedAt: following.Followship.createdAt,
         isFollowing: followingsId.includes(following.id)
       }))
-      return res.json(followings)
+      return res.status(200).json(followings)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -397,9 +362,6 @@ const userController = {
   // 查看建議追隨名單 (跟隨者數量排列前10)
   getTopUsers: async (req, res, next) => {
     try {
-      const currentUser = await User.findByPk(helpers.getUser(req).id, {
-        include: { model: User, as: 'Followings' }
-      })
       let users = await User.findAll({
         where: { role: 'user' },
         include: [
@@ -416,11 +378,8 @@ const userController = {
         order: [[sequelize.literal('followCount'), 'DESC']],
         limit: 10
       })
-      // 該使用者是否在追隨
-      const followingsId = []
-      currentUser.Followings.forEach(following => {
-        followingsId.push(following.id)
-      })
+      // 現在使用者是否在追隨
+      const followingsId = helpers.getUser(req).Followings.map(following => following.id)
       // 整理回傳資料
       users = users.map(user => {
         return {
@@ -431,7 +390,7 @@ const userController = {
           isFollowing: followingsId.includes(user.id)
         }
       })
-      return res.json(users)
+      return res.status(200).json(users)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -439,7 +398,7 @@ const userController = {
   },
   // 取得現在登入的 user 資料
   getCurrentUser: (req, res) => {
-    return res.json({
+    return res.status(200).json({
       id: req.user.id,
       account: req.user.account,
       name: req.user.name,

@@ -16,7 +16,8 @@ const strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
     include: [
       { model: db.Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followings' },
-      { model: User, as: 'Followers' }
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Authors' }
     ]
   }).then(user => {
     if (!user) return next(null, false)

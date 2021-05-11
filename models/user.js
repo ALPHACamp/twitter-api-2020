@@ -49,6 +49,16 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'subscriberId',
       as: 'Authors'
     })
+    // User.belongsToMany(User, {
+    //   through: models.Chat,
+    //   foreignKey: 'receivedUserId',
+    //   as: 'receivedMessages'
+    // })
+    // User.belongsToMany(User, {
+    //   through: models.Chat,
+    //   foreignKey: 'UserId',
+    //   as: 'sendMessages'
+    // })
   }
   return User
 }
