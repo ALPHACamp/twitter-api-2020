@@ -105,12 +105,13 @@ const adminController = {
       const id = req.params.id
       const tweet = await Tweet.findByPk(id)
       if (!tweet) { return res.status(401).json({ status: 'error', message: 'this tweet doesn\'t exist!' }) }
+      await tweet.destroy()
       // 刪除相關資料
-      Promise.all([
-        tweet.destroy(),
-        Like.destroy({ where: { TweetId: id } }),
-        Reply.destroy({ where: { TweetId: id } })
-      ])
+      // Promise.all([
+      //   tweet.destroy(),
+      //   Like.destroy({ where: { TweetId: id } }),
+      //   Reply.destroy({ where: { TweetId: id } })
+      // ])
       return res.status(200).json({ status: 'success', message: 'this tweet has been deleted!' })
     } catch (e) {
       console.log(e)
