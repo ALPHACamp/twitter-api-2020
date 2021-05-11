@@ -25,7 +25,7 @@ require('./routes')(app)
 // 設置錯誤訊息
 app.use((err, req, res, next) => {
   if (err) {
-    res.status(555).json({ message: String(err) })
+    res.status(500).json({ message: String(err) })
     return next()
   }
 })
