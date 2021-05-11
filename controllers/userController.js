@@ -14,8 +14,6 @@ const sequelize = require('sequelize')
 const { Op } = require('sequelize')
 
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-const defaultAvatar = 'https://i.imgur.com/OFjWJfj.jpg'
-const defaultCover = 'https://i.imgur.com/QznpNwS.jpeg'
 
 const uploadImg = path => {
   return new Promise((resolve, reject) => {
@@ -92,16 +90,15 @@ const userController = {
       const user = await User.findAll({
         where: { [Op.or]: [{ email }, { account }] }
       })
-      if (user) { return res.status(409).json({ status: 'error', message: 'this account or email has been used!' }) }
+      console.log('user', user)
+      if (user.length) { return res.status(409).json({ status: 'error', message: 'this account or email has been used!' }) }
       // 新增 user
       await User.create({
         account,
         name,
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-        role: 'user',
-        avatar: defaultAvatar,
-        cover: defaultCover
+        role: 'user'
       })
       return res.status(200).json({ status: 'success', message: 'register success!' })
     } catch (e) {
