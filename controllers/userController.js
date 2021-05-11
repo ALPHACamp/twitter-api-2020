@@ -83,6 +83,11 @@ const userController = {
       if (password !== checkPassword) {
         return res.status(400).json({ status: 'error', message: 'password & checkPassword must be same!' })
       }
+      // 確認 email 格式正確
+      const emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
+      if (!emailRule.test(email)) {
+        return res.status(400).json({ status: 'error', message: 'email format is incorrect!' })
+      }
       // 確認 email & account 沒有被使用
       const user = await User.findAll({
         where: { [Op.or]: [{ email }, { account }] }
@@ -136,7 +141,6 @@ const userController = {
         isSubscript: authors.includes(user.id)
       }
       return res.status(200).json(user)
-
     } catch (e) {
       console.log(e)
       return next(e)
