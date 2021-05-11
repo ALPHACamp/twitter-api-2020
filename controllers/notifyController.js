@@ -25,7 +25,6 @@ const notifyController = {
       //   }
       // }) 
 
-
       notifies = notifies.map(notify => {
         return {
           id: notify.id,
@@ -46,7 +45,7 @@ const notifyController = {
       if (!notifies) {
         return res.json({ message: "There aren't notification to this User." })
       } else {
-        return (res.json({ notifies }), next())
+        return (res.status(201).json({ notifies }), next())
       }
 
     } catch (e) { return next(e) }

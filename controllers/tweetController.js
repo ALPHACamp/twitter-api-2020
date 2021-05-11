@@ -17,7 +17,7 @@ const tweetController = {
       // const Liked = tweets.LikedUsers
 
       if (tweets.length === 0) {
-        return res.json({ status: 'error', message: 'There is no tweets in database.' })
+        return res.status(500).json({ status: 'error', message: 'There is no tweets in database.' })
       }
 
       tweets = tweets.map(tweet => {
@@ -44,7 +44,7 @@ const tweetController = {
         }
       })
 
-      return res.json(tweets)
+      return res.status(200).json(tweets)
 
     } catch (e) {
       console.log(e)
@@ -63,7 +63,7 @@ const tweetController = {
       })
 
       if (tweet === null) {
-        return res.json({ status: 'error', message: "Can't find this tweet." })
+        return res.status(404).json({ status: 'error', message: "Can't find this tweet." })
       }
 
       const tweetReplies = helpers.repliesInfos(tweet)
@@ -88,7 +88,7 @@ const tweetController = {
         },
         tweetReplies: tweetReplies
       }
-      return res.json(tweet)
+      return res.status(200).json(tweet)
     } catch (e) {
       console.log(e)
       return next(e)
@@ -100,12 +100,12 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
 
       if (!description) {
-        return res.json({ status: 'error', message: "It must have description to tweet." })
+        return res.status(400).json({ status: 'error', message: "It must have description to tweet." })
       } else if (description.length > 140) {
-        return res.json({ status: 'error', message: "Description max length is 140 words" })
+        return res.status(413).json({ status: 'error', message: "Description max length is 140 words" })
       }
       await Tweet.create({ UserId, description })
-      return (res.json({ status: 'success', message: 'Tweet has built successfully!' }), next())
+      return (res.status(201).json({ status: 'success', message: 'Tweet has built successfully!' }), next())
     } catch (e) {
       console.log(e)
       return next(e)
@@ -122,12 +122,12 @@ const tweetController = {
       })
 
       if (tweet === null) {
-        return res.json({ status: 'error', message: "Can't find this tweet." })
+        return res.status(404).json({ status: 'error', message: "Can't find this tweet." })
       }
 
       const tweetReplies = helpers.repliesInfos(tweet)
 
-      return res.json(tweetReplies)
+      return res.status(200).json(tweetReplies)
     }
     catch (e) {
       console.log(e)
@@ -141,14 +141,14 @@ const tweetController = {
       const TweetId = req.params.tweet_Id
 
       if (!comment) {
-        return res.json({ status: 'error', message: "It must have comment to reply." })
+        return res.status(400).json({ status: 'error', message: "It must have comment to reply." })
       } else if (await Tweet.findByPk(TweetId) === null) {
-        return res.json({ status: 'error', message: "This tweetId doesn't exist." })
+        return res.status(400).json({ status: 'error', message: "This tweetId doesn't exist." })
       } else if (comment.length > 140) {
-        return res.json({ status: 'error', message: "comment max length is 140 words" })
+        return res.status(413).json({ status: 'error', message: "comment max length is 140 words" })
       }
       await Reply.create({ TweetId, UserId, comment })
-      return (res.json({ status: 'success', message: 'Reply has built successfully!' }), next())
+      return (res.status(201).json({ status: 'success', message: 'Reply has built successfully!' }), next())
 
     } catch (e) {
       console.log(e)
@@ -159,7 +159,7 @@ const tweetController = {
     try {
       const TweetId = req.params.tweet_Id
       if (await Tweet.findByPk(TweetId) === null) {
-        return res.json({ status: 'error', message: "This tweetId doesn't exist." })
+        return res.status(404).json({ status: 'error', message: "This tweetId doesn't exist." })
       } else {
         await Like.create({
           UserId: helpers.getUser(req).id,
@@ -167,10 +167,10 @@ const tweetController = {
         })
       }
 
-      return (res.json({ status: 'success', message: 'Like has built successfully!' }), next())
-    } catch (e) { return res.json({ status: 'error', message: 'Failed to build a like.' }) }
+      return (res.status(201).json({ status: 'success', message: 'Like has built successfully!' }), next())
+    } catch (e) { return (res.json({ status: 'error', message: 'Failed to build a like.' }), next(e)) }
   },
-  tweetUnlike: async (req, res) => {
+  tweetUnlike: async (req, res, next) => {
     try {
       like = await Like.findOne({
         where: {
@@ -179,8 +179,8 @@ const tweetController = {
         }
       })
       await like.destroy()
-      return res.json({ status: 'success', message: 'Like has removed successfully!' })
-    } catch (e) { return res.json({ status: 'error', message: 'Failed to remove a like.' }) }
+      return res.status(201).json({ status: 'success', message: 'Like has removed successfully!' })
+    } catch (e) { return (res.json({ status: 'error', message: 'Failed to remove a like.' }), next(e)) }
   }
 }
 
