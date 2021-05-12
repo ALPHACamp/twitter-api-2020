@@ -3,7 +3,10 @@ const Chat = db.Chat
 const User = db.User
 const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers, historyMsgForOneUser, getUnreadMsg } = require('./utils')
-const moment = require('moment')
+// const moment = require('moment')
+const dayjs = require('dayjs')
+const utc = require('dayjs/plugin/utc')
+dayjs.extend(utc)
 
 const users = []
 const botName = 'Chat Bot'
@@ -49,7 +52,8 @@ module.exports = (io) => {
         UserId: socket.user.id,
         receivedUserId: socket.user.channel === 'publicRoom' ? 0 : receivedUserId,
         message: msg,
-        time: moment.utc().locale('zh_TW').utcOffset('+08:00').format('h:mm a'),
+        // time: moment.utc().locale('zh_TW').utcOffset('+08:00').format('h:mm a'),
+        time: dayjs.utc().local().format('h:mm a'),
         channel: socket.user.channel
       })
       const msgData = {
