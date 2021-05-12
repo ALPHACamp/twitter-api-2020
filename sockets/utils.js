@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken')
-const moment = require('moment')
-moment.locale('zh_TW')
+// const moment = require('moment')
+// moment.locale('zh_TW')
+const dayjs = require('dayjs')
+const utc = require('dayjs/plugin/utc')
+dayjs.extend(utc)
 const { Op } = require('sequelize')
 const User = require('../models').User
 const Chat = require('../models').Chat
@@ -41,8 +44,8 @@ function formatMessage (username, text, msgType) {
   return {
     username,
     text,
-    // time: moment().format('h:mm a'),
-    time: moment.utc().locale('zh_TW').utcOffset('+08:00').format('h:mm a'),
+    // time: moment.utc().locale('zh_TW').utcOffset('+08:00').format('h:mm a'),
+    time: dayjs.utc().local().format('h:mm a'),
     msgType
   }
 }

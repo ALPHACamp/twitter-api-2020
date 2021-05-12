@@ -5,9 +5,10 @@ const Reply = db.Reply
 const Like = db.Like
 
 const helpers = require('../_helpers')
-// const { loginCheck } = require('../utils/user')
 
-const moment = require('moment')
+const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
@@ -210,7 +211,7 @@ const userController = {
           UserId: tweet.UserId,
           description: tweet.description,
           createdAt: tweet.createdAt,
-          fromNow: moment(tweet.createdAt).fromNow(),
+          fromNow: dayjs(tweet.createdAt).fromNow(),
           user: {
             id: tweet.User.id,
             name: tweet.User.name,
@@ -250,7 +251,7 @@ const userController = {
           UserId: tweet.UserId,
           description: tweet.description,
           createdAt: tweet.createdAt,
-          fromNow: moment(tweet.createdAt).fromNow(),
+          fromNow: dayjs(tweet.createdAt).fromNow(),
           user: {
             id: tweet.User.id,
             account: tweet.User.account,
@@ -288,7 +289,7 @@ const userController = {
           UserId: tweet.UserId,
           description: tweet.description,
           createdAt: tweet.createdAt,
-          fromNow: moment(tweet.createdAt).fromNow(),
+          fromNow: dayjs(tweet.createdAt).fromNow(),
           user: {
             id: tweet.User.id,
             name: tweet.User.name,
