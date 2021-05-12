@@ -311,8 +311,8 @@ const socket = server => {
         socket.broadcast
           .to(`self ${otherUser}`)
           .emit(
-            'new private chat message',
-            generateMessage(msg.message, msg.userId, user.avatar),
+            'private chat message',
+            generateMessage(msg.message, msg.userId, user.avatar, true),
             msg.roomId
           )
       }
