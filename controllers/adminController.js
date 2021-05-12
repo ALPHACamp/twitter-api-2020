@@ -2,7 +2,6 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
-const Reply = db.Reply
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { sequelize } = require('../models')
@@ -12,24 +11,24 @@ const adminController = {
   login: async (req, res, next) => {
     try {
       const { account, password } = req.body
-      // check account & password required
+      // 確認 account & password必填
       if (!account || !password) {
         return res.status(400).json({ status: 'error', message: 'account and password are required!' })
       }
-      // check account exists or not
+      // 確認 account 是否已存在資料庫
       const user = await User.findOne({ where: { account } })
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'this account has not been registered!' })
       }
-      // check user role, must be admin
+      // 確認使用者的 role, 必須是 'admin'
       if (user.role !== 'admin') {
-        return res.status(401).json({ status: 'error', message: 'you don\'t have authority to login!' })
+        return res.status(403).json({ status: 'error', message: 'you don\'t have authority to login!' })
       }
-      // check password correct or not
+      // 確認 password 是否正確
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'password incorrect!' })
       }
-      // get token
+      // 回傳使用者資訊和 token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.status(200).json({

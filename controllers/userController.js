@@ -5,6 +5,7 @@ const Reply = db.Reply
 const Like = db.Like
 
 const helpers = require('../_helpers')
+// const { loginCheck } = require('../utils/user')
 
 const moment = require('moment')
 const bcrypt = require('bcryptjs')
@@ -90,7 +91,6 @@ const userController = {
       const user = await User.findAll({
         where: { [Op.or]: [{ email }, { account }] }
       })
-      console.log('user', user)
       if (user.length) { return res.status(409).json({ status: 'error', message: 'this account or email has been used!' }) }
       // 新增 user
       await User.create({
@@ -168,11 +168,20 @@ const userController = {
       const updateData = { account, name, email, password, introduction }
       // 處理圖片
       const { files } = req
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      const imgAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
-      const imgCover = files.cover ? await uploadImg(files.cover[0].path) : null
-      updateData.avatar = files.avatar ? imgAvatar.data.link : user.avatar
-      updateData.cover = files.cover ? imgCover.data.link : user.cover
+      const imgType = ['.jpg', '.jpeg', '.png']
+      if (files) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        for (const file in files) {
+          const index = files[file][0].originalname.lastIndexOf('.')
+          const fileType = files[file][0].originalname.slice(index)
+          if (imgType.includes(fileType)) {
+            const img = await uploadImg(files[file][0].path)
+            updateData[file] = img.data.link
+          } else {
+            return res.status(400).json({ status: 'error', message: `image type of ${file} is not avaliable, please upload .jpg, .jpeg, .png file!` })
+          }
+        }
+      }
       await user.update(updateData)
       return res.status(200).json({ status: 'success', message: 'profile edit success!' })
     } catch (e) {
