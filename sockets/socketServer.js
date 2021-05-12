@@ -6,7 +6,9 @@ const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers, his
 // const moment = require('moment')
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
 dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const users = []
 const botName = 'Chat Bot'
@@ -53,7 +55,8 @@ module.exports = (io) => {
         receivedUserId: socket.user.channel === 'publicRoom' ? 0 : receivedUserId,
         message: msg,
         // time: moment.utc().locale('zh_TW').utcOffset('+08:00').format('h:mm a'),
-        time: dayjs.utc().local().format('h:mm a'),
+        // time: dayjs.utc().local().format('h:mm a'),
+        time: dayjs().tz('Asia/Taipei').format('h:mm a'),
         channel: socket.user.channel
       })
       const msgData = {
