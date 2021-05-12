@@ -5,6 +5,8 @@ const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers, historyMsgForOneUser, getUnreadMsg } = require('./utils')
 // const moment = require('moment')
 const dayjs = require('dayjs')
+require('dayjs/locale/zh-tw')
+dayjs.locale('zh-tw')
 const utc = require('dayjs/plugin/utc')
 const timezone = require('dayjs/plugin/timezone')
 dayjs.extend(utc)
