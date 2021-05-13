@@ -8,12 +8,12 @@ const subscriptController = {
       const authorId = req.body.id
 
       if (!subscriberId || !authorId || (subscriberId === authorId)) {
-        return res.json({ status: 'error', message: "There is some error with subscriberId or authorId." })
+        return res.status(404).json({ status: 'error', message: "There is some error with subscriberId or authorId." })
       }
       await Subscript.create({
         subscriberId, authorId
       })
-      return res.json({ status: 'success', message: 'Subscript has built successfully!' })
+      return res.status(201).json({ status: 'success', message: 'Subscript has built successfully!' })
 
     } catch (e) {
       console.log(e)
@@ -31,10 +31,10 @@ const subscriptController = {
         }
       })
       if (subscript === null) {
-        return res.json({ status: 'error', message: "Can't find subscripts." })
+        return res.status(404).json({ status: 'error', message: "Can't find subscripts." })
       }
       subscript.destroy()
-      return res.json({ status: 'success', message: 'Subscript has removed successfully!' })
+      return res.status(200).json({ status: 'success', message: 'Subscript has removed successfully!' })
     } catch (e) {
       console.log(e)
       return next(e)
