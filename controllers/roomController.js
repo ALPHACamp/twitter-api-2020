@@ -100,7 +100,7 @@ const roomController = {
 
       if (checkRoom.length) {
         await JoinRoom.update(
-          { createdAt: Date.now(), updatedAt: Date.now() },
+          { createdAt: Date.now() },
           {
             where: {
               UserId: [currentUserId, receiverId],

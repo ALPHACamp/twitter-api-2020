@@ -154,10 +154,7 @@ const updateTime = async (UserId, ChatRoomId) => {
   console.log('UserId', UserId)
   console.log('ChatRoomId', ChatRoomId)
 
-  await JoinRoom.update(
-    { updatedAt: Date.now() },
-    { where: { UserId, ChatRoomId } }
-  )
+  await JoinRoom.update({}, { where: { UserId, ChatRoomId } })
 
   console.log(`update time for user ${UserId} in room ${ChatRoomId}`)
 }
@@ -190,7 +187,6 @@ const saveData = async data => {
     console.log('checkData', checkData.toJSON())
     checkData.changed('updatedAt', true)
     return await checkData.save()
-    // return await checkData.update({ updatedAt: Date.now() })
   }
 
   await Notification.create({
