@@ -380,9 +380,9 @@ const tweetController = {
 
   editReply: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const ReplyId = req.params.reply_id
-      const UserId = helpers.getUser(req).id
+      const { tweet_id: TweetId, reply_id: ReplyId } = req.params
+      const UserId = req.user.id
+      const { comment } = req.body
       const reply = await Reply.findOne({
         where: {
           id: ReplyId,
@@ -394,10 +394,13 @@ const tweetController = {
       if (!reply) {
         return res
           .status(400)
-          .json({ status: 'error', message: 'this reply does not exist or belong to you' })
+          .json({
+            status: 'error',
+            message: 'this reply does not exist or belong to you'
+          })
       }
 
-      if (!req.body.comment.trim()) {
+      if (!comment.trim()) {
         return res
           .status(422)
           .json({
@@ -410,7 +413,7 @@ const tweetController = {
         id: reply.id,
         UserId,
         TweetId,
-        comment: req.body.comment,
+        comment,
         createdAt: reply.createdAt,
         updatedAt: new Date()
       })
