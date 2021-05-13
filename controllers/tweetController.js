@@ -210,9 +210,10 @@ const tweetController = {
 
   postReply: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
-      const UserId = helpers.getUser(req).id
+      const { tweet_id: TweetId } = req.params
+      const targetTweet = await Tweet.findByPk(TweetId)
+      const UserId = req.user.id
+      const { comment } = req.body
 
       if (!targetTweet) {
         return res
@@ -223,9 +224,9 @@ const tweetController = {
           })
       }
 
-      const tweetAuthor = await User.findOne({ where: { id: targetTweet.UserId } })
+      const tweetAuthor = await User.findByPk(targetTweet.UserId)
 
-      if (!req.body.comment.trim()) {
+      if (!comment.trim()) {
         return res
           .status(422)
           .json({
@@ -237,9 +238,7 @@ const tweetController = {
       const reply = await Reply.create({
         UserId,
         TweetId,
-        comment: req.body.comment,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        comment
       })
 
       return res
