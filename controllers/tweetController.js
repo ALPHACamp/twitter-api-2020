@@ -285,18 +285,19 @@ const tweetController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.tweet_id)
+      const { tweet_id: TweetId } = req.params
+      const tweet = await Tweet.findByPk(TweetId)
 
       if (!tweet) {
         return res
           .status(200)
           .json({
             status: 'error',
-            message: 'tweet does not exist'
+            message: 'this tweet doesn\'t exist'
           })
       }
 
-      if (tweet.UserId !== helpers.getUser(req).id) {
+      if (tweet.UserId !== req.user.id) {
         return res
           .status(403)
           .json({
@@ -305,7 +306,6 @@ const tweetController = {
           })
       }
 
-      // Replies and likes related to this tweet must be deleted as well
       await Promise.all([
         Reply.destroy({ where: { TweetId: tweet.id } }),
         Like.destroy({ where: { TweetId: tweet.id } }),
@@ -314,7 +314,10 @@ const tweetController = {
 
       res
         .status(200)
-        .json({ status: 'success', message: 'delete successfully' })
+        .json({
+          status: 'success',
+          message: 'delete successfully'
+        })
 
     } catch (err) {
       next(error)
