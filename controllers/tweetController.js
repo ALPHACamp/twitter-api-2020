@@ -256,24 +256,27 @@ const tweetController = {
 
   getReplies: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
+      const { tweet_id: TweetId } = req.params
+      const targetTweet = await Tweet.findByPk(TweetId)
 
       if (!targetTweet) {
         return res
           .status(404)
           .json({
             status: 'error',
-            message: 'tweet does not exist'
+            message: 'this tweet doesn\'t exist'
           })
       }
 
-      const replies = await Reply.findAll({ raw: true, nest: true, where: { TweetId } })
+      const replies = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { TweetId }
+      })
+
       return res
         .status(200)
-        .json(
-          replies
-        )
+        .json(replies)
     }
     catch (error) {
       next(error)
