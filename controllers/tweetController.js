@@ -45,6 +45,7 @@ const tweetController = {
       next(error)
     }
   },
+
   getTweets: async (req, res, next) => {
     try {
       let tweets = await Tweet.findAll({
@@ -70,6 +71,7 @@ const tweetController = {
           account: tweet.User.account
         }
       }))
+
       return res
         .status(200)
         .json(tweets)
@@ -80,7 +82,7 @@ const tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
+      const { tweet_id: TweetId } = req.params
       let tweet = await Tweet.findByPk(TweetId, {
         include: [User, Like, Reply]
       })
@@ -90,7 +92,7 @@ const tweetController = {
           .status(404)
           .json({
             status: 'error',
-            message: 'cannot get tweet that doesn\'t exist'
+            message: 'this tweet doesn\'t exist'
           })
       }
 
