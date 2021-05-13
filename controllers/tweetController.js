@@ -124,8 +124,9 @@ const tweetController = {
 
   likeTweet: async (req, res, next) => {
     try {
-      const UserId = helpers.getUser(req).id
-      const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
+      const UserId = req.user.id
+      const { tweet_id: TweetId } = req.params
+      const targetTweet = await Tweet.findByPk(TweetId)
 
       if (!targetTweet) {
         return res
@@ -136,7 +137,7 @@ const tweetController = {
           })
       }
 
-      const like = await Like.findOne({ where: { TweetId: req.params.tweet_id, UserId } })
+      const like = await Like.findOne({ where: { TweetId, UserId } })
 
       if (like) {
         return res
@@ -149,12 +150,14 @@ const tweetController = {
 
       await Like.create({
         UserId,
-        TweetId: req.params.tweet_id
+        TweetId
       })
 
       return res
         .status(200)
-        .json({ status: 'success' })
+        .json({
+          status: 'success'
+        })
     }
     catch (error) {
       next(error)
