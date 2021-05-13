@@ -3,7 +3,13 @@ const JoinRoom = db.JoinRoom
 const User = db.User
 const Notification = db.Notification
 
-const PublicRoomId = 4
+const PUBLIC_ROOM_ID = Number(process.env.PUBLIC_ROOM_ID)
+const interactionType = {
+  tweet: 1,
+  follow: 2,
+  reply: 3,
+  like: 4
+}
 const users = []
 
 const addUser = async ({ socketId, roomId, userId, username }) => {
@@ -15,7 +21,7 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
 
   const user = { socketId, roomId, userId, username }
   users.push(user)
-  if (Number(user.roomId) === PublicRoomId) {
+  if (Number(user.roomId) === PUBLIC_ROOM_ID) {
     console.log(`Add user ${userId} to public room`)
 
     await JoinRoom.findOrCreate({
@@ -94,7 +100,7 @@ const removeUser = async (socketId, roomId, userId) => {
   console.log('---- getOtherUser function ----')
   console.log('socketId', socketId)
 
-  const originalRoomId = roomId ? roomId : PublicRoomId
+  const originalRoomId = roomId ? roomId : PUBLIC_ROOM_ID
   console.log('originalRoomId', originalRoomId)
 
   const index = users.findIndex(
@@ -163,7 +169,10 @@ const saveData = async data => {
   console.log('---- saveData function ----')
   console.log('data', data)
 
-  if (data.type === 1 || data.type === 3) {
+  if (
+    data.type === interactionType.tweet ||
+    data.type === interactionType.reply
+  ) {
     return await Notification.findOrCreate({
       where: {
         UserId: data.id,
@@ -215,6 +224,8 @@ const getSubscribers = async userId => {
 }
 
 module.exports = {
+  interactionType,
+  PUBLIC_ROOM_ID,
   addUser,
   getUser,
   getUsersInRoom,

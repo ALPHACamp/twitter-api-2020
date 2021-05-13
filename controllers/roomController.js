@@ -6,14 +6,11 @@ const Message = db.Message
 const Notification = db.Notification
 const Tweet = db.Tweet
 const Reply = db.Reply
+
 const helpers = require('../_helpers')
-const { countUsers, users } = require('../utils/users')
-
-const { generateMessage } = require('../utils/message')
+const { users } = require('../utils/users')
 const { Sequelize, sequelize } = require('../models')
-const { Op } = Sequelize
-
-const publicRoom = 4
+const { PUBLIC_ROOM_ID } = require('../utils/users')
 
 const roomController = {
   getRoom: async (req, res, next) => {
@@ -84,14 +81,14 @@ const roomController = {
         FROM JoinRooms j1
         INNER JOIN JoinRooms j2
         ON j1.ChatRoomId = j2.ChatRoomId
-        WHERE j1.UserId <> j2.UserId AND j1.UserId = (:receiverId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom);
+        WHERE j1.UserId <> j2.UserId AND j1.UserId = (:receiverId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:PUBLIC_ROOM_ID);
       `,
         {
           type: Sequelize.QueryTypes.SELECT,
           replacements: {
             currentUserId,
             receiverId,
-            publicRoom
+            PUBLIC_ROOM_ID
           }
         }
       )
@@ -146,13 +143,13 @@ const roomController = {
         GROUP BY ChatRoomId
         ) AS msg
         ON msg.cid = j1.ChatRoomId
-        WHERE j1.UserId <> j2.UserId AND j1.UserId <> (:currentUserId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:publicRoom)
+        WHERE j1.UserId <> j2.UserId AND j1.UserId <> (:currentUserId) AND j2.UserId = (:currentUserId) AND j2.ChatRoomId <> (:PUBLIC_ROOM_ID)
         ) 
         AND role = 'user'
       `,
         {
           type: Sequelize.QueryTypes.SELECT,
-          replacements: { currentUserId, publicRoom }
+          replacements: { currentUserId, PUBLIC_ROOM_ID }
         }
       )
 
@@ -185,7 +182,7 @@ const roomController = {
         attributes: ['ChatRoomId'],
         where: {
           UserId: helpers.getUser(req).id,
-          ChatRoomId: { $not: publicRoom }
+          ChatRoomId: { $not: PUBLIC_ROOM_ID }
         }
       })
       joinedRooms = joinedRooms.map(room => room.ChatRoomId)
@@ -271,7 +268,7 @@ const roomController = {
         attributes: ['ChatRoomId'],
         where: {
           UserId: helpers.getUser(req).id,
-          ChatRoomId: { $not: publicRoom }
+          ChatRoomId: { $not: PUBLIC_ROOM_ID }
         }
       })
       joinedRooms = joinedRooms.map(room => room.ChatRoomId)

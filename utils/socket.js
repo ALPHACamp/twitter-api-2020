@@ -5,6 +5,8 @@ const Message = db.Message
 
 const { generateMessage } = require('./message')
 const {
+  interactionType,
+  PUBLIC_ROOM_ID,
   addUser,
   getUser,
   removeUser,
@@ -39,7 +41,7 @@ const socket = server => {
       let rooms = []
       if (userId) {
         socket.join(`self ${userId}`)
-        socket.join(`4`)
+        socket.join(`${PUBLIC_ROOM_ID}`)
         console.log('socket.rooms1-1', socket.rooms)
 
         if (!data.rooms || !data.rooms.length) {
@@ -55,7 +57,7 @@ const socket = server => {
           console.log('socket.rooms1-2', socket.rooms)
 
           rooms.push(`self ${userId}`)
-          rooms.push(`4`)
+          rooms.push(`${PUBLIC_ROOM_ID}`)
           console.log('rooms1 - start session', rooms)
         } else {
           rooms = data.rooms
@@ -128,16 +130,19 @@ const socket = server => {
                 id: userId,
                 currentUserId: subscriber,
                 tweetId: tweetId,
-                type: 1
+                type: interactionType.tweet
               })
             })
           )
         }
         console.log(`notify users in # ${user.account} channel`)
 
-        socket.broadcast
-          .to(`# ${user.account}`)
-          .emit('notification', { ...user, tweet, tweetId, type: 1 })
+        socket.broadcast.to(`# ${user.account}`).emit('notification', {
+          ...user,
+          tweet,
+          tweetId,
+          type: interactionType.tweet
+        })
       }
     })
 
@@ -153,7 +158,7 @@ const socket = server => {
       await saveData({
         id: data.currentUserId,
         currentUserId: data.userId,
-        type: 4
+        type: interactionType.like
       })
       const user = await getUserInfo(data.currentUserId)
       console.log('user', user)
@@ -162,7 +167,7 @@ const socket = server => {
 
       socket.broadcast
         .to(`self ${data.userId}`)
-        .emit('notification', { ...user, type: 4 })
+        .emit('notification', { ...user, type: interactionType.like })
     })
 
     // follow
@@ -177,7 +182,7 @@ const socket = server => {
       await saveData({
         id: data.currentUserId,
         currentUserId: data.userId,
-        type: 2
+        type: interactionType.follow
       })
 
       const user = await getUserInfo(data.currentUserId)
@@ -187,7 +192,7 @@ const socket = server => {
 
       socket.broadcast
         .to(`self ${data.userId}`)
-        .emit('notification', { ...user, type: 2 })
+        .emit('notification', { ...user, type: interactionType.follow })
     })
 
     // reply
@@ -203,7 +208,7 @@ const socket = server => {
         id: data.currentUserId,
         currentUserId: data.userId,
         replyId: data.replyId,
-        type: 3
+        type: interactionType.reply
       })
 
       const user = await getUserInfo(data.currentUserId)
@@ -215,7 +220,7 @@ const socket = server => {
         ...user,
         replyId: data.replyId,
         reply: data.reply,
-        type: 3
+        type: interactionType.reply
       })
     })
 
@@ -238,7 +243,7 @@ const socket = server => {
 
       await updateTime(userId, roomId)
 
-      if (roomId === 4) {
+      if (roomId === PUBLIC_ROOM_ID) {
         // count users
         const usersInRoom = await getUsersInRoom(user.roomId)
 
