@@ -9,16 +9,27 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       UserId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      receivedUserId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       message: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
+        allowNull: false
       },
       time: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       channel: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      isRead: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,

@@ -4,16 +4,18 @@ const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
 
-const helpers = require('../_helpers')
-
+// dayjs
 const dayjs = require('dayjs')
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
+
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
+
+const helpers = require('../_helpers')
 
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 

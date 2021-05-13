@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
-// const moment = require('moment')
-// moment.locale('zh_TW')
+const { Op } = require('sequelize')
+
+// dayjs
 const dayjs = require('dayjs')
 require('dayjs/locale/zh-tw')
 dayjs.locale('zh-tw')
@@ -8,10 +9,9 @@ const utc = require('dayjs/plugin/utc')
 const timezone = require('dayjs/plugin/timezone')
 dayjs.extend(utc)
 dayjs.extend(timezone)
-const { Op } = require('sequelize')
+
 const User = require('../models').User
 const Chat = require('../models').Chat
-const UnreadChat = require('../models').UnreadChat
 
 // 驗證身分
 async function authenticated (socket, next) {
@@ -54,7 +54,7 @@ function formatMessage (username, text, msgType) {
   }
 }
 
-async function historyMsg (channel, Chat, next) {
+async function historyMsg (channel) {
   try {
     let chatRecords = await Chat.findAll({
       raw: true,
@@ -73,7 +73,6 @@ async function historyMsg (channel, Chat, next) {
     return chatRecords
   } catch (e) {
     console.log(e)
-    return next(e)
   }
 }
 
@@ -129,11 +128,18 @@ async function historyMsgForOneUser (id) {
 }
 
 async function getUnreadMsg (id) {
-  const msg = await UnreadChat.findAll({
+  // const msg = await UnreadChat.findAll({
+  //   raw: true,
+  //   nest: true,
+  //   where: { UserId: id },
+  //   attributes: ['id', 'UserId', 'ChatId', 'channel']
+  // })
+  // return msg
+  const msg = await Chat.findAll({
     raw: true,
     nest: true,
-    where: { UserId: id },
-    attributes: ['id', 'UserId', 'ChatId', 'channel']
+    where: { receivedUserId: id, isRead: false },
+    attributes: ['id', 'UserId', 'channel', 'time']
   })
   return msg
 }
