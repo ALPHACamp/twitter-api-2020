@@ -433,12 +433,11 @@ const tweetController = {
 
   deleteReply: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const replyId = req.params.reply_id
-      const UserId = helpers.getUser(req).id
+      const { tweet_id: TweetId, reply_id: ReplyId } = req.params
+      const UserId = req.user.id
       const reply = await Reply.findOne({
         where: {
-          id: replyId,
+          id: ReplyId,
           UserId,
           TweetId
         }
@@ -447,7 +446,10 @@ const tweetController = {
       if (!reply) {
         return res
           .status(400)
-          .json({ status: 'error', message: 'this reply does not exist or belong to you' })
+          .json({
+            status: 'error',
+            message: 'this reply does not exist or belong to you'
+          })
       }
 
       await reply.destroy()
@@ -457,7 +459,7 @@ const tweetController = {
         .json({
           status: 'success',
           message: 'successfully deleted your response',
-          deletedReplyId: replyId
+          deletedReplyId: ReplyId
         })
     }
     catch (error) {
