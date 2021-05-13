@@ -326,7 +326,8 @@ const tweetController = {
 
   editTweet: async (req, res, next) => {
     try {
-      let tweet = await Tweet.findByPk(req.params.tweet_id)
+      const { tweet_id: TweetId } = req.params
+      let tweet = await Tweet.findByPk(TweetId)
       const { description } = req.body
 
       if (!tweet) {
@@ -334,11 +335,11 @@ const tweetController = {
           .status(200)
           .json({
             status: 'error',
-            message: 'tweet does not exist'
+            message: 'this tweet doesn\'t exist'
           })
       }
 
-      if (tweet.UserId !== helpers.getUser(req).id) {
+      if (tweet.UserId !== req.user.id) {
         return res
           .status(403)
           .json({
@@ -359,7 +360,7 @@ const tweetController = {
       await tweet.update({
         id: tweet.id,
         UserId: tweet.UserId,
-        description,
+        description: description.trim() ? description : tweet.description,
         createdAt: tweet.createdAt,
         updatedAt: new Date()
       })
