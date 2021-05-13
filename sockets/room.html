@@ -81,20 +81,22 @@
       const unreadCount = document.getElementById('unread-count')
       if (currentUser.id === id) {
         count = message.length     
-      }  
+      }
       unreadCount.innerText = count
     })
 
     // 'historyMsgForOneUser' from server
-    socket.on('historyMsgForOneUser', historyMsgList => {
-      const historyMsg = document.getElementById('history-msg')
-      let html = ``
-      historyMsgList.forEach(msg => {
-        html += `
-          <span>${msg.username} - ${msg.text} | </span>
-        `
-      })
-      historyMsg.innerHTML = html
+    socket.on('historyMsgForOneUser', ({historyMsgList, UserId, receivedUserId}) => {
+      if (currentUser.id === UserId || currentUser.id === receivedUserId) {
+        const historyMsg = document.getElementById('history-msg')
+        let html = ``
+        historyMsgList.forEach(msg => {
+          html += `
+            <span>${msg.username} - ${msg.text} | </span>
+          `
+        })
+        historyMsg.innerHTML = html
+      }
     })
 
     // private Room submit

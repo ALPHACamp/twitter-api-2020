@@ -1,7 +1,6 @@
 const db = require('../models')
 const Chat = db.Chat
 const User = db.User
-const UnreadChat = db.UnreadChat
 const { userIndex, authenticated, formatMessage, historyMsg, getPublicUsers, historyMsgForOneUser, getUnreadMsg } = require('./utils')
 
 // dayjs
@@ -43,15 +42,26 @@ module.exports = (io) => {
       connectionCount[socket.user.id] ++
     }
 
-    // online count & user list
+    // 傳送 onlineCount、userList 給前端
     io.emit('onlineCount', getPublicUsers(users).length)
     io.emit('userList', getPublicUsers(users))
 
-    // listen for userMsg
+    // 更新歷史訊息列表給前端
+    const historyMsgList = await historyMsgForOneUser(socket.user.id)
+    const UserId = socket.user.id
+    const receivedUserId = 0
+    socket.emit('historyMsgForOneUser', { historyMsgList, UserId, receivedUserId })
+
+    // 更新未讀訊息給前端
+    const message = await getUnreadMsg(socket.user.id)
+    const id = Number(socket.user.id)
+    socket.emit('unreadMsg', { message, id })
+
+    // 監聽 userMsg 事件
     socket.on('userMsg', async (msg) => {
       // 找出 receivedUserId
       const userList = socket.user.channel.split('-')
-      const receivedUserId = userList.find(userId => Number(userId) !== socket.user.id)
+      let receivedUserId = userList.find(userId => Number(userId) !== socket.user.id)
       // 判斷在 channel 裡的人
       const userInChannel = users.filter(user => user.channel === socket.user.channel)
       const isRead = userInChannel.some(user => user.id === receivedUserId)
@@ -72,6 +82,7 @@ module.exports = (io) => {
         avatar: socket.user.avatar,
         text: msg,
         time: chat.time,
+        isRead: chat.isRead,
         msgType: ''
       }
       // 發送訊息資訊給前端
@@ -82,7 +93,9 @@ module.exports = (io) => {
         io.to(socket.user.channel).emit('privateChatMsg', msgData)
         // 更新歷史訊息列表
         const historyMsgList = await historyMsgForOneUser(socket.user.id)
-        socket.emit('historyMsgForOneUser', historyMsgList)
+        const UserId = socket.user.id
+        receivedUserId = Number(receivedUserId)
+        io.to('publicRoom').to(socket.user.channel).emit('historyMsgForOneUser', { historyMsgList, UserId, receivedUserId })
       }
       // 更新未讀訊息給前端
       const message = await getUnreadMsg(receivedUserId)
@@ -111,7 +124,9 @@ module.exports = (io) => {
         io.emit('userList', getPublicUsers(users))
         // 更新歷史訊息列表
         const historyMsgList = await historyMsgForOneUser(socket.user.id)
-        socket.emit('historyMsgForOneUser', historyMsgList)
+        const UserId = socket.user.id
+        const receivedUserId = 0
+        socket.emit('historyMsgForOneUser', { historyMsgList, UserId, receivedUserId })
         // 把未讀訊息變成已讀
         await Chat.update(
           { isRead: true },
@@ -129,15 +144,6 @@ module.exports = (io) => {
         socket.emit('findUser', `can not find userId: ${userId}!`)
       }
     })
-
-    // 更新歷史訊息列表
-    const historyMsgList = await historyMsgForOneUser(socket.user.id)
-    socket.emit('historyMsgForOneUser', historyMsgList)
-
-    // 更新未讀訊息
-    const message = await getUnreadMsg(socket.user.id)
-    const id = Number(socket.user.id)
-    socket.emit('unreadMsg', { message, id })
 
     // run when client disconnect
     socket.on('disconnect', () => {
