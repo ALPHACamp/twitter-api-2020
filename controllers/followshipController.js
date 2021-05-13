@@ -8,12 +8,12 @@ const followshipController = {
       const followingId = req.body.id
 
       if (!followerId || !followingId) {
-        return res.json({ status: 'error', message: "Can't find followerId." })
+        return res.status(404).json({ status: 'error', message: "Can't find followerId." })
       }
       await Followship.create({
         followerId, followingId
       })
-      return (res.json({ status: 'success', message: 'Followship has built successfully!' }), next())
+      return (res.status(201).json({ status: 'success', message: 'Followship has built successfully!' }), next())
 
     } catch (e) {
       console.log(e)
@@ -31,10 +31,10 @@ const followshipController = {
         }
       })
       if (followship === null) {
-        return res.json({ status: 'error', message: "Can't find followships." })
+        return res.status(404).json({ status: 'error', message: "Can't find followships." })
       }
       followship.destroy()
-      return res.json({ status: 'success', message: 'Followship has removed successfully!' })
+      return res.status(200).json({ status: 'success', message: 'Followship has removed successfully!' })
     } catch (e) {
       console.log(e)
       return next(e)
