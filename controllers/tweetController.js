@@ -9,9 +9,9 @@ const tweetController = {
   postTweets: async (req, res, next) => {
     try {
       let { description } = req.body
-      const UserId = helpers.getUser(req).id
+      const UserId = req.user.id
 
-      if (!description) {
+      if (!description.trim()) {
         return res
           .status(422)
           .json({
@@ -29,18 +29,9 @@ const tweetController = {
           })
       }
 
-      await Tweet.create({
+      const tweet = await Tweet.create({
         UserId,
-        description,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
-      const tweet = await Tweet.findAll({
-        raw: true,
-        nest: true,
-        limit: 1,
-        order: [['createdAt', 'DESC']]
+        description
       })
 
       return res
