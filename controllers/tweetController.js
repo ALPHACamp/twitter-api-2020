@@ -130,7 +130,7 @@ const tweetController = {
 
       if (!targetTweet) {
         return res
-          .status(204)
+          .status(200)
           .json({
             status: 'error',
             message: 'cannot like a tweet that doesn\'t exist'
@@ -172,7 +172,7 @@ const tweetController = {
 
       if (!targetTweet) {
         return res
-          .status(204)
+          .status(200)
           .json({
             status: 'error',
             message: 'cannot unlike a tweet that doesn\'t exist'
