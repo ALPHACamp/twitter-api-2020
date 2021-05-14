@@ -1,8 +1,5 @@
 # Simple Twitter API
 
-# Simple Twitter API
-
----
 
 這是一個為了提供給前端開發的簡易 Twitter 專案，所自製的後端 API 伺服器。
 
@@ -12,7 +9,6 @@
 
 ## 環境建置( prerequisites )
 
----
 
 - [Express 4.16.4](https://www.npmjs.com/package/express)
 - [Node.js v10.15.0](https://nodejs.org/en/download/)
@@ -24,7 +20,6 @@
 
 1.  下載專案並安裝套件
 
----
 
 ```jsx
 git clone [https://github.com/KarolChang/twitter-api-2020](https://github.com/KarolChang/twitter-api-2020)
@@ -53,13 +48,12 @@ npm run dev
 
 ## 共同開發人員
 
----
 
 [Karol Chang](https://github.com/KarolChang/twitter-api-2020)
 
 [Calvin Huang](https://github.com/yuchengH1988/twitter-api-2020)
 
-# API 說明
+## API 說明
 
 - 除了**後臺管理者登入**、**使用者登入**、**註冊**這 3 條路由之外，其餘皆需在 header 的 Authorization 帶上"Bearer" + token
 - response 皆包含 http status code & message (說明成功狀態或是失敗原因)
@@ -77,7 +71,6 @@ Password: 12345678;
 
 ## API 文件
 
----
 
 ### 後臺管理者登入 ( 使用者認證 )
 
@@ -1074,7 +1067,7 @@ Success ( 以一則為例 )
 
 | 連線狀態                                                                       | 後端操作 | 回傳格式 | 回傳說明                                                |
 | ------------------------------------------------------------------------------ | -------- | -------- | ------------------------------------------------------- |
-| (1) connection<br> (2) connection / socket.on('privateUser') <br>(3)disconnect | io.emit  | number   | 目前線上的人數(同一個使用者開多分頁會被視為 1 個使用者) |
+| (1) connection<br> (2) connection / socket.on('privateUser') <br>(3)disconnect | io.emit  | number   | 目前線上的人數(同一個使用者開多分頁會被視為1個使用者) |
 
 **Response**
 
@@ -1084,9 +1077,9 @@ Success ( 以一則為例 )
 
 ### userList 事件
 
-| 連線狀態                                                                        | 後端操作 | 回傳格式    | 回傳說明                                                        |
-| ------------------------------------------------------------------------------- | -------- | ----------- | --------------------------------------------------------------- |
-| (1) connection <br>(2) connection / socket.on('privateUser')<br> (3) disconnect | io.emit  | array (obj) | 目前在線上的使用者列表(同一個使用者開多分頁會被視為 1 個使用者) |
+| 連線狀態                                                                       | 後端操作 | 回傳格式 | 回傳說明                                                |
+| ------------------------------------------------------------------------------ | -------- | -------- | ------------------------------------------------------- |
+| (1) connection<br> (2) connection / socket.on('privateUser') <br>(3) disconnect | io.emit  | array (obj) | 目前線上的使用者列表(同一個使用者開多分頁會被視為1個使用者) |
 
 **Response**
 
@@ -1189,7 +1182,7 @@ can not find user: user1!
 ### historyMsgForOneUser 事件
 
 | 連線狀態                                                                                               | 後端操作                                                                   | 回傳格式               | 回傳說明                                             |
-| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------------- |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------------------- |
 | (1) connection<br> (2) connection / socket.on('privateUser') <br>(3) connection / socket.on('userMsg') | (1,2) socket.emit<br> (3) io.to('publicRoom').to(socket.user.channel).emit | arr(obj)/number/number | 歷史訊息列表、傳訊息的使用者 id、收到訊息的使用者 id |
 
 **Response**
@@ -1217,7 +1210,7 @@ receivedUserId: 2
 ### unreadMsg 事件
 
 | 連線狀態                                                                                                 | 後端操作                                                | 回傳格式        | 回傳說明                  |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------- | ------------------------- |
+| -------------------------------------------------------------- | ------------------------------------------------------- | --------------- | ------------------------- |
 | (1) connection <br> (2) connection / socket.on('privateUser') <br> (3) connection / socket.on('userMsg') | (1,2) socket.emit <br> (3) socket.to('publicRoom').emit | arr(obj)/number | 未讀訊息、未讀的使用者 id |
 
 **Response**
