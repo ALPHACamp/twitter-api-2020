@@ -9,7 +9,7 @@ const tweetController = {
   postTweets: async (req, res, next) => {
     try {
       let { description } = req.body
-      const UserId = helpers.getUser(req).id
+      const UserId = req.user.id
 
       if (!description) {
         return res
@@ -131,7 +131,7 @@ const tweetController = {
 
   likeTweet: async (req, res, next) => {
     try {
-      const UserId = helpers.getUser(req).id
+      const UserId = req.user.id
       const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
 
       if (!targetTweet) {
@@ -170,7 +170,7 @@ const tweetController = {
 
   unlikeTweet: async (req, res, next) => {
     try {
-      const UserId = helpers.getUser(req).id
+      const UserId = req.user.id
       const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
 
       if (!targetTweet) {
@@ -215,7 +215,7 @@ const tweetController = {
     try {
       const TweetId = req.params.tweet_id
       const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
-      const UserId = helpers.getUser(req).id
+      const UserId = req.user.id
 
       if (!targetTweet) {
         return res
@@ -297,7 +297,7 @@ const tweetController = {
           })
       }
 
-      if (tweet.UserId !== helpers.getUser(req).id) {
+      if (tweet.UserId !== req.user.id) {
         return res
           .status(403)
           .json({
@@ -336,7 +336,7 @@ const tweetController = {
           })
       }
 
-      if (tweet.UserId !== helpers.getUser(req).id) {
+      if (tweet.UserId !== req.user.id) {
         return res
           .status(403)
           .json({
@@ -379,7 +379,7 @@ const tweetController = {
     try {
       const TweetId = req.params.tweet_id
       const ReplyId = req.params.reply_id
-      const UserId = helpers.getUser(req).id
+      const UserId = req.user.id
       const reply = await Reply.findOne({
         where: {
           id: ReplyId,
@@ -429,7 +429,7 @@ const tweetController = {
     try {
       const TweetId = req.params.tweet_id
       const replyId = req.params.reply_id
-      const UserId = helpers.getUser(req).id
+      const UserId = req.user.id
       const reply = await Reply.findOne({
         where: {
           id: replyId,
