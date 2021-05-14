@@ -9,7 +9,7 @@ const tweetController = {
   postTweets: async (req, res, next) => {
     try {
       let { description } = req.body
-      const UserId = req.user.id
+      const userId = req.user.id
 
       if (!description.trim()) {
         return res
@@ -30,7 +30,7 @@ const tweetController = {
       }
 
       const tweet = await Tweet.create({
-        UserId,
+        UserId: userId,
         description
       })
 
@@ -82,8 +82,8 @@ const tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
-      const { tweet_id: TweetId } = req.params
-      let tweet = await Tweet.findByPk(TweetId, {
+      const { tweet_id: tweetId } = req.params
+      let tweet = await Tweet.findByPk(tweetId, {
         include: [User, Like, Reply]
       })
 
@@ -124,9 +124,9 @@ const tweetController = {
 
   likeTweet: async (req, res, next) => {
     try {
-      const UserId = req.user.id
-      const { tweet_id: TweetId } = req.params
-      const targetTweet = await Tweet.findByPk(TweetId)
+      const userId = req.user.id
+      const { tweet_id: tweetId } = req.params
+      const targetTweet = await Tweet.findByPk(tweetId)
 
       if (!targetTweet) {
         return res
@@ -137,7 +137,7 @@ const tweetController = {
           })
       }
 
-      const like = await Like.findOne({ where: { TweetId, UserId } })
+      const like = await Like.findOne({ where: { TweetId: tweetId, UserId: userId } })
 
       if (like) {
         return res
@@ -149,8 +149,8 @@ const tweetController = {
       }
 
       await Like.create({
-        UserId,
-        TweetId
+        UserId: userId,
+        TweetId: tweetId
       })
 
       return res
@@ -166,9 +166,9 @@ const tweetController = {
 
   unlikeTweet: async (req, res, next) => {
     try {
-      const UserId = req.user.id
-      const { tweet_id: TweetId } = req.params
-      const targetTweet = await Tweet.findByPk(TweetId)
+      const userId = req.user.id
+      const { tweet_id: tweetId } = req.params
+      const targetTweet = await Tweet.findByPk(tweetId)
 
       if (!targetTweet) {
         return res
@@ -181,8 +181,8 @@ const tweetController = {
 
       const like = await Like.findOne({
         where: {
-          UserId,
-          TweetId
+          UserId: userId,
+          TweetId: tweetId
         }
       })
 
@@ -210,9 +210,9 @@ const tweetController = {
 
   postReply: async (req, res, next) => {
     try {
-      const { tweet_id: TweetId } = req.params
-      const targetTweet = await Tweet.findByPk(TweetId)
-      const UserId = req.user.id
+      const { tweet_id: tweetId } = req.params
+      const targetTweet = await Tweet.findByPk(tweetId)
+      const userId = req.user.id
       const { comment } = req.body
 
       if (!targetTweet) {
@@ -236,8 +236,8 @@ const tweetController = {
       }
 
       const reply = await Reply.create({
-        UserId,
-        TweetId,
+        UserId: userId,
+        TweetId: tweetId,
         comment
       })
 
@@ -256,8 +256,8 @@ const tweetController = {
 
   getReplies: async (req, res, next) => {
     try {
-      const { tweet_id: TweetId } = req.params
-      const targetTweet = await Tweet.findByPk(TweetId)
+      const { tweet_id: tweetId } = req.params
+      const targetTweet = await Tweet.findByPk(tweetId)
 
       if (!targetTweet) {
         return res
@@ -271,7 +271,7 @@ const tweetController = {
       const replies = await Reply.findAll({
         raw: true,
         nest: true,
-        where: { TweetId }
+        where: { TweetId: tweetId }
       })
 
       return res
@@ -285,8 +285,8 @@ const tweetController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const { tweet_id: TweetId } = req.params
-      const tweet = await Tweet.findByPk(TweetId)
+      const { tweet_id: tweetId } = req.params
+      const tweet = await Tweet.findByPk(tweetId)
 
       if (!tweet) {
         return res
@@ -326,8 +326,8 @@ const tweetController = {
 
   editTweet: async (req, res, next) => {
     try {
-      const { tweet_id: TweetId } = req.params
-      let tweet = await Tweet.findByPk(TweetId)
+      const { tweet_id: tweetId } = req.params
+      let tweet = await Tweet.findByPk(tweetId)
       const { description } = req.body
 
       if (!tweet) {
@@ -360,9 +360,7 @@ const tweetController = {
       await tweet.update({
         id: tweet.id,
         UserId: tweet.UserId,
-        description: description.trim() ? description : tweet.description,
-        createdAt: tweet.createdAt,
-        updatedAt: new Date()
+        description: description.trim() ? description : tweet.description
       })
 
       return res
@@ -380,14 +378,14 @@ const tweetController = {
 
   editReply: async (req, res, next) => {
     try {
-      const { tweet_id: TweetId, reply_id: ReplyId } = req.params
-      const UserId = req.user.id
+      const { tweet_id: tweetId, reply_id: replyId } = req.params
+      const userId = req.user.id
       const { comment } = req.body
       const reply = await Reply.findOne({
         where: {
-          id: ReplyId,
-          UserId,
-          TweetId
+          id: replyId,
+          UserId: userId,
+          TweetId: tweetId
         }
       })
 
@@ -411,11 +409,9 @@ const tweetController = {
 
       await reply.update({
         id: reply.id,
-        UserId,
-        TweetId,
-        comment,
-        createdAt: reply.createdAt,
-        updatedAt: new Date()
+        UserId: userId,
+        TweetId: tweetId,
+        comment
       })
 
       return res
@@ -433,13 +429,13 @@ const tweetController = {
 
   deleteReply: async (req, res, next) => {
     try {
-      const { tweet_id: TweetId, reply_id: ReplyId } = req.params
-      const UserId = req.user.id
+      const { tweet_id: tweetId, reply_id: ReplyId } = req.params
+      const userId = req.user.id
       const reply = await Reply.findOne({
         where: {
           id: ReplyId,
-          UserId,
-          TweetId
+          UserId: userId,
+          TweetId: tweetId
         }
       })
 
