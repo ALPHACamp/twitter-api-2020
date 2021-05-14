@@ -11,7 +11,7 @@ const tweetController = {
       let { description } = req.body
       const UserId = req.user.id
 
-      if (!description) {
+      if (!description.trim()) {
         return res
           .status(422)
           .json({
@@ -29,18 +29,9 @@ const tweetController = {
           })
       }
 
-      await Tweet.create({
+      const tweet = await Tweet.create({
         UserId,
-        description,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
-      const tweet = await Tweet.findAll({
-        raw: true,
-        nest: true,
-        limit: 1,
-        order: [['createdAt', 'DESC']]
+        description
       })
 
       return res
@@ -54,6 +45,7 @@ const tweetController = {
       next(error)
     }
   },
+
   getTweets: async (req, res, next) => {
     try {
       let tweets = await Tweet.findAll({
@@ -79,6 +71,7 @@ const tweetController = {
           account: tweet.User.account
         }
       }))
+
       return res
         .status(200)
         .json(tweets)
@@ -89,7 +82,7 @@ const tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
+      const { tweet_id: TweetId } = req.params
       let tweet = await Tweet.findByPk(TweetId, {
         include: [User, Like, Reply]
       })
@@ -99,7 +92,7 @@ const tweetController = {
           .status(404)
           .json({
             status: 'error',
-            message: 'cannot get tweet that doesn\'t exist'
+            message: 'this tweet doesn\'t exist'
           })
       }
 
@@ -132,7 +125,8 @@ const tweetController = {
   likeTweet: async (req, res, next) => {
     try {
       const UserId = req.user.id
-      const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
+      const { tweet_id: TweetId } = req.params
+      const targetTweet = await Tweet.findByPk(TweetId)
 
       if (!targetTweet) {
         return res
@@ -143,7 +137,7 @@ const tweetController = {
           })
       }
 
-      const like = await Like.findOne({ where: { TweetId: req.params.tweet_id, UserId } })
+      const like = await Like.findOne({ where: { TweetId, UserId } })
 
       if (like) {
         return res
@@ -156,12 +150,14 @@ const tweetController = {
 
       await Like.create({
         UserId,
-        TweetId: req.params.tweet_id
+        TweetId
       })
 
       return res
         .status(200)
-        .json({ status: 'success' })
+        .json({
+          status: 'success'
+        })
     }
     catch (error) {
       next(error)
@@ -171,7 +167,8 @@ const tweetController = {
   unlikeTweet: async (req, res, next) => {
     try {
       const UserId = req.user.id
-      const targetTweet = await Tweet.findOne({ where: { id: req.params.tweet_id } })
+      const { tweet_id: TweetId } = req.params
+      const targetTweet = await Tweet.findByPk(TweetId)
 
       if (!targetTweet) {
         return res
@@ -185,7 +182,7 @@ const tweetController = {
       const like = await Like.findOne({
         where: {
           UserId,
-          TweetId: req.params.tweet_id
+          TweetId
         }
       })
 
@@ -213,9 +210,10 @@ const tweetController = {
 
   postReply: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
+      const { tweet_id: TweetId } = req.params
+      const targetTweet = await Tweet.findByPk(TweetId)
       const UserId = req.user.id
+      const { comment } = req.body
 
       if (!targetTweet) {
         return res
@@ -226,9 +224,9 @@ const tweetController = {
           })
       }
 
-      const tweetAuthor = await User.findOne({ where: { id: targetTweet.UserId } })
+      const tweetAuthor = await User.findByPk(targetTweet.UserId)
 
-      if (!req.body.comment.trim()) {
+      if (!comment.trim()) {
         return res
           .status(422)
           .json({
@@ -240,9 +238,7 @@ const tweetController = {
       const reply = await Reply.create({
         UserId,
         TweetId,
-        comment: req.body.comment,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        comment
       })
 
       return res
@@ -260,24 +256,27 @@ const tweetController = {
 
   getReplies: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const targetTweet = await Tweet.findOne({ where: { id: TweetId } })
+      const { tweet_id: TweetId } = req.params
+      const targetTweet = await Tweet.findByPk(TweetId)
 
       if (!targetTweet) {
         return res
           .status(404)
           .json({
             status: 'error',
-            message: 'tweet does not exist'
+            message: 'this tweet doesn\'t exist'
           })
       }
 
-      const replies = await Reply.findAll({ raw: true, nest: true, where: { TweetId } })
+      const replies = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { TweetId }
+      })
+
       return res
         .status(200)
-        .json(
-          replies
-        )
+        .json(replies)
     }
     catch (error) {
       next(error)
@@ -286,14 +285,15 @@ const tweetController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.tweet_id)
+      const { tweet_id: TweetId } = req.params
+      const tweet = await Tweet.findByPk(TweetId)
 
       if (!tweet) {
         return res
           .status(200)
           .json({
             status: 'error',
-            message: 'tweet does not exist'
+            message: 'this tweet doesn\'t exist'
           })
       }
 
@@ -306,7 +306,6 @@ const tweetController = {
           })
       }
 
-      // Replies and likes related to this tweet must be deleted as well
       await Promise.all([
         Reply.destroy({ where: { TweetId: tweet.id } }),
         Like.destroy({ where: { TweetId: tweet.id } }),
@@ -315,7 +314,10 @@ const tweetController = {
 
       res
         .status(200)
-        .json({ status: 'success', message: 'delete successfully' })
+        .json({
+          status: 'success',
+          message: 'delete successfully'
+        })
 
     } catch (err) {
       next(error)
@@ -324,7 +326,8 @@ const tweetController = {
 
   editTweet: async (req, res, next) => {
     try {
-      let tweet = await Tweet.findByPk(req.params.tweet_id)
+      const { tweet_id: TweetId } = req.params
+      let tweet = await Tweet.findByPk(TweetId)
       const { description } = req.body
 
       if (!tweet) {
@@ -332,7 +335,7 @@ const tweetController = {
           .status(200)
           .json({
             status: 'error',
-            message: 'tweet does not exist'
+            message: 'this tweet doesn\'t exist'
           })
       }
 
@@ -357,7 +360,7 @@ const tweetController = {
       await tweet.update({
         id: tweet.id,
         UserId: tweet.UserId,
-        description,
+        description: description.trim() ? description : tweet.description,
         createdAt: tweet.createdAt,
         updatedAt: new Date()
       })
@@ -377,9 +380,9 @@ const tweetController = {
 
   editReply: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const ReplyId = req.params.reply_id
+      const { tweet_id: TweetId, reply_id: ReplyId } = req.params
       const UserId = req.user.id
+      const { comment } = req.body
       const reply = await Reply.findOne({
         where: {
           id: ReplyId,
@@ -391,10 +394,13 @@ const tweetController = {
       if (!reply) {
         return res
           .status(400)
-          .json({ status: 'error', message: 'this reply does not exist or belong to you' })
+          .json({
+            status: 'error',
+            message: 'this reply does not exist or belong to you'
+          })
       }
 
-      if (!req.body.comment.trim()) {
+      if (!comment.trim()) {
         return res
           .status(422)
           .json({
@@ -407,7 +413,7 @@ const tweetController = {
         id: reply.id,
         UserId,
         TweetId,
-        comment: req.body.comment,
+        comment,
         createdAt: reply.createdAt,
         updatedAt: new Date()
       })
@@ -427,12 +433,11 @@ const tweetController = {
 
   deleteReply: async (req, res, next) => {
     try {
-      const TweetId = req.params.tweet_id
-      const replyId = req.params.reply_id
+      const { tweet_id: TweetId, reply_id: ReplyId } = req.params
       const UserId = req.user.id
       const reply = await Reply.findOne({
         where: {
-          id: replyId,
+          id: ReplyId,
           UserId,
           TweetId
         }
@@ -441,7 +446,10 @@ const tweetController = {
       if (!reply) {
         return res
           .status(400)
-          .json({ status: 'error', message: 'this reply does not exist or belong to you' })
+          .json({
+            status: 'error',
+            message: 'this reply does not exist or belong to you'
+          })
       }
 
       await reply.destroy()
@@ -451,7 +459,7 @@ const tweetController = {
         .json({
           status: 'success',
           message: 'successfully deleted your response',
-          deletedReplyId: replyId
+          deletedReplyId: ReplyId
         })
     }
     catch (error) {
