@@ -6,7 +6,7 @@ const helpers = require('../_helpers')
 const followshipController = {
   followUser: async (req, res, next) => {
     try {
-      const followingId = req.body.id
+      const followingId = req.params.id
       const followingUser = await User.findByPk(followingId)
       const followerId = helpers.getUser(req).id
 
@@ -60,7 +60,7 @@ const followshipController = {
 
   unfollowUser: async (req, res, next) => {
     try {
-      const followingId = req.params.followingId
+      const followingId = req.params.id
       const followerId = helpers.getUser(req).id
       const unfollowedUser = await User.findByPk(followingId)
       const followship = await Followship.findOne({ where: { followingId, followerId } })
