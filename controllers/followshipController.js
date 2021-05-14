@@ -11,56 +11,59 @@ const followshipController = {
       const followingUser = await User.findOne({
         where: {
           id: followingId,
-          $not: { id: 1 }
+          $not: { role: 'admin' }
         }
       })
 
-      if (Number(followingId) !== followerId) {
-        const followship = await Followship.findOne({
-          where: {
-            followingId,
-            followerId
-          }
-        })
-
-        if (followship) {
-          return res
-            .status(409)
-            .json({
-              status: 'error',
-              message: `already followed @${followingUser.account}`
-            })
-        }
-
-        if (!followingUser) {
-          return res
-            .status(200)
-            .json({
-              status: 'error',
-              message: 'this user doesn\'t exist'
-            })
-        }
-
-        await Followship.create({
-          followerId,
-          followingId
-        })
-
+      if (!followingUser) {
         return res
           .status(200)
           .json({
-            status: 'success',
-            message: `followed @${followingUser.account}`,
-            followingUser
+            status: 'error',
+            message: 'this user doesn\'t exist'
           })
       }
 
+      if (Number(followingId) === followerId) {
+        return res
+          .status(403)
+          .json({
+            status: 'error',
+            message: 'You cannot follow yourself.'
+          })
+      }
+
+      const followship = await Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
+
+      if (followship) {
+        return res
+          .status(409)
+          .json({
+            status: 'error',
+            message: `already followed @${followingUser.account}`
+          })
+      }
+
+      await Followship.create({
+        followerId,
+        followingId
+      })
+
       return res
-        .status(403)
+        .status(200)
         .json({
-          status: 'error',
-          message: 'You cannot follow yourself.'
+          status: 'success',
+          message: `followed @${followingUser.account}`,
+          followingUser
         })
+
+
+
     } catch (error) {
       next(error)
     }
@@ -73,13 +76,7 @@ const followshipController = {
       const unfollowedUser = await User.findOne({
         where: {
           id: followingId,
-          $not: { id: 1 }
-        }
-      })
-      const followship = await Followship.findOne({
-        where: {
-          followingId,
-          followerId
+          $not: { role: 'admin' }
         }
       })
 
@@ -100,6 +97,13 @@ const followshipController = {
             message: 'You cannot unfollow yourself.'
           })
       }
+
+      const followship = await Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
 
       if (!followship) {
         return res
