@@ -6,53 +6,64 @@ const helpers = require('../_helpers')
 const followshipController = {
   followUser: async (req, res, next) => {
     try {
-      const followingId = req.body.id
-      const followingUser = await User.findByPk(followingId)
-      const followerId = helpers.getUser(req).id
-
-      if (Number(followingId) !== followerId) {
-        const followship = await Followship.findOne({ where: { followingId, followerId } })
-
-        if (followship) {
-          return res
-            .status(409)
-            .json({
-              status: 'error',
-              message: `already followed @${followingUser.account}`
-            })
+      const followerId = req.user.id
+      const followingId = req.params.id
+      const followingUser = await User.findOne({
+        where: {
+          id: followingId,
+          $not: { role: 'admin' }
         }
+      })
 
-        if (!followingUser) {
-          return res
-            .status(200)
-            .json({
-              status: 'error',
-              message: 'this user doesn\'t exist'
-            })
-        }
-
-        await Followship.create({
-          followerId,
-          followingId, // 前端要埋在 form 裡傳過來
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
-
+      if (!followingUser) {
         return res
           .status(200)
           .json({
-            status: 'success',
-            message: `followed @${followingUser.account}`,
-            followingUser
+            status: 'error',
+            message: 'this user doesn\'t exist'
           })
       }
 
+      if (Number(followingId) === followerId) {
+        return res
+          .status(403)
+          .json({
+            status: 'error',
+            message: 'You cannot follow yourself.'
+          })
+      }
+
+      const followship = await Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
+
+      if (followship) {
+        return res
+          .status(409)
+          .json({
+            status: 'error',
+            message: `already followed @${followingUser.account}`
+          })
+      }
+
+      await Followship.create({
+        followerId,
+        followingId
+      })
+
       return res
-        .status(403)
+        .status(200)
         .json({
-          status: 'error',
-          message: 'You cannot follow yourself.'
+          status: 'success',
+          message: `followed @${followingUser.account}`,
+          followingUser
         })
+
+
+
     } catch (error) {
       next(error)
     }
@@ -60,12 +71,15 @@ const followshipController = {
 
   unfollowUser: async (req, res, next) => {
     try {
-      const followingId = req.params.followingId
-      const followerId = helpers.getUser(req).id
-      const unfollowedUser = await User.findByPk(followingId)
-      const followship = await Followship.findOne({ where: { followingId, followerId } })
+      const followingId = req.params.id
+      const followerId = req.user.id
+      const unfollowedUser = await User.findOne({
+        where: {
+          id: followingId,
+          $not: { role: 'admin' }
+        }
+      })
 
-      // 排除 unfollowedUser 不存在的狀況
       if (!unfollowedUser) {
         return res
           .status(200)
@@ -75,7 +89,22 @@ const followshipController = {
           })
       }
 
-      // unfollowUser function 排除找不到 user 的狀況（const user = await Followship.findOne({ where: { followingId } }) ）
+      if (Number(followingId) === followerId) {
+        return res
+          .status(403)
+          .json({
+            status: 'error',
+            message: 'You cannot unfollow yourself.'
+          })
+      }
+
+      const followship = await Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
+
       if (!followship) {
         return res
           .status(200)
