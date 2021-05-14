@@ -12,6 +12,22 @@ const interactionType = {
 }
 const users = []
 
+const getCurrentUserInfo = async socket => {
+  console.log('---- getCurrentUserInfo function ----')
+
+  if (!socket.userId) return
+
+  const user = await User.findByPk(socket.userId, {
+    raw: true,
+    nest: true,
+    attributes: ['id', 'name', 'account', 'email', 'avatar', 'role']
+  })
+
+  if (!user) return
+
+  socket.user = { ...user, socketId: socket.id }
+}
+
 const addUser = async ({ socketId, roomId, userId, username }) => {
   console.log('---- addUser function ----')
   console.log('socketId', socketId)
@@ -21,6 +37,8 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
 
   const user = { socketId, roomId, userId, username }
   users.push(user)
+  console.log('users', users)
+
   if (Number(user.roomId) === PUBLIC_ROOM_ID) {
     console.log(`Add user ${userId} to public room`)
 
@@ -29,46 +47,6 @@ const addUser = async ({ socketId, roomId, userId, username }) => {
     })
   }
   return user
-}
-
-const getUser = async (socketId, userId) => {
-  console.log('---- getUser function ----')
-  console.log('socketId', socketId)
-
-  if (userId) {
-    console.log('userId', userId)
-
-    const userInfo = await User.findByPk(userId)
-
-    console.log('userInfo', userInfo)
-
-    return {
-      id: userInfo.id,
-      account: userInfo.account,
-      name: userInfo.name,
-      avatar: userInfo.avatar
-    }
-  }
-
-  const user = users.find(user => user.socketId === socketId)
-  const userInfo = await User.findByPk(user.userId)
-  return { ...user, avatar: userInfo.avatar }
-}
-
-const getUserInfo = async userId => {
-  console.log('---- getUserInfo function ----')
-  console.log('userId', userId)
-
-  let user = await User.findByPk(userId)
-  if (!user) return null
-
-  user = user.toJSON()
-  return {
-    id: user.id,
-    account: user.account,
-    name: user.name,
-    avatar: user.avatar
-  }
 }
 
 const getUsersInRoom = async roomId => {
@@ -96,32 +74,20 @@ const getUsersInRoom = async roomId => {
   return filteredUsers
 }
 
-const removeUser = async (socketId, roomId, userId) => {
-  console.log('---- getOtherUser function ----')
-  console.log('socketId', socketId)
-
-  const originalRoomId = roomId ? roomId : PUBLIC_ROOM_ID
-  console.log('originalRoomId', originalRoomId)
+const removeUser = async socket => {
+  console.log('---- removeUser function ----')
+  console.log('socket.id', socket.id)
 
   const index = users.findIndex(
-    user => user.socketId === socketId && user.roomId === originalRoomId
+    user => user.socketId === socket.id && user.roomId === PUBLIC_ROOM_ID
   )
   console.log('index', index)
 
   if (index === -1) return null
 
   const user = users.splice(index, 1)[0]
-  console.log('user', user)
+  console.log('users', users)
 
-  userId = userId || user.userId
-
-  console.log(`update time for user ${userId} in room ${originalRoomId}`)
-  await updateTime(userId, originalRoomId)
-
-  // private room
-  if (roomId) return null
-
-  // public room
   return user
 }
 
@@ -226,13 +192,12 @@ const getSubscribers = async userId => {
 module.exports = {
   interactionType,
   PUBLIC_ROOM_ID,
+  getCurrentUserInfo,
   addUser,
-  getUser,
   getUsersInRoom,
   removeUser,
   users,
   getAuthors,
-  getUserInfo,
   getOtherUser,
   updateTime,
   saveData,

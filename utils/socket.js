@@ -1,5 +1,6 @@
 const socketio = require('socket.io')
 
+const { authenticatedSocket } = require('../middleware/auth')
 const db = require('../models')
 const Message = db.Message
 
@@ -7,12 +8,11 @@ const { generateMessage } = require('./message')
 const {
   interactionType,
   PUBLIC_ROOM_ID,
+  getCurrentUserInfo,
   addUser,
-  getUser,
   removeUser,
   getUsersInRoom,
   getAuthors,
-  getUserInfo,
   getOtherUser,
   updateTime,
   saveData,
@@ -24,15 +24,24 @@ const socket = server => {
   global.io = socketio(server, {
     cors: {
       origin: ['http://localhost:8080', 'https://ivyhungtw.github.io'],
-      methods: ['GET', 'POST', 'DELETE'],
+      methods: ['GET', 'POST'],
       transports: ['websocket', 'polling'],
       credentials: true
     },
     allowEIO3: true
   })
-  global.io.on('connection', socket => {
+
+  global.io.use(authenticatedSocket).on('connection', async socket => {
+    console.log('===== connected!!! =====')
+    console.log('socket.userId', socket.userId)
+
+    await getCurrentUserInfo(socket)
+
+    const userId = socket.user.id
+    console.log('socket.user.id', socket.user.id)
+
     // session
-    socket.on('start session', async (data, userId) => {
+    socket.on('start session', async data => {
       console.log('===== start session =====')
       console.log('data', data)
       console.log('userId', userId)
@@ -40,8 +49,7 @@ const socket = server => {
 
       let rooms = []
       if (userId) {
-        socket.join(`self ${userId}`)
-        socket.join(`${PUBLIC_ROOM_ID}`)
+        socket.join([`self ${userId}`, `${PUBLIC_ROOM_ID}`])
         console.log('socket.rooms1-1', socket.rooms)
 
         if (!data.rooms || !data.rooms.length) {
@@ -56,14 +64,12 @@ const socket = server => {
           }
           console.log('socket.rooms1-2', socket.rooms)
 
-          rooms.push(`self ${userId}`)
-          rooms.push(`${PUBLIC_ROOM_ID}`)
+          rooms.push(`self ${userId}`, `${PUBLIC_ROOM_ID}`)
           console.log('rooms1 - start session', rooms)
         } else {
           rooms = data.rooms
-          rooms.forEach(room => {
-            socket.join(room)
-          })
+          socket.join(rooms)
+
           console.log('socket.rooms2', socket.rooms)
           console.log('rooms2 - start session', rooms)
         }
@@ -111,39 +117,33 @@ const socket = server => {
       socket.emit('set session', { rooms })
     })
 
-    // notification
-    socket.on('notification', async ({ userId, tweetId, tweet }) => {
+    // Tweet
+    socket.on('notification', async ({ tweetId, tweet }) => {
       console.log('===== receive notification =====')
-      console.log('data', { userId, tweetId, tweet })
+      console.log('data', { tweetId, tweet })
 
-      const user = await getUserInfo(userId)
-
-      console.log('user', user)
-
-      if (user) {
-        // Save to subscribers' notifications
-        const subscribers = await getSubscribers(userId)
-        if (subscribers) {
-          await Promise.all(
-            subscribers.map(subscriber => {
-              return saveData({
-                id: userId,
-                currentUserId: subscriber,
-                tweetId: tweetId,
-                type: interactionType.tweet
-              })
+      // Save to subscribers' notifications
+      const subscribers = await getSubscribers(userId)
+      if (subscribers) {
+        await Promise.all(
+          subscribers.map(subscriber => {
+            return saveData({
+              id: userId,
+              currentUserId: subscriber,
+              tweetId: tweetId,
+              type: interactionType.tweet
             })
-          )
-        }
-        console.log(`notify users in # ${user.account} channel`)
-
-        socket.broadcast.to(`# ${user.account}`).emit('notification', {
-          ...user,
-          tweet,
-          tweetId,
-          type: interactionType.tweet
-        })
+          })
+        )
       }
+      console.log(`notify users in # ${socket.user.account} channel`)
+
+      socket.broadcast.to(`# ${socket.user.account}`).emit('notification', {
+        ...socket.user,
+        tweet,
+        tweetId,
+        type: interactionType.tweet
+      })
     })
 
     // like
@@ -156,18 +156,16 @@ const socket = server => {
       }
 
       await saveData({
-        id: data.currentUserId,
+        id: userId,
         currentUserId: data.userId,
         type: interactionType.like
       })
-      const user = await getUserInfo(data.currentUserId)
-      console.log('user', user)
 
       console.log(`broadcast to self ${data.userId}`)
 
       socket.broadcast
         .to(`self ${data.userId}`)
-        .emit('notification', { ...user, type: interactionType.like })
+        .emit('notification', { ...socket.user, type: interactionType.like })
     })
 
     // follow
@@ -180,19 +178,16 @@ const socket = server => {
       }
 
       await saveData({
-        id: data.currentUserId,
+        id: userId,
         currentUserId: data.userId,
         type: interactionType.follow
       })
-
-      const user = await getUserInfo(data.currentUserId)
-      console.log('user', user)
 
       console.log(`broadcast to self ${data.userId}`)
 
       socket.broadcast
         .to(`self ${data.userId}`)
-        .emit('notification', { ...user, type: interactionType.follow })
+        .emit('notification', { ...socket.user, type: interactionType.follow })
     })
 
     // reply
@@ -205,19 +200,16 @@ const socket = server => {
       }
 
       await saveData({
-        id: data.currentUserId,
+        id: userId,
         currentUserId: data.userId,
         replyId: data.replyId,
         type: interactionType.reply
       })
 
-      const user = await getUserInfo(data.currentUserId)
-      console.log('user', user)
-
       console.log(`broadcast to self ${data.userId}`)
 
       socket.broadcast.to(`self ${data.userId}`).emit('notification', {
-        ...user,
+        ...socket.user,
         replyId: data.replyId,
         reply: data.reply,
         type: interactionType.reply
@@ -225,38 +217,39 @@ const socket = server => {
     })
 
     // join
-    socket.on('join', async ({ username, roomId, userId }) => {
+    socket.on('join', async ({ username, roomId }) => {
       console.log('===== receive join =====')
       console.log('username', username)
       console.log('roomId', roomId)
-      console.log('userId', userId)
+      console.log('PUBLIC_ROOM_ID', PUBLIC_ROOM_ID)
 
-      const user = await addUser({
-        socketId: socket.id,
-        roomId,
-        userId,
-        username
-      })
-      socket.join(user.roomId)
+      roomId = Number(roomId)
+      socket.join(`${roomId}`)
       console.log('socket.rooms', socket.rooms)
-      // reset session
 
       await updateTime(userId, roomId)
 
       if (roomId === PUBLIC_ROOM_ID) {
+        await addUser({
+          socketId: socket.id,
+          roomId,
+          userId,
+          username
+        })
+
         // count users
-        const usersInRoom = await getUsersInRoom(user.roomId)
+        const usersInRoom = await getUsersInRoom(roomId)
 
         console.log('usersInRoom', usersInRoom)
 
-        io.to(user.roomId).emit('users count', {
+        io.to(`${roomId}`).emit('users count', {
           users: usersInRoom,
           userCount: usersInRoom.length
         })
 
         // notify everyone except the user
         socket.broadcast
-          .to(user.roomId)
+          .to(`${roomId}`)
           .emit('message', generateMessage(`${username} 上線`))
       }
     })
@@ -265,17 +258,14 @@ const socket = server => {
       console.log('===== receive chat message =====')
       console.log('msg', msg)
 
-      const user = await getUser(socket.id)
-      console.log('user', user)
-
       await Message.create({
-        UserId: user.userId,
-        ChatRoomId: user.roomId,
+        UserId: userId,
+        ChatRoomId: PUBLIC_ROOM_ID,
         message: msg.message
       })
-      io.to(user.roomId).emit(
+      io.to(`${PUBLIC_ROOM_ID}`).emit(
         'chat message',
-        generateMessage(msg.message, user.userId, user.avatar)
+        generateMessage(msg.message, userId, socket.user.avatar)
       )
 
       // Event Acknowledgement
@@ -286,27 +276,25 @@ const socket = server => {
     socket.on('private chat message', async (msg, callback) => {
       console.log('===== receive private chat message =====')
       console.log('msg', msg)
-
-      const user = await getUser(socket.id, msg.userId)
-      console.log('user', user)
+      msg.roomId = Number(msg.roomId)
 
       await Message.create({
-        UserId: msg.userId,
+        UserId: userId,
         ChatRoomId: msg.roomId,
         message: msg.message
       })
-      io.to(msg.roomId).emit(
+      io.to(`${msg.roomId}`).emit(
         'private chat message',
-        generateMessage(msg.message, msg.userId, user.avatar)
+        generateMessage(msg.message, userId, socket.user.avatar)
       )
 
-      const otherUser = await getOtherUser(msg.userId, msg.roomId)
+      const otherUser = await getOtherUser(userId, msg.roomId)
       console.log('otherUser', otherUser)
 
       socket.broadcast.to(`self ${otherUser}`).emit('notice from private', {
         roomId: msg.roomId,
         message: msg.message,
-        userId: msg.userId
+        userId: userId
       })
 
       // notify another user
@@ -317,7 +305,7 @@ const socket = server => {
           .to(`self ${otherUser}`)
           .emit(
             'private chat message',
-            generateMessage(msg.message, msg.userId, user.avatar, true),
+            generateMessage(msg.message, msg.userId, socket.user.avatar, true),
             msg.roomId
           )
       }
@@ -334,25 +322,29 @@ const socket = server => {
 
       if (roomId) {
         socket.leave(`${roomId}`)
-        await removeUser(socket.id, roomId, userId)
+        await updateTime(userId, roomId)
+        if (roomId === PUBLIC_ROOM_ID) {
+          await removeUser(socket)
+        }
       }
     })
 
     socket.on('disconnect', async () => {
       console.log('===== disconnect =====')
 
-      const user = await removeUser(socket.id)
+      // remove user from public room record
+      const user = await removeUser(socket)
       console.log('user', user)
 
       if (user) {
         // count users
         const usersInRoom = await getUsersInRoom(user.roomId)
-        io.to(user.roomId).emit('users count', {
+        io.to(`${user.roomId}`).emit('users count', {
           users: usersInRoom,
           userCount: usersInRoom.length
         })
 
-        io.to(user.roomId).emit(
+        io.to(`${user.roomId}`).emit(
           'message',
           generateMessage(`${user.username} 離線`)
         )
