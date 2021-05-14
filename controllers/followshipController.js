@@ -6,12 +6,22 @@ const helpers = require('../_helpers')
 const followshipController = {
   followUser: async (req, res, next) => {
     try {
-      const followingId = req.params.id
-      const followingUser = await User.findOne({ where: { id: followingId, $not: { id: 1 } } })
       const followerId = req.user.id
+      const followingId = req.params.id
+      const followingUser = await User.findOne({
+        where: {
+          id: followingId,
+          $not: { id: 1 }
+        }
+      })
 
       if (Number(followingId) !== followerId) {
-        const followship = await Followship.findOne({ where: { followingId, followerId } })
+        const followship = await Followship.findOne({
+          where: {
+            followingId,
+            followerId
+          }
+        })
 
         if (followship) {
           return res
@@ -60,10 +70,19 @@ const followshipController = {
     try {
       const followingId = req.params.id
       const followerId = req.user.id
-      const unfollowedUser = await User.findOne({ where: { id: followingId, $not: { id: 1 } } })
-      const followship = await Followship.findOne({ where: { followingId, followerId } })
+      const unfollowedUser = await User.findOne({
+        where: {
+          id: followingId,
+          $not: { id: 1 }
+        }
+      })
+      const followship = await Followship.findOne({
+        where: {
+          followingId,
+          followerId
+        }
+      })
 
-      // 排除 unfollowedUser 不存在的狀況
       if (!unfollowedUser) {
         return res
           .status(200)
@@ -73,7 +92,15 @@ const followshipController = {
           })
       }
 
-      // unfollowUser function 排除找不到 user 的狀況（const user = await Followship.findOne({ where: { followingId } }) ）
+      if (Number(followingId) === followerId) {
+        return res
+          .status(403)
+          .json({
+            status: 'error',
+            message: 'You cannot unfollow yourself.'
+          })
+      }
+
       if (!followship) {
         return res
           .status(200)
