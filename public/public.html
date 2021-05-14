@@ -71,7 +71,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.6.0/qs.min.js"></script>
 
     <script>
-      var socket = io()
+      var socket = io.connect('http://localhost:3000', {
+        auth: {
+          token:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjIwODc5MjgyfQ.jFRlkelMKmHoPtncjN0GZx7Q1wgqQnojBaG97dMoMyE'
+        }
+      })
 
       var messages = document.getElementById('messages')
       var form = document.getElementById('form')
@@ -79,11 +84,11 @@
 
       // Options
       const username = '123'
-      const room = '4'
+      const room = '1'
 
       socket.emit('join', { username, roomId: room, userId: 3 })
 
-      socket.emit('start session', { rooms: ['# 12'] }, 1)
+      socket.emit('start session', { rooms: [] }, 1)
       socket.on('set session', rooms => {
         console.log(rooms)
       })
@@ -102,7 +107,7 @@
         e.preventDefault()
         if (input.value) {
           socket.emit(
-            'private chat message',
+            'chat message',
             { message: input.value, newMessage: false },
             () => {
               console.log('Delivered!')
@@ -112,7 +117,7 @@
         }
       })
 
-      socket.on('private chat message', function (msg) {
+      socket.on('chat message', function (msg) {
         var item = document.createElement('li')
         item.textContent = `${msg.text} - ${moment(msg.createdAt).format(
           'h:mm a'
