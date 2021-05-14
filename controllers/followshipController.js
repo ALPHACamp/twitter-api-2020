@@ -7,8 +7,8 @@ const followshipController = {
   followUser: async (req, res, next) => {
     try {
       const followingId = req.params.id
-      const followingUser = await User.findByPk(followingId)
-      const followerId = helpers.getUser(req).id
+      const followingUser = await User.findOne({ where: { id: followingId, $not: { id: 1 } } })
+      const followerId = req.user.id
 
       if (Number(followingId) !== followerId) {
         const followship = await Followship.findOne({ where: { followingId, followerId } })
@@ -33,9 +33,7 @@ const followshipController = {
 
         await Followship.create({
           followerId,
-          followingId, // 前端要埋在 form 裡傳過來
-          createdAt: new Date(),
-          updatedAt: new Date()
+          followingId
         })
 
         return res
@@ -61,8 +59,8 @@ const followshipController = {
   unfollowUser: async (req, res, next) => {
     try {
       const followingId = req.params.id
-      const followerId = helpers.getUser(req).id
-      const unfollowedUser = await User.findByPk(followingId)
+      const followerId = req.user.id
+      const unfollowedUser = await User.findOne({ where: { id: followingId, $not: { id: 1 } } })
       const followship = await Followship.findOne({ where: { followingId, followerId } })
 
       // 排除 unfollowedUser 不存在的狀況
