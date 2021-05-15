@@ -6,8 +6,8 @@ const helpers = require('../_helpers')
 const subscriptionController = {
   subscribeUser: async (req, res, next) => {
     try {
-      const authorId = req.body.id
-      const subscriberId = helpers.getUser(req).id
+      const authorId = req.params.id
+      const subscriberId = req.user.id
 
       // Users can not subscribe themselves
       if (Number(authorId) === subscriberId) {
@@ -56,11 +56,11 @@ const subscriptionController = {
 
   unsubscribeUser: async (req, res, next) => {
     try {
-      const authorId = req.params.authorId
+      const authorId = req.params.id
       const [author, subscription] = await Promise.all([
         User.findByPk(authorId),
         Subscription.findOne({
-          where: { authorId, subscriberId: helpers.getUser(req).id }
+          where: { authorId, subscriberId: req.user.id }
         })
       ])
 
