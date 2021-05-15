@@ -11,22 +11,9 @@
   <div class="chat-container">
     <header class="chat-header">
       <h1><i class="fas fa-smile"></i> ChatRoom <span id="user-name"></span></h1>
-      <h3><a href="/chat/room">go to private room</a></h3> 
-      <h4>user online: <span id="online">0</span></h6>
-      <h4>user list: <span id="user-list"></span></h4>
+      <h3><a href="/chat">index</a> | <a href="/chat/pub">public room</a> | <a href="/chat/room">private room</a> </h3>
+      <h4>unread count: <span id="unread-count"></span></h4>
     </header>
-    <hr>
-    <main class="chat-main">
-      <div class="chat-messages">
-        <!-- put message here -->
-      </div>
-    </main>
-    <div class="chat-form-container">
-      <form id="chat-form">
-        <input id="msg" type="text" placeholder="Enter Message" required autocomplete="off" />
-        <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
-      </form>
-    </div>
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -47,90 +34,26 @@
       }
     })
 
+    // emit 'outOfRoom' to server
+    socket.emit('outOfRoom')
+    
+    let currentUserId = 0
     // 'userInfo' from server
     socket.on('userInfo', user => {
       // render users in user list
       const userName = document.getElementById('user-name')
       userName.innerText = `for ${user.name}`
+      // currentUser
+      currentUserId = user.id
     })
 
-    // 'chatMsg' from server
-    socket.on('chatMsg', message => {
-      outputMessage(message)
+    // 'unreadMsgCount' from server
+    socket.on('unreadMsg', ({ message, id }) => {
+      if (currentUserId === id) {
+        const unreadCount = document.getElementById('unread-count')
+        unreadCount.innerText = message.length
+      }
     })
-
-    // 'userOnline' from server
-    socket.on('userOnline', message => {
-      outputMessage(message)
-    })
-
-    // 'userOffline' from server
-    socket.on('userOffline', message => {
-      outputMessage(message)
-    })
-
-    // 'onlineCount' from server
-    socket.on('onlineCount', onlineCount => {
-      // output onlineCount to DOM
-      const online = document.getElementById('online')
-      online.innerText = onlineCount
-    })
-
-    // 'userList' from server
-    socket.on('userList', users => {
-      const userList = document.getElementById('user-list')
-      let html = ''
-      users.forEach(user => {
-        html += `<span>${user.name} <span>`
-      })
-      userList.innerHTML = html
-    })
-
-    // 'historyMsg' from server
-    socket.on('historyMsg', chatRecords => {
-      outputHistoryMessage(chatRecords)
-    })
-
-    // message submit
-    const chatForm = document.querySelector('#chat-form')
-    chatForm.addEventListener('submit', (e) => {
-      e.preventDefault()
-      // get msg text
-      const msg = e.target.elements.msg.value
-      // emit msg to server
-      socket.emit('userMsg', msg)
-      // clear input & focus on it
-      e.target.elements.msg.value = ''
-      e.target.elements.msg.focus()
-    })
-
-    // output message to DOM
-    function outputMessage(message) {
-      const div = document.createElement('div')
-      div.classList.add('message')
-      div.innerHTML = `
-        <p>${message.username} <span>${message.time}</span></p>
-        <p>${message.text}</p>
-        <hr>
-      `
-      document.querySelector('.chat-messages').appendChild(div)
-    }
-
-    // output message to DOM (for history)
-    function outputHistoryMessage(messages) {
-      const chatMsgs = document.querySelector('.chat-messages')
-      chatMsgs.innerHTML = ''
-      messages.forEach(message => {
-        const div = document.createElement('div')
-        div.classList.add('message')
-        div.innerHTML = `
-        <p>${message.username} <span>${message.time}</span></p>
-        <p>${message.text}</p>
-        <hr>
-      `
-        chatMsgs.appendChild(div)
-      })
-    }
 
   </script>
 </body>

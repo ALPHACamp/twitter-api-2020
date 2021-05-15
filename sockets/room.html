@@ -11,6 +11,7 @@
   <div class="chat-container">
     <header class="chat-header">
       <h1><i class="fas fa-smile"></i> ChatRoom(Private) <span id="user-name"></span></h1>
+      <h3><a href="/chat">index</a> | <a href="/chat/pub">public room</a> | <a href="/chat/room">private room</a> </h3>
         <form id="private-chat-form">
           <label for="user">who do you want to talk?</label>
           <input type="text" id="user" required>
@@ -60,14 +61,18 @@
       }
     })
 
-    let currentUser = []
+    // emit 'outOfRoom' to server
+    socket.emit('outOfRoom')
+
+    let currentUserId = 0
     // 'userInfo' from server
     socket.on('userInfo', user => {
+      console.log(user)
       // render users in user list
       const userName = document.getElementById('user-name')
       userName.innerText = `for ${user.name}`
-      // currentUser
-      currentUser = user
+      // currentUserId
+      currentUserId = user.id
     })
  
     // 'chatMsg' from server
@@ -75,19 +80,17 @@
       outputMessage(message)
     })
 
-    let count = 0
     // 'unreadMsgCount' from server
-    socket.on('unreadMsg', ({message, id}) => {
-      const unreadCount = document.getElementById('unread-count')
-      if (currentUser.id === id) {
-        count = message.length     
+    socket.on('unreadMsg', ({ message, id }) => {
+      if (currentUserId === id) {
+        const unreadCount = document.getElementById('unread-count')
+        unreadCount.innerText = message.length
       }
-      unreadCount.innerText = count
     })
 
     // 'historyMsgForOneUser' from server
     socket.on('historyMsgForOneUser', ({historyMsgList, UserId, receivedUserId}) => {
-      if (currentUser.id === UserId || currentUser.id === receivedUserId) {
+      if (currentUserId === UserId || currentUserId === receivedUserId) {
         const historyMsg = document.getElementById('history-msg')
         let html = ``
         historyMsgList.forEach(msg => {
