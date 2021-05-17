@@ -2,7 +2,6 @@ const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
-const Reply = db.Reply
 
 const { sequelize } = require('../models')
 

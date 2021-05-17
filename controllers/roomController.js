@@ -7,7 +7,6 @@ const Notification = db.Notification
 const Tweet = db.Tweet
 const Reply = db.Reply
 
-const helpers = require('../_helpers')
 const { users } = require('../utils/users')
 const { Sequelize, sequelize } = require('../models')
 const { PUBLIC_ROOM_ID } = require('../utils/users')
@@ -181,7 +180,7 @@ const roomController = {
         nest: true,
         attributes: ['ChatRoomId'],
         where: {
-          UserId: helpers.getUser(req).id,
+          UserId: req.user.id,
           ChatRoomId: { $not: PUBLIC_ROOM_ID }
         }
       })
@@ -223,7 +222,7 @@ const roomController = {
           where: {
             ChatRoomId: joinedRooms,
             UserId: {
-              $notLike: helpers.getUser(req).id
+              $notLike: req.user.id
             }
           },
           include: [User]
@@ -267,7 +266,7 @@ const roomController = {
         nest: true,
         attributes: ['ChatRoomId'],
         where: {
-          UserId: helpers.getUser(req).id,
+          UserId: req.user.id,
           ChatRoomId: { $not: PUBLIC_ROOM_ID }
         }
       })
@@ -303,7 +302,7 @@ const roomController = {
       let notifications = await Notification.findAll({
         raw: true,
         nest: true,
-        where: { receiverId: helpers.getUser(req).id },
+        where: { receiverId: req.user.id },
         include: [User, Tweet, Reply],
         order: [['updatedAt', 'DESC']]
       })
