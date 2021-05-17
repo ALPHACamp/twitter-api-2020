@@ -5,7 +5,6 @@ const User = db.User
 const Tweet = db.Tweet
 
 // JWT
-const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
@@ -14,20 +13,20 @@ let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 jwtOptions.secretOrKey = process.env.JWT_SECRET
 
-let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
-  User.findByPk(jwt_payload.id, {
+let strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
+  const user = await User.findByPk(jwt_payload.id, {
     include: [
-      { model: db.Tweet, as: 'RepliedTweets' },
-      { model: db.Tweet, as: 'LikedTweets' },
+      { model: Tweet, as: 'RepliedTweets' },
+      { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' },
       { model: User, as: 'Subscribers' },
       { model: User, as: 'Subscriptions' }
     ]
-  }).then(user => {
-    if (!user) return next(null, false)
-    return next(null, user)
   })
+
+  if (!user) return next(null, false)
+  return next(null, user)
 })
 passport.use(strategy)
 
