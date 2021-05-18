@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const validator = require('validator')
 
 const db = require('../models')
 const { sequelize } = require('../models')
@@ -226,7 +227,6 @@ const userController = {
         const result = await checkUserInfo(req)
 
         if (!result) {
-          const user = await User.findByPk(userId)
           await user.update({
             account: req.body.account,
             name: req.body.name,
@@ -269,14 +269,14 @@ const userController = {
       const { files } = req
       const acceptedType = ['.png', '.jpg', '.jpeg']
 
-      if (!name || name.length > 50) {
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
         errors.push({
           message: 'Name can not be empty or longer than 50 characters'
         })
       }
       // Introduction can be empty
       if (introduction) {
-        if (introduction.length > 160) {
+        if (!validator.isByteLength(introduction, { min: 0, max: 160 })) {
           errors.push({
             message: 'Introduction can not be longer than 160 characters'
           })

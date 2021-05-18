@@ -3,6 +3,8 @@ const JoinRoom = db.JoinRoom
 const User = db.User
 const Notification = db.Notification
 
+const validator = require('validator')
+
 const PUBLIC_ROOM_ID = Number(process.env.PUBLIC_ROOM_ID)
 const interactionType = {
   tweet: 1,
@@ -241,26 +243,25 @@ function getResourceInfo(user, resource, likes) {
 async function checkUserInfo(req) {
   const errors = []
   const { account, name, email, password, checkPassword } = req.body
-  const emailRule = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
 
   // Before creating an account or updating account info ,
   // make sure all the required fields are correctly filled out
   if (!account || !name || !email || !password || !checkPassword) {
     errors.push({ message: 'Please fill out all fields.' })
   }
-  if (email.search(emailRule) === -1) {
+  if (email && !validator.isEmail(email)) {
     errors.push({ message: 'Please enter the correct email address.' })
   }
-  if (password.length < 4 || password.length > 12) {
+  if (password && !validator.isByteLength(password, { min: 4, max: 12 })) {
     errors.push({ message: 'Password does not meet the required length' })
   }
   if (password !== checkPassword) {
     errors.push({ message: 'Password and checkPassword do not match.' })
   }
-  if (name.length > 50) {
+  if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
     errors.push({ message: 'Name can not be longer than 50 characters.' })
   }
-  if (account.length > 50) {
+  if (account && !validator.isByteLength(account, { min: 0, max: 50 })) {
     errors.push({
       message: 'Account can not be longer than 50 characters.'
     })
