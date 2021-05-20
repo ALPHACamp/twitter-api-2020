@@ -23,7 +23,11 @@ const socket = server => {
   // Set up socket.io
   global.io = socketio(server, {
     cors: {
-      origin: ['http://localhost:8080', 'https://ivyhungtw.github.io'],
+      origin: [
+        'http://localhost:8080',
+        'https://ivyhungtw.github.io',
+        'https://clementpan.github.io'
+      ],
       methods: ['GET', 'POST'],
       transports: ['websocket', 'polling'],
       credentials: true

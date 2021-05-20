@@ -1,14 +1,20 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const validator = require('validator')
 
 const db = require('../models')
+const { sequelize } = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
 
-const helpers = require('../_helpers')
-const { sequelize } = require('../models')
+const {
+  getFollowshipInfo,
+  getResourceInfo,
+  checkUserInfo,
+  getUserInfoId
+} = require('../utils/users')
 
 // Upload image
 const imgur = require('imgur-node-api')
@@ -77,7 +83,7 @@ const userController = {
   },
   register: async (req, res, next) => {
     try {
-      const result = await helpers.checkUserInfo(req)
+      const result = await checkUserInfo(req)
 
       if (!result) {
         await User.create({
@@ -109,13 +115,10 @@ const userController = {
         })
       }
 
-      // email amd account should be unique
-      if (result.value && result.key) {
-        return res.status(409).json({
-          status: 'error',
-          message: `A user with ${result.value} already exists. Choose a different ${result.key}.`
-        })
-      }
+      return res.status(409).json({
+        status: 'error',
+        message: `A user already exists. Choose a different account or email.`
+      })
     } catch (error) {
       next(error)
     }
@@ -142,7 +145,7 @@ const userController = {
       })
 
       // Clean up users data
-      const followings = helpers.getUserInfoId(req, 'Followings')
+      const followings = getUserInfoId(req, 'Followings')
 
       users = users.map(user => ({
         id: user.id,
@@ -169,11 +172,16 @@ const userController = {
       })
 
       // User can not see profile of admin or user that doesn't exist
-      helpers.checkUser(res, user)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
 
       // Clean up user data
-      const subscriptions = helpers.getUserInfoId(req, 'Subscriptions')
-      const followings = helpers.getUserInfoId(req, 'Followings')
+      const subscriptions = getUserInfoId(req, 'Subscriptions')
+      const followings = getUserInfoId(req, 'Followings')
 
       user = {
         id: user.id,
@@ -187,10 +195,8 @@ const userController = {
         tweetCount: user.Tweets.length,
         followerCount: user.Followers.length,
         followingCount: user.Followings.length,
-        isFollowed: followings ? followings.includes(user.id) : followings,
-        isSubscribed: subscriptions
-          ? subscriptions.includes(user.id)
-          : subscriptions
+        isFollowed: followings.includes(user.id),
+        isSubscribed: subscriptions.includes(user.id)
       }
 
       res.status(200).json(user)
@@ -199,7 +205,7 @@ const userController = {
     }
   },
   editUser: async (req, res, next) => {
-    const userId = helpers.getUser(req).id
+    const userId = req.user.id
     const id = req.params.id
     const { name, introduction, page } = req.body
 
@@ -215,10 +221,9 @@ const userController = {
     try {
       // setting
       if (page === 'setting') {
-        const result = await helpers.checkUserInfo(req)
+        const result = await checkUserInfo(req)
 
         if (!result) {
-          const user = await User.findByPk(userId)
           await user.update({
             account: req.body.account,
             name: req.body.name,
@@ -246,13 +251,12 @@ const userController = {
         }
 
         // email amd account should be unique
-        if (result.value && result.key) {
-          return res.status(409).json({
-            status: 'error',
-            message: `A user with ${result.value} already exists. Choose a different ${result.key}.`,
-            userInput: req.body
-          })
-        }
+
+        return res.status(409).json({
+          status: 'error',
+          message: `A user already exists. Choose a different account or email.`,
+          userInput: req.body
+        })
       }
 
       // profile
@@ -261,14 +265,14 @@ const userController = {
       const { files } = req
       const acceptedType = ['.png', '.jpg', '.jpeg']
 
-      if (!name || name.length > 50) {
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
         errors.push({
           message: 'Name can not be empty or longer than 50 characters'
         })
       }
       // Introduction can be empty
       if (introduction) {
-        if (introduction.length > 160) {
+        if (!validator.isByteLength(introduction, { min: 0, max: 160 })) {
           errors.push({
             message: 'Introduction can not be longer than 160 characters'
           })
@@ -334,17 +338,22 @@ const userController = {
         order: [[sequelize.literal('`Tweets`.`createdAt`'), 'DESC']]
       })
 
-      helpers.checkUser(res, user)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
 
       // Clean up tweets data
-      const likes = helpers.getUserInfoId(req, 'LikedTweets')
+      const likes = getUserInfoId(req, 'LikedTweets')
       const tweets = user.dataValues.Tweets.map(tweet => ({
         id: tweet.id,
         description: tweet.description,
         createdAt: tweet.createdAt,
         replyCount: tweet.Replies.length,
         likeCount: tweet.Likes.length,
-        isLiked: likes ? likes.includes(tweet.id) : null
+        isLiked: likes.includes(tweet.id)
       }))
 
       return res.status(200).json(tweets)
@@ -365,11 +374,16 @@ const userController = {
         order: [[sequelize.literal('`Replies`.`createdAt`'), 'DESC']]
       })
 
-      helpers.checkUser(res, user)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
 
       // Clean up data
-      const likes = helpers.getUserInfoId(req, 'LikedTweets')
-      const replies = helpers.getResourceInfo(user, 'Replies', likes)
+      const likes = getUserInfoId(req, 'LikedTweets')
+      const replies = getResourceInfo(user, 'Replies', likes)
 
       return res.status(200).json(replies)
     } catch (error) {
@@ -378,7 +392,6 @@ const userController = {
   },
   getLikes: async (req, res, next) => {
     try {
-      // Make sure user exists or is not admin
       const user = await User.findByPk(req.params.id, {
         include: [
           {
@@ -388,11 +401,18 @@ const userController = {
         ],
         order: [[sequelize.literal('`Likes`.`createdAt`'), 'DESC']]
       })
-      helpers.checkUser(res, user)
+
+      // Make sure user exists or is not admin
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
 
       // Clean up data
-      const currentUserLikes = helpers.getUserInfoId(req, 'LikedTweets')
-      const likes = helpers.getResourceInfo(user, 'Likes', currentUserLikes)
+      const currentUserLikes = getUserInfoId(req, 'LikedTweets')
+      const likes = getResourceInfo(user, 'Likes', currentUserLikes)
 
       return res.status(200).json(likes)
     } catch (error) {
@@ -408,11 +428,16 @@ const userController = {
         ]
       })
 
-      helpers.checkUser(res, user)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
 
       // Clean up followers info
-      const currentUserFollowings = helpers.getUserInfoId(req, 'Followings')
-      const followers = helpers.getFollowshipInfo(
+      const currentUserFollowings = getUserInfoId(req, 'Followings')
+      const followers = getFollowshipInfo(
         user,
         'Followers',
         currentUserFollowings
@@ -438,11 +463,16 @@ const userController = {
       })
 
       // Make sure user exists or is not admin
-      helpers.checkUser(res, user)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: 'user does not exist'
+        })
+      }
 
       // Clean up followings data
-      const currentUserFollowings = helpers.getUserInfoId(req, 'Followings')
-      const followings = helpers.getFollowshipInfo(
+      const currentUserFollowings = getUserInfoId(req, 'Followings')
+      const followings = getFollowshipInfo(
         user,
         'Followings',
         currentUserFollowings

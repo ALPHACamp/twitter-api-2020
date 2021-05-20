@@ -1,7 +1,6 @@
 const db = require('../models')
 const Subscription = db.Subscription
 const User = db.User
-const helpers = require('../_helpers')
 
 const subscriptionController = {
   subscribeUser: async (req, res, next) => {
