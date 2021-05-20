@@ -115,13 +115,10 @@ const userController = {
         })
       }
 
-      // email amd account should be unique
-      if (result.value && result.key) {
-        return res.status(409).json({
-          status: 'error',
-          message: `A user with ${result.value} already exists. Choose a different ${result.key}.`
-        })
-      }
+      return res.status(409).json({
+        status: 'error',
+        message: `A user already exists. Choose a different account or email.`
+      })
     } catch (error) {
       next(error)
     }
@@ -254,13 +251,12 @@ const userController = {
         }
 
         // email amd account should be unique
-        if (result.value && result.key) {
-          return res.status(409).json({
-            status: 'error',
-            message: `A user with ${result.value} already exists. Choose a different ${result.key}.`,
-            userInput: req.body
-          })
-        }
+
+        return res.status(409).json({
+          status: 'error',
+          message: `A user already exists. Choose a different account or email.`,
+          userInput: req.body
+        })
       }
 
       // profile

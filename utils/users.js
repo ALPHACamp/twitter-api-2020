@@ -4,6 +4,7 @@ const User = db.User
 const Notification = db.Notification
 
 const validator = require('validator')
+const { Op } = require('sequelize')
 
 const PUBLIC_ROOM_ID = Number(process.env.PUBLIC_ROOM_ID)
 const interactionType = {
@@ -270,23 +271,29 @@ async function checkUserInfo(req) {
   if (errors.length > 0) return { errors }
 
   // email amd account should be unique
-  const check = { email, account }
-  for (const key in check) {
-    const value = check[key]
-    const user = await User.findOne({ where: { [key]: value } })
-
-    // setting page
-    if (req.user) {
-      if (user && value !== req.user[key]) {
-        return { value, key }
+  let users
+  // setting page
+  if (req.user) {
+    users = await User.findAll({
+      where: {
+        [Op.or]: [{ email }, { account }],
+        [Op.not]: [{ id: req.user.id }]
       }
-    }
-
-    // register page
-    if (!req.user && user) {
-      return { value, key }
-    }
+    })
   }
+
+  // register page
+  if (!req.user) {
+    users = await User.findAll({
+      where: { [Op.or]: [{ email }, { account }] }
+    })
+  }
+
+  console.log('users', users)
+
+  if (users.length) return true
+  return false
+  // }
 }
 
 function getUserInfoId(req, info) {
