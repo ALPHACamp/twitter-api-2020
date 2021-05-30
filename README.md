@@ -1,9 +1,19 @@
 ## Simple Twitter
 ---
-
+- 前端部署: https://darric-lu.github.io/Alphitter-Vue-api/
+- 後端專案: https://github.com/a9540907/twitter-api-2020
+- 前端專案: https://github.com/Darric-Lu/Alphitter-Vue-api.git
 ## 專案功能介紹
 ---
-待補
+- 註冊成為一般使用者即可使用該網站
+- 一般使用者可以發佈貼文
+- 一般使用者可以回覆貼文
+- 一般使用者可以喜歡/取消喜歡貼文
+- 一般使用者可以追蹤/取消追蹤其他使用者
+- 一般使用者可以修改個人帳戶與編輯個人資料
+- 一般使用者可以造訪其他使用者個人主頁面
+- 管理員可以刪除任何一篇貼文
+- 管理員可以查看所有使用者資訊
 
 
 ## 專案初始化
