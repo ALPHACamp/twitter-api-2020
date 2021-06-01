@@ -25,10 +25,6 @@ tags:
     description: User related
   - name: tweets
     description: Tweets related
-  - name: followships
-    description: Followships related
-  - name: subscriptions
-    description: Subscriptions related
   - name: replies
     description: Replies related
   - name: rooms
@@ -236,9 +232,9 @@ paths:
   #             examples:
   #               success:
   #                 value: |-
-  #                   { 
-  #                     "status": "success", 
-  #                     "message": "delete successfully" 
+  #                   {
+  #                     "status": "success",
+  #                     "message": "delete successfully"
   #                   }
   #       '400':
   #         description: Bad request
@@ -373,7 +369,7 @@ paths:
                   example: "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
       responses:
         '200':
-          description: 
+          description:
           content:
             application/json:
               schema:
@@ -454,7 +450,7 @@ paths:
                     }
         '404':
           description: This tweet doesn't exist.
-          
+
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     put:
@@ -486,7 +482,7 @@ paths:
                   example: 1
                 description:
                   type: string
-                  example: "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
+                  example: 'doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat'
       responses:
         '200':
           description: Successfully edited a tweet.
@@ -529,7 +525,7 @@ paths:
         - bearerAuth: []
       tags:
         - tweets
-      summary: Delete a specific tweet.  
+      summary: Delete a specific tweet.
       description: User can delete a specific tweet by specifying its id.
       operationId: userDeleteTweet
       parameters:
@@ -610,9 +606,7 @@ paths:
                     }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-
-  '/tweets/{tweet_id}/unlike':
-    post:
+    delete:
       security:
         - bearerAuth: []
       tags:
@@ -706,7 +700,7 @@ paths:
                         }
                     ]
         '404':
-          description: This tweet doesn't exist.     
+          description: This tweet doesn't exist.
           content:
             application/json:
               examples:
@@ -823,7 +817,7 @@ paths:
                   example: 1
                 description:
                   type: string
-                  example: "doloribus iure deleniti veritatis ut. Excepturi expedita blanditiis fugiat"
+                  example: 'doloribus iure deleniti veritatis ut. Excepturi expedita blanditiis fugiat'
       responses:
         '200':
           description: Successfully edited a tweet.
@@ -866,7 +860,7 @@ paths:
         - bearerAuth: []
       tags:
         - replies
-      summary: Delete a spicific reply.  
+      summary: Delete a spicific reply.
       description: User can delete their own reply by speicifying its tweetId and replyId.
       operationId: deleteReply
       parameters:
@@ -908,245 +902,6 @@ paths:
                     {
                         "status": "success",
                         "message": "successfully deleted reply"
-                    }
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-
-  '/followships':
-    post:
-      security:
-        - bearerAuth: []
-      tags:
-        - followships
-      summary: Follow a user.
-      description: User can follow another user by speicifying his id.
-      operationId: followUser
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  example: 2
-      responses:
-        '200':
-          description: Successfully followed user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Followships'
-              examples:
-                success:
-                  value: |-
-                    { 
-                      "status": "success", 
-                      "message": "successfully followed user",
-                      "followingUser": {
-                        "id": 2,
-                        "name": "user1",
-                        "account": "user1",
-                        "avatar": "https://i.imgur.com/q6bwDGO.png",
-                        "cover": "https://i.imgur.com/1jDf2Me.png",
-                        "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"                        
-                      }
-                    }
-                error:
-                  value: |-
-                    { 
-                      "status": "success", 
-                      "message": "this user does not exist"
-                    }
-        '403':
-          description: You cannot follow yourself.
-          content:
-            application/json:
-              examples:
-                error:
-                  value: |-
-                    { 
-                      "status": "error", 
-                      "message": "you cannot follow yourself"
-                    }
-        '409':
-          description: Already followed this user.
-          content:
-            application/json:
-              examples:
-                error:
-                  value: |-
-                    { 
-                      "status": "error", 
-                      "message": "already followed this user"
-                    }
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-
-  '/followships/{followingId}':
-    delete:
-      security:
-        - bearerAuth: []
-      tags:  
-        - followships
-      summary: Unfollow a user.
-      description: User can unfollow an user by speicifying his id.
-      operationId: unfollowUser
-      parameters:
-        - name: followingId
-          in: path
-          required: true
-          description: The id of the user you want to unfollow.
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-      responses:
-        '200':
-          description: Successfully unfollowed user.
-          content:
-            application/json:
-              examples:
-                success:
-                  value: |-
-                    { 
-                      "status": "success", 
-                      "message": "successfully unfollowed user",
-                    }
-                error:
-                  value: |-
-                    { 
-                      "status": "error", 
-                      "message": "cannot unfollow an user that does not exist"
-                    }
-                error2:
-                  value: |-
-                    { 
-                      "status": "error", 
-                      "message": "cannot unfollow since you haven't followed this user before"
-                    }
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-
-  '/subscriptions':
-    post:
-      security:
-        - bearerAuth: []
-      tags:
-        - subscriptions
-      summary: Subscribe a user.
-      description: User can subscribe an user by speicifying his id.
-      operationId: subscribeUser
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  example: 2
-      responses:
-        '200':
-          description: Successfully followed user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Subscriptions'
-              examples:
-                success:
-                  value: |-
-                    {
-                      "status": "success",
-                      "message": "subscribed @user4",
-                      "author": {
-                          "id": 5,
-                          "name": "user4",
-                          "email": "user4@example.com",
-                          "password": "$2a$10$OqwegZokDJq4YXwoyoxoquHTCZzzo96exM4rObEvofIAlhf4Nw8Xy",
-                          "role": "user",
-                          "avatar": "https://i.imgur.com/q6bwDGO.png",
-                          "introduction": "reprehenderit dignissimos dolores",
-                          "account": "user4",
-                          "cover": "https://i.imgur.com/1jDf2Me.png",
-                          "createdAt": "2021-04-25T17:45:46.000Z",
-                          "updatedAt": "2021-04-25T17:45:46.000Z"
-                      }
-                    }
-                error:
-                  value: |-
-                    {
-                      "status": "error",
-                      "message": "cannot subscribe an user that doesn't exist"
-                    }
-        '403':
-          description: You cannot subscribe yourself.
-          content:
-            application/json:
-              examples:
-                error:
-                  value: |-
-                    {
-                      "status": "error",
-                      "message": "You cannot subscribe yourself."
-                    }
-        '409':
-          description: Already subscribed this user.
-          content:
-            application/json:
-              examples:
-                error:
-                  value: |-
-                    {
-                      "status": "error",
-                      "message": "already subscribed @user4"
-                    }
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-
-  '/subscriptions/{authorId}':
-    delete:
-      security:
-        - bearerAuth: []
-      tags:  
-        - subscriptions
-      summary: Unsubscribe a user.
-      description: User can unsubscribe an user by speicifying his id.
-      operationId: unsubscribeUser
-      parameters:
-        - name: authorId
-          in: path
-          required: true
-          description: The id of the user you want to unfollow.
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-      responses:
-        '200':
-          description: Successfully unsubscribe user.
-          content:
-            application/json:
-              examples:
-                success:
-                  value: |-
-                    {
-                      "status": "success",
-                      "message": "Unsubscribe @user1"
-                    }
-                error:
-                  value: |-
-                    {
-                      "status": "error",
-                      "message": "unable to cancel subscription since you haven't subscribed @user2 before"
-                    }
-                error1:
-                  value: |-
-                    {
-                      "status": "error",
-                      "message": "cannot unsubscribe an user that doesn't exist"
                     }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
@@ -1313,7 +1068,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: 
+            schema:
               type: object
               properties:
                 account:
@@ -1483,7 +1238,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: 
+            schema:
               type: object
               properties:
                 page:
@@ -1611,7 +1366,7 @@ paths:
                           "name": "Dignissimos repellat maxime nisi quia molestiae poDignissimos repellat maxime nisi quia molestiae po",
                           "introduction": ""
                       }
-                    }                
+                    }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -1805,6 +1560,120 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
+  '/users/{id}/followships':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Follow a user.
+      description: User can follow another user by speicifying his id.
+      operationId: followUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to follow.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully followed user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Followships'
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully followed user",
+                      "followingUser": {
+                        "id": 2,
+                        "name": "user1",
+                        "account": "user1",
+                        "avatar": "https://i.imgur.com/q6bwDGO.png",
+                        "cover": "https://i.imgur.com/1jDf2Me.png",
+                        "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"                        
+                      }
+                    }
+                error:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "this user does not exist"
+                    }
+        '403':
+          description: You cannot follow yourself.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "you cannot follow yourself"
+                    }
+        '409':
+          description: Already followed this user.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "already followed this user"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Unfollow a user.
+      description: User can unfollow an user by speicifying his id.
+      operationId: unfollowUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to unfollow.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully unfollowed user.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    { 
+                      "status": "success", 
+                      "message": "successfully unfollowed user",
+                    }
+                error:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "cannot unfollow an user that does not exist"
+                    }
+                error2:
+                  value: |-
+                    { 
+                      "status": "error", 
+                      "message": "cannot unfollow since you haven't followed this user before"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
   '/users/{id}/followers':
     get:
       security:
@@ -1912,7 +1781,125 @@ paths:
                     }
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  
+  '/users/{id}/subscriptions':
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Subscribe a user.
+      description: User can subscribe an user by speicifying his id.
+      operationId: subscribeUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to unfollow.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully followed user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriptions'
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "subscribed @user4",
+                      "author": {
+                          "id": 5,
+                          "name": "user4",
+                          "email": "user4@example.com",
+                          "password": "$2a$10$OqwegZokDJq4YXwoyoxoquHTCZzzo96exM4rObEvofIAlhf4Nw8Xy",
+                          "role": "user",
+                          "avatar": "https://i.imgur.com/q6bwDGO.png",
+                          "introduction": "reprehenderit dignissimos dolores",
+                          "account": "user4",
+                          "cover": "https://i.imgur.com/1jDf2Me.png",
+                          "createdAt": "2021-04-25T17:45:46.000Z",
+                          "updatedAt": "2021-04-25T17:45:46.000Z"
+                      }
+                    }
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot subscribe an user that doesn't exist"
+                    }
+        '403':
+          description: You cannot subscribe yourself.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "You cannot subscribe yourself."
+                    }
+        '409':
+          description: Already subscribed this user.
+          content:
+            application/json:
+              examples:
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "already subscribed @user4"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - user
+      summary: Unsubscribe a user.
+      description: User can unsubscribe an user by speicifying his id.
+      operationId: unsubscribeUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user you want to unfollow.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successfully unsubscribe user.
+          content:
+            application/json:
+              examples:
+                success:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "Unsubscribe @user1"
+                    }
+                error:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "unable to cancel subscription since you haven't subscribed @user2 before"
+                    }
+                error1:
+                  value: |-
+                    {
+                      "status": "error",
+                      "message": "cannot unsubscribe an user that doesn't exist"
+                    }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
   '/rooms':
     get:
       security:
@@ -1981,7 +1968,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: 
+            schema:
               type: object
               properties:
                 userId:
@@ -2085,7 +2072,7 @@ paths:
                     ]
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  
+
   '/rooms/private/unread':
     get:
       security:
