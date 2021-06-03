@@ -56,7 +56,7 @@ const socket = server => {
         socket.join([`self ${userId}`, `${PUBLIC_ROOM_ID}`])
         console.log('socket.rooms1-1', socket.rooms)
 
-        if (!data.rooms || !data.rooms.length) {
+        if (!data || !data.length) {
           const authors = await getAuthors(userId)
           console.log('authors', authors)
 
@@ -71,7 +71,7 @@ const socket = server => {
           rooms.push(`self ${userId}`, `${PUBLIC_ROOM_ID}`)
           console.log('rooms1 - start session', rooms)
         } else {
-          rooms = data.rooms
+          rooms = data
           socket.join(rooms)
 
           console.log('socket.rooms2', socket.rooms)
