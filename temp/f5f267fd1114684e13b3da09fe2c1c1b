@@ -1,0 +1,77 @@
+{
+	"info": {
+		"_postman_id": "84d906a6-dd55-4916-bebe-376521435659",
+		"name": "Twutter Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "後台登入驗證",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzMsImlhdCI6MTYxODgyNTU5OH0.bPI3Jqs2SNKq2x-HaJMRP8eHiV8ANTLAYL73uXFgadM",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjE4OTE0NzIxfQ.pK2GM3CKV-oERhhkdibjdHnycQ1bHUCCgrf3hA7uRGE",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"root@example.com\",\r\n    \"password\": \"12345678\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://simple-twitter-mysql.herokuapp.com/api/admin/login",
+					"protocol": "https",
+					"host": [
+						"simple-twitter-mysql",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"api",
+						"admin",
+						"login"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				},
+				"description": "email \r\npassword"
+			},
+			"response": []
+		}
+	]
+}
