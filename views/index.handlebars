@@ -1,0 +1,97 @@
+<head>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="../socket.js"></script>
+  <script>
+    var socket = io()
+  </script>
+  <style>
+    html,
+    #send-box input {
+      display: inline-block;
+    }
+
+    #send-box input.error {
+      border: 1px solid red;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container" style="width:500px; top:50px; display:block; position:relative" class="my-0 mx-auto">
+    <div id="status-box" class="text-right" style="">
+      <h6>
+        Server: <span id="status"> -</span> / <span id="online"> </span>
+        online.
+      </h6>
+    </div>
+    <div id="content" class="border rounded overflow-auto" style="height: 350px; weight:100%; color:darkolivegreen">
+    </div>
+    <div id="send-box" class="mt-3 text-center" style="width: 100%">
+      <form id="send-form">
+        <input type="text" class="d-print-inline-block" style="width: 15%;" name="name" id="name" placeholder="暱稱">
+        <input type="text" style="width: 70%;" name="msg" id="msg" placeholder="說點什麼？">
+        <input type="submit" style="width: 10%;" value="送出">
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const status = document.getElementById("status");
+      const online = document.getElementById("online");
+      const sendForm = document.getElementById("send-form")
+      const content = document.getElementById("content")
+
+      socket.on('online', (amount) => {
+        console.log(amount)
+        online.innerText = amount;
+      })
+
+      socket.on("connect", () => {
+        status.innerText = "Connected."
+      })
+
+      socket.emit("chatting", "NEW USER LOGIN")
+
+      sendForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        let ok = true;
+        const formData = {};
+        const formChild = sendForm.children;
+
+        for (let i = 0; i < sendForm.childElementCount; i++) {
+          let child = formChild[i];
+          if (child.name !== "") {
+            var childValue = child.value;
+            if (childValue === "" || !childValue) {
+              ok = false;
+            } else {
+              formData[child.name] = childValue;
+            }
+          }
+        }
+        if (ok) socket.emit("send message", formData)
+        formChild[1].value = ""
+      })
+
+      socket.on('newclientlogin', function (data) {
+        content.innerHTML += ` <div class="ml-3"> ${data.description} </div> `
+
+      });
+
+      socket.on("msg", (data) => {
+        content.innerHTML += ` <div class="ml-3"> ${data.name} says :  ${data.msg}</div>
+        `
+      })
+
+      socket.on("selfmsg", (data) => {
+        content.innerHTML += ` <div class="mr-3 text-right"> ${data.msg}</div>
+        `
+      })
+
+      socket.on('exit', () => {
+        content.innerHTML += ` <div class="ml-3"> USER EXIT </div> `
+      })
+    })
+  </script>
+</body>
