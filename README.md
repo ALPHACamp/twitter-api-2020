@@ -26,10 +26,56 @@ Password: 12345678
 
 #### Admin related
 
-| Method | Path              | description                                                  | req.body | res.json tables |
-| ------ | ----------------- | ------------------------------------------------------------ | -------- | --------------- |
-| GET    | /admin/users      | 取得站內所有使用者資料及其社群活躍數據，按推文數從多到少排序 | -------- | users           |
-| DELETE | /admin/tweets/:id | 刪除一筆 id 符合的推文                                       | -------- | --------        |
+#### `GET /admin/users`
+
+- **Description**
+
+  Get all users data including their social activeness
+
+- **Response**
+
+  - 200: Successfully retrieved an array of user objects
+
+  ```
+    [
+      {
+        "id": 4,
+        "name": "user3",
+        "avatar": "https://i.imgur.com/q6bwDGO.png",
+        "account": "user3",
+        "cover": "https://i.imgur.com/1jDf2Me.png",
+        "tweetCount": 10,
+        "followerCount": 0,
+        "followingCount": 1,
+        "likeCount": 0
+      }
+    ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+#### `DELETE /admin/tweets/:tweet_id`
+
+- **Description**
+
+  Delete a tweet by specifying its id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet you want to delete
+
+- **Response**
+
+  - 200: Successfully deleted a tweet
+
+  ```
+    {
+      "status": "success",
+      "message": "delete successfully"
+    }
+  ```
+
+  - 401: Access token is missing or invalid
 
 #### User related
 
