@@ -79,18 +79,702 @@ Password: 12345678
 
 #### User related
 
-| Method | Path                      | description                                                 | req.body                                                                    | res.json tables                     |
-| ------ | ------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------- |
-| GET    | /users                    | 取出推薦追蹤的使用者資料，取出 followers 前六名的使用者資料 | -------                                                                     | users, followships                  |
-| POST   | /users                    | 使用者註冊帳號                                              | account, name, email, password, checkPassword                               | --------                            |
-| POST   | /users/login              | 使用者登入                                                  | account, password                                                           | users                               |
-| GET    | /users/:id                | 瀏覽單一 user 資料                                          | --------                                                                    | users, tweets, followships          |
-| PUT    | /users/:id                | 編輯自己所有的資料                                          | account, name, email, password, checkPassword, introduction, avatar, banner | --------                            |
-| GET    | /users/:id/tweets         | 看見某使用者發過的推文                                      | --------                                                                    | tweets, replies, followships, likes |
-| GET    | /users/:id/replied_tweets | 看見某使用者回覆過的推文及回覆                              | --------                                                                    | tweets, replies, likes, users       |
-| GET    | /users/:id/likes          | 看見某使用者喜歡過的推文                                    | --------                                                                    | tweets, replies, likes, users       |
-| GET    | /users/:id/followings     | 看見某使用者跟隨中的人                                      | --------                                                                    | users, followships                  |
-| GET    | /users/:id/followers      | 看見某使用者的跟隨者                                        | --------                                                                    | users, followships                  |
+#### `GET /users`
+
+- **Description**
+
+  Get the data of top 6 users with most followers
+
+- **Response**
+
+  - 200: SRetrieve an array of user objects
+
+  ```
+    [
+      {
+        "id": 2,
+        "name": "user1",
+        "avatar": "https://i.imgur.com/q6bwDGO.png",
+        "account": "user1",
+        "isFollowed": true
+      }
+    ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+#### `POST /users`
+
+- **Description**
+
+  Register an account by filling out required fields of personal information
+
+- **Request Body**
+
+  - account
+  - name
+  - email
+  - password
+  - checkPassword
+
+  ```
+    {
+      "account": "user1",
+      "name": "user1",
+      "email": "user1@example.com",
+      "password": "12345678",
+      "checkPassword": "12345678"
+    }
+  ```
+
+- **Response**
+
+  - 200: Registered an account
+
+  ```
+    {
+      "status": "success",
+      "message": "user1 register successfully! Please login."
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 409: A user already exists
+
+  ```
+    {
+      "status": "error",
+      "message": "A user with email 'user7@example.com' already exists. Choose a different account or login directly.",
+      "userInput": {
+        "email": "user7@example.com",
+        "password": "12345678",
+        "name": "rrrr",
+        "checkPassword": "12345678",
+        "account": "user1"
+      }
+    }
+  ```
+
+  - 422: Did not meet field requirements
+
+  ```
+    {
+      "status": "error",
+      "errors": [
+        {
+          "message": "Please enter the correct email address."
+        },
+        {
+          "message": "Password and checkPassword do not match."
+        }
+      ],
+      "userInput": {
+        "email": "user7@example",
+        "password": "1234567",
+        "name": "rrrr",
+        "checkPassword": "12345678",
+        "account": "user1"
+      }
+    }
+  ```
+
+#### `POST /users/login`
+
+- **Description**
+
+  Login by filling out account and password
+
+- **Request Body**
+
+  - account
+  - password
+
+  ```
+  {
+    "account": "user1",
+    "password": "12345678"
+  }
+  ```
+
+- **Response**
+
+  - 200: Login successfully
+
+  ```
+    {
+      "status": "success",
+      "message": "login successfully",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjE5NDUyNzY1fQ.PWVB3oa9pqmA6-sQii69BCs1bFJXlYO6yaM4hhthq7E",
+      "user": {
+        "id": 3,
+        "name": "user2",
+        "email": "user2@example.com",
+        "account": "user2",
+        "avatar": "https://i.imgur.com/q6bwDGO.png",
+        "introduction": "Dignissimos repellat maxime nisi quia molestiae po",
+        "cover": "https://i.imgur.com/1jDf2Me.png",
+        "role": "user"
+      }
+    }
+  ```
+
+  - 401: Incorrect password
+
+  ```
+    {
+      "status": "error",
+      "message": "Incorrect Password"
+    }
+  ```
+
+  - 422: All fields are required
+
+  ```
+    {
+      "status": "error",
+      "message": "All fields are required."
+    }
+  ```
+
+#### `GET /users/current_user`
+
+- **Description**
+
+  Get current login user's data
+
+- **Response**
+
+  - 200: Retrieved a user
+
+  ```
+    {
+      "id": 14,
+      "name": "user1",
+      "account": "user1",
+      "email": "user1@example.com",
+      "avatar": "https://i.imgur.com/q6bwDGO.png",
+      "role": "user",
+      "cover": "https://i.imgur.com/1jDf2Me.png",
+      "introduction": "Maxime quo quos beatae aut quaerat rem."
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+#### `GET /users/:id`
+
+- **Description**
+
+  Get a specific user's data by id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Retrieved an user object
+
+  ```
+    {
+      "id": 24,
+      "name": "user2",
+      "email": "user2@example.com",
+      "account": "user2",
+      "avatar": "https://i.imgur.com/q6bwDGO.png",
+      "introduction": "Accusamus harum voluptas. Nostrum incidunt fugiat ",
+      "cover": "https://i.imgur.com/1jDf2Me.png",
+      "role": "user",
+      "tweetCount": 10,
+      "followerCount": 1,
+      "followingCount": 0,
+      "isFollowed": true,
+      "isSubscribed": false
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 404: User does not exist
+
+  ```
+    {
+      "status": "error",
+      "message": "user does not exist"
+    }
+  ```
+
+#### `PUT /users/:id`
+
+- **Description**
+
+  Edit the profile or set the data
+
+- **Parameters**
+
+  - id: The id of the current login user
+
+- **Request Body**
+
+  - page: leave it blank for profile page, setting for setting page
+  - account
+  - name
+  - email
+  - password
+  - checkPassword
+  - introduction
+  - avatar
+  - cover
+
+```
+  {
+    "page": "(leave blank for profile, setting for setting page)",
+    "account": "user1",
+    "name": "user1",
+    "email": "user1@example.com",
+    "password": "12345678",
+    "checkPassword": "12345678",
+    "introduction": "Hi",
+    "avatar": "https://i.imgur.com/q6bwDGO.png",
+    "cover": "https://i.imgur.com/1jDf2Me.png"
+  }
+```
+
+- **Response**
+
+  - 200: Profile/setting page updated successfully
+
+  ```
+    {
+      "status": "success",
+      "message": "profile/setting update successfully"
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 403: You can not edit other's profile
+
+  ```
+    {
+      "status": "error",
+      "message": "You can not edit other's profile"
+    }
+  ```
+
+  - 409: A user already exists
+
+  ```
+    {
+      "status": "error",
+      "message": "A user with 'user1@example.com' already exists. Choose a different email.",
+      "userInput": {
+        "email": "user1@example.com",
+        "password": "12345678",
+        "name": "root",
+        "checkPassword": "12345678",
+        "account": "user10",
+        "page": "setting"
+      }
+    }
+  ```
+
+  - 422: Did not meet field requirements
+
+  ```
+    {
+      "status": "error",
+      "errors": [
+        {
+          "message": "Please fill out all fields."
+        },
+        {
+          "message": "Please enter the correct email address."
+        },
+        {
+          "message": "Password and checkPassword do not match."
+        }
+      ],
+      "userInput": {
+        "email": "",
+        "password": "12345678",
+        "name": "rrrr",
+        "checkPassword": "123456789",
+        "account": "user2",
+        "page": "setting"
+      }
+    }
+  ```
+
+#### `GET /users/:id/tweets`
+
+- **Description**
+
+  Get a specific user's tweets by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Retrieved an array of tweet objects
+
+  ```
+    [
+      {
+        "id": 104,
+        "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+        "createdAt": "2021-04-25T14:07:36.000Z",
+        "replyCount": 3,
+        "likeCount": 1,
+        "isLiked": true
+      }
+    ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 404: User does not exist
+
+  ```
+    {
+      "status": "error",
+      "message": "user does not exist"
+    }
+  ```
+
+#### `GET /users/:id/replied_tweets`
+
+- **Description**
+
+  Get the tweets a specific user replied by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Retrieved an array of tweet objects
+
+  ```
+    [
+      {
+        "id": 314,
+        "comment": "Voluptate qui enim magnam error dolorum voluptas e",
+        "createdAt": "2021-04-25T14:07:36.000Z",
+        "TweetId": 104,
+        "Tweet": {
+          "id": 104,
+          "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+          "createdAt": "2021-04-25T14:07:36.000Z",
+          "isLiked": true,
+          "User": {
+            "id": 24,
+            "name": "user2",
+            "account": "user2",
+            "avatar": "https://i.imgur.com/q6bwDGO.png"
+          },
+          "replyCount": 3,
+          "likeCount": 1
+        }
+      }
+    ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 404: User does not exist
+
+  ```
+    {
+      "status": "error",
+      "message": "user does not exist"
+    }
+  ```
+
+#### `GET /users/:id/likes`
+
+- **Description**
+
+  Get the tweets a specific user likes by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Retrieved an array of tweet objects
+
+  ```
+    [
+      {
+        "id": 4,
+        "createdAt": "2021-04-25T14:16:45.000Z",
+        "TweetId": 104,
+        "Tweet": {
+          "id": 104,
+          "description": "Ad sit vel ut doloribus fugiat. Quasi repudiandae ea error deleniti amet a iusto. Unde voluptatem officia. Et mollitia accusamus qui quia est doloribus quisquam ex odit. Amet quo omnis eos corporis qui cum est rerum.",
+          "createdAt": "2021-04-25T14:07:36.000Z",
+          "isLiked": true,
+          "User": {
+            "id": 24,
+            "name": "user2",
+            "account": "user2",
+            "avatar": "https://i.imgur.com/q6bwDGO.png"
+          },
+          "replyCount": 3,
+          "likeCount": 1
+        }
+      }
+    ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 404: User does not exist
+
+  ```
+    {
+      "status": "error",
+      "message": "user does not exist"
+    }
+  ```
+
+#### `GET /users/:id/followings`
+
+- **Description**
+
+  Get a specific user's following list by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Retrieved an array of user objects
+
+  ```
+    [
+      {
+        "followingId": 24,
+        "name": "user2",
+        "account": "user2",
+        "avatar": "https://i.imgur.com/q6bwDGO.png",
+        "introduction": "Accusamus harum voluptas. Nostrum incidunt fugiat ",
+        "createdAt": "2021-04-25T14:07:36.000Z",
+        "isFollowing": true
+      }
+    ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 404: User does not exist
+
+  ```
+    {
+      "status": "error",
+      "message": "user does not exist"
+    }
+  ```
+
+#### `GET /users/:id/followers`
+
+- **Description**
+
+  Get a specific user's follower list by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Retrieved an array of user objects
+
+  ```
+    [
+      {
+        "followerId": 14,
+        "name": "user1",
+        "account": "user1",
+        "avatar": "https://i.imgur.com/q6bwDGO.png",
+        "introduction": "Maxime quo quos beatae aut quaerat rem.",
+        "createdAt": "2021-04-25T14:07:35.000Z",
+        "isFollowing": false
+      }
+    ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 404: User does not exist
+
+  ```
+    {
+      "status": "error",
+      "message": "user does not exist"
+    }
+  ```
+
+#### `POST users/:id/followships`
+
+- **Description**
+
+  Follow the user by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Successfully followed the user
+
+  ```
+    {
+      "status": "success",
+      "message": "successfully followed user",
+      "followingUser": {
+        "id": 2,
+        "name": "user1",
+        "account": "user1",
+        "avatar": "https://i.imgur.com/q6bwDGO.png",
+        "cover": "https://i.imgur.com/1jDf2Me.png",
+        "introduction": "Non enim aut. Rerum esse ratione voluptatem accusa"
+      }
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 403: You cannot follow yourself
+
+  ```
+    {
+      "status": "error",
+      "message": "you cannot follow yourself"
+    }
+  ```
+
+  - 409: Already followed this user
+
+  ```
+    {
+      "status": "error",
+      "message": "already followed this user"
+    }
+  ```
+
+#### `DELETE users/:id/followships`
+
+- **Description**
+
+  Unfollow the user by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Successfully unfollowed the user
+
+  ```
+    {
+      "status": "success",
+      "message": "successfully unfollowed the user",
+    }
+  ```
+
+  - 403: You cannot unfollow yourself
+
+  ```
+    {
+      "status": "error",
+      "message": "you cannot unfollow yourself"
+    }
+  ```
+
+#### `POST users/:id/subscriptions`
+
+- **Description**
+
+  Subscribe the user by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Successfully subscribed the user
+
+  ```
+    {
+      "status": "success",
+      "message": "subscribed @user4",
+      "author": {
+          "id": 5,
+          "name": "user4",
+          "email": "user4@example.com",
+          "password": "$2a$10$OqwegZokDJq4YXwoyoxoquHTCZzzo96exM4rObEvofIAlhf4Nw8Xy",
+          "role": "user",
+          "avatar": "https://i.imgur.com/q6bwDGO.png",
+          "introduction": "reprehenderit dignissimos dolores",
+          "account": "user4",
+          "cover": "https://i.imgur.com/1jDf2Me.png",
+          "createdAt": "2021-04-25T17:45:46.000Z",
+          "updatedAt": "2021-04-25T17:45:46.000Z"
+      }
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 403: You cannot subscribe yourself
+
+  ```
+    {
+      "status": "error",
+      "message": "you cannot subscribe yourself"
+    }
+  ```
+
+  - 409: Already subscribed this user
+
+  ```
+    {
+      "status": "error",
+      "message": "already subscribed this user"
+    }
+  ```
+
+#### `DELETE users/:id/subscriptions`
+
+- **Description**
+
+  Unsubscribe the user user by user id
+
+- **Parameters**
+
+  - id: The id of the user
+
+- **Response**
+
+  - 200: Successfully unsubscribe the user
+
+  ```
+    {
+      "status": "success",
+      "message": "Unsubscribe @user1",
+    }
+  ```
 
 #### Tweet related
 
@@ -99,13 +783,6 @@ Password: 12345678
 | POST   | /tweets           | 建立一筆推文                                     | description(140) | -------                       |
 | GET    | /tweets           | 取出全站推文及其關聯資料，按建立日期從新到舊排序 | --------         | tweets, users, replies, likes |
 | GET    | /tweets/:tweet_id | 取出一筆推文、推文者資料及按讚數                 | --------         | tweets, users, replies, likes |
-
-#### Followship related
-
-| Method | Path                      | description        | req.body    | res.json tables |
-| ------ | ------------------------- | ------------------ | ----------- | --------------- |
-| POST   | /followships              | follow 一個 user   | followingId | --------        |
-| DELETE | /followships/:followingId | unfollow 一個 user | --------    | --------        |
 
 #### Like related
 
