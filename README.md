@@ -1,6 +1,6 @@
 # Simple Twitter API
 
-A RESTful API server for [Simple Twitter](https://github.com/ivyhungtw/simple-twitter) project built with Node.js, Express framework, and mySQL
+A RESTful API server for [Simple Twitter](https://github.com/ivyhungtw/simple-twitter) project built with Node.js, Express framework, and MySQL
 
 ## Base URL
 
@@ -87,7 +87,7 @@ Password: 12345678
 
 - **Response**
 
-  - 200: SRetrieve an array of user objects
+  - 200: Retrieve an array of user objects
 
   ```
     [
@@ -117,15 +117,15 @@ Password: 12345678
   - password
   - checkPassword
 
-  ```
-    {
-      "account": "user1",
-      "name": "user1",
-      "email": "user1@example.com",
-      "password": "12345678",
-      "checkPassword": "12345678"
-    }
-  ```
+```
+  {
+    "account": "user1",
+    "name": "user1",
+    "email": "user1@example.com",
+    "password": "12345678",
+    "checkPassword": "12345678"
+  }
+```
 
 - **Response**
 
@@ -190,12 +190,12 @@ Password: 12345678
   - account
   - password
 
-  ```
+```
   {
     "account": "user1",
     "password": "12345678"
   }
-  ```
+```
 
 - **Response**
 
@@ -317,7 +317,7 @@ Password: 12345678
 
 - **Request Body**
 
-  - page: leave it blank for profile page, setting for setting page
+  - page: '' for profile page, 'setting' for setting page
   - account
   - name
   - email
@@ -329,7 +329,7 @@ Password: 12345678
 
 ```
   {
-    "page": "(leave blank for profile, setting for setting page)",
+    "page": "('' for profile page, 'setting' for setting page)",
     "account": "user1",
     "name": "user1",
     "email": "user1@example.com",
@@ -759,7 +759,7 @@ Password: 12345678
 
 - **Description**
 
-  Unsubscribe the user user by user id
+  Unsubscribe the user by user id
 
 - **Parameters**
 
@@ -910,10 +910,10 @@ Password: 12345678
   - description
 
 ```
-    {
-      "UserId": 1,
-      "description": "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
-    }
+  {
+    "UserId": 1,
+    "description": "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
+  }
 ```
 
 - **Response**
@@ -921,17 +921,16 @@ Password: 12345678
   - 200: Successfully edited a tweet
 
   ```
-      {
-        "status": "success",
-        "message": "successfully edited a tweet",
-        "editedTweetId": 2
-      }
-
+    {
+      "status": "success",
+      "message": "successfully edited a tweet",
+      "editedTweetId": 2
+    }
   ```
 
-- 401: Access token is missing or invalid
+  - 401: Access token is missing or invalid
 
-- 403: You cannot edit other user's tweet
+  - 403: You cannot edit other user's tweet
 
   ```
     {
@@ -940,7 +939,7 @@ Password: 12345678
     }
   ```
 
-- 422: Input cannot be longer than 140 characters
+  - 422: Input cannot be longer than 140 characters
 
   ```
     {
@@ -964,15 +963,15 @@ Password: 12345678
   - 200: Successfully deleted the tweet
 
   ```
-      {
-        "status": "success",
-        "message": "delete successfully"
-      }
+    {
+      "status": "success",
+      "message": "delete successfully"
+    }
   ```
 
-- 401: Access token is missing or invalid
+  - 401: Access token is missing or invalid
 
-- 403: You cannot delete other user's tweet
+  - 403: You cannot delete other user's tweet
 
   ```
     {
@@ -1040,16 +1039,16 @@ Password: 12345678
   - 200: Successfully retrieved replies of this tweet
 
   ```
-      [
-        {
-          "id": 13,
-          "UserId": 3,
-          "TweetId": 5,
-          "comment": "Adipisci minus officia voluptatum totam aut et qui",
-          "createdAt": "2021-04-19T16:45:10.000Z",
-          "updatedAt": "2021-04-19T16:45:10.000Z"
-      }
-      ]
+    [
+      {
+        "id": 13,
+        "UserId": 3,
+        "TweetId": 5,
+        "comment": "Adipisci minus officia voluptatum totam aut et qui",
+        "createdAt": "2021-04-19T16:45:10.000Z",
+        "updatedAt": "2021-04-19T16:45:10.000Z"
+    }
+    ]
   ```
 
   - 401: Access token is missing or invalid
@@ -1090,10 +1089,10 @@ Password: 12345678
   - 200: Successfully replied to this tweet
 
   ```
-      {
-        "status": "success",
-        "message": "successfully replied to this tweet"
-      }
+    {
+      "status": "success",
+      "message": "successfully replied to this tweet"
+    }
   ```
 
   - 401: Access token is missing or invalid
@@ -1137,11 +1136,11 @@ Password: 12345678
   - 200: Successfully edited the reply
 
   ```
-      {
-        "status": "success",
-        "message": "successfully updated your reply",
-        "updatedReplyId": 1
-      }
+    {
+      "status": "success",
+      "message": "successfully updated your reply",
+      "updatedReplyId": 1
+    }
   ```
 
   - 401: Access token is missing or invalid
@@ -1180,10 +1179,10 @@ Password: 12345678
   - 200: Successfully deleted your reply
 
   ```
-      {
-        "status": "success",
-        "message": "successfully deleted your reply"
-      }
+    {
+      "status": "success",
+      "message": "successfully deleted your reply"
+    }
   ```
 
   - 401: Access token is missing or invalid
@@ -1211,18 +1210,14 @@ By following the instruction, you can run a Simple Twitter API server on your lo
 #### Clone the repository to your local machine
 
 ```
-
 $ git clone https://github.com/ivyhungtw/twitter-api-2020.git
-
 ```
 
 #### Install project dependencies
 
 ```
-
 $ cd twitter-api-2020
 $ npm install
-
 ```
 
 #### Add .env file
@@ -1232,33 +1227,29 @@ To properly use the app and login feature, make sure you have filled out the fol
 You can register your own IMGUR client id on [IMGUR](https://api.imgur.com/oauth2/addclient).
 
 ```
-
 JWT_SECRET=<your_jwt_secret>
 IMGUR_CLIENT_ID=<your_imgur_client_id>
-
 ```
 
 #### Enter your MySQL Workbench password in config.json file
 
 ```
-
 {
-"development": {
-"username": "root",
-"password": "<your_mysql_workbench_password>",
-"database": "forum",
-"host": "127.0.0.1",
-"dialect": "mysql"
-},
-"test": {
-"username": "root",
-"password": "<your_mysql_workbench_password>",
-"database": "forum_test",
-"host": "127.0.0.1",
-"dialect": "mysql",
-"logging": false
+  "development": {
+    "username": "root",
+    "password": "<your_mysql_workbench_password>",
+    "database": "forum",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": "<your_mysql_workbench_password>",
+    "database": "forum_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
 }
-
 ```
 
 #### Create database in MySQL
@@ -1266,22 +1257,18 @@ IMGUR_CLIENT_ID=<your_imgur_client_id>
 To create database for development and test, run the following syntax in MySQL Workbench.
 
 ```
-
 drop database if exists ac_twitter_workspace;
 create database ac_twitter_workspace;
 drop database if exists ac_twitter_workspace_test;
 create database ac_twitter_workspace_test;
-
 ```
 
 #### Use Sequelize CLI to create tables in database
 
 ```
-
 $ npx sequelize db:migrate
 $ NODE_ENV=test
 $ npx sequelize db:migrate
-
 ```
 
 #### Import seed data
@@ -1289,19 +1276,15 @@ $ npx sequelize db:migrate
 To have default users, tweets, and replies set up in ac_twitter_workspace database, run the following script.
 
 ```
-
 $ NODE_ENV=development
 $ npx sequelize db:seed:all
-
 ```
 
 #### Run test
 
 ```
-
 $ NODE_ENV=test
 $ npm run test
-
 ```
 
 #### Start the server
@@ -1309,17 +1292,13 @@ $ npm run test
 If you have installed [nodemon](https://www.npmjs.com/package/nodemon), run the following script:
 
 ```
-
 $ npm run dev
-
 ```
 
 or just run:
 
 ```
-
 $ node app.js
-
 ```
 
 The server will start running on http://localhost:3000/
@@ -1329,7 +1308,3 @@ The server will start running on http://localhost:3000/
 [Yi-Tzu(Ivy) Hung](https://github.com/ivyhungtw)
 
 [Sherry Liao](https://github.com/sherryliao21)
-
-```
-
-```
