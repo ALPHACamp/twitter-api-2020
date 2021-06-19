@@ -778,25 +778,424 @@ Password: 12345678
 
 #### Tweet related
 
-| Method | Path              | description                                      | req.body         | res.json tables               |
-| ------ | ----------------- | ------------------------------------------------ | ---------------- | ----------------------------- |
-| POST   | /tweets           | 建立一筆推文                                     | description(140) | -------                       |
-| GET    | /tweets           | 取出全站推文及其關聯資料，按建立日期從新到舊排序 | --------         | tweets, users, replies, likes |
-| GET    | /tweets/:tweet_id | 取出一筆推文、推文者資料及按讚數                 | --------         | tweets, users, replies, likes |
+#### `GET /tweets`
 
-#### Like related
+- **Description**
 
-| Method | Path               | description  | req.body | res.json tables |
-| ------ | ------------------ | ------------ | -------- | --------------- |
-| POST   | /tweets/:id/like   | 喜歡一則推文 | -------- | --------        |
-| POST   | /tweets/:id/unlike | 取消喜歡     | -------- | --------        |
+  Get a list of all tweets
 
-#### Reply related
+- **Response**
 
-| Method | Path                      | description            | req.body         | res.json tables |
-| ------ | ------------------------- | ---------------------- | ---------------- | --------------- |
-| POST   | /tweets/:tweet_id/replies | 新增回覆               | comment (text>0) | --------        |
-| GET    | /tweets/:tweet_id/replies | 瀏覽一則推文的所有回覆 | --------         | replies, users  |
+  - 200: Successfully retrieved an array of tweet objects
+
+  ```
+    [
+      {
+          "id": 1,
+          "UserId": 1,
+          "description": "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus",
+          "createdAt": "2021-04-19T16:45:10.000Z",
+          "updatedAt": "2021-04-19T16:45:10.000Z",
+          "replyCount": 3,
+          "likeCount": 1,
+          "isLiked": true,
+          "user": {
+              "avatar": "https://i.imgur.com/q6bwDGO.png",
+              "name": "root",
+              "account": "root"
+          }
+      }
+    ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+#### `POST /tweets`
+
+- **Description**
+
+  Post a tweet
+
+- **Request Body**
+
+  - UserId
+  - description
+
+```
+  {
+    "UserId": 1,
+    "description": "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
+  }
+```
+
+- **Response**
+
+  - 200: Successfully posted a tweet
+
+  ```
+    {
+      "status": "success",
+      "message": "successfully posted a tweet",
+      "tweet": [
+        {
+          "id": 60,
+          "UserId": 1,
+          "description": "Ipsa quaerat.\n \rDicta officiis",
+          "createdAt": "2021-04-27T09:09:15.000Z",
+          "updatedAt": "2021-04-27T09:09:15.000Z"
+        }
+      ]
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 422: Input cannot be longer than 140 characters or empty
+
+  ```
+    {
+      "status": "error",
+      "message": "Input cannot be longer than 140 characters / input should not be blank"
+    }
+  ```
+
+#### `GET /tweets/:tweet_id`
+
+- **Description**
+
+  Get the data of a specific tweet by tweet id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+
+- **Response**
+
+  - 200: Successfully retrieved the data of the tweet
+
+  ```
+    {
+      "id": 13,
+      "description": "Vitae reiciendis voluptatem laudantium quis laudantium.\nIpsa et dolor et quasi suscipit totam neque nisi.",
+      "createdAt": "2021-04-19T16:45:10.000Z",
+      "updatedAt": "2021-04-19T16:45:10.000Z",
+      "user": {
+        "id": 2,
+        "name": "user1",
+        "avatar": "https://i.imgur.com/q6bwDGO.png"
+      },
+      "likesLength": 0,
+      "commentsLength": 4,
+      "isLiked": false
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 404: This tweet doesn't exist
+
+#### `PUT /tweets/:tweet_id`
+
+- **Description**
+
+  Edit a tweet of the current login user
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+
+- **Request Body**
+
+  - UserId
+  - description
+
+```
+    {
+      "UserId": 1,
+      "description": "doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat"
+    }
+```
+
+- **Response**
+
+  - 200: Successfully edited a tweet
+
+  ```
+      {
+        "status": "success",
+        "message": "successfully edited a tweet",
+        "editedTweetId": 2
+      }
+
+  ```
+
+- 401: Access token is missing or invalid
+
+- 403: You cannot edit other user's tweet
+
+  ```
+    {
+      "status": "error",
+      "message": "you cannot edit other user's tweet"
+    }
+  ```
+
+- 422: Input cannot be longer than 140 characters
+
+  ```
+    {
+      "status": "error",
+      "message": "input cannot be longer than 140 characters"
+    }
+  ```
+
+#### `DELETE /tweets/:tweet_id`
+
+- **Description**
+
+  Delete a specific tweet by tweet id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+
+- **Response**
+
+  - 200: Successfully deleted the tweet
+
+  ```
+      {
+        "status": "success",
+        "message": "delete successfully"
+      }
+  ```
+
+- 401: Access token is missing or invalid
+
+- 403: You cannot delete other user's tweet
+
+  ```
+    {
+      "status": "error",
+      "message": "you cannot delete other user's tweet"
+    }
+  ```
+
+#### `POST /tweets/:tweet_id/like`
+
+- **Description**
+
+  Like a specific tweet by tweet id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+
+- **Response**
+
+  - 200: Successfully liked this tweet
+
+  ```
+    {
+      "status": "success"
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+#### `DELETE /tweets/:tweet_id/like`
+
+- **Description**
+
+  Unlike a specific tweet by tweet id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+
+- **Response**
+
+  - 200: Successfully unliked this tweet
+
+  ```
+    {
+      "status": "success"
+    }
+  ```
+
+  - 401: Access token is missing or invalid
+
+#### `GET /tweets/:tweet_id/replies`
+
+- **Description**
+
+  Get all replies of a specific tweet by tweet id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+
+- **Response**
+
+  - 200: Successfully retrieved replies of this tweet
+
+  ```
+      [
+        {
+          "id": 13,
+          "UserId": 3,
+          "TweetId": 5,
+          "comment": "Adipisci minus officia voluptatum totam aut et qui",
+          "createdAt": "2021-04-19T16:45:10.000Z",
+          "updatedAt": "2021-04-19T16:45:10.000Z"
+      }
+      ]
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 404: This tweet doesn't exist
+
+  ```
+    {
+      "status": "error",
+      "message": "this tweet doesn't exist"
+    }
+  ```
+
+#### `POST /tweets/:tweet_id/replies`
+
+- **Description**
+
+  Reply to a specific tweet by tweet id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+
+- **Request Body**
+
+  - UserId
+  - comment
+
+```
+  {
+    "UserId": 1,
+    "comment": "Ipsa quaerat modi alias vel eos odit qui ut et. Vel dolor doloribus iure deleniti veritatis ut. Aut quam odio reprehenderit. Et reprehenderit temporibus. Excepturi expedita blanditiis fugiat. Ratione debitis mollitia explicabo nam omnis.\n \rDicta officiis"
+    }
+```
+
+- **Response**
+
+  - 200: Successfully replied to this tweet
+
+  ```
+      {
+        "status": "success",
+        "message": "successfully replied to this tweet"
+      }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 422: comment cannot be empty
+
+  ```
+    {
+      "status": "success",
+      "message": "comment cannot be blank"
+    }
+  ```
+
+#### `PUT /tweets/:tweet_id/replies/:reply_id`
+
+- **Description**
+
+  Edit a reply to a specific tweet by tweet id and reply id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+  - reply_id: The id of the reply
+
+- **Request Body**
+
+  - UserId
+  - ReplyId
+  - description
+
+```
+  {
+    "UserId": 1,
+    "ReplyId": 1,
+    "description": "doloribus iure deleniti veritatis ut. Excepturi expedita blanditiis fugiat"
+  }
+```
+
+- **Response**
+
+  - 200: Successfully edited the reply
+
+  ```
+      {
+        "status": "success",
+        "message": "successfully updated your reply",
+        "updatedReplyId": 1
+      }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 400: This reply does not exist or belong to you
+
+  ```
+    {
+      "status": "error",
+      "message": "This reply does not exist or belong to you"
+    }
+  ```
+
+  - 422: comment cannot be empty
+
+  ```
+    {
+      "status": "success",
+      "message": "comment cannot be blank"
+    }
+  ```
+
+#### `DELETE /tweets/:tweet_id/replies/:reply_id`
+
+- **Description**
+
+  Delete a reply to a tweet by tweet id and reply id
+
+- **Parameters**
+
+  - tweet_id: The id of the tweet
+  - reply_id: The id of the reply
+
+- **Response**
+
+  - 200: Successfully deleted your reply
+
+  ```
+      {
+        "status": "success",
+        "message": "successfully deleted your reply"
+      }
+  ```
+
+  - 401: Access token is missing or invalid
+
+  - 400: This reply does not exist or belong to you
+
+  ```
+    {
+      "status": "error",
+      "message": "This reply does not exist or belong to you"
+    }
+  ```
 
 ## Install Simple Twitter API
 
@@ -812,14 +1211,18 @@ By following the instruction, you can run a Simple Twitter API server on your lo
 #### Clone the repository to your local machine
 
 ```
+
 $ git clone https://github.com/ivyhungtw/twitter-api-2020.git
+
 ```
 
 #### Install project dependencies
 
 ```
+
 $ cd twitter-api-2020
 $ npm install
+
 ```
 
 #### Add .env file
@@ -829,29 +1232,33 @@ To properly use the app and login feature, make sure you have filled out the fol
 You can register your own IMGUR client id on [IMGUR](https://api.imgur.com/oauth2/addclient).
 
 ```
+
 JWT_SECRET=<your_jwt_secret>
 IMGUR_CLIENT_ID=<your_imgur_client_id>
+
 ```
 
 #### Enter your MySQL Workbench password in config.json file
 
 ```
+
 {
-  "development": {
-    "username": "root",
-    "password": "<your_mysql_workbench_password>",
-    "database": "forum",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  },
-  "test": {
-    "username": "root",
-    "password": "<your_mysql_workbench_password>",
-    "database": "forum_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql",
-    "logging": false
-  }
+"development": {
+"username": "root",
+"password": "<your_mysql_workbench_password>",
+"database": "forum",
+"host": "127.0.0.1",
+"dialect": "mysql"
+},
+"test": {
+"username": "root",
+"password": "<your_mysql_workbench_password>",
+"database": "forum_test",
+"host": "127.0.0.1",
+"dialect": "mysql",
+"logging": false
+}
+
 ```
 
 #### Create database in MySQL
@@ -859,18 +1266,22 @@ IMGUR_CLIENT_ID=<your_imgur_client_id>
 To create database for development and test, run the following syntax in MySQL Workbench.
 
 ```
+
 drop database if exists ac_twitter_workspace;
 create database ac_twitter_workspace;
 drop database if exists ac_twitter_workspace_test;
 create database ac_twitter_workspace_test;
+
 ```
 
 #### Use Sequelize CLI to create tables in database
 
 ```
+
 $ npx sequelize db:migrate
 $ NODE_ENV=test
 $ npx sequelize db:migrate
+
 ```
 
 #### Import seed data
@@ -878,15 +1289,19 @@ $ npx sequelize db:migrate
 To have default users, tweets, and replies set up in ac_twitter_workspace database, run the following script.
 
 ```
+
 $ NODE_ENV=development
 $ npx sequelize db:seed:all
+
 ```
 
 #### Run test
 
 ```
+
 $ NODE_ENV=test
 $ npm run test
+
 ```
 
 #### Start the server
@@ -894,13 +1309,17 @@ $ npm run test
 If you have installed [nodemon](https://www.npmjs.com/package/nodemon), run the following script:
 
 ```
+
 $ npm run dev
+
 ```
 
 or just run:
 
 ```
+
 $ node app.js
+
 ```
 
 The server will start running on http://localhost:3000/
@@ -910,3 +1329,7 @@ The server will start running on http://localhost:3000/
 [Yi-Tzu(Ivy) Hung](https://github.com/ivyhungtw)
 
 [Sherry Liao](https://github.com/sherryliao21)
+
+```
+
+```
