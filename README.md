@@ -1,6 +1,18 @@
 # Simple Twitter API
 
-A RESTful API server for [Simple Twitter](https://github.com/ivyhungtw/simple-twitter) project built with Node.js, Express framework, and MySQL
+A RESTful API server for [Simple Twitter](https://github.com/ClementPan/simpleTwitterX) project built with Node.js, Express framework, and MySQL.
+
+🚀 Simple Twitter is now live [here](https://clementpan.github.io/simpleTwitterX), you can use the following account to login:
+
+```
+Admin
+Account: root
+Password: 12345678
+
+User
+Account: user1
+Password: 12345678
+```
 
 ## Base URL
 
