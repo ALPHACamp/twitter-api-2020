@@ -24,8 +24,8 @@
     "mysql2": "^1.6.4",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
-    "sequelize": "^4.42.0",
-    "sequelize-cli": "^5.5.0",
+    "sequelize": "^6.3.5",
+    "sequelize-cli": "^6.2.0",
     "sinon": "^7.2.3",
     "sinon-chai": "^3.3.0"
   },
