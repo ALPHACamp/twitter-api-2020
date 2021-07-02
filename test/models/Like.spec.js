@@ -1,6 +1,6 @@
-var chai = require('chai');
-var sinon = require('sinon');
-chai.use(require('sinon-chai'));
+const chai = require('chai')
+const sinon = require('sinon')
+chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
 const {
@@ -15,7 +15,6 @@ const db = require('../../models')
 const LikeModel = require('../../models/like')
 
 describe('# Like Model', () => {
-  
   before(done => {
     done()
   })
@@ -48,37 +47,35 @@ describe('# Like Model', () => {
   })
 
   context('action', () => {
-
     let data = null
 
     it('create', (done) => {
-      db.Like.create({}).then((like) => {   
+      db.Like.create({}).then((like) => {
         data = like
         done()
       })
     })
     it('read', (done) => {
-        db.Like.findByPk(data.id).then((like) => {  
-          expect(data.id).to.be.equal(like.id)
-          done()
-        })
+      db.Like.findByPk(data.id).then((like) => {
+        expect(data.id).to.be.equal(like.id)
+        done()
+      })
     })
     it('update', (done) => {
-      db.Like.update({}, { where: { id: data.id }}).then(() => {
-        db.Like.findByPk(data.id).then((like) => { 
-          expect(data.updatedAt).to.be.not.equal(like.updatedAt) 
+      db.Like.update({}, { where: { id: data.id } }).then(() => {
+        db.Like.findByPk(data.id).then((like) => {
+          expect(data.updatedAt).to.be.not.equal(like.updatedAt)
           done()
         })
       })
     })
     it('delete', (done) => {
-      db.Like.destroy({ where: { id: data.id }}).then(() => {
-        db.Like.findByPk(data.id).then((like) => { 
-          expect(like).to.be.equal(null) 
+      db.Like.destroy({ where: { id: data.id } }).then(() => {
+        db.Like.findByPk(data.id).then((like) => {
+          expect(like).to.be.equal(null)
           done()
         })
       })
     })
   })
-
 })

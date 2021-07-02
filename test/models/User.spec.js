@@ -1,5 +1,5 @@
-var chai = require('chai')
-var sinon = require('sinon')
+const chai = require('chai')
+const sinon = require('sinon')
 chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
@@ -25,7 +25,7 @@ describe('# User Model', () => {
 
   context('properties', () => {
     ;[
-      'name', 'email', 'password', 'account',  'cover', 'avatar'
+      'name', 'email', 'password', 'account', 'cover', 'avatar'
     ].forEach(checkPropertyExists(user))
   })
 

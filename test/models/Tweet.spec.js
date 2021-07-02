@@ -1,6 +1,6 @@
-var chai = require('chai');
-var sinon = require('sinon');
-chai.use(require('sinon-chai'));
+const chai = require('chai')
+const sinon = require('sinon')
+chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
 const {
@@ -15,10 +15,8 @@ const db = require('../../models')
 const TweetModel = require('../../models/tweet')
 
 describe('# Tweet Model', () => {
-  
   before(done => {
     done()
-
   })
 
   const Tweet = TweetModel(sequelize, dataTypes)
@@ -55,37 +53,35 @@ describe('# Tweet Model', () => {
   })
 
   context('action', () => {
-
     let data = null
 
     it('create', (done) => {
-      db.Tweet.create({UserId: 1, description: 'hi'}).then((tweet) => {   
+      db.Tweet.create({ UserId: 1, description: 'hi' }).then((tweet) => {
         data = tweet
         done()
       })
     })
     it('read', (done) => {
-      db.Tweet.findByPk(data.id).then((tweet) => {  
+      db.Tweet.findByPk(data.id).then((tweet) => {
         expect(data.id).to.be.equal(tweet.id)
-          done()
-        })
+        done()
+      })
     })
     it('update', (done) => {
-      db.Tweet.update({}, { where: { id: data.id }}).then(() => {
-        db.Tweet.findByPk(data.id).then((tweet) => { 
-          expect(data.updatedAt).to.be.not.equal(tweet.updatedAt) 
+      db.Tweet.update({}, { where: { id: data.id } }).then(() => {
+        db.Tweet.findByPk(data.id).then((tweet) => {
+          expect(data.updatedAt).to.be.not.equal(tweet.updatedAt)
           done()
         })
       })
     })
     it('delete', (done) => {
-      db.Tweet.destroy({ where: { id: data.id }}).then(() => {
-        db.Tweet.findByPk(data.id).then((tweet) => { 
-          expect(tweet).to.be.equal(null) 
+      db.Tweet.destroy({ where: { id: data.id } }).then(() => {
+        db.Tweet.findByPk(data.id).then((tweet) => {
+          expect(tweet).to.be.equal(null)
           done()
         })
       })
     })
   })
-
 })
