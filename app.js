@@ -1,3 +1,4 @@
+const db = require('./models')
 const express = require('express')
 const helpers = require('./_helpers')
 
@@ -16,6 +17,6 @@ function authenticated (req, res, next) {
 }
 
 app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
 
 module.exports = app
