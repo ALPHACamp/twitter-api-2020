@@ -56,7 +56,7 @@ const tweetService = {
 
   unlikeTweet: async (unlike) => {
     try {
-      await Like.destroy({ where: { id: unlike.id } })
+      await Like.destroy({ where: unlike })
       return { status: 200, message: 'A like has deleted' }
     } catch (error) {
       throw new Error(error)
