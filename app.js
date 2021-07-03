@@ -3,6 +3,7 @@ const session = require('express-session')
 const methodOverride = require('method-override')
 const helpers = require('./_helpers')
 
+const passport = require('./config/passport')
 const routes = require('./routes')
 
 const app = express()
@@ -12,6 +13,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: 'devSecretIsVeryMystery', resave: false, saveUninitialized: false }))
 app.use(methodOverride('_method'))
+app.use(passport.initialize())
 
 app.use(routes)
 
