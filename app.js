@@ -1,15 +1,20 @@
 const express = require('express')
-const helpers = require('./_helpers');
+const session = require('express-session')
+const methodOverride = require('method-override')
+const helpers = require('./_helpers')
+
+const routes = require('./routes')
 
 const app = express()
 const port = 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+app.use(session({ secret: 'devSecretIsVeryMystery', resave: false, saveUninitialized: false }))
+app.use(methodOverride('_method'))
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.use(routes)
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
