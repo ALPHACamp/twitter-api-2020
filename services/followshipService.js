@@ -1,3 +1,4 @@
+
 const { Followship } = require('../models')
 
 const followshipService = {
@@ -7,7 +8,7 @@ const followshipService = {
       if (!created) {
         return ({ message: 'there is a same data found before create' })
       }
-      return { status: 201, message: 'A followship has created' }
+      return { status: 200, message: 'A followship has created' }
     } catch (error) {
       throw new Error(error)
     }
