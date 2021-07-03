@@ -3,7 +3,7 @@ const { Tweet, Reply, Like } = require('../models')
 const tweetService = {
   getTweets: async () => {
     try {
-      return await Tweet.findAll({ raw: true, nest: true })
+      return await Tweet.findAll()
     } catch (error) {
       throw new Error(error)
     }
@@ -12,7 +12,15 @@ const tweetService = {
   postTweet: async (tweet) => {
     try {
       await Tweet.create(tweet)
-      return { status: 201, message: 'A tweet has created' }
+      return { status: 200, message: 'A tweet has created' }
+    } catch (error) {
+      throw new Error(error)
+    }
+  },
+
+  getTweet: async (tweet_id) => {
+    try {
+      return await Tweet.findByPk(tweet_id)
     } catch (error) {
       throw new Error(error)
     }
@@ -31,7 +39,7 @@ const tweetService = {
   postReply: async (reply) => {
     try {
       await Reply.create(reply)
-      return { status: 201, message: 'A reply has created' }
+      return { status: 200, message: 'A reply has created' }
     } catch (error) {
       throw new Error(error)
     }
@@ -40,7 +48,7 @@ const tweetService = {
   likeTweet: async (like) => {
     try {
       await Like.create(like)
-      return { status: 201, message: 'A like has created' }
+      return { status: 200, message: 'A like has created' }
     } catch (error) {
       throw new Error(error)
     }
