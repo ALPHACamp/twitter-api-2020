@@ -10,6 +10,15 @@ const tweetController = {
     }
   },
 
+  postTweet: async (req, res) => {
+    try {
+      const data = await tweetService.postTweet(req.body)
+      return res.status(201).json(data)
+    } catch (error) {
+      return res.json(error)
+    }
+  },
+
   getTweetAndReplies: async (req, res) => {
     try {
       const data = await tweetService.getTweetAndReplies(req.params.tweet_id)

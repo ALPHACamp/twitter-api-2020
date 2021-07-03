@@ -9,6 +9,15 @@ const tweetService = {
     }
   },
 
+  postTweet: async (tweet) => {
+    try {
+      await Tweet.create(tweet)
+      return { status: 201, message: 'A tweet has created' }
+    } catch (error) {
+      throw new Error(error)
+    }
+  },
+
   getTweetAndReplies: async (tweet_id) => {
     try {
       return await Tweet.findByPk(tweet_id, {
