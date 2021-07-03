@@ -53,7 +53,11 @@ const tweetController = {
 
   likeTweet: async (req, res) => {
     try {
-      const data = await tweetService.likeTweet(req.body)
+      const likeData = {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweet_id
+      }
+      const data = await tweetService.likeTweet(likeData)
       return res.status(200).json(data)
     } catch (error) {
       return res.json(error)
@@ -62,7 +66,11 @@ const tweetController = {
 
   unlikeTweet: async (req, res) => {
     try {
-      const data = await tweetService.unlikeTweet(req.body)
+      const likeData = {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweet_id
+      }
+      const data = await tweetService.unlikeTweet(likeData)
       return res.status(200).json(data)
     } catch (error) {
       return res.json(error)
