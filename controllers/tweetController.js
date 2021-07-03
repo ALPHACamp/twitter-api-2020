@@ -44,7 +44,12 @@ const tweetController = {
 
   postReply: async (req, res) => {
     try {
-      const data = await tweetService.postReply(req.body)
+      const replyData = {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweet_id,
+        ...req.body
+      }
+      const data = await tweetService.postReply(replyData)
       return res.status(200).json(data)
     } catch (error) {
       return res.json(error)
