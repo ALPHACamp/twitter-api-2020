@@ -59,6 +59,14 @@ const userController = {
       return next(error)
     }
   },
+  getUser: async (req, res, next) => {
+    try {
+      const user = await userService.getUser(req.params.user_id)
+      return res.json({ user })
+    } catch (error) {
+      return next(error)
+    }
+  },
   putUser: async (req, res, next) => {
     try {
       const { checkPassword, ...formBody } = req.body
@@ -80,17 +88,33 @@ const userController = {
       })
       return res.json({ user })
     } catch (error) {
-      next(error)
+      return next(error)
     }
   },
-  getTweetsByUser: async (req, res, next) => {
+  putUserProfile: async (req, res, next) => {
+    try {
+      const user = await userService.putUser(req.params.user_id, { ...req.body })
+      return res.json({ user })
+    } catch (error) {
+      return next(error)
+    }
+  },
+  getTweets: async (req, res, next) => {
     try {
       const tweets = await tweetService.getTweets({
         UserId: req.params.user_id
       })
       return res.json({ tweets })
     } catch (error) {
-      next(error)
+      return next(error)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const tweets = await tweetService.getAllRepliesFromUser(req.params.user_id)
+      return res.json({ tweets })
+    } catch (error) {
+      return next(error)
     }
   }
 }
