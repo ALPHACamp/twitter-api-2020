@@ -1,6 +1,6 @@
 const passport = require('passport')
-const db = require('../models')
-const User = db.User
+const { User } = require('../models')
+
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -12,13 +12,15 @@ let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 jwtOptions.secretOrKey = process.env.JWT_SECRET
 
-let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
-  User.findByPk(jwt_payload.id)
-    .then(user => {
-      if (!user) return next(null, false)
-      return next(null, user)
-    })
-})
-passport.use(strategy)
+passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
+  try {
+    const user = await User.findByPk(jwt_payload.id)
+    if (!user) return done(null, false)
+    return done(null, user)
+  }
+  catch (err) {
+    return done(err, user)
+  }
+}))
 
 module.exports = passport
