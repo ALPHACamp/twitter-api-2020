@@ -35,6 +35,7 @@ const userController = {
       return next(error)
     }
   },
+
   signUp: async (req, res, next) => {
     try {
       const { checkPassword, ...formBody } = req.body
@@ -59,6 +60,7 @@ const userController = {
       return next(error)
     }
   },
+
   getUser: async (req, res, next) => {
     try {
       const user = await userService.getUser(req.params.user_id)
@@ -67,6 +69,7 @@ const userController = {
       return next(error)
     }
   },
+
   putUser: async (req, res, next) => {
     try {
       const { checkPassword, ...formBody } = req.body
@@ -91,6 +94,7 @@ const userController = {
       return next(error)
     }
   },
+
   putUserProfile: async (req, res, next) => {
     try {
       const user = await userService.putUser(req.params.user_id, { ...req.body })
@@ -99,6 +103,7 @@ const userController = {
       return next(error)
     }
   },
+
   getTweets: async (req, res, next) => {
     try {
       const tweets = await tweetService.getTweets({
@@ -109,10 +114,38 @@ const userController = {
       return next(error)
     }
   },
+
   getReplies: async (req, res, next) => {
     try {
       const tweets = await tweetService.getAllRepliesFromUser(req.params.user_id)
       return res.json({ tweets })
+    } catch (error) {
+      return next(error)
+    }
+  },
+
+  getFollowings: async (req, res, next) => {
+    try {
+      const followings = await userService.getFollowings(req.params.user_id)
+      return res.json(followings)
+    } catch (error) {
+      return next(error)
+    }
+  },
+
+  getFollowers: async (req, res, next) => {
+    try {
+      const followers = await userService.getFollowers(req.params.user_id)
+      return res.json(followers)
+    } catch (error) {
+      return next(error)
+    }
+  },
+
+  getTopUsers: async (req, res, next) => {
+    try {
+      const topUsers = await userService.getTopUsers(req.user.id)
+      return res.json(topUsers)
     } catch (error) {
       return next(error)
     }
