@@ -29,7 +29,7 @@ describe('# user requests', () => {
             db.User.findByPk(1).then(user => {
               user.account.should.equal('User1');
               user.email.should.equal('User1@example.com');
-              return done();
+              done();
             })
           })
       });
@@ -68,7 +68,6 @@ describe('# user requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-
             res.body.name.should.equal('root');
 
             return done();
