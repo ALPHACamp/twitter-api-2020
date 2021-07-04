@@ -1,4 +1,5 @@
 const { User, Tweet, Like, sequelize } = require('../models')
+const { Op } = require('sequelize')
 
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -26,9 +27,12 @@ const adminService = {
     return await User.findAll({
       raw: true,
       nest: true,
+      where: { id: { [Op.not]: 1 } },
       attributes: [
         'id',
         'name',
+        'avatar',
+        'cover',
         [sequelize.literal('count(distinct Tweets.id)'), 'TweetsCount'],
         [sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
         [sequelize.literal('count(distinct Followers.id)'), 'FollowersCount'],

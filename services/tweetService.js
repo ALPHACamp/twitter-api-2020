@@ -1,8 +1,11 @@
-const { Tweet, Reply, Like } = require('../models')
+const { Tweet, Reply, Like, User } = require('../models')
 
 const tweetService = {
   getTweets: async () => {
-    return await Tweet.findAll()
+    return await Tweet.findAll({
+      include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+      order: [['createdAt', 'DESC']]
+    })
   },
 
   postTweet: async (tweet) => {
