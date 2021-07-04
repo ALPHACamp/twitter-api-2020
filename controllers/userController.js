@@ -149,6 +149,15 @@ const userController = {
     } catch (error) {
       return next(error)
     }
+  },
+
+  getLikes: async (req, res, next) => {
+    try {
+      const likes = await userService.getLikes(req.params.user_id)
+      return res.json(likes)
+    } catch (error) {
+      return next(error)
+    }
   }
 }
 

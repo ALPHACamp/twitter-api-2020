@@ -1,4 +1,4 @@
-const { User, sequelize } = require('../models')
+const { User, Like, sequelize } = require('../models')
 
 const userService = {
   signIn: async (email) => {
@@ -85,6 +85,14 @@ const userService = {
       raw: true,
       nest: true
     })
+  },
+
+  getLikes: async (id) => {
+    const likes = await User.findByPk(id, {
+      attributes: [],
+      include: Like
+    })
+    return likes.toJSON().Likes
   }
 }
 
