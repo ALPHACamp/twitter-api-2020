@@ -1,15 +1,52 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const express = require('express')
-const helpers = require('./_helpers');
+const helpers = require('./_helpers')
+const passport = require('./config/passport.js')
+const bodyParser = require('body-parser')
+const session = require('express-session')
+const methodOverride = require('method-override')
+const cors = require('cors')
+const exphbs = require('express-handlebars')
+const flash = require('connect-flash')
 
+const router = require('./routes')
+const hbsHelpers = require('./config/handlebars-helpers.js')
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+app.engine('hbs', exphbs({ extname: 'hbs', defaultLayout: 'main', helpers: hbsHelpers }))
+app.set('view engine', 'hbs')
+app.use(cors())
+app.use(express.static('public'))
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+app.use(methodOverride('_method'))
+app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }))
+app.use(flash())
+app.use(passport.initialize())
+app.use(passport.session())
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.use((req, res, next) => {
+  res.locals.user = req.user
+  res.locals.isAuthenticated = req.isAuthenticated()
+  res.locals.domain = process.env.DOMAIN
+  res.locals.success_msg = req.flash('success_msg')
+  res.locals.error_msg = req.flash('error_msg')
+
+  next()
+})
+app.use(router)
+app.use(function (err, req, res, next) {
+  console.error(err.stack)
+  return res.status(500).json({ status: 'error', message: `${err.stack}` })
+})
+
+const http = require('http').createServer(app)
+const io = require('socket.io')(http)
+require('./sockets')(io)
+
+http.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app

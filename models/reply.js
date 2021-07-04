@@ -1,8 +1,16 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Reply = sequelize.define('Reply', {
-  }, {});
-  Reply.associate = function(models) {
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER,
+    comment: DataTypes.TEXT
+  }, {
+    sequelize,
+    modelName: 'Reply',
+  });
+  Reply.associate = function (models) {
+    Reply.belongsTo(models.User)
+    Reply.belongsTo(models.Tweet)
   };
   return Reply;
 };

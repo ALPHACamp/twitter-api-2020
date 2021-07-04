@@ -1,0 +1,72 @@
+{{!-- 中間欄: 有歷史訊息的使用者 --}}
+<div class="col-4  col-md-3 no-gutters center-column private-middle-column">
+  <div class="title-wrapper d-flex align-items-center justify-content-between px-3">
+    <div class="title-wrapper d-flex justify-content-center flex-column">
+      <h1 class="title">訊息</h1>
+    </div>
+    <span class="add-message-wrapper">
+      <i class="far fa-envelope"></i>
+      <span class="plus-icon">+</span>
+    </span>
+  </div>
+  <div class="px-3 user-panel">
+    {{!-- 1位有歷史訊息的使用者 --}}
+    {{!-- <a href="{{domain}}chat/1">
+      <div class="py-2 d-flex align-items-center connected-user">
+        <img class="user-avatar flex-shrink-0" src="https://loremflickr.com/140/140/people/?random=7" alt="">
+        <div class="user-wrapper flex-shrink-1">
+          <div>
+            <strong>User1</strong>
+            <span class="text-gray">@User1</span>
+            <span class="text-gray">56秒</span>
+          </div>
+          <div class="message-view">jfveoorejtimoivjrt;sjbiotnrjvioj;fmklcamkemviotubiuyintiomopio</div>
+        </div>
+      </div>
+    </a> --}}
+  </div>
+</div>
+
+{{!-- 右欄: message board --}}
+<div class="col-5 col-md-7 right-column no-gutters">
+  <div class="title-wrapper d-flex flex-column justify-content-center px-3">
+    {{#if home}}
+    {{else}}
+    <div class="private-room-title-userid" style="display: none;"></div>
+    <h1 class="title private-room-title-username"></h1>
+    <div class="text-gray private-room-title-account"></div>
+    {{/if}}
+  </div>
+
+  <div class="message-board">
+    {{#if home}}
+    {{else}}
+    {{!-- 他人發的訊息 --}}
+    {{!-- <div class="message-wrapper d-flex align-items-end px-3 py-2">
+      <img class="message-avatar" src="https://loremflickr.com/140/140/people/?random=7" alt="">
+      <div class="message flex-grow-1">
+        <div class="message-text bg-gray">
+          fvjiowrtmjretjvkljklfdsvnrejdlaojioejunivojfkldklvfmjioeruytuidfjkddjskmvweiou
+        </div>
+        <div class="message-time text-gray">下午 09:35</div>
+      </div>
+    </div> --}}
+    {{!-- 自己發的訊息 --}}
+    {{!-- <div class="my-message-wrapper d-flex justify-content-end px-3 py-1">
+      <div class="message">
+        <div class="d-flex justify-content-end">
+          <div class="message-text my-message-text">fvjiowrtmjretjvkljklj</div>
+        </div>
+        <div class="message-time text-right text-gray">下午 09:35</div>
+      </div>
+    </div> --}}
+  </div>
+  {{/if}}
+
+  {{!-- 訊息輸入表單 --}}
+  <form action="" class="message-form hidden-component">
+    <input type="text" name="message" class="message-input flex-grow-1 border-0 rounded-pill bg-gray form-control"
+      placeholder="輸入訊息...">
+    <button class="btn send-message-btn"><i class="fas fa-location-arrow"></i></button>
+  </form>
+</div>

@@ -1,0 +1,416 @@
+.no-gutters{
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.container-fluid {
+  width: calc(100% - 25px) !important;
+  margin-right: 0px !important;
+}
+
+.bg-gray {
+  background: #e6ecf0;
+}
+
+.text-gray {
+ color: #666;
+}
+
+.text-larger {
+  font-size: larger;
+}
+
+
+
+/* navbar style */
+/* navbar: from vue */
+.modal-dialog {
+  max-width: 600px;
+}
+.modal-content {
+  border-radius: 14px;
+  border: 0;
+}
+.modal-header {
+  height: 54px;
+}
+.close {
+  color: #ff6600;
+  opacity: 1;
+  margin: -1rem -1rem -1rem -1rem;
+  font-size: 30px;
+}
+.modal-footer {
+  border: 0;
+}
+nav {
+  height: 100vh;
+}
+.nav-btn {
+  width: 200px;
+  color: #1c1c1c;
+  font-weight: 700;
+  margin-bottom: 34px;
+}
+.active {
+  color: #ff6600;
+}
+img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 16px;
+}
+hr {
+  margin: 0;
+}
+.nav-btn:hover {
+  text-decoration: none;
+}
+.fonSize18 {
+  font-size: 18px;
+}
+.btn-tweet {
+  color: white;
+  background: #ff6600;
+  border-color: transparent;
+  height: 50px;
+  border-radius: 25px;
+  width: 200px;
+}
+.btn-tweet-submit {
+  color: white;
+  background: #ff6600;
+  border-color: transparent;
+  height: 40px;
+  border-radius: 20px;
+  width: 64px;
+}
+.btn-tweet:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 0.2rem transparent;
+}
+.btn-tweet:hover {
+  opacity: 0.9;
+}
+.sign-out-btn {
+  width: 200px;
+  margin: auto 0 17px 0;
+  padding: 0;
+  font-weight: 700;
+}
+.sign-out-btn:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 0.2rem transparent;
+  background: transparent;
+}
+.pointer {
+  cursor: pointer;
+}
+
+/* modal-setting (from vue)*/
+textarea {
+  margin: 0;
+  padding: 0;
+  margin-top: 12px;
+  resize: none;
+  border: none;
+}
+textarea:focus {
+  outline: none;
+}
+.btn-cancel {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+.btn-cancel::before,
+.btn-cancel::after {
+  content: "";
+  position: absolute;
+  height: 24px;
+  width: 4px;
+  border-radius: 2px;
+  background: #ff6600;
+  z-index: 99;
+  left: 42%;
+  /* transform: translate(-50%, -50%); */
+}
+.btn-cancel::before {
+  transform: rotate(45deg);
+}
+.btn-cancel::after {
+  transform: rotate(-45deg);
+}
+.router-link-active {
+  color: #ff6600;
+}
+img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 16px;
+}
+
+/* navbar - new setting */
+
+#chat-room .nav-btn {
+  max-width: calc(100% - 2px);
+  margin-bottom: 20px;
+}
+
+#chat-room .btn-tweet {
+  max-width: calc(100% - 2px);
+}
+
+.bell-icon-wrapper {
+  margin-right: calc(23.99px - 18.9px);
+  position: relative;
+}
+
+.message-icon-wrapper {
+  margin-right: calc(23.99px - 21.6px);
+  position:relative;
+}
+
+.new-status-light::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    background: #ff4800;
+    border-radius: 50%;
+    position: absolute;
+    top: 2.5px;
+    right: -2.5px;
+}
+
+.bell-icon-wrapper .new-status-light::before {
+  right: calc(18.9px - 21.6px + 1.5px + 2.5px);
+  top: 4px;
+}
+
+/* public - center */
+.center-column {
+  border-left: 1px solid #e6ecf0;
+  border-right: 1px solid #e6ecf0;
+  height: 100vh;
+}
+
+.title-wrapper {
+  border-bottom: 1px solid #e6ecf0;
+  height: 55px;  
+}
+
+.title {
+  color: #1c1c1c;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.connected-user {
+  border-bottom: 1px solid #e6ecf0;
+}
+
+/* message-board */
+
+.message-board {
+  height: calc(100vh - 55px - 61px);
+  overflow-y: auto;
+}
+
+.message-board .badge-pill {
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+
+.message-text {
+  border-radius: 1.5em 1.5em 1.5em 0;
+  padding: 0.8em;
+  max-width: 60%;
+  word-break: break-all;
+  width: fit-content;
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  bottom: 1.5rem;
+}
+
+.my-message-wrapper .message {
+  width: calc( 100% - 40px - 16px);
+}
+
+.my-message-text {
+  border-radius: 1.5em 1.5em 0 1.5em;
+  background:#ff6600;
+  color: white;
+  position: relative;
+  right:0;
+  max-width: 60%;
+}
+
+/* message-board: input */
+.message-form {
+ padding: 10px 25px;
+ border-top: 1px solid #e6ecf0;
+ position: absolute;
+ bottom: 0;
+ width: 100%;
+ display: flex;
+}
+
+.send-message-btn{
+  flex-basis: auto;
+}
+
+.fa-location-arrow {
+  transform: rotate(45deg);
+  font-size: 24px;
+  color: #ff6600;
+}
+
+/* private-chat: center column */
+.add-message-wrapper {
+  position: relative;
+}
+
+.add-message-wrapper .plus-icon {
+  background: white;
+  border-radius: 0.1em;
+  font-size: 0.5rem;
+  position: absolute;
+  top: 1px;
+  right: -5px;
+  line-height: 1.5em;
+  padding: 0 1px;
+
+}
+
+.user-wrapper {
+  flex-basis: auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.message-view {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hidden-component {
+  visibility:hidden
+}
+
+.unread-message {
+  color: blue;
+  font-weight: bold;
+}
+
+/* sign in (from vue) */
+.sign-in-wrapper {
+  width: 540px;
+  margin: 0 auto;
+}
+.ac-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.logo-image {
+  margin: 65px 0 35px 0;
+}
+
+.title {
+  font-family: Noto Sans TC;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 23px;
+  line-height: 33px;
+  color: #1c1c1c;
+}
+.input-container {
+  position: relative;
+}
+
+.sign-in-wrapper input {
+  text-align: start;
+  vertical-align: bottom;
+  position: relative;
+  height: 50px;
+  border-style: none;
+  background: #f5f8fa;
+  border-radius: 4px;
+  border-bottom: 2px solid #657786;
+  padding-top: 30px;
+}
+.sign-in-wrapper .input-title {
+  position: absolute;
+  font-family: Noto Sans TC;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 15px;
+  color: #657786;
+  top: 28px;
+  left: 12px;
+  z-index: 2;
+  /* bottom: -30px; */
+}
+
+/* 按鈕寬度class不行改，但id可以 */
+#btn-submit {
+  width: 100%;
+  height: 50px;
+}
+.btn-submit {
+  background: #ff6600;
+  border-radius: 50px;
+  width: 122px;
+  margin-top: 30px;
+  border: 1px solid transparent;
+  outline: none;
+  color: #ffffff;
+}
+.pages-link {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 40px;
+}
+
+.link {
+  text-decoration: underline;
+}
+
+.sign-in-wrapper span {
+  color: #0099ff;
+}
+
+a {
+  color: inherit;
+}
+
+
+/* sign in page- new setting */
+#sign-in-page {
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+}
+
+#canvas {
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+}
+
+.hide {
+  display: none;
+}

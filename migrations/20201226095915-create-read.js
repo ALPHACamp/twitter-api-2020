@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Tweets', {
+    return queryInterface.createTable('Reads', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -11,21 +11,16 @@ module.exports = {
       UserId: {
         type: Sequelize.INTEGER
       },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: false
+      ChannelId: {
+        type: Sequelize.INTEGER
       },
-      createdAt: {
+      date: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Tweets');
+    return queryInterface.dropTable('Reads');
   }
 };
