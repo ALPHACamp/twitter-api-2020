@@ -1,7 +1,7 @@
 'use strict'
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
-const userCounts = 5 // default user
+const userCount = 5 // default user
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -26,7 +26,7 @@ module.exports = {
       ),
       queryInterface.bulkInsert(
         'Users',
-        Array.from({ length: userCounts }, (_, i) => ({
+        Array.from({ length: userCount }, (_, i) => ({
           name: faker.name.findName(),
           account: `user${i}`,
           email: `user${i}@example.com`,
