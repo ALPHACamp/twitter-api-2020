@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Socket.IO chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 13px Helvetica, Arial;
+    }
+
+    form {
+      background: #000;
+      padding: 3px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    form input {
+      border: 0;
+      padding: 10px;
+      width: 90%;
+      margin-right: 0.5%;
+    }
+
+    form button {
+      width: 9%;
+      background: rgb(130, 224, 255);
+      border: none;
+      padding: 10px;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+    }
+
+    #messages li:nth-child(odd) {
+      background: #eee;
+    }
+  </style>
+</head>
+
+<body>
+  <ul id="messages"></ul>
+  <form action="">
+    <input id="m" autocomplete="off" /><button>Send</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script>
+    $(function () {
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNTk2MjY3MzczfQ.uIxzoMjHAFeSjgnONf211uHK3YWJGYNkg7kZ4G0SgGo'
+
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNTk2MzUxMDI5fQ.1LoF3OLV3Wx--p4uad26tVk_PVTzJNCmHCMEn8QoZJo'
+
+      // 試驗用
+      // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNTk2MzAwNTYxfQ.bo6dbNZA035leBQBKjNaV4DGuVYqNBb_u_JzPBJ0p9c'
+      var socket = io.connect('http://localhost:3000', {
+        query: { token }
+      });
+
+      // var socket = io.connect('http://localhost:3000');
+
+      socket.emit('login', {});
+
+
+      $('form').submit(function (e) {
+        e.preventDefault(); // prevents page reloading
+
+        socket.emit('old-message', { startId: 45, count: 5 });
+
+        socket.emit('send', { content: $('#m').val() });
+        $('#m').val('');
+        return false;
+      });
+
+      socket.on('message', function (obj) {
+        console.log(obj)
+        $('#messages').append($('<li>').text(obj.content));
+      });
+
+      socket.on('online-users', function (msg) {
+        console.log('online-users')
+        console.log(msg)
+      });
+
+      socket.on('disconnect', function () {
+        console.log('disconnect')
+      })
+
+      // 事件叫 connect，無法啟動 chat.js 裡的 socket.on 'connect' 事件，所以事件改名成 new-user
+      socket.on('new-user', function (obj) {
+        console.log('new-user')
+      })
+
+      socket.on('old-message', function (obj) {
+        console.log('old-message')
+        console.log(obj)
+      })
+    });
+  </script>
+</body>
+
+</html>
