@@ -8,14 +8,16 @@ const authenticated = passport.authenticate('jwt', { session: false })
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
     if (req.user.role === 'admin') { return next() }
-    return res.json({ status: 'error', message: 'permission denied' })
+    res.json({ status: 'error', message: 'permission denied' })
+    return res.redirect('back')
   } else {
+    res.redirect('back')
     return res.json({ status: 'error', message: 'permission denied' })
   }
 }
 
 
-router.get('/', authenticated, authenticatedAdmin, (req, res) => res.json({ key: 1 }))
+router.get('/', authenticated, authenticatedAdmin, (req, res) => res.json({ key: 'test' }))
 router.get('/signin', userController.signInPage)
 
 router.get('/signup', userController.signUpPage)
