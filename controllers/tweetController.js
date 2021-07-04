@@ -2,47 +2,47 @@ const tweetService = require('../services/tweetService')
 const helpers = require('../_helpers')
 
 const tweetController = {
-  getTweets: async (req, res) => {
+  getTweets: async (req, res, next) => {
     try {
       const data = await tweetService.getTweets()
       return res.status(200).json(data)
     } catch (error) {
-      return res.json(error)
+      next(error)
     }
   },
 
-  postTweet: async (req, res) => {
+  postTweet: async (req, res, next) => {
     try {
       const postData = {
         UserId: helpers.getUser(req).id,
-        ...req.body,
+        ...req.body
       }
       const data = await tweetService.postTweet(postData)
       return res.status(200).json(data)
     } catch (error) {
-      return res.json(error)
+      next(error)
     }
   },
 
-  getTweet: async (req, res) => {
+  getTweet: async (req, res, next) => {
     try {
       const data = await tweetService.getTweet(req.params.tweet_id)
       return res.status(200).json(data)
     } catch (error) {
-      return res.json(error)
+      next(error)
     }
   },
 
-  getTweetAndReplies: async (req, res) => {
+  getTweetAndReplies: async (req, res, next) => {
     try {
       const data = await tweetService.getTweetAndReplies(req.params.tweet_id)
       return res.status(200).json(data.Replies)
     } catch (error) {
-      return res.json(error)
+      next(error)
     }
   },
 
-  postReply: async (req, res) => {
+  postReply: async (req, res, next) => {
     try {
       const replyData = {
         UserId: helpers.getUser(req).id,
@@ -52,11 +52,11 @@ const tweetController = {
       const data = await tweetService.postReply(replyData)
       return res.status(200).json(data)
     } catch (error) {
-      return res.json(error)
+      next(error)
     }
   },
 
-  likeTweet: async (req, res) => {
+  likeTweet: async (req, res, next) => {
     try {
       const likeData = {
         UserId: helpers.getUser(req).id,
@@ -65,11 +65,11 @@ const tweetController = {
       const data = await tweetService.likeTweet(likeData)
       return res.status(200).json(data)
     } catch (error) {
-      return res.json(error)
+      next(error)
     }
   },
 
-  unlikeTweet: async (req, res) => {
+  unlikeTweet: async (req, res, next) => {
     try {
       const likeData = {
         UserId: helpers.getUser(req).id,
@@ -78,11 +78,9 @@ const tweetController = {
       const data = await tweetService.unlikeTweet(likeData)
       return res.status(200).json(data)
     } catch (error) {
-      return res.json(error)
+      next(error)
     }
-  },
-
-
+  }
 }
 
 module.exports = tweetController

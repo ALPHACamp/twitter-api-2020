@@ -1,7 +1,6 @@
 const express = require('express')
 const session = require('express-session')
 const methodOverride = require('method-override')
-const helpers = require('./_helpers')
 
 const passport = require('./config/passport')
 const routes = require('./routes')

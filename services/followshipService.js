@@ -1,27 +1,18 @@
-
 const { Followship } = require('../models')
 
 const followshipService = {
   addFollow: async (a, b) => {
-    try {
-      const [data, created] = await Followship.findOrCreate({ where: { followerId: a, followingId: b } })
-      if (!created) {
-        return ({ message: 'there is a same data found before create' })
-      }
-      return { status: 200, message: 'A followship has created' }
-    } catch (error) {
-      throw new Error(error)
+    const [, created] = await Followship.findOrCreate({ where: { followerId: a, followingId: b } })
+    if (!created) {
+      throw new Error('there is a same data found before create')
     }
+    return { message: 'A followship has created' }
   },
 
   unFollow: async (a, b) => {
-    try {
-      await Followship.destroy({ where: { followerId: a, followingId: b } })
-      return { status: 200, message: 'A followship has destroy' }
-    } catch (error) {
-      throw new Error(error)
-    }
-  },
+    await Followship.destroy({ where: { followerId: a, followingId: b } })
+    return { message: 'A followship has destroy' }
+  }
 }
 
 module.exports = followshipService
