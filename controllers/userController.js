@@ -23,21 +23,22 @@ const userController = {
         return res.redirect('back')
       } else {
         // confirm unique user
-        User.findOne({ where: { email: req.body.email } }).then(user => {
-          if (user) {
-            req.flash('error_messages', '信箱重複！')
-            return res.redirect('/signup')
-          } else {
-            User.create({
-              account: account,
-              email: email,
-              password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-            }).then(user => {
-              console.log('成功註冊帳號！')
-              return res.redirect('/signin')
-            })
-          }
-        })
+        User.findOne({ where: { email: req.body.email } })
+          .then(user => {
+            if (user) {
+              req.flash('error_messages', '信箱重複！')
+              return res.redirect('/signup')
+            } else {
+              User.create({
+                account: account,
+                email: email,
+                password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+              }).then(user => {
+                console.log('成功註冊帳號！')
+                return res.redirect('/signin')
+              })
+            }
+          })
       }
     } else {
       console.log('全部欄位都要輸入')

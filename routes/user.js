@@ -16,11 +16,23 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
+const authenticatedUser = (req, res, next) => {
+  if (req.user) {
+    if (req.user.role === 'user') { return next() }
+    res.json({ status: 'error', message: 'permission denied' })
+    return res.redirect('back')
+  } else {
+    res.redirect('back')
+    return res.json({ status: 'error', message: 'permission denied' })
+  }
+}
+
 
 router.get('/', authenticated, authenticatedAdmin, (req, res) => res.json({ key: 'test' }))
+
 router.get('/signin', userController.signInPage)
 
-router.get('/signup', userController.signUpPage)
+router.get('/signup', authenticated, userController.signUpPage)
 
 router.post('/signup', userController.signUp)
 router.post('/signin', userController.signIn)
