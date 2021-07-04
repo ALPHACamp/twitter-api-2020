@@ -33,6 +33,31 @@ const userController = {
     } catch (error) {
       return next(error)
     }
+  },
+  signUp: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      if (!account || !name || !email || !password) {
+        throw new Error('All field are required.')
+      }
+      if (password !== checkPassword) {
+        throw new Error('password and checkPassword must be the same.')
+      }
+
+      const hash = bcrypt.hashSync(password, 10)
+      const user = await userService.signUp({
+        name,
+        account,
+        email,
+        password: hash
+      })
+
+      return res.json({
+        data: user
+      })
+    } catch (error) {
+      return next(error)
+    }
   }
 }
 
