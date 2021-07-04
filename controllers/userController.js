@@ -1,6 +1,11 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
 
 const userController = {
   signInPage: (req, res) => {
@@ -42,33 +47,46 @@ const userController = {
   },
   signIn: (req, res) => {
     const { account, password } = req.body
+    console.log(req.body)
     // 檢查必要資料
     if (!account || !password) {
       console.log('請入資訊')
       return res.redirect('back')
     }
-    // 檢查 user 是否存在與密碼是否正確
-    // let username = req.body.email
-    // let password = req.body.password
-
-    // User.findOne({ where: { email: username } }).then(user => {
-    //   if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
-    //   if (!bcrypt.compareSync(password, user.password)) {
-    //     return res.status(401).json({ status: 'error', message: 'passwords did not match' })
-    //   }
-    //   // 簽發 token
-    //   var payload = { id: user.id }
-    //   var token = jwt.sign(payload, process.env.JWT_SECRET)
-    //   return res.json({
-    //     status: 'success',
-    //     message: 'ok',
-    //     token: token,
-    //     user: {
-    //       id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin
-    //     }
-    //   })
-    // })
+    User.findOne({
+      where: {
+        account: account,
+      }
+    })
+      .then(user => {
+        console.log('step1')
+        if (!user) {
+          console.log('沒有此帳戶')
+          return res.redirect('back')
+        }
+        console.log('step2')
+        if (!bcrypt.compareSync(password, user.password)) {
+          console.log('密碼錯誤')
+          return res.redirect('back')
+        }
+        // 簽發 token
+        const payload = { id: user.id }
+        const token = jwt.sign(payload, process.env.JWT_SECRET)
+        console.log('step3')
+        res.json({
+          status: 'success',
+          message: 'ok',
+          token: token,
+          user: {
+            id: user.id, account: user.account, email: user.email
+          }
+        })
+      })
   },
+  logout: (req, res) => {
+    console.log('登出成功！')
+    req.logout()
+    res.redirect('/signin')
+  }
 }
-
 module.exports = userController
