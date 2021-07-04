@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
 const userService = require('../services/userService')
+const tweetService = require('../services/tweetService')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -36,19 +37,18 @@ const userController = {
   },
   signUp: async (req, res, next) => {
     try {
-      const { account, name, email, password, checkPassword } = req.body
+      const { checkPassword, ...formBody } = req.body
+      const { account, name, email, password } = formBody
       if (!account || !name || !email || !password) {
         throw new Error('All field are required.')
       }
       if (password !== checkPassword) {
-        throw new Error('password and checkPassword must be the same.')
+        throw new Error('Fields password and checkPassword must be the same.')
       }
 
       const hash = bcrypt.hashSync(password, 10)
       const user = await userService.signUp({
-        name,
-        account,
-        email,
+        ...formBody,
         password: hash
       })
 
@@ -57,6 +57,40 @@ const userController = {
       })
     } catch (error) {
       return next(error)
+    }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const { checkPassword, ...formBody } = req.body
+      const { account, name, email, password } = formBody
+      if (!account || !name || !email || !password) {
+        throw new Error('All field are required.')
+      }
+      if (password !== checkPassword) {
+        throw new Error('Fields password and checkPassword must be the same.')
+      }
+      if (account === email) {
+        throw new Error('Field account and email must be different.')
+      }
+
+      const hash = bcrypt.hashSync(password, 10)
+      const user = await userService.putUser(req.params.user_id, {
+        ...formBody,
+        password: hash
+      })
+      return res.json({ user })
+    } catch (error) {
+      next(error)
+    }
+  },
+  getTweetsByUser: async (req, res, next) => {
+    try {
+      const tweets = await tweetService.getTweets({
+        UserId: req.params.user_id
+      })
+      return res.json({ tweets })
+    } catch (error) {
+      next(error)
     }
   }
 }

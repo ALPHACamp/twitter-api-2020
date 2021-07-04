@@ -15,6 +15,16 @@ const userService = {
     })
     if (!created) throw new Error('This email is already exist.')
     return user
+  },
+  putUser: async (id, body) => {
+    // TODO: Need to check 'email' and 'account' are both unique.
+    // const existAccount = await User.fineOne({ where: { account: body.account } })
+    // if (existAccount) throw new Error('This account name is already exist.')
+    const user = await User.update(
+      { ...body },
+      { where: { id } }
+    )
+    return user
   }
 }
 
