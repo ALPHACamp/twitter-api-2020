@@ -1,5 +1,6 @@
 const express = require('express');
 const exphbs = require('express-handlebars')
+const helpers = require('./_helpers')
 
 const app = express()
 
@@ -14,6 +15,12 @@ app.use(express.urlencoded({ extended: false }))
 
 
 require('./routes')(app)
+
+app.use((req, res, next) => {
+  res.locals.user = helpers.getUser(req)
+  next()
+})
+
 app.use((err, req, res, next) => {
   return res.status(500).json({ Error: String(err) })
 })
