@@ -7,7 +7,7 @@ module.exports = {
       Array.from({ length: 50 }).map((item, index) => ({
         id: index + 1,
         UserId: Math.ceil((index + 1) / 10),
-        description: faker.lorem.text(),
+        description: faker.lorem.text().substring(0, 140),
         createdAt: new Date(),
         updatedAt: new Date()
       })
