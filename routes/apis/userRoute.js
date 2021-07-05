@@ -3,7 +3,10 @@ const router = express.Router()
 
 const userController = require('../../controllers/userController')
 
+const { authenticated, checkRole } = require('../../middlewares/auth')
+
 router.post('/', userController.signUp)
+router.all(authenticated, checkRole())
 router.get('/top', userController.getTopUsers)
 router.get('/:user_id', userController.getUser)
 router.put('/:user_id', userController.putUser)

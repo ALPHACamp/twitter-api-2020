@@ -1,4 +1,4 @@
-const { User, Like, sequelize } = require('../models')
+const { User, Like, Sequelize } = require('../models')
 
 const userService = {
   signIn: async (email) => {
@@ -72,13 +72,13 @@ const userService = {
         'account',
         'avatar',
         'introduction',
-        [sequelize.literal(`(exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id))`), 'isFollowed'],
-        [sequelize.fn('count', sequelize.col('Followers.id')), 'FollowerCount']
+        [Sequelize.literal(`(exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id))`), 'isFollowed'],
+        [Sequelize.fn('count', Sequelize.col('Followers.id')), 'FollowerCount']
       ],
       include: { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
       order: [
-        [sequelize.col('FollowerCount'), 'DESC'],
-        [sequelize.col('isFollowed'), 'DESC']
+        [Sequelize.col('FollowerCount'), 'DESC'],
+        [Sequelize.col('isFollowed'), 'DESC']
       ],
       group: ['id'],
       subQuery: false,

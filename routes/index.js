@@ -12,6 +12,7 @@ router.use((req, res, next) => {
 router.use((error, req, res, next) => {
   res.status(500)
   const { statusCode: status } = res
+  console.error(error)
   return res.json({ status, message: error.message })
 })
 
