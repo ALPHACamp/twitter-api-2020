@@ -3,7 +3,6 @@ const passport = require('../config/passport')
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) return next(err)
-    console.log(user)
     if (!user) return next(new Error('no user'))
     req.user = { ...user.dataValues }
     return next()
