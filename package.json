@@ -28,7 +28,8 @@
     "sequelize": "^4.44.4",
     "sequelize-cli": "^5.5.1",
     "sinon": "^7.2.3",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.3.0",
+    "validator": "^13.6.0"
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",
