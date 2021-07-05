@@ -15,6 +15,6 @@ router.post('/signin', userController.signIn)
 router.use('/users', userRoute)
 router.use('/tweets', authenticated, checkRole(), tweetRoute)
 router.use('/followships', authenticated, checkRole(), followshipRoute)
-router.use('/admin', authenticated, checkRole('admin'), adminRoute)
+router.use('/admin', adminRoute)
 
 module.exports = router
