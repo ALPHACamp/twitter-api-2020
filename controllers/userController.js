@@ -44,10 +44,10 @@ const userController = {
   },
   signUp: async (req, res) => {
     try {
-      const { account, name, email, password, passwordConfirm } = req.body
+      const { account, name, email, password, checkPassword } = req.body
       const message = []
       // check all inputs are required
-      if (!account || !name || !email || !password || !passwordConfirm) {
+      if (!account || !name || !email || !password || !checkPassword) {
         message.push('所有欄位都是必填')
       }
       // check account length and type
@@ -63,11 +63,11 @@ const userController = {
         message.push('請輸入有效的信箱')
       }
       // check password length and type
-      if (password && !validator.isByteLength(password, { min: 8, max: 15 })) {
-        message.push('請輸入長度介於 8-15 的密碼')
+      if (password && !validator.isByteLength(password, { min: 5, max: 15 })) {
+        message.push('請輸入長度介於 5-15 的密碼')
       }
-      // check password and passwordConfirm
-      if (password && (password !== passwordConfirm)) {
+      // check password and checkPassword
+      if (password && (password !== checkPassword)) {
         message.push('密碼與確認密碼不相符')
       }
       if (message.length) {
