@@ -84,7 +84,8 @@ let userController = {
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' },
           { model: Tweet, as: 'LikedTweets' }
-        ]
+        ],
+        order: [[Tweet, 'createdAt', 'DESC']]
       })
       if (!user) throw new Error('找不到使用者')
 
