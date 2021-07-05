@@ -1,5 +1,7 @@
 'use strict';
+
 const faker = require('faker')
+const functions = require('../config/functions')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -9,8 +11,8 @@ module.exports = {
         UserId: Math.ceil(Math.random() * 5),
         TweetId: Math.ceil((index + 1) / 3),
         comment: faker.lorem.text().substring(0, 50),
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
+        updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       })
       ), {})
   },
