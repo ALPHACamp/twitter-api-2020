@@ -1,6 +1,8 @@
 const express = require('express')
-const session = require('express-session')
-const methodOverride = require('method-override')
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 const passport = require('./config/passport')
 const routes = require('./routes')
@@ -10,8 +12,6 @@ const port = 3000
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(session({ secret: 'devSecretIsVeryMystery', resave: false, saveUninitialized: false }))
-app.use(methodOverride('_method'))
 app.use(passport.initialize())
 
 app.use(routes)

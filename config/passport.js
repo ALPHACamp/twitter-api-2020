@@ -7,7 +7,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: 'JWTSecretIsWeird'
+  secretOrKey: process.env.JWTSECRET
 }
 
 passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, next) => {

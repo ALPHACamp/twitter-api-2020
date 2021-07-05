@@ -1,5 +1,7 @@
+// TODO: 目前getUsers取出的資料含root，前端可能不需要。
+
 const { User, Tweet, Like, Sequelize } = require('../models')
-const { Op } = Sequelize
+// const { Op } = Sequelize
 
 const adminService = {
   deleteTweet: async (tweetId) => {
@@ -11,7 +13,7 @@ const adminService = {
     return await User.findAll({
       raw: true,
       nest: true,
-      where: { id: { [Op.not]: 1 } },
+      // where: { id: { [Op.not]: 1 } },
       attributes: [
         'id',
         'name',
