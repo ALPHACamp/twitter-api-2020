@@ -1,4 +1,5 @@
 const userController = require('../controllers/userController')
+const adminController = require('../controllers/adminController')
 const passport = require('../config/passport')
 
 const authenticated = passport.authenticate('jwt', { session: false })
@@ -18,7 +19,7 @@ module.exports = (app) => {
   app.post('/signup', userController.signUp)
   app.post('/signin', userController.signIn)
 
-  // app.post('/signin/admin')
+  app.post('/signin/admin', adminController.signIn)
   // // admin
   // app.get('/admin/tweets')
   // app.get('/admin/users')
