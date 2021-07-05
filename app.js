@@ -1,6 +1,7 @@
 const db = require('./models')
 const express = require('express')
 const bodyParser = require('body-parser')
+const methodOverride = require('method-override')
 const helpers = require('./_helpers')
 
 const app = express()
@@ -18,6 +19,8 @@ app.use((req, res, next) => {
 function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
+
+app.use(methodOverride('_method'))
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port http://localhost:${port}`))
