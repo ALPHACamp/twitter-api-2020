@@ -10,6 +10,10 @@ app.use(express.urlencoded({ extended: true }))
 app.listen(port, () => console.log(`App is listening on http://localhost:${port}!`))
 
 require('./routes')(app)
+app.use((req, res, next) => {
+  res.locals.user = helpers.getUser(req)
+  next()
+})
 app.use((err, req, res, next) => {
   res.json({ status: 'error', message: err.message })
   console.log(err.message)
