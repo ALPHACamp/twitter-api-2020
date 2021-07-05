@@ -11,8 +11,8 @@ module.exports = {
       name: 'Ryan',
       account: 'RyanHuang',
       intro: faker.lorem.text(),
-      avatar: 1,
-      cover: 2,
+      avatar: 'https://i.pravatar.cc/150?img=68',
+      cover: `https://loremflickr.com/660/240/paris/?lock=${Math.random() * 100}`,
       role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -23,6 +23,9 @@ module.exports = {
       name: 'Lyvia',
       account: 'LyviaLee',
       intro: faker.lorem.text(),
+      avatar: 'https://i.pravatar.cc/150?img=29',
+      cover: `https://loremflickr.com/660/240/paris/?lock=${Math.random() * 100}`,
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -32,6 +35,9 @@ module.exports = {
       name: 'Aaron',
       account: 'AaronWang',
       intro: faker.lorem.text(),
+      avatar: 'https://i.pravatar.cc/150?img=56',
+      cover: `https://loremflickr.com/660/240/paris/?lock=${Math.random() * 100}`,
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -41,8 +47,9 @@ module.exports = {
       name: 'Beatrice',
       account: 'BeatricePai',
       intro: faker.lorem.text(),
-
-
+      avatar: 'https://i.pravatar.cc/150?img=28',
+      cover: `https://loremflickr.com/660/240/paris/?lock=${Math.random() * 100}`,
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -52,7 +59,9 @@ module.exports = {
       name: 'Tim',
       account: 'TimChien',
       intro: faker.lorem.text(),
-
+      avatar: 'https://i.pravatar.cc/150?img=60',
+      cover: `https://loremflickr.com/660/240/restaurant,food/?lock=${Math.random() * 100}`,
+      role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
