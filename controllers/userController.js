@@ -20,7 +20,7 @@ const userController = {
       }
 
       const payload = { id: user.id }
-      const token = jwt.sign(payload, 'JWTSecretIsWeird')
+      const token = jwt.sign(payload, process.env.JWTSECRET)
       return res.json({
         status: 200,
         token,

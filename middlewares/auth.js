@@ -6,7 +6,7 @@ const authenticated = (req, res, next) => {
     if (!user) return next(new Error('no user'))
     req.user = { ...user.dataValues }
     return next()
-  })
+  })(req, res, next)
 }
 
 const checkRole = (role = 'user') => {
