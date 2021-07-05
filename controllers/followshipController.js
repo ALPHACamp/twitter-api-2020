@@ -5,7 +5,7 @@ const followshipController = {
   addFollow: async (req, res, next) => {
     try {
       const data = await followshipService.addFollow(helpers.getUser(req).id, req.body.id)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
@@ -14,7 +14,7 @@ const followshipController = {
   unFollow: async (req, res, next) => {
     try {
       const data = await followshipService.unFollow(helpers.getUser(req).id, req.params.followingId)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }

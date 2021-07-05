@@ -3,12 +3,9 @@ const router = express.Router()
 
 const adminController = require('../../controllers/adminController')
 const tweetController = require('../../controllers/tweetController')
+const userController = require('../../controllers/userController')
 
-router.get('/', (req, res, next) => {
-  res.send('this is /api/admin router.')
-})
-
-router.post('/signin', adminController.signIn)
+router.post('/signin', userController.signIn)
 router.get('/tweets', tweetController.getTweets)
 router.delete('/tweets/:tweet_id', adminController.deleteTweet)
 router.get('/users', adminController.getUsers)

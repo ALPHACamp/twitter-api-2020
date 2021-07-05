@@ -1,8 +1,9 @@
 const { Tweet, Reply, Like, User } = require('../models')
 
 const tweetService = {
-  getTweets: async () => {
+  getTweets: async (whereQuery = {}) => {
     return await Tweet.findAll({
+      where: whereQuery,
       include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })

@@ -5,7 +5,7 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const data = await tweetService.getTweets()
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
@@ -18,7 +18,7 @@ const tweetController = {
         ...req.body
       }
       const data = await tweetService.postTweet(postData)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
@@ -27,7 +27,7 @@ const tweetController = {
   getTweet: async (req, res, next) => {
     try {
       const data = await tweetService.getTweet(req.params.tweet_id)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
@@ -36,7 +36,7 @@ const tweetController = {
   getTweetAndReplies: async (req, res, next) => {
     try {
       const data = await tweetService.getTweetAndReplies(req.params.tweet_id)
-      return res.status(200).json(data.Replies)
+      return res.json(data.Replies)
     } catch (error) {
       next(error)
     }
@@ -50,7 +50,7 @@ const tweetController = {
         ...req.body
       }
       const data = await tweetService.postReply(replyData)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
@@ -63,7 +63,7 @@ const tweetController = {
         TweetId: req.params.tweet_id
       }
       const data = await tweetService.likeTweet(likeData)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
@@ -76,7 +76,7 @@ const tweetController = {
         TweetId: req.params.tweet_id
       }
       const data = await tweetService.unlikeTweet(likeData)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
