@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -106,6 +106,29 @@ let userController = {
           isLiked: user.LikedTweets
         }
       })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getUserTweets: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: Tweet, include: [Like, Reply] }],
+        order: [[Tweet, 'createdAt', 'DESC']]
+      })
+      if (!user) throw new Error('找不到使用者')
+      console.log(user.toJSON())
+      const tweets = user.toJSON().Tweets.map((t) => ({
+        tweetId: t.id,
+        userId: t.UserId,
+        createdAt: t.createdAt,
+        description: t.description,
+        likeCount: t.Likes.length,
+        replyCount: t.Replies.length
+      }))
+
+      return res.json(tweets)
     } catch (error) {
       next(error)
     }
