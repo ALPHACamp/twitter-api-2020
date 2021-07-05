@@ -30,8 +30,8 @@ module.exports = (app) => {
 
   app.post('/signin/admin', adminController.signIn)
   // admin
-  app.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
-  // app.get('/admin/users')
+  app.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+  app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
   // users
   app.get('/api/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
   // app.get('/users/:userId/replies')

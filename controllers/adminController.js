@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -53,6 +53,32 @@ let adminController = {
         return res.json(data)
       })
       .catch((err) => next(err))
+  },
+
+  getUsers: (req, res, next) => {
+    return User.findAll({
+      include: [
+        { model: Tweet, attributes: ['id'] },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' },
+        { model: Like },
+      ],
+    }).then((users) => {
+      users = users.map((user) => ({
+        ...user.dataValues,
+        TweetCount: user.Tweets.length,
+        FollowingCount: user.Followings.length,
+        FollowerCount: user.Followers.length,
+        LikeCount: user.Likes.length,
+      }))
+      users = users.sort((a, b) => b.TweetCount - a.TweetCount)
+      return res.json({
+        status: 'success',
+        message: {
+          users: users,
+        },
+      })
+    })
   },
 }
 
