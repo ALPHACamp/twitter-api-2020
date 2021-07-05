@@ -5,7 +5,7 @@ const adminController = {
     const { email, password } = req.body
     try {
       const data = await adminService.signIn(email, password)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
@@ -14,7 +14,7 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       const data = await adminService.deleteTweet(req.params.tweet_id)
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
@@ -23,7 +23,7 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const data = await adminService.getUsers()
-      return res.status(200).json(data)
+      return res.json(data)
     } catch (error) {
       next(error)
     }
