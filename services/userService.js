@@ -40,13 +40,13 @@ const userService = {
       include: [
         {
           model: User,
-          as: 'Followers',
-          attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
+          as: 'Followings',
+          attributes: [['id', 'followingId'], 'account', 'name', 'avatar', 'introduction'],
           through: { attributes: [] }
         }
       ]
     })
-    return followings.toJSON().Followers
+    return followings.toJSON().Followings
   },
 
   getFollowers: async (id) => {
@@ -56,7 +56,7 @@ const userService = {
         {
           model: User,
           as: 'Followers',
-          attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
+          attributes: [['id', 'followerId'], 'account', 'name', 'avatar', 'introduction'],
           through: { attributes: [] }
         }
       ]

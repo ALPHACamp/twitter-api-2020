@@ -64,7 +64,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const user = await userService.getUser(req.params.user_id)
-      return res.json({ user })
+      return res.json(user)
     } catch (error) {
       return next(error)
     }
@@ -72,24 +72,12 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
-      const { checkPassword, ...formBody } = req.body
-      const { account, name, email, password } = formBody
-      if (!account || !name || !email || !password) {
-        throw new Error('All field are required.')
-      }
-      if (password !== checkPassword) {
-        throw new Error('Fields password and checkPassword must be the same.')
-      }
-      if (account === email) {
-        throw new Error('Field account and email must be different.')
-      }
+      const { password, ...formBody } = req.body
 
-      const hash = bcrypt.hashSync(password, 10)
       const user = await userService.putUser(req.params.user_id, {
-        ...formBody,
-        password: hash
+        ...formBody
       })
-      return res.json({ user })
+      return res.json(user)
     } catch (error) {
       return next(error)
     }
@@ -109,7 +97,7 @@ const userController = {
       const tweets = await tweetService.getTweets({
         UserId: req.params.user_id
       })
-      return res.json({ tweets })
+      return res.json(tweets)
     } catch (error) {
       return next(error)
     }
@@ -118,7 +106,7 @@ const userController = {
   getReplies: async (req, res, next) => {
     try {
       const tweets = await tweetService.getAllRepliesFromUser(req.params.user_id)
-      return res.json({ tweets })
+      return res.json(tweets)
     } catch (error) {
       return next(error)
     }
