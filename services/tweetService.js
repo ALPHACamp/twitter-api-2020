@@ -1,69 +1,42 @@
-const { Tweet, Reply, Like } = require('../models')
+const { Tweet, Reply, Like, User } = require('../models')
 
 const tweetService = {
   getTweets: async (whereQuery = {}) => {
-    try {
-      return await Tweet.findAll({
-        where: whereQuery,
-        order: [['createdAt', 'DESC']]
-      })
-    } catch (error) {
-      throw new Error(error)
-    }
+    return await Tweet.findAll({
+      where: whereQuery,
+      include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+      order: [['createdAt', 'DESC']]
+    })
   },
 
   postTweet: async (tweet) => {
-    try {
-      await Tweet.create(tweet)
-      return { status: 200, message: 'A tweet has created' }
-    } catch (error) {
-      throw new Error(error)
-    }
+    await Tweet.create(tweet)
+    return { message: 'A tweet has created' }
   },
 
-  getTweet: async (tweet_id) => {
-    try {
-      return await Tweet.findByPk(tweet_id)
-    } catch (error) {
-      throw new Error(error)
-    }
+  getTweet: async (tweetId) => {
+    return await Tweet.findByPk(tweetId)
   },
 
-  getTweetAndReplies: async (tweet_id) => {
-    try {
-      return await Tweet.findByPk(tweet_id, {
-        include: Reply
-      })
-    } catch (error) {
-      throw new Error(error)
-    }
+  getTweetAndReplies: async (tweetId) => {
+    return await Tweet.findByPk(tweetId, {
+      include: Reply
+    })
   },
 
   postReply: async (reply) => {
-    try {
-      await Reply.create(reply)
-      return { status: 200, message: 'A reply has created' }
-    } catch (error) {
-      throw new Error(error)
-    }
+    await Reply.create(reply)
+    return { message: 'A reply has created' }
   },
 
   likeTweet: async (like) => {
-    try {
-      await Like.create(like)
-      return { status: 200, message: 'A like has created' }
-    } catch (error) {
-      throw new Error(error)
-    }
+    await Like.create(like)
+    return { message: 'A like has created' }
   },
 
   unlikeTweet: async (unlike) => {
-    try {
-      await Like.destroy({ where: unlike })
-      return { status: 200, message: 'A like has deleted' }
-    } catch (error) {
-      throw new Error(error)
-    }
+    await Like.destroy({ where: unlike })
+    return { message: 'A like has deleted' }
   },
 
   getAllRepliesFromUser: async (UserId) => {
