@@ -37,6 +37,14 @@ const tweetService = {
   unlikeTweet: async (unlike) => {
     await Like.destroy({ where: unlike })
     return { message: 'A like has deleted' }
+  },
+
+  getAllRepliesFromUser: async (UserId) => {
+    return await Reply.findAll({
+      where: { UserId },
+      nest: true,
+      raw: true
+    })
   }
 }
 
