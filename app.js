@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const helpers = require('./_helpers')
 const app = express()
 const port = process.env.PORT || 3000
+require('../twitter-api-2020/models')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()

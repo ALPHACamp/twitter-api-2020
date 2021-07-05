@@ -20,7 +20,7 @@ const userController = {
       const user = await User.findOne({ where: { account } })
       if (!user) return res.status(401).json({ status: 'error', message: '使用者帳號或密碼有誤' })
       if (user.role !== 'user') return res.status(401).json({ status: 'error', message: '無權限登入' })
-      if (!bcrypt.compareSync(password, inputAccount.password)) {
+      if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: '使用者帳號或密碼有誤' })
       }
       const payload = { id: user.id }
