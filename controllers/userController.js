@@ -78,7 +78,7 @@ let userController = {
 
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.userId, {
+      const user = await User.findByPk(req.params.id, {
         include: [
           Tweet,
           { model: User, as: 'Followings' },
