@@ -10,11 +10,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
       },
       UserId: {
-        allowNull: false,
         type: DataTypes.INTEGER,
       },
       TweetId: {
-        allowNull: false,
         type: DataTypes.INTEGER,
       },
       comment: {

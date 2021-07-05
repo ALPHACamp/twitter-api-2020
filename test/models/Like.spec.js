@@ -52,7 +52,7 @@ describe('# Like Model', () => {
     let data = null
 
     it('create', (done) => {
-      db.Like.create({UserId:1,TweetId:1}).then((like) => {   
+      db.Like.create({}).then((like) => {   
         data = like
         done()
       })

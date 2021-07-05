@@ -52,7 +52,7 @@ describe('# Reply Model', () => {
     let data = null
 
     it('create', (done) => {
-      db.Reply.create({ UserId: 1, TweetId: 1 })
+      db.Reply.create({})
         .then((reply) => {
           data = reply;
           done();

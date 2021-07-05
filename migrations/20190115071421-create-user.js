@@ -50,7 +50,6 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       lastLoginAt: {
-        allowNull: false,
         type: Sequelize.DATE,
       },
     });
