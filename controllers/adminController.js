@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -36,6 +36,21 @@ let adminController = {
             role: user.role,
           },
         })
+      })
+      .catch((err) => next(err))
+  },
+
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      include: { model: User, attributes: ['name', 'avatar', 'account'] },
+      raw: true,
+    })
+      .then((tweets) => {
+        const data = tweets.map((t) => ({
+          ...t,
+          description: t.description.substring(0, 50),
+        }))
+        return res.json(data)
       })
       .catch((err) => next(err))
   },
