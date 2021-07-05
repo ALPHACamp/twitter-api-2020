@@ -63,10 +63,12 @@ describe('# User Model', () => {
     let data = null
 
     it('create', (done) => {
-      db.User.create({}).then((user) => {
-        data = user
-        done()
-      })
+      db.User.create({
+        lastLoginAt:Date.now(),
+      }).then((user) => {
+        data = user;
+        done();
+      });
     })
     it('read', (done) => {
       db.User.findByPk(data.id).then((user) => {

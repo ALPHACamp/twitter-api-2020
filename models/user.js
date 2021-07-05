@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     "User",
@@ -57,7 +57,20 @@ module.exports = (sequelize, DataTypes) => {
     },
     {}
   );
-  User.associate = function(models) {
+  User.associate = function (models) {
+    User.hasMany(models.Like);
+    User.hasMany(models.Reply);
+    User.hasMany(models.Tweet);
+    User.belongsToMany(User, {
+      through: models.Followship,
+      foreignKey: "followingId",
+      as: "Followers",
+    });
+    User.belongsToMany(User, {
+      through: models.Followship,
+      foreignKey: "followerId",
+      as: "Followings",
+    });
   };
   return User;
 };
