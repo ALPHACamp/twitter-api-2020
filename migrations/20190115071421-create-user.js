@@ -17,14 +17,29 @@ module.exports = {
       name: {
         type: Sequelize.STRING
       },
+      account: {
+        type: Sequelize.STRING
+      },
       avatar: {
         type: Sequelize.STRING
       },
-      introduction: {
+      cover: {
+        type: Sequelize.STRING
+      },
+      bio: {
         type: Sequelize.TEXT
       },
-      role: {
-        type: Sequelize.STRING
+      isAdmin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      followingCounts: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+      },
+      followerCounts: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,
