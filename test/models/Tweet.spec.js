@@ -59,10 +59,12 @@ describe('# Tweet Model', () => {
     let data = null
 
     it('create', (done) => {
-      db.Tweet.create({UserId: 1, description: 'hi'}).then((tweet) => {   
-        data = tweet
-        done()
-      })
+      db.Tweet.create({ UserId: 1, description: "hi" })
+        .then((tweet) => {
+          data = tweet;
+          done();
+        })
+        .catch(done);
     })
     it('read', (done) => {
       db.Tweet.findByPk(data.id).then((tweet) => {  

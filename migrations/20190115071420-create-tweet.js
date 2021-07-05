@@ -13,7 +13,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       description: {
-        type: Sequelize.STRING(140),
+        type: Sequelize.TEXT,
       },
       createdAt: {
         allowNull: false,
@@ -24,7 +24,6 @@ module.exports = {
         type: Sequelize.DATE,
       },
       deletedAt: {
-        allowNull: false,
         type: Sequelize.DATE,
       },
       likeNum: {
@@ -34,7 +33,6 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       AdminId: {
-        allowNull: false,
         type: Sequelize.INTEGER,
       },
     });

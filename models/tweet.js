@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
       },
       description: {
-        type: DataTypes.STRING(140),
+        type: DataTypes.TEXT,
       },
       createdAt: {
         allowNull: false,
@@ -25,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
       },
       deletedAt: {
-        allowNull: false,
         type: DataTypes.DATE,
       },
       likeNum: {
@@ -35,12 +34,15 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
       },
       AdminId: {
-        allowNull: false,
         type: DataTypes.INTEGER,
       },
     },
     {}
   );
-  Tweet.associate = function (models) {};
+  Tweet.associate = function (models) {
+    Tweet.hasMany(models.Reply);
+    Tweet.hasMany(models.Like);
+    Tweet.belongsTo(models.User)
+  };
   return Tweet;
 };
