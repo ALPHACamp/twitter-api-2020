@@ -78,13 +78,14 @@ let userController = {
 
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.userId, {
+      const user = await User.findByPk(req.params.id, {
         include: [
           Tweet,
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' },
           { model: Tweet, as: 'LikedTweets' }
-        ]
+        ],
+        order: [[Tweet, 'createdAt', 'DESC']]
       })
       if (!user) throw new Error('找不到使用者')
 
