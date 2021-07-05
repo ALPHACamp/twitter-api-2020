@@ -1,8 +1,6 @@
 const express = require('express')
 const router = express.Router()
 
-const passport = require('../../config/passport')
-
 const userRoute = require('./userRoute')
 const tweetRoute = require('./tweetRoute')
 const followshipRoute = require('./followshipRoute')
@@ -10,15 +8,7 @@ const adminRoute = require('./adminRoute')
 
 const userController = require('../../controllers/userController')
 
-const authenticated = passport.authenticate('jwt', { session: false })
-const checkRole = (role = 'user') => {
-  return (req, res, next) => {
-    if (req.user.role !== role) {
-      return next(new Error('Permission denied.'))
-    }
-    return next()
-  }
-}
+const { authenticated, checkRole } = require('../../middlewares/auth')
 
 router.post('/signin', userController.signIn)
 
