@@ -32,8 +32,8 @@ module.exports = (app) => {
   // admin
   app.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
   // app.get('/admin/users')
-  // // users
-  // app.get('/users/:userId')
+  // users
+  app.get('/api/users/:userId', authenticated, authenticatedNotAdmin, userController.getUser)
   // app.get('/users/:userId/replies')
   // app.put('/users/:userId/edit')
   // app.get('/users/:userId/likes')
