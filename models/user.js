@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: 'https://www.seekpng.com/png/full/153-1536586_free-facebook-cover-image-transparent-png-facebook-cover.png'
     },
-    intro: DataTypes.TEXT,
+    introduction: DataTypes.TEXT,
     role: {
       type: DataTypes.STRING,
       allowNull: false,
