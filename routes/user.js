@@ -20,10 +20,7 @@ const authenticatedUser = (req, res, next) => {
   return res.json({ status: 'error', message: 'permission denied' })
 }
 
-
-router.get('/', authenticated, authenticatedAdmin, (req, res) => res.json({ key: 'test' }))
-
-router.post('/signup', userController.signup)
+router.post('/', userController.signup)
 router.post('/signin', userController.signin)
 
 module.exports = router
