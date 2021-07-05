@@ -1,9 +1,12 @@
 const { Tweet, Reply, Like } = require('../models')
 
 const tweetService = {
-  getTweets: async () => {
+  getTweets: async (whereQuery = {}) => {
     try {
-      return await Tweet.findAll()
+      return await Tweet.findAll({
+        where: whereQuery,
+        order: [['createdAt', 'DESC']]
+      })
     } catch (error) {
       throw new Error(error)
     }
@@ -62,6 +65,14 @@ const tweetService = {
       throw new Error(error)
     }
   },
+
+  getAllRepliesFromUser: async (UserId) => {
+    return await Reply.findAll({
+      where: { UserId },
+      nest: true,
+      raw: true
+    })
+  }
 }
 
 module.exports = tweetService
