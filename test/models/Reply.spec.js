@@ -52,10 +52,12 @@ describe('# Reply Model', () => {
     let data = null
 
     it('create', (done) => {
-      db.Reply.create({}).then((reply) => {   
-        data = reply
-        done()
-      })
+      db.Reply.create({ UserId: 1, TweetId: 1 })
+        .then((reply) => {
+          data = reply;
+          done();
+        })
+        .catch(done);
     })
     it('read', (done) => {
       db.Reply.findByPk(data.id).then((reply) => {  

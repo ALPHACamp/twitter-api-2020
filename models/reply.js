@@ -29,12 +29,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
       },
       deletedAt: {
-        allowNull: false,
         type: DataTypes.DATE,
       },
     },
     {}
   );
-  Reply.associate = function (models) {};
+  Reply.associate = function (models) {
+    Reply.belongsTo(models.User);
+    Reply.belongsTo(models.Tweet);
+  };
   return Reply;
 };
