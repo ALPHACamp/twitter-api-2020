@@ -16,6 +16,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Tweets', null, { truncate: true, restartIdentity: true })
+    await queryInterface.bulkDelete('Tweets', null, { truncate: true })
   }
 };
