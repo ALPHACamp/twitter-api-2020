@@ -11,8 +11,16 @@ module.exports = {
       UserId: {
         type: Sequelize.INTEGER
       },
-      description: {
+      content: {
         type: Sequelize.TEXT
+      },
+      replyCounts: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+      },
+      likeCounts: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,
