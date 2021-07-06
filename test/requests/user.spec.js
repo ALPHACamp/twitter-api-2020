@@ -151,6 +151,7 @@ describe('# user requests', () => {
             if (err) return done(err);
             expect(res.body).to.be.an('array');
             res.body[0].content.should.equal('Tweet1 的 comment');
+
             return done();
           })
       });
