@@ -5,4 +5,6 @@ const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 
 // router.use(authenticated, authenticatedAdmin)
 
+router.get('/users', adminController.getUsers)
+
 module.exports = router
