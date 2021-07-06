@@ -1,8 +1,4 @@
-const { User } = require('../models')
-const { Tweet } = require('../models')
-const { Reply } = require('../models')
-const { Like } = require('../models')
-const { Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
 const bcrypt = require('bcryptjs')
@@ -116,11 +112,6 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      // const user = await User.findByPk(req.params.id, {
-      //   include: [
-      //     { model: User, as: 'Followers' }]
-      // })
-      // const followers = user.Followers
       const followers = await Followship.findAll({
         where: { followingId: req.params.id }
       })
@@ -129,11 +120,9 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      console.log('@@@@@@@', helpers.getUser(req))
       const { name, email, password, account, bio } = req.body
       const avatar = req.files.avatar || false
       const cover = req.files.cover || false
-      const string = 's'
       const user = await User.findByPk(req.params.id)
       if (avatar && !cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)

@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     followingId: DataTypes.INTEGER,
     followerId: DataTypes.INTEGER
   }, {});
-  Followship.associate = function (models) {
+  Followship.associate = function(models) {
     // associations can be defined here
   };
   return Followship;
