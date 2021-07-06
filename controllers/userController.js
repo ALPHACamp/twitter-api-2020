@@ -19,13 +19,12 @@ const userController = {
       }
       const user = await User.findOne({ where: { account } })
       if (!user) return res.status(401).json({ status: 'error', message: '使用者帳號或密碼有誤' })
-      if (user.role !== 'user') return res.status(401).json({ status: 'error', message: '無權限登入' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: '使用者帳號或密碼有誤' })
       }
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
+      return res.status(200).json({
         status: 'success',
         message: 'ok',
         token: token,
@@ -35,11 +34,13 @@ const userController = {
           email: user.email,
           name: user.name,
           avatar: user.avatar,
+          cover:user.cover,
           role: user.role
         }
       })
     } catch (err) {
       console.log(err)
+      res.status(400).json({ status: 'error', message: 'error' })
     }
   },
   signUp: async (req, res) => {
@@ -93,6 +94,7 @@ const userController = {
       return res.json({ status: 'success', message: '註冊成功！' })
     } catch (err) {
       console.log(err)
+      res.status(400).json({ status: 'error', message: 'error' })
     }
   }
 }
