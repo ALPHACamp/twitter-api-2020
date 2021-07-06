@@ -78,33 +78,22 @@ let userController = {
 
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, {
-        include: [
-          Tweet,
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Followers' },
-          { model: Tweet, as: 'LikedTweets' }
-        ],
+      const user = await User.findByPk(req.params.userId, {
+        include: [Tweet, { model: User, as: 'Followings' }, { model: User, as: 'Followers' }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
       if (!user) throw new Error('找不到使用者')
 
       return res.json({
-        status: 'success',
-        message: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          account: user.account,
-          cover: user.cover,
-          avatar: user.avatar,
-          introduction: user.introduction,
-          Tweets: user.Tweets,
-          followingCount: user.Followings.length,
-          followerCount: user.Followers.length,
-          isFollowed: user.Followings.includes(user.id),
-          isLiked: user.LikedTweets
-        }
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        account: user.account,
+        cover: user.cover,
+        avatar: user.avatar,
+        introduction: user.introduction,
+        followingCount: user.Followings.length,
+        followerCount: user.Followers.length
       })
     } catch (error) {
       next(error)
@@ -123,12 +112,28 @@ let userController = {
         tweetId: t.id,
         userId: t.UserId,
         createdAt: t.createdAt,
-        description: t.description,
+        description: t.description.substring(0, 50),
         likeCount: t.Likes.length,
         replyCount: t.Replies.length
       }))
-      
+
       return res.json(tweets)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getAllReplies: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.userId, {
+        include: Reply,
+        order: [[Reply, 'createdAt', 'DESC']]
+      })
+      if (!user) throw new Error('找不到使用者')
+
+      console.log(user.toJSON().Replies)
+
+      return res.json(user.toJSON().Replies)
     } catch (error) {
       next(error)
     }
