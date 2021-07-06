@@ -106,7 +106,7 @@ let userController = {
         include: [{ model: Tweet, include: [Like, Reply] }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
-      if (!user) throw new Error('找不到使用者')
+      if (!user) throw new Error('這名使用者不存在或已被刪除')
 
       const tweets = user.toJSON().Tweets.map((t) => ({
         tweetId: t.id,
@@ -125,13 +125,54 @@ let userController = {
 
   getAllReplies: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.userId, {
+      const replies = await User.findByPk(req.params.userId, {
         include: Reply,
         order: [[Reply, 'createdAt', 'DESC']]
       })
-      if (!user) throw new Error('找不到使用者')
+      if (!replies) throw new Error('這名使用者不存在或已被刪除')
 
-      return res.json(user.toJSON().Replies)
+      return res.json(replies.toJSON().Replies)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getLikes: async (req, res, next) => {
+    try {
+      const like = await User.findByPk(req.params.userId, {
+        attributes: [],
+        include: [
+          {
+            model: Like,
+            attributes: { exclude: ['updatedAt'] },
+            include: [
+              {
+                model: Tweet,
+                attributes: { exclude: ['updatedAt'] },
+                include: [
+                  { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+                  { model: Like, attributes: ['TweetId'] },
+                  { model: Reply, attributes: ['TweetId'] }
+                ]
+              }
+            ]
+          }
+        ],
+        order: [[Like, 'createdAt', 'DESC']]
+      })
+      if (!like) throw new Error('這名使用者不存在或已被刪除')
+
+      const data = like.toJSON().Likes.map((d) => ({
+        TweetId: d.TweetId,
+        userName: d.Tweet.User.name,
+        userAccount: d.Tweet.User.account,
+        userAvatar: d.Tweet.User.avatar,
+        description: d.Tweet.description.substring(0, 50),
+        likeConut: d.Tweet.Likes.length,
+        replyCount: d.Tweet.Replies.length
+      }))
+
+      res.json(data)
     } catch (error) {
       next(error)
     }
