@@ -10,5 +10,3 @@ module.exports = () => {
   }
   return cors(corsOptionsDelegate)
 }
-
-// module.exports
