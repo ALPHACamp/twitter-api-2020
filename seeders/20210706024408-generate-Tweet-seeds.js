@@ -9,7 +9,7 @@ module.exports = {
           id: j * 10 + i + 1,
           content: faker.lorem.text(140),
           likeNum: 0,
-          replyNum: 0,
+          replyNum: 3,
           createdAt: new Date(),
           updatedAt: new Date(),
           UserId: i + 1,

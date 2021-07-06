@@ -15,7 +15,7 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
       likeNum: 0,
-      replyNum: 0,
+      tweetNum: 10,
       followingNum: 0,
       followerNum: 0,
       lastLoginAt: new Date()

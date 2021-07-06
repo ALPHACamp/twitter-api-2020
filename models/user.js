@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       likeNum: {
         type: DataTypes.INTEGER,
       },
-      replyNum: {
+      tweetNum: {
         type: DataTypes.INTEGER,
       },
       followingNum: {
