@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       UserId: {
         type: DataTypes.INTEGER,
       },
-      description: {
+      content: {
         type: DataTypes.TEXT,
       },
       createdAt: {
@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
     Tweet.hasMany(models.Like);
     Tweet.belongsTo(models.User)
     Tweet.belongsTo(models.Admin);
+    Tweet.belongsToMany(models.User, { through: models.Like, foreignKey: "TweetId", as: "LikedUsers", })
   };
   return Tweet;
 };

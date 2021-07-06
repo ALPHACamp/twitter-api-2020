@@ -14,7 +14,7 @@ module.exports = {
       TweetId: {
         type: Sequelize.INTEGER,
       },
-      comment: {
+      content: {
         type: Sequelize.TEXT,
       },
       createdAt: {
