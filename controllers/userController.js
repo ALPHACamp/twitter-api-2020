@@ -2,7 +2,7 @@ const { User } = require('../models')
 const { Tweet } = require('../models')
 const { Reply } = require('../models')
 const imgur = require('imgur-node-api')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -118,8 +118,73 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const { name, email, password, account, role, bio } = req.body
-      const { avatar, cover } = req.files
+      const { name, email, password, account, bio } = req.body
+      // const { avatar, cover } = req.files
+      const avatar = req.files.avatar || false
+      const cover = req.files.cover || false
+      // const { file } = req
+      const user = await User.findByPk(req.params.id)
+      if (avatar && !cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(avatar[0].path, (err, img) => {
+          user.update({
+            name: name,
+            email: email,
+            password: password,
+            account: account,
+            bio: bio,
+            avatar: avatar ? img.data.link : req.body.avatar,
+          })
+          return res.json({ status: 'success', message: '個人頭貼更新成功' })
+        })
+      } else if (!avatar && cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(cover[0].path, (err, img) => {
+          user.update({
+            name: name,
+            email: email,
+            password: password,
+            account: account,
+            bio: bio,
+            cover: cover ? img.data.link : req.body.cover,
+          })
+          return res.json({ status: 'success', message: '封面更新成功' })
+        })
+      } else if (avatar && cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(avatar[0].path, (err, img) => {
+          user.update({
+            name: name,
+            email: email,
+            password: password,
+            account: account,
+            bio: bio,
+            avatar: avatar ? img.data.link : req.body.avatar,
+          })
+        })
+        imgur.upload(cover[0].path, (err, img) => {
+          user.update({
+            name: name,
+            email: email,
+            password: password,
+            account: account,
+            bio: bio,
+            cover: cover ? img.data.link : req.body.cover,
+          })
+        })
+        return res.json({ status: 'success', message: '個人資訊更新成功' })
+      } else {
+        user.update({
+          name: name,
+          email: email,
+          password: password,
+          account: account,
+          bio: bio,
+          avatar: req.body.avatar,
+          cover: req.body.cover,
+        })
+        return res.json({ status: 'success', message: '更新成功' })
+      }
     } catch (err) { next(err) }
   },
 }

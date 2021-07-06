@@ -1,12 +1,13 @@
 const express = require('express');
 const app = express()
-const helpers = require('./_helpers')
+
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-const port = process.env.PORT || 3000
 
+const port = process.env.PORT || 3000
+const helpers = require('./_helpers')
 app.use(express.urlencoded({ extended: false }))
 app.use('/upload', express.static(__dirname + '/upload'))
 

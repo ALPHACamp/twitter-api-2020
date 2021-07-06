@@ -5,24 +5,6 @@ const passport = require('../config/passport')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
-const authenticated = passport.authenticate('jwt', { session: false })
-
-
-const authenticatedAdmin = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'admin') { return next() }
-    return res.json({ status: 'error', message: 'permission denied' })
-  }
-  return res.json({ status: 'error', message: 'permission denied' })
-}
-
-const authenticatedUser = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'user') { return next() }
-    return res.json({ status: 'error', message: 'permission denied' })
-  }
-  return res.json({ status: 'error', message: 'permission denied' })
-}
 
 //   /api/users
 
