@@ -40,7 +40,7 @@ module.exports = {
       likeNum: {
         type: Sequelize.INTEGER,
       },
-      replyNum: {
+      tweetNum: {
         type: Sequelize.INTEGER,
       },
       followingNum: {
