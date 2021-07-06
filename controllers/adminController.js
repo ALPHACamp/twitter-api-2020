@@ -58,7 +58,7 @@ let adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
       include: [
-        { model: Tweet, attributes: ['id'] },
+        { model: Tweet, attributes: ['id'], include: User },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
         { model: Like },
@@ -73,6 +73,14 @@ let adminController = {
       }))
       users = users.sort((a, b) => b.TweetCount - a.TweetCount)
       return res.json(users)
+    })
+  },
+
+  deleteTweets: (req, res, next) => {
+    return Tweet.findByPk(req.params.id).then((tweet) => {
+      tweet.destroy().then((tweet) => {
+        return res.json({ status: 'success', message: '' })
+      })
     })
   },
 }

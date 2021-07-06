@@ -41,6 +41,12 @@ module.exports = (app) => {
   // admin
   app.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+  app.delete(
+    '/api/admin/tweets/:id',
+    authenticated,
+    authenticatedAdmin,
+    adminController.deleteTweets
+  )
   // users
   app.get('/api/users/:userId', authenticated, authenticatedNotAdmin, userController.getUser)
   app.get(
@@ -67,7 +73,6 @@ module.exports = (app) => {
   // app.post('/tweets')
   // app.post('/tweets/:tweetId/replies')
   // app.put('/tweets/:tweetId')
-  // app.delete('/tweets/:tweetId')
   // app.post('/tweets/:tweetId/like')
   // app.delete('/tweets/:tweetId/like')
   // // replies
