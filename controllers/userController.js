@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
-const { Op } = require("sequelize")
+const { Op } = require('sequelize')
 
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -23,10 +23,12 @@ const userController = {
           ]
         }
       }).then(user => {
-        if (user.email === req.body.email) {
-          return res.json({ status: 'error', message: '信箱重複！' })
-        } else if (user.account === req.body.account) {
-          return res.json({ status: 'error', message: '帳號重複！' })
+        if (user) {
+          if (user.email === req.body.email) {
+            return res.json({ status: 'error', message: '信箱重複！' })
+          } else if (user.account === req.body.account) {
+            return res.json({ status: 'error', message: '帳號重複！' })
+          }
         } else {
           User.create({
             account: req.body.account,
