@@ -131,8 +131,6 @@ let userController = {
       })
       if (!user) throw new Error('找不到使用者')
 
-      console.log(user.toJSON().Replies)
-
       return res.json(user.toJSON().Replies)
     } catch (error) {
       next(error)
