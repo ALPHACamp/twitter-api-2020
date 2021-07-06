@@ -26,7 +26,7 @@ module.exports = {
       cover: {
         type: Sequelize.STRING,
       },
-      bio: {
+      introduction: {
         type: Sequelize.TEXT,
       },
       createdAt: {

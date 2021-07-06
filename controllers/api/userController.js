@@ -73,7 +73,7 @@ let userController = {
   getUser: (req, res) => {
     const id = req.params.id
     const userId = 1 //before building JWT
-    const attributes = ['id', 'account', 'name', 'email', 'bio', 'avatar', 'cover', 'tweetNum', 'likeNum', 'followingNum', 'followerNum', 'lastLoginAt']
+    const attributes = ['id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover', 'tweetNum', 'likeNum', 'followingNum', 'followerNum', 'lastLoginAt']
     User.findByPk(id, {
       attributes,
       include: [{

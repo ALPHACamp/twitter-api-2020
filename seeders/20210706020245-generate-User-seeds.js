@@ -11,7 +11,7 @@ module.exports = {
       name: faker.name.findName(),
       avatar: "https://loremflickr.com/g/320/240/girl/all",
       cover: "https://loremflickr.com/800/600/dog",
-      bio: faker.lorem.text(100),
+      introduction: faker.lorem.text(100),
       createdAt: new Date(),
       updatedAt: new Date(),
       likeNum: 0,
