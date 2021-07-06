@@ -1,4 +1,4 @@
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 
 const tweetController = {
@@ -17,16 +17,53 @@ const tweetController = {
     }
   },
 
+  likeTweet: async (req, res, next) => {
+    try {
+      const { TweetId } = req.params
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) return res.json({ status: 'error', message: '查無此推文' })
+      const [like, created] = await Like.findOrCreate({
+        where: {
+          UserId: req.user.id,
+          TweetId
+        }
+      })
+      if (created) return res.json({ status: 'success', message: '成功按讚推文' })
+      return res.json({ status: 'error', message: '推文已按過讚' })
+    }
+    catch (err) {
+      next(err)
+    }
+  },
+
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const like = await Like.findOne({
+        where: {
+          UserId: req.user.id,
+          TweetId: req.params.TweetId
+        }
+      })
+      if (!like) return res.json({ status: 'error', message: '此推文並無按讚紀錄' })
+      await like.destroy()
+      return res.json({ status: 'success', message: '按讚紀錄已刪除' })
+    }
+    catch (err) {
+      next(err)
+    }
+  },
+
   postReply: async (req, res, next) => {
     try {
       const { content } = req.body
+      const { TweetId } = req.params
       if (!content) return res.json({ status: 'error', message: '回覆不得為空白' })
-      const tweet = await Tweet.findOne({ where: { id: req.params.TweetId } })
+      const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.json({ status: 'error', message: '找不到此推文' })
       await Reply.create({
         content,
         UserId: req.user.id,
-        TweetId: tweet.id
+        TweetId
       })
       return res.json({ status: 'success', message: '回覆新增成功' })
     }
@@ -35,6 +72,23 @@ const tweetController = {
     }
   },
 
+  likeReply: async (req, res, next) => {
+    try {
+
+    }
+    catch (err) {
+      next(err)
+    }
+  },
+
+  unlikeReply: async (req, res, next) => {
+    try {
+
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 
 }
 
