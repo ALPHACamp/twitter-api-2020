@@ -34,6 +34,7 @@ module.exports = (app) => {
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
   // users
   app.get('/api/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
+  app.get('/api/users/:userId/tweets', authenticated, authenticatedNotAdmin, userController.getUserTweets)
   // app.get('/users/:userId/replies')
   // app.put('/users/:userId/edit')
   // app.get('/users/:userId/likes')
