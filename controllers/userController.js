@@ -70,6 +70,15 @@ const userController = {
     }
   },
 
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const user = await userService.getUser(req.user.id)
+      return res.json(user)
+    } catch (error) {
+      return next(error)
+    }
+  },
+
   putUser: async (req, res, next) => {
     try {
       const { password, ...formBody } = req.body
