@@ -23,32 +23,32 @@ let userController = {
         delete user.dataValues.Followers
         return user
       })
-      return res.json({ Users: users })
+      return res.status(200).json({ Users: users })
     }).catch(err => {
-      return res.json({ status: 'error', message: err })
+      return res.status(500).json({ status: 'error', message: err })
     })
   },
   postUser: (req, res) => {
     const { name, account, email, password, checkPassword } = req.body
     if (!name || !account || !email || !password || !checkPassword) {
-      return res.json({
+      return res.status(401).json({
         status: 'error', message: "Missing data."
       })
     }
     if (password !== checkPassword) {
-      return res.json({
+      return res.status(401).json({
         status: 'error', message: "Password and confirm password doesn't match."
       })
     }
     User.findOne({ where: { account } }).then(user => {
       if (user) {
-        return res.json({
+        return res.status(401).json({
           status: 'error', message: "Account was already used."
         })
       } else {
         User.findOne({ where: { email } }).then(user => {
           if (user) {
-            return res.json({
+            return res.status(401).json({
               status: 'error', message: "Email was already used."
             })
           } else {
@@ -59,13 +59,15 @@ let userController = {
               password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
             })
               .then(user => {
-                return res.json({
+                return res.status(200).json({
                   status: 'success', message: "Account successfully created."
                 })
               })
           }
         })
       }
+    }).catch(err => {
+      return res.status(500).json({ status: 'error', message: err })
     })
   }
 }
