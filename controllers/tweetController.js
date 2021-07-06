@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Like } = require('../models')
 
 
 const tweetController = {
@@ -72,23 +72,8 @@ const tweetController = {
     }
   },
 
-  likeReply: async (req, res, next) => {
-    try {
 
-    }
-    catch (err) {
-      next(err)
-    }
-  },
 
-  unlikeReply: async (req, res, next) => {
-    try {
-
-    }
-    catch (err) {
-      next(err)
-    }
-  }
 
 }
 
