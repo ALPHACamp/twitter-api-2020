@@ -113,12 +113,12 @@ let userController = {
 
   getUserTweets: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, {
+      const user = await User.findByPk(req.params.userId, {
         include: [{ model: Tweet, include: [Like, Reply] }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
       if (!user) throw new Error('找不到使用者')
-      console.log(user.toJSON())
+
       const tweets = user.toJSON().Tweets.map((t) => ({
         tweetId: t.id,
         userId: t.UserId,
