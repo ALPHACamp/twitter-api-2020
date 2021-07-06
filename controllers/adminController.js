@@ -8,7 +8,15 @@ const adminController = {
       return res.json(user)
     } catch (err) { next(err) }
   },
-
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id) || false
+      if (tweet) {
+        tweet.destroy()
+        return res.json({ status: 'success', message: "推文刪除成功" })
+      }
+    } catch (err) { next(err) }
+  }
 
 }
 

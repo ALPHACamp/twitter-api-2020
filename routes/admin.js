@@ -5,6 +5,8 @@ const helpers = require('../_helpers')
 
 router.get('/users', helpers.authenticated, helpers.authenticatedAdmin, adminController.getAllUser)
 
+router.delete('/tweets/:id', helpers.authenticated, helpers.authenticatedAdmin, adminController.deleteTweet)
+
 // router.delete('/:id', helpers.authenticated, helpers.authenticatedAdmin, adminController.deleteFollowing)
 
 
