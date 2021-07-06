@@ -4,7 +4,8 @@ const helpers = require('../_helpers')
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
-      const data = await tweetService.getTweets()
+      const fromAdmin = req.originalUrl.includes('admin')
+      const data = await tweetService.getTweets({}, fromAdmin)
       return res.json(data)
     } catch (error) {
       next(error)
