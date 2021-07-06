@@ -45,7 +45,7 @@ module.exports = (app) => {
   app.get('/api/users/:userId/tweets', authenticated, authenticatedNotAdmin, userController.getUserTweets)
   app.get('/api/users/:userId/replied_tweets', authenticated, authenticatedNotAdmin, userController.getAllReplies)
   // app.put('/users/:userId/edit')
-  // app.get('/users/:userId/likes')
+  app.get('/api/users/:userId/likes', authenticated, authenticatedNotAdmin, userController.getLikes)
   // app.get('/users/:userId/followers')
   // app.get('/users/:userId/followings')
   // app.post('/users/:userId/follow')
