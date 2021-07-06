@@ -3,7 +3,8 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.addColumn('Users', 'account', {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      unique: true
     })
   },
 
