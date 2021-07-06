@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       cover: {
         type: DataTypes.STRING,
       },
-      bio: {
+      introduction: {
         type: DataTypes.TEXT,
       },
       createdAt: {
