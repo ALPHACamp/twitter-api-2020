@@ -9,7 +9,9 @@ const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signUp: (req, res) => {
-    if (req.body.checkPassword !== req.body.password) {
+    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
+      return res.json({ status: 'error', message: '每個欄位都是必要欄位！' })
+    } else if (req.body.checkPassword !== req.body.password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     } else {
       User.findOne({ where: { email: req.body.email } }).then(user => {
