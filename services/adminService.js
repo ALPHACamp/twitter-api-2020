@@ -6,7 +6,7 @@ const { User, Tweet, Like, Sequelize } = require('../models')
 const adminService = {
   deleteTweet: async (tweetId) => {
     await Tweet.destroy({ where: { id: tweetId } })
-    return ({ message: `the tweet id ${tweetId} deleted successfully` })
+    return ({ status: 'success', message: `the tweet id ${tweetId} deleted successfully` })
   },
 
   getUsers: async () => {

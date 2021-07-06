@@ -22,7 +22,7 @@ const userController = {
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWTSECRET)
       return res.json({
-        status: 200,
+        status: 'success',
         token,
         user: {
           id: user.id,
@@ -54,6 +54,7 @@ const userController = {
       })
 
       return res.json({
+        status: 'success',
         data: user
       })
     } catch (error) {
@@ -86,7 +87,7 @@ const userController = {
       const user = await userService.putUser(req.params.user_id, {
         ...formBody
       })
-      return res.json(user)
+      return res.json({ status: 'success', user })
     } catch (error) {
       return next(error)
     }
@@ -95,7 +96,7 @@ const userController = {
   putUserProfile: async (req, res, next) => {
     try {
       const user = await userService.putUser(req.params.user_id, { ...req.body })
-      return res.json({ user })
+      return res.json({ status: 'success', user })
     } catch (error) {
       return next(error)
     }
@@ -106,7 +107,7 @@ const userController = {
       const tweets = await tweetService.getTweets({
         UserId: req.params.user_id
       })
-      return res.json(tweets)
+      return res.json({ status: 'success', tweets })
     } catch (error) {
       return next(error)
     }
@@ -115,7 +116,7 @@ const userController = {
   getReplies: async (req, res, next) => {
     try {
       const tweets = await tweetService.getAllRepliesFromUser(req.params.user_id)
-      return res.json(tweets)
+      return res.json({ status: 'success', tweets })
     } catch (error) {
       return next(error)
     }
@@ -124,7 +125,7 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const followings = await userService.getFollowings(req.params.user_id)
-      return res.json(followings)
+      return res.json({ status: 'success', followings })
     } catch (error) {
       return next(error)
     }
@@ -133,7 +134,7 @@ const userController = {
   getFollowers: async (req, res, next) => {
     try {
       const followers = await userService.getFollowers(req.params.user_id)
-      return res.json(followers)
+      return res.json({ status: 'success', followers })
     } catch (error) {
       return next(error)
     }
@@ -142,7 +143,7 @@ const userController = {
   getTopUsers: async (req, res, next) => {
     try {
       const topUsers = await userService.getTopUsers(req.user.id)
-      return res.json(topUsers)
+      return res.json({ status: 'success', topUsers })
     } catch (error) {
       return next(error)
     }
@@ -151,7 +152,7 @@ const userController = {
   getLikes: async (req, res, next) => {
     try {
       const likes = await userService.getLikes(req.params.user_id)
-      return res.json(likes)
+      return res.json({ status: 'success', likes })
     } catch (error) {
       return next(error)
     }

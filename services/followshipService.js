@@ -6,12 +6,12 @@ const followshipService = {
     if (!created) {
       throw new Error('there is a same data found before create')
     }
-    return { message: 'A followship has created' }
+    return { status: 'success', message: 'A followship has created' }
   },
 
   unFollow: async (a, b) => {
     await Followship.destroy({ where: { followerId: a, followingId: b } })
-    return { message: 'A followship has destroy' }
+    return { status: 'success', message: 'A followship has destroy' }
   }
 }
 
