@@ -70,7 +70,7 @@ module.exports = (app) => {
   // // tweets
   app.get('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.getTweets)
   // app.get('/tweets/:tweetId')
-  // app.post('/tweets')
+  app.post('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.postTweets)
   // app.post('/tweets/:tweetId/replies')
   // app.put('/tweets/:tweetId')
   // app.post('/tweets/:tweetId/like')
