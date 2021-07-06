@@ -1,5 +1,7 @@
 const userController = require('../controllers/userController')
+const adminController = require('../controllers/adminController')
 const passport = require('../config/passport')
+const helpers = require('../_helpers')
 
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, token) => {
@@ -20,17 +22,26 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
+const authenticatedNotAdmin = (req, res, next) => {
+  if (helpers.getUser(req).role === 'admin') {
+    return res.json({ status: 'error', message: 'permission denied' })
+  } else {
+    return next()
+  }
+}
+
 module.exports = (app) => {
   app.get('/', (req, res) => res.send('Hello World!'))
   app.post('/api/users', userController.signUp)
   app.post('/signin', userController.signIn)
 
-  // app.post('/signin/admin')
-  // // admin
-  // app.get('/admin/tweets')
-  // app.get('/admin/users')
-  // // users
-  // app.get('/users/:userId')
+  app.post('/signin/admin', adminController.signIn)
+  // admin
+  app.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+  app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+  // users
+  app.get('/api/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
+  app.get('/api/users/:userId/tweets', authenticated, authenticatedNotAdmin, userController.getUserTweets)
   // app.get('/users/:userId/replies')
   // app.put('/users/:userId/edit')
   // app.get('/users/:userId/likes')

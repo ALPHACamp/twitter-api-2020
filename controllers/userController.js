@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs')
-const db = require('../models')
-const User = db.User
+const { User, Tweet, Like, Reply } = require('../models')
+
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
+// const ExtractJwt = passportJWT.ExtractJwt
+// const JwtStrategy = passportJWT.Strategy
 
 let userController = {
   signIn: (req, res, next) => {
@@ -73,6 +73,64 @@ let userController = {
           }
         })
         .catch((err) => next(err))
+    }
+  },
+
+  getUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          Tweet,
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' },
+          { model: Tweet, as: 'LikedTweets' }
+        ],
+        order: [[Tweet, 'createdAt', 'DESC']]
+      })
+      if (!user) throw new Error('找不到使用者')
+
+      return res.json({
+        status: 'success',
+        message: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          account: user.account,
+          cover: user.cover,
+          avatar: user.avatar,
+          introduction: user.introduction,
+          Tweets: user.Tweets,
+          followingCount: user.Followings.length,
+          followerCount: user.Followers.length,
+          isFollowed: user.Followings.includes(user.id),
+          isLiked: user.LikedTweets
+        }
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getUserTweets: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.userId, {
+        include: [{ model: Tweet, include: [Like, Reply] }],
+        order: [[Tweet, 'createdAt', 'DESC']]
+      })
+      if (!user) throw new Error('找不到使用者')
+
+      const tweets = user.toJSON().Tweets.map((t) => ({
+        tweetId: t.id,
+        userId: t.UserId,
+        createdAt: t.createdAt,
+        description: t.description,
+        likeCount: t.Likes.length,
+        replyCount: t.Replies.length
+      }))
+      
+      return res.json(tweets)
+    } catch (error) {
+      next(error)
     }
   }
 }
