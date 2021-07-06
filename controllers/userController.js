@@ -14,7 +14,7 @@ let userController = {
     }
 
     User.findOne({
-      where: { account: req.body.account },
+      where: { account: req.body.account }
     })
       .then((user) => {
         if (!user) return res.status(401).json({ status: 'error', message: '此使用者尚未註冊' })
@@ -34,8 +34,8 @@ let userController = {
             name: user.name,
             email: user.email,
             account: user.account,
-            role: user.role,
-          },
+            role: user.role
+          }
         })
       })
       .catch((err) => next(err))
@@ -45,13 +45,13 @@ let userController = {
     if (!req.body.account || !req.body.password) {
       throw new Error('請輸入必填項目')
     }
-    if (req.body.passwordCheck !== req.body.password) {
+    if (req.body.checkPassword !== req.body.password) {
       throw new Error('兩次密碼輸入不同！')
     } else {
       User.findOne({
         where: {
-          $or: { email: req.body.email, account: req.body.account },
-        },
+          $or: { email: req.body.email, account: req.body.account }
+        }
       })
         .then((user) => {
           if (user) {
@@ -66,7 +66,7 @@ let userController = {
               name: req.body.name,
               email: req.body.email,
               account: req.body.account,
-              password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
+              password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
             }).then((user) => {
               return res.json({ status: 'success', message: '成功註冊帳號！' })
             })
@@ -74,7 +74,7 @@ let userController = {
         })
         .catch((err) => next(err))
     }
-  },
+  }
 }
 
 module.exports = userController
