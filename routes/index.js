@@ -4,11 +4,12 @@ const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
 function authenticated(req, res, next) {
-  passport.authenticate('jwt', { session: false }, (err, token) => {
-    if (err || !token) {
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err || !user) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' })
     }
-    next()
+    req.user = user // JWT 沒有使用 session，所以需要手動設置
+    return next()
   })(req, res, next)
 }
 const authenticatedAdmin = (req, res, next) => {
