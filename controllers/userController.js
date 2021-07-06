@@ -45,7 +45,7 @@ let userController = {
     if (!req.body.account || !req.body.password) {
       throw new Error('請輸入必填項目')
     }
-    if (req.body.passwordCheck !== req.body.password) {
+    if (req.body.checkPassword !== req.body.password) {
       throw new Error('兩次密碼輸入不同！')
     } else {
       User.findOne({
@@ -127,7 +127,7 @@ let userController = {
         likeCount: t.Likes.length,
         replyCount: t.Replies.length
       }))
-
+      
       return res.json(tweets)
     } catch (error) {
       next(error)

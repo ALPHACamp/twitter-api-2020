@@ -22,5 +22,6 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   })
 })
 
+passport.use(strategy)
 module.exports = passport
 passport.use(strategy)

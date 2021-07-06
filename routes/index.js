@@ -3,7 +3,14 @@ const adminController = require('../controllers/adminController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
-const authenticated = passport.authenticate('jwt', { session: false })
+function authenticated(req, res, next) {
+  passport.authenticate('jwt', { session: false }, (err, token) => {
+    if (err || !token) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' })
+    }
+    next()
+  })(req, res, next)
+}
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
     if (helpers.getUser(req).role === 'admin') {
@@ -25,7 +32,7 @@ const authenticatedNotAdmin = (req, res, next) => {
 
 module.exports = (app) => {
   app.get('/', (req, res) => res.send('Hello World!'))
-  app.post('/signup', userController.signUp)
+  app.post('/api/users', userController.signUp)
   app.post('/signin', userController.signIn)
 
   app.post('/signin/admin', adminController.signIn)
