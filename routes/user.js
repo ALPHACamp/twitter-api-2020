@@ -10,7 +10,7 @@ const upload = multer({ dest: 'temp/' })
 
 router.get('/:id/followers', userController.getUserFollowers)
 router.get('/:id/followings', userController.getUserFollowings)
-router.get('/:id/likes', userController.getUserLikeTweet)
+router.get('/:id/likes', userController.getUserLike)
 router.get('/:id/replied_tweets', userController.getUserRepliedTweets)
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id', userController.getUser)

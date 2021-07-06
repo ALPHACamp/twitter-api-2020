@@ -2,10 +2,12 @@ const { User } = require('../models')
 const { Tweet } = require('../models')
 const { Reply } = require('../models')
 const { Like } = require('../models')
+const { Followship } = require('../models')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
 
 
 
@@ -24,8 +26,8 @@ const userController = {
       const salt = await bcrypt.genSalt(10)
       const hashPassword = await bcrypt.hash(password, salt)
       await User.create({
-        name,
         account,
+        name,
         email,
         password: hashPassword
       })
@@ -86,46 +88,52 @@ const userController = {
       })
       const tweets = await replies.map(reply => reply.Tweet)
       if (tweets.length === 0) return res.json({ status: 'error', message: '沒有回覆的推文' })
-      return res.json(tweets)
+      return res.json(replies)
     } catch (err) { next(err) }
   },
-  getUserLikeTweet: async (req, res, next) => {
+  getUserLike: async (req, res, next) => {
     try {
       const likes = await Like.findAll({
         include: [{ model: Tweet, include: [User] }],
         where: { UserId: req.params.id }
       })
-      const tweets = await likes.map(like => like.Tweet)
-      return res.json(tweets)
+      return res.json(likes)
     } catch (err) { next(err) }
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, {
-        include: [
-          { model: User, as: 'Followings' }]
+      // const user = await User.findByPk(req.params.id, {
+      //   include: [
+      //     { model: User, as: 'Followings' }]
+      // })
+      // const followings = user.Followings
+      const followings = await Followship.findAll({
+        // include: [{ model: User, as: followings }],
+        where: { followerId: req.params.id }
       })
-      const followings = user.Followings
       return res.json(followings)
     } catch (err) { next(err) }
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, {
-        include: [
-          { model: User, as: 'Followers' }]
+      // const user = await User.findByPk(req.params.id, {
+      //   include: [
+      //     { model: User, as: 'Followers' }]
+      // })
+      // const followers = user.Followers
+      const followers = await Followship.findAll({
+        where: { followingId: req.params.id }
       })
-      const followers = user.Followers
       return res.json(followers)
     } catch (err) { next(err) }
   },
   putUser: async (req, res, next) => {
     try {
+      console.log('@@@@@@@', helpers.getUser(req))
       const { name, email, password, account, bio } = req.body
-      // const { avatar, cover } = req.files
       const avatar = req.files.avatar || false
       const cover = req.files.cover || false
-      // const { file } = req
+      const string = 's'
       const user = await User.findByPk(req.params.id)
       if (avatar && !cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
@@ -138,7 +146,7 @@ const userController = {
             bio: bio,
             avatar: avatar ? img.data.link : req.body.avatar,
           })
-          return res.json({ status: 'success', message: '個人頭貼更新成功' })
+          return res.json([user, { status: 'success', message: '個人頭貼更新成功' }])
         })
       } else if (!avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
@@ -151,7 +159,7 @@ const userController = {
             bio: bio,
             cover: cover ? img.data.link : req.body.cover,
           })
-          return res.json({ status: 'success', message: '封面更新成功' })
+          return res.json([user, { status: 'success', message: '封面更新成功' }])
         })
       } else if (avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
@@ -175,7 +183,7 @@ const userController = {
             cover: cover ? img.data.link : req.body.cover,
           })
         })
-        return res.json({ status: 'success', message: '個人資訊更新成功' })
+        return res.json([user, { status: 'success', message: '個人資訊更新成功' }])
       } else {
         user.update({
           name: name,
@@ -183,10 +191,8 @@ const userController = {
           password: password,
           account: account,
           bio: bio,
-          avatar: req.body.avatar,
-          cover: req.body.cover,
         })
-        return res.json({ status: 'success', message: '更新成功' })
+        return res.json(user)
       }
     } catch (err) { next(err) }
   },

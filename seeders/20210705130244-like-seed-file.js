@@ -4,7 +4,6 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert('Likes', [{
       UserId: 2,
-      ContentLikedId: 4,
       TweetId: 2,
       ReplyId: 0,
       createdAt: new Date(),
@@ -12,7 +11,6 @@ module.exports = {
     },
     {
       UserId: 3,
-      ContentLikedId: 3,
       TweetId: 1,
       ReplyId: 0,
       createdAt: new Date(),
@@ -20,7 +18,6 @@ module.exports = {
     },
     {
       UserId: 2,
-      ContentLikedId: 2,
       TweetId: 2,
       ReplyId: 0,
       createdAt: new Date(),
