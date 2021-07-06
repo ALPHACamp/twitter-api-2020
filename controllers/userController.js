@@ -1,6 +1,7 @@
 const { User } = require('../models')
 const { Tweet } = require('../models')
 const { Reply } = require('../models')
+const { Like } = require('../models')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
 const bcrypt = require('bcryptjs')
@@ -90,10 +91,12 @@ const userController = {
   },
   getUserLikeTweet: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, {
-        include: [Tweet]
+      const likes = await Like.findAll({
+        include: [{ model: Tweet, include: [User] }],
+        where: { UserId: req.params.id }
       })
-      return res.json(user)
+      const tweets = await likes.map(like => like.Tweet)
+      return res.json(tweets)
     } catch (err) { next(err) }
   },
   getUserFollowings: async (req, res, next) => {
