@@ -1,9 +1,7 @@
-const express = require("express");
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
+const tweetController = require('../../controllers/api/tweetController')
 
+router.get('/', tweetController.getTweets)
 
-router.get("/",(req, res) => {
-  res.send("tweet here")
-})
-
-module.exports = router;
+module.exports = router

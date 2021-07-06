@@ -7,13 +7,13 @@ module.exports = {
       for (let j = 0; j < 10; ++j) {
         data.push({
           id: j * 10 + i + 1,
-          content: faker.lorem.text(140),
+          description: faker.lorem.text(140),
           likeNum: 0,
           replyNum: 3,
           createdAt: new Date(),
           updatedAt: new Date(),
           UserId: i + 1,
-        })
+        });
       }
     })
     await queryInterface.bulkInsert("Tweets", data, {})
