@@ -11,7 +11,7 @@ const tweetService = {
 
   postTweet: async (tweet) => {
     await Tweet.create(tweet)
-    return { message: 'A tweet has created' }
+    return { status: 'success', message: 'A tweet has created' }
   },
 
   getTweet: async (tweetId) => {
@@ -26,17 +26,17 @@ const tweetService = {
 
   postReply: async (reply) => {
     await Reply.create(reply)
-    return { message: 'A reply has created' }
+    return { status: 'success', message: 'A reply has created' }
   },
 
   likeTweet: async (like) => {
     await Like.create(like)
-    return { message: 'A like has created' }
+    return { status: 'success', message: 'A like has created' }
   },
 
   unlikeTweet: async (unlike) => {
     await Like.destroy({ where: unlike })
-    return { message: 'A like has deleted' }
+    return { status: 'success', message: 'A like has deleted' }
   },
 
   getAllRepliesFromUser: async (UserId) => {
