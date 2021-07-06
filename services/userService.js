@@ -19,7 +19,16 @@ const userService = {
   },
 
   getUser: async (id) => {
-    const user = await User.findByPk(id)
+    const user = await User.findByPk(id, {
+      attributes: {
+        exclude: ['password']
+      },
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' },
+        { model: Like }
+      ]
+    })
     return user.toJSON()
   },
 
