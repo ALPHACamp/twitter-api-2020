@@ -63,7 +63,7 @@ module.exports = (app) => {
   )
   // app.put('/users/:userId/edit')
   app.get('/api/users/:userId/likes', authenticated, authenticatedNotAdmin, userController.getLikes)
-  // app.get('/users/:userId/followers')
+  app.get('/api/users/:userId/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
   app.get('/api/users/:userId/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
   // app.post('/users/:userId/follow')
   // app.delete('/users/:userId/follow')

@@ -14,8 +14,8 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
     include: [
       { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' },
-    ],
+      { model: User, as: 'Followings' }
+    ]
   }).then((user) => {
     if (!user) return next(null, false)
     return next(null, user)
@@ -24,4 +24,3 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
 
 passport.use(strategy)
 module.exports = passport
-passport.use(strategy)

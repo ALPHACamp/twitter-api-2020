@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Like, Reply } = require('../models')
 const { sequelize } = require('../models')
+const helpers = require('../_helpers')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -188,13 +189,45 @@ let userController = {
           {
             model: User,
             as: 'Followings',
-            attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'introduction']
+            attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'introduction'],
+            through: { attributes: [] }
           }
         ],
-        order: [[sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']] // -> returns JSON object field by key
+        order: [[sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']] // '->' returns JSON object field by key
       })
+      if (!following) throw new Error('這名使用者不存在或已被刪除')
 
       res.json(following.toJSON().Followings)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getFollowers: async (req, res, next) => {
+    try {
+      const followers = await User.findByPk(req.params.userId, {
+        attributes: [],
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'introduction'],
+            through: { attributes: [] }
+          }
+        ],
+        order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']] // '->' returns JSON object field by key
+      })
+      if (!followers) throw new Error('這名使用者不存在或已被刪除')
+
+      const data = followers.toJSON().Followers.map((d) => ({
+        ...d,
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.map((f) => f.id)
+          .includes(d.followerId)
+      }))
+
+      res.json(data)
     } catch (error) {
       next(error)
     }
