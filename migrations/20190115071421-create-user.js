@@ -18,7 +18,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'https://image.flaticon.com/icons/png/512/847/847969.png'
       },
       introduction: {
         type: Sequelize.TEXT
