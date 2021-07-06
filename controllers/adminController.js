@@ -1,12 +1,6 @@
 const db = require('../models')
 const { User, Tweet, Like } = db
-const bcrypt = require('bcryptjs')
 
-// JWT
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
 
 const adminController = {
   getUsers: async (req, res) => {
@@ -42,7 +36,7 @@ const adminController = {
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
-  deleteTweet:async (req, res) => {
+  deleteTweet: async (req, res) => {
     try {
       const id = req.params.id
       const tweet = await Tweet.findByPk(id)
@@ -50,10 +44,10 @@ const adminController = {
       await tweet.destroy()
       return res.status(200).json({ status: 'success', message: 'this tweet has been deleted!' })
     } catch (err) {
-    console.log(err)
-    res.status(500).json({ status: 'error', message: 'error' })
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
-  },  
+  }
 }
 
 module.exports = adminController
