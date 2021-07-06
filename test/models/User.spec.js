@@ -64,9 +64,9 @@ describe('# User Model', () => {
 
     it('create', (done) => {
       db.User.create({}).then((user) => {
-        data = user
-        done()
-      })
+        data = user;
+        done();
+      }).catch(done)
     })
     it('read', (done) => {
       db.User.findByPk(data.id).then((user) => {
