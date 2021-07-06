@@ -12,8 +12,10 @@ const authenticated = (req, res, next) => {
 
 const checkRole = (role = 'user') => {
   return (req, res, next) => {
-    if (helpers.getUser(req).role !== role) {
-      return next(new Error('Permission denied.'))
+    if (helpers.getUser(req).role) {
+      if (helpers.getUser(req).role !== role) {
+        return next(new Error('Permission denied.'))
+      }
     }
     return next()
   }
