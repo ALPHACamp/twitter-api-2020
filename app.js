@@ -1,15 +1,34 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const express = require('express')
-const helpers = require('./_helpers');
+const bodyParser = require('body-parser')
+const cors = require('cors')
 
 const app = express()
-const port = 3000
+const PORT = process.env.PORT
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+//integrate socket server to main server
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "*",
+    credentials: true
+  }
+})
+require('./socket/socketServer')(io)
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+require('./config/passport')
+const routes = require('./routes/index')
 
-module.exports = app
+app.use(cors())
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+app.use(routes)
+
+app.use((err, req, res, next) => {
+  console.log(err)
+  return res.status(500).json({ status: 'error', message: '內部伺服器錯誤' })
+})
+
+server.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
