@@ -1,4 +1,5 @@
 const passport = require('../config/passport')
+const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
@@ -11,7 +12,7 @@ const authenticated = (req, res, next) => {
 
 const checkRole = (role = 'user') => {
   return (req, res, next) => {
-    if (req.user.role !== role) {
+    if (helpers.getUser(req).role !== role) {
       return next(new Error('Permission denied.'))
     }
     return next()
