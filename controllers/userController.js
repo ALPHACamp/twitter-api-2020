@@ -34,13 +34,13 @@ const userController = {
           email: user.email,
           name: user.name,
           avatar: user.avatar,
-          cover:user.cover,
+          cover: user.cover,
           role: user.role
         }
       })
     } catch (err) {
       console.log(err)
-      res.status(400).json({ status: 'error', message: 'error' })
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   signUp: async (req, res) => {

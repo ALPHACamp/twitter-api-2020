@@ -23,7 +23,6 @@ const adminController = {
         user.Tweets.forEach(tweet => {
           likedCount += tweet.Likes.length
         })
-        users.sort((a, b) => b.Tweets.length - a.Tweets.length)
         return {
           id: user.id,
           account: user.account,
@@ -36,11 +35,25 @@ const adminController = {
           followersCount: user.Followers.length
         }
       })
+      users.sort((a, b) => b.tweetCount - a.tweetCount)
       return res.status(200).json(users)
     } catch (err) {
       console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
-  }
+  },
+  deleteTweet:async (req, res) => {
+    try {
+      const id = req.params.id
+      const tweet = await Tweet.findByPk(id)
+      if (!tweet) { return res.status(401).json({ status: 'error', message: 'this tweet doesn\'t exist!' }) }
+      await tweet.destroy()
+      return res.status(200).json({ status: 'success', message: 'this tweet has been deleted!' })
+    } catch (err) {
+    console.log(err)
+    res.status(500).json({ status: 'error', message: 'error' })
+    }
+  },  
 }
 
 module.exports = adminController
