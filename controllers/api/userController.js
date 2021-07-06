@@ -69,6 +69,28 @@ let userController = {
     }).catch(err => {
       return res.status(500).json({ status: 'error', message: err })
     })
+  },
+  getUser: (req, res) => {
+    const id = req.params.id
+    const userId = 1 //before building JWT
+    const attributes = ['id', 'account', 'name', 'email', 'bio', 'avatar', 'cover', 'tweetNum', 'likeNum', 'followingNum', 'followerNum', 'lastLoginAt']
+    User.findByPk(id, {
+      attributes,
+      include: [{
+        model: User,
+        as: "Followers",
+        attributes: ['id']
+      }]
+    }).then(user => {
+      if (user) {
+        user.dataValues.isFollowing = user.dataValues.Followers.some(follower => follower.id === userId)
+        delete user.dataValues.Followers
+        return res.json(user)
+      }
+      return res.status(404).json({ status: 'error', message: 'User not found.' })
+    }).catch(err => {
+      return res.status(500).json({ status: 'error', message: err })
+    })
   }
 }
 
