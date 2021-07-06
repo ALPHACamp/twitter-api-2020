@@ -10,15 +10,6 @@ const JwtStrategy = passportJWT.Strategy
 module.exports = app => {
   app.use(passport.initialize())
   app.use(passport.session())
-  passport.serializeUser((user, cb) => {
-    cb(null, user.id)
-  })
-  passport.deserializeUser((id, cb) => {
-    User.findByPk(id).then(user => {
-      user = user.toJSON()
-      return cb(null, user)
-    })
-  })
 
   const jwtOptions = {}
   jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
