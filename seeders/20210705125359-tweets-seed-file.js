@@ -7,7 +7,7 @@ module.exports = {
       Array.from({ length: 50 }).map((d, i) => ({
         id: i + 1,
         UserId: i % 5 + 2, // id 2~6 的一般使用者各10篇
-        content: faker.lorem.sentence(),
+        description: faker.lorem.sentence(),
         replyCounts: 3,
         createdAt: new Date(),
         updatedAt: new Date()

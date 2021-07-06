@@ -19,12 +19,12 @@ module.exports = (sequelize, DataTypes) => {
     cover: {
       type: DataTypes.STRING
     },
-    bio: {
+    introduction: {
       type: DataTypes.TEXT
     },
-    isAdmin: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: 'normal'
     },
     followingCounts: {
       type: DataTypes.INTEGER,
