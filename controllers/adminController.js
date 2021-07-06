@@ -50,7 +50,7 @@ let adminController = {
           ...t,
           description: t.description.substring(0, 50),
         }))
-        return res.json(data)
+        return res.json({ Tweets: data })
       })
       .catch((err) => next(err))
   },
@@ -72,12 +72,7 @@ let adminController = {
         LikeCount: user.Likes.length,
       }))
       users = users.sort((a, b) => b.TweetCount - a.TweetCount)
-      return res.json({
-        status: 'success',
-        message: {
-          users: users,
-        },
-      })
+      return res.json(users)
     })
   },
 }
