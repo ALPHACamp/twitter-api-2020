@@ -7,8 +7,6 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    isTweet: DataTypes.BOOLEAN,
-    ContentLikedId: DataTypes.INTEGER,
     TweetId: DataTypes.INTEGER,
     ReplyId: DataTypes.INTEGER,
     UserId: DataTypes.INTEGER,

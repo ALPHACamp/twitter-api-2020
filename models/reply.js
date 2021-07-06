@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     Reply.hasMany(models.Like)
     Reply.belongsToMany(models.User, {
       through: 'Like',
-      foreignKey: 'ContentLikedId',
+      foreignKey: 'ReplyId',
       as: 'GiveLikesUsers'
     })
   };
