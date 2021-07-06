@@ -63,6 +63,7 @@ describe('# Like Model', () => {
         done()
       })
     })
+
     it('update', (done) => {
       db.Like.update({}, { where: { id: data.id } }).then(() => {
         db.Like.findByPk(data.id).then((like) => {

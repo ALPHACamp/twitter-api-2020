@@ -1,6 +1,15 @@
 const { User } = require('../models')
+const { Tweet } = require('../models')
+const { Reply } = require('../models')
+const { Like } = require('../models')
+const { Followship } = require('../models')
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
+
+
 
 const userController = {
 
@@ -17,8 +26,8 @@ const userController = {
       const salt = await bcrypt.genSalt(10)
       const hashPassword = await bcrypt.hash(password, salt)
       await User.create({
-        name,
         account,
+        name,
         email,
         password: hashPassword
       })
@@ -53,7 +62,140 @@ const userController = {
     catch (err) {
       next(err)
     }
-  }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (user === null) { return { status: 'error', message: '使用者不存在' } }
+      return res.json(user)
+      // return res.json({ key: 'test' })
+    } catch (err) { next(err) }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({ where: { UserId: req.params.id } })
+      if (tweets.length === 0) {
+        return res.json({ status: 'error', message: '使用者暫無貼文' })
+      }
+      return res.json(tweets)
+    } catch (err) { next(err) }
+  },
+  getUserRepliedTweets: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [Tweet]
+      })
+      const tweets = await replies.map(reply => reply.Tweet)
+      if (tweets.length === 0) return res.json({ status: 'error', message: '沒有回覆的推文' })
+      return res.json(replies)
+    } catch (err) { next(err) }
+  },
+  getUserLike: async (req, res, next) => {
+    try {
+      const likes = await Like.findAll({
+        include: [{ model: Tweet, include: [User] }],
+        where: { UserId: req.params.id }
+      })
+      return res.json(likes)
+    } catch (err) { next(err) }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      // const user = await User.findByPk(req.params.id, {
+      //   include: [
+      //     { model: User, as: 'Followings' }]
+      // })
+      // const followings = user.Followings
+      const followings = await Followship.findAll({
+        // include: [{ model: User, as: followings }],
+        where: { followerId: req.params.id }
+      })
+      return res.json(followings)
+    } catch (err) { next(err) }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      // const user = await User.findByPk(req.params.id, {
+      //   include: [
+      //     { model: User, as: 'Followers' }]
+      // })
+      // const followers = user.Followers
+      const followers = await Followship.findAll({
+        where: { followingId: req.params.id }
+      })
+      return res.json(followers)
+    } catch (err) { next(err) }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      console.log('@@@@@@@', helpers.getUser(req))
+      const { name, email, password, account, bio } = req.body
+      const avatar = req.files.avatar || false
+      const cover = req.files.cover || false
+      const string = 's'
+      const user = await User.findByPk(req.params.id)
+      if (avatar && !cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(avatar[0].path, (err, img) => {
+          user.update({
+            name: name,
+            email: email,
+            password: password,
+            account: account,
+            bio: bio,
+            avatar: avatar ? img.data.link : req.body.avatar,
+          })
+          return res.json([user, { status: 'success', message: '個人頭貼更新成功' }])
+        })
+      } else if (!avatar && cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(cover[0].path, (err, img) => {
+          user.update({
+            name: name,
+            email: email,
+            password: password,
+            account: account,
+            bio: bio,
+            cover: cover ? img.data.link : req.body.cover,
+          })
+          return res.json([user, { status: 'success', message: '封面更新成功' }])
+        })
+      } else if (avatar && cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(avatar[0].path, (err, img) => {
+          user.update({
+            name: name,
+            email: email,
+            password: password,
+            account: account,
+            bio: bio,
+            avatar: avatar ? img.data.link : req.body.avatar,
+          })
+        })
+        imgur.upload(cover[0].path, (err, img) => {
+          user.update({
+            name: name,
+            email: email,
+            password: password,
+            account: account,
+            bio: bio,
+            cover: cover ? img.data.link : req.body.cover,
+          })
+        })
+        return res.json([user, { status: 'success', message: '個人資訊更新成功' }])
+      } else {
+        user.update({
+          name: name,
+          email: email,
+          password: password,
+          account: account,
+          bio: bio,
+        })
+        return res.json(user)
+      }
+    } catch (err) { next(err) }
+  },
 }
 
 module.exports = userController

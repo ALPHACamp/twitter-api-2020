@@ -3,6 +3,7 @@ function getUser(req) {
 }
 
 const passport = require('./config/passport')
+
 const authenticated = passport.authenticate('jwt', { session: false })
 
 function authenticatedUser(req, res, next) {
