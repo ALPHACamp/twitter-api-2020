@@ -1,8 +1,14 @@
-"use strict"
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Reply = sequelize.define(
-    "Reply",
+    'Reply',
     {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: DataTypes.INTEGER,
+      },
       UserId: DataTypes.INTEGER,
       TweetId: DataTypes.INTEGER,
       comment: DataTypes.TEXT,
