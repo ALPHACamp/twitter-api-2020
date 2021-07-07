@@ -1,16 +1,7 @@
 const { Tweet, Reply, Like, User, Sequelize } = require('../models')
 
 const tweetService = {
-  getTweets: async (whereQuery, admin) => {
-    if (admin) {
-      return await Tweet.findAll({
-        where: whereQuery,
-        attributes: { exclude: ['UserId'] },
-        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
-        order: [['createdAt', 'DESC']]
-      })
-    }
-
+  getTweets: async (whereQuery = {}) => {
     return await Tweet.findAll({
       where: whereQuery,
       attributes: [
@@ -23,6 +14,15 @@ const tweetService = {
         { model: Reply, attributes: [[Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount']] },
         { model: Like, attributes: [] }
       ],
+      order: [['createdAt', 'DESC']]
+    })
+  },
+
+  getTweetsForAdmin: async (whereQuery = {}) => {
+    return await Tweet.findAll({
+      where: whereQuery,
+      attributes: { exclude: ['UserId'] },
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
   },
