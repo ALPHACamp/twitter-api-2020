@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const { ImgurClient } = require('imgur')
 const client = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID })
-const { User, Tweet, Like, Reply } = require('../models')
+const { User, Tweet, Like, Reply, Followship } = require('../models')
 const { sequelize } = require('../models')
 const helpers = require('../_helpers')
 
@@ -244,16 +244,13 @@ let userController = {
 
     if (id !== userId) throw new Error('只能修改自己的 profile')
     if (!name) throw new Error('名字為必填')
-    if (introduction)
-      introduction.trim().length > 140
-        ? error.push({ status: 'error', message: '個人介紹最多 140 字' })
-        : (introduction = introduction.trim())
-    if (name)
-      name.trim().length > 15 ? error.push({ status: 'error', message: '名字最多 15 字' }) : (name = name.trim())
-
-    if (error.length) return res.json(error)
 
     try {
+      if (introduction)
+        introduction.trim().length > 140 ? error.push('個人介紹最多 140 字') : (introduction = introduction.trim())
+      if (name) name.trim().length > 15 ? error.push('名字最多 15 字') : (name = name.trim())
+      if (error.length) throw new Error(error)
+
       const user = await User.findByPk(id)
       if (!user) throw new Error('user not found.')
 
@@ -276,6 +273,41 @@ let userController = {
       })
 
       res.json({ status: 'success', message: 'update successfully' })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  addFollowing: async (req, res, next) => {
+    try {
+      if (Number(req.body.id) === helpers.getUser(req).id) throw new Error('你無法追蹤自己')
+      const isFollowing = await Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: req.body.id
+        }
+      })
+      if (isFollowing) return res.json({ status: 'success', message: '已追蹤過囉～' })
+
+      await Followship.create({ followerId: helpers.getUser(req).id, followingId: Number(req.body.id) })
+      return res.json({ status: 'success', message: '追蹤成功' })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  removeFollowing: async (req, res, next) => {
+    if (Number(req.params.userId) === helpers.getUser(req).id) {
+      return res.json({ status: 'error', message: '無法取消追蹤自己' })
+    }
+    try {
+      const followship = await Followship.findOne({
+        where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId }
+      })
+      if (!followship) res.json({ status: 'error', message: '已移除 follow' })
+
+      await followship.destroy()
+      return res.json({ status: 'success', message: 'unfollow successfully' })
     } catch (error) {
       next(error)
     }
