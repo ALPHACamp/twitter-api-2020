@@ -9,14 +9,14 @@ let followController = {
       where: { followerId: req.params.id },
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
-      order: [['createdAt', 'desc']],
       include: {
         model: User,
         as: "following",
         attributes: ['id', 'account', 'name', 'avatar',
           'likeNum', 'tweetNum', 'followingNum', 'followerNum']
       },
-      attributes: ['id', 'followingId', 'followerId']
+      attributes: ['id', 'followingId', 'followerId'],
+      order: [[{ model: User, as: "following" }, 'followerNum', 'desc']]
     }
     Followship.findAll(options)
       .then(followings => {
