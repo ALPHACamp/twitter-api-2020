@@ -46,6 +46,43 @@ const followController = {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
     }
+  },
+  removeFollowing: async (req, res) => {
+    try {
+      const followerId = req.user.id
+      const followingId = req.params.id
+
+      const followedUser = await User.findOne({
+        where: {
+          id: followingId,
+          role: 'user'
+        }
+      })
+
+      if (!followedUser | !followerId) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this followingId or followerId.' })
+      }
+
+      if (followerId === Number(followingId)) {
+        return res.status(403).json({ status: 'error', message: 'You cannot unfollow yourself' })
+      }
+
+      const followship = await Followship.findOne({
+        followerId,
+        followingId
+      })
+
+      if (!followship) {
+        return res.status(409).json({ status: 'error', message: `You didn't followed @${followedUser.account} before` })
+      }
+
+      await followship.destroy()
+
+      return res.status(200).json({ status: 'success', message: `Unfollowed @${followedUser.account}successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   }
 
 }
