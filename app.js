@@ -1,10 +1,11 @@
 const express = require('express')
 const session = require('express-session')
 const helpers = require('./_helpers');
-
 const app = express()
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const port = process.env.PORT || 3000
-
 const passport = require('./config/passport')
 
 app.use(express.urlencoded({ extended: true }))
@@ -15,7 +16,7 @@ app.use(session({
   saveUninitialized: false
 }))
 app.use(passport.initialize())
-
+app.use('/upload', express.static(__dirname + '/upload'))
 app.use((req, res, next) => {
   req.user = helpers.getUser(req)
   next()
