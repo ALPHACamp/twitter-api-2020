@@ -26,6 +26,23 @@ const tweetController = {
       next(err)
       return res.json({ status: 'error', message: err.toString() })
     }
+  },
+  postTweet: async (req, res, next) => {
+    // 推文內容不得空白，限 140 個字
+    const { description } = req.body
+    if (!description) return res.json({ status: 'error', message: "Description is required." })
+    if (description.length > 140) return res.json({ status: 'error', message: "The maximum length of a tweet is 140 characters." })
+
+    try {
+      await Tweet.create({
+        description,
+        UserId: req.user.id
+      })
+      return res.json({ status: 'success', message: 'Tweet was successfully created.' })
+    } catch (err) {
+      next(err)
+      return res.json({ status: 'error', message: err.toString() })
+    }
   }
 }
 

@@ -36,9 +36,11 @@ router.post('/signin', userController.signIn)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
+// router.get('/admin/users', adminController.getUsers)
 router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
 
 // tweet routes
 router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
+router.post('/tweets', authenticatedNotAdmin, tweetController.postTweet)
 
 module.exports = router
