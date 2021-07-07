@@ -5,6 +5,7 @@ const helpers = require('../_helpers.js')
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
+const tweetController = require('../controllers/tweetController.js')
 
 // jwt驗證
 const authenticated = passport.authenticate('jwt', { session: false })
@@ -31,8 +32,13 @@ const authenticatedNotAdmin = (req, res, next) => {
 // user routes
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
-router.get('/users/:id', authenticatedNotAdmin, userController.getUser)
+// router.get('/users/:id', authenticatedNotAdmin, userController.getUser)
+
 // admin routes
 router.post('/admin/signin', adminController.signIn)
+router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+
+// tweet routes
+router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
 
 module.exports = router
