@@ -128,18 +128,23 @@ let tweetController = {
       UserId: currentUserId,
       description: req.body.description,
       likeNum: 0,
-      replyNum: 0
+      replyNum: 0,
     }
     Tweet.create(data)
-      .then((tweet) =>
-        res
-          .status(200)
-          .json({ status: '200', message: 'Successfully posted new tweet.' })
-      )
+      .then((tweet) => {
+        User.findByPk(currentUserId)
+          .then((user) => user.increment({ tweetNum: 1 }))
+          .then(() =>
+            res.status(200).json({
+              status: '200',
+              message: 'Successfully posted new tweet.',
+            })
+          )
+      })
       .catch((error) =>
         res.status(400).json({
           status: 'error',
-          message: ''
+          message: '',
         })
       )
   },
