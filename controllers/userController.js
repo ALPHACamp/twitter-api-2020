@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -88,7 +88,24 @@ const userController = {
       console.log(err)
       next(err)
     }
-  }
+  },
+  getLikedTweets: async (req, res, next) => {
+    try {
+      // 得到使用者所有 Likes 的陣列後再 map 得到 Tweets array
+      let user = await User.findAll({
+        where: { id: req.params.id },
+        include: [{ model: Like, include: [Tweet] }],
+      })
+      const Likes = user[0].dataValues.Likes
+      const Tweets = Likes.map(like => {
+        return { ...like.dataValues.Tweet.dataValues }
+      })
+      return res.json({ Tweets })
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
 }
 
 module.exports = userController
