@@ -8,11 +8,14 @@ const Like = db.Like
 const TweetController = {
   getTweets: (req, res) => {
     return Tweet.findAll({
+      include: [User],
       order: [['createdAt', 'DESC']],
       raw: true,
       nest: true,
     })
-      .then(tweets => { return res.json({ tweets }) })
+      .then(tweets => {
+        return res.json(tweets)
+      })
 
   },
   getTweet: (req, res) => {
@@ -24,6 +27,7 @@ const TweetController = {
     })
       .then(tweet => {
         return res.json({
+          description: tweet.description,
           tweet,
           LikeCount: tweet.Likes.length
         })
