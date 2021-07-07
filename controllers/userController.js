@@ -1,4 +1,6 @@
 const bcrypt = require('bcryptjs')
+const { ImgurClient } = require('imgur')
+const client = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID })
 const { User, Tweet, Like, Reply } = require('../models')
 const { sequelize } = require('../models')
 const helpers = require('../_helpers')
@@ -18,7 +20,7 @@ let userController = {
     User.findOne({
       where: { account: req.body.account }
     })
-      .then((user) => {
+      .then(user => {
         if (!user) return res.status(401).json({ status: 'error', message: '此使用者尚未註冊' })
 
         if (!bcrypt.compareSync(req.body.password, user.password)) {
@@ -40,7 +42,7 @@ let userController = {
           }
         })
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
 
   signUp: (req, res, next) => {
@@ -55,7 +57,7 @@ let userController = {
           $or: { email: req.body.email, account: req.body.account }
         }
       })
-        .then((user) => {
+        .then(user => {
           if (user) {
             if (user.email === req.body.email) {
               throw new Error('信箱重複！')
@@ -69,12 +71,12 @@ let userController = {
               email: req.body.email,
               account: req.body.account,
               password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-            }).then((user) => {
+            }).then(user => {
               return res.json({ status: 'success', message: '成功註冊帳號！' })
             })
           }
         })
-        .catch((err) => next(err))
+        .catch(err => next(err))
     }
   },
 
@@ -110,7 +112,7 @@ let userController = {
       })
       if (!user) throw new Error('這名使用者不存在或已被刪除')
 
-      const tweets = user.toJSON().Tweets.map((t) => ({
+      const tweets = user.toJSON().Tweets.map(t => ({
         tweetId: t.id,
         userId: t.UserId,
         createdAt: t.createdAt,
@@ -164,7 +166,7 @@ let userController = {
       })
       if (!like) throw new Error('這名使用者不存在或已被刪除')
 
-      const data = like.toJSON().Likes.map((d) => ({
+      const data = like.toJSON().Likes.map(d => ({
         userId: d.UserId,
         TweetId: d.TweetId,
         userName: d.Tweet.User.name,
@@ -219,15 +221,61 @@ let userController = {
       })
       if (!followers) throw new Error('這名使用者不存在或已被刪除')
 
-      const data = followers.toJSON().Followers.map((d) => ({
+      const data = followers.toJSON().Followers.map(d => ({
         ...d,
         isFollowing: helpers
           .getUser(req)
-          .Followings.map((f) => f.id)
+          .Followings.map(f => f.id)
           .includes(d.followerId)
       }))
 
       res.json(data)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  putUserProfile: async (req, res, next) => {
+    let { name, introduction } = req.body
+    const { files } = req
+    const userId = helpers.getUser(req).id
+    const id = Number(req.params.userId)
+    const error = []
+
+    if (id !== userId) throw new Error('只能修改自己的 profile')
+    if (!name) throw new Error('名字為必填')
+    if (introduction)
+      introduction.trim().length > 140
+        ? error.push({ status: 'error', message: '個人介紹最多 140 字' })
+        : (introduction = introduction.trim())
+    if (name)
+      name.trim().length > 15 ? error.push({ status: 'error', message: '名字最多 15 字' }) : (name = name.trim())
+
+    if (error.length) return res.json(error)
+
+    try {
+      const user = await User.findByPk(id)
+      if (!user) throw new Error('user not found.')
+
+      const images = {}
+      if (files) {
+        for (const key in files) {
+          // req.files 是一個物件 (String -> Array) 键是文件名，值是文件陣列
+          // e.g. req.files['avatar'][0] -> File
+          console.log(files[key][0].path)
+          images[key] = await client.upload(files[key][0].path)
+        }
+      }
+
+      // console.log(images.avatar)
+      await user.update({
+        name,
+        introduction,
+        avatar: images.avatar ? images.avatar.data.link : user.avatar,
+        cover: images.cover ? images.cover.data.link : user.cover
+      })
+
+      res.json({ status: 'success', message: 'update successfully' })
     } catch (error) {
       next(error)
     }

@@ -5,6 +5,23 @@ const replyController = require('../controllers/replyController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
+const tweetController = require('../controllers/tweetController')
+const multer = require('multer')
+const upload = multer({
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      cb(new Error('只接受 jpg、jpeg、png 檔案'))
+    }
+    cb(null, true)
+  },
+  dest: 'temp/'
+})
+const cpUpload = upload.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'cover', maxCount: 1 }
+])
+
+
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) {
@@ -33,7 +50,7 @@ const authenticatedNotAdmin = (req, res, next) => {
   }
 }
 
-module.exports = (app) => {
+module.exports = app => {
   app.get('/', (req, res) => res.send('Hello World!'))
   app.post('/api/users', userController.signUp)
   app.post('/signin', userController.signIn)
@@ -43,11 +60,14 @@ module.exports = (app) => {
   app.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
   app.delete('/api/admin/tweets/:tweetId', authenticated, authenticatedAdmin, adminController.deleteTweets)
+
   // users
   app.get('/api/users/:userId', authenticated, authenticatedNotAdmin, userController.getUser)
   app.get('/api/users/:userId/tweets', authenticated, authenticatedNotAdmin, userController.getUserTweets)
   app.get('/api/users/:userId/replied_tweets', authenticated, authenticatedNotAdmin, userController.getAllReplies)
-  // app.put('/users/:userId/edit')
+
+  app.put('/api/users/:userId', authenticated, authenticatedNotAdmin, cpUpload, userController.putUserProfile)
+
   app.get('/api/users/:userId/likes', authenticated, authenticatedNotAdmin, userController.getLikes)
   app.get('/api/users/:userId/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
   app.get('/api/users/:userId/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
