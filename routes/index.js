@@ -80,8 +80,8 @@ module.exports = app => {
   app.post('/api/tweets/:tweetId/replies', authenticated, authenticatedNotAdmin, replyController.postReply)
   app.get('/api/tweets/:tweetId/replies', authenticated, authenticatedNotAdmin, replyController.getReply)
   // app.put('/tweets/:tweetId')
-  // app.post('/tweets/:tweetId/like')
-  // app.delete('/tweets/:tweetId/like')
+  app.post('/api/tweets/:tweetId/like', authenticated, tweetController.likeTweet)
+  app.post('/api/tweets/:tweetId/unlike', authenticated, tweetController.unlikeTweet)
   // // replies
   // app.post('/replies/:replyId/like')
   // app.delete('/replies/:replyId/like')
