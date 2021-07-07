@@ -24,7 +24,8 @@ const userController = {
         account,
         name,
         email,
-        password: hashPassword
+        password: hashPassword,
+        role: 'user'
       })
       return res.json({ status: 'success', message: '註冊成功' })
     }
@@ -59,15 +60,18 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id)
-      if (user === null) { return { status: 'error', message: '使用者不存在' } }
+      const user = await User.findByPk(req.params.id) || false
+      if (!user) return res.json({ status: 'error', message: '使用者不存在' })
       return res.json(user)
       // return res.json({ key: 'test' })
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({ where: { UserId: req.params.id } })
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [User]
+      })
       if (tweets.length === 0) {
         return res.json({ status: 'error', message: '使用者暫無貼文' })
       }
@@ -87,8 +91,10 @@ const userController = {
   },
   getUserLike: async (req, res, next) => {
     try {
-      const likes = await Like.findAll({
-        include: [{ model: Tweet, include: [User] }],
+      let likes = await Like.findAll({
+        include: [
+          User,
+          { model: Tweet, include: [User] }],
         where: { UserId: req.params.id }
       })
       return res.json(likes)
@@ -96,14 +102,11 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      // const user = await User.findByPk(req.params.id, {
-      //   include: [
-      //     { model: User, as: 'Followings' }]
-      // })
+      // const followsing = await Followship.findByPk(req.params.id)
       // const followings = user.Followings
       const followings = await Followship.findAll({
-        // include: [{ model: User, as: followings }],
-        where: { followerId: req.params.id }
+        where: { followerId: req.params.id },
+        include: [User]
       })
       return res.json(followings)
     } catch (err) { next(err) }

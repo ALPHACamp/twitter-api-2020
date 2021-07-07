@@ -8,4 +8,7 @@ module.exports = (app) => {
   app.use('/api/users', user)
   app.use('/api/tweets', helpers.authenticated, helpers.authenticatedUser, tweet)
   app.use('/api/admin', helpers.authenticated, helpers.authenticatedAdmin, admin)
+  app.use('/api/followships', helpers.authenticated, helpers.authenticatedUser, followship)
 }
+
+// helpers.authenticated, helpers.authenticatedUser,
