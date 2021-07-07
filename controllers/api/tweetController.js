@@ -46,6 +46,37 @@ let tweetController = {
         })
         .catch(() => res.status(404).json({ status: 'error', message: '' }))
     })
+  },
+  getTweet: (req, res) => {
+    const options = {
+      attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt', 'updatedAt', 'deletedAt', 'AdminId'],
+      include: [
+        { model: User, as: "User", attributes: ['id', 'account', 'name', 'avatar'] },
+        {
+          model: User, as: "LikedUsers", attributes: ['id'], through: {
+            attributes: []
+          }
+        }
+      ]
+    }
+    Tweet.findByPk(req.params.tweetId, options)
+      .then(tweet => {
+        tweet = tweet.toJSON();
+        const { id, description, likeNum, replyNum, createdAt, updatedAt, deletedAt, AdminId, User } = tweet
+        res.status(200).json({
+          id,
+          isLike: tweet.LikedUsers.some(user => user.id === currentUserId),
+          description,
+          likeNum,
+          replyNum,
+          createdAt,
+          updatedAt,
+          deletedAt,
+          AdminId,
+          User,
+        })
+      })
+      .catch(() => res.status(404).json({ status: 'error', message: '' }))
   }
 }
 
