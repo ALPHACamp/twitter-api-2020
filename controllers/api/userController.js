@@ -134,6 +134,13 @@ let userController = {
         })
       }
     }
+    // if there's a introduction update
+    if (introduction.length > 140) {
+      return res.status(401).json({
+        status: 'error',
+        message: "Can not post over 140 characters"
+      })
+    }
     User.findOne({ where: { account } }).then(user => {
       //check if account was already used
       if (account && user && user.id !== id) {
