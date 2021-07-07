@@ -148,6 +148,36 @@ let tweetController = {
         })
       )
   },
+  getUserTweets: (req, res) => {
+    const options = {
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
+      attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt'],
+      order: [['createdAt', 'desc']],
+      subQuery: false,
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar'],
+          as: 'User'
+        },
+        {
+          model: User,
+          as: 'LikedUsers',
+          attributes: ['id']
+        }
+      ],
+      where: { UserId: req.params.id }
+    }
+    Tweet.findAll(options).then(tweets => {
+      tweets = tweets.map(tweet => {
+        tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(likedUser => likedUser.id === currentUserId)
+        delete tweet.dataValues.LikedUsers
+        return tweet
+      })
+      return res.status(200).json(tweets)
+    }).catch(error => res.status(500).json({ status: 'error', message: error }))
+  }
 }
 
 module.exports = tweetController
