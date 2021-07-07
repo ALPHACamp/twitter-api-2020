@@ -165,7 +165,7 @@ const userController = {
         account: follower.dataValues.account,
         avatar: follower.dataValues.avatar,
         bio: follower.dataValues.bio,
-        isFollowed: helpers.getUser(req).Followers.map(follower => follower.id).includes(follower.dataValues.id)
+        isFollowed: helpers.getUser(req).Followings.map(follower => follower.id).includes(follower.dataValues.id)
       }))
       return res.json(followers)
     } catch (err) { next(err) }
