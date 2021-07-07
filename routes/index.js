@@ -69,7 +69,7 @@ module.exports = app => {
   app.get('/api/users/:userId/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
   app.get('/api/users/:userId/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
   app.post('/api/followships', authenticated, authenticatedNotAdmin, userController.addFollowing)
-  // app.delete('/users/:userId/follow')
+  app.delete('/api/followships/:followingId', authenticated, authenticatedNotAdmin, userController.removeFollowing)
   // // tweets
   app.get('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.getTweets)
   app.get('/api/tweets/:tweetId', authenticated, authenticatedNotAdmin, tweetController.getTweet)

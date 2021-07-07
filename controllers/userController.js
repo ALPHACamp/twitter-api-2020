@@ -289,23 +289,42 @@ let userController = {
       })
       if (isFollowing) return res.json({ status: 'success', message: '已追蹤過囉～' })
 
-      const data = await Followship.create({ followerId: helpers.getUser(req).id, followingId: Number(req.body.id) })
-
-      // ============================== 測試用 ================================================ //
-      console.log(data.toJSON())
-      const test = await Followship.findAll({ raw: true, nest: true, attributes: ['id', 'followerId', 'followingId'] })
-      console.log('Followship all data:', test)
-      console.log('===============================================================================')
-      const test2 = await Followship.findByPk(1)
-      console.log('findByPk(1):')
-      console.log(test2)
-      console.log('===============================================================================')
-      const test3 = await Followship.findByPk(2)
-      console.log('findByPk(2):')
-      console.log(test3.toJSON())
-      // ================================== 測試用 ============================================ //
-
+      await Followship.create({ followerId: helpers.getUser(req).id, followingId: Number(req.body.id) })
       return res.json({ status: 'success', message: '追蹤成功' })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  removeFollowing: async (req, res, next) => {
+    if (Number(req.params.userId) === helpers.getUser(req).id) {
+      return res.json({ status: 'error', message: '無法取消追蹤自己' })
+    }
+    try {
+      const followship = await Followship.findOne({
+        where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId }
+      })
+      if (!followship) res.json({ status: 'error', message: '已移除 follow' })
+
+      await followship.destroy()
+      return res.json({ status: 'success', message: 'unfollow successfully' })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  removeFollowing: async (req, res, next) => {
+    if (Number(req.params.userId) === helpers.getUser(req).id) {
+      return res.json({ status: 'error', message: '無法取消追蹤自己' })
+    }
+    try {
+      const followship = await Followship.findOne({
+        where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId }
+      })
+      if (!followship) res.json({ status: 'error', message: '已移除 follow' })
+
+      await followship.destroy()
+      return res.json({ status: 'success', message: 'unfollow successfully' })
     } catch (error) {
       next(error)
     }
