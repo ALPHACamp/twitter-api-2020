@@ -126,7 +126,7 @@ const tweetController = {
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.json({ status: 'error', message: '找不到此推文' })
       await Reply.create({
-        content,
+        content: content.trim(),
         UserId: req.user.id,
         TweetId
       })
