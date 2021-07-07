@@ -1,10 +1,9 @@
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-const imgur = require('imgur-node-api')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
-
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 
 const userController = {
@@ -119,7 +118,7 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const { name, email, password, account, bio } = req.body
+      let { name, email, password, account, bio } = req.body
       const avatar = req.files.avatar || false
       const cover = req.files.cover || false
       const user = await User.findByPk(req.params.id)
@@ -127,12 +126,13 @@ const userController = {
         imgur.setClientID(IMGUR_CLIENT_ID)
         imgur.upload(avatar[0].path, (err, img) => {
           user.update({
-            name: name,
-            email: email,
-            password: password,
-            account: account,
-            bio: bio,
-            avatar: avatar ? img.data.link : req.body.avatar,
+            name: name || helpers.getUser(req).name,
+            email: email || helpers.getUser(req).email,
+            password: password || helpers.getUser(req).password,
+            account: account || helpers.getUser(req).account,
+            bio: bio || helpers.getUser(req).bio,
+            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+            cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
           return res.json([user, { status: 'success', message: '個人頭貼更新成功' }])
         })
@@ -140,12 +140,13 @@ const userController = {
         imgur.setClientID(IMGUR_CLIENT_ID)
         imgur.upload(cover[0].path, (err, img) => {
           user.update({
-            name: name,
-            email: email,
-            password: password,
-            account: account,
-            bio: bio,
-            cover: cover ? img.data.link : req.body.cover,
+            name: name || helpers.getUser(req).name,
+            email: email || helpers.getUser(req).email,
+            password: password || helpers.getUser(req).password,
+            account: account || helpers.getUser(req).account,
+            bio: bio || helpers.getUser(req).bio,
+            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+            cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
           return res.json([user, { status: 'success', message: '封面更新成功' }])
         })
@@ -153,42 +154,46 @@ const userController = {
         imgur.setClientID(IMGUR_CLIENT_ID)
         imgur.upload(avatar[0].path, (err, img) => {
           user.update({
-            name: name,
-            email: email,
-            password: password,
-            account: account,
-            bio: bio,
-            avatar: avatar ? img.data.link : req.body.avatar,
+            name: name || helpers.getUser(req).name,
+            email: email || helpers.getUser(req).email,
+            password: password || helpers.getUser(req).password,
+            account: account || helpers.getUser(req).account,
+            bio: bio || helpers.getUser(req).bio,
+            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+            cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
         })
         imgur.upload(cover[0].path, (err, img) => {
           user.update({
-            name: name,
-            email: email,
-            password: password,
-            account: account,
-            bio: bio,
-            cover: cover ? img.data.link : req.body.cover,
+            name: name || helpers.getUser(req).name,
+            email: email || helpers.getUser(req).email,
+            password: password || helpers.getUser(req).password,
+            account: account || helpers.getUser(req).account,
+            bio: bio || helpers.getUser(req).bio,
+            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+            cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
         })
         return res.json([user, { status: 'success', message: '個人資訊更新成功' }])
       } else {
         user.update({
-          name: name,
-          email: email,
-          password: password,
-          account: account,
-          bio: bio,
+          name: name || helpers.getUser(req).name,
+          email: email || helpers.getUser(req).email,
+          password: password || helpers.getUser(req).password,
+          account: account || helpers.getUser(req).account,
+          bio: bio || helpers.getUser(req).bio,
+          avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+          cover: cover ? img.data.link : helpers.getUser(req).cover,
         })
         return res.json(user)
       }
     } catch (err) { next(err) }
   },
-  logout: (req, res) => {
-    req.logout()
-    res.json({ status: 'success', message: '成功登出' })
-    return res.redirect('/api/users/signin')
-  },
+  // logout: (req, res) => {
+  //   req.logout()
+  //   res.json({ status: 'success', message: '成功登出' })
+  //   return res.redirect('/api/users/signin')
+  // },
 }
 
 module.exports = userController
