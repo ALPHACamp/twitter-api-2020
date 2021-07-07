@@ -8,45 +8,111 @@ let currentUserId = 1
 
 let tweetController = {
   getTweets: (req, res) => {
-    let limit = req.query.limit || defaultLimit
-    let offset = req.query.offset || 0
-    const userAttr = ['id', 'account', 'name', 'avatar']
-    const tweetAttr = ['id', 'description', 'likeNum', 'replyNum', 'createdAt']
-    const order = [['createdAt', 'desc']]
-    Like.findAll({
-      raw: true,
-      attributes: ['TweetId'],
-      where: { UserId: currentUserId }
-    }).then((userlike) => {
-      Tweet.findAll({
-        raw: true,
-        nest: true,
-        limit,
-        offset,
-        attributes: tweetAttr,
-        order,
-        include: [
-          {
-            model: User,
-            attributes: userAttr
+    const options = {
+      limit: req.query.limit || defaultLimit,
+      offset: req.query.offset || 0,
+      attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt'],
+      order: [['createdAt', 'desc']],
+      subQuery: false,
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'account', 'name', 'avatar'],
+          as: 'User',
+        },
+        {
+          model: User,
+          as: 'LikedUsers',
+          attributes: ['id'],
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+    }
+    Tweet.findAll(options)
+      .then((tweets) => {
+        tweets = tweets.map((tweet) => {
+          const {
+            id,
+            description,
+            likeNum,
+            replyNum,
+            createdAt,
+            updatedAt,
+            deletedAt,
+            AdminId,
+            User,
+          } = tweet
+          return {
+            id,
+            isLike: tweet.LikedUsers.some((user) => user.id === currentUserId),
+            description: description.substring(0, 50),
+            likeNum,
+            replyNum,
+            createdAt,
+            updatedAt,
+            deletedAt,
+            AdminId,
+            User,
           }
-        ]
-      })
-        .then((tweets) => {
-          tweets = tweets.map((tweet) => ({
-            id: tweet.id,
-            description: tweet.description.substring(0, 50),
-            isLike: userlike.some((like) => like.TweetId === tweet.id),
-            likeNum: tweet.likeNum,
-            replyNum: tweet.replyNum,
-            createdAt: tweet.createdAt,
-            User: tweet.User
-          }))
-          return res.status(200).json(tweets)
         })
-        .catch(() => res.status(404).json({ status: 'error', message: '' }))
-    })
-  }
+        return res.status(200).json(tweets)
+      })
+      .catch(() => res.status(404).json({ status: 'error', message: '' }))
+  },
+  getTweet: (req, res) => {
+    const options = {
+      attributes: [
+        'id',
+        'description',
+        'likeNum',
+        'replyNum',
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
+        'AdminId',
+      ],
+      include: [
+        {
+          model: User,
+          as: 'LikedUsers',
+          attributes: ['id'],
+          through: {
+            attributes: [],
+          },
+        },
+      ],
+    }
+    Tweet.findByPk(req.params.tweetId, options)
+      .then((tweet) => {
+        tweet = tweet.toJSON()
+        const {
+          id,
+          description,
+          likeNum,
+          replyNum,
+          createdAt,
+          updatedAt,
+          deletedAt,
+          AdminId,
+          User,
+        } = tweet
+        res.status(200).json({
+          id,
+          isLike: tweet.LikedUsers.some((user) => user.id === currentUserId),
+          description,
+          likeNum,
+          replyNum,
+          createdAt,
+          updatedAt,
+          deletedAt,
+          AdminId,
+          User,
+        })
+      })
+      .catch(() => res.status(404).json({ status: 'error', message: '' }))
+  },
 }
 
 module.exports = tweetController
