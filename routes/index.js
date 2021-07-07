@@ -1,8 +1,9 @@
 const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
+const tweetController = require('../controllers/tweetController')
+const replyController = require('../controllers/replyController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
-const tweetController = require('../controllers/tweetController')
 
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -81,7 +82,12 @@ module.exports = (app) => {
   app.get('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.getTweets)
   app.get('/api/tweets/:tweetId', authenticated, authenticatedNotAdmin, tweetController.getTweet)
   app.post('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.postTweets)
-  // app.post('/tweets/:tweetId/replies')
+  app.post(
+    '/api/tweets/:tweetId/replies',
+    authenticated,
+    authenticatedNotAdmin,
+    replyController.postReply
+  )
   // app.put('/tweets/:tweetId')
   // app.post('/tweets/:tweetId/like')
   // app.delete('/tweets/:tweetId/like')
