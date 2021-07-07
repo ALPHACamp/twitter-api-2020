@@ -65,7 +65,14 @@ let replyController = {
       where: { UserId: req.params.id },
       include: {
         model: Tweet,
-        as: 'repliedTweet'
+        as: 'repliedTweet',
+        attributes: [
+          'id',
+          'description',
+          'likeNum',
+          'replyNum',
+          'createdAt'
+        ]
       },
       order: [['createdAt', 'desc']]
     }
