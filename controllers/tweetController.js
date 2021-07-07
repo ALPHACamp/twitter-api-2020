@@ -22,7 +22,7 @@ const tweetController = {
         replyCount: 0,
         likeCount: 0
       }).then(tweet => {
-        return res.status(201).json({
+        return res.status(200).json({
           id: tweet.id,
           status: 'success',
           message: 'Create tweet successfully'
