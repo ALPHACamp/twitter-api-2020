@@ -57,6 +57,38 @@ let likeController = {
           message: ''
         })
       )
+  },
+  deleteLike: (req, res) => {
+    Like.findOne({
+      where: { TweetId: req.params.tweetId, UserId: currentUserId }
+    })
+      .then((Like) =>
+        Like.destroy().then(() =>
+          Promise.all([
+            Tweet.findByPk(req.params.tweetId).then((tweet) =>
+              tweet.decrement({ likeNum: 1 })
+            ),
+            User.findByPk(currentUserId).then((user) =>
+              user.decrement({ likeNum: 1 })
+            )
+          ])
+            .then(() =>
+              res.status(200).json({
+                status: 'success',
+                message: 'Successfully unliked tweet.'
+              })
+            )
+            .catch((error) =>
+              res.json(500).json({ status: 'error', message: error })
+            )
+        )
+      )
+      .catch((error) =>
+        res.status(400).json({
+          status: 'error',
+          message: ''
+        })
+      )
   }
 }
 
