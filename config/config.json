@@ -9,10 +9,9 @@
   "test": {
     "username": "root",
     "password": "password",
-    "database": "ac_twitter_workspace_test",
+    "database": "ac_twitter_workspacetest",
     "host": "127.0.0.1",
-    "dialect": "mysql",
-    "logging": false
+    "dialect": "mysql"
   },
   "production": {
     "username": "root",

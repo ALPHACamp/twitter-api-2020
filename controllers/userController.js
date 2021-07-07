@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const Sequelize = require('sequelize')
 
 
 const userController = {
@@ -60,9 +61,13 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id) || false
+      const user = await User.findByPk(req.params.id, {
+        attributes: [
+          'account', 'name', 'email', 'password'
+        ]
+      }) || false
       if (!user) return res.json({ status: 'error', message: '使用者不存在' })
-      return res.json(user)
+      return res.json({ status: 'success', message: user })
       // return res.json({ key: 'test' })
     } catch (err) { next(err) }
   },
@@ -70,31 +75,55 @@ const userController = {
     try {
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
-        include: [User]
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
+        ],
+        include: [
+          {
+            model: User, attributes: ['account', 'name', 'avatar', 'cover', 'bio']
+          }],
       })
       if (tweets.length === 0) {
         return res.json({ status: 'error', message: '使用者暫無貼文' })
       }
-      return res.json(tweets)
+      return res.json({ status: 'success', message: tweets })
     } catch (err) { next(err) }
   },
   getUserRepliedTweets: async (req, res, next) => {
     try {
       const replies = await Reply.findAll({
         where: { UserId: req.params.id },
-        include: [Tweet]
+        include: [{
+          model: Tweet,
+          include: [{ model: User, attributes: ['avatar', 'name', 'account'] }],
+          attributes: [
+            'id',
+            'description',
+            'createdAt',
+            [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
+          ]
+        }],
+        order: [['createdAt', 'DESC']]
       })
-      const tweets = await replies.map(reply => reply.Tweet)
-      if (tweets.length === 0) return res.json({ status: 'error', message: '沒有回覆的推文' })
-      return res.json(replies)
+      if (replies.length === 0) return res.json({ status: 'error', message: '沒有回覆的推文' })
+      return res.json({ status: 'success', message: replies })
     } catch (err) { next(err) }
   },
   getUserLike: async (req, res, next) => {
     try {
       let likes = await Like.findAll({
         include: [
-          User,
-          { model: Tweet, include: [User] }],
+          { model: User, attributes: ['account', 'name', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['description'],
+            include: [{ model: User, attributes: ['account', 'name', 'avatar'] }]
+          }],
         where: { UserId: req.params.id }
       })
       return res.json(likes)
@@ -102,12 +131,8 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      // const followsing = await Followship.findByPk(req.params.id)
-      // const followings = user.Followings
-      const followings = await Followship.findAll({
-        where: { followerId: req.params.id },
-        include: [User]
-      })
+      const followings = await Followship.findById(4)
+      // const followings = await User.findById(4)
       return res.json(followings)
     } catch (err) { next(err) }
   },
@@ -192,11 +217,12 @@ const userController = {
       }
     } catch (err) { next(err) }
   },
-  // logout: (req, res) => {
-  //   req.logout()
-  //   res.json({ status: 'success', message: '成功登出' })
-  //   return res.redirect('/api/users/signin')
-  // },
 }
 
 module.exports = userController
+
+// const followings = user.Followings
+      // const followings = await Followship.findAll({
+      //   where: { followerId: req.params.id },
+      //   // include: [{ model: User, as: 'Followings' }]
+      // })
