@@ -275,7 +275,7 @@ let userController = {
         cover: images.cover ? images.cover.data.link : user.cover
       })
 
-      res.json({ status: 'update successfully' })
+      res.json({ status: 'success', message: 'update successfully' })
     } catch (error) {
       next(error)
     }
