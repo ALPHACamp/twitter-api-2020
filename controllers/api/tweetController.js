@@ -9,8 +9,8 @@ let currentUserId = 1
 let tweetController = {
   getTweets: (req, res) => {
     const options = {
-      limit: req.query.limit || defaultLimit,
-      offset: req.query.offset || 0,
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
       attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt'],
       order: [['createdAt', 'desc']],
       subQuery: false,

@@ -5,8 +5,8 @@ const defaultLimit = 10
 
 let userController = {
   getUsers: (req, res) => {
-    const offset = req.query.offset || 0
-    const limit = req.query.limit || defaultLimit
+    const offset = +req.query.offset || 0
+    const limit = +req.query.limit || defaultLimit
     const userId = 1 //before building JWT
     const order = [['followerNum', 'DESC']]
     const attributes = ['id', 'account', 'name', 'avatar', 'cover', 'tweetNum', 'likeNum', 'followingNum', 'followerNum', 'lastLoginAt']
