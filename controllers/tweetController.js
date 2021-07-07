@@ -17,7 +17,8 @@ const tweetController = {
         ],
         include: [
           { model: User, attributes: ['avatar', 'name', 'account'] },
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
       if (!tweets.length) return res.json({ status: 'error', message: '目前查無任何推文' })
       return res.json({ status: 'success', message: tweets })
