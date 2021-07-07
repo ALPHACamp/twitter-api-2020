@@ -1,7 +1,10 @@
 const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
+const tweetController = require('../controllers/tweetController')
+const replyController = require('../controllers/replyController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
+
 const tweetController = require('../controllers/tweetController')
 const multer = require('multer')
 const upload = multer({
@@ -17,6 +20,7 @@ const cpUpload = upload.fields([
   { name: 'avatar', maxCount: 1 },
   { name: 'cover', maxCount: 1 }
 ])
+
 
 function authenticated(req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -55,12 +59,15 @@ module.exports = app => {
   // admin
   app.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
-  app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweets)
+  app.delete('/api/admin/tweets/:tweetId', authenticated, authenticatedAdmin, adminController.deleteTweets)
+
   // users
   app.get('/api/users/:userId', authenticated, authenticatedNotAdmin, userController.getUser)
   app.get('/api/users/:userId/tweets', authenticated, authenticatedNotAdmin, userController.getUserTweets)
   app.get('/api/users/:userId/replied_tweets', authenticated, authenticatedNotAdmin, userController.getAllReplies)
+
   app.put('/api/users/:userId', authenticated, authenticatedNotAdmin, cpUpload, userController.putUserProfile)
+
   app.get('/api/users/:userId/likes', authenticated, authenticatedNotAdmin, userController.getLikes)
   app.get('/api/users/:userId/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
   app.get('/api/users/:userId/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
@@ -68,9 +75,10 @@ module.exports = app => {
   // app.delete('/users/:userId/follow')
   // // tweets
   app.get('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.getTweets)
-  // app.get('/tweets/:tweetId')
+  app.get('/api/tweets/:tweetId', authenticated, authenticatedNotAdmin, tweetController.getTweet)
   app.post('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.postTweets)
-  // app.post('/tweets/:tweetId/replies')
+  app.post('/api/tweets/:tweetId/replies', authenticated, authenticatedNotAdmin, replyController.postReply)
+  app.get('/api/tweets/:tweetId/replies', authenticated, authenticatedNotAdmin, replyController.getReply)
   // app.put('/tweets/:tweetId')
   // app.post('/tweets/:tweetId/like')
   // app.delete('/tweets/:tweetId/like')
