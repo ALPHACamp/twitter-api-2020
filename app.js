@@ -37,6 +37,12 @@ app.use((req, res, next) => {
   return next()
 })
 
+// for mocha test's requirement
+app.use((req, res, next) => {
+  req.user = helpers.getUser(req)
+  next()
+})
+
 app.use(routes)
 
 app.get('/', (req, res) => res.send('Hello World!'))
