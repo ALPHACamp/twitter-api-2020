@@ -98,7 +98,7 @@ let userController = {
     const id = Number(req.params.id)
     const userId = 1 //before building JWT
     const { name, account, password, email, passwordNew, passwordNewCheck, introduction, avatar, cover } = req.body
-    const files = req
+    const { files } = req
     async function saveAndRes(user) {
       await user.save()
       delete user.dataValues.password
@@ -135,7 +135,7 @@ let userController = {
       }
     }
     // if there's a introduction update
-    if (introduction.length > 140) {
+    if (introduction && (introduction.length > 140)) {
       return res.status(401).json({
         status: 'error',
         message: "Can not post over 140 characters"
@@ -175,12 +175,12 @@ let userController = {
             user.introduction = introduction || user.introduction
 
             // if there's image upload
-            if (files.files && (files.files.avatar || files.files.cover)) {
+            if (files && (files.avatar || files.cover)) {
               imgur.setClientID(IMGUR_CLIENT_ID)
-              if (files.files.avatar) {
-                imgur.upload(files.files.avatar[0].path, async (err, avatar) => {
-                  if (files.files.cover) {
-                    imgur.upload(files.files.cover[0].path, async (err, cover) => {
+              if (files.avatar) {
+                imgur.upload(files.avatar[0].path, async (err, avatar) => {
+                  if (files.cover) {
+                    imgur.upload(files.cover[0].path, async (err, cover) => {
                       user.avatar = avatar.data.link || user.avatar
                       user.cover = cover.data.link || user.cover
                       await saveAndRes(user)
@@ -192,7 +192,7 @@ let userController = {
                   }
                 })
               } else {
-                imgur.upload(files.files.cover[0].path, async (err, cover) => {
+                imgur.upload(files.cover[0].path, async (err, cover) => {
                   user.avatar = user.avatar
                   user.cover = cover.data.link || user.cover
                   await saveAndRes(user)
