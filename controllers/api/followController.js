@@ -1,11 +1,15 @@
 const db = require('../../models')
 const Followship = db.Followship
 const User = db.User
+const defaultLimit = 10
 
 let followController = {
   getUserFollowers: (req, res) => {
     const options = {
       where: { followingId: req.params.id },
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
+      order: [['createdAt', 'desc']],
       include: {
         model: User,
         as: "follower",
