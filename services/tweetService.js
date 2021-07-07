@@ -1,19 +1,21 @@
 const { Tweet, Reply, Like, User, Sequelize } = require('../models')
 
 const tweetService = {
-  getTweets: async (whereQuery = {}) => {
+  getTweets: async (currentUserId, whereQuery = {}) => {
     return await Tweet.findAll({
       where: whereQuery,
       attributes: [
-        'id', 'description', 'createdAt',
+        'id',
+        'createdAt',
         [Sequelize.literal('substring(description,1,50)'), 'description'],
-        [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount']
+        [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
+        [Sequelize.literal(`if(exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id), 'true','false')`), 'isLike']
       ],
       group: 'id',
       include: [
+        { model: Like, attributes: [] },
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Reply, attributes: [[Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount']] },
-        { model: Like, attributes: [] }
+        { model: Reply, attributes: [[Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount']] }
       ],
       order: [['createdAt', 'DESC']]
     })
