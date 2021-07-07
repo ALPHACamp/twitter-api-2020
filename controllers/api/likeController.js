@@ -92,6 +92,9 @@ let likeController = {
   },
   getUserLikes: (req, res) => {
     const options = {
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
+      order: [['createdAt', 'desc']],
       attributes: ['id', 'UserId', 'TweetId'],
       where: { UserId: req.params.id },
       include: {
