@@ -3,7 +3,7 @@ const tweet = require('./tweet')
 const reply = require('./reply')
 
 module.exports = (app) => {
-  app.use('/api/users', user)
-  app.use('/api/tweets', tweet)
-  app.use('/api/replies', reply)
+  app.use('/api/users', helpers.authenticated, helpers.authenticatedUser, user)
+  app.use('/api/tweets', helpers.authenticated, helpers.authenticatedUser, tweet)
+  app.use('/api/replies', helpers.authenticated, helpers.authenticatedUser, reply)
 }
