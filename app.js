@@ -23,7 +23,8 @@ app.use(methodOverride('_method'))
 //   // passport.authenticate('jwt', { ses...
 // };
 
-passport(app)
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use((req, res, next) => {
   if (!req.header('Authorization')) {
