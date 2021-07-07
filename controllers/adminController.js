@@ -35,6 +35,7 @@ const adminController = {
         }
       })
     } catch (err) {
+      console.log(err)
       next(err)
     }
   }
