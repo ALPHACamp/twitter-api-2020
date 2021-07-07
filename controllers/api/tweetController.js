@@ -29,7 +29,7 @@ let tweetController = {
           },
         },
       ],
-    };
+    }
     Tweet.findAll(options)
       .then((tweets) => {
         tweets = tweets.map((tweet) => {
@@ -47,7 +47,7 @@ let tweetController = {
           return {
             id,
             isLike: tweet.LikedUsers.some((user) => user.id === currentUserId),
-            description:description.substring(0,50),
+            description: description.substring(0, 50),
             likeNum,
             replyNum,
             createdAt,
@@ -56,29 +56,51 @@ let tweetController = {
             AdminId,
             User,
           }
-        });
-        return res.status(200).json(tweets);
+        })
+        return res.status(200).json(tweets)
       })
-      .catch(() => res.status(404).json({ status: 'error', message: '' }));
+      .catch(() => res.status(404).json({ status: 'error', message: '' }))
   },
   getTweet: (req, res) => {
     const options = {
-      attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt', 'updatedAt', 'deletedAt', 'AdminId'],
+      attributes: [
+        'id',
+        'description',
+        'likeNum',
+        'replyNum',
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
+        'AdminId',
+      ],
       include: [
         {
-          model: User, as: "LikedUsers", attributes: ['id'], through: {
-            attributes: []
-          }
-        }
-      ]
+          model: User,
+          as: 'LikedUsers',
+          attributes: ['id'],
+          through: {
+            attributes: [],
+          },
+        },
+      ],
     }
     Tweet.findByPk(req.params.tweetId, options)
-      .then(tweet => {
-        tweet = tweet.toJSON();
-        const { id, description, likeNum, replyNum, createdAt, updatedAt, deletedAt, AdminId, User } = tweet
+      .then((tweet) => {
+        tweet = tweet.toJSON()
+        const {
+          id,
+          description,
+          likeNum,
+          replyNum,
+          createdAt,
+          updatedAt,
+          deletedAt,
+          AdminId,
+          User,
+        } = tweet
         res.status(200).json({
           id,
-          isLike: tweet.LikedUsers.some(user => user.id === currentUserId),
+          isLike: tweet.LikedUsers.some((user) => user.id === currentUserId),
           description,
           likeNum,
           replyNum,
@@ -90,7 +112,7 @@ let tweetController = {
         })
       })
       .catch(() => res.status(404).json({ status: 'error', message: '' }))
-  }
+  },
 }
 
 module.exports = tweetController
