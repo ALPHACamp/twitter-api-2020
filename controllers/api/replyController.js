@@ -9,8 +9,8 @@ let currentUserId = 1
 let replyController = {
   getReplies: (req, res) => {
     const options = {
-      limit: req.query.limit || defaultLimit,
-      offset: req.query.offset || 0,
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
       where: {
         TweetId: req.params.tweetId,
       },
