@@ -26,6 +26,7 @@ const adminService = {
         [Sequelize.literal('count(distinct Followings.id)'), 'FollowingsCount']
       ],
       group: 'id',
+      order: [[Sequelize.literal('TweetsCount'), 'DESC']],
       include: [
         { model: Tweet, attributes: [] },
         { model: Like, attributes: [] },
