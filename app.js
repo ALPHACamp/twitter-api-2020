@@ -29,13 +29,20 @@ app.use(passport.session())
 app.use((req, res, next) => {
   if (!req.header('Authorization')) {
     return next()
-  } 
+  }
 
   const token = req.header('Authorization').replace('Bearer ', '')
-  const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
-  req.user = decoded
-  return next()
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'invalid token'
+      })
+    } else {
+      req.user = decoded
+      return next()
+    }
+  })
 })
 
 // for mocha test's requirement
