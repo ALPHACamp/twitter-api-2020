@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken')
 const userService = require('../services/userService')
 const tweetService = require('../services/tweetService')
 
+const imgurUpload = require('../utils/imgurUpload')
+
 const userController = {
   signIn: async (req, res, next) => {
     try {
@@ -83,6 +85,19 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       const { password, ...formBody } = req.body
+      const { files } = req
+      if (files) {
+        if (files.avatar) {
+          const [avatarData] = files.avatar
+          const avatar = await imgurUpload(avatarData.path)
+          formBody.avatar = avatar
+        }
+        if (files.cover) {
+          const [coverData] = files.cover
+          const cover = await imgurUpload(coverData.path)
+          formBody.cover = cover
+        }
+      }
 
       const user = await userService.putUser(req.params.user_id, {
         ...formBody
