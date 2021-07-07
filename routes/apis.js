@@ -36,7 +36,7 @@ router.get('/users/:id', userController.getUser)
 router.post('/admin/signin', authenticatedNotAdmin, adminController.signIn)
 
 // followship
-router.post('/followships', authenticatedNotAdmin, followshipController.addFollowing)
-router.delete('/followships/:followingId', authenticatedNotAdmin, followshipController.removeFollowing)
+router.post('/followships', authenticated, authenticatedNotAdmin, followshipController.addFollowing)
+router.delete('/followships/:followingId', authenticated, authenticatedNotAdmin, followshipController.removeFollowing)
 
 module.exports = router
