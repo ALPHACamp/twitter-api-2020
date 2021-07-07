@@ -13,7 +13,7 @@ module.exports = {
         id: userIndex * 10 + (postIndex + 1),
         UserId: user.UserId,
         description: faker.lorem.sentence(5, 139),
-        replyCount: 0,
+        replyCount: 3,
         likeCount: 0,
         createdAt: new Date(),
         updatedAt: new Date()
