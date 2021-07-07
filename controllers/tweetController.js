@@ -74,7 +74,10 @@ const tweetController = {
       if (description.length > 140) {
         return res.json({ status: 'error', message: '已超過推文最高上限140字' })
       }
-      await Tweet.create({ description, UserId: req.user.id })
+      await Tweet.create({
+        description: description.trim(),
+        UserId: req.user.id
+      })
       return res.json({ status: 'success', message: '推文新增成功' })
     }
     catch (err) {
