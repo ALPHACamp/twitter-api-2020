@@ -38,6 +38,7 @@ router.post('/signin', userController.signIn)
 router.post('/admin/signin', adminController.signIn)
 // router.get('/admin/users', adminController.getUsers)
 router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', adminController.deleteTweet)
 
 // tweet routes
 router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)

@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
@@ -44,8 +44,35 @@ const adminController = {
       next(err)
     }
   },
+  getUsers: async (req, res, next) => {
+    // to be continued.
+    try {
+      // 資料按推文數排列，如果 role = admin，不用顯示
+      // 要包括關注人數、跟隨者人數、推文 (tweet) 數量、推文被 like 的數量
+      const result = await User.findAll({
+        raw: true,
+        nest: true,
+        attributes: ['id', 'name', 'account', 'avatar', 'cover', 'followingCounts', 'followerCounts'],
+        include: [
+          { model: Tweet },
+          { model: Like },
+        ]
+      })
+      // 將取得資料做整理
+      const users = result.map(user => ({
+        ...user,
+        createdAt: moment(user.createdAt).format('YYYY-MM-DD kk:mm:ss')
+      }))
+      return res.json({ status: 'success', users })
+    } catch (err) {
+      // 把失誤 pass 給 express，並將失誤訊息 pass 給前端
+      next(err)
+      return res.json({ status: 'error', message: err.toString() })
+    }
+  },
   getTweets: async (req, res, next) => {
     try {
+      // 資料按發文日期 desc 排列
       const result = await Tweet.findAll({
         raw: true,
         nest: true,
@@ -65,6 +92,16 @@ const adminController = {
         createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
       }))
       return res.json({ status: 'success', tweets })
+    } catch (err) {
+      next(err)
+      return res.json({ status: 'error', message: err.toString() })
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      tweet.destroy()
+      return res.json({ status: 'success', message: 'Tweet deleted successfully.' })
     } catch (err) {
       next(err)
       return res.json({ status: 'error', message: err.toString() })
