@@ -122,7 +122,7 @@ const userController = {
       const tweets = await tweetService.getTweets({
         UserId: req.params.user_id
       })
-      return res.json({ status: 'success', tweets })
+      return res.json(tweets)
     } catch (error) {
       return next(error)
     }
@@ -131,7 +131,7 @@ const userController = {
   getReplies: async (req, res, next) => {
     try {
       const tweets = await tweetService.getAllRepliesFromUser(req.params.user_id)
-      return res.json({ status: 'success', tweets })
+      return res.json(tweets)
     } catch (error) {
       return next(error)
     }
@@ -140,7 +140,7 @@ const userController = {
   getFollowings: async (req, res, next) => {
     try {
       const followings = await userService.getFollowings(req.params.user_id)
-      return res.json({ status: 'success', followings })
+      return res.json(followings)
     } catch (error) {
       return next(error)
     }
@@ -149,7 +149,7 @@ const userController = {
   getFollowers: async (req, res, next) => {
     try {
       const followers = await userService.getFollowers(req.params.user_id)
-      return res.json({ status: 'success', followers })
+      return res.json(followers)
     } catch (error) {
       return next(error)
     }
@@ -167,7 +167,7 @@ const userController = {
   getLikes: async (req, res, next) => {
     try {
       const likes = await userService.getLikes(req.params.user_id)
-      return res.json({ status: 'success', likes })
+      return res.json(likes)
     } catch (error) {
       return next(error)
     }
