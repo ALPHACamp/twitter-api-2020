@@ -6,11 +6,13 @@ const imageFields = [{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount:
 const userController = require('../../controllers/api/userController')
 const tweetController = require('../../controllers/api/tweetController')
 
+const replyController = require('../../controllers/api/replyController')
+
 router.get('/', userController.getUsers)
 router.post('/', userController.postUser)
 router.get('/:id', userController.getUser)
 router.put('/:id', upload.fields(imageFields), userController.putUser)
 
-router.get('/:id/replied_tweets', tweetController.getUserRepliedTweets)
+router.get('/:id/replied_tweets', replyController.getRepliedTweets)
 
 module.exports = router
