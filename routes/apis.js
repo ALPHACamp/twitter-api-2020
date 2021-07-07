@@ -6,6 +6,7 @@ const helpers = require('../_helpers.js')
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 const followshipController = require('../controllers/followshipController.js')
+const likeController = require('../controllers/likeController.js')
 
 // jwt驗證
 const authenticated = passport.authenticate('jwt', { session: false })
@@ -38,5 +39,9 @@ router.post('/admin/signin', authenticatedNotAdmin, adminController.signIn)
 // followship
 router.post('/followships', authenticated, authenticatedNotAdmin, followshipController.addFollowing)
 router.delete('/followships/:followingId', authenticated, authenticatedNotAdmin, followshipController.removeFollowing)
+
+// like
+router.post('/tweets/:id/like', authenticated, authenticatedNotAdmin, likeController.addLike)
+router.post('/tweets/:id/unlike', authenticated, authenticatedNotAdmin, likeController.removeLike)
 
 module.exports = router

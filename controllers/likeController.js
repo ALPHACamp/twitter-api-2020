@@ -3,10 +3,10 @@ const { Like, Tweet, User } = require('../models')
 const increaseLikeCounts = (tweetId) => {
   return new Promise((resolve, reject) => {
     // 找到指定 Tweet 並將 likeCounts 加一
-    const tweet = Tweet.findByPk(tweetId)
+    Tweet.findByPk(tweetId)
       .then(tweet => {
         tweet.likeCounts += 1
-        return Tweet.update({ likeCounts: tweet.likeCounts })
+        return tweet.update({ likeCounts: tweet.likeCounts })
       })
       .then(() => resolve('likeCounts + 1'))
       .catch(err => reject(err))
@@ -16,10 +16,10 @@ const increaseLikeCounts = (tweetId) => {
 const decreaseLikeCounts = (tweetId) => {
   return new Promise((resolve, reject) => {
     // 找到指定 Tweet 並將 likeCounts 減一
-    const tweet = Tweet.findByPk(tweetId)
+    Tweet.findByPk(tweetId)
       .then(tweet => {
         tweet.likeCounts -= 1
-        return Tweet.update({ likeCounts: tweet.likeCounts })
+        return tweet.update({ likeCounts: tweet.likeCounts })
       })
       .then(() => resolve('likeCounts - 1'))
       .catch(err => reject(err))
@@ -29,7 +29,14 @@ const decreaseLikeCounts = (tweetId) => {
 const likeController = {
   addLike: async (req, res, next) => {
     try {
-      const like = await Like.create({
+      const like = await Like.findOne({
+        where: { TweetId: req.params.id, UserId: req.user.id }
+      })
+      if (like) {
+        return res.json({ status: 'error', message: 'Like 已存在' })
+      }
+      // Like 不存在，create Like 並將指定 Tweet LikeCounts + 1
+      await Like.create({
         UserId: req.user.id,
         TweetId: req.params.id,
       })
@@ -42,7 +49,13 @@ const likeController = {
   },
   removeLike: async (req, res, next) => {
     try {
-      const like = await Like.findByPk(req.params.id)
+      const like = await Like.findOne({
+        where: { TweetId: req.params.id, UserId: req.user.id }
+      })
+      if (!like) {
+        return res.json({ status: 'error', message: '指定的 Like 不存在' })
+      }
+      // 找到指定 Like，destroy 並將指定 Tweet LikeCounts - 1
       await like.destroy()
       await decreaseLikeCounts(req.params.id)
       return res.json({ status: 'success', message: '已取消喜愛這則貼文' })
@@ -52,3 +65,5 @@ const likeController = {
     }
   }
 }
+
+module.exports = likeController
