@@ -29,6 +29,18 @@ const TweetController = {
         })
       })
   },
+  postTweet: (req, res) => {
+    if (!req.body.description) { return res.json({ status: 'error', message: 'Please input tweet' }) }
+    else {
+      return Tweet.create({
+        UserId: req.user.id,
+        description: req.body.description
+      })
+        .then((tweet) => { res.json({ status: 'success', message: 'The tweet was successfully created' }) })
+    }
+
+
+  }
 
 }
 

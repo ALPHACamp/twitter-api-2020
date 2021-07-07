@@ -5,5 +5,7 @@ const { authenticated } = require('../../middleware/auth')
 
 router.get('/', tweetController.getTweets)
 router.get('/:tweet_id', tweetController.getTweet)
+router.post('/', tweetController.postTweet)
+
 
 module.exports = router
