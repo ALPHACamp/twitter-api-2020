@@ -46,6 +46,20 @@ let adminController = {
         return res.status(200).json(tweets)
       })
       .catch(() => res.status(404).json({ status: 'error', message: '' }))
+  },
+  deleteTweet: (req, res) => {
+    Tweet.findByPk(req.params.tweetId)
+      .then((tweet) => tweet.destroy())
+      .then(() =>
+        res
+          .status(200)
+          .json({ status: 'success', message: 'Successfully delete tweet.' })
+      )
+      .catch(() =>
+        res
+          .status(403)
+          .json({ status: 'error', message: 'permission is denied' })
+      )
   }
 }
 
