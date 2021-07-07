@@ -1,6 +1,7 @@
 const db = require("../models")
 const Tweet = db.Tweet
 const User = db.User
+const Reply = db.Reply
 
 
 const TweetController = {
@@ -10,14 +11,17 @@ const TweetController = {
       raw: true,
       nest: true,
     })
-      .then(tweets => { res.json({ tweets }) })
+      .then(tweets => { return res.json({ tweets }) })
 
   },
-  /*getTweet: (req, res) => {
-    return Tweet.findbyPK(req.params.id)
-      .then(tweet => { res.json({ tweet }) })
-
-  },*/
+  getTweet: (req, res) => {
+    return Tweet.findByPk(req.params.tweet_id, {
+      include: [
+        User,
+        { model: Reply, include: [User] }]
+    })
+      .then(tweet => { return res.json({ tweet }) })
+  },
 
 }
 
