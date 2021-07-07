@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 const followshipController = {
 
   showAllUser: async (req, res, next) => {
-    let user = await User.findAll({
+    let users = await User.findAll({
       where: {
         id: { [Op.ne]: helpers.getUser(req).id },
         role: { [Op.eq]: 'user' }
@@ -15,14 +15,15 @@ const followshipController = {
       ]
     })
 
-    user = user.map(user => ({
+    users = users.map(user => ({
       name: user.dataValues.name,
       account: user.dataValues.account,
       avatar: user.dataValues.avatar,
+      totalFollowers: user.dataValues.Followers.length,
       isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(user.dataValues.id)
     }))
-
-    return res.json(user)
+    users = users.sort((a, b) => b.totalFollowers - a.totalFollowers)
+    return res.json(users)
   },
   addFollowing: async (req, res, next) => {
     try {

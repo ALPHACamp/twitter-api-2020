@@ -133,7 +133,7 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'bio'] }],
-        order: [['Followings', Followship, 'createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']]
       })
       const followingsData = user.Followings
       if (followingsData.length === 0) return res.json({ status: 'error', message: '沒有追蹤者' })
@@ -154,7 +154,7 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followers' }],
-        order: [['Followers', Followship, 'createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']]
       })
       const followersData = user.Followers
       if (followersData.length === 0) return res.json({ status: 'error', message: '沒有追隨者' })
