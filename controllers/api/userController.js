@@ -91,6 +91,71 @@ let userController = {
     }).catch(err => {
       return res.status(500).json({ status: 'error', message: err })
     })
+  },
+  putUser: (req, res) => {
+    const id = Number(req.params.id)
+    const userId = 1 //before building JWT
+    const { name, account, password, passwordNew, passwordNewCheck, introduction, avatar, cover } = req.body
+    // check user permission
+    if (id !== userId) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'You have no access to this account.'
+      })
+    }
+    // if there's a password update
+    if (passwordNew) {
+      if (!passwordNewCheck) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'New password confirmation missing.'
+        })
+      }
+      if (!password) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Current password missing.'
+        })
+      }
+      if (passwordNew != passwordNewCheck) {
+        return res.status(401).json({
+          status: 'error',
+          message: "Password and confirm password doesn't match."
+        })
+      }
+    }
+    User.findOne({ where: { account } }).then(user => {
+      //check if account was already used
+      if (account && user && user.id !== id) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Account was already used.'
+        })
+      }
+      // account 1.NULL 2.unchanged 3.changed & unique  will pass
+
+      User.findByPk(id).then(
+        async (user) => {
+          //check current password before add new password
+          if (passwordNew && !bcrypt.compareSync(password, user.password)) {
+            return res.status(401).json({
+              status: 'error',
+              message: "Current password incorrect."
+            })
+          }
+          user.name = name || user.name
+          user.account = account || user.account
+          user.password = passwordNew ? bcrypt.hashSync(passwordNew, bcrypt.genSaltSync(10)) : user.password
+          user.introduction = introduction || user.introduction
+          user.avatar = avatar || user.avatar
+          user.cover = cover || user.cover
+          await user.save()
+          delete user.dataValues.password
+          return res.status(200).json(user)
+        }).catch(err => {
+          return res.status(500).json({ status: 'error', message: err })
+        })
+    })
   }
 }
 
