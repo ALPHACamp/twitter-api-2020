@@ -43,7 +43,10 @@ const TweetController = {
         description: req.body.description
       })
         .then((tweet) => { res.status(200).json({ status: 'success', message: 'The tweet was successfully created' }) })
-        .catch(error => console.log('error'))
+        .catch(error => {
+          console.log('error')
+          res.status(500).json({ status: 'error', message: 'error' })
+        })
     }
 
   },
@@ -66,7 +69,10 @@ const TweetController = {
         comment: req.body.comment
       })
         .then((reply) => { res.status(200).json({ status: 'success', message: 'The comment was successfully created' }) })
-        .catch(error => console.log('error'))
+        .catch(error => {
+          console.log('error')
+          res.status(500).json({ status: 'error', message: 'error' })
+        })
     }
 
   }
