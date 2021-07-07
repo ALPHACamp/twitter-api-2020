@@ -25,7 +25,7 @@ describe('# User Model', () => {
 
   context('properties', () => {
     ;[
-      'name', 'email', 'password', 'account',  'cover', 'avatar'
+      'name', 'email', 'password', 'account', 'cover', 'avatar'
     ].forEach(checkPropertyExists(user))
   })
 
@@ -65,11 +65,13 @@ describe('# User Model', () => {
     it('create', (done) => {
       db.User.create({}).then((user) => {
         data = user
+        console.log('data', data, 'user', user)
         done()
       })
     })
     it('read', (done) => {
       db.User.findByPk(data.id).then((user) => {
+        console.log('readDataId', data.id)
         expect(data.id).to.be.equal(user.id)
         done()
       })

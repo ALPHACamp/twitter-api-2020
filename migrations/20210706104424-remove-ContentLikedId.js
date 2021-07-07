@@ -7,7 +7,7 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.addColumn('Likes', 'ContentLikedId', {
-      type: Sequelize.INTEGER,
-    });
+      type: Sequelize.INTEGER
+    })
   }
 };

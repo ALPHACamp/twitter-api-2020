@@ -7,7 +7,7 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.addColumn('Likes', 'isTweet', {
-      type: Sequelize.BOOLEAN,
-    });
+      type: Sequelize.BOOLEAN
+    })
   }
 };
