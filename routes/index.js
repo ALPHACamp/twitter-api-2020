@@ -6,5 +6,4 @@ module.exports = (app) => {
   app.use('/api/users', users)
   app.use('/api/tweets', tweets)
   app.use('/api/admin', admin)
-  app.use('/api/tweets/:tweet_id/replies', reply)
 }

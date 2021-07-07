@@ -7,5 +7,9 @@ router.get('/', tweetController.getTweets)
 router.get('/:tweet_id', tweetController.getTweet)
 router.post('/', tweetController.postTweet)
 
+//Reply
+router.get('/:tweet_id/reply', tweetController.getReplies)
+router.post('/:tweet_id/reply', tweetController.postReply)
+
 
 module.exports = router

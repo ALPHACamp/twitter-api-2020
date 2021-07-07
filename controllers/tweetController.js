@@ -1,7 +1,6 @@
 const db = require("../models")
-const Tweet = db.Tweet
-const User = db.User
-const Like = db.Like
+const { Tweet, User, Like, Reply } = db
+
 
 
 const TweetController = {
@@ -47,6 +46,28 @@ const TweetController = {
         .catch(error => console.log('error'))
     }
 
+  },
+  getReplies: (req, res) => {
+    return Reply.findAll({
+      where: { TweetId: req.params.tweet_id }
+    })
+      .then(replies => {
+        return res.status(200).json(replies)
+      })
+      .catch(error => console.log('error'))
+  },
+  postReply: async (req, res) => {
+    if (!req.body.comment) { return res.status(204).json({ status: 'error', message: 'Please input comment' }) }
+    else if (req.body.comment.length >= 50) { return res.status(409).json({ status: 'error', message: 'comment can\'t be more than 50 words' }) }
+    else {
+      await Reply.create({
+        UserId: req.user.id,
+        TweetId: req.params.tweet_id,
+        comment: req.body.comment
+      })
+        .then((reply) => { res.status(200).json({ status: 'success', message: 'The comment was successfully created' }) })
+        .catch(error => console.log('error'))
+    }
 
   }
 
