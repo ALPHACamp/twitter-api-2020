@@ -77,15 +77,12 @@ const userController = {
           { model: User, as: 'Followings' }
         ]
       })
-      user = user.toJSON()
       const { id, name, account, email, role,
         avatar, followingCounts, followerCounts } = user
       return res.json({
-        user: {
-          id, name, account, email, role,
-          avatar, followingCounts, followerCounts,
-          Followers: user.Followers, Followings: user.Followings
-        }
+        id, name, account, email, role,
+        avatar, followingCounts, followerCounts,
+        Followers: user.Followers, Followings: user.Followings
       })
     } catch (err) {
       console.log(err)
