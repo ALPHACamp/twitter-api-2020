@@ -76,7 +76,7 @@ let replyController = {
           'createdAt'
         ]
       },
-      order: [['createdAt', 'desc']]
+      order: [[{ model: Tweet, as: "repliedTweet" }, 'createdAt', 'desc']]
     }
     Reply.findAll(options)
       .then(replies => {
