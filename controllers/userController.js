@@ -33,7 +33,6 @@ const userController = {
       next(err)
     }
   },
-
   signin: async (req, res, next) => {
     try {
       const { account, password } = req.body
@@ -184,6 +183,11 @@ const userController = {
         return res.json(user)
       }
     } catch (err) { next(err) }
+  },
+  logout: (req, res) => {
+    req.logout()
+    res.json({ status: 'success', message: '成功登出' })
+    return res.redirect('/api/users/signin')
   },
 }
 

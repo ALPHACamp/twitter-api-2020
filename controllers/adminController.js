@@ -1,4 +1,4 @@
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet } = require('../models')
 const helpers = require('../_helpers')
 
 const adminController = {
@@ -17,7 +17,6 @@ const adminController = {
       }
     } catch (err) { next(err) }
   }
-
 }
 
 module.exports = adminController

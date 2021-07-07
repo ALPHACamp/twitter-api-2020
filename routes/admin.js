@@ -7,7 +7,5 @@ router.get('/users', helpers.authenticated, helpers.authenticatedAdmin, adminCon
 
 router.delete('/tweets/:id', helpers.authenticated, helpers.authenticatedAdmin, adminController.deleteTweet)
 
-// router.delete('/:id', helpers.authenticated, helpers.authenticatedAdmin, adminController.deleteFollowing)
-
 
 module.exports = router

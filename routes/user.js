@@ -8,6 +8,11 @@ const helpers = require('../_helpers')
 
 
 //   /api/users
+router.get('/signin', (req, res) => res.json({ key: 'signinPage' }))
+router.get('/signup', (req, res) => res.json({ key: 'signupPage' }))
+router.get('/logout', userController.logout)
+router.post('/signin', userController.signin)
+router.post('/', userController.signup)
 
 router.get('/:id/followers', helpers.authenticated, helpers.authenticatedUser, userController.getUserFollowers)
 router.get('/:id/followings', helpers.authenticated, helpers.authenticatedUser, userController.getUserFollowings)
@@ -17,7 +22,6 @@ router.get('/:id/tweets', helpers.authenticated, helpers.authenticatedUser, user
 router.get('/:id', helpers.authenticated, helpers.authenticatedUser, userController.getUser)
 router.put('/:id', helpers.authenticated, helpers.authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
 
-router.post('/signin', userController.signin)
-router.post('/', userController.signup)
+
 
 module.exports = router
