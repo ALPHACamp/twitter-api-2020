@@ -108,7 +108,31 @@ const userController = {
       cover: req.user.cover,
       introduction: req.user.introduction
     })
-  },  
+  },
+  getTopUsers: async (req, res) => {
+    try {
+      let users = await User.findAll({
+        include: [
+          { model: User, as: 'Followers' }
+        ],
+        attributes: ['id', 'name', 'email', 'avatar'],
+        limit:10,
+      })
+      if (!users){
+        res.status(404).json({ status: 'error', message: 'Cannot find any user in db.' })
+      }
+      users = users.map(user => ({
+        ...user.dataValues,
+        followerCount: user.Followers.length,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      users = users.sort((a, b) => b.followerCount - a.followerCount)
+    return res.status(200).json(users)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
+  },
 }
 
 module.exports = userController
