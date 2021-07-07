@@ -11,6 +11,7 @@ const helpers = require('../_helpers')
 
 // router.get('/logout', userController.logout)
 router.post('/signin', userController.signin)
+
 router.post('/', userController.signup)
 
 router.use(helpers.authenticated, helpers.authenticatedUser)

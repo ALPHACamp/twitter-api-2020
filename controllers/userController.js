@@ -131,16 +131,42 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      const followings = await Followship.findById(4)
-      // const followings = await User.findById(4)
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'bio'] }],
+        order: [['Followings', Followship, 'createdAt', 'DESC']]
+      })
+      const followingsData = user.Followings
+      if (followingsData.length === 0) return res.json({ status: 'error', message: '沒有追蹤者' })
+
+      const followings = followingsData.map(following => ({
+        followingId: following.dataValues.id,
+        name: following.dataValues.name,
+        account: following.dataValues.account,
+        avatar: following.dataValues.avatar,
+        bio: following.dataValues.bio,
+        isFollowed: helpers.getUser(req).Followings.map(following => following.id).includes(following.dataValues.id)
+      }))
+
       return res.json(followings)
     } catch (err) { next(err) }
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const followers = await Followship.findAll({
-        where: { followingId: req.params.id }
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followers' }],
+        order: [['Followers', Followship, 'createdAt', 'DESC']]
       })
+      const followersData = user.Followers
+      if (followersData.length === 0) return res.json({ status: 'error', message: '沒有追隨者' })
+
+      const followers = followersData.map(follower => ({
+        followerId: follower.dataValues.id,
+        name: follower.dataValues.name,
+        account: follower.dataValues.account,
+        avatar: follower.dataValues.avatar,
+        bio: follower.dataValues.bio,
+        isFollowed: helpers.getUser(req).Followers.map(follower => follower.id).includes(follower.dataValues.id)
+      }))
       return res.json(followers)
     } catch (err) { next(err) }
   },
@@ -220,9 +246,3 @@ const userController = {
 }
 
 module.exports = userController
-
-// const followings = user.Followings
-      // const followings = await Followship.findAll({
-      //   where: { followerId: req.params.id },
-      //   // include: [{ model: User, as: 'Followings' }]
-      // })
