@@ -91,7 +91,16 @@ let likeController = {
       )
   },
   getUserLikes: (req, res) => {
-    Like.findAll({ where: { UserId: req.params.id } })
+    const options = {
+      attributes: ['id', 'UserId', 'TweetId'],
+      where: { UserId: req.params.id },
+      include: {
+        model: Tweet,
+        as: 'LikedTweet',
+        attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt']
+      }
+    }
+    Like.findAll(options)
       .then(likes => res.status(200).json(likes))
       .catch(error => res.status(500).json(error))
   }
