@@ -3,7 +3,11 @@ const router = express.Router()
 const tweetController = require('../controllers/tweetController')
 const helpers = require('../_helpers')
 
+router.get('/', helpers.authenticated, helpers.authenticatedUser, tweetController.getTweets)
+
 router.post('/', helpers.authenticated, helpers.authenticatedUser, tweetController.postTweet)
+
+router.get('/:TweetId', helpers.authenticated, helpers.authenticatedUser, tweetController.getTweet)
 
 router.post('/:TweetId/like', helpers.authenticated, helpers.authenticatedUser, tweetController.likeTweet)
 

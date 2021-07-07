@@ -1,7 +1,55 @@
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply, sequelize } = require('../models')
+const Sequelize = require('sequelize')
 
 
 const tweetController = {
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
+        ],
+        include: [
+          { model: User, attributes: ['avatar', 'name', 'account'] },
+        ]
+      })
+      if (!tweets.length) return res.json({ status: 'error', message: '目前查無任何推文' })
+      return res.json({ status: 'success', message: tweets })
+    }
+    catch (err) {
+      next(err)
+    }
+  },
+
+  getTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.TweetId, {
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
+          [Sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
+        ],
+        include: [
+          { model: User, attributes: ['avatar', 'name', 'account'] },
+          { model: Reply, include: [{ model: User, attributes: ['avatar', 'name', 'account'] }] }
+        ],
+      })
+      if (!tweet) return res.json({ status: 'error', message: '查無此推文' })
+      return res.json({ status: 'success', message: tweet })
+    }
+    catch (err) {
+      next(err)
+    }
+  },
+
   postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
