@@ -37,9 +37,10 @@ const TweetController = {
   },
   postTweet: (req, res) => {
     if (!req.body.description) { return res.json({ status: 'error', message: 'Please input tweet' }) }
+    else if (req.body.description.length >= 140) { return res.json({ status: 'error', message: 'tweet can\'t be more than 140 words' }) }
     else {
       return Tweet.create({
-        UserId: req.user.id,
+        UserId: req.body.id,
         description: req.body.description
       })
         .then((tweet) => { res.json({ status: 'success', message: 'The tweet was successfully created' }) })
