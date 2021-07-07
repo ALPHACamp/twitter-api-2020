@@ -9,6 +9,8 @@ router.post('/', helpers.authenticated, helpers.authenticatedUser, tweetControll
 
 router.get('/:TweetId', helpers.authenticated, helpers.authenticatedUser, tweetController.getTweet)
 
+router.get('/:TweetId/replies', helpers.authenticated, helpers.authenticatedUser, tweetController.getTweetReplies)
+
 router.post('/:TweetId/like', helpers.authenticated, helpers.authenticatedUser, tweetController.likeTweet)
 
 router.post('/:TweetId/unlike', helpers.authenticated, helpers.authenticatedUser, tweetController.unlikeTweet)

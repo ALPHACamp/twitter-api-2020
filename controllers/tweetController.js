@@ -51,6 +51,22 @@ const tweetController = {
     }
   },
 
+  getTweetReplies: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { TweetId: req.params.TweetId },
+        include: [{ model: User, attributes: ['avatar', 'name', 'account'] }],
+        order: [['createdAt', 'DESC']]
+      })
+      return res.json({ status: 'success', message: replies })
+    }
+    catch (err) {
+      next(err)
+    }
+  },
+
   postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
