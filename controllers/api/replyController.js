@@ -33,7 +33,7 @@ let replyController = {
     if (req.body.comment.length > 140) {
       return res.status(400).json({
         status: 'error',
-        messgae: 'Can not post over 140 characters',
+        message: 'Can not post over 140 characters',
       })
     }
     const data = {
