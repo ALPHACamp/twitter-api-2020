@@ -1,6 +1,7 @@
 const user = require('./user')
 const tweet = require('./tweet')
 const reply = require('./reply')
+const helpers = require('../_helpers')
 
 module.exports = (app) => {
   app.use('/api/users', helpers.authenticated, helpers.authenticatedUser, user)
