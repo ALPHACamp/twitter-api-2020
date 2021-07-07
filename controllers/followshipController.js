@@ -2,10 +2,10 @@ const { User, Followship, Tweet } = require('../models')
 
 const increaseFollowingCounts = async (userId) => {
   return new Promise((resolve, reject) => {
-    User.findByPK(userId)
+    User.findByPk(userId)
       .then(user => {
         user.followingCounts += 1
-        return user.update({ followingCounts })
+        return user.update({ followingCounts: user.followingCounts })
       })
       .then(() => resolve('followingCounts + 1'))
       .catch(err => reject(err))
@@ -14,10 +14,10 @@ const increaseFollowingCounts = async (userId) => {
 
 const decreaseFollowingCounts = async (userId) => {
   return new Promise((resolve, reject) => {
-    User.findByPK(userId)
+    User.findByPk(userId)
       .then(user => {
         user.followingCounts -= 1
-        return user.update({ followingCounts })
+        return user.update({ followingCounts: user.followingCounts })
       })
       .then(() => resolve('followingCounts - 1'))
       .catch(err => reject(err))
@@ -26,10 +26,10 @@ const decreaseFollowingCounts = async (userId) => {
 
 const increaseFollowerCounts = async (userId) => {
   return new Promise((resolve, reject) => {
-    User.findByPK(userId)
+    User.findByPk(userId)
       .then(user => {
         user.followerCounts += 1
-        return user.update({ followerCounts })
+        return user.update({ followerCounts: user.followerCounts })
       })
       .then(() => resolve('followerCounts + 1'))
       .catch(err => reject(err))
@@ -38,10 +38,10 @@ const increaseFollowerCounts = async (userId) => {
 
 const decreaseFollowerCounts = async (userId) => {
   return new Promise((resolve, reject) => {
-    User.findByPK(userId)
+    User.findByPk(userId)
       .then(user => {
         user.followerCounts -= 1
-        return user.update({ followerCounts })
+        return user.update({ followerCounts: user.followerCounts })
       })
       .then(() => resolve('followerCounts - 1'))
       .catch(err => reject(err))
@@ -74,7 +74,7 @@ const followshipController = {
       })
       await followship.destroy()
       await decreaseFollowingCounts(req.user.id)
-      await decreaseFollowerCounts(req.body.id)
+      await decreaseFollowerCounts(req.params.followingId)
       return res.json({ status: 'success', message: '已取消追隨' })
     } catch (err) {
       console.log(err)
