@@ -26,12 +26,12 @@ const authenticatedNotAdmin = (req, res, next) => {
     return res.json({ status: 'error', message: '未通過身份驗證！' })
   }
 }
-// Ex. router.get('/test', authenticated, authenticatedNotAdmin, (req, res) => res.send('Hello'))
 
 // user routes
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
-router.get('/users/:id', authenticatedNotAdmin, userController.getUser)
+router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
+
 // admin routes
 router.post('/admin/signin', adminController.signIn)
 
