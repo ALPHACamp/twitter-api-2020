@@ -17,6 +17,12 @@ let replyController = {
       })
       .catch((err) => next(err))
   },
+
+  getReply: (req, res, next) => {
+    Reply.findAll({ where: { TweetId: req.params.tweetId } }, { include: { model: User } }).then((reply) => {
+      res.json(reply)
+    })
+  },
 }
 
 module.exports = replyController
