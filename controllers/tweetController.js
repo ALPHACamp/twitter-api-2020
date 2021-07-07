@@ -1,7 +1,6 @@
 const db = require("../models")
 const Tweet = db.Tweet
 const User = db.User
-const Reply = db.Reply
 const Like = db.Like
 
 
@@ -14,7 +13,7 @@ const TweetController = {
       nest: true,
     })
       .then(tweets => {
-        return res.json(tweets)
+        return res.status(200).json(tweets)
       })
       .catch(error => console.log('error'))
 
@@ -26,23 +25,25 @@ const TweetController = {
         Like,]
     })
       .then(tweet => {
-        return res.json({
+        return res.status(200).json({
           description: tweet.description,
           tweet,
-          LikeCount: tweet.Likes.length
+          LikeCount: tweet.Likes.length,
+          status: 'success',
+          message: 'Get the tweet successfully'
         })
       })
       .catch(error => console.log('error'))
   },
-  postTweet: (req, res) => {
-    if (!req.body.description) { return res.json({ status: 'error', message: 'Please input tweet' }) }
-    else if (req.body.description.length >= 140) { return res.json({ status: 'error', message: 'tweet can\'t be more than 140 words' }) }
+  postTweet: async (req, res) => {
+    if (!req.body.description) { return res.status(204).json({ status: 'error', message: 'Please input tweet' }) }
+    else if (req.body.description.length >= 140) { return res.status(409).json({ status: 'error', message: 'tweet can\'t be more than 140 words' }) }
     else {
-      return Tweet.create({
-        UserId: req.body.id,
+      await Tweet.create({
+        UserId: req.user.id,
         description: req.body.description
       })
-        .then((tweet) => { res.json({ status: 'success', message: 'The tweet was successfully created' }) })
+        .then((tweet) => { res.status(200).json({ status: 'success', message: 'The tweet was successfully created' }) })
         .catch(error => console.log('error'))
     }
 
