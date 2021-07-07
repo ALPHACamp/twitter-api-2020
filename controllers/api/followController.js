@@ -13,7 +13,8 @@ let followController = {
       include: {
         model: User,
         as: "follower",
-        attributes: ['id', 'account', 'name', 'avatar']
+        attributes: ['id', 'account', 'name', 'avatar',
+          'likeNum', 'tweetNum', 'followingNum', 'followerNum']
       },
       attributes: ['id', 'followingId', 'followerId']
     }
