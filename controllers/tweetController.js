@@ -1,5 +1,4 @@
 const tweetService = require('../services/tweetService')
-const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -23,7 +22,7 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     try {
       const postData = {
-        UserId: helpers.getUser(req).id,
+        UserId: req.user.id,
         ...req.body
       }
       const data = await tweetService.postTweet(postData)
@@ -54,7 +53,7 @@ const tweetController = {
   postReply: async (req, res, next) => {
     try {
       const replyData = {
-        UserId: helpers.getUser(req).id,
+        UserId: req.user.id,
         TweetId: req.params.tweet_id,
         ...req.body
       }
@@ -68,7 +67,7 @@ const tweetController = {
   likeTweet: async (req, res, next) => {
     try {
       const likeData = {
-        UserId: helpers.getUser(req).id,
+        UserId: req.user.id,
         TweetId: req.params.tweet_id
       }
       const data = await tweetService.likeTweet(likeData)
@@ -81,7 +80,7 @@ const tweetController = {
   unlikeTweet: async (req, res, next) => {
     try {
       const likeData = {
-        UserId: helpers.getUser(req).id,
+        UserId: req.user.id,
         TweetId: req.params.tweet_id
       }
       const data = await tweetService.unlikeTweet(likeData)
