@@ -311,23 +311,6 @@ let userController = {
     } catch (error) {
       next(error)
     }
-  },
-
-  removeFollowing: async (req, res, next) => {
-    if (Number(req.params.userId) === helpers.getUser(req).id) {
-      return res.json({ status: 'error', message: '無法取消追蹤自己' })
-    }
-    try {
-      const followship = await Followship.findOne({
-        where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId }
-      })
-      if (!followship) res.json({ status: 'error', message: '已移除 follow' })
-
-      await followship.destroy()
-      return res.json({ status: 'success', message: 'unfollow successfully' })
-    } catch (error) {
-      next(error)
-    }
   }
 }
 
