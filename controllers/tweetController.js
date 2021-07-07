@@ -3,7 +3,7 @@ const tweetService = require('../services/tweetService')
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
-      const data = await tweetService.getTweets()
+      const data = await tweetService.getTweets(req.user.id)
       return res.json(data)
     } catch (error) {
       next(error)
