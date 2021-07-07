@@ -1,9 +1,9 @@
 const db = require('../models')
 const Tweet = db.Tweet
+const Reply = db.Reply
 
 const tweetController = {
   postTweet: (req, res) => {
-    //TODO: if (!req.user.id) 的錯誤處理需要寫在authenticated裡面
     const { description } = req.body
     if (!description) {
       return res.status(400).json({
@@ -29,6 +29,41 @@ const tweetController = {
         })
       })
     }
+  },
+
+  postReply: (req, res) => {
+    const { comment } = req.body
+    const TweetId = req.params.id
+    const UserId = req.user.id
+
+    if (!comment) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Comment can not be null'
+      })
+    }
+
+    return Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Tweet does not exist'
+          })
+        }
+
+        return Reply.create({
+          UserId,
+          TweetId,
+          comment
+        }).then(reply => {
+          return res.status(200).json({
+            id: reply.id,
+            status: 'success',
+            message: 'Reply has been created successfully'
+          })
+        })
+      })
   }
 }
 
