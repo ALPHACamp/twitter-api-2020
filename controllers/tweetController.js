@@ -1,4 +1,4 @@
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 let tweetController = {
@@ -10,6 +10,14 @@ let tweetController = {
     })
       .then((tweets) => {
         return res.json(tweets)
+      })
+      .catch((err) => next(err))
+  },
+
+  getTweet: (req, res, next) => {
+    return Tweet.findByPk(req.params.tweetId, { include: { model: Reply } })
+      .then((tweet) => {
+        return res.json(tweet)
       })
       .catch((err) => next(err))
   },
