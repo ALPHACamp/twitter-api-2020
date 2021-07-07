@@ -42,20 +42,32 @@ let tweetController = {
   },
 
   likeTweet: (req, res, next) => {
+    // const isLiked = Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } })
+    // if (isLiked) {
+    //   return res.redirect('back')
+    // }
     return Like.create({
       UserId: helpers.getUser(req).id,
       TweetId: req.params.tweetId,
     })
       .then((tweet) => {
-        res.json({ status: 'success', message: 'Like was successfully created' })
+        return res.json({ status: 'success', message: 'You had successfully like this tweet' })
       })
       .catch((err) => next(err))
   },
 
   unlikeTweet: (req, res, next) => {
-    return Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } }).then((tweet) =>
-      tweet.destroy().then(res.json({ status: 'success', message: 'Like was successfully deleted' }))
-    )
+    return Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } }).then((tweet) => {
+      // if (!tweet) {
+      //   return res.redirect('back')
+      // }
+      tweet
+        .destroy()
+        .then(res.json({ status: 'success', message: 'You had successfully unlike this tweet' }))
+        .catch((err) => {
+          next(err)
+        })
+    })
   },
 }
 
