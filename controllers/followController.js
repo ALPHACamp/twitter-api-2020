@@ -22,7 +22,7 @@ const followController = {
 
       // cannot follow self.
       if (followerId === Number(followingId)) {
-        return res.status(400).json({ status: 'error', message: 'You cannot follow yourself' })
+        return res.status(403).json({ status: 'error', message: 'You cannot follow yourself' })
       }
 
       // check followship
@@ -34,7 +34,7 @@ const followController = {
       })
 
       if (followship) {
-        return res.status(400).json({ status: 'error', message: `You already followed @${followedUser.account}` })
+        return res.status(409).json({ status: 'error', message: `You already followed @${followedUser.account}` })
       }
 
       await Followship.create({
