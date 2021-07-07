@@ -26,12 +26,12 @@ module.exports = {
       cover: {
         type: Sequelize.STRING
       },
-      bio: {
+      introduction: {
         type: Sequelize.TEXT
       },
-      isAdmin: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+      role: {
+        type: Sequelize.STRING,
+        defaultValue: 'normal'
       },
       followingCounts: {
         type: Sequelize.INTEGER,

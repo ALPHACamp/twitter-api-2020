@@ -11,7 +11,7 @@ module.exports = {
       UserId: {
         type: Sequelize.INTEGER
       },
-      content: {
+      description: {
         type: Sequelize.TEXT
       },
       replyCounts: {

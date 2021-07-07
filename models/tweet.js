@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     UserId: {
       type: DataTypes.INTEGER
     },
-    content: {
+    description: {
       type: DataTypes.STRING(140)
     },
     replyCounts: {

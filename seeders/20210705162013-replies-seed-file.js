@@ -8,7 +8,7 @@ module.exports = {
         id: i + 1,
         UserId: Math.floor(Math.random() * 5) + 2, // id 2~6 的隨機使用者
         TweetId: i % 50 + 1, // id 1~50 的推文各3個回覆
-        content: faker.lorem.sentence(),
+        comment: faker.lorem.sentence(),
         createdAt: new Date(),
         updatedAt: new Date()
       })
