@@ -1,14 +1,14 @@
 'use strict';
-const bcrypt = require('bcrypt-nodejs')
+const bcrypt = require('bcryptjs')
 const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const admin = {
       id: 1,
-      account: 'admin',
-      name: 'admin',
-      email: faker.internet.email(),
+      account: 'Admin',
+      name: 'Admin',
+      email: 'root@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'admin',
       introduction: faker.lorem.sentence(),
