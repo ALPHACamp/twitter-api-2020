@@ -19,7 +19,7 @@ const adminController = {
         return res.json({ status: 'error', message: '帳號或密碼不正確！' })
       }
       // 檢查是否為非管理者
-      if (!user.isAdmin) {
+      if (user.role === 'normal') {
         return res.json({ status: 'error', message: '非管理者無法登入後台！' })
       }
       // 簽發 token
@@ -31,7 +31,7 @@ const adminController = {
         token: token,
         user: {
           // 這包user回傳資料可依前端需求增減
-          id: user.id, account: user.account, name: user.name, email: user.email, isAdmin: user.isAdmin, avatar: user.avatar
+          id: user.id, account: user.account, name: user.name, email: user.email, role: user.role, avatar: user.avatar
         }
       })
     } catch (err) {
