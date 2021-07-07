@@ -7,5 +7,6 @@ router.post('/', userController.signUp)
 router.post('/signin', userController.signIn)
 
 router.use(authenticated)
+router.get('/current_user', userController.getCurrentUser)
 
 module.exports = router

@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User } = db
+const { User,Tweet,Like } = db
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 
@@ -96,7 +96,19 @@ const userController = {
       console.log(err)
       res.status(400).json({ status: 'error', message: 'error' })
     }
-  }
+  },
+  getCurrentUser: (req, res) => {
+    return res.status(200).json({
+      id: req.user.id,
+      name: req.user.name,
+      account: req.user.account,
+      email: req.user.email,
+      avatar: req.user.avatar,
+      role: req.user.role,
+      cover: req.user.cover,
+      introduction: req.user.introduction
+    })
+  },  
 }
 
 module.exports = userController
