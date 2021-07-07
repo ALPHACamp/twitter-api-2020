@@ -51,7 +51,14 @@ const decreaseFollowerCounts = async (userId) => {
 const followshipController = {
   addFollowing: async (req, res, next) => {
     try {
-      const followship = await Followship.create({
+      const followship = await Followship.findOne({
+        where: { followerId: req.user.id, followingId: req.body.id }
+      })
+      if (followship) {
+        return res.json({ status: 'error', message: '已追隨這個使用者！' })
+      }
+      // 未追隨使用者，create 並將使用者/被追隨者 FollowingCounts/FollowerCounts + 1
+      await Followship.create({
         followerId: req.user.id,
         followingId: req.body.id,
       })
@@ -72,6 +79,10 @@ const followshipController = {
           followerId: req.user.id
         }
       })
+      if (!followship) {
+        return res.json({ status: 'error', message: '未追隨此使用者！' })
+      }
+      // Followship 存在，destroy 並將使用者/被追隨者 FollowingCounts/FollowerCounts - 1
       await followship.destroy()
       await decreaseFollowingCounts(req.user.id)
       await decreaseFollowerCounts(req.params.followingId)
