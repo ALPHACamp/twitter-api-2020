@@ -16,6 +16,7 @@ const TweetController = {
       .then(tweets => {
         return res.json(tweets)
       })
+      .catch(error => console.log('error'))
 
   },
   getTweet: (req, res) => {
@@ -32,6 +33,7 @@ const TweetController = {
           LikeCount: tweet.Likes.length
         })
       })
+      .catch(error => console.log('error'))
   },
   postTweet: (req, res) => {
     if (!req.body.description) { return res.json({ status: 'error', message: 'Please input tweet' }) }
@@ -41,6 +43,7 @@ const TweetController = {
         description: req.body.description
       })
         .then((tweet) => { res.json({ status: 'success', message: 'The tweet was successfully created' }) })
+        .catch(error => console.log('error'))
     }
 
 
