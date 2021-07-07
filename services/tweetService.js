@@ -6,6 +6,7 @@ const tweetService = {
       where: whereQuery,
       attributes: [
         'id', 'description', 'createdAt',
+        [Sequelize.literal('substring(description,1,50)'), 'description'],
         [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount']
       ],
       group: 'id',
@@ -21,7 +22,11 @@ const tweetService = {
   getTweetsForAdmin: async (whereQuery = {}) => {
     return await Tweet.findAll({
       where: whereQuery,
-      attributes: { exclude: ['UserId'] },
+      attributes: [
+        'id',
+        'createdAt',
+        [Sequelize.literal('substring(description,1,50)'), 'description']
+      ],
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
