@@ -9,7 +9,7 @@ const { authenticated, checkRole } = require('../../middlewares/auth')
 
 router.post('/signin', userController.signIn)
 router.use(authenticated, checkRole('admin'))
-router.get('/tweets', tweetController.getTweets)
+router.get('/tweets', tweetController.getTweetsForAdmin)
 router.delete('/tweets/:tweet_id', adminController.deleteTweet)
 router.get('/users', adminController.getUsers)
 

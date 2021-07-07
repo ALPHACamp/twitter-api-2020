@@ -11,6 +11,15 @@ const tweetController = {
     }
   },
 
+  getTweetsForAdmin: async (req, res, next) => {
+    try {
+      const data = await tweetService.getTweetsForAdmin()
+      return res.json(data)
+    } catch (error) {
+      next(error)
+    }
+  },
+
   postTweet: async (req, res, next) => {
     try {
       const postData = {
