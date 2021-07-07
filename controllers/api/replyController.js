@@ -61,6 +61,8 @@ let replyController = {
   },
   getRepliedTweets: (req, res) => {
     const options = {
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
       attributes: ['id', 'UserId', 'TweetId', 'comment', 'createdAt'],
       where: { UserId: req.params.id },
       include: {
