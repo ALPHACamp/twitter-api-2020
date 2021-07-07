@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       introduction: {
         type: DataTypes.TEXT,
       },
-      createdAt: {
+      updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
       },
