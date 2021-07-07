@@ -89,6 +89,11 @@ let likeController = {
           message: ''
         })
       )
+  },
+  getUserLikes: (req, res) => {
+    Like.findAll({ where: { UserId: req.params.id } })
+      .then(likes => res.status(200).json(likes))
+      .catch(error => res.status(500).json(error))
   }
 }
 
