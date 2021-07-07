@@ -303,7 +303,7 @@ describe('# user requests', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
         const rootUser = await db.User.create({ name: 'root' });
-        this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+        this.authenticate = sinon.stub(helpers, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
           return (req, res, next) => { };
         });
@@ -321,7 +321,7 @@ describe('# user requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function (err, res) {
-            // if (err) return done(err);
+            if (err) return done(err);
             db.User.findByPk(1).then(user => {
               user.name.should.equal('User11');
               user.bio.should.equal('User11');

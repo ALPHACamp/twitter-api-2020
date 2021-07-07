@@ -14,8 +14,9 @@ app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
-  return next()
+  next()
 })
+
 
 require('./routes')(app)
 
