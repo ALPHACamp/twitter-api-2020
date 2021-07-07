@@ -42,7 +42,7 @@ module.exports = (app) => {
   app.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
   app.delete(
-    '/api/admin/tweets/:id',
+    '/api/admin/tweets/:tweetId',
     authenticated,
     authenticatedAdmin,
     adminController.deleteTweets
@@ -63,13 +63,23 @@ module.exports = (app) => {
   )
   // app.put('/users/:userId/edit')
   app.get('/api/users/:userId/likes', authenticated, authenticatedNotAdmin, userController.getLikes)
-  app.get('/api/users/:userId/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
-  app.get('/api/users/:userId/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
+  app.get(
+    '/api/users/:userId/followers',
+    authenticated,
+    authenticatedNotAdmin,
+    userController.getFollowers
+  )
+  app.get(
+    '/api/users/:userId/followings',
+    authenticated,
+    authenticatedNotAdmin,
+    userController.getFollowings
+  )
   // app.post('/users/:userId/follow')
   // app.delete('/users/:userId/follow')
   // // tweets
   app.get('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.getTweets)
-  // app.get('/tweets/:tweetId')
+  app.get('/api/tweets/:tweetId', authenticated, authenticatedNotAdmin, tweetController.getTweet)
   app.post('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.postTweets)
   // app.post('/tweets/:tweetId/replies')
   // app.put('/tweets/:tweetId')

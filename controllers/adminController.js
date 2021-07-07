@@ -77,7 +77,7 @@ let adminController = {
   },
 
   deleteTweets: (req, res, next) => {
-    return Tweet.findByPk(req.params.id).then((tweet) => {
+    return Tweet.findByPk(req.params.tweetId).then((tweet) => {
       tweet.destroy().then((tweet) => {
         return res.json({ status: 'success', message: '' })
       })
