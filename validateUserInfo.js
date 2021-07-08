@@ -9,7 +9,7 @@ module.exports = {
           name: { type: 'string', maxLength: 15 },
           account: { type: 'string', maxLength: 10 },
           email: { type: 'string', format: 'email' },
-          password: { type: 'string', maxLength: 15, minLength: 6 },
+          password: { type: 'string', maxLength: 15, minLength: 5 },
           introduction: { type: 'string', maxLength: 140 }
         },
         additionalProperties: false
@@ -20,7 +20,7 @@ module.exports = {
         name: '名字長度最多 15 個字',
         account: '帳號最多 10 個字',
         email: '請輸入正確的 email',
-        password: '密碼長度為 6 至 15',
+        password: '密碼長度為 5 至 15',
         introduction: '個人介紹最多 140 字'
       }
     }
