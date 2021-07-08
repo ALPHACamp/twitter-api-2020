@@ -105,6 +105,45 @@ const tweetController = {
 
       return res.status(200).json(tweet)
     })
+  },
+
+  getTweets: (req, res) => {
+    const user_id = req.user.id
+
+    return Tweet.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        },
+        {
+          model: Like,
+          required: false,
+          where: {
+            UserId: user_id
+          }
+        }
+      ],
+      attributes: {
+        exclude: ['updatedAt', 'UserId'],
+      },
+      raw: true,
+      nest: true
+    }).then(tweets => {
+
+      tweets = tweets.map((tweet, i) => {
+        const final = {
+          ...tweet,
+          isLike: Boolean(tweet.Likes.id)
+        }
+
+        delete final.Likes
+
+        return final
+      })
+
+      return res.status(200).json(tweets)
+    })
   }
 }
 
