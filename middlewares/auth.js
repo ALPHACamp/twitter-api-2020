@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken')
+
 module.exports = {
   getReqUserFromToken: (req, res, next) => {
     if (!req.header('Authorization')) {
