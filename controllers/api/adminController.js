@@ -4,7 +4,6 @@ const Tweet = db.Tweet
 const Admin = db.Admin
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
-const passportJwt = require('passport-jwt')
 
 let defaultLimit = 10
 
@@ -93,7 +92,7 @@ let adminController = {
           id: admin.id,
           isAdmin: true,
         }
-        let token = jwt.sign(payload, 'alphacamp')
+        let token = jwt.sign(payload, process.env.JWT_SECRET)
         return res.status(200).json({
           status: 'success',
           message: 'ok',
