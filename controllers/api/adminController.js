@@ -1,6 +1,11 @@
 const db = require('../../models')
 const User = db.User
 const Tweet = db.Tweet
+const Admin = db.Admin
+const bcrypt = require('bcrypt-nodejs')
+const jwt = require('jsonwebtoken')
+const passportJwt = require('passport-jwt')
+
 let defaultLimit = 10
 
 let adminController = {
@@ -9,7 +14,7 @@ let adminController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       raw: true,
-      attributes: { exclude: ['password', 'updatedAt', 'createdAt'] }
+      attributes: { exclude: ['password', 'updatedAt', 'createdAt'] },
     }
     User.findAll(options)
       .then((users) => {
@@ -34,9 +39,9 @@ let adminController = {
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          as: 'User'
-        }
-      ]
+          as: 'User',
+        },
+      ],
     }
     Tweet.findAll(options)
       .then((tweets) => {
@@ -60,7 +65,49 @@ let adminController = {
           .status(403)
           .json({ status: 'error', message: 'permission is denied' })
       )
-  }
+  },
+  login: (req, res) => {
+    console.log(req.body)
+    const { password, email } = req.body
+    if (!password || !email) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'password or email can not be empty',
+      })
+    }
+
+    Admin.findOne({ where: { email } })
+      .then((admin) => {
+        if (!admin) {
+          return res
+            .status(401)
+            .json({ status: 'error', message: 'this admin user is not exist' })
+        }
+        if (!bcrypt.compareSync(password, admin.password)) {
+          return res
+            .status(401)
+            .json({ status: 'error', message: 'password is not correct' })
+        }
+
+        let payload = {
+          id: admin.id,
+          isAdmin: true,
+        }
+        let token = jwt.sign(payload, 'alphacamp')
+        return res.status(200).json({
+          status: 'success',
+          message: 'ok',
+          token,
+          User: {
+            name: admin.name,
+            email: admin.email,
+          },
+        })
+      })
+      .catch((error) =>
+        res.status(401).json({ status: 'error', message: error })
+      )
+  },
 }
 
 module.exports = adminController
