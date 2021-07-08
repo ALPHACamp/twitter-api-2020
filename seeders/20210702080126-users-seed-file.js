@@ -30,7 +30,7 @@ module.exports = {
         name: 'user2',
         account: 'user2',
         role: 'user',
-        avatar: 'https://i2.kknews.cc/SIG=t4a6t5/4r5r0002r2qo665o5699.jpg',
+        avatar: 'https://image.flaticon.com/icons/png/512/763/763704.png',
         cover: 'https://images.unsplash.com/photo-1491555103944-7c647fd857e6?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -41,7 +41,7 @@ module.exports = {
         name: 'user3',
         account: 'user3',
         role: 'user',
-        avatar: 'https://image.flaticon.com/icons/png/512/847/847969.png',
+        avatar: 'https://image.flaticon.com/icons/png/512/763/763704.png',
         cover: 'https://images.unsplash.com/photo-1567261585152-02a94eeda80a?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1190&q=80',
         createdAt: new Date(),
         updatedAt: new Date()
