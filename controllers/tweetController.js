@@ -58,7 +58,7 @@ const tweetController = {
     try {
       const { comment } = req.body
 
-      if (!comment.trim().length || comment > 140) throw new Error('Invalid comment.')
+      if (!comment.trim().length || comment.trim().length > 140) throw new Error('Invalid comment.')
 
       const replyData = {
         UserId: req.user.id,
