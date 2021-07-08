@@ -1,17 +1,22 @@
 const bcrypt = require('bcryptjs')
 const { ImgurClient } = require('imgur')
 const client = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID })
-const { User, Tweet, Like, Reply, Followship } = require('../models')
-const { sequelize } = require('../models')
+const { User, Tweet, Like, Reply, Followship, sequelize } = require('../models')
+// const { sequelize } = require('../models')
 const helpers = require('../_helpers')
+const Ajv = require('ajv').default
+const addFormats = require('ajv-formats')
+const ajv = new Ajv({ allErrors: true }) // 顯示超過一個以上的 errors
+addFormats(ajv)
+require('ajv-errors')(ajv)
+const validateUserInfo = require('../validateUserInfo')
+const validate = ajv.compile(validateUserInfo.schema)
 
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
-// const ExtractJwt = passportJWT.ExtractJwt
-// const JwtStrategy = passportJWT.Strategy
 
-let userController = {
+const userController = {
   signIn: (req, res, next) => {
     if (!req.body.account || !req.body.password) {
       throw new Error('請輸入必填項目')
@@ -45,38 +50,22 @@ let userController = {
       .catch(err => next(err))
   },
 
-  signUp: (req, res, next) => {
-    if (!req.body.account || !req.body.password) {
-      throw new Error('請輸入必填項目')
-    }
-    if (req.body.checkPassword !== req.body.password) {
-      throw new Error('兩次密碼輸入不同！')
-    } else {
-      User.findOne({
-        where: {
-          $or: { email: req.body.email, account: req.body.account }
-        }
+  signUp: async (req, res, next) => {
+    try {
+      const result = await validateUserInfo.checkUserInfo(req, validate)
+      if (result) return res.json({ status: 'error', message: result })
+
+      await User.create({
+        name: req.body.name.trim(),
+        email: req.body.email,
+        account: req.body.account.trim(),
+        avatar: 'https://i.imgur.com/TmLy5dw.png',
+        cover: 'https://i.imgur.com/pNr8Hlb.jpeg',
+        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
       })
-        .then(user => {
-          if (user) {
-            if (user.email === req.body.email) {
-              throw new Error('信箱重複！')
-            }
-            if (user.account === req.body.account) {
-              throw new Error('帳號重複！')
-            }
-          } else {
-            User.create({
-              name: req.body.name,
-              email: req.body.email,
-              account: req.body.account,
-              password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-            }).then(user => {
-              return res.json({ status: 'success', message: '成功註冊帳號！' })
-            })
-          }
-        })
-        .catch(err => next(err))
+      return res.json({ status: 'success', message: '成功註冊帳號！' })
+    } catch (error) {
+      next(error)
     }
   },
 
@@ -131,6 +120,7 @@ let userController = {
     try {
       const replies = await User.findByPk(req.params.userId, {
         include: Reply,
+        attributes: [],
         order: [[Reply, 'createdAt', 'DESC']]
       })
       if (!replies) throw new Error('這名使用者不存在或已被刪除')
@@ -235,25 +225,34 @@ let userController = {
     }
   },
 
-  putUserProfile: async (req, res, next) => {
+  putUser: async (req, res, next) => {
     let { name, introduction } = req.body
     const { files } = req
     const userId = helpers.getUser(req).id
     const id = Number(req.params.userId)
-    const error = []
-
-    if (id !== userId) throw new Error('只能修改自己的 profile')
-    if (!name) throw new Error('名字為必填')
 
     try {
-      if (introduction)
-        introduction.trim().length > 140 ? error.push('個人介紹最多 140 字') : (introduction = introduction.trim())
-      if (name) name.trim().length > 15 ? error.push('名字最多 15 字') : (name = name.trim())
-      if (error.length) throw new Error(error)
+      if (id !== userId) throw new Error('只能修改自己的個人資訊')
+      if (!name) throw new Error('名字為必填')
+
+      const result = await validateUserInfo.checkUserInfo(req, validate)
+      if (result) return res.json({ status: 'error', message: result })
 
       const user = await User.findByPk(id)
       if (!user) throw new Error('user not found.')
 
+      // setting
+      if (req.body.setting) {
+        await User.create({
+          name: req.body.name,
+          email: req.body.email.trim(),
+          account: req.body.account.trim(),
+          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+        })
+        return res.json({ status: 'success', message: 'update successgully！' })
+      }
+
+      // profile edit
       const images = {}
       if (files) {
         for (const key in files) {
@@ -266,13 +265,13 @@ let userController = {
 
       // console.log(images.avatar)
       await user.update({
-        name,
+        name: name.trim(),
         introduction,
         avatar: images.avatar ? images.avatar.data.link : user.avatar,
         cover: images.cover ? images.cover.data.link : user.cover
       })
 
-      res.json({ status: 'success', message: 'update successfully' })
+      return res.json({ status: 'success', message: 'update successfully' })
     } catch (error) {
       next(error)
     }
@@ -287,7 +286,7 @@ let userController = {
           followingId: req.body.id
         }
       })
-      if (isFollowing) return res.json({ status: 'success', message: '已追蹤過囉～' })
+      if (isFollowing) throw new Error('你已追蹤過這名使用者')
 
       await Followship.create({ followerId: helpers.getUser(req).id, followingId: Number(req.body.id) })
       return res.json({ status: 'success', message: '追蹤成功' })
@@ -297,14 +296,15 @@ let userController = {
   },
 
   removeFollowing: async (req, res, next) => {
-    if (Number(req.params.userId) === helpers.getUser(req).id) {
-      return res.json({ status: 'error', message: '無法取消追蹤自己' })
-    }
     try {
+      if (Number(req.params.followingId) === helpers.getUser(req).id) {
+        throw new Error('無法取消追蹤自己')
+      }
+
       const followship = await Followship.findOne({
         where: { followerId: helpers.getUser(req).id, followingId: req.params.followingId }
       })
-      if (!followship) res.json({ status: 'error', message: '已移除 follow' })
+      if (!followship) res.json({ status: 'error', message: '不能移除你沒追蹤過的使用者' })
 
       await followship.destroy()
       return res.json({ status: 'success', message: 'unfollow successfully' })
@@ -313,5 +313,7 @@ let userController = {
     }
   }
 }
+
+module.exports = userController
 
 module.exports = userController
