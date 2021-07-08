@@ -22,10 +22,10 @@ passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
       ]
     })
     if (!user) return done(null, false)
-    return done(null, user)
+    return done(null, user.toJSON())
   }
   catch (err) {
-    return done(err, null)
+    return done(err, user)
   }
 }))
 

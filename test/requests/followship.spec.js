@@ -16,7 +16,8 @@ describe('# followship requests', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
         await db.Followship.destroy({ where: {}, truncate: true })
-        const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+        const rootUser = await db.User.create({ name: 'root' });
+        this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
           return (req, res, next) => { };
         });
@@ -79,10 +80,12 @@ describe('# followship requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function (err, res) {
+
             if (err) return done(err);
             db.Followship.findByPk(1).then(followship => {
               expect(followship).to.be.null
               return done();
+
             })
           })
       });

@@ -14,7 +14,7 @@ router.post('/signin', userController.signin)
 
 router.post('/', userController.signup)
 
-router.use(helpers.authenticated, helpers.authenticatedUser)
+router.use(helpers.authenticated)
 router.get('/:id/followers', userController.getUserFollowers)
 router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/likes', userController.getUserLike)

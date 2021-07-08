@@ -48,7 +48,8 @@ describe('# user requests', () => {
     describe('GET /users/:id', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
-        const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+        const rootUser = await db.User.create({ name: 'root' });
+        this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
           return (req, res, next) => { };
         });
@@ -68,7 +69,6 @@ describe('# user requests', () => {
           .expect(200)
           .end(function (err, res) {
             if (err) return done(err);
-
             res.body.name.should.equal('root');
 
             return done();
@@ -302,7 +302,7 @@ describe('# user requests', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
         const rootUser = await db.User.create({ name: 'root' });
-        this.authenticate = sinon.stub(helpers, "authenticate").callsFake((strategy, options, callback) => {
+        this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
           return (req, res, next) => { };
         });

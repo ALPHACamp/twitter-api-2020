@@ -5,7 +5,7 @@ const helpers = require('../_helpers')
 
 router.get('/', followshipController.showAllUser)
 
-router.post('/:id', followshipController.addFollowing)
+router.post('/', followshipController.addFollowing)
 
 router.delete('/:id', followshipController.deleteFollowing)
 
