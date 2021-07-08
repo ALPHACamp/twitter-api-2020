@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+const Like = db.Like
 const { Op } = require('sequelize')
 
 const jwt = require('jsonwebtoken')
@@ -81,7 +83,63 @@ const userController = {
         })
       })
   },
-
+  getUserTweets: (req, res) => {
+    const UserId = req.params.id
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'This user does not exist.'
+          })
+        }
+        return Tweet.findAll({
+          where: { UserId },
+          attributes: {
+            exclude: ['UserId', 'updatedAt']
+          }
+        }).then(tweets => {
+          return res.status(200).json(tweets)
+        })
+      })
+  },
+  getUserLikes: (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'This user does not exist.'
+          })
+        }
+        return Like.findAll({
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id', 'description', 'createdAt', 'replyCount', 'likeCount']
+            },
+            {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          ],
+          where: { UserId },
+          attributes: ['TweetId']
+        }).then(likes => {
+          likes.forEach(like => {
+            like = like.toJSON()
+            if (like.User.id === viewerId) {
+              like.Tweet.isLike = true
+            } else {
+              like.Tweet.isLike = false
+            }
+          })
+          return res.status(200).json(likes)
+        })
+      })
+  }
 }
 
 module.exports = userController
