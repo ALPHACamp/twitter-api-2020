@@ -56,9 +56,9 @@ const userController = {
       if (result) return res.json({ status: 'error', message: result })
 
       await User.create({
-        name: req.body.name,
+        name: req.body.name.trim(),
         email: req.body.email,
-        account: req.body.account,
+        account: req.body.account.trim(),
         avatar: 'https://i.imgur.com/TmLy5dw.png',
         cover: 'https://i.imgur.com/pNr8Hlb.jpeg',
         password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
