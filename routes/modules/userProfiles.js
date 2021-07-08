@@ -3,11 +3,11 @@ const router = express.Router()
 const userController = require('../../controllers/userController')
 const { authenticated } = require('../../middleware/auth')
 
-router.get('/tweets', userController.getUserTweets)
-router.get('/replied_tweets', userController.getUserReplies)
-router.get('/likes', userController.getUserLikes)
-router.get('/followings', userController.getUserFollowings)
-router.get('/followers', userController.getUserFollowers)
+router.get('/:id/tweets', userController.getUserTweets)
+router.get('/:id/replied_tweets', userController.getUserReplies)
+router.get('/:id/likes', userController.getUserLikes)
+router.get('/:id/followings', userController.getUserFollowings)
+router.get('/:id/followers', userController.getUserFollowers)
 
 
 //router.use(authenticated)
