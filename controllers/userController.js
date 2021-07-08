@@ -2,6 +2,19 @@ const db = require('../models')
 const { User, Tweet, Like } = db
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
+const uploadImg = path => {
+  return new Promise((resolve, reject) => {
+    imgur.upload(path, (err, img) => {
+      if (err) {
+        return reject('error happened')
+      }
+      resolve(img)
+    })
+  })
+}
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -20,7 +33,7 @@ const userController = {
       const user = await User.findOne({ where: { account } })
       if (!user) return res.status(401).json({ status: 'error', message: 'That account is not registered!' })
       if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: 'Email or Password incorrect.' })
+        return res.status(401).json({ status: 'error', message: 'Account or Password incorrect.' })
       }
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -51,11 +64,11 @@ const userController = {
       if (!account || !name || !email || !password || !checkPassword) {
         message.push('All fields are required！')
       }
-      // check account length and type
+      // check name length and type
       if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
         message.push('Name can not be longer than 50 characters.')
       }
-      // check name length and type
+      // check account length and type
       if (account && !validator.isByteLength(account, { min: 0, max: 20 })) {
         message.push('Account can not be longer than 20 characters.')
       }
@@ -218,18 +231,18 @@ const userController = {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
       const data = {
-          id: user.id,
-          name: user.name,
-          account: user.account,
-          email: user.email,
-          avatar: user.avatar,
-          cover: user.cover,
-          introduction: user.introduction,
-          tweetCount: user.Tweets.length,
-          followerCount: user.Followers.length,
-          followingCount: user.Followings.length,
-          status: 'success',
-          message: `Get @${user.account}'s  profile successfully.`
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        email: user.email,
+        avatar: user.avatar,
+        cover: user.cover,
+        introduction: user.introduction,
+        tweetCount: user.Tweets.length,
+        followerCount: user.Followers.length,
+        followingCount: user.Followings.length,
+        status: 'success',
+        message: `Get @${user.account}'s  profile successfully.`
       }
       // if (Number(id) !== req.user.id) {
       //   return res.status(200).json(
@@ -238,13 +251,81 @@ const userController = {
       //   )
       // }
       return res.status(200).json(
-        data 
+        data
       )
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
     }
+  },
+  editUserProfile: async (req, res) => {
+    const id = req.params.id
+    const { name, introduction } = req.body
+    const message = []
+    // only user himself allow to edit account
+    if (req.user.id !== Number(id)) {
+      return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+    }
+    // check this user is or not in db
+    const user = await User.findByPk(id)
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+    }
+    // check Name is required
+    if (!name) {
+      message.push('Name is required')
+    }
+    // check name length and type
+    if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+      message.push('Name can not be longer than 50 characters.')
+    }
+    // check introduction length and type
+    if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
+      message.push('Introduction can not be longer than 160 characters.')
+    }
+
+    if (message.length) {
+      return res.status(400).json({ status: 'error', message })
+    }
+    let avatar
+    let cover
+
+    const { files } = req
+
+    const imgArray = []
+
+    if (files && files.avatar) {
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      avatar = await uploadImg(files.avatar[0].path)
+      imgArray.push(avatar)
+    }
+
+    if (files && files.cover) {
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      cover = await uploadImg(files.cover[0].path)
+      imgArray.push(cover)
+    }
+
+    Promise.all(imgArray)
+      .then(values => {
+        const [avatar, cover] = values
+
+        user.update({
+          name: name || req.user.name,
+          introduction: introduction || req.user.introduction,
+          avatar: files && files.avatar ? avatar.link : user.avatar,
+          cover: files && files.cover ? cover.link : user.cover
+        })
+          .then(() => {
+            return res.status(200).json({ status: 'success', message: ` Update ${name}'s profile successfully.` })
+          })
+          .catch(error => {
+            console.log(err)
+            res.status(500).json({ status: 'error', message: 'error' })
+          })
+      })
   }
+
 }
 
 module.exports = userController

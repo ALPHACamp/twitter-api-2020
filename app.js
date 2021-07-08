@@ -11,6 +11,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use('/upload', express.static(__dirname + '/upload'))
 // for mocha test's requirement
 app.use((req, res, next) => {
   req.user = helpers.getUser(req)
