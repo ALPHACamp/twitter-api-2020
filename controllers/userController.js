@@ -14,7 +14,7 @@ const validate = ajv.compile(validateUserInfo.schema)
 
 // JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
+// const passportJWT = require('passport-jwt')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -26,7 +26,8 @@ const userController = {
       where: { account: req.body.account }
     })
       .then(user => {
-        if (!user) return res.status(401).json({ status: 'error', message: '此使用者尚未註冊' })
+        if (!user) throw new Error('此使用者尚未註冊')
+        if (user.role === 'admin') throw new Error('permission denied')
 
         if (!bcrypt.compareSync(req.body.password, user.password)) {
           throw new Error('密碼輸入錯誤')
