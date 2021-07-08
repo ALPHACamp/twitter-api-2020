@@ -74,7 +74,7 @@ let userController = {
   },
   getUser: (req, res) => {
     const id = req.params.id
-    const userId = 1 //before building JWT
+    const userId = +req.user.id 
     const attributes = ['id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover', 'tweetNum', 'likeNum', 'followingNum', 'followerNum', 'lastLoginAt']
     User.findByPk(id, {
       attributes,
@@ -96,7 +96,7 @@ let userController = {
   },
   putUser: (req, res) => {
     const id = Number(req.params.id)
-    const userId = 1 //before building JWT
+     const userId = +req.user.id  
     const { name, account, password, email, passwordNew, passwordNewCheck, introduction, avatar, cover } = req.body
     const { files } = req
     async function saveAndRes(user) {
