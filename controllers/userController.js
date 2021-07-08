@@ -10,6 +10,7 @@ const userController = {
   signIn: async (req, res, next) => {
     try {
       const { email, password } = req.body
+
       if (!email || !password) {
         throw new Error('Required fields did not exist. (email or password)')
       }
@@ -17,6 +18,10 @@ const userController = {
       if (!user) {
         throw new Error('No such user found.')
       }
+      if (req.baseUrl.includes('admin')) {
+        if (user.role !== 'admin') throw new Error('User cannot sign in admin page.')
+      }
+      if (user.role === 'admin') throw new Error('Admin cannot sign in user page.')
       if (!bcrypt.compareSync(password, user.password)) {
         throw new Error('Incorrect password word.')
       }
