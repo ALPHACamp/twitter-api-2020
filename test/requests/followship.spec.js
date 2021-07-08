@@ -40,7 +40,7 @@ describe('# followship requests', () => {
               followship.followerId.should.equal(1);
               followship.followingId.should.equal(2);
               return done();
-            })
+            }).catch(done)
           })
       });
 

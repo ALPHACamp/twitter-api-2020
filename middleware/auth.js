@@ -1,7 +1,7 @@
 const passport = require('passport')
 const helper = require('../_helpers')
 module.exports = {
-  authenticated:  (req, res, next) => {
+  authenticated: (req, res, next) => {
     passport.authenticate('jwt', { session: false }, (err, user) => {
       if (err) {
         console.log(err)
@@ -9,8 +9,8 @@ module.exports = {
           .status(403)
           .json({ status: 'error', message: ' permission is denied' })
       }
-      console.log(user)
       req.user = user
+      // console.log(req.user)
       return next()
     })(req, res, next)
   },
@@ -23,5 +23,15 @@ module.exports = {
       })
     }
     return next()
+  },
+  authenticatedUser: (req, res, next) => {
+    req.user = helper.getUser(req)
+    if (req.user.role == 'user' || !req.user.role) {
+      return next()
+    }
+    return res.status(403).json({
+      status: 'error',
+      message: 'permission is denied, only User can visit'
+    })
   }
 }
