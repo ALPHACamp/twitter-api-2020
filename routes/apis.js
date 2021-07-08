@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const helpers = require('../_helpers.js')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
@@ -32,6 +34,8 @@ router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
 router.put('/users/:id', authenticated, authenticatedNotAdmin, userController.putUser)
+router.put('/user/:id/edit', authenticated, authenticatedNotAdmin,
+  upload.fields([{ name: 'avatar', max: 1 }, { name: 'cover', max: 1 }]), userController.editUser)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
