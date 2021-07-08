@@ -8,7 +8,7 @@ const defaultLimit = 10
 let currentUserId = 1
 
 let tweetController = {
-  getTweets: (req, res) => {
+getUserTweets: (req, res) => {
     const options = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
@@ -19,48 +19,24 @@ let tweetController = {
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          as: 'User',
+          as: 'User'
         },
         {
           model: User,
           as: 'LikedUsers',
-          attributes: ['id'],
-          through: {
-            attributes: [],
-          },
-        },
+          attributes: ['id']
+        }
       ],
+      where: { UserId: req.params.id }
     }
-    Tweet.findAll(options)
-      .then((tweets) => {
-        tweets = tweets.map((tweet) => {
-          const {
-            id,
-            description,
-            likeNum,
-            replyNum,
-            createdAt,
-            updatedAt,
-            deletedAt,
-            AdminId,
-            User,
-          } = tweet
-          return {
-            id,
-            isLike: tweet.LikedUsers.some((user) => user.id === currentUserId),
-            description: description.substring(0, 50),
-            likeNum,
-            replyNum,
-            createdAt,
-            updatedAt,
-            deletedAt,
-            AdminId,
-            User,
-          }
-        })
-        return res.status(200).json(tweets)
+    Tweet.findAll(options).then(tweets => {
+      tweets = tweets.map(tweet => {
+        tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(likedUser => likedUser.id === currentUserId)
+        delete tweet.dataValues.LikedUsers
+        return tweet
       })
-      .catch(() => res.status(404).json({ status: 'error', message: '' }))
+      return res.status(200).json(tweets)
+    }).catch(error => res.status(500).json({ status: 'error', message: error }))
   },
   getTweet: (req, res) => {
     const options = {
@@ -148,7 +124,8 @@ let tweetController = {
           message: '',
         })
       )
-  }
+  },
+  
 }
 
 module.exports = tweetController
