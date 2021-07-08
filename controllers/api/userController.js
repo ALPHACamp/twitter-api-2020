@@ -141,70 +141,90 @@ let userController = {
         message: "Can not post over 140 characters"
       })
     }
-    User.findOne({ where: { account } }).then(user => {
-      //check if account was already used
-      if (account && user && user.id !== id) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'Account was already used.'
-        })
-      }
-      // account 1.NULL 2.unchanged 3.changed & unique  will pass
-      User.findOne({ where: { email } }).then(user => {
-        //check if email was already used
-        if (email && user && user.id !== id) {
-          return res.status(401).json({
-            status: 'error',
-            message: 'Email was already used.'
-          })
+
+    User.findByPk(id)
+      .then(user => {
+        if (!account || user.account === account) {
+          return user
         }
-        // email 1.NULL 2.unchanged 3.changed & unique  will pass
-        User.findByPk(id).then(
-          async (user) => {
-            //check current password before add new password
-            if (passwordNew && !bcrypt.compareSync(password, user.password)) {
+        else {
+          return User.findOne({ where: { account } }).then(otherUser => {
+            //check if account was already used
+            if (otherUser && otherUser.id !== id) {
               return res.status(401).json({
                 status: 'error',
-                message: "Current password incorrect."
+                message: 'Account was already used.'
               })
             }
-            user.name = name || user.name
-            user.account = account || user.account
-            user.email = email || user.email
-            user.password = passwordNew ? bcrypt.hashSync(passwordNew, bcrypt.genSaltSync(10)) : user.password
-            user.introduction = introduction || user.introduction
-
-            // if there's image upload
-            if (files && (files.avatar || files.cover)) {
-              imgur.setClientID(IMGUR_CLIENT_ID)
-              if (files.avatar) {
-                imgur.upload(files.avatar[0].path, async (err, avatar) => {
-                  if (files.cover) {
-                    imgur.upload(files.cover[0].path, async (err, cover) => {
-                      user.avatar = avatar.data.link || user.avatar
-                      user.cover = cover.data.link || user.cover
-                      await saveAndRes(user)
-                    })
-                  } else {
-                    user.avatar = avatar.data.link || user.avatar
-                    user.cover = user.cover
-                    await saveAndRes(user)
-                  }
-                })
-              } else {
-                imgur.upload(files.cover[0].path, async (err, cover) => {
-                  user.avatar = user.avatar
-                  user.cover = cover.data.link || user.cover
-                  await saveAndRes(user)
-                })
-              }
-            } else {
-              await saveAndRes(user)
-            }
+            user.account = account
+            return user
           })
+        }
       })
-    })
+      .then(user => {
+        if (!email || user.email === email) {
+          return user
+        } else {
+          return User.findOne({ where: { email } }).then(otherUser => {
+            //check if email was already used
+            if (otherUser && otherUser.id !== id) {
+              return res.status(401).json({
+                status: 'error',
+                message: 'Email was already used.'
+              })
+            }
+            user.email = email
+            return user
+          })
+        }
+      })
+      .then(user => {
+        //check current password before add new password
+        if (passwordNew && !bcrypt.compareSync(password, user.password)) {
+          return res.status(401).json({
+            status: 'error',
+            message: "Current password incorrect."
+          })
+        }
+        user.name = name || user.name
+        user.password = passwordNew ? bcrypt.hashSync(passwordNew, bcrypt.genSaltSync(10)) : user.password
+        user.introduction = introduction || user.introduction
+        return user
+      })
+      .then(async (user) => {
+        // two image files
+        if (files && files.avatar && files.cover) {
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          return new Promise((resolve, reject) => {
+            imgur.upload(files.avatar[0].path, (err, avatar) => { resolve(avatar.data.link) })
+          })
+            .then(async (avatar) => {
+              return new Promise((resolve, reject) => {
+                imgur.upload(files.cover[0].path, (err, cover) => { resolve({ avatar, cover: cover.data.link }) })
+              })
+                .then(async (links) => {
+                  user.avatar = links.avatar
+                  user.cover = links.cover
+                  return await saveAndRes(user)
+                })
+                .catch(err => { return res.status(500).json({ status: 'error', message: err }) })
+            })
+        }
+        // one image file
+        else if (files && (files.avatar || files.cover)) {
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          image = files.avatar || files.cover
+          imageName = files.avatar ? 'avatar' : 'cover'
+          return imgur.upload(image[0].path, async (err, image) => {
+            user.dataValues[imageName] = image.data.link
+            return await saveAndRes(user)
+          })
+        }
+        // no image file
+        else {
+          return await saveAndRes(user)
+        }
+      })
   }
 }
-
-module.exports = userController;
+module.exports = userController
