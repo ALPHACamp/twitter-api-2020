@@ -326,13 +326,12 @@ const userController = {
       })
   },
 
-
   getUserTweets: (req, res) => {
     return Tweet.findAll({
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
       raw: true,
-      nest: true,
+      nest: true
     })
       .then(tweets => {
         return res.status(200).json(tweets)
@@ -348,7 +347,7 @@ const userController = {
       include: { model: Tweet },
       order: [['createdAt', 'DESC']],
       raw: true,
-      nest: true,
+      nest: true
     })
       .then(replies => {
         return res.status(200).json(replies)
@@ -364,7 +363,7 @@ const userController = {
       include: { model: Tweet },
       order: [['createdAt', 'DESC']],
       raw: true,
-      nest: true,
+      nest: true
     })
       .then(likes => {
         return res.status(200).json(likes)
@@ -379,7 +378,7 @@ const userController = {
       where: { followerId: req.params.id },
       order: [['createdAt', 'DESC']],
       raw: true,
-      nest: true,
+      nest: true
     })
       .then(followings => {
         return res.status(200).json(followings)
@@ -394,7 +393,7 @@ const userController = {
       where: { followingId: req.params.id },
       order: [['createdAt', 'DESC']],
       raw: true,
-      nest: true,
+      nest: true
     })
       .then(followers => {
         return res.status(200).json(followers)
@@ -403,7 +402,7 @@ const userController = {
         console.log('error')
         res.status(500).json({ status: 'error', message: 'error' })
       })
-  },
+  }
 }
 
 module.exports = userController
