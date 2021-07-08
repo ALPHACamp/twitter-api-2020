@@ -5,6 +5,7 @@ const helpers = require('../_helpers.js')
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
+const tweetController = require('../controllers/tweetController.js')
 
 // jwt驗證
 const authenticated = (req, res, next) => {
@@ -47,5 +48,12 @@ router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.ge
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
+// router.get('/admin/users', adminController.getUsers)
+router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', adminController.deleteTweet)
+
+// tweet routes
+router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
+router.post('/tweets', authenticatedNotAdmin, tweetController.postTweet)
 
 module.exports = router
