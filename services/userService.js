@@ -18,11 +18,12 @@ const userService = {
     return user
   },
 
-  getUser: async (id) => {
-    const user = await User.findByPk(id, {
-      attributes: {
-        exclude: ['password']
-      },
+  getUser: async (currentUserId, viewingId) => {
+    const user = await User.findByPk(viewingId, {
+      attributes: [
+        'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'account', 'role', 'createdAt',
+        [Sequelize.literal(`(exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id))`), 'isFollowed']
+      ],
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },

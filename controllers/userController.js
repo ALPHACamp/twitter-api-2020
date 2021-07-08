@@ -66,7 +66,7 @@ const userController = {
 
   getUser: async (req, res, next) => {
     try {
-      const user = await userService.getUser(req.params.user_id)
+      const user = await userService.getUser(req.user.id, req.params.user_id)
       return res.json(user)
     } catch (error) {
       return next(error)
