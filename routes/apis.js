@@ -58,6 +58,6 @@ router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
 router.post('/tweets', authenticatedNotAdmin, tweetController.postTweet)
 
 // reply routes
-router.post('/tweets/:tweet_id/replies', authenticatedNotAdmin, replyController.postReply)
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedNotAdmin, replyController.postReply)
 
 module.exports = router

@@ -1,4 +1,4 @@
-const { Reply } = require('../models')
+const { Reply, Tweet } = require('../models')
 
 const replyController = {
   postReply: async (req, res, next) => {
@@ -13,6 +13,7 @@ const replyController = {
         UserId: req.user.id,
         TweetId: req.params.tweet_id
       })
+      await Tweet.increment('replyCounts', { where: { id: req.params.tweet_id } })
       return res.json({ status: 'success', message: '成功新增回覆內容！' })
     } catch (err) {
       console.log(err)
