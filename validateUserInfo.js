@@ -28,16 +28,18 @@ module.exports = {
 
   checkUserInfo: async function checkUserInfo(req, validate) {
     const { name, email, account, password, checkPassword, introduction, setting } = req.body
+    const errors = []
     if (!helpers.getUser(req) || setting) {
       if (!account || !password || !name || !email || !checkPassword) {
-        return '請輸入必填項目'
+        errors.push('請輸入必填項目')
+        return errors
       }
       if (checkPassword !== password) {
-        return '兩次密碼輸入不同！'
+        errors.push('兩次密碼輸入不同！')
+        return errors
       }
     }
 
-    const errors = []
     validate({ name, email, account, password, introduction })
     if (validate.errors) {
       for (const error of validate.errors) {
