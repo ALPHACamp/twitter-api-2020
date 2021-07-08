@@ -5,7 +5,7 @@ const defaultLimit = 10
 let currentUserId = 1
 
 let followController = {
-    getUserFollowings: (req, res) => {
+  getUserFollowings: (req, res) => {
     const options = {
       where: { followerId: req.params.id },
       limit: +req.query.limit || defaultLimit,
@@ -22,6 +22,25 @@ let followController = {
     Followship.findAll(options)
       .then(followings => {
         return res.status(200).json(followings)
+      }).catch(error => res.status(500).json({ status: 'error', message: error }))
+  },
+  getUserFollowers: (req, res) => {
+    const options = {
+      where: { followingId: req.params.id },
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
+      include: {
+        model: User,
+        as: "follower",
+        attributes: ['id', 'account', 'name', 'avatar',
+          'likeNum', 'tweetNum', 'followingNum', 'followerNum']
+      },
+      attributes: ['id', 'followingId', 'followerId'],
+      order: [[{ model: User, as: "follower" }, 'followerNum', 'desc']]
+    }
+    Followship.findAll(options)
+      .then(followers => {
+        return res.status(200).json(followers)
       }).catch(error => res.status(500).json({ status: 'error', message: error }))
   },
   postFollowship: (req, res) => {
