@@ -208,7 +208,6 @@ const userController = {
         where: {
           id: id
         },
-
         include: [
           { model: Tweet },
           { model: User, as: 'Followers' },
@@ -218,9 +217,7 @@ const userController = {
       if (!user) {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
-
-      if (Number(id) !== req.user.id) {
-        return res.status(200).json({
+      const data = {
           id: user.id,
           name: user.name,
           account: user.account,
@@ -231,25 +228,18 @@ const userController = {
           tweetCount: user.Tweets.length,
           followerCount: user.Followers.length,
           followingCount: user.Followings.length,
-          isFollowed: req.user.Followings.map(d => d.id).includes(user.id),
           status: 'success',
           message: `Get @${user.account}'s  profile successfully.`
-        })
       }
-      return res.status(200).json({
-        id: user.id,
-        name: user.name,
-        account: user.account,
-        email: user.email,
-        avatar: user.avatar,
-        cover: user.cover,
-        introduction: user.introduction,
-        tweetCount: user.Tweets.length,
-        followerCount: user.Followers.length,
-        followingCount: user.Followings.length,
-        status: 'success',
-        message: `Get @${user.account}'s  profile successfully.`
-      })
+      // if (Number(id) !== req.user.id) {
+      //   return res.status(200).json(
+      //     data,
+      //     data.isFollowed = req.user.Followings.map(d => d.id).includes(user.id)
+      //   )
+      // }
+      return res.status(200).json(
+        data 
+      )
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
