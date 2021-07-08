@@ -15,10 +15,10 @@ const userController = {
       const { name, account, email, password, confirmPassword } = req.body
       if (!name || !account || !email || !password || !confirmPassword) return res.json({ status: 'error', message: '請填入所有欄位' })
       if (password !== confirmPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
-      let user = await User.findOne({ where: { email } })
-      if (user) return res.json({ status: 'error', message: `此信箱已註冊` })
-      user = await User.findOne({ where: { account } })
-      if (user) return res.json({ status: 'error', message: `此帳號已有人使用` })
+      let user = await User.findOne({ where: { account } })
+      if (user) return res.json({ status: 'error', message: `此帳號已被註冊` })
+      user = await User.findOne({ where: { email } })
+      if (user) return res.json({ status: 'error', message: `此信箱已被註冊` })
 
       const salt = await bcrypt.genSalt(10)
       const hashPassword = await bcrypt.hash(password, salt)
@@ -27,7 +27,6 @@ const userController = {
         name,
         email,
         password: hashPassword,
-        role: 'user'
       })
       return res.json({ status: 'success', message: '註冊成功' })
     }
@@ -62,7 +61,7 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '只供使用者登入使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const user = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
@@ -87,12 +86,11 @@ const userController = {
       }) || false
       if (!user) return res.json({ status: 'error', message: '使用者不存在' })
       return res.json(user)
-      // return res.json({ key: 'test' })
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '只供使用者登入使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         attributes: [
@@ -115,7 +113,7 @@ const userController = {
   },
   getUserRepliedTweets: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '只供使用者登入使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       // const replies = await Reply.findAll({
       //   where: { UserId: req.params.id },
       //   include: [{
@@ -152,7 +150,7 @@ const userController = {
   },
   getUserLike: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '只供使用者登入使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       let likes = await Like.findAll({
         include: [
           { model: User, attributes: ['account', 'name', 'avatar', 'cover'] },
@@ -170,7 +168,7 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '只供使用者登入使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const user = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
@@ -199,7 +197,7 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '只供使用者登入使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const user = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
@@ -226,7 +224,7 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '只供使用者登入使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       let { name, email, password, confirmPassword, account, bio, } = req.body
       const avatar = req.files.avatar || false
       const cover = req.files.cover || false

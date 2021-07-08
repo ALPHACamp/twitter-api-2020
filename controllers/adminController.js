@@ -1,12 +1,14 @@
 const { User, Tweet } = require('../models')
 const helpers = require('../_helpers')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+
 
 const adminController = {
   signin: async (req, res, next) => {
     try {
       const { account, password } = req.body
       if (!account || !password) return res.json({ status: 'error', message: '請填入所有欄位' })
-
       const user = await User.findOne({ where: { account } })
       if (!user) return res.status(401).json({ status: 'error', message: '管理員專用' })
       const isMatch = await bcrypt.compare(password, user.password)
@@ -30,8 +32,17 @@ const adminController = {
   getAllUser: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'admin') return res.json({ status: 'error', message: '管理員專用' })
-      const user = await User.findAll()
+      const user = await User.findAll({})
       return res.json(user)
+    } catch (err) { next(err) }
+  },
+  getAllTweet: async (req, res, next) => {
+    try {
+      if (helpers.getUser(req).role !== 'admin') return res.json({ status: 'error', message: '管理員專用' })
+      const tweets = await Tweet.findAll({
+        include: [User],
+      })
+      return res.json(tweets)
     } catch (err) { next(err) }
   },
   deleteTweet: async (req, res, next) => {

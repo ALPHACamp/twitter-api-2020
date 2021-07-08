@@ -55,13 +55,11 @@ describe('# user requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
       })
 
-
-      // GET /users/:id
       it(' - successfully', (done) => {
         request(app)
           .get('/api/users/1')
@@ -94,7 +92,7 @@ describe('# user requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.Tweet.create({ UserId: 1, description: 'User1 的 Tweet1' })
       })
@@ -107,7 +105,6 @@ describe('# user requests', () => {
           .expect(200)
           .end(function (err, res) {
             if (err) return done(err);
-
             expect(res.body).to.be.an('array');
             res.body[0].description.should.equal('User1 的 Tweet1');
 
@@ -135,7 +132,7 @@ describe('# user requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.Tweet.create({ UserId: 1, description: 'User1 的 Tweet1' })
         await db.Reply.create({ UserId: 1, TweetId: 1, content: 'Tweet1 的 comment' })
@@ -177,7 +174,7 @@ describe('# user requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
         await db.Tweet.create({ UserId: 2, description: 'User2 的 Tweet1' })
@@ -221,7 +218,7 @@ describe('# user requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
         await db.Followship.create({ followerId: 1, followingId: 2 })
@@ -262,7 +259,7 @@ describe('# user requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
         await db.Followship.create({ followerId: 1, followingId: 2 })
@@ -308,7 +305,7 @@ describe('# user requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1', bio: 'User1' })
       })
 

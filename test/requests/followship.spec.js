@@ -23,7 +23,7 @@ describe('# followship requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
       })
@@ -67,7 +67,7 @@ describe('# followship requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, Followings: [], role: 'user' });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
         await db.Followship.create({ followerId: 1, followingId: 2 })
@@ -80,7 +80,6 @@ describe('# followship requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function (err, res) {
-
             if (err) return done(err);
             db.Followship.findByPk(1).then(followship => {
               expect(followship).to.be.null

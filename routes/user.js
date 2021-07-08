@@ -11,10 +11,11 @@ const helpers = require('../_helpers')
 
 // router.get('/logout', userController.logout)
 router.post('/signin', userController.signin)
-
 router.post('/', userController.signup)
 
+// router.use(helpers.authenticated)
 router.use(helpers.authenticated)
+
 router.get('/:id/followers', userController.getUserFollowers)
 router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/likes', userController.getUserLike)
@@ -28,3 +29,4 @@ router.put('/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cove
 module.exports = router
 
 // helpers.authenticated, helpers.authenticatedUser,
+// if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })

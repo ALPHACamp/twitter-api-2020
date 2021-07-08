@@ -1,7 +1,6 @@
 const express = require('express')
 const app = express()
 
-
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
@@ -11,7 +10,6 @@ const helpers = require('./_helpers')
 
 app.use(express.urlencoded({ extended: false }))
 app.use('/upload', express.static(__dirname + '/upload'))
-
 app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
   return next()
