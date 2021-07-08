@@ -119,7 +119,7 @@ const userController = {
 
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await tweetService.getTweets({
+      const tweets = await tweetService.getTweets(req.user.id, {
         UserId: req.params.user_id
       })
       return res.json(tweets)
