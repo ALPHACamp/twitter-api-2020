@@ -116,7 +116,7 @@ const userController = {
       }
       await user.update({
         name, account, email,
-        password: bcrypt.hashSync(bcrypt.genSaltSync(10), password)
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
       })
       return res.json({ status: 'success', message: '個人設定修改成功' })
     } catch (err) {
