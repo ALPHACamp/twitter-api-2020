@@ -1,6 +1,10 @@
 const db = require('../models')
 const Tweet = db.Tweet
 const Reply = db.Reply
+const User = db.User
+const Like = db.Like
+
+const { Op } = require('sequelize')
 
 const tweetController = {
   postTweet: (req, res) => {
@@ -64,6 +68,43 @@ const tweetController = {
           })
         })
       })
+  },
+
+  getSingleTweet: (req, res) => {
+    const tweet_id = req.params.id
+    const user_id = req.user.id
+
+    return Tweet.findByPk(tweet_id, {
+      include: {
+        model: User,
+        attributes: ['id', 'name', 'account', 'avatar']
+      },
+      attributes: {
+        exclude: ['updatedAt', 'UserId']
+      }
+    }).then(tweet => {
+      if (!tweet) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Tweet does not exist'
+        })
+      }
+
+      return Like.findOne({
+        where: {
+          [Op.and]: [
+            { TweetId: tweet_id },
+            { UserId: user_id }
+          ]
+        }
+      }).then(like => {
+        tweet = tweet.toJSON()
+        tweet.isLike = Boolean(like)
+
+        return res.status(200).json(tweet)
+      })
+
+    })
   }
 }
 
