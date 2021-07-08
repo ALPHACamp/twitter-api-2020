@@ -42,9 +42,14 @@ const userController = {
     try {
       const { checkPassword, ...formBody } = req.body
       const { account, name, email, password } = formBody
+
       if (!account || !name || !email || !password) {
         throw new Error('All field are required.')
       }
+      if (!email.match(/.+@.+\..+/i)) {
+        throw new Error('Invalid email.')
+      }
+      await userService.checkUnique(formBody)
       if (password !== checkPassword) {
         throw new Error('Fields password and checkPassword must be the same.')
       }
@@ -84,7 +89,19 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
-      const { password, ...formBody } = req.body
+      const { password, checkPassword, email, ...formBody } = req.body
+
+      if (password && password !== checkPassword) {
+        throw new Error('Field password & checkPassword must be same.')
+      }
+
+      if (email && !email.match(/.+@.+\..+/i)) {
+        throw new Error('Invalid email.')
+      }
+      await userService.checkUnique(req.body)
+
+      const hash = password ? bcrypt.hashSync(password, 10) : null
+
       const { files } = req
       if (files) {
         if (files.avatar) {
@@ -100,17 +117,9 @@ const userController = {
       }
 
       const user = await userService.putUser(req.params.user_id, {
-        ...formBody
+        ...formBody,
+        password: hash
       })
-      return res.json({ status: 'success', user })
-    } catch (error) {
-      return next(error)
-    }
-  },
-
-  putUserProfile: async (req, res, next) => {
-    try {
-      const user = await userService.putUser(req.params.user_id, { ...req.body })
       return res.json({ status: 'success', user })
     } catch (error) {
       return next(error)
