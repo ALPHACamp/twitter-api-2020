@@ -65,7 +65,23 @@ const userController = {
         }
       })
     })
-  }
+  },
+  getUser: (req, res) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) {
+          return res.status(404).json({
+            status: 'error',
+            message: 'User not found.'
+          })
+        }
+        const { id, name, account, avatar, cover, introduction, followerCount, followingCount } = user
+        return res.status(200).json({
+          id, name, account, avatar, cover, introduction, followerCount, followingCount
+        })
+      })
+  },
+
 }
 
 module.exports = userController
