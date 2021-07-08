@@ -15,6 +15,6 @@ app.listen(port, () => console.log(`App is listening on http://localhost:${port}
 require('./routes')(app)
 app.use((err, req, res, next) => {
   res.json({ status: 'error', message: err.message })
-  console.log(err.message)
+  console.error(err)
 })
 module.exports = app
