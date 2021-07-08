@@ -62,7 +62,7 @@ const adminController = {
       // 將取得資料做整理
       const users = result.map(user => ({
         ...user,
-        createdAt: moment(user.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        createdAt: moment(user.createdAt).format('YYYY-MM-DD hh:mm:ss a')
       }))
       return res.json({ status: 'success', users })
     } catch (err) {

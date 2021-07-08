@@ -48,7 +48,7 @@ router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.ge
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
-// router.get('/admin/users', adminController.getUsers)
+router.get('/admin/users', adminController.getUsers)
 router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
 router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
 

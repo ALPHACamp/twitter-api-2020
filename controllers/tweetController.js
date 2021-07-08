@@ -21,7 +21,7 @@ const tweetController = {
         ...tweet,
         createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
       }))
-      return res.json({ status: 'success', tweets })
+      return res.json(tweets)
     } catch (err) {
       next(err)
       return res.json({ status: 'error', message: err.toString() })
@@ -59,9 +59,9 @@ const tweetController = {
       // 時間格式整理
       tweet = {
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss a')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
       }
-      return res.json({ status: 'success', tweet })
+      return res.json(tweet)
     } catch (err) {
       next(err)
       return res.json({ status: 'error', message: err.toString() })
