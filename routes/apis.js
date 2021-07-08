@@ -31,6 +31,7 @@ const authenticatedNotAdmin = (req, res, next) => {
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
+router.put('/users/:id', authenticated, authenticatedNotAdmin, userController.putUser)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)

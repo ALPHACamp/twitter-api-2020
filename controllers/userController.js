@@ -1,3 +1,6 @@
+const imgur = require('imgur-node-api')
+const fs = require('fs')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -84,6 +87,38 @@ const userController = {
         avatar, followingCounts, followerCounts,
         Followers: user.Followers, Followings: user.Followings
       })
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      const { name, account, email, password, checkPassword } = req.body
+      // 確認所有欄位
+      if (!name || !account || !email || !password || !checkPassword) {
+        return res.json({ status: 'error', message: '所有欄位皆為必填！' })
+      }
+      // 確認沒有相同帳號的使用者
+      let sameUser = await User.findOne({ where: { account } })
+      if (sameUser.dataValues.id !== user.dataValues.id) {
+        return res.json({ status: 'error', message: '此帳號已有人使用！' })
+      }
+      // 確認沒有相同 email 的使用者
+      sameUser = await User.findOne({ where: { email } })
+      if (sameUser.dataValues.id !== user.dataValues.id) {
+        return res.json({ status: 'error', message: '此 email 已存在！' })
+      }
+      // 確認密碼相同
+      if (password !== checkPassword) {
+        return res.json({ status: 'error', message: '密碼與確認密碼不符！' })
+      }
+      await user.update({
+        name, account, email,
+        password: bcrypt.hashSync(bcrypt.genSaltSync(10), password)
+      })
+      return res.json({ status: 'success', message: '個人設定修改成功' })
     } catch (err) {
       console.log(err)
       next(err)
