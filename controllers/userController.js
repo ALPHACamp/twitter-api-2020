@@ -144,8 +144,36 @@ const userController = {
         res.status(500).json({ status: 'error', message: 'error' })
       })
   },
-  getUserFollowings: (req, res) => { },
-  getUserFollowers: (req, res) => { },
+  getUserFollowings: (req, res) => {
+    return Followship.findAll({
+      where: { followerId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+    })
+      .then(followings => {
+        return res.status(200).json(followings)
+      })
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
+  },
+  getUserFollowers: (req, res) => {
+    return Followship.findAll({
+      where: { followingId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+    })
+      .then(followers => {
+        return res.status(200).json(followers)
+      })
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
+  },
 }
 
 module.exports = userController
