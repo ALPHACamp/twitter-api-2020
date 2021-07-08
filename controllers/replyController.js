@@ -19,9 +19,11 @@ let replyController = {
   },
 
   getReply: (req, res, next) => {
-    Reply.findAll({ where: { TweetId: req.params.tweetId } }, { include: { model: User } }).then((reply) => {
-      res.json(reply)
-    })
+    Reply.findAll({ where: { TweetId: req.params.tweetId } }, { include: { model: User } })
+      .then((reply) => {
+        res.json(reply)
+      })
+      .catch((err) => next(err))
   },
 }
 

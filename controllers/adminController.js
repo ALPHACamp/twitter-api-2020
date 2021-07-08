@@ -58,7 +58,7 @@ let adminController = {
   getUsers: (req, res, next) => {
     return User.findAll({
       include: [
-        { model: Tweet, attributes: ['id'], include: User },
+        { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['id', 'name'] } },
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
         { model: Like },
