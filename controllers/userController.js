@@ -81,7 +81,7 @@ const userController = {
       if (message.length) {
         return res.status(400).json({ status: 'error', message })
       }
-      
+
       await User.create({
         account,
         name,
@@ -112,7 +112,7 @@ const userController = {
         include: [
           { model: User, as: 'Followers' }
         ],
-        attributes: ['id', 'name', 'email', 'avatar'],
+        attributes: ['id', 'name', 'email', 'avatar', 'account'],
         limit: 10
       })
       if (!users) {
@@ -196,6 +196,60 @@ const userController = {
 
       await user.update({ name, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)), email, account })
       return res.status(200).json({ status: 'success', message: `@${account} Update account information successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
+  },
+  getUser: async (req, res) => {
+    try {
+      const id = req.params.id
+      const user = await User.findOne({
+        where: {
+          id: id
+        },
+
+        include: [
+          { model: Tweet },
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      })
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+
+      if (Number(id) !== req.user.id) {
+        return res.status(200).json({
+          id: user.id,
+          name: user.name,
+          account: user.account,
+          email: user.email,
+          avatar: user.avatar,
+          cover: user.cover,
+          introduction: user.introduction,
+          tweetCount: user.Tweets.length,
+          followerCount: user.Followers.length,
+          followingCount: user.Followings.length,
+          isFollowed: req.user.Followings.map(d => d.id).includes(user.id),
+          status: 'success',
+          message: `Get @${user.account}'s  profile successfully.`
+        })
+      }
+      return res.status(200).json({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        email: user.email,
+        avatar: user.avatar,
+        cover: user.cover,
+        introduction: user.introduction,
+        tweetCount: user.Tweets.length,
+        followerCount: user.Followers.length,
+        followingCount: user.Followings.length,
+        status: 'success',
+        message: `Get @${user.account}'s  profile successfully.`
+      })
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })

@@ -11,4 +11,5 @@ router.get('/current', userController.getCurrentUser)
 router.get('/top', userController.getTopUsers)
 
 router.put('/:id/account', userController.editAccount)
+router.get('/:id', userController.getUser)
 module.exports = router
