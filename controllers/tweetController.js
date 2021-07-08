@@ -36,7 +36,7 @@ let tweetController = {
       UserId: helpers.getUser(req).id,
     })
       .then((tweet) => {
-        res.json({ status: 'success', message: 'description was successfully created' })
+        res.json(tweet)
       })
       .catch((err) => next(err))
   },
