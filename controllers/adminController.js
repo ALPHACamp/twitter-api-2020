@@ -1,7 +1,6 @@
 const db = require('../models')
 const { User, Tweet, Like } = db
 
-
 const adminController = {
   getUsers: async (req, res) => {
     try {

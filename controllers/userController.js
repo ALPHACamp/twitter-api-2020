@@ -143,20 +143,20 @@ const userController = {
       const { email: currentEmail, account: currentAccount } = req.user
 
       const id = req.params.id
-  
-      //only user himself allow to edit account
+
+      // only user himself allow to edit account
       if (req.user.id !== Number(id)) {
         return res.status(401).json({ status: 'error', message: 'Permission denied.' })
       }
 
-      //check this user is or not in db
+      // check this user is or not in db
       const user = await User.findByPk(id)
       if (!user) {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
 
-      let message = []
-      
+      const message = []
+
       // check all inputs are required
       if (!account || !name || !email || !password || !checkPassword) {
         message.push('All fields are required！')
@@ -181,14 +181,14 @@ const userController = {
       if (password && (password !== checkPassword)) {
         message.push('The password and confirmation do not match.Please retype them.')
       }
-      if (email !== currentEmail ) {
+      if (email !== currentEmail) {
         const userEmail = await User.findOne({ where: { email } })
         if (userEmail) {
           message.push('This email address is already being used.')
-        }  
+        }
       }
-      if ( account !== currentAccount) {
-        const  userAccount = await  User.findOne({ where: { account } })
+      if (account !== currentAccount) {
+        const userAccount = await User.findOne({ where: { account } })
         if (userAccount) {
           message.push('This account is already being used.')
         }
