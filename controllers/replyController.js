@@ -1,4 +1,5 @@
-const { Reply, Tweet } = require('../models')
+const { Reply, Tweet, User } = require('../models')
+const moment = require('moment')
 
 const replyController = {
   postReply: async (req, res, next) => {
@@ -15,6 +16,31 @@ const replyController = {
       })
       await Tweet.increment('replyCounts', { where: { id: req.params.tweet_id } })
       return res.json({ status: 'success', message: '成功新增回覆內容！' })
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const results = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { TweetId: req.params.tweet_id },
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }],
+        order: [
+          ['createdAt', 'DESC']
+        ]
+      })
+      const replies = results.map(reply => ({
+        ...reply,
+        createdAt: moment(reply.createdAt).format('YYYY-MM-DD kk:mm:ss')
+      }))
+      return res.json(replies)
     } catch (err) {
       console.log(err)
       next(err)
