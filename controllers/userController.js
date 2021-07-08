@@ -120,6 +120,7 @@ const userController = {
     try {
       const replies = await User.findByPk(req.params.userId, {
         include: Reply,
+        attributes: [],
         order: [[Reply, 'createdAt', 'DESC']]
       })
       if (!replies) throw new Error('這名使用者不存在或已被刪除')
