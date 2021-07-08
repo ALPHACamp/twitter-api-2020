@@ -94,12 +94,12 @@ getUserTweets: (req, res) => {
     if (!req.body.description) {
       return res
         .status(400)
-        .json({ status: 'error', messgae: 'Can not post empty description' })
+        .json({ status: 'error', message: 'Can not post empty description' })
     }
     if (req.body.description.length > 140) {
       return res
         .status(400)
-        .json({ status: 'error', messgae: 'Can not post over 140 characters' })
+        .json({ status: 'error', message: 'Can not post over 140 characters' })
     }
     const data = {
       UserId: currentUserId,
