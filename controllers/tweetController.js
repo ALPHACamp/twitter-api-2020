@@ -102,7 +102,20 @@ const TweetController = {
     }
 
   },
-  postUnlike: (req, res) => {
+  postUnlike: async (req, res) => {
+    let liked = await Like.findOne({
+      where: { UserId: req.user.id, TweetId: req.params.id }
+    })
+    if (!liked) { res.status(400).json({ status: 'error', message: 'error' }) }
+    else {
+      liked.destroy()
+        .then(like => { res.status(200).json({ status: 'success', message: 'The like was successfully deleted' }) })
+        .catch(error => {
+          console.log('error')
+          res.status(500).json({ status: 'error', message: 'error' })
+        })
+
+    }
 
   },
 
