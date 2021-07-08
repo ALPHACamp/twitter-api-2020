@@ -1,9 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const tweetController = require('../../controllers/tweetController')
-const { authenticated } = require('../../middleware/auth')
+const { authenticated, authenticatedUser } = require('../../middleware/auth')
+
+router.use(authenticated)
 
 router.get('/', tweetController.getTweets)
+
+router.use(authenticatedUser)
+
 router.get('/:tweet_id', tweetController.getTweet)
 router.post('/', tweetController.postTweet)
 
