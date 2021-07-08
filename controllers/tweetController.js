@@ -4,7 +4,7 @@ const Reply = db.Reply
 const User = db.User
 const Like = db.Like
 
-const { Op } = require('sequelize')
+const { Op, Sequelize } = require('sequelize')
 
 const tweetController = {
   postTweet: (req, res) => {
@@ -75,12 +75,21 @@ const tweetController = {
     const user_id = req.user.id
 
     return Tweet.findByPk(tweet_id, {
-      include: {
-        model: User,
-        attributes: ['id', 'name', 'account', 'avatar']
-      },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        },
+        {
+          model: Like,
+          required: false,
+          where: {
+            UserId: user_id
+          }
+        }
+      ],
       attributes: {
-        exclude: ['updatedAt', 'UserId']
+        exclude: ['updatedAt', 'UserId'],
       }
     }).then(tweet => {
       if (!tweet) {
@@ -90,20 +99,11 @@ const tweetController = {
         })
       }
 
-      return Like.findOne({
-        where: {
-          [Op.and]: [
-            { TweetId: tweet_id },
-            { UserId: user_id }
-          ]
-        }
-      }).then(like => {
-        tweet = tweet.toJSON()
-        tweet.isLike = Boolean(like)
+      tweet = tweet.toJSON()
+      tweet.isLike = Boolean(tweet.Likes[0])
+      delete tweet.Likes
 
-        return res.status(200).json(tweet)
-      })
-
+      return res.status(200).json(tweet)
     })
   }
 }
