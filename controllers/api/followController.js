@@ -4,6 +4,36 @@ const User = db.User
 const defaultLimit = 10
 
 let followController = {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   getUserFollowers: (req, res) => {
     const options = {
       where: { followingId: req.params.id },
@@ -23,6 +53,6 @@ let followController = {
         return res.status(200).json(followers)
       }).catch(error => res.status(500).json({ status: 'error', message: error }))
   }
-};
+}
 
 module.exports = followController;

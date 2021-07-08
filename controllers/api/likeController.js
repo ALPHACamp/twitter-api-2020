@@ -89,6 +89,23 @@ let likeController = {
           message: ''
         })
       )
+  },
+  getUserLikes: (req, res) => {
+    const options = {
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
+      attributes: ['id', 'UserId', 'TweetId'],
+      where: { UserId: req.params.id },
+      include: {
+        model: Tweet,
+        as: 'LikedTweet',
+        attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt']
+      },
+      order: [[{ model: Tweet, as: 'LikedTweet' }, 'createdAt', 'desc']]
+    }
+    Like.findAll(options)
+      .then(likes => res.status(200).json(likes))
+      .catch(error => res.status(500).json(error))
   }
 }
 
