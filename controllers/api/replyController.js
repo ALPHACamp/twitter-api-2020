@@ -1,10 +1,10 @@
 const db = require('../../models')
 const Reply = db.Reply
 const User = db.User
-const Tweet  = db.Tweet
+const Tweet = db.Tweet
 const defaultLimit = 10
 //temp 
-let currentUserId = 1 
+let currentUserId = 1
 
 let replyController = {
   getReplies: (req, res) => {
@@ -33,7 +33,7 @@ let replyController = {
     if (req.body.comment.length > 140) {
       return res.status(400).json({
         status: 'error',
-        messgae: 'Can not post over 140 characters',
+        message: 'Can not post over 140 characters',
       })
     }
     const data = {
@@ -59,6 +59,30 @@ let replyController = {
         })
       )
   },
+  getRepliedTweets: (req, res) => {
+    const options = {
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
+      attributes: ['id', 'UserId', 'TweetId', 'comment', 'createdAt'],
+      where: { UserId: req.params.id },
+      include: {
+        model: Tweet,
+        as: 'repliedTweet',
+        attributes: [
+          'id',
+          'description',
+          'likeNum',
+          'replyNum',
+          'createdAt'
+        ]
+      },
+      order: [[{ model: Tweet, as: "repliedTweet" }, 'createdAt', 'desc']]
+    }
+    Reply.findAll(options)
+      .then(replies => {
+        return res.status(200).json(replies)
+      }).catch(error => res.status(500).json({ status: 'error', message: error }))
+  }
 }
 
 module.exports = replyController
