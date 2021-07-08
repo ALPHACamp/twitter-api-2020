@@ -15,7 +15,8 @@ const userService = {
     return user
   },
 
-  getUser: async (currentUserId, viewingId) => {
+  // TODO: 
+  getUser: async (viewingId, currentUserId = 0) => {
     const user = await User.findByPk(viewingId, {
       attributes: [
         'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'account', 'role', 'createdAt',
