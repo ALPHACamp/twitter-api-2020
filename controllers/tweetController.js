@@ -14,7 +14,10 @@ const TweetController = {
       .then(tweets => {
         return res.status(200).json(tweets)
       })
-      .catch(error => console.log('error'))
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
 
   },
   getTweet: (req, res) => {
@@ -32,7 +35,10 @@ const TweetController = {
           message: 'Get the tweet successfully'
         })
       })
-      .catch(error => console.log('error'))
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
   },
   postTweet: async (req, res) => {
     if (!req.body.description) { return res.status(204).json({ status: 'error', message: 'Please input tweet' }) }
@@ -57,7 +63,11 @@ const TweetController = {
       .then(replies => {
         return res.status(200).json(replies)
       })
-      .catch(error => console.log('error'))
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      }
+      )
   },
   postReply: async (req, res) => {
     if (!req.body.comment) { return res.status(204).json({ status: 'error', message: 'Please input comment' }) }

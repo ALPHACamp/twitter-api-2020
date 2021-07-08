@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User } = db
+const { User, Tweet, Reply, Like, Followship } = db
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 
