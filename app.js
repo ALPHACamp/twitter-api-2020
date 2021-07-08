@@ -1,4 +1,5 @@
 const express = require('express')
+const session = require('express-session')
 const helpers = require('./_helpers');
 
 const app = express()
@@ -8,12 +9,21 @@ const passport = require('./config/passport')
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(session({
+  secret: 'secret',
+  resave: false,
+  saveUninitialized: false
+}))
 app.use(passport.initialize())
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
-  // passport.authenticate('jwt', { ses...
-};
+app.use((req, res, next) => {
+  req.user = helpers.getUser(req)
+  next()
+})
+app.use((req, res, next) => {
+  res.locals.user = req.user
+  next()
+})
 
 require('./routes')(app)
 
