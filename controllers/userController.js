@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Like } = db
+const { User, Tweet, Reply, Like, Followship } = db
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const imgur = require('imgur-node-api')
@@ -25,7 +25,7 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   signIn: async (req, res) => {
     try {
-    // check all inputs are required
+      // check all inputs are required
       const { account, password } = req.body
       if (!account || !password) {
         return res.json({ status: 'error', message: 'All fields are required!' })
@@ -324,8 +324,86 @@ const userController = {
             res.status(500).json({ status: 'error', message: 'error' })
           })
       })
-  }
+  },
 
+
+  getUserTweets: (req, res) => {
+    return Tweet.findAll({
+      where: { UserId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+    })
+      .then(tweets => {
+        return res.status(200).json(tweets)
+      })
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
+  },
+  getUserReplies: (req, res) => {
+    return Reply.findAll({
+      where: { UserId: req.params.id },
+      include: { model: Tweet },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+    })
+      .then(replies => {
+        return res.status(200).json(replies)
+      })
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
+  },
+  getUserLikes: (req, res) => {
+    return Like.findAll({
+      where: { UserId: req.params.id },
+      include: { model: Tweet },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+    })
+      .then(likes => {
+        return res.status(200).json(likes)
+      })
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
+  },
+  getUserFollowings: (req, res) => {
+    return Followship.findAll({
+      where: { followerId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+    })
+      .then(followings => {
+        return res.status(200).json(followings)
+      })
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
+  },
+  getUserFollowers: (req, res) => {
+    return Followship.findAll({
+      where: { followingId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+    })
+      .then(followers => {
+        return res.status(200).json(followers)
+      })
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
+  },
 }
 
 module.exports = userController
