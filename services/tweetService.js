@@ -40,8 +40,13 @@ const tweetService = {
     return { status: 'success', message: 'A tweet has created' }
   },
 
-  getTweet: async (tweetId) => {
-    return await Tweet.findByPk(tweetId)
+  getTweet: async (currentUserId, tweetId) => {
+    return await Tweet.findByPk(tweetId, {
+      attributes: [
+        'id', 'description', 'createdAt',
+        [Sequelize.literal(`if(exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id), 'true','false')`), 'isLike']
+      ]
+    })
   },
 
   getTweetAndReplies: async (tweetId) => {
