@@ -1,7 +1,5 @@
-const db = require("../models")
+const db = require('../models')
 const { Tweet, User, Like, Reply } = db
-
-
 
 const TweetController = {
   getTweets: (req, res) => {
@@ -9,7 +7,7 @@ const TweetController = {
       include: [User],
       order: [['createdAt', 'DESC']],
       raw: true,
-      nest: true,
+      nest: true
     })
       .then(tweets => {
         return res.status(200).json(tweets)
@@ -18,13 +16,12 @@ const TweetController = {
         console.log('error')
         res.status(500).json({ status: 'error', message: 'error' })
       })
-
   },
   getTweet: (req, res) => {
     return Tweet.findByPk(req.params.tweet_id, {
       include: [
         User,
-        Like,]
+        Like]
     })
       .then(tweet => {
         return res.status(200).json({
@@ -41,9 +38,7 @@ const TweetController = {
       })
   },
   postTweet: async (req, res) => {
-    if (!req.body.description) { return res.status(204).json({ status: 'error', message: 'Please input tweet' }) }
-    else if (req.body.description.length >= 140) { return res.status(409).json({ status: 'error', message: 'tweet can\'t be more than 140 words' }) }
-    else {
+    if (!req.body.description) { return res.status(204).json({ status: 'error', message: 'Please input tweet' }) } else if (req.body.description.length >= 140) { return res.status(409).json({ status: 'error', message: 'tweet can\'t be more than 140 words' }) } else {
       await Tweet.create({
         UserId: req.user.id,
         description: req.body.description
@@ -54,7 +49,6 @@ const TweetController = {
           res.status(500).json({ status: 'error', message: 'error' })
         })
     }
-
   },
   getReplies: (req, res) => {
     return Reply.findAll({
@@ -70,9 +64,7 @@ const TweetController = {
       )
   },
   postReply: async (req, res) => {
-    if (!req.body.comment) { return res.status(204).json({ status: 'error', message: 'Please input comment' }) }
-    else if (req.body.comment.length >= 50) { return res.status(409).json({ status: 'error', message: 'comment can\'t be more than 50 words' }) }
-    else {
+    if (!req.body.comment) { return res.status(204).json({ status: 'error', message: 'Please input comment' }) } else if (req.body.comment.length >= 50) { return res.status(409).json({ status: 'error', message: 'comment can\'t be more than 50 words' }) } else {
       await Reply.create({
         UserId: req.user.id,
         TweetId: req.params.tweet_id,
@@ -84,7 +76,6 @@ const TweetController = {
           res.status(500).json({ status: 'error', message: 'error' })
         })
     }
-
   },
   postLike: async (req, res) => {
     let liked = await Like.findOne({
@@ -120,6 +111,5 @@ const TweetController = {
   },
 
 }
-
 
 module.exports = TweetController
