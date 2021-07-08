@@ -14,10 +14,12 @@ router.post('/', userController.postUser)
 router.get('/:id', userController.getUser)
 router.put('/:id', upload.fields(imageFields), userController.putUser)
 router.get('/:id/followings', followController.getUserFollowings)
+router.get('/:id/followers', followController.getUserFollowers)
 router.get('/:id/tweets', tweetController.getUserTweets)
 router.get('/:id/replied_tweets', replyController.getRepliedTweets)
-
-
 router.get('/:id/likes', likeController.getUserLikes)
+
+
+
 
 module.exports = router
