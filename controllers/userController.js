@@ -128,7 +128,22 @@ const userController = {
         res.status(500).json({ status: 'error', message: 'error' })
       })
   },
-  getUserLikes: (req, res) => { },
+  getUserLikes: (req, res) => {
+    return Like.findAll({
+      where: { UserId: req.params.id },
+      include: { model: Tweet },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true,
+    })
+      .then(likes => {
+        return res.status(200).json(likes)
+      })
+      .catch(error => {
+        console.log('error')
+        res.status(500).json({ status: 'error', message: 'error' })
+      })
+  },
   getUserFollowings: (req, res) => { },
   getUserFollowers: (req, res) => { },
 }
