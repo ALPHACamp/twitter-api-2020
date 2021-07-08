@@ -33,7 +33,7 @@ const authenticatedAdmin = (req, res, next) => {
 // 驗證登入者是否為非管理者=>用於前台路由
 const authenticatedNotAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
-    if (helpers.getUser(req).role === 'normal') { return next() }
+    if (helpers.getUser(req).role !== 'admin') { return next() }
     return res.json({ status: 'error', message: '管理者沒有權限登入前台！' })
   } else {
     return res.json({ status: 'error', message: '未通過身份驗證！' })
@@ -43,7 +43,7 @@ const authenticatedNotAdmin = (req, res, next) => {
 // user routes
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
-router.get('/users/:id', authenticated, userController.getUser)
+router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
