@@ -34,7 +34,7 @@ const tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
-      const data = await tweetService.getTweet(req.params.tweet_id)
+      const data = await tweetService.getTweet(req.user.id, req.params.tweet_id)
       return res.json(data)
     } catch (error) {
       next(error)

@@ -18,11 +18,12 @@ const userService = {
     return user
   },
 
-  getUser: async (id) => {
-    const user = await User.findByPk(id, {
-      attributes: {
-        exclude: ['password']
-      },
+  getUser: async (currentUserId, viewingId) => {
+    const user = await User.findByPk(viewingId, {
+      attributes: [
+        'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'account', 'role', 'createdAt',
+        [Sequelize.literal(`if(exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id), 'true','false')`), 'isFollowed']
+      ],
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
@@ -81,7 +82,7 @@ const userService = {
         'account',
         'avatar',
         'introduction',
-        [Sequelize.literal(`(exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id))`), 'isFollowed'],
+        [Sequelize.literal(`if(exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id),'true','false')`), 'isFollowed'],
         [Sequelize.fn('count', Sequelize.col('Followers.id')), 'FollowerCount']
       ],
       include: { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
