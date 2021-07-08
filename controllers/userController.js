@@ -12,7 +12,7 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   signIn: async (req, res) => {
     try {
-    // check all inputs are required
+      // check all inputs are required
       const { account, password } = req.body
       if (!account || !password) {
         return res.json({ status: 'error', message: '所有欄位都是必填' })
@@ -96,7 +96,12 @@ const userController = {
       console.log(err)
       res.status(400).json({ status: 'error', message: 'error' })
     }
-  }
+  },
+  getUserTweets: (req, res) => { },
+  getUserReplies: (req, res) => { },
+  getUserLikes: (req, res) => { },
+  getUserFollowings: (req, res) => { },
+  getUserFollowers: (req, res) => { },
 }
 
 module.exports = userController
