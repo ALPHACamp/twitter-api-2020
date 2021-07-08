@@ -24,8 +24,11 @@ router.post('/', userController.signUp)
 router.post('/signin', userController.signIn)
 
 router.use(authenticated)
+
 router.get('/current', userController.getCurrentUser)
 router.get('/top', userController.getTopUsers)
+
+router.use(authenticatedUser)
 
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id/replied_tweets', userController.getUserReplies)
