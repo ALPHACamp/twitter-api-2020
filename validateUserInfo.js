@@ -19,7 +19,6 @@ module.exports = {
       properties: {
         name: '名字長度最多 15 個字',
         account: '帳號最多 10 個字',
-        address: '地址長度需小於 30 個字',
         email: '請輸入正確的 email',
         password: '密碼長度為 6 至 15',
         introduction: '個人介紹最多 140 字'
