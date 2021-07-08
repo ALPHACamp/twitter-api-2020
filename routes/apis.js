@@ -34,7 +34,7 @@ router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
 router.put('/users/:id', authenticated, authenticatedNotAdmin, userController.putUser)
-router.put('/user/:id/edit', authenticated, authenticatedNotAdmin,
+router.put('/users/:id/edit', authenticated, authenticatedNotAdmin,
   upload.fields([{ name: 'avatar', max: 1 }, { name: 'cover', max: 1 }]), userController.editUser)
 
 // admin routes

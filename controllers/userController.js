@@ -1,9 +1,20 @@
 const imgur = require('imgur-node-api')
-const fs = require('fs')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+
+const imgurUpload = (file) => {
+  return new Promise((resolve, reject) => {
+    imgur.setClientID(IMGUR_CLIENT_ID)
+    imgur.upload(file.path, (err, img) => {
+      if (err) {
+        reject(err)
+      }
+      resolve(img)
+    })
+  })
+}
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -119,6 +130,42 @@ const userController = {
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
       })
       return res.json({ status: 'success', message: '個人設定修改成功' })
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  editUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      const { name, introduction } = req.body
+      const { files } = req
+      if (!name) {
+        return res.json({ status: 'error', message: '名稱不可空白！' })
+      }
+      if (files) {
+        let avatar = undefined
+        let cover = undefined
+        // 上傳頭像
+        if (files.avatar) {
+          avatar = await imgurUpload(files.avatar[0])
+        }
+        // 上傳封面
+        if (files.cover) {
+          cover = await imgurUpload(files.cover[0])
+        }
+        // update 使用者資料
+        await user.update({
+          name, introduction,
+          avatar: avatar ? avatar.data.link : user.avatar,
+          cover: cover ? cover.data.link : user.cover
+        })
+        return res.json({ status: 'success', message: '個人資料修改成功' })
+      } else { // 未上傳檔案
+        // update 使用者資料
+        await user.update({ name, introduction })
+        return res.json({ status: 'success', message: '個人資料修改成功' })
+      }
     } catch (err) {
       console.log(err)
       next(err)
