@@ -71,20 +71,17 @@ const userController = {
       if (password && (password !== checkPassword)) {
         message.push('The password and confirmation do not match.Please retype them.')
       }
+      const [inputEmail, inputAccount] = await Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } })])
+      if (inputEmail) {
+        message.push('This email address is already being used.')
+      }
+      if (inputAccount) {
+        message.push('This account is already being used.')
+      }
       if (message.length) {
         return res.status(400).json({ status: 'error', message })
       }
-      const [inputEmail, inputAccount] = await Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } })])
-      const errorMessage = []
-      if (inputEmail) {
-        errorMessage.push('This email address is already being used.')
-      }
-      if (inputAccount) {
-        errorMessage.push('This account is already being used.')
-      }
-      if (errorMessage.length) {
-        return res.status(409).json({ status: 'error', message: errorMessage })
-      }
+      
       await User.create({
         account,
         name,
