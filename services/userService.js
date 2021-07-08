@@ -8,13 +8,10 @@ const userService = {
   },
 
   signUp: async (formBody) => {
-    const [user, created] = await User.findOrCreate({
-      where: { email: formBody.email },
-      defaults: {
-        ...formBody
-      }
+    await userService.checkUnique(formBody)
+    const user = await User.create({
+      ...formBody
     })
-    if (!created) throw new Error('This email is already exist.')
     return user
   },
 
@@ -34,9 +31,7 @@ const userService = {
   },
 
   putUser: async (id, body) => {
-    // TODO: Need to check 'email' and 'account' are both unique.
-    // const existAccount = await User.fineOne({ where: { account: body.account } })
-    // if (existAccount) throw new Error('This account name is already exist.')
+    await userService.checkUnique(body)
     const user = await User.update(
       { ...body },
       { where: { id } }
@@ -103,6 +98,17 @@ const userService = {
       include: Like
     })
     return likes.toJSON().Likes
+  },
+
+  checkUnique: async ({ email, account }) => {
+    if (email) {
+      email = await User.findOne({ where: { email } })
+      if (email) throw new Error('This email is exist.')
+    }
+    if (account) {
+      account = await User.findOne({ where: { account } })
+      if (account) throw new Error('This account is exist.')
+    }
   }
 }
 

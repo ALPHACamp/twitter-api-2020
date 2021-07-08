@@ -21,9 +21,13 @@ const tweetController = {
 
   postTweet: async (req, res, next) => {
     try {
+      const { description } = req.body
+
+      if (!description.trim().length && description.length > 140) throw new Error('Invalid tweet.')
+
       const postData = {
         UserId: req.user.id,
-        ...req.body
+        description
       }
       const data = await tweetService.postTweet(postData)
       return res.json(data)
@@ -52,10 +56,14 @@ const tweetController = {
 
   postReply: async (req, res, next) => {
     try {
+      const { comment } = req.body
+
+      if (!comment.trim().length || comment.trim().length > 140) throw new Error('Invalid comment.')
+
       const replyData = {
         UserId: req.user.id,
         TweetId: req.params.tweet_id,
-        ...req.body
+        comment
       }
       const data = await tweetService.postReply(replyData)
       return res.json(data)
