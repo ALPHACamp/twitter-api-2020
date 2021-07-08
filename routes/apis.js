@@ -7,7 +7,20 @@ const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 
 // jwt驗證
-const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (err) { return next(err); }
+    if (!user) {
+      if (info.name === "TokenExpiredError") {
+        return res.status(401).json({ message: "Your token has expired." });
+      } else {
+        return res.status(401).json({ message: info.message });
+      }
+    }
+    req.user = user;
+    return next();
+  })(req, res, next)
+}
 // 驗證登入者是否為管理者=>用於後台路由
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req)) {
@@ -30,7 +43,7 @@ const authenticatedNotAdmin = (req, res, next) => {
 // user routes
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
-router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
+router.get('/users/:id', authenticated, userController.getUser)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
