@@ -15,12 +15,12 @@ const userController = {
     // check all inputs are required
       const { account, password } = req.body
       if (!account || !password) {
-        return res.json({ status: 'error', message: '所有欄位都是必填' })
+        return res.json({ status: 'error', message: 'All fields are required！' })
       }
       const user = await User.findOne({ where: { account } })
-      if (!user) return res.status(401).json({ status: 'error', message: '使用者帳號或密碼有誤' })
+      if (!user) return res.status(401).json({ status: 'error', message: 'That account is not registered!' })
       if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: '使用者帳號或密碼有誤' })
+        return res.status(401).json({ status: 'error', message: 'Email or Password incorrect.' })
       }
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -49,27 +49,27 @@ const userController = {
       const message = []
       // check all inputs are required
       if (!account || !name || !email || !password || !checkPassword) {
-        message.push('所有欄位都是必填')
+        message.push('All fields are required！')
       }
       // check account length and type
       if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-        message.push('名稱長度必須小於50字')
+        message.push('Name can not be longer than 50 characters.')
       }
       // check name length and type
       if (account && !validator.isByteLength(account, { min: 0, max: 20 })) {
-        message.push('帳號長度必須小於20字')
+        message.push('Account can not be longer than 20 characters.')
       }
       // check email validation
       if (email && !validator.isEmail(email)) {
-        message.push('請輸入有效的信箱')
+        message.push(`${email} is not a valid email address.`)
       }
       // check password length and type
       if (password && !validator.isByteLength(password, { min: 5, max: 15 })) {
-        message.push('請輸入長度介於 5-15 的密碼')
+        message.push('Password does not meet the required length.')
       }
       // check password and checkPassword
       if (password && (password !== checkPassword)) {
-        message.push('密碼與確認密碼不相符')
+        message.push('The password and confirmation do not match.Please retype them.')
       }
       if (message.length) {
         return res.status(400).json({ status: 'error', message })
@@ -77,10 +77,10 @@ const userController = {
       const [inputEmail, inputAccount] = await Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } })])
       const errorMessage = []
       if (inputEmail) {
-        errorMessage.push('此信箱已註冊！')
+        errorMessage.push('This email address is already being used.')
       }
       if (inputAccount) {
-        errorMessage.push('此帳號已註冊！')
+        errorMessage.push('This account is already being used.')
       }
       if (errorMessage.length) {
         return res.status(409).json({ status: 'error', message: errorMessage })
@@ -91,10 +91,10 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       })
-      return res.json({ status: 'success', message: '註冊成功！' })
+      return res.status(200).json({ status: 'success', message: `@${account} Sign up successfully.Please sign in.` })
     } catch (err) {
       console.log(err)
-      res.status(400).json({ status: 'error', message: 'error' })
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   getCurrentUser: (req, res) => {
@@ -127,7 +127,8 @@ const userController = {
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.followerCount - a.followerCount)
-    return res.status(200).json(users)
+    return res.status(200).json({users,status: 'success',
+          message: 'Get top ten users successfully'})
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
