@@ -12,11 +12,11 @@ const upload = multer({
     }
     cb(null, true)
   },
-  dest: 'temp/'
+  dest: 'temp/',
 })
 const cpUpload = upload.fields([
   { name: 'avatar', maxCount: 1 },
-  { name: 'cover', maxCount: 1 }
+  { name: 'cover', maxCount: 1 },
 ])
 
 function authenticated(req, res, next) {
@@ -47,7 +47,7 @@ const authenticatedNotAdmin = (req, res, next) => {
   }
 }
 
-module.exports = app => {
+module.exports = (app) => {
   app.get('/', (req, res) => res.send('Hello World!'))
   app.post('/api/users', userController.signUp)
   app.post('/signin', userController.signIn)
@@ -70,15 +70,18 @@ module.exports = app => {
   app.get('/api/users/:userId/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
   app.post('/api/followships', authenticated, authenticatedNotAdmin, userController.addFollowing)
   app.delete('/api/followships/:followingId', authenticated, authenticatedNotAdmin, userController.removeFollowing)
-  // // tweets
+
+  // tweets
   app.get('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.getTweets)
   app.get('/api/tweets/:tweetId', authenticated, authenticatedNotAdmin, tweetController.getTweet)
   app.post('/api/tweets', authenticated, authenticatedNotAdmin, tweetController.postTweets)
+  app.put('/api/tweets/:tweetId', authenticated, authenticatedNotAdmin, tweetController.putTweet)
   app.post('/api/tweets/:tweetId/replies', authenticated, authenticatedNotAdmin, replyController.postReply)
   app.get('/api/tweets/:tweetId/replies', authenticated, authenticatedNotAdmin, replyController.getReply)
-  // app.put('/tweets/:tweetId')
+
   app.post('/api/tweets/:tweetId/like', authenticated, tweetController.likeTweet)
   app.post('/api/tweets/:tweetId/unlike', authenticated, tweetController.unlikeTweet)
+
   // // replies
   // app.post('/replies/:replyId/like')
   // app.delete('/replies/:replyId/like')
