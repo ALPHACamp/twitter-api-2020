@@ -28,6 +28,7 @@ const userController = {
         return res.json({ status: 'success', message: '帳號註冊成功！' })
       }
     } catch (err) {
+      console.log(err)
       next(err)
     }
   },
@@ -63,6 +64,28 @@ const userController = {
         }
       })
     } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      let user = await User.findOne({
+        where: { id: req.params.id },
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const { id, name, account, email, role,
+        avatar, followingCounts, followerCounts } = user
+      return res.json({
+        id, name, account, email, role,
+        avatar, followingCounts, followerCounts,
+        Followers: user.Followers, Followings: user.Followings
+      })
+    } catch (err) {
+      console.log(err)
       next(err)
     }
   }
