@@ -1,61 +1,64 @@
 "use strict";
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
-    "User",
+    'User',
     {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER
       },
       email: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING
       },
       password: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING
       },
       name: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING
       },
       account: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING
+      },
+      role: {
+        type: DataTypes.STRING
       },
       avatar: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING
       },
       cover: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING
       },
       introduction: {
-        type: DataTypes.TEXT,
+        type: DataTypes.TEXT
       },
       updatedAt: {
         allowNull: false,
-        type: DataTypes.DATE,
+        type: DataTypes.DATE
       },
       updatedAt: {
         allowNull: false,
-        type: DataTypes.DATE,
+        type: DataTypes.DATE
       },
       likeNum: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER
       },
       tweetNum: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER
       },
       followingNum: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER
       },
       followerNum: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.INTEGER
       },
       lastLoginAt: {
-        type: DataTypes.DATE,
-      },
+        type: DataTypes.DATE
+      }
     },
     {}
-  );
+  )
   User.associate = function (models) {
     User.hasMany(models.Like);
     User.hasMany(models.Reply);

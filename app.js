@@ -21,10 +21,10 @@ app.use(passport.session())
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 }
-app.use((req, res, next) => {
-  req.user = helpers.getUser(req)
-  next()
-})
+// app.use((req, res, next) => {
+//   req.user = helpers.getUser(req)
+//   next()
+// })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 

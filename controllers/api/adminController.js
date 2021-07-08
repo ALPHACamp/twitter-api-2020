@@ -13,7 +13,7 @@ let adminController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       raw: true,
-      attributes: { exclude: ['password', 'updatedAt', 'createdAt'] },
+      attributes: { exclude: ['password', 'updatedAt', 'createdAt'] }
     }
     User.findAll(options)
       .then((users) => {
@@ -38,9 +38,9 @@ let adminController = {
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          as: 'User',
-        },
-      ],
+          as: 'User'
+        }
+      ]
     }
     Tweet.findAll(options)
       .then((tweets) => {
@@ -66,31 +66,29 @@ let adminController = {
       )
   },
   login: (req, res) => {
-    console.log(req.body)
     const { password, email } = req.body
     if (!password || !email) {
       return res.status(401).json({
         status: 'error',
-        message: 'password or email can not be empty',
+        message: 'password or email can not be empty'
       })
     }
 
-    Admin.findOne({ where: { email } })
-      .then((admin) => {
-        if (!admin) {
+    User.findOne({ where: { email } })
+      .then((user) => {
+        if (!user) {
           return res
             .status(401)
             .json({ status: 'error', message: 'this admin user is not exist' })
         }
-        if (!bcrypt.compareSync(password, admin.password)) {
+        if (!bcrypt.compareSync(password, user.password)) {
           return res
             .status(401)
             .json({ status: 'error', message: 'password is not correct' })
         }
 
         let payload = {
-          id: admin.id,
-          isAdmin: true,
+          id: user.id
         }
         let token = jwt.sign(payload, process.env.JWT_SECRET)
         return res.status(200).json({
@@ -98,15 +96,16 @@ let adminController = {
           message: 'ok',
           token,
           User: {
-            name: admin.name,
-            email: admin.email,
-          },
+            id: user.id,
+            name: user.name,
+            email: user.email
+          }
         })
       })
       .catch((error) =>
         res.status(401).json({ status: 'error', message: error })
       )
-  },
+  }
 }
 
 module.exports = adminController
