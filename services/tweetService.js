@@ -9,13 +9,14 @@ const tweetService = {
         'createdAt',
         [Sequelize.literal('substring(description,1,50)'), 'description'],
         [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
+        [Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount'],
         [Sequelize.literal(`if(exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id), 'true','false')`), 'isLike']
       ],
       group: 'id',
       include: [
         { model: Like, attributes: [] },
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Reply, attributes: [[Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount']] }
+        { model: Reply, attributes: [] }
       ],
       order: [['createdAt', 'DESC']]
     })
