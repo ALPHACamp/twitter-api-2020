@@ -41,6 +41,20 @@ let tweetController = {
       .catch((err) => next(err))
   },
 
+  putTweet: (req, res, next) => {
+    Tweet.findByPk(req.params.tweetId).then((tweet) => {
+      if (!tweet) {
+        return res.redirect('back')
+      }
+      tweet
+        .update({ description: req.body.description })
+        .then((tweet) => {
+          return res.json(tweet)
+        })
+        .catch((err) => next(err))
+    })
+  },
+
   likeTweet: (req, res, next) => {
     // const isLiked = Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } })
     // if (isLiked) {
