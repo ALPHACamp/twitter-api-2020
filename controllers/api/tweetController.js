@@ -2,6 +2,7 @@ const db = require('../../models')
 const Tweet = db.Tweet
 const Like = db.Like
 const User = db.User
+const Reply = db.Reply
 const defaultLimit = 10
 //temp user ==> userId = 1
 let currentUserId = 1
@@ -9,8 +10,8 @@ let currentUserId = 1
 let tweetController = {
   getTweets: (req, res) => {
     const options = {
-      limit: req.query.limit || defaultLimit,
-      offset: req.query.offset || 0,
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
       attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt'],
       order: [['createdAt', 'desc']],
       subQuery: false,
@@ -147,7 +148,7 @@ let tweetController = {
           message: '',
         })
       )
-  },
+  }
 }
 
 module.exports = tweetController
