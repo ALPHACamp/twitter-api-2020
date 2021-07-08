@@ -8,5 +8,6 @@ router.post('/login', userController.logIn)
 router.post('/', userController.signUp)
 router.get('/:id', switchAuthenticatedMiddleware(), userController.getUser)
 router.get('/:id/tweets', switchAuthenticatedMiddleware(), userController.getUserTweets)
+router.get('/:id/likes', switchAuthenticatedMiddleware(), userController.getUserLikes)
 
 module.exports = router
