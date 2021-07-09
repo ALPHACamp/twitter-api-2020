@@ -1,109 +1,195 @@
 const db = require('../models')
 const { Tweet, User, Like, Reply } = db
+const validator = require('validator')
 
 const TweetController = {
-  getTweets: (req, res) => {
-    return Tweet.findAll({
-      include: [User],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(tweets => {
-        return res.status(200).json(tweets)
+  getTweets: async (req, res) => {
+    try {
+      let tweets = await Tweet.findAll({
+        include: [
+          User,
+          Reply,
+          Like,
+          { model: User, as: 'LikedUsers' }
+        ],
+        order: [['createdAt', 'DESC']]
       })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
-  },
-  getTweet: (req, res) => {
-    return Tweet.findByPk(req.params.tweet_id, {
-      include: [
-        User,
-        Like]
-    })
-      .then(tweet => {
-        return res.status(200).json({
+      if (!tweets) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any tweets in db.' })
+      }
+      tweets = tweets.map(tweet => {
+        return {
+          id: tweet.id,
+          UserId: tweet.UserId,
           description: tweet.description,
-          tweet,
-          LikeCount: tweet.Likes.length,
-          status: 'success',
-          message: 'Get the tweet successfully'
-        })
+          createdAt: tweet.createdAt,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar,
+          likedCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
+        }
       })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
-  },
-  postTweet: async (req, res) => {
-    if (!req.body.description) { return res.status(204).json({ status: 'error', message: 'Please input tweet' }) } else if (req.body.description.length >= 140) { return res.status(409).json({ status: 'error', message: 'tweet can\'t be more than 140 words' }) } else {
-      await Tweet.create({
-        UserId: req.user.id,
-        description: req.body.description
-      })
-        .then((tweet) => { res.status(200).json({ status: 'success', message: 'The tweet was successfully created' }) })
-        .catch(error => {
-          console.log('error')
-          res.status(500).json({ status: 'error', message: 'error' })
-        })
+      return res.status(200).json(tweets)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   },
-  getReplies: (req, res) => {
-    return Reply.findAll({
-      where: { TweetId: req.params.tweet_id }
-    })
-      .then(replies => {
-        return res.status(200).json(replies)
-      })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
+  getTweet: async (req, res) => {
+    try {
+      const id = req.params.tweet_id
+      const tweet = await Tweet.findByPk(id,
+        {
+          include: [
+            User,
+            Like,
+            Reply,
+            { model: User, as: 'LikedUsers' }]
+        })
+      if (!tweet) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this tweet in db.' })
       }
-      )
+      return res.status(200).json({
+        status: 'success',
+        message: 'Get the tweet successfully',
+        id: tweet.id,
+        UserId: tweet.UserId,
+        description: tweet.description,
+        LikeCount: tweet.Likes.length,
+        createdAt: tweet.createdAt,
+        account: tweet.User.account,
+        name: tweet.User.name,
+        avatar: tweet.User.avatar,
+        likedCount: tweet.Likes.length,
+        repliedCount: tweet.Replies.length,
+        isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
+      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
+  },
+  postTweet: async (req, res) => {
+    try {
+      const { description } = req.body
+      if (!description) {
+        return res.status(400).json({ status: 'error', message: 'Please input tweet.' })
+      }
+      if (description && !validator.isByteLength(description, { min: 0, max: 140 })) {
+        return res.status(409).json({ status: 'error', message: 'Tweet can\'t be more than 140 words.' })
+      }
+      await Tweet.create({
+        UserId: req.user.id,
+        description
+      })
+      return res.status(200).json({ status: 'success', message: 'The tweet was successfully created.' })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
+  },
+  getReplies: async (req, res) => {
+    try {
+      let replies = await Reply.findAll({
+        where: { TweetId: req.params.tweet_id },
+        include: [User,{model: Tweet, include: User}]
+      })
+      if (!replies) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any replies in db.' })
+      }
+      replies = replies.map(reply => {
+        return {
+          id: reply.id,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          tweetAuthorAccount: reply.Tweet.User.account,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          commentAccount: reply.User.account,
+          name: reply.User.name,
+          avatar: reply.User.avatar
+        }
+      })
+      return res.status(200).json(replies)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   },
   postReply: async (req, res) => {
-    if (!req.body.comment) { return res.status(204).json({ status: 'error', message: 'Please input comment' }) } else if (req.body.comment.length >= 50) { return res.status(409).json({ status: 'error', message: 'comment can\'t be more than 50 words' }) } else {
+    try {
+      const TweetId = req.params.tweet_id
+      const repliedTweet = await Tweet.findByPk(TweetId, { include: [User] })
+      if (!repliedTweet) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this tweet in db.' })
+      }
+      const repliedTweetAuthor = repliedTweet.dataValues.User.dataValues.account
+      const { comment } = req.body
+      if (!comment) {
+        return res.status(400).json({ status: 'error', message: 'Please input comment.' })
+      }
+      if (comment && !validator.isByteLength(comment, { min: 0, max: 50 })) {
+        return res.status(409).json({ status: 'error', message: 'Comment can\'t be more than 50 words.' })
+      }
       await Reply.create({
         UserId: req.user.id,
-        TweetId: req.params.tweet_id,
-        comment: req.body.comment
+        TweetId,
+        comment
       })
-        .then((reply) => { res.status(200).json({ status: 'success', message: 'The comment was successfully created' }) })
-        .catch(error => {
-          console.log('error')
-          res.status(500).json({ status: 'error', message: 'error' })
-        })
+      return res.status(200).json({ status: 'success', message: `You replied @${repliedTweetAuthor}'s tweet successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   postLike: async (req, res) => {
-    const liked = await Like.findOne({
-      where: { UserId: req.user.id, TweetId: req.params.id }
-    })
-    if (liked) { res.status(400).json({ status: 'error', message: 'error' }) } else {
-      Like.create({ UserId: req.user.id, TweetId: req.params.id })
-        .then(like => { res.status(200).json({ status: 'success', message: 'The like was successfully created' }) })
-        .catch(error => {
-          console.log('error')
-          res.status(500).json({ status: 'error', message: 'error' })
-        })
+    try {
+      const TweetId = req.params.id
+      const UserId = req.user.id
+      const likedTweet = await Tweet.findByPk(
+        TweetId, { include: [User] }
+      )
+      if (!likedTweet) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this tweet in db.' })
+      }
+      const likedTweetAuthor = likedTweet.dataValues.User.dataValues.account
+      const liked = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+      if (liked) {
+        return res.status(400).json({ status: 'error', message: 'You already liked this tweet.' })
+      }
+      await Like.create({ UserId, TweetId })
+      return res.status(200).json({ status: 'success', message: `You liked @${likedTweetAuthor}'s tweet successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   postUnlike: async (req, res) => {
-    const liked = await Like.findOne({
-      where: { UserId: req.user.id, TweetId: req.params.id }
-    })
-    if (!liked) { res.status(400).json({ status: 'error', message: 'error' }) } else {
-      liked.destroy()
-        .then(like => { res.status(200).json({ status: 'success', message: 'The like was successfully deleted' }) })
-        .catch(error => {
-          console.log('error')
-          res.status(500).json({ status: 'error', message: 'error' })
-        })
+    try {
+      const TweetId = req.params.id
+      const UserId = req.user.id
+      const unlikedTweet = await Tweet.findByPk(
+        TweetId, { include: [User] }
+      )
+      if (!unlikedTweet) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this tweet in db.' })
+      }
+      const unlikedTweetAuthor = unlikedTweet.dataValues.User.dataValues.account
+      const liked = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+      if (!liked) { return res.status(400).json({ status: 'error', message: 'You never like this tweet before.' }) }
+      await liked.destroy()
+      return res.status(200).json({ status: 'success', message: `You unliked ${unlikedTweetAuthor}'s tweet successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   }
-
 }
 
 module.exports = TweetController

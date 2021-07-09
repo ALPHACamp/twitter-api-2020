@@ -99,12 +99,9 @@ const userController = {
         account,
         name,
         email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
-        role: 'user',
-        avatar: 'https://i.imgur.com/q6bwDGO.png',
-        cover: 'https://i.imgur.com/1jDf2Me.png'
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       })
-      return res.status(200).json({ status: 'success', message: `@${account} Sign up successfully.Please sign in.` })
+      return res.status(200).json({ status: 'success', message: `@${account} sign up successfully.Please sign in.` })
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
