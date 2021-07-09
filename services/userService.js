@@ -1,6 +1,8 @@
 const { User, Like, Sequelize } = require('../models')
 const { Op } = Sequelize
 
+const RequestError = require('../utils/customError')
+
 const userService = {
   signIn: async (email) => {
     return await User.findOne({
@@ -112,11 +114,11 @@ const userService = {
   checkUnique: async ({ email, account }, userId = null) => {
     if (email) {
       email = await User.findOne({ where: { email, [Op.not]: { id: userId } } })
-      if (email) throw new Error('This email is exist.')
+      if (email) throw new RequestError('This email is exist.')
     }
     if (account) {
       account = await User.findOne({ where: { account, [Op.not]: { id: userId } } })
-      if (account) throw new Error('This account is exist.')
+      if (account) throw new RequestError('This account is exist.')
     }
   }
 }

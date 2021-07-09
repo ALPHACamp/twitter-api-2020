@@ -1,10 +1,12 @@
 const { Followship } = require('../models')
 
+const RequestError = require('../utils/customError')
+
 const followshipService = {
   addFollow: async (a, b) => {
     const [, created] = await Followship.findOrCreate({ where: { followerId: a, followingId: b } })
     if (!created) {
-      throw new Error('there is a same data found before create')
+      throw new RequestError('there is a same data found before create')
     }
     return { status: 'success', message: 'A followship has created' }
   },
