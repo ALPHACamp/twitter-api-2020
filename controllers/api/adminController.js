@@ -13,7 +13,7 @@ let adminController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       raw: true,
-      attributes: { exclude: ['password', 'updatedAt', 'createdAt'] }
+      attributes: { exclude: ['email', 'introduction', 'password', 'lastLoginAt', 'updatedAt', 'createdAt'] }
     }
     User.findAll(options)
       .then((users) => {
