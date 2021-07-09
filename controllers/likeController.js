@@ -5,8 +5,7 @@ const increaseLikeCounts = (tweetId) => {
     // 找到指定 Tweet 並將 likeCounts 加一
     Tweet.findByPk(tweetId)
       .then(tweet => {
-        tweet.likeCounts += 1
-        return tweet.update({ likeCounts: tweet.likeCounts })
+        return tweet.increment('likeCounts')
       })
       .then(() => resolve('likeCounts + 1'))
       .catch(err => reject(err))
@@ -18,8 +17,7 @@ const decreaseLikeCounts = (tweetId) => {
     // 找到指定 Tweet 並將 likeCounts 減一
     Tweet.findByPk(tweetId)
       .then(tweet => {
-        tweet.likeCounts -= 1
-        return tweet.update({ likeCounts: tweet.likeCounts })
+        return tweet.decrement('likeCounts')
       })
       .then(() => resolve('likeCounts - 1'))
       .catch(err => reject(err))
