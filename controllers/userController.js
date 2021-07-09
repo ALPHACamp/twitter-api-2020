@@ -109,6 +109,27 @@ const userController = {
       console.log(err)
       next(err)
     }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const results = await Followship.findAll({
+        raw: true,
+        nest: true,
+        where: { followingId: req.params.id },
+        include: [{
+          model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const followships = results.map(followship => ({
+        ...followship,
+        isFollowed: req.user.Followings.map(f => f.id).includes(followship.Follower.id)
+      }))
+      return res.json(followships)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
   }
 }
 
