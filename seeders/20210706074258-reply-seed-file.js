@@ -11,7 +11,7 @@ module.exports = {
 
     // 1-50
     const tweets = Array.from({ length: TWEET_NUM }).map((item, i) => ({
-      id: i + 2
+      id: i + 1
     }))
 
     const userPool = Array.from({ length: TOTAL_USER }).map((_, index) => index + 1)
