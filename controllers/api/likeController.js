@@ -5,7 +5,6 @@ const Tweet = db.Tweet
 
 let defaultLimit = 10
 //temp user
-let currentUserId = 1
 
 let likeController = {
   getLikes: (req, res) => {
@@ -32,13 +31,13 @@ let likeController = {
       .catch(() => res.status(404).json({ status: 'error', messgae: '' }))
   },
   postLike: (req, res) => {
-    Like.create({ UserId: currentUserId, TweetId: req.params.tweetId })
+    Like.create({ UserId: +req.user.id, TweetId: req.params.tweetId })
       .then((like) => {
         Promise.all([
           Tweet.findByPk(req.params.tweetId).then((tweet) =>
             tweet.increment({ likeNum: 1 })
           ),
-          User.findByPk(currentUserId).then((user) =>
+          User.findByPk(+req.user.id).then((user) =>
             user.increment({ likeNum: 1 })
           )
         ])
@@ -60,7 +59,7 @@ let likeController = {
   },
   deleteLike: (req, res) => {
     Like.findOne({
-      where: { TweetId: req.params.tweetId, UserId: currentUserId }
+      where: { TweetId: req.params.tweetId, UserId: +req.user.id }
     })
       .then((Like) =>
         Like.destroy().then(() =>
@@ -68,7 +67,7 @@ let likeController = {
             Tweet.findByPk(req.params.tweetId).then((tweet) =>
               tweet.decrement({ likeNum: 1 })
             ),
-            User.findByPk(currentUserId).then((user) =>
+            User.findByPk(+req.user.id).then((user) =>
               user.decrement({ likeNum: 1 })
             )
           ])

@@ -4,7 +4,7 @@ const User = db.User
 const Tweet = db.Tweet
 const defaultLimit = 10
 //temp 
-let currentUserId = 1
+
 
 let replyController = {
   getReplies: (req, res) => {
@@ -37,7 +37,7 @@ let replyController = {
       })
     }
     const data = {
-      UserId: currentUserId,
+      UserId: +req.user.id,
       TweetId: req.params.tweetId,
       comment: req.body.comment,
     }

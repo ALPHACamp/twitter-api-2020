@@ -5,7 +5,6 @@ const User = db.User
 const Reply = db.Reply
 const defaultLimit = 10
 //temp user ==> userId = 1
-let currentUserId = 1
 
 let tweetController = {
   getUserTweets: (req, res) => {
@@ -19,29 +18,33 @@ let tweetController = {
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          as: 'User'
+          as: 'User',
+          where: { role: 'user' }
         },
         {
           model: User,
           as: 'LikedUsers',
-          attributes: ['id']
+          attributes: ['id'],
         }
       ],
       where: { UserId: req.params.id }
     }
     Tweet.findAll(options).then(tweets => {
       tweets = tweets.map(tweet => {
-        tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(likedUser => likedUser.id === currentUserId)
+        tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(
+          (likedUser) => likedUser.id === +req.user.id
+        )
         tweet.dataValues.description = tweet.dataValues.description.substring(0, 50)
         delete tweet.dataValues.LikedUsers
         return tweet
       })
-      return res.status(200).json(tweets)
-    }).catch(error => res.status(500).json({ status: 'error', message: error }))
+      .catch((error) =>
+        res.status(500).json({ status: 'error', message: error })
+      )
   },
   getTweets: (req, res) => {
     const options = {
-      limit: req.query.limit || defaultLimit,
+      limit: +req.query.limit || defaultLimit,
       offset: req.query.offset || 0,
       attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt'],
       order: [['createdAt', 'desc']],
@@ -51,16 +54,17 @@ let tweetController = {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
           as: 'User',
+          where: { role: 'user' }
         },
         {
           model: User,
           as: 'LikedUsers',
           attributes: ['id'],
           through: {
-            attributes: [],
+            attributes: []
           },
-        },
-      ],
+        }
+      ]
     }
     Tweet.findAll(options)
       .then((tweets) => {
@@ -74,11 +78,11 @@ let tweetController = {
             updatedAt,
             deletedAt,
             AdminId,
-            User,
+            User
           } = tweet
           return {
             id,
-            isLike: tweet.LikedUsers.some((user) => user.id === currentUserId),
+            isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
             description: description.substring(0, 50),
             likeNum,
             replyNum,
@@ -86,12 +90,12 @@ let tweetController = {
             updatedAt,
             deletedAt,
             AdminId,
-            User,
+            User
           }
         })
         return res.status(200).json(tweets)
       })
-      .catch(() => res.status(404).json({ status: 'error', message: '' }))
+      // .catch(() => res.status(404).json({ status: 'error', message: '' }))
   },
   getTweet: (req, res) => {
     const options = {
@@ -103,7 +107,7 @@ let tweetController = {
         'createdAt',
         'updatedAt',
         'deletedAt',
-        'AdminId',
+        'AdminId'
       ],
       include: [
         {
@@ -111,10 +115,10 @@ let tweetController = {
           as: 'LikedUsers',
           attributes: ['id'],
           through: {
-            attributes: [],
-          },
-        },
-      ],
+            attributes: []
+          }
+        }
+      ]
     }
     Tweet.findByPk(req.params.tweetId, options)
       .then((tweet) => {
@@ -128,11 +132,11 @@ let tweetController = {
           updatedAt,
           deletedAt,
           AdminId,
-          User,
+          User
         } = tweet
         res.status(200).json({
           id,
-          isLike: tweet.LikedUsers.some((user) => user.id === currentUserId),
+          isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
           description,
           likeNum,
           replyNum,
@@ -140,7 +144,7 @@ let tweetController = {
           updatedAt,
           deletedAt,
           AdminId,
-          User,
+          User
         })
       })
       .catch(() => res.status(404).json({ status: 'error', message: '' }))
@@ -157,30 +161,29 @@ let tweetController = {
         .json({ status: 'error', message: 'Can not post over 140 characters' })
     }
     const data = {
-      UserId: currentUserId,
+      UserId: +req.user.id,
       description: req.body.description,
       likeNum: 0,
-      replyNum: 0,
+      replyNum: 0
     }
     Tweet.create(data)
       .then((tweet) => {
-        User.findByPk(currentUserId)
+        User.findByPk(+req.user.id)
           .then((user) => user.increment({ tweetNum: 1 }))
           .then(() =>
             res.status(200).json({
               status: '200',
-              message: 'Successfully posted new tweet.',
+              message: 'Successfully posted new tweet.'
             })
           )
       })
       .catch((error) =>
         res.status(400).json({
           status: 'error',
-          message: '',
+          message: ''
         })
       )
-  },
-
+  }
 }
 
 module.exports = tweetController
