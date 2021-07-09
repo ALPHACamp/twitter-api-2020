@@ -18,7 +18,7 @@ const authenticated = (req, res, next) => {
         return res.status(401).json({ message: info.message });
       }
     }
-    req.user = user;
+    req.user = user.dataValues;
     return next();
   })(req, res, next)
 }

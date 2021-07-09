@@ -1,5 +1,6 @@
 const { User, Tweet, Like } = require('../models')
 const bcrypt = require('bcryptjs')
+const moment = require('moment')
 const jwt = require('jsonwebtoken')
 
 const userController = {
@@ -98,9 +99,15 @@ const userController = {
       })
       const Likes = user[0].dataValues.Likes
       const Tweets = Likes.map(like => {
-        return { ...like.dataValues.Tweet.dataValues }
+        const tweetData = like.dataValues.Tweet.dataValues
+        return {
+          ...tweetData,
+          TweetId: tweetData.id,
+          createdAt: moment(tweetData.createdAt).format('YYYY - MM - DD hh: mm: ss a'),
+          updatedAt: moment(tweetData.createdAt).format('YYYY - MM - DD hh: mm: ss a')
+        }
       })
-      return res.json({ Tweets })
+      return res.json(Tweets)
     } catch (err) {
       console.log(err)
       next(err)
