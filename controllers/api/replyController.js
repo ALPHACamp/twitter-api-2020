@@ -22,18 +22,24 @@ let replyController = {
     }
     Reply.findAll(options)
       .then((replies) => res.status(200).json(replies))
-      .catch(() => res.status(404).json({ status: 'error', message: '' }))
+      .catch((error) => res.status(500).json({
+        status: 'error',
+        message: error
+      }))
   },
   postReply: (req, res) => {
     if (!req.body.comment) {
       return res
         .status(400)
-        .json({ status: 'error', messgae: 'Can not post empty comment.' })
+        .json({
+          status: 'error',
+          message: 'Cannot post empty comment.'
+        })
     }
     if (req.body.comment.length > 140) {
       return res.status(400).json({
         status: 'error',
-        message: 'Can not post over 140 characters.',
+        message: 'Cannot post over 140 characters.',
       })
     }
     const data = {
@@ -53,7 +59,7 @@ let replyController = {
           )
       })
       .catch((error) =>
-        res.status(400).json({
+        res.status(500).json({
           status: 'error',
           message: error,
         })
@@ -86,7 +92,10 @@ let replyController = {
           return reply
         })
         return res.status(200).json(replies)
-      }).catch(error => res.status(500).json({ status: 'error', message: error }))
+      }).catch(error => res.status(500).json({
+        status: 'error',
+        message: error
+      }))
   }
 }
 

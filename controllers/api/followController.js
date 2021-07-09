@@ -6,9 +6,8 @@ const { Op } = require('sequelize')
 
 let followController = {
   getUserFollowings: (req, res) => {
-    const currentUserId = +req.user.id
     const options = {
-      where: { followerId: req.params.id },
+      where: { followerId: +req.params.id },
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       include: {
@@ -34,7 +33,7 @@ let followController = {
           if (following.introduction) {
             following.introduction = following.introduction.substring(0, 50)
           }
-          following.isFollowing = following.Followers.some(user => user.id === req.user.id)
+          following.isFollowing = following.Followers.some(user => user.id === +req.user.id)
           delete following.Followers
           return followship
         })
@@ -43,7 +42,7 @@ let followController = {
   },
   getUserFollowers: (req, res) => {
     const options = {
-      where: { followingId: req.params.id },
+      where: { followingId: +req.params.id },
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       include: {
@@ -69,7 +68,7 @@ let followController = {
           if (follower.introduction) {
             follower.introduction = follower.introduction.substring(0, 50)
           }
-          follower.isFollowing = follower.Followers.some(user => user.id === req.user.id)
+          follower.isFollowing = follower.Followers.some(user => user.id === +req.user.id)
           delete follower.Followers
           return followship
         })
@@ -77,13 +76,13 @@ let followController = {
       }).catch(error => res.status(500).json({ status: 'error', message: error }))
   },
   postFollowship: (req, res) => {
-    Followship.create({ followerId: req.user.id, followingId: req.body.id })
+    Followship.create({ followerId: +req.user.id, followingId: +req.body.id })
       .then(followship => {
         Promise.all([
-          User.findByPk(req.user.id).then((currentUser) =>
+          User.findByPk(+req.user.id).then((currentUser) =>
             currentUser.increment({ followingNum: 1 })
           ),
-          User.findByPk(req.body.id).then((followingUser) =>
+          User.findByPk(+req.body.id).then((followingUser) =>
             followingUser.increment({ followerNum: 1 })
           )
         ])
@@ -101,14 +100,14 @@ let followController = {
       })
   },
   deleteFollowship: (req, res) => {
-    Followship.findOne({ where: { followerId: +req.user.id, followingId: req.params.id } })
+    Followship.findOne({ where: { followerId: +req.user.id, followingId: +req.params.id } })
       .then(followship => {
         followship.destroy().then(() => {
           Promise.all([
-            User.findByPk(req.user.id).then((currentUser) =>
+            User.findByPk(+req.user.id).then((currentUser) =>
               currentUser.decrement({ followingNum: 1 })
             ),
-            User.findByPk(req.params.id).then((followingUser) =>
+            User.findByPk(+req.params.id).then((followingUser) =>
               followingUser.decrement({ followerNum: 1 })
             )
           ])
@@ -134,7 +133,9 @@ let followController = {
         role: 'user'
       },
       attributes: ['id', 'name', 'account', 'avatar'],
-      order: [['followerNum', 'desc']]
+      order: [['followerNum', 'desc']],
+      limit: +req.query.limit || defaultLimit,
+      offset: +req.query.offset || 0,
     }
     Followship.findAll({
       where: { followerId: userId },

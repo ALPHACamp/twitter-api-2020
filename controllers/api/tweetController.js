@@ -35,17 +35,17 @@ let tweetController = {
           tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(
             (likedUser) => likedUser.id === +req.user.id
           )
-          tweet.dataValues.description = tweet.dataValues.description.substring(
-            0,
-            50
-          )
+          tweet.dataValues.description = tweet.dataValues.description.substring(0, 50)
           delete tweet.dataValues.LikedUsers
           return tweet
         })
         return res.status(200).json(tweets)
       })
       .catch((error) =>
-        res.status(500).json({ status: 'error', message: error })
+        res.status(500).json({
+          status: 'error',
+          message: error
+        })
       )
   },
   getTweets: (req, res) => {
@@ -100,7 +100,10 @@ let tweetController = {
       })
       return res.status(200).json(tweets)
     })
-      .catch((error) => res.status(404).json({ status: 'error', message: error }))
+      .catch((error) => res.status(500).json({
+        status: 'error',
+        message: error
+      }))
   },
   getTweet: (req, res) => {
     const options = {
@@ -144,31 +147,45 @@ let tweetController = {
           AdminId,
           User
         } = tweet
-        res.status(200).json({
-          id,
-          isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
-          description,
-          likeNum,
-          replyNum,
-          createdAt,
-          updatedAt,
-          deletedAt,
-          AdminId,
-          User
-        })
+        if (tweet) {
+          return res.status(200).json({
+            id,
+            isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
+            description,
+            likeNum,
+            replyNum,
+            createdAt,
+            updatedAt,
+            deletedAt,
+            AdminId,
+            User
+          })
+        }
+        return res
+          .status(404)
+          .json({ status: 'error', message: 'Tweet not found.' })
       })
-      .catch((error) => res.status(404).json({ status: 'error', message: error }))
+      .catch((error) => res.status(500).json({
+        status: 'error',
+        message: error
+      }))
   },
   postTweet: (req, res) => {
     if (!req.body.description) {
       return res
         .status(400)
-        .json({ status: 'error', message: 'Can not post empty description.' })
+        .json({
+          status: 'error',
+          message: 'Cannot post empty description.'
+        })
     }
     if (req.body.description.length > 140) {
       return res
         .status(400)
-        .json({ status: 'error', message: 'Can not post over 140 characters.' })
+        .json({
+          status: 'error',
+          message: 'Cannot post over 140 characters.'
+        })
     }
     const data = {
       UserId: +req.user.id,
@@ -188,7 +205,7 @@ let tweetController = {
           )
       })
       .catch((error) =>
-        res.status(400).json({
+        res.status(500).json({
           status: 'error',
           message: error
         })

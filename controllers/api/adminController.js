@@ -25,7 +25,7 @@ let adminController = {
         res.status(200).json(users)
       })
       .catch((error) => {
-        res.status(404).json({ status: 'error', message: error })
+        res.status(500).json({ status: 'error', message: error })
       })
   },
   getTweets: (req, res) => {
@@ -49,7 +49,7 @@ let adminController = {
         })
         return res.status(200).json(tweets)
       })
-      .catch(() => res.status(404).json({ status: 'error', message: '' }))
+      .catch(() => res.status(500).json({ status: 'error', message: error }))
   },
   deleteTweet: (req, res) => {
     Tweet.findByPk(req.params.tweetId)
@@ -61,30 +61,30 @@ let adminController = {
       )
       .catch(() =>
         res
-          .status(403)
-          .json({ status: 'error', message: 'Permission is denied.' })
+          .status(500)
+          .json({ status: 'error', message: error })
       )
   },
   login: (req, res) => {
     const { password, email } = req.body
     if (!password || !email) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: 'Password or email can not be empty.'
       })
     }
 
-    User.findOne({ where: { email, role:'admin' }})
+    User.findOne({ where: { email, role: 'admin' } })
       .then((user) => {
         if (!user) {
           return res
             .status(401)
-            .json({ status: 'error', message: "This admin account doesn't exist" })
+            .json({ status: 'error', message: "This admin account doesn't exist." })
         }
         if (!bcrypt.compareSync(password, user.password)) {
           return res
             .status(401)
-            .json({ status: 'error', message: 'Password incorrect' })
+            .json({ status: 'error', message: 'Password incorrect.' })
         }
 
         let payload = {
@@ -93,17 +93,18 @@ let adminController = {
         let token = jwt.sign(payload, process.env.JWT_SECRET)
         return res.status(200).json({
           status: 'success',
-          message: 'ok',
+          message: 'Administrator successfully login.',
           token,
           User: {
             id: user.id,
             name: user.name,
+            account: user.account,
             email: user.email
           }
         })
       })
       .catch((error) =>
-        res.status(401).json({ status: 'error', message: error })
+        res.status(500).json({ status: 'error', message: error })
       )
   }
 }
