@@ -23,7 +23,7 @@ describe('# like requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [], role: 'user' });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
         await db.Tweet.create({ UserId: 2, description: 'User2 的 Tweet1' })
@@ -35,7 +35,7 @@ describe('# like requests', () => {
           .post('/api/tweets/1/like')
           .set('Accept', 'application/json')
           .expect(200)
-          .end(function (err, req, res) {
+          .end(function (err, res) {
             if (err) return done(err);
             db.Like.findByPk(1).then(like => {
               like.UserId.should.equal(1);
@@ -66,7 +66,7 @@ describe('# like requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [], role: 'user' });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
         await db.Tweet.create({ UserId: 2, description: 'User2 的 Tweet1' })
