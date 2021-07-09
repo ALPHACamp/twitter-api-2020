@@ -28,7 +28,7 @@ let likeController = {
         likes = likes.map((like) => like.User)
         res.status(200).json(likes)
       })
-      .catch((error) => res.status(404).json({ status: 'error', message: error }))
+      .catch((error) => res.status(500).json({ status: 'error', message: error }))
   },
   postLike: (req, res) => {
     Like.create({ UserId: +req.user.id, TweetId: req.params.tweetId })
@@ -51,9 +51,9 @@ let likeController = {
           )
       })
       .catch((error) =>
-        res.status(400).json({
+        res.status(500).json({
           status: 'error',
-          message: ''
+          message: error
         })
       )
   },
@@ -83,9 +83,9 @@ let likeController = {
         )
       )
       .catch((error) =>
-        res.status(400).json({
+        res.status(500).json({
           status: 'error',
-          message: ''
+          message: error
         })
       )
   },
