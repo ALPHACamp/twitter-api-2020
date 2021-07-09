@@ -1,14 +1,16 @@
 const { Reply, Like } = require('../models')
+const helpers = require('../_helpers')
 
 const replyController = {
   likeReply: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const { ReplyId } = req.params
       const reply = await Reply.findByPk(ReplyId)
       if (!reply) return res.json({ status: 'error', message: '找不到此回覆' })
       const [like, created] = await Like.findOrCreate({
         where: {
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           ReplyId
         }
       })
@@ -22,9 +24,10 @@ const replyController = {
 
   unlikeReply: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const like = await Like.findOne({
         where: {
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           ReplyId: req.params.ReplyId
         }
       })
