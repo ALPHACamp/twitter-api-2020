@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const helpers = require('../_helpers.js')
+const { User } = require('../models')
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
@@ -10,7 +11,7 @@ const replyController = require('../controllers/replyController.js')
 
 // jwt驗證
 const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+  passport.authenticate('jwt', { session: false }, async (err, user, info) => {
     if (err) { return next(err); }
     if (!user) {
       if (info.name === "TokenExpiredError") {
@@ -19,6 +20,12 @@ const authenticated = (req, res, next) => {
         return res.status(401).json({ message: info.message });
       }
     }
+    user = await User.findByPk(user.dataValues.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
     req.user = user.dataValues;
     return next();
   })(req, res, next)
@@ -46,6 +53,8 @@ const authenticatedNotAdmin = (req, res, next) => {
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
+router.get('/users/:id/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
+router.get('/users/:id/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
