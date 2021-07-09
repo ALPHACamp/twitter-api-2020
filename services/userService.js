@@ -19,7 +19,8 @@ const userService = {
   getUser: async (viewingId, currentUserId = null) => {
     const user = await User.findByPk(viewingId, {
       attributes: [
-        'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'account', 'role', 'createdAt',
+        'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt',
+        [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
         [Sequelize.literal(`if(exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id), 'true','false')`), 'isFollowed']
       ],
       include: [
@@ -47,7 +48,10 @@ const userService = {
         {
           model: User,
           as: 'Followings',
-          attributes: [['id', 'followingId'], 'account', 'name', 'avatar', 'introduction'],
+          attributes: [
+            ['id', 'followingId'],
+            [Sequelize.fn('concat', '@', Sequelize.col('Followings.account')), 'account'],
+            'name', 'avatar', 'introduction'],
           through: { attributes: [] }
         }
       ]
@@ -62,7 +66,10 @@ const userService = {
         {
           model: User,
           as: 'Followers',
-          attributes: [['id', 'followerId'], 'account', 'name', 'avatar', 'introduction'],
+          attributes: [
+            ['id', 'followerId'],
+            [Sequelize.fn('concat', '@', Sequelize.col('Followers.account')), 'account'],
+            'name', 'avatar', 'introduction'],
           through: { attributes: [] }
         }
       ]
@@ -75,7 +82,7 @@ const userService = {
       attributes: [
         'id',
         'name',
-        'account',
+        [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
         'avatar',
         'introduction',
         [Sequelize.literal(`if(exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id),'true','false')`), 'isFollowed'],

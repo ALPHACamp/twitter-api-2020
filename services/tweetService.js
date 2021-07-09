@@ -15,7 +15,15 @@ const tweetService = {
       group: 'id',
       include: [
         { model: Like, attributes: [] },
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        {
+          model: User,
+          attributes:
+            [
+              'id', 'name',
+              [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
+              'avatar'
+            ]
+        },
         { model: Reply, attributes: [] }
       ],
       order: [['createdAt', 'DESC']]
@@ -30,7 +38,17 @@ const tweetService = {
         'createdAt',
         [Sequelize.literal('substring(description,1,50)'), 'description']
       ],
-      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+      include: [
+        {
+          model: User,
+          attributes:
+            [
+              'id', 'name',
+              [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
+              'avatar'
+            ]
+        }
+      ],
       order: [['createdAt', 'DESC']]
     })
   },
