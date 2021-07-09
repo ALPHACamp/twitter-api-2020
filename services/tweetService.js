@@ -62,7 +62,28 @@ const tweetService = {
     return await Tweet.findByPk(tweetId, {
       attributes: [
         'id', 'description', 'createdAt',
+        [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
         [Sequelize.literal(`if(exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id), 'true','false')`), 'isLike']
+      ],
+      group: 'Replies.id',
+      include: [
+        {
+          model: User,
+          attributes:
+            [
+              'id', 'name', 'avatar',
+              [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']
+            ]
+        },
+        { model: Like, attributes: [] },
+        {
+          model: Reply,
+          attributes: ['id', 'comment', 'createdAt'],
+          include: {
+            model: User,
+            attributes: ['id', 'name', 'cover', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
+          }
+        }
       ]
     })
   },
