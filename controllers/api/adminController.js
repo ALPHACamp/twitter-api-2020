@@ -62,7 +62,7 @@ let adminController = {
       .catch(() =>
         res
           .status(403)
-          .json({ status: 'error', message: 'permission is denied' })
+          .json({ status: 'error', message: 'Permission is denied.' })
       )
   },
   login: (req, res) => {
