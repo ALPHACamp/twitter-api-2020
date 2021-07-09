@@ -16,13 +16,14 @@ describe('# followship requests', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
         await db.Followship.destroy({ where: {}, truncate: true })
-        const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+        const rootUser = await db.User.create({ name: 'root' });
+        this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
           return (req, res, next) => { };
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, role: 'user', Followings: [] });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
       })
@@ -66,7 +67,7 @@ describe('# followship requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, Followings: [], role: 'user' });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
         await db.Followship.create({ followerId: 1, followingId: 2 })
@@ -83,6 +84,7 @@ describe('# followship requests', () => {
             db.Followship.findByPk(1).then(followship => {
               expect(followship).to.be.null
               return done();
+
             })
           })
       });

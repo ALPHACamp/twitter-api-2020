@@ -2,6 +2,7 @@ const { User, Tweet, Like, Reply } = require('../models')
 const Sequelize = require('sequelize')
 const helpers = require('../_helpers')
 
+
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
@@ -105,7 +106,7 @@ const tweetController = {
 
   likeTweet: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })   
       const { TweetId } = req.params
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.json({ status: 'error', message: '查無此推文' })
@@ -116,6 +117,7 @@ const tweetController = {
         }
       })
       if (created) return res.json({ status: 'success', message: '成功按讚推文' })
+      const tweet22 = await Tweet.findAll({})
       return res.json({ status: 'error', message: '推文已按過讚' })
     }
     catch (err) {
