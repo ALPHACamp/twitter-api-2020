@@ -15,9 +15,8 @@ const validate = ajv.compile(validateUserInfo.schema)
 // JWT
 const jwt = require('jsonwebtoken')
 
-function getTweetLikes(req) {
-  // LikedTweets 有資料才做 map 處理，不然 test 會過不了
-  if (helpers.getUser(req).LikedTweets) return helpers.getUser(req).LikedTweets.map(d => d.id)
+function getData(data) {
+  if (data) return data.map(d => d.id)
   return []
 }
 
@@ -108,7 +107,8 @@ const userController = {
       })
       if (!user) throw new Error('這名使用者不存在或已被刪除')
 
-      const likes = getTweetLikes(req)
+      // LikedTweets 有資料才做 map 處理，不然 test 會過不了
+      const likes = getData(helpers.getUser(req).LikedTweets)
 
       const tweets = user.toJSON().Tweets.map(t => ({
         tweetId: t.id,
@@ -166,7 +166,7 @@ const userController = {
       })
       if (!like) throw new Error('這名使用者不存在或已被刪除')
 
-      const likes = getTweetLikes(req)
+      const likes = getData(helpers.getUser(req).LikedTweets)
 
       const data = like.toJSON().Likes.map(d => ({
         userId: d.UserId,
@@ -202,7 +202,14 @@ const userController = {
       })
       if (!following) throw new Error('這名使用者不存在或已被刪除')
 
-      res.json(following.toJSON().Followings)
+      const isFollowing = getData(helpers.getUser(req).Followings)
+      console.log(isFollowing)
+      const data = following.toJSON().Followings.map(d => ({
+        ...d,
+        isFollowing: isFollowing.includes(d.followingId)
+      }))
+
+      res.json(data)
     } catch (error) {
       next(error)
     }
