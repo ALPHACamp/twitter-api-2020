@@ -92,19 +92,22 @@ const userController = {
   },
   getLikedTweets: async (req, res, next) => {
     try {
-      // 得到使用者所有 Likes 的陣列後再 map 得到 Tweets array
-      let user = await User.findAll({
-        where: { id: req.params.id },
-        include: [{ model: Like, include: [Tweet] }],
+      let likes = await Like.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        include: [{
+          model: Tweet,
+          attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+          include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
+        }],
+        order: [['createdAt', 'DESC']]
       })
-      const Likes = user[0].dataValues.Likes
-      const Tweets = Likes.map(like => {
-        const tweetData = like.dataValues.Tweet.dataValues
+      const Tweets = likes.map(like => {
         return {
-          ...tweetData,
-          TweetId: tweetData.id,
-          createdAt: moment(tweetData.createdAt).format('YYYY - MM - DD hh: mm: ss a'),
-          updatedAt: moment(tweetData.createdAt).format('YYYY - MM - DD hh: mm: ss a')
+          ...like.Tweet,
+          TweetId: like.Tweet.id,
+          createdAt: moment(like.Tweet.createdAt).format('YYYY - MM - DD hh: mm: ss a'),
         }
       })
       return res.json(Tweets)
