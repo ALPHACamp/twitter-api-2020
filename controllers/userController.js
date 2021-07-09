@@ -6,6 +6,7 @@ const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
 const Sequelize = require('sequelize')
 const { Op } = require("sequelize")
+const { replaceSetter } = require('sinon')
 // const Sequelize = require('sequelize')
 
 const userController = {
@@ -68,7 +69,7 @@ const userController = {
           role: { [Op.ne]: 'admin' }
         },
         attributes: [
-          'id', 'account', 'name', 'bio',
+          'id', 'account', 'name', 'bio', 'avatar', 'cover',
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowingId = User.id)'), 'totalFollowers'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id)'), 'totalFollowings']
         ],
@@ -225,43 +226,46 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
-      let { name, email, password, confirmPassword, account, bio, } = req.body
-      const avatar = req.files.avatar || false
-      const cover = req.files.cover || false
-      const avatarImg = helpers.getUser(req).avatar || false
-      const coverImg = helpers.getUser(req).avatar || false
+      let { name, email, password, confirmPassword, account, bio, avatar, cover } = req.body
+      const hasPostInfo = JSON.stringify(req.body) === '{}'
+      confirmPassword = confirmPassword || false
+      const checkPassword = confirmPassword === password
+      account = account || null
       const user = await User.findOne({
         where: {
-          id: { [Op.eq]: req.params.id, },
+          id: helpers.getUser(req).id,
           role: { [Op.ne]: 'admin' }
         }
       })
+      if (hasPostInfo) return res.json({ status: 'error', message: '請填入資訊' })
       const checkAccount = await User.findOne({ where: { account, id: { [Op.ne]: helpers.getUser(req).id } } }) || false
       if (checkAccount) {
         return res.json({ status: 'error', message: '此帳號已有人使用' })
       }
-      if (confirmPassword && confirmPassword === password && !checkAccount) {
+      if (confirmPassword && checkPassword && !hasPostInfo) {
         user.update({
-          name: name || helpers.getUser(req).name,
-          email: email || helpers.getUser(req).email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null) || helpers.getUser(req).password,
-          account: account || helpers.getUser(req).account,
+          name: name || user.name,
+          email: email || user.email,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) || user.password,
+          account: account || user.account,
         })
-        return res.json([user, { status: 'success', message: '個人資訊更新成功' }])
+        return res.json([user, { status: 'success', message: '資訊更新成功' }])
       }
-      if (confirmPassword && confirmPassword !== password) { return res.json({ status: 'error', message: '確認密碼錯誤' }) }
-
+      if (confirmPassword && !checkPassword && !hasPostInfo) return res.json({ status: 'error', message: '請確認密碼一致' })
+      if (req.files) {
+        avatar = req.files.avatar || false
+        cover = req.files.cover || false
+      }
       if (avatar && !cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
         imgur.upload(avatar[0].path, (err, img) => {
           user.update({
             name: name || helpers.getUser(req).name,
             email: email || helpers.getUser(req).email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null) || helpers.getUser(req).password,
             account: account || helpers.getUser(req).account,
             bio: bio || helpers.getUser(req).bio,
             avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
-            cover: cover ? img.data.link : helpers.getUser(req).cover,
+            cover: helpers.getUser(req).cover,
           })
           return res.json([user, { status: 'success', message: '個人頭貼更新成功' }])
         })
@@ -271,35 +275,32 @@ const userController = {
           user.update({
             name: name || helpers.getUser(req).name,
             email: email || helpers.getUser(req).email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null) || helpers.getUser(req).password,
             account: account || helpers.getUser(req).account,
             bio: bio || helpers.getUser(req).bio,
-            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+            avatar: helpers.getUser(req).avatar,
             cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
           return res.json([user, { status: 'success', message: '封面更新成功' }])
         })
       } else if (avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        imgur.upload(avatar[0].path, (err, img) => {
+        await imgur.upload(avatar[0].path, (err, img) => {
           user.update({
             name: name || helpers.getUser(req).name,
             email: email || helpers.getUser(req).email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null) || helpers.getUser(req).password,
             account: account || helpers.getUser(req).account,
             bio: bio || helpers.getUser(req).bio,
             avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
-            cover: cover ? img.data.link : helpers.getUser(req).cover,
+            cover: helpers.getUser(req).cover,
           })
         })
-        imgur.upload(cover[0].path, (err, img) => {
+        await imgur.upload(cover[0].path, (err, img) => {
           user.update({
             name: name || helpers.getUser(req).name,
             email: email || helpers.getUser(req).email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null) || helpers.getUser(req).password,
             account: account || helpers.getUser(req).account,
             bio: bio || helpers.getUser(req).bio,
-            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+            avatar: helpers.getUser(req).avatar,
             cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
         })
@@ -308,13 +309,10 @@ const userController = {
         user.update({
           name: name || helpers.getUser(req).name,
           email: email || helpers.getUser(req).email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null) || helpers.getUser(req).password,
           account: account || helpers.getUser(req).account,
           bio: bio || helpers.getUser(req).bio,
-          avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
-          cover: cover ? img.data.link : helpers.getUser(req).cover,
         })
-        return res.json(user)
+        return res.json([user, { status: 'success', message: '資訊更新成功' }])
       }
 
     } catch (err) { next(err) }

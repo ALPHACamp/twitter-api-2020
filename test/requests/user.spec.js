@@ -147,8 +147,7 @@ describe('# user requests', () => {
           .end(function (err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('array');
-            res.body[0].content.should.equal('Tweet1 的 comment');
-
+            res.body[0].Replies[0].content.should.equal('Tweet1 的 comment');
             return done();
           })
       });
@@ -325,7 +324,6 @@ describe('# user requests', () => {
             })
           })
       });
-
       after(async () => {
         this.authenticate.restore();
         this.getUser.restore();

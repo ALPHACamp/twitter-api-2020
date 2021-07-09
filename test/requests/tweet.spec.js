@@ -22,7 +22,7 @@ describe('# tweet requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-        ).returns({ id: 1, Followings: [] });
+        ).returns({ id: 1, Followings: [], role: 'user' });
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
       })
 
