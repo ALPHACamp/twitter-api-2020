@@ -28,7 +28,7 @@ let likeController = {
         likes = likes.map((like) => like.User)
         res.status(200).json(likes)
       })
-      .catch(() => res.status(404).json({ status: 'error', messgae: '' }))
+      .catch((error) => res.status(404).json({ status: 'error', message: error }))
   },
   postLike: (req, res) => {
     Like.create({ UserId: +req.user.id, TweetId: req.params.tweetId })
@@ -100,7 +100,7 @@ let likeController = {
         as: 'LikedTweet',
         attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt']
       },
-      order: [[{ model: Tweet, as: 'LikedTweet' }, 'createdAt', 'desc']]
+      order: [['createdAt', 'desc']]
     }
     Like.findAll(options)
       .then(likes => res.status(200).json(likes))
