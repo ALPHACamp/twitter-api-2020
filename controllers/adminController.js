@@ -5,6 +5,7 @@ const adminController = {
   getUsers: async (req, res) => {
     try {
       let users = await User.findAll({
+        where: { role: 'user' },
         include: [
           { model: Tweet, include: [Like] },
           { model: User, as: 'Followings' },
