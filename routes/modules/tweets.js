@@ -1,19 +1,16 @@
 const express = require('express')
 const router = express.Router()
 const tweetController = require('../../controllers/tweetController')
-const { authenticated, authenticatedUser } = require('../../middleware/auth')
-
-router.use(authenticated)
+const { authenticatedUser } = require('../../middleware/auth')
 
 router.get('/', tweetController.getTweets)
+router.get('/:tweet_id', tweetController.getTweet)
+router.get('/:tweet_id/replies', tweetController.getReplies)
 
 router.use(authenticatedUser)
-
-router.get('/:tweet_id', tweetController.getTweet)
 router.post('/', tweetController.postTweet)
 
 // Reply
-router.get('/:tweet_id/replies', tweetController.getReplies)
 router.post('/:tweet_id/replies', tweetController.postReply)
 
 // Like
