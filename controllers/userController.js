@@ -54,7 +54,7 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const result = await validateUserInfo.checkUserInfo(req, validate)
-      if (result) return res.json({ status: 'error', message: result })
+      if (result) return res.json({ status: 'error', message: result, data: req.body })
 
       await User.create({
         name: req.body.name.trim(),
