@@ -7,11 +7,10 @@ const imgur = require('imgur-node-api')
 const { Op } = require('sequelize')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const defaultLimit = 10
-//temp user ==> userId = 1
-let currentUserId = 1
 
 let userController = {
   getUsers: (req, res) => {
+    const userId = req.user.id
     const offset = +req.query.offset || 0
     const limit = +req.query.limit || defaultLimit
     const order = [['followerNum', 'DESC']]
@@ -43,27 +42,30 @@ let userController = {
       .then((users) => {
         users = users.map((user) => {
           user.dataValues.isFollowing = user.dataValues.Followers.some(
-            (follower) => follower.id === currentUserId
+            (follower) => follower.id === userId
           )
           delete user.dataValues.Followers
           return user
         })
         return res.status(200).json(users)
       })
-      .catch((err) => {
-        return res.status(500).json({ status: 'error', message: err })
+      .catch((error) => {
+        return res.status(500).json({
+          status: 'error',
+          message: error
+        })
       })
   },
   postUser: (req, res) => {
     const { name, account, email, password, checkPassword } = req.body
     if (!name || !account || !email || !password || !checkPassword) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: 'Missing data.'
       })
     }
     if (password !== checkPassword) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: "Password and confirm password doesn't match."
       })
@@ -71,14 +73,14 @@ let userController = {
     User.findOne({ where: { account } })
       .then((user) => {
         if (user) {
-          return res.status(401).json({
+          return res.status(400).json({
             status: 'error',
             message: 'Account was already used.'
           })
         } else {
           User.findOne({ where: { email } }).then((user) => {
             if (user) {
-              return res.status(401).json({
+              return res.status(400).json({
                 status: 'error',
                 message: 'Email was already used.'
               })
@@ -98,8 +100,8 @@ let userController = {
           })
         }
       })
-      .catch((err) => {
-        return res.status(500).json({ status: 'error', message: err })
+      .catch((error) => {
+        return res.status(500).json({ status: 'error', message: error })
       })
   },
   getUser: (req, res) => {
@@ -132,7 +134,7 @@ let userController = {
       .then((user) => {
         if (user) {
           user.dataValues.isFollowing = user.dataValues.Followers.some(
-            (follower) => follower.id === currentUserId
+            (follower) => follower.id === userId
           )
           delete user.dataValues.Followers
           return res.json(user)
@@ -141,8 +143,11 @@ let userController = {
           .status(404)
           .json({ status: 'error', message: 'User not found.' })
       })
-      .catch((err) => {
-        return res.status(500).json({ status: 'error', message: err })
+      .catch((error) => {
+        return res.status(500).json({
+          status: 'error',
+          message: error
+        })
       })
   },
   putUser: (req, res) => {
@@ -155,41 +160,40 @@ let userController = {
       email,
       passwordNew,
       passwordNewCheck,
-      introduction,
-      avatar,
-      cover
+      introduction
     } = req.body
     const { files } = req
     async function saveAndRes(user) {
       await user.save()
+      delete user.dataValues.role
       delete user.dataValues.password
       delete user.dataValues.createdAt
       delete user.dataValues.updatedAt
       return res.status(200).json(user)
     }
     // check user permission
-    if (id !== currentUserId) {
+    if (id !== userId) {
       return res.status(403).json({
         status: 'error',
-        message: 'You have no access to this account.'
+        message: 'You have no permission to edit this account.'
       })
     }
     // if there's a password update
     if (passwordNew) {
       if (!passwordNewCheck) {
-        return res.status(401).json({
+        return res.status(400).json({
           status: 'error',
           message: 'New password confirmation missing.'
         })
       }
       if (!password) {
-        return res.status(401).json({
+        return res.status(400).json({
           status: 'error',
           message: 'Current password missing.'
         })
       }
       if (passwordNew != passwordNewCheck) {
-        return res.status(401).json({
+        return res.status(400).json({
           status: 'error',
           message: "Password and confirm password doesn't match."
         })
@@ -197,9 +201,9 @@ let userController = {
     }
     // if there's a introduction update
     if (introduction && introduction.length > 140) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
-        message: 'Can not post over 140 characters'
+        message: 'Cannot post over 140 characters'
       })
     }
 
@@ -211,7 +215,7 @@ let userController = {
           return User.findOne({ where: { account } }).then((otherUser) => {
             //check if account was already used
             if (otherUser && otherUser.id !== id) {
-              return res.status(401).json({
+              return res.status(400).json({
                 status: 'error',
                 message: 'Account was already used.'
               })
@@ -228,7 +232,7 @@ let userController = {
           return User.findOne({ where: { email } }).then((otherUser) => {
             //check if email was already used
             if (otherUser && otherUser.id !== id) {
-              return res.status(401).json({
+              return res.status(400).json({
                 status: 'error',
                 message: 'Email was already used.'
               })
@@ -296,9 +300,9 @@ let userController = {
   login: (req, res) => {
     const { password, email } = req.body
     if (!password || !email) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
-        message: 'password or email can not be empty'
+        message: 'Password or email can not be empty.'
       })
     }
 
@@ -307,12 +311,12 @@ let userController = {
         if (!user) {
           return res
             .status(401)
-            .json({ status: 'error', message: 'this user is not exist' })
+            .json({ status: 'error', message: "This user doesn't exist." })
         }
         if (!bcrypt.compareSync(password, user.password)) {
           return res
             .status(401)
-            .json({ status: 'error', message: 'password is not correct' })
+            .json({ status: 'error', message: 'Password incorrect.' })
         }
         let payload = {
           id: user.id
@@ -320,17 +324,18 @@ let userController = {
         let token = jwt.sign(payload, process.env.JWT_SECRET)
         return res.status(200).json({
           status: 'success',
-          message: 'ok',
+          message: 'User successfully login.',
           token,
           User: {
             id: user.id,
             name: user.name,
+            account: user.account,
             email: user.email
           }
         })
       })
       .catch((error) =>
-        res.status(401).json({ status: 'error', message: error })
+        res.status(500).json({ status: 'error', message: error })
       )
   }
 }
