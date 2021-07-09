@@ -1,4 +1,5 @@
 const { User, Like, Sequelize } = require('../models')
+const { Op } = Sequelize
 
 const userService = {
   signIn: async (email) => {
@@ -15,8 +16,7 @@ const userService = {
     return user
   },
 
-  // TODO: 
-  getUser: async (viewingId, currentUserId = 0) => {
+  getUser: async (viewingId, currentUserId = null) => {
     const user = await User.findByPk(viewingId, {
       attributes: [
         'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'account', 'role', 'createdAt',
@@ -32,7 +32,7 @@ const userService = {
   },
 
   putUser: async (id, body) => {
-    await userService.checkUnique(body)
+    await userService.checkUnique(body, id)
     const user = await User.update(
       { ...body },
       { where: { id } }
@@ -101,13 +101,13 @@ const userService = {
     return likes.toJSON().Likes
   },
 
-  checkUnique: async ({ email, account }) => {
+  checkUnique: async ({ email, account }, userId = null) => {
     if (email) {
-      email = await User.findOne({ where: { email } })
+      email = await User.findOne({ where: { email, [Op.not]: { id: userId } } })
       if (email) throw new Error('This email is exist.')
     }
     if (account) {
-      account = await User.findOne({ where: { account } })
+      account = await User.findOne({ where: { account, [Op.not]: { id: userId } } })
       if (account) throw new Error('This account is exist.')
     }
   }
