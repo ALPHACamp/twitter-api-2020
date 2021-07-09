@@ -92,18 +92,33 @@ const TweetController = {
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
-  getReplies: (req, res) => {
-    return Reply.findAll({
-      where: { TweetId: req.params.tweet_id }
-    })
-      .then(replies => {
-        return res.status(200).json(replies)
+  getReplies: async (req, res) => {
+    try {
+      let replies = await Reply.findAll({
+        where: { TweetId: req.params.tweet_id },
+        include: [User]
       })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
+      if (!replies) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any replies in db.' })
       }
-      )
+      replies = replies.map(reply => {
+        return {
+          id: reply.id,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          account: reply.User.account,
+          createdAt: reply.User.createdAt,
+          name: reply.User.name,
+          avatar: reply.User.avatar
+        }
+      })
+      return res.status(200).json(replies)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   },
   postReply: async (req, res) => {
     if (!req.body.comment) { return res.status(204).json({ status: 'error', message: 'Please input comment' }) } else if (req.body.comment.length >= 50) { return res.status(409).json({ status: 'error', message: 'comment can\'t be more than 50 words' }) } else {
