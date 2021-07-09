@@ -116,6 +116,29 @@ const userController = {
       console.log(err)
       next(err)
     }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const results = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const tweets = results.map(tweet => ({
+        ...tweet,
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+      }))
+      return res.json(tweets)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
   }
 }
 
