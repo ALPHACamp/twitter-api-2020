@@ -78,7 +78,7 @@ const TweetController = {
         return res.status(400).json({ status: 'error', message: 'Please input tweet.' })
       }
       if (description && !validator.isByteLength(description, { min: 0, max: 140 })) {
-        return res.status(409).json({ status: 'error', message: 'tweet can\'t be more than 140 words.' })
+        return res.status(409).json({ status: 'error', message: 'Tweet can\'t be more than 140 words.' })
       }
       await Tweet.create({
         UserId: req.user.id,
@@ -94,7 +94,7 @@ const TweetController = {
     try {
       let replies = await Reply.findAll({
         where: { TweetId: req.params.tweet_id },
-        include: [User]
+        include: [User,{model: Tweet, include: User}]
       })
       if (!replies) {
         return res.status(404).json({ status: 'error', message: 'Cannot find any replies in db.' })
@@ -104,10 +104,10 @@ const TweetController = {
           id: reply.id,
           UserId: reply.UserId,
           TweetId: reply.TweetId,
+          tweetAuthorAccount: reply.Tweet.User.account,
           comment: reply.comment,
           createdAt: reply.createdAt,
-          account: reply.User.account,
-          createdAt: reply.User.createdAt,
+          commentAccount: reply.User.account,
           name: reply.User.name,
           avatar: reply.User.avatar
         }
