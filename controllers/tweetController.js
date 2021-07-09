@@ -35,7 +35,6 @@ const tweetController = {
     }
   },
 
-  // TODO: fix replyCount 忘記做increment的問題
   postReply: (req, res) => {
     const { comment } = req.body
     const TweetId = req.params.id
@@ -56,14 +55,12 @@ const tweetController = {
             message: 'Tweet does not exist'
           })
         }
-
-        return Reply.create({
-          UserId,
-          TweetId,
-          comment
-        }).then(reply => {
+        return Promise.all([
+          Reply.create({ UserId, TweetId, comment }),
+          tweet.increment('replyCount')
+        ]).then(result => {
           return res.status(200).json({
-            id: reply.id,
+            id: result[0].id,
             status: 'success',
             message: 'Reply has been created successfully'
           })
