@@ -1,8 +1,10 @@
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-const { User } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
+
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const moment = require('moment')
 
 const imgurUpload = (file) => {
   return new Promise((resolve, reject) => {
@@ -103,6 +105,118 @@ const userController = {
       next(err)
     }
   },
+  getTopFollowedUsers: async (req, res, next) => {
+    try {
+      const topLimit = 10
+      const results = await User.findAll({
+        raw: true,
+        nest: true,
+        attributes: ['id', 'name', 'account', 'avatar', 'followerCounts'],
+        limit: topLimit,
+        order: [['followerCounts', 'DESC']]
+      })
+      const topUsers = results.map(topUser => ({
+        ...topUser,
+        isFollowed: req.user.Followings.map(f => f.id).includes(topUser.id)
+      }))
+      return res.json(topUsers)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const results = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [{
+          model: Tweet,
+          attributes: ['id', 'description', 'createdAt'],
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ]
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const replies = results.map(reply => {
+        reply.createdAt = moment(reply.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        reply.Tweet.createdAt = moment(reply.Tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        return reply
+      })
+      return res.json(replies)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const results = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const tweets = results.map(tweet => ({
+        ...tweet,
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+      }))
+      return res.json(tweets)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const results = await Followship.findAll({
+        raw: true,
+        nest: true,
+        where: { followerId: req.params.id },
+        include: [{
+          model: User, as: 'Following', attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const followships = results.map(followship => ({
+        ...followship,
+        isFollowed: req.user.Followings.map(f => f.id).includes(followship.Following.id)
+      }))
+      return res.json(followships)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const results = await Followship.findAll({
+        raw: true,
+        nest: true,
+        where: { followingId: req.params.id },
+        include: [{
+          model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const followships = results.map(followship => ({
+        ...followship,
+        isFollowed: req.user.Followings.map(f => f.id).includes(followship.Follower.id)
+      }))
+      return res.json(followships)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
   putUser: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -149,12 +263,12 @@ const userController = {
       }
       // 確認沒有相同帳號的使用者
       let sameUser = await User.findOne({ where: { account } })
-      if (sameUser.dataValues.id !== user.dataValues.id) {
+      if (sameUser && sameUser.dataValues.id !== user.dataValues.id) {
         return res.json({ status: 'error', message: '此帳號已存在！' })
       }
       // 確認沒有相同 email 的使用者
       sameUser = await User.findOne({ where: { email } })
-      if (sameUser.dataValues.id !== user.dataValues.id) {
+      if (sameUser && sameUser.dataValues.id !== user.dataValues.id) {
         return res.json({ status: 'error', message: '此 email 已存在！' })
       }
       // 確認密碼相同

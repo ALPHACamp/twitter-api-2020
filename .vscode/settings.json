@@ -3,6 +3,8 @@
     "api",
     "imgur",
     "node",
+    "followship",
+    "followships",
     "resave",
     "signin"
   ]
