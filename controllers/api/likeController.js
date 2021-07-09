@@ -93,19 +93,38 @@ let likeController = {
     const options = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
-      attributes: ['id', 'UserId', 'TweetId'],
+      order: [['createdAt', 'desc']],
+      attributes: ['id', 'UserId', 'TweetId', 'createdAt'],
       where: { UserId: req.params.id },
       include: {
         model: Tweet,
         as: 'LikedTweet',
+        include: [
+          {
+            model: User,
+            as: 'Author',
+            attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id'],
+            through: {
+              attributes: []
+            }
+          }
+        ],
         attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt']
-      },
-      order: [['createdAt', 'desc']]
+      }
     }
     Like.findAll(options)
       .then(likes => {
         likes = likes.map(like => {
-          like.LikedTweet.dataValues.description = like.LikedTweet.dataValues.description.substring(0, 50)
+          like.LikedTweet.description = like.LikedTweet.description.substring(0, 50)
+          like.LikedTweet.dataValues.isLike = like.LikedTweet.dataValues.LikedUsers.some(
+            (likedUser) => likedUser.id === +req.user.id
+          )
+          delete like.LikedTweet.dataValues.LikedUsers
           return like
         })
         return res.status(200).json(likes)

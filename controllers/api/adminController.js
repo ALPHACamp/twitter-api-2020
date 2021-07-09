@@ -38,7 +38,7 @@ let adminController = {
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          as: 'User'
+          as: 'Author'
         }
       ]
     }
