@@ -2,6 +2,7 @@ const db = require('../../models')
 const Followship = db.Followship
 const User = db.User
 const defaultLimit = 10
+const { Op } = require('sequelize')
 
 let followController = {
   getUserFollowings: (req, res) => {
@@ -122,6 +123,35 @@ let followController = {
               res.json(500).json({ status: 'error', message: error })
             )
         })
+      })
+  },
+  getNotFollowingUsers: (req, res) => {
+    const userId = +req.user.id
+    Followship.findAll({
+      where: { followerId: userId },
+      attributes: ['followingId']
+    })
+      .then(followships => {
+        const followings = followships.map(followship => followship.followingId)
+        const options = {
+          where: {
+            [Op.not]: { id: { [Op.or]: followings } },
+            role: 'user'
+          },
+          attributes: ['id', 'name', 'account', 'avatar'],
+          order: [['followerNum', 'desc']],
+          limit: +req.query.limit || defaultLimit,
+          offset: +req.query.offset || 0,
+        }
+        followings.push(userId)
+        User.findAll(options)
+          .then(users => {
+            res.status(200).json(users)
+          })
+          .catch((error) => res.status(500).json({
+            status: 'error',
+            message: error
+          }))
       })
   }
 }
