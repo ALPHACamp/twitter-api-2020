@@ -25,7 +25,7 @@ let adminController = {
         res.status(200).json(users)
       })
       .catch((error) => {
-        res.status(404).json({ status: 'error', message: '' })
+        res.status(404).json({ status: 'error', message: error })
       })
   },
   getTweets: (req, res) => {
@@ -70,7 +70,7 @@ let adminController = {
     if (!password || !email) {
       return res.status(401).json({
         status: 'error',
-        message: 'password or email can not be empty'
+        message: 'Password or email can not be empty.'
       })
     }
 
@@ -79,12 +79,12 @@ let adminController = {
         if (!user) {
           return res
             .status(401)
-            .json({ status: 'error', message: 'this admin user is not exist' })
+            .json({ status: 'error', message: "This admin account doesn't exist" })
         }
         if (!bcrypt.compareSync(password, user.password)) {
           return res
             .status(401)
-            .json({ status: 'error', message: 'password is not correct' })
+            .json({ status: 'error', message: 'Password incorrect' })
         }
 
         let payload = {

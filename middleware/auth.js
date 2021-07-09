@@ -7,10 +7,9 @@ module.exports = {
         console.log(err)
         return res
           .status(403)
-          .json({ status: 'error', message: ' permission is denied' })
+          .json({ status: 'error', message: 'Permission is denied.' })
       }
       req.user = user
-      // console.log(req.user)
       return next()
     })(req, res, next)
   },
@@ -19,7 +18,7 @@ module.exports = {
     if (req.user.role !== 'admin') {
       return res.status(403).json({
         status: 'error',
-        message: 'permission is denied, only Administrator can visit'
+        message: 'Permission is denied, only Administrator can visit.'
       })
     }
     return next()
@@ -31,7 +30,7 @@ module.exports = {
     }
     return res.status(403).json({
       status: 'error',
-      message: 'permission is denied, only User can visit'
+      message: 'Permission is denied, only User can visit.'
     })
   }
 }
