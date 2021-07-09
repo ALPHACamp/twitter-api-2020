@@ -1,6 +1,7 @@
-const { User, Followship } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const moment = require('moment')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -89,6 +90,35 @@ const userController = {
       next(err)
     }
   },
+
+  getReplies: async (req, res, next) => {
+    try {
+      const results = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [{
+          model: Tweet,
+          attributes: ['id', 'description', 'createdAt'],
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ]
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const replies = results.map(reply => {
+        reply.createdAt = moment(reply.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        reply.Tweet.createdAt = moment(reply.Tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        return reply
+      })
+      return res.json(replies)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+
   getFollowings: async (req, res, next) => {
     try {
       const results = await Followship.findAll({
@@ -105,6 +135,29 @@ const userController = {
         isFollowed: req.user.Followings.map(f => f.id).includes(followship.Following.id)
       }))
       return res.json(followships)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const results = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const tweets = results.map(tweet => ({
+        ...tweet,
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+      }))
+      return res.json(tweets)
     } catch (err) {
       console.log(err)
       next(err)
