@@ -18,7 +18,7 @@ let tweetController = {
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          as: 'User',
+          as: 'Author',
           where: { role: 'user' }
         },
         {
@@ -59,7 +59,7 @@ let tweetController = {
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          as: 'User',
+          as: 'Author',
           where: { role: 'user' }
         },
         {
@@ -120,7 +120,7 @@ let tweetController = {
       include: [
         {
           model: User,
-          as: 'User',
+          as: 'Author',
           attributes: ['id', 'account', 'name', 'avatar']
         },
         {
