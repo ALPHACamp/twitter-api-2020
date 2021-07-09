@@ -14,7 +14,12 @@ const validate = ajv.compile(validateUserInfo.schema)
 
 // JWT
 const jwt = require('jsonwebtoken')
-// const passportJWT = require('passport-jwt')
+
+function getTweetLikes(req) {
+  // LikedTweets 有資料才做 map 處理，不然 test 會過不了
+  if (helpers.getUser(req).LikedTweets) return helpers.getUser(req).LikedTweets.map(d => d.id)
+  return []
+}
 
 const userController = {
   signIn: (req, res, next) => {
@@ -97,24 +102,19 @@ const userController = {
 
   getUserTweets: async (req, res, next) => {
     try {
-      let likes = []
-
       const user = await User.findByPk(req.params.userId, {
         include: [{ model: Tweet, include: [Like, Reply] }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
       if (!user) throw new Error('這名使用者不存在或已被刪除')
 
-      // LikedTweets 有資料才做 map 處理，不然 test 會過不了
-      if (helpers.getUser(req).LikedTweets) {
-        likes = helpers.getUser(req).LikedTweets.map(d => d.id)
-      }
+      const likes = getTweetLikes(req)
 
       const tweets = user.toJSON().Tweets.map(t => ({
         tweetId: t.id,
         userId: t.UserId,
         createdAt: t.createdAt,
-        description: t.description.substring(0, 50),
+        description: t.description,
         likeCount: t.Likes.length,
         replyCount: t.Replies.length,
         isLiked: likes.length ? likes.includes(t.id) : false
@@ -166,15 +166,18 @@ const userController = {
       })
       if (!like) throw new Error('這名使用者不存在或已被刪除')
 
+      const likes = getTweetLikes(req)
+
       const data = like.toJSON().Likes.map(d => ({
         userId: d.UserId,
         TweetId: d.TweetId,
         userName: d.Tweet.User.name,
         userAccount: d.Tweet.User.account,
         userAvatar: d.Tweet.User.avatar,
-        description: d.Tweet.description.substring(0, 50),
+        description: d.Tweet.description,
         likeCount: d.Tweet.Likes.length,
-        replyCount: d.Tweet.Replies.length
+        replyCount: d.Tweet.Replies.length,
+        isLiked: likes.length ? likes.includes(d.TweetId) : false
       }))
 
       res.json(data)
