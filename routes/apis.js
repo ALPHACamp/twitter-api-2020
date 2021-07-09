@@ -6,6 +6,7 @@ const helpers = require('../_helpers.js')
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 const tweetController = require('../controllers/tweetController.js')
+const replyController = require('../controllers/replyController.js')
 
 // jwt驗證
 const authenticated = (req, res, next) => {
@@ -18,7 +19,7 @@ const authenticated = (req, res, next) => {
         return res.status(401).json({ message: info.message });
       }
     }
-    req.user = user;
+    req.user = user.dataValues;
     return next();
   })(req, res, next)
 }
@@ -55,5 +56,9 @@ router.delete('/admin/tweets/:id', adminController.deleteTweet)
 // tweet routes
 router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
 router.post('/tweets', authenticatedNotAdmin, tweetController.postTweet)
+
+// reply routes
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedNotAdmin, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedNotAdmin, replyController.getReplies)
 
 module.exports = router
