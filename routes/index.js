@@ -50,7 +50,7 @@ const authenticatedNotAdmin = (req, res, next) => {
 module.exports = app => {
   app.get('/', (req, res) => res.send('Hello World!'))
   app.post('/api/users', userController.signUp)
-  app.post('/api/signin', userController.signIn)
+  app.post('/api/users/signin', userController.signIn)
 
   app.post('/signin/admin', adminController.signIn)
   // admin
