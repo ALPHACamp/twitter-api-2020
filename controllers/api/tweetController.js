@@ -8,7 +8,7 @@ const defaultLimit = 10
 let currentUserId = 1
 
 let tweetController = {
-getUserTweets: (req, res) => {
+  getUserTweets: (req, res) => {
     const options = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
@@ -32,13 +32,14 @@ getUserTweets: (req, res) => {
     Tweet.findAll(options).then(tweets => {
       tweets = tweets.map(tweet => {
         tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(likedUser => likedUser.id === currentUserId)
+        tweet.dataValues.description = tweet.dataValues.description.substring(0, 50)
         delete tweet.dataValues.LikedUsers
         return tweet
       })
       return res.status(200).json(tweets)
     }).catch(error => res.status(500).json({ status: 'error', message: error }))
   },
-    getTweets: (req, res) => {
+  getTweets: (req, res) => {
     const options = {
       limit: req.query.limit || defaultLimit,
       offset: req.query.offset || 0,
@@ -179,7 +180,7 @@ getUserTweets: (req, res) => {
         })
       )
   },
-  
+
 }
 
 module.exports = tweetController
