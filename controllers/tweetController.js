@@ -144,6 +144,28 @@ const tweetController = {
 
       return res.status(200).json(tweets)
     })
+  },
+
+  postLike: (req, res) => {
+    const UserId = req.user.id
+    const TweetId = req.params.id
+
+    return Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Tweet does not exist'
+          })
+        }
+        return Like.create({ UserId, TweetId })
+      }).then(like => {
+        return res.status(200).json({
+          status: 'success',
+          message: 'Like successfully',
+          tweetId: like.TweetId
+        })
+      })
   }
 }
 
