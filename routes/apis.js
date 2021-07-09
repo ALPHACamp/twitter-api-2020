@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const helpers = require('../_helpers.js')
+const { User } = require('../models')
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
@@ -9,7 +10,7 @@ const tweetController = require('../controllers/tweetController.js')
 
 // jwt驗證
 const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+  passport.authenticate('jwt', { session: false }, async (err, user, info) => {
     if (err) { return next(err); }
     if (!user) {
       if (info.name === "TokenExpiredError") {
@@ -18,7 +19,13 @@ const authenticated = (req, res, next) => {
         return res.status(401).json({ message: info.message });
       }
     }
-    req.user = user;
+    user = await User.findByPk(user.dataValues.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+    req.user = user.dataValues;
     return next();
   })(req, res, next)
 }
