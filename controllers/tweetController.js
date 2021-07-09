@@ -19,8 +19,6 @@ const TweetController = {
       }
       tweets = tweets.map(tweet => {
         return {
-          status: 'success',
-          message: 'Get the tweets successfully',
           id: tweet.id,
           UserId: tweet.UserId,
           description: tweet.description,
@@ -147,16 +145,27 @@ const TweetController = {
     }
   },
   postLike: async (req, res) => {
-    const liked = await Like.findOne({
-      where: { UserId: req.user.id, TweetId: req.params.id }
-    })
-    if (liked) { res.status(400).json({ status: 'error', message: 'error' }) } else {
-      Like.create({ UserId: req.user.id, TweetId: req.params.id })
-        .then(like => { res.status(200).json({ status: 'success', message: 'The like was successfully created' }) })
-        .catch(error => {
-          console.log('error')
-          res.status(500).json({ status: 'error', message: 'error' })
-        })
+    try {
+      const TweetId = req.params.id
+      const UserId = req.user.id
+      const likedTweet = await Tweet.findByPk(
+        TweetId, { include: [User] }
+      )
+      if (!likedTweet) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this tweet in db.' })
+      }
+      const likedTweetAuthor = likedTweet.dataValues.User.dataValues.account
+      const liked = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+      if (liked) {
+        return res.status(400).json({ status: 'error', message: 'You already liked this tweet.' })
+      }
+      await Like.create({ UserId, TweetId })
+      return res.status(200).json({ status: 'success', message: `You liked @${likedTweetAuthor}'s tweet.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   postUnlike: async (req, res) => {
