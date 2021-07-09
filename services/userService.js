@@ -79,6 +79,7 @@ const userService = {
 
   getTopUsers: async (id) => {
     return await User.findAll({
+      where: { [Op.not]: { role: 'admin' } },
       attributes: [
         'id',
         'name',
