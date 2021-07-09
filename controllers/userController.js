@@ -28,7 +28,7 @@ const userController = {
       // check all inputs are required
       const { account, password } = req.body
       if (!account || !password) {
-        return res.json({ status: 'error', message: 'All fields are required!' })
+        return res.status(422).json({ status: 'error', message: 'All fields are required!' })
       }
       const user = await User.findOne({ where: { account } })
       if (!user) return res.status(401).json({ status: 'error', message: 'That account is not registered!' })
@@ -99,7 +99,10 @@ const userController = {
         account,
         name,
         email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+        role: 'user',
+        avatar: 'https://i.imgur.com/q6bwDGO.png',
+        cover: 'https://i.imgur.com/1jDf2Me.png'
       })
       return res.status(200).json({ status: 'success', message: `@${account} Sign up successfully.Please sign in.` })
     } catch (err) {
