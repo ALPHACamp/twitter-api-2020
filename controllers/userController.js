@@ -203,7 +203,7 @@ const userController = {
       if (!following) throw new Error('這名使用者不存在或已被刪除')
 
       const isFollowing = getData(helpers.getUser(req).Followings)
-      console.log(isFollowing)
+
       const data = following.toJSON().Followings.map(d => ({
         ...d,
         isFollowing: isFollowing.includes(d.followingId)
@@ -231,12 +231,11 @@ const userController = {
       })
       if (!followers) throw new Error('這名使用者不存在或已被刪除')
 
+      const isFollowing = getData(helpers.getUser(req).Followings)
+
       const data = followers.toJSON().Followers.map(d => ({
         ...d,
-        isFollowing: helpers
-          .getUser(req)
-          .Followings.map(f => f.id)
-          .includes(d.followerId)
+        isFollowing: isFollowing.includes(d.followerId)
       }))
 
       res.json(data)
