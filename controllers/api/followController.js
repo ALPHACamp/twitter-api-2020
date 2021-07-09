@@ -33,7 +33,7 @@ let followController = {
           if (following.introduction) {
             following.introduction = following.introduction.substring(0, 50)
           }
-          following.isFollowing = following.Followers.some(user => user.id === currentUserId)
+          following.isFollowing = following.Followers.some(user => user.id === req.user.id)
           delete following.Followers
           return followship
         })
@@ -68,7 +68,7 @@ let followController = {
           if (follower.introduction) {
             follower.introduction = follower.introduction.substring(0, 50)
           }
-          follower.isFollowing = follower.Followers.some(user => user.id === currentUserId)
+          follower.isFollowing = follower.Followers.some(user => user.id === req.user.id)
           delete follower.Followers
           return followship
         })

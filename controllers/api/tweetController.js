@@ -100,7 +100,7 @@ let tweetController = {
       })
       return res.status(200).json(tweets)
     })
-    // .catch(() => res.status(404).json({ status: 'error', message: '' }))
+      .catch((error) => res.status(404).json({ status: 'error', message: error }))
   },
   getTweet: (req, res) => {
     const options = {
@@ -115,6 +115,11 @@ let tweetController = {
         'AdminId'
       ],
       include: [
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'account', 'name', 'avatar']
+        },
         {
           model: User,
           as: 'LikedUsers',
@@ -152,18 +157,18 @@ let tweetController = {
           User
         })
       })
-      .catch(() => res.status(404).json({ status: 'error', message: '' }))
+      .catch((error) => res.status(404).json({ status: 'error', message: error }))
   },
   postTweet: (req, res) => {
     if (!req.body.description) {
       return res
         .status(400)
-        .json({ status: 'error', message: 'Can not post empty description' })
+        .json({ status: 'error', message: 'Can not post empty description.' })
     }
     if (req.body.description.length > 140) {
       return res
         .status(400)
-        .json({ status: 'error', message: 'Can not post over 140 characters' })
+        .json({ status: 'error', message: 'Can not post over 140 characters.' })
     }
     const data = {
       UserId: +req.user.id,
@@ -185,7 +190,7 @@ let tweetController = {
       .catch((error) =>
         res.status(400).json({
           status: 'error',
-          message: ''
+          message: error
         })
       )
   }

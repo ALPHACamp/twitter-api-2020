@@ -15,7 +15,7 @@ let replyController = {
         TweetId: req.params.tweetId,
       },
       attributes: ['id', 'comment', 'createdAt'],
-      order: [['createdAt', 'DESC']],
+      order: [['createdAt', 'ASC']],
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
       ],
@@ -28,12 +28,12 @@ let replyController = {
     if (!req.body.comment) {
       return res
         .status(400)
-        .json({ status: 'error', message: 'Can not post empty comment' })
+        .json({ status: 'error', messgae: 'Can not post empty comment.' })
     }
     if (req.body.comment.length > 140) {
       return res.status(400).json({
         status: 'error',
-        message: 'Can not post over 140 characters',
+        message: 'Can not post over 140 characters.',
       })
     }
     const data = {
@@ -55,7 +55,7 @@ let replyController = {
       .catch((error) =>
         res.status(400).json({
           status: 'error',
-          message: '',
+          message: error,
         })
       )
   },
@@ -76,7 +76,7 @@ let replyController = {
           'createdAt'
         ]
       },
-      order: [[{ model: Tweet, as: "RepliedTweet" }, 'createdAt', 'desc']]
+      order: [['createdAt', 'desc']]
     }
     Reply.findAll(options)
       .then(replies => {
