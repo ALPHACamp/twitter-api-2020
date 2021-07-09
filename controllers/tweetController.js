@@ -18,11 +18,12 @@ const TweetController = {
       }
       tweets = tweets.map(tweet => {
         return {
+          status: 'success',
+          message: 'Get the tweets successfully',
           id: tweet.id,
           UserId: tweet.UserId,
           description: tweet.description,
           createdAt: tweet.createdAt,
-          updatedAt: tweet.updatedAt,
           account: tweet.User.account,
           name: tweet.User.name,
           avatar: tweet.User.avatar,
@@ -37,25 +38,39 @@ const TweetController = {
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
-  getTweet: (req, res) => {
-    return Tweet.findByPk(req.params.tweet_id, {
-      include: [
-        User,
-        Like]
-    })
-      .then(tweet => {
-        return res.status(200).json({
-          description: tweet.description,
-          tweet,
-          LikeCount: tweet.Likes.length,
-          status: 'success',
-          message: 'Get the tweet successfully'
+  getTweet: async (req, res) => {
+    try {
+      const id = req.params.tweet_id
+      const tweet = await Tweet.findByPk(id,
+        {
+          include: [
+            User,
+            Like,
+            Reply,
+            { model: User, as: 'LikedUsers' }]
         })
+      if (!tweet) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this tweet in db.' })
+      }
+      return res.status(200).json({
+        status: 'success',
+        message: 'Get the tweet successfully',
+        id: tweet.id,
+        UserId: tweet.UserId,
+        description: tweet.description,
+        LikeCount: tweet.Likes.length,
+        createdAt: tweet.createdAt,
+        account: tweet.User.account,
+        name: tweet.User.name,
+        avatar: tweet.User.avatar,
+        likedCount: tweet.Likes.length,
+        repliedCount: tweet.Replies.length,
+        isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
       })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   },
   postTweet: async (req, res) => {
     if (!req.body.description) { return res.status(204).json({ status: 'error', message: 'Please input tweet' }) } else if (req.body.description.length >= 140) { return res.status(409).json({ status: 'error', message: 'tweet can\'t be more than 140 words' }) } else {
