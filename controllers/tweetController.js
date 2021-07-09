@@ -1,4 +1,5 @@
 const tweetService = require('../services/tweetService')
+const RequestError = require('../utils/customError')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -23,7 +24,7 @@ const tweetController = {
     try {
       const { description } = req.body
 
-      if (!description.trim().length && description.length > 140) throw new Error('Invalid tweet.')
+      if (!description.trim().length && description.length > 140) throw new RequestError('Invalid tweet.')
 
       const postData = {
         UserId: req.user.id,
@@ -58,7 +59,7 @@ const tweetController = {
     try {
       const { comment } = req.body
 
-      if (!comment.trim().length || comment.trim().length > 140) throw new Error('Invalid comment.')
+      if (!comment.trim().length || comment.trim().length > 140) throw new RequestError('Invalid comment.')
 
       const replyData = {
         UserId: req.user.id,

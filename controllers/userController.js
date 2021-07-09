@@ -5,6 +5,7 @@ const userService = require('../services/userService')
 const tweetService = require('../services/tweetService')
 
 const imgurUpload = require('../utils/imgurUpload')
+const RequestError = require('../utils/customError')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -12,19 +13,21 @@ const userController = {
       const { email, password } = req.body
 
       if (!email || !password) {
-        throw new Error('Required fields did not exist. (email or password)')
+        throw new RequestError('Required fields did not exist. (email or password)')
       }
       const user = await userService.signIn(email)
       if (!user) {
-        throw new Error('No such user found.')
+        throw new RequestError('No such user found.')
       }
+
       if (req.baseUrl.includes('admin')) {
-        if (user.role !== 'admin') throw new Error('User cannot sign in admin page.')
+        if (user.role !== 'admin') throw new RequestError('User cannot sign in admin page.')
       } else {
-      if (user.role === 'admin') throw new Error('Admin cannot sign in user page.')
+        if (user.role === 'admin') throw new RequestError('Admin cannot sign in user page.')
       }
+
       if (!bcrypt.compareSync(password, user.password)) {
-        throw new Error('Incorrect password word.')
+        throw new RequestError('Incorrect password word.')
       }
 
       const payload = { id: user.id }
@@ -50,14 +53,14 @@ const userController = {
       const { account, name, email, password } = formBody
 
       if (!account || !name || !email || !password) {
-        throw new Error('All field are required.')
+        throw new RequestError('All field are required.')
       }
       if (!email.match(/.+@.+\..+/i)) {
-        throw new Error('Invalid email.')
+        throw new RequestError('Invalid email.')
       }
       await userService.checkUnique(formBody)
       if (password !== checkPassword) {
-        throw new Error('Fields password and checkPassword must be the same.')
+        throw new RequestError('Fields password and checkPassword must be the same.')
       }
 
       const hash = bcrypt.hashSync(password, 10)
@@ -98,16 +101,16 @@ const userController = {
       const { password, checkPassword, email } = req.body
 
       if (req.user.id !== parseInt(req.params.user_id)) {
-        throw new Error('Can only edit your own profile.')
+        throw new RequestError('Can only edit your own profile.')
       }
 
       if (password) {
-        if (password !== checkPassword) throw new Error('Field password & checkPassword must be same.')
+        if (password !== checkPassword) throw new RequestError('Field password & checkPassword must be same.')
         req.body.password = bcrypt.hashSync(password, 10)
       }
 
       if (email && !email.match(/.+@.+\..+/i)) {
-        throw new Error('Invalid email.')
+        throw new RequestError('Invalid email.')
       }
       await userService.checkUnique(req.body, req.params.user_id)
 
