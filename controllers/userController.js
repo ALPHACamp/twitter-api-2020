@@ -233,7 +233,7 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      let { name, bio } = req.body
+      let { name, bio, avatar, cover } = req.body
       const user = await User.findOne({
         where: {
           id: helpers.getUser(req).id,
@@ -243,55 +243,58 @@ const userController = {
       })
       if (!name) return res.json({ status: 'error', message: '請填寫名稱' })
 
-      if (JSON.stringify(req.files) !== '{}') {
-        avatar = req.files.avatar
-        cover = req.files.cover
-        if (avatar && !cover) {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          await imgur.upload(avatar[0].path, (err, img) => {
-            user.update({
-              name: name,
-              bio: bio,
-              avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
-              cover: helpers.getUser(req).cover,
-            })
-            return res.json([user, { status: 'success', message: '頭貼更新完成' }])
+      if (req.files) {
+        avatar = req.files.avatar || false
+        cover = req.files.cover || false
+      }
+
+      if (avatar && !cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        await imgur.upload(avatar[0].path, (err, img) => {
+          user.update({
+            name: name,
+            bio: bio,
+            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+            cover: helpers.getUser(req).cover,
           })
-        } else if (!avatar && cover) {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          await imgur.upload(cover[0].path, (err, img) => {
-            user.update({
-              name: name,
-              bio: bio,
-              avatar: helpers.getUser(req).avatar,
-              cover: cover ? img.data.link : helpers.getUser(req).cover,
-            })
-            return res.json([user, { status: 'success', message: '封面更新完成' }])
+          return res.json([user, { status: 'success', message: '頭貼更新完成' }])
+        })
+      } else if (!avatar && cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        await imgur.upload(cover[0].path, (err, img) => {
+          user.update({
+            name: name,
+            bio: bio,
+            avatar: helpers.getUser(req).avatar,
+            cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
-        } else {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          await imgur.upload(avatar[0].path, (err, img) => {
-            user.update({
-              name: name,
-              bio: bio,
-              avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
-              cover: helpers.getUser(req).cover,
-            })
+          return res.json([user, { status: 'success', message: '封面更新完成' }])
+        })
+      } else if (avatar && cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        await imgur.upload(avatar[0].path, (err, img) => {
+          user.update({
+            name: name,
+            bio: bio,
+            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+            cover: helpers.getUser(req).cover,
           })
-          await imgur.upload(cover[0].path, (err, img) => {
-            user.update({
-              name: name,
-              bio: bio,
-              avatar: helpers.getUser(req).avatar,
-              cover: cover ? img.data.link : helpers.getUser(req).cover,
-            })
+        })
+        await imgur.upload(cover[0].path, (err, img) => {
+          user.update({
+            name: name,
+            bio: bio,
+            avatar: helpers.getUser(req).avatar,
+            cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
-          return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
-        }
+        })
+        return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
       } else {
         await user.update({
           name: name,
           bio: bio,
+          avatar,
+          cover,
         })
         return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
       }
