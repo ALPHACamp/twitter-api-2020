@@ -1,5 +1,6 @@
 const db = require('../models')
 const { Tweet, User, Like, Reply } = db
+const validator = require('validator')
 
 const TweetController = {
   getTweets: async (req, res) => {
@@ -73,16 +74,22 @@ const TweetController = {
     }
   },
   postTweet: async (req, res) => {
-    if (!req.body.description) { return res.status(204).json({ status: 'error', message: 'Please input tweet' }) } else if (req.body.description.length >= 140) { return res.status(409).json({ status: 'error', message: 'tweet can\'t be more than 140 words' }) } else {
+    try {
+      const { description } = req.body
+      if (!description) {
+        return res.status(400).json({ status: 'error', message: 'Please input tweet.' })
+      }
+      if (description && !validator.isByteLength(description, { min: 0, max: 140 })) {
+        return res.status(409).json({ status: 'error', message: 'tweet can\'t be more than 140 words.' })
+      }
       await Tweet.create({
         UserId: req.user.id,
-        description: req.body.description
+        description
       })
-        .then((tweet) => { res.status(200).json({ status: 'success', message: 'The tweet was successfully created' }) })
-        .catch(error => {
-          console.log('error')
-          res.status(500).json({ status: 'error', message: 'error' })
-        })
+      return res.status(200).json({ status: 'success', message: 'The tweet was successfully created.' })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   getReplies: (req, res) => {
