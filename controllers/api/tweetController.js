@@ -29,16 +29,14 @@ let tweetController = {
       ],
       where: { UserId: req.params.id }
     }
-    Tweet.findAll(options)
-      .then((tweets) => {
-        tweets = tweets.map((tweet) => {
-          tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(
-            (likedUser) => likedUser.id === +req.user.id
-          )
-          delete tweet.dataValues.LikedUsers
-          return tweet
-        })
-        return res.status(200).json(tweets)
+    Tweet.findAll(options).then(tweets => {
+      tweets = tweets.map(tweet => {
+        tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(
+          (likedUser) => likedUser.id === +req.user.id
+        )
+        tweet.dataValues.description = tweet.dataValues.description.substring(0, 50)
+        delete tweet.dataValues.LikedUsers
+        return tweet
       })
       .catch((error) =>
         res.status(500).json({ status: 'error', message: error })

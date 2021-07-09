@@ -1,31 +1,30 @@
 const db = require('../../models')
 const User = db.User
+const Followship = db.Followship
 const bcrypt = require('bcrypt-nodejs')
 const imgur = require('imgur-node-api')
+const { Op } = require('sequelize')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const defaultLimit = 10
+//temp user ==> userId = 1
+let currentUserId = 1
 
 let userController = {
   getUsers: (req, res) => {
     const offset = +req.query.offset || 0
     const limit = +req.query.limit || defaultLimit
-    const userId = 1 //before building JWT
     const order = [['followerNum', 'DESC']]
-    const attributes = ['id', 'account', 'name', 'avatar', 'cover', 'tweetNum', 'likeNum', 'followingNum', 'followerNum', 'lastLoginAt']
+    const attributes = ['id', 'account', 'email', 'name', 'avatar', 'cover', 'tweetNum', 'likeNum', 'followingNum', 'followerNum', 'lastLoginAt']
     User.findAll({
       offset, limit, order, attributes,
-      include: [{
-        model: User,
-        as: "Followers",
-        attributes: ['id']
-      }]
+      include: { model: User, as: 'Followers', attributes: ['id'], through: { attributes: [] } }
     }).then(users => {
       users = users.map(user => {
-        user.dataValues.isFollowing = user.dataValues.Followers.some(follower => follower.id === userId)
+        user.dataValues.isFollowing = user.dataValues.Followers.some(follower => follower.id === currentUserId)
         delete user.dataValues.Followers
         return user
       })
-      return res.status(200).json({ Users: users })
+      return res.status(200).json(users)
     }).catch(err => {
       return res.status(500).json({ status: 'error', message: err })
     })
@@ -85,7 +84,7 @@ let userController = {
       }]
     }).then(user => {
       if (user) {
-        user.dataValues.isFollowing = user.dataValues.Followers.some(follower => follower.id === userId)
+        user.dataValues.isFollowing = user.dataValues.Followers.some(follower => follower.id === currentUserId)
         delete user.dataValues.Followers
         return res.json(user)
       }
@@ -107,7 +106,7 @@ let userController = {
       return res.status(200).json(user)
     }
     // check user permission
-    if (id !== userId) {
+    if (id !== currentUserId) {
       return res.status(403).json({
         status: 'error',
         message: 'You have no access to this account.'

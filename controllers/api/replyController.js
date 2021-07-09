@@ -28,7 +28,7 @@ let replyController = {
     if (!req.body.comment) {
       return res
         .status(400)
-        .json({ status: 'error', messgae: 'Can not post empty comment' })
+        .json({ status: 'error', message: 'Can not post empty comment' })
     }
     if (req.body.comment.length > 140) {
       return res.status(400).json({
@@ -67,7 +67,7 @@ let replyController = {
       where: { UserId: req.params.id },
       include: {
         model: Tweet,
-        as: 'repliedTweet',
+        as: 'RepliedTweet',
         attributes: [
           'id',
           'description',
@@ -76,10 +76,15 @@ let replyController = {
           'createdAt'
         ]
       },
-      order: [[{ model: Tweet, as: "repliedTweet" }, 'createdAt', 'desc']]
+      order: [[{ model: Tweet, as: "RepliedTweet" }, 'createdAt', 'desc']]
     }
     Reply.findAll(options)
       .then(replies => {
+        replies = replies.map(reply => {
+          reply.dataValues.comment = reply.dataValues.comment.substring(0, 50)
+          reply.RepliedTweet.dataValues.description = reply.RepliedTweet.dataValues.description.substring(0, 50)
+          return reply
+        })
         return res.status(200).json(replies)
       }).catch(error => res.status(500).json({ status: 'error', message: error }))
   }
