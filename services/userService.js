@@ -88,7 +88,7 @@ const userService = {
         [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
         'avatar',
         'introduction',
-        [Sequelize.literal(`if(exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id),'true','false')`), 'isFollowed'],
+        [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id)`), 'isFollowed'],
         [Sequelize.fn('count', Sequelize.col('Followers.id')), 'FollowerCount']
       ],
       include: { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
