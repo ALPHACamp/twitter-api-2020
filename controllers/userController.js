@@ -109,7 +109,11 @@ const userController = {
         createdAt: t.createdAt,
         description: t.description.substring(0, 50),
         likeCount: t.Likes.length,
-        replyCount: t.Replies.length
+        replyCount: t.Replies.length,
+        isLiked: helpers
+          .getUser(req)
+          .LikedTweets.map(d => d.id)
+          .includes(t.id)
       }))
 
       return res.json(tweets)
