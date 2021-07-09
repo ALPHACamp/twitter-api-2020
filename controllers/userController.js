@@ -115,31 +115,18 @@ const userController = {
   getUserRepliedTweets: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
-      // const replies = await Reply.findAll({
-      //   where: { UserId: req.params.id },
-      //   include: [{
-      //     model: Tweet,
-      //     include: [{ model: User, attributes: ['avatar', 'name', 'account'] }],
-      //     attributes: [
-      //       'id',
-      //       'description',
-      //       'createdAt',
-      //       [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
-      //       [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
-      //     ]
-      //   }],
-      //   order: [['createdAt', 'DESC']]
-      // })
-      // if (replies.length === 0) return res.json({ status: 'error', message: '沒有回覆的推文' })
       const tweets = await Tweet.findAll({
-        include: [{
-          model: Reply, where: { UserId: req.params.id },
-          attributes: ['content', 'createdAt'],
-          include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
-          order: ['createdAt', 'DESC']
-        }],
+        include: [
+          { model: User, attributes: ['name', 'account', 'avatar'] },
+          {
+            model: Reply, where: { UserId: req.params.id },
+            attributes: ['content', 'createdAt'],
+            include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+            order: ['createdAt', 'DESC']
+          }],
         attributes: [
           'id',
+          'UserId',
           'description',
           'createdAt',
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],

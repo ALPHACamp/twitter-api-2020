@@ -65,7 +65,7 @@ const tweetController = {
         include: [{ model: User, attributes: ['avatar', 'name', 'account'] }],
         order: [['createdAt', 'DESC']]
       })
-      return res.json({ status: 'success', message: replies })
+      return res.json([replies, { status: 'success', message: '取得使用者回覆' }])
     }
     catch (err) {
       next(err)
@@ -140,7 +140,7 @@ const tweetController = {
       if (!tweet) return res.json({ status: 'error', message: '找不到此推文' })
       await Reply.create({
         content: content.trim(),
-        UserId: req.user.id,
+        UserId: helpers.getUser(req).id,
         TweetId
       })
       return res.json({ status: 'success', message: '回覆新增成功' })
