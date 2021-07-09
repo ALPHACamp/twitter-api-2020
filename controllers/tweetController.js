@@ -23,14 +23,9 @@ let tweetController = {
   },
 
   postTweets: (req, res, next) => {
-    if (!req.body.description) {
-      res.json({ status: 'error', message: "description didn't exist" })
-      return res.redirect('back')
-    }
-    if (req.body.description.length > 140) {
-      res.json({ status: 'error', message: 'description only allow 140 characters' })
-      return res.redirect('back')
-    }
+    if (!req.body.description) throw new Error('請輸入必填項目')
+    if (req.body.description.length > 140) throw new Error('數入字數超過140字')
+
     return Tweet.create({
       description: req.body.description,
       UserId: helpers.getUser(req).id,
