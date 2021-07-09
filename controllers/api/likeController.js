@@ -31,6 +31,12 @@ let likeController = {
       .catch((error) => res.status(500).json({ status: 'error', message: error }))
   },
   postLike: (req, res) => {
+    if (req.user.role === 'admin') {
+      return res.status(401).json({
+      status: 'error',
+      message: 'Only normal user account can post like.'
+      })
+    }
     Like.create({ UserId: +req.user.id, TweetId: req.params.tweetId })
       .then((like) => {
         Promise.all([
@@ -58,6 +64,12 @@ let likeController = {
       )
   },
   deleteLike: (req, res) => {
+    if (req.user.role === 'admin') {
+      return res.status(401).json({
+      status: 'error',
+      message: 'Only normal user account can delete like.'
+      })
+    }
     Like.findOne({
       where: { TweetId: req.params.tweetId, UserId: +req.user.id }
     })

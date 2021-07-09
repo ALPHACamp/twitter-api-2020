@@ -9,6 +9,54 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const defaultLimit = 10
 
 let userController = {
+  getUsers: (req, res) => {
+    const userId = req.user.id
+    const offset = +req.query.offset || 0
+    const limit = +req.query.limit || defaultLimit
+    const order = [['followerNum', 'DESC']]
+    const attributes = [
+      'id',
+      'account',
+      'email',
+      'name',
+      'avatar',
+      'cover',
+      'tweetNum',
+      'likeNum',
+      'followingNum',
+      'followerNum',
+      'lastLoginAt'
+    ]
+    User.findAll({
+      offset,
+      limit,
+      order,
+      attributes,
+      include: {
+        model: User,
+        as: 'Followers',
+        attributes: ['id'],
+        through: { attributes: [] }
+      },
+      where: { role: 'user'}
+    })
+      .then((users) => {
+        users = users.map((user) => {
+          user.dataValues.isFollowing = user.dataValues.Followers.some(
+            (follower) => follower.id === userId
+          )
+          delete user.dataValues.Followers
+          return user
+        })
+        return res.status(200).json(users)
+      })
+      .catch((error) => {
+        return res.status(500).json({
+          status: 'error',
+          message: error
+        })
+      })
+  },
   postUser: (req, res) => {
     const { name, account, email, password, checkPassword } = req.body
     if (!name || !account || !email || !password || !checkPassword) {
@@ -124,6 +172,12 @@ let userController = {
       delete user.dataValues.updatedAt
       return res.status(200).json(user)
     }
+    if (req.user.role === 'admin') {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Only normal user account can modify profile.'
+      })
+    }
     // check user permission
     if (id !== userId) {
       return res.status(403).json({
@@ -165,7 +219,7 @@ let userController = {
         if (!account || user.account === account) {
           return user
         } else {
-          return User.findOne({ where: { account } }).then((otherUser) => {
+          return User.findOne({ where: { account , role : 'user'} }).then((otherUser) => {
             //check if account was already used
             if (otherUser && otherUser.id !== id) {
               return res.status(400).json({
@@ -182,17 +236,19 @@ let userController = {
         if (!email || user.email === email) {
           return user
         } else {
-          return User.findOne({ where: { email } }).then((otherUser) => {
-            //check if email was already used
-            if (otherUser && otherUser.id !== id) {
-              return res.status(400).json({
-                status: 'error',
-                message: 'Email was already used.'
-              })
+          return User.findOne({ where: { email, role: 'user' } }).then(
+            (otherUser) => {
+              //check if email was already used
+              if (otherUser && otherUser.id !== id) {
+                return res.status(400).json({
+                  status: 'error',
+                  message: 'Email was already used.'
+                })
+              }
+              user.email = email
+              return user
             }
-            user.email = email
-            return user
-          })
+          )
         }
       })
       .then((user) => {
