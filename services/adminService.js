@@ -17,7 +17,7 @@ const adminService = {
       attributes: [
         'id',
         'name',
-        'account',
+        [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
         'avatar',
         'cover',
         [Sequelize.literal('count(distinct Tweets.id)'), 'TweetsCount'],
