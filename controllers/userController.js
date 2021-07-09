@@ -95,7 +95,7 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      const { name, account, email, password, checkPassword } = req.body
+      const { name, account, email, password, checkPassword, introduction } = req.body
       // 確認所有欄位
       if (!name || !account || !email || !password || !checkPassword) {
         return res.json({ status: 'error', message: '所有欄位皆為必填！' })
@@ -103,7 +103,7 @@ const userController = {
       // 確認沒有相同帳號的使用者
       let sameUser = await User.findOne({ where: { account } })
       if (sameUser.dataValues.id !== user.dataValues.id) {
-        return res.json({ status: 'error', message: '此帳號已有人使用！' })
+        return res.json({ status: 'error', message: '此帳號已存在！' })
       }
       // 確認沒有相同 email 的使用者
       sameUser = await User.findOne({ where: { email } })
