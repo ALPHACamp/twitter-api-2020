@@ -127,24 +127,22 @@ let followController = {
   },
   getNotFollowingUsers: (req, res) => {
     const userId = +req.user.id
-    const options = {
-      where: {
-        [Op.not]: { id: { [Op.or]: followings } },
-        role: 'user'
-      },
-      attributes: ['id', 'name', 'account', 'avatar'],
-      order: [['followerNum', 'desc']],
-      limit: +req.query.limit || defaultLimit,
-      offset: +req.query.offset || 0,
-    }
     Followship.findAll({
       where: { followerId: userId },
       attributes: ['followingId']
     })
       .then(followships => {
-        return followships.map(followship => followship.followingId)
-      })
-      .then(followings => {
+        const followings = followships.map(followship => followship.followingId)
+        const options = {
+          where: {
+            [Op.not]: { id: { [Op.or]: followings } },
+            role: 'user'
+          },
+          attributes: ['id', 'name', 'account', 'avatar'],
+          order: [['followerNum', 'desc']],
+          limit: +req.query.limit || defaultLimit,
+          offset: +req.query.offset || 0,
+        }
         followings.push(userId)
         User.findAll(options)
           .then(users => {
