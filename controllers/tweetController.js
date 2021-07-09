@@ -162,26 +162,34 @@ const TweetController = {
         return res.status(400).json({ status: 'error', message: 'You already liked this tweet.' })
       }
       await Like.create({ UserId, TweetId })
-      return res.status(200).json({ status: 'success', message: `You liked @${likedTweetAuthor}'s tweet.` })
+      return res.status(200).json({ status: 'success', message: `You liked @${likedTweetAuthor}'s tweet successfully.` })
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   postUnlike: async (req, res) => {
-    const liked = await Like.findOne({
-      where: { UserId: req.user.id, TweetId: req.params.id }
-    })
-    if (!liked) { res.status(400).json({ status: 'error', message: 'error' }) } else {
-      liked.destroy()
-        .then(like => { res.status(200).json({ status: 'success', message: 'The like was successfully deleted' }) })
-        .catch(error => {
-          console.log('error')
-          res.status(500).json({ status: 'error', message: 'error' })
-        })
+    try {
+      const TweetId = req.params.id
+      const UserId = req.user.id
+      const unlikedTweet = await Tweet.findByPk(
+        TweetId, { include: [User] }
+      )
+      if (!unlikedTweet) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this tweet in db.' })
+      }
+      const unlikedTweetAuthor = unlikedTweet.dataValues.User.dataValues.account
+      const liked = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+      if (!liked) { return res.status(400).json({ status: 'error', message: 'You never like this tweet before.' }) }
+      await liked.destroy()
+      return res.status(200).json({ status: 'success', message: `You unliked ${unlikedTweetAuthor}'s tweet successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   }
-
 }
 
 module.exports = TweetController
