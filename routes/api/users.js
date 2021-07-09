@@ -13,6 +13,8 @@ const tweetController = require('../../controllers/api/tweetController')
 const replyController = require('../../controllers/api/replyController')
 const { authenticated, authenticatedUser } = require('../../middleware/auth')
 
+router.post('/login', userController.login)
+
 router.use(authenticated, authenticatedUser)
 
 router.get('/', userController.getUsers)

@@ -24,19 +24,25 @@ let tweetController = {
         {
           model: User,
           as: 'LikedUsers',
-          attributes: ['id'],
+          attributes: ['id']
         }
       ],
       where: { UserId: req.params.id }
     }
-    Tweet.findAll(options).then(tweets => {
-      tweets = tweets.map(tweet => {
-        tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(
-          (likedUser) => likedUser.id === +req.user.id
-        )
-        tweet.dataValues.description = tweet.dataValues.description.substring(0, 50)
-        delete tweet.dataValues.LikedUsers
-        return tweet
+    Tweet.findAll(options)
+      .then((tweets) => {
+        tweets = tweets.map((tweet) => {
+          tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(
+            (likedUser) => likedUser.id === +req.user.id
+          )
+          tweet.dataValues.description = tweet.dataValues.description.substring(
+            0,
+            50
+          )
+          delete tweet.dataValues.LikedUsers
+          return tweet
+        })
+        return res.status(200).json(tweets)
       })
       .catch((error) =>
         res.status(500).json({ status: 'error', message: error })
@@ -62,40 +68,39 @@ let tweetController = {
           attributes: ['id'],
           through: {
             attributes: []
-          },
+          }
         }
       ]
     }
-    Tweet.findAll(options)
-      .then((tweets) => {
-        tweets = tweets.map((tweet) => {
-          const {
-            id,
-            description,
-            likeNum,
-            replyNum,
-            createdAt,
-            updatedAt,
-            deletedAt,
-            AdminId,
-            User
-          } = tweet
-          return {
-            id,
-            isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
-            description: description.substring(0, 50),
-            likeNum,
-            replyNum,
-            createdAt,
-            updatedAt,
-            deletedAt,
-            AdminId,
-            User
-          }
-        })
-        return res.status(200).json(tweets)
+    Tweet.findAll(options).then((tweets) => {
+      tweets = tweets.map((tweet) => {
+        const {
+          id,
+          description,
+          likeNum,
+          replyNum,
+          createdAt,
+          updatedAt,
+          deletedAt,
+          AdminId,
+          User
+        } = tweet
+        return {
+          id,
+          isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
+          description: description.substring(0, 50),
+          likeNum,
+          replyNum,
+          createdAt,
+          updatedAt,
+          deletedAt,
+          AdminId,
+          User
+        }
       })
-      // .catch(() => res.status(404).json({ status: 'error', message: '' }))
+      return res.status(200).json(tweets)
+    })
+    // .catch(() => res.status(404).json({ status: 'error', message: '' }))
   },
   getTweet: (req, res) => {
     const options = {
