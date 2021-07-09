@@ -52,6 +52,7 @@ const authenticatedNotAdmin = (req, res, next) => {
 // user routes
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
+router.get('/users/top', authenticated, authenticatedNotAdmin, userController.getTopFollowedUsers)
 router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
 router.get('/users/:id/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)

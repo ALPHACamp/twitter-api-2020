@@ -89,6 +89,26 @@ const userController = {
       next(err)
     }
   },
+  getTopFollowedUsers: async (req, res, next) => {
+    try {
+      const topLimit = 10
+      const results = await User.findAll({
+        raw: true,
+        nest: true,
+        attributes: ['id', 'name', 'account', 'avatar', 'followerCounts'],
+        limit: topLimit,
+        order: [['followerCounts', 'DESC']]
+      })
+      const topUsers = results.map(topUser => ({
+        ...topUser,
+        isFollowed: req.user.Followings.map(f => f.id).includes(topUser.id)
+      }))
+      return res.json(topUsers)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
   getFollowings: async (req, res, next) => {
     try {
       const results = await Followship.findAll({
