@@ -304,7 +304,12 @@ const userController = {
   putUserInfo: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      let { name, email, password, confirmPassword, account } = req.body
+      let { account, name, email, password, confirmPassword } = req.body
+      account = account.trim()
+      name = name.trim()
+      email = email.trim()
+      password = password.trim()
+      confirmPassword = confirmPassword.trim()
       if (!name || !email || !password || !confirmPassword || !account) return res.json({ status: 'error', message: '所有欄位皆必填' })
       const user = await User.findByPk(helpers.getUser(req).id)
       const checkAccount = await User.findOne({ where: { account, id: { [Op.ne]: helpers.getUser(req).id } } })
