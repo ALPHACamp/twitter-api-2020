@@ -5,6 +5,7 @@ const defaultLimit = 10
 
 let followController = {
   getUserFollowings: (req, res) => {
+    const currentUserId = +req.user.id
     const options = {
       where: { followerId: req.params.id },
       limit: +req.query.limit || defaultLimit,

@@ -74,7 +74,7 @@ let adminController = {
       })
     }
 
-    User.findOne({ where: { email } })
+    User.findOne({ where: { email, role:'admin' }})
       .then((user) => {
         if (!user) {
           return res
