@@ -11,49 +11,6 @@ const defaultLimit = 10
 let currentUserId = 1
 
 let userController = {
-  getUsers: (req, res) => {
-    const offset = +req.query.offset || 0
-    const limit = +req.query.limit || defaultLimit
-    const order = [['followerNum', 'DESC']]
-    const attributes = [
-      'id',
-      'account',
-      'email',
-      'name',
-      'avatar',
-      'cover',
-      'tweetNum',
-      'likeNum',
-      'followingNum',
-      'followerNum',
-      'lastLoginAt'
-    ]
-    User.findAll({
-      offset,
-      limit,
-      order,
-      attributes,
-      include: {
-        model: User,
-        as: 'Followers',
-        attributes: ['id'],
-        through: { attributes: [] }
-      }
-    })
-      .then((users) => {
-        users = users.map((user) => {
-          user.dataValues.isFollowing = user.dataValues.Followers.some(
-            (follower) => follower.id === currentUserId
-          )
-          delete user.dataValues.Followers
-          return user
-        })
-        return res.status(200).json(users)
-      })
-      .catch((err) => {
-        return res.status(500).json({ status: 'error', message: err })
-      })
-  },
   postUser: (req, res) => {
     const { name, account, email, password, checkPassword } = req.body
     if (!name || !account || !email || !password || !checkPassword) {

@@ -17,7 +17,7 @@ router.post('/login', userController.login)
 
 router.use(authenticated, authenticatedUser)
 
-router.get('/', userController.getUsers)
+router.get('/', followController.getNotFollowingUsers)
 router.post('/', userController.postUser)
 router.get('/:id', userController.getUser)
 router.put('/:id', upload.fields(imageFields), userController.putUser)
