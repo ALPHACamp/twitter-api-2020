@@ -6,6 +6,7 @@ const { User } = require('../models')
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
+const followshipController = require('../controllers/followshipController.js')
 const tweetController = require('../controllers/tweetController.js')
 const replyController = require('../controllers/replyController.js')
 
@@ -26,6 +27,7 @@ const authenticated = (req, res, next) => {
         { model: User, as: 'Followings' }
       ]
     })
+
     req.user = user.dataValues;
     return next();
   })(req, res, next)
@@ -61,6 +63,10 @@ router.post('/admin/signin', adminController.signIn)
 router.get('/admin/users', adminController.getUsers)
 router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
 router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
+
+// followship routes
+router.post('/followships', authenticated, authenticatedNotAdmin, followshipController.addFollowing)
+router.delete('/followships/:followingId', authenticated, authenticatedNotAdmin, followshipController.removeFollowing)
 
 // tweet routes
 router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
