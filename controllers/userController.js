@@ -94,36 +94,38 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
-      const { password, checkPassword, email, ...formBody } = req.body
+      const { password, checkPassword, email } = req.body
 
-      if (password && password !== checkPassword) {
-        throw new Error('Field password & checkPassword must be same.')
+      if (req.user.id !== parseInt(req.params.user_id)) {
+        throw new Error('Can only edit your own profile.')
+      }
+
+      if (password) {
+        if (password !== checkPassword) throw new Error('Field password & checkPassword must be same.')
+        req.body.password = bcrypt.hashSync(password, 10)
       }
 
       if (email && !email.match(/.+@.+\..+/i)) {
         throw new Error('Invalid email.')
       }
-      await userService.checkUnique(req.body)
-
-      const hash = password ? bcrypt.hashSync(password, 10) : null
+      await userService.checkUnique(req.body, req.params.user_id)
 
       const { files } = req
       if (files) {
         if (files.avatar) {
           const [avatarData] = files.avatar
           const avatar = await imgurUpload(avatarData.path)
-          formBody.avatar = avatar
+          req.body.avatar = avatar
         }
         if (files.cover) {
           const [coverData] = files.cover
           const cover = await imgurUpload(coverData.path)
-          formBody.cover = cover
+          req.body.cover = cover
         }
       }
 
       const user = await userService.putUser(req.params.user_id, {
-        ...formBody,
-        password: hash
+        ...req.body
       })
       return res.json({ status: 'success', user })
     } catch (error) {
