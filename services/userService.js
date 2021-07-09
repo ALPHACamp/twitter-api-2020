@@ -23,7 +23,7 @@ const userService = {
       attributes: [
         'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt',
         [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
-        [Sequelize.literal(`if(exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id), 'true','false')`), 'isFollowed']
+        [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
       ],
       include: [
         { model: User, as: 'Followers' },
