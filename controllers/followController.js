@@ -23,7 +23,7 @@ const followController = {
       })
 
       // check both followerId and followingId are existed.
-      if (!followingUser| !followerUser) {
+      if (!followingUser | !followerUser) {
         return res.status(404).json({ status: 'error', message: 'Cannot find this followingId or followerId.' })
       }
 
@@ -73,7 +73,7 @@ const followController = {
         }
       })
 
-      if (!unfollowingUser  | !unfollowerUser) {
+      if (!unfollowingUser | !unfollowerUser) {
         return res.status(404).json({ status: 'error', message: 'Cannot find this followingId or followerId.' })
       }
 

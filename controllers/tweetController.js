@@ -2,20 +2,40 @@ const db = require('../models')
 const { Tweet, User, Like, Reply } = db
 
 const TweetController = {
-  getTweets: (req, res) => {
-    return Tweet.findAll({
-      include: [User],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(tweets => {
-        return res.status(200).json(tweets)
+  getTweets: async (req, res) => {
+    try {
+      let tweets = await Tweet.findAll({
+        include: [
+          User,
+          Reply,
+          Like,
+          { model: User, as: 'LikedUsers' }
+        ],
+        order: [['createdAt', 'DESC']]
       })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
+      if (!tweets) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any tweets in db.' })
+      }
+      tweets = tweets.map(tweet => {
+        return {
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          updatedAt: tweet.updatedAt,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar,
+          likedCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
+        }
       })
+      return res.status(200).json(tweets)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   },
   getTweet: (req, res) => {
     return Tweet.findByPk(req.params.tweet_id, {
