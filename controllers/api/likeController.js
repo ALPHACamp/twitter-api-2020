@@ -104,7 +104,13 @@ let likeController = {
       order: [[{ model: Tweet, as: 'LikedTweet' }, 'createdAt', 'desc']]
     }
     Like.findAll(options)
-      .then(likes => res.status(200).json(likes))
+      .then(likes => {
+        likes = likes.map(like => {
+          like.LikedTweet.dataValues.description = like.LikedTweet.dataValues.description.substring(0, 50)
+          return like
+        })
+        return res.status(200).json(likes)
+      })
       .catch(error => res.status(500).json(error))
   }
 }
