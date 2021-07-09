@@ -255,7 +255,7 @@ const userController = {
       if (!name) throw new Error('名字為必填')
 
       const result = await validateUserInfo.checkUserInfo(req, validate)
-      if (result) return res.json({ status: 'error', message: result })
+      if (result) return res.json({ status: 'error', message: result, data: req.body })
 
       const user = await User.findByPk(id)
       if (!user) throw new Error('user not found.')
