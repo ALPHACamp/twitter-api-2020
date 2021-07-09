@@ -2,15 +2,17 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const helpers = require('../_helpers.js')
+const { User } = require('../models')
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 const followshipController = require('../controllers/followshipController.js')
 const tweetController = require('../controllers/tweetController.js')
+const replyController = require('../controllers/replyController.js')
 
 // jwt驗證
 const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+  passport.authenticate('jwt', { session: false }, async (err, user, info) => {
     if (err) { return next(err); }
     if (!user) {
       if (info.name === "TokenExpiredError") {
@@ -19,6 +21,13 @@ const authenticated = (req, res, next) => {
         return res.status(401).json({ message: info.message });
       }
     }
+    user = await User.findByPk(user.dataValues.id, {
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+
     req.user = user.dataValues;
     return next();
   })(req, res, next)
@@ -46,20 +55,26 @@ const authenticatedNotAdmin = (req, res, next) => {
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
+router.get('/users/:id/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
+router.get('/users/:id/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
+router.get('/admin/users', adminController.getUsers)
+router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
 
-// followship
+// followship routes
 router.post('/followships', authenticated, authenticatedNotAdmin, followshipController.addFollowing)
 router.delete('/followships/:followingId', authenticated, authenticatedNotAdmin, followshipController.removeFollowing)
 
-// router.get('/admin/users', adminController.getUsers)
-router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
-router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
-
 // tweet routes
 router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
+router.get('/tweets/:id', authenticatedNotAdmin, tweetController.getTweet)
 router.post('/tweets', authenticatedNotAdmin, tweetController.postTweet)
+
+// reply routes
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedNotAdmin, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedNotAdmin, replyController.getReplies)
 
 module.exports = router
