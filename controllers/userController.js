@@ -243,8 +243,8 @@ const userController = {
       if (checkAccount) {
         return res.json({ status: 'error', message: '此帳號已有人使用' })
       }
-      if (confirmPassword && checkPassword && !hasPostInfo) {
-        user.update({
+      if (password && checkPassword && !hasPostInfo) {
+        await user.update({
           name: name || user.name,
           email: email || user.email,
           password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) || user.password,
@@ -252,14 +252,14 @@ const userController = {
         })
         return res.json([user, { status: 'success', message: '資訊更新成功' }])
       }
-      if (confirmPassword && !checkPassword && !hasPostInfo) return res.json({ status: 'error', message: '請確認密碼一致' })
+      if (password && !checkPassword && !hasPostInfo) return res.json({ status: 'error', message: '請確認密碼一致' })
       if (req.files) {
         avatar = req.files.avatar || false
         cover = req.files.cover || false
       }
       if (avatar && !cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        imgur.upload(avatar[0].path, (err, img) => {
+        await imgur.upload(avatar[0].path, (err, img) => {
           user.update({
             name: name || helpers.getUser(req).name,
             email: email || helpers.getUser(req).email,
@@ -272,7 +272,7 @@ const userController = {
         })
       } else if (!avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        imgur.upload(cover[0].path, (err, img) => {
+        await imgur.upload(cover[0].path, (err, img) => {
           user.update({
             name: name || helpers.getUser(req).name,
             email: email || helpers.getUser(req).email,
@@ -307,7 +307,7 @@ const userController = {
         })
         return res.json([user, { status: 'success', message: '個人資訊更新成功' }])
       } else {
-        user.update({
+        await user.update({
           name: name || helpers.getUser(req).name,
           email: email || helpers.getUser(req).email,
           account: account || helpers.getUser(req).account,

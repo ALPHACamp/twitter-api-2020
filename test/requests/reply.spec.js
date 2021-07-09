@@ -23,11 +23,7 @@ describe('# reply requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-<<<<<<< HEAD
-        ).returns({ id: 1, Followings: [], role: 'user' });
-=======
         ).returns({ id: 1, role: 'user', Followings: [] });
->>>>>>> origin
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
         await db.Tweet.create({ UserId: 2, description: 'User2 的 Tweet1' })
@@ -76,11 +72,7 @@ describe('# reply requests', () => {
         });
         this.getUser = sinon.stub(
           helpers, 'getUser'
-<<<<<<< HEAD
-        ).returns({ id: 1, Followings: [], role: 'user' });
-=======
         ).returns({ id: 1, role: 'user', Followings: [] });
->>>>>>> origin
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
         await db.Tweet.create({ UserId: 1, description: 'User1 的 Tweet1' })
         await db.Reply.create({ UserId: 1, TweetId: 1, content: 'Tweet1 的 comment' })
@@ -95,11 +87,7 @@ describe('# reply requests', () => {
           .end(function (err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('array');
-<<<<<<< HEAD
-            res.body[0][0].content.should.equal('Tweet1 的 comment');
-=======
             res.body[0].content.should.equal('Tweet1 的 comment');
->>>>>>> origin
             return done();
           })
       });
