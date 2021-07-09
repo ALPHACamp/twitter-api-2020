@@ -21,7 +21,7 @@ const tweetController = {
         ...tweet,
         createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
       }))
-      return res.json({ status: 'success', tweets })
+      return res.json(tweets)
     } catch (err) {
       next(err)
       return res.json({ status: 'error', message: err.toString() })
@@ -39,6 +39,29 @@ const tweetController = {
         UserId: req.user.id
       })
       return res.json({ status: 'success', message: 'Tweet was successfully created.' })
+    } catch (err) {
+      next(err)
+      return res.json({ status: 'error', message: err.toString() })
+    }
+  },
+  getTweet: async (req, res, next) => {
+    // 取得 tweet 與其相關回文
+    try {
+      let tweet = await Tweet.findByPk(req.params.id, {
+        raw: true,
+        // nest: true,
+        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }]
+      })
+      // 時間格式整理
+      tweet = {
+        ...tweet,
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+      }
+      return res.json(tweet)
     } catch (err) {
       next(err)
       return res.json({ status: 'error', message: err.toString() })

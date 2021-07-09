@@ -1,4 +1,4 @@
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
@@ -90,6 +90,7 @@ const userController = {
       next(err)
     }
   },
+
   getReplies: async (req, res, next) => {
     try {
       const results = await Reply.findAll({
@@ -117,6 +118,28 @@ const userController = {
       next(err)
     }
   },
+
+  getFollowings: async (req, res, next) => {
+    try {
+      const results = await Followship.findAll({
+        raw: true,
+        nest: true,
+        where: { followerId: req.params.id },
+        include: [{
+          model: User, as: 'Following', attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const followships = results.map(followship => ({
+        ...followship,
+        isFollowed: req.user.Followings.map(f => f.id).includes(followship.Following.id)
+      }))
+      return res.json(followships)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
   getTweets: async (req, res, next) => {
     try {
       const results = await Tweet.findAll({
@@ -135,6 +158,27 @@ const userController = {
         createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
       }))
       return res.json(tweets)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const results = await Followship.findAll({
+        raw: true,
+        nest: true,
+        where: { followingId: req.params.id },
+        include: [{
+          model: User, as: 'Follower', attributes: ['id', 'name', 'account', 'avatar', 'introduction']
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const followships = results.map(followship => ({
+        ...followship,
+        isFollowed: req.user.Followings.map(f => f.id).includes(followship.Follower.id)
+      }))
+      return res.json(followships)
     } catch (err) {
       console.log(err)
       next(err)
