@@ -47,9 +47,9 @@ const authenticatedNotAdmin = (req, res, next) => {
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
-router.put('/users/:id', authenticated, authenticatedNotAdmin, userController.putUser)
-router.put('/users/:id/edit', authenticated, authenticatedNotAdmin,
-  upload.fields([{ name: 'avatar', max: 1 }, { name: 'cover', max: 1 }]), userController.editUser)
+router.put('/users/:id', authenticated, authenticatedNotAdmin,
+  upload.fields([{ name: 'avatar', max: 1 }, { name: 'cover', max: 1 }]), userController.putUser)
+router.put('/users/:id/edit', authenticated, authenticatedNotAdmin, userController.editUser)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
