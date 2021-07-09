@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const faker = require('faker')
 'use strict';
 
 module.exports = {
@@ -9,6 +10,8 @@ module.exports = {
       email: 'root@example.com',
       role: 'admin',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+      bio: faker.lorem.sentence(),
+      avatar: faker.image.image(),
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -18,6 +21,8 @@ module.exports = {
       email: 'user1@example.com',
       role: 'user',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+      bio: faker.lorem.sentence(),
+      avatar: faker.image.image(),
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -27,6 +32,8 @@ module.exports = {
       email: 'user2@example.com',
       role: 'user',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+      bio: faker.lorem.sentence(),
+      avatar: faker.image.image(),
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -36,6 +43,8 @@ module.exports = {
       email: 'user3@example.com',
       role: 'user',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+      bio: faker.lorem.sentence(),
+      avatar: faker.image.image(),
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -45,6 +54,8 @@ module.exports = {
       email: 'user4@example.com',
       role: 'user',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+      bio: faker.lorem.sentence(),
+      avatar: faker.image.image(),
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -54,6 +65,8 @@ module.exports = {
       email: 'user5@example.com',
       role: 'user',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
+      bio: faker.lorem.sentence(),
+      avatar: faker.image.image(),
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -65,3 +78,4 @@ module.exports = {
     return queryInterface.bulkDelete('Users', null, {});
   }
 };
+

@@ -1,10 +1,11 @@
-const { User, Tweet, Like, Reply, sequelize } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const Sequelize = require('sequelize')
-
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const tweets = await Tweet.findAll({
         raw: true,
         nest: true,
@@ -13,7 +14,8 @@ const tweetController = {
           'description',
           'createdAt',
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
+          [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
         ],
         include: [
           { model: User, attributes: ['avatar', 'name', 'account'] },
@@ -21,7 +23,7 @@ const tweetController = {
         order: [['createdAt', 'DESC']]
       })
       if (!tweets.length) return res.json({ status: 'error', message: '目前查無任何推文' })
-      return res.json({ status: 'success', message: tweets })
+      return res.json(tweets)
     }
     catch (err) {
       next(err)
@@ -30,6 +32,7 @@ const tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const tweet = await Tweet.findByPk(req.params.TweetId, {
         attributes: [
           'id',
@@ -37,14 +40,22 @@ const tweetController = {
           'createdAt',
           [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
           [Sequelize.literal('(SELECT COUNT (*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
+          [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
         ],
         include: [
           { model: User, attributes: ['avatar', 'name', 'account'] },
-          { model: Reply, include: [{ model: User, attributes: ['avatar', 'name', 'account'] }] }
+          {
+            model: Reply,
+            attributes: [
+              'id',
+              'content',
+              [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Replies.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked']],
+            include: [{ model: User, attributes: ['avatar', 'name', 'account'] }]
+          }
         ],
       })
       if (!tweet) return res.json({ status: 'error', message: '查無此推文' })
-      return res.json({ status: 'success', message: tweet })
+      return res.json(tweet)
     }
     catch (err) {
       next(err)
@@ -53,14 +64,20 @@ const tweetController = {
 
   getTweetReplies: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const replies = await Reply.findAll({
         raw: true,
         nest: true,
         where: { TweetId: req.params.TweetId },
+        attributes: [
+          'id',
+          'content',
+          [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Reply.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked']
+        ],
         include: [{ model: User, attributes: ['avatar', 'name', 'account'] }],
         order: [['createdAt', 'DESC']]
       })
-      return res.json({ status: 'success', message: replies })
+      return res.json(replies)
     }
     catch (err) {
       next(err)
@@ -69,6 +86,7 @@ const tweetController = {
 
   postTweet: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const { description } = req.body
       if (!description) return res.json({ status: 'error', message: '推文不得為空白' })
       if (description.length > 140) {
@@ -76,7 +94,7 @@ const tweetController = {
       }
       await Tweet.create({
         description: description.trim(),
-        UserId: req.user.id
+        UserId: helpers.getUser(req).id
       })
       return res.json({ status: 'success', message: '推文新增成功' })
     }
@@ -87,12 +105,13 @@ const tweetController = {
 
   likeTweet: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const { TweetId } = req.params
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.json({ status: 'error', message: '查無此推文' })
       const [like, created] = await Like.findOrCreate({
         where: {
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           TweetId
         }
       })
@@ -106,9 +125,10 @@ const tweetController = {
 
   unlikeTweet: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const like = await Like.findOne({
         where: {
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           TweetId: req.params.TweetId
         }
       })
@@ -123,6 +143,7 @@ const tweetController = {
 
   postReply: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const { content } = req.body
       const { TweetId } = req.params
       if (!content) return res.json({ status: 'error', message: '回覆不得為空白' })
@@ -130,7 +151,7 @@ const tweetController = {
       if (!tweet) return res.json({ status: 'error', message: '找不到此推文' })
       await Reply.create({
         content: content.trim(),
-        UserId: req.user.id,
+        UserId: helpers.getUser(req).id,
         TweetId
       })
       return res.json({ status: 'success', message: '回覆新增成功' })

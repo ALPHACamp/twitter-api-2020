@@ -4,7 +4,15 @@ function getUser(req) {
 
 const passport = require('./config/passport')
 
-const authenticated = passport.authenticate('jwt', { session: false })
+
+function authenticated(req, res, next) {
+  passport.authenticate('jwt', { session: false }, (error, user) => {
+    if (!user) return res.json({ status: 'error', message: 'No jwt token' })
+    if (error) return res.json({ status: 'error', message: error })
+    req.user = user
+    return next()
+  })(req, res, next)
+}
 
 function authenticatedUser(req, res, next) {
   if (req.user) {
