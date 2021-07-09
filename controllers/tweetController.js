@@ -35,6 +35,7 @@ const tweetController = {
     }
   },
 
+  // TODO: fix replyCount 忘記做increment的問題
   postReply: (req, res) => {
     const { comment } = req.body
     const TweetId = req.params.id
@@ -158,14 +159,46 @@ const tweetController = {
             message: 'Tweet does not exist'
           })
         }
-        return Like.create({ UserId, TweetId })
-      }).then(like => {
-        return res.status(200).json({
-          status: 'success',
-          message: 'Like successfully',
-          tweetId: like.TweetId
-        })
+        return tweet.increment('likeCount')
+          .then(tweet => {
+            return Like.create({ UserId, TweetId })
+          })
+          .then(like => {
+            return res.status(200).json({
+              status: 'success',
+              message: 'Like successfully',
+              tweetId: like.TweetId
+            })
+          })
       })
+  },
+
+  postUnlike: (req, res) => {
+    const UserId = req.user.id
+    const TweetId = req.params.id
+
+    return Like.findOne({
+      where: {
+        [Op.and]: [
+          { UserId },
+          { TweetId }
+        ]
+      },
+      include: {
+        model: Tweet
+      }
+    }).then(like => {
+      return Promise.all([
+        like.destroy(),
+        like.Tweet.decrement('likeCount')
+      ])
+    }).then(result => {
+      return res.status(200).json({
+        status: 'success',
+        message: 'Unlike successfully',
+        tweetId: result[1].Tweet.id
+      })
+    })
   }
 }
 
