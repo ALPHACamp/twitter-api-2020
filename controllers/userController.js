@@ -20,8 +20,9 @@ const userController = {
       }
       if (req.baseUrl.includes('admin')) {
         if (user.role !== 'admin') throw new Error('User cannot sign in admin page.')
-      }
+      } else {
       if (user.role === 'admin') throw new Error('Admin cannot sign in user page.')
+      }
       if (!bcrypt.compareSync(password, user.password)) {
         throw new Error('Incorrect password word.')
       }
