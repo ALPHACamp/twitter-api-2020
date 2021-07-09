@@ -27,16 +27,16 @@ router.use(authenticated)
 
 router.get('/current', userController.getCurrentUser)
 router.get('/top', userController.getTopUsers)
-
-router.use(authenticatedUser)
-
+router.get('/:id/tweets', userController.getUserTweets)
+router.get('/:id', userController.getUser)
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id/replied_tweets', userController.getUserReplies)
 router.get('/:id/likes', userController.getUserLikes)
 router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/followers', userController.getUserFollowers)
+
+router.use(authenticatedUser)
 router.put('/:id/account', userController.editAccount)
-router.get('/:id', userController.getUser)
 router.put('/:id', imageUpload, userController.editUserProfile)
 
 module.exports = router
