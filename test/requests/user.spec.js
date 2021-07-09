@@ -316,8 +316,6 @@ describe('# user requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function (err, res) {
-            console.log(res.body)
-            // db.User.findByPk(1).then(user => console.log(user.toJSON()))
             if (err) return done(err);
             db.User.findByPk(1).then(user => {
               user.name.should.equal('User11');
