@@ -121,17 +121,29 @@ const TweetController = {
     }
   },
   postReply: async (req, res) => {
-    if (!req.body.comment) { return res.status(204).json({ status: 'error', message: 'Please input comment' }) } else if (req.body.comment.length >= 50) { return res.status(409).json({ status: 'error', message: 'comment can\'t be more than 50 words' }) } else {
+    try {
+      const TweetId = req.params.tweet_id
+      const repliedTweet = await Tweet.findByPk(TweetId, { include: [User] })
+      if (!repliedTweet) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this tweet in db.' })
+      }
+      const repliedTweetAuthor = repliedTweet.dataValues.User.dataValues.account
+      const { comment } = req.body
+      if (!comment) {
+        return res.status(400).json({ status: 'error', message: 'Please input comment.' })
+      }
+      if (comment && !validator.isByteLength(comment, { min: 0, max: 50 })) {
+        return res.status(409).json({ status: 'error', message: 'Comment can\'t be more than 50 words.' })
+      }
       await Reply.create({
         UserId: req.user.id,
-        TweetId: req.params.tweet_id,
-        comment: req.body.comment
+        TweetId,
+        comment
       })
-        .then((reply) => { res.status(200).json({ status: 'success', message: 'The comment was successfully created' }) })
-        .catch(error => {
-          console.log('error')
-          res.status(500).json({ status: 'error', message: 'error' })
-        })
+      return res.status(200).json({ status: 'success', message: `You replied @${repliedTweetAuthor}'s tweet successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   postLike: async (req, res) => {
