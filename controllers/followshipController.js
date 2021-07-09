@@ -4,8 +4,7 @@ const increaseFollowingCounts = async (userId) => {
   return new Promise((resolve, reject) => {
     User.findByPk(userId)
       .then(user => {
-        user.followingCounts += 1
-        return user.update({ followingCounts: user.followingCounts })
+        return user.increment('followingCounts')
       })
       .then(() => resolve('followingCounts + 1'))
       .catch(err => reject(err))
@@ -16,8 +15,7 @@ const decreaseFollowingCounts = async (userId) => {
   return new Promise((resolve, reject) => {
     User.findByPk(userId)
       .then(user => {
-        user.followingCounts -= 1
-        return user.update({ followingCounts: user.followingCounts })
+        return user.decrement('followingCounts')
       })
       .then(() => resolve('followingCounts - 1'))
       .catch(err => reject(err))
@@ -28,8 +26,7 @@ const increaseFollowerCounts = async (userId) => {
   return new Promise((resolve, reject) => {
     User.findByPk(userId)
       .then(user => {
-        user.followerCounts += 1
-        return user.update({ followerCounts: user.followerCounts })
+        return user.increment('followerCounts')
       })
       .then(() => resolve('followerCounts + 1'))
       .catch(err => reject(err))
@@ -40,8 +37,7 @@ const decreaseFollowerCounts = async (userId) => {
   return new Promise((resolve, reject) => {
     User.findByPk(userId)
       .then(user => {
-        user.followerCounts -= 1
-        return user.update({ followerCounts: user.followerCounts })
+        return user.decrement('followerCounts')
       })
       .then(() => resolve('followerCounts - 1'))
       .catch(err => reject(err))
