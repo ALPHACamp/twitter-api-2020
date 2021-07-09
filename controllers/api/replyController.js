@@ -28,6 +28,12 @@ let replyController = {
       }))
   },
   postReply: (req, res) => {
+    if (req.user.role === 'admin') {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Only normal user account can post reply.'
+      })
+    }
     if (!req.body.comment) {
       return res
         .status(400)

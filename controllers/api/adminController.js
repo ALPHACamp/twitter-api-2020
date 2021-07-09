@@ -53,6 +53,11 @@ let adminController = {
       .catch(() => res.status(500).json({ status: 'error', message: error }))
   },
   deleteTweet: (req, res) => {
+    if(req.user.role !== 'admin'){
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'Only admin account can delete tweet.' })
+    }
     Tweet.findByPk(req.params.tweetId)
       .then((tweet) => tweet.destroy())
       .then(() =>
