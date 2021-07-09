@@ -5,6 +5,7 @@ const adminController = {
   getUsers: async (req, res) => {
     try {
       let users = await User.findAll({
+        where: { role: 'user' },
         include: [
           { model: Tweet, include: [Like] },
           { model: User, as: 'Followings' },
@@ -37,10 +38,12 @@ const adminController = {
   deleteTweet: async (req, res) => {
     try {
       const id = req.params.id
-      const tweet = await Tweet.findByPk(id)
-      if (!tweet) { return res.status(401).json({ status: 'error', message: 'this tweet doesn\'t exist!' }) }
+      const tweet = await Tweet.findByPk(id, { include: [User] })
+      if (!tweet) { return res.status(401).json({ status: 'error', message: 'This tweet doesn\'t exist!' }) }
+      const tweetAuthor = tweet.dataValues.User.dataValues.account
       await tweet.destroy()
-      return res.status(200).json({ status: 'success', message: 'this tweet has been deleted!' })
+      console.log(tweetAuthor)
+      return res.status(200).json({ status: 'success', message: `@${tweetAuthor}'s tweet has been deleted!` })
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
