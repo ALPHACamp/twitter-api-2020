@@ -1,10 +1,12 @@
 const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const Sequelize = require('sequelize')
+const helpers = require('../_helpers')
 
 
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const tweets = await Tweet.findAll({
         raw: true,
         nest: true,
@@ -30,6 +32,7 @@ const tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const tweet = await Tweet.findByPk(req.params.TweetId, {
         attributes: [
           'id',
@@ -44,6 +47,7 @@ const tweetController = {
         ],
       })
       if (!tweet) return res.json({ status: 'error', message: '查無此推文' })
+
       return res.json({ status: 'success', message: tweet })
     }
     catch (err) {
@@ -53,6 +57,7 @@ const tweetController = {
 
   getTweetReplies: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const replies = await Reply.findAll({
         raw: true,
         nest: true,
@@ -69,6 +74,7 @@ const tweetController = {
 
   postTweet: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const { description } = req.body
       if (!description) return res.json({ status: 'error', message: '推文不得為空白' })
       if (description.length > 140) {
@@ -87,16 +93,18 @@ const tweetController = {
 
   likeTweet: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const { TweetId } = req.params
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.json({ status: 'error', message: '查無此推文' })
       const [like, created] = await Like.findOrCreate({
         where: {
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           TweetId
         }
       })
       if (created) return res.json({ status: 'success', message: '成功按讚推文' })
+      const tweet22 = await Tweet.findAll({})
       return res.json({ status: 'error', message: '推文已按過讚' })
     }
     catch (err) {
@@ -106,9 +114,10 @@ const tweetController = {
 
   unlikeTweet: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const like = await Like.findOne({
         where: {
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           TweetId: req.params.TweetId
         }
       })
@@ -123,6 +132,7 @@ const tweetController = {
 
   postReply: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
       const { content } = req.body
       const { TweetId } = req.params
       if (!content) return res.json({ status: 'error', message: '回覆不得為空白' })

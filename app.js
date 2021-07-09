@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
-
+const session = require('express-session')
+const methodOverride = require('method-override')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -9,12 +10,13 @@ const port = process.env.PORT || 3000
 
 const helpers = require('./_helpers')
 
+app.use(methodOverride('_method'))
 app.use(express.urlencoded({ extended: false }))
 app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
-  next()
+  return next()
 })
 
 

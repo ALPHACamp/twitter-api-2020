@@ -1,7 +1,11 @@
 const passport = require('passport')
 const { User } = require('../models')
 const helpers = require('../_helpers')
+const express = require('express')
+const app = express()
 
+
+app.use(passport.initialize())
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -22,11 +26,12 @@ passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
       ]
     })
     if (!user) return done(null, false)
-    return done(null, user)
+    return done(null, user.toJSON())
   }
   catch (err) {
     return done(err, user)
   }
 }))
+
 
 module.exports = passport
