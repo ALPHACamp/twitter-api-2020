@@ -97,11 +97,18 @@ const userController = {
 
   getUserTweets: async (req, res, next) => {
     try {
+      let likes = []
+
       const user = await User.findByPk(req.params.userId, {
         include: [{ model: Tweet, include: [Like, Reply] }],
         order: [[Tweet, 'createdAt', 'DESC']]
       })
       if (!user) throw new Error('這名使用者不存在或已被刪除')
+
+      // LikedTweets 有資料才做 map 處理，不然 test 會過不了
+      if (helpers.getUser(req).LikedTweets) {
+        likes = helpers.getUser(req).LikedTweets.map(d => d.id)
+      }
 
       const tweets = user.toJSON().Tweets.map(t => ({
         tweetId: t.id,
@@ -110,10 +117,7 @@ const userController = {
         description: t.description.substring(0, 50),
         likeCount: t.Likes.length,
         replyCount: t.Replies.length,
-        isLiked: helpers
-          .getUser(req)
-          .LikedTweets.map(d => d.id)
-          .includes(t.id)
+        isLiked: likes.length ? likes.includes(t.id) : false
       }))
 
       return res.json(tweets)
