@@ -37,7 +37,8 @@ let userController = {
         as: 'Followers',
         attributes: ['id'],
         through: { attributes: [] }
-      }
+      },
+      where: { role: 'user'}
     })
       .then((users) => {
         users = users.map((user) => {
@@ -212,7 +213,7 @@ let userController = {
         if (!account || user.account === account) {
           return user
         } else {
-          return User.findOne({ where: { account } }).then((otherUser) => {
+          return User.findOne({ where: { account , role : 'user'} }).then((otherUser) => {
             //check if account was already used
             if (otherUser && otherUser.id !== id) {
               return res.status(400).json({
@@ -229,17 +230,19 @@ let userController = {
         if (!email || user.email === email) {
           return user
         } else {
-          return User.findOne({ where: { email } }).then((otherUser) => {
-            //check if email was already used
-            if (otherUser && otherUser.id !== id) {
-              return res.status(400).json({
-                status: 'error',
-                message: 'Email was already used.'
-              })
+          return User.findOne({ where: { email, role: 'user' } }).then(
+            (otherUser) => {
+              //check if email was already used
+              if (otherUser && otherUser.id !== id) {
+                return res.status(400).json({
+                  status: 'error',
+                  message: 'Email was already used.'
+                })
+              }
+              user.email = email
+              return user
             }
-            user.email = email
-            return user
-          })
+          )
         }
       })
       .then((user) => {
