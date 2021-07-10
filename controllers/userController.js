@@ -311,19 +311,42 @@ const userController = {
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
-  getUserReplies: (req, res) => {
-    return Reply.findAll({
-      where: { UserId: req.params.id },
-      include: { model: Tweet },
-      order: [['createdAt', 'DESC']]
-    })
-      .then(replies => {
-        return res.status(200).json(replies)
+  getUserReplies: async (req, res) => {
+    try {
+      const UserId = req.params.id
+      const user = await User.findByPk(UserId)
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+      if (user.role === 'admin') {
+        return res.status(400).json({ status: 'error', message: 'Cannot view admin.' })
+      }
+      let replies = await Reply.findAll({
+        where: { UserId },
+        include: [User, { model: Tweet, include: User }],
+        order: [['createdAt', 'DESC']]
       })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
+      if (!replies) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any replies in db.' })
+      }
+      replies = replies.map(reply => {
+        return {
+          id: reply.id,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          tweetAuthorAccount: reply.Tweet.User.account,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          commentAccount: reply.User.account,
+          name: reply.User.name,
+          avatar: reply.User.avatar
+        }
       })
+      return res.status(200).json(replies)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   },
   getUserLikes: (req, res) => {
     return Like.findAll({
