@@ -1,8 +1,8 @@
 const db = require('../../models')
+const { Op } = require('sequelize')
 const Followship = db.Followship
 const User = db.User
 const defaultLimit = 10
-const { Op } = require('sequelize')
 
 let followController = {
   getUserFollowings: (req, res) => {
@@ -28,17 +28,22 @@ let followController = {
     }
     Followship.findAll(options)
       .then(followships => {
-        followships = followships.map(followship => {
-          const following = followship.dataValues.following.dataValues
-          if (following.introduction) {
-            following.introduction = following.introduction.substring(0, 50)
-          }
-          following.isFollowing = following.Followers.some(user => user.id === +req.user.id)
-          delete following.Followers
-          return followship
-        })
+        followships = followships
+          .map(followship => {
+            const following = followship.following.dataValues
+            if (following.introduction) {
+              following.introduction = following.introduction.substring(0, 50)
+            }
+            following.isFollowing = following.Followers.some(user => user.id === +req.user.id)
+            delete following.Followers
+            return followship
+          })
         return res.status(200).json(followships)
-      }).catch(error => res.status(500).json({ status: 'error', message: error }))
+      }).catch(error =>
+        res.status(500).json({
+          status: 'error',
+          message: error
+        }))
   },
   getUserFollowers: (req, res) => {
     const options = {
@@ -64,7 +69,7 @@ let followController = {
     Followship.findAll(options)
       .then(followships => {
         followships = followships.map(followship => {
-          const follower = followship.dataValues.follower.dataValues
+          const follower = followship.follower.dataValues
           if (follower.introduction) {
             follower.introduction = follower.introduction.substring(0, 50)
           }
@@ -73,62 +78,80 @@ let followController = {
           return followship
         })
         return res.status(200).json(followships)
-      }).catch(error => res.status(500).json({ status: 'error', message: error }))
+      }).catch(error =>
+        res.status(500).json({
+          status: 'error',
+          message: error
+        }))
   },
   postFollowship: (req, res) => {
-    Followship.create({ followerId: +req.user.id, followingId: +req.body.id })
+    Followship.create({
+      followerId: +req.user.id,
+      followingId: +req.body.id
+    })
       .then(followship => {
         Promise.all([
-          User.findByPk(+req.user.id).then((currentUser) =>
-            currentUser.increment({ followingNum: 1 })
-          ),
-          User.findByPk(+req.body.id).then((followingUser) =>
-            followingUser.increment({ followerNum: 1 })
-          )
+          User.findByPk(+req.user.id)
+            .then((currentUser) =>
+              currentUser.increment({ followingNum: 1 })
+            ),
+          User.findByPk(+req.body.id)
+            .then((followingUser) =>
+              followingUser.increment({ followerNum: 1 })
+            )
         ])
           .then(() =>
-            res
-              .status(200)
-              .json({
-                status: 'success',
-                message: 'Successfully followed user.'
-              })
+            res.status(200).json({
+              status: 'success',
+              message: 'Successfully followed user.'
+            })
           )
           .catch((error) =>
-            res.json(500).json({ status: 'error', message: error })
+            res.json(500).json({
+              status: 'error',
+              message: error
+            })
           )
       })
   },
   deleteFollowship: (req, res) => {
-    Followship.findOne({ where: { followerId: +req.user.id, followingId: +req.params.id } })
+    Followship.findOne({
+      where: {
+        followerId: +req.user.id,
+        followingId: +req.params.id
+      }
+    })
       .then(followship => {
-        followship.destroy().then(() => {
-          Promise.all([
-            User.findByPk(+req.user.id).then((currentUser) =>
-              currentUser.decrement({ followingNum: 1 })
-            ),
-            User.findByPk(+req.params.id).then((followingUser) =>
-              followingUser.decrement({ followerNum: 1 })
-            )
-          ])
-            .then(() =>
-              res
-                .status(200)
-                .json({
+        followship.destroy()
+          .then(() => {
+            Promise.all([
+              User.findByPk(+req.user.id)
+                .then((currentUser) =>
+                  currentUser.decrement({ followingNum: 1 })
+                ),
+              User.findByPk(+req.params.id)
+                .then((followingUser) =>
+                  followingUser.decrement({ followerNum: 1 })
+                )
+            ])
+              .then(() =>
+                res.status(200).json({
                   status: 'success',
                   message: 'Successfully unfollowed user.'
                 })
-            )
-            .catch((error) =>
-              res.json(500).json({ status: 'error', message: error })
-            )
-        })
+              )
+              .catch((error) =>
+                res.json(500).json({
+                  status: 'error',
+                  message: error
+                })
+              )
+          })
       })
   },
   getNotFollowingUsers: (req, res) => {
-    const userId = +req.user.id
     Followship.findAll({
-      where: { followerId: userId },
+      where: { followerId: +req.user.id },
       attributes: ['followingId']
     })
       .then(followships => {
@@ -143,15 +166,16 @@ let followController = {
           limit: +req.query.limit || defaultLimit,
           offset: +req.query.offset || 0,
         }
-        followings.push(userId)
+        followings.push(+req.user.id)
         User.findAll(options)
           .then(users => {
             res.status(200).json(users)
           })
-          .catch((error) => res.status(500).json({
-            status: 'error',
-            message: error
-          }))
+          .catch((error) =>
+            res.status(500).json({
+              status: 'error',
+              message: error
+            }))
       })
   }
 }

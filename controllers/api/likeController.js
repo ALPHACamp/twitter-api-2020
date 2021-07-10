@@ -2,9 +2,7 @@ const db = require('../../models')
 const Like = db.Like
 const User = db.User
 const Tweet = db.Tweet
-
-let defaultLimit = 10
-//temp user
+const defaultLimit = 10
 
 let likeController = {
   getLikes: (req, res) => {
@@ -12,7 +10,7 @@ let likeController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       where: {
-        TweetId: req.params.tweetId
+        TweetId: +req.params.tweetId
       },
       attributes: [],
       include: [
@@ -28,26 +26,40 @@ let likeController = {
         likes = likes.map((like) => like.User)
         res.status(200).json(likes)
       })
-      .catch((error) => res.status(500).json({ status: 'error', message: error }))
+      .catch((error) =>
+        res
+          .status(500).json({
+            status: 'error',
+            message: error
+          }))
   },
   postLike: (req, res) => {
-    Like.create({ UserId: +req.user.id, TweetId: req.params.tweetId })
+    Like.create({
+      UserId: +req.user.id,
+      TweetId: +req.params.tweetId
+    })
       .then((like) => {
         Promise.all([
-          Tweet.findByPk(req.params.tweetId).then((tweet) =>
-            tweet.increment({ likeNum: 1 })
-          ),
-          User.findByPk(+req.user.id).then((user) =>
-            user.increment({ likeNum: 1 })
-          )
+          Tweet.findByPk(+req.params.tweetId)
+            .then((tweet) =>
+              tweet.increment({ likeNum: 1 })
+            ),
+          User.findByPk(+req.user.id)
+            .then((user) =>
+              user.increment({ likeNum: 1 })
+            )
         ])
           .then(() =>
-            res
-              .status(200)
-              .json({ status: 'success', message: 'Successfully liked tweet.' })
+            res.status(200).json({
+              status: 'success',
+              message: 'Successfully liked tweet.'
+            })
           )
           .catch((error) =>
-            res.json(500).json({ status: 'error', message: error })
+            res.json(500).json({
+              status: 'error',
+              message: error
+            })
           )
       })
       .catch((error) =>
@@ -59,17 +71,22 @@ let likeController = {
   },
   deleteLike: (req, res) => {
     Like.findOne({
-      where: { TweetId: req.params.tweetId, UserId: +req.user.id }
+      where: {
+        TweetId: +req.params.tweetId,
+        UserId: +req.user.id
+      }
     })
       .then((Like) =>
         Like.destroy().then(() =>
           Promise.all([
-            Tweet.findByPk(req.params.tweetId).then((tweet) =>
-              tweet.decrement({ likeNum: 1 })
-            ),
-            User.findByPk(+req.user.id).then((user) =>
-              user.decrement({ likeNum: 1 })
-            )
+            Tweet.findByPk(+req.params.tweetId)
+              .then((tweet) =>
+                tweet.decrement({ likeNum: 1 })
+              ),
+            User.findByPk(+req.user.id)
+              .then((user) =>
+                user.decrement({ likeNum: 1 })
+              )
           ])
             .then(() =>
               res.status(200).json({
@@ -78,7 +95,10 @@ let likeController = {
               })
             )
             .catch((error) =>
-              res.json(500).json({ status: 'error', message: error })
+              res.json(500).json({
+                status: 'error',
+                message: error
+              })
             )
         )
       )
@@ -95,7 +115,7 @@ let likeController = {
       offset: +req.query.offset || 0,
       order: [['createdAt', 'desc']],
       attributes: ['id', 'UserId', 'TweetId', 'createdAt'],
-      where: { UserId: req.params.id },
+      where: { UserId: +req.params.id },
       include: {
         model: Tweet,
         as: 'LikedTweet',
@@ -129,7 +149,12 @@ let likeController = {
         })
         return res.status(200).json(likes)
       })
-      .catch(error => res.status(500).json(error))
+      .catch((error) =>
+        res.status(500).json({
+          status: 'error',
+          message: error
+        })
+      )
   }
 }
 

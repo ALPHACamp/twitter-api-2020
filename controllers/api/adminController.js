@@ -1,7 +1,6 @@
 const db = require('../../models')
 const User = db.User
 const Tweet = db.Tweet
-const Admin = db.Admin
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 
@@ -26,7 +25,10 @@ let adminController = {
         res.status(200).json(users)
       })
       .catch((error) => {
-        res.status(500).json({ status: 'error', message: error })
+        res.status(500).json({
+          status: 'error',
+          message: error
+        })
       })
   },
   getTweets: (req, res) => {
@@ -50,20 +52,26 @@ let adminController = {
         })
         return res.status(200).json(tweets)
       })
-      .catch(() => res.status(500).json({ status: 'error', message: error }))
+      .catch(() =>
+        res.status(500).json({
+          status: 'error',
+          message: error
+        }))
   },
   deleteTweet: (req, res) => {
-    Tweet.findByPk(req.params.tweetId)
+    Tweet.findByPk(+req.params.tweetId)
       .then((tweet) => tweet.destroy())
       .then(() =>
-        res
-          .status(200)
-          .json({ status: 'success', message: 'Successfully delete tweet.' })
+        res.status(200).json({
+          status: 'success',
+          message: 'Successfully delete tweet.'
+        })
       )
       .catch(() =>
-        res
-          .status(500)
-          .json({ status: 'error', message: error })
+        res.status(500).json({
+          status: 'error',
+          message: error
+        })
       )
   },
   login: (req, res) => {
@@ -78,14 +86,16 @@ let adminController = {
     User.findOne({ where: { email, role: 'admin' } })
       .then((user) => {
         if (!user) {
-          return res
-            .status(401)
-            .json({ status: 'error', message: "This admin account doesn't exist." })
+          return res.status(401).json({
+            status: 'error',
+            message: "This admin account doesn't exist."
+          })
         }
         if (!bcrypt.compareSync(password, user.password)) {
-          return res
-            .status(401)
-            .json({ status: 'error', message: 'Password incorrect.' })
+          return res.status(401).json({
+            status: 'error',
+            message: 'Password incorrect.'
+          })
         }
 
         let payload = {
@@ -105,7 +115,10 @@ let adminController = {
         })
       })
       .catch((error) =>
-        res.status(500).json({ status: 'error', message: error })
+        res.status(500).json({
+          status: 'error',
+          message: error
+        })
       )
   }
 }
