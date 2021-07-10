@@ -1,4 +1,4 @@
-const { User, Like, Sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Sequelize } = require('../models')
 const { Op } = Sequelize
 
 const RequestError = require('../utils/customError')
@@ -92,8 +92,32 @@ const userService = {
   },
 
   getLikes: async (id) => {
-    const likes = await User.findByPk(id, { attributes: [], include: Like })
-    return likes.Likes
+    const likes = await Tweet.findAll({
+      where: {
+        id: {
+          [Op.in]: [Sequelize.literal(`select TweetId from Likes where UserId = ${id}`)]
+        }
+      },
+      attributes: [
+        ['id', 'TweetId'], 'createdAt',
+        [Sequelize.literal('substring(description,1,50)'), 'description'],
+        [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
+        [Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount'],
+        [Sequelize.literal(`exists(select 1 from Likes where UserId = ${id} and TweetId = Tweet.id)`), 'isLike']
+      ],
+      group: 'TweetId',
+      include: [
+        { model: Like, attributes: [] },
+        { model: Reply, attributes: [] },
+        {
+          model: User,
+          attributes:
+            ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
+        }
+      ],
+      order: [[Sequelize.literal('likes.createdAt DESC')]]
+    })
+    return likes
   },
 
   checkUnique: async ({ email, account }, userId = null) => {
