@@ -3,6 +3,7 @@ const { User, Tweet, Reply, Like, Followship } = db
 const validator = require('validator')
 const { formValidation } = require('../config/functions')
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
@@ -25,7 +26,7 @@ const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signIn: async (req, res) => {
-    //#swagger.tags = ['SignUp/Signin']
+    // #swagger.tags = ['SignUp/Signin']
     try {
       // check all inputs are required
       const { account, password } = req.body
@@ -59,7 +60,7 @@ const userController = {
     }
   },
   signUp: async (req, res) => {
-    //#swagger.tags = ['SignUp/Signin']
+    // #swagger.tags = ['SignUp/Signin']
     try {
       const { account, name, email, password, checkPassword } = req.body
       const message = []
@@ -87,7 +88,7 @@ const userController = {
     }
   },
   getCurrentUser: (req, res) => {
-    //#swagger.tags = ['Users']
+    // #swagger.tags = ['Users']
     return res.status(200).json({
       id: req.user.id,
       name: req.user.name,
@@ -100,7 +101,7 @@ const userController = {
     })
   },
   getTopUsers: async (req, res) => {
-    //#swagger.tags = ['Users']
+    // #swagger.tags = ['Users']
     try {
       let users = await User.findAll({
         where: { role: 'user' },
@@ -132,7 +133,7 @@ const userController = {
     }
   },
   editAccount: async (req, res) => {
-    //#swagger.tags = ['Users']
+    // #swagger.tags = ['Users']
     try {
       const { account, name, email, password, checkPassword } = req.body
       const { email: currentEmail, account: currentAccount } = req.user
@@ -171,7 +172,7 @@ const userController = {
     }
   },
   getUser: async (req, res) => {
-    //#swagger.tags = ['Users']
+    // #swagger.tags = ['Users']
     try {
       const id = req.params.id
       const user = await User.findOne({
@@ -184,7 +185,7 @@ const userController = {
           { model: User, as: 'Followings' }
         ]
       })
-      if (!user ||user.role === 'admin') {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
       const data = {
@@ -211,7 +212,7 @@ const userController = {
     }
   },
   editUserProfile: async (req, res) => {
-    //#swagger.tags = ['Users']
+    // #swagger.tags = ['Users']
     try {
       const id = req.params.id
       const { name, introduction } = req.body
@@ -265,7 +266,7 @@ const userController = {
   },
 
   getUserTweets: async (req, res) => {
-    //#swagger.tags = ['Users']
+    // #swagger.tags = ['Users']
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
@@ -273,7 +274,7 @@ const userController = {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
 
-      let tweets = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
         where: { UserId },
         include: [
           User,
@@ -294,14 +295,14 @@ const userController = {
   },
 
   getUserReplies: async (req, res) => {
-     //#swagger.tags = ['Users']
+    // #swagger.tags = ['Users']
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
       if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
-  
+
       let replies = await Reply.findAll({
         where: { UserId },
         include: [User, { model: Tweet, include: User }],
@@ -331,7 +332,7 @@ const userController = {
   },
 
   getUserLikes: async (req, res) => {
-      //#swagger.tags = ['Users']
+    // #swagger.tags = ['Users']
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
@@ -352,7 +353,7 @@ const userController = {
           id: like.id,
           UserId: like.UserId,
           TweetId: like.TweetId,
-          likeCreatedAt:like.createdAt,
+          likeCreatedAt: like.createdAt,
           account: like.Tweet.User.account,
           name: like.Tweet.User.name,
           avatar: like.Tweet.User.avatar,
@@ -370,52 +371,67 @@ const userController = {
     }
   },
 
-  getUserFollowings:async(req, res) => {
-     //#swagger.tags = ['Users']
-    try{
+  getUserFollowings: async (req, res) => {
+    // #swagger.tags = ['Users']
+    try {
       let user = await User.findByPk(req.params.id,
-        {include: [
-        { model: User, as: 'Followings' }
-      ],
+        {
+          include: [
+            { model: User, as: 'Followings' }],
           order: [['Followings', Followship, 'createdAt', 'DESC']]
         })
       if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
-        if (!user.Followings.length) {
-          return res.status(200).json({ message: `@${user.account} has no following.` })
-        }
-        const followingsId = req.user.Followings.map(following => following.id)
-        user = user.Followings.map(following => ({
+      if (!user.Followings.length) {
+        return res.status(200).json({ message: `@${user.account} has no following.` })
+      }
+
+      user = user.Followings.map(following => ({
         followingId: following.id,
         account: following.account,
         name: following.name,
         avatar: following.avatar,
         introduction: following.introduction,
         followshipCreatedAt: following.Followship.createdAt,
-        isFollowing: followingsId.includes(following.id)
+        isFollowed: helpers.getUser(req).Followings.map(f => f.id).includes(following.id)
       }))
-        return res.status(200).json(user)
+      return res.status(200).json(user)
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
-  getUserFollowers: (req, res) => {
-    //#swagger.tags = ['Users']
-    return Followship.findAll({
-      where: { followingId: req.params.id },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(followers => {
-        return res.status(200).json(followers)
-      })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
+  getUserFollowers: async (req, res) => {
+    // #swagger.tags = ['Users']
+    try {
+      let user = await User.findByPk(req.params.id,
+        {
+          include: [
+            { model: User, as: 'Followers' }
+          ],
+          order: [['Followers', Followship, 'createdAt', 'DESC']]
+        })
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+      if (!user.Followers.length) {
+        return res.status(200).json({ message: `@${user.account} has no follower.` })
+      }
+      user = user.Followers.map(follower => ({
+        followerId: follower.id,
+        account: follower.account,
+        name: follower.name,
+        avatar: follower.avatar,
+        introduction: follower.introduction,
+        followshipCreatedAt: follower.Followship.createdAt,
+        isFollowed: helpers.getUser(req).Followings.map(f => f.id).includes(follower.id)
+      }))
+      return res.status(200).json(user)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   }
 }
 

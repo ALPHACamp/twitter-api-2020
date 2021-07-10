@@ -7,8 +7,6 @@ require('../twitter-api-2020/models')
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json') // 剛剛輸出的 JSON
 
-
-
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
