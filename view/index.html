@@ -81,6 +81,17 @@
       }
     })
 
+    // 載入先前對話
+    socket.on('allMessages', msgs => {
+      console.log(msgs)
+      for (msg of msgs) {
+        let item = document.createElement('li')
+        item.textContent = msg.message
+        messages.appendChild(item)
+        window.scrollTo(0, document.body.scrollHeight)
+      }
+    })
+
     socket.on('chat message', msg => {
       let item = document.createElement('li')
       item.textContent = msg

@@ -41,18 +41,26 @@ app.get('/', (req, res, next) => {
   res.sendFile(__dirname + '/view/index.html')
 })
 
+// 陣列儲存用戶對話
+let msgs = [{ name: 'root', message: 'Greeting!' }]
+
 io.on("connect_error", (err) => {
   console.log(`connect_error due to ${err.message}`);
 })
 io.on('connection', (socket) => {
-  console.log('Hello world')
+  console.log('new user connected')
+  // 發送之前的全部訊息
+  io.emit('allMessages', msgs)
+
   socket.on('chat message', (msg) => {
+    // 新訊息放進陣列儲存
+    msgs.push({ message: msg })
     // broadcasting to all connected sockets
     io.emit('chat message', msg)
     console.log('message: ' + msg)
   })
   socket.on('disconnect', () => {
-    console.log('Bye')
+    console.log('disconnected')
   })
 })
 
