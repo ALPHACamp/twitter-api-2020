@@ -55,7 +55,7 @@ const followshipController = {
         }
       })
       if (!followingShip) { return res.json({ status: 'error', message: '使用者沒有追蹤的人' }) }
-      followingShip.destroy()
+      await followingShip.destroy()
 
       return res.json({ status: 'success', message: '已取消追蹤' })
     } catch (err) { next(err) }
