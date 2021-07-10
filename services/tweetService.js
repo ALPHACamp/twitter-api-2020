@@ -17,8 +17,7 @@ const tweetService = {
         { model: Reply, attributes: [] },
         {
           model: User,
-          attributes:
-            ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
+          attributes: ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
         }
       ],
       order: [['createdAt', 'DESC']]
