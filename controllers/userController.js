@@ -6,8 +6,15 @@ const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
 const Sequelize = require('sequelize')
 const { Op } = require("sequelize")
-const { replaceSetter } = require('sinon')
 
+const imgurUpload = (filePath) => {
+  return new Promise((resolve, reject) => {
+    imgur.upload(filePath, (err, img) => {
+      if (err) return reject(err)
+      return resolve(img)
+    })
+  })
+}
 
 const userController = {
 
@@ -35,6 +42,7 @@ const userController = {
       next(err)
     }
   },
+
   signin: async (req, res, next) => {
     try {
       const { account, password } = req.body
@@ -63,6 +71,7 @@ const userController = {
 
   getCurrentUser: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const user = await User.findByPk(helpers.getUser(req).id, {
         attributes: ['id', 'name', 'account', 'avatar']
       })
@@ -103,6 +112,7 @@ const userController = {
       return res.json(user)
     } catch (err) { next(err) }
   },
+
   getUserTweets: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
@@ -126,6 +136,7 @@ const userController = {
       return res.json(tweets)
     } catch (err) { next(err) }
   },
+
   getUserRepliedTweets: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
@@ -149,12 +160,10 @@ const userController = {
       })
 
       if (tweets.length === 0) return res.json({ status: 'error', message: '沒有回覆任何推文' })
-
       return res.json(tweets)
-
-
     } catch (err) { next(err) }
   },
+
   getUserLike: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
@@ -174,6 +183,7 @@ const userController = {
       return res.json(likes)
     } catch (err) { next(err) }
   },
+
   getUserFollowings: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
@@ -203,6 +213,7 @@ const userController = {
       return res.json(followings)
     } catch (err) { next(err) }
   },
+
   getUserFollowers: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
@@ -230,6 +241,7 @@ const userController = {
       return res.json([followers, { status: 'error', message: '沒有追隨者' }])
     } catch (err) { next(err) }
   },
+
   putUser: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
@@ -250,43 +262,41 @@ const userController = {
 
       if (avatar && !cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        await imgur.upload(avatar[0].path, (err, img) => {
-          user.update({
-            name: name,
-            bio: bio,
-            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
-            cover: helpers.getUser(req).cover,
-          })
-          return res.json([user, { status: 'success', message: '頭貼更新完成' }])
+        const img = await imgurUpload(avatar[0].path)
+        await user.update({
+          name: name,
+          bio: bio,
+          avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+          cover: helpers.getUser(req).cover,
         })
+        return res.json([user, { status: 'success', message: '頭貼更新完成' }])
+
       } else if (!avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        await imgur.upload(cover[0].path, (err, img) => {
-          user.update({
-            name: name,
-            bio: bio,
-            avatar: helpers.getUser(req).avatar,
-            cover: cover ? img.data.link : helpers.getUser(req).cover,
-          })
-          return res.json([user, { status: 'success', message: '封面更新完成' }])
+        const img = await imgurUpload(cover[0].path)
+        await user.update({
+          name: name,
+          bio: bio,
+          avatar: helpers.getUser(req).avatar,
+          cover: cover ? img.data.link : helpers.getUser(req).cover,
         })
+        return res.json([user, { status: 'success', message: '封面更新完成' }])
+
       } else if (avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        await imgur.upload(avatar[0].path, (err, img) => {
-          user.update({
-            name: name,
-            bio: bio,
-            avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
-            cover: helpers.getUser(req).cover,
-          })
+        const img = await imgurUpload(avatar[0].path)
+        await user.update({
+          name: name,
+          bio: bio,
+          avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
+          cover: helpers.getUser(req).cover,
         })
-        await imgur.upload(cover[0].path, (err, img) => {
-          user.update({
-            name: name,
-            bio: bio,
-            avatar: helpers.getUser(req).avatar,
-            cover: cover ? img.data.link : helpers.getUser(req).cover,
-          })
+        const secondImg = await imgurUpload(cover[0].path)
+        await user.update({
+          name: name,
+          bio: bio,
+          avatar: helpers.getUser(req).avatar,
+          cover: cover ? secondImg.data.link : helpers.getUser(req).cover,
         })
         return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
       } else {
