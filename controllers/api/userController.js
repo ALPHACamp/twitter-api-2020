@@ -113,7 +113,7 @@ let userController = {
     const { name, account, password, email, passwordNew, passwordNewCheck, introduction } = req.body
     const { files } = req
     async function saveAndRes(user) {
-      await user.save()
+      await user.update(user.dataValues)
       delete user.dataValues.role
       delete user.dataValues.password
       delete user.dataValues.createdAt
@@ -157,9 +157,9 @@ let userController = {
     }
 
     User.findByPk(id)
-      .then((user) => {
+      .then(async (user) => {
         if (account && user.account !== account) {
-          return User.findOne({ where: { account, role: 'user' } }).then((otherUser) => {
+          await User.findOne({ where: { account, role: 'user' } }).then((otherUser) => {
             //check if account was already used
             if (otherUser && otherUser.id !== id) {
               return res.status(400).json({
@@ -172,7 +172,7 @@ let userController = {
           })
         }
         if (email && user.email !== email) {
-          return User.findOne({ where: { email, role: 'user' } }).then(
+          await User.findOne({ where: { email, role: 'user' } }).then(
             (otherUser) => {
               //check if email was already used
               if (otherUser && otherUser.id !== id) {
@@ -217,7 +217,7 @@ let userController = {
               .then(async (links) => {
                 user.avatar = links.avatar
                 user.cover = links.cover
-                return await saveAndRes(user)
+                await saveAndRes(user)
               })
               .catch((err) => {
                 return res.status(500).json({ status: 'error', message: err })
@@ -225,17 +225,19 @@ let userController = {
           })
         }
         // one image file
-        if (files && (files.avatar || files.cover)) {
+        else if (files && (files.avatar || files.cover)) {
           imgur.setClientID(IMGUR_CLIENT_ID)
           image = files.avatar || files.cover
           imageName = files.avatar ? 'avatar' : 'cover'
-          return imgur.upload(image[0].path, async (err, image) => {
-            user.dataValues[imageName] = image.data.link
-            return await saveAndRes(user)
+          return imgur.upload(image[0].path, (err, image) => {
+            user[imageName] = image.data.link
+            saveAndRes(user).catch(err => console.log(err))
           })
         }
         // no image file
-        return await saveAndRes(user)
+        else {
+          await saveAndRes(user)
+        }
       })
   },
   login: (req, res) => {
