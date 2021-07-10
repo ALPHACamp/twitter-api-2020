@@ -63,7 +63,7 @@ const tweetService = {
           attributes: ['id', 'comment', 'createdAt'],
           include: {
             model: User,
-            attributes: ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
+            attributes: ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('Replies.User.account')), 'account']]
           }
         }
       ]
@@ -101,7 +101,7 @@ const tweetService = {
         {
           model: Tweet,
           attributes: ['description'],
-          include: { model: User, attributes: ['id', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']] }
+          include: { model: User, attributes: ['id', [Sequelize.fn('concat', '@', Sequelize.col('Tweet.User.account')), 'account']] }
         }
       ],
       order: [['createdAt', 'DESC']]
