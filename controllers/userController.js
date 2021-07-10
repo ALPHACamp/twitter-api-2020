@@ -3,6 +3,8 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
+const Reply = db.Reply
+const Followship = db.Followship
 const { Op } = require('sequelize')
 
 const jwt = require('jsonwebtoken')
@@ -139,7 +141,51 @@ const userController = {
           return res.status(200).json(likes)
         })
       })
+  },
+  getUserFollowings: (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    return User.findAll({
+      include: [
+        {
+          model: User,
+          as: 'Followings',
+          attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+          nest: true,
+
+          include: {
+            model: User,
+            as: 'Followers',
+            attributes: ['id'],
+            where: { id: viewerId },
+            nest: true,
+            required: false
+          }
+        }
+      ],
+      where: { id: UserId },
+      attributes: [],
+      nest: true,
+      raw: true
+    }).then(async data => {
+      data = data.map((item, i) => {
+        const mapItem = {
+          ...item.dataValues,
+          followingId: item.Followings.id,
+          Followings: {
+            ...item.Followings,
+            isFollowing: Boolean(item.Followings.Followers.id)
+          }
+        }
+        delete mapItem.Followings.Followship
+        delete mapItem.Followings.Followers.Followship
+        delete mapItem.Followings.Followers
+        return mapItem
+      })
+      return res.status(200).json(data)
+    })
   }
+
 }
 
 module.exports = userController
