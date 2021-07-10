@@ -39,7 +39,7 @@ const userController = {
       const token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.status(200).json({
         status: 'success',
-        message: 'ok',
+        message: 'Sign in successfully.',
         token: token,
         user: {
           id: user.id,
