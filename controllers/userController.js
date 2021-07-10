@@ -9,7 +9,6 @@ const { Op } = require('sequelize')
 
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
-const { postReply } = require('./tweetController')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
