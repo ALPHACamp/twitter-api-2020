@@ -53,10 +53,10 @@ const userService = {
   },
 
   getFollowers: async (userId, currentUserId) => {
-    const followers = await User.findAll(userId, {
+    const followers = await User.findAll({
       where: {
         id: {
-          [Op.in]: [Sequelize.literal(`select followerId from followships where followerId = ${userId}`)]
+          [Op.in]: [Sequelize.literal(`select followerId from followships where followingId = ${userId}`)]
         }
       },
       attributes: [

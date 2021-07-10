@@ -168,7 +168,7 @@ const userController = {
 
   getFollowers: async (req, res, next) => {
     try {
-      const followers = await userService.getFollowers(req.params.user_id)
+      const followers = await userService.getFollowers(req.params.user_id, req.user.id)
       return res.json(followers)
     } catch (error) {
       return next(error)
