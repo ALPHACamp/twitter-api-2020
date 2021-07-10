@@ -159,7 +159,7 @@ const userController = {
 
   getFollowings: async (req, res, next) => {
     try {
-      const followings = await userService.getFollowings(req.params.user_id)
+      const followings = await userService.getFollowings(req.params.user_id, req.user.id)
       return res.json(followings)
     } catch (error) {
       return next(error)
@@ -168,7 +168,7 @@ const userController = {
 
   getFollowers: async (req, res, next) => {
     try {
-      const followers = await userService.getFollowers(req.params.user_id)
+      const followers = await userService.getFollowers(req.params.user_id, req.user.id)
       return res.json(followers)
     } catch (error) {
       return next(error)
