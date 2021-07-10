@@ -5,7 +5,6 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const moment = require('moment')
 const jwt = require('jsonwebtoken')
-const moment = require('moment')
 
 const imgurUpload = (file) => {
   return new Promise((resolve, reject) => {
