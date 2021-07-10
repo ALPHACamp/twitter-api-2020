@@ -138,11 +138,8 @@ const userController = {
       }
       // check this user is or not in db
       const user = await User.findByPk(id)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
-      }
-      if (user.role === 'admin') {
-        return res.status(400).json({ status: 'error', message: 'Admin is not allowed to edit account.' })
       }
       const message = []
       formValidation(account, name, email, password, checkPassword)
@@ -174,7 +171,6 @@ const userController = {
       const user = await User.findOne({
         where: {
           id: id
-
         },
         include: [
           { model: Tweet },
@@ -182,11 +178,8 @@ const userController = {
           { model: User, as: 'Followings' }
         ]
       })
-      if (!user) {
+      if (!user ||user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
-      }
-      if (user.role === 'admin') {
-        return res.status(400).json({ status: 'error', message: 'Cannot view admin.' })
       }
       const data = {
         status: 'success',
@@ -222,11 +215,8 @@ const userController = {
       }
       // check this user is or not in db
       const user = await User.findByPk(id)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
-      }
-      if (user.role === 'admin') {
-        return res.status(400).json({ status: 'error', message: 'Admin is not allowed to edit profile.' })
       }
       // check Name is required
       if (!name) {
@@ -271,12 +261,10 @@ const userController = {
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
-      if (user.role === 'admin') {
-        return res.status(400).json({ status: 'error', message: 'Cannot view admin.' })
-      }
+
       let tweets = await Tweet.findAll({
         where: { UserId },
         include: [
@@ -315,12 +303,10 @@ const userController = {
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
-      if (user.role === 'admin') {
-        return res.status(400).json({ status: 'error', message: 'Cannot view admin.' })
-      }
+  
       let replies = await Reply.findAll({
         where: { UserId },
         include: [User, { model: Tweet, include: User }],
@@ -352,11 +338,8 @@ const userController = {
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
-      }
-      if (user.role === 'admin') {
-        return res.status(400).json({ status: 'error', message: 'Cannot view admin.' })
       }
       let likes = await Like.findAll({
         where: { UserId },
@@ -372,11 +355,12 @@ const userController = {
           id: like.id,
           UserId: like.UserId,
           TweetId: like.TweetId,
+          likeCreatedAt:like.createdAt,
           account: like.Tweet.User.account,
           name: like.Tweet.User.name,
           avatar: like.Tweet.User.avatar,
           description: like.Tweet.description,
-          createdAt: like.Tweet.createdAt,
+          tweetCreatedAt: like.Tweet.createdAt,
           likedCount: like.Tweet.Likes.length,
           repliedCount: like.Tweet.Replies.length,
           isLike: like.Tweet.Likes.some((t) => t.UserId === req.user.id)
@@ -388,20 +372,35 @@ const userController = {
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
-  getUserFollowings: (req, res) => {
-    return Followship.findAll({
-      where: { followerId: req.params.id },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(followings => {
-        return res.status(200).json(followings)
-      })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
+  getUserFollowings:async(req, res) => {
+    try{
+      let user = await User.findByPk(req.params.id,
+        {include: [
+        { model: User, as: 'Followings' }
+      ],
+          order: [['Followings', Followship, 'createdAt', 'DESC']]
+        })
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+        if (!user.Followings.length) {
+          return res.status(200).json({ message: `@${user.account} has no following.` })
+        }
+        const followingsId = req.user.Followings.map(following => following.id)
+        user = user.Followings.map(following => ({
+        followingId: following.id,
+        account: following.account,
+        name: following.name,
+        avatar: following.avatar,
+        introduction: following.introduction,
+        followshipCreatedAt: following.Followship.createdAt,
+        isFollowing: followingsId.includes(following.id)
+      }))
+        return res.status(200).json(user)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   },
   getUserFollowers: (req, res) => {
     return Followship.findAll({
