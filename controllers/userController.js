@@ -63,6 +63,7 @@ const userController = {
 
   getCurrentUser: async (req, res, next) => {
     try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const user = await User.findByPk(helpers.getUser(req).id, {
         attributes: ['id', 'name', 'account', 'avatar']
       })
