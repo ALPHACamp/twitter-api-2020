@@ -9,6 +9,54 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const defaultLimit = 10
 
 let userController = {
+  getUsers: (req, res) => {
+    const userId = req.user.id
+    const offset = +req.query.offset || 0
+    const limit = +req.query.limit || defaultLimit
+    const order = [['followerNum', 'DESC']]
+    const attributes = [
+      'id',
+      'account',
+      'email',
+      'name',
+      'avatar',
+      'cover',
+      'tweetNum',
+      'likeNum',
+      'followingNum',
+      'followerNum',
+      'lastLoginAt'
+    ]
+    User.findAll({
+      offset,
+      limit,
+      order,
+      attributes,
+      include: {
+        model: User,
+        as: 'Followers',
+        attributes: ['id'],
+        through: { attributes: [] }
+      },
+      where: { role: 'user'}
+    })
+      .then((users) => {
+        users = users.map((user) => {
+          user.dataValues.isFollowing = user.dataValues.Followers.some(
+            (follower) => follower.id === userId
+          )
+          delete user.dataValues.Followers
+          return user
+        })
+        return res.status(200).json(users)
+      })
+      .catch((error) => {
+        return res.status(500).json({
+          status: 'error',
+          message: error
+        })
+      })
+  },
   postUser: (req, res) => {
     const { name, account, email, password, checkPassword } = req.body
     if (!name || !account || !email || !password || !checkPassword) {
@@ -23,7 +71,7 @@ let userController = {
         message: "Password and confirm password doesn't match."
       })
     }
-    User.findOne({ where: { account } })
+    User.findOne({ where: { account, role: 'user' } })
       .then((user) => {
         if (user) {
           return res.status(400).json({
@@ -31,7 +79,7 @@ let userController = {
             message: 'Account was already used.'
           })
         } else {
-          User.findOne({ where: { email } }).then((user) => {
+          User.findOne({ where: { email, role: 'user' } }).then((user) => {
             if (user) {
               return res.status(400).json({
                 status: 'error',
@@ -82,7 +130,8 @@ let userController = {
           as: 'Followers',
           attributes: ['id']
         }
-      ]
+      ],
+      where: { role: 'user' }
     })
       .then((user) => {
         if (user) {
@@ -162,10 +211,8 @@ let userController = {
 
     User.findByPk(id)
       .then((user) => {
-        if (!account || user.account === account) {
-          return user
-        } else {
-          return User.findOne({ where: { account } }).then((otherUser) => {
+        if (account && user.account !== account) {
+          return User.findOne({ where: { account , role : 'user'} }).then((otherUser) => {
             //check if account was already used
             if (otherUser && otherUser.id !== id) {
               return res.status(400).json({
@@ -177,25 +224,24 @@ let userController = {
             return user
           })
         }
-      })
-      .then((user) => {
-        if (!email || user.email === email) {
+        if (email && user.email !== email) {
+            return User.findOne({ where: { email, role: 'user' } }).then(
+              (otherUser) => {
+                //check if email was already used
+                if (otherUser && otherUser.id !== id) {
+                  return res.status(400).json({
+                    status: 'error',
+                    message: 'Email was already used.'
+                  })
+                }
+                user.email = email
+                return user
+              }
+            )
+          }
           return user
-        } else {
-          return User.findOne({ where: { email } }).then((otherUser) => {
-            //check if email was already used
-            if (otherUser && otherUser.id !== id) {
-              return res.status(400).json({
-                status: 'error',
-                message: 'Email was already used.'
-              })
-            }
-            user.email = email
-            return user
-          })
-        }
       })
-      .then((user) => {
+      .then( async(user) => {
         //check current password before add new password
         if (passwordNew && !bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({
@@ -208,9 +254,6 @@ let userController = {
           ? bcrypt.hashSync(passwordNew, bcrypt.genSaltSync(10))
           : user.password
         user.introduction = introduction || user.introduction
-        return user
-      })
-      .then(async (user) => {
         // two image files
         if (files && files.avatar && files.cover) {
           imgur.setClientID(IMGUR_CLIENT_ID)
@@ -235,7 +278,7 @@ let userController = {
           })
         }
         // one image file
-        else if (files && (files.avatar || files.cover)) {
+        if (files && (files.avatar || files.cover)) {
           imgur.setClientID(IMGUR_CLIENT_ID)
           image = files.avatar || files.cover
           imageName = files.avatar ? 'avatar' : 'cover'
@@ -245,9 +288,7 @@ let userController = {
           })
         }
         // no image file
-        else {
-          return await saveAndRes(user)
-        }
+          return await saveAndRes(user)  
       })
   },
   login: (req, res) => {
