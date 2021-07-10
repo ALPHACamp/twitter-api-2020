@@ -27,10 +27,6 @@ app.use((req, res, next) => {
   req.user = helpers.getUser(req)
   next()
 })
-app.use((req, res, next) => {
-  res.locals.user = req.user
-  next()
-})
 
 require('./routes')(app)
 

@@ -53,6 +53,9 @@ const authenticatedNotAdmin = (req, res, next) => {
   }
 }
 
+// current user
+router.get('/current_user', authenticated, userController.getCurrentUser)
+
 // user routes
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
