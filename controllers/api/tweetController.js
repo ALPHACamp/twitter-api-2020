@@ -1,10 +1,7 @@
 const db = require('../../models')
 const Tweet = db.Tweet
-const Like = db.Like
 const User = db.User
-const Reply = db.Reply
 const defaultLimit = 10
-//temp user ==> userId = 1
 
 let tweetController = {
   getUserTweets: (req, res) => {
@@ -27,7 +24,7 @@ let tweetController = {
           attributes: ['id']
         }
       ],
-      where: { UserId: req.params.id }
+      where: { UserId: +req.params.id }
     }
     Tweet.findAll(options)
       .then((tweets) => {
@@ -51,7 +48,7 @@ let tweetController = {
   getTweets: (req, res) => {
     const options = {
       limit: +req.query.limit || defaultLimit,
-      offset: req.query.offset || 0,
+      offset: +req.query.offset || 0,
       attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt'],
       order: [['createdAt', 'desc']],
       subQuery: false,
@@ -74,17 +71,7 @@ let tweetController = {
     }
     Tweet.findAll(options).then((tweets) => {
       tweets = tweets.map((tweet) => {
-        const {
-          id,
-          description,
-          likeNum,
-          replyNum,
-          createdAt,
-          updatedAt,
-          deletedAt,
-          AdminId,
-          User
-        } = tweet
+        const { id, description, likeNum, replyNum, createdAt, updatedAt, deletedAt, AdminId, User } = tweet
         return {
           id,
           isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
@@ -107,16 +94,7 @@ let tweetController = {
   },
   getTweet: (req, res) => {
     const options = {
-      attributes: [
-        'id',
-        'description',
-        'likeNum',
-        'replyNum',
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-        'AdminId'
-      ],
+      attributes: [ 'id', 'description', 'likeNum', 'replyNum', 'createdAt', 'updatedAt', 'deletedAt', 'AdminId' ],
       include: [
         {
           model: User,
@@ -133,20 +111,10 @@ let tweetController = {
         }
       ]
     }
-    Tweet.findByPk(req.params.tweetId, options)
+    Tweet.findByPk(+req.params.tweetId, options)
       .then((tweet) => {
         tweet = tweet.toJSON()
-        const {
-          id,
-          description,
-          likeNum,
-          replyNum,
-          createdAt,
-          updatedAt,
-          deletedAt,
-          AdminId,
-          User
-        } = tweet
+        const { id, description, likeNum, replyNum, createdAt, updatedAt, deletedAt, AdminId, User } = tweet
         if (tweet) {
           return res.status(200).json({
             id,
@@ -163,7 +131,10 @@ let tweetController = {
         }
         return res
           .status(404)
-          .json({ status: 'error', message: 'Tweet not found.' })
+          .json({
+            status: 'error',
+            message: 'Tweet not found.'
+          })
       })
       .catch((error) => res.status(500).json({
         status: 'error',

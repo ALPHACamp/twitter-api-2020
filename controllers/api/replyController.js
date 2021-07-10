@@ -3,7 +3,6 @@ const Reply = db.Reply
 const User = db.User
 const Tweet = db.Tweet
 const defaultLimit = 10
-//temp 
 
 
 let replyController = {
@@ -12,7 +11,7 @@ let replyController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       where: {
-        TweetId: req.params.tweetId,
+        TweetId: +req.params.tweetId,
       },
       attributes: ['id', 'comment', 'createdAt'],
       order: [['createdAt', 'ASC']],
@@ -46,12 +45,12 @@ let replyController = {
     }
     const data = {
       UserId: +req.user.id,
-      TweetId: req.params.tweetId,
+      TweetId: +req.params.tweetId,
       comment: req.body.comment,
     }
     Reply.create(data)
       .then((reply) => {
-        Tweet.findByPk(req.params.tweetId)
+        Tweet.findByPk(+req.params.tweetId)
           .then((tweet) => tweet.increment({ replyNum: 1 }))
           .then(() =>
             res.status(200).json({
@@ -72,7 +71,7 @@ let replyController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       attributes: ['id', 'UserId', 'TweetId', 'comment', 'createdAt'],
-      where: { UserId: req.params.id },
+      where: { UserId: +req.params.id },
       include: {
         model: Tweet,
         as: 'RepliedTweet',
