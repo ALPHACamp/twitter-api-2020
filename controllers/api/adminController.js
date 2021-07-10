@@ -1,9 +1,10 @@
 const db = require('../../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
-
 let defaultLimit = 10
 
 let adminController = {
@@ -12,8 +13,17 @@ let adminController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       raw: true,
-      attributes: { exclude: ['email', 'introduction', 'password', 'lastLoginAt', 'updatedAt', 'createdAt'] },
-      where: { role : 'user'}
+      attributes: {
+        exclude: [
+          'email',
+          'introduction',
+          'password',
+          'lastLoginAt',
+          'updatedAt',
+          'createdAt'
+        ]
+      },
+      where: { role: 'user' }
     }
     User.findAll(options)
       .then((users) => {
@@ -56,23 +66,40 @@ let adminController = {
         res.status(500).json({
           status: 'error',
           message: error
-        }))
+        })
+      )
   },
   deleteTweet: (req, res) => {
-    Tweet.findByPk(+req.params.tweetId)
-      .then((tweet) => tweet.destroy())
-      .then(() =>
-        res.status(200).json({
-          status: 'success',
-          message: 'Successfully delete tweet.'
+    const options = {
+      include: [
+        { model: Reply, attributes: ['id'], raw: true },
+        { model: Like, attributes: ['id'] }
+      ]
+    }
+    Tweet.findByPk(+req.params.tweetId, options).then(async (tweet) => {
+      await tweet.destroy()
+      await User.decrement({ tweetNum: 1 }, { where: { id: tweet.UserId } })
+      if (tweet.Replies.length) {
+        await Reply.destroy({
+          where: { id: tweet.Replies.map((reply) => reply.id) }
         })
-      )
-      .catch(() =>
-        res.status(500).json({
-          status: 'error',
-          message: error
+      }
+      if (tweet.Likes.length) {
+        await Like.destroy({
+          where: { id: tweet.Likes.map((like) => like.id) }
         })
-      )
+      }
+      res.status(200).json({
+        status: 'success',
+        message: 'Successfully delete tweet.'
+      })
+    })
+    .catch((error) =>
+      res.status(500).json({
+        status: 'error',
+        message: error
+      })
+    )
   },
   login: (req, res) => {
     const { password, email } = req.body

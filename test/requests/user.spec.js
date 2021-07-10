@@ -106,7 +106,6 @@ describe('# user requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
-            console.log(res)
             if (err) return done(err);
 
             expect(res.body).to.be.an('array');
