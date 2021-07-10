@@ -23,18 +23,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.DATE,
       },
-      deletedAt: {
-        type: DataTypes.DATE,
-      },
       likeNum: {
         type: DataTypes.INTEGER,
       },
       replyNum: {
         type: DataTypes.INTEGER,
-      },
-      AdminId: {
-        type: DataTypes.INTEGER,
-      },
+      }
     },
     {}
   );

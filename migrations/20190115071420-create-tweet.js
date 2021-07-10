@@ -22,16 +22,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      deletedAt: {
-        type: Sequelize.DATE,
-      },
       likeNum: {
         type: Sequelize.INTEGER,
       },
       replyNum: {
-        type: Sequelize.INTEGER,
-      },
-      AdminId: {
         type: Sequelize.INTEGER,
       },
     });
