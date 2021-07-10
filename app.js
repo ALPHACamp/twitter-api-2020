@@ -1,13 +1,17 @@
 const express = require('express')
 const session = require('express-session')
 const helpers = require('./_helpers');
-
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
+// Create http server for socket.io
 const server = require('http').createServer(app)
-const { Server } = require('socket.io')
-const io = new Server(server)
-
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+})
 const passport = require('./config/passport')
 
 app.use(express.urlencoded({ extended: true }))
@@ -33,16 +37,23 @@ server.listen(4040, () => {
   console.log(`socketio server listening on port 4040!`)
 })
 
+app.get('/', (req, res, next) => {
+  res.sendFile(__dirname + '/view/index.html')
+})
+
+io.on("connect_error", (err) => {
+  console.log(`connect_error due to ${err.message}`);
+})
 io.on('connection', (socket) => {
   console.log('Hello world')
-
+  socket.on('chat message', (msg) => {
+    // broadcasting to all connected sockets
+    io.emit('chat message', msg)
+    console.log('message: ' + msg)
+  })
   socket.on('disconnect', () => {
     console.log('Bye')
   })
-})
-
-app.get('/', (req, res, next) => {
-  res.sendFile(__dirname + '/view/index.html')
 })
 
 require('./routes')(app)

@@ -66,9 +66,27 @@
   <form id="form" action="">
     <input id="input" autocomplete="off" /><button>Send</button>
   </form>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  <script src="http://localhost:4040/socket.io/socket.io.js"></script>
   <script>
-    let socket = io("<http://localhost:4040>")
+    let socket = io('http://localhost:4040')
+    let messages = document.getElementById('messages')
+    let form = document.getElementById('form')
+    let input = document.getElementById('input')
+
+    form.addEventListener('submit', event => {
+      event.preventDefault()
+      if (input.value) {
+        socket.emit('chat message', input.value)
+        input.value = ''
+      }
+    })
+
+    socket.on('chat message', msg => {
+      let item = document.createElement('li')
+      item.textContent = msg
+      messages.appendChild(item)
+      window.scrollTo(0, document.body.scrollHeight)
+    })
   </script>
 </body>
 

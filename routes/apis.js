@@ -34,8 +34,9 @@ const authenticated = (req, res, next) => {
 }
 // 驗證登入者是否為管理者=>用於後台路由
 const authenticatedAdmin = (req, res, next) => {
-  if (helpers.getUser(req)) {
-    if (helpers.getUser(req).role === 'admin') { return next() }
+  console.log(req.user)
+  if (req.user) {
+    if (req.user.role === 'admin') { return next() }
     return res.json({ status: 'error', message: '非管理者沒有權限登入後台！' })
   } else {
     return res.json({ status: 'error', message: '未通過身份驗證！' })
@@ -43,8 +44,8 @@ const authenticatedAdmin = (req, res, next) => {
 }
 // 驗證登入者是否為非管理者=>用於前台路由
 const authenticatedNotAdmin = (req, res, next) => {
-  if (helpers.getUser(req)) {
-    if (helpers.getUser(req).role !== 'admin') { return next() }
+  if (req.user) {
+    if (req.user.role !== 'admin') { return next() }
     return res.json({ status: 'error', message: '管理者沒有權限登入前台！' })
   } else {
     return res.json({ status: 'error', message: '未通過身份驗證！' })
@@ -64,8 +65,8 @@ router.get('/users/:id/followers', authenticated, authenticatedNotAdmin, userCon
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
-router.get('/admin/users', adminController.getUsers)
-router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
 
 // followship routes
@@ -77,9 +78,9 @@ router.post('/tweets/:id/like', authenticated, authenticatedNotAdmin, likeContro
 router.post('/tweets/:id/unlike', authenticated, authenticatedNotAdmin, likeController.removeLike)
 
 // tweet routes
-router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
-router.get('/tweets/:id', authenticatedNotAdmin, tweetController.getTweet)
-router.post('/tweets', authenticatedNotAdmin, tweetController.postTweet)
+router.get('/tweets', authenticated, authenticatedNotAdmin, tweetController.getTweets)
+router.get('/tweets/:id', authenticated, authenticatedNotAdmin, tweetController.getTweet)
+router.post('/tweets', authenticated, authenticatedNotAdmin, tweetController.postTweet)
 
 // reply routes
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedNotAdmin, replyController.postReply)
