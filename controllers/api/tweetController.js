@@ -19,7 +19,6 @@ let tweetController = {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
           as: 'User',
-          where: { role: 'user' }
         },
         {
           model: User,
@@ -60,7 +59,6 @@ let tweetController = {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
           as: 'User',
-          where: { role: 'user' }
         },
         {
           model: User,

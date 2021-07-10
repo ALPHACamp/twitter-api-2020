@@ -173,12 +173,6 @@ let userController = {
       delete user.dataValues.updatedAt
       return res.status(200).json(user)
     }
-    if (req.user.role === 'admin') {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Only normal user account can modify profile.'
-      })
-    }
     // check user permission
     if (id !== userId) {
       return res.status(403).json({
