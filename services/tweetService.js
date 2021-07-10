@@ -101,7 +101,7 @@ const tweetService = {
         {
           model: Tweet,
           attributes: ['description'],
-          include: { model: User, attributes: ['id', 'account'] }
+          include: { model: User, attributes: ['id', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']] }
         }
       ],
       order: [['createdAt', 'DESC']]
