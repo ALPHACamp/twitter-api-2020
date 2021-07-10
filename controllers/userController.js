@@ -267,28 +267,55 @@ const userController = {
     }
   },
 
-  getUserTweets: (req, res) => {
-    return Tweet.findAll({
-      where: { UserId: req.params.id },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(tweets => {
-        return res.status(200).json(tweets)
+  getUserTweets: async (req, res) => {
+    try {
+      const UserId = req.params.id
+      const user = await User.findByPk(UserId)
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+      if (user.role === 'admin') {
+        return res.status(400).json({ status: 'error', message: 'Cannot view admin.' })
+      }
+      let tweets = await Tweet.findAll({
+        where: { UserId },
+        include: [
+          User,
+          Reply,
+          Like,
+          { model: User, as: 'LikedUsers' }
+        ],
+        order: [['createdAt', 'DESC']]
       })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
+      if (!tweets) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any tweets in db.' })
+      }
+
+      tweets = tweets.map(tweet => {
+        return {
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar,
+          likedCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
+        }
       })
+      return res.status(200).json(tweets)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   },
   getUserReplies: (req, res) => {
     return Reply.findAll({
       where: { UserId: req.params.id },
       include: { model: Tweet },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
+      order: [['createdAt', 'DESC']]
     })
       .then(replies => {
         return res.status(200).json(replies)
