@@ -81,8 +81,6 @@ let tweetController = {
           replyNum,
           createdAt,
           updatedAt,
-          deletedAt,
-          AdminId,
           User
         } = tweet
         return {
@@ -93,8 +91,6 @@ let tweetController = {
           replyNum,
           createdAt,
           updatedAt,
-          deletedAt,
-          AdminId,
           User
         }
       })
@@ -113,9 +109,7 @@ let tweetController = {
         'likeNum',
         'replyNum',
         'createdAt',
-        'updatedAt',
-        'deletedAt',
-        'AdminId'
+        'updatedAt'
       ],
       include: [
         {
@@ -143,8 +137,6 @@ let tweetController = {
           replyNum,
           createdAt,
           updatedAt,
-          deletedAt,
-          AdminId,
           User
         } = tweet
         if (tweet) {
@@ -156,8 +148,6 @@ let tweetController = {
             replyNum,
             createdAt,
             updatedAt,
-            deletedAt,
-            AdminId,
             User
           })
         }
