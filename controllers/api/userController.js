@@ -211,9 +211,7 @@ let userController = {
 
     User.findByPk(id)
       .then((user) => {
-        if (!account || user.account === account) {
-          return user
-        } else {
+        if (account && user.account !== account) {
           return User.findOne({ where: { account , role : 'user'} }).then((otherUser) => {
             //check if account was already used
             if (otherUser && otherUser.id !== id) {
@@ -226,27 +224,24 @@ let userController = {
             return user
           })
         }
-      })
-      .then((user) => {
-        if (!email || user.email === email) {
-          return user
-        } else {
-          return User.findOne({ where: { email, role: 'user' } }).then(
-            (otherUser) => {
-              //check if email was already used
-              if (otherUser && otherUser.id !== id) {
-                return res.status(400).json({
-                  status: 'error',
-                  message: 'Email was already used.'
-                })
+        if (email && user.email !== email) {
+            return User.findOne({ where: { email, role: 'user' } }).then(
+              (otherUser) => {
+                //check if email was already used
+                if (otherUser && otherUser.id !== id) {
+                  return res.status(400).json({
+                    status: 'error',
+                    message: 'Email was already used.'
+                  })
+                }
+                user.email = email
+                return user
               }
-              user.email = email
-              return user
-            }
-          )
-        }
+            )
+          }
+          return user
       })
-      .then((user) => {
+      .then( async(user) => {
         //check current password before add new password
         if (passwordNew && !bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({
@@ -259,9 +254,6 @@ let userController = {
           ? bcrypt.hashSync(passwordNew, bcrypt.genSaltSync(10))
           : user.password
         user.introduction = introduction || user.introduction
-        return user
-      })
-      .then(async (user) => {
         // two image files
         if (files && files.avatar && files.cover) {
           imgur.setClientID(IMGUR_CLIENT_ID)
@@ -286,7 +278,7 @@ let userController = {
           })
         }
         // one image file
-        else if (files && (files.avatar || files.cover)) {
+        if (files && (files.avatar || files.cover)) {
           imgur.setClientID(IMGUR_CLIENT_ID)
           image = files.avatar || files.cover
           imageName = files.avatar ? 'avatar' : 'cover'
@@ -296,9 +288,7 @@ let userController = {
           })
         }
         // no image file
-        else {
-          return await saveAndRes(user)
-        }
+          return await saveAndRes(user)  
       })
   },
   login: (req, res) => {
