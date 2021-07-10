@@ -262,13 +262,13 @@ const userController = {
 
       // setting
       if (req.body.setting) {
-        await User.create({
+        await user.update({
           name: req.body.name,
-          email: req.body.email.trim(),
+          email: req.body.email,
           account: req.body.account.trim(),
           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
         })
-        return res.json({ status: 'success', message: 'update successgully！' })
+        return res.json({ status: 'success', message: 'update successfully！' })
       }
 
       // profile edit
@@ -332,7 +332,5 @@ const userController = {
     }
   }
 }
-
-module.exports = userController
 
 module.exports = userController
