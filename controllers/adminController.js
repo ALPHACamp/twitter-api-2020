@@ -2,7 +2,7 @@ const { User, Tweet, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
-
+const db = require('../models')
 const adminController = {
   signIn: async (req, res, next) => {
     try {
