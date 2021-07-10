@@ -3,6 +3,7 @@
     "followship",
     "followships",
     "resave",
-    "signin"
+    "signin",
+    "socketio"
   ]
 }

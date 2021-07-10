@@ -4,8 +4,9 @@ const helpers = require('./_helpers');
 
 const app = express()
 const port = process.env.PORT || 3000
-const server = require('http').Server(app)
-const io = require('socket.io')(server)
+const server = require('http').createServer(app)
+const { Server } = require('socket.io')
+const io = new Server(server)
 
 const passport = require('./config/passport')
 
@@ -27,7 +28,11 @@ app.use((req, res, next) => {
   next()
 })
 
-require('./routes')(app)
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+server.listen(4040, () => {
+  console.log(`socketio server listening on port 4040!`)
+})
+
 io.on('connection', (socket) => {
   console.log('Hello world')
 
@@ -35,6 +40,11 @@ io.on('connection', (socket) => {
     console.log('Bye')
   })
 })
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+app.get('/', (req, res, next) => {
+  res.sendFile(__dirname + '/view/index.html')
+})
+
+require('./routes')(app)
 
 module.exports = app
