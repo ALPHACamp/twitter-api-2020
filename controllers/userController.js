@@ -184,8 +184,45 @@ const userController = {
       })
       return res.status(200).json(data)
     })
-  }
+  },
+  getUserRepliedTweets: (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
 
+    return Reply.findAll({
+      where: { UserId },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        },
+        {
+          model: Tweet,
+          attributes: ['id', 'description', 'replyCount', 'likeCount'],
+          include: { model: Like, separate: true, where: { UserId: viewerId }, required: false }
+        }
+      ],
+      attributes: ['id', 'createdAt', 'comment'],
+      nest: true
+    }).then(replies => {
+      replies = replies.map((item, i) => {
+        const mapItem = {
+          ...item.dataValues,
+          Tweet: {
+            ...item.Tweet.dataValues,
+            isLike: Boolean(item.Tweet.Likes[0])
+          },
+          User: {
+            ...item.User.dataValues
+          }
+        }
+        delete mapItem.Tweet.Likes
+
+        return mapItem
+      })
+      return res.status(200).json(replies)
+    })
+  }
 }
 
 module.exports = userController
