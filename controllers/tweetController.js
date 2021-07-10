@@ -51,18 +51,20 @@ let tweetController = {
   },
 
   likeTweet: (req, res, next) => {
-    // const isLiked = Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } })
-    // if (isLiked) {
-    //   return res.redirect('back')
-    // }
-    return Like.create({
-      UserId: helpers.getUser(req).id,
-      TweetId: req.params.tweetId,
-    })
-      .then((tweet) => {
+    Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } })
+      .then(isLiked => {
+        if (isLiked) throw new Error('你已經喜歡過這則貼文')
+        
+        return Like.create({
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.tweetId
+        })
+      })
+
+      .then(tweet => {
         return res.json({ status: 'success', message: 'You had successfully like this tweet' })
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
 
   unlikeTweet: (req, res, next) => {
