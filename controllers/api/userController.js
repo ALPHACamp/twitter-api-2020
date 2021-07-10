@@ -71,7 +71,7 @@ let userController = {
         message: "Password and confirm password doesn't match."
       })
     }
-    User.findOne({ where: { account } })
+    User.findOne({ where: { account, role: 'user' } })
       .then((user) => {
         if (user) {
           return res.status(400).json({
@@ -79,7 +79,7 @@ let userController = {
             message: 'Account was already used.'
           })
         } else {
-          User.findOne({ where: { email } }).then((user) => {
+          User.findOne({ where: { email, role: 'user' } }).then((user) => {
             if (user) {
               return res.status(400).json({
                 status: 'error',
@@ -130,7 +130,8 @@ let userController = {
           as: 'Followers',
           attributes: ['id']
         }
-      ]
+      ],
+      where: { role: 'user' }
     })
       .then((user) => {
         if (user) {

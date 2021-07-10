@@ -76,14 +76,6 @@ let followController = {
       }).catch(error => res.status(500).json({ status: 'error', message: error }))
   },
   postFollowship: (req, res) => {
-    if (req.user.role === 'admin') {
-       return res
-          .status(401)
-          .json({
-          status: 'error',
-          message: 'Only normal user account can post follow.'
-      })
-    }
     Followship.create({ followerId: +req.user.id, followingId: +req.body.id })
       .then(followship => {
         Promise.all([
@@ -108,12 +100,6 @@ let followController = {
       })
   },
   deleteFollowship: (req, res) => {
-    if (req.user.role === 'admin') {
-        return res.status(401).json({
-        status: 'error',
-        message: 'Only normal user account can post follow.'
-        })
-    }
     Followship.findOne({ where: { followerId: +req.user.id, followingId: +req.params.id } })
       .then(followship => {
         followship.destroy().then(() => {
