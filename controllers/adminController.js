@@ -1,4 +1,3 @@
-const db = require('../models')
 const { User, Tweet, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -106,7 +105,7 @@ ORDER BY UserTweetCount DESC;`
       const tweets = result.map(tweet => ({
         ...tweet,
         description: tweet.description.substring(0, 50),
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
       }))
       return res.json(tweets)
     } catch (err) {
@@ -118,7 +117,7 @@ ORDER BY UserTweetCount DESC;`
     try {
       const tweet = await Tweet.findByPk(req.params.id)
       tweet.destroy()
-      return res.json({ status: 'success', message: 'Tweet deleted successfully.' })
+      return res.json({ status: 'success', message: '成功刪除推文！' })
     } catch (err) {
       next(err)
       return res.json({ status: 'error', message: err.toString() })
