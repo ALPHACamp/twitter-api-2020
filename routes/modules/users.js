@@ -25,8 +25,8 @@ router.post('/signin', userController.signIn)
 
 router.use(authenticated)
 
+router.get('/', userController.getTopUsers)
 router.get('/current', userController.getCurrentUser)
-router.get('/top', userController.getTopUsers)
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id', userController.getUser)
 router.get('/:id/tweets', userController.getUserTweets)

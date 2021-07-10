@@ -99,25 +99,28 @@ const userController = {
   getTopUsers: async (req, res) => {
     try {
       let users = await User.findAll({
+        where: { role: 'user' },
         include: [
           { model: User, as: 'Followers' }
         ],
-        attributes: ['id', 'name', 'email', 'avatar', 'account'],
         limit: 10
       })
       if (!users) {
         return res.status(404).json({ status: 'error', message: 'Cannot find any user in db.' })
       }
       users = users.map(user => ({
-        ...user.dataValues,
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+        account: user.account,
         followerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.followerCount - a.followerCount)
       return res.status(200).json({
-        users,
         status: 'success',
-        message: 'Get top ten users successfully'
+        message: 'Get top ten users successfully',
+        users
       })
     } catch (err) {
       console.log(err)
