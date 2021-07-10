@@ -69,9 +69,9 @@ router.put('/users/:id/edit', authenticated, authenticatedNotAdmin, userControll
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
-router.get('/admin/users', adminController.getUsers)
-router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
-router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 // followship routes
 router.post('/followships', authenticated, authenticatedNotAdmin, followshipController.addFollowing)
@@ -82,9 +82,9 @@ router.post('/tweets/:id/like', authenticated, authenticatedNotAdmin, likeContro
 router.post('/tweets/:id/unlike', authenticated, authenticatedNotAdmin, likeController.removeLike)
 
 // tweet routes
-router.get('/tweets', authenticatedNotAdmin, tweetController.getTweets)
-router.get('/tweets/:id', authenticatedNotAdmin, tweetController.getTweet)
-router.post('/tweets', authenticatedNotAdmin, tweetController.postTweet)
+router.get('/tweets', authenticated, authenticatedNotAdmin, tweetController.getTweets)
+router.get('/tweets/:id', authenticated, authenticatedNotAdmin, tweetController.getTweet)
+router.post('/tweets', authenticated, authenticatedNotAdmin, tweetController.postTweet)
 
 // reply routes
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedNotAdmin, replyController.postReply)
