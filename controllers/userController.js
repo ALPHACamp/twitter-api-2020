@@ -227,7 +227,7 @@ const userController = {
         followingId: follower.dataValues.Followship.followingId,
         isFollowing: helpers.getUser(req).Followings.map(follower => follower.id).includes(follower.dataValues.id)
       }))
-      return res.json(followers)
+      return res.json([followers, { status: 'error', message: '沒有追隨者' }])
     } catch (err) { next(err) }
   },
   putUser: async (req, res, next) => {
