@@ -70,9 +70,9 @@ const adminController = {
           ],
           [
             Sequelize.literal(`(
-              SELECT COUNT(Tweets.likeCounts)
+              SELECT SUM(Tweets.likeCounts)
               FROM Tweets
-              WHERE Tweets.UserId = User.id AND Tweets.likeCounts = 1
+              WHERE Tweets.UserId = User.id
             )`),
             'BeLikedCounts'
           ]
