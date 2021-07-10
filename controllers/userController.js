@@ -24,6 +24,7 @@ const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signIn: async (req, res) => {
+    //#swagger.tags = ['SignUp/Signin']
     try {
       // check all inputs are required
       const { account, password } = req.body
@@ -57,6 +58,7 @@ const userController = {
     }
   },
   signUp: async (req, res) => {
+    //#swagger.tags = ['SignUp/Signin']
     try {
       const { account, name, email, password, checkPassword } = req.body
       const message = []
@@ -108,6 +110,7 @@ const userController = {
     }
   },
   getCurrentUser: (req, res) => {
+    //#swagger.tags = ['Users']
     return res.status(200).json({
       id: req.user.id,
       name: req.user.name,
@@ -120,6 +123,7 @@ const userController = {
     })
   },
   getTopUsers: async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
       let users = await User.findAll({
         include: [
@@ -148,6 +152,7 @@ const userController = {
     }
   },
   editAccount: async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
       const { account, name, email, password, checkPassword } = req.body
       const { email: currentEmail, account: currentAccount } = req.user
@@ -215,6 +220,7 @@ const userController = {
     }
   },
   getUser: async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
       const id = req.params.id
       const user = await User.findOne({
@@ -259,6 +265,7 @@ const userController = {
     }
   },
   editUserProfile: async (req, res) => {
+    //#swagger.tags = ['Users']
     const id = req.params.id
     const { name, introduction } = req.body
     const message = []
@@ -327,6 +334,7 @@ const userController = {
   },
 
   getUserTweets: (req, res) => {
+    //#swagger.tags = ['Users']
     return Tweet.findAll({
       where: { UserId: req.params.id },
       order: [['createdAt', 'DESC']],
@@ -342,6 +350,7 @@ const userController = {
       })
   },
   getUserReplies: (req, res) => {
+    //#swagger.tags = ['Users']
     return Reply.findAll({
       where: { UserId: req.params.id },
       include: { model: Tweet },
@@ -358,6 +367,7 @@ const userController = {
       })
   },
   getUserLikes: (req, res) => {
+    //#swagger.tags = ['Users']
     return Like.findAll({
       where: { UserId: req.params.id },
       include: { model: Tweet },
@@ -374,6 +384,7 @@ const userController = {
       })
   },
   getUserFollowings: (req, res) => {
+    //#swagger.tags = ['Users']
     return Followship.findAll({
       where: { followerId: req.params.id },
       order: [['createdAt', 'DESC']],
@@ -389,6 +400,7 @@ const userController = {
       })
   },
   getUserFollowers: (req, res) => {
+    //#swagger.tags = ['Users']
     return Followship.findAll({
       where: { followingId: req.params.id },
       order: [['createdAt', 'DESC']],
