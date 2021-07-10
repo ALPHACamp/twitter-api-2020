@@ -50,7 +50,7 @@ const adminController = {
       if (helpers.getUser(req).role !== 'admin') return res.json({ status: 'error', message: '管理員專用' })
       const tweet = await Tweet.findByPk(req.params.id) || false
       if (tweet) {
-        tweet.destroy()
+        await tweet.destroy()
         return res.json({ status: 'success', message: "推文刪除成功" })
       }
     } catch (err) { next(err) }
