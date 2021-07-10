@@ -1,14 +1,25 @@
 # twitter-api-2020
-# README
+# 前端串接 README
 
 
 ## 初始化
 ### 請在終端機輸入
+
 ```
 git clone https://github.com/wintersprouter/twitter-api-2020.git
 cd twitter-api-2020
 npm install  (請參考 package.json)
 ```
+
+
+### 建立.env
+
+```
+PORT='3000'
+JWT_SECRET= xxx
+IMGUR_CLIENT_ID= xxx
+```
+
 
 ### 使用 MySQL Workbench 建立資料庫
 需要與 config/config.json 一致
@@ -29,5 +40,5 @@ npm run dev
 
 
 ## 共用帳號
-請一律設定一個共用的 root user
+共用root user
 root@example.com，登入密碼 12345678
