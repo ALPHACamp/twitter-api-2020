@@ -50,33 +50,31 @@ let tweetController = {
     })
   },
 
-  likeTweet: (req, res, next) => {
-    // const isLiked = Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } })
-    // if (isLiked) {
-    //   return res.redirect('back')
-    // }
-    return Like.create({
-      UserId: helpers.getUser(req).id,
-      TweetId: req.params.tweetId,
-    })
-      .then((tweet) => {
-        return res.json({ status: 'success', message: 'You had successfully like this tweet' })
+  likeTweet: async (req, res, next) => {
+    try {
+      const isLiked = await Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } })
+      if (isLiked) throw new Error('you had already liked this tweet')
+
+      await Like.create({
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweetId,
       })
-      .catch((err) => next(err))
+      return res.json({ status: 'success', message: 'like this tweet successfully' })
+    } catch (error) {
+      next(error)
+    }
   },
 
-  unlikeTweet: (req, res, next) => {
-    return Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } }).then((tweet) => {
-      // if (!tweet) {
-      //   return res.redirect('back')
-      // }
-      tweet
-        .destroy()
-        .then(res.json({ status: 'success', message: 'You had successfully unlike this tweet' }))
-        .catch((err) => {
-          next(err)
-        })
-    })
+  unlikeTweet: async (req, res, next) => {
+    try {
+      const isLiked = await Like.findOne({ where: { UserId: helpers.getUser(req).id, TweetId: req.params.tweetId } })
+      if (!isLiked) throw new Error('like already been removed')
+
+      await isLiked.destroy()
+      return res.json({ status: 'success', message: 'unlike successfully' })
+    } catch (error) {
+      next(error)
+    }
   },
 }
 
