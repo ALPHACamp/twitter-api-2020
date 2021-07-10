@@ -165,7 +165,6 @@ const userController = {
       ],
       where: { id: UserId },
       attributes: [],
-      through: { attributes: [] },
       nest: true,
       raw: true
     }).then(async data => {
