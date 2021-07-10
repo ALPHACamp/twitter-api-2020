@@ -9,7 +9,6 @@ const { Op } = require('sequelize')
 
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
-const { postReply } = require('./tweetController')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -153,15 +152,13 @@ const userController = {
           as: 'Followings',
           attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
           nest: true,
-          raw: true,
 
           include: {
             model: User,
             as: 'Followers',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+            attributes: ['id'],
             where: { id: viewerId },
             nest: true,
-            raw: true,
             required: false
           }
         }
@@ -173,18 +170,22 @@ const userController = {
     }).then(async data => {
       data = data.map((item, i) => {
         const mapItem = {
-          ...item,
-          followingId: item.Followings.Followship.followingId,
+          ...item.dataValues,
+          followingId: item.Followings.id,
           Followings: {
             ...item.Followings,
             isFollowing: Boolean(item.Followings.Followers.id)
           }
         }
+        delete mapItem.Followings.Followship
+        delete mapItem.Followings.Followers.Followship
+        delete mapItem.Followings.Followers
         return mapItem
       })
       return res.status(200).json(data)
     })
   }
+
 }
 
 module.exports = userController
