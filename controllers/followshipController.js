@@ -2,8 +2,9 @@ const followshipService = require('../services/followshipService')
 
 const followshipController = {
   addFollow: async (req, res, next) => {
+    const followReq = { followerId: req.user.id, followingId: req.body.id }
     try {
-      const data = await followshipService.addFollow(req.user.id, req.body.id)
+      const data = await followshipService.addFollow(followReq)
       return res.json(data)
     } catch (error) {
       next(error)
@@ -11,8 +12,9 @@ const followshipController = {
   },
 
   unFollow: async (req, res, next) => {
+    const followReq = { followerId: req.user.id, followingId: req.params.followingId }
     try {
-      const data = await followshipService.unFollow(req.user.id, req.params.followingId)
+      const data = await followshipService.unFollow(followReq)
       return res.json(data)
     } catch (error) {
       next(error)
