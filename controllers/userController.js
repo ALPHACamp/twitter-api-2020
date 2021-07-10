@@ -1,8 +1,9 @@
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-const { User, Tweet, Reply, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const bcrypt = require('bcryptjs')
+const moment = require('moment')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
 
@@ -120,6 +121,32 @@ const userController = {
         isFollowed: req.user.Followings.map(f => f.id).includes(topUser.id)
       }))
       return res.json(topUsers)
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  getLikedTweets: async (req, res, next) => {
+    try {
+      let likes = await Like.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        include: [{
+          model: Tweet,
+          attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+          include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      const Tweets = likes.map(like => {
+        return {
+          ...like.Tweet,
+          TweetId: like.Tweet.id,
+          createdAt: moment(like.Tweet.createdAt).format('YYYY - MM - DD hh: mm: ss a'),
+        }
+      })
+      return res.json(Tweets)
     } catch (err) {
       console.log(err)
       next(err)
