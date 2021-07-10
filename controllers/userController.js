@@ -153,38 +153,41 @@ const userController = {
           as: 'Followings',
           attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
           nest: true,
-          raw: true,
 
           include: {
             model: User,
             as: 'Followers',
-            attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+            attributes: ['id'],
             where: { id: viewerId },
             nest: true,
-            raw: true,
             required: false
           }
         }
       ],
       where: { id: UserId },
       attributes: [],
+      through: { attributes: [] },
       nest: true,
       raw: true
     }).then(async data => {
       data = data.map((item, i) => {
         const mapItem = {
-          ...item,
-          followingId: item.Followings.Followship.followingId,
+          ...item.dataValues,
+          followingId: item.Followings.id,
           Followings: {
             ...item.Followings,
             isFollowing: Boolean(item.Followings.Followers.id)
           }
         }
+        delete mapItem.Followings.Followship
+        delete mapItem.Followings.Followers.Followship
+        delete mapItem.Followings.Followers
         return mapItem
       })
       return res.status(200).json(data)
     })
   }
+
 }
 
 module.exports = userController
