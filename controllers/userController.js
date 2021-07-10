@@ -141,6 +141,9 @@ const userController = {
       if (!user) {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
+      if (user.role === 'admin') {
+        return res.status(400).json({ status: 'error', message: 'Admin is not allowed to edit account.' })
+      }
       const message = []
       formValidation(account, name, email, password, checkPassword)
       if (email !== currentEmail) {
@@ -183,8 +186,7 @@ const userController = {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
       if (user.role === 'admin') {
-        const data = { status: 'error', message: 'Cannot view administrator.' }
-        return res.status(400).json(data)
+        return res.status(400).json({ status: 'error', message: 'Cannot view admin.' })
       }
       const data = {
         status: 'success',
@@ -210,71 +212,59 @@ const userController = {
     }
   },
   editUserProfile: async (req, res) => {
-    const id = req.params.id
-    const { name, introduction } = req.body
-    const message = []
-    // only user himself allow to edit account
-    if (req.user.id !== Number(id)) {
-      return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+    try {
+      const id = req.params.id
+      const { name, introduction } = req.body
+      const message = []
+      // only user himself allow to edit account
+      if (req.user.id !== Number(id)) {
+        return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+      }
+      // check this user is or not in db
+      const user = await User.findByPk(id)
+      if (!user) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+      if (user.role === 'admin') {
+        return res.status(400).json({ status: 'error', message: 'Admin is not allowed to edit profile.' })
+      }
+      // check Name is required
+      if (!name) {
+        message.push('Name is required.')
+      }
+      // check name length and type
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+        message.push('Name can not be longer than 50 characters.')
+      }
+      // check introduction length and type
+      if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
+        message.push('Introduction can not be longer than 160 characters.')
+      }
+      if (message.length) {
+        return res.status(400).json({ status: 'error', message })
+      }
+      const updateData = { name, introduction }
+      const { files } = req
+      const imgType = ['.jpg', '.jpeg', '.png']
+      if (files) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        for (const file in files) {
+          const index = files[file][0].originalname.lastIndexOf('.')
+          const fileType = files[file][0].originalname.slice(index)
+          if (imgType.includes(fileType)) {
+            const img = await uploadImg(files[file][0].path)
+            updateData[file] = img.data.link
+          } else {
+            return res.status(400).json({ status: 'error', message: `Image type of ${file} should be .jpg, .jpeg, .png .` })
+          }
+        }
+      }
+      await user.update(updateData)
+      return res.status(200).json({ status: 'success', message: `Update ${name}'s profile successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
-    // check this user is or not in db
-    const user = await User.findByPk(id)
-    if (!user) {
-      return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
-    }
-    // check Name is required
-    if (!name) {
-      message.push('Name is required')
-    }
-    // check name length and type
-    if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-      message.push('Name can not be longer than 50 characters.')
-    }
-    // check introduction length and type
-    if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
-      message.push('Introduction can not be longer than 160 characters.')
-    }
-
-    if (message.length) {
-      return res.status(400).json({ status: 'error', message })
-    }
-    let avatar
-    let cover
-
-    const { files } = req
-
-    const imgArray = []
-
-    if (files && files.avatar) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      avatar = await uploadImg(files.avatar[0].path)
-      imgArray.push(avatar)
-    }
-
-    if (files && files.cover) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      cover = await uploadImg(files.cover[0].path)
-      imgArray.push(cover)
-    }
-
-    Promise.all(imgArray)
-      .then(values => {
-        const [avatar, cover] = values
-
-        user.update({
-          name: name || req.user.name,
-          introduction: introduction || req.user.introduction,
-          avatar: files && files.avatar ? avatar.link : user.avatar,
-          cover: files && files.cover ? cover.link : user.cover
-        })
-          .then(() => {
-            return res.status(200).json({ status: 'success', message: ` Update ${name}'s profile successfully.` })
-          })
-          .catch(error => {
-            console.log(err)
-            res.status(500).json({ status: 'error', message: 'error' })
-          })
-      })
   },
 
   getUserTweets: (req, res) => {
