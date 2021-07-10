@@ -4,20 +4,7 @@ const userController = require('../../controllers/userController')
 const { authenticated, authenticatedUser } = require('../../middleware/auth')
 
 const multer = require('multer')
-
-const upload = multer({
-  dest: 'temp/',
-  fileFilter: (req, files, cb) => {
-    if (!files.originalname.match(/\.(jpg|jpeg|png)$/)) {
-      cb(null, false, res.status(400).json({ status: 'error', message: 'Only accept .jpg,.jpeg,.png pictures' }))
-    }
-    cb(null, true)
-  },
-  limits: {
-    fileSize: 1000000,
-    files: 2
-  }
-})
+const upload = multer({ dest: 'temp/' })
 const imageUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
 router.post('/', userController.signUp)
@@ -25,8 +12,8 @@ router.post('/signin', userController.signIn)
 
 router.use(authenticated)
 
+router.get('/', userController.getTopUsers)
 router.get('/current', userController.getCurrentUser)
-router.get('/top', userController.getTopUsers)
 router.get('/:id/tweets', userController.getUserTweets)
 router.get('/:id', userController.getUser)
 router.get('/:id/tweets', userController.getUserTweets)

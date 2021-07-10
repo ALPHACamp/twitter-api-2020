@@ -1,6 +1,7 @@
 const db = require('../models')
 const { User, Tweet, Reply, Like, Followship } = db
 const validator = require('validator')
+const { formValidation } = require('../config/functions')
 const bcrypt = require('bcryptjs')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -40,7 +41,7 @@ const userController = {
       const token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.status(200).json({
         status: 'success',
-        message: 'ok',
+        message: 'Sign in successfully.',
         token: token,
         user: {
           id: user.id,
@@ -62,30 +63,7 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
       const message = []
-      // check all inputs are required
-      if (!account || !name || !email || !password || !checkPassword) {
-        message.push('All fields are required！')
-      }
-      // check name length and type
-      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-        message.push('Name can not be longer than 50 characters.')
-      }
-      // check account length and type
-      if (account && !validator.isByteLength(account, { min: 0, max: 20 })) {
-        message.push('Account can not be longer than 20 characters.')
-      }
-      // check email validation
-      if (email && !validator.isEmail(email)) {
-        message.push(`${email} is not a valid email address.`)
-      }
-      // check password length and type
-      if (password && !validator.isByteLength(password, { min: 5, max: 15 })) {
-        message.push('Password does not meet the required length.')
-      }
-      // check password and checkPassword
-      if (password && (password !== checkPassword)) {
-        message.push('The password and confirmation do not match.Please retype them.')
-      }
+      formValidation(account, name, email, password, checkPassword)
       const [inputEmail, inputAccount] = await Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } })])
       if (inputEmail) {
         message.push('This email address is already being used.')
@@ -96,7 +74,6 @@ const userController = {
       if (message.length) {
         return res.status(400).json({ status: 'error', message })
       }
-
       await User.create({
         account,
         name,
@@ -126,25 +103,28 @@ const userController = {
     //#swagger.tags = ['Users']
     try {
       let users = await User.findAll({
+        where: { role: 'user' },
         include: [
           { model: User, as: 'Followers' }
         ],
-        attributes: ['id', 'name', 'email', 'avatar', 'account'],
         limit: 10
       })
       if (!users) {
         return res.status(404).json({ status: 'error', message: 'Cannot find any user in db.' })
       }
       users = users.map(user => ({
-        ...user.dataValues,
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+        account: user.account,
         followerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.followerCount - a.followerCount)
       return res.status(200).json({
-        users,
         status: 'success',
-        message: 'Get top ten users successfully'
+        message: 'Get top ten users successfully',
+        users
       })
     } catch (err) {
       console.log(err)
@@ -156,46 +136,18 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword } = req.body
       const { email: currentEmail, account: currentAccount } = req.user
-
       const id = req.params.id
-
       // only user himself allow to edit account
       if (req.user.id !== Number(id)) {
         return res.status(401).json({ status: 'error', message: 'Permission denied.' })
       }
-
       // check this user is or not in db
       const user = await User.findByPk(id)
-      if (!user) {
+      if (!user || user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
-
       const message = []
-
-      // check all inputs are required
-      if (!account || !name || !email || !password || !checkPassword) {
-        message.push('All fields are required！')
-      }
-      // check account length and type
-      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-        message.push('Name can not be longer than 50 characters.')
-      }
-      // check name length and type
-      if (account && !validator.isByteLength(account, { min: 0, max: 20 })) {
-        message.push('Account can not be longer than 20 characters.')
-      }
-      // check email validation
-      if (email && !validator.isEmail(email)) {
-        message.push(`${email} is not a valid email address.`)
-      }
-      // check password length and type
-      if (password && !validator.isByteLength(password, { min: 5, max: 15 })) {
-        message.push('Password does not meet the required length.')
-      }
-      // check password and checkPassword
-      if (password && (password !== checkPassword)) {
-        message.push('The password and confirmation do not match.Please retype them.')
-      }
+      formValidation(account, name, email, password, checkPassword)
       if (email !== currentEmail) {
         const userEmail = await User.findOne({ where: { email } })
         if (userEmail) {
@@ -211,7 +163,6 @@ const userController = {
       if (message.length) {
         return res.status(400).json({ status: 'error', message })
       }
-
       await user.update({ name, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)), email, account })
       return res.status(200).json({ status: 'success', message: `@${account} Update account information successfully.` })
     } catch (err) {
@@ -233,12 +184,14 @@ const userController = {
           { model: User, as: 'Followings' }
         ]
       })
-      if (!user) {
+      if (!user ||user.role === 'admin') {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
       const data = {
-        id: user.id,
-        name: user.name,
+        status: 'success',
+        message: `Get @${user.account}'s  profile successfully.`,
+        id: user.dataValues.id,
+        name: user.dataValues.name,
         account: user.account,
         email: user.email,
         avatar: user.avatar,
@@ -247,15 +200,8 @@ const userController = {
         tweetCount: user.Tweets.length,
         followerCount: user.Followers.length,
         followingCount: user.Followings.length,
-        status: 'success',
-        message: `Get @${user.account}'s  profile successfully.`
+        isFollowed: user.Followers.map(d => d.id).includes(req.user.id)
       }
-      // if (Number(id) !== req.user.id) {
-      //   return res.status(200).json(
-      //     data,
-      //     data.isFollowed = req.user.Followings.map(d => d.id).includes(user.id)
-      //   )
-      // }
       return res.status(200).json(
         data
       )
@@ -266,138 +212,194 @@ const userController = {
   },
   editUserProfile: async (req, res) => {
     //#swagger.tags = ['Users']
-    const id = req.params.id
-    const { name, introduction } = req.body
-    const message = []
-    // only user himself allow to edit account
-    if (req.user.id !== Number(id)) {
-      return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+    try {
+      const id = req.params.id
+      const { name, introduction } = req.body
+      const message = []
+      // only user himself allow to edit account
+      if (req.user.id !== Number(id)) {
+        return res.status(401).json({ status: 'error', message: 'Permission denied.' })
+      }
+      // check this user is or not in db
+      const user = await User.findByPk(id)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+      // check Name is required
+      if (!name) {
+        message.push('Name is required.')
+      }
+      // check name length and type
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+        message.push('Name can not be longer than 50 characters.')
+      }
+      // check introduction length and type
+      if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
+        message.push('Introduction can not be longer than 160 characters.')
+      }
+      if (message.length) {
+        return res.status(400).json({ status: 'error', message })
+      }
+      const updateData = { name, introduction }
+      const { files } = req
+      const imgType = ['.jpg', '.jpeg', '.png']
+      if (files) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        for (const file in files) {
+          const index = files[file][0].originalname.lastIndexOf('.')
+          const fileType = files[file][0].originalname.slice(index)
+          if (imgType.includes(fileType)) {
+            const img = await uploadImg(files[file][0].path)
+            updateData[file] = img.data.link
+          } else {
+            return res.status(400).json({ status: 'error', message: `Image type of ${file} should be .jpg, .jpeg, .png .` })
+          }
+        }
+      }
+      await user.update(updateData)
+      return res.status(200).json({ status: 'success', message: `Update ${name}'s profile successfully.` })
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
-    // check this user is or not in db
-    const user = await User.findByPk(id)
-    if (!user) {
-      return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
-    }
-    // check Name is required
-    if (!name) {
-      message.push('Name is required')
-    }
-    // check name length and type
-    if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-      message.push('Name can not be longer than 50 characters.')
-    }
-    // check introduction length and type
-    if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
-      message.push('Introduction can not be longer than 160 characters.')
-    }
+  },
 
-    if (message.length) {
-      return res.status(400).json({ status: 'error', message })
+  getUserTweets: async (req, res) => {
+    //#swagger.tags = ['Users']
+    try {
+      const UserId = req.params.id
+      const user = await User.findByPk(UserId)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+
+      let tweets = await Tweet.findAll({
+        where: { UserId },
+        include: [
+          User,
+          Reply,
+          Like,
+          { model: User, as: 'LikedUsers' }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!tweets) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any tweets in db.' })
+      }
+      return res.status(200).json(tweets)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
-    let avatar
-    let cover
+  },
 
-    const { files } = req
-
-    const imgArray = []
-
-    if (files && files.avatar) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      avatar = await uploadImg(files.avatar[0].path)
-      imgArray.push(avatar)
+  getUserReplies: async (req, res) => {
+     //#swagger.tags = ['Users']
+    try {
+      const UserId = req.params.id
+      const user = await User.findByPk(UserId)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+  
+      let replies = await Reply.findAll({
+        where: { UserId },
+        include: [User, { model: Tweet, include: User }],
+        order: [['createdAt', 'DESC']]
+      })
+      if (!replies) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any replies in db.' })
+      }
+      replies = replies.map(reply => {
+        return {
+          id: reply.id,
+          UserId: reply.UserId,
+          TweetId: reply.TweetId,
+          tweetAuthorAccount: reply.Tweet.User.account,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          commentAccount: reply.User.account,
+          name: reply.User.name,
+          avatar: reply.User.avatar
+        }
+      })
+      return res.status(200).json(replies)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
+  },
 
-    if (files && files.cover) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      cover = await uploadImg(files.cover[0].path)
-      imgArray.push(cover)
+  getUserLikes: async (req, res) => {
+      //#swagger.tags = ['Users']
+    try {
+      const UserId = req.params.id
+      const user = await User.findByPk(UserId)
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+      let likes = await Like.findAll({
+        where: { UserId },
+        include: [{
+          model: Tweet,
+          include: [{ model: User },
+            { model: Reply, include: [{ model: User }] }, Like]
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      likes = likes.map(like => {
+        return {
+          id: like.id,
+          UserId: like.UserId,
+          TweetId: like.TweetId,
+          likeCreatedAt:like.createdAt,
+          account: like.Tweet.User.account,
+          name: like.Tweet.User.name,
+          avatar: like.Tweet.User.avatar,
+          description: like.Tweet.description,
+          tweetCreatedAt: like.Tweet.createdAt,
+          likedCount: like.Tweet.Likes.length,
+          repliedCount: like.Tweet.Replies.length,
+          isLike: like.Tweet.Likes.some((t) => t.UserId === req.user.id)
+        }
+      })
+      return res.status(200).json(likes)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
     }
+  },
 
-    Promise.all(imgArray)
-      .then(values => {
-        const [avatar, cover] = values
-
-        user.update({
-          name: name || req.user.name,
-          introduction: introduction || req.user.introduction,
-          avatar: files && files.avatar ? avatar.link : user.avatar,
-          cover: files && files.cover ? cover.link : user.cover
+  getUserFollowings:async(req, res) => {
+     //#swagger.tags = ['Users']
+    try{
+      let user = await User.findByPk(req.params.id,
+        {include: [
+        { model: User, as: 'Followings' }
+      ],
+          order: [['Followings', Followship, 'createdAt', 'DESC']]
         })
-          .then(() => {
-            return res.status(200).json({ status: 'success', message: ` Update ${name}'s profile successfully.` })
-          })
-          .catch(error => {
-            console.log(err)
-            res.status(500).json({ status: 'error', message: 'error' })
-          })
-      })
-  },
-
-  getUserTweets: (req, res) => {
-    //#swagger.tags = ['Users']
-    return Tweet.findAll({
-      where: { UserId: req.params.id },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(tweets => {
-        return res.status(200).json(tweets)
-      })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
-  },
-  getUserReplies: (req, res) => {
-    //#swagger.tags = ['Users']
-    return Reply.findAll({
-      where: { UserId: req.params.id },
-      include: { model: Tweet },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(replies => {
-        return res.status(200).json(replies)
-      })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
-  },
-  getUserLikes: (req, res) => {
-    //#swagger.tags = ['Users']
-    return Like.findAll({
-      where: { UserId: req.params.id },
-      include: { model: Tweet },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(likes => {
-        return res.status(200).json(likes)
-      })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
-  },
-  getUserFollowings: (req, res) => {
-    //#swagger.tags = ['Users']
-    return Followship.findAll({
-      where: { followerId: req.params.id },
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(followings => {
-        return res.status(200).json(followings)
-      })
-      .catch(error => {
-        console.log('error')
-        res.status(500).json({ status: 'error', message: 'error' })
-      })
+      if (!user || user.role === 'admin') {
+        return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
+      }
+        if (!user.Followings.length) {
+          return res.status(200).json({ message: `@${user.account} has no following.` })
+        }
+        const followingsId = req.user.Followings.map(following => following.id)
+        user = user.Followings.map(following => ({
+        followingId: following.id,
+        account: following.account,
+        name: following.name,
+        avatar: following.avatar,
+        introduction: following.introduction,
+        followshipCreatedAt: following.Followship.createdAt,
+        isFollowing: followingsId.includes(following.id)
+      }))
+        return res.status(200).json(user)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json({ status: 'error', message: 'error' })
+    }
   },
   getUserFollowers: (req, res) => {
     //#swagger.tags = ['Users']
