@@ -56,7 +56,7 @@ let likeController = {
             })
           )
           .catch((error) =>
-            res.json(500).json({
+            res.status(500).json({
               status: 'error',
               message: error
             })
@@ -95,7 +95,7 @@ let likeController = {
               })
             )
             .catch((error) =>
-              res.json(500).json({
+              res.status(500).json({
                 status: 'error',
                 message: error
               })
