@@ -215,34 +215,7 @@ const tweetController = {
         })
       }
     })
-  },
 
-  getTweetReplies: (req, res) => {
-    const TweetId = req.params.id
-    const userId = req.user.id
-
-    return Tweet.findByPk(TweetId)
-      .then(tweet => {
-        if (!tweet) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Tweet does not exist'
-          })
-        }
-
-        return Reply.findAll({
-          where: [{ TweetId }],
-          attributes: ['id', 'comment', 'createdAt'],
-          include: [
-            {
-              model: User,
-              attributes: ['id', 'name', 'account', 'avatar']
-            }
-          ],
-        }).then(replies => {
-          return res.status(200).json(replies)
-        })
-      })
   }
 }
 
