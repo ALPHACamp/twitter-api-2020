@@ -3,16 +3,16 @@ const { Followship } = require('../models')
 const RequestError = require('../utils/customError')
 
 const followshipService = {
-  addFollow: async (a, b) => {
-    const [, created] = await Followship.findOrCreate({ where: { followerId: a, followingId: b } })
+  addFollow: async (followReq) => {
+    const [, created] = await Followship.findOrCreate({ where: followReq })
     if (!created) {
       throw new RequestError('there is a same data found before create')
     }
     return { status: 'success', message: 'A followship has created' }
   },
 
-  unFollow: async (a, b) => {
-    await Followship.destroy({ where: { followerId: a, followingId: b } })
+  unFollow: async (followReq) => {
+    await Followship.destroy({ where: followReq })
     return { status: 'success', message: 'A followship has destroy' }
   }
 }

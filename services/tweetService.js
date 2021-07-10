@@ -5,8 +5,7 @@ const tweetService = {
     return await Tweet.findAll({
       where: whereQuery,
       attributes: [
-        'id',
-        'createdAt',
+        'id', 'createdAt',
         [Sequelize.literal('substring(description,1,50)'), 'description'],
         [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
         [Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount'],
@@ -15,16 +14,12 @@ const tweetService = {
       group: 'id',
       include: [
         { model: Like, attributes: [] },
+        { model: Reply, attributes: [] },
         {
           model: User,
           attributes:
-            [
-              'id', 'name',
-              [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
-              'avatar'
-            ]
-        },
-        { model: Reply, attributes: [] }
+            ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
+        }
       ],
       order: [['createdAt', 'DESC']]
     })
@@ -33,20 +28,11 @@ const tweetService = {
   getTweetsForAdmin: async (whereQuery = {}) => {
     return await Tweet.findAll({
       where: whereQuery,
-      attributes: [
-        'id',
-        'createdAt',
-        [Sequelize.literal('substring(description,1,50)'), 'description']
-      ],
+      attributes: ['id', 'createdAt', [Sequelize.literal('substring(description,1,50)'), 'description']],
       include: [
         {
           model: User,
-          attributes:
-            [
-              'id', 'name',
-              [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
-              'avatar'
-            ]
+          attributes: ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
         }
       ],
       order: [['createdAt', 'DESC']]
@@ -67,15 +53,11 @@ const tweetService = {
       ],
       group: 'Replies.id',
       include: [
+        { model: Like, attributes: [] },
         {
           model: User,
-          attributes:
-            [
-              'id', 'name', 'avatar',
-              [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']
-            ]
+          attributes: ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
         },
-        { model: Like, attributes: [] },
         {
           model: Reply,
           attributes: ['id', 'comment', 'createdAt'],
@@ -89,9 +71,7 @@ const tweetService = {
   },
 
   getTweetAndReplies: async (tweetId) => {
-    return await Tweet.findByPk(tweetId, {
-      include: Reply
-    })
+    return await Tweet.findByPk(tweetId, { include: Reply })
   },
 
   postReply: async (reply) => {
@@ -110,11 +90,7 @@ const tweetService = {
   },
 
   getAllRepliesFromUser: async (UserId) => {
-    return await Reply.findAll({
-      where: { UserId },
-      nest: true,
-      raw: true
-    })
+    return await Reply.findAll({ where: { UserId } })
   }
 }
 

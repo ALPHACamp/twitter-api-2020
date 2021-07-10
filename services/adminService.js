@@ -11,8 +11,6 @@ const adminService = {
 
   getUsers: async () => {
     return await User.findAll({
-      raw: true,
-      nest: true,
       where: { role: { [Op.not]: 'admin' } },
       attributes: [
         'id',
