@@ -1,13 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const { switchAuthenticatedMiddleware } = require('../../_helpers')
+const { authenticated } = require('../../middlewares/auth')
 
 const userController = require('../../controllers/userController')
 
 router.post('/login', userController.logIn)
 router.post('/', userController.signUp)
-router.get('/:id', switchAuthenticatedMiddleware(), userController.getUser)
-router.get('/:id/tweets', switchAuthenticatedMiddleware(), userController.getUserTweets)
-router.get('/:id/likes', switchAuthenticatedMiddleware(), userController.getUserLikes)
+router.get('/:id', authenticated, userController.getUser)
+router.get('/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/:id/likes', authenticated, userController.getUserLikes)
+
 
 module.exports = router

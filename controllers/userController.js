@@ -3,10 +3,12 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
+const Reply = db.Reply
 const { Op } = require('sequelize')
 
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
+const { postReply } = require('./tweetController')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -139,7 +141,8 @@ const userController = {
           return res.status(200).json(likes)
         })
       })
-  }
+  },
+  
 }
 
 module.exports = userController
