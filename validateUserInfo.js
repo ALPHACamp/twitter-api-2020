@@ -50,19 +50,30 @@ module.exports = {
     if (errors.length) return errors
     if (helpers.getUser(req) && !setting) return
 
-    const user = await User.findOne({
-      where: {
-        $or: { email, account }
-      }
-    })
+    /* email, account 重複處理 */
+    let user = {}
+    if (helpers.getUser(req)) {  // for setting
+      user = await User.findOne({
+        where: {
+          $or: { email, account: account.trim() },
+          $not: { id: helpers.getUser(req).id }
+        }
+      })
+
+      if (!user) return
+    }
+
+    if (!helpers.getUser(req)) {  // for signup
+      user = await User.findOne({
+        where: {
+          $or: { email, account: account.trim() }
+        }
+      })
+    }
 
     if (user) {
-      if (user.email === email) {
-        errors.push('信箱重複！')
-      }
-      if (user.account === account.trim()) {
-        errors.push('帳號重複！')
-      }
+      if (user.email === email) errors.push('信箱重複！')
+      if (user.account === account.trim()) errors.push('帳號重複！')
     }
     if (errors.length) return errors
   }
