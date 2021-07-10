@@ -14,7 +14,11 @@ const validate = ajv.compile(validateUserInfo.schema)
 
 // JWT
 const jwt = require('jsonwebtoken')
-// const passportJWT = require('passport-jwt')
+
+function getData(data) {
+  if (data) return data.map(d => d.id)
+  return []
+}
 
 const userController = {
   signIn: (req, res, next) => {
@@ -54,7 +58,7 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const result = await validateUserInfo.checkUserInfo(req, validate)
-      if (result) return res.json({ status: 'error', message: result })
+      if (result) return res.json({ status: 'error', message: result, data: req.body })
 
       await User.create({
         name: req.body.name.trim(),
@@ -103,13 +107,17 @@ const userController = {
       })
       if (!user) throw new Error('這名使用者不存在或已被刪除')
 
+      // LikedTweets 有資料才做 map 處理，不然 test 會過不了
+      const likes = getData(helpers.getUser(req).LikedTweets)
+
       const tweets = user.toJSON().Tweets.map(t => ({
         tweetId: t.id,
         userId: t.UserId,
         createdAt: t.createdAt,
-        description: t.description.substring(0, 50),
+        description: t.description,
         likeCount: t.Likes.length,
-        replyCount: t.Replies.length
+        replyCount: t.Replies.length,
+        isLiked: likes.length ? likes.includes(t.id) : false
       }))
 
       return res.json(tweets)
@@ -158,15 +166,18 @@ const userController = {
       })
       if (!like) throw new Error('這名使用者不存在或已被刪除')
 
+      const likes = getData(helpers.getUser(req).LikedTweets)
+
       const data = like.toJSON().Likes.map(d => ({
         userId: d.UserId,
         TweetId: d.TweetId,
         userName: d.Tweet.User.name,
         userAccount: d.Tweet.User.account,
         userAvatar: d.Tweet.User.avatar,
-        description: d.Tweet.description.substring(0, 50),
+        description: d.Tweet.description,
         likeCount: d.Tweet.Likes.length,
-        replyCount: d.Tweet.Replies.length
+        replyCount: d.Tweet.Replies.length,
+        isLiked: likes.length ? likes.includes(d.TweetId) : false
       }))
 
       res.json(data)
@@ -191,7 +202,14 @@ const userController = {
       })
       if (!following) throw new Error('這名使用者不存在或已被刪除')
 
-      res.json(following.toJSON().Followings)
+      const isFollowing = getData(helpers.getUser(req).Followings)
+
+      const data = following.toJSON().Followings.map(d => ({
+        ...d,
+        isFollowing: isFollowing.includes(d.followingId)
+      }))
+
+      res.json(data)
     } catch (error) {
       next(error)
     }
@@ -213,12 +231,11 @@ const userController = {
       })
       if (!followers) throw new Error('這名使用者不存在或已被刪除')
 
+      const isFollowing = getData(helpers.getUser(req).Followings)
+
       const data = followers.toJSON().Followers.map(d => ({
         ...d,
-        isFollowing: helpers
-          .getUser(req)
-          .Followings.map(f => f.id)
-          .includes(d.followerId)
+        isFollowing: isFollowing.includes(d.followerId)
       }))
 
       res.json(data)
@@ -238,7 +255,7 @@ const userController = {
       if (!name) throw new Error('名字為必填')
 
       const result = await validateUserInfo.checkUserInfo(req, validate)
-      if (result) return res.json({ status: 'error', message: result })
+      if (result) return res.json({ status: 'error', message: result, data: req.body })
 
       const user = await User.findByPk(id)
       if (!user) throw new Error('user not found.')
