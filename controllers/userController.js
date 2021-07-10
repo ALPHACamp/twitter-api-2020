@@ -76,7 +76,7 @@ const userController = {
 
   getUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const user = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
@@ -98,14 +98,14 @@ const userController = {
           ],
           order: [['createdAt', 'DESC']]
         }]
-      }) || false
+      })
       if (!user) return res.json({ status: 'error', message: '使用者不存在' })
       return res.json(user)
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         attributes: [
@@ -128,7 +128,7 @@ const userController = {
   },
   getUserRepliedTweets: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const tweets = await Tweet.findAll({
         include: [
           { model: User, attributes: ['name', 'account', 'avatar'] },
@@ -147,13 +147,18 @@ const userController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
         ],
       })
+
+      if (tweets.length === 0) return res.json({ status: 'error', message: '沒有回覆任何推文' })
+
       return res.json(tweets)
+
+
     } catch (err) { next(err) }
   },
   getUserLike: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
-      let likes = await Like.findAll({
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      const likes = await Like.findAll({
         include: [
           { model: User, attributes: ['account', 'name', 'avatar', 'cover'] },
           {
@@ -165,12 +170,13 @@ const userController = {
           }],
         where: { UserId: req.params.id }
       })
+      if (likes.length === 0) return res.json({ status: 'error', message: '沒有喜歡的推文或回覆' })
       return res.json(likes)
     } catch (err) { next(err) }
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const user = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
@@ -199,7 +205,7 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const user = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
@@ -226,98 +232,101 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
-      let { name, email, password, confirmPassword, account, bio, avatar, cover } = req.body
-      const hasPostInfo = JSON.stringify(req.body) === '{}'
-      confirmPassword = confirmPassword || false
-      const checkPassword = confirmPassword === password
-      account = account || null
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      let { name, bio, avatar, cover } = req.body
       const user = await User.findOne({
         where: {
           id: helpers.getUser(req).id,
           role: { [Op.ne]: 'admin' }
-        }
+        },
+        attributes: ['id', 'name', 'bio', 'avatar', 'cover']
       })
-      if (hasPostInfo) return res.json({ status: 'error', message: '請填入資訊' })
-      const checkAccount = await User.findOne({ where: { account, id: { [Op.ne]: helpers.getUser(req).id } } }) || false
-      if (checkAccount) {
-        return res.json({ status: 'error', message: '此帳號已有人使用' })
-      }
-      if (password && checkPassword && !hasPostInfo) {
-        await user.update({
-          name: name || user.name,
-          email: email || user.email,
-          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) || user.password,
-          account: account || user.account,
-        })
-        return res.json([user, { status: 'success', message: '資訊更新成功' }])
-      }
-      if (password && !checkPassword && !hasPostInfo) return res.json({ status: 'error', message: '請確認密碼一致' })
+      if (!name) return res.json({ status: 'error', message: '請填寫名稱' })
+
       if (req.files) {
         avatar = req.files.avatar || false
         cover = req.files.cover || false
       }
+
       if (avatar && !cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
         await imgur.upload(avatar[0].path, (err, img) => {
           user.update({
-            name: name || helpers.getUser(req).name,
-            email: email || helpers.getUser(req).email,
-            account: account || helpers.getUser(req).account,
-            bio: bio || helpers.getUser(req).bio,
+            name: name,
+            bio: bio,
             avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
             cover: helpers.getUser(req).cover,
           })
-          return res.json([user, { status: 'success', message: '個人頭貼更新成功' }])
+          return res.json([user, { status: 'success', message: '頭貼更新完成' }])
         })
       } else if (!avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
         await imgur.upload(cover[0].path, (err, img) => {
           user.update({
-            name: name || helpers.getUser(req).name,
-            email: email || helpers.getUser(req).email,
-            account: account || helpers.getUser(req).account,
-            bio: bio || helpers.getUser(req).bio,
+            name: name,
+            bio: bio,
             avatar: helpers.getUser(req).avatar,
             cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
-          return res.json([user, { status: 'success', message: '封面更新成功' }])
+          return res.json([user, { status: 'success', message: '封面更新完成' }])
         })
       } else if (avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
         await imgur.upload(avatar[0].path, (err, img) => {
           user.update({
-            name: name || helpers.getUser(req).name,
-            email: email || helpers.getUser(req).email,
-            account: account || helpers.getUser(req).account,
-            bio: bio || helpers.getUser(req).bio,
+            name: name,
+            bio: bio,
             avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
             cover: helpers.getUser(req).cover,
           })
         })
         await imgur.upload(cover[0].path, (err, img) => {
           user.update({
-            name: name || helpers.getUser(req).name,
-            email: email || helpers.getUser(req).email,
-            account: account || helpers.getUser(req).account,
-            bio: bio || helpers.getUser(req).bio,
+            name: name,
+            bio: bio,
             avatar: helpers.getUser(req).avatar,
             cover: cover ? img.data.link : helpers.getUser(req).cover,
           })
         })
-        return res.json([user, { status: 'success', message: '個人資訊更新成功' }])
+        return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
       } else {
         await user.update({
-          name: name || helpers.getUser(req).name,
-          email: email || helpers.getUser(req).email,
-          account: account || helpers.getUser(req).account,
-          bio: bio || helpers.getUser(req).bio,
+          name: name,
+          bio: bio,
+          avatar,
+          cover,
         })
-        return res.json([user, { status: 'success', message: '資訊更新成功' }])
+        return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
       }
 
     } catch (err) { next(err) }
   },
+  putUserInfo: async (req, res, next) => {
+    try {
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      let { account, name, email, password, confirmPassword } = req.body
+      account = account.trim()
+      name = name.trim()
+      email = email.trim()
+      password = password.trim()
+      confirmPassword = confirmPassword.trim()
+      if (!name || !email || !password || !confirmPassword || !account) return res.json({ status: 'error', message: '所有欄位皆必填' })
+      const user = await User.findByPk(helpers.getUser(req).id)
+      const checkAccount = await User.findOne({ where: { account, id: { [Op.ne]: helpers.getUser(req).id } } })
+      const checkEmail = await User.findOne({ where: { email, id: { [Op.ne]: helpers.getUser(req).id } } })
+      const checkPassword = password === confirmPassword
+      if (checkAccount) return res.json({ status: 'error', message: '此帳號已被使用' })
+      if (checkEmail) return res.json({ status: 'error', message: '此信箱已被使用' })
+      if (!checkPassword) return res.json({ status: 'error', message: '請確認密碼是否一致' })
+      user.update({
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+      })
+      return res.json([user, { status: 'success', message: '帳戶信息更新成功' }])
+    } catch (err) { next(err) }
+  }
 }
 
 module.exports = userController

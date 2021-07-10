@@ -6,7 +6,7 @@ const followshipController = {
 
   showAllUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       let users = await User.findAll({
         where: {
           id: { [Op.ne]: helpers.getUser(req).id },
@@ -30,7 +30,7 @@ const followshipController = {
   },
   addFollowing: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const [follow, created] = await Followship.findOrCreate({
         where: {
           followerId: helpers.getUser(req).id,
@@ -47,7 +47,7 @@ const followshipController = {
   },
   deleteFollowing: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限使用者' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const followingShip = await Followship.findOne({
         where: {
           followerId: helpers.getUser(req).id,
