@@ -25,6 +25,7 @@ const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signIn: async (req, res) => {
+    //#swagger.tags = ['SignUp/Signin']
     try {
       // check all inputs are required
       const { account, password } = req.body
@@ -58,6 +59,7 @@ const userController = {
     }
   },
   signUp: async (req, res) => {
+    //#swagger.tags = ['SignUp/Signin']
     try {
       const { account, name, email, password, checkPassword } = req.body
       const message = []
@@ -78,13 +80,14 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       })
-      return res.status(200).json({ status: 'success', message: `@${account} Sign up successfully.Please sign in.` })
+      return res.status(200).json({ status: 'success', message: `@${account} sign up successfully.Please sign in.` })
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
   getCurrentUser: (req, res) => {
+    //#swagger.tags = ['Users']
     return res.status(200).json({
       id: req.user.id,
       name: req.user.name,
@@ -97,6 +100,7 @@ const userController = {
     })
   },
   getTopUsers: async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
       let users = await User.findAll({
         where: { role: 'user' },
@@ -128,6 +132,7 @@ const userController = {
     }
   },
   editAccount: async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
       const { account, name, email, password, checkPassword } = req.body
       const { email: currentEmail, account: currentAccount } = req.user
@@ -166,6 +171,7 @@ const userController = {
     }
   },
   getUser: async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
       const id = req.params.id
       const user = await User.findOne({
@@ -205,6 +211,7 @@ const userController = {
     }
   },
   editUserProfile: async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
       const id = req.params.id
       const { name, introduction } = req.body
@@ -258,6 +265,7 @@ const userController = {
   },
 
   getUserTweets: async (req, res) => {
+    //#swagger.tags = ['Users']
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
@@ -278,28 +286,15 @@ const userController = {
       if (!tweets) {
         return res.status(404).json({ status: 'error', message: 'Cannot find any tweets in db.' })
       }
-
-      tweets = tweets.map(tweet => {
-        return {
-          id: tweet.id,
-          UserId: tweet.UserId,
-          description: tweet.description,
-          createdAt: tweet.createdAt,
-          account: tweet.User.account,
-          name: tweet.User.name,
-          avatar: tweet.User.avatar,
-          likedCount: tweet.Likes.length,
-          repliedCount: tweet.Replies.length,
-          isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
-        }
-      })
       return res.status(200).json(tweets)
     } catch (err) {
       console.log(err)
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
+
   getUserReplies: async (req, res) => {
+     //#swagger.tags = ['Users']
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
@@ -334,7 +329,9 @@ const userController = {
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
+
   getUserLikes: async (req, res) => {
+      //#swagger.tags = ['Users']
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
@@ -372,7 +369,9 @@ const userController = {
       res.status(500).json({ status: 'error', message: 'error' })
     }
   },
+
   getUserFollowings:async(req, res) => {
+     //#swagger.tags = ['Users']
     try{
       let user = await User.findByPk(req.params.id,
         {include: [
@@ -403,6 +402,7 @@ const userController = {
     }
   },
   getUserFollowers: (req, res) => {
+    //#swagger.tags = ['Users']
     return Followship.findAll({
       where: { followingId: req.params.id },
       order: [['createdAt', 'DESC']],

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": " nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "test": "mocha test --exit --recursive --timeout 5000",
+    "swagger-autogen": "node ./swagger.js"
   },
   "author": "",
   "license": "ISC",
@@ -35,6 +36,8 @@
     "sequelize-cli": "^5.5.1",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.7.0",
+    "swagger-autogen": "^2.10.3",
+    "swagger-ui-express": "^4.1.6",
     "validator": "^13.6.0"
   },
   "devDependencies": {
