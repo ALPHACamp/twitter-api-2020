@@ -243,7 +243,6 @@ const userController = {
       })
       if (!name) return res.json({ status: 'error', message: '請填寫名稱' })
 
-      
       if (req.files) {
         avatar = req.files.avatar || false
         cover = req.files.cover || false
