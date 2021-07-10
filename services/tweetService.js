@@ -92,10 +92,19 @@ const tweetService = {
   getAllRepliesFromUser: async (UserId) => {
     return await Reply.findAll({
       where: { UserId },
-      attributes: [['id', 'TweetId'], ['TweetId', 'ToOriginalTweetId'], 'comment', 'createdAt'],
+      attributes: ['id', 'TweetId', 'comment', 'createdAt'],
       include: [
-        { model: User, attributes: ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']] }
-      ]
+        {
+          model: User,
+          attributes: ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
+        },
+        {
+          model: Tweet,
+          attributes: ['description'],
+          include: { model: User, attributes: ['id', 'account'] }
+        }
+      ],
+      order: [['createdAt', 'DESC']]
     })
   }
 }
