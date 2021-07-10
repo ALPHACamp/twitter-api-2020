@@ -85,6 +85,12 @@ let followController = {
         }))
   },
   postFollowship: (req, res) => {
+    if (+req.user.id === +req.body.id) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Not allow to self-follow.'
+      })
+    }
     Followship.create({
       followerId: +req.user.id,
       followingId: +req.body.id
@@ -107,7 +113,7 @@ let followController = {
             })
           )
           .catch((error) =>
-            res.json(500).json({
+            res.status(500).json({
               status: 'error',
               message: error
             })
@@ -122,6 +128,12 @@ let followController = {
       }
     })
       .then(followship => {
+        if (!followship) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'This Follow does not exist.'
+          })
+        }
         followship.destroy()
           .then(() => {
             Promise.all([
@@ -141,7 +153,7 @@ let followController = {
                 })
               )
               .catch((error) =>
-                res.json(500).json({
+                res.status(500).json({
                   status: 'error',
                   message: error
                 })

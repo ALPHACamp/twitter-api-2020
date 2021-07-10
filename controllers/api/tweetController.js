@@ -71,7 +71,7 @@ let tweetController = {
     }
     Tweet.findAll(options).then((tweets) => {
       tweets = tweets.map((tweet) => {
-        const { id, description, likeNum, replyNum, createdAt, updatedAt, User } = tweet
+        const { id, description, likeNum, replyNum, createdAt, updatedAt, Author } = tweet
         return {
           id,
           isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
@@ -80,7 +80,7 @@ let tweetController = {
           replyNum,
           createdAt,
           updatedAt,
-          User
+          Author
         }
       })
       return res.status(200).json(tweets)
@@ -92,7 +92,7 @@ let tweetController = {
   },
   getTweet: (req, res) => {
     const options = {
-      attributes: [ 'id', 'description', 'likeNum', 'replyNum', 'createdAt', 'updatedAt', 'deletedAt', 'AdminId' ],
+      attributes: [ 'id', 'description', 'likeNum', 'replyNum', 'createdAt', 'updatedAt' ],
       include: [
         {
           model: User,
@@ -112,7 +112,7 @@ let tweetController = {
     Tweet.findByPk(+req.params.tweetId, options)
       .then((tweet) => {
         tweet = tweet.toJSON()
-        const { id, description, likeNum, replyNum, createdAt, updatedAt, User } = tweet
+        const { id, description, likeNum, replyNum, createdAt, updatedAt, Author } = tweet
         if (tweet) {
           return res.status(200).json({
             id,
@@ -122,7 +122,7 @@ let tweetController = {
             replyNum,
             createdAt,
             updatedAt,
-            User
+            Author
           })
         }
         return res
