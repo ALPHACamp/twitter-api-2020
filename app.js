@@ -1,12 +1,18 @@
 const express = require('express')
 const session = require('express-session')
 const helpers = require('./_helpers');
+
+const cors = require('cors')
+
 const app = express()
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const port = process.env.PORT || 3000
 const passport = require('./config/passport')
+
+// cors 的預設為全開放
+app.use(cors())
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
