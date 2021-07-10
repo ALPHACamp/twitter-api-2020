@@ -16,8 +16,10 @@ let replyController = {
       },
       attributes: ['id', 'comment', 'createdAt'],
       order: [['createdAt', 'ASC']],
-      include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+      include: [{
+        model: User,
+        attributes: ['id', 'account', 'name', 'avatar']
+      },
       ],
     }
     Reply.findAll(options)
@@ -80,6 +82,21 @@ let replyController = {
           'likeNum',
           'replyNum',
           'createdAt'
+        ],
+        include: [
+          {
+            model: User,
+            as: 'Author',
+            attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id'],
+            through: {
+              attributes: []
+            }
+          }
         ]
       },
       order: [['createdAt', 'desc']]
@@ -87,8 +104,12 @@ let replyController = {
     Reply.findAll(options)
       .then(replies => {
         replies = replies.map(reply => {
-          reply.dataValues.comment = reply.dataValues.comment.substring(0, 50)
-          reply.RepliedTweet.dataValues.description = reply.RepliedTweet.dataValues.description.substring(0, 50)
+          reply.comment = reply.comment.substring(0, 50)
+          reply.RepliedTweet.description = reply.RepliedTweet.description.substring(0, 50)
+          reply.RepliedTweet.dataValues.isLike = reply.RepliedTweet.dataValues.LikedUsers.some(
+            (likedUser) => likedUser.id === +req.user.id
+          )
+          delete reply.RepliedTweet.dataValues.LikedUsers
           return reply
         })
         return res.status(200).json(replies)
