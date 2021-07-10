@@ -270,7 +270,6 @@ describe('# user requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function (err, res) {
-            console.log(res.body)
             if (err) return done(err);
             expect(res.body).to.be.an('array');
             res.body[0].followerId.should.equal(1);
