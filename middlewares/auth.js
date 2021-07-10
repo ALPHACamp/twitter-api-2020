@@ -1,22 +1,22 @@
 const jwt = require('jsonwebtoken')
 
-module.exports = {
-  getReqUserFromToken: (req, res, next) => {
-    if (!req.header('Authorization')) {
-      return next()
-    }
+const passport = require('../config/passport')
 
-    const token = req.header('Authorization').replace('Bearer ', '')
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
+module.exports = {
+  authenticated: (req, res, next) => {
+    passport.authenticate('jwt', { session: false }, (err, user, info) => {
+
+      if (err) { return next(err) }
+      if (!user) {
         return res.status(400).json({
           status: 'error',
-          message: 'invalid token'
+          message: 'User does not exist'
         })
-      } else {
-        req.user = decoded
-        return next()
       }
-    })
+
+      req.user = { ...user.dataValues }
+      next()
+    })(req, res, next) // TODO:要了解為什麼要加這個，不加就會沒辦法運作
   }
+
 }
