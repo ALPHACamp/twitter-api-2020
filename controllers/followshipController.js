@@ -27,7 +27,7 @@ const followshipController = {
       if (followship) {
         return res.status(400).json({
           status: 'error',
-          message: 'User had followered before'
+          message: 'This user is already in your following list'
         })
       }
 
@@ -38,7 +38,7 @@ const followshipController = {
         if (users.length !== 2) {
           return res.status(400).json({
             status: 'error',
-            message: 'current user or following id might wrong'
+            message: 'Current userId or following id may be wrong'
           })
         }
 
@@ -49,7 +49,7 @@ const followshipController = {
         ]).then(result => {
           return res.status(200).json({
             status: 'success',
-            message: `User.id ${users[0].id} follow user.id ${users[1].id} successfully`
+            message: `User.id ${users[0].id} followed user.id ${users[1].id} successfully`
           })
         })
       })
