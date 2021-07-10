@@ -8,7 +8,13 @@ module.exports = (sequelize, DataTypes) => {
     introduction: DataTypes.STRING,
     role: { type: DataTypes.STRING, defaultValue: 'user' },
     account: DataTypes.STRING,
-    cover: { type: DataTypes.STRING, defaultValue: 'https://images.unsplash.com/27/perspective.jpg?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80' }
+    cover: { type: DataTypes.STRING, defaultValue: 'https://images.unsplash.com/27/perspective.jpg?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80' },
+    isFollowed: {
+      type: DataTypes.VIRTUAL,
+      get: function () {
+        return !!this.getDataValue('isFollowed')
+      }
+    }
   }, {})
   User.associate = function (models) {
     User.hasMany(models.Tweet)

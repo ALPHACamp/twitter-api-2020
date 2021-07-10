@@ -36,40 +36,36 @@ const userService = {
     return user
   },
 
-  getFollowings: async (id) => {
-    const followings = await User.findByPk(id, {
-      attributes: [],
-      include: [
-        {
-          model: User,
-          as: 'Followings',
-          attributes: [
-            ['id', 'followingId'], 'name', 'avatar', 'introduction',
-            [Sequelize.fn('concat', '@', Sequelize.col('Followings.account')), 'account']
-          ],
-          through: { attributes: [] }
+  getFollowings: async (userId, currentUserId) => {
+    const followings = await User.findAll({
+      where: {
+        id: {
+          [Op.in]: [Sequelize.literal(`select followingId from followships where followerId = ${userId}`)]
         }
+      },
+      attributes: [
+        ['id', 'followingId'], 'name', 'avatar', 'introduction',
+        [Sequelize.fn('concat', '@', Sequelize.col('account')), 'account'],
+        [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
       ]
     })
-    return followings.Followings
+    return followings
   },
 
-  getFollowers: async (id) => {
-    const followers = await User.findByPk(id, {
-      attributes: [],
-      include: [
-        {
-          model: User,
-          as: 'Followers',
-          attributes: [
-            ['id', 'followerId'], 'name', 'avatar', 'introduction',
-            [Sequelize.fn('concat', '@', Sequelize.col('Followers.account')), 'account']
-          ],
-          through: { attributes: [] }
+  getFollowers: async (userId, currentUserId) => {
+    const followers = await User.findAll(userId, {
+      where: {
+        id: {
+          [Op.in]: [Sequelize.literal(`select followerId from followships where followerId = ${userId}`)]
         }
+      },
+      attributes: [
+        ['id', 'followingId'], 'name', 'avatar', 'introduction',
+        [Sequelize.fn('concat', '@', Sequelize.col('account')), 'account'],
+        [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
       ]
     })
-    return followers.Followers
+    return followers
   },
 
   getTopUsers: async (id) => {
