@@ -1,5 +1,4 @@
-# twitter-api-2020
-# 前端串接 README
+# twitter-api-2020 - 前端串接 README
 
 
 ## 初始化
@@ -30,14 +29,25 @@ create database ac_twitter_workspace_test;
 ```
 
 
-### 在終端機輸入以下指令，以進行資料庫遷移、種子資料初始化、啟動專案
+### 在終端機輸入以下指令，進行資料庫遷移、種子資料初始化
 
 ```
 npx sequelize db:migrate
 npx sequelize db:seed:all
+```
+
+### 在終端機輸入以下指令，啟動swagger API 和 後端專案
+
+```
+npm run swagger-autogen
 npm run dev
 ```
 
+## API文件
+http://localhost:3000/api-doc/
+
+## API串接網址
+http://localhost:3000/api/{route}
 
 ## 共用帳號
 共用root user
