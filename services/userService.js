@@ -5,16 +5,12 @@ const RequestError = require('../utils/customError')
 
 const userService = {
   signIn: async (email) => {
-    return await User.findOne({
-      where: { email }
-    })
+    return await User.findOne({ where: { email } })
   },
 
   signUp: async (formBody) => {
     await userService.checkUnique(formBody)
-    const user = await User.create({
-      ...formBody
-    })
+    const user = await User.create({ ...formBody })
     return user
   },
 
@@ -31,15 +27,12 @@ const userService = {
         { model: Like }
       ]
     })
-    return user.toJSON()
+    return user
   },
 
   putUser: async (id, body) => {
     await userService.checkUnique(body, id)
-    const user = await User.update(
-      { ...body },
-      { where: { id } }
-    )
+    const user = await User.update({ ...body }, { where: { id } })
     return user
   },
 
@@ -51,14 +44,14 @@ const userService = {
           model: User,
           as: 'Followings',
           attributes: [
-            ['id', 'followingId'],
-            [Sequelize.fn('concat', '@', Sequelize.col('Followings.account')), 'account'],
-            'name', 'avatar', 'introduction'],
+            ['id', 'followingId'], 'name', 'avatar', 'introduction',
+            [Sequelize.fn('concat', '@', Sequelize.col('Followings.account')), 'account']
+          ],
           through: { attributes: [] }
         }
       ]
     })
-    return followings.toJSON().Followings
+    return followings.Followings
   },
 
   getFollowers: async (id) => {
@@ -69,25 +62,22 @@ const userService = {
           model: User,
           as: 'Followers',
           attributes: [
-            ['id', 'followerId'],
-            [Sequelize.fn('concat', '@', Sequelize.col('Followers.account')), 'account'],
-            'name', 'avatar', 'introduction'],
+            ['id', 'followerId'], 'name', 'avatar', 'introduction',
+            [Sequelize.fn('concat', '@', Sequelize.col('Followers.account')), 'account']
+          ],
           through: { attributes: [] }
         }
       ]
     })
-    return followers.toJSON().Followers
+    return followers.Followers
   },
 
   getTopUsers: async (id) => {
     return await User.findAll({
       where: { [Op.not]: { role: 'admin' } },
       attributes: [
-        'id',
-        'name',
+        'id', 'name', 'avatar', 'introduction',
         [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
-        'avatar',
-        'introduction',
         [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id)`), 'isFollowed'],
         [Sequelize.fn('count', Sequelize.col('Followers.id')), 'FollowerCount']
       ],
@@ -96,19 +86,14 @@ const userService = {
         [Sequelize.col('FollowerCount'), 'DESC'],
         [Sequelize.col('isFollowed'), 'DESC']
       ],
-      group: ['id'],
-      subQuery: false,
-      raw: true,
-      nest: true
+      group: 'id',
+      subQuery: false
     })
   },
 
   getLikes: async (id) => {
-    const likes = await User.findByPk(id, {
-      attributes: [],
-      include: Like
-    })
-    return likes.toJSON().Likes
+    const likes = await User.findByPk(id, { attributes: [], include: Like })
+    return likes.Likes
   },
 
   checkUnique: async ({ email, account }, userId = null) => {
