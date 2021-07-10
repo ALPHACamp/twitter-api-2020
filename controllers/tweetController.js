@@ -55,14 +55,12 @@ const tweetController = {
             message: 'Tweet does not exist'
           })
         }
-
-        return Reply.create({
-          UserId,
-          TweetId,
-          comment
-        }).then(reply => {
+        return Promise.all([
+          Reply.create({ UserId, TweetId, comment }),
+          tweet.increment('replyCount')
+        ]).then(result => {
           return res.status(200).json({
-            id: reply.id,
+            id: result[0].id,
             status: 'success',
             message: 'Reply has been created successfully'
           })
@@ -150,22 +148,73 @@ const tweetController = {
     const UserId = req.user.id
     const TweetId = req.params.id
 
-    return Tweet.findByPk(TweetId)
-      .then(tweet => {
-        if (!tweet) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Tweet does not exist'
-          })
-        }
-        return Like.create({ UserId, TweetId })
-      }).then(like => {
+    return Tweet.findByPk(TweetId, {
+      include: {
+        required: false,
+        model: Like,
+        where: { UserId }
+      }
+    }).then(tweet => {
+      if (!tweet) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Tweet does not exist'
+        })
+      }
+
+      if (tweet.Likes[0]) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'User had liked this tweet before'
+        })
+      }
+
+      return Promise.all([
+        tweet.increment('likeCount'),
+        Like.create({ UserId, TweetId })
+      ]).then(result => {
         return res.status(200).json({
           status: 'success',
           message: 'Like successfully',
-          tweetId: like.TweetId
+          tweetId: result[1].TweetId
         })
       })
+    })
+  },
+
+  postUnlike: (req, res) => {
+    const UserId = req.user.id
+    const TweetId = req.params.id
+
+    return Like.findOne({
+      where: {
+        [Op.and]: [
+          { UserId },
+          { TweetId }
+        ]
+      },
+      include: {
+        model: Tweet
+      }
+    }).then(like => {
+      if (!like) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'User did not like this tweet before'
+        })
+      } else {
+        return Promise.all([
+          like.destroy(),
+          like.Tweet.decrement('likeCount')
+        ]).then(result => {
+          return res.status(200).json({
+            status: 'success',
+            message: 'Unlike successfully',
+            tweetId: result[1].id
+          })
+        })
+      }
+    })
   }
 }
 
