@@ -5,13 +5,13 @@ const tweetService = {
     return await Tweet.findAll({
       where: whereQuery,
       attributes: [
-        'id', 'createdAt',
+        ['id', 'TweetId'], 'createdAt',
         [Sequelize.literal('substring(description,1,50)'), 'description'],
         [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
         [Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount'],
         [Sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLike']
       ],
-      group: 'id',
+      group: 'TweetId',
       include: [
         { model: Like, attributes: [] },
         { model: Reply, attributes: [] },
