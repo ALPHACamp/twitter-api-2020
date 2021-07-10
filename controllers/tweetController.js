@@ -4,7 +4,7 @@ const validator = require('validator')
 
 const TweetController = {
   getTweets: async (req, res) => {
-    //#swagger.tags = ['Tweets']
+    // #swagger.tags = ['Tweets']
     try {
       let tweets = await Tweet.findAll({
         include: [
@@ -39,7 +39,7 @@ const TweetController = {
     }
   },
   getTweet: async (req, res) => {
-    //#swagger.tags = ['Tweets']
+    // #swagger.tags = ['Tweets']
     try {
       const id = req.params.tweet_id
       const tweet = await Tweet.findByPk(id,
@@ -74,7 +74,7 @@ const TweetController = {
     }
   },
   postTweet: async (req, res) => {
-    //#swagger.tags = ['Tweets']
+    // #swagger.tags = ['Tweets']
     try {
       const { description } = req.body
       if (!description) {
@@ -94,11 +94,12 @@ const TweetController = {
     }
   },
   getReplies: async (req, res) => {
-    //#swagger.tags = ['Replies']
+    // #swagger.tags = ['Replies']
     try {
       let replies = await Reply.findAll({
         where: { TweetId: req.params.tweet_id },
-        include: [User, { model: Tweet, include: User }]
+        include: [User, { model: Tweet, include: User }],
+        order: [['createdAt', 'DESC']]
       })
       if (!replies) {
         return res.status(404).json({ status: 'error', message: 'Cannot find any replies in db.' })
@@ -123,7 +124,7 @@ const TweetController = {
     }
   },
   postReply: async (req, res) => {
-    //#swagger.tags = ['Replies']
+    // #swagger.tags = ['Replies']
     try {
       const TweetId = req.params.tweet_id
       const repliedTweet = await Tweet.findByPk(TweetId, { include: [User] })
@@ -150,7 +151,7 @@ const TweetController = {
     }
   },
   postLike: async (req, res) => {
-    //#swagger.tags = ['Likes']
+    // #swagger.tags = ['Likes']
     try {
       const TweetId = req.params.id
       const UserId = req.user.id
@@ -175,7 +176,7 @@ const TweetController = {
     }
   },
   postUnlike: async (req, res) => {
-    //#swagger.tags = ['Likes']
+    // #swagger.tags = ['Likes']
     try {
       const TweetId = req.params.id
       const UserId = req.user.id
