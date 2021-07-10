@@ -297,7 +297,7 @@ describe('# user requests', () => {
     describe('PUT /api/users/:id', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
-        const rootUser = await db.User.create({ name: 'root' });
+        const rootUser = await db.User.create({ name: 'root', avatar: 'i am root' });
         this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
           return (req, res, next) => { };
