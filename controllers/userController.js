@@ -5,7 +5,6 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const moment = require('moment')
 const jwt = require('jsonwebtoken')
-const moment = require('moment')
 
 const imgurUpload = (file) => {
   return new Promise((resolve, reject) => {
@@ -143,7 +142,7 @@ const userController = {
         return {
           ...like.Tweet,
           TweetId: like.Tweet.id,
-          createdAt: moment(like.Tweet.createdAt).format('YYYY - MM - DD hh: mm: ss a'),
+          createdAt: moment(like.Tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
         }
       })
       return res.json(Tweets)
@@ -169,8 +168,8 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
       const replies = results.map(reply => {
-        reply.createdAt = moment(reply.createdAt).format('YYYY-MM-DD kk:mm:ss')
-        reply.Tweet.createdAt = moment(reply.Tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        reply.createdAt = moment(reply.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        reply.Tweet.createdAt = moment(reply.Tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
         return reply
       })
       return res.json(replies)
@@ -194,7 +193,7 @@ const userController = {
       })
       const tweets = results.map(tweet => ({
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
       }))
       return res.json(tweets)
     } catch (err) {
@@ -283,7 +282,7 @@ const userController = {
   editUser: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      const { name, account, email, password, checkPassword, introduction } = req.body
+      const { name, account, email, password, checkPassword } = req.body
       // 確認所有欄位
       if (!name || !account || !email || !password || !checkPassword) {
         return res.json({ status: 'error', message: '所有欄位皆為必填！' })

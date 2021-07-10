@@ -12,7 +12,7 @@ const followshipController = {
       // 未追隨使用者，create 並將使用者/被追隨者 FollowingCounts/FollowerCounts + 1
       await Followship.create({
         followerId: req.user.id,
-        followingId: req.body.id,
+        followingId: req.body.id
       })
       await User.increment('followingCounts', { where: { id: req.user.id } })
       await User.increment('followerCounts', { where: { id: req.body.id } })
