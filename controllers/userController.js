@@ -171,6 +171,7 @@ const userController = {
       const user = await User.findOne({
         where: {
           id: id
+
         },
         include: [
           { model: Tweet },
@@ -181,9 +182,15 @@ const userController = {
       if (!user) {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
+      if (user.role === 'admin') {
+        const data = { status: 'error', message: 'Cannot view administrator.' }
+        return res.status(400).json(data)
+      }
       const data = {
-        id: user.id,
-        name: user.name,
+        status: 'success',
+        message: `Get @${user.account}'s  profile successfully.`,
+        id: user.dataValues.id,
+        name: user.dataValues.name,
         account: user.account,
         email: user.email,
         avatar: user.avatar,
@@ -192,15 +199,8 @@ const userController = {
         tweetCount: user.Tweets.length,
         followerCount: user.Followers.length,
         followingCount: user.Followings.length,
-        status: 'success',
-        message: `Get @${user.account}'s  profile successfully.`
+        isFollowed: user.Followers.map(d => d.id).includes(req.user.id)
       }
-      // if (Number(id) !== req.user.id) {
-      //   return res.status(200).json(
-      //     data,
-      //     data.isFollowed = req.user.Followings.map(d => d.id).includes(user.id)
-      //   )
-      // }
       return res.status(200).json(
         data
       )
