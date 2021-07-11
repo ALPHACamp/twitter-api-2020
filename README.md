@@ -74,7 +74,7 @@ http://localhost:3000/api/{route}
 | user   | RyanHuang   | 12345678   |
   
 ## API說明
-* 除了後臺管理者登入、使用者登入、註冊這 3 條路由外，其餘路由需在 header 的 Authorization 帶上"Bearer" + token (token可從登入時拿到)
+* 除了管理員、使用者登入和使用者註冊這 2 條路由外，其餘路由需在 header 的 Authorization 帶上"Bearer" + token (token可從登入時拿到)
 * response 皆包含 http status code & message (說明成功狀態或是失敗原因)
 
 ## API文件
@@ -597,16 +597,52 @@ status code: 409
 }
 ```
 
-
-
 ## Users
+### 瀏覽使用者的檔案
+##### Method & URL
+```
+POST /api/users/:id
+```
+#### Parameters
+id：欲瀏覽的使用者 id
+##### Response
+###### Success
+```
+status code: 200
+{
+    "status": "success",
+    "message": "Get @BeatricePai's  profile successfully.",
+    "id": 4,
+    "name": "Beatrice",
+    "account": "BeatricePai",
+    "email": "betrice@example.com",
+    "avatar": "https://i.pravatar.cc/150?img=28",
+    "cover": "https://loremflickr.com/660/240/paris/?lock=95.94581210965639",
+    "introduction": "Soluta iusto nihil ut. Ipsam alias nesciunt voluptatem.,
+    "tweetCount": 10,
+    "followerCount": 2,
+    "followingCount": 1,
+    "isFollowed": true
+}
+```
+###### Failure
+##### 找不到該使用者
+```
+status code: 404
+{
+   "status": "error",
+   "message": [
+       "Cannot find any user in db."
+   ]
+}
+```
 ### 編輯自己的使用者檔案
 ##### Method & URL
 ```
 PUT /api/users/:id
 ```
 #### Parameters
-id：目前登入的使用者id
+id：目前登入的使用者 id
 ##### Request
 
 | body  | Type   | Required |
@@ -1015,6 +1051,70 @@ status code: 404
     ]
 }
 ```
+### 目前登入的使用者
+##### Method & URL
+```
+GET /api/users/current
+```
+##### Response
+###### Success
+```
+status code: 200
+{
+    "id": 1,
+    "name": "Ryan",
+    "account": "RyanHuang",
+    "email": "ryan@example.com",
+    "avatar": "https://i.pravatar.cc/150?img=68",
+    "role": "user",
+    "cover": "https://loremflickr.com/660/240/paris/?lock=37.08013914092159",
+    "introduction": "Et odio eaque.\nQuae illum nemo."
+}
+```
+### 全站追蹤者數量前 10 名的使用者名單
+##### Method & URL
+```
+GET /api/users
+```
+##### Response
+###### Success
+```
+status code: 200
+{
+    "status": "success",
+    "message": "Get top ten users successfully",
+    "users": [ 
+        {
+            "id": 3,
+            "name": "Aaron",
+            "avatar": "https://i.pravatar.cc/150?img=56",
+            "account": "AaronWang",
+            "followerCount": 2,
+            "isFollowed": true
+        },
+        {
+            "id": 4,
+            "name": "Beatrice",
+            "avatar": "https://i.pravatar.cc/150?img=28",
+            "account": "BeatricePai",
+            "followerCount": 1,
+            "isFollowed": true
+        },
+        ...
+    ]
+}
+```
+###### Failure
+###### 找不到使用者
+```
+status code: 404
+{
+   "status": "error",
+   "message": [
+       "Cannot find any user in db."
+   ]
+}
+```
 
 
 
@@ -1038,6 +1138,7 @@ status code: 200
 }
 
 ```
+
 ###### Failure
 ###### 該則推文不存在
 ```
