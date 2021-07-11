@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 
 if (process.env.NODE_ENV !== 'production') {
@@ -12,7 +13,8 @@ const helpers = require('./_helpers')
 app.use(methodOverride('_method'))
 
 app.use(cors())
-app.use(express.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: true })) //用來解析表單
+app.use(bodyParser.json()) //用來解析json
 app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use((req, res, next) => {
