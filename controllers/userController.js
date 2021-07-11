@@ -7,6 +7,9 @@ const Reply = db.Reply
 const Followship = db.Followship
 const { Op } = require('sequelize')
 
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
@@ -285,45 +288,66 @@ const userController = {
     const UserId = Number(req.params.id)
     const viewerId = req.user.id
     if (UserId !== viewerId) {
-      console.log(typeof UserId, typeof viewerId)
       return res.status(400).json({
         status: 'error',
         message: 'This is not this user\'s account.'
       })
     }
 
-    return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-        if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Required fields missing.'
-          })
-        }
-        if (req.body.password !== req.body.checkPassword) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Password should be as same as checkPassword'
-          })
-        }
-        user.update({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-        })
-        return res.status(200).json({
-          status: 'success',
-          message: 'User successfully updated.',
-          user: { id: UserId }
-        })
+    if (!req.body.name) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User name required.'
       })
+    }
+    const { files } = req
+    if (files) {
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      imgur.upload(files.avatar[0].path, (err, img) => {
+        console.log(img.data)
+        if (err) {
+          return res.json({ err })
+        }
+        return User.findByPk(req.params.id)
+          .then((user) => {
+            user.update({
+              name: req.body.name,
+              introduction: req.body.introduction,
+              avatar: files.avatar ? img.data.link : user.avatar
+              // cover: files.cover ? img.data.link : user.cover
+            })
+            imgur.upload(files.cover[0].path, (err, img) => {
+              if (err) {
+                return res.json(err)
+              }
+              return User.findByPk(req.params.id)
+                .then((user) => {
+                  user.update({
+                    cover: files.cover ? img.data.link : user.cover
+                  })
+                })
+            })
+            return res.status(200).json({
+              status: 'success',
+              message: 'User successfully updated.'
+            })
+          })
+      })
+    } else {
+      return User.findByPk(req.params.id)
+        .then((user) => {
+          user.update({
+            name: req.body.name,
+            introduction: req.body.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          })
+          return res.status(200).json({
+            status: 'success',
+            message: 'User successfully updated.'
+          })
+        })
+    }
   }
 }
 
