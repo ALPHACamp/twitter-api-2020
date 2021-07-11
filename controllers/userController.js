@@ -407,6 +407,9 @@ const userController = {
         }],
         order: [['createdAt', 'DESC']]
       })
+      if (!likes) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any liked tweets in db.' })
+      }
       likes = likes.map(like => {
         return {
           id: like.id,
