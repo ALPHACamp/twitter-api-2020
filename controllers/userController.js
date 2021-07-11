@@ -319,7 +319,7 @@ const userController = {
         return res.status(404).json({ status: 'error', message: 'Cannot find this user in db.' })
       }
 
-      const tweets = await Tweet.findAll({
+      let tweets = await Tweet.findAll({
         where: { UserId },
         include: [
           User,
@@ -332,6 +332,20 @@ const userController = {
       if (!tweets) {
         return res.status(404).json({ status: 'error', message: 'Cannot find any tweets in db.' })
       }
+      tweets = tweets.map(tweet => {
+        return {
+          id: tweet.id,
+          UserId: tweet.UserId,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          account: tweet.User.account,
+          name: tweet.User.name,
+          avatar: tweet.User.avatar,
+          likedCount: tweet.Likes.length,
+          repliedCount: tweet.Replies.length,
+          isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
+        }
+      })
       return res.status(200).json(tweets)
     } catch (err) {
       console.log(err)
