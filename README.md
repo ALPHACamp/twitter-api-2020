@@ -181,6 +181,7 @@ status code: 200
 }
 ```
 ###### Failure
+##### 所有欄位都是必填的
 ```
 status code: 422
 {
@@ -190,6 +191,7 @@ status code: 422
     ]
 }
 ```
+##### 此帳號未註冊
 ```
 status code: 401
 {
@@ -199,6 +201,7 @@ status code: 401
     ]
 }
 ```
+##### 帳號或密碼有誤
 ```
 status code: 401
 {
