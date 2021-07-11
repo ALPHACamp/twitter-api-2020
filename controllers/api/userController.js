@@ -4,7 +4,8 @@ const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-const defaultLimit = 10
+const imgurUpload = require('../../_helpers').imgurUpload
+
 
 let userController = {
   postUser: (req, res) => {
@@ -112,14 +113,6 @@ let userController = {
     const userId = +req.user.id
     const { name, account, password, email, passwordNew, passwordNewCheck, introduction } = req.body
     const { files } = req
-    async function saveAndRes(user) {
-      await user.update(user.dataValues)
-      delete user.dataValues.role
-      delete user.dataValues.password
-      delete user.dataValues.createdAt
-      delete user.dataValues.updatedAt
-      return res.status(200).json(user)
-    }
     // check user permission
     if (id !== userId) {
       return res.status(403).json({
@@ -158,6 +151,7 @@ let userController = {
 
     User.findByPk(id)
       .then(async (user) => {
+        const modifiedData = {}
         if (account && user.account !== account) {
           await User.findOne({ where: { account, role: 'user' } }).then((otherUser) => {
             //check if account was already used
@@ -167,8 +161,7 @@ let userController = {
                 message: 'Account was already used.'
               })
             }
-            user.account = account
-            return user
+            modifiedData.account = account
           })
         }
         if (email && user.email !== email) {
@@ -181,14 +174,10 @@ let userController = {
                   message: 'Email was already used.'
                 })
               }
-              user.email = email
-              return user
+              modifiedData.email = email
             }
           )
         }
-        return user
-      })
-      .then(async (user) => {
         //check current password before adding new password
         if (passwordNew && !bcrypt.compareSync(password, user.password)) {
           return res.status(401).json({
@@ -196,49 +185,23 @@ let userController = {
             message: 'Current password incorrect.'
           })
         }
-        user.name = name || user.name
-        user.password = passwordNew
+        modifiedData.name = name || user.name
+        modifiedData.password = passwordNew
           ? bcrypt.hashSync(passwordNew, bcrypt.genSaltSync(10))
           : user.password
-        user.introduction = introduction || user.introduction
-        // two image files
-        if (files && files.avatar && files.cover) {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          return new Promise((resolve, reject) => {
-            imgur.upload(files.avatar[0].path, (err, avatar) => {
-              resolve(avatar.data.link)
-            })
-          }).then(async (avatar) => {
-            return new Promise((resolve, reject) => {
-              imgur.upload(files.cover[0].path, (err, cover) => {
-                resolve({ avatar, cover: cover.data.link })
-              })
-            })
-              .then(async (links) => {
-                user.avatar = links.avatar
-                user.cover = links.cover
-                await saveAndRes(user)
-              })
-              .catch((err) => {
-                return res.status(500).json({ status: 'error', message: err })
-              })
-          })
-        }
-        // one image file
-        else if (files && (files.avatar || files.cover)) {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          image = files.avatar || files.cover
-          imageName = files.avatar ? 'avatar' : 'cover'
-          return imgur.upload(image[0].path, (err, image) => {
-            user[imageName] = image.data.link
-            saveAndRes(user).catch(err => console.log(err))
-          })
-        }
-        // no image file
-        else {
-          await saveAndRes(user)
-        }
+        modifiedData.introduction = introduction || user.introduction
+        
+        //deal with avatar、cover
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        modifiedData.avatar = files && files.avatar ? await imgurUpload(files.avatar[0].path):user.avatar
+        modifiedData.cover = files && files.cover ? await imgurUpload(files.cover[0].path) : user.cover
+        const newData = await user.update(modifiedData)
+        res.status(200).json(newData)
       })
+      .catch(error => res.status(400).json({
+        status:'error',
+        message: error
+      }))
   },
   login: (req, res) => {
     const { password, email } = req.body
