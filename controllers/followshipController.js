@@ -53,10 +53,43 @@ const followshipController = {
           })
         })
       })
-
     })
+  },
 
+  removeFollowing: (req, res) => {
+    const followingId = req.params.id
+    const followerId = req.user.id
 
+    return User.findByPk(followerId, {
+      attributes: ['id'],
+      include: [
+        {
+          model: User,
+          attributes: ['id'],
+          as: 'Followings',
+          where: { id: followingId }
+        }
+      ],
+      nest: true
+    }).then(user => {
+      if (!user) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Followship is not exist'
+        })
+      }
+
+      return Promise.all([
+        user.Followings[0].Followship.destroy(),
+        user.decrement('followingCount'),
+        user.Followings[0].decrement('followerCount')
+      ]).then(result => {
+        return res.status(200).json({
+          status: 'success',
+          message: `User.id ${user.id} removed following to user.id ${user.Followings[0].id} successfully`
+        })
+      })
+    })
   }
 }
 
