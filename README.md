@@ -702,6 +702,7 @@ status code: 400
         "This account is already being used."
     ]
 }
+```
 
 ### 瀏覽使用者跟隨者
 ##### Method & URL
