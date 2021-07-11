@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const imgur = require('imgur-node-api')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID || 'f5f20e3d9d3e60a'
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const Sequelize = require('sequelize')
 const { Op } = require("sequelize")
 
@@ -103,7 +103,7 @@ const userController = {
             [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = User.id)'), 'totalLikes']
           ],
           include: [
-            { model: User, attributes: ['avatar', 'name', 'account'] },
+            { model: User, attributes: ['id', 'avatar', 'name', 'account'] },
           ],
           order: [['createdAt', 'DESC']]
         }]
@@ -127,7 +127,7 @@ const userController = {
         ],
         include: [
           {
-            model: User, attributes: ['account', 'name', 'avatar', 'cover', 'bio']
+            model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover', 'bio']
           }],
       })
       if (tweets.length === 0) {
@@ -142,11 +142,11 @@ const userController = {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const tweets = await Tweet.findAll({
         include: [
-          { model: User, attributes: ['name', 'account', 'avatar'] },
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           {
             model: Reply, where: { UserId: req.params.id },
-            attributes: ['content', 'createdAt'],
-            include: [{ model: User, attributes: ['account', 'name', 'avatar'] }],
+            attributes: ['id', 'content', 'createdAt'],
+            include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
             order: ['createdAt', 'DESC']
           }],
         attributes: [
@@ -157,6 +157,9 @@ const userController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
         ],
+        // order: [ //測試中
+        //   [Reply, 'createdAt', 'DESC']
+        // ]
       })
 
       if (tweets.length === 0) return res.json({ status: 'error', message: '沒有回覆任何推文' })
@@ -169,13 +172,13 @@ const userController = {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const likes = await Like.findAll({
         include: [
-          { model: User, attributes: ['account', 'name', 'avatar', 'cover'] },
+          { model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover'] },
           {
             model: Tweet,
-            attributes: ['description', 'createdAt',
+            attributes: ['id', 'description', 'createdAt',
               [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
               [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']],
-            include: [{ model: User, attributes: ['account', 'name', 'avatar'] }]
+            include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
           }],
         where: { UserId: req.params.id }
       })
