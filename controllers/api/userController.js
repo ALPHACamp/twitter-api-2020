@@ -198,7 +198,7 @@ let userController = {
         const newData = await user.update(modifiedData)
         res.status(200).json(newData)
       })
-      .catch(error => res.status(400).json({
+      .catch(error => res.status(500).json({
         status:'error',
         message: error
       }))
