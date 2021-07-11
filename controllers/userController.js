@@ -97,10 +97,13 @@ const userController = {
         }
         return Tweet.findAll({
           where: { UserId },
-          attributes: {
-            exclude: ['UserId', 'updatedAt']
+          attributes: [['id', 'TweetId'], 'description', 'createdAt', 'replyCount', 'likeCount'],
+          include: {
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
           }
         }).then(tweets => {
+
           return res.status(200).json(tweets)
         })
       })
@@ -130,14 +133,26 @@ const userController = {
           where: { UserId },
           attributes: ['TweetId']
         }).then(likes => {
-          likes.forEach(like => {
-            like = like.toJSON()
-            if (like.User.id === viewerId) {
-              like.Tweet.isLike = true
-            } else {
-              like.Tweet.isLike = false
+          likes = likes.map((like, i) => {
+            const userObj = {
+              ...like.User.dataValues
             }
+
+            const mapItem = {
+              ...like.dataValues,
+              ...like.Tweet.dataValues,
+              isLike: like.User.id === viewerId
+            }
+            
+            delete mapItem.Tweet
+            delete mapItem.id
+            delete mapItem.User
+
+            mapItem.User = userObj
+
+            return mapItem
           })
+
           return res.status(200).json(likes)
         })
       })
@@ -281,7 +296,7 @@ const userController = {
       return res.status(200).json(users)
     })
   },
-      
+
   getUserRepliedTweets: (req, res) => {
     const UserId = req.params.id
     const viewerId = req.user.id
@@ -294,7 +309,7 @@ const userController = {
             error: 'This user does not exist.'
           })
         }
-        
+
         return Reply.findAll({
           where: { UserId },
           include: [
@@ -305,21 +320,27 @@ const userController = {
               include: { model: Like, separate: true, where: { UserId: viewerId }, required: false }
             }
           ],
-          attributes: ['id', 'createdAt', 'comment'],
+          attributes: ['id', 'comment'],
           nest: true
         }).then(replies => {
           replies = replies.map((item, i) => {
-            const mapItem = {
-              ...item.dataValues,
-              Tweet: {
-                ...item.Tweet.dataValues,
-                isLike: Boolean(item.Tweet.Likes[0])
-              },
-              User: {
-                ...item.User.dataValues
-              }
+            const userObj = {
+              ...item.User.dataValues
             }
-            delete mapItem.Tweet.Likes
+
+            const mapItem = {
+              TweetId: item.Tweet.dataValues.id,
+              ...item.dataValues,
+              ...item.Tweet.dataValues,
+              isLike: Boolean(item.Tweet.Likes[0]),
+            }
+
+            delete mapItem.Tweet
+            delete mapItem.Likes
+            delete mapItem.id
+            delete mapItem.User
+
+            mapItem.User = userObj
 
             return mapItem
           })

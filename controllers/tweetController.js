@@ -122,9 +122,7 @@ const tweetController = {
           }
         }
       ],
-      attributes: {
-        exclude: ['updatedAt', 'UserId'],
-      },
+      attributes: [['id', 'TweetId'], 'description', "likeCount", "replyCount", "createdAt"],
       raw: true,
       nest: true
     }).then(tweets => {
