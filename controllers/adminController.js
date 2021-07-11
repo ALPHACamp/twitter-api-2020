@@ -29,6 +29,7 @@ const adminController = {
       next(err)
     }
   },
+
   getAllUser: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'admin') return res.json({ status: 'error', message: '管理員專用' })
@@ -36,6 +37,7 @@ const adminController = {
       return res.json(user)
     } catch (err) { next(err) }
   },
+
   getAllTweet: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'admin') return res.json({ status: 'error', message: '管理員專用' })

@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const session = require('express-session')
+const cors = require('cors')
 const methodOverride = require('method-override')
 
 if (process.env.NODE_ENV !== 'production') {
@@ -9,9 +9,11 @@ if (process.env.NODE_ENV !== 'production') {
 const port = process.env.PORT
 
 const helpers = require('./_helpers')
-
 app.use(methodOverride('_method'))
-app.use(express.urlencoded({ extended: true }))
+
+app.use(cors())
+app.use(express.urlencoded({ extended: true })) //用來解析表單
+app.use(express.json()) //用來解析json
 app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use((req, res, next) => {
