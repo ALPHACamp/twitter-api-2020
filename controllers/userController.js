@@ -128,9 +128,7 @@ const userController = {
         }
       }
 
-      const user = await userService.putUser(req.params.user_id, {
-        ...req.body
-      })
+      const user = await userService.putUser(req.params.user_id, { ...req.body })
       return res.json({ status: 'success', user })
     } catch (error) {
       return next(error)

@@ -10,12 +10,11 @@ const userService = {
 
   signUp: async (formBody) => {
     await userService.checkUnique(formBody)
-    const user = await User.create({ ...formBody })
-    return user
+    return await User.create({ ...formBody })
   },
 
   getUser: async (viewingId, currentUserId = null) => {
-    const user = await User.findByPk(viewingId, {
+    return await User.findByPk(viewingId, {
       attributes: [
         'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt',
         [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
@@ -27,17 +26,15 @@ const userService = {
         { model: Like }
       ]
     })
-    return user
   },
 
   putUser: async (id, body) => {
     await userService.checkUnique(body, id)
-    const user = await User.update({ ...body }, { where: { id } })
-    return user
+    return await User.update({ ...body }, { where: { id } })
   },
 
   getFollowings: async (userId, currentUserId) => {
-    const followings = await User.findAll({
+    return await User.findAll({
       where: {
         id: {
           [Op.in]: [Sequelize.literal(`select followingId from followships where followerId = ${userId}`)]
@@ -49,11 +46,10 @@ const userService = {
         [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
       ]
     })
-    return followings
   },
 
   getFollowers: async (userId, currentUserId) => {
-    const followers = await User.findAll({
+    return await User.findAll({
       where: {
         id: {
           [Op.in]: [Sequelize.literal(`select followerId from followships where followingId = ${userId}`)]
@@ -65,7 +61,6 @@ const userService = {
         [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
       ]
     })
-    return followers
   },
 
   getTopUsers: async (id) => {
@@ -88,7 +83,7 @@ const userService = {
   },
 
   getLikes: async (id) => {
-    const likes = await Tweet.findAll({
+    return await Tweet.findAll({
       where: {
         id: {
           [Op.in]: [Sequelize.literal(`select TweetId from Likes where UserId = ${id}`)]
@@ -113,7 +108,6 @@ const userService = {
       ],
       order: [[Sequelize.literal('likes.createdAt DESC')]]
     })
-    return likes
   },
 
   checkUnique: async ({ email, account }, userId = null) => {
