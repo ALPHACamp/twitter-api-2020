@@ -11,6 +11,9 @@ const adminController = {
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }]
       })
+      if (!users) {
+        return res.status(404).json({ status: 'error', message: 'Cannot find any users in db.' })
+      }
       users = users.map(user => {
         let likedCount = 0
         user.Tweets.forEach(tweet => {
