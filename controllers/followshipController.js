@@ -17,6 +17,7 @@ const followshipController = {
         ]
       })
       users = await users.map(user => ({
+        id: user.dataValues.id,
         name: user.dataValues.name,
         account: user.dataValues.account,
         avatar: user.dataValues.avatar,

@@ -19,7 +19,7 @@ const tweetController = {
           [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
         ],
         include: [
-          { model: User, attributes: ['avatar', 'name', 'account'] },
+          { model: User, attributes: ['id', 'avatar', 'name', 'account'] },
         ],
         order: [['createdAt', 'DESC']]
       })
@@ -44,7 +44,7 @@ const tweetController = {
           [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
         ],
         include: [
-          { model: User, attributes: ['avatar', 'name', 'account'] },
+          { model: User, attributes: ['id', 'avatar', 'name', 'account'] },
           {
             model: Reply,
             attributes: [
@@ -52,8 +52,7 @@ const tweetController = {
               'content',
               [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Replies.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
               [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.ReplyId = Replies.id)'), 'totalLikes']],
-            // order: [[Sequelize.literal('totalLikes'), 'DESC']], 測試中
-            include: [{ model: User, attributes: ['avatar', 'name', 'account'] }]
+            include: [{ model: User, attributes: ['id', 'avatar', 'name', 'account'] }]
           }
         ],
       })
@@ -78,7 +77,7 @@ const tweetController = {
           [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Reply.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
           [Sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.ReplyId = Reply.id)`), 'totalLikes']
         ],
-        include: [{ model: User, attributes: ['avatar', 'name', 'account'] }],
+        include: [{ model: User, attributes: ['id', 'avatar', 'name', 'account'] }],
         order: [[Sequelize.literal('totalLikes'), 'DESC']]
       })
       return res.json(replies)
@@ -164,10 +163,6 @@ const tweetController = {
       next(err)
     }
   },
-
-
-
-
 }
 
 module.exports = tweetController
