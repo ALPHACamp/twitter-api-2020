@@ -1,4 +1,4 @@
-## Simple-twitter-api
+# Simple Twitter RESTful API 
 ##### 這是一個提供前端開發串接API的Simple Twitter專案
 
 ## 共同開發人員 (Collaborator)
@@ -12,7 +12,7 @@
 * MySQL workbench - - v8.0.25
 
 ## 初始化（Initialize）
-* 請在終端機輸入
+1. 請在終端機輸入
 
 ```
 git clone https://github.com/wintersprouter/twitter-api-2020.git
@@ -20,7 +20,7 @@ cd twitter-api-2020
 npm install  (請參考 package.json)
 ```
 
-* 建立.env
+2. 建立.env
 
 ```
 PORT='3000'
@@ -29,7 +29,7 @@ IMGUR_CLIENT_ID= xxx
 ```
 
 
-* 使用 MySQL Workbench 建立資料庫
+3. 使用 MySQL Workbench 建立資料庫
   * 需要與 config/config.json 一致
 
 ```
@@ -37,14 +37,14 @@ create database ac_twitter_workspace;
 create database ac_twitter_workspace_test;
 ```
 
-* 在終端機輸入以下指令，進行資料庫遷移、種子資料初始化
+4. 在終端機輸入以下指令，進行資料庫遷移、種子資料初始化
 
 ```
 npx sequelize db:migrate
 npx sequelize db:seed:all
 ```
 
-* 在終端機輸入以下指令，啟動swagger API 和 後端專案
+5. 在終端機輸入以下指令，啟動 swagger API 和 後端專案
 
 ```
 npm run swagger-autogen
@@ -64,16 +64,21 @@ http://localhost:3000/api-doc/
 ＊ API串接網址
 http://localhost:3000/api/{route}
 
-* 共用帳號
-  ＊ 後台登入帳號：root　登入密碼：12345678　
-  ＊ 前台登入帳號 : RyanHuang　登入密碼：12345678　
+### 共用帳號
+使用者可以使用以下帳號分別登入系統前台、後台。
+
+
+| role| account | password |
+| -------- | -------- | -------- |
+| admin  | root   | 12345678  |
+| user   | RyanHuang   | 12345678   |
   
 ## API說明
 * 除了後臺管理者登入、使用者登入、註冊這 3 條路由外，其餘路由需在 header 的 Authorization 帶上"Bearer" + token (token可從登入時拿到)
 * response 皆包含 http status code & message (說明成功狀態或是失敗原因)
 
 ## API文件
-## 前台註冊登入
+## Sign in & Sign up
 #### 前台註冊
 ##### Method & URL
 ```
@@ -91,6 +96,7 @@ POST /api/users
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "@Lee sign up successfully.Please sign in."
@@ -99,11 +105,36 @@ POST /api/users
 ###### Failure
 ###### email或account重複註冊
 ```
+status code: 400
 {
     "status": "error",
     "message": [
         "This email address is already being used.",
         "This account is already being used."
+    ]
+}
+```
+###### 有未填欄位
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "All fields are required！"
+    ]
+}
+```
+###### 表單填寫錯誤原因
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "Name can not be longer than 50 characters.",
+        "Account can not be longer than 20 characters.",
+        "example.com is not a valid email address.",
+        "Password does not meet the required length.",
+        "The password and confirmation do not match.Please retype them."
     ]
 }
 ```
@@ -123,6 +154,7 @@ POST /api/users/signin
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "Sign in successfully.",
@@ -140,11 +172,28 @@ POST /api/users/signin
 ```
 ###### Failure
 ```
+status code: 422
 {
     "status": "error",
     "message": [
-        "All fields are required!",
-        "That account is not registered!",
+        "All fields are required！"
+    ]
+}
+```
+```
+status code: 401
+{
+    "status": "error",
+    "message": [
+        "That account is not registered!"
+    ]
+}
+```
+```
+status code: 401
+{
+    "status": "error",
+    "message": [
         "Account or Password incorrect."
     ]
 }
@@ -496,6 +545,8 @@ DELETE /api/followships/:followingId
 ```
 PUT /api/users/:id
 ```
+#### Parameters
+id：目前登入的使用者id
 ##### Request
 
 | Params  | Type   | Required |
@@ -508,30 +559,75 @@ PUT /api/users/:id
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "Update ${name}'s profile successfully."
 }
 ```
 ###### Failure
+
+##### 只有使用者本人可以編輯
 ```
+status code: 401
 {
     "status": "error",
     "message": [
-        "Permission denied.",
-        "Cannot find this user in db.",
-        "Name is required.",
-        "Name can not be longer than 50 characters.",
-        "Introduction can not be longer than 160 characters.",
-        "Image type of ${file} should be .jpg, .jpeg, .png ."
+        "Permission denied."
     ]
 }
 ```
+##### 查無該使用者
+ ```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any user in db."
+    ]
+}
+```
+##### 名稱未填寫
+ ```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "Name is required."
+    ]
+}
+ ```
+ ##### 名稱不得超過 50 字
+ ##### 簡介不得超過 160 字
+  ```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "Name can not be longer than 50 characters."
+        "Introduction can not be longer than 160 characters."
+    ]
+}
+ ```
+ ##### 圖片格式須符合.jpg, .jpeg, .png 
 
-### 瀏覽使用者檔案
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        " Image type of file should be .jpg, .jpeg, .png ."
+    ]
+}
+ ```
+
+
+### 編輯使用者帳戶資料
 ```
 PUT /api/users/:id/account
 ```
+#### Parameters
+id：目前登入的使用者id
 ##### Request
 
 | Params  | Type   | Required |
@@ -544,23 +640,68 @@ PUT /api/users/:id/account
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "@${account} Update account information successfully."
 }
 ```
 ###### Failure
+
+##### 只有使用者本人可以編輯
 ```
+status code: 401
 {
     "status": "error",
     "message": [
-        "Permission denied.",
-        "Cannot find this user in db.",
+        "Permission denied."
+    ]
+}
+```
+##### 查無該使用者
+ ```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any user in db."
+    ]
+}
+```
+##### 所有欄位都是必填的
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "All fields are required！"
+    ]
+}
+```
+##### 表單填寫錯誤原因
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "Name can not be longer than 50 characters.",
+        "Account can not be longer than 20 characters.",
+        "example.com is not a valid email address.",
+        "Password does not meet the required length.",
+        "The password and confirmation do not match.Please retype them."
+    ]
+}
+```
+##### 信箱或帳號已存在
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
         "This email address is already being used.",
         "This account is already being used."
     ]
 }
-```
 
 ### 瀏覽使用者跟隨者
 ##### Method & URL
