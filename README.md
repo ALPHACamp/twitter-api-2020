@@ -79,7 +79,7 @@ http://localhost:3000/api/{route}
 
 ## API文件
 ## Sign in & Sign up
-#### 前台註冊
+#### 前台使用者註冊
 ##### Method & URL
 ```
 POST /api/users
@@ -215,13 +215,16 @@ POST /api/tweets
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "The tweet was successfully created."
 }
 ```
 ###### Failure
+##### 推文內容不得空白
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -229,7 +232,9 @@ POST /api/tweets
     ]
 }
 ```
+##### 推文字數不得超過 140 字
 ```
+status code: 409
 {
     "status": "error",
     "message": [
@@ -238,7 +243,7 @@ POST /api/tweets
 }
 ```
 
-### 瀏覽推文
+### 瀏覽所有推文
 ##### Method & URL
 ```
 GET /api/tweets
@@ -246,6 +251,7 @@ GET /api/tweets
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "id": 30,
@@ -263,7 +269,9 @@ GET /api/tweets
 ]
 ```
 ###### Failure
+##### 查無任何推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -278,16 +286,18 @@ GET /api/tweets
 ```
 GET /api/tweets/:tweet_id
 ```
+#### Parameters
+tweet_id：欲瀏覽的推文 id
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "Get the tweet successfully",
     "id": 1,
     "UserId": 1,
     "description": "Aut enim reiciendis dicta quo ducimus tempora illum soluta. Eligendi nobis molestias hic. Numquam eos dignissimos doloribus nisi minus conse",
-    "LikeCount": 2,
     "createdAt": "2021-03-24T03:10:18.000Z",
     "account": "RyanHuang",
     "name": "Ryan",
@@ -298,7 +308,9 @@ GET /api/tweets/:tweet_id
 }
 ```
 ###### Failure
+##### 找不到該推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -321,17 +333,22 @@ POST /api/tweets/:tweet_id/replies
 | --------| ------ | ---------|
 | comment | Srting | True |
 
+#### Parameters
+tweet_id：欲回覆的推文 id
+
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
-    "message": "The tweet was successfully created."
+    "message": "You replied @${repliedTweetAuthor}'s tweet successfully."
 }
 ```
 ###### Failure
 ##### 找不到該推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -341,6 +358,7 @@ POST /api/tweets/:tweet_id/replies
 ```
 ##### 推文回覆空白
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -350,6 +368,7 @@ POST /api/tweets/:tweet_id/replies
 ```
 ##### 推文回覆超過50字
 ```
+status code: 409
 {
     "status": "error",
     "message": [
@@ -363,9 +382,12 @@ POST /api/tweets/:tweet_id/replies
 ```
 GET /api/tweets/:tweet_id/replies
 ```
+#### Parameters
+tweet_id：瀏覽回覆的推文 id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "id": 2,
@@ -382,7 +404,9 @@ GET /api/tweets/:tweet_id/replies
 ]
 ```
 ###### Failure
+##### 找不到任何回覆
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -398,9 +422,12 @@ GET /api/tweets/:tweet_id/replies
 ```
 POST /api/tweets/:id/like
 ```
+#### Parameters
+id：欲點like的推文 id
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "You liked @${likedTweetAuthor}'s tweet successfully."
@@ -409,6 +436,7 @@ POST /api/tweets/:id/like
 ###### Failure
 ##### 找不到該推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -418,6 +446,7 @@ POST /api/tweets/:id/like
 ```
 ##### 推文已被按讚
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -431,10 +460,13 @@ POST /api/tweets/:id/like
 ```
 POST /api/tweets/:id/unlike
 ```
+#### Parameters
+id：欲取消like的推文 id
 
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "You unliked ${unlikedTweetAuthor}'s tweet successfully."
@@ -443,6 +475,7 @@ POST /api/tweets/:id/unlike
 ###### Failure
 ##### 找不到該推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -452,6 +485,7 @@ POST /api/tweets/:id/unlike
 ```
 ##### 推文沒被按讚
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -466,9 +500,16 @@ POST /api/tweets/:id/unlike
 ```
 POST /api/followships
 ```
+##### Request
+
+| body  | descriotion |
+| --------| ------ | 
+| followingId | 欲追蹤的使用者id | 
+
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "You followed @${followingUser.account} successfully."
@@ -477,6 +518,7 @@ POST /api/followships
 ###### Failure
 ##### 找不到該使用者
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -486,10 +528,21 @@ POST /api/followships
 ```
 ##### 不能追蹤自己
 ```
+status code: 403
 {
     "status": "error",
     "message": [
         "You cannot follow yourself." 
+    ]
+}
+```
+##### 已經追蹤該名使用者了
+```
+status code: 409
+{
+    "status": "error",
+    "message": [
+        "You already followed @${followingUser.account}" 
     ]
 }
 ```
@@ -499,9 +552,13 @@ POST /api/followships
 ```
 DELETE /api/followships/:followingId
 ```
+#### Parameters
+followingId：欲取消追蹤的使用者 id
+
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "Unfollowed @${followingUser.account} successfully."
@@ -510,6 +567,7 @@ DELETE /api/followships/:followingId
 ###### Failure
 ##### 找不到該使用者 
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -519,16 +577,18 @@ DELETE /api/followships/:followingId
 ```
 ##### 不能取消追蹤自己
 ```
+status code: 403
 {
     "status": "error",
     "message": [
-        "You cannot follow yourself." 
+        "You cannot unfollow yourself." 
     ]
 }
 ```
 
 ##### 沒有追蹤過
 ```
+status code: 409
 {
     "status": "error",
     "message": [
@@ -549,7 +609,7 @@ PUT /api/users/:id
 id：目前登入的使用者id
 ##### Request
 
-| Params  | Type   | Required |
+| body  | Type   | Required |
 | --------| ------ | ---------|
 | name    | String | True |
 | introduction  | String | False |
@@ -1026,3 +1086,5 @@ status code: 404
 }
 ```
 
+
+[![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
