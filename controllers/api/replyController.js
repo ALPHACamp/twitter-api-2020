@@ -103,8 +103,6 @@ let replyController = {
     Reply.findAll(options)
       .then(replies => {
         replies = replies.map(reply => {
-          reply.comment = reply.comment.substring(0, 50)
-          reply.RepliedTweet.description = reply.RepliedTweet.description.substring(0, 50)
           reply.RepliedTweet.dataValues.isLike = reply.RepliedTweet.dataValues.LikedUsers.some(
             (likedUser) => likedUser.id === +req.user.id
           )

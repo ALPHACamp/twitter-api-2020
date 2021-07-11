@@ -31,9 +31,6 @@ let followController = {
         followships = followships
           .map(followship => {
             const following = followship.following.dataValues
-            if (following.introduction) {
-              following.introduction = following.introduction.substring(0, 50)
-            }
             following.isFollowing = following.Followers.some(user => user.id === +req.user.id)
             delete following.Followers
             return followship
@@ -70,9 +67,6 @@ let followController = {
       .then(followships => {
         followships = followships.map(followship => {
           const follower = followship.follower.dataValues
-          if (follower.introduction) {
-            follower.introduction = follower.introduction.substring(0, 50)
-          }
           follower.isFollowing = follower.Followers.some(user => user.id === +req.user.id)
           delete follower.Followers
           return followship

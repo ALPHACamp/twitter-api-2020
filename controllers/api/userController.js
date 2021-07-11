@@ -23,6 +23,13 @@ let userController = {
         message: "Password and confirm password doesn't match."
       })
     }
+    if (name.length > 50) {
+      return res.status(400)
+        .json({
+          status: 'error',
+          message: 'Cannot post over 50 characters.'
+        })
+    }
     User.findOne({
       where: {
         account,
@@ -143,11 +150,19 @@ let userController = {
       }
     }
     // if there's a introduction update
-    if (introduction && introduction.length > 140) {
+    if (introduction && introduction.length > 160) {
       return res.status(400).json({
         status: 'error',
-        message: 'Cannot post over 140 characters'
+        message: 'Cannot post over 160 characters'
       })
+    }
+    // if there's a name update
+    if (name && name.length > 50) {
+      return res.status(400)
+        .json({
+          status: 'error',
+          message: 'Cannot post over 50 characters.'
+        })
     }
 
     User.findByPk(id)
