@@ -89,7 +89,7 @@ http://localhost:3000/api/{route}
 
 ## API文件
 ## Sign in & Sign up
-#### 前台使用者註冊
+### 前台使用者註冊
 ##### Method & URL
 ```
 POST /api/users
@@ -149,7 +149,7 @@ status code: 400
 }
 ```
 
-#### 使用者或管理員登入
+### 使用者或管理員登入
 ##### Method & URL
 ```
 POST /api/users/signin
