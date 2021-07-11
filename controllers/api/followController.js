@@ -85,34 +85,47 @@ let followController = {
         message: 'Not allow to self-follow.'
       })
     }
-    Followship.create({
-      followerId: +req.user.id,
-      followingId: +req.body.id
-    })
-      .then(followship => {
-        Promise.all([
-          User.findByPk(+req.user.id)
-            .then((currentUser) =>
-              currentUser.increment({ followingNum: 1 })
-            ),
-          User.findByPk(+req.body.id)
-            .then((followingUser) =>
-              followingUser.increment({ followerNum: 1 })
-            )
-        ])
-          .then(() =>
-            res.status(200).json({
-              status: 'success',
-              message: 'Successfully followed user.'
-            })
-          )
-          .catch((error) =>
-            res.status(500).json({
-              status: 'error',
-              message: error
-            })
-          )
+    Followship.findOne({
+      where: {
+        followerId: +req.user.id,
+        followingId: +req.body.id
+      }
+    }).then(followship => {
+      if (followship) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'You are already following this user.'
+        })
+      }
+      Followship.create({
+        followerId: +req.user.id,
+        followingId: +req.body.id
       })
+        .then(followship => {
+          Promise.all([
+            User.findByPk(+req.user.id)
+              .then((currentUser) =>
+                currentUser.increment({ followingNum: 1 })
+              ),
+            User.findByPk(+req.body.id)
+              .then((followingUser) =>
+                followingUser.increment({ followerNum: 1 })
+              )
+          ])
+            .then(() =>
+              res.status(200).json({
+                status: 'success',
+                message: 'Successfully followed user.'
+              })
+            )
+            .catch((error) =>
+              res.status(500).json({
+                status: 'error',
+                message: error
+              })
+            )
+        })
+    })
   },
   deleteFollowship: (req, res) => {
     Followship.findOne({
