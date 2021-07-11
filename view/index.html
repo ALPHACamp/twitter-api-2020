@@ -76,13 +76,13 @@
     form.addEventListener('submit', event => {
       event.preventDefault()
       if (input.value) {
-        socket.emit('chat message', input.value)
+        socket.emit('newMessage', input.value)
         input.value = ''
       }
     })
 
     // 載入先前對話
-    socket.on('allMessages', msgs => {
+    socket.on('historyMessages', msgs => {
       console.log(msgs)
       for (msg of msgs) {
         let item = document.createElement('li')
@@ -92,7 +92,7 @@
       }
     })
 
-    socket.on('chat message', msg => {
+    socket.on('newMessage', msg => {
       let item = document.createElement('li')
       item.textContent = msg
       messages.appendChild(item)
