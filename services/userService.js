@@ -78,7 +78,8 @@ const userService = {
         [Sequelize.col('isFollowed'), 'DESC']
       ],
       group: 'id',
-      subQuery: false
+      subQuery: false,
+      limit: 10
     })
   },
 
