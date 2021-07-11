@@ -475,7 +475,7 @@ POST /api/followships
 }
 ```
 ###### Failure
-##### 找不到該追蹤者
+##### 找不到該使用者
 ```
 {
     "status": "error",
@@ -508,7 +508,7 @@ DELETE /api/followships/:followingId
 }
 ```
 ###### Failure
-##### 找不到該追蹤者
+##### 找不到該使用者 
 ```
 {
     "status": "error",
@@ -577,7 +577,7 @@ status code: 401
     ]
 }
 ```
-##### 查無該使用者
+##### 找不到該使用者 或 使用者沒有前台瀏覽權限
  ```
 status code: 404
 {
@@ -658,7 +658,7 @@ status code: 401
     ]
 }
 ```
-##### 查無該使用者
+##### 找不到該使用者 或 使用者沒有前台瀏覽權限
  ```
 status code: 404
 {
@@ -709,26 +709,41 @@ status code: 400
 ```
 GET /api/users/:id/followers
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "followerId": 2,
         "account": "LyviaLee",
         "name": "Lyvia",
         "avatar": "https://i.pravatar.cc/150?img=29",
-        "introduction": "Illo ab sed quos maxime adipisci est.\nFugiat facere dolores quis quidem impedit id.",
+        "introduction": "Illo ab sed quos maxime adipisci est.",
         "followshipCreatedAt": "2021-03-17T13:07:42.000Z",
         "isFollowed": false
     }
+    ...
 ]
 ```
-
+status code: 200
 ```
 {
     "message": [
         "@${user.account} has no follower."
+    ]
+}
+```
+###### Failure
+##### 找不到該使用者 或 使用者沒有前台瀏覽權限
+ ```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any user in db."
     ]
 }
 ```
@@ -738,9 +753,12 @@ GET /api/users/:id/followers
 ```
 GET /api/users/:id/followings
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "followerId": 2,
@@ -751,10 +769,12 @@ GET /api/users/:id/followings
         "followshipCreatedAt": "2021-03-17T13:07:42.000Z",
         "isFollowed": false
     }
+    ...
 ]
 ```
 
 ```
+status code: 200
 {
     "message": [
         "@${user.account} has no following."
@@ -764,6 +784,7 @@ GET /api/users/:id/followings
 ###### Failure
 ###### 找不到該使用者 或 使用者沒有前台瀏覽權限
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -772,51 +793,51 @@ GET /api/users/:id/followings
 }
 ```
 
-### 瀏覽使用者發過的推文
+### 瀏覽使用者發過的所有推文
 ##### Method & URL
 ```
 GET /api/users/:id/tweets
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
-        "id": 3,
+        "id": 5,
         "UserId": 1,
-        "description": "Non quidem eligendi aspernatur veniam. Vero porro ea soluta dolores eveniet quas ipsum blanditiis exercitationem. Esse sit laborum ipsam har",
-        "createdAt": "2021-06-25T10:41:56.000Z",
-        "updatedAt": "2021-06-14T20:36:31.000Z",
-        "User": {
-            "id": 1,
-            "account": "RyanHuang",
-            "email": "ryan@example.com",
-            "password": "$2a$10$d/OdTnXltn2zyy6icgAiWuyeYpUuSFkIOpf1Sg7iWenIfDPhxgICq",
-            "name": "Ryan",
-            "avatar": "https://i.pravatar.cc/150?img=68",
-            "cover": "https://loremflickr.com/660/240/paris/?lock=62.67199844521949",
-            "introduction": "consectetur",
-            "role": "user",
-            "createdAt": "2021-05-21T08:02:29.000Z",
-            "updatedAt": "2021-02-19T23:49:05.000Z"
-        },
-        "Replies": [
-            {
-                "id": 9,
-                "UserId": 3,
-                "TweetId": 3,
-                "comment": "Ratione architecto eaque dolor inventore nihil ver",
-                "createdAt": "2021-04-28T00:10:19.000Z",
-                "updatedAt": "2021-06-14T01:21:39.000Z"
-            },
-        ]
-    },...
-]
+        "description": "labore",
+        "createdAt": "2021-06-19T21:05:51.000Z",
+        "account": "RyanHuang",
+        "name": "123",
+        "avatar": "https://i.pravatar.cc/150?img=68",
+        "likedCount": 0,
+        "repliedCount": 3,
+        "isLike": false
+    },
+    {
+        "id": 9,
+        "UserId": 1,
+        "description": "Vel est ut ea amet mollitia.",
+        "createdAt": "2021-05-03T05:00:31.000Z",
+        "account": "RyanHuang",
+        "name": "123",
+        "avatar": "https://i.pravatar.cc/150?img=68",
+        "likedCount": 1,
+        "repliedCount": 3,
+        "isLike": false
+    },
+    ...
+]    
+
 ```
 
 ###### Failure
 ###### 找不到該使用者 或 使用者沒有前台瀏覽權限
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -824,14 +845,26 @@ GET /api/users/:id/tweets
     ]
 }
 ```
+###### 查無任何推文
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any tweets in db.",
+    ]
+}
+```
 
-
-### 瀏覽使用者的回覆
+### 瀏覽使用者的所有回覆
 ##### Method & URL
 ```
 GET /api/users/:id/replied_tweets
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
+
 ###### Success
 ```
 [
@@ -853,6 +886,7 @@ GET /api/users/:id/replied_tweets
 ###### Failure
 ###### 找不到該使用者 或 使用者沒有前台瀏覽權限
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -860,15 +894,28 @@ GET /api/users/:id/replied_tweets
     ]
 }
 ```
+###### 查無任何回覆
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any replies in db.",
+    ]
+}
+```
 
-### 瀏覽使用者按讚的紀錄
+### 瀏覽使用者所有點讚的推文
 ##### Method & URL
 ```
 GET /api/users/:id/likes
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "id": 12,
@@ -887,10 +934,10 @@ GET /api/users/:id/likes
     ...
 ]
 ```
-
 ###### Failure
 ###### 找不到該使用者 或 使用者沒有前台瀏覽權限
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -898,6 +945,17 @@ GET /api/users/:id/likes
     ]
 }
 ```
+###### 查無點讚的推文
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any liked tweets in db.",
+    ]
+}
+```
+
 
 
 ## Admin
@@ -906,9 +964,12 @@ GET /api/users/:id/likes
 ```
 DELETE /api/admin/tweets/:id
 ```
+#### Parameters
+id：欲刪除的推文id
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": [
@@ -918,7 +979,9 @@ DELETE /api/admin/tweets/:id
 
 ```
 ###### Failure
+###### 該則推文不存在
 ```
+status code: 401
 {
     "status": "error",
     "message": [
@@ -935,6 +998,7 @@ GET /api/admin/users
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "id": 1,
@@ -949,5 +1013,16 @@ GET /api/admin/users
     },
     ...
 ]
+```
+###### Failure
+###### 找不到任何使用者
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any users in db.",
+    ]
+}
 ```
 
