@@ -58,15 +58,15 @@ npx sequelize db:seed:undo:all
 ```
 
 ## 串接資源
-*　API文件網址
+* API文件網址
 http://localhost:3000/api-doc/
 
-＊ API串接網址
+* API串接網址
 http://localhost:3000/api/{route}
 
 * 共用帳號
-  ＊ 後台登入帳號：root　登入密碼：12345678　
-  ＊ 前台登入帳號 : RyanHuang　登入密碼：12345678　
+  * 後台登入帳號：root　登入密碼：12345678　
+  * 前台登入帳號 : RyanHuang　登入密碼：12345678　
   
 ## API說明
 * 除了後臺管理者登入、使用者登入、註冊這 3 條路由外，其餘路由需在 header 的 Authorization 帶上"Bearer" + token (token可從登入時拿到)
