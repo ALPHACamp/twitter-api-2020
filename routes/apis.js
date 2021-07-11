@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const helpers = require('../_helpers.js')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
 const { User } = require('../models')
 
 const userController = require('../controllers/userController.js')
@@ -17,7 +19,7 @@ const authenticated = (req, res, next) => {
     if (err) { return next(err); }
     if (!user) {
       if (info.name === "TokenExpiredError") {
-        return res.status(401).json({ message: "Your token has expired." });
+        return res.status(401).json({ message: 'Token已過期！' });
       } else {
         return res.status(401).json({ message: info.message });
       }
@@ -52,22 +54,28 @@ const authenticatedNotAdmin = (req, res, next) => {
   }
 }
 
+// current user
+router.get('/current_user', authenticated, userController.getCurrentUser)
+
 // user routes
 router.post('/users', userController.signUp)
 router.post('/signin', userController.signIn)
 router.get('/users/top', authenticated, authenticatedNotAdmin, userController.getTopFollowedUsers)
 router.get('/users/:id', authenticated, authenticatedNotAdmin, userController.getUser)
+router.get('/users/:id/likes', authenticated, authenticatedNotAdmin, userController.getLikedTweets)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedNotAdmin, userController.getReplies)
 router.get('/users/:id/tweets', authenticated, authenticatedNotAdmin, userController.getTweets)
 router.get('/users/:id/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
-
+router.put('/users/:id', authenticated, authenticatedNotAdmin,
+  upload.fields([{ name: 'avatar', max: 1 }, { name: 'cover', max: 1 }]), userController.putUser)
+router.put('/users/:id/edit', authenticated, authenticatedNotAdmin, userController.editUser)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
-router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 // followship routes
 router.post('/followships', authenticated, authenticatedNotAdmin, followshipController.addFollowing)

@@ -38,7 +38,7 @@ const replyController = {
       })
       const replies = results.map(reply => ({
         ...reply,
-        createdAt: moment(reply.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        createdAt: moment(reply.createdAt).format('YYYY-MM-DD hh:mm:ss a')
       }))
       return res.json(replies)
     } catch (err) {

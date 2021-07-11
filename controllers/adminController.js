@@ -1,8 +1,8 @@
-const db = require('../models')
 const { User, Tweet, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
+const Sequelize = require('sequelize')
 
 const adminController = {
   signIn: async (req, res, next) => {
@@ -50,36 +50,35 @@ const adminController = {
     try {
       // 資料按推文數排列，只顯示 role = normal 的 user 資料
       // 要包括關注人數、跟隨者人數、推文 (tweet) 數量、推文被 like 的數量
-      // const result = await User.findAll({
-      //   raw: true,
-      //   nest: true,
-      //   where: {
-      //     role: 'normal'
-      //   },
-      //   attributes: ['id', 'name', 'account', 'avatar', 'cover', 'followingCounts', 'followerCounts'],
-      //   include: [
-      //     { model: Tweet,
-      //       // attributes: [],
-      //       // include: [{ model: Like}] 
-      //     },
-      //   ],
-      //   // group: ['User']
-      // })
-
-      const SQLQuery = `SELECT u.id, u.name, u.account, u.avatar, u.cover, u.followingCounts, u.followerCounts,
-      (SELECT COUNT(*)
-       FROM Tweets t
-       WHERE u.id = t.UserId
-      ) AS UserTweetCount,
-      (SELECT COUNT(*)
-       FROM Likes l
-       WHERE u.id = l.UserId
-      ) AS UserTweetBeLikedCount
-FROM Users u
-ORDER BY UserTweetCount DESC;`
-
-      const users = await db.sequelize.query(SQLQuery, { raw: true, nest: true })
-
+      const users = await User.findAll({
+        raw: true,
+        nest: true,
+        where: {
+          role: 'normal'
+        },
+        attributes: [
+          'id', 'name', 'account', 'avatar',
+          'cover', 'followingCounts', 'followerCounts',
+          [
+            Sequelize.literal(`(
+              SELECT COUNT(Tweets.id)
+              FROM Tweets
+              WHERE Tweets.UserId = User.id
+            )`),
+            'TweetCounts'
+          ],
+          [
+            Sequelize.literal(`(
+              SELECT SUM(Tweets.likeCounts)
+              FROM Tweets
+              WHERE Tweets.UserId = User.id
+            )`),
+            'BeLikedCounts'
+          ]
+        ],
+        group: ['User.id'],
+        order: [[Sequelize.literal('TweetCounts'), 'DESC']]
+      })
       return res.json(users)
     } catch (err) {
       // 把失誤 pass 給 express，並將失誤訊息 pass 給前端
@@ -106,7 +105,7 @@ ORDER BY UserTweetCount DESC;`
       const tweets = result.map(tweet => ({
         ...tweet,
         description: tweet.description.substring(0, 50),
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD kk:mm:ss')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
       }))
       return res.json(tweets)
     } catch (err) {
@@ -118,7 +117,7 @@ ORDER BY UserTweetCount DESC;`
     try {
       const tweet = await Tweet.findByPk(req.params.id)
       tweet.destroy()
-      return res.json({ status: 'success', message: 'Tweet deleted successfully.' })
+      return res.json({ status: 'success', message: '成功刪除推文！' })
     } catch (err) {
       next(err)
       return res.json({ status: 'error', message: err.toString() })
