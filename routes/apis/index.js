@@ -11,7 +11,7 @@ const userController = require('../../controllers/userController')
 const { authenticated, checkRole } = require('../../middlewares/auth')
 
 router.post('/signin', userController.signIn)
-router.get('/current_user', authenticated, checkRole(), userController.getCurrentUser)
+router.get('/current_user', authenticated, userController.getCurrentUser)
 
 router.use('/users', userRoute)
 router.use('/tweets', authenticated, checkRole(), tweetRoute)
