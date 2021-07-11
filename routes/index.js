@@ -8,4 +8,10 @@ module.exports = (app) => {
   app.use('/api/tweets', tweets)
   app.use('/api/admin', admins)
   app.use('/api/followships', followships)
+  app.use('/', (req, res) => {
+    res.status(404).json({
+      status: 'error',
+      message: 'Page not found.'
+    })
+  })
 }

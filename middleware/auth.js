@@ -3,8 +3,7 @@ const helper = require('../_helpers')
 module.exports = {
   authenticated: (req, res, next) => {
     passport.authenticate('jwt', { session: false }, (err, user) => {
-      if (err) {
-        console.log(err)
+      if (!user) {
         return res
           .status(403)
           .json({ status: 'error', message: 'Permission is denied.' })
