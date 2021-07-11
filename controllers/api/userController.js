@@ -220,6 +220,7 @@ let userController = {
       }))
   },
   login: (req, res) => {
+    const { password, email } = req.body
     const options = {
       where: {
         email,
@@ -246,7 +247,6 @@ let userController = {
         ]
       }
     }
-    const { password, email } = req.body
     if (!password || !email) {
       return res.status(400).json({
         status: 'error',
