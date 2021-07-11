@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       UserId: {
         type: DataTypes.INTEGER,
       },
-      content: {
+      description: {
         type: DataTypes.TEXT,
       },
       createdAt: {
@@ -23,26 +23,19 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.DATE,
       },
-      deletedAt: {
-        type: DataTypes.DATE,
-      },
       likeNum: {
         type: DataTypes.INTEGER,
       },
       replyNum: {
         type: DataTypes.INTEGER,
-      },
-      AdminId: {
-        type: DataTypes.INTEGER,
-      },
+      }
     },
     {}
   );
   Tweet.associate = function (models) {
     Tweet.hasMany(models.Reply);
     Tweet.hasMany(models.Like);
-    Tweet.belongsTo(models.User)
-    Tweet.belongsTo(models.Admin);
+    Tweet.belongsTo(models.User, { foreignKey: "UserId", as: "Author"})
     Tweet.belongsToMany(models.User, { through: models.Like, foreignKey: "TweetId", as: "LikedUsers", })
   };
   return Tweet;

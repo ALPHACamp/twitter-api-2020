@@ -11,7 +11,7 @@ module.exports = {
       UserId: {
         type: Sequelize.INTEGER,
       },
-      content: {
+      description: {
         type: Sequelize.TEXT,
       },
       createdAt: {
@@ -22,16 +22,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      deletedAt: {
-        type: Sequelize.DATE,
-      },
       likeNum: {
         type: Sequelize.INTEGER,
       },
       replyNum: {
-        type: Sequelize.INTEGER,
-      },
-      AdminId: {
         type: Sequelize.INTEGER,
       },
     });

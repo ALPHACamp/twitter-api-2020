@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("Replies", {
+    return queryInterface.createTable('Replies', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -14,7 +14,7 @@ module.exports = {
       TweetId: {
         type: Sequelize.INTEGER,
       },
-      content: {
+      comment: {
         type: Sequelize.TEXT,
       },
       createdAt: {
@@ -28,7 +28,7 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE,
       },
-    });
+    })
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Replies');
