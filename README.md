@@ -96,7 +96,7 @@ POST /api/users
 ```
 ##### Request
 
-| Params  | Type   | Required |
+| body   | Type   | Required |
 | --------| ------ | ---------|
 | account | Srting | True |
 | name    | String | True |
@@ -156,7 +156,7 @@ POST /api/users/signin
 ```
 ##### Request
 
-| Params  | Type   | Required |
+| body  | Type   | Required |
 | --------| ------ | ---------|
 | account | Srting | True |
 | password| String | True |
@@ -218,7 +218,7 @@ POST /api/tweets
 ```
 ##### Request
 
-| Params  | Type   | Required |
+| body  | Type   | Required |
 | --------| ------ | ---------|
 | description | Srting | True |
 
@@ -339,7 +339,7 @@ POST /api/tweets/:tweet_id/replies
 ```
 ##### Request
 
-| Params  | Type   | Required |
+| body   | Type   | Required |
 | --------| ------ | ---------|
 | comment | Srting | True |
 
@@ -736,7 +736,7 @@ PUT /api/users/:id/account
 id：目前登入的使用者id
 ##### Request
 
-| Params  | Type   | Required |
+| body   | Type   | Required |
 | --------| ------ | ---------|
 | account | Srting | True |
 | name    | String | True |
