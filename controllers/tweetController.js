@@ -50,7 +50,9 @@ const tweetController = {
             attributes: [
               'id',
               'content',
-              [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Replies.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked']],
+              [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Replies.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
+              [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.ReplyId = Replies.id)'), 'totalLikes']],
+            // order: [[Sequelize.literal('totalLikes'), 'DESC']], 測試中
             include: [{ model: User, attributes: ['avatar', 'name', 'account'] }]
           }
         ],
@@ -73,10 +75,11 @@ const tweetController = {
         attributes: [
           'id',
           'content',
-          [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Reply.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked']
+          [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Reply.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
+          [Sequelize.literal(`(SELECT COUNT (*) FROM Likes WHERE Likes.ReplyId = Reply.id)`), 'totalLikes']
         ],
         include: [{ model: User, attributes: ['avatar', 'name', 'account'] }],
-        order: [['createdAt', 'DESC']]
+        order: [[Sequelize.literal('totalLikes'), 'DESC']]
       })
       return res.json(replies)
     }
