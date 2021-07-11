@@ -1,5 +1,8 @@
 const db = require('../../models')
 const User = db.User
+const Followship = db.Followship
+const Like = db.Like
+const Tweet = db.Tweet
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
@@ -190,16 +193,16 @@ let userController = {
           ? bcrypt.hashSync(passwordNew, bcrypt.genSaltSync(10))
           : user.password
         modifiedData.introduction = introduction || user.introduction
-        
+
         //deal with avatar、cover
         imgur.setClientID(IMGUR_CLIENT_ID)
-        modifiedData.avatar = files && files.avatar ? await imgurUpload(files.avatar[0].path):user.avatar
+        modifiedData.avatar = files && files.avatar ? await imgurUpload(files.avatar[0].path) : user.avatar
         modifiedData.cover = files && files.cover ? await imgurUpload(files.cover[0].path) : user.cover
         const newData = await user.update(modifiedData)
         res.status(200).json(newData)
       })
       .catch(error => res.status(500).json({
-        status:'error',
+        status: 'error',
         message: error
       }))
   },
@@ -213,7 +216,7 @@ let userController = {
     }
 
     User.findOne({ where: { email, role: 'user' } })
-      .then((user) => {
+      .then(async (user) => {
         if (!user) {
           return res
             .status(401)
@@ -234,6 +237,32 @@ let userController = {
           id: user.id
         }
         let token = jwt.sign(payload, process.env.JWT_SECRET)
+        const Nums = {}
+        // check followerNum
+        await Followship.findAndCountAll({
+          where: { followingId: user.id }
+        }).then(result => {
+          Nums.followerNum = result.count
+        })
+        // check followingNum
+        await Followship.findAndCountAll({
+          where: { followerId: user.id }
+        }).then(result => {
+          Nums.followingNum = result.count
+        })
+        // check likeNum
+        await Like.findAndCountAll({
+          where: { UserId: user.id }
+        }).then(result => {
+          Nums.likeNum = result.count
+        })
+        // check tweetNum
+        await Tweet.findAndCountAll({
+          where: { UserId: user.id }
+        }).then(result => {
+          Nums.tweetNum = result.count
+        })
+        await user.update(Nums)
         return res.status(200).json({
           status: 'success',
           message: 'User successfully login.',
