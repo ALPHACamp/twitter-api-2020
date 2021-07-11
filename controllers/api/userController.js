@@ -205,15 +205,7 @@ let userController = {
       }))
   },
   login: (req, res) => {
-    const { password, email } = req.body
-    if (!password || !email) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Password or email can not be empty.'
-      })
-    }
-
-    User.findOne({
+    const options = {
       where: {
         email,
         role: 'user'
@@ -238,7 +230,16 @@ let userController = {
           ],
         ]
       }
-    })
+    }
+    const { password, email } = req.body
+    if (!password || !email) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Password or email can not be empty.'
+      })
+    }
+
+    User.findOne(options)
       .then(async (user) => {
         if (!user) {
           return res
