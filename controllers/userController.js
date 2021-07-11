@@ -317,21 +317,27 @@ const userController = {
               include: { model: Like, separate: true, where: { UserId: viewerId }, required: false }
             }
           ],
-          attributes: ['id', 'createdAt', 'comment'],
+          attributes: ['id', 'comment'],
           nest: true
         }).then(replies => {
           replies = replies.map((item, i) => {
-            const mapItem = {
-              ...item.dataValues,
-              Tweet: {
-                ...item.Tweet.dataValues,
-                isLike: Boolean(item.Tweet.Likes[0])
-              },
-              User: {
-                ...item.User.dataValues
-              }
+            const userObj = {
+              ...item.User.dataValues
             }
-            delete mapItem.Tweet.Likes
+
+            const mapItem = {
+              TweetId: item.Tweet.dataValues.id,
+              ...item.dataValues,
+              ...item.Tweet.dataValues,
+              isLike: Boolean(item.Tweet.Likes[0]),
+            }
+
+            delete mapItem.Tweet
+            delete mapItem.Likes
+            delete mapItem.id
+            delete mapItem.User
+
+            mapItem.User = userObj
 
             return mapItem
           })
