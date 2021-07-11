@@ -11,7 +11,7 @@ const port = process.env.PORT
 const helpers = require('./_helpers')
 
 app.use(methodOverride('_method'))
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
 app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use((req, res, next) => {

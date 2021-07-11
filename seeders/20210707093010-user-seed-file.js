@@ -5,6 +5,7 @@ const faker = require('faker')
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert('Users', [{
+      id: 5,
       account: '@root',
       name: 'root',
       email: 'root@example.com',
@@ -16,6 +17,7 @@ module.exports = {
       updatedAt: new Date(),
     },
     {
+      id: 10,
       account: '@user1',
       name: 'user1',
       email: 'user1@example.com',
@@ -27,6 +29,7 @@ module.exports = {
       updatedAt: new Date(),
     },
     {
+      id: 15,
       account: '@user2',
       name: 'user2',
       email: 'user2@example.com',
@@ -38,6 +41,7 @@ module.exports = {
       updatedAt: new Date(),
     },
     {
+      id: 20,
       account: '@user3',
       name: 'user3',
       email: 'user3@example.com',
@@ -49,6 +53,7 @@ module.exports = {
       updatedAt: new Date(),
     },
     {
+      id: 25,
       account: '@user4',
       name: 'user4',
       email: 'user4@example.com',
@@ -60,6 +65,7 @@ module.exports = {
       updatedAt: new Date(),
     },
     {
+      id: 30,
       account: '@user5',
       name: 'user5',
       email: 'user5@example.com',

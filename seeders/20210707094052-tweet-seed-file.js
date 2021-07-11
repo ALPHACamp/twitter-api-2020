@@ -4,11 +4,10 @@ const faker = require('faker')
 module.exports = {
   up: (queryInterface, Sequelize) => {
     let userId = ''
-    for (let i = 2; i < 7; i++) {
-      userId += String(i).repeat(10)
+    for (let i = 10; i <= 30; i = i + 5) {
+      userId += (String(i) + ',').repeat(10)
     }
-    const userIdArray = userId.split('') //每個使用者10篇文
-
+    const userIdArray = userId.split(',') //每個使用者10篇文
     return queryInterface.bulkInsert('Tweets',
       Array.from({ length: 50 }).map((d, i) =>
       ({
