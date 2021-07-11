@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const session = require('express-session')
+const cors = require('cors')
 const methodOverride = require('method-override')
 
 if (process.env.NODE_ENV !== 'production') {
@@ -9,8 +9,9 @@ if (process.env.NODE_ENV !== 'production') {
 const port = process.env.PORT || 3000
 
 const helpers = require('./_helpers')
-
 app.use(methodOverride('_method'))
+
+app.use(cors())
 app.use(express.urlencoded({ extended: false }))
 app.use('/upload', express.static(__dirname + '/upload'))
 
