@@ -314,10 +314,11 @@ const userController = {
   getCurrentUser: async (req, res, next) => {
     try {
       const { id, name, account, email, role,
-        avatar, followingCounts, followerCounts } = req.user
+        avatar, cover, introduction, followingCounts, followerCounts } = req.user
       return res.json({
         id, name, account, email, role,
         avatar, followingCounts, followerCounts,
+        cover, introduction,
         Followers: req.user.Followers, Followings: req.user.Followings
       })
     } catch (err) {
