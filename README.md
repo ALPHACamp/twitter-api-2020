@@ -113,7 +113,7 @@ status code: 200
 }
 ```
 ###### Failure
-###### email或account重複註冊
+##### email 或 account 重複註冊
 ```
 status code: 400
 {
@@ -124,7 +124,7 @@ status code: 400
     ]
 }
 ```
-###### 有未填欄位
+##### 有未填欄位
 ```
 status code: 400
 {
@@ -134,7 +134,7 @@ status code: 400
     ]
 }
 ```
-###### 表單填寫錯誤原因
+##### 表單填寫錯誤原因
 ```
 status code: 400
 {
