@@ -197,6 +197,8 @@ const userController = {
             error: 'This user does not exist.'
           })
         }
+
+        
       }).then(user => {
         return Reply.findAll({
           where: { UserId },
