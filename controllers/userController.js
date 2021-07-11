@@ -97,10 +97,13 @@ const userController = {
         }
         return Tweet.findAll({
           where: { UserId },
-          attributes: {
-            exclude: ['UserId', 'updatedAt']
+          attributes: [['id', 'TweetId'], 'description', 'createdAt', 'replyCount', 'likeCount'],
+          include: {
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
           }
         }).then(tweets => {
+
           return res.status(200).json(tweets)
         })
       })
