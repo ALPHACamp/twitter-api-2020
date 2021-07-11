@@ -249,7 +249,36 @@ const userController = {
           return res.status(200).json(data)
         })
       })
-      return res.status(200).json(data)
+  },
+  getTopUsers: (req, res) => {
+    const viewerId = req.user.id
+
+    return User.findAll({
+      include: {
+        model: User,
+        as: 'Followers',
+        where: { id: viewerId },
+        attributes: ['id'],
+        required: false,
+        nest: true
+      },
+      where: { role: 'user' },
+      attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'followerCount'],
+      order: [['followerCount', 'DESC']],
+      limit: 10,
+      nest: true,
+      raw: true
+    }).then(users => {
+      users = users.map((item, i) => {
+        const mapItem = {
+          ...item,
+          isFollowing: Boolean(item.Followers.id)
+        }
+        delete mapItem.Followers
+        delete mapItem.followerCount
+        return mapItem
+      })
+      return res.status(200).json(users)
     })
   },
       
