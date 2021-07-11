@@ -52,7 +52,6 @@ const tweetController = {
               'content',
               [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Replies.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
               [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.ReplyId = Replies.id)'), 'totalLikes']],
-            // order: [[Sequelize.literal('totalLikes'), 'DESC']], 測試中
             include: [{ model: User, attributes: ['id', 'avatar', 'name', 'account'] }]
           }
         ],
