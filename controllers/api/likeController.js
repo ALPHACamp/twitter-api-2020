@@ -140,7 +140,6 @@ let likeController = {
     Like.findAll(options)
       .then(likes => {
         likes = likes.map(like => {
-          like.LikedTweet.description = like.LikedTweet.description.substring(0, 50)
           like.LikedTweet.dataValues.isLike = like.LikedTweet.dataValues.LikedUsers.some(
             (likedUser) => likedUser.id === +req.user.id
           )

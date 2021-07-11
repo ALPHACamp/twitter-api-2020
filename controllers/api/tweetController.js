@@ -32,7 +32,6 @@ let tweetController = {
           tweet.dataValues.isLike = tweet.dataValues.LikedUsers.some(
             (likedUser) => likedUser.id === +req.user.id
           )
-          tweet.description = tweet.description.substring(0, 50)
           delete tweet.dataValues.LikedUsers
           return tweet
         })
@@ -75,7 +74,7 @@ let tweetController = {
         return {
           id,
           isLike: tweet.LikedUsers.some((user) => user.id === +req.user.id),
-          description: description.substring(0, 50),
+          description,
           likeNum,
           replyNum,
           createdAt,
