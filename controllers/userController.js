@@ -130,14 +130,26 @@ const userController = {
           where: { UserId },
           attributes: ['TweetId']
         }).then(likes => {
-          likes.forEach(like => {
-            like = like.toJSON()
-            if (like.User.id === viewerId) {
-              like.Tweet.isLike = true
-            } else {
-              like.Tweet.isLike = false
+          likes = likes.map((like, i) => {
+            const userObj = {
+              ...like.User.dataValues
             }
+
+            const mapItem = {
+              ...like.dataValues,
+              ...like.Tweet.dataValues,
+              isLike: like.User.id === viewerId
+            }
+            
+            delete mapItem.Tweet
+            delete mapItem.id
+            delete mapItem.User
+
+            mapItem.User = userObj
+
+            return mapItem
           })
+
           return res.status(200).json(likes)
         })
       })
@@ -281,7 +293,7 @@ const userController = {
       return res.status(200).json(users)
     })
   },
-      
+
   getUserRepliedTweets: (req, res) => {
     const UserId = req.params.id
     const viewerId = req.user.id
@@ -294,7 +306,7 @@ const userController = {
             error: 'This user does not exist.'
           })
         }
-        
+
         return Reply.findAll({
           where: { UserId },
           include: [
