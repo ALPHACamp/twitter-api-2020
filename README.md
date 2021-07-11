@@ -1,15 +1,22 @@
 # Simple Twitter RESTful API 
-##### 這是一個提供前端開發串接API的Simple Twitter專案
-
-## 共同開發人員 (Collaborator)
-* [Chia-Hui](https://github.com/wintersprouter)
-* [Hsin Yeh](https://github.com/Hsinyehh)
+ 
+ 這是一個提供前端開發串接 API 的 Simple Twitter 專案
 
 ## 環境建置與需求 (Enviroment)
-* Node.js - v14.16.1
-* Express - v4.17.1
-* MySQL - v8.0.25
-* MySQL workbench - - v8.0.25
+### 伺服器（server）
+* [Node.js](https://nodejs.org/en/) - v14.16.1
+* [Express](https://expressjs.com/) - v4.17.1
+### 資料庫（database）
+* [sequelize](https://www.npmjs.com/package/sequelize) - v4.44.4
+* [sequelize-cli](https://www.npmjs.com/package/sequelize-cli) - v5.5.1
+* [mysql2](https://www.npmjs.com/package/mysql2) - v1.7.0
+* [MySQL](https://www.mysql.com/) - v8.0.25
+* [MySQL workbench](https://dev.mysql.com/downloads/) - v8.0.25
+### 身份驗證（authentication）
+* [passport](https://www.npmjs.com/package/passport) - v0.4.1
+* [passport-jwt](https://www.npmjs.com/package/passport-jwt) - v 4.0.0
+* [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - v8.5.1
+
 
 ## 初始化（Initialize）
 1. 請在終端機輸入
@@ -56,6 +63,9 @@ npm run dev
 ```
 npx sequelize db:seed:undo:all
 ```
+## 共同開發人員 (Collaborator)
+* [Chia-Hui](https://github.com/wintersprouter)
+* [Hsin Yeh](https://github.com/Hsinyehh)
 
 ## 串接資源
 *　API文件網址
@@ -64,7 +74,7 @@ http://localhost:3000/api-doc/
 ＊ API串接網址
 http://localhost:3000/api/{route}
 
-### 共用帳號
+### Demo 帳號
 使用者可以使用以下帳號分別登入系統前台、後台。
 
 
