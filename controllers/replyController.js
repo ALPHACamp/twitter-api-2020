@@ -2,29 +2,31 @@ const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 let replyController = {
-  postReply: (req, res, next) => {
-    if (!req.body.comment) {
-      res.json({ status: 'error', message: "comment didn't exist" })
-      return res.redirect('back')
-    }
-    return Reply.create({
-      comment: req.body.comment,
-      UserId: helpers.getUser(req).id,
-      TweetId: req.params.tweetId,
-    })
-      .then((reply) => {
-        res.json(reply)
+  postReply: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.tweetId)
+      if (!tweet) throw new Error("this tweet doesn't exist")
+      if (!req.body.comment) throw new Error('請輸入必填項目')
+      const reply = await Reply.create({
+        comment: req.body.comment,
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweetId
       })
-      .catch((err) => next(err))
+      return res.json(reply)
+    } catch (error) {
+      next(error)
+    }
   },
 
-  getReply: (req, res, next) => {
-    Reply.findAll({ where: { TweetId: req.params.tweetId } }, { include: { model: User } })
-      .then((reply) => {
-        res.json(reply)
-      })
-      .catch((err) => next(err))
-  },
+  getReply: async (req, res, next) => {
+    try {
+      const reply = await Reply.findAll({ where: { TweetId: req.params.tweetId } }, { include: { model: User } })
+      if (!reply) throw new Error("this reply doesn't exist")
+      return res.json(reply)
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 
 module.exports = replyController
