@@ -94,10 +94,11 @@ const userController = {
         ]
       })
       const { id, name, account, email, role,
-        avatar, followingCounts, followerCounts } = user
+        avatar, cover, introduction, followingCounts, followerCounts } = user
       return res.json({
         id, name, account, email, role,
         avatar, followingCounts, followerCounts,
+        cover, introduction,
         Followers: user.Followers, Followings: user.Followings
       })
     } catch (err) {
