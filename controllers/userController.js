@@ -185,7 +185,7 @@ const userController = {
       return res.status(200).json(data)
     })
   },
-  getUserRepliedTweets: (req, res) => {
+    getUserRepliedTweets: (req, res) => {
     const UserId = req.params.id
     const viewerId = req.user.id
 
@@ -197,9 +197,7 @@ const userController = {
             error: 'This user does not exist.'
           })
         }
-
         
-      }).then(user => {
         return Reply.findAll({
           where: { UserId },
           include: [
