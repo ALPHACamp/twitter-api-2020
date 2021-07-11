@@ -14,11 +14,11 @@ const replyController = require('../../controllers/api/replyController')
 const { authenticated, authenticatedUser } = require('../../middleware/auth')
 
 router.post('/login', userController.login)
+router.post('/', userController.postUser)
 
 router.use(authenticated, authenticatedUser)
 
 router.get('/', followController.getNotFollowingUsers)
-router.post('/', userController.postUser)
 router.get('/:id', userController.getUser)
 router.put('/:id', upload.fields(imageFields), userController.putUser)
 router.get('/:id/followings', followController.getUserFollowings)
