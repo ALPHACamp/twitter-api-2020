@@ -5,12 +5,11 @@ const passport = require('../config/passport')
 module.exports = {
   authenticated: (req, res, next) => {
     passport.authenticate('jwt', { session: false }, (err, user, info) => {
-
       if (err) { return next(err) }
       if (!user) {
         return res.status(400).json({
           status: 'error',
-          message: 'User does not exist'
+          message: `${info}`
         })
       }
 
