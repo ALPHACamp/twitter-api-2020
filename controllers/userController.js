@@ -205,7 +205,7 @@ const userController = {
             'avatar',
             'cover',
             'bio',
-            [Sequelize.literal('(SELECT followingId FROM Followships WHERE followingId = id AND followerId = User.id)'), 'followingId'],
+            [Sequelize.literal(`(SELECT followingId FROM Followships WHERE followerId = User.id AND followingId = Followings.id)`), 'followingId'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE TweetId IN (SELECT id FROM Tweets WHERE UserId = User.id))'), 'totalLikes'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],

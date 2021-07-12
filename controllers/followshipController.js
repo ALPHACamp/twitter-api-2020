@@ -37,7 +37,6 @@ const followshipController = {
       if (helpers.getUser(req).id === Number(req.body.id)) {
         return res.json({ status: 'error', message: '無法追蹤自己' })
       }
-
       const [follow, created] = await Followship.findOrCreate({
         where: {
           followerId: helpers.getUser(req).id,
