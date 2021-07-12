@@ -1,10 +1,6 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
-const Like = db.Like
-const Reply = db.Reply
-const Followship = db.Followship
+const { User, Tweet, Like, Reply, Followship, Sequelize} = db
 const { Op } = require('sequelize')
 
 const jwt = require('jsonwebtoken')
@@ -143,7 +139,7 @@ const userController = {
               ...like.Tweet.dataValues,
               isLike: like.User.id === viewerId
             }
-            
+
             delete mapItem.Tweet
             delete mapItem.id
             delete mapItem.User
@@ -347,6 +343,19 @@ const userController = {
           return res.status(200).json(replies)
         })
       })
+  },
+
+  getCurrentUser: (req, res) => {
+    const currentUserId = req.user.id
+
+    return User.findByPk(currentUserId, {
+      attributes: [
+        'id', 'name', 'account', 'avatar',
+        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'dmin' and id = '${req.user.id}')`), 'isAdmin']
+      ]
+    }).then(user => {
+      return res.status(200).json(user)
+    })
   }
 }
 
