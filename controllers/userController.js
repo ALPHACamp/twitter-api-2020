@@ -187,28 +187,30 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      const user = await User.findOne({
+
+      const followings = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
         },
-        include: [{ model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'bio'] }],
-        order: [['createdAt', 'DESC']]
+        attributes: ['id', 'account', 'name', 'email', 'avatar'],
+        include: [{
+          model: User, as: 'Followings',
+          attributes: [
+            'id',
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'bio',
+            [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE TweetId IN (SELECT id FROM Tweets WHERE UserId = User.id))'), 'totalLikes'],
+            [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
+            [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
+            [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followerId = User.id)'), 'totalFollowings'],
+            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = User.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
+          ]
+        }],
       })
-
-      const followingsData = user.Followings
-
-      if (followingsData.length === 0) return res.json({ status: 'error', message: '沒有追蹤者' })
-      const followings = followingsData.map(following => ({
-        id: following.dataValues.id,
-        name: following.dataValues.name,
-        account: following.dataValues.account,
-        avatar: following.dataValues.avatar,
-        bio: following.dataValues.bio,
-        followingId: following.dataValues.id,
-        followerId: following.dataValues.Followship.followerId,
-        isFollowing: helpers.getUser(req).Followings.map(following => following.id).includes(following.dataValues.id)
-      }))
 
       return res.json(followings)
     } catch (err) { next(err) }
@@ -217,27 +219,29 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      const user = await User.findOne({
+      const followers = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
         },
-        include: [{ model: User, as: 'Followers' }],
-        order: [['createdAt', 'DESC']]
+        attributes: ['id', 'account', 'name', 'email', 'avatar'],
+        include: [{
+          model: User, as: 'Followers',
+          attributes: [
+            'id',
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'bio',
+            [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE TweetId IN (SELECT id FROM Tweets WHERE UserId = User.id))'), 'totalLikes'],
+            [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
+            [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
+            [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followerId = User.id)'), 'totalFollowings'],
+            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = User.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
+          ]
+        }],
       })
-      const followersData = user.Followers
-      if (followersData.length === 0) return res.json({ status: 'error', message: '沒有追隨者' })
-
-      const followers = followersData.map(follower => ({
-        id: follower.dataValues.id,
-        name: follower.dataValues.name,
-        account: follower.dataValues.account,
-        avatar: follower.dataValues.avatar,
-        bio: follower.dataValues.bio,
-        followerId: follower.dataValues.id,
-        followingId: follower.dataValues.Followship.followingId,
-        isFollowing: helpers.getUser(req).Followings.map(follower => follower.id).includes(follower.dataValues.id)
-      }))
       return res.json(followers)
     } catch (err) { next(err) }
   },

@@ -2,7 +2,7 @@ const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
+const Sequelize = require('sequelize')
 
 const adminController = {
   signin: async (req, res, next) => {
@@ -33,28 +33,19 @@ const adminController = {
   getAllUser: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'admin') return res.json({ status: 'error', message: '管理員專用' })
-      let users = await User.findAll({
-        include: [
-          { model: Tweet, include: [Like] },
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' },
-        ]
+      const users = await User.findAll({
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE TweetId IN (SELECT id FROM Tweets WHERE UserId = User.id))'), 'totalLikes'],
+          [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
+          [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
+          [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followerId = User.id)'), 'totalFollowings']
+        ],
       })
-      users = await users.map(user => ({
-        id: user.dataValues.id,
-        name: user.dataValues.name,
-        account: user.dataValues.account,
-        avatar: user.dataValues.avatar,
-        cover: user.dataValues.cover,
-        beLikeCount: user.dataValues.Tweets.map(tweet => {
-          if (!tweet || !tweet.Likes) return 0
-          return tweet.Likes.length
-        }).reduce((total, e) => { return total + e }, 0),
-        totalTweets: user.dataValues.Tweets.length,
-        totalFollowers: user.dataValues.Followers.length,
-        totalFollowings: user.dataValues.Followings.length,
-        isFollowing: helpers.getUser(req).Followings.map(following => following.id).includes(user.dataValues.id)
-      }))
       return res.json(users)
     } catch (err) { next(err) }
   },
