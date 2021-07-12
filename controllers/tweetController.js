@@ -19,7 +19,7 @@ const tweetController = {
           [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
         ],
         include: [
-          { model: User, attributes: ['id', 'avatar', 'name', 'account'] },
+          { model: User, attributes: ['id', 'avatar', 'name', 'account'] }
         ],
         order: [['createdAt', 'DESC']]
       })
@@ -95,11 +95,11 @@ const tweetController = {
       if (description.length > 140) {
         return res.json({ status: 'error', message: '已超過推文最高上限140字' })
       }
-      await Tweet.create({
+      const tweet = await Tweet.create({
         description: description.trim(),
         UserId: helpers.getUser(req).id
       })
-      return res.json({ status: 'success', message: '推文新增成功' })
+      return res.json({ status: 'success', message: tweet })
     }
     catch (err) {
       next(err)

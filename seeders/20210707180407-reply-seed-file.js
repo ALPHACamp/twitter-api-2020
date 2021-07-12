@@ -24,6 +24,3 @@ module.exports = {
     return queryInterface.bulkDelete('Replies', null, {})
   }
 };
-
-//5 15 25 35 45 55
-//1  3  5  7  9  11
