@@ -326,6 +326,16 @@ const userController = {
       console.log(err)
       next(err)
     }
+  },
+  removeCover: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      await user.update({ cover: null })
+      return res.json({ status: 'success', message: '個人封面已刪除' })
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
   }
 }
 

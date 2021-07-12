@@ -69,6 +69,7 @@ router.get('/users/:id/followers', authenticated, authenticatedNotAdmin, userCon
 router.put('/users/:id', authenticated, authenticatedNotAdmin,
   upload.fields([{ name: 'avatar', max: 1 }, { name: 'cover', max: 1 }]), userController.putUser)
 router.put('/users/:id/edit', authenticated, authenticatedNotAdmin, userController.editUser)
+router.delete('/users/:id/cover', authenticated, authenticatedNotAdmin, userController.removeCover)
 
 // admin routes
 router.post('/admin/signin', adminController.signIn)
