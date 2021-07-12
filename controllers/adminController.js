@@ -4,6 +4,7 @@ const { User, Tweet, Like } = db
 const adminController = {
   getUsers: async (req, res, next) => {
     // #swagger.tags = ['Admin']
+    // #swagger.description = 'Get users data.'
     try {
       let users = await User.findAll({
         include: [
@@ -39,6 +40,7 @@ const adminController = {
   },
   deleteTweet: async (req, res, next) => {
     // #swagger.tags = ['Admin']
+    // #swagger.description = 'Delete a tweet.'
     try {
       const id = req.params.id
       const tweet = await Tweet.findByPk(id, { include: [User] })

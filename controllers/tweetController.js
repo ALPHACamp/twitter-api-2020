@@ -5,6 +5,7 @@ const validator = require('validator')
 const TweetController = {
   getTweets: async (req, res, next) => {
     // #swagger.tags = ['Tweets']
+    // #swagger.description = 'Get all tweets data.'
     try {
       let tweets = await Tweet.findAll({
         include: [
@@ -39,6 +40,7 @@ const TweetController = {
   },
   getTweet: async (req, res, next) => {
     // #swagger.tags = ['Tweets']
+    // #swagger.description = 'Get a tweet's data.'
     try {
       const id = req.params.tweet_id
       const tweet = await Tweet.findByPk(id,
@@ -72,6 +74,7 @@ const TweetController = {
   },
   postTweet: async (req, res, next) => {
     // #swagger.tags = ['Tweets']
+    // #swagger.description = 'Post a tweet.'
     try {
       const { description } = req.body
       if (!description) {
@@ -91,6 +94,7 @@ const TweetController = {
   },
   getReplies: async (req, res, next) => {
     // #swagger.tags = ['Replies']
+    // #swagger.description = 'Get replies data.'
     try {
       let replies = await Reply.findAll({
         where: { TweetId: req.params.tweet_id },
@@ -120,6 +124,7 @@ const TweetController = {
   },
   postReply: async (req, res, next) => {
     // #swagger.tags = ['Replies']
+    // #swagger.description = 'Post a reply.'
     try {
       const TweetId = req.params.tweet_id
       const repliedTweet = await Tweet.findByPk(TweetId, { include: [User] })
@@ -146,6 +151,7 @@ const TweetController = {
   },
   postLike: async (req, res, next) => {
     // #swagger.tags = ['Likes']
+    // #swagger.description = 'Post a like.'
     try {
       const TweetId = req.params.id
       const UserId = req.user.id
@@ -170,6 +176,7 @@ const TweetController = {
   },
   postUnlike: async (req, res, next) => {
     // #swagger.tags = ['Likes']
+    // #swagger.description = 'Post an unlike.'
     try {
       const TweetId = req.params.id
       const UserId = req.user.id
