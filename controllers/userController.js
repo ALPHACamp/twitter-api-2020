@@ -284,76 +284,11 @@ const userController = {
       return res.status(200).json(users)
     })
   },
-  putUser: (req, res) => {
-    const UserId = Number(req.params.id)
-    const viewerId = req.user.id
-    if (UserId !== viewerId) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'This is not this user\'s account.'
-      })
-    }
 
-    if (!req.body.name) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'User name required.'
-      })
-    }
-    const { files } = req
-    if (files) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      imgur.upload(files.avatar[0].path, (err, img) => {
-        console.log(img.data)
-        if (err) {
-          return res.json({ err })
-        }
-        return User.findByPk(req.params.id)
-          .then((user) => {
-            user.update({
-              name: req.body.name,
-              introduction: req.body.introduction,
-              avatar: files.avatar ? img.data.link : user.avatar
-              // cover: files.cover ? img.data.link : user.cover
-            })
-            imgur.upload(files.cover[0].path, (err, img) => {
-              if (err) {
-                return res.json(err)
-              }
-              return User.findByPk(req.params.id)
-                .then((user) => {
-                  user.update({
-                    cover: files.cover ? img.data.link : user.cover
-                  })
-                })
-            })
-            return res.status(200).json({
-              status: 'success',
-              message: 'User successfully updated.'
-            })
-          })
-      })
-    } else {
-      return User.findByPk(req.params.id)
-        .then((user) => {
-          user.update({
-            name: req.body.name,
-            introduction: req.body.introduction,
-            avatar: user.avatar,
-            cover: user.cover
-          })
-          return res.status(200).json({
-            status: 'success',
-            message: 'User successfully updated.'
-          })
-        })
-    }
-  },
   putUserSettings: (req, res) => {
     const UserId = Number(req.params.id)
     const viewerId = req.user.id
     if (UserId !== viewerId) {
-      console.log(typeof UserId, typeof viewerId)
       return res.status(400).json({
         status: 'error',
         message: 'This is not this user\'s account.'
@@ -380,17 +315,25 @@ const userController = {
             message: 'Password should be as same as checkPassword'
           })
         }
-        user.update({
+
+        return user.update({
           account: req.body.account,
           name: req.body.name,
           email: req.body.email,
           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+        }).then(() => {
+          return res.status(200).json({
+            status: 'success',
+            message: 'User successfully updated.',
+            user: { id: UserId }
+          })
+        }).catch(err => {
+          return res.status(400).json({
+            status: 'error',
+            message: err.errors[0].message
+          })
         })
-        return res.status(200).json({
-          status: 'success',
-          message: 'User successfully updated.',
-          user: { id: UserId }
-        })
+
       })
   }
 
