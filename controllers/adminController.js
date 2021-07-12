@@ -8,8 +8,8 @@ const adminController = {
     return User.findAll({
       where: {
         [Op.or]: [
-          { role: { [Op.not]: 'admin' } },
-          { name: 'root' }
+          { role: { [Op.ne]: 'admin' } },
+          { role: { [Op.is]: null} }
         ]
       },
       attributes: [
@@ -23,7 +23,6 @@ const adminController = {
         }
       ],
       group: 'id',
-      // having: { role: { [Op.not]: 'admin' } }
     }).then(users => {
       res.status(200).json(users)
     })
