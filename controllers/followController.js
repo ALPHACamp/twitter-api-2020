@@ -2,7 +2,7 @@ const db = require('../models')
 const { Followship, User } = db
 
 const followController = {
-  addFollowing: async (req, res) => {
+  addFollowing: async (req, res, next) => {
     // #swagger.tags = ['Followships']
     // #swagger.description = 'Follow a user.'
     try {
@@ -52,11 +52,10 @@ const followController = {
       })
       return res.status(200).json({ status: 'success', message: `You followed @${followingUser.account} successfully.` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  removeFollowing: async (req, res) => {
+  removeFollowing: async (req, res, next) => {
     // #swagger.tags = ['Followships']
     // #swagger.description = 'Unfollow a user.'
     try {
@@ -100,8 +99,7 @@ const followController = {
 
       return res.status(200).json({ status: 'success', message: `Unfollowed @${unfollowingUser.account} successfully.` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   }
 }

@@ -3,7 +3,7 @@ const { Tweet, User, Like, Reply } = db
 const validator = require('validator')
 
 const TweetController = {
-  getTweets: async (req, res) => {
+  getTweets: async (req, res, next) => {
     // #swagger.tags = ['Tweets']
     // #swagger.description = 'Get all tweets data.'
     try {
@@ -35,11 +35,10 @@ const TweetController = {
       })
       return res.status(200).json(tweets)
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  getTweet: async (req, res) => {
+  getTweet: async (req, res, next) => {
     // #swagger.tags = ['Tweets']
     // #swagger.description = 'Get a tweet's data.'
     try {
@@ -70,11 +69,10 @@ const TweetController = {
         isLike: tweet.LikedUsers.map(t => t.id).includes(req.user.id)
       })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  postTweet: async (req, res) => {
+  postTweet: async (req, res, next) => {
     // #swagger.tags = ['Tweets']
     // #swagger.description = 'Post a tweet.'
     try {
@@ -91,11 +89,10 @@ const TweetController = {
       })
       return res.status(200).json({ status: 'success', message: 'The tweet was successfully created.' })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  getReplies: async (req, res) => {
+  getReplies: async (req, res, next) => {
     // #swagger.tags = ['Replies']
     // #swagger.description = 'Get replies data.'
     try {
@@ -122,11 +119,10 @@ const TweetController = {
       })
       return res.status(200).json(replies)
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  postReply: async (req, res) => {
+  postReply: async (req, res, next) => {
     // #swagger.tags = ['Replies']
     // #swagger.description = 'Post a reply.'
     try {
@@ -150,11 +146,10 @@ const TweetController = {
       })
       return res.status(200).json({ status: 'success', message: `You replied @${repliedTweetAuthor}'s tweet successfully.` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  postLike: async (req, res) => {
+  postLike: async (req, res, next) => {
     // #swagger.tags = ['Likes']
     // #swagger.description = 'Post a like.'
     try {
@@ -176,11 +171,10 @@ const TweetController = {
       await Like.create({ UserId, TweetId })
       return res.status(200).json({ status: 'success', message: `You liked @${likedTweetAuthor}'s tweet successfully.` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  postUnlike: async (req, res) => {
+  postUnlike: async (req, res, next) => {
     // #swagger.tags = ['Likes']
     // #swagger.description = 'Post an unlike.'
     try {
@@ -200,8 +194,7 @@ const TweetController = {
       await liked.destroy()
       return res.status(200).json({ status: 'success', message: `You unliked ${unlikedTweetAuthor}'s tweet successfully.` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   }
 }

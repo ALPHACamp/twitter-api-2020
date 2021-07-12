@@ -24,7 +24,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userController = {
-  signIn: async (req, res) => {
+  signIn: async (req, res, next) => {
     // #swagger.tags = ['SignUp/Signin']
     // #swagger.description = 'User and admin sign in.'
     try {
@@ -55,11 +55,10 @@ const userController = {
         }
       })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  signUp: async (req, res) => {
+  signUp: async (req, res, next) => {
     // #swagger.tags = ['SignUp/Signin']
     // #swagger.description = 'User sign up.'
     try {
@@ -107,12 +106,12 @@ const userController = {
       })
       return res.status(200).json({ status: 'success', message: `@${account} sign up successfully.Please sign in.` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  getCurrentUser: (req, res) => {
-    // #swagger.tags = ['SignUp/Signin']
+
+  getCurrentUser: (req, res, next) => {
+    // #swagger.tags = ['Users']
     // #swagger.description = 'Get current user's data.'
     return res.status(200).json({
       id: req.user.id,
@@ -125,7 +124,7 @@ const userController = {
       introduction: req.user.introduction
     })
   },
-  getTopUsers: async (req, res) => {
+  getTopUsers: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Get top ten users data.'
     try {
@@ -154,11 +153,10 @@ const userController = {
         users
       })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  editAccount: async (req, res) => {
+  editAccount: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Edit user's account information.'
     try {
@@ -217,11 +215,10 @@ const userController = {
       await user.update({ name, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)), email, account })
       return res.status(200).json({ status: 'success', message: `@${account} Update account information successfully.` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  getUser: async (req, res) => {
+  getUser: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Get a user's data.'
     try {
@@ -258,11 +255,10 @@ const userController = {
         data
       )
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  editUserProfile: async (req, res) => {
+  editUserProfile: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Edit user's profile.'
     try {
@@ -312,12 +308,11 @@ const userController = {
       await user.update(updateData)
       return res.status(200).json({ status: 'success', message: `Update ${name}'s profile successfully.` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
 
-  getUserTweets: async (req, res) => {
+  getUserTweets: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Get user's tweets data.'
     try {
@@ -356,12 +351,11 @@ const userController = {
       })
       return res.status(200).json(tweets)
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
 
-  getUserReplies: async (req, res) => {
+  getUserReplies: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Get user's replies data.'
     try {
@@ -394,12 +388,11 @@ const userController = {
       })
       return res.status(200).json(replies)
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
 
-  getUserLikes: async (req, res) => {
+  getUserLikes: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Get user's liked tweets data.'
     try {
@@ -438,12 +431,11 @@ const userController = {
       })
       return res.status(200).json(likes)
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
 
-  getUserFollowings: async (req, res) => {
+  getUserFollowings: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Get user's followings data.'
     try {
@@ -471,11 +463,10 @@ const userController = {
       }))
       return res.status(200).json(user)
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  getUserFollowers: async (req, res) => {
+  getUserFollowers: async (req, res, next) => {
     // #swagger.tags = ['Users']
     // #swagger.description = 'Get user's followers data.'
     try {
@@ -503,8 +494,7 @@ const userController = {
       }))
       return res.status(200).json(user)
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   }
 }
