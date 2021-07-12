@@ -92,25 +92,18 @@ const userController = {
           role: { [Op.ne]: 'admin' }
         },
         attributes: [
-          'id', 'account', 'name', 'bio', 'avatar', 'cover',
+          'id', 'account', 'name', 'email', 'bio', 'avatar', 'cover',
+          [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowingId = User.id)'), 'totalFollowers'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id)'), 'totalFollowings']
         ],
-        include: [{
-          model: Tweet, attributes: [
-            'id', 'description', 'createdAt',
-            [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = User.id)'), 'totalReplies'],
-            [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = User.id)'), 'totalLikes']
-          ],
-          include: [
-            { model: User, attributes: ['id', 'avatar', 'name', 'account'] },
-          ],
-          order: [['createdAt', 'DESC']]
-        }]
       })
       if (!user) return res.json({ status: 'error', message: '使用者不存在' })
       return res.json(user)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   getUserTweets: async (req, res, next) => {
@@ -126,11 +119,9 @@ const userController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
         ],
-        include: [
-          {
-            model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover', 'bio']
-          }
-        ],
+        include: [{
+          model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover', 'bio']
+        }],
       })
       if (tweets.length === 0) {
         return res.json({ status: 'error', message: '使用者暫無貼文' })
