@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
-const { User, Tweet, Like, Reply, Followship, Sequelize} = db
+const { User, Tweet, Like, Reply, Followship, Sequelize } = db
 const { Op } = require('sequelize')
 
 const jwt = require('jsonwebtoken')
@@ -83,6 +83,8 @@ const userController = {
   },
   getUserTweets: (req, res) => {
     const UserId = req.params.id
+    const viewerId = req.user.id
+
     return User.findByPk(UserId)
       .then(user => {
         if (!user) {
@@ -93,13 +95,21 @@ const userController = {
         }
         return Tweet.findAll({
           where: { UserId },
-          attributes: [['id', 'TweetId'], 'description', 'createdAt', 'replyCount', 'likeCount'],
-          include: {
-            model: User,
-            attributes: ['id', 'name', 'account', 'avatar']
-          }
+          attributes: [
+            ['id', 'TweetId'],
+            'description', 'createdAt', 'replyCount', 'likeCount',
+            [Sequelize.literal(`exists (select * from Likes where Likes.UserId = '${viewerId}' and Likes.TweetId = Tweet.id)`), 'isLike']
+          ],
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            },
+            {
+              model: Like, attributes: []
+            }
+          ]
         }).then(tweets => {
-
           return res.status(200).json(tweets)
         })
       })
