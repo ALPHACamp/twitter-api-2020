@@ -3,6 +3,9 @@ const { User, Followship } = require('../models')
 const followshipController = {
   addFollowing: async (req, res, next) => {
     try {
+      if (req.user.id === req.body.id) {
+        return res.json({ status: 'error', message: '無法追隨自己！' })
+      }
       const followship = await Followship.findOne({
         where: { followerId: req.user.id, followingId: req.body.id }
       })
