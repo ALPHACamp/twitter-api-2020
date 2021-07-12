@@ -67,12 +67,12 @@ npx sequelize db:seed:undo:all
 * [Chia-Hui](https://github.com/wintersprouter)
 * [Hsin Yeh](https://github.com/Hsinyehh)
 
-## 串接資源
-* API文件網址
-http://localhost:3000/api-doc/
+## Base URL
+* http://localhost:3000/api/{route}
+* https://simpletwitter-api.herokuapp.com/api/{route}
 
-* API串接網址
-http://localhost:3000/api/{route}
+## API文件網址
+http://localhost:3000/api-doc/
 
 ### Demo 帳號
 使用者可以使用以下帳號分別登入系統前台、後台。
