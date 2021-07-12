@@ -4,7 +4,7 @@ const followshipController = require('../controllers/followshipController')
 
 router.get('/', followshipController.showAllUser)
 
-router.post('/', followshipController.addFollowing)
+router.post('/:id', followshipController.addFollowing)
 
 router.delete('/:id', followshipController.deleteFollowing)
 
