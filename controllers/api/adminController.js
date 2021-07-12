@@ -73,7 +73,7 @@ let adminController = {
     const options = {
       include: [
         { model: Reply, attributes: ['id'], raw: true },
-        { model: Like, attributes: ['id'] }
+        { model: Like, attributes: ['id','UserId'] }
       ]
     }
     Tweet.findByPk(+req.params.tweetId, options).then(async (tweet) => {
@@ -88,6 +88,8 @@ let adminController = {
         await Like.destroy({
           where: { id: tweet.Likes.map((like) => like.id) }
         })
+        await User.decrement({ likeNum: 1 },{ where: { id: tweet.Likes.map((like) => like.UserId) }}
+        )
       }
       res.status(200).json({
         status: 'success',
