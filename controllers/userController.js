@@ -3,6 +3,10 @@ const db = require('../models')
 const { User, Tweet, Like, Reply, Followship, Sequelize } = db
 const { Op } = require('sequelize')
 
+// const imgur = require('imgur-node-api')
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
@@ -301,6 +305,67 @@ const userController = {
       })
       return res.status(200).json(users)
     })
+  },
+
+  putUser: (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+
+    if (Number(UserId) !== viewerId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'This is not this user\'s account.'
+      })
+    }
+
+    if (!req.body.name) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User name required.'
+      })
+    }
+
+    const { files } = req
+
+    // TODO：改善重複上傳的問題
+    if (files) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      const avatar = files.avatar ? imgur.uploadFile((files.avatar[0].path)) : null
+      const cover = files.cover ? imgur.uploadFile((files.cover[0].path)) : null
+
+      Promise.all([avatar, cover])
+        .then(images => {
+          return User.findByPk(UserId)
+            .then(user => {
+              user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                avatar: files.avatar ? images[0].link : user.avatar,
+                cover: files.cover ? images[1].link : user.cover
+              })
+              return res.status(200).json({
+                status: 'success',
+                message: 'User successfully updated.'
+              })
+            })
+        })
+    } else {
+
+      return User.findByPk(UserId)
+        .then((user) => {
+          user.update({
+            name: req.body.name,
+            introduction: req.body.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          }).then(() => {
+            return res.status(200).json({
+              status: 'success',
+              message: 'User successfully updated.'
+            })
+          })
+        })
+    }
   },
 
   getUserRepliedTweets: (req, res) => {

@@ -4,10 +4,14 @@ const { authenticated } = require('../../middlewares/auth')
 
 const userController = require('../../controllers/userController')
 
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
 router.post('/login', userController.logIn)
 router.post('/', userController.signUp)
 router.get('/current_user', authenticated, userController.getCurrentUser)
 router.get('/top', authenticated, userController.getTopUsers)
+router.put('/:id', authenticated, upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUser)
 router.get('/:id', authenticated, userController.getUser)
 router.get('/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/:id/likes', authenticated, userController.getUserLikes)
