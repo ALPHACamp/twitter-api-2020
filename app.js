@@ -3,8 +3,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express')
 const helpers = require('./_helpers')
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
