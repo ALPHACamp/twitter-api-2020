@@ -8,6 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 const port = process.env.PORT || 3000
 const cors = require('cors')
 require('./models')
+const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json') // 剛剛輸出的 JSON
 
 
