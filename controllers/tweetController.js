@@ -24,7 +24,7 @@ const tweetController = {
     try {
       const { description } = req.body
 
-      if (!description.trim().length && description.trim().length > 140) throw new RequestError('Invalid tweet.')
+      if (!description.trim().length || description.trim().length > 140) throw new RequestError('Invalid tweet.')
 
       const postData = {
         UserId: req.user.id,
