@@ -2,53 +2,64 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "REST API",
-    "description": ""
+    "title": "Simple Twitter API",
+    "description": "This API document is for <b>Simple Twitter</b> project. "
   },
   "host": "localhost:3000",
   "basePath": "/",
   "tags": [
     {
       "name": "SignUp/Signin",
-      "description": "註冊登入 router"
+      "description": "Sign up and sign in related."
     },
     {
       "name": "Users",
-      "description": "使用者 router"
+      "description": "Users related."
     },
     {
       "name": "Admin",
-      "description": "後台 router"
+      "description": "Admin related."
     },
     {
       "name": "Tweets",
-      "description": "Tweets router"
+      "description": "Tweets related."
     },
     {
       "name": "Replies",
-      "description": "Replies router"
+      "description": "Replies related."
     },
     {
       "name": "Likes",
-      "description": "Likes router"
+      "description": "Likes related."
     },
     {
       "name": "Followships",
-      "description": "追蹤 router"
+      "description": "Followships related."
     }
   ],
   "schemes": [
     "http"
   ],
-  "consumes": [],
-  "produces": [],
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
     "/api/users/": {
       "post": {
         "tags": [
           "SignUp/Signin"
         ],
-        "description": "",
+        "description": "User sign up.",
         "parameters": [
           {
             "name": "obj",
@@ -91,7 +102,7 @@
         "tags": [
           "Users"
         ],
-        "description": "",
+        "description": "Get top ten users data.",
         "parameters": [],
         "responses": {
           "200": {
@@ -114,7 +125,7 @@
         "tags": [
           "SignUp/Signin"
         ],
-        "description": "",
+        "description": "User and admin sign in.",
         "parameters": [
           {
             "name": "obj",
@@ -151,266 +162,10 @@
     "/api/users/current": {
       "get": {
         "tags": [
-          "Users"
+          "SignUp/Signin"
         ],
-        "description": "",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/users/{id}/tweets": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
+        "description": "Get current user",
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/users/{id}": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "model": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "example": "any"
-                },
-                "introduction": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/users/{id}/replied_tweets": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/users/{id}/likes": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/users/{id}/followings": {
-      "get": {
-        "tags": [],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/users/{id}/followers": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/users/{id}/account": {
-      "put": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
           {
             "name": "obj",
             "in": "body",
@@ -455,12 +210,232 @@
         }
       }
     },
+    "/api/users/{id}/tweets": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "Get user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "Get a user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "description": "Edit user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/replied_tweets": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "Get user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/likes": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "Get user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/followings": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "Get user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/followers": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "Get user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/users/{id}/account": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "description": "Edit user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/admin/users": {
       "get": {
         "tags": [
           "Admin"
         ],
-        "description": "",
+        "description": "Get users data.",
         "parameters": [],
         "responses": {
           "200": {
@@ -468,6 +443,9 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -480,7 +458,7 @@
         "tags": [
           "Admin"
         ],
-        "description": "",
+        "description": "Delete a tweet.",
         "parameters": [
           {
             "name": "id",
@@ -504,7 +482,7 @@
         "tags": [
           "Tweets"
         ],
-        "description": "",
+        "description": "Get all tweets data.",
         "parameters": [],
         "responses": {
           "200": {
@@ -525,7 +503,7 @@
         "tags": [
           "Tweets"
         ],
-        "description": "",
+        "description": "Post a tweet.",
         "parameters": [
           {
             "name": "obj",
@@ -561,7 +539,7 @@
         "tags": [
           "Tweets"
         ],
-        "description": "",
+        "description": "Get a tweet",
         "parameters": [
           {
             "name": "tweet_id",
@@ -571,14 +549,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -591,7 +563,7 @@
         "tags": [
           "Replies"
         ],
-        "description": "",
+        "description": "Get replies data.",
         "parameters": [
           {
             "name": "tweet_id",
@@ -619,7 +591,7 @@
         "tags": [
           "Replies"
         ],
-        "description": "",
+        "description": "Post a reply.",
         "parameters": [
           {
             "name": "tweet_id",
@@ -664,7 +636,7 @@
         "tags": [
           "Likes"
         ],
-        "description": "",
+        "description": "Post a like.",
         "parameters": [
           {
             "name": "id",
@@ -697,7 +669,7 @@
         "tags": [
           "Likes"
         ],
-        "description": "",
+        "description": "Post an unlike.",
         "parameters": [
           {
             "name": "id",
@@ -730,7 +702,7 @@
         "tags": [
           "Followships"
         ],
-        "description": "",
+        "description": "Follow a user.",
         "parameters": [
           {
             "name": "obj",
@@ -772,7 +744,7 @@
         "tags": [
           "Followships"
         ],
-        "description": "",
+        "description": "Unfollow a user.",
         "parameters": [
           {
             "name": "followingId",
