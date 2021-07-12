@@ -20,8 +20,10 @@ const userController = {
 
   signup: async (req, res, next) => {
     try {
-      const { name, account, email, password, confirmPassword } = req.body
-      if (!name || !account || !email || !password || !confirmPassword) return res.json({ status: 'error', message: '請填入所有欄位' })
+      let { name, account, email, password, confirmPassword } = req.body
+
+      if (!name.trim() || !account.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) return res.json({ status: 'error', message: '請填入所有欄位' })
+
       if (password !== confirmPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
       let user = await User.findOne({ where: { account } })
       if (user) return res.json({ status: 'error', message: `此帳號已被註冊` })
@@ -203,6 +205,7 @@ const userController = {
             'avatar',
             'cover',
             'bio',
+            [Sequelize.literal('(SELECT followingId FROM Followships WHERE followingId = id AND followerId = User.id)'), 'followingId'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE TweetId IN (SELECT id FROM Tweets WHERE UserId = User.id))'), 'totalLikes'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
