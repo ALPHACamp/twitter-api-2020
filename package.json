@@ -21,6 +21,7 @@
     "express-handlebars": "^3.0.0",
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
+    "imgur": "^1.0.2",
     "imgur-node-api": "^0.1.0",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",

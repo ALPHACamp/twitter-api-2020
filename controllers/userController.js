@@ -7,7 +7,8 @@ const Reply = db.Reply
 const Followship = db.Followship
 const { Op } = require('sequelize')
 
-const imgur = require('imgur-node-api')
+// const imgur = require('imgur-node-api')
+const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const jwt = require('jsonwebtoken')
@@ -285,9 +286,10 @@ const userController = {
     })
   },
   putUser: (req, res) => {
-    const UserId = Number(req.params.id)
+    const UserId = req.params.id
     const viewerId = req.user.id
-    if (UserId !== viewerId) {
+
+    if (Number(UserId) !== viewerId) {
       return res.status(400).json({
         status: 'error',
         message: 'This is not this user\'s account.'
@@ -300,41 +302,32 @@ const userController = {
         message: 'User name required.'
       })
     }
+
     const { files } = req
+
     if (files) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      imgur.upload(files.avatar[0].path, (err, img) => {
-        console.log(img.data)
-        if (err) {
-          return res.json({ err })
-        }
-        return User.findByPk(req.params.id)
-          .then((user) => {
-            user.update({
-              name: req.body.name,
-              introduction: req.body.introduction,
-              avatar: files.avatar ? img.data.link : user.avatar
-              // cover: files.cover ? img.data.link : user.cover
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      const avatar = files.avatar ? imgur.uploadFile((files.avatar[0].path)) : null
+      const cover = files.cover ? imgur.uploadFile((files.cover[0].path)) : null
+
+      Promise.all([avatar, cover])
+        .then(images => {
+          return User.findByPk(UserId)
+            .then(user => {
+              user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                avatar: files.avatar ? images[0].link : user.avatar,
+                cover: images[1].link ? images[1].link : user.cover
+              })
+              return res.status(200).json({
+                status: 'success',
+                message: 'User successfully updated.'
+              })
             })
-            imgur.upload(files.cover[0].path, (err, img) => {
-              if (err) {
-                return res.json(err)
-              }
-              return User.findByPk(req.params.id)
-                .then((user) => {
-                  user.update({
-                    cover: files.cover ? img.data.link : user.cover
-                  })
-                })
-            })
-            return res.status(200).json({
-              status: 'success',
-              message: 'User successfully updated.'
-            })
-          })
-      })
+        })
     } else {
-      return User.findByPk(req.params.id)
+      return User.findByPk(UserId)
         .then((user) => {
           user.update({
             name: req.body.name,
