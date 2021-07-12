@@ -34,13 +34,24 @@ let likeController = {
           }))
   },
   postLike: (req, res) => {
-    Like.findOne({
-      where: {
-        UserId: +req.user.id,
-        TweetId: +req.params.tweetId
+    Promise.all([
+      Tweet.findByPk(+req.params.tweetId),
+      Like.findOne({
+        where: {
+          UserId: +req.user.id,
+          TweetId: +req.params.tweetId
+        }
+      })
+    ]).then(result => {
+      if (!result[0]) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: 'Tweet not found.'
+          })
       }
-    }).then(like => {
-      if (like) {
+      if (result[1]) {
         return res.status(400).json({
           status: 'error',
           message: 'You already liked this tweet.'
@@ -51,6 +62,7 @@ let likeController = {
         TweetId: +req.params.tweetId
       })
         .then((like) => {
+          //Tweet likeNum +1 & User likeNum +1
           Promise.all([
             Tweet.findByPk(+req.params.tweetId)
               .then((tweet) =>
@@ -74,12 +86,6 @@ let likeController = {
               })
             )
         })
-        .catch((error) =>
-          res.status(500).json({
-            status: 'error',
-            message: error
-          })
-        )
     })
   },
   deleteLike: (req, res) => {

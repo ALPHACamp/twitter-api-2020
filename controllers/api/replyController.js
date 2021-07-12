@@ -48,16 +48,29 @@ let replyController = {
       TweetId: +req.params.tweetId,
       comment: req.body.comment,
     }
-    Reply.create(data)
-      .then((reply) => {
-        Tweet.findByPk(+req.params.tweetId)
-          .then((tweet) => tweet.increment({ replyNum: 1 }))
-          .then(() =>
-            res.status(200).json({
-              status: '200',
-              message: 'Successfully posted new reply.',
+    Tweet.findByPk(+req.params.tweetId)
+      .then((tweet) => {
+        //if tweet exists
+        if (tweet) {
+          Reply.create(data)
+            .then((reply) => {
+              tweet.increment({ replyNum: 1 })
+            }).then(() => {
+              return res.status(200).json({
+                status: '200',
+                message: 'Successfully posted new reply.',
+              })
             })
-          )
+        }
+        //if tweet doesn't exists
+        else { 
+          return res
+            .status(404)
+            .json({
+              status: 'error',
+              message: 'Tweet not found.'
+            })
+        }
       })
       .catch((error) =>
         res.status(500).json({
