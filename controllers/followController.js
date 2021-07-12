@@ -4,6 +4,7 @@ const { Followship, User } = db
 const followController = {
   addFollowing: async (req, res) => {
     // #swagger.tags = ['Followships']
+    // #swagger.description = 'Follow a user.'
     try {
       const followerId = req.user.id
       const followingId = req.body.id
@@ -57,6 +58,7 @@ const followController = {
   },
   removeFollowing: async (req, res) => {
     // #swagger.tags = ['Followships']
+    // #swagger.description = 'Unfollow a user.'
     try {
       const followerId = req.user.id
       const followingId = req.params.followingId

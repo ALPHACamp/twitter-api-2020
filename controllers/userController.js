@@ -26,6 +26,7 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   signIn: async (req, res) => {
     // #swagger.tags = ['SignUp/Signin']
+    // #swagger.description = 'User and admin sign in.'
     try {
       // check all inputs are required
       const { account, password } = req.body
@@ -60,6 +61,7 @@ const userController = {
   },
   signUp: async (req, res) => {
     // #swagger.tags = ['SignUp/Signin']
+    // #swagger.description = 'User sign up.'
     try {
       const { account, name, email, password, checkPassword } = req.body
       const message = []
@@ -110,7 +112,8 @@ const userController = {
     }
   },
   getCurrentUser: (req, res) => {
-    // #swagger.tags = ['Users']
+    // #swagger.tags = ['SignUp/Signin']
+    // #swagger.description = 'Get current user's data.'
     return res.status(200).json({
       id: req.user.id,
       name: req.user.name,
@@ -124,6 +127,7 @@ const userController = {
   },
   getTopUsers: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Get top ten users data.'
     try {
       let users = await User.findAll({
         where: { role: 'user' },
@@ -156,6 +160,7 @@ const userController = {
   },
   editAccount: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Edit user's account information.'
     try {
       const { account, name, email, password, checkPassword } = req.body
       const { email: currentEmail, account: currentAccount } = req.user
@@ -218,6 +223,7 @@ const userController = {
   },
   getUser: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Get a user's data.'
     try {
       const id = req.params.id
       const user = await User.findOne({
@@ -258,6 +264,7 @@ const userController = {
   },
   editUserProfile: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Edit user's profile.'
     try {
       const id = req.params.id
       const { name, introduction } = req.body
@@ -312,6 +319,7 @@ const userController = {
 
   getUserTweets: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Get user's tweets data.'
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
@@ -355,6 +363,7 @@ const userController = {
 
   getUserReplies: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Get user's replies data.'
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
@@ -392,6 +401,7 @@ const userController = {
 
   getUserLikes: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Get user's liked tweets data.'
     try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId)
@@ -435,6 +445,7 @@ const userController = {
 
   getUserFollowings: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Get user's followings data.'
     try {
       let user = await User.findByPk(req.params.id,
         {
@@ -466,6 +477,7 @@ const userController = {
   },
   getUserFollowers: async (req, res) => {
     // #swagger.tags = ['Users']
+    // #swagger.description = 'Get user's followers data.'
     try {
       let user = await User.findByPk(req.params.id,
         {
