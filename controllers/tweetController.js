@@ -1,5 +1,6 @@
 const { Tweet, User } = require('../models')
 const moment = require('moment')
+const Sequelize = require('sequelize')
 
 const tweetController = {
   getTweets: async (req, res, next) => {
@@ -7,7 +8,12 @@ const tweetController = {
       const result = await Tweet.findAll({
         raw: true,
         nest: true,
-        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt', [
+          Sequelize.literal(`EXISTS (
+            SELECT * FROM Likes
+            WHERE UserId = ${req.user.id} AND TweetId = Tweet.id
+          )`
+          ), 'isLiked']],
         order: [
           ['createdAt', 'DESC']
         ],
@@ -19,7 +25,8 @@ const tweetController = {
       // 將取得資料做整理
       const tweets = result.map(tweet => ({
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a'),
+        isLiked: tweet.isLiked === 1
       }))
       return res.json(tweets)
     } catch (err) {
@@ -50,7 +57,12 @@ const tweetController = {
       let tweet = await Tweet.findByPk(req.params.id, {
         raw: true,
         nest: true,
-        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt', [
+          Sequelize.literal(`EXISTS (
+            SELECT * FROM Likes
+            WHERE UserId = ${req.user.id} AND TweetId = ${req.params.id}
+          )`
+          ), 'isLiked']],
         include: [{
           model: User,
           attributes: ['id', 'name', 'account', 'avatar']
@@ -59,7 +71,8 @@ const tweetController = {
       // 時間格式整理
       tweet = {
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a'),
+        isLiked: tweet.isLiked === 1
       }
       return res.json(tweet)
     } catch (err) {
