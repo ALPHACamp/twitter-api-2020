@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Sequelize = require('sequelize')
 
-
 const adminController = {
   signin: async (req, res, next) => {
     try {
