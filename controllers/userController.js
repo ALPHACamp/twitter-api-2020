@@ -305,6 +305,7 @@ const userController = {
 
     const { files } = req
 
+    // TODO：改善重複上傳的問題
     if (files) {
       imgur.setClientId(IMGUR_CLIENT_ID)
       const avatar = files.avatar ? imgur.uploadFile((files.avatar[0].path)) : null
@@ -327,6 +328,7 @@ const userController = {
             })
         })
     } else {
+
       return User.findByPk(UserId)
         .then((user) => {
           user.update({
@@ -334,10 +336,11 @@ const userController = {
             introduction: req.body.introduction,
             avatar: user.avatar,
             cover: user.cover
-          })
-          return res.status(200).json({
-            status: 'success',
-            message: 'User successfully updated.'
+          }).then(() => {
+            return res.status(200).json({
+              status: 'success',
+              message: 'User successfully updated.'
+            })
           })
         })
     }
