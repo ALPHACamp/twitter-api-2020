@@ -2,7 +2,7 @@ const db = require('../models')
 const { User, Tweet, Like } = db
 
 const adminController = {
-  getUsers: async (req, res) => {
+  getUsers: async (req, res, next) => {
     // #swagger.tags = ['Admin']
     try {
       let users = await User.findAll({
@@ -34,11 +34,10 @@ const adminController = {
       users.sort((a, b) => b.tweetCount - a.tweetCount)
       return res.status(200).json(users)
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   },
-  deleteTweet: async (req, res) => {
+  deleteTweet: async (req, res, next) => {
     // #swagger.tags = ['Admin']
     try {
       const id = req.params.id
@@ -49,8 +48,7 @@ const adminController = {
       console.log(tweetAuthor)
       return res.status(200).json({ status: 'success', message: `@${tweetAuthor}'s tweet has been deleted!` })
     } catch (err) {
-      console.log(err)
-      res.status(500).json({ status: 'error', message: 'error' })
+      next(err)
     }
   }
 }
