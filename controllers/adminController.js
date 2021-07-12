@@ -1,9 +1,32 @@
-// const db = require('../models')
+const db = require('../models')
+const { User, Tweet, Sequelize } = db
+const { Op } = require('sequelize')
 
 const adminController = {
-  // for testing: test if authenticated & authenticatedAdmin works
+
   getUsers: (req, res) => {
-    return res.json({ status: 'success', message: 'getUsers' })
+    return User.findAll({
+      where: {
+        [Op.or]: [
+          { role: { [Op.not]: 'admin' } },
+          { name: 'root' }
+        ]
+      },
+      attributes: [
+        'id', 'account', 'name', 'avatar', 'cover', 'followerCount', 'followingCount',
+        [Sequelize.fn('COUNT', Sequelize.col('*')), 'tweetCount'],
+        [Sequelize.fn('SUM', Sequelize.col('Tweets.likeCount')), 'likeCount']
+      ],
+      include: [
+        {
+          model: Tweet, attributes: []
+        }
+      ],
+      group: 'id',
+      // having: { role: { [Op.not]: 'admin' } }
+    }).then(users => {
+      res.status(200).json(users)
+    })
   }
 }
 
