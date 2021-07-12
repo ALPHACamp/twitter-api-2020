@@ -95,10 +95,11 @@ const userController = {
       })
       const { id, name, account, email, role,
         avatar, cover, introduction, followingCounts, followerCounts } = user
+      const isFollowed = req.user.Followings.map(f => f.id).includes(id)
       return res.json({
         id, name, account, email, role,
         avatar, followingCounts, followerCounts,
-        cover, introduction,
+        cover, introduction, isFollowed,
         Followers: user.Followers, Followings: user.Followings
       })
     } catch (err) {
