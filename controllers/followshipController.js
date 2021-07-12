@@ -35,7 +35,7 @@ const followshipController = {
         User.findByPk(followerId),
         User.findByPk(followingId)
       ]).then(users => {
-        if (users.length !== 2) {
+        if (!users[1]) {
           return res.status(400).json({
             status: 'error',
             message: 'Current userId or following id may be wrong'
