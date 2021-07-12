@@ -47,18 +47,28 @@ const adminController = {
         ],
       })
       return res.json(users)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   getAllTweet: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'admin') return res.json({ status: 'error', message: '管理員專用' })
       let tweets = await Tweet.findAll({
-        include: [User],
+        attributes: ['id', 'description', 'createdAt'],
+        include: [
+          { model: User, attributes: ['id', 'avatar', 'name', 'account'] },
+        ],
       })
       return res.json(tweets)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
+
   deleteTweet: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'admin') return res.json({ status: 'error', message: '管理員專用' })

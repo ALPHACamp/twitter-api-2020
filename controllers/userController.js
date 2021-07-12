@@ -73,7 +73,7 @@ const userController = {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const user = await User.findByPk(helpers.getUser(req).id, {
-        attributes: ['id', 'name', 'account', 'avatar']
+        attributes: ['id', 'name', 'account', 'email', 'avatar']
       })
       if (!user) return res.json({ status: 'error', message: '找不到此使用者的資訊' })
       return res.json(user)
@@ -92,25 +92,18 @@ const userController = {
           role: { [Op.ne]: 'admin' }
         },
         attributes: [
-          'id', 'account', 'name', 'bio', 'avatar', 'cover',
+          'id', 'account', 'name', 'email', 'bio', 'avatar', 'cover',
+          [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowingId = User.id)'), 'totalFollowers'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id)'), 'totalFollowings']
         ],
-        include: [{
-          model: Tweet, attributes: [
-            'id', 'description', 'createdAt',
-            [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = User.id)'), 'totalReplies'],
-            [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = User.id)'), 'totalLikes']
-          ],
-          include: [
-            { model: User, attributes: ['id', 'avatar', 'name', 'account'] },
-          ],
-          order: [['createdAt', 'DESC']]
-        }]
       })
       if (!user) return res.json({ status: 'error', message: '使用者不存在' })
       return res.json(user)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   getUserTweets: async (req, res, next) => {
@@ -122,19 +115,22 @@ const userController = {
           'id',
           'description',
           'createdAt',
+          [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
         ],
-        include: [
-          {
-            model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover', 'bio']
-          }],
+        include: [{
+          model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover', 'bio']
+        }],
       })
       if (tweets.length === 0) {
         return res.json({ status: 'error', message: '使用者暫無貼文' })
       }
       return res.json(tweets)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   getUserRepliedTweets: async (req, res, next) => {
@@ -169,19 +165,23 @@ const userController = {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const likes = await Like.findAll({
         include: [
-          { model: User, attributes: ['id', 'account', 'name', 'avatar', 'cover'] },
           {
             model: Tweet,
             attributes: ['id', 'description', 'createdAt',
+              [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
               [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
               [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']],
             include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
-          }],
+          }
+        ],
         where: { UserId: req.params.id }
       })
       if (likes.length === 0) return res.json({ status: 'error', message: '沒有喜歡的推文或回覆' })
       return res.json(likes)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   getUserFollowings: async (req, res, next) => {
@@ -315,6 +315,7 @@ const userController = {
 
     } catch (err) { next(err) }
   },
+
   putUserInfo: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
