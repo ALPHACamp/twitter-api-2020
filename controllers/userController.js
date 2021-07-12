@@ -351,7 +351,7 @@ const userController = {
     return User.findByPk(currentUserId, {
       attributes: [
         'id', 'name', 'account', 'avatar',
-        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'Admin' and id = '${req.user.id}')`), 'isAdmin']
+        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'dmin' and id = '${req.user.id}')`), 'isAdmin']
       ]
     }).then(user => {
       return res.status(200).json(user)
