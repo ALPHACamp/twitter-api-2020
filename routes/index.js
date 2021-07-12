@@ -12,7 +12,3 @@ module.exports = (app) => {
   app.use('/api/admin', admin)
   app.use('/api/followships', helpers.authenticated, followship)
 }
-
-// helpers.authenticated, helpers.authenticatedUser,
-// helpers.authenticated, helpers.authenticatedAdmin,
-
