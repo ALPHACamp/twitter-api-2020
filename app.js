@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const app = express()
 const port = process.env.PORT || 3000
 const cors = require('cors')
-require('../twitter-api-2020/models')
+require('./models')
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json') // 剛剛輸出的 JSON
 
