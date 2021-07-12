@@ -49,7 +49,7 @@ const tweetController = {
     try {
       let tweet = await Tweet.findByPk(req.params.id, {
         raw: true,
-        // nest: true,
+        nest: true,
         attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
         include: [{
           model: User,
