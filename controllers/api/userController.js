@@ -1,5 +1,6 @@
 const db = require('../../models')
 const User = db.User
+const sequelize = require('sequelize')
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
@@ -21,6 +22,13 @@ let userController = {
         status: 'error',
         message: "Password and confirm password doesn't match."
       })
+    }
+    if (name.length > 50) {
+      return res.status(400)
+        .json({
+          status: 'error',
+          message: 'Cannot post over 50 characters.'
+        })
     }
     User.findOne({
       where: {
@@ -142,11 +150,19 @@ let userController = {
       }
     }
     // if there's a introduction update
-    if (introduction && introduction.length > 140) {
+    if (introduction && introduction.length > 160) {
       return res.status(400).json({
         status: 'error',
-        message: 'Cannot post over 140 characters'
+        message: 'Cannot post over 160 characters'
       })
+    }
+    // if there's a name update
+    if (name && name.length > 50) {
+      return res.status(400)
+        .json({
+          status: 'error',
+          message: 'Cannot post over 50 characters.'
+        })
     }
 
     User.findByPk(id)
@@ -190,21 +206,47 @@ let userController = {
           ? bcrypt.hashSync(passwordNew, bcrypt.genSaltSync(10))
           : user.password
         modifiedData.introduction = introduction || user.introduction
-        
+
         //deal with avatar、cover
         imgur.setClientID(IMGUR_CLIENT_ID)
-        modifiedData.avatar = files && files.avatar ? await imgurUpload(files.avatar[0].path):user.avatar
+        modifiedData.avatar = files && files.avatar ? await imgurUpload(files.avatar[0].path) : user.avatar
         modifiedData.cover = files && files.cover ? await imgurUpload(files.cover[0].path) : user.cover
         const newData = await user.update(modifiedData)
         res.status(200).json(newData)
       })
       .catch(error => res.status(500).json({
-        status:'error',
+        status: 'error',
         message: error
       }))
   },
   login: (req, res) => {
     const { password, email } = req.body
+    const options = {
+      where: {
+        email,
+        role: 'user'
+      },
+      attributes: {
+        include: [
+          [
+            sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"),
+            'followerNum'
+          ],
+          [
+            sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"),
+            'followingNum'
+          ],
+          [
+            sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"),
+            'likeNum'
+          ],
+          [
+            sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"),
+            'tweetNum'
+          ],
+        ]
+      }
+    }
     if (!password || !email) {
       return res.status(400).json({
         status: 'error',
@@ -212,8 +254,8 @@ let userController = {
       })
     }
 
-    User.findOne({ where: { email, role: 'user' } })
-      .then((user) => {
+    User.findOne(options)
+      .then(async (user) => {
         if (!user) {
           return res
             .status(401)
@@ -234,6 +276,11 @@ let userController = {
           id: user.id
         }
         let token = jwt.sign(payload, process.env.JWT_SECRET)
+        await User.update(user.dataValues, {
+          where: {
+            id: user.dataValues.id
+          }
+        })
         return res.status(200).json({
           status: 'success',
           message: 'User successfully login.',

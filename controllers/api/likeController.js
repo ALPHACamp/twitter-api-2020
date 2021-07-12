@@ -34,40 +34,59 @@ let likeController = {
           }))
   },
   postLike: (req, res) => {
-    Like.create({
-      UserId: +req.user.id,
-      TweetId: +req.params.tweetId
-    })
-      .then((like) => {
-        Promise.all([
-          Tweet.findByPk(+req.params.tweetId)
-            .then((tweet) =>
-              tweet.increment({ likeNum: 1 })
-            ),
-          User.findByPk(+req.user.id)
-            .then((user) =>
-              user.increment({ likeNum: 1 })
-            )
-        ])
-          .then(() =>
-            res.status(200).json({
-              status: 'success',
-              message: 'Successfully liked tweet.'
-            })
-          )
-          .catch((error) =>
-            res.status(500).json({
-              status: 'error',
-              message: error
-            })
-          )
+    Promise.all([
+      Tweet.findByPk(+req.params.tweetId),
+      Like.findOne({
+        where: {
+          UserId: +req.user.id,
+          TweetId: +req.params.tweetId
+        }
       })
-      .catch((error) =>
-        res.status(500).json({
+    ]).then(result => {
+      if (!result[0]) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: 'Tweet not found.'
+          })
+      }
+      if (result[1]) {
+        return res.status(400).json({
           status: 'error',
-          message: error
+          message: 'You already liked this tweet.'
         })
-      )
+      }
+      Like.create({
+        UserId: +req.user.id,
+        TweetId: +req.params.tweetId
+      })
+        .then((like) => {
+          //Tweet likeNum +1 & User likeNum +1
+          Promise.all([
+            Tweet.findByPk(+req.params.tweetId)
+              .then((tweet) =>
+                tweet.increment({ likeNum: 1 })
+              ),
+            User.findByPk(+req.user.id)
+              .then((user) =>
+                user.increment({ likeNum: 1 })
+              )
+          ])
+            .then(() =>
+              res.status(200).json({
+                status: 'success',
+                message: 'Successfully liked tweet.'
+              })
+            )
+            .catch((error) =>
+              res.status(500).json({
+                status: 'error',
+                message: error
+              })
+            )
+        })
+    })
   },
   deleteLike: (req, res) => {
     Like.findOne({
@@ -76,7 +95,13 @@ let likeController = {
         UserId: +req.user.id
       }
     })
-      .then((Like) =>
+      .then((Like) => {
+        if (!Like) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'This Like does not exist.'
+          })
+        }
         Like.destroy().then(() =>
           Promise.all([
             Tweet.findByPk(+req.params.tweetId)
@@ -101,6 +126,7 @@ let likeController = {
               })
             )
         )
+      }
       )
       .catch((error) =>
         res.status(500).json({
@@ -140,7 +166,6 @@ let likeController = {
     Like.findAll(options)
       .then(likes => {
         likes = likes.map(like => {
-          like.LikedTweet.description = like.LikedTweet.description.substring(0, 50)
           like.LikedTweet.dataValues.isLike = like.LikedTweet.dataValues.LikedUsers.some(
             (likedUser) => likedUser.id === +req.user.id
           )
