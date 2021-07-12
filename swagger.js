@@ -1,39 +1,58 @@
 const swaggerAutogen = require('swagger-autogen')()
+const outputFile = './swagger_output.json' // 輸出的文件名稱
+const endpointsFiles = ['./app.js'] // 要指向的 API，使用 Express 直接指向到 app.js
 
 const doc = {
+  info: {
+    version: '1.0.0',
+    title: 'Simple Twitter API',
+    description: 'This API document is for <b>Simple Twitter</b> project. '
+  },
+  host: 'localhost:3000',
+  basePath: '/',
+  schemes: [
+    'http'
+  ],
+  consumes: ['application/json'],
+  produces: ['application/json'],
   tags: [ // by default: empty Array
     {
       name: 'SignUp/Signin',
-      description: '註冊登入 router'
+      description: 'Sign up and sign in related.'
     },
     {
       name: 'Users',
-      description: '使用者 router'
+      description: 'Users related.'
     },
     {
       name: 'Admin',
-      description: '後台 router'
+      description: 'Admin related.'
     },
     {
       name: 'Tweets',
-      description: 'Tweets router'
+      description: 'Tweets related.'
     },
     {
       name: 'Replies',
-      description: 'Replies router'
+      description: 'Replies related.'
     },
     {
       name: 'Likes',
-      description: 'Likes router'
+      description: 'Likes related.'
     },
     {
       name: 'Followships',
-      description: '追蹤 router'
+      description: 'Followships related.'
     }
-  ]
-}
+  ],
 
-const outputFile = './swagger_output.json' // 輸出的文件名稱
-const endpointsFiles = ['./app.js'] // 要指向的 API，使用 Express 直接指向到 app.js
+  securityDefinitions: {
+    BearerAuth: {
+      type: 'apiKey',
+      name: 'Authorization',
+      in: 'header'
+    }
+  }
+}
 
 swaggerAutogen(outputFile, endpointsFiles, doc) // swaggerAutogen 的方法
