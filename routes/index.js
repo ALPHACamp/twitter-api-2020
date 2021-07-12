@@ -8,7 +8,7 @@ const followships = require('./modules/followships')
 const tweets = require('./modules/tweets')
 const users = require('./modules/users')
 
-router.use('/api/admin', checkRole('Admin'), admin)
+router.use('/api/admin', authenticated, checkRole('admin'), admin)
 router.use('/api/followships', authenticated, followships)
 router.use('/api/tweets', authenticated, tweets)
 router.use('/api/users', users)
