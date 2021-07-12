@@ -91,6 +91,7 @@ let followController = {
         followingId: +req.body.id
       }
     }).then(followship => {
+      //if already follow
       if (followship) {
         return res.status(400).json({
           status: 'error',
@@ -102,6 +103,7 @@ let followController = {
         followingId: +req.body.id
       })
         .then(followship => {
+          //followerUser followingNum +1 & followingUser followerNum +1
           Promise.all([
             User.findByPk(+req.user.id)
               .then((currentUser) =>
