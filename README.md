@@ -68,10 +68,10 @@ npx sequelize db:seed:undo:all
 * [Hsin Yeh](https://github.com/Hsinyehh)
 
 ## 串接資源
-*　API文件網址
+* API文件網址
 http://localhost:3000/api-doc/
 
-＊ API串接網址
+* API串接網址
 http://localhost:3000/api/{route}
 
 ### Demo 帳號
