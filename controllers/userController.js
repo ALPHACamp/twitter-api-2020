@@ -319,7 +319,7 @@ const userController = {
                 name: req.body.name,
                 introduction: req.body.introduction,
                 avatar: files.avatar ? images[0].link : user.avatar,
-                cover: images[1].link ? images[1].link : user.cover
+                cover: files.cover ? images[1].link : user.cover
               })
               return res.status(200).json({
                 status: 'success',
