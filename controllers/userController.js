@@ -1,13 +1,10 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
-const Like = db.Like
-const Reply = db.Reply
-const Followship = db.Followship
+const { User, Tweet, Like, Reply, Followship, Sequelize } = db
 const { Op } = require('sequelize')
 
-const imgur = require('imgur-node-api')
+// const imgur = require('imgur-node-api')
+const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const jwt = require('jsonwebtoken')
@@ -90,6 +87,8 @@ const userController = {
   },
   getUserTweets: (req, res) => {
     const UserId = req.params.id
+    const viewerId = req.user.id
+
     return User.findByPk(UserId)
       .then(user => {
         if (!user) {
@@ -100,9 +99,20 @@ const userController = {
         }
         return Tweet.findAll({
           where: { UserId },
-          attributes: {
-            exclude: ['UserId', 'updatedAt']
-          }
+          attributes: [
+            ['id', 'TweetId'],
+            'description', 'createdAt', 'replyCount', 'likeCount',
+            [Sequelize.literal(`exists (select * from Likes where Likes.UserId = '${viewerId}' and Likes.TweetId = Tweet.id)`), 'isLike']
+          ],
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            },
+            {
+              model: Like, attributes: []
+            }
+          ]
         }).then(tweets => {
           return res.status(200).json(tweets)
         })
@@ -133,14 +143,26 @@ const userController = {
           where: { UserId },
           attributes: ['TweetId']
         }).then(likes => {
-          likes.forEach(like => {
-            like = like.toJSON()
-            if (like.User.id === viewerId) {
-              like.Tweet.isLike = true
-            } else {
-              like.Tweet.isLike = false
+          likes = likes.map((like, i) => {
+            const userObj = {
+              ...like.User.dataValues
             }
+
+            const mapItem = {
+              ...like.dataValues,
+              ...like.Tweet.dataValues,
+              isLike: like.User.id === viewerId
+            }
+
+            delete mapItem.Tweet
+            delete mapItem.id
+            delete mapItem.User
+
+            mapItem.User = userObj
+
+            return mapItem
           })
+
           return res.status(200).json(likes)
         })
       })
@@ -285,6 +307,67 @@ const userController = {
     })
   },
 
+  putUser: (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+
+    if (Number(UserId) !== viewerId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'This is not this user\'s account.'
+      })
+    }
+
+    if (!req.body.name) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User name required.'
+      })
+    }
+
+    const { files } = req
+
+    // TODO：改善重複上傳的問題
+    if (files) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      const avatar = files.avatar ? imgur.uploadFile((files.avatar[0].path)) : null
+      const cover = files.cover ? imgur.uploadFile((files.cover[0].path)) : null
+
+      Promise.all([avatar, cover])
+        .then(images => {
+          return User.findByPk(UserId)
+            .then(user => {
+              user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                avatar: files.avatar ? images[0].link : user.avatar,
+                cover: files.cover ? images[1].link : user.cover
+              })
+              return res.status(200).json({
+                status: 'success',
+                message: 'User successfully updated.'
+              })
+            })
+        })
+    } else {
+
+      return User.findByPk(UserId)
+        .then((user) => {
+          user.update({
+            name: req.body.name,
+            introduction: req.body.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          }).then(() => {
+            return res.status(200).json({
+              status: 'success',
+              message: 'User successfully updated.'
+            })
+          })
+        })
+    }
+  },
+
   putUserSettings: (req, res) => {
     const UserId = Number(req.params.id)
     const viewerId = req.user.id
@@ -335,6 +418,71 @@ const userController = {
         })
 
       })
+  },
+  
+  getUserRepliedTweets: (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({
+            status: 'error',
+            error: 'This user does not exist.'
+          })
+        }
+
+        return Reply.findAll({
+          where: { UserId },
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            {
+              model: Tweet,
+              attributes: ['id', 'description', 'replyCount', 'likeCount'],
+              include: { model: Like, separate: true, where: { UserId: viewerId }, required: false }
+            }
+          ],
+          attributes: ['id', 'comment'],
+          nest: true
+        }).then(replies => {
+          replies = replies.map((item, i) => {
+            const userObj = {
+              ...item.User.dataValues
+            }
+
+            const mapItem = {
+              TweetId: item.Tweet.dataValues.id,
+              ...item.dataValues,
+              ...item.Tweet.dataValues,
+              isLike: Boolean(item.Tweet.Likes[0]),
+            }
+
+            delete mapItem.Tweet
+            delete mapItem.Likes
+            delete mapItem.id
+            delete mapItem.User
+
+            mapItem.User = userObj
+
+            return mapItem
+          })
+          return res.status(200).json(replies)
+        })
+      })
+  },
+
+  getCurrentUser: (req, res) => {
+    const currentUserId = req.user.id
+
+    return User.findByPk(currentUserId, {
+      attributes: [
+        'id', 'name', 'account', 'avatar',
+        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'dmin' and id = '${req.user.id}')`), 'isAdmin']
+      ]
+    }).then(user => {
+      return res.status(200).json(user)
+    })
   }
 
 }
