@@ -1,18 +1,25 @@
-## Simple-twitter-api
-##### 這是一個提供前端開發串接API的Simple Twitter專案
-
-## 共同開發人員 (Collaborator)
-* [Chia-Hui](https://github.com/wintersprouter)
-* [Hsin Yeh](https://github.com/Hsinyehh)
+# Simple Twitter RESTful API 
+ 
+ 這是一個提供前端開發串接 API 的 Simple Twitter 專案
 
 ## 環境建置與需求 (Enviroment)
-* Node.js - v14.16.1
-* Express - v4.17.1
-* MySQL - v8.0.25
-* MySQL workbench - - v8.0.25
+### 伺服器（server）
+* [Node.js](https://nodejs.org/en/) - v14.16.1
+* [Express](https://expressjs.com/) - v4.17.1
+### 資料庫（database）
+* [sequelize](https://www.npmjs.com/package/sequelize) - v4.44.4
+* [sequelize-cli](https://www.npmjs.com/package/sequelize-cli) - v5.5.1
+* [mysql2](https://www.npmjs.com/package/mysql2) - v1.7.0
+* [MySQL](https://www.mysql.com/) - v8.0.25
+* [MySQL workbench](https://dev.mysql.com/downloads/) - v8.0.25
+### 身份驗證（authentication）
+* [passport](https://www.npmjs.com/package/passport) - v0.4.1
+* [passport-jwt](https://www.npmjs.com/package/passport-jwt) - v 4.0.0
+* [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - v8.5.1
+
 
 ## 初始化（Initialize）
-* 請在終端機輸入
+1. 請在終端機輸入
 
 ```
 git clone https://github.com/wintersprouter/twitter-api-2020.git
@@ -20,7 +27,7 @@ cd twitter-api-2020
 npm install  (請參考 package.json)
 ```
 
-* 建立.env
+2. 建立.env
 
 ```
 PORT='3000'
@@ -29,7 +36,7 @@ IMGUR_CLIENT_ID= xxx
 ```
 
 
-* 使用 MySQL Workbench 建立資料庫
+3. 使用 MySQL Workbench 建立資料庫
   * 需要與 config/config.json 一致
 
 ```
@@ -37,14 +44,14 @@ create database ac_twitter_workspace;
 create database ac_twitter_workspace_test;
 ```
 
-* 在終端機輸入以下指令，進行資料庫遷移、種子資料初始化
+4. 在終端機輸入以下指令，進行資料庫遷移、種子資料初始化
 
 ```
 npx sequelize db:migrate
 npx sequelize db:seed:all
 ```
 
-* 在終端機輸入以下指令，啟動swagger API 和 後端專案
+5. 在終端機輸入以下指令，啟動 swagger API 和 後端專案
 
 ```
 npm run swagger-autogen
@@ -56,6 +63,9 @@ npm run dev
 ```
 npx sequelize db:seed:undo:all
 ```
+## 共同開發人員 (Collaborator)
+* [Chia-Hui](https://github.com/wintersprouter)
+* [Hsin Yeh](https://github.com/Hsinyehh)
 
 ## 串接資源
 * API文件網址
@@ -64,24 +74,29 @@ http://localhost:3000/api-doc/
 * API串接網址
 http://localhost:3000/api/{route}
 
-* 共用帳號
-  * 後台登入帳號：root　登入密碼：12345678　
-  * 前台登入帳號 : RyanHuang　登入密碼：12345678　
+### Demo 帳號
+使用者可以使用以下帳號分別登入系統前台、後台。
+
+
+| role| account | password |
+| -------- | -------- | -------- |
+| admin  | root   | 12345678  |
+| user   | RyanHuang   | 12345678   |
   
 ## API說明
-* 除了後臺管理者登入、使用者登入、註冊這 3 條路由外，其餘路由需在 header 的 Authorization 帶上"Bearer" + token (token可從登入時拿到)
+* 除了管理員、使用者登入和使用者註冊這 2 條路由外，其餘路由需在 header 的 Authorization 帶上"Bearer" + token (token可從登入時拿到)
 * response 皆包含 http status code & message (說明成功狀態或是失敗原因)
 
 ## API文件
-## 前台註冊登入
-#### 前台註冊
+## Sign in & Sign up
+### 前台使用者註冊
 ##### Method & URL
 ```
 POST /api/users
 ```
 ##### Request
 
-| Params  | Type   | Required |
+| body   | Type   | Required |
 | --------| ------ | ---------|
 | account | Srting | True |
 | name    | String | True |
@@ -91,14 +106,16 @@ POST /api/users
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "@Lee sign up successfully.Please sign in."
 }
 ```
 ###### Failure
-###### email或account重複註冊
+##### email 或 account 重複註冊
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -107,15 +124,39 @@ POST /api/users
     ]
 }
 ```
+##### 有未填欄位
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "All fields are required！"
+    ]
+}
+```
+##### 表單填寫錯誤原因
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "Name can not be longer than 50 characters.",
+        "Account can not be longer than 20 characters.",
+        "example.com is not a valid email address.",
+        "Password does not meet the required length.",
+        "The password and confirmation do not match.Please retype them."
+    ]
+}
+```
 
-#### 使用者或管理員登入
+### 使用者或管理員登入
 ##### Method & URL
 ```
 POST /api/users/signin
 ```
 ##### Request
 
-| Params  | Type   | Required |
+| body  | Type   | Required |
 | --------| ------ | ---------|
 | account | Srting | True |
 | password| String | True |
@@ -123,6 +164,7 @@ POST /api/users/signin
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "Sign in successfully.",
@@ -139,12 +181,32 @@ POST /api/users/signin
 }
 ```
 ###### Failure
+##### 所有欄位都是必填的
 ```
+status code: 422
 {
     "status": "error",
     "message": [
-        "All fields are required!",
-        "That account is not registered!",
+        "All fields are required！"
+    ]
+}
+```
+##### 此帳號未註冊
+```
+status code: 401
+{
+    "status": "error",
+    "message": [
+        "That account is not registered!"
+    ]
+}
+```
+##### 帳號或密碼有誤
+```
+status code: 401
+{
+    "status": "error",
+    "message": [
         "Account or Password incorrect."
     ]
 }
@@ -159,20 +221,23 @@ POST /api/tweets
 ```
 ##### Request
 
-| Params  | Type   | Required |
+| body  | Type   | Required |
 | --------| ------ | ---------|
 | description | Srting | True |
 
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "The tweet was successfully created."
 }
 ```
 ###### Failure
+##### 推文內容不得空白
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -180,7 +245,9 @@ POST /api/tweets
     ]
 }
 ```
+##### 推文字數不得超過 140 字
 ```
+status code: 409
 {
     "status": "error",
     "message": [
@@ -189,7 +256,7 @@ POST /api/tweets
 }
 ```
 
-### 瀏覽推文
+### 瀏覽所有推文
 ##### Method & URL
 ```
 GET /api/tweets
@@ -197,6 +264,7 @@ GET /api/tweets
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "id": 30,
@@ -214,7 +282,9 @@ GET /api/tweets
 ]
 ```
 ###### Failure
+##### 查無任何推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -229,16 +299,18 @@ GET /api/tweets
 ```
 GET /api/tweets/:tweet_id
 ```
+#### Parameters
+tweet_id：欲瀏覽的推文 id
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "Get the tweet successfully",
     "id": 1,
     "UserId": 1,
     "description": "Aut enim reiciendis dicta quo ducimus tempora illum soluta. Eligendi nobis molestias hic. Numquam eos dignissimos doloribus nisi minus conse",
-    "LikeCount": 2,
     "createdAt": "2021-03-24T03:10:18.000Z",
     "account": "RyanHuang",
     "name": "Ryan",
@@ -249,7 +321,9 @@ GET /api/tweets/:tweet_id
 }
 ```
 ###### Failure
+##### 找不到該推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -268,21 +342,26 @@ POST /api/tweets/:tweet_id/replies
 ```
 ##### Request
 
-| Params  | Type   | Required |
+| body   | Type   | Required |
 | --------| ------ | ---------|
 | comment | Srting | True |
+
+#### Parameters
+tweet_id：欲回覆的推文 id
 
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
-    "message": "The tweet was successfully created."
+    "message": "You replied @${repliedTweetAuthor}'s tweet successfully."
 }
 ```
 ###### Failure
 ##### 找不到該推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -292,6 +371,7 @@ POST /api/tweets/:tweet_id/replies
 ```
 ##### 推文回覆空白
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -301,6 +381,7 @@ POST /api/tweets/:tweet_id/replies
 ```
 ##### 推文回覆超過50字
 ```
+status code: 409
 {
     "status": "error",
     "message": [
@@ -314,9 +395,12 @@ POST /api/tweets/:tweet_id/replies
 ```
 GET /api/tweets/:tweet_id/replies
 ```
+#### Parameters
+tweet_id：瀏覽回覆的推文 id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "id": 2,
@@ -333,7 +417,9 @@ GET /api/tweets/:tweet_id/replies
 ]
 ```
 ###### Failure
+##### 找不到任何回覆
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -349,9 +435,12 @@ GET /api/tweets/:tweet_id/replies
 ```
 POST /api/tweets/:id/like
 ```
+#### Parameters
+id：欲點like的推文 id
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "You liked @${likedTweetAuthor}'s tweet successfully."
@@ -360,6 +449,7 @@ POST /api/tweets/:id/like
 ###### Failure
 ##### 找不到該推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -369,6 +459,7 @@ POST /api/tweets/:id/like
 ```
 ##### 推文已被按讚
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -382,10 +473,13 @@ POST /api/tweets/:id/like
 ```
 POST /api/tweets/:id/unlike
 ```
+#### Parameters
+id：欲取消like的推文 id
 
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "You unliked ${unlikedTweetAuthor}'s tweet successfully."
@@ -394,6 +488,7 @@ POST /api/tweets/:id/unlike
 ###### Failure
 ##### 找不到該推文
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -403,6 +498,7 @@ POST /api/tweets/:id/unlike
 ```
 ##### 推文沒被按讚
 ```
+status code: 400
 {
     "status": "error",
     "message": [
@@ -417,17 +513,25 @@ POST /api/tweets/:id/unlike
 ```
 POST /api/followships
 ```
+##### Request
+
+| body  | descriotion |
+| --------| ------ | 
+| followingId | 欲追蹤的使用者id | 
+
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "You followed @${followingUser.account} successfully."
 }
 ```
 ###### Failure
-##### 找不到該追蹤者
+##### 找不到該使用者
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -437,10 +541,21 @@ POST /api/followships
 ```
 ##### 不能追蹤自己
 ```
+status code: 403
 {
     "status": "error",
     "message": [
         "You cannot follow yourself." 
+    ]
+}
+```
+##### 已經追蹤該名使用者了
+```
+status code: 409
+{
+    "status": "error",
+    "message": [
+        "You already followed @${followingUser.account}" 
     ]
 }
 ```
@@ -450,17 +565,22 @@ POST /api/followships
 ```
 DELETE /api/followships/:followingId
 ```
+#### Parameters
+followingId：欲取消追蹤的使用者 id
+
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "Unfollowed @${followingUser.account} successfully."
 }
 ```
 ###### Failure
-##### 找不到該追蹤者
+##### 找不到該使用者 
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -470,16 +590,18 @@ DELETE /api/followships/:followingId
 ```
 ##### 不能取消追蹤自己
 ```
+status code: 403
 {
     "status": "error",
     "message": [
-        "You cannot follow yourself." 
+        "You cannot unfollow yourself." 
     ]
 }
 ```
 
 ##### 沒有追蹤過
 ```
+status code: 409
 {
     "status": "error",
     "message": [
@@ -488,17 +610,55 @@ DELETE /api/followships/:followingId
 }
 ```
 
-
-
 ## Users
+### 瀏覽使用者的檔案
+##### Method & URL
+```
+POST /api/users/:id
+```
+#### Parameters
+id：欲瀏覽的使用者 id
+##### Response
+###### Success
+```
+status code: 200
+{
+    "status": "success",
+    "message": "Get @BeatricePai's  profile successfully.",
+    "id": 4,
+    "name": "Beatrice",
+    "account": "BeatricePai",
+    "email": "betrice@example.com",
+    "avatar": "https://i.pravatar.cc/150?img=28",
+    "cover": "https://loremflickr.com/660/240/paris/?lock=95.94581210965639",
+    "introduction": "Soluta iusto nihil ut. Ipsam alias nesciunt voluptatem.,
+    "tweetCount": 10,
+    "followerCount": 2,
+    "followingCount": 1,
+    "isFollowed": true
+}
+```
+###### Failure
+##### 找不到該使用者
+```
+status code: 404
+{
+   "status": "error",
+   "message": [
+       "Cannot find any user in db."
+   ]
+}
+```
 ### 編輯自己的使用者檔案
 ##### Method & URL
 ```
 PUT /api/users/:id
 ```
+#### Parameters
+id：目前登入的使用者 id
 ##### Request
 
-| Params  | Type   | Required |
+| body  | Type   | Required |
 | --------| ------ | ---------|
 | name    | String | True |
 | introduction  | String | False |
@@ -508,33 +668,78 @@ PUT /api/users/:id
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "Update ${name}'s profile successfully."
 }
 ```
 ###### Failure
+
+##### 只有使用者本人可以編輯
 ```
+status code: 401
 {
     "status": "error",
     "message": [
-        "Permission denied.",
-        "Cannot find this user in db.",
-        "Name is required.",
-        "Name can not be longer than 50 characters.",
-        "Introduction can not be longer than 160 characters.",
-        "Image type of ${file} should be .jpg, .jpeg, .png ."
+        "Permission denied."
     ]
 }
 ```
+##### 找不到該使用者 或 使用者沒有前台瀏覽權限
+ ```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any user in db."
+    ]
+}
+```
+##### 名稱未填寫
+ ```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "Name is required."
+    ]
+}
+ ```
+ ##### 名稱不得超過 50 字
+ ##### 簡介不得超過 160 字
+  ```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "Name can not be longer than 50 characters."
+        "Introduction can not be longer than 160 characters."
+    ]
+}
+ ```
+ ##### 圖片格式須符合.jpg, .jpeg, .png 
 
-### 瀏覽使用者檔案
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        " Image type of file should be .jpg, .jpeg, .png ."
+    ]
+}
+ ```
+
+
+### 編輯使用者帳戶資料
 ```
 PUT /api/users/:id/account
 ```
+#### Parameters
+id：目前登入的使用者id
 ##### Request
 
-| Params  | Type   | Required |
+| body   | Type   | Required |
 | --------| ------ | ---------|
 | account | Srting | True |
 | name    | String | True |
@@ -544,18 +749,64 @@ PUT /api/users/:id/account
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": "@${account} Update account information successfully."
 }
 ```
 ###### Failure
+
+##### 只有使用者本人可以編輯
 ```
+status code: 401
 {
     "status": "error",
     "message": [
-        "Permission denied.",
-        "Cannot find this user in db.",
+        "Permission denied."
+    ]
+}
+```
+##### 找不到該使用者 或 使用者沒有前台瀏覽權限
+ ```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any user in db."
+    ]
+}
+```
+##### 所有欄位都是必填的
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "All fields are required！"
+    ]
+}
+```
+##### 表單填寫錯誤原因
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
+        "Name can not be longer than 50 characters.",
+        "Account can not be longer than 20 characters.",
+        "example.com is not a valid email address.",
+        "Password does not meet the required length.",
+        "The password and confirmation do not match.Please retype them."
+    ]
+}
+```
+##### 信箱或帳號已存在
+```
+status code: 400
+{
+    "status": "error",
+    "message": [
         "This email address is already being used.",
         "This account is already being used."
     ]
@@ -567,26 +818,41 @@ PUT /api/users/:id/account
 ```
 GET /api/users/:id/followers
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "followerId": 2,
         "account": "LyviaLee",
         "name": "Lyvia",
         "avatar": "https://i.pravatar.cc/150?img=29",
-        "introduction": "Illo ab sed quos maxime adipisci est.\nFugiat facere dolores quis quidem impedit id.",
+        "introduction": "Illo ab sed quos maxime adipisci est.",
         "followshipCreatedAt": "2021-03-17T13:07:42.000Z",
         "isFollowed": false
     }
+    ...
 ]
 ```
-
+status code: 200
 ```
 {
     "message": [
         "@${user.account} has no follower."
+    ]
+}
+```
+###### Failure
+##### 找不到該使用者 或 使用者沒有前台瀏覽權限
+ ```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any user in db."
     ]
 }
 ```
@@ -596,9 +862,12 @@ GET /api/users/:id/followers
 ```
 GET /api/users/:id/followings
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "followerId": 2,
@@ -609,10 +878,12 @@ GET /api/users/:id/followings
         "followshipCreatedAt": "2021-03-17T13:07:42.000Z",
         "isFollowed": false
     }
+    ...
 ]
 ```
 
 ```
+status code: 200
 {
     "message": [
         "@${user.account} has no following."
@@ -622,6 +893,7 @@ GET /api/users/:id/followings
 ###### Failure
 ###### 找不到該使用者 或 使用者沒有前台瀏覽權限
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -630,51 +902,51 @@ GET /api/users/:id/followings
 }
 ```
 
-### 瀏覽使用者發過的推文
+### 瀏覽使用者發過的所有推文
 ##### Method & URL
 ```
 GET /api/users/:id/tweets
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
-        "id": 3,
+        "id": 5,
         "UserId": 1,
-        "description": "Non quidem eligendi aspernatur veniam. Vero porro ea soluta dolores eveniet quas ipsum blanditiis exercitationem. Esse sit laborum ipsam har",
-        "createdAt": "2021-06-25T10:41:56.000Z",
-        "updatedAt": "2021-06-14T20:36:31.000Z",
-        "User": {
-            "id": 1,
-            "account": "RyanHuang",
-            "email": "ryan@example.com",
-            "password": "$2a$10$d/OdTnXltn2zyy6icgAiWuyeYpUuSFkIOpf1Sg7iWenIfDPhxgICq",
-            "name": "Ryan",
-            "avatar": "https://i.pravatar.cc/150?img=68",
-            "cover": "https://loremflickr.com/660/240/paris/?lock=62.67199844521949",
-            "introduction": "consectetur",
-            "role": "user",
-            "createdAt": "2021-05-21T08:02:29.000Z",
-            "updatedAt": "2021-02-19T23:49:05.000Z"
-        },
-        "Replies": [
-            {
-                "id": 9,
-                "UserId": 3,
-                "TweetId": 3,
-                "comment": "Ratione architecto eaque dolor inventore nihil ver",
-                "createdAt": "2021-04-28T00:10:19.000Z",
-                "updatedAt": "2021-06-14T01:21:39.000Z"
-            },
-        ]
-    },...
-]
+        "description": "labore",
+        "createdAt": "2021-06-19T21:05:51.000Z",
+        "account": "RyanHuang",
+        "name": "123",
+        "avatar": "https://i.pravatar.cc/150?img=68",
+        "likedCount": 0,
+        "repliedCount": 3,
+        "isLike": false
+    },
+    {
+        "id": 9,
+        "UserId": 1,
+        "description": "Vel est ut ea amet mollitia.",
+        "createdAt": "2021-05-03T05:00:31.000Z",
+        "account": "RyanHuang",
+        "name": "123",
+        "avatar": "https://i.pravatar.cc/150?img=68",
+        "likedCount": 1,
+        "repliedCount": 3,
+        "isLike": false
+    },
+    ...
+]    
+
 ```
 
 ###### Failure
 ###### 找不到該使用者 或 使用者沒有前台瀏覽權限
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -682,14 +954,26 @@ GET /api/users/:id/tweets
     ]
 }
 ```
+###### 查無任何推文
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any tweets in db.",
+    ]
+}
+```
 
-
-### 瀏覽使用者的回覆
+### 瀏覽使用者的所有回覆
 ##### Method & URL
 ```
 GET /api/users/:id/replied_tweets
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
+
 ###### Success
 ```
 [
@@ -711,6 +995,7 @@ GET /api/users/:id/replied_tweets
 ###### Failure
 ###### 找不到該使用者 或 使用者沒有前台瀏覽權限
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -718,15 +1003,28 @@ GET /api/users/:id/replied_tweets
     ]
 }
 ```
+###### 查無任何回覆
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any replies in db.",
+    ]
+}
+```
 
-### 瀏覽使用者按讚的紀錄
+### 瀏覽使用者所有點讚的推文
 ##### Method & URL
 ```
 GET /api/users/:id/likes
 ```
+#### Parameters
+id：欲瀏覽的使用者id
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "id": 12,
@@ -745,10 +1043,10 @@ GET /api/users/:id/likes
     ...
 ]
 ```
-
 ###### Failure
 ###### 找不到該使用者 或 使用者沒有前台瀏覽權限
 ```
+status code: 404
 {
     "status": "error",
     "message": [
@@ -756,6 +1054,81 @@ GET /api/users/:id/likes
     ]
 }
 ```
+###### 查無點讚的推文
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any liked tweets in db.",
+    ]
+}
+```
+### 目前登入的使用者
+##### Method & URL
+```
+GET /api/users/current
+```
+##### Response
+###### Success
+```
+status code: 200
+{
+    "id": 1,
+    "name": "Ryan",
+    "account": "RyanHuang",
+    "email": "ryan@example.com",
+    "avatar": "https://i.pravatar.cc/150?img=68",
+    "role": "user",
+    "cover": "https://loremflickr.com/660/240/paris/?lock=37.08013914092159",
+    "introduction": "Et odio eaque.\nQuae illum nemo."
+}
+```
+### 全站追蹤者數量前 10 名的使用者名單
+##### Method & URL
+```
+GET /api/users
+```
+##### Response
+###### Success
+```
+status code: 200
+{
+    "status": "success",
+    "message": "Get top ten users successfully",
+    "users": [ 
+        {
+            "id": 3,
+            "name": "Aaron",
+            "avatar": "https://i.pravatar.cc/150?img=56",
+            "account": "AaronWang",
+            "followerCount": 2,
+            "isFollowed": true
+        },
+        {
+            "id": 4,
+            "name": "Beatrice",
+            "avatar": "https://i.pravatar.cc/150?img=28",
+            "account": "BeatricePai",
+            "followerCount": 1,
+            "isFollowed": true
+        },
+        ...
+    ]
+}
+```
+###### Failure
+###### 找不到使用者
+```
+status code: 404
+{
+   "status": "error",
+   "message": [
+       "Cannot find any user in db."
+   ]
+}
+```
+
 
 
 ## Admin
@@ -764,9 +1137,12 @@ GET /api/users/:id/likes
 ```
 DELETE /api/admin/tweets/:id
 ```
+#### Parameters
+id：欲刪除的推文id
 ##### Response
 ###### Success
 ```
+status code: 200
 {
     "status": "success",
     "message": [
@@ -775,8 +1151,11 @@ DELETE /api/admin/tweets/:id
 }
 
 ```
+
 ###### Failure
+###### 該則推文不存在
 ```
+status code: 401
 {
     "status": "error",
     "message": [
@@ -793,6 +1172,7 @@ GET /api/admin/users
 ##### Response
 ###### Success
 ```
+status code: 200
 [
     {
         "id": 1,
@@ -808,4 +1188,17 @@ GET /api/admin/users
     ...
 ]
 ```
+###### Failure
+###### 找不到任何使用者
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any users in db.",
+    ]
+}
+```
 
+
+[![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)

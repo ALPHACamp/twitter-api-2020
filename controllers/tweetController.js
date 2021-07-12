@@ -59,7 +59,6 @@ const TweetController = {
         id: tweet.id,
         UserId: tweet.UserId,
         description: tweet.description,
-        LikeCount: tweet.Likes.length,
         createdAt: tweet.createdAt,
         account: tweet.User.account,
         name: tweet.User.name,
