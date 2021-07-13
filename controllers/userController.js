@@ -238,7 +238,7 @@ const userController = {
           attributes: [],
           nest: true,
           raw: true,
-          order: [[{ model: User, as: 'Followings'}, 'createdAt', 'DESC']]
+          order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
         }).then(async data => {
           data = data.map((item, i) => {
             const mapItem = {
@@ -325,7 +325,7 @@ const userController = {
         required: false,
         nest: true
       },
-      where: { role: 'user' },
+      where: { role: { [Op.ne]: 'admin' } },
       attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'followerCount'],
       order: [['followerCount', 'DESC']],
       limit: 10,
