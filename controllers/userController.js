@@ -113,6 +113,7 @@ const userController = {
       const results = await User.findAll({
         raw: true,
         nest: true,
+        where: { role: 'normal' },
         attributes: ['id', 'name', 'account', 'avatar', 'followerCounts'],
         limit: topLimit,
         order: [['followerCounts', 'DESC']]
