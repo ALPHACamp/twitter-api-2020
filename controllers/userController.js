@@ -26,9 +26,9 @@ const userController = {
 
       if (password !== confirmPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
       let user = await User.findOne({ where: { account } })
-      if (user) return res.json({ status: 'error', message: `此帳號已被註冊` })
+      if (user) return res.status(403).json({ status: 'error', message: `此帳號已被註冊` })
       user = await User.findOne({ where: { email } })
-      if (user) return res.json({ status: 'error', message: `此信箱已被註冊` })
+      if (user) return res.status(403).json({ status: 'error', message: `此信箱已被註冊` })
 
       const salt = await bcrypt.genSalt(10)
       const hashPassword = await bcrypt.hash(password, salt)
@@ -97,7 +97,8 @@ const userController = {
           'id', 'account', 'name', 'email', 'bio', 'avatar', 'cover',
           [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowingId = User.id)'), 'totalFollowers'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id)'), 'totalFollowings']
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.FollowerId = User.id)'), 'totalFollowings'],
+          [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = User.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
         ],
       })
       if (!user) return res.json({ status: 'error', message: '使用者不存在' })
