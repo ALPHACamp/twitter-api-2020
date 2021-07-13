@@ -22,9 +22,11 @@ module.exports = {
       },
       avatar: {
         type: Sequelize.STRING,
+        defaultValue: ''
       },
       cover: {
         type: Sequelize.STRING,
+        defaultValue: ''
       },
       bio: {
         type: Sequelize.TEXT
