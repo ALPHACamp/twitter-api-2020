@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 
 const passport = require('../config/passport')
+const helpers = require('../_helpers')
 
 module.exports = {
   authenticated: (req, res, next) => {
@@ -20,7 +21,7 @@ module.exports = {
 
   checkRole: (roleName = 'user') => {
     return (req, res, next) => {
-      if (req.user.role === roleName) {
+      if (helpers.getUser(req).role === roleName) {
         return next()
       } else {
         return res.status(403).json({
