@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
@@ -15,10 +16,9 @@ const swaggerFile = require('./swagger_output.json') // 剛剛輸出的 JSON
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use( express.static(__dirname ,'public'))
 app.use('/upload', express.static(__dirname + '/upload'))
-
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
-
 require('./routes')(app)
 
 app.use((err, req, res, next) => {
