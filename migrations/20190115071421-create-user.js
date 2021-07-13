@@ -29,7 +29,8 @@ module.exports = {
         defaultValue: ''
       },
       bio: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
+        defaultValue: ''
       },
       role: {
         type: Sequelize.STRING,
