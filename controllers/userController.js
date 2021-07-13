@@ -15,11 +15,26 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   signUp: (req, res) => {
     let { name, email, account, password, checkPassword } = req.body
+    let errors = []
+    let errorMsg = ''
 
-    if (!name || !account || !email || !password || !checkPassword) {
+    const isFieldsAbsence = !name || !account || !email || !password || !checkPassword
+    const isPasswordUnequalCheckPassword = checkPassword !== password
+
+    if (isFieldsAbsence || isPasswordUnequalCheckPassword) {
+      if (isFieldsAbsence) {
+        errors.push('每個欄位都是必要欄位')
+      }
+
+      if (isPasswordEqualCheckPassword) {
+        errors.push('兩次密碼輸入不同')
+      }
+      
+      errorMsg = errors.join(',')
+
       return res.json({
         status: 'error',
-        message: '每個欄位都是必要欄位！',
+        message: `${errorMsg}`,
         request_data: {
           name: name,
           account: account,
@@ -28,9 +43,7 @@ const userController = {
           checkPassword: checkPassword
         }
       })
-    } else if (checkPassword !== password) {
-      return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
-    } else {
+    }  else {
 
       account = account.replace(/^[@]*/, '')
 
@@ -43,12 +56,9 @@ const userController = {
         }
       }).then(user => {
         if (user) {
-          let errors = []
-          let errorMsg = ''
-
           if (user.email === email) {
             errors.push('信箱重複')
-          } 
+          }
           if (user.account === account) {
             errors.push('帳號重複')
           }
