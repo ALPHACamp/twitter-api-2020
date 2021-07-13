@@ -87,7 +87,7 @@ const tweetController = {
         }
       ],
       attributes: {
-        exclude: ['updatedAt', 'UserId'],
+        exclude: ['updatedAt', 'UserId']
       }
     }).then(tweet => {
       if (!tweet) {
@@ -122,11 +122,11 @@ const tweetController = {
           }
         }
       ],
-      attributes: [['id', 'TweetId'], 'description', "likeCount", "replyCount", "createdAt"],
+      order: [['createdAt', 'DESC']],
+      attributes: [['id', 'TweetId'], 'description', 'likeCount', 'replyCount', 'createdAt'],
       raw: true,
       nest: true
     }).then(tweets => {
-
       tweets = tweets.map((tweet, i) => {
         const final = {
           ...tweet,
@@ -214,7 +214,7 @@ const tweetController = {
       }
     })
   },
-  
+
   getTweetReplies: (req, res) => {
     const TweetId = req.params.id
 
@@ -247,7 +247,5 @@ const tweetController = {
     })
   }
 }
-
-
 
 module.exports = tweetController
