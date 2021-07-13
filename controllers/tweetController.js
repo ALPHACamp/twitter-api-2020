@@ -15,7 +15,7 @@ let tweetController = {
       if (!tweets) throw new Error("there's no tweets in DB")
       const LikedTweetsId = getData(helpers.getUser(req).LikedTweets)
 
-      tweets = await tweets.map(t => ({
+      tweets = tweets.map(t => ({
         ...t.dataValues,
         isLiked: LikedTweetsId.length ? LikedTweetsId.includes(t.id) : false,
         replyCount: t.Replies.length,
