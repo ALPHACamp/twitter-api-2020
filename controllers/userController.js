@@ -38,11 +38,19 @@ const userController = {
         }
       }).then(user => {
         if (user) {
-          if (user.email === req.body.email) {
-            return res.json({ status: 'error', message: '信箱重複！' })
-          } else if (user.account === req.body.account) {
-            return res.json({ status: 'error', message: '帳號重複！' })
+          let errors = []
+          let errorMsg = ''
+
+          if (user.email === email) {
+            errors.push('信箱重複')
+          } 
+          if (user.account === account) {
+            errors.push('帳號重複')
           }
+
+          errorMsg = errors.join(',')
+
+          return res.json({ status: 'error', message: `${errorMsg}` })
         } else {
           User.create({
             account: req.body.account,
