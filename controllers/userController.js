@@ -15,7 +15,17 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   signUp: (req, res) => {
     if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
-      return res.json({ status: 'error', message: '每個欄位都是必要欄位！' })
+      return res.json({
+        status: 'error',
+        message: '每個欄位都是必要欄位！',
+        request_data: {
+          name: req.body.name,
+          account: req.body.account,
+          email: req.body.email,
+          password: req.body.password,
+          checkPassword: req.body.checkPassword
+        }
+      })
     } else if (req.body.checkPassword !== req.body.password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     } else {
@@ -419,7 +429,7 @@ const userController = {
 
       })
   },
-  
+
   getUserRepliedTweets: (req, res) => {
     const UserId = req.params.id
     const viewerId = req.user.id
