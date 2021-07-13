@@ -1,4 +1,3 @@
-const { listen } = require('../app')
 const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 function getData(data) {
