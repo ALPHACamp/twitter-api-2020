@@ -174,7 +174,10 @@ const userController = {
             }
           ],
           where: { UserId },
-          attributes: ['TweetId']
+          attributes: ['TweetId'],
+          order: [
+            ['createdAt', 'DESC']
+          ]
         }).then(likes => {
           likes = likes.map((like, i) => {
             const userObj = {
