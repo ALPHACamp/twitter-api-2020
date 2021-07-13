@@ -1,14 +1,27 @@
+const { listen } = require('../app')
 const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
+function getData(data) {
+  if (data) return data.map(d => d.id)
+  return []
+}
 
 let tweetController = {
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
-        include: [{ model: User, attributes: ['name', 'avatar', 'account'] }, { model: Like }],
+      let tweets = await Tweet.findAll({
+        include: [{ model: User, attributes: ['name', 'avatar', 'account'] }, { model: Like }, { model: Reply }],
         order: [['createdAt', 'DESC']],
       })
       if (!tweets) throw new Error("there's no tweets in DB")
+      const LikedTweetsId = getData(helpers.getUser(req).LikedTweets)
+
+      tweets = await tweets.map(t => ({
+        ...t.dataValues,
+        isLiked: LikedTweetsId.length ? LikedTweetsId.includes(t.id) : false,
+        replyCount: t.Replies.length,
+        likeCount: t.Likes.length,
+      }))
       return res.json(tweets)
     } catch (error) {
       next(error)
@@ -17,7 +30,7 @@ let tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.tweetId, { include: { model: Reply } })
+      const tweet = await Tweet.findByPk(req.params.tweetId, { include: { model: Reply, model: Like } })
       if (!tweet) throw new Error("this tweet doesn't exist")
       return res.json(tweet)
     } catch (error) {
