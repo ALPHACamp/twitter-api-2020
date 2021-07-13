@@ -22,7 +22,8 @@ const adminController = {
           model: Tweet, attributes: []
         }
       ],
-      group: 'id',
+      order: [[Sequelize.literal('tweetCount'), 'DESC']],
+      group: 'id'
     }).then(users => {
       res.status(200).json(users)
     })
