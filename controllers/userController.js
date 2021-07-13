@@ -190,7 +190,7 @@ const userController = {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
 
-      const followings = await User.findOne({
+      let followings = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
@@ -199,13 +199,12 @@ const userController = {
         include: [{
           model: User, as: 'Followings',
           attributes: [
-            'id',
+            ['id', 'followingId'],
             'name',
             'account',
             'avatar',
             'cover',
             'bio',
-            [Sequelize.literal(`(SELECT followingId FROM Followships WHERE followerId = User.id AND followingId = Followings.id)`), 'followingId'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE TweetId IN (SELECT id FROM Tweets WHERE UserId = User.id))'), 'totalLikes'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
@@ -215,14 +214,14 @@ const userController = {
         }],
       })
 
-      return res.json(followings)
+      return res.json(followings.Followings)
     } catch (err) { next(err) }
   },
 
   getUserFollowers: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      const followers = await User.findOne({
+      let followers = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
@@ -231,7 +230,7 @@ const userController = {
         include: [{
           model: User, as: 'Followers',
           attributes: [
-            'id',
+            ['id', 'followerId'],
             'name',
             'account',
             'avatar',
@@ -245,7 +244,9 @@ const userController = {
           ]
         }],
       })
-      return res.json(followers)
+
+
+      return res.json(followers.Followers)
     } catch (err) { next(err) }
   },
 
