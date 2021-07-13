@@ -29,6 +29,8 @@ const userController = {
     } else if (req.body.checkPassword !== req.body.password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     } else {
+
+      account = account.replace(/^[@]*/, '')
       User.findOne({
         where: {
           [Op.or]: [
