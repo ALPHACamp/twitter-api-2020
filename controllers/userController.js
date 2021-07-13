@@ -14,41 +14,64 @@ const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signUp: (req, res) => {
-    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
+    let { name, email, account, password, checkPassword } = req.body
+    let errors = []
+    let errorMsg = ''
+
+    const isFieldsAbsence = !name || !account || !email || !password || !checkPassword
+    const isPasswordUnequalCheckPassword = checkPassword !== password
+
+    if (isFieldsAbsence || isPasswordUnequalCheckPassword) {
+      if (isFieldsAbsence) {
+        errors.push('每個欄位都是必要欄位')
+      }
+
+      if (isPasswordEqualCheckPassword) {
+        errors.push('兩次密碼輸入不同')
+      }
+
+      errorMsg = errors.join(',')
+
       return res.json({
         status: 'error',
-        message: '每個欄位都是必要欄位！',
+        message: `${errorMsg}`,
         request_data: {
-          name: req.body.name,
-          account: req.body.account,
-          email: req.body.email,
-          password: req.body.password,
-          checkPassword: req.body.checkPassword
+          name: name,
+          account: account,
+          email: email,
+          password: password,
+          checkPassword: checkPassword
         }
       })
-    } else if (req.body.checkPassword !== req.body.password) {
-      return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     } else {
+
+      account = account.replace(/^[@]*/, '')
+
       User.findOne({
         where: {
           [Op.or]: [
-            { email: req.body.email },
-            { account: req.body.account }
+            { email: email },
+            { account: account }
           ]
         }
       }).then(user => {
         if (user) {
-          if (user.email === req.body.email) {
-            return res.json({ status: 'error', message: '信箱重複！' })
-          } else if (user.account === req.body.account) {
-            return res.json({ status: 'error', message: '帳號重複！' })
+          if (user.email === email) {
+            errors.push('信箱重複')
           }
+          if (user.account === account) {
+            errors.push('帳號重複')
+          }
+
+          errorMsg = errors.join(',')
+
+          return res.json({ status: 'error', message: `${errorMsg}` })
         } else {
           User.create({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+            account: account,
+            name: name,
+            email: email,
+            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
           }).then(user => {
             return res.json({ status: 'success', message: '成功註冊帳號！' })
           })
@@ -63,22 +86,23 @@ const userController = {
     const account = req.body.account
     const password = req.body.password
 
-    User.findOne({ where: { account: account } }).then(user => {
-      if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
-      if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: 'passwords did not match' })
-      }
-      const payload = { id: user.id, role: user.role }
-      const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
-        status: 'success',
-        message: 'ok',
-        token: token,
-        user: {
-          id: user.id, name: user.name, email: user.email, role: user.role
+    User.findOne({ where: { account: account } })
+      .then(user => {
+        if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
+        if (!bcrypt.compareSync(password, user.password)) {
+          return res.status(401).json({ status: 'error', message: 'passwords did not match' })
         }
+        const payload = { id: user.id, role: user.role }
+        const token = jwt.sign(payload, process.env.JWT_SECRET)
+        return res.json({
+          status: 'success',
+          message: 'ok',
+          token: token,
+          user: {
+            id: user.id, name: user.name, email: user.email, isAdmin: Boolean(user.role === 'admin')
+          }
+        })
       })
-    })
   },
   getUser: (req, res) => {
     return User.findByPk(req.params.id)
@@ -151,7 +175,10 @@ const userController = {
             }
           ],
           where: { UserId },
-          attributes: ['TweetId']
+          attributes: ['TweetId'],
+          order: [
+            ['createdAt', 'DESC']
+          ]
         }).then(likes => {
           likes = likes.map((like, i) => {
             const userObj = {
@@ -211,7 +238,8 @@ const userController = {
           where: { id: UserId },
           attributes: [],
           nest: true,
-          raw: true
+          raw: true,
+          order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
         }).then(async data => {
           data = data.map((item, i) => {
             const mapItem = {
@@ -265,7 +293,8 @@ const userController = {
           where: { id: UserId },
           attributes: [],
           nest: true,
-          raw: true
+          raw: true,
+          order: [[{ model: User, as: 'Followers' }, 'createdAt', 'DESC']]
         }).then(async data => {
           data = data.map((item, i) => {
             const mapItem = {
@@ -297,7 +326,7 @@ const userController = {
         required: false,
         nest: true
       },
-      where: { role: 'user' },
+      where: { role: { [Op.ne]: 'admin' } },
       attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'followerCount'],
       order: [['followerCount', 'DESC']],
       limit: 10,
@@ -442,7 +471,6 @@ const userController = {
             error: 'This user does not exist.'
           })
         }
-
         return Reply.findAll({
           where: { UserId },
           include: [
@@ -454,7 +482,8 @@ const userController = {
             }
           ],
           attributes: ['id', 'comment'],
-          nest: true
+          nest: true,
+          order: [[Reply.associations.Tweet, 'createdAt', 'DESC']],
         }).then(replies => {
           replies = replies.map((item, i) => {
             const userObj = {
@@ -462,9 +491,9 @@ const userController = {
             }
 
             const mapItem = {
-              TweetId: item.Tweet.dataValues.id,
+              TweetId: item.dataValues.Tweet.dataValues.id,
               ...item.dataValues,
-              ...item.Tweet.dataValues,
+              ...item.dataValues.Tweet.dataValues,
               isLike: Boolean(item.Tweet.Likes[0]),
             }
 
@@ -488,7 +517,7 @@ const userController = {
     return User.findByPk(currentUserId, {
       attributes: [
         'id', 'name', 'account', 'avatar',
-        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'dmin' and id = '${req.user.id}')`), 'isAdmin']
+        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${req.user.id}')`), 'isAdmin']
       ]
     }).then(user => {
       return res.status(200).json(user)
