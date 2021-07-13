@@ -195,7 +195,6 @@ const userController = {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
         },
-        attributes: ['id', 'account', 'name', 'email', 'avatar'],
         include: [{
           model: User, as: 'Followings',
           attributes: [
@@ -213,9 +212,11 @@ const userController = {
           ]
         }],
       })
-
       return res.json(followings.Followings)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   getUserFollowers: async (req, res, next) => {
@@ -226,7 +227,6 @@ const userController = {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
         },
-        attributes: ['id', 'account', 'name', 'email', 'avatar'],
         include: [{
           model: User, as: 'Followers',
           attributes: [
@@ -244,10 +244,11 @@ const userController = {
           ]
         }],
       })
-
-
       return res.json(followers.Followers)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   putUser: async (req, res, next) => {

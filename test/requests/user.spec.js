@@ -272,7 +272,6 @@ describe('# user requests', () => {
             if (err) return done(err);
             expect(res.body).to.be.an('array');
             res.body[0].followerId.should.equal(1);
-
             return done();
           })
       });
