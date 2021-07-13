@@ -1,4 +1,4 @@
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
@@ -115,8 +115,11 @@ const adminController = {
   },
   deleteTweet: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id)
-      tweet.destroy()
+      await Promise.all([
+        Tweet.destroy({ where: { id: req.params.id } }),
+        Reply.destroy({ where: { TweetId: req.params.id } }),
+        Like.destroy({ where: { TweetId: req.params.id } })
+      ])
       return res.json({ status: 'success', message: '成功刪除推文！' })
     } catch (err) {
       next(err)
