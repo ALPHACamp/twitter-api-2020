@@ -209,7 +209,7 @@ const userController = {
             [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followerId = User.id)'), 'totalFollowings'],
-            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = User.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
+            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = Followings.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
           ]
         }],
       })
@@ -241,7 +241,7 @@ const userController = {
             [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followerId = User.id)'), 'totalFollowings'],
-            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = User.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
+            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = Followers.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
           ]
         }],
       })
