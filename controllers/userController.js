@@ -14,28 +14,31 @@ const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signUp: (req, res) => {
-    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
+    let { name, email, account, password, checkPassword } = req.body
+
+    if (!name || !account || !email || !password || !checkPassword) {
       return res.json({
         status: 'error',
         message: '每個欄位都是必要欄位！',
         request_data: {
-          name: req.body.name,
-          account: req.body.account,
-          email: req.body.email,
-          password: req.body.password,
-          checkPassword: req.body.checkPassword
+          name: name,
+          account: account,
+          email: email,
+          password: password,
+          checkPassword: checkPassword
         }
       })
-    } else if (req.body.checkPassword !== req.body.password) {
+    } else if (checkPassword !== password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     } else {
 
       account = account.replace(/^[@]*/, '')
+
       User.findOne({
         where: {
           [Op.or]: [
-            { email: req.body.email },
-            { account: req.body.account }
+            { email: email },
+            { account: account }
           ]
         }
       }).then(user => {
@@ -55,10 +58,10 @@ const userController = {
           return res.json({ status: 'error', message: `${errorMsg}` })
         } else {
           User.create({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+            account: account,
+            name: name,
+            email: email,
+            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
           }).then(user => {
             return res.json({ status: 'success', message: '成功註冊帳號！' })
           })
