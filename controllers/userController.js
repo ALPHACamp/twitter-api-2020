@@ -29,7 +29,7 @@ const userController = {
       if (isPasswordEqualCheckPassword) {
         errors.push('兩次密碼輸入不同')
       }
-      
+
       errorMsg = errors.join(',')
 
       return res.json({
@@ -43,7 +43,7 @@ const userController = {
           checkPassword: checkPassword
         }
       })
-    }  else {
+    } else {
 
       account = account.replace(/^[@]*/, '')
 
@@ -465,7 +465,6 @@ const userController = {
             error: 'This user does not exist.'
           })
         }
-
         return Reply.findAll({
           where: { UserId },
           include: [
@@ -477,7 +476,8 @@ const userController = {
             }
           ],
           attributes: ['id', 'comment'],
-          nest: true
+          nest: true,
+          order: [[Reply.associations.Tweet, 'createdAt', 'DESC']],
         }).then(replies => {
           replies = replies.map((item, i) => {
             const userObj = {
@@ -485,9 +485,9 @@ const userController = {
             }
 
             const mapItem = {
-              TweetId: item.Tweet.dataValues.id,
+              TweetId: item.dataValues.Tweet.dataValues.id,
               ...item.dataValues,
-              ...item.Tweet.dataValues,
+              ...item.dataValues.Tweet.dataValues,
               isLike: Boolean(item.Tweet.Likes[0]),
             }
 
@@ -511,7 +511,7 @@ const userController = {
     return User.findByPk(currentUserId, {
       attributes: [
         'id', 'name', 'account', 'avatar',
-        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'dmin' and id = '${req.user.id}')`), 'isAdmin']
+        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${req.user.id}')`), 'isAdmin']
       ]
     }).then(user => {
       return res.status(200).json(user)
