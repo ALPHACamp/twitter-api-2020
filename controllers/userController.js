@@ -234,7 +234,8 @@ const userController = {
           where: { id: UserId },
           attributes: [],
           nest: true,
-          raw: true
+          raw: true,
+          order: [[{ model: User, as: 'Followings'}, 'createdAt', 'DESC']]
         }).then(async data => {
           data = data.map((item, i) => {
             const mapItem = {
