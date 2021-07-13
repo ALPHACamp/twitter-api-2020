@@ -20,8 +20,10 @@ const userController = {
 
   signup: async (req, res, next) => {
     try {
-      const { name, account, email, password, confirmPassword } = req.body
-      if (!name || !account || !email || !password || !confirmPassword) return res.json({ status: 'error', message: '請填入所有欄位' })
+      let { name, account, email, password, confirmPassword } = req.body
+
+      if (!name.trim() || !account.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) return res.json({ status: 'error', message: '請填入所有欄位' })
+
       if (password !== confirmPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
       let user = await User.findOne({ where: { account } })
       if (user) return res.json({ status: 'error', message: `此帳號已被註冊` })
@@ -188,7 +190,7 @@ const userController = {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
 
-      const followings = await User.findOne({
+      let followings = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
@@ -197,7 +199,7 @@ const userController = {
         include: [{
           model: User, as: 'Followings',
           attributes: [
-            'id',
+            ['id', 'followingId'],
             'name',
             'account',
             'avatar',
@@ -212,14 +214,14 @@ const userController = {
         }],
       })
 
-      return res.json(followings)
+      return res.json(followings.Followings)
     } catch (err) { next(err) }
   },
 
   getUserFollowers: async (req, res, next) => {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      const followers = await User.findOne({
+      let followers = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
@@ -228,7 +230,7 @@ const userController = {
         include: [{
           model: User, as: 'Followers',
           attributes: [
-            'id',
+            ['id', 'followerId'],
             'name',
             'account',
             'avatar',
@@ -242,7 +244,9 @@ const userController = {
           ]
         }],
       })
-      return res.json(followers)
+
+
+      return res.json(followers.Followers)
     } catch (err) { next(err) }
   },
 
