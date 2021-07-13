@@ -294,17 +294,11 @@ const userController = {
       } else if (avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
         const img = await imgurUpload(avatar[0].path)
-        await user.update({
-          name: name,
-          bio: bio,
-          avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
-          cover: helpers.getUser(req).cover,
-        })
         const secondImg = await imgurUpload(cover[0].path)
         await user.update({
           name: name,
           bio: bio,
-          avatar: helpers.getUser(req).avatar,
+          avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
           cover: cover ? secondImg.data.link : helpers.getUser(req).cover,
         })
         return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
@@ -312,8 +306,8 @@ const userController = {
         await user.update({
           name: name,
           bio: bio,
-          avatar,
-          cover,
+          avatar: helpers.getUser(req).avatar,
+          cover: helpers.getUser(req).cover,
         })
         return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
       }
