@@ -9,7 +9,7 @@ const adminController = {
     try {
       const { account, password } = req.body
       if (!account || !password) return res.json({ status: 'error', message: '請填寫所有欄位' })
-      const user = await User.findOne({ where: { account } })
+      const user = await User.findOne({ where: { account, role: 'admin' } })
       if (!user) return res.status(401).json({ status: 'error', message: '查無此管理員' })
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return res.status(401).json({ status: 'error', message: '密碼輸入錯誤' })
@@ -21,7 +21,7 @@ const adminController = {
         message: 'ok',
         token,
         user: {
-          id: user.id, account: user.account, name: user.name, email: user.email, isAdmin: user.isAdmin
+          id: user.id, account: user.account, name: user.name, email: user.email, role: user.role
         }
       })
     }

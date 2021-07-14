@@ -10,7 +10,6 @@ router.post('/', userController.signup)
 
 router.use(helpers.authenticated)
 
-router.get('/currentUser', userController.getCurrentUser)
 router.get('/:id/followers', userController.getUserFollowers)
 router.get('/:id/followings', userController.getUserFollowings)
 router.get('/:id/likes', userController.getUserLike)

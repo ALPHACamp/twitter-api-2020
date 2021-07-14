@@ -52,7 +52,7 @@ const userController = {
       const { account, password } = req.body
       if (!account || !password) return res.json({ status: 'error', message: '請填寫所有欄位' })
 
-      const user = await User.findOne({ where: { account } })
+      const user = await User.findOne({ where: { account, role: 'user' } })
       if (!user) return res.status(401).json({ status: 'error', message: '查無此使用者' })
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return res.status(401).json({ status: 'error', message: '密碼輸入錯誤' })
@@ -67,20 +67,6 @@ const userController = {
           id: user.id, account: user.account, name: user.name, email: user.email, role: user.role
         }
       })
-    }
-    catch (err) {
-      next(err)
-    }
-  },
-
-  getCurrentUser: async (req, res, next) => {
-    try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
-      const user = await User.findByPk(helpers.getUser(req).id, {
-        attributes: ['id', 'role', 'name', 'account', 'email', 'avatar']
-      })
-      if (!user) return res.json({ status: 'error', message: '查無目前登入者的資訊' })
-      return res.json(user)
     }
     catch (err) {
       next(err)
