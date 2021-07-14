@@ -351,7 +351,9 @@ const userController = {
       })
 
       res.json(users)
-    } catch (error) {}
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
