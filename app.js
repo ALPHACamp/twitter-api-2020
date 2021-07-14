@@ -20,11 +20,18 @@ app.use(express.urlencoded({ extended: true })) //用來解析表單
 app.use(express.json()) //用來解析json
 app.use('/upload', express.static(__dirname + '/upload'))
 
+
+
+io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    io.emit('chat message', msg);
+  });
+})
+
 app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
   return next()
 })
-
 
 require('./routes')(app)
 
