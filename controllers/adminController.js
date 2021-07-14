@@ -2,6 +2,8 @@ const db = require('../models')
 const { User, Tweet, Sequelize } = db
 const { Op } = require('sequelize')
 
+const tweetService = require('../services/tweetService')
+
 const adminController = {
 
   getUsers: (req, res) => {
@@ -48,6 +50,13 @@ const adminController = {
               message: `Tweet.id ${tweetDeleted.id} has been destroyed successfully`
             })
           })
+      })
+  },
+  getTweets: (req, res) => {
+    const viewerId = req.user.id
+    tweetService.getTweets(viewerId, 'admin')
+      .then(data => {
+        return res.status(200).json(data)
       })
   }
 }
