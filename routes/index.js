@@ -59,6 +59,7 @@ module.exports = app => {
   app.delete('/api/admin/tweets/:tweetId', authenticated, authenticatedAdmin, adminController.deleteTweets)
 
   // users
+  app.get('/api/users', authenticated, authenticatedNotAdmin, userController.getTopUsers)
   app.get('/api/users/:userId', authenticated, authenticatedNotAdmin, userController.getUser)
   app.get('/api/users/:userId/tweets', authenticated, authenticatedNotAdmin, userController.getUserTweets)
   app.get('/api/users/:userId/replied_tweets', authenticated, authenticatedNotAdmin, userController.getAllReplies)

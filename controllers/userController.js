@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs')
 const { ImgurClient } = require('imgur')
 const client = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID })
 const { User, Tweet, Like, Reply, Followship, sequelize } = require('../models')
-// const { sequelize } = require('../models')
 const helpers = require('../_helpers')
 const Ajv = require('ajv').default
 const addFormats = require('ajv-formats')
@@ -330,6 +329,29 @@ const userController = {
     } catch (error) {
       next(error)
     }
+  },
+
+  getTopUsers: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const users = await User.findAll({
+        where: { $not: { role: 'admin' } },
+        include: { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'account',
+          [ sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+            'followersCount' ],
+          [sequelize.literal(`exists (SELECT true FROM Followships WHERE FollowerId = ${userId} AND FollowingId = User.id)`), 'isFollowed']
+        ],
+        order: [[sequelize.literal('followersCount'), 'DESC']],
+        limit: 10
+      })
+
+      res.json(users)
+    } catch (error) {}
   }
 }
 
