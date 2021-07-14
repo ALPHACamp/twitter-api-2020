@@ -146,7 +146,8 @@ const userController = {
             {
               model: Like, attributes: []
             }
-          ]
+          ],
+          order: [['createdAt', 'DESC']],
         }).then(tweets => {
           return res.status(200).json(tweets)
         })
