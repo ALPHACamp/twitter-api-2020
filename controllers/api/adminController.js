@@ -13,6 +13,7 @@ let adminController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       raw: true,
+      order: [['tweetNum', 'desc']],
       attributes: {
         exclude: [
           'email',
@@ -21,7 +22,7 @@ let adminController = {
           'lastLoginAt',
           'updatedAt',
           'createdAt'
-        ]
+        ],
       },
       where: { role: 'user' }
     }
@@ -73,7 +74,7 @@ let adminController = {
     const options = {
       include: [
         { model: Reply, attributes: ['id'], raw: true },
-        { model: Like, attributes: ['id','UserId'] }
+        { model: Like, attributes: ['id', 'UserId'] }
       ]
     }
     Tweet.findByPk(+req.params.tweetId, options).then(async (tweet) => {
@@ -88,7 +89,7 @@ let adminController = {
         await Like.destroy({
           where: { id: tweet.Likes.map((like) => like.id) }
         })
-        await User.decrement({ likeNum: 1 },{ where: { id: tweet.Likes.map((like) => like.UserId) }}
+        await User.decrement({ likeNum: 1 }, { where: { id: tweet.Likes.map((like) => like.UserId) } }
         )
       }
       res.status(200).json({
@@ -96,12 +97,12 @@ let adminController = {
         message: 'Successfully delete tweet.'
       })
     })
-    .catch((error) =>
-      res.status(500).json({
-        status: 'error',
-        message: error
-      })
-    )
+      .catch((error) =>
+        res.status(500).json({
+          status: 'error',
+          message: error
+        })
+      )
   },
   login: (req, res) => {
     const { password, email } = req.body
