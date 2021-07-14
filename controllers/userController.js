@@ -521,6 +521,7 @@ const userController = {
         [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${req.user.id}')`), 'isAdmin']
       ]
     }).then(user => {
+      user.dataValues.isAdmin = Boolean(user.dataValues.isAdmin)
       return res.status(200).json(user)
     })
   }
