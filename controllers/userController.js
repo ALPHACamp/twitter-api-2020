@@ -166,7 +166,7 @@ const userController = {
           attributes: ['id', 'description', 'createdAt', 'replyCounts', 'likeCounts', [
             Sequelize.literal(`EXISTS (
             SELECT * FROM Likes
-            WHERE UserId = ${req.params.id} AND TweetId = Tweet.id
+            WHERE UserId = ${req.user.id} AND TweetId = Tweet.id
           )`
             ), 'isLiked']],
           include: [{
