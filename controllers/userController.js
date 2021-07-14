@@ -23,8 +23,10 @@ const userController = {
       let { name, account, email, password, confirmPassword } = req.body
 
       if (!name.trim() || !account.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) return res.json({ status: 'error', message: '請填入所有欄位' })
-
+      if (password.trim().length < 4 || password.trim().length > 15) return res.json({ status: 'error', message: '密碼長度需介於4-15個字元' })
+      if (name.length > 50 || account.length > 50) return res.json({ status: 'error', message: '帳號和名稱長度需小於50字元' })
       if (password !== confirmPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
+
       let user = await User.findOne({ where: { account } })
       if (user) return res.status(403).json({ status: 'error', message: `此帳號已被註冊` })
       user = await User.findOne({ where: { email } })
