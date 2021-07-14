@@ -22,9 +22,11 @@ const userController = {
     try {
       let { name, account, email, password, confirmPassword } = req.body
 
-      if (!name.trim() || !account.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) return res.json({ status: 'error', message: '請填入所有欄位' })
-
+      if (!name.trim() || !account.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) return res.json({ status: 'error', message: '請填寫所有欄位' })
+      if (password.trim().length < 4 || password.trim().length > 15) return res.json({ status: 'error', message: '密碼長度需介於4-15個字元' })
+      if (name.length > 50 || account.length > 50) return res.json({ status: 'error', message: '帳號和名稱長度需小於50字元' })
       if (password !== confirmPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
+
       let user = await User.findOne({ where: { account } })
       if (user) return res.status(403).json({ status: 'error', message: `此帳號已被註冊` })
       user = await User.findOne({ where: { email } })
@@ -48,7 +50,7 @@ const userController = {
   signin: async (req, res, next) => {
     try {
       const { account, password } = req.body
-      if (!account || !password) return res.json({ status: 'error', message: '請填入所有欄位' })
+      if (!account || !password) return res.json({ status: 'error', message: '請填寫所有欄位' })
 
       const user = await User.findOne({ where: { account, role: 'user' } })
       if (!user) return res.status(401).json({ status: 'error', message: '查無此使用者' })
@@ -71,23 +73,9 @@ const userController = {
     }
   },
 
-  getCurrentUser: async (req, res, next) => {
-    try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      const user = await User.findByPk(helpers.getUser(req).id, {
-        attributes: ['id', 'name', 'account', 'email', 'avatar']
-      })
-      if (!user) return res.json({ status: 'error', message: '找不到此使用者的資訊' })
-      return res.json(user)
-    }
-    catch (err) {
-      next(err)
-    }
-  },
-
   getUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       const user = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
@@ -101,7 +89,7 @@ const userController = {
           [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = User.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
         ],
       })
-      if (!user) return res.json({ status: 'error', message: '使用者不存在' })
+      if (!user) return res.json({ status: 'error', message: '查無此使用者的資訊' })
       return res.json(user)
     }
     catch (err) {
@@ -111,7 +99,7 @@ const userController = {
 
   getUserTweets: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         attributes: [
@@ -127,7 +115,7 @@ const userController = {
         }],
       })
       if (tweets.length === 0) {
-        return res.json({ status: 'error', message: '使用者暫無貼文' })
+        return res.json({ status: 'error', message: '使用者暫無推文' })
       }
       return res.json(tweets)
     }
@@ -138,7 +126,7 @@ const userController = {
 
   getUserRepliedTweets: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       const tweets = await Tweet.findAll({
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
@@ -157,15 +145,17 @@ const userController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
         ],
       })
-
-      if (tweets.length === 0) return res.json({ status: 'error', message: '沒有回覆任何推文' })
+      if (tweets.length === 0) return res.json({ status: 'error', message: '使用者沒有回覆任何推文' })
       return res.json(tweets)
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   getUserLike: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       const likes = await Like.findAll({
         include: [
           {
@@ -179,7 +169,7 @@ const userController = {
         ],
         where: { UserId: req.params.id }
       })
-      if (likes.length === 0) return res.json({ status: 'error', message: '沒有喜歡的推文或回覆' })
+      if (likes.length === 0) return res.json({ status: 'error', message: '使用者沒有喜歡的推文或回覆' })
       return res.json(likes)
     }
     catch (err) {
@@ -189,9 +179,9 @@ const userController = {
 
   getUserFollowings: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
 
-      let followings = await User.findOne({
+      const followings = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
@@ -213,6 +203,7 @@ const userController = {
           ]
         }],
       })
+      if (followings.length === 0) return res.json({ status: 'error', message: '使用者沒有追蹤任何人' })
       return res.json(followings.Followings)
     }
     catch (err) {
@@ -222,8 +213,8 @@ const userController = {
 
   getUserFollowers: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      let followers = await User.findOne({
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
+      const followers = await User.findOne({
         where: {
           id: { [Op.eq]: req.params.id, },
           role: { [Op.ne]: 'admin' }
@@ -240,11 +231,12 @@ const userController = {
             [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE TweetId IN (SELECT id FROM Tweets WHERE UserId = User.id))'), 'totalLikes'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
-            [Sequelize.literal('(SELECT COUNT (*) FROM Followships,Users WHERE followerId = User.id)'), 'totalFollowings'],
-            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followerId = ${helpers.getUser(req).id} AND followingId = Followers.id))`), 'isFollowing']
+            [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followerId = User.id)'), 'totalFollowings'],
+            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = Followers.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
           ]
         }],
       })
+      if (followers.length === 0) return res.json({ status: 'error', message: '目前沒有人追蹤使用者' })
       return res.json(followers.Followers)
     }
     catch (err) {
@@ -254,7 +246,7 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       let { name, bio, avatar, cover } = req.body
       const user = await User.findOne({
         where: {
@@ -274,8 +266,8 @@ const userController = {
         imgur.setClientID(IMGUR_CLIENT_ID)
         const img = await imgurUpload(avatar[0].path)
         await user.update({
-          name: name,
-          bio: bio,
+          name,
+          bio,
           avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
           cover: helpers.getUser(req).cover,
         })
@@ -285,8 +277,8 @@ const userController = {
         imgur.setClientID(IMGUR_CLIENT_ID)
         const img = await imgurUpload(cover[0].path)
         await user.update({
-          name: name,
-          bio: bio,
+          name,
+          bio,
           avatar: helpers.getUser(req).avatar,
           cover: cover ? img.data.link : helpers.getUser(req).cover,
         })
@@ -297,42 +289,45 @@ const userController = {
         const img = await imgurUpload(avatar[0].path)
         const secondImg = await imgurUpload(cover[0].path)
         await user.update({
-          name: name,
-          bio: bio,
+          name,
+          bio,
           avatar: avatar ? img.data.link : helpers.getUser(req).avatar,
           cover: cover ? secondImg.data.link : helpers.getUser(req).cover,
         })
         return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
       } else {
         await user.update({
-          name: name,
-          bio: bio,
+          name,
+          bio,
           avatar: helpers.getUser(req).avatar,
           cover: helpers.getUser(req).cover,
         })
         return res.json([user, { status: 'success', message: '個人資訊更新完成' }])
       }
 
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   },
 
   putUserInfo: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       let { account, name, email, password, confirmPassword } = req.body
       account = account.trim()
       name = name.trim()
       email = email.trim()
       password = password.trim()
       confirmPassword = confirmPassword.trim()
-      if (!name || !email || !password || !confirmPassword || !account) return res.json({ status: 'error', message: '所有欄位皆必填' })
+      if (!name || !email || !password || !confirmPassword || !account) return res.json({ status: 'error', message: '請填寫所有欄位' })
       const user = await User.findByPk(helpers.getUser(req).id)
       const checkAccount = await User.findOne({ where: { account, id: { [Op.ne]: helpers.getUser(req).id } } })
       const checkEmail = await User.findOne({ where: { email, id: { [Op.ne]: helpers.getUser(req).id } } })
       const checkPassword = password === confirmPassword
       if (checkAccount) return res.json({ status: 'error', message: '此帳號已被使用' })
       if (checkEmail) return res.json({ status: 'error', message: '此信箱已被使用' })
-      if (!checkPassword) return res.json({ status: 'error', message: '請確認密碼是否一致' })
+      if (!checkPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
       user.update({
         account,
         name,
@@ -340,7 +335,10 @@ const userController = {
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
       })
       return res.json([user, { status: 'success', message: '帳戶信息更新成功' }])
-    } catch (err) { next(err) }
+    }
+    catch (err) {
+      next(err)
+    }
   }
 }
 
