@@ -6,6 +6,8 @@ const Like = db.Like
 
 const { Op, Sequelize } = require('sequelize')
 
+const tweetService = require('../services/tweetService')
+
 const tweetController = {
   postTweet: (req, res) => {
     const { description } = req.body
@@ -106,40 +108,11 @@ const tweetController = {
   },
 
   getTweets: (req, res) => {
-    const user_id = req.user.id
-
-    return Tweet.findAll({
-      include: [
-        {
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        },
-        {
-          model: Like,
-          required: false,
-          where: {
-            UserId: user_id
-          }
-        }
-      ],
-      order: [['createdAt', 'DESC']],
-      attributes: [['id', 'TweetId'], 'description', 'likeCount', 'replyCount', 'createdAt'],
-      raw: true,
-      nest: true
-    }).then(tweets => {
-      tweets = tweets.map((tweet, i) => {
-        const final = {
-          ...tweet,
-          isLike: Boolean(tweet.Likes.id)
-        }
-
-        delete final.Likes
-
-        return final
+    const viewerId = req.user.id
+    tweetService.getTweets(viewerId, 'user')
+      .then(data => {
+        return res.status(200).json(data)
       })
-
-      return res.status(200).json(tweets)
-    })
   },
 
   postLike: (req, res) => {
