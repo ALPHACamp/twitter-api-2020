@@ -75,7 +75,7 @@ const userController = {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
       const user = await User.findByPk(helpers.getUser(req).id, {
-        attributes: ['id', 'name', 'account', 'email', 'avatar']
+        attributes: ['id', 'role', 'name', 'account', 'email', 'avatar']
       })
       if (!user) return res.json({ status: 'error', message: '找不到此使用者的資訊' })
       return res.json(user)
