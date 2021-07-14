@@ -7,8 +7,8 @@ const followshipController = {
 
   showAllUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
-      let users = await User.findAll({
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
+      const users = await User.findAll({
         limit: 10,
         where: {
           id: { [Op.ne]: helpers.getUser(req).id },
@@ -24,6 +24,7 @@ const followshipController = {
         ],
         order: [[Sequelize.literal('totalFollowers'), 'DESC']]
       })
+      if (!users) return res.json({ status: 'error', message: '目前沒有任何使用者的資訊' })
       return res.json(users)
     }
     catch (err) {
@@ -33,7 +34,7 @@ const followshipController = {
 
   addFollowing: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       if (helpers.getUser(req).id === Number(req.body.id)) {
         return res.json({ status: 'error', message: '無法追蹤自己' })
       }
@@ -46,7 +47,7 @@ const followshipController = {
       if (created) {
         return res.json({ status: 'success', message: '追蹤成功' })
       }
-      return res.json({ status: 'error', message: '已追蹤過了' })
+      return res.json({ status: 'error', message: '已追蹤過此使用者' })
     }
     catch (err) {
       next(err)
@@ -55,7 +56,7 @@ const followshipController = {
 
   deleteFollowing: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '僅限一般使用者使用' })
+      if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       const followingShip = await Followship.findOne({
         where: {
           followerId: helpers.getUser(req).id,
