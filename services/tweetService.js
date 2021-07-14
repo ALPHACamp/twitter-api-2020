@@ -4,6 +4,7 @@ const { Tweet, User, Like, Sequelize } = db
 const tweetService = {
   getTweets: (viewerId, viewerRole = 'user') => {
     let attributesOption = []
+    const descriptionLength = 50
 
     switch (viewerRole) {
       case 'user':
@@ -14,7 +15,8 @@ const tweetService = {
         break;
 
       case 'admin':
-        attributesOption = [['id', 'TweetId'], 'description', 'createdAt']
+        attributesOption = [['id', 'TweetId'], [Sequelize.fn('LEFT', Sequelize.col('description'), descriptionLength), 'description'], 'createdAt']
+
         break;
     }
 
