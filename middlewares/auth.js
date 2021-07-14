@@ -19,17 +19,18 @@ module.exports = {
     })(req, res, next) // TODO:要了解為什麼要加這個，不加就會沒辦法運作
   },
 
-  checkRole: (roleName = 'user') => {
+  checkNotRole: (roleName = 'user') => {
     return (req, res, next) => {
-      if (helpers.getUser(req).role === roleName) {
+      if (helpers.getUser(req).role !== roleName) {
         return next()
       } else {
+        console.log(helpers.getUser(req))
         return res.status(403).json({
           status: 'error',
           message: `User should be role:${roleName} to pass role check`
         })
       }
     }
-  },
+  }
 
 }
