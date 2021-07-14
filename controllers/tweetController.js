@@ -29,9 +29,27 @@ let tweetController = {
 
   getTweet: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.tweetId, { include: { model: Reply, model: Like } })
+      const tweet = await Tweet.findByPk(req.params.tweetId, {
+        include: [
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id', 'userId'] },
+          { model: User, attributes: ['name', 'avatar', 'account'] },
+        ],
+      })
       if (!tweet) throw new Error("this tweet doesn't exist")
-      return res.json(tweet)
+      const replyCount = tweet.Replies.length
+      const likeCount = tweet.Likes.length
+
+      return res.json({
+        account: tweet.User.account,
+        avatar: tweet.User.avatar,
+        name: tweet.User.name,
+        description: tweet.description,
+        isLiked: tweet.Likes.map(d => d.userId).includes(tweet.userId),
+        createdAt: tweet.createdAt,
+        replyCount,
+        likeCount,
+      })
     } catch (error) {
       next(error)
     }
