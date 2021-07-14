@@ -7,14 +7,12 @@ const RequestError = require('../utils/customError')
 
 router.use('/api', apis)
 router.use((req, res, next) => {
-  res.status(404)
-  return res.json({ status: 'error', message: `Cannot find ${req.method} ${req.path}` })
+  return res.status(404).json({ status: 'error', message: `Cannot find ${req.method} ${req.path}` })
 })
 router.use((error, req, res, next) => {
   console.log(error.message)
-  res.status(500)
-  if (error instanceof RequestError) res.status(400)
-  return res.json({ status: 'error', message: error.message })
+  if (error instanceof RequestError) return res.status(400).json({ status: 'error', message: error.message })
+  return res.status(500).json({ status: 'error', message: error.message })
 })
 
 module.exports = router
