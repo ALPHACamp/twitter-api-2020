@@ -24,7 +24,6 @@ module.exports = {
       if (helpers.getUser(req).role !== roleName) {
         return next()
       } else {
-        console.log(helpers.getUser(req))
         return res.status(403).json({
           status: 'error',
           message: `User should not be role:${roleName} to pass role check`
