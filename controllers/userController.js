@@ -147,8 +147,13 @@ const userController = {
             {
               model: Like, attributes: []
             }
-          ]
+          ],
+          order: [['createdAt', 'DESC']],
         }).then(tweets => {
+          tweets.forEach(tweet => {
+            tweet.dataValues.isLike = Boolean(tweet.dataValues.isLike)
+          })
+
           return res.status(200).json(tweets)
         })
       })
