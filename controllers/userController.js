@@ -71,6 +71,7 @@ const userController = {
             account: account,
             name: name,
             email: email,
+            role: 'user',
             password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
           }).then(user => {
             return res.json({ status: 'success', message: '成功註冊帳號！' })
