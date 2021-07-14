@@ -5,6 +5,7 @@ const replyController = require('../controllers/replyController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
+const { getCurrentUser } = require('../controllers/userController')
 const upload = multer({
   fileFilter(req, file, cb) {
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
@@ -59,12 +60,11 @@ module.exports = app => {
 
   // users
   app.get('/api/users', authenticated, authenticatedNotAdmin, userController.getTopUsers)
+  app.get('/api/users/currentUser', authenticated, authenticatedNotAdmin, userController.getCurrentUser)
   app.get('/api/users/:userId', authenticated, authenticatedNotAdmin, userController.getUser)
   app.get('/api/users/:userId/tweets', authenticated, authenticatedNotAdmin, userController.getUserTweets)
   app.get('/api/users/:userId/replied_tweets', authenticated, authenticatedNotAdmin, userController.getAllReplies)
-
   app.put('/api/users/:userId', authenticated, authenticatedNotAdmin, cpUpload, userController.putUser)
-
   app.get('/api/users/:userId/likes', authenticated, authenticatedNotAdmin, userController.getLikes)
   app.get('/api/users/:userId/followers', authenticated, authenticatedNotAdmin, userController.getFollowers)
   app.get('/api/users/:userId/followings', authenticated, authenticatedNotAdmin, userController.getFollowings)

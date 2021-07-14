@@ -354,6 +354,21 @@ const userController = {
     } catch (error) {
       next(error)
     }
+  },
+
+  getCurrentUser: (req, res) => {
+      const user = helpers.getUser(req)
+      console.log(user)
+      return res.json({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role,
+        cover: user.cover,
+        introduction: user.introduction
+      })
   }
 }
 
