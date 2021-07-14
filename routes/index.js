@@ -42,7 +42,7 @@ const authenticatedAdmin = (req, res, next) => {
 
 const authenticatedNotAdmin = (req, res, next) => {
   if (helpers.getUser(req).role === 'admin') {
-    return res.json({ status: 'error', message: 'permission denied' })
+    return res.json({ status: 'error', message: '管理者請從後台登入' })
   } else {
     return next()
   }
