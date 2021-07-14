@@ -116,6 +116,28 @@ let userController = {
         })
       })
   },
+  getCurrentUser: (req, res) => {
+  const options = {
+    attributes: [
+      'id',
+      'account',
+      'name',
+      'email',
+      'avatar',
+      'role',
+    ],
+  }
+  User.findByPk(req.user.id, options)
+    .then((user) => {
+        return res.json(user)
+    })
+    .catch((error) => {
+      return res.status(500).json({
+        status: 'error',
+        message: error
+      })
+    })
+  },
   putUser: (req, res) => {
     const id = +req.params.id
     const userId = +req.user.id
@@ -276,6 +298,7 @@ let userController = {
           id: user.id
         }
         let token = jwt.sign(payload, process.env.JWT_SECRET)
+        user.lastLoginAt = new Date()
         await User.update(user.dataValues, {
           where: {
             id: user.dataValues.id
