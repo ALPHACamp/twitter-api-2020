@@ -344,7 +344,7 @@ const userController = {
           'account',
           [ sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
             'followersCount' ],
-          [sequelize.literal(`exists (SELECT true FROM Followships WHERE FollowerId = ${userId} AND FollowingId = User.id)`), 'isFollowed']
+          [sequelize.literal(`exists (SELECT true FROM Followships WHERE FollowerId = ${userId} AND FollowingId = User.id)`), 'isFollowing']
         ],
         order: [[sequelize.literal('followersCount'), 'DESC']],
         limit: 10
