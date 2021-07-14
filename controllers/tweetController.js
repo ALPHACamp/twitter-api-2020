@@ -50,9 +50,10 @@ const tweetController = {
             attributes: [
               'id',
               'content',
+              'createdAt',
               [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.ReplyId = Replies.id AND Likes.UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
               [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE Likes.ReplyId = Replies.id)'), 'totalLikes']],
-            include: [{ model: User, attributes: ['id', 'avatar', 'name', 'account'] }]
+            include: [{ model: User, attributes: ['id', 'avatar', 'name', 'account'] }],
           }
         ],
       })
