@@ -100,7 +100,7 @@ const userController = {
           message: 'ok',
           token: token,
           user: {
-            id: user.id, name: user.name, email: user.email, isAdmin: Boolean(user.role === 'admin')
+            id: user.id, name: user.name, email: user.email, account: user.account, avatar: user.avatar, isAdmin: Boolean(user.role === 'admin')
           }
         })
       })
