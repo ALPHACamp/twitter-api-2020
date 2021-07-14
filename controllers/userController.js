@@ -194,7 +194,12 @@ const userController = {
         raw: true,
         nest: true,
         where: { UserId: req.params.id },
-        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt', [
+          Sequelize.literal(`EXISTS (
+            SELECT * FROM Likes
+            WHERE UserId = ${req.user.id} AND TweetId = Tweet.id
+          )`
+          ), 'isLiked']],
         include: [{
           model: User,
           attributes: ['id', 'name', 'account', 'avatar']
@@ -203,7 +208,8 @@ const userController = {
       })
       const tweets = results.map(tweet => ({
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a'),
+        isLiked: tweet.isLiked === 1
       }))
       return res.json(tweets)
     } catch (err) {
