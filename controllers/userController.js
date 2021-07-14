@@ -30,7 +30,7 @@ const userController = {
     })
       .then(user => {
         if (!user) throw new Error('此使用者尚未註冊')
-        if (user.role === 'admin') throw new Error('permission denied')
+        if (user.role === 'admin') throw new Error('管理者請從後台登入')
 
         if (!bcrypt.compareSync(req.body.password, user.password)) {
           throw new Error('密碼輸入錯誤')
@@ -342,9 +342,16 @@ const userController = {
           'name',
           'avatar',
           'account',
-          [ sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
-            'followersCount' ],
-          [sequelize.literal(`exists (SELECT true FROM Followships WHERE FollowerId = ${userId} AND FollowingId = User.id)`), 'isFollowing']
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+            'followersCount'
+          ],
+          [
+            sequelize.literal(
+              `exists (SELECT true FROM Followships WHERE FollowerId = ${userId} AND FollowingId = User.id)`
+            ),
+            'isFollowing'
+          ]
         ],
         order: [[sequelize.literal('followersCount'), 'DESC']],
         limit: 10
@@ -357,18 +364,18 @@ const userController = {
   },
 
   getCurrentUser: (req, res) => {
-      const user = helpers.getUser(req)
-      console.log(user)
-      return res.json({
-        id: user.id,
-        name: user.name,
-        account: user.account,
-        email: user.email,
-        avatar: user.avatar,
-        role: user.role,
-        cover: user.cover,
-        introduction: user.introduction
-      })
+    const user = helpers.getUser(req)
+    console.log(user)
+    return res.json({
+      id: user.id,
+      name: user.name,
+      account: user.account,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+      cover: user.cover,
+      introduction: user.introduction
+    })
   }
 }
 
