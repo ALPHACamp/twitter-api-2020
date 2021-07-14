@@ -117,26 +117,26 @@ let userController = {
       })
   },
   getCurrentUser: (req, res) => {
-  const options = {
-    attributes: [
-      'id',
-      'account',
-      'name',
-      'email',
-      'avatar',
-      'role',
-    ],
-  }
-  User.findByPk(req.user.id, options)
-    .then((user) => {
+    const options = {
+      attributes: [
+        'id',
+        'account',
+        'name',
+        'email',
+        'avatar',
+        'role',
+      ],
+    }
+    User.findByPk(req.user.id, options)
+      .then((user) => {
         return res.json(user)
-    })
-    .catch((error) => {
-      return res.status(500).json({
-        status: 'error',
-        message: error
       })
-    })
+      .catch((error) => {
+        return res.status(500).json({
+          status: 'error',
+          message: error
+        })
+      })
   },
   putUser: (req, res) => {
     const id = +req.params.id
@@ -304,17 +304,19 @@ let userController = {
             id: user.dataValues.id
           }
         })
-        return res.status(200).json({
-          status: 'success',
-          message: 'User successfully login.',
-          token,
-          User: {
-            id: user.id,
-            name: user.name,
-            account: user.account,
-            email: user.email
-          }
-        })
+        return res
+          .status(200)
+          .json({
+            status: 'success',
+            message: 'User successfully login.',
+            token,
+            User: {
+              id: user.id,
+              name: user.name,
+              account: user.account,
+              email: user.email
+            }
+          })
       })
       .catch((error) =>
         res.status(500).json({
