@@ -91,7 +91,7 @@ const tweetController = {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const { description } = req.body
-      if (!description) return res.json({ status: 'error', message: '推文不得為空白' })
+      if (!description) return res.json({ status: 'error', message: '請填寫推文內容' })
       if (description.length > 140) {
         return res.json({ status: 'error', message: '已超過推文最高上限140字' })
       }
@@ -149,7 +149,8 @@ const tweetController = {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能僅開放給一般使用者' })
       const { content } = req.body
       const { TweetId } = req.params
-      if (!content) return res.json({ status: 'error', message: '回覆不得為空白' })
+      if (content.length > 140) return res.json({ status: 'error', message: '回覆字數不得超過140字' })
+      if (!content) return res.json({ status: 'error', message: '請填寫回覆內容' })
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) return res.json({ status: 'error', message: '找不到此推文' })
       await Reply.create({
