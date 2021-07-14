@@ -1,7 +1,7 @@
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-
+const Sequelize = require('sequelize')
 const bcrypt = require('bcryptjs')
 const moment = require('moment')
 const jwt = require('jsonwebtoken')
@@ -163,16 +163,23 @@ const userController = {
         attributes: ['id', 'comment', 'createdAt'],
         include: [{
           model: Tweet,
-          attributes: ['id', 'description', 'createdAt'],
-          include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-          ]
+          attributes: ['id', 'description', 'createdAt', 'replyCounts', 'likeCounts', [
+            Sequelize.literal(`EXISTS (
+            SELECT * FROM Likes
+            WHERE UserId = ${req.params.id} AND TweetId = Tweet.id
+          )`
+            ), 'isLiked']],
+          include: [{
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          }]
         }],
         order: [['createdAt', 'DESC']]
       })
       const replies = results.map(reply => {
         reply.createdAt = moment(reply.createdAt).format('YYYY-MM-DD hh:mm:ss a')
         reply.Tweet.createdAt = moment(reply.Tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        reply.Tweet.isLiked = reply.Tweet.isLiked ? true : false
         return reply
       })
       return res.json(replies)
