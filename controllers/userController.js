@@ -50,7 +50,7 @@ const userController = {
       const { account, password } = req.body
       if (!account || !password) return res.json({ status: 'error', message: '請填入所有欄位' })
 
-      const user = await User.findOne({ where: { account } })
+      const user = await User.findOne({ where: { account, role: 'user' } })
       if (!user) return res.status(401).json({ status: 'error', message: '查無此使用者' })
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return res.status(401).json({ status: 'error', message: '密碼輸入錯誤' })
@@ -209,7 +209,7 @@ const userController = {
             [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followerId = User.id)'), 'totalFollowings'],
-            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = User.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
+            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = Followings.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
           ]
         }],
       })
@@ -240,8 +240,8 @@ const userController = {
             [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE TweetId IN (SELECT id FROM Tweets WHERE UserId = User.id))'), 'totalLikes'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Tweets WHERE UserId = User.id)'), 'totalTweets'],
             [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followingId = User.id)'), 'totalFollowers'],
-            [Sequelize.literal('(SELECT COUNT (*) FROM Followships WHERE followerId = User.id)'), 'totalFollowings'],
-            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followingId = User.id AND followerId = ${helpers.getUser(req).id}))`), 'isFollowing']
+            [Sequelize.literal('(SELECT COUNT (*) FROM Followships,Users WHERE followerId = User.id)'), 'totalFollowings'],
+            [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Followships WHERE followerId = ${helpers.getUser(req).id} AND followingId = Followers.id))`), 'isFollowing']
           ]
         }],
       })
