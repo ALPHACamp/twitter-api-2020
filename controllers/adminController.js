@@ -62,9 +62,13 @@ const adminController = {
   },
   getUser: (req, res) => {
     const UserId = req.params.id
-    userService.getUser(req, res, UserId, 'admin')
+    userService.getUser(req, res, 'admin', UserId)
+      .then(data => { return data })
+  },
+  getUserTweets: (req, res) => {
+    const UserId = req.params.id
+    userService.getUserTweets(req, res, 'admin', UserId)
       .then(data => { return data })
   }
 }
-
 module.exports = adminController

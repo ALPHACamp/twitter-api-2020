@@ -107,46 +107,14 @@ const userController = {
   },
   getUser: (req, res) => {
     const UserId = req.params.id
-    userService.getUser(req, res, UserId, 'user')
+    userService.getUser(req, res, 'user', UserId)
       .then(data => { return data })
   },
   getUserTweets: (req, res) => {
     const UserId = req.params.id
     const viewerId = req.user.id
-
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-        return Tweet.findAll({
-          where: { UserId },
-          attributes: [
-            ['id', 'TweetId'],
-            'description', 'createdAt', 'replyCount', 'likeCount',
-            [Sequelize.literal(`exists (select * from Likes where Likes.UserId = '${viewerId}' and Likes.TweetId = Tweet.id)`), 'isLike']
-          ],
-          include: [
-            {
-              model: User,
-              attributes: ['id', 'name', 'account', 'avatar']
-            },
-            {
-              model: Like, attributes: []
-            }
-          ],
-          order: [['createdAt', 'DESC']]
-        }).then(tweets => {
-          tweets.forEach(tweet => {
-            tweet.dataValues.isLike = Boolean(tweet.dataValues.isLike)
-          })
-
-          return res.status(200).json(tweets)
-        })
-      })
+    userService.getUserTweets(req, res, 'user', UserId, viewerId)
+      .then(data => { return data })
   },
   getUserLikes: (req, res) => {
     const UserId = req.params.id
