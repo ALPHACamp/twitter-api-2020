@@ -21,7 +21,7 @@ const userService = {
         [Sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed'],
         [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount']
       ],
-      group: 'Followers.id',
+      group: 'Users.id',
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
@@ -103,7 +103,7 @@ const userService = {
       ],
       group: 'TweetId',
       include: [
-        { model: Like, attributes: [] },
+        { model: Like, attributes: ['createdAt'] },
         { model: Reply, attributes: [] },
         {
           model: User,
