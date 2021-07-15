@@ -14,96 +14,38 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userController = {
-  signUp: (req, res) => {
-    let { name, email, account, password, checkPassword } = req.body
-    const errors = []
-    let errorMsg = ''
+  signUp: async (req, res) => {
+    const { body } = req
+    const { name, account, email, password, checkPassword } = body
 
-    const isFieldsAbsence = !name || !account || !email || !password || !checkPassword
-    const isPasswordUnequalCheckPassword = checkPassword !== password
-
-    if (isFieldsAbsence || isPasswordUnequalCheckPassword) {
-      if (isFieldsAbsence) {
-        errors.push('每個欄位都是必要欄位')
-      }
-
-      if (isPasswordUnequalCheckPassword) {
-        errors.push('兩次密碼輸入不同')
-      }
-
-      errorMsg = errors.join(',')
-
-      return res.json({
-        status: 'error',
-        message: `${errorMsg}`,
+    try {
+      const data = await userService.signUp(body)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message,
         request_data: {
-          name: name,
-          account: account,
-          email: email,
-          password: password,
-          checkPassword: checkPassword
-        }
-      })
-    } else {
-      account = account.replace(/^[@]*/, '')
-
-      User.findOne({
-        where: {
-          [Op.or]: [
-            { email: email },
-            { account: account }
-          ]
-        }
-      }).then(user => {
-        if (user) {
-          if (user.email === email) {
-            errors.push('信箱重複')
-          }
-          if (user.account === account) {
-            errors.push('帳號重複')
-          }
-
-          errorMsg = errors.join(',')
-
-          return res.json({ status: 'error', message: `${errorMsg}` })
-        } else {
-          User.create({
-            account: account,
-            name: name,
-            email: email,
-            role: 'user',
-            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
-            return res.json({ status: 'success', message: '成功註冊帳號！' })
-          })
+          name: name || null,
+          account: account || null,
+          email: email || null,
+          password: password || null,
+          checkPassword: checkPassword || null
         }
       })
     }
   },
-  logIn: (req, res) => {
-    if (!req.body.account || !req.body.password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
-    }
-    const account = req.body.account
-    const password = req.body.password
-
-    User.findOne({ where: { account: account } })
-      .then(user => {
-        if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
-        if (!bcrypt.compareSync(password, user.password)) {
-          return res.status(401).json({ status: 'error', message: 'passwords did not match' })
-        }
-        const payload = { id: user.id, role: user.role }
-        const token = jwt.sign(payload, process.env.JWT_SECRET)
-        return res.json({
-          status: 'success',
-          message: 'ok',
-          token: token,
-          user: {
-            id: user.id, name: user.name, email: user.email, account: user.account, avatar: user.avatar, isAdmin: Boolean(user.role === 'admin')
-          }
-        })
+  logIn: async (req, res) => {
+    const { body } = req
+    try {
+      const data = await userService.login(body)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
       })
+    }
   },
   getUser: (req, res) => {
     const UserId = req.params.id

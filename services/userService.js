@@ -1,7 +1,90 @@
 const db = require('../models')
 const { User, Tweet, Like, Reply, Followship, Sequelize } = db
+const { Op } = Sequelize
+const RequestError = require('../libs/RequestError')
+const bcrypt = require('bcryptjs')
+
+const jwt = require('jsonwebtoken')
 
 const userService = {
+  signUp: (body) => {
+    let { name, email, account, password, checkPassword } = body
+    const errors = []
+    let errorMsg = ''
+
+    const isFieldsAbsence = !name || !account || !email || !password || !checkPassword
+    const isPasswordUnequalCheckPassword = checkPassword !== password
+
+    if (isFieldsAbsence || isPasswordUnequalCheckPassword) {
+      if (isFieldsAbsence) {
+        errors.push('每個欄位都是必要欄位')
+      }
+
+      if (isPasswordUnequalCheckPassword) {
+        errors.push('兩次密碼輸入不同')
+      }
+
+      errorMsg = errors.join(',')
+
+      throw new RequestError(errorMsg)
+    } else {
+      account = account.replace(/^[@]*/, '')
+
+      return User.findOne({
+        where: {
+          [Op.or]: [
+            { email: email },
+            { account: account }
+          ]
+        }
+      }).then(user => {
+        if (user) {
+          if (user.email === email) {
+            errors.push('信箱重複')
+          }
+          if (user.account === account) {
+            errors.push('帳號重複')
+          }
+
+          errorMsg = errors.join(',')
+
+          throw new RequestError(errorMsg)
+        } else {
+          User.create({
+            account: account,
+            name: name,
+            email: email,
+            role: 'user',
+            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+          }).then(user => {
+            return { status: 'success', message: '成功註冊帳號！' }
+          })
+        }
+      })
+    }
+  },
+  login: (body) => {
+    const { account, password } = body
+    if (!account || !password) {
+      throw new RequestError('Required fields missing')
+    }
+
+    return User.findOne({ where: { account: account } })
+      .then(user => {
+        if (!user) { throw new RequestError('no such user found') }
+        if (!bcrypt.compareSync(password, user.password)) {
+          throw new RequestError('Passwords did not match')
+        }
+        const payload = { id: user.id, role: user.role }
+        const token = jwt.sign(payload, process.env.JWT_SECRET)
+        return {
+          token: token,
+          user: {
+            id: user.id, name: user.name, email: user.email, account: user.account, avatar: user.avatar, isAdmin: Boolean(user.role === 'admin')
+          }
+        }
+      })
+  },
   getUser: (req, res, viewerRole, UserId) => {
     return User.findByPk(UserId)
       .then(user => {
