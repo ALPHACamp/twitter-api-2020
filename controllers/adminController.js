@@ -65,7 +65,7 @@ let adminController = {
             ), 'likeCount'],
           [ sequelize.literal(
               '(SELECT COUNT(*) FROM Users INNER JOIN Followships ON User.id = Followships.followerId WHERE Followships.followingId = Users.id)'
-              ), 'followeingCount' ],
+              ), 'followingCount' ],
           [ sequelize.literal(
             '(SELECT COUNT(*) FROM Users INNER JOIN Followships ON User.id = Followships.followingId WHERE Followships.followerId = Users.id)'
             ), 'followerCount' ],
@@ -74,7 +74,10 @@ let adminController = {
             ), 'tweetCount' ],
         ],
         order: [[sequelize.literal('tweetCount'), 'DESC']],
+        raw: true
       })
+
+      console.log(users)
       return res.json(users)
     } catch (error) {
       next(error)
