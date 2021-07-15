@@ -92,6 +92,37 @@ const tweetService = {
         })
       })
   },
+
+  getSingleTweet: (viewerId, tweet_id) => {
+    return Tweet.findByPk(tweet_id, {
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        },
+        {
+          model: Like,
+          required: false,
+          where: {
+            UserId: viewerId
+          }
+        }
+      ],
+      attributes: {
+        exclude: ['updatedAt', 'UserId']
+      }
+    }).then(tweet => {
+      if (!tweet) {
+        throw new RequestError('Tweet does not exist')
+      }
+
+      tweet = tweet.toJSON()
+      tweet.isLike = Boolean(tweet.Likes[0])
+      delete tweet.Likes
+
+      return tweet
+    })
+  },
   }
 }
 

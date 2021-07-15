@@ -43,41 +43,20 @@ const tweetController = {
     }
   },
 
-  getSingleTweet: (req, res) => {
+  getSingleTweet: async (req, res) => {
     const tweet_id = req.params.id
-    const user_id = req.user.id
+    const viewerId = req.user.id
 
-    return Tweet.findByPk(tweet_id, {
-      include: [
-        {
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        },
-        {
-          model: Like,
-          required: false,
-          where: {
-            UserId: user_id
-          }
-        }
-      ],
-      attributes: {
-        exclude: ['updatedAt', 'UserId']
-      }
-    }).then(tweet => {
-      if (!tweet) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Tweet does not exist'
-        })
-      }
+    try {
+      const data = await tweetService.getSingleTweet(viewerId, tweet_id)
 
-      tweet = tweet.toJSON()
-      tweet.isLike = Boolean(tweet.Likes[0])
-      delete tweet.Likes
-
-      return res.status(200).json(tweet)
-    })
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
 
   getTweets: (req, res) => {
