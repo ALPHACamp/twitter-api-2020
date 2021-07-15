@@ -85,16 +85,16 @@ const userService = {
         }
       })
   },
-  getUser: (req, res, viewerRole, UserId) => {
+  getUser: (viewerRole, UserId) => {
     return User.findByPk(UserId)
       .then(user => {
         if (!user) {
-          return res.status(401).json({ status: 'error', message: 'User not found.' })
+          throw new RequestError('User not found.')
         }
         const { id, name, account, avatar, cover, introduction, followerCount, followingCount } = user
-        return res.status(200).json({
+        return {
           id, name, account, avatar, cover, introduction, followerCount, followingCount
-        })
+        }
       })
   },
   getUserTweets: (req, res, viewerRole, UserId, viewerId) => {

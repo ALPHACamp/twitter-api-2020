@@ -47,10 +47,17 @@ const userController = {
       })
     }
   },
-  getUser: (req, res) => {
+  getUser: async (req, res) => {
     const UserId = req.params.id
-    userService.getUser(req, res, 'user', UserId)
-      .then(data => { return data })
+    try {
+      const data = await userService.getUser('user', UserId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
   getUserTweets: (req, res) => {
     const UserId = req.params.id
