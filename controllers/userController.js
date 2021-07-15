@@ -3,7 +3,8 @@ const db = require('../models')
 const { User, Tweet, Like, Reply, Followship, Sequelize } = db
 const { Op } = require('sequelize')
 
-// const imgur = require('imgur-node-api')
+const userService = require('../services/userService')
+
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
@@ -13,522 +14,172 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userController = {
-  signUp: (req, res) => {
-    let { name, email, account, password, checkPassword } = req.body
-    let errors = []
-    let errorMsg = ''
+  signUp: async (req, res) => {
+    const { body } = req
+    const { name, account, email, password, checkPassword } = body
 
-    const isFieldsAbsence = !name || !account || !email || !password || !checkPassword
-    const isPasswordUnequalCheckPassword = checkPassword !== password
-
-    if (isFieldsAbsence || isPasswordUnequalCheckPassword) {
-      if (isFieldsAbsence) {
-        errors.push('每個欄位都是必要欄位')
-      }
-
-      if (isPasswordEqualCheckPassword) {
-        errors.push('兩次密碼輸入不同')
-      }
-
-      errorMsg = errors.join(',')
-
-      return res.json({
-        status: 'error',
-        message: `${errorMsg}`,
+    try {
+      const data = await userService.signUp(body)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message,
         request_data: {
-          name: name,
-          account: account,
-          email: email,
-          password: password,
-          checkPassword: checkPassword
-        }
-      })
-    } else {
-
-      account = account.replace(/^[@]*/, '')
-
-      User.findOne({
-        where: {
-          [Op.or]: [
-            { email: email },
-            { account: account }
-          ]
-        }
-      }).then(user => {
-        if (user) {
-          if (user.email === email) {
-            errors.push('信箱重複')
-          }
-          if (user.account === account) {
-            errors.push('帳號重複')
-          }
-
-          errorMsg = errors.join(',')
-
-          return res.json({ status: 'error', message: `${errorMsg}` })
-        } else {
-          User.create({
-            account: account,
-            name: name,
-            email: email,
-            role: 'user',
-            password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
-            return res.json({ status: 'success', message: '成功註冊帳號！' })
-          })
+          name: name || null,
+          account: account || null,
+          email: email || null,
+          password: password || null,
+          checkPassword: checkPassword || null
         }
       })
     }
   },
-  logIn: (req, res) => {
-    if (!req.body.account || !req.body.password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
-    }
-    const account = req.body.account
-    const password = req.body.password
-
-    User.findOne({ where: { account: account } })
-      .then(user => {
-        if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
-        if (!bcrypt.compareSync(password, user.password)) {
-          return res.status(401).json({ status: 'error', message: 'passwords did not match' })
-        }
-        const payload = { id: user.id, role: user.role }
-        const token = jwt.sign(payload, process.env.JWT_SECRET)
-        return res.json({
-          status: 'success',
-          message: 'ok',
-          token: token,
-          user: {
-            id: user.id, name: user.name, email: user.email, account: user.account, avatar: user.avatar, isAdmin: Boolean(user.role === 'admin')
-          }
-        })
-      })
-  },
-  getUser: (req, res) => {
-    return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) {
-          return res.status(404).json({
-            status: 'error',
-            message: 'User not found.'
-          })
-        }
-        const { id, name, account, avatar, cover, introduction, followerCount, followingCount } = user
-        return res.status(200).json({
-          id, name, account, avatar, cover, introduction, followerCount, followingCount
-        })
-      })
-  },
-  getUserTweets: (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
-
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-        return Tweet.findAll({
-          where: { UserId },
-          attributes: [
-            ['id', 'TweetId'],
-            'description', 'createdAt', 'replyCount', 'likeCount',
-            [Sequelize.literal(`exists (select * from Likes where Likes.UserId = '${viewerId}' and Likes.TweetId = Tweet.id)`), 'isLike']
-          ],
-          include: [
-            {
-              model: User,
-              attributes: ['id', 'name', 'account', 'avatar']
-            },
-            {
-              model: Like, attributes: []
-            }
-          ],
-          order: [['createdAt', 'DESC']],
-        }).then(tweets => {
-          tweets.forEach(tweet => {
-            tweet.dataValues.isLike = Boolean(tweet.dataValues.isLike)
-          })
-
-          return res.status(200).json(tweets)
-        })
-      })
-  },
-  getUserLikes: (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-        return Like.findAll({
-          include: [
-            {
-              model: Tweet,
-              attributes: ['id', 'description', 'createdAt', 'replyCount', 'likeCount']
-            },
-            {
-              model: User,
-              attributes: ['id', 'name', 'account', 'avatar']
-            }
-          ],
-          where: { UserId },
-          attributes: ['TweetId'],
-          order: [
-            ['createdAt', 'DESC']
-          ]
-        }).then(likes => {
-          likes = likes.map((like, i) => {
-            const userObj = {
-              ...like.User.dataValues
-            }
-
-            const mapItem = {
-              ...like.dataValues,
-              ...like.Tweet.dataValues,
-              isLike: like.User.id === viewerId
-            }
-
-            delete mapItem.Tweet
-            delete mapItem.id
-            delete mapItem.User
-
-            mapItem.User = userObj
-
-            return mapItem
-          })
-
-          return res.status(200).json(likes)
-        })
-      })
-  },
-  getUserFollowings: (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
-
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-      }).then(user => {
-        return User.findAll({
-          include: [
-            {
-              model: User,
-              as: 'Followings',
-              attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
-              nest: true,
-
-              include: {
-                model: User,
-                as: 'Followers',
-                attributes: ['id'],
-                where: { id: viewerId },
-                nest: true,
-                required: false
-              }
-            }
-          ],
-          where: { id: UserId },
-          attributes: [],
-          nest: true,
-          raw: true,
-          order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
-        }).then(async data => {
-          data = data.map((item, i) => {
-            const mapItem = {
-              ...item.dataValues,
-              followingId: item.Followings.id,
-              Followings: {
-                ...item.Followings,
-                isFollowing: Boolean(item.Followings.Followers.id)
-              }
-            }
-            delete mapItem.Followings.Followship
-            delete mapItem.Followings.Followers.Followship
-            delete mapItem.Followings.Followers
-            return mapItem
-          })
-          return res.status(200).json(data)
-        })
-      })
-  },
-  getUserFollowers: (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
-
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-      }).then(user => {
-        return User.findAll({
-          include: [
-            {
-              model: User,
-              as: 'Followers',
-              attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
-              nest: true,
-
-              include: {
-                model: User,
-                as: 'Followers',
-                attributes: ['id'],
-                where: { id: viewerId },
-                nest: true,
-                required: false
-              }
-            }
-          ],
-          where: { id: UserId },
-          attributes: [],
-          nest: true,
-          raw: true,
-          order: [[{ model: User, as: 'Followers' }, 'createdAt', 'DESC']]
-        }).then(async data => {
-          data = data.map((item, i) => {
-            const mapItem = {
-              ...item.dataValues,
-              followerId: item.Followers.id,
-              Followers: {
-                ...item.Followers,
-                isFollowing: Boolean(item.Followers.Followers.id)
-              }
-            }
-            delete mapItem.Followers.Followship
-            delete mapItem.Followers.Followers.Followship
-            delete mapItem.Followers.Followers
-            return mapItem
-          })
-          return res.status(200).json(data)
-        })
-      })
-  },
-  getTopUsers: (req, res) => {
-    const viewerId = req.user.id
-
-    return User.findAll({
-      include: {
-        model: User,
-        as: 'Followers',
-        where: { id: viewerId },
-        attributes: ['id'],
-        required: false,
-        nest: true
-      },
-      where: { role: { [Op.ne]: 'admin' } },
-      attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'followerCount'],
-      order: [['followerCount', 'DESC']],
-      limit: 10,
-      nest: true,
-      raw: true
-    }).then(users => {
-      users = users.map((item, i) => {
-        const mapItem = {
-          ...item,
-          isFollowing: Boolean(item.Followers.id)
-        }
-        delete mapItem.Followers
-        delete mapItem.followerCount
-        return mapItem
-      })
-      return res.status(200).json(users)
-    })
-  },
-
-  putUser: (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
-
-    if (Number(UserId) !== viewerId) {
+  logIn: async (req, res) => {
+    const { body } = req
+    try {
+      const data = await userService.login(body)
+      return res.status(200).json(data)
+    } catch (error) {
       return res.status(400).json({
-        status: 'error',
-        message: 'This is not this user\'s account.'
+        status: error.name,
+        message: error.message
       })
-    }
-
-    if (!req.body.name) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'User name required.'
-      })
-    }
-
-    const { files } = req
-
-    // TODO：改善重複上傳的問題
-    if (files) {
-      imgur.setClientId(IMGUR_CLIENT_ID)
-      const avatar = files.avatar ? imgur.uploadFile((files.avatar[0].path)) : null
-      const cover = files.cover ? imgur.uploadFile((files.cover[0].path)) : null
-
-      Promise.all([avatar, cover])
-        .then(images => {
-          return User.findByPk(UserId)
-            .then(user => {
-              user.update({
-                name: req.body.name,
-                introduction: req.body.introduction,
-                avatar: files.avatar ? images[0].link : user.avatar,
-                cover: files.cover ? images[1].link : user.cover
-              })
-              return res.status(200).json({
-                status: 'success',
-                message: 'User successfully updated.'
-              })
-            })
-        })
-    } else {
-
-      return User.findByPk(UserId)
-        .then((user) => {
-          user.update({
-            name: req.body.name,
-            introduction: req.body.introduction,
-            avatar: user.avatar,
-            cover: user.cover
-          }).then(() => {
-            return res.status(200).json({
-              status: 'success',
-              message: 'User successfully updated.'
-            })
-          })
-        })
     }
   },
-
-  putUserSettings: (req, res) => {
-    const UserId = Number(req.params.id)
-    const viewerId = req.user.id
-    if (UserId !== viewerId) {
+  getUser: async (req, res) => {
+    const UserId = req.params.id
+    try {
+      const data = await userService.getUser('user', UserId, false)
+      return res.status(200).json(data)
+    } catch (error) {
       return res.status(400).json({
-        status: 'error',
-        message: 'This is not this user\'s account.'
+        status: error.name,
+        message: error.message
       })
     }
-
-    return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-        if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Required fields missing.'
-          })
-        }
-        if (req.body.password !== req.body.checkPassword) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Password should be as same as checkPassword'
-          })
-        }
-
-        return user.update({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-        }).then(() => {
-          return res.status(200).json({
-            status: 'success',
-            message: 'User successfully updated.',
-            user: { id: UserId }
-          })
-        }).catch(err => {
-          return res.status(400).json({
-            status: 'error',
-            message: err.errors[0].message
-          })
-        })
-
-      })
   },
-
-  getUserRepliedTweets: (req, res) => {
+  getUserTweets: async (req, res) => {
     const UserId = req.params.id
     const viewerId = req.user.id
-
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            error: 'This user does not exist.'
-          })
-        }
-        return Reply.findAll({
-          where: { UserId },
-          include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-            {
-              model: Tweet,
-              attributes: ['id', 'description', 'replyCount', 'likeCount'],
-              include: { model: Like, separate: true, where: { UserId: viewerId }, required: false }
-            }
-          ],
-          attributes: ['id', 'comment'],
-          nest: true,
-          order: [[Reply.associations.Tweet, 'createdAt', 'DESC']],
-        }).then(replies => {
-          replies = replies.map((item, i) => {
-            const userObj = {
-              ...item.User.dataValues
-            }
-
-            const mapItem = {
-              TweetId: item.dataValues.Tweet.dataValues.id,
-              ...item.dataValues,
-              ...item.dataValues.Tweet.dataValues,
-              isLike: Boolean(item.Tweet.Likes[0]),
-            }
-
-            delete mapItem.Tweet
-            delete mapItem.Likes
-            delete mapItem.id
-            delete mapItem.User
-
-            mapItem.User = userObj
-
-            return mapItem
-          })
-          return res.status(200).json(replies)
-        })
+    try {
+      const data = await userService.getUserTweets('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
       })
+    }
+  },
+  getUserLikes: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserLikes('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+  getUserFollowings: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserFollowings('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+  getUserFollowers: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserFollowers('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+  getTopUsers: async (req, res) => {
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getTopUsers('user', viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
 
-  getCurrentUser: (req, res) => {
-    const currentUserId = req.user.id
+  putUser: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    const { body, files } = req
+    try {
+      const data = await userService.putUser('user', UserId, viewerId, body, files)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
 
-    return User.findByPk(currentUserId, {
-      attributes: [
-        'id', 'name', 'account', 'avatar',
-        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${req.user.id}')`), 'isAdmin']
-      ]
-    }).then(user => {
-      user.dataValues.isAdmin = Boolean(user.dataValues.isAdmin)
-      return res.status(200).json(user)
-    })
+  putUserSettings: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    const { body } = req
+    try {
+      const data = await userService.putUserSettings('user', UserId, viewerId, body)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+
+  getUserRepliedTweets: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserRepliedTweets('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+
+  getCurrentUser: async (req, res) => {
+    const UserId = req.user.id
+
+    try {
+      const data = await userService.getUser('user', UserId, true)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   }
 
 }

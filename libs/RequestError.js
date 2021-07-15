@@ -7,4 +7,4 @@ function RequestError(message) {
 RequestError.prototype = Object.create(Error.prototype);
 RequestError.prototype.constructor = RequestError;
 
-module.exports = RequestError
+module.exports = RequestError 

@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { authenticated, checkNotRole } =require('../../middlewares/auth')
+const { authenticated, checkNotRole } = require('../../middlewares/auth')
 
 const userController = require('../../controllers/userController')
 
@@ -19,6 +19,5 @@ router.get('/:id/likes', authenticated, checkNotRole('admin'), userController.ge
 router.get('/:id/replied_tweets', authenticated, checkNotRole('admin'), userController.getUserRepliedTweets)
 router.get('/:id/followings', authenticated, checkNotRole('admin'), userController.getUserFollowings)
 router.get('/:id/followers', authenticated, checkNotRole('admin'), userController.getUserFollowers)
-
 
 module.exports = router

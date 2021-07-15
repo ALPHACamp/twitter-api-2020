@@ -3,6 +3,7 @@ const { User, Tweet, Like, Reply, Sequelize } = db
 const { Op } = require('sequelize')
 
 const tweetService = require('../services/tweetService')
+const userService = require('../services/userService')
 
 const adminController = {
 
@@ -75,5 +76,4 @@ const adminController = {
       })
   }
 }
-
 module.exports = adminController
