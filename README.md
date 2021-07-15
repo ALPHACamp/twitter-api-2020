@@ -1,6 +1,4 @@
 # Simple Twitter RESTful API 
- 
- 這是一個提供前端開發串接 API 的 Simple Twitter 專案
  這是一個使用 Node.js + Express + MySQL 建立的 Simple Twitter 後端專案，部署於 Heroku，以 RESTFul API 滿足社群網站不同資料的互動需求，搭配 [Simple-Twitter-Vue](https://github.com/chris1085/SimpleTwitter-vue) 前端專案，打造一個全方位的社群網站。
  
  ## 目錄
