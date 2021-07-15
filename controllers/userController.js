@@ -353,7 +353,7 @@ const userController = {
       if (checkEmail) return res.json({ status: 'error', message: '此信箱已被使用' })
       if (!checkPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
       user.update({
-        account,
+        account: `@${account}`,
         name,
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
