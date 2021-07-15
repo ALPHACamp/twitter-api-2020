@@ -202,7 +202,8 @@ const tweetService = {
           ],
           required: false
         }
-      ]
+      ],
+      order: [[{model: Reply}, 'createdAt','ASC']]
     }).then(tweetWithReplies => {
       if (!tweetWithReplies) {
         throw new RequestError('Tweet does not exist')
