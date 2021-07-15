@@ -90,6 +90,7 @@ const userController = {
         cover: user.cover,
         avatar: user.avatar,
         introduction: user.introduction,
+        tweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
         followerCount: user.Followers.length
       })
