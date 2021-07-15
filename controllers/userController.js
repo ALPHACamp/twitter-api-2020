@@ -187,7 +187,8 @@ const userController = {
               'createdAt',
               [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE ReplyId = Reply.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
               [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE ReplyId = Reply.id)'), 'totalLikes']
-            ]
+            ],
+            include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
           }
         ],
       })
