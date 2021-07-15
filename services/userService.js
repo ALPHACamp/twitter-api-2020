@@ -21,7 +21,7 @@ const userService = {
         [Sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed'],
         [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount']
       ],
-      group: 'id',
+      group: 'Followers.id',
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
@@ -95,6 +95,7 @@ const userService = {
       },
       attributes: [
         ['id', 'TweetId'], 'createdAt',
+        [Sequelize.literal('Likes.createdAt'), 'LikesCreatedAt'],
         [Sequelize.literal('SUBSTRING(description,1,50)'), 'description'],
         [Sequelize.literal('COUNT(DISTINCT Likes.id)'), 'LikesCount'],
         [Sequelize.literal('COUNT(DISTINCT Replies.id)'), 'RepliesCount'],
@@ -110,7 +111,7 @@ const userService = {
             ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
         }
       ],
-      order: [[Sequelize.literal('Likes.createdAt DESC')]]
+      order: [[Sequelize.col('LikesCreatedAt'), 'DESC']]
     })
   },
 
