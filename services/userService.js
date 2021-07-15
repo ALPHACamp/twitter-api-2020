@@ -53,14 +53,12 @@ const userService = {
 
           throw new RequestError(errorMsg)
         } else {
-          User.create({
+          return User.create({
             account: account,
             name: name,
             email: email,
             role: 'user',
             password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
-            return { status: 'success', message: '成功註冊帳號！' }
           })
         }
       })
