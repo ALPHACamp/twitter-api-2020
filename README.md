@@ -2,12 +2,12 @@
  這是一個使用 Node.js + Express + MySQL 建立的 Simple Twitter 後端專案，部署於 Heroku，以 RESTFul API 滿足社群網站不同資料的互動需求，搭配 [Simple-Twitter-Vue](https://github.com/chris1085/SimpleTwitter-vue) 前端專案，打造一個全方位的社群網站。
  
  ## 目錄
-- [環境建置與需求(Enviroment)](#環境建置與需求(Enviroment))
-- [專案安裝流程(Installing)](#專案安裝流程(Installing))
-- [開發人員(Contributor)](#開發人員(Contributor))
+- [Enviroment-環境建置與需求](#Enviroment-環境建置與需求)
+- [Installing-專案安裝流程](#Installing-專案安裝流程)
+- [Contributor-開發人員](#Contributor-開發人員)
 - [API文件](#API文件)
 
-## 環境建置與需求(Enviroment)
+## Enviroment-環境建置與需求
 ### 伺服器（server）
 * [Node.js](https://nodejs.org/en/) - v14.16.1
 * [Express](https://expressjs.com/) - v4.17.1
@@ -23,7 +23,7 @@
 * [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - v8.5.1
 
 
-## 專案安裝流程(Installing)
+## Installing-專案安裝流程
 1. 請在終端機輸入
 
 ```
@@ -68,7 +68,7 @@ npm run dev
 ```
 npx sequelize db:seed:undo:all
 ```
-## 開發人員(Contributor)
+## Contributor-開發人員
 * [Chia-Hui](https://github.com/wintersprouter)
 * [Hsin Yeh](https://github.com/Hsinyehh)
 
