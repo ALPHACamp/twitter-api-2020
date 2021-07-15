@@ -27,7 +27,13 @@ const tweetService = {
       include: [
         {
           model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
+          attributes: ['id', 'name', 'account', 'avatar'],
+          where: {
+            [Op.or]: [
+              { role: { [Op.ne]: 'admin' } },
+              { role: { [Op.is]: null } }
+            ]
+          }
         },
         {
           model: Like,
@@ -202,7 +208,8 @@ const tweetService = {
           ],
           required: false
         }
-      ]
+      ],
+      order: [[{model: Reply}, 'createdAt','ASC']]
     }).then(tweetWithReplies => {
       if (!tweetWithReplies) {
         throw new RequestError('Tweet does not exist')
