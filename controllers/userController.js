@@ -132,8 +132,17 @@ const userController = {
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           {
             model: Reply, where: { UserId: req.params.id },
-            attributes: ['id', 'content', 'createdAt'],
-            include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+            attributes: [
+              'id',
+              'content',
+              'createdAt',
+              'tweetId',
+              [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.ReplyId = Replies.id)'), 'totalLikes'],
+              [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE ReplyId = Replies.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
+            ],
+            include: [{
+              model: User, attributes: ['id', 'account', 'name', 'avatar',]
+            }],
             order: ['createdAt', 'DESC']
           }],
         attributes: [
