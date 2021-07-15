@@ -27,7 +27,12 @@ const tweetService = {
       include: [
         {
           model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
+          attributes: ['id', 'name', 'account', 'avatar'],
+          where: {
+            role: {
+              [Op.ne]: 'admin'
+            }
+          }
         },
         {
           model: Like,
