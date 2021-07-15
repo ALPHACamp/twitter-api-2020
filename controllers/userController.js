@@ -136,13 +136,10 @@ const userController = {
               'id',
               'content',
               'createdAt',
-              'tweetId',
-              [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.ReplyId = Replies.id)'), 'totalLikes'],
+              [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE ReplyId = Replies.id)'), 'totalLikes'],
               [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE ReplyId = Replies.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
             ],
-            include: [{
-              model: User, attributes: ['id', 'account', 'name', 'avatar',]
-            }],
+            include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
             order: ['createdAt', 'DESC']
           }],
         attributes: [
@@ -151,7 +148,8 @@ const userController = {
           'description',
           'createdAt',
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
-          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
+          [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
+          [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
         ],
         order: ['createdAt', 'DESC']
       })
@@ -167,17 +165,33 @@ const userController = {
     try {
       if (helpers.getUser(req).role !== 'user') return res.json({ status: 'error', message: '此功能為一般使用者專用' })
       const likes = await Like.findAll({
+        where: { UserId: req.params.id },
         include: [
           {
             model: Tweet,
-            attributes: ['id', 'description', 'createdAt',
+            attributes: [
+              'id',
+              'description',
+              'createdAt',
               [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
               [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
               [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']],
             include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
+          },
+          {
+            model: Reply,
+            attributes: [
+              'id',
+              'content',
+              'TweetId',
+              'UserId',
+              'createdAt',
+              [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE ReplyId = Reply.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
+              [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE ReplyId = Reply.id)'), 'totalLikes']
+            ],
+            include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
           }
         ],
-        where: { UserId: req.params.id }
       })
       if (likes.length === 0) return res.json({ status: 'error', message: '使用者沒有喜歡的推文或回覆' })
       return res.json(likes)
