@@ -6,7 +6,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const admin = {
       id: 1,
-      account: 'Admin',
+      account: 'root@example.com',
       name: 'Admin',
       email: 'root@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
