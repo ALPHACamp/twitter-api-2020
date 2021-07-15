@@ -27,7 +27,7 @@ const userController = {
       if (name.length > 50 || account.length > 50) return res.json({ status: 'error', message: '帳號和名稱長度需小於50字元' })
       if (password !== confirmPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
 
-      let user = await User.findOne({ where: { account } })
+      let user = await User.findOne({ where: { account: `@${account}` } })
       if (user) return res.status(403).json({ status: 'error', message: `此帳號已被註冊` })
       user = await User.findOne({ where: { email } })
       if (user) return res.status(403).json({ status: 'error', message: `此信箱已被註冊` })
