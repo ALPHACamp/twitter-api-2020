@@ -21,10 +21,9 @@ const userService = {
         [Sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed'],
         [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount']
       ],
-      group: 'User.id',
       include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
+        { model: User, as: 'Followers', attributes: [] },
+        { model: User, as: 'Followings', attributes: [] },
         { model: Like },
         { model: Tweet, attributes: [] }
       ]
@@ -101,7 +100,7 @@ const userService = {
         [Sequelize.literal('COUNT(DISTINCT Replies.id)'), 'RepliesCount'],
         [Sequelize.literal(`EXISTS(SELECT 1 FROM Likes WHERE UserId = ${id} AND TweetId = Tweet.id)`), 'isLike']
       ],
-      group: 'TweetId',
+      group: ['TweetId', 'Likes.createdAt'],
       include: [
         { model: Like, attributes: ['createdAt'] },
         { model: Reply, attributes: [] },
