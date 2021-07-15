@@ -12,7 +12,8 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const port = process.env.PORT
-const helpers = require('./_helpers')
+const helpers = require('./_helpers');
+const { database } = require('faker');
 app.use(methodOverride('_method'))
 
 app.use(cors())
@@ -24,6 +25,8 @@ app.use('/upload', express.static(__dirname + '/upload'))
 
 io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
+    // const msgAttributes = { content: msg.content, user: database }
+    // console.log(msgAttributes)
     io.emit('chat message', msg);
   });
 })

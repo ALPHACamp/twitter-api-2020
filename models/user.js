@@ -24,6 +24,17 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followerId',
       as: 'Followings'
     })
+    User.hasMany(models.Chat)
+    User.belongsToMany(models.Chatroom, {
+      through: models.UserRoom,
+      foreignKey: 'UserId',
+      as: 'Chatrooms'
+    })
+    // User.belongsToMany(models.Chatroom, {
+    //   through: models.UserRoom,
+    //   foreignKey: 'ChatroomId',
+    //   as: 'Users'
+    // })
   };
   return User;
 };
