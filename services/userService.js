@@ -88,15 +88,29 @@ const userService = {
         }
       })
   },
-  getUser: (viewerRole, UserId) => {
-    return User.findByPk(UserId)
+  getUser: (viewerRole, UserId, currentUser) => {
+    let attributesOption = []
+    switch (currentUser) {
+      case 'currentUser':
+        attributesOption = [
+          'id', 'name', 'account', 'email', 'avatar', [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${UserId}')`), 'isAdmin']
+        ]
+        break
+      case 'user':
+        attributesOption = ['id', 'name', 'account', 'avatar', 'cover', 'introduction', 'followerCount', 'followingCount']
+    }
+    return User.findByPk(UserId, { attributes: attributesOption })
       .then(user => {
         if (!user) {
           throw new RequestError('User not found.')
         }
-        const { id, name, account, avatar, cover, introduction, followerCount, followingCount } = user
+        if (currentUser === 'currentUser') {
+          user.dataValues.isAdmin = Boolean(user.dataValues.isAdmin)
+        }
+        const { id, name, account, email, avatar, cover, introduction, followerCount, followingCount } = user
+        const isAdmin = user.dataValues.isAdmin
         return {
-          id, name, account, avatar, cover, introduction, followerCount, followingCount
+          id, name, account, email, avatar, cover, introduction, followerCount, followingCount, isAdmin
         }
       })
   },

@@ -50,7 +50,7 @@ const userController = {
   getUser: async (req, res) => {
     const UserId = req.params.id
     try {
-      const data = await userService.getUser('user', UserId)
+      const data = await userService.getUser('user', UserId, 'user')
       return res.status(200).json(data)
     } catch (error) {
       return res.status(400).json({
@@ -168,18 +168,18 @@ const userController = {
     }
   },
 
-  getCurrentUser: (req, res) => {
-    const currentUserId = req.user.id
+  getCurrentUser: async (req, res) => {
+    const UserId = req.user.id
 
-    return User.findByPk(currentUserId, {
-      attributes: [
-        'id', 'name', 'account', 'avatar',
-        [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${req.user.id}')`), 'isAdmin']
-      ]
-    }).then(user => {
-      user.dataValues.isAdmin = Boolean(user.dataValues.isAdmin)
-      return res.status(200).json(user)
-    })
+    try {
+      const data = await userService.getUser('user', UserId, 'currentUser')
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   }
 
 }
