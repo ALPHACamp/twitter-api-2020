@@ -89,6 +89,9 @@
 
     socket.on('chat message', (msg) => {
       // socket.emit('chat message', data)
+      socket.name = 'user1'
+      socket.messages = 'usertest1'
+      console.log(socket)
       console.log('client', socket.id)
       const item = document.createElement('li');
       item.textContent = msg;
