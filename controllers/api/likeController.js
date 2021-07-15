@@ -10,16 +10,17 @@ let likeController = {
       limit: +req.query.limit || defaultLimit,
       offset: +req.query.offset || 0,
       where: {
-        TweetId: +req.params.tweetId
+        TweetId: +req.params.tweetId,
       },
       attributes: [],
       include: [
         {
           model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          order: [['followerNum', 'DESC']]
-        }
-      ]
+          order: [['followerNum', 'DESC']],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
     }
     Like.findAll(options)
       .then((likes) => {
