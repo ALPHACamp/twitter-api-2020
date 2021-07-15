@@ -97,7 +97,7 @@ const userService = {
         }
       })
   },
-  getUserTweets: (req, res, viewerRole, UserId, viewerId) => {
+  getUserTweets: (viewerRole, UserId, viewerId) => {
     let attributesOption = []
 
     switch (viewerRole) {
@@ -120,10 +120,7 @@ const userService = {
     return User.findByPk(UserId)
       .then(user => {
         if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
+          throw new RequestError('This user does not exist.')
         }
         return Tweet.findAll({
           where: { UserId },
@@ -144,7 +141,7 @@ const userService = {
               tweet.dataValues.isLike = Boolean(tweet.dataValues.isLike)
             })
           }
-          return res.status(200).json(tweets)
+          return tweets
         })
       })
   },
