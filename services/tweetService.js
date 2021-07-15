@@ -182,6 +182,34 @@ const tweetService = {
       }
     })
   },
+
+  getTweetReplies: (TweetId) => {
+
+    return Tweet.findByPk(TweetId, {
+      attributes: [],
+      nest: true,
+      include: [
+        {
+          model: Reply,
+          attributes: ['id', 'comment', 'createdAt'],
+          nest: true,
+          include: [
+            {
+              model: User,
+              nest: true,
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          ],
+          required: false
+        }
+      ]
+    }).then(tweetWithReplies => {
+      if (!tweetWithReplies) {
+        throw new RequestError('Tweet does not exist')
+      }
+      
+      return tweetWithReplies.Replies
+    })
   }
 }
 

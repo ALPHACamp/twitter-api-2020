@@ -106,36 +106,19 @@ const tweetController = {
     }
   },
 
-  getTweetReplies: (req, res) => {
+  getTweetReplies: async (req, res) => {
     const TweetId = req.params.id
 
-    return Tweet.findByPk(TweetId, {
-      attributes: [],
-      nest: true,
-      include: [
-        {
-          model: Reply,
-          attributes: ['id', 'comment', 'createdAt'],
-          nest: true,
-          include: [
-            {
-              model: User,
-              nest: true,
-              attributes: ['id', 'name', 'account', 'avatar']
-            }
-          ],
-          required: false
-        }
-      ]
-    }).then(tweetWithReplies => {
-      if (!tweetWithReplies) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Tweet does not exist'
-        })
-      }
-      return res.status(200).json(tweetWithReplies.Replies)
-    })
+    try {
+      const data = await tweetService.getTweetReplies(TweetId) 
+    
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }  
   }
 }
 
