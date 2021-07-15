@@ -64,6 +64,60 @@ const userService = {
           return res.status(200).json(tweets)
         })
       })
+  },
+  getUserLikes: (req, res, viewerRole, UserId, viewerId) => {
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'This user does not exist.'
+          })
+        }
+        return Like.findAll({
+          include: [
+            {
+              model: Tweet,
+              attributes: ['id', 'description', 'createdAt', 'replyCount', 'likeCount']
+            },
+            {
+              model: User,
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          ],
+          where: { UserId },
+          attributes: ['TweetId'],
+          order: [
+            ['createdAt', 'DESC']
+          ]
+        }).then(likes => {
+          likes = likes.map((like, i) => {
+            const userObj = {
+              ...like.User.dataValues
+            }
+
+            const mapItem = {
+              ...like.dataValues,
+              ...like.Tweet.dataValues,
+              isLike: like.User.id === viewerId
+            }
+
+            delete mapItem.Tweet
+            delete mapItem.id
+            delete mapItem.User
+
+            mapItem.User = userObj
+
+            if (viewerRole === 'admin') {
+              delete mapItem.isLike
+            }
+
+            return mapItem
+          })
+
+          return res.status(200).json(likes)
+        })
+      })
   }
 }
 

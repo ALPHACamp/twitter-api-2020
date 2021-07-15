@@ -69,6 +69,11 @@ const adminController = {
     const UserId = req.params.id
     userService.getUserTweets(req, res, 'admin', UserId)
       .then(data => { return data })
+  },
+  getUserLikes: (req, res) => {
+    const UserId = req.params.id
+    userService.getUserLikes(req, res, 'admin', UserId)
+      .then(data => { return data })
   }
 }
 module.exports = adminController
