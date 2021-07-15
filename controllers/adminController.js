@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Sequelize } = db
+const { User, Tweet, Like, Reply, Sequelize } = db
 const { Op } = require('sequelize')
 
 const tweetService = require('../services/tweetService')
@@ -44,13 +44,28 @@ const adminController = {
           })
         }
 
-        return tweet.destroy()
-          .then(tweetDeleted => {
-            return res.status(200).json({
-              status: 'success',
-              message: `Tweet.id ${tweetDeleted.id} has been destroyed successfully`
-            })
+        return Promise.all([
+          tweet.destroy(),
+          Reply.destroy({
+            where: {
+              TweetId: {
+                [Op.in]: [tweetId],
+              }
+            }
+          }),
+          Like.destroy({
+            where: {
+              TweetId: {
+                [Op.in]: [tweetId],
+              }
+            }
           })
+        ]).then(result => {
+          return res.status(200).json({
+            status: 'success',
+            message: `Tweet.id ${result[0].id} and associate replies and likes have been destroyed successfully.`
+          })
+        })
       })
   },
   getTweets: (req, res) => {
