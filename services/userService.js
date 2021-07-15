@@ -145,14 +145,11 @@ const userService = {
         })
       })
   },
-  getUserLikes: (req, res, viewerRole, UserId, viewerId) => {
+  getUserLikes: (viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
       .then(user => {
         if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
+          throw new RequestError('This user does not exist.')
         }
       }).then(user => {
         return Like.findAll({
@@ -196,7 +193,7 @@ const userService = {
             return mapItem
           })
 
-          return res.status(200).json(likes)
+          return likes
         })
       })
   },
