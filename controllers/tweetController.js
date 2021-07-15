@@ -59,50 +59,35 @@ const tweetController = {
     }
   },
 
-  getTweets: (req, res) => {
+  getTweets: async (req, res) => {
     const viewerId = req.user.id
-    tweetService.getTweets(viewerId, 'user')
-      .then(data => {
-        return res.status(200).json(data)
+    try {
+      const data = await tweetService.getTweets(viewerId, 'user')
+
+      return res.status(200).json(data)
+
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
       })
+    }
   },
 
-  postLike: (req, res) => {
-    const UserId = req.user.id
+  postLike: async (req, res) => {
+    const viewerId = req.user.id
     const TweetId = req.params.id
 
-    return Tweet.findByPk(TweetId, {
-      include: {
-        required: false,
-        model: Like,
-        where: { UserId }
-      }
-    }).then(tweet => {
-      if (!tweet) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Tweet does not exist'
-        })
-      }
+    try {
+      const data = await tweetService.postLike(viewerId, TweetId)
 
-      if (tweet.Likes[0]) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'User had liked this tweet before'
-        })
-      }
-
-      return Promise.all([
-        tweet.increment('likeCount'),
-        Like.create({ UserId, TweetId })
-      ]).then(result => {
-        return res.status(200).json({
-          status: 'success',
-          message: 'Like successfully',
-          tweetId: result[1].TweetId
-        })
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
       })
-    })
+    }  
   },
 
   postUnlike: (req, res) => {

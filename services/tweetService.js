@@ -123,6 +123,35 @@ const tweetService = {
       return tweet
     })
   },
+
+  postLike: (viewerId, TweetId) => {
+    return Tweet.findByPk(TweetId, {
+      include: {
+        required: false,
+        model: Like,
+        where: { UserId: viewerId }
+      }
+    }).then(tweet => {
+      if (!tweet) {
+        throw new RequestError('Tweet does not exist')
+      }
+
+      if (tweet.Likes[0]) {
+        throw new RequestError('User had liked this tweet before')
+      }
+
+      return Promise.all([
+        tweet.increment('likeCount'),
+        Like.create({ UserId: viewerId, TweetId })
+      ]).then(result => {
+        return {
+          status: 'success',
+          message: 'Like successfully',
+          tweetId: result[1].TweetId
+        }
+      })
+    })
+  },
   }
 }
 
