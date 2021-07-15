@@ -25,18 +25,18 @@ require('./config/mongoose')
 
 let count = 1
 io.on('connection', (socket) => {
-
-  socket.emit('chat message', '連線成功！');
+  io.emit('chat message', '連線成功！');
   socket.on('chat message', (msg) => {
     SocketHander.storeMessages(msg)
+    io.emit('chat message', `${socket.id} 傳送訊息`);
+    count++
     const date = new Date()
     io.emit('chat message', `${date} ${msg}`);
-    socket.emit('chat message', `後端收到訊息第${count}次`);
-    count++
+
   });
 
   socket.on('disconnect', () => {
-    io.emit('chat message', '有人離開聊天室')
+    console.log('有人離開聊天室')
   })
 
 })
