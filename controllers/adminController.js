@@ -59,36 +59,6 @@ const adminController = {
       .then(data => {
         return res.status(200).json(data)
       })
-  },
-  getUser: (req, res) => {
-    const UserId = req.params.id
-    userService.getUser(req, res, 'admin', UserId)
-      .then(data => { return data })
-  },
-  getUserTweets: (req, res) => {
-    const UserId = req.params.id
-    userService.getUserTweets(req, res, 'admin', UserId)
-      .then(data => { return data })
-  },
-  getUserLikes: (req, res) => {
-    const UserId = req.params.id
-    userService.getUserLikes(req, res, 'admin', UserId)
-      .then(data => { return data })
-  },
-  getUserFollowings: (req, res) => {
-    const UserId = req.params.id
-    userService.getUserFollowings(req, res, 'admin', UserId)
-      .then(data => { return data })
-  },
-  getUserFollowers: (req, res) => {
-    const UserId = req.params.id
-    userService.getUserFollowers(req, res, 'admin', UserId)
-      .then(data => { return data })
-  },
-  getUserRepliedTweets: (req, res) => {
-    const UserId = req.params.id
-    userService.getUserRepliedTweets(req, res, 'admin', UserId)
-      .then(data => { return data })
   }
 }
 module.exports = adminController
