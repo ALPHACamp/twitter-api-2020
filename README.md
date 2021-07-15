@@ -4,7 +4,8 @@
  
  ## 目錄
 - [環境建置與需求 (Enviroment)](#環境建置與需求 (Enviroment))
-- [共同開發人員 (Collaborator)](#共同開發人員 (Collaborator))
+- [專案安裝流程(Installing)](#專案安裝流程(Installing))
+- [開發人員與職責分工 (Contributor and Responsibility)](#開發人員與職責分工 (Contributor and Responsibility))
 
 ## 環境建置與需求 (Enviroment)
 ### 伺服器（server）
@@ -22,7 +23,7 @@
 * [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - v8.5.1
 
 
-## 初始化（Initialize）
+## 專案安裝流程(Installing)
 1. 請在終端機輸入
 
 ```
@@ -67,13 +68,10 @@ npm run dev
 ```
 npx sequelize db:seed:undo:all
 ```
-## 共同開發人員 (Collaborator)
+## 開發人員與職責分工 (Contributor and Responsibility)
 * [Chia-Hui](https://github.com/wintersprouter)
 * [Hsin Yeh](https://github.com/Hsinyehh)
 
-## Base URL
-* http://localhost:3000/api/{route}
-* https://simpletwitter-api.herokuapp.com/api/{route}
 
 ## API文件網址
 http://localhost:3000/api-doc/
@@ -90,7 +88,9 @@ http://localhost:3000/api-doc/
 ## API說明
 * 除了管理員、使用者登入和使用者註冊這 2 條路由外，其餘路由需在 header 的 Authorization 帶上"Bearer" + token (token可從登入時拿到)
 * response 皆包含 http status code & message (說明成功狀態或是失敗原因)
-
+### Base URL
+* http://localhost:3000/api/{route}
+* https://simpletwitter-api.herokuapp.com/api/{route}
 ## API文件
 ## Sign in & Sign up
 ### 前台使用者註冊
