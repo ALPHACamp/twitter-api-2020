@@ -102,7 +102,7 @@ const userService = {
         if (!user) {
           throw new RequestError('User not found.')
         }
-        if (currentUser === 'currentUser') {
+        if (isCurrentUser === true) {
           user.dataValues.isAdmin = Boolean(user.dataValues.isAdmin)
         }
         const { id, name, account, email, avatar, cover, introduction, followerCount, followingCount } = user
