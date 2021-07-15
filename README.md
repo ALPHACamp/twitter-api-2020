@@ -4,7 +4,7 @@
  
  ## 目錄
 - [環境建置與需求 (Enviroment)](#環境建置與需求-(Enviroment))
-- [專案安裝流程(Installing)](#專案安裝流程-(Installing))
+- [專案安裝流程 (Installing)](#專案安裝流程-(Installing))
 - [開發人員與職責分工 (Contributor and Responsibility)](#開發人員與職責分工-(Contributor and Responsibility))
 
 ## 環境建置與需求 (Enviroment)
@@ -23,7 +23,7 @@
 * [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - v8.5.1
 
 
-## 專案安裝流程(Installing)
+## 專案安裝流程 (Installing)
 1. 請在終端機輸入
 
 ```
