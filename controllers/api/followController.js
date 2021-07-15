@@ -12,19 +12,31 @@ let followController = {
       offset: +req.query.offset || 0,
       include: {
         model: User,
-        as: "following",
-        attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'likeNum', 'tweetNum', 'followingNum', 'followerNum'],
-        include: [{
-          model: User,
-          as: "Followers",
-          attributes: ['id'],
-          through: {
-            attributes: []
-          }
-        }]
+        as: 'following',
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          'introduction',
+          'likeNum',
+          'tweetNum',
+          'followingNum',
+          'followerNum',
+        ],
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id'],
+            through: {
+              attributes: [],
+            },
+          },
+        ],
       },
-      attributes: ['id', 'followingId', 'followerId'],
-      order: [[{ model: User, as: "following" }, 'followerNum', 'desc']]
+      attributes: ['id', 'followingId', 'followerId', 'createdAt'],
+      order: [['createdAt', 'desc']],
     }
     Followship.findAll(options)
       .then(followships => {
@@ -49,19 +61,31 @@ let followController = {
       offset: +req.query.offset || 0,
       include: {
         model: User,
-        as: "follower",
-        attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'likeNum', 'tweetNum', 'followingNum', 'followerNum'],
-        include: [{
-          model: User,
-          as: "Followers",
-          attributes: ['id'],
-          through: {
-            attributes: []
-          }
-        }]
+        as: 'follower',
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          'introduction',
+          'likeNum',
+          'tweetNum',
+          'followingNum',
+          'followerNum',
+        ],
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id'],
+            through: {
+              attributes: [],
+            },
+          },
+        ],
       },
-      attributes: ['id', 'followingId', 'followerId'],
-      order: [[{ model: User, as: "follower" }, 'followerNum', 'desc']]
+      attributes: ['id', 'followingId', 'followerId', 'createdAt'],
+      order: [['createdAt', 'desc']],
     }
     Followship.findAll(options)
       .then(followships => {
