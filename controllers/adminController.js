@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const jwt = require('jsonwebtoken')
 
 let adminController = {
@@ -54,19 +54,22 @@ let adminController = {
   getUsers: async (req, res, next) => {
     try {
       let users = await User.findAll({
+        attributes: { exclude: ['email', 'password', 'introduction', 'role', 'createdAt', 'updatedAt'] },
         include: [
           { model: Tweet, attributes: ['id'], include: { model: User, attributes: ['id', 'name'] } },
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' },
-          { model: Like }
+          { model: User, as: 'Followers', attributes: ['id'] },
+          { model: User, as: 'Followings', attributes: ['id'] },
+          { model: Like, attributes: ['id'] },
+          { model: Reply, attributes: ['id'] }
         ]
       })
       users = await users.map(user => ({
         ...user.dataValues,
-        TweetCount: user.Tweets.length,
-        FollowingCount: user.Followings.length,
-        FollowerCount: user.Followers.length,
-        LikeCount: user.Likes.length
+        tweetCount: user.Tweets.length,
+        followingCount: user.Followings.length,
+        followerCount: user.Followers.length,
+        likeCount: user.Likes.length,
+        replyCount: user.Replies.length
       }))
       users = await users.sort((a, b) => b.TweetCount - a.TweetCount)
       return res.json(users)
