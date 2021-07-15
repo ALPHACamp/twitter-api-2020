@@ -17,7 +17,7 @@ const adminController = {
       },
       attributes: [
         'id', 'account', 'name', 'avatar', 'cover', 'followerCount', 'followingCount',
-        [Sequelize.fn('COUNT', Sequelize.col('*')), 'tweetCount'],
+        [Sequelize.fn('COUNT', Sequelize.col('Tweets.UserId')), 'tweetCount'],
         [Sequelize.fn('SUM', Sequelize.col('Tweets.likeCount')), 'likeCount']
       ],
       include: [
