@@ -152,6 +152,36 @@ const tweetService = {
       })
     })
   },
+
+  postUnlike: (viewerId, TweetId) => {
+
+    return Like.findOne({
+      where: {
+        [Op.and]: [
+          { UserId: viewerId },
+          { TweetId }
+        ]
+      },
+      include: {
+        model: Tweet
+      }
+    }).then(like => {
+      if (!like) {
+        throw new RequestError('User did not like this tweet before')
+      } else {
+        return Promise.all([
+          like.destroy(),
+          like.Tweet.decrement('likeCount')
+        ]).then(result => {
+          return {
+            status: 'success',
+            message: 'Unlike successfully',
+            tweetId: result[1].id
+          }
+        })
+      }
+    })
+  },
   }
 }
 

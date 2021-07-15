@@ -90,39 +90,20 @@ const tweetController = {
     }  
   },
 
-  postUnlike: (req, res) => {
-    const UserId = req.user.id
+  postUnlike: async (req, res) => {
+    const viewerId = req.user.id
     const TweetId = req.params.id
 
-    return Like.findOne({
-      where: {
-        [Op.and]: [
-          { UserId },
-          { TweetId }
-        ]
-      },
-      include: {
-        model: Tweet
-      }
-    }).then(like => {
-      if (!like) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'User did not like this tweet before'
-        })
-      } else {
-        return Promise.all([
-          like.destroy(),
-          like.Tweet.decrement('likeCount')
-        ]).then(result => {
-          return res.status(200).json({
-            status: 'success',
-            message: 'Unlike successfully',
-            tweetId: result[1].id
-          })
-        })
-      }
-    })
+    try {
+      const data = await tweetService.postUnlike(viewerId, TweetId)
+    
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
 
   getTweetReplies: (req, res) => {
