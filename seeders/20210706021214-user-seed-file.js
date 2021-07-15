@@ -14,6 +14,8 @@ module.exports = {
       introduction: faker.lorem.sentence(),
       avatar: 'https://loremflickr.com/320/240/people?random=100',
       cover: 'https://loremflickr.com/320/240/view?random=100',
+      followingCount: 0,
+      followerCount: 0,
       createdAt: new Date(),
       updatedAt: new Date()
     }
