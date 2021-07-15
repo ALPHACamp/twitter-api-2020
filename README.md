@@ -5,7 +5,7 @@
  ## 目錄
 - [環境建置與需求 (Enviroment)](#環境建置與需求-(Enviroment))
 - [專案安裝流程 (Installing)](#專案安裝流程-(Installing))
-- [開發人員與職責分工 (Contributor and Responsibility)](#開發人員與職責分工-(Contributor and Responsibility))
+- [開發人員 (Contributor)](#開發人員 -(Contributor))
 - [API文件](#API文件)
 
 ## 環境建置與需求 (Enviroment)
@@ -69,7 +69,7 @@ npm run dev
 ```
 npx sequelize db:seed:undo:all
 ```
-## 開發人員與職責分工 (Contributor and Responsibility)
+## 開發人員
 * [Chia-Hui](https://github.com/wintersprouter)
 * [Hsin Yeh](https://github.com/Hsinyehh)
 
