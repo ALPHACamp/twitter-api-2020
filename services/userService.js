@@ -18,9 +18,10 @@ const userService = {
       attributes: [
         'id', 'email', 'name', 'avatar', 'introduction', 'cover', 'role', 'createdAt',
         [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
-        [Sequelize.literal(`exists (SELECT 1 FROM Followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed'],
+        [Sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed'],
         [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount']
       ],
+      group: 'id',
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
@@ -39,13 +40,13 @@ const userService = {
     return await User.findAll({
       where: {
         id: {
-          [Op.in]: [Sequelize.literal(`select followingId from followships where followerId = ${userId}`)]
+          [Op.in]: [Sequelize.literal(`SELECT followingId FROM Followships WHERE followerId = ${userId}`)]
         }
       },
       attributes: [
         ['id', 'followingId'], 'name', 'avatar', 'introduction',
         [Sequelize.fn('concat', '@', Sequelize.col('account')), 'account'],
-        [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
+        [Sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
       ]
     })
   },
@@ -54,13 +55,13 @@ const userService = {
     return await User.findAll({
       where: {
         id: {
-          [Op.in]: [Sequelize.literal(`select followerId from followships where followingId = ${userId}`)]
+          [Op.in]: [Sequelize.literal(`SELECT followerId FROM Followships WHERE followingId = ${userId}`)]
         }
       },
       attributes: [
         ['id', 'followerId'], 'name', 'avatar', 'introduction',
         [Sequelize.fn('concat', '@', Sequelize.col('account')), 'account'],
-        [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
+        [Sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE FollowerId = ${currentUserId} AND FollowingId = User.id)`), 'isFollowed']
       ]
     })
   },
@@ -71,7 +72,7 @@ const userService = {
       attributes: [
         'id', 'name', 'avatar', 'introduction',
         [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
-        [Sequelize.literal(`exists (SELECT 1 FROM followships WHERE FollowerId = ${id} AND FollowingId = User.id)`), 'isFollowed'],
+        [Sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE FollowerId = ${id} AND FollowingId = User.id)`), 'isFollowed'],
         [Sequelize.fn('count', Sequelize.col('Followers.id')), 'FollowerCount']
       ],
       include: { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
@@ -89,15 +90,15 @@ const userService = {
     return await Tweet.findAll({
       where: {
         id: {
-          [Op.in]: [Sequelize.literal(`select TweetId from Likes where UserId = ${id}`)]
+          [Op.in]: [Sequelize.literal(`SELECT TweetId FROM Likes WHERE UserId = ${id}`)]
         }
       },
       attributes: [
         ['id', 'TweetId'], 'createdAt',
-        [Sequelize.literal('substring(description,1,50)'), 'description'],
-        [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
-        [Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount'],
-        [Sequelize.literal(`exists(select 1 from Likes where UserId = ${id} and TweetId = Tweet.id)`), 'isLike']
+        [Sequelize.literal('SUBSTRING(description,1,50)'), 'description'],
+        [Sequelize.literal('COUNT(DISTINCT Likes.id)'), 'LikesCount'],
+        [Sequelize.literal('COUNT(DISTINCT Replies.id)'), 'RepliesCount'],
+        [Sequelize.literal(`EXISTS(SELECT 1 FROM Likes WHERE UserId = ${id} AND TweetId = Tweet.id)`), 'isLike']
       ],
       group: 'TweetId',
       include: [
@@ -109,7 +110,7 @@ const userService = {
             ['id', 'name', 'avatar', [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account']]
         }
       ],
-      order: [[Sequelize.literal('likes.createdAt DESC')]]
+      order: [[Sequelize.literal('Likes.createdAt DESC')]]
     })
   },
 
