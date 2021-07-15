@@ -1,6 +1,10 @@
 # Simple Twitter RESTful API 
  
  這是一個提供前端開發串接 API 的 Simple Twitter 專案
+ 
+ ## 目錄
+- [環境建置與需求 (Enviroment)](#環境建置與需求 (Enviroment))
+- [共同開發人員 (Collaborator)](#共同開發人員 (Collaborator))
 
 ## 環境建置與需求 (Enviroment)
 ### 伺服器（server）
