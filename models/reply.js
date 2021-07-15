@@ -5,9 +5,9 @@ module.exports = (sequelize, DataTypes) => {
     TweetId: DataTypes.INTEGER,
     comment: DataTypes.STRING
   }, {})
-  Reply.associate = function(models) {
+  Reply.associate = function (models) {
     Reply.belongsTo(models.User)
-    Reply.belongsTo(models.Tweet, { onDelete: 'CASCADE' })
+    Reply.belongsTo(models.Tweet)
   }
   return Reply
 }
