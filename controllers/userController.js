@@ -168,13 +168,27 @@ const userController = {
         include: [
           {
             model: Tweet,
-            attributes: ['id', 'description', 'createdAt',
+            attributes: [
+              'id',
+              'description',
+              'createdAt',
               [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE Likes.TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
               [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
               [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']],
             include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
           },
-          { model: Reply, attributes: ['id', 'content', 'TweetId', 'UserId', 'createdAt'] }
+          {
+            model: Reply,
+            attributes: [
+              'id',
+              'content',
+              'TweetId',
+              'UserId',
+              'createdAt',
+              [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE ReplyId = Reply.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked'],
+              [Sequelize.literal('(SELECT COUNT (*) FROM Likes WHERE ReplyId = Reply.id)'), 'totalLikes']
+            ]
+          }
         ],
       })
       if (likes.length === 0) return res.json({ status: 'error', message: '使用者沒有喜歡的推文或回覆' })
