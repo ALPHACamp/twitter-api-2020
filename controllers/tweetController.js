@@ -9,30 +9,18 @@ const { Op, Sequelize } = require('sequelize')
 const tweetService = require('../services/tweetService')
 
 const tweetController = {
-  postTweet: (req, res) => {
+  postTweet: async (req, res) => {
     const { description } = req.body
-    if (!description) {
+    const viewerId = req.user.id
+
+    try {
+      const data = await tweetService.postTweet(viewerId, description)
+
+      return res.status(200).json(data)
+    } catch (error) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Description can not be null'
-      })
-    } else if (description.length > 140) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Description can not be longer than 140'
-      })
-    } else {
-      return Tweet.create({
-        UserId: req.user.id,
-        description,
-        replyCount: 0,
-        likeCount: 0
-      }).then(tweet => {
-        return res.status(200).json({
-          id: tweet.id,
-          status: 'success',
-          message: 'Create tweet successfully'
-        })
+        status: error.name,
+        message: error.message
       })
     }
   },

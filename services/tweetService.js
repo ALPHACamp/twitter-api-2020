@@ -1,5 +1,7 @@
 const db = require('../models')
-const { Tweet, User, Like, Sequelize } = db
+const { Tweet, Reply, User, Like, Followship, Sequelize } = db
+const { Op } = Sequelize
+const RequestError = require('../libs/RequestError')
 
 const tweetService = {
   getTweets: (viewerId, viewerRole = 'user') => {
@@ -45,6 +47,28 @@ const tweetService = {
 
       return tweets
     })
+  },
+
+  postTweet: (viewerId, description = null) => {
+    if (!description) {
+      throw new RequestError('Description can not be null')
+    } else if (description.length > 140) {
+      throw new RequestError('Description can not be longer than 140')
+    } else {
+      return Tweet.create({
+        UserId: viewerId,
+        description,
+        replyCount: 0,
+        likeCount: 0
+      }).then(tweet => {
+        return {
+          id: tweet.id,
+          status: 'success',
+          message: 'Create tweet successfully'
+        }
+      })
+    }
+  },
   }
 }
 
