@@ -69,7 +69,7 @@ npm run dev
 ```
 npx sequelize db:seed:undo:all
 ```
-## 開發人員
+## 開發人員(Contributor)
 * [Chia-Hui](https://github.com/wintersprouter)
 * [Hsin Yeh](https://github.com/Hsinyehh)
 
