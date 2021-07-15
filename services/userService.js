@@ -375,6 +375,40 @@ const userService = {
         })
     }
   },
+  putUserSettings: (viewerRole, UserId, viewerId, body) => {
+    const { account, name, email, password, checkPassword } = body
+    if (Number(UserId) !== viewerId) {
+      throw new RequestError('This is not this user\'s account.')
+    }
+
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          throw new RequestError('This user does not exist.')
+        }
+        if (!account || !name || !email || !password || !checkPassword) {
+          throw new RequestError('Required fields missing.')
+        }
+        if (password !== checkPassword) {
+          throw new RequestError('Password should be as same as checkPassword')
+        }
+
+        return user.update({
+          account: account,
+          name: name,
+          email: email,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+        }).then(() => {
+          return {
+            status: 'success',
+            message: 'User successfully updated.',
+            user: { id: UserId }
+          }
+        }).catch(err => {
+          throw new RequestError(err)
+        })
+      })
+  },
   getUserRepliedTweets: (req, res, viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
       .then(user => {

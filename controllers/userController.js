@@ -139,55 +139,19 @@ const userController = {
     }
   },
 
-  putUserSettings: (req, res) => {
-    const UserId = Number(req.params.id)
+  putUserSettings: async (req, res) => {
+    const UserId = req.params.id
     const viewerId = req.user.id
-    if (UserId !== viewerId) {
+    const { body } = req
+    try {
+      const data = await userService.putUserSettings('user', UserId, viewerId, body)
+      return res.status(200).json(data)
+    } catch (error) {
       return res.status(400).json({
-        status: 'error',
-        message: 'This is not this user\'s account.'
+        status: error.name,
+        message: error.message
       })
     }
-
-    return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-        if (!req.body.account || !req.body.name || !req.body.email || !req.body.password || !req.body.checkPassword) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Required fields missing.'
-          })
-        }
-        if (req.body.password !== req.body.checkPassword) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Password should be as same as checkPassword'
-          })
-        }
-
-        return user.update({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-        }).then(() => {
-          return res.status(200).json({
-            status: 'success',
-            message: 'User successfully updated.',
-            user: { id: UserId }
-          })
-        }).catch(err => {
-          return res.status(400).json({
-            status: 'error',
-            message: err.errors[0].message
-          })
-        })
-      })
   },
 
   getUserRepliedTweets: (req, res) => {
