@@ -64,7 +64,7 @@
 <body>
   <ul id="messagesBody"></ul>
   <form id="form" action="">
-    <input id="roomName" type="hidden" name="roomName" autocomplete="off" />
+    <input id="roomName" type="hidden" name="roomName" autocomplete="off" value="user1" />
     <input id="message" name="message" autocomplete="off" />
     <button type="submit">Send</button>
   </form>
@@ -84,35 +84,14 @@
       }
     });
 
-    socket.on('chat message', function (msg) {
+    socket.on('chat message', (msg) => {
+      console.log('client', socket.id)
       const item = document.createElement('li');
       item.textContent = msg;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     });
   </script>
-
-  <!-- <script>
-    const socket = io("ws://localhost:3000");
-
-    socket.on("connect", () => { // 要么使用 send()   socket.send( "Hello!" );
-
-
-
-      // 或使用emit() 和自定義事件名稱
-      socket.emit("salutations", "Hello!", { "mr": "john" }, Uint8Array.from([1, 2, 3, 4]));
-    });
-
-    // 處理用 socket.send() 發送的事件
-    socket.on("message", data => { console.log(data); });
-
-
-
-    // 處理用 socket.emit() 發送的事件
-    socket.on("greetings", (elem1, elem2, elem3) => { console.log(elem1, elem2, elem3); });
-  </script> -->
-
-
 </body>
 
 </html>
