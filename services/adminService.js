@@ -3,9 +3,13 @@
 const { User, Tweet, Like, Sequelize } = require('../models')
 const { Op } = Sequelize
 
+const RequestError = require('../utils/customError')
+
 const adminService = {
   deleteTweet: async (tweetId) => {
-    await Tweet.destroy({ where: { id: tweetId } })
+    const tweet = await Tweet.findByPk(tweetId, { include: [Like] })
+    if (!tweet) throw new RequestError(`Cannot find tweet id ${tweetId}`)
+    await tweet.destroy()
     return ({ status: 'success', message: `the tweet id ${tweetId} deleted successfully` })
   },
 
