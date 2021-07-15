@@ -98,11 +98,18 @@ const userController = {
       })
     }
   },
-  getUserFollowers: (req, res) => {
+  getUserFollowers: async (req, res) => {
     const UserId = req.params.id
     const viewerId = req.user.id
-    userService.getUserFollowers(req, res, 'user', UserId, viewerId)
-      .then(data => { return data })
+    try {
+      const data = await userService.getUserFollowers('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
   getTopUsers: (req, res) => {
     const viewerId = req.user.id
