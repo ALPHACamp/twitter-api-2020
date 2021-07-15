@@ -3,6 +3,8 @@ const app = express()
 //socket
 const server = require('http').createServer(app);
 const io = require('socket.io')(server)
+const { createAdapter } = require("@socket.io/mongo-adapter");
+const SocketHander = require('./socket/index')
 
 const cors = require('cors')
 const methodOverride = require('method-override')
@@ -19,25 +21,22 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true })) //用來解析表單
 app.use(express.json()) //用來解析json
 app.use('/upload', express.static(__dirname + '/upload'))
-
+require('./config/mongoose')
 
 let count = 1
 io.on('connection', (socket) => {
-  socket.emit('chat message', '連線成功！');
-  console.log('server', socket.id)
 
+  socket.emit('chat message', '連線成功！');
   socket.on('chat message', (msg) => {
+    SocketHander.storeMessages(msg)
     const date = new Date()
-    socket.emit('chat message', `${date} ${msg}`);
+    io.emit('chat message', `${date} ${msg}`);
     socket.emit('chat message', `後端收到訊息第${count}次`);
     count++
   });
-  socket.emit('eventName', {
-    msg: '後端收到第' + count + '次！',
-  })
 
   socket.on('disconnect', () => {
-    console.log('user disconnect')
+    io.emit('chat message', '有人離開聊天室')
   })
 
 })
