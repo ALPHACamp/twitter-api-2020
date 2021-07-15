@@ -431,11 +431,13 @@ const userService = {
         return Reply.findAll({
           where: { UserId },
           include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
             {
               model: Tweet,
               attributes: ['id', 'description', 'replyCount', 'likeCount'],
-              include: { model: Like, separate: true, where: { UserId: viewerId }, required: false }
+              include: [
+                { model: Like, separate: true, where: { UserId: viewerId }, required: false },
+                { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+              ]
             }
           ],
           attributes: ['id', 'comment'],
@@ -444,7 +446,7 @@ const userService = {
         }).then(replies => {
           replies = replies.map((item, i) => {
             const userObj = {
-              ...item.User.dataValues
+              ...item.dataValues.Tweet.dataValues.User.dataValues
             }
 
             const mapItem = {
