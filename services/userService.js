@@ -304,6 +304,35 @@ const userService = {
         })
       })
   },
+  getTopUsers: (viewerRole, viewerId) => {
+    return User.findAll({
+      include: {
+        model: User,
+        as: 'Followers',
+        where: { id: viewerId },
+        attributes: ['id'],
+        required: false,
+        nest: true
+      },
+      where: { role: { [Op.ne]: 'admin' } },
+      attributes: ['id', 'name', 'account', 'avatar', 'introduction', 'followerCount'],
+      order: [['followerCount', 'DESC']],
+      limit: 10,
+      nest: true,
+      raw: true
+    }).then(users => {
+      users = users.map((item, i) => {
+        const mapItem = {
+          ...item,
+          isFollowing: Boolean(item.Followers.id)
+        }
+        delete mapItem.Followers
+        delete mapItem.followerCount
+        return mapItem
+      })
+      return users
+    })
+  },
   getUserRepliedTweets: (req, res, viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
       .then(user => {
