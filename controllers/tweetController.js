@@ -30,6 +30,7 @@ const tweetController = {
       }))
       return res.json(tweets)
     } catch (err) {
+      console.log(err)
       next(err)
       return res.json({ status: 'error', message: err.toString() })
     }
@@ -47,6 +48,7 @@ const tweetController = {
       })
       return res.json({ status: 'success', message: '成功新增推文內容！' })
     } catch (err) {
+      console.log(err)
       next(err)
       return res.json({ status: 'error', message: err.toString() })
     }
@@ -76,6 +78,7 @@ const tweetController = {
       }
       return res.json(tweet)
     } catch (err) {
+      console.log(err)
       next(err)
       return res.json({ status: 'error', message: err.toString() })
     }
