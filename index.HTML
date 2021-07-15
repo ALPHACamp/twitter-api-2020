@@ -23,7 +23,7 @@
       backdrop-filter: blur(10px);
     }
 
-    #input {
+    #message {
       border: none;
       padding: 0 1rem;
       flex-grow: 1;
@@ -31,7 +31,7 @@
       margin: 0.25rem;
     }
 
-    #input:focus {
+    #message:focus {
       outline: none;
     }
 
@@ -45,17 +45,17 @@
       color: #fff;
     }
 
-    #messages {
+    #messagesBody {
       list-style-type: none;
       margin: 0;
       padding: 0;
     }
 
-    #messages>li {
+    #messagesBody>li {
       padding: 0.5rem 1rem;
     }
 
-    #messages>li:nth-child(odd) {
+    #messagesBody>li:nth-child(odd) {
       background: #efefef;
     }
   </style>
@@ -63,11 +63,11 @@
 
 <body>
   <ul id="messagesBody"></ul>
-  <form id="form" action="./api/chat/5" method="post">
+  <form id="form" action="">
+    <input id="roomName" type="hidden" name="roomName" autocomplete="off" />
     <input id="message" name="message" autocomplete="off" />
     <button type="submit">Send</button>
   </form>
-
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
@@ -91,6 +91,28 @@
       window.scrollTo(0, document.body.scrollHeight);
     });
   </script>
+
+  <!-- <script>
+    const socket = io("ws://localhost:3000");
+
+    socket.on("connect", () => { // 要么使用 send()   socket.send( "Hello!" );
+
+
+
+      // 或使用emit() 和自定義事件名稱
+      socket.emit("salutations", "Hello!", { "mr": "john" }, Uint8Array.from([1, 2, 3, 4]));
+    });
+
+    // 處理用 socket.send() 發送的事件
+    socket.on("message", data => { console.log(data); });
+
+
+
+    // 處理用 socket.emit() 發送的事件
+    socket.on("greetings", (elem1, elem2, elem3) => { console.log(elem1, elem2, elem3); });
+  </script> -->
+
+
 </body>
 
 </html>

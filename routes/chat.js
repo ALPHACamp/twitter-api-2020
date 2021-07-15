@@ -1,4 +1,5 @@
 const express = require('express')
+const app = express()
 const router = express.Router()
 const chatController = require('../controllers/chatController')
 
@@ -12,7 +13,14 @@ router.get('/', (req, res) => {
   res.sendFile(resolvedPath)
 })
 
-router.use(helpers.authenticated)
+// router.get('/', (req, res) => {
+//   let messages = 'hellow world'
+//   res.send(messages);
+// })
+
+
+// router.use(helpers.authenticated)
+
 
 router.get('/:roomId', chatController.getContent)
 

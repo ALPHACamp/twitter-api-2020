@@ -23,13 +23,13 @@ const chatController = {
   },
   postMessage: async (req, res, next) => {
     try {
-      console.log('params', req.params.roomId)
-      const chat = await Chat.create({
+      await Chat.create({
         UserId: helpers.getUser(req).id,
         message: req.body.message,
-        ChatroomId: 5
+        ChatroomId: req.params.roomId
       })
-      res.json([chat, { status: 'success', message: '發送成功' }])
+
+      res.json({ status: 'success', message: '發送成功' })
     }
     catch (err) {
       next(err)

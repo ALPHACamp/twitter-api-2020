@@ -5,8 +5,23 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 const helpers = require('../_helpers')
 
-router.post('/signin', userController.signin)
+router.post('/signin', userController.signin, (req, res) => {
+  console.log('1')
+  res.redirect('./api/chat/5')
+})
 router.post('/', userController.signup)
+
+const path = require('path')
+const signinPath = './signinPage.HTML'
+const signin = path.resolve(signinPath)
+
+
+router.get('/signin', (req, res) => {
+  res.sendFile(signin)
+})
+
+
+
 
 router.use(helpers.authenticated)
 
