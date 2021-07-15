@@ -409,14 +409,11 @@ const userService = {
         })
       })
   },
-  getUserRepliedTweets: (req, res, viewerRole, UserId, viewerId) => {
+  getUserRepliedTweets: (viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
       .then(user => {
         if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            error: 'This user does not exist.'
-          })
+          throw new RequestError('This user does not exist.')
         }
       }).then(user => {
         return Reply.findAll({
@@ -457,7 +454,7 @@ const userService = {
 
             return mapItem
           })
-          return res.status(200).json(replies)
+          return replies
         })
       })
   }
