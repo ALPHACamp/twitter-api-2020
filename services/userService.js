@@ -8,6 +8,7 @@ const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const jwt = require('jsonwebtoken')
+const { map } = require('../app')
 
 const userService = {
   signUp: (body) => {
@@ -171,33 +172,35 @@ const userService = {
           include: [
             {
               model: Tweet,
-              attributes: ['id', 'description', 'createdAt', 'replyCount', 'likeCount']
-            },
-            {
-              model: User,
-              attributes: ['id', 'name', 'account', 'avatar']
+              attributes: ['id', 'description', 'createdAt', 'replyCount', 'likeCount'],
+              include: [
+                { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+                { model: Like, separate: true, where: { UserId: viewerId }, required: false }
+              ]
             }
           ],
           where: { UserId },
           attributes: ['TweetId'],
           order: [
             ['createdAt', 'DESC']
-          ]
+          ],
+          nest: true
         }).then(likes => {
           likes = likes.map((like, i) => {
             const userObj = {
-              ...like.User.dataValues
+              ...like.dataValues.Tweet.dataValues.User.dataValues
             }
 
             const mapItem = {
               ...like.dataValues,
               ...like.Tweet.dataValues,
-              isLike: like.User.id === viewerId
+              isLike: like.dataValues.Tweet.dataValues.User.dataValues.id === viewerId
             }
 
             delete mapItem.Tweet
             delete mapItem.id
             delete mapItem.User
+            delete mapItem.Likes
 
             mapItem.User = userObj
 
@@ -431,11 +434,13 @@ const userService = {
         return Reply.findAll({
           where: { UserId },
           include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
             {
               model: Tweet,
               attributes: ['id', 'description', 'replyCount', 'likeCount'],
-              include: { model: Like, separate: true, where: { UserId: viewerId }, required: false }
+              include: [
+                { model: Like, separate: true, where: { UserId: viewerId }, required: false },
+                { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+              ]
             }
           ],
           attributes: ['id', 'comment'],
@@ -444,7 +449,7 @@ const userService = {
         }).then(replies => {
           replies = replies.map((item, i) => {
             const userObj = {
-              ...item.User.dataValues
+              ...item.dataValues.Tweet.dataValues.User.dataValues
             }
 
             const mapItem = {
