@@ -4,6 +4,9 @@ const { Op } = Sequelize
 const RequestError = require('../libs/RequestError')
 const bcrypt = require('bcryptjs')
 
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
 const jwt = require('jsonwebtoken')
 
 const userService = {
@@ -332,6 +335,45 @@ const userService = {
       })
       return users
     })
+  },
+  putUser: (viewerRole, UserId, viewerId, body, files) => {
+    if (Number(UserId) !== viewerId) {
+      throw new RequestError('This is not this user\'s account.')
+    }
+
+    if (!body.name) {
+      throw new RequestError('User name required.')
+    }
+
+    // TODO：改善重複上傳的問題
+    if (files) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      const avatar = files.avatar ? imgur.uploadFile((files.avatar[0].path)) : null
+      const cover = files.cover ? imgur.uploadFile((files.cover[0].path)) : null
+
+      Promise.all([avatar, cover])
+        .then(images => {
+          return User.findByPk(UserId)
+            .then(user => {
+              return user.update({
+                name: body.name,
+                introduction: body.introduction,
+                avatar: files.avatar ? images[0].link : user.avatar,
+                cover: files.cover ? images[1].link : user.cover
+              })
+            })
+        })
+    } else {
+      return User.findByPk(UserId)
+        .then((user) => {
+          return user.update({
+            name: body.name,
+            introduction: body.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          })
+        })
+    }
   },
   getUserRepliedTweets: (req, res, viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
