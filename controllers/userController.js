@@ -125,57 +125,58 @@ const userController = {
   getUserFollowings: (req, res) => {
     const UserId = req.params.id
     const viewerId = req.user.id
+    userService.getUserFollowings(req, res, 'user', UserId, viewerId)
+      .then(data => { return data })
+    // return User.findByPk(UserId)
+    //   .then(user => {
+    //     if (!user) {
+    //       return res.status(400).json({
+    //         status: 'error',
+    //         message: 'This user does not exist.'
+    //       })
+    //     }
+    //   }).then(user => {
+    //     return User.findAll({
+    //       include: [
+    //         {
+    //           model: User,
+    //           as: 'Followings',
+    //           attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+    //           nest: true,
 
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'This user does not exist.'
-          })
-        }
-      }).then(user => {
-        return User.findAll({
-          include: [
-            {
-              model: User,
-              as: 'Followings',
-              attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
-              nest: true,
-
-              include: {
-                model: User,
-                as: 'Followers',
-                attributes: ['id'],
-                where: { id: viewerId },
-                nest: true,
-                required: false
-              }
-            }
-          ],
-          where: { id: UserId },
-          attributes: [],
-          nest: true,
-          raw: true,
-          order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
-        }).then(async data => {
-          data = data.map((item, i) => {
-            const mapItem = {
-              ...item.dataValues,
-              followingId: item.Followings.id,
-              Followings: {
-                ...item.Followings,
-                isFollowing: Boolean(item.Followings.Followers.id)
-              }
-            }
-            delete mapItem.Followings.Followship
-            delete mapItem.Followings.Followers.Followship
-            delete mapItem.Followings.Followers
-            return mapItem
-          })
-          return res.status(200).json(data)
-        })
-      })
+    //           include: {
+    //             model: User,
+    //             as: 'Followers',
+    //             attributes: ['id'],
+    //             where: { id: viewerId },
+    //             nest: true,
+    //             required: false
+    //           }
+    //         }
+    //       ],
+    //       where: { id: UserId },
+    //       attributes: [],
+    //       nest: true,
+    //       raw: true,
+    //       order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
+    //     }).then(async data => {
+    //       data = data.map((item, i) => {
+    //         const mapItem = {
+    //           ...item.dataValues,
+    //           followingId: item.Followings.id,
+    //           Followings: {
+    //             ...item.Followings,
+    //             isFollowing: Boolean(item.Followings.Followers.id)
+    //           }
+    //         }
+    //         delete mapItem.Followings.Followship
+    //         delete mapItem.Followings.Followers.Followship
+    //         delete mapItem.Followings.Followers
+    //         return mapItem
+    //       })
+    //       return res.status(200).json(data)
+    //     })
+    //   })
   },
   getUserFollowers: (req, res) => {
     const UserId = req.params.id

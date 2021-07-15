@@ -11,5 +11,6 @@ router.get('/tweets', adminController.getTweets)
 router.get('/users/:id', adminController.getUser)
 router.get('/users/:id/tweets', adminController.getUserTweets)
 router.get('/users/:id/likes', adminController.getUserLikes)
+router.get('/users/:id/followings', adminController.getUserFollowings)
 
 module.exports = router

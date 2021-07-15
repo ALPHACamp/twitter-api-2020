@@ -74,6 +74,7 @@ const userService = {
             message: 'This user does not exist.'
           })
         }
+      }).then(user => {
         return Like.findAll({
           include: [
             {
@@ -116,6 +117,62 @@ const userService = {
           })
 
           return res.status(200).json(likes)
+        })
+      })
+  },
+  getUserFollowings: (req, res, viewerRole, UserId, viewerId) => {
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'This user does not exist.'
+          })
+        }
+      }).then(user => {
+        return User.findAll({
+          include: [
+            {
+              model: User,
+              as: 'Followings',
+              attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+              nest: true,
+
+              include: {
+                model: User,
+                as: 'Followers',
+                attributes: ['id'],
+                where: { id: viewerId },
+                nest: true,
+                required: false
+              }
+            }
+          ],
+          where: { id: UserId },
+          attributes: [],
+          nest: true,
+          raw: true,
+          order: [[{ model: User, as: 'Followings' }, 'createdAt', 'DESC']]
+        }).then(async data => {
+          data = data.map((item, i) => {
+            const mapItem = {
+              ...item.dataValues,
+              followingId: item.Followings.id,
+              Followings: {
+                ...item.Followings,
+                isFollowing: Boolean(item.Followings.Followers.id)
+              }
+            }
+            delete mapItem.Followings.Followship
+            delete mapItem.Followings.Followers.Followship
+            delete mapItem.Followings.Followers
+
+            if (viewerRole === 'admin') {
+              delete mapItem.Followings.isFollowing
+            }
+            return mapItem
+          })
+          return res.status(200).json(data)
         })
       })
   }
