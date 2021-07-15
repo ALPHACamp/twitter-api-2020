@@ -69,6 +69,29 @@ const tweetService = {
       })
     }
   },
+
+  postReply: (viewerId, TweetId, comment) => {
+    if (!comment) {
+      throw new RequestError('Comment can not be null')
+    }
+
+    return Tweet.findByPk(TweetId)
+      .then(tweet => {
+        if (!tweet) {
+          throw new RequestError('Tweet does not exist')
+        }
+        return Promise.all([
+          Reply.create({ UserId: viewerId, TweetId, comment }),
+          tweet.increment('replyCount')
+        ]).then(result => {
+          return {
+            id: result[0].id,
+            status: 'success',
+            message: 'Reply has been created successfully'
+          }
+        })
+      })
+  },
   }
 }
 

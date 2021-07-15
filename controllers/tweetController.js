@@ -25,37 +25,22 @@ const tweetController = {
     }
   },
 
-  postReply: (req, res) => {
+  postReply: async (req, res) => {
     const { comment } = req.body
     const TweetId = req.params.id
-    const UserId = req.user.id
+    const viewerId = req.user.id
 
-    if (!comment) {
+    try {
+      const data = await tweetService.postReply(viewerId, TweetId, comment)
+
+      return res.status(200).json(data)
+
+    } catch (error) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Comment can not be null'
+        status: error.name,
+        message: error.message
       })
     }
-
-    return Tweet.findByPk(TweetId)
-      .then(tweet => {
-        if (!tweet) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Tweet does not exist'
-          })
-        }
-        return Promise.all([
-          Reply.create({ UserId, TweetId, comment }),
-          tweet.increment('replyCount')
-        ]).then(result => {
-          return res.status(200).json({
-            id: result[0].id,
-            status: 'success',
-            message: 'Reply has been created successfully'
-          })
-        })
-      })
   },
 
   getSingleTweet: (req, res) => {
