@@ -50,7 +50,7 @@ const userController = {
   getUser: async (req, res) => {
     const UserId = req.params.id
     try {
-      const data = await userService.getUser('user', UserId, 'user')
+      const data = await userService.getUser('user', UserId, false)
       return res.status(200).json(data)
     } catch (error) {
       return res.status(400).json({
@@ -172,7 +172,7 @@ const userController = {
     const UserId = req.user.id
 
     try {
-      const data = await userService.getUser('user', UserId, 'currentUser')
+      const data = await userService.getUser('user', UserId, true)
       return res.status(200).json(data)
     } catch (error) {
       return res.status(400).json({
