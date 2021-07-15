@@ -3,9 +3,9 @@
  這是一個提供前端開發串接 API 的 Simple Twitter 專案
  
  ## 目錄
-- [環境建置與需求 (Enviroment)](#環境建置與需求 (Enviroment))
-- [專案安裝流程(Installing)](#專案安裝流程(Installing))
-- [開發人員與職責分工 (Contributor and Responsibility)](#開發人員與職責分工 (Contributor and Responsibility))
+- [環境建置與需求 (Enviroment)](#環境建置與需求-(Enviroment))
+- [專案安裝流程(Installing)](#專案安裝流程-(Installing))
+- [開發人員與職責分工 (Contributor and Responsibility)](#開發人員與職責分工-(Contributor and Responsibility))
 
 ## 環境建置與需求 (Enviroment)
 ### 伺服器（server）
