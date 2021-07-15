@@ -20,9 +20,17 @@ let replyController = {
 
   getReply: async (req, res, next) => {
     try {
-      const reply = await Reply.findAll({ where: { TweetId: req.params.tweetId } }, { include: { model: User } })
+      let reply = await Reply.findAll({
+        where: { TweetId: req.params.tweetId },
+        include: { model: User, attributes: ['name', 'avatar', 'account'] }
+      })
       if (!reply) throw new Error("this reply doesn't exist")
-      return res.json(reply)
+
+      replies = reply.map(r => ({
+        ...r.dataValues
+      }))
+
+      return res.json(replies)
     } catch (error) {
       next(error)
     }
