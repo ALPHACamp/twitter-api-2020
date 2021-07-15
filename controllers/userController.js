@@ -153,6 +153,7 @@ const userController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'totalReplies'],
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes']
         ],
+        order: ['createdAt', 'DESC']
       })
       if (tweets.length === 0) return res.json({ status: 'error', message: '使用者沒有回覆任何推文' })
       return res.json(tweets)
