@@ -5,7 +5,7 @@ const replyController = require('../controllers/replyController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
-const { getCurrentUser } = require('../controllers/userController')
+
 const upload = multer({
   fileFilter(req, file, cb) {
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
