@@ -86,15 +86,15 @@ const userService = {
         }
       })
   },
-  getUser: (viewerRole, UserId, currentUser) => {
+  getUser: (viewerRole, UserId, IsCurrentUser) => {
     let attributesOption = []
     switch (currentUser) {
-      case 'currentUser':
+      case true:
         attributesOption = [
           'id', 'name', 'account', 'email', 'avatar', [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${UserId}')`), 'isAdmin']
         ]
         break
-      case 'user':
+      case false:
         attributesOption = ['id', 'name', 'account', 'avatar', 'cover', 'introduction', 'followerCount', 'followingCount']
     }
     return User.findByPk(UserId, { attributes: attributesOption })
