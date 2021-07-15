@@ -5,7 +5,6 @@
  ## 目錄
 - [環境建置與需求 (Enviroment)](#環境建置與需求-(Enviroment))
 - [專案安裝流程 (Installing)](#專案安裝流程-(Installing))
-- [開發人員 (Contributor)](#開發人員 -(Contributor))
 - [API文件](#API文件)
 
 ## 環境建置與需求 (Enviroment)
