@@ -41,7 +41,7 @@ let adminController = {
         include: { model: User, attributes: ['name', 'avatar', 'account'] },
         raw: true
       })
-      const data = await tweets.map(t => ({
+      const data = tweets.map(t => ({
         ...t,
         description: t.description.substring(0, 50)
       }))
