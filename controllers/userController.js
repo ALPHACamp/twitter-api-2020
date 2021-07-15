@@ -27,7 +27,7 @@ const userController = {
       if (name.length > 50 || account.length > 50) return res.json({ status: 'error', message: '帳號和名稱長度需小於50字元' })
       if (password !== confirmPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
 
-      let user = await User.findOne({ where: { account: `@${account}` } })
+      let user = await User.findOne({ where: { account } })
       if (user) return res.status(403).json({ status: 'error', message: `此帳號已被註冊` })
       user = await User.findOne({ where: { email } })
       if (user) return res.status(403).json({ status: 'error', message: `此信箱已被註冊` })
@@ -52,7 +52,7 @@ const userController = {
       const { account, password } = req.body
       if (!account || !password) return res.json({ status: 'error', message: '請填寫所有欄位' })
 
-      const user = await User.findOne({ where: { account: `@${account}`, role: 'user' } })
+      const user = await User.findOne({ where: { account, role: 'user' } })
       if (!user) return res.status(401).json({ status: 'error', message: '查無此使用者' })
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return res.status(401).json({ status: 'error', message: '密碼輸入錯誤' })
@@ -353,7 +353,7 @@ const userController = {
       if (checkEmail) return res.json({ status: 'error', message: '此信箱已被使用' })
       if (!checkPassword) return res.json({ status: 'error', message: '密碼與確認密碼不符' })
       user.update({
-        account: `@${account}`,
+        account,
         name,
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
