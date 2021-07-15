@@ -4,6 +4,7 @@
  ## 目錄
 - [環境建置與需求 (Enviroment)](#環境建置與需求-(Enviroment))
 - [專案安裝流程 (Installing)](#專案安裝流程-(Installing))
+- [開發人員 (Contributor)](#開發人員-(Contributor))
 - [API文件](#API文件)
 
 ## 環境建置與需求 (Enviroment)
@@ -67,7 +68,7 @@ npm run dev
 ```
 npx sequelize db:seed:undo:all
 ```
-## 開發人員(Contributor)
+## 開發人員 (Contributor)
 * [Chia-Hui](https://github.com/wintersprouter)
 * [Hsin Yeh](https://github.com/Hsinyehh)
 
@@ -75,14 +76,6 @@ npx sequelize db:seed:undo:all
 ## API文件網址
 http://localhost:3000/api-doc/
 
-### Demo 帳號
-使用者可以使用以下帳號分別登入系統前台、後台。
-
-
-| role| account | password |
-| -------- | -------- | -------- |
-| admin  | root   | 12345678  |
-| user   | RyanHuang   | 12345678   |
   
 ## API說明
 * 除了管理員、使用者登入和使用者註冊這 2 條路由外，其餘路由需在 header 的 Authorization 帶上"Bearer" + token (token可從登入時拿到)
@@ -90,6 +83,13 @@ http://localhost:3000/api-doc/
 ### Base URL
 * http://localhost:3000/api/{route}
 * https://simpletwitter-api.herokuapp.com/api/{route}
+### Demo 帳號
+使用者可以使用以下帳號分別登入系統前台、後台。
+
+|role| account | password |
+| -------- | -------- | -------- |
+| admin  | root   | 12345678  |
+| user   | RyanHuang   | 12345678    
 ## API文件
  ### API 目錄
 - [Sign in & Sign up](#Sign-in-&-Sign-up)
@@ -128,6 +128,7 @@ http://localhost:3000/api-doc/
 - [Admin](#Admin) 
    - [後台刪除一則貼文](後台刪除一則貼文)
    - [後台瀏覽所有使用者](後台瀏覽所有使用者)
+
 ## Sign in & Sign up
 ### 前台使用者註冊
 ##### Method & URL
