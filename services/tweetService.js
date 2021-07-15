@@ -29,9 +29,10 @@ const tweetService = {
           model: User,
           attributes: ['id', 'name', 'account', 'avatar'],
           where: {
-            role: {
-              [Op.ne]: 'admin'
-            }
+            [Op.or]: [
+              { role: { [Op.ne]: 'admin' } },
+              { role: { [Op.is]: null } }
+            ]
           }
         },
         {
