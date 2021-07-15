@@ -21,7 +21,20 @@ const chatController = {
       next(err)
     }
   },
-
+  postMessage: async (req, res, next) => {
+    try {
+      console.log('params', req.params.roomId)
+      const chat = await Chat.create({
+        UserId: helpers.getUser(req).id,
+        message: req.body.message,
+        ChatroomId: 5
+      })
+      res.json([chat, { status: 'success', message: '發送成功' }])
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 }
 
 module.exports = chatController

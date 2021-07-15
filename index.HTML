@@ -62,18 +62,19 @@
 </head>
 
 <body>
-  <ul id="messages"></ul>
-  <form id="form" action="" method="post">
-    <input id="input" autocomplete="off" /><button type="submit">Send</button>
+  <ul id="messagesBody"></ul>
+  <form id="form" action="./api/chat/5" method="post">
+    <input id="message" name="message" autocomplete="off" />
+    <button type="submit">Send</button>
   </form>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
 
-    const messages = document.querySelector('#messages');
+    const messages = document.querySelector('#messagesBody');
     const form = document.querySelector('#form');
-    const input = document.querySelector('#input');
+    const input = document.querySelector('#message');
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();

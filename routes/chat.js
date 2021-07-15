@@ -7,13 +7,18 @@ const filePath = './index.html'
 const resolvedPath = path.resolve(filePath)
 const helpers = require('../_helpers')
 
+
+router.get('/', (req, res) => {
+  res.sendFile(resolvedPath)
+})
+
 router.use(helpers.authenticated)
 
 router.get('/:roomId', chatController.getContent)
 
-// router.get('/', (req, res) => {
-//   console.log(helpers.getUser(req))
-//   res.sendFile(resolvedPath)
-// })
+
+
+router.post('/:roomId', chatController.postMessage)
+
 
 module.exports = router
