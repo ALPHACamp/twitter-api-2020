@@ -54,27 +54,35 @@ let adminController = {
   getUsers: async (req, res, next) => {
     try {
       let users = await User.findAll({
+        include: [
+          { model: Tweet, attributes: [] },
+          { model: Like, attributes: [] },
+          { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
+          { model: User, as: 'Followings', attributes: [], through: { attributes: [] } }
+        ],
         attributes: [
           'id',
           'name',
           'account',
           'avatar',
           'cover',
-          [ sequelize.literal(
+          [
+            sequelize.literal(
               '(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'
-            ), 'likeCount'],
-          [ sequelize.literal(
-              '(SELECT COUNT(*) FROM Users INNER JOIN Followships ON User.id = Followships.followerId WHERE Followships.followingId = Users.id)'
-              ), 'followingCount' ],
-          [ sequelize.literal(
-            '(SELECT COUNT(*) FROM Users INNER JOIN Followships ON User.id = Followships.followingId WHERE Followships.followerId = Users.id)'
-            ), 'followerCount' ],
-          [ sequelize.literal(
-            '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
-            ), 'tweetCount' ],
+            ),
+            'likeCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+            'followingCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+            'followerCount'
+          ],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount']
         ],
-        order: [[sequelize.literal('tweetCount'), 'DESC']],
-        raw: true
+        order: [[sequelize.literal('tweetCount'), 'DESC']]
       })
 
       console.log(users)
