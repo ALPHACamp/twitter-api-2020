@@ -3,7 +3,8 @@ const db = require('../models')
 const { User, Tweet, Like, Reply, Followship, Sequelize } = db
 const { Op } = require('sequelize')
 
-// const imgur = require('imgur-node-api')
+const userService = require('../services/userService')
+
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
@@ -15,7 +16,7 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   signUp: (req, res) => {
     let { name, email, account, password, checkPassword } = req.body
-    let errors = []
+    const errors = []
     let errorMsg = ''
 
     const isFieldsAbsence = !name || !account || !email || !password || !checkPassword
@@ -26,7 +27,7 @@ const userController = {
         errors.push('每個欄位都是必要欄位')
       }
 
-      if (isPasswordEqualCheckPassword) {
+      if (isPasswordUnequalCheckPassword) {
         errors.push('兩次密碼輸入不同')
       }
 
@@ -44,7 +45,6 @@ const userController = {
         }
       })
     } else {
-
       account = account.replace(/^[@]*/, '')
 
       User.findOne({
@@ -106,19 +106,9 @@ const userController = {
       })
   },
   getUser: (req, res) => {
-    return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) {
-          return res.status(404).json({
-            status: 'error',
-            message: 'User not found.'
-          })
-        }
-        const { id, name, account, avatar, cover, introduction, followerCount, followingCount } = user
-        return res.status(200).json({
-          id, name, account, avatar, cover, introduction, followerCount, followingCount
-        })
-      })
+    const UserId = req.params.id
+    userService.getUser(req, res, UserId, 'user')
+      .then(data => { return data })
   },
   getUserTweets: (req, res) => {
     const UserId = req.params.id
@@ -148,7 +138,7 @@ const userController = {
               model: Like, attributes: []
             }
           ],
-          order: [['createdAt', 'DESC']],
+          order: [['createdAt', 'DESC']]
         }).then(tweets => {
           tweets.forEach(tweet => {
             tweet.dataValues.isLike = Boolean(tweet.dataValues.isLike)
@@ -395,7 +385,6 @@ const userController = {
             })
         })
     } else {
-
       return User.findByPk(UserId)
         .then((user) => {
           user.update({
@@ -461,7 +450,6 @@ const userController = {
             message: err.errors[0].message
           })
         })
-
       })
   },
 
@@ -489,7 +477,7 @@ const userController = {
           ],
           attributes: ['id', 'comment'],
           nest: true,
-          order: [[Reply.associations.Tweet, 'createdAt', 'DESC']],
+          order: [[Reply.associations.Tweet, 'createdAt', 'DESC']]
         }).then(replies => {
           replies = replies.map((item, i) => {
             const userObj = {
@@ -500,7 +488,7 @@ const userController = {
               TweetId: item.dataValues.Tweet.dataValues.id,
               ...item.dataValues,
               ...item.dataValues.Tweet.dataValues,
-              isLike: Boolean(item.Tweet.Likes[0]),
+              isLike: Boolean(item.Tweet.Likes[0])
             }
 
             delete mapItem.Tweet

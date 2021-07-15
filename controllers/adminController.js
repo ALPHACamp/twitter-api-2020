@@ -3,6 +3,7 @@ const { User, Tweet, Sequelize } = db
 const { Op } = require('sequelize')
 
 const tweetService = require('../services/tweetService')
+const userService = require('../services/userService')
 
 const adminController = {
 
@@ -58,6 +59,11 @@ const adminController = {
       .then(data => {
         return res.status(200).json(data)
       })
+  },
+  getUser: (req, res) => {
+    const UserId = req.params.id
+    userService.getUser(req, res, UserId, 'admin')
+      .then(data => { return data })
   }
 }
 
