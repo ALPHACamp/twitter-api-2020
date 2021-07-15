@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Like, Followship, Sequelize } = db
+const { User, Tweet, Like, Reply, Followship, Sequelize } = db
 
 const userService = {
   getUser: (req, res, viewerRole, UserId) => {
@@ -230,6 +230,58 @@ const userService = {
             return mapItem
           })
           return res.status(200).json(data)
+        })
+      })
+  },
+  getUserRepliedTweets: (req, res, viewerRole, UserId, viewerId) => {
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({
+            status: 'error',
+            error: 'This user does not exist.'
+          })
+        }
+      }).then(user => {
+        return Reply.findAll({
+          where: { UserId },
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            {
+              model: Tweet,
+              attributes: ['id', 'description', 'replyCount', 'likeCount'],
+              include: { model: Like, separate: true, where: { UserId: viewerId }, required: false }
+            }
+          ],
+          attributes: ['id', 'comment'],
+          nest: true,
+          order: [[Reply.associations.Tweet, 'createdAt', 'DESC']]
+        }).then(replies => {
+          replies = replies.map((item, i) => {
+            const userObj = {
+              ...item.User.dataValues
+            }
+
+            const mapItem = {
+              TweetId: item.dataValues.Tweet.dataValues.id,
+              ...item.dataValues,
+              ...item.dataValues.Tweet.dataValues,
+              isLike: Boolean(item.Tweet.Likes[0])
+            }
+            delete mapItem.Tweet
+            delete mapItem.Likes
+            delete mapItem.id
+            delete mapItem.User
+
+            if (viewerRole === 'admin') {
+              delete mapItem.isLike
+            }
+
+            mapItem.User = userObj
+
+            return mapItem
+          })
+          return res.status(200).json(replies)
         })
       })
   }
