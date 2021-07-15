@@ -12,7 +12,7 @@ env:
 # 在 install 前執行的指令
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS ac_twitter_workspace_test default character set utf8mb4 collate utf8mb4_unicode_ci;'
-  - mysql -e 'SET sql_mode="";'
+  - mysql -e 'SET @@global.sql_mode="STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION";'
   - npm install sequelize-cli -g
 
 # 在執行測試之前的指令
