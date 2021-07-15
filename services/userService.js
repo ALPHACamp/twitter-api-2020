@@ -175,6 +175,63 @@ const userService = {
           return res.status(200).json(data)
         })
       })
+  },
+  getUserFollowers: (req, res, viewerRole, UserId, viewerId) => {
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'This user does not exist.'
+          })
+        }
+      }).then(user => {
+        return User.findAll({
+          include: [
+            {
+              model: User,
+              as: 'Followers',
+              attributes: ['id', 'name', 'account', 'avatar', 'introduction'],
+              nest: true,
+
+              include: {
+                model: User,
+                as: 'Followers',
+                attributes: ['id'],
+                where: { id: viewerId },
+                nest: true,
+                required: false
+              }
+            }
+          ],
+          where: { id: UserId },
+          attributes: [],
+          nest: true,
+          raw: true,
+          order: [[{ model: User, as: 'Followers' }, 'createdAt', 'DESC']]
+        }).then(async data => {
+          data = data.map((item, i) => {
+            const mapItem = {
+              ...item.dataValues,
+              followerId: item.Followers.id,
+              Followers: {
+                ...item.Followers,
+                isFollowing: Boolean(item.Followers.Followers.id)
+              }
+            }
+            delete mapItem.Followers.Followship
+            delete mapItem.Followers.Followers.Followship
+            delete mapItem.Followers.Followers
+
+            if (viewerRole === 'admin') {
+              delete mapItem.Followers.isFollowing
+            }
+
+            return mapItem
+          })
+          return res.status(200).json(data)
+        })
+      })
   }
 }
 
