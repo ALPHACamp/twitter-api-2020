@@ -52,7 +52,7 @@ const userController = {
       const { account, password } = req.body
       if (!account || !password) return res.json({ status: 'error', message: '請填寫所有欄位' })
 
-      const user = await User.findOne({ where: { account: `@${account}`, role: 'user' } })
+      const user = await User.findOne({ where: { account, role: 'user' } })
       if (!user) return res.status(401).json({ status: 'error', message: '查無此使用者' })
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch) return res.status(401).json({ status: 'error', message: '密碼輸入錯誤' })
