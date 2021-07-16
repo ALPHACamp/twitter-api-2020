@@ -10,6 +10,10 @@ module.exports = (server) => {
     })
 
     // 引用module的功能檔案在這之下
+    // 1. 顯示所有使用者
+    require('./modules/listUser')
+    // 2. 聊天室內登入通知
+    require('./modules/enterNotice')
 
     socket.on('chat message', msg => {
       socket.emit('chat message', msg)
