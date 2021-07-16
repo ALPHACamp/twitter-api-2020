@@ -22,10 +22,8 @@ const chatService = {
   },
 
   joinPrivateChat: async (a, b) => {
-    await Member.findAll({
-      where: {
-        UserId: [a, b]
-      }
+    return await Member.findAll({
+      attributes: ['RoomId', 'UserId', [Sequelize.literal('COUNT(UserId) OVER(partition by RoomId)'), 'people']]
     })
   }
 }
