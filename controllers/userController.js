@@ -354,6 +354,7 @@ const userController = {
             'isFollowing'
           ]
         ],
+        order: [[sequelize.literal('isFollowing'), 'DESC']],
         order: [[sequelize.literal('followersCount'), 'DESC']],
         limit: 10
       })
