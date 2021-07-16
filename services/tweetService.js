@@ -11,7 +11,7 @@ const tweetService = {
     switch (viewerRole) {
       case 'user':
         attributesOption = [
-          ['id', 'TweetId'], 'description', 'likeCount', 'replyCount', 'createdAt',
+          [Sequelize.fn('DISTINCT', Sequelize.col('Tweet.id')), 'TweetId'], 'description', 'likeCount', 'replyCount', 'createdAt',
           [Sequelize.literal(`exists (select * from Likes where Likes.UserId = '${viewerId}' and Likes.TweetId = Tweet.id)`), 'isLike']
         ]
         break;
@@ -42,7 +42,6 @@ const tweetService = {
       ],
       order: [['createdAt', 'DESC']],
       attributes: attributesOption,
-      group: Sequelize.col('TweetId'),
       raw: true,
       nest: true
     }).then(tweets => {
