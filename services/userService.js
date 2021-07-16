@@ -199,7 +199,7 @@ const userService = {
             const mapItem = {
               ...like.dataValues,
               ...like.Tweet.dataValues,
-              isLike: like.dataValues.Tweet.dataValues.User.dataValues.id === viewerId
+              isLike: Boolean(like.dataValues.Tweet.dataValues.Likes[0])
             }
 
             delete mapItem.Tweet
