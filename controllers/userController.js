@@ -1,7 +1,7 @@
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-
+const Sequelize = require('sequelize')
 const bcrypt = require('bcryptjs')
 const moment = require('moment')
 const jwt = require('jsonwebtoken')
@@ -94,10 +94,12 @@ const userController = {
         ]
       })
       const { id, name, account, email, role,
-        avatar, followingCounts, followerCounts } = user
+        avatar, cover, introduction, followingCounts, followerCounts } = user
+      const isFollowed = req.user.Followings.map(f => f.id).includes(id)
       return res.json({
         id, name, account, email, role,
         avatar, followingCounts, followerCounts,
+        cover, introduction, isFollowed,
         Followers: user.Followers, Followings: user.Followings
       })
     } catch (err) {
@@ -111,6 +113,7 @@ const userController = {
       const results = await User.findAll({
         raw: true,
         nest: true,
+        where: { role: 'normal' },
         attributes: ['id', 'name', 'account', 'avatar', 'followerCounts'],
         limit: topLimit,
         order: [['followerCounts', 'DESC']]
@@ -160,16 +163,23 @@ const userController = {
         attributes: ['id', 'comment', 'createdAt'],
         include: [{
           model: Tweet,
-          attributes: ['id', 'description', 'createdAt'],
-          include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-          ]
+          attributes: ['id', 'description', 'createdAt', 'replyCounts', 'likeCounts', [
+            Sequelize.literal(`EXISTS (
+            SELECT * FROM Likes
+            WHERE UserId = ${req.user.id} AND TweetId = Tweet.id
+          )`
+            ), 'isLiked']],
+          include: [{
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          }]
         }],
         order: [['createdAt', 'DESC']]
       })
       const replies = results.map(reply => {
         reply.createdAt = moment(reply.createdAt).format('YYYY-MM-DD hh:mm:ss a')
         reply.Tweet.createdAt = moment(reply.Tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        reply.Tweet.isLiked = reply.Tweet.isLiked ? true : false
         return reply
       })
       return res.json(replies)
@@ -184,7 +194,12 @@ const userController = {
         raw: true,
         nest: true,
         where: { UserId: req.params.id },
-        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt'],
+        attributes: ['id', 'description', 'replyCounts', 'likeCounts', 'createdAt', [
+          Sequelize.literal(`EXISTS (
+            SELECT * FROM Likes
+            WHERE UserId = ${req.user.id} AND TweetId = Tweet.id
+          )`
+          ), 'isLiked']],
         include: [{
           model: User,
           attributes: ['id', 'name', 'account', 'avatar']
@@ -193,7 +208,8 @@ const userController = {
       })
       const tweets = results.map(tweet => ({
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a'),
+        isLiked: tweet.isLiked === 1
       }))
       return res.json(tweets)
     } catch (err) {
@@ -321,6 +337,16 @@ const userController = {
         cover, introduction,
         Followers: req.user.Followers, Followings: req.user.Followings
       })
+    } catch (err) {
+      console.log(err)
+      next(err)
+    }
+  },
+  removeCover: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      await user.update({ cover: null })
+      return res.json({ status: 'success', message: '個人封面已刪除' })
     } catch (err) {
       console.log(err)
       next(err)
