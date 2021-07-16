@@ -20,7 +20,7 @@ module.exports = (server) => {
     // 1. 顯示所有使用者
     require('./modules/listUser')
     // 2. 聊天室內登入通知
-    require('./modules/enterNotice')
+    require('./modules/enterNotice')(socket)
 
     socket.on('chat message', msg => {
       const timeStamp = new Date()
