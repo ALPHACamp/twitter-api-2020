@@ -16,6 +16,13 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const port = process.env.PORT || 3000
+<<<<<<< HEAD
+=======
+const cors = require('cors')
+require('./models')
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./swagger_output.json') // 剛剛輸出的 JSON
+>>>>>>> origin/master
 
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
