@@ -84,8 +84,9 @@
     });
 
     socket.on('chat message', function (msg) {
+      console.log(msg.id)
       var item = document.createElement('li');
-      item.textContent = msg;
+      item.textContent = msg.message;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     });
