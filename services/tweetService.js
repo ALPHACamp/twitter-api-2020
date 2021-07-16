@@ -42,6 +42,7 @@ const tweetService = {
       ],
       order: [['createdAt', 'DESC']],
       attributes: attributesOption,
+      group: Sequelize.col('TweetId'),
       raw: true,
       nest: true
     }).then(tweets => {
