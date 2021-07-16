@@ -18,7 +18,7 @@ module.exports = (server) => {
 
     // 引用module的功能檔案在這之下
     // 1. 顯示所有使用者
-    require('./modules/listUser')
+    require('./modules/listUser')(io)
     // 2. 聊天室內登入通知
     require('./modules/enterNotice')(socket)
 
@@ -40,7 +40,5 @@ module.exports = (server) => {
     console.log(err.message)  // the error message, for example "Session ID unknown"
     console.log(err.context)  // some additional error context
   })
-
-
 
 }
