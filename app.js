@@ -21,18 +21,14 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true })) //用來解析表單
 app.use(express.json()) //用來解析json
 app.use('/upload', express.static(__dirname + '/upload'))
-require('./config/mongoose')
+// require('./config/mongoose')
 
-let count = 1
+
 io.on('connection', (socket) => {
-  io.emit('chat message', '連線成功！');
+  // io.emit('chat message', '連線成功！');
   socket.on('chat message', (msg) => {
-    SocketHander.storeMessages(msg)
-    io.emit('chat message', `${socket.id} 傳送訊息`);
-    count++
     const date = new Date()
-    io.emit('chat message', `${date} ${msg}`);
-
+    io.emit('chat message', `${msg.name}: ${msg.msg}`);
   });
 
   socket.on('disconnect', () => {
