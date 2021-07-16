@@ -3,8 +3,6 @@ const router = express.Router()
 
 const chatController = require('../../controllers/chatController')
 
-router.get('/')
-router.get('/:room')
-router.post('/')
+router.get('/:room', chatController.getHistoryChat)
 
 module.exports = router
