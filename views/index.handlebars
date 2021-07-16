@@ -17,10 +17,12 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (input.value) {
-      socket.emit('chat message', { socket_id: `${socket.id}`, message: `${input.value}`, ChatroomId: `${ChatroomId.value}` });
+      socket.emit('chat message', input.value);
       input.value = '';
     }
   });
+  let data = { UserId: 25, name: '蚯蚓', ChatroomId: 10 }
+  socket.emit('user', (data))
 
   socket.on('chat message', (msg) => {
     const item = document.createElement('li');

@@ -12,22 +12,27 @@ const io = (server) => {
   });
 
   io.on('connection', async (socket) => {
-    // console.log(socket.handshake)
-    socket.data.username = "alice"
-    // console.log(socket.data)
-    socket.broadcast.emit('chat message', `${socket.id}上線`);
+
+    let user = {}
+    socket.on('user', (data) => {
+      user = data
+      user[socket.id] = data.UserId
+      console.log(user)
+      io.emit('chat message', `${data.name}上線`);
+    })
+
     await socket.on('chat message', async (msg) => {
       await Chat.create({
-        UserId: 15,
-        message: msg.message,
-        ChatroomId: msg.ChatroomId
+        UserId: user.UserId,
+        message: msg,
+        ChatroomId: user.ChatroomId
       })
-      io.emit('chat message', `${socket.id}: ${msg.message}_${socket.handshake.time}`);
+      io.emit('chat message', `${user.name}: ${msg}`);
     });
 
     socket.on('disconnect', () => {
-      console.log('out', socket.data)
-      io.emit('chat message', `${socket.id}離開聊天室`)
+      io.emit('chat message', `${user.name}離開聊天室`)
+      user = {}
     })
 
   })
