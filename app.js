@@ -7,6 +7,8 @@ const cors = require('cors')
 
 const server = require('http').createServer(app)
 
+app.use(cors())
+
 const buildSocket = require('./server')
 
 const port = process.env.PORT || 3000
@@ -17,8 +19,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 const passport = require('./config/passport');
 const { replaceReqUser } = require('./middlewares/mocha')
-
-app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
