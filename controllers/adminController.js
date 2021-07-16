@@ -39,6 +39,7 @@ let adminController = {
     try {
       const tweets = await Tweet.findAll({
         include: { model: User, attributes: ['name', 'avatar', 'account'] },
+        order: [['createdAt', 'DESC']],
         raw: true
       })
       const data = tweets.map(t => ({
