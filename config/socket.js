@@ -17,7 +17,6 @@ const io = (server) => {
     // console.log(socket.data)
     socket.broadcast.emit('chat message', `${socket.id}上線`);
     await socket.on('chat message', async (msg) => {
-      console.log(msg)
       await Chat.create({
         UserId: 15,
         message: msg.message,
@@ -27,6 +26,7 @@ const io = (server) => {
     });
 
     socket.on('disconnect', () => {
+      console.log('out', socket.data)
       io.emit('chat message', `${socket.id}離開聊天室`)
     })
 
