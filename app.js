@@ -2,14 +2,14 @@ const path = require('path')
 const http = require('http')
 const express = require('express')
 const bodyParser = require('body-parser')
-require('./models')
 const cors = require('cors')
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json')
 
 const app = express()
 const server = http.createServer(app)
-const socket = require('socket.io')
+const db = require('./models')
+const jwt = require('jsonwebtoken')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -24,19 +24,38 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/upload', express.static(__dirname + '/upload'))
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
-app.get('/chat', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html')
+app.get('/users/chat', (req, res) => {
+  res.sendFile(__dirname + '/public/publicRoom.html')
 })
+
 require('./routes')(app)
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://localhost:8080',
+    origin: ['http://localhost:8080', 'https://chris1085.github.io/SimpleTwitter-vue/#/signin'],
     methods: ['GET', 'POST'],
     credentials: true
   }
 })
-io.on('connection', async socket => {
+
+io.use(
+  (socket, next) => {
+    const token = socket.handshake.auth.token
+    if (socket.handshake.query && socket.handshake.query.token) {
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET,
+        (err, decoded) => {
+          if (err) return next(new Error('Authentication error'))
+          socket.userId = decoded.id
+          console.log('socket.userId', socket.userId)
+          next()
+        })
+    } else {
+      next(new Error('Authentication error'))
+    }
+  }
+).on('connection', async socket => {
   console.log('connection')
   // emit發送歷史訊息(avatar id account name messages)
   // emit使用者上線通知 //emit 所有上線使用者的資訊(avatar id account name)
