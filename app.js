@@ -1,10 +1,14 @@
 const express = require('express')
-// const helpers = require('./_helpers');
+const app = express()
+
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 const cors = require('cors')
 
-const app = express()
+const server = require('http').createServer(app)
+
+const buildSocket = require('./server')
+
 const port = process.env.PORT || 3000
 const routes = require('./routes')
 if (process.env.NODE_ENV !== 'production') {
@@ -26,9 +30,15 @@ app.use(passport.session())
 // for mocha test's requirement
 app.use(replaceReqUser)
 
+// 可以用這個實驗簡單的socket
+app.get('/socket', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
+buildSocket(server)
+
 app.use(routes)
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+server.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
