@@ -6,8 +6,11 @@ module.exports = (server) => {
   const io = new Server(server, {
       cors: {
       origin: process.env.CORS_WHITE_LIST.split(','),
-      methods: ['GET', 'POST']
-    }
+      methods: ['GET', 'POST'],
+      transports: ['websocket', 'polling'],
+      credentials: true
+    },
+    allowEIO3: true
   })
 
   io.use(socketAuth)
@@ -25,6 +28,7 @@ module.exports = (server) => {
     })
     socket.on('disconnect', (reason) => {
       console.log(`${socket.id} is leaving.`)
+      console.log(io.engine.clientsCount)
     })
   })
 }
