@@ -37,7 +37,7 @@ const userController = {
         }
 
         var payload = { id: user.id }
-        var token = jwt.sign(payload, process.env.JWT_SECRET)
+        var token = jwt.sign(payload, 'alphacamp')
         return res.json({
           status: 'success',
           message: 'Login successfully',
