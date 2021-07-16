@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat room</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+    integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+  <script src="https://kit.fontawesome.com/5337c75802.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <main role="main">
+    <div class="container">
+      <div class="center-content d-flex col-12 mt-4" id="tweet-content" style="max-width: 60vw">
+        <div class="chatbox justify-content-between" style="width: 100%">
+          <div class="row rounded-lg overflow-hidden ">
+            <!-- 上線使用者-->
+            <div class="col-3 px-0" style="border-right: 1px solid #E6ECF0">
+              <div class="bg-white">
+      
+                <div class="bg-gray px-3 py-2 bg-light" id="usertitle" style="border-bottom: 1px solid #E6ECF0">
+                  <p class="h5 mb-0 font-weight-bold">上線使用者(N)</p>
+                </div>
+      
+                <div class="contacts-box" id="chatUserlist" style="overflow-y: scroll; height: 598px;">
+      
+                </div>
+              </div>
+            </div>
+            <!-- Chat Box-->
+            <div class="col-9 px-0">
+              <div class="bg-gray px-3 py-2 bg-light" style="border-bottom: 1px solid #E6ECF0">
+                <p class="h5 mb-0 font-weight-bold">公開聊天室</p>
+              </div>
+              <div id="chatmessage" class="px-4 py-5 chat-box bg-white" style="overflow-y: scroll; height: 550px;"> 
+              </div>
+              <!-- Typing area -->
+              <form action="#" class="bg-light">
+                <div class="input-group">
+                  <input type="text" placeholder="輸入訊息" aria-describedby="button-addon2"
+                    class="form-control rounded-0 border-0 py-4 bg-light" id="msg">
+                  <div class="input-group-append">
+                    <button id="button-addon2" type="submit" class="btn btn-link"> <i class="fa fa-paper-plane"></i></button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/locale/zh-tw.js'></script>
+</body>
+</html>
