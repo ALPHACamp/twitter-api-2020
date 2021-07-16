@@ -35,7 +35,7 @@ const userController = {
       const salt = await bcrypt.genSalt(10)
       const hashPassword = await bcrypt.hash(password, salt)
       await User.create({
-        account: `@${account}`,
+        account,
         name,
         email,
         password: hashPassword,
@@ -151,7 +151,6 @@ const userController = {
           [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
           [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE TweetId = Tweet.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
         ],
-        order: ['createdAt', 'DESC']
       })
       if (tweets.length === 0) return res.json({ status: 'error', message: '使用者沒有回覆任何推文' })
       return res.json(tweets)
