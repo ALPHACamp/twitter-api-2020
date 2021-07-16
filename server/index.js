@@ -23,7 +23,13 @@ module.exports = (server) => {
     require('./modules/enterNotice')
 
     socket.on('chat message', msg => {
-      socket.emit('chat message', msg)
+      const timeStamp = new Date()
+      const message = {
+        id: socket.id,
+        createdAt: timeStamp,
+        message: msg
+      }
+      socket.emit('chat message', message)
     })
 
   })
