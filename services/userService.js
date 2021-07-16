@@ -8,7 +8,6 @@ const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const jwt = require('jsonwebtoken')
-const { map } = require('../app')
 
 const userService = {
   signUp: (body) => {
@@ -60,6 +59,11 @@ const userService = {
             email: email,
             role: 'user',
             password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+          }).then(result => {
+            return {
+              status: 'success',
+              message: '成功註冊帳號！'
+            }
           })
         }
       })
@@ -80,6 +84,7 @@ const userService = {
         const payload = { id: user.id, role: user.role }
         const token = jwt.sign(payload, process.env.JWT_SECRET)
         return {
+          status: 'success',
           token: token,
           user: {
             id: user.id, name: user.name, email: user.email, account: user.account, avatar: user.avatar, isAdmin: Boolean(user.role === 'admin')
@@ -376,6 +381,11 @@ const userService = {
                 avatar: files.avatar ? images[0].link : user.avatar,
                 cover: files.cover ? images[1].link : user.cover
               })
+            }).then(result => {
+              return {
+                status: 'success',
+                message: 'User successfully updated.'
+              }
             })
         })
     } else {
@@ -387,6 +397,11 @@ const userService = {
             avatar: user.avatar,
             cover: user.cover
           })
+        }).then(result => {
+          return {
+            status: 'success',
+            message: 'User successfully updated.'
+          }
         })
     }
   },
