@@ -62,7 +62,6 @@ io.on('connection', async socket => {
   console.log('連接成功上線ID -----', socket.id)
   if (!socket.id) return
 
-  // emit使用者上線通知 //emit 所有上線使用者的資訊(avatar id account name)
   socket.on('online', async data => {
     // 用socket.id撈使用者資料
     // const user = await User.findByPk(socket.id,{
@@ -80,7 +79,14 @@ io.on('connection', async socket => {
   })
   socket.on('disconnect', () => {
     // emit使用者離線通知
-    console.log('disconnect')
+    console.log('disconnect', socket.id)
+    // 線上使用者列表移除離線使用者資料
+    activeUsers.delete(socket.id)
+    // activeUsers.delete(socket.userId)
+    // 聊天室通知該名使用者離開聊天
+    socket.broadcast.emit('message', socket.id)
+    // 發送線上使用者列表
+    socket.broadcast.emit('activeUsers', activeUsers)
   })
 })
 
