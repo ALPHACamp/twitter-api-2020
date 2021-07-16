@@ -314,7 +314,8 @@ let userController = {
               id: user.id,
               name: user.name,
               account: user.account,
-              email: user.email
+              email: user.email,
+              role: user.role
             }
           })
       })
