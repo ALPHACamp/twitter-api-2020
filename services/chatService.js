@@ -3,7 +3,7 @@ const { Chat, User } = require('../models')
 const chatService = {
   getHistoryChat: async (roomId = null) => {
     return await Chat.findAll({
-      attributes: ['text', 'createdAt'],
+      attributes: ['id', 'text', 'createdAt'],
       where: { room: roomId },
       include: [
         { model: User, attributes: ['id', 'name', 'avatar'] }

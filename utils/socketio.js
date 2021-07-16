@@ -32,7 +32,7 @@ module.exports = {
       io.emit('connection', clientsCount)
       const announce = `User ${socket.id} joined the public room.`
       socket.emit('announce', {
-        clientsCount, message: `${socket.user.name} joined.`
+        users, message: `${socket.user.name} joined.`
       })
       socket.on('chatMessage', async (message) => {
         await postChat({
@@ -47,7 +47,7 @@ module.exports = {
       socket.on('disconnect', (reason) => {
         users.delete(socket.user)
         socket.emit('announce', {
-          clientsCount, message: `${socket.user.name} left.`
+          users, message: `${socket.user.name} left.`
         })
         console.log(`${socket.id} is leaving.`, clientsCount)
       })
