@@ -1,7 +1,8 @@
-const { Chat, User } = require('../models')
+const { Chat, User, Member, Room, Sequelize } = require('../models')
+const { Op } = Sequelize
 
 const chatService = {
-  getHistoryChat: async (roomId = null) => {
+  joinPublicChat: async (roomId = null) => {
     return await Chat.findAll({
       attributes: ['id', 'text', 'createdAt'],
       where: { room: roomId },
@@ -18,6 +19,14 @@ const chatService = {
     } catch (error) {
       return error.message
     }
+  },
+
+  joinPrivateChat: async (a, b) => {
+    await Member.findAll({
+      where: {
+        UserId: [a, b]
+      }
+    })
   }
 }
 
