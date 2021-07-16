@@ -17,7 +17,7 @@ let adminController = {
         throw new Error('密碼輸入錯誤')
       }
       let payload = { id: user.id }
-      let token = jwt.sign(payload, process.env.JWT_SECRET)
+      let token = jwt.sign(payload, 'alphacamp')
       return res.json({
         status: 'success',
         message: 'Login successfully',
