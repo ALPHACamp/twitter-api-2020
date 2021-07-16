@@ -4,7 +4,7 @@ const functions = require('../config/functions')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Followships',
-      Array.from({ length: 4 }).map((item, index) => ({
+      Array.from({ length: 10 }).map((item, index) => ({
         id: index + 1,
         followingId: index + 1,
         followerId: index + 2,
