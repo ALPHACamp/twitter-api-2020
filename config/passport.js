@@ -7,7 +7,7 @@ const { User, Tweet } = require('../models')
 
 let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
-jwtOptions.secretOrKey = process.env.JWT_SECRET
+jwtOptions.secretOrKey = 'alphacamp'
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id, {
@@ -16,7 +16,7 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
-  }).then((user) => {
+  }).then(user => {
     if (!user) return next(null, false)
     return next(null, user)
   })
