@@ -8,7 +8,7 @@ const User = db.User
 
 let jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: 'numberFive',
 }
 
 let strategy = new JwtStrategy(jwtOptions, (jwt_payload, done) => {
