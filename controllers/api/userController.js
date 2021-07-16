@@ -129,7 +129,7 @@ let userController = {
     }
     User.findByPk(req.user.id, options)
       .then((user) => {
-        return res.json(user)
+        return res.status(200).json(user)
       })
       .catch((error) => {
         return res.status(500).json({
