@@ -44,9 +44,9 @@ app.get('/', (req, res, next) => {
 })
 
 // 引入聊天紀錄
-const records = require('./records')
+let records = require('./records')
 // 在線人數
-const onlineCounts = 0
+let onlineCounts = 0
 
 io.on("connect_error", (err) => {
   console.log(`connect_error due to ${err.message}`);
@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
   console.log('new user connected')
 
   // 發送之前的全部訊息
-  io.emit('historyMessages', msgs)
+  // io.emit('historyMessages', msgs)
 
   socket.on('newMessage', (msg) => {
     // 前端傳來的訊息為空 return
