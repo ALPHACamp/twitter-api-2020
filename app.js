@@ -64,7 +64,8 @@ io.on('connection', (socket) => {
     // 前端傳來的訊息為空 return
     if (!msg) return
     // 新訊息放進陣列儲存
-    msgs.push({ message: msg })
+    // msgs.push({ message: msg })
+
     // broadcasting to all connected sockets
     io.emit('newMessage', msg)
     console.log('message: ' + msg)
