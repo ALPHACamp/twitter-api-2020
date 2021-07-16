@@ -120,19 +120,6 @@ module.exports = {
     },
     {
       id: 10,
-      email: 'Taiwan_CDC@example.com',
-      password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-      name: 'TaiwanCDC',
-      account: 'Taiwan_CDC',
-      introduction: 'Official Twitter account of Centers for Disease Control, ROC (Taiwan)',
-      avatar: 'https://pbs.twimg.com/profile_images/819857147546595328/QfzeN-LP_400x400.jpg',
-      cover: 'https://pbs.twimg.com/profile_banners/819824721537605632/1623380994/1500x500',
-      role: 'user',
-      createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
-      updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
-    },
-    {
-      id: 11,
       email: 'elonmusk@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       name: 'Elon Musk',
@@ -145,7 +132,7 @@ module.exports = {
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
     },
     {
-      id: 12,
+      id: 11,
       email: 'root@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       name: 'root',
