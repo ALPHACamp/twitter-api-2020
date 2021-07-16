@@ -356,7 +356,7 @@ const userService = {
       return users
     })
   },
-  putUser: (viewerRole, UserId, viewerId, body, files) => {
+  putUser: async (viewerRole, UserId, viewerId, body, files) => {
     if (Number(UserId) !== viewerId) {
       throw new RequestError('This is not this user\'s account.')
     }
@@ -365,79 +365,83 @@ const userService = {
       throw new RequestError('User name required.')
     }
 
-    // TODO：改善重複上傳的問題
-    if (files) {
-      imgur.setClientId(IMGUR_CLIENT_ID)
-      const avatar = files.avatar ? imgur.uploadFile((files.avatar[0].path)) : null
-      const cover = files.cover ? imgur.uploadFile((files.cover[0].path)) : null
+    try {
+      // TODO：改善重複上傳的問題
+      if (files) {
+        imgur.setClientId(IMGUR_CLIENT_ID)
+        const avatar = files.avatar ? await imgur.uploadFile((files.avatar[0].path)) : null
+        const cover = files.cover ? await imgur.uploadFile((files.cover[0].path)) : null
 
-      Promise.all([avatar, cover])
-        .then(images => {
-          return User.findByPk(UserId)
-            .then(user => {
-              return user.update({
-                name: body.name,
-                introduction: body.introduction,
-                avatar: files.avatar ? images[0].link : user.avatar,
-                cover: files.cover ? images[1].link : user.cover
-              })
-            }).then(result => {
-              return {
-                status: 'success',
-                message: 'User successfully updated.'
-              }
-            })
+        const user = await User.findByPk(UserId)
+
+        const updateResult = await user.update({
+          name: body.name,
+          introduction: body.introduction,
+          avatar: files.avatar ? avatar.link : user.avatar,
+          cover: files.cover ? cover.link : user.cover
         })
-    } else {
-      return User.findByPk(UserId)
-        .then((user) => {
-          return user.update({
-            name: body.name,
-            introduction: body.introduction,
-            avatar: user.avatar,
-            cover: user.cover
-          })
-        }).then(result => {
-          return {
-            status: 'success',
-            message: 'User successfully updated.'
-          }
+
+        return {
+          status: 'success',
+          message: 'User successfully updated.'
+        }
+
+      } else {
+
+        const user = await User.findByPk(UserId)
+
+        const updateResult = await user.update({
+          name: body.name,
+          introduction: body.introduction,
+          avatar: user.avatar,
+          cover: user.cover
         })
+
+        return {
+          status: 'success',
+          message: 'User successfully updated.'
+        }
+      }
+    } catch (error) {
+      throw new RequestError(error.message)
     }
+
+
   },
-  putUserSettings: (viewerRole, UserId, viewerId, body) => {
+  putUserSettings: async (viewerRole, UserId, viewerId, body) => {
     const { account, name, email, password, checkPassword } = body
     if (Number(UserId) !== viewerId) {
       throw new RequestError('This is not this user\'s account.')
     }
 
-    return User.findByPk(UserId)
-      .then(user => {
-        if (!user) {
-          throw new RequestError('This user does not exist.')
-        }
-        if (!account || !name || !email || !password || !checkPassword) {
-          throw new RequestError('Required fields missing.')
-        }
-        if (password !== checkPassword) {
-          throw new RequestError('Password should be as same as checkPassword')
-        }
+    try {
+      const user = await User.findByPk(UserId)
 
-        return user.update({
-          account: account,
-          name: name,
-          email: email,
-          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-        }).then(() => {
-          return {
-            status: 'success',
-            message: 'User successfully updated.',
-            user: { id: UserId }
-          }
-        }).catch(err => {
-          throw new RequestError(err)
-        })
+      if (!user) {
+        throw new RequestError('This user does not exist.')
+      }
+      if (!account || !name || !email || !password || !checkPassword) {
+        throw new RequestError('Required fields missing.')
+      }
+      if (password !== checkPassword) {
+        throw new RequestError('Password should be as same as checkPassword')
+      }
+
+      const updateResult = await user.update({
+        account: account,
+        name: name,
+        email: email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       })
+
+      return {
+        status: 'success',
+        message: 'User successfully updated.',
+        user: { id: UserId }
+      }
+    } catch (error) {
+      throw new RequestError(error.message)
+    }
   },
   getUserRepliedTweets: (viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
