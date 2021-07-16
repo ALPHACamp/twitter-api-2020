@@ -1,34 +1,56 @@
 const { Server } = require('socket.io')
 
+const { postChat } = require('../services/chatService')
+
 const { socketAuth } = require('../middlewares/auth')
 
-module.exports = (server) => {
-  const io = new Server(server, {
+let io
+const users = new WeakSet()
+
+module.exports = {
+  init(server) {
+    io = new Server(server, {
       cors: {
-      origin: process.env.CORS_WHITE_LIST.split(','),
-      methods: ['GET', 'POST'],
-      transports: ['websocket', 'polling'],
-      credentials: true
-    },
-    allowEIO3: true
-  })
-
-  io.use(socketAuth)
-
-  io.on('connection', (socket) => {
-    console.log('A user connected')
-    console.log(io.engine.clientsCount)
-    
-    io.emit('connection', io.engine.clientsCount)
-    const announce = `User ${socket.id} joined the public room.`
-    socket.broadcast.emit('announce', announce, io.engine.clientsCount)
-    socket.on('chat message', (message) => {
-      message = `${socket.user.name}: ${message}`
-      socket.broadcast.emit('chat message', message, socket.user)
+        origin: process.env.CORS_WHITE_LIST.split(','),
+        methods: ['GET', 'POST'],
+        transports: ['websocket', 'polling'],
+        credentials: true
+      },
+      allowEIO3: true
     })
-    socket.on('disconnect', (reason) => {
-      console.log(`${socket.id} is leaving.`)
-      console.log(io.engine.clientsCount)
+  },
+  connect() {
+    if (!io) throw new Error('No socket io server instance')
+
+    io.use(socketAuth)
+
+    io.on('connection', (socket) => {
+      const { clientsCount } = io.engine
+      console.log('A user connected ', clientsCount)
+      users.add(socket.user)
+
+      io.emit('connection', clientsCount)
+      const announce = `User ${socket.id} joined the public room.`
+      socket.emit('announce', {
+        clientsCount, message: `${socket.user.name} joined.`
+      })
+      socket.on('chatMessage', async (message) => {
+        await postChat({
+          UserId: message.User.id,
+          text: message.text,
+          createdAt: message.createdAt,
+          updatedAt: message.time
+        })
+        io.emit('chatMessage', message)
+      })
+
+      socket.on('disconnect', (reason) => {
+        users.delete(socket.user)
+        socket.emit('announce', {
+          clientsCount, message: `${socket.user.name} left.`
+        })
+        console.log(`${socket.id} is leaving.`, clientsCount)
+      })
     })
-  })
+  }
 }
