@@ -451,7 +451,7 @@ const userService = {
           include: [
             {
               model: Tweet,
-              attributes: ['id', 'description', 'replyCount', 'likeCount'],
+              attributes: ['id', 'description', 'replyCount', 'likeCount', 'createdAt'],
               include: [
                 { model: Like, separate: true, where: { UserId: viewerId }, required: false },
                 { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
