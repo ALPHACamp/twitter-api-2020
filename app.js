@@ -1,61 +1,45 @@
 const express = require('express')
 const app = express()
+const exphbs = require('express-handlebars')
+
 //socket
 const server = require('http').createServer(app);
-const io = require('socket.io')(server)
+// const io = require('socket.io')(server)
 const { createAdapter } = require("@socket.io/mongo-adapter");
-const SocketHander = require('./socket/index')
-
 const cors = require('cors')
 const methodOverride = require('method-override')
 
-io.on('connection', () => { /* … */ });
+
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const port = process.env.PORT
 const helpers = require('./_helpers')
-app.use(methodOverride('_method'))
 
+app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
+app.set('view engine', "handlebars")
+
+app.use(express.static('public'))
+app.use(methodOverride('_method'))
 app.use(cors())
 app.use(express.urlencoded({ extended: true })) //用來解析表單
 app.use(express.json()) //用來解析json
 app.use('/upload', express.static(__dirname + '/upload'))
-// require('./config/mongoose')
-
-
-io.on('connection', (socket) => {
-  // io.emit('chat message', '連線成功！');
-  socket.on('chat message', (msg) => {
-    const date = new Date()
-    io.emit('chat message', `${msg.name}: ${msg.msg}`);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('有人離開聊天室')
-  })
-
-})
 
 app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
   return next()
 })
 
-
-
-
-
-
 require('./routes')(app)
+require('./config/socket').io(server)
 
 app.use((err, req, res, next) => {
   return res.status(500).json({ Error: String(err) })
 })
-
-// app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
 //socket
 server.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
+
+// app.listen(port, () => console.log(`Example app listening on port ${port}!`))

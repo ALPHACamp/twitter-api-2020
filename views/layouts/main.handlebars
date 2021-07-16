@@ -62,38 +62,7 @@
 </head>
 
 <body>
-  <ul id="messagesBody"></ul>
-  <form id="form" action="">
-    <input id="roomName" type="hidden" name="roomName" autocomplete="off" value="user1" />
-    <input id="message" name="message" autocomplete="off" />
-    <button type="submit">Send</button>
-  </form>
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-
-    const messages = document.querySelector('#messagesBody');
-    const form = document.querySelector('#form');
-    const input = document.querySelector('#message');
-    socket.name = 'user1'
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (input.value) {
-        socket.name = 'user1'
-        socket.id = 15
-        socket.emit('chat message', { id: `${socket.id}`, name: `${socket.name}`, msg: `${input.value}` });
-        input.value = '';
-      }
-    });
-
-    socket.on('chat message', (msg) => {
-      const item = document.createElement('li');
-      item.textContent = msg;
-      messages.appendChild(item);
-      window.scrollTo(0, document.body.scrollHeight);
-    });
-
-  </script>
+  {{{body}}}
 </body>
 
 </html>
