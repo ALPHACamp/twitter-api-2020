@@ -297,7 +297,7 @@ let userController = {
         let payload = {
           id: user.id
         }
-        let token = jwt.sign(payload, process.env.JWT_SECRET)
+        let token = jwt.sign(payload, 'numberFive')
         user.lastLoginAt = new Date()
         await User.update(user.dataValues, {
           where: {

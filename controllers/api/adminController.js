@@ -131,7 +131,7 @@ let adminController = {
         let payload = {
           id: user.id
         }
-        let token = jwt.sign(payload, process.env.JWT_SECRET)
+        let token = jwt.sign(payload, 'numberFive')
         return res.status(200).json({
           status: 'success',
           message: 'Administrator successfully login.',
