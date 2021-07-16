@@ -5,6 +5,7 @@ const userRoute = require('./userRoute')
 const tweetRoute = require('./tweetRoute')
 const followshipRoute = require('./followshipRoute')
 const adminRoute = require('./adminRoute')
+const chatRoute = require('./chatRoute')
 
 const userController = require('../../controllers/userController')
 
@@ -17,5 +18,7 @@ router.use('/users', userRoute)
 router.use('/tweets', authenticated, checkRole(), tweetRoute)
 router.use('/followships', authenticated, checkRole(), followshipRoute)
 router.use('/admin', adminRoute)
+
+router.use('/chat', authenticated, checkRole(), chatRoute)
 
 module.exports = router
