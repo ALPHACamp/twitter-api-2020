@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 
-app.use(session({ secret: process.env.SESSION_SECRET, saveUninitialized: true, resave: false }))
+app.use(session({ secret: 'numberFive', saveUninitialized: true, resave: false }))
 const passport = require('./config/passport')
 app.use(passport.initialize())
 app.use(passport.session())
