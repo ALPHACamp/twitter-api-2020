@@ -2,6 +2,7 @@ const express = require('express')
 // const helpers = require('./_helpers');
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
+const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -11,22 +12,16 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const passport = require('./config/passport');
-const { getReqUserFromToken } = require('./middlewares/auth')
 const { replaceReqUser } = require('./middlewares/mocha')
+
+app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(methodOverride('_method'))
 
-// use helpers.getUser(req) to replace req.user
-// function authenticated(req, res, next){
-//   // passport.authenticate('jwt', { ses...
-// };
-
 app.use(passport.initialize())
 app.use(passport.session())
-
-app.use(getReqUserFromToken)
 
 // for mocha test's requirement
 app.use(replaceReqUser)

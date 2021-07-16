@@ -1,72 +1,125 @@
 const db = require('../models')
 const Tweet = db.Tweet
 const Reply = db.Reply
+const User = db.User
+const Like = db.Like
+
+const { Op, Sequelize } = require('sequelize')
+
+const tweetService = require('../services/tweetService')
 
 const tweetController = {
-  postTweet: (req, res) => {
+  postTweet: async (req, res) => {
     const { description } = req.body
-    if (!description) {
+    const viewerId = req.user.id
+
+    try {
+      const data = await tweetService.postTweet(viewerId, description)
+
+      return res.status(200).json(data)
+    } catch (error) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Description can not be null'
-      })
-    } else if (description.length > 140) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Description can not be longer than 140'
-      })
-    } else {
-      return Tweet.create({
-        UserId: req.user.id,
-        description,
-        replyCount: 0,
-        likeCount: 0
-      }).then(tweet => {
-        return res.status(200).json({
-          id: tweet.id,
-          status: 'success',
-          message: 'Create tweet successfully'
-        })
+        status: error.name,
+        message: error.message
       })
     }
   },
 
-  postReply: (req, res) => {
+  postReply: async (req, res) => {
     const { comment } = req.body
     const TweetId = req.params.id
-    const UserId = req.user.id
+    const viewerId = req.user.id
 
-    if (!comment) {
+    try {
+      const data = await tweetService.postReply(viewerId, TweetId, comment)
+
+      return res.status(200).json(data)
+
+    } catch (error) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Comment can not be null'
+        status: error.name,
+        message: error.message
       })
     }
+  },
 
-    return Tweet.findByPk(TweetId)
-      .then(tweet => {
-        if (!tweet) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Tweet does not exist'
-          })
-        }
+  getSingleTweet: async (req, res) => {
+    const tweet_id = req.params.id
+    const viewerId = req.user.id
 
-        return Reply.create({
-          UserId,
-          TweetId,
-          comment
-        }).then(reply => {
-          return res.status(200).json({
-            id: reply.id,
-            status: 'success',
-            message: 'Reply has been created successfully'
-          })
-        })
+    try {
+      const data = await tweetService.getSingleTweet(viewerId, tweet_id)
+
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
       })
+    }
+  },
+
+  getTweets: async (req, res) => {
+    const viewerId = req.user.id
+    try {
+      const data = await tweetService.getTweets(viewerId, 'user')
+
+      return res.status(200).json(data)
+
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+
+  postLike: async (req, res) => {
+    const viewerId = req.user.id
+    const TweetId = req.params.id
+
+    try {
+      const data = await tweetService.postLike(viewerId, TweetId)
+
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }  
+  },
+
+  postUnlike: async (req, res) => {
+    const viewerId = req.user.id
+    const TweetId = req.params.id
+
+    try {
+      const data = await tweetService.postUnlike(viewerId, TweetId)
+    
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+
+  getTweetReplies: async (req, res) => {
+    const TweetId = req.params.id
+
+    try {
+      const data = await tweetService.getTweetReplies(TweetId) 
+    
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }  
   }
 }
-
-
 
 module.exports = tweetController

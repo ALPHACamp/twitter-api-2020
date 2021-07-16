@@ -1,7 +1,12 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
-const User = db.User
+const { User, Tweet, Like, Reply, Followship, Sequelize } = db
 const { Op } = require('sequelize')
+
+const userService = require('../services/userService')
+
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -9,63 +14,174 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userController = {
-  signUp: (req, res) => {
-    if (!req.body.name || !req.body.account || !req.body.email || !req.body.password || !req.body.checkPassword) {
-      return res.json({ status: 'error', message: '每個欄位都是必要欄位！' })
-    } else if (req.body.checkPassword !== req.body.password) {
-      return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
-    } else {
-      User.findOne({
-        where: {
-          [Op.or]: [
-            { email: req.body.email },
-            { account: req.body.account }
-          ]
-        }
-      }).then(user => {
-        if (user) {
-          if (user.email === req.body.email) {
-            return res.json({ status: 'error', message: '信箱重複！' })
-          } else if (user.account === req.body.account) {
-            return res.json({ status: 'error', message: '帳號重複！' })
-          }
-        } else {
-          User.create({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
-            return res.json({ status: 'success', message: '成功註冊帳號！' })
-          })
+  signUp: async (req, res) => {
+    const { body } = req
+    const { name, account, email, password, checkPassword } = body
+
+    try {
+      const data = await userService.signUp(body)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message,
+        request_data: {
+          name: name || null,
+          account: account || null,
+          email: email || null,
+          password: password || null,
+          checkPassword: checkPassword || null
         }
       })
     }
   },
-  logIn: (req, res) => {
-    if (!req.body.account || !req.body.password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
-    }
-    const account = req.body.account
-    const password = req.body.password
-
-    User.findOne({ where: { account: account } }).then(user => {
-      if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
-      if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: 'passwords did not match' })
-      }
-      const payload = { id: user.id, role: user.role }
-      const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
-        status: 'success',
-        message: 'ok',
-        token: token,
-        user: {
-          id: user.id, name: user.name, email: user.email, role: user.role
-        }
+  logIn: async (req, res) => {
+    const { body } = req
+    try {
+      const data = await userService.login(body)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
       })
-    })
+    }
+  },
+  getUser: async (req, res) => {
+    const UserId = req.params.id
+    try {
+      const data = await userService.getUser('user', UserId, false)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+  getUserTweets: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserTweets('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+  getUserLikes: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserLikes('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+  getUserFollowings: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserFollowings('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+  getUserFollowers: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserFollowers('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+  getTopUsers: async (req, res) => {
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getTopUsers('user', viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+
+  putUser: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    const { body, files } = req
+    try {
+      const data = await userService.putUser('user', UserId, viewerId, body, files)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+
+  putUserSettings: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    const { body } = req
+    try {
+      const data = await userService.putUserSettings('user', UserId, viewerId, body)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+
+  getUserRepliedTweets: async (req, res) => {
+    const UserId = req.params.id
+    const viewerId = req.user.id
+    try {
+      const data = await userService.getUserRepliedTweets('user', UserId, viewerId)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+  },
+
+  getCurrentUser: async (req, res) => {
+    const UserId = req.user.id
+
+    try {
+      const data = await userService.getUser('user', UserId, true)
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   }
+
 }
 
 module.exports = userController
