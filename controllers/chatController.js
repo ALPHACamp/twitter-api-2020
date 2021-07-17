@@ -1,9 +1,9 @@
 const chatService = require('../services/chatService')
 
 const chatController = {
-  joinPublicChat: async (req, res, next) => {
+  getHistoryChat: async (req, res, next) => {
     try {
-      const data = await chatService.joinPublicChat()
+      const data = await chatService.getHistoryChat()
       return res.json(data)
     } catch (error) {
       next(error)
