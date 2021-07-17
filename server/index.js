@@ -8,7 +8,7 @@ module.exports = (server) => {
     }
   })
 
-  io.on('connection', socket => {
+  io.on('connection', async socket => {
     console.log('A user connecting')
     console.log(socket.handshake.headers.host)
     console.log(socket.handshake.url)
@@ -18,7 +18,9 @@ module.exports = (server) => {
     socket.onAny((event, ...args) => {
       console.log(event, args)
     })
-    messageService.getMessages(socket)
+
+    const data = await messageService.getMessages(socket)
+    socket.emit('get messages', data)
 
     require('./modules/listUser')(io, socket)
     require('./modules/enterNotice')(socket)

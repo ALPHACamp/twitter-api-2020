@@ -19,14 +19,14 @@ const messageService = {
     })
   },
 
-  getMessages: (socket, isPrivate) => {
+  getMessages: (socket, isPrivate = false) => {
     let whereClause = {}
     switch (isPrivate) {
       case true:
-        // whereClause = { roomId:  }
+        // whereClause = { RoomId:  }
         break
       case false:
-        whereClause = { roomId: null }
+        whereClause = { RoomId: null }
         break
     }
     return Message.findAll({
@@ -42,8 +42,7 @@ const messageService = {
           createdAt: msg.dataValues.createdAt
         }
         return mapItem
-      })
-      socket.emit('get messages', msg)
+      }).then(msg => { return msg })
     })
   }
 }
