@@ -4,10 +4,15 @@ const socketio = require('socket.io')
 const db = require('../models')
 const Message = db.Message
 const User = db.User
+const {authenticatedSocket} = require('../middleware/auth')
 
 module.exports = (server) => {
   const io = socketio(server)
-  io.on('connection', (socket) => {
+  const wrap = (middleware) => (socket, next) =>
+    middleware(socket.request, {}, next)
+
+  io.use(wrap(authenticatedSocket)).on('connection', (socket) => {
+    console.log(socket.request.user)
     /* connect */
     sockets.push(socket)
     userSockets[socket.id] = 1

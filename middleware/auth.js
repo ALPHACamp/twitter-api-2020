@@ -31,5 +31,14 @@ module.exports = {
       status: 'error',
       message: 'Permission is denied, only User can visit.'
     })
+  },
+  authenticatedSocket: (req, res, next) => {
+    passport.authenticate('jwt', { session: false }, (err, user) => {
+      if (!user) {
+        return next('Permission is denied')
+      }
+      req.user = user
+      return next()
+    })(req, res, next)
   }
 }
