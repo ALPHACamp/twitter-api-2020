@@ -1,6 +1,7 @@
 const messageService = require('../services/messageService')
 
 module.exports = (server) => {
+
   const io = require('socket.io')(server, {
     cors: {
       origin: '*',
@@ -19,21 +20,67 @@ module.exports = (server) => {
       console.log(event, args)
     })
 
-    const data = await messageService.getMessages(socket)
-    socket.emit('get messages', data)
+    const users = []
 
-    require('./modules/listUser')(io, socket)
-    require('./modules/enterNotice')(socket)
+    // 非同步執行，不知道會不會有渲染順序的問題
+    try {
+      const messages = messageController.getMessages(socket)
+      socket.emit('get messages', messages)
+    } catch (error) {
+      return socket.emit('error', {
+        status: error.name,
+        message: error.message
+      })
+    }
 
-    socket.on('chat message', msg => {
-      messageService.saveMessage(msg)
-      const timeStamp = new Date()
-      const message = {
-        id: socket.id,
-        createdAt: timeStamp,
-        message: msg
+    socket.once('current user', msg => {
+      let usersPool = new Map()
+      socket.data = { ...msg }
+
+      for (let [id, socket] of io.of('/').sockets) {
+        if (usersPool.has(socket.data.user_id)) {
+          return
+        } else {
+          users.push({ ...socket.data })
+          usersPool.set(socket.data.user_id, {
+            ...socket.data
+          })
+        }
       }
-      socket.emit('chat message', message)
+
+      socket.emit('users', users)
+      socket.broadcast.emit('users', users)
+      socket.broadcast.emit('user connected', {
+        name: socket.data.name,
+        isOnline: 1
+      })
+    })
+
+    socket.on('chat message', async msg => {
+      try {
+        const message = {
+          id: socket.data.id,
+          createdAt: msg.createdAt,
+          message: msg.content
+        }
+        await messageController.saveMessage(socket, msg)
+
+        return socket.emit('chat message', message)
+
+      } catch (error) {
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
+      }
+    })
+
+    socket.on('disconnect', reason => {
+      socket.broadcast.emit('users', users)
+      socket.broadcast.emit('user disconnected', {
+        name: socket.data.name,
+        isOnline: 0
+      })
     })
   })
 

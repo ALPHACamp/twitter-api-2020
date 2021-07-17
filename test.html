@@ -27,6 +27,14 @@
       transports: ['websocket', 'polling']
     })
 
+    const data = {
+      avatar: 'https://i.imgur.com/kfIu65A.png',
+      name: 'user2',
+      account: 'user2',
+      user_id: 2
+    }
+    socket.emit('current user', data)
+
     const currentUserBtn = document.querySelector('#current_user')
 
     currentUserBtn.addEventListener('click', e => {
@@ -41,16 +49,21 @@
     })
 
     socket.on('users', msg => {
-      console.log('users', msg)
+      console.log('這是users', msg)
     })
 
     socket.on('user connected', msg => {
-      console.log('user connected', msg)
+      console.log('這是user connected', msg)
     })
 
     // 接受歷史訊息
     socket.on('get messages', msg => {
-      console.log('get messages', msg)
+      console.log('這是get messages', msg)
+    })
+
+    socket.on('user disconnected', msg => {
+      console.log('這是user disconnected', msg)
+
     })
 
     socket.on('connect_error', error => {
@@ -60,6 +73,7 @@
         socket.io.opts.transports = ["polling", "websocket"];
       })
     })
+
 
 
   </script>
