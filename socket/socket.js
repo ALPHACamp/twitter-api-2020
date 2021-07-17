@@ -13,10 +13,9 @@ module.exports = (server) => {
     middleware(socket.request, {}, next)
 
   io.use(wrap(authenticatedSocket)).on('connection', (socket) => {
-    // console.log(socket.request.user)
     /* connect */
     sockets.push(socket)
-    userSockets[Math.floor(Math.random() * 6) + 1] = socket.id
+    userSockets[1] = socket.id
     // console.log(sockets)
     console.log(userSockets)
     console.log(`User is online: ${socket.id}`)
@@ -99,7 +98,25 @@ module.exports = (server) => {
         )
         user2Socket.join(roomId)
       }
-      callback({ roomId })
+      callback({ roomId }, socket.id)
+    })
+    //listen privacy msg and send
+    socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
+      console.log('=========')
+      console.log({ UserId, RoomId, content })
+      console.log('=========')
+
+      const user = await User.findByPk(+UserId)
+      const message = await Message.create({ UserId, RoomId, content })
+      console.log(user.toJSON())
+      console.log(message.toJSON())
+      // const user = array[0].toJSON()
+      //  = array[1].toJSON()
+      let createdAt = message.createdAt
+      const avatar = user.avatar
+      socket
+        .to(RoomId)
+        .emit('get_private_msg', { UserId, RoomId, content, avatar, createdAt })
     })
   })
 }
