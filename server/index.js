@@ -32,17 +32,19 @@ module.exports = (server) => {
       })
     }
 
-    socket.on('current user', msg => {
+    socket.once('current user', msg => {
+      let usersPool = new Map()
       socket.data = { ...msg }
 
       for (let [id, socket] of io.of('/').sockets) {
-        users.push({
-          userSocketId: id,
-          id: socket.data.id,
-          account: socket.data.account,
-          name: socket.data.name,
-          avatar: socket.data.avatar
-        })
+        if (usersPool.has(socket.data.user_id)) {
+          return
+        } else {
+          users.push({ ...socket.data })
+          usersPool.set(socket.data.user_id, {
+            ...socket.data
+          })
+        }
       }
 
       socket.emit('users', users)
