@@ -49,6 +49,7 @@ module.exports = (server) => {
       socket.broadcast.emit('users', users)
       socket.broadcast.emit('user connected', {
         name: socket.data.name,
+        isOnline: 1
       })
     })
 
@@ -75,6 +76,7 @@ module.exports = (server) => {
       socket.broadcast.emit('users', users)
       socket.broadcast.emit('user disconnected', {
         name: socket.data.name,
+        isOnline: 0
       })
     })
   })
