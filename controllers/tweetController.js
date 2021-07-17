@@ -41,6 +41,7 @@ let tweetController = {
       const likeCount = tweet.Likes.length
 
       return res.json({
+        userId: tweet.UserId,
         account: tweet.User.account,
         avatar: tweet.User.avatar,
         name: tweet.User.name,
