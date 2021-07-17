@@ -54,7 +54,12 @@ const messageService = {
   },
 
   searchUnread: (io, socket, msg) => {
-
+    return Message.findAll({
+      where: {
+        isRead: false,
+        UserId: msg.id
+      }
+    }).then(msg => { return msg.length })
   },
 
   clearUnread: (io, socket, msg) => {
