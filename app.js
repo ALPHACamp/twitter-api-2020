@@ -1,15 +1,27 @@
 const express = require('express')
-const helpers = require('./_helpers');
-
+const cors = require('cors')
+const bodyParser = require('body-parser')
+const session = require('express-session')
+const helpers = require('./_helpers')
+if (process.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const app = express()
-const port = 3000
+const port = process.env.PORT
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+//bodyparse set
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
-app.get('/', (req, res) => res.send('Hello World!'))
+
+app.use(session({ secret: 'numberFive', saveUninitialized: true, resave: false }))
+const passport = require('./config/passport')
+app.use(passport.initialize())
+app.use(passport.session())
+
+app.use(cors())
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
+
+require('./routes/index')(app)
