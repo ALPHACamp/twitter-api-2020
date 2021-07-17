@@ -1,3 +1,5 @@
+const messageController = require('../controllers/messageController')
+
 module.exports = (server) => {
   const io = require('socket.io')(server, {
     cors: {
@@ -16,11 +18,13 @@ module.exports = (server) => {
     socket.onAny((event, ...args) => {
       console.log(event, args)
     })
+    messageController.getMessages()
 
     require('./modules/listUser')(io, socket)
     require('./modules/enterNotice')(socket)
 
     socket.on('chat message', msg => {
+      messageController.saveMessage()
       const timeStamp = new Date()
       const message = {
         id: socket.id,

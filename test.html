@@ -48,6 +48,11 @@
       console.log('user connected', msg)
     })
 
+    // 接受歷史訊息
+    socket.on('get messages', msg => {
+      console.log('get messages', msg)
+    })
+
     socket.on('connect_error', error => {
       console.log('=====connect_error=====', error.message)
 
