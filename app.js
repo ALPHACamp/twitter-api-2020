@@ -21,13 +21,11 @@ const port = process.env.PORT || 3000
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-app.use(express.static(path.join(__dirname, 'public')))
+
 
 app.use('/upload', express.static(__dirname + '/upload'))
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
-app.get('/users/chat', (req, res) => {
-  res.sendFile(__dirname + '/public/publicRoom.html')
-})
+
 
 require('./routes')(app)
 
