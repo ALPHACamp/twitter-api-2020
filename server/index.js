@@ -22,7 +22,7 @@ module.exports = (server) => {
 
     const users = []
 
-    messageController.getMessages()
+    messageController.getMessages(socket)
 
     socket.on('current user', msg => {
       socket.data = { ...msg }
