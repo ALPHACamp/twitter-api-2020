@@ -17,14 +17,18 @@ module.exports = (server) => {
     })
 
     /* join public room */
-    socket.on('join-public-room', socketController.joinPublicRoom)
+    socket.on('join-public-room',
+      io.emit('new-join', socketController.joinPublicRoom)
+    )
 
     /* get public history */
     socket.on('get-public-history', socketController.getPublicHistory)
 
     /* public message */
-    socket.on('post-public-msg', socketController.postPublicMsg)
-
+    socket.on('post-public-msg',
+      socket.broadcast.emit('get-public-msg',
+        socketController.postPublicMsg)
+    )
   })
 
 }

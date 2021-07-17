@@ -21,9 +21,9 @@ let socketController = {
   },
   joinPublicRoom: ({ userId }) => {
     const user = await User.findByPk(userId)
-    io.emit('new-join', {
+    return {
       name: user.name
-    })
+    }
   },
   postPublicMsg: async ({ msg, userId }) => {
     const message = await Message.create({
@@ -32,11 +32,11 @@ let socketController = {
       content: msg
     })
     const user = await User.findByPk(userId)
-    socket.broadcast.emit('get-public-msg', {
+    return {
       msg: message.content,
       createdAt: message.createdAt,
       avatar: user.avatar
-    })
+    }
   },
 }
 module.exports = socketController
