@@ -44,15 +44,23 @@ module.exports = (server) => {
       })
     })
 
-    socket.on('chat message', msg => {
-      messageController.saveMessage()
-      const timeStamp = new Date()
-      const message = {
-        id: socket.id,
-        createdAt: timeStamp,
-        message: msg
+    socket.on('chat message', async msg => {
+      try {
+        const message = {
+          id: socket.data.id,
+          createdAt: msg.createdAt,
+          message: msg.content
+        }
+        await messageController.saveMessage(socket, msg)
+
+        return socket.emit('chat message', message)
+
+      } catch (error) {
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
       }
-      socket.emit('chat message', message)
     })
 
     socket.on('disconnect', reason => {
