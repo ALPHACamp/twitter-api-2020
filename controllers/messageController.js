@@ -4,18 +4,18 @@ const User = db.User
 const Message = db.Message
 
 const messageController = {
-  saveMessage: (socket, msg) => {
-    if (!msg) {
+  saveMessage: (msg) => {
+    if (!msg.content) {
       throw new RequestError('Empty input, no msg to save')
     }
-    if (!socket.data.id) {
+    if (!msg.id) {
       throw new RequestError('Save message failed, login to send message')
     }
     return Message.create({
-      UserId: socket.data.id,
-      content: msg,
-      // createdAt: 要是前端傳的時間
-      // updatedAt:
+      UserId: msg.id,
+      content: msg.content,
+      createdAt: msg.createdAt,
+      updatedAt: msg.updatedAt
     })
   },
 
