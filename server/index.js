@@ -22,6 +22,84 @@ module.exports = (server) => {
 
     const users = []
 
+    // 未讀通知
+    socket.on('messageNotify', async msg => {
+      try {
+        const unReads = await messageService.searchUnread(io, socket, msg)
+
+        socket.emit('messageNotify', unReads)
+
+      } catch (error) {
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
+      }
+    })
+
+    // 進入私聊介面
+    socket.on('enterPrivateInterface', async msg => {
+      try {
+        const chattedUsers = await messageService.getChattedUsers(io, socket, msg)
+
+        socket.emit('chattedUsers', chattedUsers)
+      } catch (error) {
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
+      }
+    })
+
+    // 進入房間
+    socket.on('enterRoom', async msg => {
+      try {
+        const { id, listenerId } = msg
+        let roomName = ''
+        // 加入房間
+
+        // 先清空 => 後搜尋未讀
+        await messageService.clearUnread(io, socket, msg)
+        const unReads = await messageService.searchUnread(io, socket, msg)
+
+        socket.emit('messageNotify', unReads)
+
+        // 取得歷史訊息
+        const messages = await messageService.getMessages(socket, true)
+        socket.emit('getMessages', messages)
+
+      } catch (error) {
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
+      }
+    })
+
+    // 1on1私聊
+    socket.on('privateMessage', async msg => {
+      try {
+        let isInRoom = true
+        let roomName = ''
+
+        // 分辨對話人是否在房間
+        // 組合roomName
+        // code...
+        msg.isInRoom = isInRoom
+
+
+        // 儲存訊息
+        const message = await messageService.saveMessage(msg)
+        socket.to(roomName).emit('privateMessage', message)
+
+      } catch (error) {
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
+      }
+    })
+
     socket.on('currentUser', async msg => {
       try {
         let usersPool = new Map()

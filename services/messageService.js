@@ -20,7 +20,7 @@ const messageService = {
       message = message.toJSON()
       message.id = message.UserId
       delete message.UserId
-      
+
       return message
     })
   },
@@ -51,7 +51,19 @@ const messageService = {
       })
       return msg
     })
-  }
+  },
+
+  searchUnread: (io, socket, msg) => {
+
+  },
+
+  clearUnread: (io, socket, msg) => {
+
+  },
+
+  getChattedUsers: (io, socket, msg) => {
+
+  },
 }
 
 module.exports = messageService
