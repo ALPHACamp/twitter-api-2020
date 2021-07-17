@@ -4,6 +4,12 @@ const Message = db.Message
 
 const messageController = {
   saveMessage: (socket, msg) => {
+    if (!msg) {
+      throw new RequestError('Empty input, no msg to save')
+    }
+    if (!socket.data.id) {
+      throw new RequestError('Save message failed, login to send message')
+    }
     return Message.create({
       UserId: socket.data.id,
       content: msg
