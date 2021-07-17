@@ -1,4 +1,3 @@
-const path = require('path')
 const http = require('http')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -23,7 +22,6 @@ app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-
 app.use('/upload', express.static(__dirname + '/upload'))
 //swagger
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
@@ -37,7 +35,8 @@ const io = require('socket.io')(server, {
     credentials: true
   }
 })
-const activeUsers = new Set()
+const activeUsers = []
+const activeUsersCount = 1
 io.use(
   (socket, next) => {
     const token = socket.handshake.auth.token
@@ -57,11 +56,10 @@ io.use(
   }
 ).on('connection', async socket => {
   console.log('connection')
-  console.log('連接成功上線ID -----', socket.id)
-  if (!socket.id) return
+  if (!userId) return
   socket.on('online', async userId => {
     try {
-      // 用socket.id撈使用者資料
+    // 用userId撈使用者資料
       const user = await User.findByPk(userId, {
         include: [id, avatar, account, name]
       })
@@ -70,9 +68,16 @@ io.use(
       socket.user = user
       user.socketId = [socket.id]
       // 線上使用者列表加入新使用者的資料
-      activeUsers.add(user)
-      // 發送線上使用者列表
-      io.emit('activeUsers', [...activeUsers])
+      if (activeUsers.map(u => u.id).includes(user.id)) {
+        console.log('This user exited.')
+      } else {
+        activeUsers.push(user)
+        activeUsersCount++
+        console.log(activeUsersCount)
+      }
+      console.log(activeUsers)
+      // 發送線上使用者列表//發送上線人數
+      io.emit('activeUsers', activeUsersCount, activeUsersCount)
       // 向聊天室廣播新的使用者上線
       const data = {
         online: user
@@ -88,13 +93,17 @@ io.use(
       if (!userId) { return }
       // 線上使用者列表移除離線使用者資料
       activeUsers.delete(socket.userId)
+      const activeUsersIndex = activeUsers.map(u => u.id).indexOf(userId)
+      activeUsers.splice(activeUsersIndex, 1)
+      console.log(activeUsers)
+      console.log(activeUsersCount)
       // 聊天室通知該名使用者離開聊天
       const data = {
         offline: user
       }
       io.emit('message', data)
       // 發送線上使用者列表
-      io.emit('activeUsers', activeUsers)
+      io.emit('activeUsers', activeUsers, activeUsersCount)
     } catch (err) {
       console.log(err)
     }

@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Message = sequelize.define('Message', {
     id: {
@@ -9,9 +9,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     content: DataTypes.TEXT,
     UserId: DataTypes.INTEGER
-  }, {});
+  }, {})
   Message.associate = function (models) {
     Message.belongsTo(models.User)
-  };
-  return Message;
-};
+  }
+  return Message
+}
