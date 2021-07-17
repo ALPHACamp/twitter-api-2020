@@ -110,14 +110,17 @@ const userController = {
       // LikedTweets 有資料才做 map 處理，不然 test 會過不了
       const likes = getData(helpers.getUser(req).LikedTweets)
 
-      const tweets = user.toJSON().Tweets.map(t => ({
-        tweetId: t.id,
-        userId: t.UserId,
-        createdAt: t.createdAt,
-        description: t.description,
-        likeCount: t.Likes.length,
-        replyCount: t.Replies.length,
-        isLiked: likes.length ? likes.includes(t.id) : false
+      const tweets = user.Tweets.map(t => ({
+        userId: user.toJSON().id,
+        userName: user.toJSON().name,
+        userAvatar: user.toJSON().avatar,
+        userAccount: user.toJSON().account,
+        tweetId: t.dataValues.id,
+        createdAt: t.dataValues.createdAt,
+        description: t.dataValues.description,
+        replyCount: t.dataValues.Replies.length,
+        likeCount: t.dataValues.Likes.length,
+        isLiked: likes.length ? likes.includes(t.dataValues.id) : false
       }))
 
       return res.json(tweets)
