@@ -1,6 +1,7 @@
 const messageController = require('../controllers/messageController')
 
 module.exports = (server) => {
+
   const io = require('socket.io')(server, {
     cors: {
       origin: '*',
@@ -18,10 +19,30 @@ module.exports = (server) => {
     socket.onAny((event, ...args) => {
       console.log(event, args)
     })
+
+    const users = []
+
     messageController.getMessages()
 
-    require('./modules/listUser')(io, socket)
-    require('./modules/enterNotice')(socket)
+    socket.on('current user', msg => {
+      socket.data = { ...msg }
+
+      for (let [id, socket] of io.of('/').sockets) {
+        users.push({
+          userSocketId: id,
+          user_id: socket.data.id,
+          account: socket.data.account,
+          name: socket.data.name,
+          avatar: socket.data.avatar
+        })
+      }
+
+      socket.emit('users', users)
+      socket.broadcast.emit('users', users)
+      socket.broadcast.emit('user connected', {
+        name: socket.data.name,
+      })
+    })
 
     socket.on('chat message', msg => {
       messageController.saveMessage()
