@@ -4,7 +4,7 @@ const chatService = {
   getHistoryChat: async (roomId = null) => {
     return await Chat.findAll({
       attributes: ['id', 'text', 'createdAt'],
-      where: { room: roomId },
+      where: { RoomId: roomId },
       include: [
         { model: User, attributes: ['id', 'name', 'avatar'] }
       ],

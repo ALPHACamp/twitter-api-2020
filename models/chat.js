@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate (models) {
       Chat.belongsTo(models.User)
+      Chat.belongsTo(models.Room)
     }
   };
   Chat.init({
