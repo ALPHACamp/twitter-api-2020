@@ -1,7 +1,7 @@
-const { Chat, User, sequelize } = require('../models')
+const { Chat, User, Member, Room, sequelize } = require('../models')
 
 const chatService = {
-  joinPublicChat: async (roomId = null) => {
+  getHistoryChat: async (roomId = null) => {
     return await Chat.findAll({
       attributes: ['id', 'text', 'createdAt'],
       where: { room: roomId },
@@ -20,7 +20,8 @@ const chatService = {
     }
   },
 
-  getPrivateChatList: async (currentId) => {
+  getPrivateChatList: async (currentId, targetId = null) => {
+    const target = targetId ? `AND userId = ${targetId}` : ''
     return await await sequelize.query(
       `SELECT data.id As RoomId, data.name As RoomName, Users.id, Users.name, Users.avatar FROM
       (SELECT Room.id, Room.name, COUNT(Members.id) OVER(partition by RoomId) AS people,
@@ -29,9 +30,21 @@ const chatService = {
       Members.updatedAt AS MembersUpdatedAt FROM Rooms AS Room
       LEFT OUTER JOIN Members AS Members ON Room.id = Members.RoomId) AS data,
       Users
-      WHERE UserId = Users.id AND (people = 2 AND userId != ${currentId})`,
+      WHERE UserId = Users.id AND (people = 2 AND userId != ${currentId} ${target})`,
       { type: sequelize.QueryTypes.SELECT }
     )
+  },
+
+  joinPrivateChat: async (currentId, targetId) => {
+    if (!chatService.getPrivateChatList(currentId, targetId).length) {
+      const room = await Room.create({
+        name: `${currentId}+${targetId}`
+      })
+
+      await Member.bulkCreate([{ RoomId: room.id, UserId: currentId }, { RoomId: room.id, UserId: targetId }])
+      return room.name
+    }
+    return 'room existed!'
   }
 }
 
