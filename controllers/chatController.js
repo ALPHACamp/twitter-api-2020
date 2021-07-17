@@ -10,10 +10,11 @@ const chatController = {
         where: { ChatroomId: 5 },
         include: [{ model: User, attributes: ['id', 'name', 'avatar'] }]
       })
-      res.json(room)
+      return res.json(room)
+      // callback(room)
     }
     catch (err) {
-      next(err)
+      console.log(err)
     }
   },
   postMessage: async (data, req, next) => {

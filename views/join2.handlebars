@@ -1,3 +1,4 @@
+<h5>私人通道</h5>
 <ul id="messagesBody">
   {{#each data}}
   <li>{{this.dataValues.User.dataValues.name}} : {{this.dataValues.message}}</li>
@@ -21,15 +22,14 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (input.value) {
-      socket.emit('chat message', input.value);
+      socket.emit('private message', socket.id, input.value);
       input.value = '';
     }
   });
   let socketId = socket.id
-  let data = { UserId: 25, name: '蚯蚓', ChatroomId: 5, socketId: socketId }
-  socket.emit('user', (data))
+  let data = { UserId: 25, name: '蚯蚓', ChatroomId: 10, socketId: socketId }
 
-  socket.on('chat message', (msg) => {
+  socket.on('private message', (anotherSocketId, msg) => {
     const item = document.createElement('li');
     item.textContent = msg;
     messages.appendChild(item);
