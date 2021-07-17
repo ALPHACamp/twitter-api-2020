@@ -22,10 +22,8 @@ app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-
 app.use('/upload', express.static(__dirname + '/upload'))
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
-
 
 require('./routes')(app)
 
