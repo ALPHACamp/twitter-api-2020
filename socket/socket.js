@@ -47,6 +47,13 @@ module.exports = (server) => {
         name: user.name
       })
     })
+    /* leave public room */
+    socket.on('leave_public_room', async ({ userId }) => {
+      const user = await User.findByPk(userId)
+      io.emit('user_leave', {
+        name: user.name
+      })
+    })
 
     /* get public history */
     socket.on('get_public_history', async ({ offset, limit }, cb) => {
