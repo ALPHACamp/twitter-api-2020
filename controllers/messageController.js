@@ -1,5 +1,6 @@
 const RequestError = require('../libs/RequestError')
 const db = require('../models')
+const User = db.User
 const Message = db.Message
 
 const messageController = {
@@ -12,13 +13,14 @@ const messageController = {
     }
     return Message.create({
       UserId: socket.data.id,
-      content: msg
+      content: msg,
+      // createdAt: 要是前端傳的時間
+      // updatedAt:
     })
   },
 
   getMessages: (socket, isPrivate) => {
     let whereClause = {}
-    isPrivate = false
     switch (isPrivate) {
       case true:
         // whereClause = { roomId:  }
@@ -29,8 +31,18 @@ const messageController = {
     }
     return Message.findAll({
       where: whereClause,
-      order: [['createdAt', 'ASC']]
+      order: [['createdAt', 'ASC']],
+      include: { model: User }
     }).then(msg => {
+      msg = msg.map((msg, i) => {
+        const mapItem = {
+          id: msg.dataValues.UserId,
+          avatar: msg.dataValues.User.dataValues.avatar,
+          content: msg.dataValues.content,
+          createdAt: msg.dataValues.createdAt
+        }
+        return mapItem
+      })
       socket.emit('get messages', msg)
     })
   }
