@@ -3,7 +3,7 @@ const db = require('../models')
 const User = db.User
 const Message = db.Message
 
-const messageController = {
+const messageService = {
   saveMessage: (msg) => {
     if (!msg.content) {
       throw new RequestError('Empty input, no msg to save')
@@ -15,7 +15,7 @@ const messageController = {
       UserId: msg.id,
       content: msg.content,
       createdAt: msg.createdAt,
-      updatedAt: msg.updatedAt
+      updatedAt: msg.createdAt
     })
   },
 
@@ -48,4 +48,4 @@ const messageController = {
   }
 }
 
-module.exports = messageController
+module.exports = messageService

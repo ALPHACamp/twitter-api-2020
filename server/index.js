@@ -1,4 +1,4 @@
-const messageController = require('../controllers/messageController')
+const messageService = require('../services/messageService')
 
 module.exports = (server) => {
   const io = require('socket.io')(server, {
@@ -18,13 +18,13 @@ module.exports = (server) => {
     socket.onAny((event, ...args) => {
       console.log(event, args)
     })
-    messageController.getMessages(socket)
+    messageService.getMessages(socket)
 
     require('./modules/listUser')(io, socket)
     require('./modules/enterNotice')(socket)
 
     socket.on('chat message', msg => {
-      messageController.saveMessage(socket, msg)
+      messageService.saveMessage(msg)
       const timeStamp = new Date()
       const message = {
         id: socket.id,
@@ -33,7 +33,6 @@ module.exports = (server) => {
       }
       socket.emit('chat message', message)
     })
-
   })
 
   // io.engine.on('connection_error', (err, socket) => {
@@ -42,5 +41,4 @@ module.exports = (server) => {
   //   console.log(err.message)  // the error message, for example "Session ID unknown"
   //   console.log(err.context)  // some additional error context
   // })
-
 }
