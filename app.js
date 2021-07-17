@@ -59,7 +59,7 @@ io.use(
   if (!userId) return
   socket.on('online', async userId => {
     try {
-    // 用userId撈使用者資料
+      // 用userId撈使用者資料
       const user = await User.findByPk(userId, {
         include: [id, avatar, account, name]
       })
@@ -110,21 +110,21 @@ io.use(
   })
   // api發送歷史訊息(avatar id account name messages)
   // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
-  socket.on('sendMessage', async (message, userId) => {
-    console.log(message, userId)
+  socket.on('sendMessage', async (message) => {
+    console.log(message)
     try {
-      if (message && userId) {
+      if (message) {
         const createMessage = await Message.create({
           content: message,
-          UserId: userId,
+          UserId: message.id,
           createdAt: Date.now()
         })
         const { createdAt } = createMessage
         //撈使用者
-        const user = await User.findByPk(userId)
-        const { id, name, avatar, account, } = user
+        const user = await User.findByPk(userId, { attributes: { exclude: ['email', 'password', 'introduction', 'cover', 'role'] } })
+
         //傳送使用者和訊息
-        socket.emit('newMessage', { message, createdAt, id, name, avatar, account })
+        socket.emit('newMessage', { createMessage, user })
       }
     }
     catch (err) { console.log(err) }
