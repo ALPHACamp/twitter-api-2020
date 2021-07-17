@@ -1,7 +1,9 @@
+const messageController = require('../controllers/messageController')
+
 module.exports = (server) => {
   const io = require('socket.io')(server, {
     cors: {
-      origin: ['http://localhost:8080/', 'https://marcolin1.github.io/'],
+      origin: '*',
       methods: ['GET', 'POST']
     }
   })
@@ -10,19 +12,19 @@ module.exports = (server) => {
     console.log('A user connecting')
     console.log(socket.handshake.headers.host)
     console.log(socket.handshake.url)
+    console.log(io.of("/").sockets.size)
 
     // 可以在伺服器端顯示通道過來的所有事件，以及相關的參數
     socket.onAny((event, ...args) => {
       console.log(event, args)
     })
+    messageController.getMessages()
 
-    // 引用module的功能檔案在這之下
-    // 1. 顯示所有使用者
-    require('./modules/listUser')(io)
-    // 2. 聊天室內登入通知
+    require('./modules/listUser')(io, socket)
     require('./modules/enterNotice')(socket)
 
     socket.on('chat message', msg => {
+      messageController.saveMessage()
       const timeStamp = new Date()
       const message = {
         id: socket.id,
@@ -34,11 +36,11 @@ module.exports = (server) => {
 
   })
 
-  io.engine.on('connection_error', (err) => {
-    console.log(err.req)     // the request object
-    console.log(err.code)    // the error code, for example 1
-    console.log(err.message)  // the error message, for example "Session ID unknown"
-    console.log(err.context)  // some additional error context
-  })
+  // io.engine.on('connection_error', (err, socket) => {
+  //   console.log(err.req)     // the request object
+  //   console.log(err.code)    // the error code, for example 1
+  //   console.log(err.message)  // the error message, for example "Session ID unknown"
+  //   console.log(err.context)  // some additional error context
+  // })
 
 }

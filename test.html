@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <main>
+    <button type="submit" id='current_user'>current user事件</button>
+  </main>
+
+
+
+
+
+  <script src="./node_modules/socket.io/client-dist/socket.io.js"></script>
+  <script>
+    const url = 'http://localhost:3000'
+    const url2 = 'https://infinite-mountain-11239.herokuapp.com'
+
+    const socket = io(url, {
+      transports: ['websocket', 'polling']
+    })
+
+    const currentUserBtn = document.querySelector('#current_user')
+
+    currentUserBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        avatar: 'https://i.imgur.com/kfIu65A.png',
+        name: 'user2',
+        account: 'user2',
+        user_id: 2
+      }
+      socket.emit('current user', data)
+    })
+
+    socket.on('users', msg => {
+      console.log('users', msg)
+    })
+
+    socket.on('user connected', msg => {
+      console.log('user connected', msg)
+    })
+
+    // 接受歷史訊息
+    socket.on('get messages', msg => {
+      console.log('get messages', msg)
+    })
+
+    socket.on('connect_error', error => {
+      console.log('=====connect_error=====', error.message)
+
+      socket.on("connect_error", () => {
+        socket.io.opts.transports = ["polling", "websocket"];
+      })
+    })
+
+
+  </script>
+</body>
+
+</html>
