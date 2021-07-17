@@ -39,10 +39,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.DATE
       },
-      updatedAt: {
-        allowNull: false,
-        type: DataTypes.DATE
-      },
       likeNum: {
         type: DataTypes.INTEGER
       },
@@ -57,6 +53,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       lastLoginAt: {
         type: DataTypes.DATE
+      },
+      isOnline: {
+        allowNull: false,
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       }
     },
     {}
