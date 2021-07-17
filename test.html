@@ -69,13 +69,21 @@
       console.log('這是chatMessage', msg)
     })
 
+    socket.on('chattedUsers', msg => {
+      console.log('這是chattedUsers', msg)
+    })
+
+    socket.on('privateMessage', msg => {
+      console.log('這是privateMessage', msg)
+    })
+
+    socket.on('messageNotify', msg => {
+      console.log('這是messageNotify', msg)
+    })
+
     socket.on('error', msg => {
       console.log('這是error', msg)
     })
-
-    // socket.io.on('reconnect_attempt', msg => {
-    //   socket.emit('current user', data)
-    // })
 
     socket.on('connect_error', error => {
       console.log('=====connect_error=====', error.message)
