@@ -45,35 +45,38 @@ app.get('/', (req, res, next) => {
   res.sendFile(__dirname + '/view/index.html')
 })
 
-// 在線人數
+// 群聊在線人數
 let onlineCounts = 0
 onlineUser = []
 
+const publicNamespace = io.of("/public")
+const privateNamespace = io.of("/private")
+
 // 連線錯誤監聽
-io.on("connect_error", (err) => {
-  console.log(`connect_error due to ${err.message}`);
+publicNamespace.on("connect_error", (err, next) => {
+  console.log(`connect_error due to ${err.message}`)
+  next(err)
 })
 
-
 // 連線監聽
-io.on('connection', async (socket) => {
+publicNamespace.on('connection', async (socket) => {
   // 連線發生時發送人數給網頁
   onlineCounts += 1
-  io.emit('online', onlineCounts)
+  publicNamespace.emit('online', onlineCounts)
   console.log('new user connected')
 
   // 請求 new user socket
-  io.to(socket.id).emit('newUser')
+  publicNamespace.to(socket.id).emit('newUser')
 
   // 接收 current user 回傳 onlineUser array
   socket.on('newUser', userId => {
-    socket.data.user = userId
+    socket.user = userId
     onlineUser.push(userId)
 
     console.log(onlineUser)
 
-    io.emit('onlineUser', onlineUser)
-    socket.broadcast.emit('userJoin', socket.data.user)
+    publicNamespace.emit('onlineUser', onlineUser)
+    socket.broadcast.emit('userJoin', socket.user)
   })
 
   try {
@@ -85,7 +88,7 @@ io.on('connection', async (socket) => {
       order: [['createdAt', 'ASC']]
     })
     console.log(msgs)
-    io.to(socket.id).emit('historyMessages', msgs)
+    publicNamespace.to(socket.id).emit('historyMessages', msgs)
   } catch (err) {
     console.log(err)
   }
@@ -96,7 +99,7 @@ io.on('connection', async (socket) => {
       // 前端傳來的訊息為空 return
       if (!msg.content) return
       // 取得 sender id
-      const senderId = socket.data.user
+      const senderId = socket.user
       if (!senderId) return
 
       const { content, isPublic } = msg
@@ -106,7 +109,7 @@ io.on('connection', async (socket) => {
       })
 
       // 傳新訊息給所有人
-      io.emit('newMessage', message.toJSON())
+      publicNamespace.emit('newMessage', message.toJSON())
       console.log('message: ' + msg)
     } catch (err) {
       console.log(err)
@@ -118,9 +121,9 @@ io.on('connection', async (socket) => {
     // 離開時減少聊天室人數並發送給網頁
     onlineCounts = (onlineCounts <= 0) ? 0 : onlineCounts -= 1
     onlineUser = onlineUser.filter(user => user !== socket.data.user)
-    io.emit('online', onlineCounts)
-    io.emit('onlineUser', onlineUser)
-    io.emit('userLeave', socket.data.user)
+    publicNamespace.emit('online', onlineCounts)
+    publicNamespace.emit('onlineUser', onlineUser)
+    publicNamespace.emit('userLeave', socket.data.user)
     console.log('disconnected')
   })
 })
