@@ -110,18 +110,24 @@ io.use(
   })
   // api發送歷史訊息(avatar id account name messages)
   // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
-  socket.on('sendMessage', async (message) => {
-    console.log(message)
-    if (message) {
-      await Message.create({
-        content: message,
-        //test-還沒拿到user的狀況
-        UserId: 1,
-      })
-      //撈使用者
+  socket.on('sendMessage', async (message, userId) => {
+    console.log(message, userId)
+    try {
+      if (message && userId) {
+        const createMessage = await Message.create({
+          content: message,
+          UserId: userId,
+          createdAt: Date.now()
+        })
+        const { createdAt } = createMessage
+        //撈使用者
+        const user = await User.findByPk(userId)
+        const { id, name, avatar, account, } = user
+        //傳送使用者和訊息
+        socket.emit('newMessage', { message, createdAt, id, name, avatar, account })
+      }
     }
-    //傳送使用者和訊息
-    socket.emit('newMessage', message)
+    catch (err) { console.log(err) }
   })
 })
 
