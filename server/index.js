@@ -1,4 +1,4 @@
-const messageController = require('../controllers/messageController')
+const messageService = require('../services/messageService')
 
 module.exports = (server) => {
 
@@ -24,7 +24,8 @@ module.exports = (server) => {
 
     // 非同步執行，不知道會不會有渲染順序的問題
     try {
-      messageController.getMessages(socket)
+      const messages = messageController.getMessages(socket)
+      socket.emit('get messages', messages)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
@@ -89,5 +90,4 @@ module.exports = (server) => {
   //   console.log(err.message)  // the error message, for example "Session ID unknown"
   //   console.log(err.context)  // some additional error context
   // })
-
 }
