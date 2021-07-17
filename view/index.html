@@ -73,28 +73,41 @@
     let form = document.getElementById('form')
     let input = document.getElementById('input')
 
+    // 公開訊息傳送
     form.addEventListener('submit', event => {
       event.preventDefault()
       if (input.value) {
-        socket.emit('newMessage', input.value)
+        const msg = {}
+        msg.socketId = socket.id
+        msg.content = input.value
+        msg.isPublic = true
+        socket.emit('newMessage', msg)
         input.value = ''
       }
     })
 
+    // 回傳新加入使用者 id (隨機數字)
+    socket.on('newUser', () => {
+      const userId = Math.floor(Math.random() * 100)
+      console.log(userId)
+      socket.emit('newUser', userId)
+    })
+
     // 載入先前對話
-    socket.on('historicalMessages', msgs => {
+    socket.on('historyMessages', msgs => {
       console.log(msgs)
       for (msg of msgs) {
         let item = document.createElement('li')
-        item.textContent = msg.message
+        item.textContent = msg.content
         messages.appendChild(item)
         window.scrollTo(0, document.body.scrollHeight)
       }
     })
 
+    // 公開訊息接收渲染
     socket.on('newMessage', msg => {
       let item = document.createElement('li')
-      item.textContent = msg
+      item.textContent = msg.content
       messages.appendChild(item)
       window.scrollTo(0, document.body.scrollHeight)
     })

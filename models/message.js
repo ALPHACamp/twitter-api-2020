@@ -1,11 +1,24 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Message = sequelize.define('Message', {
-    UserId: {
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER
+    },
+    senderId: {
+      type: DataTypes.INTEGER
+    },
+    receiverId: {
       type: DataTypes.INTEGER
     },
     content: {
       type: DataTypes.STRING
+    },
+    isPublic: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   }, {});
   Message.associate = function (models) {

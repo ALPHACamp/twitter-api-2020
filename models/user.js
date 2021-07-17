@@ -39,7 +39,12 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Tweet)
     User.hasMany(models.Reply)
     User.hasMany(models.Like)
-    User.hasMany(models.Message)
+    User.hasMany(models.Message, {
+      foreignKey: 'senderId'
+    })
+    User.hasMany(models.Message, {
+      foreignKey: 'receiverId'
+    })
     User.hasMany(models.Followship, {
       foreignKey: 'followingId'
     })
@@ -59,12 +64,12 @@ module.exports = (sequelize, DataTypes) => {
     User.belongsToMany(User, {
       through: models.Message,
       foreignKey: 'senderId',
-      as: 'Receiver'
+      as: 'Receivers'
     })
     User.belongsToMany(User, {
       through: models.Message,
-      foreignKey: 'receiver',
-      as: 'Sender'
+      foreignKey: 'receiverId',
+      as: 'Senders'
     })
   };
   return User;

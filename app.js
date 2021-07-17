@@ -44,8 +44,6 @@ app.get('/', (req, res, next) => {
   res.sendFile(__dirname + '/view/index.html')
 })
 
-// 引入聊天紀錄
-let records = require('./records')
 // 在線人數
 let onlineCounts = 0
 
@@ -54,6 +52,9 @@ io.on("connect_error", (err) => {
   console.log(`connect_error due to ${err.message}`);
 })
 
+// socket.id and userId mapping
+const socketMap = {}
+
 // 連線監聽
 io.on('connection', async (socket) => {
   // 連線發生時發送人數給網頁
@@ -61,27 +62,54 @@ io.on('connection', async (socket) => {
   io.emit('online', onlineCounts)
   console.log('new user connected')
 
-  // 發送之前的全部訊息
-  msgs = await Message.findAll({
-    where: { isPublic: true },
-    order: [['createAt', 'ASC']]
-  })
-  io.emit('historicalMessages', msgs)
+  // 請求 new user socket
+  io.emit('newUser')
 
+  // 接收 new user socket 建立 MAP
+  socket.on('newUser', userId => {
+    socketMap[userId] = socket.id
+    console.log(socketMap)
+  })
+
+  try {
+    // 發送之前的全部訊息
+    msgs = await Message.findAll({
+      raw: true,
+      nest: true,
+      where: { isPublic: true },
+      order: [['createdAt', 'ASC']]
+    })
+    console.log(msgs)
+    io.to(socket.id).emit('historyMessages', msgs)
+  } catch (err) {
+    console.log(err)
+  }
+
+  // 公開訊息監聽
   socket.on('newMessage', async (msg) => {
-    // 前端傳來的訊息為空 return
-    if (!msg) return
+    try {
+      // 前端傳來的訊息為空 return
+      if (!msg.content) return
 
-    // 新訊息放進資料庫
-    // Message.create({
+      const senderId =
+        Object.keys(socketMap).find(key => {
+          socketMap[key] == socket.id
+        })
+      const { receiverId, content, isPublic } = msg
+      // 新訊息放進資料庫
+      await Message.create({
+        senderId, receiverId, content, isPublic
+      })
 
-    // })
-
-    // broadcasting to all connected sockets
-    io.emit('newMessage', msg)
-    console.log('message: ' + msg)
+      // broadcasting to all connected sockets
+      io.emit('newMessage', msg)
+      console.log('message: ' + msg)
+    } catch (err) {
+      console.log(err)
+    }
   })
 
+  // 離線監聽
   socket.on('disconnect', () => {
     // 離開時減少聊天室人數並發送給網頁
     onlineCounts = (onlineCounts <= 0) ? 0 : onlineCounts -= 1
