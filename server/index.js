@@ -22,16 +22,6 @@ module.exports = (server) => {
 
     const users = []
 
-    // 非同步執行，不知道會不會有渲染順序的問題
-    try {
-      const messages = messageController.getMessages(socket)
-      socket.emit('get messages', messages)
-    } catch (error) {
-      return socket.emit('error', {
-        status: error.name,
-        message: error.message
-      })
-    }
 
     socket.once('current user', msg => {
       let usersPool = new Map()
@@ -76,12 +66,23 @@ module.exports = (server) => {
     })
 
     socket.on('disconnect', reason => {
-      socket.broadcast.emit('users', users)
-      socket.broadcast.emit('user disconnected', {
+      socket.broadcast.emit('userDisconnected', {
         name: socket.data.name,
         isOnline: 0
       })
+      socket.broadcast.emit('users', users)
     })
+
+    try {
+      const msg = await messageService.getMessages(socket)
+      socket.emit('getMessages', msg)
+    } catch (error) {
+      console.error(error)
+      return socket.emit('error', {
+        status: error.name,
+        message: error.message
+      })
+    }
   })
 
   // io.engine.on('connection_error', (err, socket) => {
