@@ -88,3 +88,4 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+bash.exe.stackdump
