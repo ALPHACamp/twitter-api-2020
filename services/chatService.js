@@ -1,5 +1,4 @@
-const { Chat, User, Member, Room, Sequelize } = require('../models')
-const { Op } = Sequelize
+const { Chat, User, sequelize } = require('../models')
 
 const chatService = {
   joinPublicChat: async (roomId = null) => {
@@ -21,10 +20,18 @@ const chatService = {
     }
   },
 
-  joinPrivateChat: async (a, b) => {
-    return await Member.findAll({
-      attributes: ['RoomId', 'UserId', [Sequelize.literal('COUNT(UserId) OVER(partition by RoomId)'), 'people']]
-    })
+  getPrivateChatList: async (currentId) => {
+    return await await sequelize.query(
+      `SELECT data.id As RoomId, data.name As RoomName, Users.id, Users.name, Users.avatar FROM
+      (SELECT Room.id, Room.name, COUNT(Members.id) OVER(partition by RoomId) AS people,
+      Members.UserId AS userId,
+      Members.createdAt AS MembersCreatedAt,
+      Members.updatedAt AS MembersUpdatedAt FROM Rooms AS Room
+      LEFT OUTER JOIN Members AS Members ON Room.id = Members.RoomId) AS data,
+      Users
+      WHERE UserId = Users.id AND (people = 2 AND userId != ${currentId})`,
+      { type: sequelize.QueryTypes.SELECT }
+    )
   }
 }
 
