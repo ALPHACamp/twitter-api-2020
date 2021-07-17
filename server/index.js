@@ -18,7 +18,7 @@ module.exports = (server) => {
     socket.onAny((event, ...args) => {
       console.log(event, args)
     })
-    messageController.getMessages()
+    messageController.getMessages(socket)
 
     require('./modules/listUser')(io, socket)
     require('./modules/enterNotice')(socket)
