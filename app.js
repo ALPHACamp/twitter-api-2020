@@ -2,6 +2,7 @@ const express = require('express')
 const session = require('express-session')
 const helpers = require('./_helpers');
 const cors = require('cors')
+const { Message } = require('./models')
 const app = express()
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -48,30 +49,41 @@ let records = require('./records')
 // 在線人數
 let onlineCounts = 0
 
+// 連線錯誤監聽
 io.on("connect_error", (err) => {
   console.log(`connect_error due to ${err.message}`);
 })
-io.on('connection', (socket) => {
+
+// 連線監聽
+io.on('connection', async (socket) => {
   // 連線發生時發送人數給網頁
   onlineCounts += 1
   io.emit('online', onlineCounts)
   console.log('new user connected')
 
   // 發送之前的全部訊息
-  // io.emit('historyMessages', msgs)
+  msgs = await Message.findAll({
+    where: { isPublic: true },
+    order: [['createAt', 'ASC']]
+  })
+  io.emit('historicalMessages', msgs)
 
-  socket.on('newMessage', (msg) => {
+  socket.on('newMessage', async (msg) => {
     // 前端傳來的訊息為空 return
     if (!msg) return
-    // 新訊息放進陣列儲存
-    // msgs.push({ message: msg })
+
+    // 新訊息放進資料庫
+    // Message.create({
+
+    // })
 
     // broadcasting to all connected sockets
     io.emit('newMessage', msg)
     console.log('message: ' + msg)
   })
+
   socket.on('disconnect', () => {
-    // 離線時減少在線人數並發送給網頁
+    // 離開時減少聊天室人數並發送給網頁
     onlineCounts = (onlineCounts <= 0) ? 0 : onlineCounts -= 1
     io.emit('online', onlineCounts)
     console.log('disconnected')

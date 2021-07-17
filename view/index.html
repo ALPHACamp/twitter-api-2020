@@ -82,7 +82,7 @@
     })
 
     // 載入先前對話
-    socket.on('historyMessages', msgs => {
+    socket.on('historicalMessages', msgs => {
       console.log(msgs)
       for (msg of msgs) {
         let item = document.createElement('li')
