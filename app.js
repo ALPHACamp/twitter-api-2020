@@ -33,60 +33,72 @@ require('./routes')(app)
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: ['http://localhost:3000', 'https://chris1085.github.io/SimpleTwitter-vue/#/signin'],
+    origin: ['http://localhost:8080', 'https://chris1085.github.io/SimpleTwitter-vue/'],
     methods: ['GET', 'POST'],
     credentials: true
   }
 })
 const activeUsers = new Set()
-// io.use(
-//   (socket, next) => {
-//     const token = socket.handshake.auth.token
-//     if (socket.handshake.query && socket.handshake.query.token) {
-//       jwt.verify(
-//         token,
-//         process.env.JWT_SECRET,
-//         (err, decoded) => {
-//           if (err) return next(new Error('Authentication error'))
-//           socket.userId = decoded.id
-//           console.log('socket.userId', socket.userId)
-//           next()
-//         })
-//     } else {
-//       next(new Error('Authentication error'))
-//     }
-//   }
-// )
-io.on('connection', async socket => {
+io.use(
+  (socket, next) => {
+    const token = socket.handshake.auth.token
+    if (socket.handshake.query && socket.handshake.query.token) {
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET,
+        (err, decoded) => {
+          if (err) return next(new Error('Authentication error'))
+          socket.userId = decoded.id
+          console.log('socket.userId', socket.userId)
+          next()
+        })
+    } else {
+      next(new Error('Authentication error'))
+    }
+  }
+).on('connection', async socket => {
   console.log('connection')
   console.log('連接成功上線ID -----', socket.id)
   if (!socket.id) return
-
-  socket.on('online', async data => {
+  socket.on('online', async userId => {
+    try {
     // 用socket.id撈使用者資料
-    // const user = await User.findByPk(socket.id,{
-    //   include: [id,avatar,account,name]
-    // })
-    // if (!user) return next(null, false)
-    // user = data
-    data = socket.id
-    // 線上使用者列表加入新使用者的資料
-    activeUsers.add(data)
-    // 發送線上使用者列表
-    io.emit('activeUsers', [...activeUsers])
-    // 向聊天室廣播新的使用者上線
-    socket.broadcast.emit('message', data)
+      const user = await User.findByPk(userId, {
+        include: [id, avatar, account, name]
+      })
+      if (!user) return
+      user = user.toJSON()
+      socket.user = user
+      user.socketId = [socket.id]
+      // 線上使用者列表加入新使用者的資料
+      activeUsers.add(user)
+      // 發送線上使用者列表
+      io.emit('activeUsers', [...activeUsers])
+      // 向聊天室廣播新的使用者上線
+      const data = {
+        online: user
+      }
+      io.emit('message', data)
+    } catch (err) {
+      console.log(err)
+    }
   })
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async (userId) => {
+    try {
     // emit使用者離線通知
-    console.log('disconnect', socket.id)
-    // 線上使用者列表移除離線使用者資料
-    activeUsers.delete(socket.id)
-    // activeUsers.delete(socket.userId)
-    // 聊天室通知該名使用者離開聊天
-    socket.broadcast.emit('message', socket.id)
-    // 發送線上使用者列表
-    socket.broadcast.emit('activeUsers', activeUsers)
+      if (!userId) { return }
+      // 線上使用者列表移除離線使用者資料
+      activeUsers.delete(socket.userId)
+      // 聊天室通知該名使用者離開聊天
+      const data = {
+        offline: user
+      }
+      io.emit('message', data)
+      // 發送線上使用者列表
+      io.emit('activeUsers', activeUsers)
+    } catch (err) {
+      console.log(err)
+    }
   })
 })
 
