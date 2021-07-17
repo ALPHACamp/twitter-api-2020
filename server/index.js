@@ -55,6 +55,12 @@ module.exports = (server) => {
       socket.emit('chat message', message)
     })
 
+    socket.on('disconnect', reason => {
+      socket.broadcast.emit('users', users)
+      socket.broadcast.emit('user disconnected', {
+        name: socket.data.name,
+      })
+    })
   })
 
   // io.engine.on('connection_error', (err, socket) => {
