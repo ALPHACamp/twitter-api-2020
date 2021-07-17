@@ -9,7 +9,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const port = process.env.PORT || 3000
 // Create http server for socket.io
-const server = require('http').createServer(app)
+// const server = require('http').createServer(app)
+const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = require('socket.io')(server, {
   cors: {
     origin: "*",
@@ -36,7 +37,6 @@ app.use((req, res, next) => {
   next()
 })
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 app.get('/', (req, res, next) => {
   res.sendFile(__dirname + '/view/index.html')

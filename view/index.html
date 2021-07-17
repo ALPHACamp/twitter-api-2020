@@ -66,11 +66,11 @@
   <form id="form" action="">
     <input id="input" autocomplete="off" /><button>Send</button>
   </form>
-  <script src="http://localhost:4040/socket.io/socket.io.js"></script>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script>
-    let socket = io("http://localhost:4040")
-    const publicNamespace = io("http://localhost:4040/public")
-    const privateNamespace = io("http://localhost:4040/private")
+    let socket = io("http://localhost:3000")
+    const publicNamespace = io("http://localhost:3000/public")
+    const privateNamespace = io("http://localhost:3000/private")
     let messages = document.getElementById('messages')
     let form = document.getElementById('form')
     let input = document.getElementById('input')
