@@ -59,7 +59,7 @@ let tweetController = {
   postTweets: async (req, res, next) => {
     try {
       if (!req.body.description) throw new Error('請輸入必填項目')
-      if (req.body.description.length > 140) throw new Error('數入字數超過140字')
+      if (req.body.description.length > 140) throw new Error('輸入字數超過140字')
 
       const tweet = await Tweet.create({
         description: req.body.description,
