@@ -4,18 +4,21 @@ const socketio = require('socket.io')
 const db = require('../models')
 const Message = db.Message
 const User = db.User
-const {authenticatedSocket} = require('../middleware/auth')
-
+const Room = db.Room
+const { authenticatedSocket } = require('../middleware/auth')
+const { Op } = require('sequelize')
 module.exports = (server) => {
   const io = socketio(server)
   const wrap = (middleware) => (socket, next) =>
     middleware(socket.request, {}, next)
 
   io.use(wrap(authenticatedSocket)).on('connection', (socket) => {
-    console.log(socket.request.user)
+    // console.log(socket.request.user)
     /* connect */
     sockets.push(socket)
-    userSockets[socket.id] = 1
+    userSockets[Math.floor(Math.random() * 6) + 1] = socket.id
+    // console.log(sockets)
+    console.log(userSockets)
     console.log(`User is online: ${socket.id}`)
     socket.emit('message', `Your socket id is  ${socket.id}`)
     socket.on('sendMessage', (data) => console.log(data))
@@ -64,6 +67,39 @@ module.exports = (server) => {
         createdAt: message.createdAt,
         avatar: user.avatar
       })
+    })
+
+    /* privacy message */
+    socket.on('join_private_room', async ({ User1Id, User2Id }, callback) => {
+      const options = {
+        where: {
+          [Op.or]: [
+            { User1Id, User2Id },
+            { User1Id: User2Id, User2Id: User1Id }
+          ]
+        }
+      }
+      const room = await Room.findOne(options)
+      let roomId
+      if (room) {
+        roomId = room.id
+      } else {
+        roomId = await Room.create({ User1Id, User2Id })
+        roomId = roomId.toJSON().id
+      }
+      //return roomId to client
+      console.log('roomId', roomId)
+      // check isOnline or not
+      if (userSockets[User2Id]) {
+        //join User1 into room
+        socket.join(roomId)
+        //join User2 into room
+        user2Socket = sockets.find(
+          (socket) => socket.id === userSockets[User2Id]
+        )
+        user2Socket.join(roomId)
+      }
+      callback({ roomId })
     })
   })
 }

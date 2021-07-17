@@ -18,6 +18,9 @@
           'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjI2NTM0NjcwfQ.5QnVDSQNwg8LFYDjlb8ECf9oFa0prn8j-VqtzaCDw2g'
       },
     })
+    socket.emit('join_private_room',({User1Id:6,User2Id:3}),(data) => {
+      console.log(data)
+    })
 
 
   </script>
