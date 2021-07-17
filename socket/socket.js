@@ -1,11 +1,9 @@
 const sockets = []
 const userSockets = {}
-const socketController = require('../controllers/socket/socketController')
 const socketio = require('socket.io')
 const db = require('../models')
 const Message = db.Message
 const User = db.User
-
 
 module.exports = (server) => {
   const io = socketio(server)
