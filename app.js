@@ -37,9 +37,6 @@ app.use((req, res, next) => {
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-server.listen(4040, () => {
-  console.log(`socketio server listening on port 4040!`)
-})
 
 app.get('/', (req, res, next) => {
   res.sendFile(__dirname + '/view/index.html')
