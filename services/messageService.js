@@ -16,10 +16,16 @@ const messageService = {
       content: msg.content,
       createdAt: msg.createdAt,
       updatedAt: msg.createdAt
+    }).then(message => {
+      message = message.toJSON()
+      message.id = message.UserId
+      delete message.UserId
+      
+      return message
     })
   },
 
-  getMessages: (socket, isPrivate = false) => {
+  getMessages: async (socket, isPrivate = false) => {
     let whereClause = {}
     switch (isPrivate) {
       case true:
@@ -42,7 +48,8 @@ const messageService = {
           createdAt: msg.dataValues.createdAt
         }
         return mapItem
-      }).then(msg => { return msg })
+      })
+      return msg
     })
   }
 }

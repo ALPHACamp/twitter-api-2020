@@ -22,50 +22,45 @@ module.exports = (server) => {
 
     const users = []
 
-    // 非同步執行，不知道會不會有渲染順序的問題
-    try {
-      const messages = messageController.getMessages(socket)
-      socket.emit('get messages', messages)
-    } catch (error) {
-      return socket.emit('error', {
-        status: error.name,
-        message: error.message
-      })
-    }
+    socket.on('currentUser', async msg => {
+      try {
+        let usersPool = new Map()
+        socket.data = { ...msg }
 
-    socket.once('current user', msg => {
-      let usersPool = new Map()
-      socket.data = { ...msg }
-
-      for (let [id, socket] of io.of('/').sockets) {
-        if (usersPool.has(socket.data.user_id)) {
-          return
-        } else {
-          users.push({ ...socket.data })
-          usersPool.set(socket.data.user_id, {
-            ...socket.data
-          })
+        for (let [id, socket] of io.of('/').sockets) {
+          if (usersPool.has(socket.data.id)) {
+            continue
+          } else if (!socket.data.id) {
+            continue
+          } else {
+            users.push({ ...socket.data })
+            usersPool.set(socket.data.id, {
+              ...socket.data
+            })
+          }
         }
+
+        socket.broadcast.emit('userConnected', {
+          name: socket.data.name,
+          isOnline: 1
+        })
+
+        io.emit('users', users)
+      } catch (error) {
+        console.error(error)
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
       }
 
-      socket.emit('users', users)
-      socket.broadcast.emit('users', users)
-      socket.broadcast.emit('user connected', {
-        name: socket.data.name,
-        isOnline: 1
-      })
     })
 
-    socket.on('chat message', async msg => {
+    socket.on('chatMessage', async msg => {
       try {
-        const message = {
-          id: socket.data.id,
-          createdAt: msg.createdAt,
-          message: msg.content
-        }
-        await messageController.saveMessage(socket, msg)
+        const message = await messageService.saveMessage(msg)
 
-        return socket.emit('chat message', message)
+        return io.emit('chatMessage', message)
 
       } catch (error) {
         return socket.emit('error', {
@@ -76,12 +71,23 @@ module.exports = (server) => {
     })
 
     socket.on('disconnect', reason => {
-      socket.broadcast.emit('users', users)
-      socket.broadcast.emit('user disconnected', {
+      socket.broadcast.emit('userDisconnected', {
         name: socket.data.name,
         isOnline: 0
       })
+      socket.broadcast.emit('users', users)
     })
+
+    try {
+      const msg = await messageService.getMessages(socket)
+      socket.emit('getMessages', msg)
+    } catch (error) {
+      console.error(error)
+      return socket.emit('error', {
+        status: error.name,
+        message: error.message
+      })
+    }
   })
 
   // io.engine.on('connection_error', (err, socket) => {
