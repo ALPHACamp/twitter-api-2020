@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json')
-//add Model
+// add Model
 const db = require('./models')
 const { User, Message } = db
 
@@ -23,90 +23,86 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 app.use('/upload', express.static(__dirname + '/upload'))
-//swagger
+// swagger
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 require('./routes')(app)
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: ['http://localhost:8080', 'https://chris1085.github.io/SimpleTwitter-vue/'],
+    origin: ['http://localhost:8081', 'https://chris1085.github.io/SimpleTwitter-vue/'],
     methods: ['GET', 'POST'],
+    transports: ['websocket', 'polling'],
     credentials: true
-  }
+  },
+  allowEIO3: true
 })
 const activeUsers = []
-const activeUsersCount = 1
-io.use(
-  (socket, next) => {
-    const token = socket.handshake.auth.token
-    if (socket.handshake.query && socket.handshake.query.token) {
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET,
-        (err, decoded) => {
-          if (err) return next(new Error('Authentication error'))
-          socket.userId = decoded.id
-          console.log('socket.userId', socket.userId)
-          next()
-        })
-    } else {
-      next(new Error('Authentication error'))
-    }
-  }
-).on('connection', async socket => {
+const activeUsersCount = 0
+// io.use(
+//   (socket, next) => {
+//     const token = socket.handshake.auth.token
+//     if (socket.handshake.query && socket.handshake.query.token) {
+//       jwt.verify(
+//         token,
+//         process.env.JWT_SECRET,
+//         (err, decoded) => {
+//           if (err) return next(new Error('Authentication error'))
+//           socket.userId = decoded.id
+//           console.log('socket.userId', socket.userId)
+//           next()
+//         })
+//     } else {
+//       next(new Error('Authentication error'))
+//     }
+//   }
+// )
+io.on('connection', socket => {
   console.log('connection')
-  if (!userId) return
-  socket.on('online', async userId => {
-    try {
-      // 用userId撈使用者資料
-      const user = await User.findByPk(userId, {
-        include: [id, avatar, account, name]
-      })
-      if (!user) return
-      user = user.toJSON()
-      socket.user = user
-      user.socketId = [socket.id]
-      // 線上使用者列表加入新使用者的資料
-      if (activeUsers.map(u => u.id).includes(user.id)) {
-        console.log('This user exited.')
-      } else {
-        activeUsers.push(user)
-        activeUsersCount++
-        console.log(activeUsersCount)
-      }
-      console.log(activeUsers)
-      // 發送線上使用者列表//發送上線人數
-      io.emit('activeUsers', activeUsersCount, activeUsersCount)
-      // 向聊天室廣播新的使用者上線
-      const data = {
-        online: user
-      }
-      io.emit('message', data)
-    } catch (err) {
-      console.log(err)
-    }
+  socket.on('createdUserId', function (userId) {
+    console.log('userId==================================', userId)
   })
-  socket.on('disconnect', async (userId) => {
-    try {
-      // emit使用者離線通知
-      if (!userId) { return }
-      // 線上使用者列表移除離線使用者資料
-      activeUsers.delete(socket.userId)
-      const activeUsersIndex = activeUsers.map(u => u.id).indexOf(userId)
-      activeUsers.splice(activeUsersIndex, 1)
-      console.log(activeUsers)
+  socket.on('online', userId => {
+    User.findByPk(userId, {
+      include: [id, avatar, account, name]
+    }).then(user => {
+      user = user.toJSON()
+    })
+    if (!user) return
+    socket.user = user
+    user.socketId = [socket.id]
+    // 線上使用者列表加入新使用者的資料
+    if (activeUsers.map(u => u.id).includes(user.id)) {
+      console.log('This user exited.')
+    } else {
+      activeUsers.push(user)
+      activeUsersCount++
       console.log(activeUsersCount)
-      // 聊天室通知該名使用者離開聊天
-      const data = {
-        offline: user
-      }
-      io.emit('message', data)
-      // 發送線上使用者列表
-      io.emit('activeUsers', activeUsers, activeUsersCount)
-    } catch (err) {
-      console.log(err)
     }
+    console.log(activeUsers)
+    // 發送線上使用者列表//發送上線人數
+    io.emit('activeUsers', activeUsersCount, activeUsersCount)
+    // 向聊天室廣播新的使用者上線
+    const data = {
+      online: user
+    }
+    io.emit('notification', data)
+  })
+  socket.on('disconnect', (userId) => {
+    // emit使用者離線通知
+    if (!userId) { return }
+    // 線上使用者列表移除離線使用者資料
+    const activeUsersIndex = activeUsers.map(u => u.id).indexOf(userId)
+    activeUsers.splice(activeUsersIndex, 1)
+    console.log(activeUsers)
+    console.log(activeUsersCount)
+    // 聊天室通知該名使用者離開聊天
+    const data = {
+      offline: user
+    }
+    io.emit('notification', data)
+    // 發送線上使用者列表
+    io.emit('activeUsers', activeUsers, activeUsersCount)
   })
   // api發送歷史訊息(avatar id account name messages)
   // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
