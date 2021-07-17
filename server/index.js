@@ -24,7 +24,7 @@ module.exports = (server) => {
     require('./modules/enterNotice')(socket)
 
     socket.on('chat message', msg => {
-      messageController.saveMessage()
+      messageController.saveMessage(socket, msg)
       const timeStamp = new Date()
       const message = {
         id: socket.id,
