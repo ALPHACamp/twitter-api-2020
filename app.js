@@ -11,8 +11,6 @@ const { User, Message } = db
 
 const app = express()
 const server = http.createServer(app)
-const db = require('./models')
-const { User } = db
 const jwt = require('jsonwebtoken')
 
 if (process.env.NODE_ENV !== 'production') {
@@ -111,7 +109,9 @@ io.use(
         //test-還沒拿到user的狀況
         UserId: 1,
       })
+      //撈使用者
     }
+    //傳送使用者和訊息
     socket.emit('newMessage', message)
   })
 })
