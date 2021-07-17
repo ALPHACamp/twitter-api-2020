@@ -15,7 +15,7 @@ const methodOverride = require('method-override')
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-const port = process.env.PORT
+const port = process.env.PORT || 3000
 const helpers = require('./_helpers')
 
 app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
