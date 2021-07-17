@@ -23,9 +23,9 @@ const io = (http) => {
 
     socket.on('chat message', async (msg) => {
       await Chat.create({
-        UserId: users.UserId,
-        message: msg,
-        ChatroomId: users.ChatroomId
+        UserId: users.id,
+        message: content,
+        ChatroomId: 5
       })
       io.emit('chat message', `${users.name}: ${msg}`);
     });
@@ -36,14 +36,14 @@ const io = (http) => {
     })
 
 
-    socket.on('private message', async (anotherSocketId, msg) => {
-      // await Chat.create({
-      //   UserId: users.UserId,
-      //   message: msg,
-      //   ChatroomId: users.ChatroomId
-      // })
-      io.emit('private message', socket.id, `${socket.id}: ${msg}`);
-    });
+    // socket.on('private message', async (anotherSocketId, msg) => {
+    //   // await Chat.create({
+    //   //   UserId: users.UserId,
+    //   //   message: msg,
+    //   //   ChatroomId: users.ChatroomId
+    //   // })
+    //   io.emit('private message', socket.id, `${socket.id}: ${msg}`);
+    // });
 
   })
 }

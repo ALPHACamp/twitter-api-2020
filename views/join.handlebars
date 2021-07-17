@@ -27,7 +27,6 @@
   let data = { UserId: 25, name: '蚯蚓', ChatroomId: 10, socketId: socketId }
 
   socket.on('private message', (anotherSocketId, msg) => {
-    console.log(msg)
     const item = document.createElement('li');
     item.textContent = msg;
     messages.appendChild(item);
