@@ -4,26 +4,40 @@ const socketio = require('socket.io')
 const db = require('../models')
 const Message = db.Message
 const User = db.User
-const {authenticatedSocket} = require('../middleware/auth')
+const { Op } = require("sequelize")
+const { authenticatedSocket } = require('../middleware/auth')
 
 module.exports = (server) => {
   const io = socketio(server)
   const wrap = (middleware) => (socket, next) =>
     middleware(socket.request, {}, next)
+  async function onlineUsers() {
+    return await User.findAll({
+      where: {
+        id: {
+          [Op.or]: Object.keys(userSockets).map(x => +x)
+        }
+      },
+      attributes: [id, name, account, avatar]
+    })
+  }
 
   io.use(wrap(authenticatedSocket)).on('connection', (socket) => {
     console.log(socket.request.user)
     /* connect */
     sockets.push(socket)
-    userSockets[socket.id] = 1
+    userSockets[socket.request.user.id] = socket.id
     console.log(`User is online: ${socket.id}`)
     socket.emit('message', `Your socket id is  ${socket.id}`)
+
+    io.emit('online_users', { users: onlineUsers() })
     socket.on('sendMessage', (data) => console.log(data))
     /* disconnect */
     socket.on('disconnect', () => {
-      delete userSockets[socket.id]
+      delete userSockets[socket.request.user.id]
       sockets.splice(sockets.indexOf(socket), 1)
       console.log(`User is offline: ${socket.id}`)
+      io.emit('online_users', { users: onlineUsers() })
     })
 
     /* join public room */
