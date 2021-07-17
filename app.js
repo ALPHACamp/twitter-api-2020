@@ -101,6 +101,19 @@ io.use(
       console.log(err)
     }
   })
+  // api發送歷史訊息(avatar id account name messages)
+  // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
+  socket.on('sendMessage', async (message) => {
+    console.log(message)
+    if (message) {
+      await Message.create({
+        content: message,
+        //test-還沒拿到user的狀況
+        UserId: 1,
+      })
+    }
+    socket.emit('newMessage', message)
+  })
 })
 
 server.listen(port, () => console.log(`Example server listening on port http://localhost:${port}`))
