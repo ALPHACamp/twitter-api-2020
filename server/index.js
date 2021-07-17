@@ -22,40 +22,45 @@ module.exports = (server) => {
 
     const users = []
 
+    socket.on('currentUser', async msg => {
+      try {
+        let usersPool = new Map()
+        socket.data = { ...msg }
 
-    socket.once('current user', msg => {
-      let usersPool = new Map()
-      socket.data = { ...msg }
-
-      for (let [id, socket] of io.of('/').sockets) {
-        if (usersPool.has(socket.data.user_id)) {
-          return
-        } else {
-          users.push({ ...socket.data })
-          usersPool.set(socket.data.user_id, {
-            ...socket.data
-          })
+        for (let [id, socket] of io.of('/').sockets) {
+          if (usersPool.has(socket.data.user_id)) {
+            continue
+          } else if (!socket.data.id) {
+            continue
+          } else {
+            users.push({ ...socket.data })
+            usersPool.set(socket.data.user_id, {
+              ...socket.data
+            })
+          }
         }
+
+        socket.broadcast.emit('userConnected', {
+          name: socket.data.name,
+          isOnline: 1
+        })
+
+        io.emit('users', users)
+      } catch (error) {
+        console.error(error)
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
       }
 
-      socket.emit('users', users)
-      socket.broadcast.emit('users', users)
-      socket.broadcast.emit('user connected', {
-        name: socket.data.name,
-        isOnline: 1
-      })
     })
 
-    socket.on('chat message', async msg => {
+    socket.on('chatMessage', async msg => {
       try {
-        const message = {
-          id: socket.data.id,
-          createdAt: msg.createdAt,
-          message: msg.content
-        }
-        await messageController.saveMessage(socket, msg)
+        const message = await messageService.saveMessage(msg)
 
-        return socket.emit('chat message', message)
+        return io.emit('chatMessage', message)
 
       } catch (error) {
         return socket.emit('error', {
