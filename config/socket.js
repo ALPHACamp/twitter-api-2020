@@ -24,13 +24,13 @@ const io = (http) => {
     socket.on('chat message', async (msg) => {
       await Chat.create({
         UserId: users.id,
-        message: content,
+        message: msg.content,
         ChatroomId: 5
       })
-      io.emit('chat message', `${users.name}: ${msg}`);
+      io.emit('chat message', `${users.name}: ${msg.content}`);
     });
     socket.on('disconnect', () => {
-      const leaveId = socket.id
+      // const leaveId = socket.id
       // console.log('leave', leaveId)
       io.emit('chat message', `${users.name}離開聊天室`)
     })
