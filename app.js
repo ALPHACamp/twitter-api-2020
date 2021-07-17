@@ -1,9 +1,11 @@
 const express = require('express')
-const app = express()
+// const app = express()
+const app = require('express')()
+const http = require('http').Server(app)
 const exphbs = require('express-handlebars')
 
 //socket
-const server = require('http').createServer(app);
+// const server = require('http').createServer(app);
 // const io = require('socket.io')(server)
 const { createAdapter } = require("@socket.io/mongo-adapter");
 const cors = require('cors')
@@ -32,13 +34,13 @@ app.use((req, res, next) => {
 })
 
 require('./routes')(app)
-require('./config/socket').io(server)
+require('./config/socket').io(http)
 
 app.use((err, req, res, next) => {
   return res.status(500).json({ Error: String(err) })
 })
 //socket
-server.listen(port, () => console.log(`Example app listening on port ${port}!`))
+http.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
 

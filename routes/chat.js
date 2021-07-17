@@ -5,9 +5,21 @@ const chatController = require('../controllers/chatController')
 
 const helpers = require('../_helpers')
 
-// router.get('/', (req, res) => {
-//   res.render('index')
+// router.get('/3', (req, res) => {
+//   chatController.getContent(req, res, (data) => {
+//     res.render('join2', { data })
+//   })
 // })
+// router.get('/2', (req, res) => {
+//   res.render('join')
+// })
+
+router.get('/', (req, res) => {
+  chatController.getContent(req, res, (data) => {
+    res.render('index', { data })
+  })
+  // res.render('index')
+})
 
 // router.use(helpers.authenticated)
 

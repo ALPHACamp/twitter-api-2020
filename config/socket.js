@@ -2,38 +2,48 @@
 const { User, Chat, Chatroom } = require('../models')
 // const helpers = require('../_helpers')
 
-const io = (server) => {
+const io = (http) => {
 
-  const io = require('socket.io')(server)
+  const io = require('socket.io')(http, {
+    cors: {
+      origin: "*"
+    }
+  })
 
   io.use((socket, next) => {
     require('../_helpers')
     next();
   });
-
-  io.on('connection', async (socket) => {
-
-    let user = {}
+  let users = {}
+  io.on('connection', (socket) => {
     socket.on('user', (data) => {
-      user = data
-      user[socket.id] = data.UserId
-      console.log(user)
-      io.emit('chat message', `${data.name}上線`);
+      users = data
+      socket.broadcast.emit('chat message', `${data.name}上線`);
     })
 
-    await socket.on('chat message', async (msg) => {
+    socket.on('chat message', async (msg) => {
       await Chat.create({
-        UserId: user.UserId,
+        UserId: users.UserId,
         message: msg,
-        ChatroomId: user.ChatroomId
+        ChatroomId: users.ChatroomId
       })
-      io.emit('chat message', `${user.name}: ${msg}`);
+      io.emit('chat message', `${users.name}: ${msg}`);
     });
-
     socket.on('disconnect', () => {
-      io.emit('chat message', `${user.name}離開聊天室`)
-      user = {}
+      const leaveId = socket.id
+      // console.log('leave', leaveId)
+      io.emit('chat message', `${users.name}離開聊天室`)
     })
+
+
+    socket.on('private message', async (anotherSocketId, msg) => {
+      // await Chat.create({
+      //   UserId: users.UserId,
+      //   message: msg,
+      //   ChatroomId: users.ChatroomId
+      // })
+      io.emit('private message', socket.id, `${socket.id}: ${msg}`);
+    });
 
   })
 }
