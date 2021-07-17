@@ -30,7 +30,7 @@ module.exports = (server) => {
       for (let [id, socket] of io.of('/').sockets) {
         users.push({
           userSocketId: id,
-          user_id: socket.data.id,
+          id: socket.data.id,
           account: socket.data.account,
           name: socket.data.name,
           avatar: socket.data.avatar
