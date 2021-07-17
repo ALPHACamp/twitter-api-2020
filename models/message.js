@@ -2,7 +2,8 @@
 module.exports = (sequelize, DataTypes) => {
   const Message = sequelize.define('Message', {
     UserId: DataTypes.INTEGER,
-    content: DataTypes.STRING
+    content: DataTypes.STRING,
+    RoomId: DataTypes.STRING
   }, {});
   Message.associate = function(models) {
     Message.belongsTo(models.User)

@@ -3,7 +3,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.addColumn('Messages', 'RoomId', {
-      type: Sequelize.INTEGER
+      type: Sequelize.STRING
     })
   },
 
