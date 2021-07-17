@@ -4,11 +4,12 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('./swagger_output.json')
+//add Model
+const db = require('./models')
+const { User, Message } = db
 
 const app = express()
 const server = http.createServer(app)
-const db = require('./models')
-const { User } = db
 const jwt = require('jsonwebtoken')
 
 if (process.env.NODE_ENV !== 'production') {
@@ -22,6 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 app.use('/upload', express.static(__dirname + '/upload'))
+//swagger
 app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 require('./routes')(app)
@@ -87,7 +89,7 @@ io.use(
   })
   socket.on('disconnect', async (userId) => {
     try {
-    // emit使用者離線通知
+      // emit使用者離線通知
       if (!userId) { return }
       // 線上使用者列表移除離線使用者資料
       activeUsers.delete(socket.userId)
@@ -105,6 +107,21 @@ io.use(
     } catch (err) {
       console.log(err)
     }
+  })
+  // api發送歷史訊息(avatar id account name messages)
+  // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
+  socket.on('sendMessage', async (message) => {
+    console.log(message)
+    if (message) {
+      await Message.create({
+        content: message,
+        //test-還沒拿到user的狀況
+        UserId: 1,
+      })
+      //撈使用者
+    }
+    //傳送使用者和訊息
+    socket.emit('newMessage', message)
   })
 })
 
