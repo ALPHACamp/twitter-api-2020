@@ -9,7 +9,7 @@ module.exports = (server) => {
     }
   })
 
-  io.on('connection', socket => {
+  io.on('connection', async socket => {
     console.log('A user connecting')
     console.log(socket.handshake.headers.host)
     console.log(socket.handshake.url)
@@ -22,7 +22,15 @@ module.exports = (server) => {
 
     const users = []
 
-    messageController.getMessages(socket)
+    // 非同步執行，不知道會不會有渲染順序的問題
+    try {
+      messageController.getMessages(socket)
+    } catch (error) {
+      return socket.emit('error', {
+        status: error.name,
+        message: error.message
+      })
+    }
 
     socket.on('current user', msg => {
       socket.data = { ...msg }
