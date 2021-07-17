@@ -11,7 +11,7 @@
 <body>
 
   <main>
-    <button type="submit" id='current_user'>current user事件</button>
+    <button type="submit" id='chat'>chat message事件</button>
   </main>
 
 
@@ -31,40 +31,51 @@
       avatar: 'https://i.imgur.com/kfIu65A.png',
       name: 'user2',
       account: 'user2',
-      user_id: 2
+      id: 2
     }
-    socket.emit('current user', data)
 
-    const currentUserBtn = document.querySelector('#current_user')
+    socket.emit('currentUser', data)
 
-    currentUserBtn.addEventListener('click', e => {
+    const chatBtn = document.querySelector('#chat')
+
+    chatBtn.addEventListener('click', e => {
       e.preventDefault()
       const data = {
-        avatar: 'https://i.imgur.com/kfIu65A.png',
-        name: 'user2',
-        account: 'user2',
-        user_id: 2
+        id: 1,
+        content: '我累了',
+        createdAt: new Date()
       }
-      socket.emit('current user', data)
+      socket.emit('chatMessage', data)
     })
 
     socket.on('users', msg => {
       console.log('這是users', msg)
     })
 
-    socket.on('user connected', msg => {
-      console.log('這是user connected', msg)
+    socket.on('userConnected', msg => {
+      console.log('這是userConnected', msg)
     })
 
     // 接受歷史訊息
-    socket.on('get messages', msg => {
-      console.log('這是get messages', msg)
+    socket.on('getMessages', msg => {
+      console.log('這是getMessages', msg)
     })
 
-    socket.on('user disconnected', msg => {
-      console.log('這是user disconnected', msg)
-
+    socket.on('userDisconnected', msg => {
+      console.log('這是userDisconnected', msg)
     })
+
+    socket.on('chatMessage', msg => {
+      console.log('這是chatMessage', msg)
+    })
+
+    socket.on('error', msg => {
+      console.log('這是error', msg)
+    })
+
+    // socket.io.on('reconnect_attempt', msg => {
+    //   socket.emit('current user', data)
+    // })
 
     socket.on('connect_error', error => {
       console.log('=====connect_error=====', error.message)
