@@ -59,7 +59,7 @@ const userController = {
 
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
+      res.json({
         status: 'success',
         message: 'ok',
         token,
@@ -67,6 +67,7 @@ const userController = {
           id: user.id, account: user.account, name: user.name, email: user.email, role: user.role
         }
       })
+      return next()
     }
     catch (err) {
       next(err)
