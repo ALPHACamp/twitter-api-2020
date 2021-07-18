@@ -42,131 +42,106 @@ const activeUsersCount = 0
 io.use(async (socket, next) => {
   const token = socket.handshake.query.token
   if (!token) return
-  console.log(token, ' token')
   if (socket.handshake.query && token) {
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
       try {
         if (err) return next(new Error('Authentication error'))
-        console.log(socket)
         socket.decoded = decoded
         socket.userId = decoded.id
-        let user = await User.findByPk(socket.userId, {
-          attributes: ['id', 'name', 'account', 'avatar', 'role']
-        })
-        if (user) {
-          socket.userId = user.dataValues.id
-          socket.user = user.dataValues
-          socket.user.socketId = socket.id
-          console.log('socket.userId', user.dataValues.id)
-          console.log('socket.user', user.dataValues)
-          console.log('socket.user.socketId', socket.id)
-        }
+        next()
       } catch (err) {
         console.log(err)
       }
     })
     next()
+  } else {
+    next(new Error('Authentication error'))
+  }
+}).on('connection', async socket => {
+  try {
+    console.log('connection', socket.userId)
+    const user = await User.findByPk(socket.userId, {
+      attributes: ['id', 'name', 'account', 'avatar', 'role']
+    })
 
-  }
-  else {
-    next(new Error('Authentication error'));
-  }
-})
-io.on('connection', socket => {
-  console.log('connection')
-  socket.on('createdUserId', async id => {
-    try {
-      console.log('id===================================================', id)
-      let user = await User.findByPk(id, {
-        attributes: [
-          'id', 'account',
-          'name', 'avatar'
-        ]
-      })
-      user = user.toJSON()
-      socket.user = user
-      user.socketId = [socket.id]
-      console.log('user===================================================', user)
-      console.log('socket.user ===================================================', socket.user)
-      console.log('user.socketId ===================================================', user.socketId)
-    } catch (err) {
-      console.log(err)
+    if (user) {
+      socket.userId = user.dataValues.id
+      socket.user = user.dataValues
+      socket.user.socketId = socket.id
+      console.log('socket.userId', user.dataValues.id)
+      console.log('socket.user', user.dataValues)
+      console.log('socket.user.socketId', socket.id)
     }
-  })
-  socket.on('online', async () => {
-    try {
-      const user = await User.findByPk(id, {
-        attributes: [
-          'id', 'account',
-          'name', 'avatar'
-        ]
-      })
-      user = user.toJSON()
-      console.log('user', user)
-      if (!user) return
-      socket.user = user
-      user.socketId = [socket.id]
-      // 線上使用者列表加入新使用者的資料
-      if (activeUsers.map(u => u.id).includes(user.id)) {
-        console.log('This user exited.')
-      } else {
-        activeUsers.push(user)
-        activeUsersCount++
-        console.log(activeUsersCount)
+
+    socket.on('createdUserId', async () => {
+      try {
+        console.log('socket.user createdUserId', socket.user)
+        console.log('socket.user createdUserId')
+      } catch (err) {
+        console.log(err)
       }
+    })
+    socket.on('online', async () => {
+      try {
+        // 線上使用者列表加入新使用者的資料
+        if (activeUsers.map(u => u.id).includes(user.id)) {
+          console.log('This user exited.')
+        } else {
+          activeUsers.push(user)
+          activeUsersCount++
+          console.log(activeUsersCount)
+        }
+        console.log(activeUsers)
+        // 發送線上使用者列表//發送上線人數
+        io.emit('activeUsers', activeUsersCount, activeUsersCount)
+        // 向聊天室廣播新的使用者上線
+        const data = { online: user }
+        io.emit('notification', data)
+      } catch (err) {
+        console.log(err)
+      }
+    })
+    socket.on('disconnect', async () => {
+      // emit使用者離線通知
+      if (!socket.user) { return }
+      console.log('disconnect', socket.user)
+      // console.log('user.socketId disconnect===================================================', userId)
+      // 線上使用者列表移除離線使用者資料
+      const activeUsersIndex = activeUsers.map(u => u.id).indexOf(socket.userId)
+      activeUsers.splice(activeUsersIndex, 1)
       console.log(activeUsers)
-      // 發送線上使用者列表//發送上線人數
-      io.emit('activeUsers', activeUsersCount, activeUsersCount)
-      // 向聊天室廣播新的使用者上線
-      const data = { online: user }
-      io.emit('notification', data)
-    } catch (err) {
-      next(err)
-    }
-  })
-  socket.on('disconnect', async () => {
-    // emit使用者離線通知
+      console.log(activeUsersCount)
+      // 聊天室通知該名使用者離開聊天
 
-    if (!socket.user) { return }
-    console.log(socket.user)
-    const userId = socket.user.id
-
-    console.log('user.socketId disconnect===================================================', userId)
-    // 線上使用者列表移除離線使用者資料
-    const activeUsersIndex = activeUsers.map(u => u.id).indexOf(id)
-    activeUsers.splice(activeUsersIndex, 1)
-    console.log(activeUsers)
-    console.log(activeUsersCount)
-    // 聊天室通知該名使用者離開聊天
-    const user = await User.findByPk(id, { include: [id, avatar, account, name] })
-    const data = {
-      offline: user
-    }
-    io.emit('notification', data)
-    // 發送線上使用者列表
-    io.emit('activeUsers', activeUsers, activeUsersCount)
-  })
-
-  // api發送歷史訊息(avatar id account name messages)
-  // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
-  socket.on('sendMessage', async (data) => {
-    console.log(data["message"])
-    try {
-      if (data) {
-        const createdMessage = await Message.create({
-          content: data["message"],
-          UserId: socket.user.userId,
-          createdAt: Date.now()
-        })
-        //撈使用者
-        /*const user = await User.findByPk(data["userId"], { raw: true, nest: true, attributes: { exclude: ['email', 'password', 'introduction', 'cover', 'role'] } })*/
-
-        console.log(socket.user)
-        //傳送使用者和訊息
-        io.emit('newMessage', { message: createdMessage.toJSON(), user: socket.user })
+      const data = {
+        offline: socket.user
       }
-    } catch (err) { console.log(err) }
-  })
+      io.emit('notification', data)
+      // 發送線上使用者列表
+      io.emit('activeUsers', activeUsers, activeUsersCount)
+    })
+    // api發送歷史訊息(avatar id account name messages)
+    // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
+    socket.on('sendMessage', async (data) => {
+      console.log('sendMessage socket.user', socket.user)
+      console.log('message', data["message"])
+      console.log(data)
+      try {
+        if (data) {
+          const createdMessage = await Message.create({
+            content: data["message"],
+            UserId: socket.user.id,
+            createdAt: Date.now()
+          })
+          // 傳送使用者和訊息
+          console.log(createdMessage.toJson())
+          socket.emit('newMessage', { message: createdMessage.toJson(), user: socket.user })
+        }
+      } catch (err) { console.log(err) }
+    })
+  } catch (err) {
+    console.log(err)
+  }
 })
 
 server.listen(port, () => console.log(`Example server listening on port http://localhost:${port}`))
