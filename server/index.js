@@ -157,7 +157,7 @@ module.exports = (server) => {
     })
 
     try {
-      const msg = await messageService.getMessages(socket, msg)
+      const msg = await messageService.getMessages(socket)
       socket.emit('getMessages', msg)
     } catch (error) {
       console.error(error)
