@@ -28,7 +28,7 @@ require('./routes')(app)
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: ['http://localhost:8080', 'https://chris1085.github.io/SimpleTwitter-vue/'],
+    origin: ['http://localhost:8080', 'https://chris1085.github.io'],
     methods: ['GET', 'POST'],
     transports: ['websocket', 'polling'],
     credentials: true
