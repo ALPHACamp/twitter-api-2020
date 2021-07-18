@@ -1,4 +1,5 @@
 const messageService = require('../services/messageService')
+const { generateRoomName } = require('../libs/utility')
 
 module.exports = (server) => {
 
@@ -55,8 +56,9 @@ module.exports = (server) => {
     socket.on('enterRoom', async msg => {
       try {
         const { id, listenerId } = msg
-        let roomName = ''
+        let roomName = generateRoomName(id, listenerId)
         // 加入房間
+        socket.join(roomName)
 
         // 先清空 => 後搜尋未讀
         await messageService.clearUnread(io, socket, msg)
@@ -76,21 +78,51 @@ module.exports = (server) => {
       }
     })
 
+    // 離開房間
+    socket.on('leaveRoom', async msg => {
+      try {
+        const { id, listenerId } = msg
+        let roomName = generateRoomName(id, listenerId)
+
+        socket.leave(roomName)
+
+      } catch (error) {
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
+      }
+    })
+
     // 1on1私聊
     socket.on('privateMessage', async msg => {
       try {
-        let isInRoom = true
-        let roomName = ''
+        const { id, listenerId } = msg
+        const roomName = generateRoomName(id, listenerId)
+        const clients = io.sockets.adapter.rooms.get(roomName)
+        const usersInRoom = []
+        let isInRoom = false
+        if (!clients) {
+          console.log('No clients in room')
+          return
+        }
 
-        // 分辨對話人是否在房間
-        // 組合roomName
-        // code...
+        for (let [id, socket] of io.of('/').sockets) {
+          const userId = socket.data.id
+          if (clients.has(id)) {
+            usersInRoom.push(userId)
+          }
+          if (usersInRoom.includes(listenerId)) {
+            isInRoom = true
+            break
+          }
+        }
+
+
         msg.isInRoom = isInRoom
-
-
         // 儲存訊息
         const message = await messageService.saveMessage(msg)
-        socket.to(roomName).emit('privateMessage', message)
+        io.to(roomName).emit('privateMessage', message)
 
       } catch (error) {
         return socket.emit('error', {
@@ -106,15 +138,17 @@ module.exports = (server) => {
         socket.data = { ...msg }
 
         for (let [id, socket] of io.of('/').sockets) {
+          const data = {
+            userSocketId: id, ...socket.data
+          }
+
           if (usersPool.has(socket.data.id)) {
             continue
           } else if (!socket.data.id) {
             continue
           } else {
-            users.push({ ...socket.data })
-            usersPool.set(socket.data.id, {
-              ...socket.data
-            })
+            users.push(data)
+            usersPool.set(socket.data.id, data)
           }
         }
 

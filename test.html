@@ -12,6 +12,12 @@
 
   <main>
     <button type="submit" id='chat'>chat message事件</button>
+    <button type="submit" id='enterPrivateInterface'>enterPrivateInterface事件</button>
+
+    <button type="submit" id='enterRoom'>enterRoom事件</button>
+    <button type="submit" id='privateMessage1to2'>privateMessage1to2事件</button>
+    <button type="submit" id='privateMessage2to1'>privateMessage2to1事件</button>
+
   </main>
 
 
@@ -29,15 +35,21 @@
 
     const data = {
       avatar: 'https://i.imgur.com/kfIu65A.png',
-      name: 'user2',
-      account: 'user2',
-      id: 2
+      name: 'user1',
+      account: 'user1',
+      id: 1
     }
 
     socket.emit('currentUser', data)
 
     const chatBtn = document.querySelector('#chat')
+    const enterPrivateInterfaceBtn = document.querySelector('#enterPrivateInterface')
+    const enterRoomBtn = document.querySelector('#enterRoom')
+    const privateMessageBtn1to2 = document.querySelector('#privateMessage1to2')
+    const privateMessageBtn2to1 = document.querySelector('#privateMessage2to1')
 
+
+    // ================按鈕監聽器======================
     chatBtn.addEventListener('click', e => {
       e.preventDefault()
       const data = {
@@ -48,6 +60,46 @@
       socket.emit('chatMessage', data)
     })
 
+    enterPrivateInterfaceBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 2,
+      }
+      socket.emit('enterPrivateInterface', data)
+    })
+
+    enterRoomBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+        listenerId: 2
+      }
+      socket.emit('enterRoom', data)
+    })
+
+    privateMessageBtn1to2.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+        listenerId: 2,
+        content: '我累了',
+        createdAt: new Date()
+      }
+      socket.emit('privateMessage', data)
+    })
+
+    privateMessageBtn2to1.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 2,
+        listenerId: 1,
+        content: '我累了',
+        createdAt: new Date()
+      }
+      socket.emit('privateMessage', data)
+    })
+
+    // ==========socket監聽器============
     socket.on('users', msg => {
       console.log('這是users', msg)
     })
