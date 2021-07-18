@@ -149,6 +149,9 @@ http://localhost:3000/api-doc/
    - [後台刪除一則貼文](#後台刪除一則貼文)
    - [後台瀏覽所有使用者](#後台瀏覽所有使用者)
 
+- [公開聊天室](#ChatRoom) 
+   - [取得歷史訊息](#取得歷史訊息)
+
 ## Sign in & Sign up
 ### 前台使用者註冊
 ##### Method & URL
@@ -1257,6 +1260,41 @@ status code: 404
     "status": "error",
     "message": [
         "Cannot find any users in db.",
+    ]
+}
+```
+## ChatRoom
+### 取得歷史訊息
+##### Method & URL
+```
+Get /api/chat
+```
+
+##### Response
+###### Success
+```
+status code: 200
+[
+    {
+        "id": 4,
+        "UserId": 5,
+        "content": "Dicta eos et excepturi. Conseq",
+        "createdAt": "2021-03-10T14:19:33.000Z",
+        "account": "TimChien",
+        "name": "Tim",
+        "avatar": "https://i.pravatar.cc/150?img=60"
+    },
+    ...
+]
+```
+###### Failure
+##### 無法取得歷史訊息
+```
+status code: 404
+{
+    "status": "error",
+    "message": [
+        "Cannot find any historyMessage in db.",
     ]
 }
 ```
