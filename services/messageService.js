@@ -11,11 +11,21 @@ const messageService = {
     if (!msg.id) {
       throw new RequestError('Save message failed, login to send message')
     }
+    let concat = ''
+    if (msg.listenerId) {
+      if (msg.id < msg.listenerId) {
+        concat = `${msg.id}n${msg.listenerId}`
+      } else {
+        concat = `${msg.listenerId}n${msg.id}`
+      }
+    }
     return Message.create({
       UserId: msg.id,
       content: msg.content,
       createdAt: msg.createdAt,
-      updatedAt: msg.createdAt
+      updatedAt: msg.createdAt,
+      roomId: msg.listenerId ? concat : null,
+      isRead: msg.isInRoom
     }).then(message => {
       message = message.toJSON()
       message.id = message.UserId
