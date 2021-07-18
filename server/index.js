@@ -1,4 +1,5 @@
 const messageService = require('../services/messageService')
+const { generateRoomName } = require('../libs/utility')
 
 module.exports = (server) => {
 
@@ -55,8 +56,9 @@ module.exports = (server) => {
     socket.on('enterRoom', async msg => {
       try {
         const { id, listenerId } = msg
-        let roomName = ''
+        let roomName = generateRoomName(id, listenerId)
         // 加入房間
+        socket.join(roomName)
 
         // 先清空 => 後搜尋未讀
         await messageService.clearUnread(io, socket, msg)
