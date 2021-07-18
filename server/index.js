@@ -1,5 +1,5 @@
 const messageService = require('../services/messageService')
-const { generateRoomName } = require('../libs/utility')
+const { generateRoomName, SearchListenerOnline, checkIsInRoom } = require('../libs/utility')
 
 module.exports = (server) => {
 
@@ -100,31 +100,40 @@ module.exports = (server) => {
         const { id, listenerId } = msg
         const roomName = generateRoomName(id, listenerId)
         const clients = io.sockets.adapter.rooms.get(roomName)
-        const usersInRoom = []
-        let isInRoom = false
+
         if (!clients) {
           console.log('No clients in room')
           return
         }
 
-        for (let [id, socket] of io.of('/').sockets) {
-          const userId = socket.data.id
-          if (clients.has(id)) {
-            usersInRoom.push(userId)
+        const { isOnline, listenerSocketId } = SearchListenerOnline(io, socket, clients, listenerId)
+
+
+        if (isOnline) {
+          if (checkIsInRoom(io, socket, clients, listenerId)) {
+            msg.isInRoom = true
+
+            const message = await messageService.saveMessage(msg)
+
+            io.to(roomName).emit('privateMessage', message)
+          } else {
+            msg.isInRoom = false
+
+            const [message, unReads] = await Promise.all([
+              messageService.saveMessage(msg),
+              messageService.searchUnread(io, socket, msg)
+            ])
+
+            socket.to(listenerSocketId).emit('messageNotify', unReads)
           }
-          if (usersInRoom.includes(listenerId)) {
-            isInRoom = true
-            break
-          }
+        } else {
+          msg.isInRoom = false
+          const message = await messageService.saveMessage(msg)
+          io.to(roomName).emit('privateMessage', message)
         }
 
-
-        msg.isInRoom = isInRoom
-        // 儲存訊息
-        const message = await messageService.saveMessage(msg)
-        io.to(roomName).emit('privateMessage', message)
-
       } catch (error) {
+        console.log(error)
         return socket.emit('error', {
           status: error.name,
           message: error.message
