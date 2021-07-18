@@ -126,7 +126,6 @@ const messageService = {
 
   getChattedUsers: async (io, socket, msg) => {
     try {
-      msg = {id: 3}
       const results = await sequelize.query(`
         Select messages.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt' From messages
         left join users on users.id = messages.userId
