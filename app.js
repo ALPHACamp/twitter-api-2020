@@ -49,8 +49,8 @@ io.use(async (socket, next) => {
         if (err) return next(new Error('Authentication error'))
         console.log(socket)
         socket.decoded = decoded
-        const { id } = socket.decoded
-        let user = await User.findByPk(id, {
+        socket.userId = decoded.id
+        let user = await User.findByPk(socket.userId, {
           attributes: ['id', 'name', 'account', 'avatar', 'role']
         })
         if (user) {
@@ -145,28 +145,25 @@ io.on('connection', socket => {
     io.emit('notification', data)
     // 發送線上使用者列表
     io.emit('activeUsers', activeUsers, activeUsersCount)
-  }) * /
+  })
 
   // api發送歷史訊息(avatar id account name messages)
   // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
   socket.on('sendMessage', async (data) => {
-    // console.log(data)
-    // console.log(data["message"])
+    console.log(data["message"])
     try {
       if (data) {
         const createdMessage = await Message.create({
           content: data["message"],
-          UserId: data["userId"],
+          UserId: socket.user.userId,
           createdAt: Date.now()
         })
         //撈使用者
-        const user = await User.findByPk(data["userId"], { raw: true, nest: true, attributes: { exclude: ['email', 'password', 'introduction', 'cover', 'role'] } })
+        /*const user = await User.findByPk(data["userId"], { raw: true, nest: true, attributes: { exclude: ['email', 'password', 'introduction', 'cover', 'role'] } })*/
 
-        // console.log(createdMessage.toJSON())
-        // console.log(user)
-
+        console.log(socket.user)
         //傳送使用者和訊息
-        io.emit('newMessage', { message: createdMessage.toJSON(), user })
+        io.emit('newMessage', { message: createdMessage.toJSON(), user: socket.user })
       }
     } catch (err) { console.log(err) }
   })
