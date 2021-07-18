@@ -43,8 +43,6 @@ app.get('/', (req, res, next) => {
   res.sendFile(__dirname + '/view/index.html')
 })
 
-// 群聊在線人數
-let onlineCounts = 0
 let onlineUser = []
 
 // 連線錯誤監聽
@@ -55,15 +53,12 @@ io.on("connect_error", (err, next) => {
 
 // 連線監聽
 io.on('connection', async (socket) => {
+  // 請求 new user socket
+  io.to(socket.id).emit('newUser')
+
   // 接收 current user 回傳 onlineUser array
   socket.on('newUser', async user => {
-    // 連線發生時發送人數給網頁
-    onlineCounts += 1
-    io.emit('online', onlineCounts)
     console.log('new user connected')
-
-    // 請求 new user socket
-    io.to(socket.id).emit('newUser')
 
     socket.user = user
     const userIdList = onlineUser.map(user => {
@@ -125,9 +120,7 @@ io.on('connection', async (socket) => {
   // 離線監聽
   socket.on('disconnect', () => {
     // 離開時減少聊天室人數並發送給網頁
-    onlineCounts = (onlineCounts <= 0) ? 0 : onlineCounts -= 1
     onlineUser = onlineUser.filter(user => user.id !== socket.user.id)
-    io.emit('online', onlineCounts)
     io.emit('onlineUser', onlineUser)
     io.emit('userLeave', socket.user)
     console.log('disconnected')
