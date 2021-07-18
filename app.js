@@ -74,6 +74,7 @@ io.use(async (socket, next) => {
     }
     socket.on('online', async () => {
       try {
+
       // 線上使用者列表加入新使用者的資料
         const user = socket.user
         if (activeUsers.map(u => u.id).includes(user.id)) {
@@ -94,7 +95,7 @@ io.use(async (socket, next) => {
       }
     })
     socket.on('disconnect', async () => {
-    // emit使用者離線通知
+      // emit使用者離線通知
       if (!socket.user) { return }
       console.log('disconnect', socket.user)
       const user = socket.user
@@ -114,22 +115,20 @@ io.use(async (socket, next) => {
     })
     // api發送歷史訊息(avatar id account name messages)
     // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
-    socket.on('sendMessage', async (message) => {
+    socket.on('sendMessage', async (data) => {
       console.log('sendMessage socket.user', socket.user)
-      console.log('message', message)
+      console.log('message', data["message"])
+      console.log(data)
       try {
-        if (message) {
-          const createMessage = await Message.create({
-            content: message,
-            UserId: message.id,
+        if (data) {
+          const createdMessage = await Message.create({
+            content: data["message"],
+            UserId: socket.userId,
             createdAt: Date.now()
           })
-          const { createdAt } = createMessage
-          // 撈使用者
-          const user = await User.findByPk(message.id)
-          const { id, name, avatar, account } = user
           // 傳送使用者和訊息
-          socket.emit('newMessage', { message, createdAt, id, name, avatar, account })
+          console.log(createdMessage.toJSON())
+          io.emit('newMessage', { message: createdMessage.toJSON(), user: socket.user })
         }
       } catch (err) { console.log(err) }
     })
