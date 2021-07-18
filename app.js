@@ -88,7 +88,7 @@ io.on('connection', socket => {
     }
     io.emit('notification', data)
   })
-  socket.on('disconnect', (userId) => {
+  /*socket.on('disconnect', (userId) => {
     // emit使用者離線通知
     if (!userId) { return }
     // 線上使用者列表移除離線使用者資料
@@ -103,7 +103,7 @@ io.on('connection', socket => {
     io.emit('notification', data)
     // 發送線上使用者列表
     io.emit('activeUsers', activeUsers, activeUsersCount)
-  })
+  })*/
   // api發送歷史訊息(avatar id account name messages)
   // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
   socket.on('sendMessage', async (message) => {
