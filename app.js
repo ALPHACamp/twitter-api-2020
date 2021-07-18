@@ -130,12 +130,12 @@ io.use(async (socket, next) => {
         if (data) {
           const createdMessage = await Message.create({
             content: data["message"],
-            UserId: socket.user.id,
+            UserId: socket.userId,
             createdAt: Date.now()
           })
           // 傳送使用者和訊息
           console.log(createdMessage.toJson())
-          socket.emit('newMessage', { message: createdMessage.toJson(), user: socket.user })
+          io.emit('newMessage', { message: createdMessage.toJson(), user: socket.user })
         }
       } catch (err) { console.log(err) }
     })
