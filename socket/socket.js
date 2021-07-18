@@ -73,7 +73,7 @@ module.exports = (server) => {
 
     /* get public history */
     socket.on('get_public_history', async ({ offset, limit }, cb) => {
-      const message = await Message.findAll({
+      const options = {
         offset,
         limit,
         order: [['createdAt', 'desc']],
@@ -83,9 +83,13 @@ module.exports = (server) => {
             attributes: ['avatar'],
             as: 'User'
           }
-        ]
-      })
-      cb(message)
+        ],
+        where: {
+          RoomId: 1
+        }
+      }
+      const messages = await Message.findAll(options)
+      cb(messages)
     })
 
     /* public message */
@@ -144,6 +148,26 @@ module.exports = (server) => {
       socket
         .to(RoomId)
         .emit('get_private_msg', { UserId, RoomId, content, avatar, createdAt })
+    })
+    /* get private history */
+    socket.on('get_private_history', async ({ offset, limit, RoomId }, cb) => {
+      const options = {
+        offset,
+        limit,
+        order: [['createdAt', 'desc']],
+        include: [
+          {
+            model: User,
+            attributes: ['avatar'],
+            as: 'User'
+          }
+        ],
+        where: {
+          RoomId
+        }
+      }
+      const messages = await Message.findAll(options)
+      cb(messages)
     })
   })
 }
