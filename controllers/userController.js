@@ -141,7 +141,7 @@ const userController = {
               [Sequelize.literal(`(SELECT EXISTS (SELECT * FROM Likes WHERE ReplyId = Replies.id AND UserId = ${helpers.getUser(req).id}))`), 'isLiked']
             ],
             include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
-            order: ['createdAt', 'DESC']
+            order: [['createdAt', 'DESC']]
           }],
         attributes: [
           'id',
