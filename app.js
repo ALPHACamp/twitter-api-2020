@@ -108,15 +108,26 @@ io.on('connection', async (socket) => {
       let message = await Message.create({
         senderId, content, isPublic
       })
-
+      message = message.toJSON()
+      message = await Message.findAll({
+        raw: true,
+        nest: true,
+        where: { id: message.id },
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar'],
+          as: 'Sender'
+        }],
+      })
       // 傳新訊息給所有人
-      io.emit('newMessage', message.toJSON())
+      io.emit('newMessage', message)
       console.log('message: ' + msg)
     } catch (err) {
       console.log(err)
     }
   })
 
+  socket.on()
   // 離線監聽
   socket.on('disconnect', () => {
     // 離開時減少聊天室人數並發送給網頁
