@@ -116,18 +116,18 @@ module.exports = (server) => {
         roomId = await Room.create({ User1Id, User2Id })
         roomId = roomId.toJSON().id
       }
-      //return roomId to client
-      console.log('roomId', roomId)
+      
       // check isOnline or not
       if (socketUsers[User2Id]) {
         //join User1 into room
         socket.join(roomId)
         //join User2 into room
         user2Socket = sockets.find(
-          (socket) => socket.id === socketUsers[User2Id]
-        )
-        user2Socket.join(roomId)
-      }
+          (socket) => socket.id === userSockets[User2Id]
+          )
+          user2Socket.join(roomId)
+        }
+      //return roomId to client
       callback({ roomId }, socket.id)
     })
     //listen privacy msg and send
