@@ -106,15 +106,17 @@ module.exports = (server) => {
         socket.data = { ...msg }
 
         for (let [id, socket] of io.of('/').sockets) {
+          const data = {
+            userSocketId: id, ...socket.data
+          }
+
           if (usersPool.has(socket.data.id)) {
             continue
           } else if (!socket.data.id) {
             continue
           } else {
-            users.push({ ...socket.data })
-            usersPool.set(socket.data.id, {
-              ...socket.data
-            })
+            users.push(data)
+            usersPool.set(socket.data.id, data)
           }
         }
 
