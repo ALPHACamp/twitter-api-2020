@@ -12,8 +12,8 @@
 
   <main>
     <button type="submit" id='chat'>chat message事件</button>
+    <button type="submit" id='messageNotify'>messageNotify事件</button>
     <button type="submit" id='enterPrivateInterface'>enterPrivateInterface事件</button>
-
     <button type="submit" id='enterRoom'>enterRoom事件</button>
     <button type="submit" id='privateMessage1to2'>privateMessage1to2事件</button>
     <button type="submit" id='privateMessage2to1'>privateMessage2to1事件</button>
@@ -43,6 +43,7 @@
     socket.emit('currentUser', data)
 
     const chatBtn = document.querySelector('#chat')
+    const messageNotifyBtn = document.querySelector('#messageNotify')
     const enterPrivateInterfaceBtn = document.querySelector('#enterPrivateInterface')
     const enterRoomBtn = document.querySelector('#enterRoom')
     const privateMessageBtn1to2 = document.querySelector('#privateMessage1to2')
@@ -55,10 +56,20 @@
       const data = {
         id: 1,
         content: '我累了',
+        avatar: 'https://i.imgur.com/kfIu65A.png',
         createdAt: new Date()
       }
       socket.emit('chatMessage', data)
     })
+
+    messageNotifyBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+      }
+      socket.emit('messageNotify', data)
+    })
+
 
     enterPrivateInterfaceBtn.addEventListener('click', e => {
       e.preventDefault()

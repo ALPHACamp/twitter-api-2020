@@ -63,17 +63,19 @@ const messageService = {
     return Message.findAll({
       where: whereClause,
       order: [['createdAt', 'ASC']],
-      include: { model: User }
+      include: { model: User },
+      raw: true,
+      nest: true
     }).then(msg => {
       msg = msg.map((msg, i) => {
         if (!msg) {
           return []
         }
         const mapItem = {
-          id: msg.dataValues.UserId,
-          avatar: msg.dataValues.User.dataValues.avatar ? msg.dataValues.User.dataValues.avatar : null,
-          content: msg.dataValues.content,
-          createdAt: msg.dataValues.createdAt
+          id: msg.UserId,
+          avatar: msg.User.avatar,
+          content: msg.content,
+          createdAt: msg.createdAt
         }
         return mapItem
       })
@@ -125,12 +127,12 @@ const messageService = {
   getChattedUsers: async (io, socket, msg) => {
     try {
       const results = await sequelize.query(`
-        select messages.UserId as 'id', users.account, users.avatar, users.name, content, messages.createdAt as 'createdAt'
-        from messages
+        Select messages.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt' From messages
         left join users on users.id = messages.userId
-        right join (Select MAX(messages.createdAt) as 'createdAt', UserId From messages Group by UserId) as temp
+        inner join (Select MAX(messages.createdAt) as 'createdAt', UserId From messages
+        where (messages.roomId like '%n${msg.id}' or messages.roomId like '${msg.id}n%') and messages.UserId != ${Number(msg.id)} Group by UserId) as temp
         on messages.createdAt = temp.createdAt
-        where (messages.roomId like '%n${msg.id}' or messages.roomId like '${msg.id}n%') and messages.UserId != ${Number(msg.id)}
+        order by createdAt DESC
       `, { type: Sequelize.QueryTypes.SELECT })
 
       return results
