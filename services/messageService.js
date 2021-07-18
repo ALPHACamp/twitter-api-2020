@@ -1,6 +1,6 @@
 const RequestError = require('../libs/RequestError')
 const db = require('../models')
-const { User, Message, Sequelize } = db
+const { User, Message, Sequelize, sequelize } = db
 const { Op } = Sequelize
 
 const messageService = {
@@ -112,8 +112,16 @@ const messageService = {
     })
   },
 
-  getChattedUsers: (io, socket, msg) => {
-
+  getChattedUsers: async (io, socket, msg) => {
+    const results = await sequelize.query(`
+        select messages.UserId as 'id', users.account, users.avatar, users.name, content, messages.createdAt as 'createdAt'
+        from messages
+        left join users on users.id = messages.userId
+        right join (Select MAX(messages.createdAt) as 'createdAt', UserId From messages Group by UserId) as temp
+        on messages.createdAt = temp.createdAt
+        where (messages.roomId like '%n${msg.id}' or messages.roomId like '${msg.id}n%') and messages.UserId != ${Number(msg.id)}
+      `, { type: Sequelize.QueryTypes.SELECT })
+    console.log('=======results=======', results)
   }
 }
 
