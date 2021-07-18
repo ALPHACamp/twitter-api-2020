@@ -38,6 +38,14 @@ module.exports = (server) => {
       delete socketUsers[socket.id]
       if (publicRoomUsers.includes(socket.id)) {
         publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
+        const users = publicRoomUsers
+          .map((socketId) => socketUsers[socketId])
+          .filter(
+            (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+          )
+        io.emit('online_users', {
+          users
+        })
       }
       const index = sockets.findIndex((obj) => obj.id === socket.id)
       sockets.splice(index, 1)
