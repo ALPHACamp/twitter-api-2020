@@ -66,7 +66,13 @@ io.on('connection', async (socket) => {
   // 接收 current user 回傳 onlineUser array
   socket.on('newUser', user => {
     socket.user = user
-    onlineUser.push(user)
+    const userIdList = onlineUser.map(user => {
+      return user.id
+    })
+    // 不重複的使用者才加進 LIST
+    if (!userIdList.includes(user.id)) {
+      onlineUser.push(user)
+    }
     console.log(onlineUser)
 
     io.emit('onlineUser', onlineUser)
