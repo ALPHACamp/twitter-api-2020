@@ -10,8 +10,6 @@ const { authenticatedSocket } = require('../middleware/auth')
 const { Op } = require('sequelize')
 module.exports = (server) => {
   const io = socketio(server)
-  const wrap = (middleware) => (socket, next) =>
-    middleware(socket.request, {}, next)
 
   async function onlineUsers() {
     return publicRoomUsers.map(id => {
@@ -24,7 +22,7 @@ module.exports = (server) => {
     })
   }
 
-  io.use(wrap(authenticatedSocket)).on('connection', (socket) => {
+  io.use((authenticatedSocket)).on('connection', (socket) => {
     const currentUser = socket.request.user
     /* connect */
     sockets.push(socket)
