@@ -30,7 +30,7 @@ require('./routes')(app)
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: ['http://localhost:8081', 'https://chris1085.github.io/SimpleTwitter-vue/'],
+    origin: ['http://localhost:8080', 'https://chris1085.github.io/SimpleTwitter-vue/'],
     methods: ['GET', 'POST'],
     transports: ['websocket', 'polling'],
     credentials: true
@@ -104,23 +104,27 @@ io.on('connection', socket => {
     // 發送線上使用者列表
     io.emit('activeUsers', activeUsers, activeUsersCount)
   })*/
+
   // api發送歷史訊息(avatar id account name messages)
   // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
-  socket.on('sendMessage', async (message) => {
-    console.log(message)
+  socket.on('sendMessage', async (data) => {
+    // console.log(data)
+    // console.log(data["message"])
     try {
-      if (message) {
-        const createMessage = await Message.create({
-          content: message,
-          UserId: message.id,
+      if (data) {
+        const createdMessage = await Message.create({
+          content: data["message"],
+          UserId: data["userId"],
           createdAt: Date.now()
         })
-        const { createdAt } = createMessage
         //撈使用者
-        const user = await User.findByPk(userId, { attributes: { exclude: ['email', 'password', 'introduction', 'cover', 'role'] } })
+        const user = await User.findByPk(data["userId"], { raw: true, nest: true, attributes: { exclude: ['email', 'password', 'introduction', 'cover', 'role'] } })
+
+        // console.log(createdMessage.toJSON())
+        // console.log(user)
 
         //傳送使用者和訊息
-        socket.emit('newMessage', { createMessage, user })
+        io.emit('newMessage', { message: createdMessage.toJSON(), user })
       }
     }
     catch (err) { console.log(err) }
