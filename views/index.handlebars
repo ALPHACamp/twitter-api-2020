@@ -16,7 +16,7 @@
       Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsImlhdCI6MTYyNjU4MDM2N30.lefe3xZsrcy8RSHD68vppNg21lZmO86jBPDeZzEcgeo'
     }
   });
-  
+
   const messages = document.querySelector('#messagesBody');
   const form = document.querySelector('#form');
   const input = document.querySelector('#message');
@@ -25,7 +25,7 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (input.value) {
-      socket.emit('chat message', input.value);
+      socket.emit('chatMessage', input.value);
       input.value = '';
     }
   });
@@ -33,7 +33,7 @@
   let data = { UserId: 25, name: '蚯蚓', ChatroomId: 5, socketId: socketId }
   socket.emit('user', (data))
 
-  socket.on('chat message', (msg) => {
+  socket.on('chatMessage', (msg) => {
     const item = document.createElement('li');
     item.textContent = msg;
     messages.appendChild(item);

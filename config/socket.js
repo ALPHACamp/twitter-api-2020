@@ -49,13 +49,11 @@ const io = (http) => {
 
   io.on('connection', (socket) => {
     const { name, id } = socket.handshake.user
-
     socket.broadcast.emit('chatMessage', `${name}上線`);
-
     socket.on('chatMessage', async (msg) => {
       await Chat.create({
         UserId: id,
-        message: msg.content,
+        message: msg,
         ChatroomId: 5
       })
       io.emit('chatMessage', msg, socket.handshake.user);
