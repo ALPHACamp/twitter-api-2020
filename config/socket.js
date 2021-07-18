@@ -1,14 +1,7 @@
 const { User, Chat, Chatroom } = require('../models')
-const helpers = require('../_helpers')
-const sessionStore = require('sessionstore')
-const passportSocketIo = require("passport.socketio");
-const cookieParser = require('cookie-parser')
-const session = require("express-session");
 
-const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
 const passportJwtSocketIo = require('passport-jwt.socketio')
 
 const options = {

@@ -1,13 +1,9 @@
 const express = require('express')
-// const app = express()
 const app = require('express')()
 const http = require('http').Server(app)
 const exphbs = require('express-handlebars')
 
 //socket
-// const server = require('http').createServer(app);
-// const io = require('socket.io')(server)
-const { createAdapter } = require("@socket.io/mongo-adapter");
 const cors = require('cors')
 const methodOverride = require('method-override')
 
@@ -44,4 +40,3 @@ http.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
 
-// app.listen(port, () => console.log(`Example app listening on port ${port}!`))
