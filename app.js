@@ -1,3 +1,4 @@
+const http = require('http')
 const express = require('express')
 const session = require('express-session')
 const helpers = require('./_helpers');
@@ -8,7 +9,10 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const port = process.env.PORT || 3000
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const server = http.createServer(app)
+
+server.listen(port, () => console.log(`Server is listening on port ${port}!`))
+
 const io = require('socket.io')(server, {
   cors: {
     origin: ['https://fogjogger1992.github.io', 'http://localhost:8080'],
