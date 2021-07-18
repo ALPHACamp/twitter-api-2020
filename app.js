@@ -127,7 +127,6 @@ io.on('connection', async (socket) => {
     }
   })
 
-  socket.on()
   // 離線監聽
   socket.on('disconnect', () => {
     // 離開時減少聊天室人數並發送給網頁
