@@ -41,11 +41,6 @@ app.use((req, res, next) => {
   next()
 })
 
-
-app.get('/', (req, res, next) => {
-  res.sendFile(__dirname + '/view/index.html')
-})
-
 let onlineUser = []
 
 // 連線錯誤監聽
