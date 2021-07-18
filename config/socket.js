@@ -47,49 +47,22 @@ const io = (http) => {
     }
   });
 
-
-  let users = {}
   io.on('connection', (socket) => {
     const { name, id } = socket.handshake.user
-    // console.log(socket)
-    // console.log('socket.id', socket.id)
-    // const rooms = io.of("/").adapter.rooms;
-    // const sids = io.of("/").adapter.sids;
-    // console.log('-----------------')
-    // console.log(id)
-    // console.log(socket.adapter.rooms)
-    // io.of("/").adapter.on("create-room", (room) => {
-    //   console.log(`room ${room} was created`);
-    // })
 
-    // io.of("/").adapter.on("join-room", (room, id) => {
-    //   console.log(`${name}已加入房間${room} `);
-    // })
-    socket.on('user', (data) => {
-      users = data
-      socket.broadcast.emit('chat message', `${name}上線`);
-    })
-    socket.on('chat message', async (msg) => {
+    socket.broadcast.emit('chatMessage', `${name}上線`);
+
+    socket.on('chatMessage', async (msg) => {
       await Chat.create({
         UserId: id,
         message: msg.content,
         ChatroomId: 5
       })
-      io.emit('chat message', `${name}: ${msg.content}`);
+      io.emit('chatMessage', msg, socket.handshake.user);
     });
     socket.on('disconnect', () => {
-      io.emit('chat message', `${name}離開聊天室`)
+      io.emit('chatMessage', `${name}離開聊天室`)
     })
-
-
-    // socket.on('private message', async (anotherSocketId, msg) => {
-    // await Chat.create({
-    //   UserId: users.UserId,
-    //   message: msg,
-    //   ChatroomId: users.ChatroomId
-    // })
-    //   io.emit('private message', socket.id, `${socket.id}: ${msg}`);
-    // });
 
   })
 }
