@@ -65,7 +65,7 @@ module.exports = (server) => {
         socket.emit('messageNotify', unReads)
 
         // 取得歷史訊息
-        const messages = await messageService.getMessages(socket, true)
+        const messages = await messageService.getMessages(socket, msg, true)
         socket.emit('getMessages', messages)
 
       } catch (error) {
