@@ -4,9 +4,9 @@ const socketio = require('socket.io')
 const db = require('../models')
 const Message = db.Message
 const User = db.User
-const { Op } = require("sequelize")
+const Room = db.Room
 const { authenticatedSocket } = require('../middleware/auth')
-
+const { Op } = require('sequelize')
 module.exports = (server) => {
   const io = socketio(server)
   const wrap = (middleware) => (socket, next) =>
@@ -23,18 +23,19 @@ module.exports = (server) => {
   }
 
   io.use(wrap(authenticatedSocket)).on('connection', (socket) => {
-    console.log(socket.request.user)
+    // console.log(socket.request.user)
+    const currentUser = socket.request.user
     /* connect */
     sockets.push(socket)
-    userSockets[socket.request.user.id] = socket.id
+    userSockets[currentUser.id] = socket.id
     console.log(`User is online: ${socket.id}`)
     socket.emit('message', `Your socket id is  ${socket.id}`)
-
     io.emit('online_users', { users: onlineUsers() })
     socket.on('sendMessage', (data) => console.log(data))
+
     /* disconnect */
     socket.on('disconnect', () => {
-      delete userSockets[socket.request.user.id]
+      delete userSockets[currentUser.id]
       sockets.splice(sockets.indexOf(socket), 1)
       console.log(`User is offline: ${socket.id}`)
       io.emit('online_users', { users: onlineUsers() })
@@ -85,6 +86,57 @@ module.exports = (server) => {
         createdAt: message.createdAt,
         avatar: user.avatar
       })
+    })
+
+    /* privacy message */
+    socket.on('join_private_room', async ({ User1Id, User2Id }, callback) => {
+      const options = {
+        where: {
+          [Op.or]: [
+            { User1Id, User2Id },
+            { User1Id: User2Id, User2Id: User1Id }
+          ]
+        }
+      }
+      const room = await Room.findOne(options)
+      let roomId
+      if (room) {
+        roomId = room.id
+      } else {
+        roomId = await Room.create({ User1Id, User2Id })
+        roomId = roomId.toJSON().id
+      }
+      //return roomId to client
+      console.log('roomId', roomId)
+      // check isOnline or not
+      if (userSockets[User2Id]) {
+        //join User1 into room
+        socket.join(roomId)
+        //join User2 into room
+        user2Socket = sockets.find(
+          (socket) => socket.id === userSockets[User2Id]
+        )
+        user2Socket.join(roomId)
+      }
+      callback({ roomId }, socket.id)
+    })
+    //listen privacy msg and send
+    socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
+      // console.log('=========')
+      // console.log({ UserId, RoomId, content })
+      // console.log('=========')
+
+      const user = await User.findByPk(+UserId)
+      const message = await Message.create({ UserId, RoomId, content })
+      // console.log(user.toJSON())
+      // console.log(message.toJSON())
+      // const user = array[0].toJSON()
+      //  = array[1].toJSON()
+      let createdAt = message.createdAt
+      const avatar = user.avatar
+      socket
+        .to(RoomId)
+        .emit('get_private_msg', { UserId, RoomId, content, avatar, createdAt })
     })
   })
 }
