@@ -1,7 +1,7 @@
 const RequestError = require('../libs/RequestError')
 const db = require('../models')
-const User = db.User
-const Message = db.Message
+const { User, Message, Sequelize } = db
+const { Op } = Sequelize
 
 const messageService = {
   saveMessage: (msg) => {
@@ -63,7 +63,24 @@ const messageService = {
   },
 
   clearUnread: (io, socket, msg) => {
+    let firstId
+    let secondId
+    if (msg.id > msg.listenerId) {
+      firstId = msg.listenerId
+      secondId = msg.id
+    } else if (msg.id < msg.listenerId) {
+      firstId = msg.id
+      secondId = msg.listenerId
+    }
 
+    return Message.update({ isRead: true }, {
+      where: {
+        [Op.and]: [
+          { UserId: msg.listenerId },
+          { RoomId: `${firstId}n${secondId}` }
+        ]
+      }
+    })
   },
 
   getChattedUsers: (io, socket, msg) => {
