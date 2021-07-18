@@ -64,10 +64,9 @@ io.on('connection', async (socket) => {
   io.to(socket.id).emit('newUser')
 
   // 接收 current user 回傳 onlineUser array
-  socket.on('newUser', userId => {
-    socket.user = userId
-    onlineUser.push(userId)
-
+  socket.on('newUser', user => {
+    socket.user = user
+    onlineUser.push(user)
     console.log(onlineUser)
 
     io.emit('onlineUser', onlineUser)
@@ -94,7 +93,7 @@ io.on('connection', async (socket) => {
       // 前端傳來的訊息為空 return
       if (!msg.content) return
       // 取得 sender id
-      const senderId = socket.user
+      const senderId = socket.user.id
       if (!senderId) return
 
       const { content, isPublic } = msg
@@ -115,7 +114,7 @@ io.on('connection', async (socket) => {
   socket.on('disconnect', () => {
     // 離開時減少聊天室人數並發送給網頁
     onlineCounts = (onlineCounts <= 0) ? 0 : onlineCounts -= 1
-    onlineUser = onlineUser.filter(user => user !== socket.data.user)
+    onlineUser = onlineUser.filter(user => user.id !== socket.user.id)
     io.emit('online', onlineCounts)
     io.emit('onlineUser', onlineUser)
     io.emit('userLeave', socket.data.user)
