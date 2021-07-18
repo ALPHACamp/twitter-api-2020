@@ -19,7 +19,7 @@ const options = {
 async function verify(jwt_payload, done) {
   try {
     const user = await User.findByPk(jwt_payload.id, {
-      attributes: ['id', 'name', 'avatar']
+      attributes: ['id', 'name', 'account', 'avatar']
     })
     if (!user) return done(null, false)
     return done(null, user.toJSON())
@@ -51,13 +51,6 @@ const io = (http) => {
   io.on('connection', (socket) => {
     const { name, id } = socket.handshake.user
 
-    const index = users.map(user => { return user.id }).indexOf(id)
-
-    if (index < 0) {
-      users.push(socket.handshake.user)
-    }
-    io.emit('totalUser', users)
-    socket.broadcast.emit('joinRoom', `${name}上線`);
     socket.on('chatMessage', (msg) => {
       Chat.create({
         UserId: id,
@@ -66,7 +59,17 @@ const io = (http) => {
       })
       io.emit('chatMessage', msg, socket.handshake.user);
     });
-    socket.on('disconnect', () => {
+
+    socket.on('login', () => {
+      const index = users.map(user => { return user.id }).indexOf(id)
+      if (index < 0) {
+        users.push(socket.handshake.user)
+      }
+      socket.broadcast.emit('joinRoom', `${name}上線`);
+      io.emit('totalUser', users)
+    })
+
+    socket.on('logout', () => {
       const removeIndex = users.map(user => { return user.id }).indexOf(id)
       users.splice(removeIndex, 1)
       io.emit('totalUser', users)

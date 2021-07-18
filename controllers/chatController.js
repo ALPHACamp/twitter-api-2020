@@ -5,13 +5,13 @@ const { Chat, User, Chatroom, UserRoom } = require('../models')
 
 const chatController = {
   getContent: async (req, res, next) => {
+    const n = 0
     try {
       const room = await Chat.findAll({
         where: { ChatroomId: 5 },
         include: [{ model: User, attributes: ['id', 'name', 'avatar'] }],
         // order: [['createdAt', 'DESC']],
-        // limit: [3],
-        // offset: 2
+        // limit: [1 + 1 * n],
       })
       return res.json(room)
       // callback(room)
