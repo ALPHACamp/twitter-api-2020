@@ -28,8 +28,15 @@ const messageService = {
       isRead: msg.isInRoom
     }).then(message => {
       message = message.toJSON()
+      message.messageId = message.id
       message.id = message.UserId
+      message.avatar = msg.avatar
+      if (msg.listenerId) {
+        message.listenerId = msg.listenerId
+      }
       delete message.UserId
+      delete message.updatedAt
+      delete message.roomId
 
       return message
     })
