@@ -76,6 +76,21 @@ module.exports = (server) => {
       }
     })
 
+    // 離開房間
+    socket.on('leaveRoom', async msg => {
+      try {
+        const { id, listenerId } = msg
+        let roomName = generateRoomName(id, listenerId)
+
+        socket.leave(roomName)
+
+      } catch (error) {
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
+      }
+    })
     // 1on1私聊
     socket.on('privateMessage', async msg => {
       try {
