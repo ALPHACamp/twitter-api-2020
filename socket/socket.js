@@ -52,6 +52,8 @@ module.exports = (server) => {
 
     /* join public room */
     socket.on('join_public_room', async ({ userId }) => {
+      console.log('============================')
+      console.log('join_public_room', userId)
       publicRoomUsers.push(userId)
       const user = socketUsers[userId]
       io.emit('new_join', {
@@ -63,6 +65,8 @@ module.exports = (server) => {
     })
     /* leave public room */
     socket.on('leave_public_room', async ({ userId }) => {
+      console.log('============================')
+      console.log('leave_public_room', userId)
       publicRoomUser.splice(publicRoomUser.indexOf(userId), 1)
       const user = socketUsers[userId]
       io.emit('user_leave', {
@@ -98,6 +102,8 @@ module.exports = (server) => {
 
     /* public message */
     socket.on('post_public_msg', async ({ msg, userId }) => {
+      console.log('============================')
+      console.log('post_public_msg', { msg, userId })
       const message = await Message.create({
         RoomId: 1,
         UserId: userId,
@@ -113,6 +119,8 @@ module.exports = (server) => {
 
     /* privacy message */
     socket.on('join_private_room', async ({ User1Id, User2Id }, callback) => {
+      console.log('============================')
+      console.log('join_private_room', { User1Id, User2Id })
       const options = {
         where: {
           [Op.or]: [
@@ -145,6 +153,9 @@ module.exports = (server) => {
     })
     //listen privacy msg and send
     socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
+      console.log('============================')
+      console.log('post_private_msg', { UserId, RoomId, content })
+
       const user = socketUsers[UserId]
       const message = await Message.create({ UserId, RoomId, content })
       let createdAt = message.createdAt
