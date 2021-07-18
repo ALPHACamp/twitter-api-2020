@@ -1,5 +1,7 @@
-<h5>私人通道</h5>
 <ul id="messagesBody">
+  {{#each data}}
+  <li>{{this.dataValues.User.dataValues.name}} : {{this.dataValues.message}}</li>
+  {{/each}}
 </ul>
 <form id="form" action="/api/chat" method="">
   <input id="ChatroomId" type="hidden" name="ChatroomId" autocomplete="off" value="5">
@@ -9,7 +11,11 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
+  const socket = io.connect('', {
+    extraHeaders: {
+      Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjUsImlhdCI6MTYyNjU5NTcyOX0.q3zKETgqX-Ynhcp0YWO7AErNV5QZYFMLUWURFzCFlec'
+    }
+  });
 
   const messages = document.querySelector('#messagesBody');
   const form = document.querySelector('#form');
@@ -19,16 +25,26 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (input.value) {
-      socket.emit('private message', socket.id, input.value);
+      socket.emit('chatMessage', input.value);
       input.value = '';
     }
   });
-  let socketId = socket.id
-  let data = { UserId: 25, name: '蚯蚓', ChatroomId: 10, socketId: socketId }
 
-  socket.on('private message', (anotherSocketId, msg) => {
+  socket.on('chatMessage', (msg, data) => {
     const item = document.createElement('li');
-    item.textContent = msg;
+    item.innerHTML = `${data.name} : ${msg}`;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  })
+  socket.on('leaveRoom', (msg) => {
+    const item = document.createElement('li');
+    item.innerHTML = msg;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  })
+  socket.on('joinRoom', (msg) => {
+    const item = document.createElement('li');
+    item.innerHTML = msg;
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
   })

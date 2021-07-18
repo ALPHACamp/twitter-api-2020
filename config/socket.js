@@ -50,7 +50,7 @@ const io = (http) => {
   io.on('connection', (socket) => {
     const { name, id } = socket.handshake.user
 
-    socket.broadcast.emit('chatMessage', `${name}上線`);
+    io.emit('joinRoom', `${name}上線`);
     socket.on('chatMessage', async (msg) => {
       await Chat.create({
         UserId: id,
@@ -60,10 +60,26 @@ const io = (http) => {
       io.emit('chatMessage', msg, socket.handshake.user);
     });
     socket.on('disconnect', () => {
-      io.emit('chatMessage', `${name}離開聊天室`)
+      console.log(name, '離開')
+      io.emit('leaveRoom', `${name}離開聊天室`)
     })
 
   })
 }
 
 module.exports = { io }
+
+
+
+
+
+// console.log('--------------')
+// console.log('rooms', socket.adapter.rooms)
+// console.log('--------------')
+// console.log('id', socket.id)
+// const rooms = io.of("/").adapter.rooms;
+// io.of("/").adapter.on("create-room", (room) => {
+//   console.log('----@@@@@@----')
+//   console.log(`room ${room} was created`);
+// });
+// console.log(name)

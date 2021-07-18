@@ -29,9 +29,15 @@
   let socketId = socket.id
   let data = { UserId: 25, name: '蚯蚓', ChatroomId: 10, socketId: socketId }
 
-  socket.on('private message', (anotherSocketId, msg) => {
+  socket.on('chatMessage', (msg, data) => {
     const item = document.createElement('li');
-    item.textContent = msg;
+    item.innerHTML = `${data.name} : ${msg}`;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  })
+  socket.on('leaveRoom', (msg) => {
+    const item = document.createElement('li');
+    item.innerHTML = msg;
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
   })

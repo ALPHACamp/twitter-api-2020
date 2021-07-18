@@ -20,7 +20,15 @@ const helpers = require('../_helpers')
 //   })
 //   // res.render('index')
 // })
+// router.get('/2', (req, res) => {
+//   chatController.getContent(req, res, (data) => {
+//     res.render('join', { data })
+//   })
+//   // res.render('index')
+// })
+
 router.get('/', chatController.getContent)
+
 // router.use(helpers.authenticated)
 
 router.get('/:roomId', chatController.getContent)

@@ -29,16 +29,24 @@
       input.value = '';
     }
   });
-  let socketId = socket.id
-  let data = { UserId: 25, name: '蚯蚓', ChatroomId: 5, socketId: socketId }
-  socket.emit('user', (data))
 
-  socket.on('chatMessage', (msg) => {
+  socket.on('chatMessage', (msg, data) => {
     const item = document.createElement('li');
-    item.textContent = msg;
+    item.innerHTML = `${data.name} : ${msg}`;
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
   })
-
+  socket.on('leaveRoom', (msg) => {
+    const item = document.createElement('li');
+    item.innerHTML = msg;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  })
+  socket.on('joinRoom', (msg) => {
+    const item = document.createElement('li');
+    item.innerHTML = msg;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  })
 
 </script>
