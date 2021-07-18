@@ -119,6 +119,10 @@ module.exports = (server) => {
     socket.on('post_public_msg', async ({ content, userId }) => {
       console.log('============================')
       console.log('post_public_msg', { content, userId })
+
+      if (content.length === 0) {
+        return
+      }
       const message = await Message.create({
         RoomId: 1,
         UserId: userId,
@@ -176,7 +180,9 @@ module.exports = (server) => {
     socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
       console.log('============================')
       console.log('post_private_msg', { UserId, RoomId, content })
-
+      if (content.length === 0) {
+        return
+      }
       const user = socketUsers[socket.id]
       const message = await Message.create({ UserId, RoomId, content })
       let createdAt = message.createdAt
