@@ -79,7 +79,7 @@ module.exports = (server) => {
     // 1on1私聊
     socket.on('privateMessage', async msg => {
       try {
-        let isInRoom = true
+        let isInRoom = false
         let roomName = ''
 
         // 分辨對話人是否在房間
