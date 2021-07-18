@@ -33,17 +33,24 @@ module.exports = (server) => {
     socket.emit('message', `Your socket id is  ${socket.id}`)
     socket.on('sendMessage', (data) => console.log(data))
 
+    function filter(publicRoomUsers) {
+      let users = []
+      publicRoomUsers.forEach((socketId) => {
+        if (socketUsers[socketId]) {
+          users.push(socketUsers[socketId])
+        }
+      })
+      let allId = users.map((item) => item.id)
+      users = users.filter((user, i, arr) => allId.indexOf(user.id) === i)
+      return users
+    }
+
     /* disconnect */
     socket.on('disconnect', () => {
       delete socketUsers[socket.id]
       if (publicRoomUsers.includes(socket.id)) {
         publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
-        let users = publicRoomUsers
-          .map((socketId) => socketUsers[socketId])
-          .filter((item) => item)
-        users.filter(
-          (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
-        )
+        const users = filter(publicRoomUsers)
         io.emit('online_users', {
           users
         })
@@ -64,12 +71,7 @@ module.exports = (server) => {
       io.emit('new_join', {
         name: user.name
       })
-      let users = publicRoomUsers
-        .map((socketId) => socketUsers[socketId])
-        .filter((item) => item)
-      users.filter(
-        (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
-      )
+      const users = filter(publicRoomUsers)
       io.emit('online_users', {
         users
       })
@@ -84,12 +86,7 @@ module.exports = (server) => {
       io.emit('user_leave', {
         name: user.name
       })
-      let users = publicRoomUsers
-        .map((socketId) => socketUsers[socketId])
-        .filter((item) => item)
-      users.filter(
-        (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
-      )
+      const users = filter(publicRoomUsers)
       io.emit('online_users', {
         users
       })
@@ -124,8 +121,7 @@ module.exports = (server) => {
     socket.on('post_public_msg', async ({ content, userId }) => {
       console.log('============================')
       console.log('post_public_msg', { content, userId })
-
-      if (content.length === 0 || !content) {
+      if (!content) {
         return
       }
       const message = await Message.create({

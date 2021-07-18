@@ -5,11 +5,11 @@ let followships = require('./api/followships')
 const path = require('path')
 
 module.exports = (app) => {
-// //  local test socket
-//   app.get('/', (req, res) => {
-//     res.sendFile(path.join(__dirname,'../index.html'))
+//  local test socket
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname,'../index.html'))
 
-//   })
+  })
   app.use('/api/users', users)
   app.use('/api/tweets', tweets)
   app.use('/api/admin', admins)
