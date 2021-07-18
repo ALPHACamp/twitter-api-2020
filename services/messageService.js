@@ -35,14 +35,22 @@ const messageService = {
     })
   },
 
-  getMessages: async (socket, isPrivate = false) => {
+  getMessages: async (socket, msg, isPrivate = false) => {
     let whereClause = {}
+    let concat = ''
+    if (msg.listenerId) {
+      if (msg.id < msg.listenerId) {
+        concat = `${msg.id}n${msg.listenerId}`
+      } else {
+        concat = `${msg.listenerId}n${msg.id}`
+      }
+    }
     switch (isPrivate) {
       case true:
-        // whereClause = { RoomId:  }
+        whereClause = { roomId: concat }
         break
       case false:
-        whereClause = { RoomId: null }
+        whereClause = { roomId: null }
         break
     }
     return Message.findAll({
