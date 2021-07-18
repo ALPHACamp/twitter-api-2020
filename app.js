@@ -45,7 +45,7 @@ app.get('/', (req, res, next) => {
 
 // 群聊在線人數
 let onlineCounts = 0
-onlineUser = []
+let onlineUser = []
 
 // 連線錯誤監聽
 io.on("connect_error", (err, next) => {
@@ -64,18 +64,22 @@ io.on('connection', async (socket) => {
   io.to(socket.id).emit('newUser')
 
   // 接收 current user 回傳 onlineUser array
-  socket.on('newUser', async (user) => {
+  socket.on('newUser', async user => {
+    socket.user = user
+    const userIdList = onlineUser.map(user => {
+      return user.id
+    })
+    // 不重複的使用者才加進 LIST
+    if (!userIdList.includes(user.id)) {
+      onlineUser.push(user)
+    }
+    console.log(onlineUser)
+
+    io.emit('onlineUser', onlineUser)
+    socket.broadcast.emit('userJoin', socket.user)
     try {
-      socket.user = user
-      const userIdList = onlineUser.map(user => {
-        return user.id
-      })
-      // 不重複的使用者才加進 LIST
-      if (!userIdList.includes(user.id)) {
-        onlineUser.push(user)
-      }
       // 發送之前的全部訊息
-      msgs = await Message.findAll({
+      const msgs = await Message.findAll({
         raw: true,
         nest: true,
         where: { isPublic: true },
@@ -83,13 +87,11 @@ io.on('connection', async (socket) => {
       })
       console.log(msgs)
       io.to(socket.id).emit('historyMessages', msgs)
-      console.log(onlineUser)
-      io.emit('onlineUser', onlineUser)
-      socket.broadcast.emit('userJoin', socket.user)
     } catch (err) {
       console.log(err)
     }
   })
+
 
 
   // 公開訊息監聽
