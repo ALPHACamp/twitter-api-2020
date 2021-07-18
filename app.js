@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = require('socket.io')(server, {
   cors: {
-    origin: "http://localhost:8080",
+    origin: "https://fogjogger1992.github.io/simple-twitter",
     methods: ["GET", "POST"],
     transports: ['websocket', 'polling'],
     credentials: true
@@ -19,7 +19,6 @@ const io = require('socket.io')(server, {
   allowEIO3: true
 })
 const passport = require('./config/passport');
-const { SSL_OP_NO_TICKET } = require('constants');
 
 // cors 的預設為全開放
 app.use(cors())
