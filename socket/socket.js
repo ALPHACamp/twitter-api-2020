@@ -9,10 +9,16 @@ const Room = db.Room
 const { authenticatedSocket } = require('../middleware/auth')
 const { Op } = require('sequelize')
 module.exports = (server) => {
-  const io = socketio(server)
+  const io = socketio(server, {
+    cors: {
+      origin: ['http://localhost:8080', 'https://ryanhsun.github.io'],
+      credentials: true
+    },
+    allowEIO3: true
+  })
 
   async function onlineUsers() {
-    return publicRoomUsers.map(id => {
+    return publicRoomUsers.map((id) => {
       return {
         id,
         name: socketUsers[id].name,
@@ -22,7 +28,8 @@ module.exports = (server) => {
     })
   }
 
-  io.use((authenticatedSocket)).on('connection', (socket) => {
+  io.use(authenticatedSocket).on('connection', (socket) => {
+    console.log(socket.request.user)
     const currentUser = socket.request.user
     /* connect */
     sockets.push(socket)
@@ -114,7 +121,7 @@ module.exports = (server) => {
         roomId = await Room.create({ User1Id, User2Id })
         roomId = roomId.toJSON().id
       }
-      
+
       // check isOnline or not
       if (socketUsers[User2Id]) {
         //join User1 into room
@@ -122,9 +129,9 @@ module.exports = (server) => {
         //join User2 into room
         user2Socket = sockets.find(
           (socket) => socket.id === userSockets[User2Id]
-          )
-          user2Socket.join(roomId)
-        }
+        )
+        user2Socket.join(roomId)
+      }
       //return roomId to client
       callback({ roomId }, socket.id)
     })

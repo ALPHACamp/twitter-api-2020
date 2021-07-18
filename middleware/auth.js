@@ -37,6 +37,9 @@ module.exports = {
     })
   },
   authenticatedSocket: (socket, next) => {
+    console.log('==========================================')
+    console.log(socket.handshake.query.auth)
+    console.log('==========================================')
     if (socket.handshake.query && socket.handshake.query.auth) {
       jwt.verify(
         socket.handshake.query.auth,
@@ -50,6 +53,7 @@ module.exports = {
             attributes: ['id', 'name', 'account', 'avatar']
           }
           let user = await User.findByPk(decoded.id, options)
+          // console.log(user)
           user = user.toJSON()
           user.socketId = socket.id
           socket.request.user = user
