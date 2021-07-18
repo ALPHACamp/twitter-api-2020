@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'Followings'
     })
     User.hasMany(models.Message)
+    User.hasMany(models.Subscription)
   };
   return User;
 };
