@@ -132,7 +132,6 @@ io.use(async (socket, next) => {
             createdAt: Date.now()
           })
           // 傳送使用者和訊息
-          let newnewMessage = createdMessage.toJSON()
           console.log('message: ', createdMessage.toJSON())
           console.log('message content: ', data)
           io.emit('newMessage', { message: createdMessage.toJSON(), user: socket.user })
