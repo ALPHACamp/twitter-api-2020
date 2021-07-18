@@ -38,16 +38,12 @@ module.exports = (server) => {
       delete socketUsers[socket.id]
       if (publicRoomUsers.includes(socket.id)) {
         publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
-        const users = publicRoomUsers
+        let users = publicRoomUsers
           .map((socketId) => socketUsers[socketId])
-          .filter(
-            (user, i, arr) => arr.map((item) => {
-             if(!item.id){
-               return 
-             }
-             return item.id
-            }).indexOf(user.id) === i
-          )
+          .filter((item) => item)
+        users.filter(
+          (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+        )
         io.emit('online_users', {
           users
         })
@@ -68,19 +64,12 @@ module.exports = (server) => {
       io.emit('new_join', {
         name: user.name
       })
-      const users = publicRoomUsers
+      let users = publicRoomUsers
         .map((socketId) => socketUsers[socketId])
-        .filter(
-          (user, i, arr) =>
-            arr
-              .map((item) => {
-                if (!item.id) {
-                  return
-                }
-                return item.id
-              })
-              .indexOf(user.id) === i
-        )
+        .filter((item) => item)
+      users.filter(
+        (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+      )
       io.emit('online_users', {
         users
       })
@@ -95,20 +84,15 @@ module.exports = (server) => {
       io.emit('user_leave', {
         name: user.name
       })
-      const users = publicRoomUsers
+      let users = publicRoomUsers
         .map((socketId) => socketUsers[socketId])
-        .filter(
-          (user, i, arr) =>
-            arr
-              .map((item) => {
-                if (!item.id) {
-                  return
-                }
-                return item.id
-              })
-              .indexOf(user.id) === i
-        )
-      io.emit('online_users', { users })
+        .filter((item) => item)
+      users.filter(
+        (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+      )
+      io.emit('online_users', {
+        users
+      })
     })
 
     /* get public history */
