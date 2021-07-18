@@ -7,14 +7,14 @@ const { socketAuth } = require('../middlewares/auth')
 let io
 const users = []
 
-function addUsers(target) {
+function addUsers (target) {
   const exist = users.some(e => e.id === target.id)
   if (exist) { return console.log('exist!') }
   users.push(target)
 }
 
 module.exports = {
-  init(server) {
+  init (server) {
     io = new Server(server, {
       cors: {
         origin: process.env.CORS_WHITE_LIST.split(','),
@@ -25,7 +25,7 @@ module.exports = {
       allowEIO3: true
     })
   },
-  connect() {
+  connect () {
     if (!io) throw new Error('No socket io server instance')
 
     io.use(socketAuth).on('connection', (socket) => {
@@ -43,7 +43,7 @@ module.exports = {
 
       socket.on('leavePublic', () => {
         console.log('leaving!!!')
-        users.splice(users.indexOf(socket.user))
+        users.splice(users.indexOf(socket.user), 1)
         console.log(users)
         socket.emit('announce', {
           users, message: `${socket.user.name} left.`
@@ -78,7 +78,7 @@ module.exports = {
 
       socket.on('disconnect', (reason) => {
         if (users.find(user => user === socket.user)) {
-          users.splice(users.indexOf(socket.user))
+          users.splice(users.indexOf(socket.user), 1)
         }
         socket.emit('announce', {
           users, message: `${socket.user.name} left.`
@@ -88,7 +88,7 @@ module.exports = {
       })
     })
   },
-  async chatMessage(socket, message) {
+  async chatMessage (socket, message) {
     if (+message.RoomId === -1) return console.log('RoomId: -1')
     await postChat({
       UserId: message.User.id,
