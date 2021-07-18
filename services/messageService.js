@@ -120,7 +120,8 @@ const messageService = {
   },
 
   getChattedUsers: async (io, socket, msg) => {
-    const results = await sequelize.query(`
+    try {
+      const results = await sequelize.query(`
         select messages.UserId as 'id', users.account, users.avatar, users.name, content, messages.createdAt as 'createdAt'
         from messages
         left join users on users.id = messages.userId
@@ -128,6 +129,11 @@ const messageService = {
         on messages.createdAt = temp.createdAt
         where (messages.roomId like '%n${msg.id}' or messages.roomId like '${msg.id}n%') and messages.UserId != ${Number(msg.id)}
       `, { type: Sequelize.QueryTypes.SELECT })
+
+      return results
+    } catch (error) {
+      throw new Error(error.message)
+    }
   }
 }
 
