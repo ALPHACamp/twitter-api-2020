@@ -134,8 +134,8 @@ io.use(async (socket, next) => {
             createdAt: Date.now()
           })
           // 傳送使用者和訊息
-          console.log(createdMessage.toJson())
-          io.emit('newMessage', { message: createdMessage.toJson(), user: socket.user })
+          console.log(createdMessage.toJSON())
+          io.emit('newMessage', { message: createdMessage.toJSON(), user: socket.user })
         }
       } catch (err) { console.log(err) }
     })
