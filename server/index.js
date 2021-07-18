@@ -141,6 +141,28 @@ module.exports = (server) => {
       }
     })
 
+    socket.on('getMessages', msg => {
+      let usersPool = new Map()
+      socket.data = { ...msg }
+
+      for (let [id, socket] of io.of('/').sockets) {
+        const data = {
+          userSocketId: id, ...socket.data
+        }
+
+        if (usersPool.has(socket.data.id)) {
+          continue
+        } else if (!socket.data.id) {
+          continue
+        } else {
+          users.push(data)
+          usersPool.set(socket.data.id, data)
+        }
+      }
+
+      io.emit('users', users)
+    })
+
     socket.on('currentUser', async msg => {
       try {
         let usersPool = new Map()
