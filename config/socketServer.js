@@ -2,7 +2,7 @@ const db = require('../models')
 const { Message, User } = db
 const activeUsers = []
 let activeUsersCount = 0
-const { socketAuthenticated,getUserInfo } = require('../config/functions')
+const { socketAuthenticated } = require('../config/functions')
 
 module.exports = (io) => {
   io.use(socketAuthenticated).on('connection', async socket => {
@@ -54,14 +54,26 @@ module.exports = (io) => {
         console.log('sendMessage socket.user', socket.user)
         try {
           if (data) {
-            const createdMessage = await Message.create({
+            let message = await Message.create({
               content: data,
               UserId: socket.userId,
               createdAt: Date.now()
             })
-            console.log('message: ', createdMessage.toJSON())
+            // 傳送使用者和訊息
+            console.log('message: ', message.toJSON())
             console.log('message content: ', data)
-            io.emit('newMessage', { message: createdMessage.toJSON(), user: socket.user })
+            let createdMessage = message.toJSON()
+            let newInfo = {
+              id: createdMessage.id,
+              UserId: socket.userId,
+              content: data,
+              createdAt: createdMessage.createdAt,
+              account: socket.user.account,
+              name: socket.user.name,
+              avatar: socket.user.avatar,
+            }
+            console.log('newInfo', newInfo)
+            io.emit('newMessage', newInfo)
           }
         } catch (err) { console.log(err) }
       })
