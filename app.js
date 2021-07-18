@@ -38,7 +38,7 @@ const io = require('socket.io')(server, {
   allowEIO3: true
 })
 const activeUsers = []
-const activeUsersCount = 0
+let activeUsersCount = 0
 io.use(async (socket, next) => {
   const token = socket.handshake.query.token
   if (!token) return
@@ -72,43 +72,38 @@ io.use(async (socket, next) => {
       console.log('socket.user', user.dataValues)
       console.log('socket.user.socketId', socket.id)
     }
-    socket.on('online', async () => {
-      try {
-      // 線上使用者列表加入新使用者的資料
-        const user = socket.user
-        if (activeUsers.map(u => u.id).includes(user.id)) {
-          console.log('This user already exited.')
-        } else {
-          activeUsers.push(user)
-          activeUsersCount++
-          console.log(activeUsersCount)
-        }
-        console.log(activeUsers)
-        // 發送線上使用者列表//發送上線人數
-        io.emit('activeUsers', activeUsersCount, activeUsersCount)
-        // 向聊天室廣播新的使用者上線
-        const data = { online: user }
-        io.emit('notification', data)
-      } catch (err) {
-        console.log(err)
-      }
-    })
+    console.log('online user', socket.user)
+    // 線上使用者列表加入新使用者的資料
+    const onlineUser = socket.user
+    if (activeUsers.map(u => u.id).includes(user.id)) {
+      console.log('This user already existed.')
+      activeUsersCount = activeUsers.length
+    } else {
+      activeUsers.push(onlineUser)
+      activeUsersCount++
+      console.log('activeUsersCount', activeUsersCount)
+    }
+    console.log('activeUsers', activeUsers)
+    // 發送線上使用者列表//發送上線人數
+    io.emit('activeUsers', activeUsersCount, activeUsers)
+    // 向聊天室廣播新的使用者上線
+    const data = { online: onlineUser }
+    io.emit('notification', data)
+
     socket.on('disconnect', async () => {
     // emit使用者離線通知
       if (!socket.user) { return }
       console.log('disconnect', socket.user)
-      const user = socket.user
+      const offlineUser = socket.user
       // 線上使用者列表移除離線使用者資料
-      const activeUsersIndex = activeUsers.map(u => u.id).indexOf(user.id)
+      const activeUsersIndex = activeUsers.map(u => u.id).indexOf(offlineUser.id)
       activeUsers.splice(activeUsersIndex, 1)
       console.log(activeUsers)
+      activeUsersCount = activeUsers.length
       console.log(activeUsersCount)
       // 聊天室通知該名使用者離開聊天
 
-      const data = {
-        offline: user
-      }
-      io.emit('notification', data)
+      io.emit('notification', offlineUser)
       // 發送線上使用者列表
       io.emit('activeUsers', activeUsers, activeUsersCount)
     })
