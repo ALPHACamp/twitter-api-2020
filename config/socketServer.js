@@ -34,6 +34,7 @@ module.exports = (io) => {
         socket.userId = user.dataValues.id
         socket.user = user.dataValues
         socket.user.socketId = socket.id
+        socket.user.channel = 'publicRoom'
         console.log('socket.userId', user.dataValues.id)
         console.log('socket.user', user.dataValues)
         console.log('socket.user.socketId', socket.id)
@@ -53,7 +54,7 @@ module.exports = (io) => {
       // 發送線上使用者列表//發送上線人數
       io.emit('activeUsers', activeUsersCount, activeUsers)
       // 向聊天室廣播新的使用者上線
-      const data = { online: onlineUser }
+      const data = { online: true ,onlineUser }
       io.emit('notification', data)
 
       socket.on('disconnect', async () => {
@@ -67,9 +68,9 @@ module.exports = (io) => {
         console.log(activeUsers)
         activeUsersCount = activeUsers.length
         console.log(activeUsersCount)
+        const data = { online: false ,onlineUser }
         // 聊天室通知該名使用者離開聊天
-
-        io.emit('notification', offlineUser)
+        io.emit('notification', data)
         // 發送線上使用者列表
         io.emit('activeUsers', activeUsers, activeUsersCount)
       })
