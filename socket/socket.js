@@ -13,11 +13,11 @@ module.exports = (server) => {
     middleware(socket.request, {}, next)
 
   io.use(wrap(authenticatedSocket)).on('connection', (socket) => {
+    // console.log(socket.request.user)
+    const currentUser = socket.request.user
     /* connect */
     sockets.push(socket)
-    userSockets[1] = socket.id
-    // console.log(sockets)
-    console.log(userSockets)
+    userSockets[currentUser.id] = socket.id
     console.log(`User is online: ${socket.id}`)
     socket.emit('message', `Your socket id is  ${socket.id}`)
     socket.on('sendMessage', (data) => console.log(data))
@@ -102,14 +102,14 @@ module.exports = (server) => {
     })
     //listen privacy msg and send
     socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
-      console.log('=========')
-      console.log({ UserId, RoomId, content })
-      console.log('=========')
+      // console.log('=========')
+      // console.log({ UserId, RoomId, content })
+      // console.log('=========')
 
       const user = await User.findByPk(+UserId)
       const message = await Message.create({ UserId, RoomId, content })
-      console.log(user.toJSON())
-      console.log(message.toJSON())
+      // console.log(user.toJSON())
+      // console.log(message.toJSON())
       // const user = array[0].toJSON()
       //  = array[1].toJSON()
       let createdAt = message.createdAt
