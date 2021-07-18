@@ -126,13 +126,14 @@ const messageService = {
 
   getChattedUsers: async (io, socket, msg) => {
     try {
+      msg = {id: 3}
       const results = await sequelize.query(`
-        select messages.UserId as 'id', users.account, users.avatar, users.name, content, messages.createdAt as 'createdAt'
-        from messages
+        Select messages.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt' From messages
         left join users on users.id = messages.userId
-        right join (Select MAX(messages.createdAt) as 'createdAt', UserId From messages Group by UserId) as temp
+        inner join (Select MAX(messages.createdAt) as 'createdAt', UserId From messages
+        where (messages.roomId like '%n${msg.id}' or messages.roomId like '${msg.id}n%') and messages.UserId != ${Number(msg.id)} Group by UserId) as temp
         on messages.createdAt = temp.createdAt
-        where (messages.roomId like '%n${msg.id}' or messages.roomId like '${msg.id}n%') and messages.UserId != ${Number(msg.id)}
+        order by createdAt DESC
       `, { type: Sequelize.QueryTypes.SELECT })
 
       return results
