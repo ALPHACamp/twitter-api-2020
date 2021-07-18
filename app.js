@@ -111,17 +111,16 @@ io.use(async (socket, next) => {
     // on監聽使用者發送的訊息//儲存訊息到db//emit發送使用者的訊息到聊天室
     socket.on('sendMessage', async (data) => {
       console.log('sendMessage socket.user', socket.user)
-      console.log('message', data["message"])
-      console.log(data)
       try {
         if (data) {
           const createdMessage = await Message.create({
-            content: data["message"],
+            content: data,
             UserId: socket.userId,
             createdAt: Date.now()
           })
           // 傳送使用者和訊息
-          console.log(createdMessage.toJSON())
+          console.log('message: ', createdMessage.toJSON())
+          console.log('message content: ', data)
           io.emit('newMessage', { message: createdMessage.toJSON(), user: socket.user })
         }
       } catch (err) { console.log(err) }
