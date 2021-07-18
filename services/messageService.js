@@ -72,12 +72,23 @@ const messageService = {
   },
 
   searchUnread: (io, socket, msg) => {
-    return Message.findAll({
+    return Message.count({
       where: {
-        isRead: false,
-        UserId: msg.id
+        [Op.and]: [{
+          roomId: {
+            [Op.or]: [
+              { [Op.like]: `${msg.id}n%` },
+              { [Op.like]: `%n${msg.id}` }
+            ]
+          }
+        },
+        { isRead: false },
+        { UserId: { [Op.ne]: msg.id } }
+        ]
       }
-    }).then(msg => { return msg.length })
+    }).then(count => {
+      return { unreadCount: count }
+    })
   },
 
   clearUnread: (io, socket, msg) => {
@@ -103,7 +114,7 @@ const messageService = {
 
   getChattedUsers: (io, socket, msg) => {
 
-  },
+  }
 }
 
 module.exports = messageService
