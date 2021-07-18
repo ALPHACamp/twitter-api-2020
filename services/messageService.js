@@ -121,7 +121,6 @@ const messageService = {
         on messages.createdAt = temp.createdAt
         where (messages.roomId like '%n${msg.id}' or messages.roomId like '${msg.id}n%') and messages.UserId != ${Number(msg.id)}
       `, { type: Sequelize.QueryTypes.SELECT })
-    console.log('=======results=======', results)
   }
 }
 
