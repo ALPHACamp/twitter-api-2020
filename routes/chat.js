@@ -14,6 +14,12 @@ const helpers = require('../_helpers')
 //   res.render('join')
 // })
 
+// router.get('/3', (req, res) => {
+//   chatController.getContent(req, res, (data) => {
+//     res.render('join2', { data })
+//   })
+//   // res.render('index')
+// })
 
 // router.get('/2', (req, res) => {
 //   chatController.getContent(req, res, (data) => {

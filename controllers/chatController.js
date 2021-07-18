@@ -8,7 +8,10 @@ const chatController = {
     try {
       const room = await Chat.findAll({
         where: { ChatroomId: 5 },
-        include: [{ model: User, attributes: ['id', 'name', 'avatar'] }]
+        include: [{ model: User, attributes: ['id', 'name', 'avatar'] }],
+        // order: [['createdAt', 'DESC']],
+        // limit: [3],
+        // offset: 2
       })
       return res.json(room)
       // callback(room)

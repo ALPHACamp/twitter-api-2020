@@ -1,4 +1,3 @@
-<h5>私人通道</h5>
 <ul id="messagesBody">
   {{#each data}}
   <li>{{this.dataValues.User.dataValues.name}} : {{this.dataValues.message}}</li>
@@ -12,7 +11,11 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
+  const socket = io.connect('', {
+    extraHeaders: {
+      Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzUsImlhdCI6MTYyNjYxMzI2NX0.IGu51MO1ovCvPTTHWve33RoEmGcursc0Lln1QaHNut0'
+    }
+  });
 
   const messages = document.querySelector('#messagesBody');
   const form = document.querySelector('#form');
@@ -22,12 +25,10 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (input.value) {
-      socket.emit('private message', socket.id, input.value);
+      socket.emit('chatMessage', input.value);
       input.value = '';
     }
   });
-  let socketId = socket.id
-  let data = { UserId: 25, name: '蚯蚓', ChatroomId: 10, socketId: socketId }
 
   socket.on('chatMessage', (msg, data) => {
     const item = document.createElement('li');
@@ -41,6 +42,14 @@
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
   })
-
+  socket.on('joinRoom', (msg) => {
+    const item = document.createElement('li');
+    item.innerHTML = msg;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  })
+  socket.on('totalUser', (data) => {
+    console.log(data)
+  })
 
 </script>

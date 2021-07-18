@@ -56,7 +56,7 @@ const io = (http) => {
     if (index < 0) {
       users.push(socket.handshake.user)
     }
-    socket.emit('totalUser', users)
+    io.emit('totalUser', users)
     socket.broadcast.emit('joinRoom', `${name}上線`);
     socket.on('chatMessage', (msg) => {
       Chat.create({
@@ -69,7 +69,7 @@ const io = (http) => {
     socket.on('disconnect', () => {
       const removeIndex = users.map(user => { return user.id }).indexOf(id)
       users.splice(removeIndex, 1)
-      socket.emit('totalUser', users)
+      io.emit('totalUser', users)
       io.emit('leaveRoom', `${name}離開聊天室`)
     })
 
