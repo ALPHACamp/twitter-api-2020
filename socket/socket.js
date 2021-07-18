@@ -89,6 +89,10 @@ module.exports = (server) => {
         }
       }
       const messages = await Message.findAll(options)
+      messages.forEach((message) => {
+        message.dataValues.avatar = message.dataValues.User.avatar
+        delete message.dataValues.User
+      })
       cb(messages)
     })
 
@@ -132,7 +136,7 @@ module.exports = (server) => {
         socket.join(roomId)
         //join User2 into room
         user2Socket = sockets.find(
-          (socket) => socket.id === userSockets[User2Id]
+          (socket) => socket.id === socketUsers[User2Id].socketId
         )
         user2Socket.join(roomId)
       }
@@ -141,7 +145,7 @@ module.exports = (server) => {
     })
     //listen privacy msg and send
     socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
-      const user = socketUsers[userId]
+      const user = socketUsers[UserId]
       const message = await Message.create({ UserId, RoomId, content })
       let createdAt = message.createdAt
       const avatar = user.avatar
@@ -166,7 +170,11 @@ module.exports = (server) => {
           RoomId
         }
       }
-      const messages = await Message.findAll(options)
+      let messages = await Message.findAll(options)
+      messages.forEach((message) => {
+        message.dataValues.avatar = message.dataValues.User.avatar
+        delete message.dataValues.User
+      })
       cb(messages)
     })
   })

@@ -11,7 +11,7 @@
 <body>
   <input id="input" type="text">
   <button id="btn">send</button>
-
+  <button id="btn2">send2</button>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -23,12 +23,18 @@
     })
     console.log(socket)
     let RoomId
-    socket.emit('join_private_room', ({ User1Id:1 , User2Id: 1 }), (data) => {
+    socket.emit('join_private_room', ({ User1Id: 1, User2Id: 5 }), (data) => {
       RoomId = data.roomId
-      console.log(roomId)
+      console.log(RoomId)
     })
     const btn = document.querySelector('#btn')
     const input = document.querySelector('#input')
+    const btn2 = document.querySelector('#btn2')
+    btn2.addEventListener('click', (event) => {
+      socket.emit('get_private_history', ({offset:0, limit:10, RoomId:26}),(data) =>{
+        console.log(data)
+      } )
+    })
     btn.addEventListener('click', (event) => {
       const value = input.value
       console.log(value)
