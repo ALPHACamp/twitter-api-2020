@@ -72,20 +72,13 @@ io.use(async (socket, next) => {
       console.log('socket.user', user.dataValues)
       console.log('socket.user.socketId', socket.id)
     }
-
-    socket.on('createdUserId', async () => {
-      try {
-        console.log('socket.user createdUserId', socket.user)
-        console.log('socket.user createdUserId')
-      } catch (err) {
-        console.log(err)
-      }
-    })
     socket.on('online', async () => {
       try {
-        // 線上使用者列表加入新使用者的資料
+
+      // 線上使用者列表加入新使用者的資料
+        const user = socket.user
         if (activeUsers.map(u => u.id).includes(user.id)) {
-          console.log('This user exited.')
+          console.log('This user already exited.')
         } else {
           activeUsers.push(user)
           activeUsersCount++
@@ -105,16 +98,16 @@ io.use(async (socket, next) => {
       // emit使用者離線通知
       if (!socket.user) { return }
       console.log('disconnect', socket.user)
-      // console.log('user.socketId disconnect===================================================', userId)
+      const user = socket.user
       // 線上使用者列表移除離線使用者資料
-      const activeUsersIndex = activeUsers.map(u => u.id).indexOf(socket.userId)
+      const activeUsersIndex = activeUsers.map(u => u.id).indexOf(user.id)
       activeUsers.splice(activeUsersIndex, 1)
       console.log(activeUsers)
       console.log(activeUsersCount)
       // 聊天室通知該名使用者離開聊天
 
       const data = {
-        offline: socket.user
+        offline: user
       }
       io.emit('notification', data)
       // 發送線上使用者列表
