@@ -91,21 +91,36 @@ module.exports = (server) => {
         })
       }
     })
+
     // 1on1私聊
     socket.on('privateMessage', async msg => {
       try {
+        const { id, listenerId } = msg
+        const roomName = generateRoomName(id, listenerId)
+        const clients = io.sockets.adapter.rooms.get(roomName)
+        const usersInRoom = []
         let isInRoom = false
-        let roomName = ''
+        if (!clients) {
+          console.log('No clients in room')
+          return
+        }
 
-        // 分辨對話人是否在房間
-        // 組合roomName
-        // code...
+        for (let [id, socket] of io.of('/').sockets) {
+          const userId = socket.data.id
+          if (clients.has(id)) {
+            usersInRoom.push(userId)
+          }
+          if (usersInRoom.includes(listenerId)) {
+            isInRoom = true
+            break
+          }
+        }
+
+
         msg.isInRoom = isInRoom
-
-
         // 儲存訊息
         const message = await messageService.saveMessage(msg)
-        socket.to(roomName).emit('privateMessage', message)
+        io.to(roomName).emit('privateMessage', message)
 
       } catch (error) {
         return socket.emit('error', {
