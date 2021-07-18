@@ -69,8 +69,8 @@
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
   <script>
     let socket = io("http://localhost:3000")
-    const publicNamespace = io("http://localhost:3000/public")
-    const privateNamespace = io("http://localhost:3000/private")
+    // const publicNamespace = io("http://localhost:3000/public")
+    // const privateNamespace = io("http://localhost:3000/private")
     let messages = document.getElementById('messages')
     let form = document.getElementById('form')
     let input = document.getElementById('input')
@@ -80,23 +80,23 @@
       event.preventDefault()
       if (input.value) {
         const msg = {}
-        msg.socketId = publicNamespace.id
+        msg.socketId = socket.id
         msg.content = input.value
         msg.isPublic = true
-        publicNamespace.emit('sendMessage', msg)
+        socket.emit('sendMessage', msg)
         input.value = ''
       }
     })
 
     // 回傳新加入使用者 id (隨機數字)
-    publicNamespace.on('newUser', () => {
+    socket.on('newUser', () => {
       const userId = Math.floor(Math.random() * 1000)
       console.log(userId)
-      publicNamespace.emit('newUser', userId)
+      socket.emit('newUser', userId)
     })
 
     // 載入先前對話
-    publicNamespace.on('historyMessages', msgs => {
+    socket.on('historyMessages', msgs => {
       console.log(msgs)
       for (msg of msgs) {
         let item = document.createElement('li')
@@ -107,17 +107,17 @@
     })
 
     // 接收使用者陣列
-    publicNamespace.on('onlineUser', onlineUser => {
+    socket.on('onlineUser', onlineUser => {
       console.log('online user: ', onlineUser)
     })
 
     // 接收 current user name
-    publicNamespace.on('userJoin', user => {
+    socket.on('userJoin', user => {
       console.log('joined: ', user)
     })
 
     // 公開訊息接收渲染
-    publicNamespace.on('newMessage', message => {
+    socket.on('newMessage', message => {
       let item = document.createElement('li')
       item.textContent = message.content
       messages.appendChild(item)
@@ -125,7 +125,7 @@
     })
 
     // 使用者離開(接收離開使用者名稱)
-    publicNamespace.on('userLeave', user => {
+    socket.on('userLeave', user => {
       console.log('leaved: ', user)
     })
   </script>

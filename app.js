@@ -8,14 +8,15 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const port = process.env.PORT || 3000
-// Create http server for socket.io
-// const server = require('http').createServer(app)
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = require('socket.io')(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
+    origin: "http://localhost:8080",
+    methods: ["GET", "POST"],
+    transports: ['websocket', 'polling'],
+    credentials: true
+  },
+  allowEIO3: true
 })
 const passport = require('./config/passport');
 const { SSL_OP_NO_TICKET } = require('constants');
@@ -46,24 +47,21 @@ app.get('/', (req, res, next) => {
 let onlineCounts = 0
 onlineUser = []
 
-const publicNamespace = io.of("/public")
-const privateNamespace = io.of("/private")
-
 // 連線錯誤監聽
-publicNamespace.on("connect_error", (err, next) => {
+io.on("connect_error", (err, next) => {
   console.log(`connect_error due to ${err.message}`)
   next(err)
 })
 
 // 連線監聽
-publicNamespace.on('connection', async (socket) => {
+io.on('connection', async (socket) => {
   // 連線發生時發送人數給網頁
   onlineCounts += 1
-  publicNamespace.emit('online', onlineCounts)
+  io.emit('online', onlineCounts)
   console.log('new user connected')
 
   // 請求 new user socket
-  publicNamespace.to(socket.id).emit('newUser')
+  io.to(socket.id).emit('newUser')
 
   // 接收 current user 回傳 onlineUser array
   socket.on('newUser', userId => {
@@ -72,7 +70,7 @@ publicNamespace.on('connection', async (socket) => {
 
     console.log(onlineUser)
 
-    publicNamespace.emit('onlineUser', onlineUser)
+    io.emit('onlineUser', onlineUser)
     socket.broadcast.emit('userJoin', socket.user)
   })
 
@@ -85,7 +83,7 @@ publicNamespace.on('connection', async (socket) => {
       order: [['createdAt', 'ASC']]
     })
     console.log(msgs)
-    publicNamespace.to(socket.id).emit('historyMessages', msgs)
+    io.to(socket.id).emit('historyMessages', msgs)
   } catch (err) {
     console.log(err)
   }
@@ -106,7 +104,7 @@ publicNamespace.on('connection', async (socket) => {
       })
 
       // 傳新訊息給所有人
-      publicNamespace.emit('newMessage', message.toJSON())
+      io.emit('newMessage', message.toJSON())
       console.log('message: ' + msg)
     } catch (err) {
       console.log(err)
@@ -118,9 +116,9 @@ publicNamespace.on('connection', async (socket) => {
     // 離開時減少聊天室人數並發送給網頁
     onlineCounts = (onlineCounts <= 0) ? 0 : onlineCounts -= 1
     onlineUser = onlineUser.filter(user => user !== socket.data.user)
-    publicNamespace.emit('online', onlineCounts)
-    publicNamespace.emit('onlineUser', onlineUser)
-    publicNamespace.emit('userLeave', socket.data.user)
+    io.emit('online', onlineCounts)
+    io.emit('onlineUser', onlineUser)
+    io.emit('userLeave', socket.data.user)
     console.log('disconnected')
   })
 })
