@@ -1,6 +1,6 @@
-const sockets = [] // array of sockets
-const socketUsers = {} // key(userId) to value(socketId, name, account, avatar)
-const publicRoomUsers = [] // array of userIds
+const sockets = [] // array of sockets  找到對應的socket物件
+const socketUsers = {} // key(userId) to value(socketId, name, account, avatar) 利用socketid可以找到對應使用者
+const publicRoomUsers = [] // array of userIds 公開聊天室的socketId
 const socketio = require('socket.io')
 const db = require('../models')
 const Message = db.Message
@@ -17,26 +17,15 @@ module.exports = (server) => {
     allowEIO3: true
   })
 
-  function onlineUsers() {
-    return publicRoomUsers
-      .filter((user, index) => publicRoomUsers.indexOf(user) === index)
-      .map((id) => {
-        return {
-          id,
-          name: socketUsers[id].name,
-          account: socketUsers[id].account,
-          avatar: socketUsers[id].avatar
-        }
-      })
-  }
-
   io.use(authenticatedSocket).on('connection', (socket) => {
     console.log(socket.request.user)
     const currentUser = socket.request.user
     /* connect */
+    // 儲存socket物件
     sockets.push(socket)
-    socketUsers[currentUser.id] = {
-      socketId: currentUser.socketId,
+    // 建立socketId 與使用者資訊的對照表
+    socketUsers[socket.id] = {
+      id: currentUser.id,
       name: currentUser.name,
       account: currentUser.account,
       avatar: currentUser.avatar
@@ -47,8 +36,10 @@ module.exports = (server) => {
 
     /* disconnect */
     socket.on('disconnect', () => {
-      delete socketUsers[currentUser.id]
-      sockets.splice(sockets.indexOf(socket), 1)
+      delete socketUsers[socket.id]
+      const index = sockets.findIndex((obj) => obj.id === socket.id)
+      console.log(index)
+      sockets.splice(index, 1)
       console.log(`User is offline: ${socket.id}`)
     })
 
@@ -56,15 +47,14 @@ module.exports = (server) => {
     socket.on('join_public_room', async ({ userId }) => {
       console.log('============================')
       console.log('join_public_room', userId)
-      console.log('加入拾得的socket ID',socket.id)
+      console.log('加入公開的socket ID', socket.id)
 
-      publicRoomUsers.push(userId)
-      const user = socketUsers[userId]
+      publicRoomUsers.push(socket.id)
+      const user = socketUsers[socket.id]
       io.emit('new_join', {
         name: user.name
       })
-      const users = onlineUsers()
-      console.log(users)
+      const users = publicRoomUsers.map((socketId) => socketUsers[socketId])
       io.emit('online_users', {
         users
       })
@@ -73,15 +63,14 @@ module.exports = (server) => {
     socket.on('leave_public_room', async ({ userId }) => {
       console.log('============================')
       console.log('leave_public_room', userId)
-      publicRoomUsers.splice(publicRoomUsers.indexOf(userId), 1)
-      if (publicRoomUsers.some((id) => id === userId)) {
-        return
-      }
-      const user = socketUsers[userId]
+
+      publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
+      const user = socketUsers[socket.id]
       io.emit('user_leave', {
         name: user.name
       })
-      io.emit('online_users', { users: onlineUsers() })
+      const users = publicRoomUsers.map((socketId) => socketUsers[socketId])
+      io.emit('online_users', { users })
     })
 
     /* get public history */
@@ -118,7 +107,7 @@ module.exports = (server) => {
         UserId: userId,
         content: msg
       })
-      const user = socketUsers[userId]
+      const user = socketUsers[socket.id]
       socket.broadcast.emit('get_public_msg', {
         msg: message.content,
         createdAt: message.createdAt,
@@ -146,26 +135,32 @@ module.exports = (server) => {
         roomId = await Room.create({ User1Id, User2Id })
         roomId = roomId.toJSON().id
       }
-
+      // 找到User2 的socketId
       // check isOnline or not
-      if (socketUsers[User2Id]) {
+      function isUser2Oneline(User2Id) {
+        for (socketId in socketUsers) {
+          if (socketUsers[socketId].id === User2Id) {
+            return socketId
+          }
+        }
+        return false
+      }
+      if (isUser2Oneline(User2Id)) {
         //join User1 into room
         socket.join(roomId)
         //join User2 into room
-        user2Socket = sockets.find(
-          (socket) => socket.id === socketUsers[User2Id].socketId
-        )
-        user2Socket.join(roomId)
+        user2SocketId = isUser2Oneline(User2Id)
+        sockets[user2SocketId].join(roomId)
       }
       //return roomId to client
-      callback({ roomId }, socket.id)
+      callback({ roomId })
     })
     //listen privacy msg and send
     socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
       console.log('============================')
       console.log('post_private_msg', { UserId, RoomId, content })
 
-      const user = socketUsers[UserId]
+      const user = socketUsers[socket.id]
       const message = await Message.create({ UserId, RoomId, content })
       let createdAt = message.createdAt
       const avatar = user.avatar
