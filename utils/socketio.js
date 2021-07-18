@@ -5,13 +5,14 @@ const { postChat } = require('../services/chatService')
 const { socketAuth } = require('../middlewares/auth')
 
 let io
-const users = new WeakSet()
+const users = []
 
 module.exports = {
   init(server) {
     io = new Server(server, {
       cors: {
-        origin: process.env.CORS_WHITE_LIST.split(','),
+        // process.env.CORS_WHITE_LIST.split(','),
+        origin: ['http://localhost:8080'],
         methods: ['GET', 'POST'],
         transports: ['websocket', 'polling'],
         credentials: true
@@ -27,25 +28,51 @@ module.exports = {
     io.on('connection', (socket) => {
       const { clientsCount } = io.engine
       console.log('A user connected ', clientsCount)
-      users.add(socket.user)
+      users.push(socket.user)
+      console.log(users)
 
-      io.emit('connection', clientsCount)
-      const announce = `User ${socket.id} joined the public room.`
+      // socket.on('joinPublic', () => {
       socket.emit('announce', {
         users, message: `${socket.user.name} joined.`
       })
+      // })
+
       socket.on('chatMessage', async (message) => {
+        console.log(message)
+        if (!message.text.trim().length) {
+          console.log(message.text)
+          throw new Error('Empty message.')
+        }
         await postChat({
           UserId: message.User.id,
           text: message.text,
           createdAt: message.createdAt,
-          updatedAt: message.time
+          updatedAt: message.createdAt
         })
         io.emit('chatMessage', message)
       })
 
+      socket.on('privateMessage', async (message) => {
+        console.log('private', message)
+        await postChat({
+          UserId: message.User.id,
+          text: message.text,
+          createdAt: message.createdAt,
+          updatedAt: message.createdAt,
+          RoomId: message.id
+        })
+        socket.to(roomId).emit('privateMessage', message)
+      })
+
+      socket.on('eventA', (ctx) => {
+        console.log('\n', ctx)
+        socket.emit('eventA', ctx)
+      })
+
       socket.on('disconnect', (reason) => {
-        users.delete(socket.user)
+        users.splice(users.indexOf(socket.user))
+        console.log(users)
+
         socket.emit('announce', {
           users, message: `${socket.user.name} left.`
         })

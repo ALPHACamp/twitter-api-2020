@@ -23,7 +23,7 @@ const chatService = {
   getPrivateChatList: async (currentId, targetId = null) => {
     const target = targetId ? `AND userId = ${targetId}` : ''
     return await await sequelize.query(
-      `SELECT data.id As RoomId, data.name As RoomName, Users.id, Users.name, Users.avatar FROM
+      `SELECT data.id As RoomId, data.name As RoomName, Users.id, Users.name, Users.avatar, CONCAT('@', Users.account) AS account FROM
       (SELECT Room.id, Room.name, COUNT(Members.id) OVER(partition by RoomId) AS people,
       Members.UserId AS userId,
       Members.createdAt AS MembersCreatedAt,
