@@ -35,7 +35,7 @@ const messageService = {
     })
   },
 
-  getMessages: async (socket, msg, isPrivate = false) => {
+  getMessages: async (socket, msg = {}, isPrivate = false) => {
     let whereClause = {}
     let concat = ''
     if (msg.listenerId) {
