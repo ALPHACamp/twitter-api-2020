@@ -12,6 +12,11 @@
 
   <main>
     <button type="submit" id='chat'>chat message事件</button>
+    <button type="submit" id='enterPrivateInterface'>enterPrivateInterface事件</button>
+
+    <button type="submit" id='enterRoom'>enterRoom事件</button>
+    <button type="submit" id='privateMessage'>privateMessage事件</button>
+
   </main>
 
 
@@ -37,7 +42,11 @@
     socket.emit('currentUser', data)
 
     const chatBtn = document.querySelector('#chat')
+    const enterPrivateInterfaceBtn = document.querySelector('#enterPrivateInterface')
+    const enterRoomBtn = document.querySelector('#enterRoom')
+    const privateMessageBtn = document.querySelector('#privateMessage')
 
+    // ================按鈕監聽器======================
     chatBtn.addEventListener('click', e => {
       e.preventDefault()
       const data = {
@@ -48,6 +57,35 @@
       socket.emit('chatMessage', data)
     })
 
+    enterPrivateInterfaceBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 2,
+      }
+      socket.emit('enterPrivateInterface', data)
+    })
+
+    enterRoomBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+        listenerId: 2
+      }
+      socket.emit('enterRoom', data)
+    })
+
+    privateMessageBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+        listenerId: 2,
+        content: '我累了',
+        createdAt: new Date()
+      }
+      socket.emit('privateMessage', data)
+    })
+
+    // ==========socket監聽器============
     socket.on('users', msg => {
       console.log('這是users', msg)
     })
