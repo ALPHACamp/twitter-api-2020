@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <input id="input" type="text">
+  <button id="btn">send</button>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io.connect('http://localhost:3000/', {
+      extraHeaders: {
+        Authorization:
+          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjI2NTM0NjcwfQ.5QnVDSQNwg8LFYDjlb8ECf9oFa0prn8j-VqtzaCDw2g'
+      },
+    })
+    console.log(socket)
+    let RoomId
+    socket.emit('join_private_room', ({ User1Id:1 , User2Id: 1 }), (data) => {
+      RoomId = data.roomId
+      console.log(roomId)
+    })
+    const btn = document.querySelector('#btn')
+    const input = document.querySelector('#input')
+    btn.addEventListener('click', (event) => {
+      const value = input.value
+      console.log(value)
+      socket.emit('post_private_msg', ({ UserId: 1, RoomId, content: value }))
+    })
+    socket.on('get_private_msg', (data) => {
+      console.log('回傳data', data)
+    })
+  </script>
+</body>
+
+</html>
