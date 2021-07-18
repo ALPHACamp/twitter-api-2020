@@ -53,8 +53,6 @@ io.on("connect_error", (err, next) => {
 
 // 連線監聽
 io.on('connection', async (socket) => {
-  // 請求 new user socket
-  io.to(socket.id).emit('newUser')
 
   // 接收 current user 回傳 onlineUser array
   socket.on('newUser', async user => {
@@ -70,6 +68,8 @@ io.on('connection', async (socket) => {
     }
     console.log(onlineUser)
 
+    // 請求 new user socket
+    io.to(socket.id).emit('newUser', user)
     io.emit('onlineUser', onlineUser)
     socket.broadcast.emit('userJoin', socket.user)
     try {
