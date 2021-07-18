@@ -11,8 +11,8 @@ const port = process.env.PORT || 3000
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = require('socket.io')(server, {
   cors: {
-    origin: "https://fogjogger1992.github.io/simple-twitter",
-    methods: ["GET", "POST"],
+    origin: ['https://fogjogger1992.github.io/simple-twitter', 'http://localhost:8080'],
+    methods: ['GET', 'POST'],
     transports: ['websocket', 'polling'],
     credentials: true
   },
