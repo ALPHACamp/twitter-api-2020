@@ -18,7 +18,6 @@ module.exports = (server) => {
   })
 
   io.use(authenticatedSocket).on('connection', (socket) => {
-    console.log(socket.request.user)
     const currentUser = socket.request.user
     /* connect */
     // 儲存socket物件
@@ -30,18 +29,17 @@ module.exports = (server) => {
       account: currentUser.account,
       avatar: currentUser.avatar
     }
-    console.log(`User is online: ${socket.id}`)
+    console.log(`User is online: ${socketUsers[socket.id].name} / ${socket.id}`)
     socket.emit('message', `Your socket id is  ${socket.id}`)
     socket.on('sendMessage', (data) => console.log(data))
 
     /* disconnect */
     socket.on('disconnect', () => {
       delete socketUsers[socket.id]
-      const index = sockets.findIndex((obj) => obj.id === socket.id)
       if (publicRoomUsers.includes(socket.id)) {
         publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
       }
-      console.log(index)
+      const index = sockets.findIndex((obj) => obj.id === socket.id)
       sockets.splice(index, 1)
       console.log(`User is offline: ${socket.id}`)
     })
@@ -57,7 +55,6 @@ module.exports = (server) => {
       io.emit('new_join', {
         name: user.name
       })
-      console.log(publicRoomUsers)
       const users = publicRoomUsers
         .map((socketId) => socketUsers[socketId])
         .filter(
