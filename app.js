@@ -64,34 +64,33 @@ io.on('connection', async (socket) => {
   io.to(socket.id).emit('newUser')
 
   // 接收 current user 回傳 onlineUser array
-  socket.on('newUser', user => {
-    socket.user = user
-    const userIdList = onlineUser.map(user => {
-      return user.id
-    })
-    // 不重複的使用者才加進 LIST
-    if (!userIdList.includes(user.id)) {
-      onlineUser.push(user)
+  socket.on('newUser', async (user) => {
+    try {
+      socket.user = user
+      const userIdList = onlineUser.map(user => {
+        return user.id
+      })
+      // 不重複的使用者才加進 LIST
+      if (!userIdList.includes(user.id)) {
+        onlineUser.push(user)
+      }
+      // 發送之前的全部訊息
+      msgs = await Message.findAll({
+        raw: true,
+        nest: true,
+        where: { isPublic: true },
+        order: [['createdAt', 'ASC']]
+      })
+      console.log(msgs)
+      io.to(socket.id).emit('historyMessages', msgs)
+      console.log(onlineUser)
+      io.emit('onlineUser', onlineUser)
+      socket.broadcast.emit('userJoin', socket.user)
+    } catch (err) {
+      console.log(err)
     }
-    console.log(onlineUser)
-
-    io.emit('onlineUser', onlineUser)
-    socket.broadcast.emit('userJoin', socket.user)
   })
 
-  try {
-    // 發送之前的全部訊息
-    msgs = await Message.findAll({
-      raw: true,
-      nest: true,
-      where: { isPublic: true },
-      order: [['createdAt', 'ASC']]
-    })
-    console.log(msgs)
-    io.to(socket.id).emit('historyMessages', msgs)
-  } catch (err) {
-    console.log(err)
-  }
 
   // 公開訊息監聽
   socket.on('sendMessage', async (msg) => {
