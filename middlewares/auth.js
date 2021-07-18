@@ -46,6 +46,7 @@ const socketAuth = (socket, next) => {
         [sequelize.fn('concat', '@', sequelize.col('account')), 'account']
       ]
     })).toJSON()
+    console.log(socket.user)
     next()
   })
 }
