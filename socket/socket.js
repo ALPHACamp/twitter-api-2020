@@ -41,7 +41,12 @@ module.exports = (server) => {
         const users = publicRoomUsers
           .map((socketId) => socketUsers[socketId])
           .filter(
-            (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+            (user, i, arr) => arr.map((item) => {
+             if(!item.id){
+               return 
+             }
+             return item.id
+            }).indexOf(user.id) === i
           )
         io.emit('online_users', {
           users
@@ -66,7 +71,15 @@ module.exports = (server) => {
       const users = publicRoomUsers
         .map((socketId) => socketUsers[socketId])
         .filter(
-          (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+          (user, i, arr) =>
+            arr
+              .map((item) => {
+                if (!item.id) {
+                  return
+                }
+                return item.id
+              })
+              .indexOf(user.id) === i
         )
       io.emit('online_users', {
         users
@@ -85,7 +98,15 @@ module.exports = (server) => {
       const users = publicRoomUsers
         .map((socketId) => socketUsers[socketId])
         .filter(
-          (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+          (user, i, arr) =>
+            arr
+              .map((item) => {
+                if (!item.id) {
+                  return
+                }
+                return item.id
+              })
+              .indexOf(user.id) === i
         )
       io.emit('online_users', { users })
     })
