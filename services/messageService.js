@@ -63,17 +63,19 @@ const messageService = {
     return Message.findAll({
       where: whereClause,
       order: [['createdAt', 'ASC']],
-      include: { model: User }
+      include: { model: User },
+      raw: true,
+      nest: true
     }).then(msg => {
       msg = msg.map((msg, i) => {
         if (!msg) {
           return []
         }
         const mapItem = {
-          id: msg.dataValues.UserId,
-          avatar: msg.dataValues.User.dataValues.avatar ? msg.dataValues.User.dataValues.avatar : null,
-          content: msg.dataValues.content,
-          createdAt: msg.dataValues.createdAt
+          id: msg.UserId,
+          avatar: msg.User.avatar,
+          content: msg.content,
+          createdAt: msg.createdAt
         }
         return mapItem
       })
