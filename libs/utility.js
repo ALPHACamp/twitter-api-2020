@@ -16,7 +16,7 @@ module.exports = {
     return roomName
   },
 
-  SearchListenerOnline: (io, socketNow, listenerId) => {
+  SearchListenerOnline: (io, socket, clients, listenerId) => {
     for (let [id, socket] of io.of('/').sockets) {
       if (clients.has(id) && socket.data.id === listenerId) {
         return {
@@ -31,7 +31,7 @@ module.exports = {
     }
   },
 
-  checkIsInRoom: (io, socket, listenerId) => {
+  checkIsInRoom: (io, socket, clients, listenerId) => {
     const usersInRoom = []
     for (let [id, socket] of io.of('/').sockets) {
       const userId = socket.data.id
