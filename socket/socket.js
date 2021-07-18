@@ -9,15 +9,12 @@ const { authenticatedSocket } = require('../middleware/auth')
 const { Op } = require('sequelize')
 module.exports = (server) => {
   const io = socketio(server)
-  const wrap = (middleware) => (socket, next) =>
-    middleware(socket.request, {}, next)
-
-  io.use(wrap(authenticatedSocket)).on('connection', (socket) => {
-    // console.log(socket.request.user)
+  io.use(authenticatedSocket).on('connection', (socket) => {
     const currentUser = socket.request.user
     /* connect */
     sockets.push(socket)
     userSockets[currentUser.id] = socket.id
+
     console.log(`User is online: ${socket.id}`)
     socket.emit('message', `Your socket id is  ${socket.id}`)
     socket.on('sendMessage', (data) => console.log(data))
@@ -86,8 +83,7 @@ module.exports = (server) => {
         roomId = await Room.create({ User1Id, User2Id })
         roomId = roomId.toJSON().id
       }
-      //return roomId to client
-      console.log('roomId', roomId)
+      
       // check isOnline or not
       if (userSockets[User2Id]) {
         //join User1 into room
@@ -95,23 +91,16 @@ module.exports = (server) => {
         //join User2 into room
         user2Socket = sockets.find(
           (socket) => socket.id === userSockets[User2Id]
-        )
-        user2Socket.join(roomId)
-      }
+          )
+          user2Socket.join(roomId)
+        }
+      //return roomId to client
       callback({ roomId }, socket.id)
     })
     //listen privacy msg and send
     socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
-      // console.log('=========')
-      // console.log({ UserId, RoomId, content })
-      // console.log('=========')
-
       const user = await User.findByPk(+UserId)
       const message = await Message.create({ UserId, RoomId, content })
-      // console.log(user.toJSON())
-      // console.log(message.toJSON())
-      // const user = array[0].toJSON()
-      //  = array[1].toJSON()
       let createdAt = message.createdAt
       const avatar = user.avatar
       socket
