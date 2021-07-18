@@ -17,15 +17,17 @@ module.exports = (server) => {
     allowEIO3: true
   })
 
-  async function onlineUsers() {
-    return publicRoomUsers.map((id) => {
-      return {
-        id,
-        name: socketUsers[id].name,
-        account: socketUsers[id].account,
-        avatar: socketUsers[id].avatar
-      }
-    })
+  function onlineUsers() {
+    return publicRoomUsers
+      .filter((user, index) => publicRoomUsers.indexOf(user) === index)
+      .map((id) => {
+        return {
+          id,
+          name: socketUsers[id].name,
+          account: socketUsers[id].account,
+          avatar: socketUsers[id].avatar
+        }
+      })
   }
 
   io.use(authenticatedSocket).on('connection', (socket) => {
@@ -54,20 +56,27 @@ module.exports = (server) => {
     socket.on('join_public_room', async ({ userId }) => {
       console.log('============================')
       console.log('join_public_room', userId)
+      console.log('加入拾得的socket ID',socket.id)
+
       publicRoomUsers.push(userId)
       const user = socketUsers[userId]
       io.emit('new_join', {
         name: user.name
       })
+      const users = onlineUsers()
+      console.log(users)
       io.emit('online_users', {
-        users: onlineUsers()
+        users
       })
     })
     /* leave public room */
     socket.on('leave_public_room', async ({ userId }) => {
       console.log('============================')
       console.log('leave_public_room', userId)
-      publicRoomUser.splice(publicRoomUser.indexOf(userId), 1)
+      publicRoomUsers.splice(publicRoomUsers.indexOf(userId), 1)
+      if (publicRoomUsers.some((id) => id === userId)) {
+        return
+      }
       const user = socketUsers[userId]
       io.emit('user_leave', {
         name: user.name
