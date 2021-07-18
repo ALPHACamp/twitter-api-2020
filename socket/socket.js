@@ -38,6 +38,9 @@ module.exports = (server) => {
     socket.on('disconnect', () => {
       delete socketUsers[socket.id]
       const index = sockets.findIndex((obj) => obj.id === socket.id)
+      if (publicRoomUsers.includes(socket.id)) {
+        publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
+      }
       console.log(index)
       sockets.splice(index, 1)
       console.log(`User is offline: ${socket.id}`)
@@ -54,7 +57,12 @@ module.exports = (server) => {
       io.emit('new_join', {
         name: user.name
       })
-      const users = publicRoomUsers.map((socketId) => socketUsers[socketId])
+      console.log(publicRoomUsers)
+      const users = publicRoomUsers
+        .map((socketId) => socketUsers[socketId])
+        .filter(
+          (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+        )
       io.emit('online_users', {
         users
       })
@@ -69,7 +77,11 @@ module.exports = (server) => {
       io.emit('user_leave', {
         name: user.name
       })
-      const users = publicRoomUsers.map((socketId) => socketUsers[socketId])
+      const users = publicRoomUsers
+        .map((socketId) => socketUsers[socketId])
+        .filter(
+          (user, i, arr) => arr.map((item) => item.id).indexOf(user.id) === i
+        )
       io.emit('online_users', { users })
     })
 
@@ -99,17 +111,17 @@ module.exports = (server) => {
     })
 
     /* public message */
-    socket.on('post_public_msg', async ({ msg, userId }) => {
+    socket.on('post_public_msg', async ({ content, userId }) => {
       console.log('============================')
-      console.log('post_public_msg', { msg, userId })
+      console.log('post_public_msg', { content, userId })
       const message = await Message.create({
         RoomId: 1,
         UserId: userId,
-        content: msg
+        content
       })
       const user = socketUsers[socket.id]
       socket.broadcast.emit('get_public_msg', {
-        msg: message.content,
+        content: message.content,
         createdAt: message.createdAt,
         avatar: user.avatar
       })
