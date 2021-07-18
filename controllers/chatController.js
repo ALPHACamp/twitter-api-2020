@@ -3,7 +3,7 @@ const { Message, User } = db
 const chatController = {
   getHistoryMessage: async (req, res, next) => {
     try {
-      let historyMessage = await Message.findAll({
+      const historyMessage = await Message.findAll({
         include: [User],
         order: [['createdAt', 'ASC']]
       })
