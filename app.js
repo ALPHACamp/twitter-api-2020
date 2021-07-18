@@ -2,7 +2,7 @@ const express = require('express')
 const session = require('express-session')
 const helpers = require('./_helpers');
 const cors = require('cors')
-const { Message } = require('./models')
+const { Message, User } = require('./models')
 const app = express()
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -55,16 +55,16 @@ io.on("connect_error", (err, next) => {
 
 // 連線監聽
 io.on('connection', async (socket) => {
-  // 連線發生時發送人數給網頁
-  onlineCounts += 1
-  io.emit('online', onlineCounts)
-  console.log('new user connected')
-
-  // 請求 new user socket
-  io.to(socket.id).emit('newUser')
-
   // 接收 current user 回傳 onlineUser array
   socket.on('newUser', async user => {
+    // 連線發生時發送人數給網頁
+    onlineCounts += 1
+    io.emit('online', onlineCounts)
+    console.log('new user connected')
+
+    // 請求 new user socket
+    io.to(socket.id).emit('newUser')
+
     socket.user = user
     const userIdList = onlineUser.map(user => {
       return user.id
@@ -83,6 +83,11 @@ io.on('connection', async (socket) => {
         raw: true,
         nest: true,
         where: { isPublic: true },
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar'],
+          as: 'Sender'
+        }],
         order: [['createdAt', 'ASC']]
       })
       console.log(msgs)
@@ -124,7 +129,7 @@ io.on('connection', async (socket) => {
     onlineUser = onlineUser.filter(user => user.id !== socket.user.id)
     io.emit('online', onlineCounts)
     io.emit('onlineUser', onlineUser)
-    io.emit('userLeave', socket.data.user)
+    io.emit('userLeave', socket.user)
     console.log('disconnected')
   })
 })
