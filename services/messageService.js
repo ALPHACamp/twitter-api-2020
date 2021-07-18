@@ -66,9 +66,12 @@ const messageService = {
       include: { model: User }
     }).then(msg => {
       msg = msg.map((msg, i) => {
+        if (!msg) {
+          return []
+        }
         const mapItem = {
           id: msg.dataValues.UserId,
-          avatar: msg.dataValues.User.dataValues.avatar,
+          avatar: msg.dataValues.User.dataValues.avatar ? msg.dataValues.User.dataValues.avatar : null,
           content: msg.dataValues.content,
           createdAt: msg.dataValues.createdAt
         }
