@@ -13,9 +13,11 @@ const port = process.env.PORT || 3000
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = require('socket.io')(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
+    origin: "http://localhost:8080",
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  allowEIO3: true
 })
 const passport = require('./config/passport');
 const { SSL_OP_NO_TICKET } = require('constants');
@@ -82,7 +84,9 @@ publicNamespace.on('connection', async (socket) => {
       raw: true,
       nest: true,
       where: { isPublic: true },
-      order: [['createdAt', 'ASC']]
+      order: [
+        ['createdAt', 'ASC']
+      ]
     })
     console.log(msgs)
     publicNamespace.to(socket.id).emit('historyMessages', msgs)
@@ -102,7 +106,9 @@ publicNamespace.on('connection', async (socket) => {
       const { content, isPublic } = msg
       // 新訊息放進資料庫
       let message = await Message.create({
-        senderId, content, isPublic
+        senderId,
+        content,
+        isPublic
       })
 
       // 傳新訊息給所有人
