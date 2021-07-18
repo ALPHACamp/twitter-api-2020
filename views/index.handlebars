@@ -11,8 +11,12 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
-
+  const socket = io.connect('', {
+    extraHeaders: {
+      Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsImlhdCI6MTYyNjU4MDM2N30.lefe3xZsrcy8RSHD68vppNg21lZmO86jBPDeZzEcgeo'
+    }
+  });
+  
   const messages = document.querySelector('#messagesBody');
   const form = document.querySelector('#form');
   const input = document.querySelector('#message');
