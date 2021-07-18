@@ -1,45 +1,25 @@
 const db = require('../models')
-const jwt = require('jsonwebtoken')
 const { Message, User } = db
 const activeUsers = []
 let activeUsersCount = 0
+const { socketAuthenticated } = require('../config/functions')
 
 module.exports = (io) => {
-  io.use(async (socket, next) => {
-    const token = socket.handshake.query.token
-    if (!token) return
-    if (socket.handshake.query && token) {
-      jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-        try {
-          if (err) return next(new Error('Authentication error'))
-          socket.decoded = decoded
-          socket.userId = decoded.id
-          next()
-        } catch (err) {
-          console.log(err)
-        }
-      })
-      next()
-    } else {
-      next(new Error('Authentication error'))
-    }
-  }).on('connection', async socket => {
+  io.use(socketAuthenticated).on('connection', async socket => {
     try {
       console.log('connection', socket.userId)
       const user = await User.findByPk(socket.userId, {
         attributes: ['id', 'name', 'account', 'avatar', 'role']
       })
-
       if (user) {
         socket.userId = user.dataValues.id
         socket.user = user.dataValues
         socket.user.socketId = socket.id
-        socket.user.channel = 'publicRoom'
         console.log('socket.userId', user.dataValues.id)
         console.log('socket.user', user.dataValues)
         console.log('socket.user.socketId', socket.id)
       }
-      console.log('online user', socket.user)
+      console.log('onlineUser', socket.user)
       // 線上使用者列表加入新使用者的資料
       const onlineUser = socket.user
       if (activeUsers.map(u => u.id).includes(user.id)) {
@@ -49,7 +29,6 @@ module.exports = (io) => {
       } else {
         activeUsers.push(onlineUser)
         activeUsersCount++
-        console.log('activeUsersCount', activeUsersCount)
       }
       console.log('activeUsers', activeUsers)
       const activeData = { activeUsersCount, activeUsers }
