@@ -18,9 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
     }
   }, {});
-  Room.associate = function(models) {
+  Room.associate = function (models) {
     Room.belongsTo(models.User, { foreignKey: "User1Id", as: "User1" })
     Room.belongsTo(models.User, { foreignKey: "User2Id", as: "User2" })
+    Room.hasMany(models.Message, { foreignKey: "RoomId", as: "Messages" })
   };
   return Room;
 };

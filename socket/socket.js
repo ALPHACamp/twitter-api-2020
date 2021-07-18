@@ -8,16 +8,9 @@ const User = db.User
 const Room = db.Room
 const { authenticatedSocket } = require('../middleware/auth')
 const { Op } = require('sequelize')
-module.exports = (server) => {
-  const io = socketio(server, {
-    cors: {
-      origin: ['http://localhost:8080', 'https://ryanhsun.github.io'],
-      credentials: true
-    },
-    allowEIO3: true
-  })
 
-  async function onlineUsers() {
+const socketController = {
+  onlineUsers: () => {
     return publicRoomUsers.map((id) => {
       return {
         id,
@@ -26,9 +19,49 @@ module.exports = (server) => {
         avatar: socketUsers[id].avatar
       }
     })
+  },
+  offlineNotices: async (currentId, lastOnlineAt) => {
+    const now = new Date()
+    let Rooms = await Room.findAll({
+      where: {
+        '$or': [
+          { User1Id: currentId },
+          { User2Id: currentId }
+        ]
+      },
+      include: {
+        model: Message,
+        as: 'Messages',
+        where: {
+          createdAt: {
+            '$between': [lastOnlineAt, now]
+          },
+        },
+        attributes: ['UserId']
+      }
+    })
+    Rooms = Rooms.map(room => {
+      const { id } = room.toJSON()
+      const UserId = room.Messages[0].UserId
+      return {
+        RoomId: id,
+        UserId
+      }
+    })
+    console.log('Rooms:', Rooms)
+    return { Rooms }
   }
+}
 
-  io.use(authenticatedSocket).on('connection', (socket) => {
+module.exports = (server) => {
+  const io = socketio(server, {
+    cors: {
+      origin: ['http://localhost:8081', 'https://ryanhsun.github.io'],
+      credentials: true
+    },
+    allowEIO3: true
+  })
+  io.use(authenticatedSocket).on('connection', async (socket) => {
     console.log(socket.request.user)
     const currentUser = socket.request.user
     /* connect */
@@ -37,15 +70,28 @@ module.exports = (server) => {
       socketId: currentUser.socketId,
       name: currentUser.name,
       account: currentUser.account,
-      avatar: currentUser.avatar
+      avatar: currentUser.avatar,
+      lastOnlineAt: currentUser.lastOnlineAt
     }
     console.log(`User is online: ${socket.id}`)
     socket.emit('message', `Your socket id is  ${socket.id}`)
+
+    // send offline notices
+    const offlineNotices = await socketController.offlineNotices(currentUser.id, socketUsers[currentUser.id].lastOnlineAt)
+    socket.emit('notice_when_offline', offlineNotices)
     socket.on('sendMessage', (data) => console.log(data))
 
     /* disconnect */
     socket.on('disconnect', () => {
-      delete socketUsers[currentUser.id]
+      // update lastOnlineA
+      const timestamp = new Date()
+      const userId = socketUsers[socket.id]
+      User.findById(userId).then(user => {
+        user.lastOnlineAt = timestamp
+        user.save()
+      })
+      
+      delete socketUsers[socket.id]
       sockets.splice(sockets.indexOf(socket), 1)
       console.log(`User is offline: ${socket.id}`)
     })
@@ -58,7 +104,7 @@ module.exports = (server) => {
         name: user.name
       })
       io.emit('online_users', {
-        users: onlineUsers()
+        users: socketController.onlineUsers()
       })
     })
     /* leave public room */
@@ -68,7 +114,7 @@ module.exports = (server) => {
       io.emit('user_leave', {
         name: user.name
       })
-      io.emit('online_users', { users: onlineUsers() })
+      io.emit('online_users', { users: socketController.onlineUsers() })
     })
 
     /* get public history */
@@ -83,7 +129,8 @@ module.exports = (server) => {
             attributes: ['avatar'],
             as: 'User'
           }
-        ]
+        ],
+        where: { RoomId: 1 }
       })
       cb(message)
     })

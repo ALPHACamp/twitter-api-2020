@@ -13,17 +13,18 @@
   <button id="btn">send</button>
 
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="D:\AlphaCampProjects\simple-socket-practice\node_modules\socket.io\client-dist\socket.io.js"></script>
   <script>
     const socket = io.connect('http://localhost:3000/', {
+      transports: ['websocket'],
       query: {
         auth:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjI2NTM0NjcwfQ.5QnVDSQNwg8LFYDjlb8ECf9oFa0prn8j-VqtzaCDw2g'
-      },
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjI2NjI3MTY4fQ.MC6qSnv8ukSj00UwMYRCn1Ba6OmsgKkbeqtcZ3ck8E0'
+      }
     })
     console.log(socket)
     let RoomId
-    socket.emit('join_private_room', ({ User1Id:1 , User2Id: 1 }), (data) => {
+    socket.emit('join_private_room', ({ User1Id: 1, User2Id: 1 }), (data) => {
       RoomId = data.roomId
       console.log(roomId)
     })
@@ -34,6 +35,7 @@
       console.log(value)
       socket.emit('post_private_msg', ({ UserId: 1, RoomId, content: value }))
     })
+    socket.on('notice_when_offline', (data) => { return console.log(data) })
     socket.on('get_private_msg', (data) => {
       console.log('回傳data', data)
     })
