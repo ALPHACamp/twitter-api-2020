@@ -14,12 +14,7 @@ const helpers = require('../_helpers')
 //   res.render('join')
 // })
 
-// router.get('/', (req, res) => {
-//   chatController.getContent(req, res, (data) => {
-//     res.render('index', { data })
-//   })
-//   // res.render('index')
-// })
+
 // router.get('/2', (req, res) => {
 //   chatController.getContent(req, res, (data) => {
 //     res.render('join', { data })
@@ -27,9 +22,17 @@ const helpers = require('../_helpers')
 //   // res.render('index')
 // })
 
+// router.get('/', (req, res) => {
+//   chatController.getContent(req, res, (data) => {
+//     res.render('index', { data })
+//   })
+//   // res.render('index')
+// })
 router.get('/', chatController.getContent)
 
-// router.use(helpers.authenticated)
+router.use(helpers.authenticated)
+
+// router.get('/', chatController.getContent)
 
 router.get('/:roomId', chatController.getContent)
 
