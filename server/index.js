@@ -7,7 +7,10 @@ module.exports = (server) => {
     cors: {
       origin: '*',
       methods: ['GET', 'POST']
-    }
+    },
+    pingTimeout: 30000,
+    rejectUnauthorized: false,
+    maxHttpBufferSize: 100000000
   })
 
   io.on('connection', async socket => {
