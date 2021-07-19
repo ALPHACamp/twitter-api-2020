@@ -3,7 +3,7 @@ const messageService = require('../services/messageService')
 const messageController = {
   getMessages: async (req, res) => {
     try {
-      const data = await messageService.getMessages(req.body)
+      const data = await messageService.getMessages(req.query)
     
       return res.status(200).json(data)
     } catch (error) {

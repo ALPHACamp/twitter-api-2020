@@ -45,16 +45,19 @@ const messageService = {
   getMessages: async (msg) => {
     if (!msg.isPrivate) {
       throw new RequestError(`isPrivate is empty`)
-    } else {
+    }
+
+    if (msg.isPrivate === 'true') {
       if (!msg.id || !msg.listenerId) {
         let errorMsgs = []
-        
+
         !msg.id ? errorMsgs.push('id') : ''
         !msg.listenerId ? errorMsgs.push('listenerId') : ''
 
         throw new RequestError(`${errorMsgs.join(', ')} is empty`)
       }
     }
+
 
 
     let whereClause = {}
