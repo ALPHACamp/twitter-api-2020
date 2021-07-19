@@ -76,24 +76,42 @@ const userController = {
 
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.userId, {
-        include: [Tweet, { model: User, as: 'Followings' }, { model: User, as: 'Followers' }],
-        order: [[Tweet, 'createdAt', 'DESC']]
+      const selfId = helpers.getUser(req).id
+      const user = await await User.findByPk(req.params.userId, {
+        include: [
+          { model: Tweet, attributes: [] },
+          { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
+          { model: User, as: 'Followings', attributes: [], through: { attributes: [] } }
+        ],
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'introduction',
+          'avatar',
+          'cover',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+            'followingCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+            'followerCount'
+          ],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
+          [
+            sequelize.literal(
+              `exists (SELECT true FROM Followships WHERE FollowerId = ${selfId} AND FollowingId = User.id)`
+            ),
+            'isFollowing'
+          ]
+        ]
       })
-      if (!user) throw new Error('找不到使用者')
 
-      return res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        account: user.account,
-        cover: user.cover,
-        avatar: user.avatar,
-        introduction: user.introduction,
-        tweetCount: user.Tweets.length,
-        followingCount: user.Followings.length,
-        followerCount: user.Followers.length
-      })
+      if (!user) throw new Error('找不到使用者')
+      console.log(user.toJSON())
+
+      return res.json(user.toJSON())
     } catch (error) {
       next(error)
     }
