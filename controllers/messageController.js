@@ -15,9 +15,11 @@ const messageController = {
   },
 
   getChattedUsers: async (req, res) => {
+    const id = req.params.id
+
     try {
-      
-    
+      const data = await messageService.getChattedUsers(id)
+
       return res.status(200).json(data)
     } catch (error) {
       return res.status(400).json({

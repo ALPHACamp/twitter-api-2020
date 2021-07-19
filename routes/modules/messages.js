@@ -3,7 +3,7 @@ const router = express.Router()
 
 const messageController = require('../../controllers/messageController')
 
+router.get('/users/:id/messaged', messageController.getChattedUsers)
 router.get('/', messageController.getMessages)
-router.get('/users/{id}/messaged', messageController.getChattedUsers)
 
 module.exports = router

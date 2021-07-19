@@ -38,20 +38,6 @@ module.exports = (server) => {
       }
     })
 
-    // 進入私聊介面
-    socket.on('enterPrivateInterface', async msg => {
-      try {
-        const chattedUsers = await messageService.getChattedUsers(io, socket, msg)
-
-        socket.emit('chattedUsers', chattedUsers)
-      } catch (error) {
-        return socket.emit('error', {
-          status: error.name,
-          message: error.message
-        })
-      }
-    })
-
     // 進入房間
     socket.on('enterRoom', async msg => {
       try {
