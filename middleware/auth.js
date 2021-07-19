@@ -1,5 +1,9 @@
 const passport = require('passport')
 const helper = require('../_helpers')
+const jwt = require('jsonwebtoken')
+const db = require('../models')
+const User = db.User
+
 module.exports = {
   authenticated: (req, res, next) => {
     passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -31,5 +35,31 @@ module.exports = {
       status: 'error',
       message: 'Permission is denied, only User can visit.'
     })
+  },
+  authenticatedSocket: (socket, next) => {
+    console.log('==========================================')
+    console.log(socket.handshake.query.auth)
+    console.log('==========================================')
+    if (socket.handshake.query && socket.handshake.query.auth) {
+      jwt.verify(
+        socket.handshake.query.auth,
+        'numberFive',
+        async (err, decoded) => {
+          if (err) {
+            return next(new Error('Authentication error'))
+          }
+          socket.decoded = decoded
+          const options = {
+            attributes: ['id', 'name', 'account', 'avatar']
+          }
+          let user = await User.findByPk(decoded.id, options)
+          // console.log(user)
+          user = user.toJSON()
+          user.socketId = socket.id
+          socket.request.user = user
+          return next()
+        }
+      )
+    }
   }
 }
