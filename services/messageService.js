@@ -43,9 +43,15 @@ const messageService = {
   },
 
   getMessages: async (msg) => {
-    if (!msg) {
+    if (!msg.isPrivate) {
       throw new RequestError('Required parameters is empty')
+    } else {
+      if (!msg.id || !msg.listenerId) {
+        throw new RequestError('Required parameters is empty')
+      }
     }
+
+
     let whereClause = {}
     let concat = ''
     if (msg.listenerId) {
