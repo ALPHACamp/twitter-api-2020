@@ -13,6 +13,6 @@ router.use('/api/admin', authenticated, checkNotRole('user'), admin)
 router.use('/api/followships', authenticated, checkNotRole('admin'), followships)
 router.use('/api/tweets', authenticated, checkNotRole('admin'), tweets)
 router.use('/api/users', users)
-router.use('/api/messages', authenticated, checkNotRole('user'), messages)
+router.use('/api/messages', authenticated, checkNotRole('admin'), messages)
 
 module.exports = router

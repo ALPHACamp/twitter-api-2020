@@ -42,7 +42,10 @@ const messageService = {
     })
   },
 
-  getMessages: async (socket, msg = {}, isPrivate = false) => {
+  getMessages: async (msg) => {
+    if (!msg) {
+      throw new RequestError('Required parameters is empty')
+    }
     let whereClause = {}
     let concat = ''
     if (msg.listenerId) {
@@ -52,7 +55,7 @@ const messageService = {
         concat = `${msg.listenerId}n${msg.id}`
       }
     }
-    switch (isPrivate) {
+    switch (msg.isPrivate) {
       case true:
         whereClause = { roomId: concat }
         break

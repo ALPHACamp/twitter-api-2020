@@ -1,9 +1,9 @@
 const messageService = require('../services/messageService')
-const RequestError = require('../libs/RequestError')
 
 const messageController = {
   getMessages: async (req, res) => {
     try {
+      const data = await messageService.getMessages(req.body)
     
       return res.status(200).json(data)
     } catch (error) {
