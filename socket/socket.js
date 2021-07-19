@@ -52,6 +52,8 @@ module.exports = (server) => {
 
     /* join public room */
     socket.on('join_public_room', async ({ userId }) => {
+      console.log('============================')
+      console.log('join_public_room', userId)
       publicRoomUsers.push(userId)
       const user = socketUsers[userId]
       io.emit('new_join', {
@@ -63,6 +65,8 @@ module.exports = (server) => {
     })
     /* leave public room */
     socket.on('leave_public_room', async ({ userId }) => {
+      console.log('============================')
+      console.log('leave_public_room', userId)
       publicRoomUser.splice(publicRoomUser.indexOf(userId), 1)
       const user = socketUsers[userId]
       io.emit('user_leave', {
@@ -73,7 +77,7 @@ module.exports = (server) => {
 
     /* get public history */
     socket.on('get_public_history', async ({ offset, limit }, cb) => {
-      const message = await Message.findAll({
+      const options = {
         offset,
         limit,
         order: [['createdAt', 'desc']],
@@ -83,13 +87,23 @@ module.exports = (server) => {
             attributes: ['avatar'],
             as: 'User'
           }
-        ]
+        ],
+        where: {
+          RoomId: 1
+        }
+      }
+      const messages = await Message.findAll(options)
+      messages.forEach((message) => {
+        message.dataValues.avatar = message.dataValues.User.avatar
+        delete message.dataValues.User
       })
-      cb(message)
+      cb(messages)
     })
 
     /* public message */
     socket.on('post_public_msg', async ({ msg, userId }) => {
+      console.log('============================')
+      console.log('post_public_msg', { msg, userId })
       const message = await Message.create({
         RoomId: 1,
         UserId: userId,
@@ -105,6 +119,8 @@ module.exports = (server) => {
 
     /* privacy message */
     socket.on('join_private_room', async ({ User1Id, User2Id }, callback) => {
+      console.log('============================')
+      console.log('join_private_room', { User1Id, User2Id })
       const options = {
         where: {
           [Op.or]: [
@@ -128,7 +144,7 @@ module.exports = (server) => {
         socket.join(roomId)
         //join User2 into room
         user2Socket = sockets.find(
-          (socket) => socket.id === userSockets[User2Id]
+          (socket) => socket.id === socketUsers[User2Id].socketId
         )
         user2Socket.join(roomId)
       }
@@ -137,13 +153,40 @@ module.exports = (server) => {
     })
     //listen privacy msg and send
     socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
-      const user = socketUsers[userId]
+      console.log('============================')
+      console.log('post_private_msg', { UserId, RoomId, content })
+
+      const user = socketUsers[UserId]
       const message = await Message.create({ UserId, RoomId, content })
       let createdAt = message.createdAt
       const avatar = user.avatar
       socket
         .to(RoomId)
         .emit('get_private_msg', { UserId, RoomId, content, avatar, createdAt })
+    })
+    /* get private history */
+    socket.on('get_private_history', async ({ offset, limit, RoomId }, cb) => {
+      const options = {
+        offset,
+        limit,
+        order: [['createdAt', 'desc']],
+        include: [
+          {
+            model: User,
+            attributes: ['avatar'],
+            as: 'User'
+          }
+        ],
+        where: {
+          RoomId
+        }
+      }
+      let messages = await Message.findAll(options)
+      messages.forEach((message) => {
+        message.dataValues.avatar = message.dataValues.User.avatar
+        delete message.dataValues.User
+      })
+      cb(messages)
     })
   })
 }
