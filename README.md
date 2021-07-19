@@ -5,7 +5,7 @@
 - [Enviroment-環境建置與需求](#Enviroment-環境建置與需求)
 - [Features-專案功能](#Features-專案功能)
 - [Installing-專案安裝流程](#Installing-專案安裝流程)
-- [Contributor-開發人員](#Contributor-開發人員)
+- [Contributor-開發人員與工作分配](#Contributor-開發人員與工作分配)
 - [API說明](#API說明)
 - [API文件](#API文件)
 ## Features-專案功能
@@ -41,7 +41,8 @@
 * [passport](https://www.npmjs.com/package/passport) - v0.4.1
 * [passport-jwt](https://www.npmjs.com/package/passport-jwt) - v 4.0.0
 * [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) - v8.5.1
-
+### 公開聊天室（public chat room）
+* [socket.io](https://socket.io/) - v4.1.3
 
 ## Installing-專案安裝流程
 1. 請在終端機輸入
@@ -88,10 +89,52 @@ npm run dev
 ```
 npx sequelize db:seed:undo:all
 ```
-## Contributor-開發人員
-* [Chia-Hui](https://github.com/wintersprouter)
-* [Hsin Yeh](https://github.com/Hsinyehh)
-
+## Contributor-開發人員與工作分配
+#### [Chia-Hui Hsueh](https://github.com/wintersprouter)
+  * 規劃資料庫 user、tweet、reply、like、followship models
+  * 撰寫 API 文件
+  * API 與功能開發
+    * 使用者與管理員登入 API
+    * 前台使用者註冊 API
+    * 追蹤一位使用者 API
+    * 取消追蹤一位使用者 API
+    * 瀏覽使用者的檔案 API
+    * 編輯自己的使用者檔案 API
+    * 編輯使用者帳戶資料 API
+    * 目前登入的使用者 API
+    * 全站追蹤者數量前10名的使用者名單 API
+    * 後台刪除一則貼文 API
+    * 後台瀏覽所有使用者 API
+    * 公開聊天室取得歷史訊息 API
+    * 使用者登入身分驗證設定
+    * sockiet.io 身分驗證設定
+    * 公開聊天室使用者上線、離線通知
+    * 公開聊天室線上使用者列表
+  * 撰寫 README.md
+  * 重構程式碼 
+    
+#### [Hsin Yeh](https://github.com/Hsinyehh)
+  * 規劃資料庫 message model
+  * 資料庫種子資料設定 user、tweet、reply、like、followship message seeders
+  * 撰寫 API 文件
+  * API 與功能開發
+    * 新增推文 API
+    * 瀏覽所有推文 API
+    * 瀏覽一則推文詳情 API
+    * 瀏覽一則推文詳情 API
+    * 回覆一則推文 API
+    * 瀏覽回覆 API
+    * 喜歡一則推文 API
+    * 取消喜歡一則推文 API
+    * 瀏覽使用者跟隨者 API
+    * 瀏覽使用者跟隨中的人 API
+    * 瀏覽使用者發過的所有推文 API
+    * 瀏覽使用者的所有回覆 API
+    * 瀏覽使用者所有點讚的推文 API
+    * 公開聊天室使用者訊息儲存
+  * 撰寫 README.md
+  * 重構程式碼     
+    
 
 ## API文件網址
 http://localhost:3000/api-doc/
@@ -220,7 +263,7 @@ POST /api/users/signin
 ```
 ##### Request
 
-| body  | Type   | Required |
+| Body  | Type   | Required |
 | --------| ------ | ---------|
 | account | Srting | True |
 | password| String | True |
@@ -285,7 +328,7 @@ POST /api/tweets
 ```
 ##### Request
 
-| body  | Type   | Required |
+| Body  | Type   | Required |
 | --------| ------ | ---------|
 | description | Srting | True |
 
@@ -406,7 +449,7 @@ POST /api/tweets/:tweet_id/replies
 ```
 ##### Request
 
-| body   | Type   | Required |
+| Body   | Type   | Required |
 | --------| ------ | ---------|
 | comment | Srting | True |
 
@@ -579,7 +622,7 @@ POST /api/followships
 ```
 ##### Request
 
-| body  | descriotion |
+| Body  | Descriotion |
 | --------| ------ | 
 | followingId | 欲追蹤的使用者id | 
 
@@ -722,7 +765,7 @@ PUT /api/users/:id
 id：目前登入的使用者 id
 ##### Request
 
-| body  | Type   | Required |
+| Body  | Type   | Required |
 | --------| ------ | ---------|
 | name    | String | True |
 | introduction  | String | False |
@@ -803,7 +846,7 @@ PUT /api/users/:id/account
 id：目前登入的使用者id
 ##### Request
 
-| body   | Type   | Required |
+| Body   | Type   | Required |
 | --------| ------ | ---------|
 | account | Srting | True |
 | name    | String | True |
