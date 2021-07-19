@@ -1,6 +1,6 @@
 const RequestError = require('../libs/RequestError')
 const db = require('../models')
-const { User, Message, Sequelize, sequelize } = db
+const { Room, Member, User, Message, Sequelize, sequelize } = db
 const { Op } = Sequelize
 
 const messageService = {
@@ -144,18 +144,48 @@ const messageService = {
   getChattedUsers: async (id) => {
     try {
       const results = await sequelize.query(`
-        Select messages.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt' From messages
-        left join users on users.id = messages.userId
-        inner join (Select MAX(messages.createdAt) as 'createdAt', UserId From messages
-        where (messages.roomId like '%n${id}' or messages.roomId like '${id}n%') and messages.UserId != ${Number(id)} Group by UserId) as temp
-        on messages.createdAt = temp.createdAt and messages.UserId = temp.UserId
-        order by createdAt DESC
+      Select temp.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt'
+      From messages
+      inner join(
+        Select MAX(messages.createdAt) as 'createdAt', messages.roomId, membersNoUser.UserId From messages
+        inner join(
+          select * from members where members.UserId != 3
+        ) as membersNoUser
+        on membersNoUser.RoomId = messages.roomId
+        where(messages.roomId like '%n3' or messages.roomId like '3n%')
+        Group by roomId
+      ) as temp
+      on messages.createdAt = temp.createdAt and messages.roomId = temp.roomId
+      left join users on users.id = temp.UserId
+      order by createdAt DESC;
       `, { type: Sequelize.QueryTypes.SELECT })
 
       return results
     } catch (error) {
       throw new Error(error.message)
     }
+  },
+
+  createPrivateRoom: async (id, listenerId, roomName) => {
+    try {
+      const users = await messageService.getChattedUsers(id)
+      const hasRoom = users.some((user, i) => { return user.id === listenerId })
+      if (!hasRoom) {
+        await Room.create({ id: `${roomName}` })
+        await Member.bulkCreate([{ RoomId: roomName, UserId: id }, { RoomId: roomName, UserId: listenerId }])
+      }
+
+      return res.status(200).json({
+        status: 'success',
+        message: `Created Room: ${roomName} successfully`
+      })
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+
   }
 }
 

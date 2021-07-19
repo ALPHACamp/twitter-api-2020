@@ -46,8 +46,9 @@ module.exports = (server) => {
       try {
         const { id, listenerId } = msg
         let roomName = generateRoomName(id, listenerId)
-        // 加入房間
         socket.join(roomName)
+
+        await messageService.createPrivateRoom(id, listenerId, roomName)
 
         // 先清空 => 後搜尋未讀
         await messageService.clearUnread(io, socket, msg)
