@@ -12,6 +12,7 @@
   <input id="input" type="text">
   <button id="btn">send</button>
   <button id="btn2">send2</button>
+  <button id="leavePublic">leavePublic</button>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
@@ -23,17 +24,34 @@
     })
     console.log(socket)
     let RoomId
-    socket.emit('join_private_room', ({ User1Id: 1, User2Id: 5 }), (data) => {
-      RoomId = data.roomId
-      console.log(RoomId)
+    //公開
+    socket.emit('join_public_room', ({ userId: 5 }))
+    socket.on("new_join", (data) => {
+      console.log('新家公開', data)
     })
+    socket.on('online_users', (data) => {
+      console.log('再現的人', data)
+    })
+    socket.on('user_leave', (data) => {
+      console.log('離開攻防的人', data)
+    })
+    //私人
+    // socket.emit('join_private_room', ({ User1Id: 1, User2Id: 5 }), (data) => {
+    //   RoomId = data.roomId
+    //   console.log(RoomId)
+    // })
     const btn = document.querySelector('#btn')
     const input = document.querySelector('#input')
     const btn2 = document.querySelector('#btn2')
+    const leavePublic = document.querySelector('#leavePublic')
+    console.log(leavePublic)
+    leavePublic.addEventListener('click', () => {
+      socket.emit('leave_public_room', { userId: 1 })
+    })
     btn2.addEventListener('click', (event) => {
-      socket.emit('get_private_history', ({offset:0, limit:10, RoomId:26}),(data) =>{
+      socket.emit('get_private_history', ({ offset: 0, limit: 10, RoomId: 26 }), (data) => {
         console.log(data)
-      } )
+      })
     })
     btn.addEventListener('click', (event) => {
       const value = input.value

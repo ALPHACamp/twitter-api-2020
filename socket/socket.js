@@ -1,6 +1,6 @@
-const sockets = [] // array of sockets
-const socketUsers = {} // key(userId) to value(socketId, name, account, avatar)
-const publicRoomUsers = [] // array of userIds
+const sockets = [] // array of sockets  找到對應的socket物件
+const socketUsers = {} // key(userId) to value(socketId, name, account, avatar) 利用socketid可以找到對應使用者
+const publicRoomUsers = [] // array of userIds 公開聊天室的socketId
 const socketio = require('socket.io')
 const db = require('../models')
 const Message = db.Message
@@ -17,36 +17,46 @@ module.exports = (server) => {
     allowEIO3: true
   })
 
-  async function onlineUsers() {
-    return publicRoomUsers.map((id) => {
-      return {
-        id,
-        name: socketUsers[id].name,
-        account: socketUsers[id].account,
-        avatar: socketUsers[id].avatar
-      }
-    })
-  }
-
   io.use(authenticatedSocket).on('connection', (socket) => {
-    console.log(socket.request.user)
     const currentUser = socket.request.user
     /* connect */
+    // 儲存socket物件
     sockets.push(socket)
-    socketUsers[currentUser.id] = {
-      socketId: currentUser.socketId,
+    // 建立socketId 與使用者資訊的對照表
+    socketUsers[socket.id] = {
+      id: currentUser.id,
       name: currentUser.name,
       account: currentUser.account,
       avatar: currentUser.avatar
     }
-    console.log(`User is online: ${socket.id}`)
+    console.log(`User is online: ${socketUsers[socket.id].name} / ${socket.id}`)
     socket.emit('message', `Your socket id is  ${socket.id}`)
     socket.on('sendMessage', (data) => console.log(data))
 
+    function filter(publicRoomUsers) {
+      let users = []
+      publicRoomUsers.forEach((socketId) => {
+        if (socketUsers[socketId]) {
+          users.push(socketUsers[socketId])
+        }
+      })
+      let allId = users.map((item) => item.id)
+      users = users.filter((user, i, arr) => allId.indexOf(user.id) === i)
+      return users
+    }
+
     /* disconnect */
     socket.on('disconnect', () => {
-      delete socketUsers[currentUser.id]
-      sockets.splice(sockets.indexOf(socket), 1)
+      delete socketUsers[socket.id]
+      if (publicRoomUsers.includes(socket.id)) {
+        publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
+        const users = filter(publicRoomUsers)
+        io.emit('online_users', {
+          users
+        })
+      }
+      const index = sockets.findIndex((obj) => obj.id === socket.id)
+      sockets.splice(index, 1)
       console.log(`User is offline: ${socket.id}`)
     })
 
@@ -54,25 +64,32 @@ module.exports = (server) => {
     socket.on('join_public_room', async ({ userId }) => {
       console.log('============================')
       console.log('join_public_room', userId)
-      publicRoomUsers.push(userId)
-      const user = socketUsers[userId]
+      console.log('加入公開的socket ID', socket.id)
+
+      publicRoomUsers.push(socket.id)
+      const user = socketUsers[socket.id]
       io.emit('new_join', {
         name: user.name
       })
+      const users = filter(publicRoomUsers)
       io.emit('online_users', {
-        users: onlineUsers()
+        users
       })
     })
     /* leave public room */
     socket.on('leave_public_room', async ({ userId }) => {
       console.log('============================')
       console.log('leave_public_room', userId)
-      publicRoomUser.splice(publicRoomUser.indexOf(userId), 1)
-      const user = socketUsers[userId]
+
+      publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
+      const user = socketUsers[socket.id]
       io.emit('user_leave', {
         name: user.name
       })
-      io.emit('online_users', { users: onlineUsers() })
+      const users = filter(publicRoomUsers)
+      io.emit('online_users', {
+        users
+      })
     })
 
     /* get public history */
@@ -101,17 +118,20 @@ module.exports = (server) => {
     })
 
     /* public message */
-    socket.on('post_public_msg', async ({ msg, userId }) => {
+    socket.on('post_public_msg', async ({ content, userId }) => {
       console.log('============================')
-      console.log('post_public_msg', { msg, userId })
+      console.log('post_public_msg', { content, userId })
+      if (!content) {
+        return
+      }
       const message = await Message.create({
         RoomId: 1,
         UserId: userId,
-        content: msg
+        content
       })
-      const user = socketUsers[userId]
+      const user = socketUsers[socket.id]
       socket.broadcast.emit('get_public_msg', {
-        msg: message.content,
+        content: message.content,
         createdAt: message.createdAt,
         avatar: user.avatar
       })
@@ -137,26 +157,34 @@ module.exports = (server) => {
         roomId = await Room.create({ User1Id, User2Id })
         roomId = roomId.toJSON().id
       }
-
+      // 找到User2 的socketId
       // check isOnline or not
-      if (socketUsers[User2Id]) {
+      function isUser2Oneline(User2Id) {
+        for (socketId in socketUsers) {
+          if (socketUsers[socketId].id === User2Id) {
+            return socketId
+          }
+        }
+        return false
+      }
+      if (isUser2Oneline(User2Id)) {
         //join User1 into room
         socket.join(roomId)
         //join User2 into room
-        user2Socket = sockets.find(
-          (socket) => socket.id === socketUsers[User2Id].socketId
-        )
-        user2Socket.join(roomId)
+        user2SocketId = isUser2Oneline(User2Id)
+        sockets[user2SocketId].join(roomId)
       }
       //return roomId to client
-      callback({ roomId }, socket.id)
+      callback({ roomId })
     })
     //listen privacy msg and send
     socket.on('post_private_msg', async ({ UserId, RoomId, content }) => {
       console.log('============================')
       console.log('post_private_msg', { UserId, RoomId, content })
-
-      const user = socketUsers[UserId]
+      if (content.length === 0 || !content) {
+        return
+      }
+      const user = socketUsers[socket.id]
       const message = await Message.create({ UserId, RoomId, content })
       let createdAt = message.createdAt
       const avatar = user.avatar
