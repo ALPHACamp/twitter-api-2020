@@ -1,6 +1,7 @@
+const http = require('http')
 const express = require('express')
 const session = require('express-session')
-const helpers = require('./_helpers');
+const helpers = require('./_helpers')
 const cors = require('cors')
 const { Message, User } = require('./models')
 const app = express()
@@ -8,18 +9,20 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const port = process.env.PORT || 3000
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const server = http.createServer(app)
+
+server.listen(port, () => console.log(`Server is listening on port ${port}!`))
+
 const io = require('socket.io')(server, {
   cors: {
-    origin: "http://localhost:8080",
-    methods: ["GET", "POST"],
+    origin: ['https://fogjogger1992.github.io', 'http://localhost:8080'],
+    methods: ['GET', 'POST'],
     transports: ['websocket', 'polling'],
     credentials: true
   },
   allowEIO3: true
 })
-const passport = require('./config/passport');
-const { SSL_OP_NO_TICKET } = require('constants');
+const passport = require('./config/passport')
 
 // cors 的預設為全開放
 app.use(cors())
@@ -38,25 +41,20 @@ app.use((req, res, next) => {
   next()
 })
 
-
-app.get('/', (req, res, next) => {
-  res.sendFile(__dirname + '/view/index.html')
-})
-
 let onlineUser = []
 
 // 連線錯誤監聽
-io.on("connect_error", (err, next) => {
+io.on('connect_error', (err, next) => {
   console.log(`connect_error due to ${err.message}`)
   next(err)
 })
 
 // 連線監聽
-io.on('connection', async (socket) => {
-
+io.on('connection', (socket) => {
+  console.log('socket server connected')
   // 接收 current user 回傳 onlineUser array
   socket.on('newUser', async user => {
-    console.log('new user connected')
+    console.log('new user join chatroom')
 
     socket.user = user
     const userIdList = onlineUser.map(user => {
@@ -66,7 +64,6 @@ io.on('connection', async (socket) => {
     if (!userIdList.includes(user.id)) {
       onlineUser.push(user)
     }
-    console.log(onlineUser)
 
     // 請求 new user socket
     io.to(socket.id).emit('newUser', user)
@@ -85,13 +82,11 @@ io.on('connection', async (socket) => {
         }],
         order: [['createdAt', 'ASC']]
       })
-      console.log(msgs)
       io.to(socket.id).emit('historyMessages', msgs)
     } catch (err) {
       console.log(err)
     }
   })
-
 
   // 公開訊息監聽
   socket.on('sendMessage', async (msg) => {
@@ -118,7 +113,7 @@ io.on('connection', async (socket) => {
           model: User,
           attributes: ['id', 'name', 'account', 'avatar'],
           as: 'Sender'
-        }],
+        }]
       })
       // 傳新訊息給所有人
       io.emit('newMessage', message)
@@ -129,11 +124,14 @@ io.on('connection', async (socket) => {
   })
 
   // 離線監聽
-  socket.on('disconnect', () => {
+  socket.on('leavingChatroom', () => {
     // 離開時減少聊天室人數並發送給網頁
     onlineUser = onlineUser.filter(user => user.id !== socket.user.id)
     io.emit('onlineUser', onlineUser)
     io.emit('userLeave', socket.user)
+    console.log('a user left chatroom')
+  })
+  socket.on('disconnect', () => {
     console.log('disconnected')
   })
 })
