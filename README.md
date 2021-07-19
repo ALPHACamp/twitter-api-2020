@@ -1,4 +1,11 @@
 # Simple Twitter RESTful API 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wintersprouter/twitter-api-2020/master/projectView.gif"/>
+</p>
+<p align="center">
+  <a href="https://standardjs.com/"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
+</p>
+
  這是一個使用 Node.js + Express + MySQL 建立的 Simple Twitter 後端專案，部署於 Heroku，以 RESTFul API 滿足社群網站不同資料的互動需求，搭配 [Simple-Twitter-Vue](https://github.com/chris1085/SimpleTwitter-vue) 前端專案，打造一個全方位的社群網站。
  
  ## Outline-目錄
