@@ -70,10 +70,10 @@ const messageService = {
       }
     }
     switch (msg.isPrivate) {
-      case true:
+      case 'true':
         whereClause = { roomId: concat }
         break
-      case false:
+      case 'false':
         whereClause = { roomId: null }
         break
     }
