@@ -1,0 +1,31 @@
+const messageService = require('../services/messageService')
+const RequestError = require('../libs/RequestError')
+
+const messageController = {
+  getMessages: async (req, res) => {
+    try {
+    
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }  
+  },
+
+  getChattedUsers: async (req, res) => {
+    try {
+      
+    
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }  
+  }
+}
+
+module.exports = messageController

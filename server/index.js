@@ -65,11 +65,6 @@ module.exports = (server) => {
         const unReads = await messageService.searchUnread(io, socket, msg)
 
         socket.emit('messageNotify', unReads)
-
-        // 取得歷史訊息
-        const messages = await messageService.getMessages(socket, msg, true)
-        socket.emit('getMessages', messages)
-
       } catch (error) {
         return socket.emit('error', {
           status: error.name,
@@ -220,17 +215,6 @@ module.exports = (server) => {
       })
       socket.broadcast.emit('users', users)
     })
-
-    try {
-      const msg = await messageService.getMessages(socket)
-      socket.emit('getMessages', msg)
-    } catch (error) {
-      console.error(error)
-      return socket.emit('error', {
-        status: error.name,
-        message: error.message
-      })
-    }
   })
 
   // io.engine.on('connection_error', (err, socket) => {
