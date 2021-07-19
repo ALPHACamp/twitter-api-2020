@@ -149,15 +149,15 @@ const messageService = {
       inner join(
         Select MAX(messages.createdAt) as 'createdAt', messages.roomId, membersNoUser.UserId From messages
         inner join(
-          select * from members where members.UserId != 3
+          select * from members where members.UserId != ${Number(id)}
         ) as membersNoUser
         on membersNoUser.RoomId = messages.roomId
-        where(messages.roomId like '%n3' or messages.roomId like '3n%')
+        where(messages.roomId like '%n${id}' or messages.roomId like '${id}n%')
         Group by roomId
       ) as temp
       on messages.createdAt = temp.createdAt and messages.roomId = temp.roomId
       left join users on users.id = temp.UserId
-      order by createdAt DESC;
+      order by createdAt DESC
       `, { type: Sequelize.QueryTypes.SELECT })
 
       return results
