@@ -44,10 +44,15 @@ const messageService = {
 
   getMessages: async (msg) => {
     if (!msg.isPrivate) {
-      throw new RequestError('Required parameters is empty')
+      throw new RequestError(`isPrivate is empty`)
     } else {
       if (!msg.id || !msg.listenerId) {
-        throw new RequestError('Required parameters is empty')
+        let errorMsgs = []
+        
+        !msg.id ? errorMsgs.push('id') : ''
+        !msg.listenerId ? errorMsgs.push('listenerId') : ''
+
+        throw new RequestError(`${errorMsgs.join(', ')} is empty`)
       }
     }
 
