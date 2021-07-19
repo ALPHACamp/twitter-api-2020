@@ -76,7 +76,7 @@ let socketController = {
     const now = new Date()
     let Rooms = await Room.findAll({
       where: {
-        '$or': [
+        [Op.or]: [
           { User1Id: currentId },
           { User2Id: currentId }
         ]
@@ -86,7 +86,7 @@ let socketController = {
         as: 'Messages',
         where: {
           createdAt: {
-            '$between': [lastOnlineAt, now]
+            [Op.between]: [lastOnlineAt, now]
           },
         },
         attributes: ['UserId']
