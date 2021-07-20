@@ -2,6 +2,7 @@ const messageService = require('../services/messageService')
 const { generateRoomName, SearchListenerOnline, checkIsInRoom } = require('../libs/utility')
 
 module.exports = (server) => {
+  const users = new Map()
 
   const io = require('socket.io')(server, {
     cors: {
@@ -22,7 +23,34 @@ module.exports = (server) => {
       console.log(event, args)
     })
 
-    const users = []
+
+    socket.on('currentUser', async msg => {
+      try {
+        socket.data = { ...msg }
+
+        const data = {
+          ...socket.data
+        }
+
+        users.set(socket.data.id, data)
+
+        socket.join(`user${socket.data.id}`)
+
+        socket.broadcast.emit('userConnected', {
+          name: socket.data.name,
+          isOnline: 1
+        })
+
+        io.emit('users', [...users.values()])
+      } catch (error) {
+        console.error(error)
+        return socket.emit('error', {
+          status: error.name,
+          message: error.message
+        })
+      }
+
+    })
 
     // 未讀通知
     socket.on('messageNotify', async msg => {
@@ -125,41 +153,7 @@ module.exports = (server) => {
       }
     })
 
-    socket.on('currentUser', async msg => {
-      try {
-        let usersPool = new Map()
-        socket.data = { ...msg }
 
-        for (let [id, socket] of io.of('/').sockets) {
-          const data = {
-            userSocketId: id, ...socket.data
-          }
-
-          if (usersPool.has(socket.data.id)) {
-            continue
-          } else if (!socket.data.id) {
-            continue
-          } else {
-            users.push(data)
-            usersPool.set(socket.data.id, data)
-          }
-        }
-
-        socket.broadcast.emit('userConnected', {
-          name: socket.data.name,
-          isOnline: 1
-        })
-
-        io.emit('users', users)
-      } catch (error) {
-        console.error(error)
-        return socket.emit('error', {
-          status: error.name,
-          message: error.message
-        })
-      }
-
-    })
 
     socket.on('chatMessage', async msg => {
       try {
@@ -175,12 +169,20 @@ module.exports = (server) => {
       }
     })
 
-    socket.on('disconnect', reason => {
-      socket.broadcast.emit('userDisconnected', {
-        name: socket.data.name,
-        isOnline: 0
-      })
-      io.emit('users', users)
+    socket.on('disconnect', async reason => {
+      const matchingSockets = await io.in(`user${socket.data.id}`).allSockets()
+      const isDisconnected = matchingSockets.size === 0
+
+      if (isDisconnected) {
+        users.delete(socket.data.id)
+
+        socket.broadcast.emit('userDisconnected', {
+          name: socket.data.name,
+          isOnline: 0
+        })
+
+        io.emit('users', users)
+      }
     })
   })
 
