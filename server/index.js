@@ -43,8 +43,9 @@ module.exports = (server) => {
             isOnline: 1
           })
 
-          io.emit('users', [...users.values()])
         }
+
+        io.emit('users', [...users.values()])
       } catch (error) {
         console.error(error)
         return socket.emit('error', {
