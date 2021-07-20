@@ -7,13 +7,14 @@ module.exports = (server) => {
     cors: {
       origin: '*',
       methods: ['GET', 'POST']
-    }
+    },
+    pingTimeout: 30000,
+    rejectUnauthorized: false,
+    maxHttpBufferSize: 100000000
   })
 
   io.on('connection', async socket => {
     console.log('A user connecting')
-    console.log(socket.handshake.headers.host)
-    console.log(socket.handshake.url)
     console.log(io.of("/").sockets.size)
 
     // 可以在伺服器端顯示通道過來的所有事件，以及相關的參數
@@ -38,38 +39,20 @@ module.exports = (server) => {
       }
     })
 
-    // 進入私聊介面
-    socket.on('enterPrivateInterface', async msg => {
-      try {
-        const chattedUsers = await messageService.getChattedUsers(io, socket, msg)
-
-        socket.emit('chattedUsers', chattedUsers)
-      } catch (error) {
-        return socket.emit('error', {
-          status: error.name,
-          message: error.message
-        })
-      }
-    })
-
     // 進入房間
     socket.on('enterRoom', async msg => {
       try {
         const { id, listenerId } = msg
         let roomName = generateRoomName(id, listenerId)
-        // 加入房間
         socket.join(roomName)
+
+        await messageService.createPrivateRoom(id, listenerId, roomName)
 
         // 先清空 => 後搜尋未讀
         await messageService.clearUnread(io, socket, msg)
         const unReads = await messageService.searchUnread(io, socket, msg)
 
         socket.emit('messageNotify', unReads)
-
-        // 取得歷史訊息
-        const messages = await messageService.getMessages(socket, msg, true)
-        socket.emit('getMessages', messages)
-
       } catch (error) {
         return socket.emit('error', {
           status: error.name,
@@ -125,6 +108,7 @@ module.exports = (server) => {
             ])
 
             socket.to(listenerSocketId).emit('messageNotify', unReads)
+            io.to(roomName).emit('privateMessage', message)
           }
         } else {
           msg.isInRoom = false
@@ -220,17 +204,6 @@ module.exports = (server) => {
       })
       socket.broadcast.emit('users', users)
     })
-
-    try {
-      const msg = await messageService.getMessages(socket)
-      socket.emit('getMessages', msg)
-    } catch (error) {
-      console.error(error)
-      return socket.emit('error', {
-        status: error.name,
-        message: error.message
-      })
-    }
   })
 
   // io.engine.on('connection_error', (err, socket) => {

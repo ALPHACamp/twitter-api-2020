@@ -1,6 +1,6 @@
 const RequestError = require('../libs/RequestError')
 const db = require('../models')
-const { User, Message, Sequelize, sequelize } = db
+const { Room, Member, User, Message, Sequelize, sequelize } = db
 const { Op } = Sequelize
 
 const messageService = {
@@ -42,7 +42,24 @@ const messageService = {
     })
   },
 
-  getMessages: async (socket, msg = {}, isPrivate = false) => {
+  getMessages: async (msg) => {
+    if (!msg.isPrivate) {
+      throw new RequestError(`isPrivate is empty`)
+    }
+
+    if (msg.isPrivate === 'true') {
+      if (!msg.id || !msg.listenerId) {
+        let errorMsgs = []
+
+        !msg.id ? errorMsgs.push('id') : ''
+        !msg.listenerId ? errorMsgs.push('listenerId') : ''
+
+        throw new RequestError(`${errorMsgs.join(', ')} is empty`)
+      }
+    }
+
+
+
     let whereClause = {}
     let concat = ''
     if (msg.listenerId) {
@@ -52,11 +69,11 @@ const messageService = {
         concat = `${msg.listenerId}n${msg.id}`
       }
     }
-    switch (isPrivate) {
-      case true:
+    switch (msg.isPrivate) {
+      case 'true':
         whereClause = { roomId: concat }
         break
-      case false:
+      case 'false':
         whereClause = { roomId: null }
         break
     }
@@ -124,21 +141,51 @@ const messageService = {
     })
   },
 
-  getChattedUsers: async (io, socket, msg) => {
+  getChattedUsers: async (id) => {
     try {
       const results = await sequelize.query(`
-        Select messages.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt' From messages
-        left join users on users.id = messages.userId
-        inner join (Select MAX(messages.createdAt) as 'createdAt', UserId From messages
-        where (messages.roomId like '%n${msg.id}' or messages.roomId like '${msg.id}n%') and messages.UserId != ${Number(msg.id)} Group by UserId) as temp
-        on messages.createdAt = temp.createdAt
-        order by createdAt DESC
+      Select temp.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt'
+      From messages
+      inner join(
+        Select MAX(messages.createdAt) as 'createdAt', messages.roomId, membersNoUser.UserId From messages
+        inner join(
+          select * from members where members.UserId != ${Number(id)}
+        ) as membersNoUser
+        on membersNoUser.RoomId = messages.roomId
+        where(messages.roomId like '%n${id}' or messages.roomId like '${id}n%')
+        Group by roomId
+      ) as temp
+      on messages.createdAt = temp.createdAt and messages.roomId = temp.roomId
+      left join users on users.id = temp.UserId
+      order by createdAt DESC
       `, { type: Sequelize.QueryTypes.SELECT })
 
       return results
     } catch (error) {
       throw new Error(error.message)
     }
+  },
+
+  createPrivateRoom: async (id, listenerId, roomName) => {
+    try {
+      const users = await messageService.getChattedUsers(id)
+      const hasRoom = users.some((user, i) => { return user.id === listenerId })
+      if (!hasRoom) {
+        await Room.create({ id: `${roomName}` })
+        await Member.bulkCreate([{ RoomId: roomName, UserId: id }, { RoomId: roomName, UserId: listenerId }])
+      }
+
+      return res.status(200).json({
+        status: 'success',
+        message: `Created Room: ${roomName} successfully`
+      })
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
+
   }
 }
 

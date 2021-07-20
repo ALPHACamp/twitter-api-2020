@@ -30,11 +30,6 @@ app.use(passport.session())
 // for mocha test's requirement
 app.use(replaceReqUser)
 
-// 可以用這個實驗簡單的socket
-app.get('/socket', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-
 buildSocket(server)
 
 app.use(routes)
