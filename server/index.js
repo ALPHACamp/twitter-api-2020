@@ -15,8 +15,6 @@ module.exports = (server) => {
 
   io.on('connection', async socket => {
     console.log('A user connecting')
-    console.log(socket.handshake.headers.host)
-    console.log(socket.handshake.url)
     console.log(io.of("/").sockets.size)
 
     // 可以在伺服器端顯示通道過來的所有事件，以及相關的參數
@@ -110,6 +108,7 @@ module.exports = (server) => {
             ])
 
             socket.to(listenerSocketId).emit('messageNotify', unReads)
+            io.to(roomName).emit('privateMessage', message)
           }
         } else {
           msg.isInRoom = false
