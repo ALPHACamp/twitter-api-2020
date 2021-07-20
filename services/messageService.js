@@ -84,22 +84,15 @@ const messageService = {
     return Message.findAll({
       where: whereClause,
       order: [['createdAt', 'ASC']],
-      include: { model: User },
-      raw: true,
-      nest: true
+      include: { model: User, attributes: [] },
+      attributes: [
+        ['UserId', 'id'],
+        [sequelize.col('User.avatar'), 'avatar'],
+        [sequelize.col('content'), 'content'],
+        [sequelize.col('Message.createdAt'), 'createdAt']
+      ]
     }).then(msg => {
-      msg = msg.map((msg, i) => {
-        if (!msg) {
-          return []
-        }
-        const mapItem = {
-          id: msg.UserId,
-          avatar: msg.User.avatar,
-          content: msg.content,
-          createdAt: msg.createdAt
-        }
-        return mapItem
-      })
+
       return msg
     })
   },
