@@ -202,7 +202,7 @@ module.exports = (server) => {
         name: socket.data.name,
         isOnline: 0
       })
-      socket.broadcast.emit('users', users)
+      io.emit('users', users)
     })
   })
 
