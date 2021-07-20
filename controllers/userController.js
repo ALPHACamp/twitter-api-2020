@@ -6,6 +6,7 @@ const tweetService = require('../services/tweetService')
 
 const imgurUpload = require('../utils/imgurUpload')
 const RequestError = require('../utils/customError')
+const { signUpValidation } = require('../utils/validation')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -49,23 +50,12 @@ const userController = {
 
   signUp: async (req, res, next) => {
     try {
-      const { checkPassword, ...formBody } = req.body
-      const { account, name, email, password } = formBody
-
-      if (!account || !name || !email || !password) {
-        throw new RequestError('All field are required.')
-      }
-      if (!email.match(/.+@.+\..+/i)) {
-        throw new RequestError('Invalid email.')
-      }
-      await userService.checkUnique(formBody)
-      if (password !== checkPassword) {
-        throw new RequestError('Fields password and checkPassword must be the same.')
-      }
+      signUpValidation(req.body)
+      await userService.checkUnique(req.body)
 
       const hash = bcrypt.hashSync(password, 10)
       const user = await userService.signUp({
-        ...formBody,
+        ...req.body,
         password: hash
       })
 
