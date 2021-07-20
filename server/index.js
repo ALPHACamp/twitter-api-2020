@@ -26,6 +26,9 @@ module.exports = (server) => {
 
     socket.on('currentUser', async msg => {
       try {
+        const matchingSockets = await io.in(`user${socket.data.id}`).allSockets()
+        const isSameUserOnline = matchingSockets.size !== 0
+
         socket.data = { ...msg }
 
         const data = {
@@ -33,15 +36,16 @@ module.exports = (server) => {
         }
 
         users.set(socket.data.id, data)
-
         socket.join(`user${socket.data.id}`)
 
-        socket.broadcast.emit('userConnected', {
-          name: socket.data.name,
-          isOnline: 1
-        })
+        if (isSameUserOnline) {
+          socket.broadcast.emit('userConnected', {
+            name: socket.data.name,
+            isOnline: 1
+          })
 
-        io.emit('users', [...users.values()])
+          io.emit('users', [...users.values()])
+        }
       } catch (error) {
         console.error(error)
         return socket.emit('error', {
@@ -181,7 +185,7 @@ module.exports = (server) => {
           isOnline: 0
         })
 
-        io.emit('users', users)
+        io.emit('users', [...users.values()])
       }
     })
   })
