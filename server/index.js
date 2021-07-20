@@ -27,23 +27,22 @@ module.exports = (server) => {
     socket.on('currentUser', async msg => {
       try {
         socket.data = { ...msg }
-        const matchingSockets = await io.in(`user${socket.data.id}`).allSockets()
-        const isSameUserOnline = matchingSockets.size !== 0
 
         const data = {
           ...socket.data
         }
 
-        users.set(socket.data.id, data)
-        socket.join(`user${socket.data.id}`)
-
-        if (isSameUserOnline) {
+        if (!users.has(socket.data.id)) {
           socket.broadcast.emit('userConnected', {
             name: socket.data.name,
             isOnline: 1
           })
-
         }
+
+        users.set(socket.data.id, data)
+        
+        // 多網頁連接同帳號判斷
+        socket.join(`user${socket.data.id}`)
 
         io.emit('users', [...users.values()])
       } catch (error) {
