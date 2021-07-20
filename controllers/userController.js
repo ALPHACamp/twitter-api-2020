@@ -53,7 +53,7 @@ const userController = {
       signUpValidation(req.body)
       await userService.checkUnique(req.body)
 
-      const hash = bcrypt.hashSync(password, 10)
+      const hash = bcrypt.hashSync(req.body.password, 10)
       const user = await userService.signUp({
         ...req.body,
         password: hash
