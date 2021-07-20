@@ -175,15 +175,15 @@ const messageService = {
         await Member.bulkCreate([{ RoomId: roomName, UserId: id }, { RoomId: roomName, UserId: listenerId }])
       }
 
-      return res.status(200).json({
+      return {
         status: 'success',
         message: `Created Room: ${roomName} successfully`
-      })
+      }
     } catch (error) {
-      return res.status(400).json({
+      return {
         status: error.name,
         message: error.message
-      })
+      }
     }
 
   }
