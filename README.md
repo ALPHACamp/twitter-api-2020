@@ -7,6 +7,19 @@
 </p>
 
  這是一個使用 Node.js + Express + MySQL 建立的 Simple Twitter 後端專案，部署於 Heroku，以 RESTFul API 滿足社群網站不同資料的互動需求，搭配 [Simple-Twitter-Vue](https://github.com/chris1085/SimpleTwitter-vue) 前端專案，打造一個全方位的社群網站。
+
+ ## Live Demo 
+ ### Demo 網址
+ [Simple-Twitter-Demo](https://chris1085.github.io/SimpleTwitter-vue/#/)
+
+### Demo 帳號
+使用者可以使用以下帳號分別登入系統前台、後台。
+
+|role| account | password |
+| -------- | -------- | -------- |
+| admin  | root   | 12345678  |
+| user   | RyanHuang   | 12345678    
+</p>
  
  ## Outline-目錄
 - [Enviroment-環境建置與需求](#Enviroment-環境建置與需求)
@@ -33,6 +46,14 @@
   - 管理者可以瀏覽全站的 Tweet 清單
   - 管理者可以瀏覽站內所有的使用者清單包含：使用者社群活躍數據，包括推文 (tweet) 數量、關注人數、跟隨者人數、推文被 like 的數量
   - 管理者可以直接刪除任何人的推文
+- 使用 bcryptjs 加密使用者密碼
+- 整合 mocha、chai、sinon、sinon-chai 完成 Model 和 Request 的測試
+- 加入 cors 實現跨網域連線
+- 設定 dotenv 加入環境變數和隱藏敏感資訊
+- 使用 faker 套件產生內容假資料
+- 使用 multer 實作圖片上傳功能
+- 整合 imgur-node-api 將圖片上傳至第三方平台
+- 加入 validator 實作後端資料驗證
 
 ## Enviroment-環境建置與需求
 ### 伺服器（server）
@@ -139,6 +160,7 @@ npx sequelize db:seed:undo:all
     * 瀏覽使用者的所有回覆 API
     * 瀏覽使用者所有點讚的推文 API
     * 公開聊天室使用者訊息儲存
+  * 部屬 Heroku
   * 撰寫 README.md
   * 重構程式碼     
     
@@ -153,13 +175,7 @@ http://localhost:3000/api-doc/
 ### Base URL
 * http://localhost:3000/api/{route}
 * https://simpletwitter-api.herokuapp.com/api/{route}
-### Demo 帳號
-使用者可以使用以下帳號分別登入系統前台、後台。
 
-|role| account | password |
-| -------- | -------- | -------- |
-| admin  | root   | 12345678  |
-| user   | RyanHuang   | 12345678    
 ## API文件
  ### API 目錄
 - [Sign in & Sign up](#Sign-in-&-Sign-up)
