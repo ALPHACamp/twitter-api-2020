@@ -43,6 +43,12 @@ const messageService = {
   },
 
   getMessages: async (msg) => {
+    msg = {
+      isPrivate: msg.isPrivate,
+      id: Number(msg.id),
+      listenerId: Number(msg.listenerId),
+    }
+
     if (!msg.isPrivate) {
       throw new RequestError(`isPrivate is empty`)
     }
@@ -57,8 +63,6 @@ const messageService = {
         throw new RequestError(`${errorMsgs.join(', ')} is empty`)
       }
     }
-
-
 
     let whereClause = {}
     let concat = ''
