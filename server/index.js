@@ -29,7 +29,7 @@ module.exports = (server) => {
         socket.data = { ...msg }
 
         const data = {
-          ...socket.data
+          userSocketId: socket.id, ...socket.data
         }
 
         if (!users.has(socket.data.id)) {
