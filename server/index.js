@@ -23,7 +23,6 @@ module.exports = (server) => {
       console.log(event, args)
     })
 
-
     socket.on('currentUser', async msg => {
       try {
         socket.data = { ...msg }
@@ -40,7 +39,7 @@ module.exports = (server) => {
         }
 
         users.set(socket.data.id, data)
-        
+
         // 多網頁連接同帳號判斷
         socket.join(`user${socket.data.id}`)
 
@@ -76,6 +75,7 @@ module.exports = (server) => {
         const { id, listenerId } = msg
         let roomName = generateRoomName(id, listenerId)
         socket.join(roomName)
+        console.log('===========roomName===========', roomName)
 
         await messageService.createPrivateRoom(id, listenerId, roomName)
 
@@ -85,6 +85,7 @@ module.exports = (server) => {
 
         socket.emit('messageNotify', unReads)
       } catch (error) {
+        console.log(error)
         return socket.emit('error', {
           status: error.name,
           message: error.message
@@ -113,7 +114,9 @@ module.exports = (server) => {
       try {
         const { id, listenerId } = msg
         const roomName = generateRoomName(id, listenerId)
+        // 找到房間內所有連線
         const clients = io.sockets.adapter.rooms.get(roomName)
+        console.log(clients)
 
         if (!clients) {
           console.log('No clients in room')
@@ -121,16 +124,20 @@ module.exports = (server) => {
         }
 
         const { isOnline, listenerSocketId } = SearchListenerOnline(io, socket, clients, listenerId)
+        console.log(`===========isOnline=============`, isOnline,'listenerSocketid: ', listenerSocketId)
 
 
         if (isOnline) {
-          if (checkIsInRoom(io, socket, clients, listenerId)) {
+          if (checkIsInRoom(io, socket, clients, listenerSocketId)) {
+            console.log('====對方在房間====')
             msg.isInRoom = true
 
             const message = await messageService.saveMessage(msg)
 
             io.to(roomName).emit('privateMessage', message)
           } else {
+            console.log('====對方不在房間====')
+
             msg.isInRoom = false
 
             const [message, unReads] = await Promise.all([
@@ -172,7 +179,25 @@ module.exports = (server) => {
       }
     })
 
+    // 離開公開聊天室事件
+    socket.on('leavePublic', async msg => {
+      const matchingSockets = await io.in(`user${socket.data.id}`).allSockets()
+      const isDisconnected = matchingSockets.size === 0
+
+      if (isDisconnected) {
+        users.delete(socket.data.id)
+
+        socket.broadcast.emit('userDisconnected', {
+          name: socket.data.name,
+          isOnline: 0
+        })
+
+        io.emit('users', [...users.values()])
+      }
+    })
+
     socket.on('disconnect', async reason => {
+      console.log(reason)
       const matchingSockets = await io.in(`user${socket.data.id}`).allSockets()
       const isDisconnected = matchingSockets.size === 0
 

@@ -18,7 +18,8 @@ module.exports = {
 
   SearchListenerOnline: (io, socket, clients, listenerId) => {
     for (let [id, socket] of io.of('/').sockets) {
-      if (clients.has(id) && socket.data.id === listenerId) {
+      console.log(`socketId:${id}, id:${socket.data.id} `)
+      if (socket.data.id === listenerId) {
         return {
           isOnline: true,
           listenerSocketId: id
@@ -31,14 +32,10 @@ module.exports = {
     }
   },
 
-  checkIsInRoom: (io, socket, clients, listenerId) => {
-    const usersInRoom = []
+  checkIsInRoom: (io, socket, clients, listenerSocketId) => {
     for (let [id, socket] of io.of('/').sockets) {
-      const userId = socket.data.id
-      if (clients.has(id)) {
-        usersInRoom.push(userId)
-      }
-      if (usersInRoom.includes(listenerId)) {
+      console.log(`socketId:${id}, id:${socket.data.id} `)
+      if (clients.has(listenerSocketId)) {
         return true
       }
     }
