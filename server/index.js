@@ -26,10 +26,9 @@ module.exports = (server) => {
 
     socket.on('currentUser', async msg => {
       try {
+        socket.data = { ...msg }
         const matchingSockets = await io.in(`user${socket.data.id}`).allSockets()
         const isSameUserOnline = matchingSockets.size !== 0
-
-        socket.data = { ...msg }
 
         const data = {
           ...socket.data
