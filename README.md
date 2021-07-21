@@ -9,6 +9,31 @@ LIVE DEMO: https://denise97220.github.io/simple-twitter-vue/#/login
 
 ## 關於專案
 
+### 從本地開始
+
+請確保你有基本環境以及MySQL資料庫
+以防版本差異問題，請設置
+```
+SET @@global.sql_mode="STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION";
+```
+
+開始之前也務必npm run install
+
+1. 建置資料(小shortcut!)
+```
+npm run setup
+```
+2. 運行
+```
+npm run dev
+```
+
+3. 測試，開發環境請切換到test
+RUN TEST
+```
+npm run test
+```
+
 ### 功能
 
 * 使用者能創建帳戶登入

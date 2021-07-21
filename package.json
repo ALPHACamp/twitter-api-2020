@@ -7,6 +7,7 @@
     "start": "cross-env NODE_ENV=development && node app.js",
     "dev": "cross-env NODE_ENV=development && nodemon app.js",
     "test": "mocha test --exit --recursive --timeout 5000",
+    "setup": "npx sequelize db:migrate && npx sequelize db:seed:all",
     "reset": "npx sequelize db:migrate:undo:all && npx sequelize db:migrate && npx sequelize db:seed:all"
   },
   "author": "",
