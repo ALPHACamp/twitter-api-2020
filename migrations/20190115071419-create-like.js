@@ -14,6 +14,9 @@ module.exports = {
       TweetId: {
         type: Sequelize.INTEGER
       },
+      ReplyId: {
+        type: Sequelize.INTEGER
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

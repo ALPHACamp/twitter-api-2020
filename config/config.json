@@ -11,15 +11,17 @@
     "password": "password",
     "database": "ac_twitter_workspace_test",
     "host": "127.0.0.1",
-    "dialect": "mysql",
-    "logging": false
+    "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "use_env_variable": "CLEARDB_DATABASE_URL",
+    "dialect": "postgres",
+    "protocol": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "rejectUnauthorized": false
+      }
+    }
   },
   "travis": {
     "username": "travis",
