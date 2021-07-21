@@ -6,6 +6,8 @@
 - method-override
 - passport_jwt
 - dotenv
+- socket.io
+- passport-jwt-socketio
 ## 資料庫
 - MySQL
 
