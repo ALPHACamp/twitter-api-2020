@@ -16,6 +16,7 @@ LIVE DEMO: https://denise97220.github.io/simple-twitter-vue/#/login
 ```
 SET @@global.sql_mode="STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION";
 ```
+(主要移除這項設定 ONLY_FULL_GROUP_BY)
 
 開始之前也務必npm run install
 
