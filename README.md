@@ -7,7 +7,7 @@
 - passport_jwt
 - dotenv
 - socket.io
-- passport-jwt-socketio
+- passport_jwt-socketio
 ## 資料庫
 - MySQL
 
