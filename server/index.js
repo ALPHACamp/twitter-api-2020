@@ -57,7 +57,7 @@ module.exports = (server) => {
     // 未讀通知
     socket.on('messageNotify', async msg => {
       try {
-        const unReads = await messageService.searchUnread(io, socket, msg)
+        const unReads = await messageService.searchUnread(io, socket, msg.id)
 
         socket.emit('messageNotify', unReads)
 
@@ -81,7 +81,7 @@ module.exports = (server) => {
 
         // 先清空 => 後搜尋未讀
         await messageService.clearUnread(io, socket, msg)
-        const unReads = await messageService.searchUnread(io, socket, msg)
+        const unReads = await messageService.searchUnread(io, socket, id)
 
         socket.emit('messageNotify', unReads)
       } catch (error) {
@@ -130,7 +130,7 @@ module.exports = (server) => {
         msg.isInRoom = false
         const [message, unReads] = await Promise.all([
           messageService.saveMessage(msg),
-          messageService.searchUnread(io, socket, msg)
+          messageService.searchUnread(io, socket, listenerId)
         ])
         io.to(roomName).emit('privateMessage', message)
         io.to(`user${listenerId}`).emit('messageNotify', unReads)

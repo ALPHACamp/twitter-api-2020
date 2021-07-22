@@ -98,19 +98,19 @@ const messageService = {
     })
   },
 
-  searchUnread: (io, socket, msg) => {
+  searchUnread: (io, socket, id) => {
     return Message.count({
       where: {
         [Op.and]: [{
           roomId: {
             [Op.or]: [
-              { [Op.like]: `${msg.id}n%` },
-              { [Op.like]: `%n${msg.id}` }
+              { [Op.like]: `${id}n%` },
+              { [Op.like]: `%n${id}` }
             ]
           }
         },
         { isRead: false },
-        { UserId: { [Op.ne]: msg.id } }
+        { UserId: { [Op.ne]: id } }
         ]
       }
     }).then(count => {
