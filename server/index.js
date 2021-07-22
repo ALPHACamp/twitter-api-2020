@@ -133,7 +133,7 @@ module.exports = (server) => {
           messageService.searchUnread(io, socket, msg)
         ])
         io.to(roomName).emit('privateMessage', message)
-        io.to(`user${socket.data.listenerId}`).emit('messageNotify', unReads)
+        io.to(`user${listenerId}`).emit('messageNotify', unReads)
 
         // if (isOnline) {
         //   if (checkIsInRoom(io, socket, clients, listenerSocketId)) {
