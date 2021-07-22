@@ -90,9 +90,10 @@ const messageService = {
         [sequelize.col('User.avatar'), 'avatar'],
         [sequelize.col('content'), 'content'],
         [sequelize.col('Message.createdAt'), 'createdAt']
-      ]
+      ],
+      raw: true
     }).then(msg => {
-
+      console.log('======msg=====', msg)
       return msg
     })
   },
