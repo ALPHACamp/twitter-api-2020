@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Socket.IO chat</title>
+  <style>
+    body {
+      margin: 0;
+      padding-bottom: 3rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #form {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.25rem;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      height: 3rem;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+    }
+
+    #input {
+      border: none;
+      padding: 0 1rem;
+      flex-grow: 1;
+      border-radius: 2rem;
+      margin: 0.25rem;
+    }
+
+    #input:focus {
+      outline: none;
+    }
+
+    #form>button {
+      background: #333;
+      border: none;
+      padding: 0 1rem;
+      margin: 0.25rem;
+      border-radius: 3px;
+      outline: none;
+      color: #fff;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages>li {
+      padding: 0.5rem 1rem;
+    }
+
+    #messages>li:nth-child(odd) {
+      background: #efefef;
+    }
+  </style>
+</head>
+
+<body>
+  <ul id="messages"></ul>
+  <form id="form" action="">
+    <input id="input" autocomplete="off" /><button>Send</button>
+  </form>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script>
+    let socket = io("http://localhost:3000")
+    // const publicNamespace = io("http://localhost:3000/public")
+    // const privateNamespace = io("http://localhost:3000/private")
+    let messages = document.getElementById('messages')
+    let form = document.getElementById('form')
+    let input = document.getElementById('input')
+
+    // 公開訊息傳送
+    form.addEventListener('submit', event => {
+      event.preventDefault()
+      if (input.value) {
+        const msg = {}
+        msg.socketId = socket.id
+        msg.content = input.value
+        msg.isPublic = true
+        socket.emit('sendMessage', msg)
+        input.value = ''
+      }
+    })
+
+    // 回傳新加入使用者 id (隨機數字)
+    socket.on('newUser', () => {
+      const userId = Math.floor(Math.random() * 1000)
+      console.log(userId)
+      socket.emit('newUser', userId)
+    })
+
+    // 載入先前對話
+    socket.on('historyMessages', msgs => {
+      console.log(msgs)
+      for (msg of msgs) {
+        let item = document.createElement('li')
+        item.textContent = msg.content
+        messages.appendChild(item)
+        window.scrollTo(0, document.body.scrollHeight)
+      }
+    })
+
+    // 接收使用者陣列
+    socket.on('onlineUser', onlineUser => {
+      console.log('online user: ', onlineUser)
+    })
+
+    // 接收 current user name
+    socket.on('userJoin', user => {
+      console.log('joined: ', user)
+    })
+
+    // 公開訊息接收渲染
+    socket.on('newMessage', message => {
+      let item = document.createElement('li')
+      item.textContent = message.content
+      messages.appendChild(item)
+      window.scrollTo(0, document.body.scrollHeight)
+    })
+
+    // 使用者離開(接收離開使用者名稱)
+    socket.on('userLeave', user => {
+      console.log('leaved: ', user)
+    })
+  </script>
+</body>
+
+</html>

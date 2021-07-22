@@ -105,7 +105,7 @@ const adminController = {
       const tweets = result.map(tweet => ({
         ...tweet,
         description: tweet.description.substring(0, 50),
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD HH:mm:ss')
+        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
       }))
       return res.json(tweets)
     } catch (err) {

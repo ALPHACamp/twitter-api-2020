@@ -1,7 +1,6 @@
 const express = require('express')
 const session = require('express-session')
-const helpers = require('./_helpers');
-
+const helpers = require('./_helpers')
 const cors = require('cors')
 
 const app = express()
@@ -9,6 +8,10 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const port = process.env.PORT || 3000
+const server = require('http').createServer(app)
+
+server.listen(port, () => console.log(`Server is listening on port ${port}!`))
+
 const passport = require('./config/passport')
 
 // cors 的預設為全開放
@@ -28,8 +31,8 @@ app.use((req, res, next) => {
   next()
 })
 
-require('./routes')(app)
+require('./utils/socketio.js')(server)
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+require('./routes')(app)
 
 module.exports = app
