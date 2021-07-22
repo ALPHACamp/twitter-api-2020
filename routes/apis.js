@@ -36,9 +36,8 @@ const authenticated = (req, res, next) => {
 }
 // 驗證登入者是否為管理者=>用於後台路由
 const authenticatedAdmin = (req, res, next) => {
-  console.log(req.user)
-  if (req.user) {
-    if (req.user.role === 'admin') { return next() }
+  if (helpers.getUser(req)) {
+    if (helpers.getUser(req).role === 'admin') { return next() }
     return res.json({ status: 'error', message: '非管理者沒有權限登入後台！' })
   } else {
     return res.json({ status: 'error', message: '未通過身份驗證！' })
@@ -46,8 +45,8 @@ const authenticatedAdmin = (req, res, next) => {
 }
 // 驗證登入者是否為非管理者=>用於前台路由
 const authenticatedNotAdmin = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role !== 'admin') { return next() }
+  if (helpers.getUser(req)) {
+    if (helpers.getUser(req).role !== 'admin') { return next() }
     return res.json({ status: 'error', message: '管理者沒有權限登入前台！' })
   } else {
     return res.json({ status: 'error', message: '未通過身份驗證！' })
