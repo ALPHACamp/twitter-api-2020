@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     title: DataTypes.STRING
   }, {})
   NotifyLabel.associate = function (models) {
-    // associations can be defined here
+    NotifyLabel.hasMany(models.Notification)
   }
   return NotifyLabel
 }

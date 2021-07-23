@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     NotifyLabelId: DataTypes.INTEGER
   }, {})
   Notification.associate = function (models) {
+    Notification.belongsTo(models.NotifyLabel)
   }
   return Notification
 }
