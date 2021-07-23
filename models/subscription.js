@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     subscriberId: DataTypes.INTEGER,
-    recipientId: DataTypes.INTEGER
+    recipientId: DataTypes.INTEGER,
+    groupName: DataTypes.STRING
   }, {})
   Subscription.associate = function (models) {
   }
