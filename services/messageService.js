@@ -142,7 +142,7 @@ const messageService = {
   getChattedUsers: async (id) => {
     try {
       const results = await sequelize.query(`
-      Select temp.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt'
+      Select temp.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt', messages.isRead, messages.UserId as 'contentOwnerId'
       From messages
       inner join(
         Select MAX(messages.createdAt) as 'createdAt', messages.roomId, membersNoUser.UserId From messages
@@ -157,6 +157,15 @@ const messageService = {
       left join users on users.id = temp.UserId
       order by createdAt DESC
       `, { type: Sequelize.QueryTypes.SELECT })
+
+      // 最後一則訊息若是我方的訊息而對方未讀，isRead應為false
+      results.forEach(result => {
+        result.isRead = Boolean(result.isRead)
+
+        if (Number(id) === result.contentOwnerId) {
+          result.isRead = true
+        }
+      })
 
       return results
     } catch (error) {
