@@ -126,12 +126,11 @@ module.exports = (server) => {
         const { isOnline, listenerSocketIds } = SearchListenerOnline(io, socket, clients, listenerId)
         console.log(`===========isOnline=============`, isOnline, 'listenerSocketid: ', listenerSocketIds)
 
-
         msg.isInRoom = checkIsInRoom(io, socket, clients, listenerSocketIds)
-        const [message, unReads] = await Promise.all([
-          messageService.saveMessage(msg),
-          messageService.searchUnread(io, socket, listenerId)
-        ])
+
+        const message = await messageService.saveMessage(msg)
+        const unReads = await messageService.searchUnread(io, socket, listenerId)
+
         io.to(roomName).emit('privateMessage', message)
         io.to(`user${listenerId}`).emit('messageNotify', unReads)
 
