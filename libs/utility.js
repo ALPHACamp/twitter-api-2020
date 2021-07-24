@@ -4,40 +4,40 @@ module.exports = {
       throw new Error('id or listener missed')
     }
 
-    let roomName = ''
-
     const sorts = [id, listenerId]
     sorts.sort((a, b) => {
       return a - b
     })
 
-    roomName = sorts.join('n')
-
+    const roomName = sorts.join('n')
     return roomName
   },
 
   SearchListenerOnline: (io, socket, clients, listenerId) => {
-    for (let [id, socket] of io.of('/').sockets) {
-      console.log(`socketId:${id}, id:${socket.data.id} `)
+    const listenerSocketIds = []
+    for (let [socketId, socket] of io.of('/').sockets) {
+      console.log(`at SearchListenerOnline, socketId:${socketId}, id:${socket.data.id} `)
       if (socket.data.id === listenerId) {
-        return {
-          isOnline: true,
-          listenerSocketId: id
-        }
+        listenerSocketIds.push(socketId)
       }
     }
-    return {
+    console.log('==listenerSocketIds==', listenerSocketIds)
+
+    return listenerSocketIds.length > 0 ? {
+      isOnline: true,
+      listenerSocketIds: listenerSocketIds
+    } : {
       isOnline: false,
-      listenerSocketId: null
+      listenerSocketIds: []
     }
   },
 
-  checkIsInRoom: (io, socket, clients, listenerSocketId) => {
-    for (let [id, socket] of io.of('/').sockets) {
-      console.log(`socketId:${id}, id:${socket.data.id} `)
-      if (clients.has(listenerSocketId)) {
-        return true
-      }
-    }
+  checkIsInRoom: (io, socket, clients, listenerSocketIds) => {
+    let isInRoom = listenerSocketIds.some(listenerSocketId => {
+      return clients.has(listenerSocketId)
+    })
+    console.log('==isInRoom==', isInRoom)
+
+    return isInRoom
   },
 }

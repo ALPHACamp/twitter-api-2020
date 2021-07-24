@@ -123,44 +123,17 @@ module.exports = (server) => {
           return
         }
 
-        const { isOnline, listenerSocketId } = SearchListenerOnline(io, socket, clients, listenerId)
-        console.log(`===========isOnline=============`, isOnline, 'listenerSocketid: ', listenerSocketId)
+        const { isOnline, listenerSocketIds } = SearchListenerOnline(io, socket, clients, listenerId)
+        console.log(`===========isOnline=============`, isOnline, 'listenerSocketid: ', listenerSocketIds)
 
 
-        msg.isInRoom = false
+        msg.isInRoom = checkIsInRoom(io, socket, clients, listenerSocketIds)
         const [message, unReads] = await Promise.all([
           messageService.saveMessage(msg),
           messageService.searchUnread(io, socket, listenerId)
         ])
         io.to(roomName).emit('privateMessage', message)
         io.to(`user${listenerId}`).emit('messageNotify', unReads)
-
-        // if (isOnline) {
-        //   if (checkIsInRoom(io, socket, clients, listenerSocketId)) {
-        //     console.log('====對方在房間====')
-        //     msg.isInRoom = true
-
-        //     const message = await messageService.saveMessage(msg)
-
-        //     io.to(roomName).emit('privateMessage', message)
-        //   } else {
-        //     console.log('====對方不在房間====')
-
-        //     msg.isInRoom = false
-
-        //     const [message, unReads] = await Promise.all([
-        //       messageService.saveMessage(msg),
-        //       messageService.searchUnread(io, socket, msg)
-        //     ])
-
-        //     socket.to(listenerSocketId).emit('messageNotify', unReads)
-        //     io.to(roomName).emit('privateMessage', message)
-        //   }
-        // } else {
-        //   msg.isInRoom = false
-        //   const message = await messageService.saveMessage(msg)
-        //   io.to(roomName).emit('privateMessage', message)
-        // }
 
       } catch (error) {
         console.log(error)
