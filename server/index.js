@@ -16,7 +16,7 @@ module.exports = (server) => {
 
   io.on('connection', async socket => {
     console.log('A user connecting')
-    console.log(io.of("/").sockets.size)
+    console.log('目前連線數量: ', io.of("/").sockets.size)
 
     // 可以在伺服器端顯示通道過來的所有事件，以及相關的參數
     socket.onAny((event, ...args) => {

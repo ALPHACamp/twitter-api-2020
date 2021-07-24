@@ -93,7 +93,6 @@ const messageService = {
       ],
       raw: true
     }).then(msg => {
-      console.log('======msg=====', msg)
       return msg
     })
   },
