@@ -35,7 +35,7 @@ const subscriptionService = {
           throw new RequestError('RecipientId may be wrong.')
         }
         if (!users[1]) {
-          throw new RequestError('SubscriptionId may be wrong.')
+          throw new RequestError('SubscriberId may be wrong.')
         }
 
         return Subscription.create({ recipientId, subscriberId, groupName: `Channel${recipientId}` })
@@ -58,7 +58,7 @@ const subscriptionService = {
         throw new RequestError('RecipientId may be wrong.')
       }
       if (!users[1]) {
-        throw new RequestError('SubscriptionId may be wrong.')
+        throw new RequestError('SubscriberId may be wrong.')
       }
 
       return Subscription.findOne({
