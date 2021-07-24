@@ -17,6 +17,24 @@ const subscriptionController = {
         message: error.message
       })
     }
+  },
+
+  removeSubscription: async (req, res) => {
+    try {
+      const { recipientId, subscriberId } = req.query
+
+      await subscriptionService.removeSubscription(recipientId, subscriberId)
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Unsubscribed successfully.'
+      })
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   }
 }
 
