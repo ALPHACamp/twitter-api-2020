@@ -50,20 +50,32 @@ const subscriptionService = {
       throw new RequestError('SubscriberId required.')
     }
 
-    return Subscription.findOne({
-      where: {
-        [Op.and]: [
-          { recipientId },
-          { subscriberId }
-        ]
+    Promise.all([
+      User.findByPk(recipientId),
+      User.findByPk(subscriberId)
+    ]).then(users => {
+      if (!users[0]) {
+        throw new RequestError('RecipientId may be wrong.')
       }
-    }).then(result => {
-      if (!result) {
-        throw new RequestError('Cannot cancel subscription since you haven\'t subscribed this user before.')
-      } else {
-        result.destroy()
-        return result
+      if (!users[1]) {
+        throw new RequestError('SubscriptionId may be wrong.')
       }
+
+      return Subscription.findOne({
+        where: {
+          [Op.and]: [
+            { recipientId },
+            { subscriberId }
+          ]
+        }
+      }).then(result => {
+        if (!result) {
+          throw new RequestError('Cannot cancel subscription since you haven\'t subscribed this user before.')
+        } else {
+          result.destroy()
+          return result
+        }
+      })
     })
   }
 }
