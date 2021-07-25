@@ -9,7 +9,8 @@ const notificationService = {
         where: {
           labelName: notifyLabelName
         },
-        attributes: ['id']
+        attributes: ['id'],
+        raw: true
       }),
       Subscription.findAll({
         where: {
@@ -32,7 +33,7 @@ const notificationService = {
       receiverId: subscriber.subscriberId,
       senderId: senderId,
       content: content,
-      NotifyLabelId: NotifyLabelId.dataValues.id
+      NotifyLabelId: NotifyLabelId.id
     })))
 
     return data
