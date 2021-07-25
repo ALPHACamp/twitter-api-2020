@@ -3,13 +3,13 @@ const subscriptionService = require('../services/subscriptionService')
 const subscriptionController = {
   addSubscription: async (req, res) => {
     try {
-      const { recipientId, subscriberId } = req.query
+      const { recipientId, subscriberId } = req.body
 
       await subscriptionService.addSubscription(recipientId, subscriberId)
 
       return res.status(200).json({
         status: 'success',
-        message: 'Subscribed successfully.'
+        message: `User${subscriberId} subscribed  user${recipientId} successfully.`
       })
     } catch (error) {
       return res.status(400).json({
@@ -21,13 +21,14 @@ const subscriptionController = {
 
   removeSubscription: async (req, res) => {
     try {
-      const { recipientId, subscriberId } = req.query
+      const { recipientId } = req.params
+      const { subscriberId } = req.body
 
       await subscriptionService.removeSubscription(recipientId, subscriberId)
 
       return res.status(200).json({
         status: 'success',
-        message: 'Unsubscribed successfully.'
+        message: `User${subscriberId} unsubscribed user${recipientId} successfully.`
       })
     } catch (error) {
       return res.status(400).json({

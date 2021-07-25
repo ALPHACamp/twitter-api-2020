@@ -3,7 +3,7 @@ const router = express.Router()
 
 const subscriptionController = require('../../controllers/subscriptionController')
 
-router.post('/users/:id/subscribe', subscriptionController.addSubscription)
-router.delete('/users/:id/subscribe', subscriptionController.removeSubscription)
+router.post('/', subscriptionController.addSubscription)
+router.delete('/:recipientId', subscriptionController.removeSubscription)
 
 module.exports = router
