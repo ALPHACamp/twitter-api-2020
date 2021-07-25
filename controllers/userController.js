@@ -49,8 +49,9 @@ const userController = {
   },
   getUser: async (req, res) => {
     const UserId = req.params.id
+    const viewerId = req.user.id
     try {
-      const data = await userService.getUser('user', UserId, false)
+      const data = await userService.getUser('user', UserId, viewerId, false)
       return res.status(200).json(data)
     } catch (error) {
       return res.status(400).json({
