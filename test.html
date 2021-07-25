@@ -11,6 +11,7 @@
 <body>
 
   <main>
+    <button type="submit" id='currentUser'>currentUser id:2事件</button>
     <button type="submit" id='chat'>chat message事件</button>
     <button type="submit" id='messageNotify'>messageNotify事件</button>
     <button type="submit" id='enterPrivateInterface'>enterPrivateInterface事件</button>
@@ -19,10 +20,6 @@
     <button type="submit" id='privateMessage2to1'>privateMessage2to1事件</button>
 
   </main>
-
-
-
-
 
   <script src="./node_modules/socket.io/client-dist/socket.io.js"></script>
   <script>
@@ -42,6 +39,7 @@
 
     socket.emit('currentUser', data)
 
+    const currentUserBtn = document.querySelector('#currentUser')
     const chatBtn = document.querySelector('#chat')
     const messageNotifyBtn = document.querySelector('#messageNotify')
     const enterPrivateInterfaceBtn = document.querySelector('#enterPrivateInterface')
@@ -51,6 +49,17 @@
 
 
     // ================按鈕監聽器======================
+    currentUserBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        avatar: 'https://i.imgur.com/kfIu65A.png',
+        name: 'user1',
+        account: 'user1',
+        id: 2
+      }
+      socket.emit('currentUser', data)
+    })
+
     chatBtn.addEventListener('click', e => {
       e.preventDefault()
       const data = {

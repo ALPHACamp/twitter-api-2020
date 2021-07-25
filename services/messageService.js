@@ -43,6 +43,12 @@ const messageService = {
   },
 
   getMessages: async (msg) => {
+    msg = {
+      isPrivate: msg.isPrivate,
+      id: Number(msg.id),
+      listenerId: Number(msg.listenerId),
+    }
+
     if (!msg.isPrivate) {
       throw new RequestError(`isPrivate is empty`)
     }
@@ -57,8 +63,6 @@ const messageService = {
         throw new RequestError(`${errorMsgs.join(', ')} is empty`)
       }
     }
-
-
 
     let whereClause = {}
     let concat = ''
@@ -80,39 +84,32 @@ const messageService = {
     return Message.findAll({
       where: whereClause,
       order: [['createdAt', 'ASC']],
-      include: { model: User },
-      raw: true,
-      nest: true
+      include: { model: User, attributes: [] },
+      attributes: [
+        ['UserId', 'id'],
+        [sequelize.col('User.avatar'), 'avatar'],
+        [sequelize.col('content'), 'content'],
+        [sequelize.col('Message.createdAt'), 'createdAt']
+      ],
+      raw: true
     }).then(msg => {
-      msg = msg.map((msg, i) => {
-        if (!msg) {
-          return []
-        }
-        const mapItem = {
-          id: msg.UserId,
-          avatar: msg.User.avatar,
-          content: msg.content,
-          createdAt: msg.createdAt
-        }
-        return mapItem
-      })
       return msg
     })
   },
 
-  searchUnread: (io, socket, msg) => {
+  searchUnread: (io, socket, id) => {
     return Message.count({
       where: {
         [Op.and]: [{
           roomId: {
             [Op.or]: [
-              { [Op.like]: `${msg.id}n%` },
-              { [Op.like]: `%n${msg.id}` }
+              { [Op.like]: `${id}n%` },
+              { [Op.like]: `%n${id}` }
             ]
           }
         },
         { isRead: false },
-        { UserId: { [Op.ne]: msg.id } }
+        { UserId: { [Op.ne]: id } }
         ]
       }
     }).then(count => {
@@ -144,7 +141,7 @@ const messageService = {
   getChattedUsers: async (id) => {
     try {
       const results = await sequelize.query(`
-      Select temp.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt'
+      Select temp.UserId as 'id', users.account, users.avatar, users.name, messages.content, messages.createdAt as 'createdAt', messages.isRead, messages.UserId as 'contentOwnerId'
       From messages
       inner join(
         Select MAX(messages.createdAt) as 'createdAt', messages.roomId, membersNoUser.UserId From messages
@@ -159,6 +156,15 @@ const messageService = {
       left join users on users.id = temp.UserId
       order by createdAt DESC
       `, { type: Sequelize.QueryTypes.SELECT })
+
+      // 最後一則訊息若是我方的訊息而對方未讀，isRead應為false
+      results.forEach(result => {
+        result.isRead = Boolean(result.isRead)
+
+        if (Number(id) === result.contentOwnerId) {
+          result.isRead = true
+        }
+      })
 
       return results
     } catch (error) {
@@ -175,15 +181,15 @@ const messageService = {
         await Member.bulkCreate([{ RoomId: roomName, UserId: id }, { RoomId: roomName, UserId: listenerId }])
       }
 
-      return res.status(200).json({
+      return {
         status: 'success',
         message: `Created Room: ${roomName} successfully`
-      })
+      }
     } catch (error) {
-      return res.status(400).json({
+      return {
         status: error.name,
         message: error.message
-      })
+      }
     }
 
   }

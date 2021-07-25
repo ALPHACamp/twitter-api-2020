@@ -16,20 +16,19 @@ module.exports = (server) => {
 
   io.on('connection', async socket => {
     console.log('A user connecting')
-    console.log(io.of("/").sockets.size)
+    console.log('目前連線數量: ', io.of("/").sockets.size)
 
     // 可以在伺服器端顯示通道過來的所有事件，以及相關的參數
     socket.onAny((event, ...args) => {
       console.log(event, args)
     })
 
-
     socket.on('currentUser', async msg => {
       try {
         socket.data = { ...msg }
 
         const data = {
-          ...socket.data
+          userSocketId: socket.id, ...socket.data
         }
 
         if (!users.has(socket.data.id)) {
@@ -40,7 +39,7 @@ module.exports = (server) => {
         }
 
         users.set(socket.data.id, data)
-        
+
         // 多網頁連接同帳號判斷
         socket.join(`user${socket.data.id}`)
 
@@ -58,7 +57,7 @@ module.exports = (server) => {
     // 未讀通知
     socket.on('messageNotify', async msg => {
       try {
-        const unReads = await messageService.searchUnread(io, socket, msg)
+        const unReads = await messageService.searchUnread(io, socket, msg.id)
 
         socket.emit('messageNotify', unReads)
 
@@ -76,15 +75,17 @@ module.exports = (server) => {
         const { id, listenerId } = msg
         let roomName = generateRoomName(id, listenerId)
         socket.join(roomName)
+        console.log('===========roomName===========', roomName)
 
         await messageService.createPrivateRoom(id, listenerId, roomName)
 
         // 先清空 => 後搜尋未讀
         await messageService.clearUnread(io, socket, msg)
-        const unReads = await messageService.searchUnread(io, socket, msg)
+        const unReads = await messageService.searchUnread(io, socket, id)
 
         socket.emit('messageNotify', unReads)
       } catch (error) {
+        console.log(error)
         return socket.emit('error', {
           status: error.name,
           message: error.message
@@ -113,39 +114,25 @@ module.exports = (server) => {
       try {
         const { id, listenerId } = msg
         const roomName = generateRoomName(id, listenerId)
+        // 找到房間內所有連線
         const clients = io.sockets.adapter.rooms.get(roomName)
+        console.log(clients)
 
         if (!clients) {
           console.log('No clients in room')
           return
         }
 
-        const { isOnline, listenerSocketId } = SearchListenerOnline(io, socket, clients, listenerId)
+        const { isOnline, listenerSocketIds } = SearchListenerOnline(io, socket, clients, listenerId)
+        console.log(`===========isOnline=============`, isOnline, 'listenerSocketid: ', listenerSocketIds)
 
+        msg.isInRoom = checkIsInRoom(io, socket, clients, listenerSocketIds)
 
-        if (isOnline) {
-          if (checkIsInRoom(io, socket, clients, listenerId)) {
-            msg.isInRoom = true
+        const message = await messageService.saveMessage(msg)
+        const unReads = await messageService.searchUnread(io, socket, listenerId)
 
-            const message = await messageService.saveMessage(msg)
-
-            io.to(roomName).emit('privateMessage', message)
-          } else {
-            msg.isInRoom = false
-
-            const [message, unReads] = await Promise.all([
-              messageService.saveMessage(msg),
-              messageService.searchUnread(io, socket, msg)
-            ])
-
-            socket.to(listenerSocketId).emit('messageNotify', unReads)
-            io.to(roomName).emit('privateMessage', message)
-          }
-        } else {
-          msg.isInRoom = false
-          const message = await messageService.saveMessage(msg)
-          io.to(roomName).emit('privateMessage', message)
-        }
+        io.to(roomName).emit('privateMessage', message)
+        io.to(`user${listenerId}`).emit('messageNotify', unReads)
 
       } catch (error) {
         console.log(error)
@@ -172,7 +159,25 @@ module.exports = (server) => {
       }
     })
 
+    // 離開公開聊天室事件
+    socket.on('leavePublic', async msg => {
+      const matchingSockets = await io.in(`user${socket.data.id}`).allSockets()
+      const isDisconnected = matchingSockets.size === 0
+
+      if (isDisconnected) {
+        users.delete(socket.data.id)
+
+        socket.broadcast.emit('userDisconnected', {
+          name: socket.data.name,
+          isOnline: 0
+        })
+
+        io.emit('users', [...users.values()])
+      }
+    })
+
     socket.on('disconnect', async reason => {
+      console.log(reason)
       const matchingSockets = await io.in(`user${socket.data.id}`).allSockets()
       const isDisconnected = matchingSockets.size === 0
 
