@@ -3,8 +3,8 @@ const notificationService = require('../services/notificationService')
 const notificationController = {
   addNotification: async (req, res) => {
     try {
-      const { senderId } = req.body
-      const data = await notificationService.addNotification()
+      const { senderId, content, notifyLabelName } = req.body
+      const data = await notificationService.addNotification(senderId, content, notifyLabelName)
 
       return res.status(200).json(data)
     } catch (error) {
