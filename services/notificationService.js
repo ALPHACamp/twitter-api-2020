@@ -8,7 +8,7 @@ const notificationService = {
       const [NotifyLabelId, subscribers] = await Promise.all([
         NotifyLabel.findOne({
           where: {
-            labelName: notifyLabelName,
+            labelName: notifyLabelName
           },
           attributes: ['id']
         }),
@@ -42,6 +42,5 @@ const notificationService = {
     }
   }
 }
-
 
 module.exports = notificationService
