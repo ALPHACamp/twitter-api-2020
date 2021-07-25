@@ -97,12 +97,12 @@ const userService = {
     switch (isCurrentUser) {
       case true:
         attributesOption = [
-          'id', 'name', 'account', 'email', 'avatar', [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${Number(UserId)}')`), 'isAdmin']
+          'id', 'name', 'account', 'email', 'avatar', [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = ${Number(UserId)})`), 'isAdmin']
         ]
         break
       case false:
         attributesOption = ['id', 'name', 'account', 'avatar', 'cover', 'introduction', 'followerCount', 'followingCount',
-          [Sequelize.literal(`exists (SELECT * FROM Subscriptions WHERE Subscriptions.subscriberId = ${Number(viewerId)} and Subscriptions.recipientId = '${Number(UserId)}')`), 'isSubscribe']
+          [Sequelize.literal(`exists (SELECT * FROM Subscriptions WHERE Subscriptions.subscriberId = ${Number(viewerId)} and Subscriptions.recipientId = ${Number(UserId)})`), 'isSubscribe']
         ]
     }
     return User.findByPk(UserId, { attributes: attributesOption })
