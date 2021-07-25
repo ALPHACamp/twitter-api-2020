@@ -6,7 +6,7 @@ const RequestError = require('../libs/RequestError')
 const subscriptionService = {
   addSubscription: (recipientId, subscriberId) => {
     if (!recipientId) {
-      throw new RequestError('Subscribe recipient Id required.')
+      throw new RequestError('RecipientId required.')
     }
     if (!subscriberId) {
       throw new RequestError('SubscriberId required.')
@@ -35,10 +35,46 @@ const subscriptionService = {
           throw new RequestError('RecipientId may be wrong.')
         }
         if (!users[1]) {
-          throw new RequestError('SubscriptionId may be wrong.')
+          throw new RequestError('SubscriberId may be wrong.')
         }
 
         return Subscription.create({ recipientId, subscriberId, groupName: `Channel${recipientId}` })
+      })
+    })
+  },
+  removeSubscription: (recipientId, subscriberId) => {
+    if (!recipientId) {
+      throw new RequestError('RecipientId required.')
+    }
+    if (!subscriberId) {
+      throw new RequestError('SubscriberId required.')
+    }
+
+    Promise.all([
+      User.findByPk(recipientId),
+      User.findByPk(subscriberId)
+    ]).then(users => {
+      if (!users[0]) {
+        throw new RequestError('RecipientId may be wrong.')
+      }
+      if (!users[1]) {
+        throw new RequestError('SubscriberId may be wrong.')
+      }
+
+      return Subscription.findOne({
+        where: {
+          [Op.and]: [
+            { recipientId },
+            { subscriberId }
+          ]
+        }
+      }).then(result => {
+        if (!result) {
+          throw new RequestError('Cannot cancel subscription since you haven\'t subscribed this user before.')
+        } else {
+          result.destroy()
+          return result
+        }
       })
     })
   }
