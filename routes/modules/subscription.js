@@ -3,6 +3,6 @@ const router = express.Router()
 
 const subscriptionController = require('../../controllers/subscriptionController')
 
-router.post('/users/:id/subscribe', subscriptionController.addSubscription)
+router.post('/', subscriptionController.addSubscription)
 
 module.exports = router

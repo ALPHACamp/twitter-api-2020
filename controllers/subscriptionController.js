@@ -3,7 +3,7 @@ const subscriptionService = require('../services/subscriptionService')
 const subscriptionController = {
   addSubscription: async (req, res) => {
     try {
-      const { recipientId, subscriberId } = req.query
+      const { recipientId, subscriberId } = req.body
 
       await subscriptionService.addSubscription(recipientId, subscriberId)
 
