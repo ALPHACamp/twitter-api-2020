@@ -9,7 +9,7 @@ module.exports = {
       labelName: 'like',
       title: '喜歡你的推文'
     }, {
-      labelName: 'followship',
+      labelName: 'follow',
       title: '開始追蹤你'
     }, {
       labelName: 'reply',
