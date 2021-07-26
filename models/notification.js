@@ -9,7 +9,12 @@ module.exports = (sequelize, DataTypes) => {
   Notification.associate = function (models) {
     Notification.belongsTo(models.NotifyLabel)
     Notification.belongsTo(models.User, {
-      foreignKey: 'senderId'
+      foreignKey: 'senderId',
+      as: 'sender'
+    })
+    Notification.belongsTo(models.User, {
+      foreignKey: 'receiverId',
+      as: 'receiver'
     })
   }
   return Notification
