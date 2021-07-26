@@ -54,7 +54,6 @@ const notificationService = {
         ],
         attributes: ['content', 'createdAt', 'isRead']
       }).then(notifications => {
-        console.log(notifications)
         notifications = notifications.map((item, i) => {
           const mapItem = {
             ...item.dataValues,
