@@ -62,4 +62,18 @@ module.exports = (io, socket) => {
       })
     }
   })
+
+  // 進入通知頁面
+  socket.on('enterNotify', async msg => {
+    try {
+      const { id } = msg
+
+      notificationService.clearUnread(id)
+    } catch (error) {
+      return socket.emit('error', {
+        status: error.name,
+        message: error.message
+      })
+    }
+  })
 }
