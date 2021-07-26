@@ -1,5 +1,6 @@
 const db = require('../models')
-const { NotifyLabel, Subscription, Notification, User } = db
+const { NotifyLabel, Subscription, Notification, User, Sequelize } = db
+const { Op } = Sequelize
 const RequestError = require('../libs/RequestError')
 
 const notificationService = {
@@ -83,6 +84,19 @@ const notificationService = {
     })
 
     return { unreadCount: count }
+  },
+
+  clearUnread: async (id) => {
+    const data = await Notification.update({ isRead: true }, {
+      where: {
+        [Op.and]: [
+          { receiverId: id },
+          { isRead: false }
+        ]
+      }
+    })
+
+    return data
   }
 }
 
