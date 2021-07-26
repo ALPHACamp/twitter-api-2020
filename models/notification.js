@@ -4,7 +4,8 @@ module.exports = (sequelize, DataTypes) => {
     receiverId: DataTypes.INTEGER,
     senderId: DataTypes.INTEGER,
     content: DataTypes.STRING,
-    NotifyLabelId: DataTypes.INTEGER
+    NotifyLabelId: DataTypes.INTEGER,
+    isRead: DataTypes.BOOLEAN
   }, {})
   Notification.associate = function (models) {
     Notification.belongsTo(models.NotifyLabel)
