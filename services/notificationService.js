@@ -33,7 +33,7 @@ const notificationService = {
       receiverId: subscriber.subscriberId,
       senderId: senderId,
       content: content,
-      NotifyLabelId: NotifyLabelId
+      NotifyLabelId: NotifyLabelId.id
     })))
 
     return data
