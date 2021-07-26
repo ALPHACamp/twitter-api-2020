@@ -32,7 +32,7 @@ module.exports = (io, socket) => {
   // 訂閱通知
   socket.on('subscribeNotify', async msg => {
     try {
-      const { id, receiverId, content, labelName } = msg
+      const { id, content, labelName } = msg
       const channelName = `Channel${id}`
 
       notificationService.addNotification(id, content, labelName)
@@ -45,6 +45,14 @@ module.exports = (io, socket) => {
       })
     }
   })
+
+  // 互動通知
+  socket.on('reactionNotify', async msg => {
+    try {
+      const { id, receiverId, content, labelName } = msg
+      const channelName = `user${id}`
+
+      notificationService.addNotification(id, content, labelName, receiverId)
 
       io.to(channelName).emit('subscribeNotify', msg)
     } catch (error) {
