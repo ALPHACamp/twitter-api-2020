@@ -1,5 +1,5 @@
 const db = require('../models')
-const { NotifyLabel, Subscription, Notification } = db
+const { NotifyLabel, Subscription, Notification, User } = db
 const RequestError = require('../libs/RequestError')
 
 const notificationService = {
@@ -33,10 +33,45 @@ const notificationService = {
       receiverId: subscriber.subscriberId,
       senderId: senderId,
       content: content,
-      NotifyLabelId: NotifyLabelId.id
+      NotifyLabelId: NotifyLabelId
     })))
 
     return data
+  },
+  getNotifications: async (id) => {
+    const user = await User.findByPk(id)
+    if (!user) {
+      throw new RequestError('This user does not exist.')
+    } else {
+      return Notification.findAll({
+        where: { receiverId: Number(id) },
+        include: [
+          { model: NotifyLabel, attributes: ['title'] },
+          {
+            model: User,
+            attributes: ['id', 'name', 'avatar']
+          }
+        ],
+        attributes: ['content', 'createdAt', 'isRead']
+      }).then(notifications => {
+        console.log(notifications)
+        notifications = notifications.map((item, i) => {
+          const mapItem = {
+            ...item.dataValues,
+            title: item.NotifyLabel.title,
+            id: item.User.id,
+            avatar: item.User.avatar,
+            name: item.User.name,
+            isRead: Boolean(item.dataValues.isRead)
+          }
+          delete mapItem.NotifyLabel
+          delete mapItem.User
+
+          return mapItem
+        })
+        return notifications
+      })
+    }
   }
 }
 
