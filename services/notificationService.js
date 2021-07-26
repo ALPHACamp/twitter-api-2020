@@ -38,6 +38,7 @@ const notificationService = {
 
     return data
   },
+
   getNotifications: async (id) => {
     const user = await User.findByPk(id)
     if (!user) {
@@ -74,6 +75,14 @@ const notificationService = {
       return mapItem
     })
     return data
+  },
+
+  searchUnread: async (id) => {
+    const count = await Notification.count({
+      where: { receiverId: id, isRead: false }
+    })
+
+    return { unreadCount: count }
   }
 }
 
