@@ -77,6 +77,20 @@ const subscriptionService = {
         }
       })
     })
+  },
+
+  getChannels: (id) => {
+    return Subscription.findAll({
+      where: {
+        subscriberId: id
+      },
+      attributes: ['groupName'],
+      raw: true
+    }).then(subscriptions => {
+      const channels = subscriptions.map(item => item.groupName)
+
+      return channels
+    })
   }
 }
 
