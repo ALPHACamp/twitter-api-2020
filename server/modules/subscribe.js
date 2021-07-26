@@ -50,11 +50,11 @@ module.exports = (io, socket) => {
   socket.on('reactionNotify', async msg => {
     try {
       const { id, receiverId, content, labelName } = msg
-      const channelName = `user${id}`
+      const channelName = `user${receiverId}`
 
       notificationService.addNotification(id, content, labelName, receiverId)
 
-      io.to(channelName).emit('subscribeNotify', msg)
+      io.to(channelName).emit('reactionNotify', msg)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
