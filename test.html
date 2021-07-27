@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <main>
+    <button type="submit" id='currentUser'>currentUser id:2事件</button>
+    <button type="submit" id='chat'>chat message事件</button>
+    <button type="submit" id='messageNotify'>messageNotify事件</button>
+    <button type="submit" id='enterPrivateInterface'>enterPrivateInterface事件</button>
+    <button type="submit" id='enterRoom'>enterRoom事件</button>
+    <button type="submit" id='privateMessage1to2'>privateMessage1to2事件</button>
+    <button type="submit" id='privateMessage2to1'>privateMessage2to1事件</button>
+
+  </main>
+
+  <script src="./node_modules/socket.io/client-dist/socket.io.js"></script>
+  <script>
+    const url = 'http://localhost:3000'
+    const url2 = 'https://infinite-mountain-11239.herokuapp.com'
+
+    const socket = io(url, {
+      transports: ['websocket', 'polling']
+    })
+
+    const data = {
+      avatar: 'https://i.imgur.com/kfIu65A.png',
+      name: 'user1',
+      account: 'user1',
+      id: 1
+    }
+
+    socket.emit('currentUser', data)
+
+    const currentUserBtn = document.querySelector('#currentUser')
+    const chatBtn = document.querySelector('#chat')
+    const messageNotifyBtn = document.querySelector('#messageNotify')
+    const enterPrivateInterfaceBtn = document.querySelector('#enterPrivateInterface')
+    const enterRoomBtn = document.querySelector('#enterRoom')
+    const privateMessageBtn1to2 = document.querySelector('#privateMessage1to2')
+    const privateMessageBtn2to1 = document.querySelector('#privateMessage2to1')
+
+
+    // ================按鈕監聽器======================
+    currentUserBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        avatar: 'https://i.imgur.com/kfIu65A.png',
+        name: 'user1',
+        account: 'user1',
+        id: 2
+      }
+      socket.emit('currentUser', data)
+    })
+
+    chatBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+        content: '我累了',
+        avatar: 'https://i.imgur.com/kfIu65A.png',
+        createdAt: new Date()
+      }
+      socket.emit('chatMessage', data)
+    })
+
+    messageNotifyBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+      }
+      socket.emit('messageNotify', data)
+    })
+
+
+    enterPrivateInterfaceBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 2,
+      }
+      socket.emit('enterPrivateInterface', data)
+    })
+
+    enterRoomBtn.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+        listenerId: 2
+      }
+      socket.emit('enterRoom', data)
+    })
+
+    privateMessageBtn1to2.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 1,
+        listenerId: 2,
+        content: '我累了',
+        createdAt: new Date()
+      }
+      socket.emit('privateMessage', data)
+    })
+
+    privateMessageBtn2to1.addEventListener('click', e => {
+      e.preventDefault()
+      const data = {
+        id: 2,
+        listenerId: 1,
+        content: '我累了',
+        createdAt: new Date()
+      }
+      socket.emit('privateMessage', data)
+    })
+
+    // ==========socket監聽器============
+    socket.on('users', msg => {
+      console.log('這是users', msg)
+    })
+
+    socket.on('userConnected', msg => {
+      console.log('這是userConnected', msg)
+    })
+
+    // 接受歷史訊息
+    socket.on('getMessages', msg => {
+      console.log('這是getMessages', msg)
+    })
+
+    socket.on('userDisconnected', msg => {
+      console.log('這是userDisconnected', msg)
+    })
+
+    socket.on('chatMessage', msg => {
+      console.log('這是chatMessage', msg)
+    })
+
+    socket.on('chattedUsers', msg => {
+      console.log('這是chattedUsers', msg)
+    })
+
+    socket.on('privateMessage', msg => {
+      console.log('這是privateMessage', msg)
+    })
+
+    socket.on('messageNotify', msg => {
+      console.log('這是messageNotify', msg)
+    })
+
+    socket.on('error', msg => {
+      console.log('這是error', msg)
+    })
+
+    socket.on('connect_error', error => {
+      console.log('=====connect_error=====', error.message)
+
+      socket.on("connect_error", () => {
+        socket.io.opts.transports = ["polling", "websocket"];
+      })
+    })
+
+
+
+  </script>
+</body>
+
+</html>

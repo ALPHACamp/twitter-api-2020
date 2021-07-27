@@ -92,16 +92,18 @@ const userService = {
         }
       })
   },
-  getUser: (viewerRole, UserId, isCurrentUser) => {
+  getUser: (viewerRole, UserId, viewerId, isCurrentUser) => {
     let attributesOption = []
     switch (isCurrentUser) {
       case true:
         attributesOption = [
-          'id', 'name', 'account', 'email', 'avatar', [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = '${UserId}')`), 'isAdmin']
+          'id', 'name', 'account', 'email', 'avatar', [Sequelize.literal(`exists (SELECT * FROM users WHERE role = 'admin' and id = ${Number(UserId)})`), 'isAdmin']
         ]
         break
       case false:
-        attributesOption = ['id', 'name', 'account', 'avatar', 'cover', 'introduction', 'followerCount', 'followingCount']
+        attributesOption = ['id', 'name', 'account', 'avatar', 'cover', 'introduction', 'followerCount', 'followingCount',
+          [Sequelize.literal(`exists (SELECT * FROM Subscriptions WHERE Subscriptions.subscriberId = ${Number(viewerId)} and Subscriptions.recipientId = ${Number(UserId)})`), 'isSubscribe']
+        ]
     }
     return User.findByPk(UserId, { attributes: attributesOption })
       .then(user => {
@@ -110,11 +112,14 @@ const userService = {
         }
         if (isCurrentUser === true) {
           user.dataValues.isAdmin = Boolean(user.dataValues.isAdmin)
+        } else if (isCurrentUser === false) {
+          user.dataValues.isSubscribe = Boolean(user.dataValues.isSubscribe)
         }
         const { id, name, account, email, avatar, cover, introduction, followerCount, followingCount } = user
         const isAdmin = user.dataValues.isAdmin
+        const isSubscribe = user.dataValues.isSubscribe
         return {
-          id, name, account, email, avatar, cover, introduction, followerCount, followingCount, isAdmin
+          id, name, account, email, avatar, cover, introduction, followerCount, followingCount, isAdmin, isSubscribe
         }
       })
   },
