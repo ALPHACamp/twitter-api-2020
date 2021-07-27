@@ -3,10 +3,8 @@ const { User, Tweet, Like, Reply, Sequelize } = db
 const { Op } = require('sequelize')
 
 const tweetService = require('../services/tweetService')
-const userService = require('../services/userService')
 
 const adminController = {
-
   getUsers: (req, res) => {
     return User.findAll({
       where: {
@@ -49,14 +47,14 @@ const adminController = {
           Reply.destroy({
             where: {
               TweetId: {
-                [Op.in]: [tweetId],
+                [Op.in]: [tweetId]
               }
             }
           }),
           Like.destroy({
             where: {
               TweetId: {
-                [Op.in]: [tweetId],
+                [Op.in]: [tweetId]
               }
             }
           })
@@ -68,6 +66,7 @@ const adminController = {
         })
       })
   },
+
   getTweets: (req, res) => {
     const viewerId = req.user.id
     tweetService.getTweets(viewerId, 'admin')
@@ -76,4 +75,5 @@ const adminController = {
       })
   }
 }
+
 module.exports = adminController
