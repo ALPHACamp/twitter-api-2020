@@ -155,7 +155,7 @@ const messageService = {
         ) as membersNoUser
         on membersNoUser.RoomId = messages.roomId
         where(messages.roomId like '%n${id}' or messages.roomId like '${id}n%')
-        Group by roomId
+        Group by roomId, membersNoUser.UserId
       ) as temp
       on messages.createdAt = temp.createdAt and messages.roomId = temp.roomId
       left join users on users.id = temp.UserId
