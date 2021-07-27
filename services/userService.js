@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Like, Reply, Followship, Sequelize } = db
+const { User, Tweet, Like, Reply, Sequelize } = db
 const { Op } = Sequelize
 const RequestError = require('../libs/RequestError')
 const bcrypt = require('bcryptjs')
@@ -69,6 +69,7 @@ const userService = {
       })
     }
   },
+
   login: (body) => {
     const { account, password } = body
     if (!account || !password) {
@@ -92,6 +93,7 @@ const userService = {
         }
       })
   },
+
   getUser: (viewerRole, UserId, viewerId, isCurrentUser) => {
     let attributesOption = []
     switch (isCurrentUser) {
@@ -123,6 +125,7 @@ const userService = {
         }
       })
   },
+
   getUserTweets: (viewerRole, UserId, viewerId) => {
     let attributesOption = []
 
@@ -131,7 +134,7 @@ const userService = {
         attributesOption = [
           ['id', 'TweetId'],
           'description', 'createdAt', 'replyCount', 'likeCount',
-          [Sequelize.literal(`exists (select * from Likes where Likes.UserId = '${viewerId}' and Likes.TweetId = Tweet.id)`), 'isLike']
+          [Sequelize.literal(`exists (select * from Likes where Likes.UserId = ${viewerId} and Likes.TweetId = Tweet.id)`), 'isLike']
         ]
         break
 
@@ -171,6 +174,7 @@ const userService = {
         })
       })
   },
+
   getUserLikes: (viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
       .then(user => {
@@ -225,6 +229,7 @@ const userService = {
         })
       })
   },
+
   getUserFollowings: (viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
       .then(user => {
@@ -278,6 +283,7 @@ const userService = {
         })
       })
   },
+
   getUserFollowers: (viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
       .then(user => {
@@ -325,13 +331,13 @@ const userService = {
             if (viewerRole === 'admin') {
               delete mapItem.Followers.isFollowing
             }
-
             return mapItem
           })
           return data
         })
       })
   },
+
   getTopUsers: (viewerRole, viewerId) => {
     return User.findAll({
       include: {
@@ -361,8 +367,9 @@ const userService = {
       return users
     })
   },
+
   putUser: async (viewerRole, UserId, viewerId, body, files) => {
-    if (Number(UserId) !== viewerId) {
+    if (UserId !== viewerId) {
       throw new RequestError('This is not this user\'s account.')
     }
 
@@ -379,7 +386,7 @@ const userService = {
 
         const user = await User.findByPk(UserId)
 
-        const updateResult = await user.update({
+        await user.update({
           name: body.name,
           introduction: body.introduction,
           avatar: files.avatar ? avatar.link : user.avatar,
@@ -388,34 +395,30 @@ const userService = {
 
         return {
           status: 'success',
-          message: 'User successfully updated.'
+          message: `User${UserId} successfully updated.`
         }
-
       } else {
-
         const user = await User.findByPk(UserId)
 
-        const updateResult = await user.update({
+        await user.update({
           name: body.name,
           introduction: body.introduction,
           avatar: user.avatar,
           cover: user.cover
         })
-
         return {
           status: 'success',
-          message: 'User successfully updated.'
+          message: `User${UserId} successfully updated.`
         }
       }
     } catch (error) {
       throw new RequestError(error.message)
     }
-
-
   },
+
   putUserSettings: async (viewerRole, UserId, viewerId, body) => {
     const { account, name, email, password, checkPassword } = body
-    if (Number(UserId) !== viewerId) {
+    if (UserId !== viewerId) {
       throw new RequestError('This is not this user\'s account.')
     }
 
@@ -432,13 +435,12 @@ const userService = {
         throw new RequestError('Password should be as same as checkPassword')
       }
 
-      const updateResult = await user.update({
+      await user.update({
         account: account,
         name: name,
         email: email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       })
-
       return {
         status: 'success',
         message: 'User successfully updated.',
@@ -448,6 +450,7 @@ const userService = {
       throw new RequestError(error.message)
     }
   },
+
   getUserRepliedTweets: (viewerRole, UserId, viewerId) => {
     return User.findByPk(UserId)
       .then(user => {

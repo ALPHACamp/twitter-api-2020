@@ -1,8 +1,6 @@
 const passport = require('passport')
-// const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
-const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy

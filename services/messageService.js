@@ -46,19 +46,23 @@ const messageService = {
     msg = {
       isPrivate: msg.isPrivate,
       id: Number(msg.id),
-      listenerId: Number(msg.listenerId),
+      listenerId: Number(msg.listenerId)
     }
 
     if (!msg.isPrivate) {
-      throw new RequestError(`isPrivate is empty`)
+      throw new RequestError('isPrivate is empty')
     }
 
     if (msg.isPrivate === 'true') {
       if (!msg.id || !msg.listenerId) {
-        let errorMsgs = []
+        const errorMsgs = []
 
-        !msg.id ? errorMsgs.push('id') : ''
-        !msg.listenerId ? errorMsgs.push('listenerId') : ''
+        if (!msg.id) {
+          errorMsgs.push('id')
+        }
+        if (!msg.listenerId) {
+          errorMsgs.push('listenerId')
+        }
 
         throw new RequestError(`${errorMsgs.join(', ')} is empty`)
       }
@@ -138,6 +142,7 @@ const messageService = {
     })
   },
 
+  // TODO: only_full_group_by
   getChattedUsers: async (id) => {
     try {
       const results = await sequelize.query(`
@@ -146,11 +151,11 @@ const messageService = {
       inner join(
         Select MAX(messages.createdAt) as 'createdAt', messages.roomId, membersNoUser.UserId From messages
         inner join(
-          select * from members where members.UserId != ${Number(id)}
+          select * from members where members.UserId != ${id}
         ) as membersNoUser
         on membersNoUser.RoomId = messages.roomId
         where(messages.roomId like '%n${id}' or messages.roomId like '${id}n%')
-        Group by roomId
+        Group by roomId, membersNoUser.UserId
       ) as temp
       on messages.createdAt = temp.createdAt and messages.roomId = temp.roomId
       left join users on users.id = temp.UserId
@@ -161,7 +166,7 @@ const messageService = {
       results.forEach(result => {
         result.isRead = Boolean(result.isRead)
 
-        if (Number(id) === result.contentOwnerId) {
+        if (id === result.contentOwnerId) {
           result.isRead = true
         }
       })
@@ -191,7 +196,6 @@ const messageService = {
         message: error.message
       }
     }
-
   }
 }
 
