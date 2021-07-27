@@ -1,17 +1,4 @@
-const bcrypt = require('bcryptjs')
-const db = require('../models')
-const { User, Tweet, Like, Reply, Followship, Sequelize } = db
-const { Op } = require('sequelize')
-
 const userService = require('../services/userService')
-
-const imgur = require('imgur')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signUp: async (req, res) => {
@@ -35,8 +22,10 @@ const userController = {
       })
     }
   },
+
   logIn: async (req, res) => {
     const { body } = req
+
     try {
       const data = await userService.login(body)
       return res.status(200).json(data)
@@ -47,9 +36,11 @@ const userController = {
       })
     }
   },
+
   getUser: async (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
+    const UserId = Number(req.params.id)
+    const viewerId = Number(req.user.id)
+
     try {
       const data = await userService.getUser('user', UserId, viewerId, false)
       return res.status(200).json(data)
@@ -60,9 +51,11 @@ const userController = {
       })
     }
   },
+
   getUserTweets: async (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
+    const UserId = Number(req.params.id)
+    const viewerId = Number(req.user.id)
+
     try {
       const data = await userService.getUserTweets('user', UserId, viewerId)
       return res.status(200).json(data)
@@ -73,9 +66,11 @@ const userController = {
       })
     }
   },
+
   getUserLikes: async (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
+    const UserId = Number(req.params.id)
+    const viewerId = Number(req.user.id)
+
     try {
       const data = await userService.getUserLikes('user', UserId, viewerId)
       return res.status(200).json(data)
@@ -86,9 +81,11 @@ const userController = {
       })
     }
   },
+
   getUserFollowings: async (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
+    const UserId = Number(req.params.id)
+    const viewerId = Number(req.user.id)
+
     try {
       const data = await userService.getUserFollowings('user', UserId, viewerId)
       return res.status(200).json(data)
@@ -99,9 +96,11 @@ const userController = {
       })
     }
   },
+
   getUserFollowers: async (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
+    const UserId = Number(req.params.id)
+    const viewerId = Number(req.user.id)
+
     try {
       const data = await userService.getUserFollowers('user', UserId, viewerId)
       return res.status(200).json(data)
@@ -112,8 +111,10 @@ const userController = {
       })
     }
   },
+
   getTopUsers: async (req, res) => {
-    const viewerId = req.user.id
+    const viewerId = Number(req.user.id)
+
     try {
       const data = await userService.getTopUsers('user', viewerId)
       return res.status(200).json(data)
@@ -126,9 +127,10 @@ const userController = {
   },
 
   putUser: async (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
+    const UserId = Number(req.params.id)
+    const viewerId = Number(req.user.id)
     const { body, files } = req
+
     try {
       const data = await userService.putUser('user', UserId, viewerId, body, files)
       return res.status(200).json(data)
@@ -141,9 +143,10 @@ const userController = {
   },
 
   putUserSettings: async (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
+    const UserId = Number(req.params.id)
+    const viewerId = Number(req.user.id)
     const { body } = req
+
     try {
       const data = await userService.putUserSettings('user', UserId, viewerId, body)
       return res.status(200).json(data)
@@ -156,8 +159,9 @@ const userController = {
   },
 
   getUserRepliedTweets: async (req, res) => {
-    const UserId = req.params.id
-    const viewerId = req.user.id
+    const UserId = Number(req.params.id)
+    const viewerId = Number(req.user.id)
+
     try {
       const data = await userService.getUserRepliedTweets('user', UserId, viewerId)
       return res.status(200).json(data)
@@ -170,11 +174,10 @@ const userController = {
   },
 
   getCurrentUser: async (req, res) => {
-    const UserId = req.user.id
+    const UserId = Number(req.user.id)
 
     try {
       const data = await userService.getUser('user', UserId, UserId, true)
-
       return res.status(200).json(data)
     } catch (error) {
       console.error(error)
@@ -184,7 +187,6 @@ const userController = {
       })
     }
   }
-
 }
 
 module.exports = userController
