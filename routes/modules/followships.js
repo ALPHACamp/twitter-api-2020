@@ -6,5 +6,4 @@ const followshipController = require('../../controllers/followshipController')
 router.delete('/:id', followshipController.removeFollowing)
 router.post('/', followshipController.addFollowing)
 
-
 module.exports = router

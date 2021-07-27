@@ -1,5 +1,5 @@
 const db = require('../models')
-const { Tweet, Reply, User, Like, Followship, Sequelize } = db
+const { Tweet, Reply, User, Like, Sequelize } = db
 const { Op } = Sequelize
 const RequestError = require('../libs/RequestError')
 
@@ -12,16 +12,14 @@ const tweetService = {
       case 'user':
         attributesOption = [
           [Sequelize.fn('DISTINCT', Sequelize.col('Tweet.id')), 'TweetId'], 'description', 'likeCount', 'replyCount', 'createdAt',
-          [Sequelize.literal(`exists (select * from Likes where Likes.UserId = '${viewerId}' and Likes.TweetId = Tweet.id)`), 'isLike']
+          [Sequelize.literal(`exists (select * from Likes where Likes.UserId = ${viewerId} and Likes.TweetId = Tweet.id)`), 'isLike']
         ]
-        break;
+        break
 
       case 'admin':
         attributesOption = [['id', 'TweetId'], [Sequelize.fn('LEFT', Sequelize.col('description'), descriptionLength), 'description'], 'createdAt']
-
-        break;
+        break
     }
-
 
     return Tweet.findAll({
       include: [
@@ -99,8 +97,8 @@ const tweetService = {
       })
   },
 
-  getSingleTweet: (viewerId, tweet_id) => {
-    return Tweet.findByPk(tweet_id, {
+  getSingleTweet: (viewerId, tweetId) => {
+    return Tweet.findByPk(tweetId, {
       include: [
         {
           model: User,
@@ -160,7 +158,6 @@ const tweetService = {
   },
 
   postUnlike: (viewerId, TweetId) => {
-
     return Like.findOne({
       where: {
         [Op.and]: [
@@ -190,7 +187,6 @@ const tweetService = {
   },
 
   getTweetReplies: (TweetId) => {
-
     return Tweet.findByPk(TweetId, {
       attributes: [],
       nest: true,
@@ -209,12 +205,12 @@ const tweetService = {
           required: false
         }
       ],
-      order: [[{model: Reply}, 'createdAt','ASC']]
+      order: [[{ model: Reply }, 'createdAt', 'ASC']]
     }).then(tweetWithReplies => {
       if (!tweetWithReplies) {
         throw new RequestError('Tweet does not exist')
       }
-      
+
       return tweetWithReplies.Replies
     })
   }
