@@ -2,6 +2,8 @@ const subscribe = require('./modules/subscribe')
 const publicChat = require('./modules/publicChat')
 const privateChat = require('./modules/privateChat')
 
+const subscriptionService = require('../services/subscriptionService')
+
 module.exports = (server) => {
   const users = new Map()
 
@@ -43,8 +45,8 @@ module.exports = (server) => {
         // 多網頁連接同帳號判斷
         socket.join(`user${socket.data.id}`)
         // 進入訂閱的頻道s
-        // const channels = await 
-        // socket.join(channels)
+        const channels = await subscriptionService.getChannels(msg.id)
+        socket.join(channels)
 
         io.emit('users', [...users.values()])
       } catch (error) {
