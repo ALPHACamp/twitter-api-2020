@@ -3,31 +3,20 @@ const { User, Tweet, Like, Reply, Sequelize } = db
 const { Op } = require('sequelize')
 
 const tweetService = require('../services/tweetService')
+const adminService = require('../services/adminService')
 
 const adminController = {
-  getUsers: (req, res) => {
-    return User.findAll({
-      where: {
-        [Op.or]: [
-          { role: { [Op.ne]: 'admin' } },
-          { role: { [Op.is]: null } }
-        ]
-      },
-      attributes: [
-        'id', 'account', 'name', 'avatar', 'cover', 'followerCount', 'followingCount',
-        [Sequelize.fn('COUNT', Sequelize.col('Tweets.UserId')), 'tweetCount'],
-        [Sequelize.fn('SUM', Sequelize.col('Tweets.likeCount')), 'likeCount']
-      ],
-      include: [
-        {
-          model: Tweet, attributes: []
-        }
-      ],
-      order: [[Sequelize.literal('tweetCount'), 'DESC']],
-      group: 'id'
-    }).then(users => {
-      res.status(200).json(users)
-    })
+  getUsers: async (req, res) => {
+    try {
+      const data = await adminService.getUsers()
+
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
 
   deleteTweet: (req, res) => {
