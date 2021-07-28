@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Sequelize } = db
+const { Reply, Like, User, Tweet, Sequelize } = db
 const { Op } = Sequelize
 const RequestError = require('../libs/RequestError')
 
@@ -27,6 +27,38 @@ const adminService = {
     }).then(users => {
       return users
     })
+  },
+
+  deleteTweet: (tweetId) => {
+    return Tweet.findByPk(tweetId)
+      .then(tweet => {
+        if (!tweet) {
+          throw new RequestError('Tweet does not exist')
+        }
+
+        return Promise.all([
+          tweet.destroy(),
+          Reply.destroy({
+            where: {
+              TweetId: {
+                [Op.in]: [tweetId]
+              }
+            }
+          }),
+          Like.destroy({
+            where: {
+              TweetId: {
+                [Op.in]: [tweetId]
+              }
+            }
+          })
+        ]).then(result => {
+          return {
+            status: 'success',
+            message: `Tweet.id ${result[0].id} and associate replies and likes have been destroyed successfully.`
+          }
+        })
+      })
   },
 }
 
