@@ -1,5 +1,5 @@
 const db = require('../models')
-const { Reply, Followship, Like, User, Tweet, Sequelize } = db
+const { Followship, User, Sequelize } = db
 const { Op } = Sequelize
 const RequestError = require('../libs/RequestError')
 

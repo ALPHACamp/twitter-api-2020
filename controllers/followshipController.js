@@ -1,9 +1,3 @@
-const db = require('../models')
-const Followship = db.Followship
-const User = db.User
-
-const { Op } = require('sequelize')
-
 const followshipService = require('../services/followshipService')
 
 const followshipController = {
