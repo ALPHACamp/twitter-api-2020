@@ -34,13 +34,19 @@ const adminController = {
     }
   },
 
-  getTweets: (req, res) => {
+  getTweets: async (req, res) => {
     const viewerId = req.user.id
 
-    tweetService.getTweets(viewerId, 'admin')
-      .then(data => {
-        return res.status(200).json(data)
+    try {
+      const data = await tweetService.getTweets(viewerId, 'admin')
+
+      return res.status(200).json(data)
+    } catch (error) {
+      return res.status(400).json({
+        status: error.name,
+        message: error.message
       })
+    }
   }
 }
 
