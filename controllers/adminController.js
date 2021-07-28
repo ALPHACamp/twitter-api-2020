@@ -1,7 +1,3 @@
-const db = require('../models')
-const { User, Tweet, Like, Reply, Sequelize } = db
-const { Op } = require('sequelize')
-
 const tweetService = require('../services/tweetService')
 const adminService = require('../services/adminService')
 
