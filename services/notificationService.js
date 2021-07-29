@@ -68,7 +68,8 @@ const notificationService = {
       ],
       attributes: ['content', 'createdAt', 'isRead'],
       raw: true,
-      nest: true
+      nest: true,
+      order: [['createdAt', 'DESC']]
     })
 
     const data = notifications.map((item, i) => {
