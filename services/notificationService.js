@@ -66,7 +66,7 @@ const notificationService = {
           as: 'sender'
         }
       ],
-      attributes: ['content', 'createdAt', 'isRead'],
+      attributes: [['id', 'notifyId'], 'content', 'createdAt', 'isRead'],
       raw: true,
       nest: true,
       order: [['createdAt', 'DESC']]
