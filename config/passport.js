@@ -12,6 +12,7 @@ let jwtOptions = {
 }
 
 let strategy = new JwtStrategy(jwtOptions, (jwt_payload, done) => {
+  console.log(jwt_payload)
   return User.findByPk(jwt_payload.id).then((user) => {
     if (!user) {
       return done(null, false)
