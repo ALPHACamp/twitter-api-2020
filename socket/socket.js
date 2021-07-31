@@ -49,7 +49,11 @@ module.exports = (server) => {
     })
     /* get private history */
     socket.on('get_private_history', async ({ offset, limit, RoomId }, cb) => {
-      const messages = await socketController.getPrivateHistory(offset, limit, RoomId)
+      const messages = await socketController.getPrivateHistory(
+        offset,
+        limit,
+        RoomId
+      )
       cb(messages)
     })
     /* private message (get and send) */

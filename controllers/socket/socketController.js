@@ -7,7 +7,6 @@ const Room = db.Room
 const Message = db.Message
 const { Op } = require('sequelize')
 
-
 let helper = {
   getPublicRoomUsers: () => {
     let users = []
@@ -30,7 +29,6 @@ let helper = {
   }
 }
 
-
 let socketController = {
   postSocket: (socket) => {
     const currentUser = socket.request.user
@@ -51,8 +49,8 @@ let socketController = {
   putLastOnlineAt: (socket) => {
     // update lastOnlineA
     const timestamp = new Date()
-    const userId = socketUsers[socket.id]
-    User.findById(userId).then(user => {
+    const userId = socketUsers[socket.id].id
+    User.findByPk(userId).then((user) => {
       user.lastOnlineAt = timestamp
       user.save()
     })
@@ -61,7 +59,7 @@ let socketController = {
     delete socketUsers[socket.id]
     if (publicRoomUsers.includes(socket.id)) {
       publicRoomUsers.splice(publicRoomUsers.indexOf(socket.id), 1)
-      const users = showPublicRoomUser(publicRoomUsers)
+      const users = helper.getPublicRoomUsers()
       io.emit('online_users', {
         users
       })
@@ -76,10 +74,7 @@ let socketController = {
     const now = new Date()
     let Rooms = await Room.findAll({
       where: {
-        [Op.or]: [
-          { User1Id: currentId },
-          { User2Id: currentId }
-        ]
+        [Op.or]: [{ User1Id: currentId }, { User2Id: currentId }]
       },
       include: {
         model: Message,
@@ -87,12 +82,12 @@ let socketController = {
         where: {
           createdAt: {
             [Op.between]: [lastOnlineAt, now]
-          },
+          }
         },
         attributes: ['UserId']
       }
     })
-    Rooms = Rooms.map(room => {
+    Rooms = Rooms.map((room) => {
       const { id } = room.toJSON()
       const UserId = room.Messages[0].UserId
       return {
