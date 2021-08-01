@@ -16,10 +16,10 @@ module.exports = (app) => {
   //   res.sendFile(path.join(__dirname,'../index.html'))
 
   // })
-  app.get('/test', (req, res) => {
+  app.get('/test', async (req, res) => {
     const roomOption = {
       where: {
-        [Op.or]: [{ User1Id: 2 }, { User2Id: 2 }],
+        [Op.or]: [{ User1Id: 1 }, { User2Id: 1 }],
         [Op.and]: [
           sequelize.literal(
             'EXISTS (select createdAt from Messages where Messages.RoomId = Room.id LIMIT 1)'
@@ -31,39 +31,47 @@ module.exports = (app) => {
           model: Message,
           as: 'Messages',
           limit: 1,
-          include: [
-            {
-              model: User,
-              as: 'User',
-              attributes: ['id', 'avatar', 'account', 'name']
-            }
-          ]
+          order: [['createdAt', 'DESC']]
+        },
+        {
+          model: User,
+          as: 'User1',
+          attributes: ['id', 'name', 'account', 'avatar']
+        },
+        {
+          model: User,
+          as: 'User2',
+          attributes: ['id', 'name', 'account', 'avatar']
         }
       ],
       attributes: {
         include: [
           [
             sequelize.literal(
-              '(select createdAt from Messages where Messages.RoomId = Room.id LIMIT 1)'
+              '(select createdAt from Messages where Messages.RoomId = Room.id order by Messages.createdAt DESC LIMIT 1)'
             ),
             'lastMsgTime'
-          ],
+          ]
         ],
         exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt']
       },
-      order: [[sequelize.literal('lastMsgTime'), 'desc']],
+      order: [[sequelize.literal('lastMsgTime'), 'DESC']],
       limit: 5
     }
-    Room.findAll(roomOption).then((rooms) => {
-      rooms.forEach((room) => {
-        const user = room.dataValues.Messages[0].dataValues.User
-        // console.log(room.dataValues.Messages[0].dataValues.User)
-        room.dataValues.Message = room.dataValues.Messages[0].dataValues.content
-        room.dataValues.User = user
-        delete room.dataValues.Messages
+    const rooms = await Room.findAll(roomOption)
+      .then((rooms) => {
+        rooms.forEach((room) => {
+          const user = room.dataValues.User1.dataValues.id !== 1 ? room.dataValues.User1.dataValues : room.dataValues.User2.dataValues
+          room.dataValues.Message = room.dataValues.Messages[0].dataValues.content
+          room.dataValues.User = user
+          room.dataValues.lastMsgTime = room.dataValues.Messages[0].dataValues.createdAt
+          delete room.dataValues.Messages
+          delete room.dataValues.User1
+          delete room.dataValues.User2
+          return room.dataValues
+        })
+        return res.json(rooms)
       })
-      res.json(rooms)
-    })
   })
   app.use('/api/users', users)
   app.use('/api/tweets', tweets)
