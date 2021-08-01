@@ -50,14 +50,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       followerNum: {
         type: DataTypes.INTEGER
-      },
-      lastLoginAt: {
-        type: DataTypes.DATE
-      },
-      isOnline: {
-        allowNull: false,
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
       }
     },
     {}

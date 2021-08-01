@@ -50,9 +50,9 @@ module.exports = {
           }
           socket.decoded = decoded
           const options = {
-            attributes: ['id', 'name', 'account', 'avatar', 'lastOnlineAt']
-          };
-          let user = await User.findById(decoded.id, options);
+            attributes: ['id', 'name', 'account', 'avatar']
+          }
+          let user = await User.findById(decoded.id, options)
           // console.log(user)
           user = user.toJSON()
           user.socketId = socket.id

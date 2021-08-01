@@ -1,18 +1,27 @@
 'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Rooms', {
+    return queryInterface.createTable('MessageRecords', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      User1Id: {
+      SenderId: {
         type: Sequelize.INTEGER
       },
-      User2Id: {
+      ReceiverId: {
         type: Sequelize.INTEGER
+      },
+      RoomId: {
+        type: Sequelize.INTEGER
+      },
+      unreadNum: {
+        type: Sequelize.INTEGER
+      },
+      isSeen: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
@@ -25,6 +34,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Rooms')
+    return queryInterface.dropTable('MessageRecords')
   }
 }
