@@ -37,9 +37,9 @@ module.exports = {
     })
   },
   authenticatedSocket: (socket, next) => {
-    console.log('==========================================')
+    console.log('=========== SOCKET HANDSHAKE ===========')
     console.log(socket.handshake.query.auth)
-    console.log('==========================================')
+    console.log('========================================')
     if (socket.handshake.query && socket.handshake.query.auth) {
       jwt.verify(
         socket.handshake.query.auth,
