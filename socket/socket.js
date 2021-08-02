@@ -1,6 +1,7 @@
 const socketio = require('socket.io')
 const { authenticatedSocket } = require('../middleware/auth')
 const socketController = require('../controllers/socket/socketController')
+const socketService = require('../service/socketService')
 const chalk = require('chalk')
 const notice = chalk.cyanBright.underline.italic
 module.exports = (server) => {
@@ -14,7 +15,7 @@ module.exports = (server) => {
   io.use(authenticatedSocket).on('connection', async (socket) => {
     /* connect */
     socketController.postSocket(socket)
-    const getMsgNotice = await socketController.getMsgNotice(null, socket)
+    const getMsgNotice = await socketService.getMsgNotice(null, socket)
     socket.emit('get_msg_notice', getMsgNotice)
     socket.on('sendMessage', (data) => console.log(data))
     /* disconnect */
