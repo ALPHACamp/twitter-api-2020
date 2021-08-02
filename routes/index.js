@@ -17,9 +17,10 @@ module.exports = (app) => {
 
   // })
   app.get('/test', async (req, res) => {
+    let userId = +req.query.userId
     const roomOption = {
       where: {
-        [Op.or]: [{ User1Id: 1 }, { User2Id: 1 }],
+        [Op.or]: [{ User1Id: userId }, { User2Id: userId }],
         [Op.and]: [
           sequelize.literal(
             'EXISTS (select createdAt from Messages where Messages.RoomId = Room.id LIMIT 1)'
@@ -31,7 +32,14 @@ module.exports = (app) => {
           model: Message,
           as: 'Messages',
           limit: 1,
-          order: [['createdAt', 'DESC']]
+          include: [
+            {
+              model: User,
+              as: 'User',
+              attributes: ['id'],
+            },
+          ],
+          order: [['createdAt', 'desc']]
         },
         {
           model: User,
@@ -45,26 +53,22 @@ module.exports = (app) => {
         }
       ],
       attributes: {
-        include: [
-          [
-            sequelize.literal(
-              '(select createdAt from Messages where Messages.RoomId = Room.id order by Messages.createdAt DESC LIMIT 1)'
-            ),
-            'lastMsgTime'
-          ]
-        ],
         exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt']
       },
-      order: [[sequelize.literal('lastMsgTime'), 'DESC']],
+      order: [[sequelize.literal(
+        '(select createdAt from Messages where Messages.RoomId = Room.id order by Messages.createdAt DESC LIMIT 1)'
+      ), 'DESC']],
       limit: 5
     }
     const rooms = await Room.findAll(roomOption)
       .then((rooms) => {
         rooms.forEach((room) => {
-          const user = room.dataValues.User1.dataValues.id !== 1 ? room.dataValues.User1.dataValues : room.dataValues.User2.dataValues
-          room.dataValues.Message = room.dataValues.Messages[0].dataValues.content
-          room.dataValues.User = user
-          room.dataValues.lastMsgTime = room.dataValues.Messages[0].dataValues.createdAt
+          const user = room.dataValues.User1.dataValues.id !== userId ? room.dataValues.User1.dataValues : room.dataValues.User2.dataValues
+          room.dataValues.lastMsg = {}
+          room.dataValues.lastMsg.fromRoomMember = room.dataValues.Messages[0].dataValues.User.id !== userId
+          room.dataValues.lastMsg.content = room.dataValues.Messages[0].dataValues.content
+          room.dataValues.lastMsg.createdAt = room.dataValues.Messages[0].dataValues.createdAt
+          room.dataValues.roomMember = user
           delete room.dataValues.Messages
           delete room.dataValues.User1
           delete room.dataValues.User2
@@ -80,7 +84,7 @@ module.exports = (app) => {
   app.use('/', (req, res) => {
     res.status(404).json({
       status: 'error',
-      message: 'Page not found.'
+      message: 'Page not found.',
     })
   })
 }

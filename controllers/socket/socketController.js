@@ -157,7 +157,7 @@ let socketController = {
     //更新isSeen為true
     const MsgRecordOption = {
       where: {
-        ReceiverId: +userId,
+        ReceiverId: userId,
         isSeen: false
       },
       attributes: ['id']
@@ -181,7 +181,14 @@ let socketController = {
           model: Message,
           as: 'Messages',
           limit: 1,
-          order: [['createdAt', 'DESC']]
+          include: [
+            {
+              model: User,
+              as: 'User',
+              attributes: ['id'],
+            },
+          ],
+          order: [['createdAt', 'desc']]
         },
         {
           model: User,
@@ -195,26 +202,22 @@ let socketController = {
         }
       ],
       attributes: {
-        include: [
-          [
-            sequelize.literal(
-              '(select createdAt from Messages where Messages.RoomId = Room.id order by Messages.createdAt DESC LIMIT 1)'
-            ),
-            'lastMsgTime'
-          ]
-        ],
         exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt']
       },
-      order: [[sequelize.literal('lastMsgTime'), 'DESC']],
+      order: [[sequelize.literal(
+        '(select createdAt from Messages where Messages.RoomId = Room.id order by Messages.createdAt DESC LIMIT 1)'
+      ), 'DESC']],
       limit: 5
     }
     const rooms = await Room.findAll(roomOption)
       .then((rooms) => {
         rooms.forEach((room) => {
           const user = room.dataValues.User1.dataValues.id !== userId ? room.dataValues.User1.dataValues : room.dataValues.User2.dataValues
-          room.dataValues.Message = room.dataValues.Messages[0].dataValues.content
-          room.dataValues.User = user
-          room.dataValues.lastMsgTime = room.dataValues.Messages[0].dataValues.createdAt
+          room.dataValues.lastMsg = {}
+          room.dataValues.lastMsg.fromRoomMember = room.dataValues.Messages[0].dataValues.User.id !== userId
+          room.dataValues.lastMsg.content = room.dataValues.Messages[0].dataValues.content
+          room.dataValues.lastMsg.createdAt = room.dataValues.Messages[0].dataValues.createdAt
+          room.dataValues.roomMember = user
           delete room.dataValues.Messages
           delete room.dataValues.User1
           delete room.dataValues.User2
