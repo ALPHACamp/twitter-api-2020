@@ -15,7 +15,7 @@ const notice = chalk.bgBlue.white
 const detail = chalk.magentaBright
 
 let socketService = {
-  getPublicRoomUsers: () => {
+  getPublicRoomUsers: (socketId) => {
     let users = []
     publicRoomUsers.forEach((socketId) => {
       if (socketUsers[socketId]) {
@@ -73,8 +73,67 @@ let socketService = {
       }
     })
     return { unseenRooms, unreadRooms }
+  },
+  addToPublicRoom: (socketId) => {
+    publicRoomUsers.push(socketId)
+  },
+  getUserInfo: (socketId) => {
+    return socketUsers[socketId]
+  },
+  showJoinPublicRoomNotice: (userId, socketId) => {
+    console.log(notice(`join_public_room: ${userId}`))
+    console.log(notice(`加入公開的socket ID: ${socketId}`))
+  },
+  showJoinPublicRoomDetail: (ids) => {
+    console.log(
+      detail('all sockets [伺服器紀錄]'),
+      '\n',
+      sockets.map((item) => item.id)
+    )
+    console.log(detail('all sockets [系統偵測]'), '\n', Array.from(ids))
+    console.log(detail('all socketUsers [詳細資料]'), '\n', socketUsers)
+    console.log(detail('all publicRoomUsers '), '\n', publicRoomUsers)
+    console.log(detail('all privateRoomUsers '), '\n', privateRoomUsers)
+  },
+  showLeavePublicRoomNotice: (userId) => {
+    console.log(notice('leave_public_room: '), userId)
+  },
+  removeUserFromPublicRoom: (socketId) => {
+    publicRoomUsers.splice(publicRoomUsers.indexOf(socketId), 1)
+  },
+  getRoomHistory: async (offset, limit, RoomId) => {
+    const options = {
+      offset,
+      limit,
+      order: [['createdAt', 'desc']],
+      include: [
+        {
+          model: User,
+          attributes: ['avatar'],
+          as: 'User'
+        }
+      ],
+      where: {
+        RoomId
+      }
+    }
+    const messages = await Message.findAll(options)
+    messages.forEach((message) => {
+      message.dataValues.avatar = message.dataValues.User.avatar
+      delete message.dataValues.User
+    })
+    return messages
+  },
+  showGetPublicHistoryNotice: () => {
+    console.log(notice(`get_public_history: roomId ${1}`))
+  },
+  showPostPublicHistoryNotice: (content, userId) => {
+    console.log(notice(`post_public_msg:`, { content, userId }))
+  },
+  addMessage: (UserId, RoomId, content) => {
+    const message = await Message.create({ UserId, RoomId, content })
+    return message
   }
-
 }
 
 module.exports = socketService
