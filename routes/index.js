@@ -17,50 +17,66 @@ module.exports = (app) => {
 
   // })
   app.get('/test', (req, res) => {
+    let userId = 1
     const roomOption = {
       where: {
-        [Op.or]: [{ User1Id: 2 }, { User2Id: 2 }],
+        [Op.or]: [{ User1Id: userId }, { User2Id: userId }],
         [Op.and]: [
           sequelize.literal(
-            'EXISTS (select createdAt from Messages where Messages.RoomId = Room.id LIMIT 1)'
-          )
-        ]
+            'EXISTS (select createdAt  from Messages where Messages.RoomId = Room.id LIMIT 1)'
+          ),
+        ],
       },
+
       include: [
         {
           model: Message,
-          as: 'Messages',
+          as: 'theOtherUser',
+          limit: 1,
+          attributes: ['RoomId', 'UserId'],
+          include: [
+            {
+              model: User,
+              as: 'Author',
+              attributes: ['id', 'avatar', 'name', 'account'],
+            },
+          ],
+          where: {
+            id: {
+              [Op.ne]: userId,
+            },
+          },
+        },
+        {
+          model: Message,
+          as: 'lastMsg',
           limit: 1,
           include: [
             {
               model: User,
-              as: 'User',
-              attributes: ['id', 'avatar', 'account', 'name']
-            }
-          ]
-        }
+              as: 'Author',
+              attributes: ['id', 'avatar', 'name', 'account'],
+            },
+          ],
+          order: [['createdAt', 'desc']],
+        },
       ],
       attributes: {
-        include: [
-          [
-            sequelize.literal(
-              '(select createdAt from Messages where Messages.RoomId = Room.id LIMIT 1)'
-            ),
-            'lastMsgTime'
-          ],
-        ],
-        exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt']
+        exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt'],
       },
-      order: [[sequelize.literal('lastMsgTime'), 'desc']],
-      limit: 5
+      order: [
+        [{ model: sequelize.Message, as: 'lastMsg' }, 'createdAt', 'desc'],
+      ],
+      limit: 5,
     }
     Room.findAll(roomOption).then((rooms) => {
       rooms.forEach((room) => {
-        const user = room.dataValues.Messages[0].dataValues.User
-        // console.log(room.dataValues.Messages[0].dataValues.User)
-        room.dataValues.Message = room.dataValues.Messages[0].dataValues.content
-        room.dataValues.User = user
-        delete room.dataValues.Messages
+        const user = room.dataValues.theOtherUser[0].dataValues.User
+        const lastMsg = room.dataValues.lastMsg[0].dataValues
+        room.dataValues.theOtherUser = user
+        delete lastMsg.RoomId
+        delete lastMsg.UserId
+        delete lastMsg.updatedAt
       })
       res.json(rooms)
     })
@@ -72,7 +88,7 @@ module.exports = (app) => {
   app.use('/', (req, res) => {
     res.status(404).json({
       status: 'error',
-      message: 'Page not found.'
+      message: 'Page not found.',
     })
   })
 }

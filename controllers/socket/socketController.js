@@ -334,7 +334,7 @@ let socketController = {
       attributes: ['id']
     }
     await MessageRecord.findAll(MsgRecordOption).then((records) => {
-      records = records.map(record => record.id)
+      records = records.map((record) => record.id)
       MessageRecord.update({ isSeen: true }, { where: { id: records } })
     })
     //拿取使用者加入的rooms並傳送
@@ -343,44 +343,60 @@ let socketController = {
         [Op.or]: [{ User1Id: userId }, { User2Id: userId }],
         [Op.and]: [
           sequelize.literal(
-            'EXISTS (select createdAt from Messages where Messages.RoomId = Room.id LIMIT 1)'
+            'EXISTS (select createdAt  from Messages where Messages.RoomId = Room.id LIMIT 1)'
           )
-        ]
+        ],
       },
+
       include: [
         {
           model: Message,
-          as: 'Messages',
+          as: 'theOtherUser',
+          limit: 1,
+          attributes: ['RoomId', 'UserId'],
+          include: [
+            {
+              model: User,
+              as: 'User',
+              attributes: ['id', 'avatar', 'name', 'account'],
+            },
+          ],
+          where: {
+            id: {
+              [Op.ne]: userId,
+            },
+          },
+        },
+        {
+          model: Message,
+          as: 'lastMsg',
           limit: 1,
           include: [
             {
               model: User,
               as: 'User',
-              attributes: ['id', 'avatar', 'name', 'account']
-            }
-          ]
-        }
+              attributes: ['id', 'avatar', 'name', 'account'],
+            },
+          ],
+          order: [['createdAt', 'desc']],
+        },
       ],
       attributes: {
-        include: [
-          [
-            sequelize.literal(
-              '(select createdAt from Messages where Messages.RoomId = Room.id LIMIT 1)'
-            ),
-            'lastMsgTime'
-          ]
-        ],
-        exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt']
+        exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt'],
       },
-      order: [[sequelize.literal('lastMsgTime'), 'desc']],
-      limit: 5
+      order: [
+        [{ model: sequelize.Message, as: 'lastMsg' }, 'createdAt', 'desc'],
+      ],
+      limit: 5,
     }
     const rooms = await Room.findAll(roomOption).then((rooms) => {
       rooms.forEach((room) => {
-        const user = room.dataValues.Messages[0].dataValues.User
-        room.dataValues.Message = room.dataValues.Messages[0].dataValues.content
-        room.dataValues.User = user
-        delete room.dataValues.Messages
+        const user = room.dataValues.theOtherUser[0].dataValues.User
+        const lastMsg = room.dataValues.lastMsg[0].dataValues
+        room.dataValues.theOtherUser = user
+        delete lastMsg.RoomId
+        delete lastMsg.UserId
+        delete lastMsg.updatedAt
       })
       return rooms
     })
@@ -389,7 +405,7 @@ let socketController = {
     socket.emit('get_msg_notice_details', getMsgNoticeDetails)
   },
   leavePrivatePage: (socket) => {
-    console.log('離開私人page:',socket.id)
+    console.log('離開私人page:', socket.id)
     console.log(' privateRoomUsers[socket.id]:', privateRoomUsers)
     console.log('============================')
     console.log('leave_private_page: ', privateRoomUsers[socket.id].id)
