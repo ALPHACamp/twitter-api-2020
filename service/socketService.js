@@ -270,7 +270,7 @@ let socketService = {
     return sockets.includes(socket)
   },
   checkSocketIdInPublicRoom: (socketId) => {
-    publicRoomUsers.includes(socketId)
+    return publicRoomUsers.includes(socketId)
   },
   checkReceiverOnPrivatePage: (ReceiverId) => {
     const receiverRooms = []

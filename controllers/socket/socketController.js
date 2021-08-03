@@ -18,7 +18,7 @@ let socketController = {
     if (socketService.checkSocketIdInPublicRoom(socket.id)) {
       socketService.showLeavePublicRoomNotice(null, socket.id)
       socketService.removeUserFromPublicRoom(socket.id)
-      const users = socketService.publicRoomUsers(socket.id)
+      const users = socketService.getPublicRoomUsers(socket.id)
       io.emit('online_users', {
         users,
       })
@@ -52,6 +52,7 @@ let socketController = {
     socket.emit('get_private_rooms', rooms)
     const getMsgNoticeDetails = await socketService.getMsgNoticeDetails(userId)
     socket.emit('get_msg_notice_details', getMsgNoticeDetails)
+    console.log(notice(`get_msg_notice_details to ${userId}`))
   },
   joinPrivateRoom: async (User1Id, User2Id, socket, io) => {
     console.log(notice(`join_private_room:`), { User1Id, User2Id })
@@ -60,6 +61,8 @@ let socketController = {
       console.log(notice(`[補] join_private_page: ${User1Id}`))
       console.log(notice(`join_private_page-socketId ${socket.id}`))
       socketService.addUserInfoToPrivateRoomSockets(User1Id, socket.id)
+      socket.emit('get_msg_notice_details', getMsgNoticeDetails)
+      console.log(notice(`get_msg_notice_details to ${User1Id}`))
     }
     await socketService.toggleReadPrivateMsg(User1Id, User2Id)
     const roomId = await socketService.getRoomId(User1Id, User2Id)
@@ -83,7 +86,6 @@ let socketController = {
   },
   leavePublicRoom: (userId, socket, io) => {
     socketService.showLeavePublicRoomNotice(userId)
-
     socketService.removeUserFromPublicRoom(socket.id)
     const user = socketService.getUserInfo(socket.id)
     io.emit('user_leave', {
@@ -163,6 +165,7 @@ let socketController = {
         avatar,
         createdAt,
       })
+      console.log(detail(`send message to ${ReceiverId}`))
       return
     }
     /* update record */
@@ -176,8 +179,8 @@ let socketController = {
     /* Receiver is online */
     if (isUserOnline) {
       /* Receiver is on private page  */
-      if (isReceiverOnPrivatePage) { 
-        /* Receiver is not in room */ 
+      if (isReceiverOnPrivatePage) {
+        /* Receiver is not in room */
         record.isSeen = true
         const updateMsgNoticeDetails = await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
         updateMsgNoticeDetails.lastMsg = {
@@ -189,12 +192,14 @@ let socketController = {
         isUserOnline.forEach((socketid) => {
           socket.to(socketid).emit('update_msg_notice_details', updateMsgNoticeDetails)
         })
+        console.log(notice(`update_msg_notice_details to ${ReceiverId}`))
       } else {
         /* Receiver is not on private page  */
         const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
         isUserOnline.forEach((socketid) => {
           socket.to(socketid).emit('get_msg_notice', getMsgNotice)
         })
+        console.log(notice(`get_msg_notice to ${ReceiverId}`))
       }
     }
     await record.save()

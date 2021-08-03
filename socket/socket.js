@@ -17,6 +17,7 @@ module.exports = (server) => {
     socketController.postSocket(socket)
     const getMsgNotice = await socketService.getMsgNotice(null, socket)
     socket.emit('get_msg_notice', getMsgNotice)
+    console.log(notice(`get_msg_notice to ${socket.id}`))
     socket.on('sendMessage', (data) => console.log(data))
     /* disconnect */
     socket.on('disconnecting', () => {
@@ -29,6 +30,7 @@ module.exports = (server) => {
     })
     /* leave public room */
     socket.on('leave_public_room', ({ userId }) => {
+      console.log(notice('伺服器收到事件 leave_public_room'))
       socketController.leavePublicRoom(userId, socket, io)
     })
     /* get public history */
