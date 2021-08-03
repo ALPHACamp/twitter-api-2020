@@ -20,7 +20,7 @@ let socketController = {
       socketService.removeUserFromPublicRoom(socket.id)
       const users = socketService.publicRoomUsers(socket.id)
       io.emit('online_users', {
-        users
+        users,
       })
     }
     if (socketService.checkSocketExists(socket)) {
@@ -35,11 +35,11 @@ let socketController = {
     socketService.showAllSocketDetails(ids)
     const user = socketService.getUserInfo(socket.id)
     io.emit('new_join', {
-      name: user.name
+      name: user.name,
     })
     const users = socketService.getPublicRoomUsers(socket.id)
     io.emit('online_users', {
-      users
+      users,
     })
   },
   joinPrivatePage: async function (userId, socket) {
@@ -87,17 +87,20 @@ let socketController = {
     socketService.removeUserFromPublicRoom(socket.id)
     const user = socketService.getUserInfo(socket.id)
     io.emit('user_leave', {
-      name: user.name
+      name: user.name,
     })
     const users = socketService.getPublicRoomUsers()
     io.emit('online_users', {
-      users
+      users,
     })
   },
   leavePrivatePage: (socket) => {
     //去除privateRoomUsers內要離開的使用者
     if (socketService.getPrivateRoomUserInfo(socket.id)) {
-      console.log(notice(`leave_private_page: `), socketService.getPrivateRoomUserInfo(socket.id))
+      console.log(
+        notice(`leave_private_page: `),
+        socketService.getPrivateRoomUserInfo(socket.id)
+      )
       socketService.removeUserFromPrivateRoom(socket.id)
     }
   },
@@ -118,35 +121,35 @@ let socketController = {
     if (!content) {
       return
     }
-    const message = await socketService.addMessage(userId, publicRoomId, content)
+    const message = await socketService.addMessage(
+      userId,
+      publicRoomId,
+      content
+    )
     const user = socketService.getUserInfo(socket.id)
     socket.broadcast.emit('get_public_msg', {
       content: message.content,
       createdAt: message.createdAt,
-      avatar: user.avatar
+      avatar: user.avatar,
     })
   },
-  postPrivateMsg: async (
-    SenderId,
-    ReceiverId,
-    RoomId,
-    content,
-    socket
-  ) => {
+  postPrivateMsg: async (SenderId, ReceiverId, RoomId, content, socket) => {
     console.log(notice(`post_private_msg:`), {
       SenderId,
       ReceiverId,
       RoomId,
-      content
+      content,
     })
     if (!content) {
       return
     }
     const user = socketService.getUserInfo(socket.id)
     const message = await socketService.addMessage(SenderId, RoomId, content)
-    const isUserOnline = socketService.getUserSocketIds(ReceiverId)
-    const isReceiverOnPrivatePage = socketService.checkReceiverOnPrivatePage(ReceiverId)
-    /* Receiver is in room */ //Receiver在聊天室裡
+    const isUserOnline = socketService.getUserSocketIds(ReceiverId) //在線的所有socketID
+    const isReceiverOnPrivatePage =
+      socketService.checkReceiverOnPrivatePage(ReceiverId) //receiver在private page的各個房間
+    /* no update record */
+    /* Receiver is  in room */ //Receiver在聊天室裡
     if (
       isReceiverOnPrivatePage &&
       isReceiverOnPrivatePage.includes(message.RoomId)
@@ -158,40 +161,43 @@ let socketController = {
         RoomId,
         content,
         avatar,
-        createdAt
+        createdAt,
       })
+      return
     }
-    /* Receiver is not in room */ //Receiver不在聊天室裡
-    else {
-      let record = await socketService.getMsgRecord(RoomId, SenderId)
-      if (!record) {
-        record = await socketService.createMsgRecord(RoomId, SenderId, ReceiverId)
-      }
-      /* Receiver is not on private page */
-      if (!isReceiverOnPrivatePage) {
-        record.isSeen = false
-        /* Send Notice if Receiver is online */
-        if (isUserOnline) {
-          const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
-          isUserOnline.forEach((socketid) => {
-            socket.to(socketid).emit('get_msg_notice', getMsgNotice)
-          })
-        }
-      }
-      record.increment({ unreadNum: 1 })
-      record.save()
-      if (isUserOnline) {
-        const rooms = await socketService.getPrivateRooms(ReceiverId)
-        const getMsgNoticeDetails = await socketService.getMsgNoticeDetails(ReceiverId)
+    /* update record */
+    const record = await socketService.getMsgRecord(RoomId, SenderId)
+    if (!record) {
+      record = await socketService.createMsgRecord(RoomId, SenderId, ReceiverId)
+    }
+    record.isSeen = false
+    await record.increment({ unreadNum: 1 })
+    /* Receiver is online */
+    if (isUserOnline) {
+      /* Receiver is on private page  */
+      if (isReceiverOnPrivatePage) { 
+        /* Receiver is not in room */ 
+        record.isSeen = true
+        const [rooms, getMsgNoticeDetails] = await Promise.all([
+          await socketService.getPrivateRooms(ReceiverId),
+          await socketService.getMsgNoticeDetails(ReceiverId),
+        ])
         isUserOnline.forEach((socketid) => {
           socket.to(socketid).emit('get_private_rooms', rooms)
           socket
-            .to(socketid)
-            .emit('get_msg_notice_details', getMsgNoticeDetails)
+          .to(socketid)
+          .emit('get_msg_notice_details', getMsgNoticeDetails)
+        })
+      } else {
+        /* Receiver is not on private page  */
+        const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
+        isUserOnline.forEach((socketid) => {
+          socket.to(socketid).emit('get_msg_notice', getMsgNotice)
         })
       }
     }
-  }
+    await record.save()
+  },
 }
 
 module.exports = socketController
