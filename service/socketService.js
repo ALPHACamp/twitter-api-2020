@@ -233,6 +233,39 @@ let socketService = {
     })
     return { unseenRooms, unreadRooms }
   },
+  getRoomDetailsForReceiver: async (SenderId, ReceiverId) => {
+    const roomOption = {
+      where: {
+        [Op.or]: [
+          { User1Id: SenderId, User2Id: ReceiverId },
+          { User1Id: ReceiverId, User2Id: SenderId }
+        ]
+      },
+      attributes: {
+        exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt']
+      },
+      include: [
+        {
+          model: User,
+          as: 'User1',
+          attributes: ['id', 'name', 'account', 'avatar']
+        },
+        {
+          model: User,
+          as: 'User2',
+          attributes: ['id', 'name', 'account', 'avatar']
+        }
+      ]
+    }
+    return await Room.findOne(roomOption)
+      .then((room) => {
+        const user = room.dataValues.User1.dataValues.id !== ReceiverId ? room.dataValues.User1.dataValues : room.dataValues.User2.dataValues
+        room.dataValues.roomMember = user
+        delete room.dataValues.User1
+        delete room.dataValues.User2
+        return room.dataValues
+      })
+  },
   checkSocketExists: (socket) => {
     return sockets.includes(socket)
   },
