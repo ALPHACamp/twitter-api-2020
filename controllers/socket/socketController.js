@@ -145,9 +145,9 @@ let socketController = {
     }
     const user = socketService.getUserInfo(socket.id)
     const message = await socketService.addMessage(SenderId, RoomId, content)
-    const isUserOnline = socketService.getUserSocketIds(ReceiverId)
+    const isUserOnline = socketService.getUserSocketIds(ReceiverId) //在線的所有socketID
     const isReceiverOnPrivatePage =
-      socketService.checkReceiverOnPrivatePage(ReceiverId)
+      socketService.checkReceiverOnPrivatePage(ReceiverId) //receiver在private page的各個房間
     /* no update record */
     /* Receiver is  in room */ //Receiver在聊天室裡
     if (
@@ -163,7 +163,7 @@ let socketController = {
         avatar,
         createdAt,
       })
-      return 
+      return
     }
     /* update record */
     let record = await socketService.getMsgRecord(RoomId, SenderId)
@@ -172,40 +172,36 @@ let socketController = {
     }
     /* Receiver is online */
     if (isUserOnline) {
+      await Promise.all([record.increment({ unreadNum: 1 }), record.save()])
+
       /* Receiver is on private page  */
-      if (isReceiverOnPrivatePage) {
+      if (isReceiverOnPrivatePage) { 
         /* Receiver is not in room */ //Receiver在其它聊天室裡
-        record.increment({ unreadNum: 1 })
+        record.isSeen = true
         await record.save()
         const [rooms, getMsgNoticeDetails] = await Promise.all([
-          await socketService.getPrivateRooms(ReceiverId)
-          ,
-          await socketService.getMsgNoticeDetails(
-            ReceiverId
-          )
+          await socketService.getPrivateRooms(ReceiverId),
+          await socketService.getMsgNoticeDetails(ReceiverId),
         ])
+        // 應該針對private page內的socketId 發更新就好
         isUserOnline.forEach((socketid) => {
           socket.to(socketid).emit('get_private_rooms', rooms)
           socket
             .to(socketid)
             .emit('get_msg_notice_details', getMsgNoticeDetails)
         })
-        return 
+        
       }
       /* Receiver is not on private page  */
-      record.isSeen = false
-      record.increment({ unreadNum: 1 })
-      await record.save()
+      //抓出不在private page的socketId傳 or 排除在正確room的socketId傳
       const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
       isUserOnline.forEach((socketid) => {
         socket.to(socketid).emit('get_msg_notice', getMsgNotice)
       })
-      return 
+      return
     }
     /* Receiver is not online */
-    record.increment({ unreadNum: 1 })
-    await record.save()
-    return
+    
   },
 }
 
