@@ -170,38 +170,32 @@ let socketController = {
     if (!record) {
       record = await socketService.createMsgRecord(RoomId, SenderId, ReceiverId)
     }
+    record.isSeen = false
+    await record.increment({ unreadNum: 1 })
     /* Receiver is online */
     if (isUserOnline) {
-      await Promise.all([record.increment({ unreadNum: 1 }), record.save()])
-
       /* Receiver is on private page  */
       if (isReceiverOnPrivatePage) { 
-        /* Receiver is not in room */ //Receiver在其它聊天室裡
+        /* Receiver is not in room */ 
         record.isSeen = true
-        await record.save()
         const [rooms, getMsgNoticeDetails] = await Promise.all([
           await socketService.getPrivateRooms(ReceiverId),
           await socketService.getMsgNoticeDetails(ReceiverId),
         ])
-        // 應該針對private page內的socketId 發更新就好
         isUserOnline.forEach((socketid) => {
           socket.to(socketid).emit('get_private_rooms', rooms)
           socket
             .to(socketid)
             .emit('get_msg_notice_details', getMsgNoticeDetails)
         })
-        
       }
       /* Receiver is not on private page  */
-      //抓出不在private page的socketId傳 or 排除在正確room的socketId傳
       const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
       isUserOnline.forEach((socketid) => {
         socket.to(socketid).emit('get_msg_notice', getMsgNotice)
       })
-      return
+      await record.save()
     }
-    /* Receiver is not online */
-    
   },
 }
 
