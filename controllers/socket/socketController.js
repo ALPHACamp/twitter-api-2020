@@ -166,7 +166,7 @@ let socketController = {
       return
     }
     /* update record */
-    let record = await socketService.getMsgRecord(RoomId, SenderId)
+    const record = await socketService.getMsgRecord(RoomId, SenderId)
     if (!record) {
       record = await socketService.createMsgRecord(RoomId, SenderId, ReceiverId)
     }
@@ -174,6 +174,11 @@ let socketController = {
     await record.increment({ unreadNum: 1 })
     /* Receiver is online */
     if (isUserOnline) {
+      /* Receiver is not on private page  */
+      const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
+      isUserOnline.forEach((socketid) => {
+        socket.to(socketid).emit('get_msg_notice', getMsgNotice)
+      })
       /* Receiver is on private page  */
       if (isReceiverOnPrivatePage) { 
         /* Receiver is not in room */ 
@@ -189,13 +194,8 @@ let socketController = {
             .emit('get_msg_notice_details', getMsgNoticeDetails)
         })
       }
-      /* Receiver is not on private page  */
-      const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
-      isUserOnline.forEach((socketid) => {
-        socket.to(socketid).emit('get_msg_notice', getMsgNotice)
-      })
-      await record.save()
     }
+    await record.save()
   },
 }
 
