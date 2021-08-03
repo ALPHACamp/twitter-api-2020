@@ -1,6 +1,9 @@
 const socketio = require('socket.io')
 const { authenticatedSocket } = require('../middleware/auth')
 const socketController = require('../controllers/socket/socketController')
+const socketService = require('../service/socketService')
+const chalk = require('chalk')
+const notice = chalk.cyanBright.underline.italic
 module.exports = (server) => {
   const io = socketio(server, {
     cors: {
@@ -12,9 +15,11 @@ module.exports = (server) => {
   io.use(authenticatedSocket).on('connection', async (socket) => {
     /* connect */
     socketController.postSocket(socket)
+    const getMsgNotice = await socketService.getMsgNotice(null, socket)
+    socket.emit('get_msg_notice', getMsgNotice)
     socket.on('sendMessage', (data) => console.log(data))
     /* disconnect */
-    socket.on('disconnect', () => {
+    socket.on('disconnecting', () => {
       socketController.deleteSocket(socket, io)
     })
 
@@ -28,6 +33,7 @@ module.exports = (server) => {
     })
     /* get public history */
     socket.on('get_public_history', async ({ offset, limit }, cb) => {
+      console.log(notice('伺服器收到事件 get_public_history'))
       const messages = await socketController.getPublicHistory(offset, limit)
       cb(messages)
     })
@@ -44,18 +50,20 @@ module.exports = (server) => {
       socketController.leavePrivatePage(socket)
     })
     /* join private room */
-    socket.on('join_private_room', async ({ User1Id, User2Id }, callback) => {
-      const roomId = await socketController.joinPrivateRoom(
+    socket.on('join_private_room', async ({ User1Id, User2Id }) => {
+      const RoomId = await socketController.joinPrivateRoom(
         User1Id,
         User2Id,
-        socket
+        socket, io
       )
       //return roomId to client
-      callback({ roomId })
+      socket.emit('join_private_room', RoomId)
+      console.log('emit join_private_room to user', RoomId)
     })
 
     /* get private history */
     socket.on('get_private_history', async ({ offset, limit, RoomId }, cb) => {
+      console.log(notice('伺服器收到事件 get_private_history'))
       const messages = await socketController.getPrivateHistory(
         offset,
         limit,

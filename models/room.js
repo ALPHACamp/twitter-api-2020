@@ -21,9 +21,7 @@ module.exports = (sequelize, DataTypes) => {
   Room.associate = function (models) {
     Room.belongsTo(models.User, { foreignKey: "User1Id", as: "User1" })
     Room.belongsTo(models.User, { foreignKey: "User2Id", as: "User2" })
-    Room.hasMany(models.Message, { foreignKey: 'RoomId', as: 'Messages' })
-    Room.hasMany(models.Message, { foreignKey: "RoomId", as: "lastMsg" })
-    Room.hasMany(models.Message, { foreignKey: 'RoomId', as: 'theOtherUser' })
+    Room.hasMany(models.Message, { foreignKey: "RoomId", as: "Messages" })
   };
   return Room;
 };

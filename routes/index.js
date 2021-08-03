@@ -16,70 +16,66 @@ module.exports = (app) => {
   //   res.sendFile(path.join(__dirname,'../index.html'))
 
   // })
-  app.get('/test', (req, res) => {
-    let userId = 1
+  app.get('/test', async (req, res) => {
+    let userId = +req.query.userId
     const roomOption = {
       where: {
         [Op.or]: [{ User1Id: userId }, { User2Id: userId }],
         [Op.and]: [
           sequelize.literal(
-            'EXISTS (select createdAt  from Messages where Messages.RoomId = Room.id LIMIT 1)'
-          ),
-        ],
+            'EXISTS (select createdAt from Messages where Messages.RoomId = Room.id LIMIT 1)'
+          )
+        ]
       },
-
       include: [
         {
           model: Message,
-          as: 'theOtherUser',
+          as: 'Messages',
           limit: 1,
-          attributes: ['RoomId', 'UserId'],
           include: [
             {
               model: User,
-              as: 'Author',
-              attributes: ['id', 'avatar', 'name', 'account'],
+              as: 'User',
+              attributes: ['id'],
             },
           ],
-          where: {
-            id: {
-              [Op.ne]: userId,
-            },
-          },
+          order: [['createdAt', 'desc']]
         },
         {
-          model: Message,
-          as: 'lastMsg',
-          limit: 1,
-          include: [
-            {
-              model: User,
-              as: 'Author',
-              attributes: ['id', 'avatar', 'name', 'account'],
-            },
-          ],
-          order: [['createdAt', 'desc']],
+          model: User,
+          as: 'User1',
+          attributes: ['id', 'name', 'account', 'avatar']
         },
+        {
+          model: User,
+          as: 'User2',
+          attributes: ['id', 'name', 'account', 'avatar']
+        }
       ],
       attributes: {
-        exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt'],
+        exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt']
       },
-      order: [
-        [{ model: sequelize.Message, as: 'lastMsg' }, 'createdAt', 'desc'],
-      ],
-      limit: 5,
+      order: [[sequelize.literal(
+        '(select createdAt from Messages where Messages.RoomId = Room.id order by Messages.createdAt DESC LIMIT 1)'
+      ), 'DESC']],
+      limit: 5
     }
-    Room.findAll(roomOption).then((rooms) => {
-      rooms.forEach((room) => {
-        const user = room.dataValues.theOtherUser[0].dataValues.User
-        const lastMsg = room.dataValues.lastMsg[0].dataValues
-        room.dataValues.theOtherUser = user
-        delete lastMsg.RoomId
-        delete lastMsg.UserId
-        delete lastMsg.updatedAt
+    const rooms = await Room.findAll(roomOption)
+      .then((rooms) => {
+        rooms.forEach((room) => {
+          const user = room.dataValues.User1.dataValues.id !== userId ? room.dataValues.User1.dataValues : room.dataValues.User2.dataValues
+          room.dataValues.lastMsg = {}
+          room.dataValues.lastMsg.fromRoomMember = room.dataValues.Messages[0].dataValues.User.id !== userId
+          room.dataValues.lastMsg.content = room.dataValues.Messages[0].dataValues.content
+          room.dataValues.lastMsg.createdAt = room.dataValues.Messages[0].dataValues.createdAt
+          room.dataValues.roomMember = user
+          delete room.dataValues.Messages
+          delete room.dataValues.User1
+          delete room.dataValues.User2
+          return room.dataValues
+        })
+        return res.json(rooms)
       })
-      res.json(rooms)
-    })
   })
   app.use('/api/users', users)
   app.use('/api/tweets', tweets)
