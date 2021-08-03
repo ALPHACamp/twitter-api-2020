@@ -174,11 +174,6 @@ let socketController = {
     await record.increment({ unreadNum: 1 })
     /* Receiver is online */
     if (isUserOnline) {
-      /* Receiver is not on private page  */
-      const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
-      isUserOnline.forEach((socketid) => {
-        socket.to(socketid).emit('get_msg_notice', getMsgNotice)
-      })
       /* Receiver is on private page  */
       if (isReceiverOnPrivatePage) { 
         /* Receiver is not in room */ 
@@ -190,8 +185,14 @@ let socketController = {
         isUserOnline.forEach((socketid) => {
           socket.to(socketid).emit('get_private_rooms', rooms)
           socket
-            .to(socketid)
-            .emit('get_msg_notice_details', getMsgNoticeDetails)
+          .to(socketid)
+          .emit('get_msg_notice_details', getMsgNoticeDetails)
+        })
+      } else {
+        /* Receiver is not on private page  */
+        const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
+        isUserOnline.forEach((socketid) => {
+          socket.to(socketid).emit('get_msg_notice', getMsgNotice)
         })
       }
     }
