@@ -166,10 +166,11 @@ let socketController = {
       return
     }
     /* update record */
-    const record = await socketService.getMsgRecord(RoomId, SenderId)
+    let record = await socketService.getMsgRecord(RoomId, SenderId)
     if (!record) {
       record = await socketService.createMsgRecord(RoomId, SenderId, ReceiverId)
     }
+    const unreadNum = record.unreadNum + 1
     record.isSeen = false
     await record.increment({ unreadNum: 1 })
     /* Receiver is online */
@@ -178,15 +179,15 @@ let socketController = {
       if (isReceiverOnPrivatePage) { 
         /* Receiver is not in room */ 
         record.isSeen = true
-        const [rooms, getMsgNoticeDetails] = await Promise.all([
-          await socketService.getPrivateRooms(ReceiverId),
-          await socketService.getMsgNoticeDetails(ReceiverId),
-        ])
+        const updateMsgNoticeDetails = await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
+        updateMsgNoticeDetails.lastMsg = {
+          fromRoomMember: true,
+          content: message.content,
+          createdAt: message.createdAt
+        }
+        updateMsgNoticeDetails.unreadNum = unreadNum
         isUserOnline.forEach((socketid) => {
-          socket.to(socketid).emit('get_private_rooms', rooms)
-          socket
-          .to(socketid)
-          .emit('get_msg_notice_details', getMsgNoticeDetails)
+          socket.to(socketid).emit('update_msg_notice_details', updateMsgNoticeDetails)
         })
       } else {
         /* Receiver is not on private page  */
