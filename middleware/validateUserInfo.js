@@ -1,5 +1,5 @@
-const helpers = require('./_helpers')
-const { User } = require('./models')
+const helpers = require('../_helpers')
+const { User } = require('../models')
 module.exports = {
   schema: {
     type: 'object',
@@ -52,7 +52,8 @@ module.exports = {
 
     /* email, account 重複處理 */
     let user = {}
-    if (helpers.getUser(req)) {  // for setting
+    if (helpers.getUser(req)) {
+      // for setting
       user = await User.findOne({
         where: {
           $or: { email, account: account.trim() },
@@ -63,7 +64,8 @@ module.exports = {
       if (!user) return
     }
 
-    if (!helpers.getUser(req)) {  // for signup
+    if (!helpers.getUser(req)) {
+      // for signup
       user = await User.findOne({
         where: {
           $or: { email, account: account.trim() }
