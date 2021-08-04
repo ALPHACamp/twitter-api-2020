@@ -33,6 +33,7 @@
     "mysql2": "^1.7.0",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
+    "passport-jwt.socketio": "^0.1.1",
     "passport-local": "^1.0.0",
     "sequelize": "^4.44.4",
     "sequelize-cli": "^5.5.1",
