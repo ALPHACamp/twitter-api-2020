@@ -8,14 +8,14 @@ const addFormats = require('ajv-formats')
 const ajv = new Ajv({ allErrors: true }) // 顯示超過一個以上的 errors
 addFormats(ajv)
 require('ajv-errors')(ajv)
-const validateUserInfo = require('../validateUserInfo')
+const validateUserInfo = require('../middleware/validateUserInfo')
 const validate = ajv.compile(validateUserInfo.schema)
 
 // JWT
 const jwt = require('jsonwebtoken')
 
 function getData(data) {
-  if (data) return data.map(d => d.id)
+  if (data) return data.map((d) => d.id)
   return []
 }
 
@@ -28,7 +28,7 @@ const userController = {
     User.findOne({
       where: { account: req.body.account }
     })
-      .then(user => {
+      .then((user) => {
         if (!user) throw new Error('此使用者尚未註冊')
         if (user.role === 'admin') throw new Error('管理者請從後台登入')
 
@@ -51,7 +51,7 @@ const userController = {
           }
         })
       })
-      .catch(err => next(err))
+      .catch((err) => next(err))
   },
 
   signUp: async (req, res, next) => {
@@ -128,7 +128,7 @@ const userController = {
       // LikedTweets 有資料才做 map 處理，不然 test 會過不了
       const likes = getData(helpers.getUser(req).LikedTweets)
 
-      const tweets = user.Tweets.map(t => ({
+      const tweets = user.Tweets.map((t) => ({
         userId: user.toJSON().id,
         userName: user.toJSON().name,
         userAvatar: user.toJSON().avatar,
@@ -189,7 +189,7 @@ const userController = {
 
       const likes = getData(helpers.getUser(req).LikedTweets)
 
-      const data = like.toJSON().Likes.map(d => ({
+      const data = like.toJSON().Likes.map((d) => ({
         userId: d.UserId,
         TweetId: d.TweetId,
         userName: d.Tweet.User.name,
@@ -225,7 +225,7 @@ const userController = {
 
       const isFollowing = getData(helpers.getUser(req).Followings)
 
-      const data = following.toJSON().Followings.map(d => ({
+      const data = following.toJSON().Followings.map((d) => ({
         ...d,
         isFollowing: isFollowing.includes(d.followingId)
       }))
@@ -254,7 +254,7 @@ const userController = {
 
       const isFollowing = getData(helpers.getUser(req).Followings)
 
-      const data = followers.toJSON().Followers.map(d => ({
+      const data = followers.toJSON().Followers.map((d) => ({
         ...d,
         isFollowing: isFollowing.includes(d.followerId)
       }))
