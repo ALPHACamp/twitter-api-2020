@@ -42,5 +42,5 @@ module.exports = (app) => {
   app.post('/api/tweets/:tweetId/unlike', authenticated, tweetController.unlikeTweet)
 
   // chats
-  app.get('/api/chats/public-room/', authenticated, chatController.getHistoryMessage)
+  app.get('/api/chats/public-messages', authenticated, chatController.getHistoryMessage)
 }
