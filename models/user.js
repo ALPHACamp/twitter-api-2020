@@ -35,10 +35,6 @@ module.exports = (sequelize, DataTypes) => {
       introduction: {
         type: DataTypes.TEXT
       },
-      updatedAt: {
-        allowNull: false,
-        type: DataTypes.DATE
-      },
       likeNum: {
         type: DataTypes.INTEGER
       },
@@ -51,13 +47,16 @@ module.exports = (sequelize, DataTypes) => {
       followerNum: {
         type: DataTypes.INTEGER
       },
-      lastLoginAt: {
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+      },
+      updatedAt: {
+        allowNull: false,
         type: DataTypes.DATE
       },
-      isOnline: {
-        allowNull: false,
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
+      timelineSeenAt: {
+        type: DataTypes.DATE
       }
     },
     {}
