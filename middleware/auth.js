@@ -37,9 +37,9 @@ module.exports = {
     })
   },
   authenticatedSocket: (socket, next) => {
-    console.log('==========================================')
+    console.log('=========== SOCKET HANDSHAKE ===========')
     console.log(socket.handshake.query.auth)
-    console.log('==========================================')
+    console.log('========================================')
     if (socket.handshake.query && socket.handshake.query.auth) {
       jwt.verify(
         socket.handshake.query.auth,
@@ -50,9 +50,9 @@ module.exports = {
           }
           socket.decoded = decoded
           const options = {
-            attributes: ['id', 'name', 'account', 'avatar', 'lastOnlineAt']
-          };
-          let user = await User.findById(decoded.id, options);
+            attributes: ['id', 'name', 'account', 'avatar']
+          }
+          let user = await User.findById(decoded.id, options)
           // console.log(user)
           user = user.toJSON()
           user.socketId = socket.id
