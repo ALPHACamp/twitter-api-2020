@@ -26,13 +26,13 @@ module.exports = (httpServer) => {
         onlineUsers.push(user)
       }
 
-      socket.broadcast.emit('joinRoom', `${name} 上線`)
+      socket.broadcast.emit('joinRoom', `${name}`)
       io.emit('totalUser', onlineUsers)
     })
 
     socket.on('publicChat', async (msg) => {
       Message.create({ UserId: id, chatRoomId: '5', message: msg })
-      io.emit('publicChat', msg)
+      io.emit('publicChat', msg, socket.handshake.user)
     })
 
     socket.on('leavePublic', async () => {
@@ -40,7 +40,7 @@ module.exports = (httpServer) => {
       onlineUsers.splice(userIdIndex, 1)
 
       await io.emit('totalUser', onlineUsers)
-      await socket.broadcast.emit('leaveRoom', `${name} 離線`)
+      await socket.broadcast.emit('leaveRoom', `${name}`)
     })
   })
 }
