@@ -1,5 +1,6 @@
 const socketService = require('../../service/socketService')
 const chalk = require('chalk')
+const socket = require('../../socket/socket')
 const highlight = chalk.bgYellow.black
 const notice = chalk.bgBlue.white
 const detail = chalk.magentaBright
@@ -20,7 +21,7 @@ let socketController = {
       socketService.removeUserFromPublicRoom(socket.id)
       const users = socketService.getPublicRoomUsers(socket.id)
       io.emit('online_users', {
-        users,
+        users
       })
     }
     if (socketService.checkSocketExists(socket)) {
@@ -35,11 +36,11 @@ let socketController = {
     socketService.showAllSocketDetails(ids)
     const user = socketService.getUserInfo(socket.id)
     io.emit('new_join', {
-      name: user.name,
+      name: user.name
     })
     const users = socketService.getPublicRoomUsers(socket.id)
     io.emit('online_users', {
-      users,
+      users
     })
   },
   joinPrivatePage: async function (userId, socket) {
@@ -89,11 +90,11 @@ let socketController = {
     socketService.removeUserFromPublicRoom(socket.id)
     const user = socketService.getUserInfo(socket.id)
     io.emit('user_leave', {
-      name: user.name,
+      name: user.name
     })
     const users = socketService.getPublicRoomUsers()
     io.emit('online_users', {
-      users,
+      users
     })
   },
   leavePrivatePage: (socket) => {
@@ -132,7 +133,7 @@ let socketController = {
     socket.broadcast.emit('get_public_msg', {
       content: message.content,
       createdAt: message.createdAt,
-      avatar: user.avatar,
+      avatar: user.avatar
     })
   },
   postPrivateMsg: async (SenderId, ReceiverId, RoomId, content, socket) => {
@@ -140,7 +141,7 @@ let socketController = {
       SenderId,
       ReceiverId,
       RoomId,
-      content,
+      content
     })
     if (!content) {
       return
@@ -163,7 +164,7 @@ let socketController = {
         RoomId,
         content,
         avatar,
-        createdAt,
+        createdAt
       })
       console.log(detail(`send message to ${ReceiverId}`))
       return
@@ -182,7 +183,8 @@ let socketController = {
       if (isReceiverOnPrivatePage) {
         /* Receiver is not in room */
         record.isSeen = true
-        const updateMsgNoticeDetails = await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
+        const updateMsgNoticeDetails =
+          await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
         updateMsgNoticeDetails.lastMsg = {
           fromRoomMember: true,
           content: message.content,
@@ -190,7 +192,9 @@ let socketController = {
         }
         updateMsgNoticeDetails.unreadNum = unreadNum
         isUserOnline.forEach((socketid) => {
-          socket.to(socketid).emit('update_msg_notice_details', updateMsgNoticeDetails)
+          socket
+            .to(socketid)
+            .emit('update_msg_notice_details', updateMsgNoticeDetails)
         })
         console.log(notice(`update_msg_notice_details to ${ReceiverId}`))
       } else {
@@ -204,6 +208,35 @@ let socketController = {
     }
     await record.save()
   },
+  postTimeline: async (ReceiverId, type, PostId, socket) => {
+    const data = await socketService.createTimelineRecord(
+      ReceiverId,
+      PostId,
+      type,
+      socket.request.user
+    )
+    const receivers = data.receivers
+    receivers.forEach(async (receiver,index) => {
+      const isUserOnline = socketService.getUserSocketIds(receiver)
+      if (isUserOnline) {
+        const isOnTimelinePage =
+          socketService.checkReceiverOnTimelinePage(isUserOnline)
+        if (isOnTimelinePage) {
+          isOnTimelinePage.forEach(socketId => {
+            socketService.updateTimelineSeenAt(receiver)
+            socket.to(socketId).emit('update_timeline_notice_detail', data.data[i])
+          })
+          return
+        }
+        //on other page
+        isUserOnline.forEach((socketId) => {
+          socket
+            .to(socketId)
+            .emit('update_timeline_notice', socketService.sendTimeNotice())
+        })
+      }
+    })
+  }
 }
 
 module.exports = socketController

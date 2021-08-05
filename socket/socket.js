@@ -56,7 +56,8 @@ module.exports = (server) => {
       const RoomId = await socketController.joinPrivateRoom(
         User1Id,
         User2Id,
-        socket, io
+        socket,
+        io
       )
       //return roomId to client
       socket.emit('join_private_room', RoomId)
@@ -86,5 +87,14 @@ module.exports = (server) => {
         )
       }
     )
+    /* notification  */
+    socket.on('post_timeline', async ({ ReceiverId, type, PostId}) => {
+      await socketController.postTimeline(
+        ReceiverId,
+        type,
+        PostId,
+        socket
+      )
+    })
   })
 }
