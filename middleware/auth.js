@@ -50,7 +50,7 @@ module.exports = {
           }
           socket.decoded = decoded
           const options = {
-            attributes: ['id', 'name', 'account', 'avatar']
+            attributes: ['id', 'name', 'account', 'avatar', 'timelineSeenAt']
           }
           let user = await User.findById(decoded.id, options)
           // console.log(user)

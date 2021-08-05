@@ -1,7 +1,9 @@
 const sockets = [] // array of sockets  找到對應的socket物件
-const socketUsers = {} // key(socketid) to value(id, name, account, avatar) 利用socketid可以找到對應使用者
+const socketUsers = {} // key(socketid) to value(id, pageNum)  0-->other  1-->public  2-->timeline
+const userData = {} // key(userid) to value(name, account, avatar, timelineSeenAt)
 const publicRoomUsers = [] // array of userIds 公開聊天室的socketId
-let privateRoomUsers = {} // key(socketid) to value(id, currentRoom)
+const privateRoomUsers = {} // key(socketid) to value(id, currentRoom)
+const timelineUsers = {} // key(socketid) to value(id)
 const db = require('../models')
 const User = db.User
 const Room = db.Room
@@ -16,17 +18,20 @@ const detail = chalk.magentaBright
 
 let socketService = {
   addNewSocketUser: (socket) => {
+    if(!userData[currentUser.id]){
+      userData[currentUser.id] = {
+        name: currentUser.name,
+        account: currentUser.account,
+        avatar: currentUser.avatar,
+        timelineSeenAt: currentUser.timelineSeenAt,
+      }
+    }
     const currentUser = socket.request.user
     /* connect */
     // 儲存socket物件
     sockets.push(socket)
     // 建立socketId 與使用者資訊的對照表
-    socketUsers[socket.id] = {
-      id: currentUser.id,
-      name: currentUser.name,
-      account: currentUser.account,
-      avatar: currentUser.avatar
-    }
+    socketUsers[socket.id] = currentUser.id
   },
   addSocketIdToPublicRoom: (socketId) => {
     publicRoomUsers.push(socketId)
@@ -59,7 +64,7 @@ let socketService = {
     let users = []
     publicRoomUsers.forEach((socketId) => {
       if (socketUsers[socketId]) {
-        users.push(socketUsers[socketId])
+        users.push(userData[socketUsers[socketId]])
       }
     })
     let allId = users.map((item) => item.id)
@@ -67,7 +72,7 @@ let socketService = {
     return users
   },
   getUserInfo: (socketId) => {
-    return socketUsers[socketId]
+    return userData[socketUsers[socketId]]
   },
   getPrivateRoomUserInfo: (socketId) => {
     return privateRoomUsers[socketId]
@@ -286,8 +291,12 @@ let socketService = {
     return false
   },
   removeSocketFromList: (socket) => {
+    const userId = socketUsers[socket.id].id
     sockets.splice(sockets.indexOf(socket), 1)
     delete socketUsers[socket.id]
+    if (!Object.keys(socketUsers).find(key => socketUsers[key] === userId)) {
+      delete userData[userId]
+    }
     return
   },
   removeUserFromPrivateRoom: (socketId) => {
@@ -337,7 +346,7 @@ let socketService = {
   showNewUserOnline: (socketId) => {
     console.log(
       highlight(
-        ` User is online: ${socketUsers[socketId].name} / ${socketId}`
+        ` User is online: ${userData[socketUsers[socketId]].name} / ${socketId}`
       )
     )
   },
@@ -351,13 +360,13 @@ let socketService = {
   },
   showLeavePublicRoomNotice: (userId, socketId) => {
     if (userId) {
-      console.log(notice('leave_public_room: '), userId)
+      console.log(notice(`leave_public_room: userID ${userId}`))
       return
     }
-    console.log(notice(`leave PublicRoom: ${socketUsers[socketId].id}`))
+    console.log(notice(`leave PublicRoom: userID ${socketUsers[socketId].id}`))
   },
   showLeavePrivatePageNotice: (socketId) => {
-    console.log(notice(`leave Private Page: ${socketUsers[socketId].id}`))
+    console.log(notice(`leave Private Page: userID ${socketUsers[socketId].id}`))
   },
   showGetPublicHistoryNotice: () => {
     console.log(notice(`get_public_history: roomId ${1}`))
