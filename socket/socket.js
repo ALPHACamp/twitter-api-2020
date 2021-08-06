@@ -86,5 +86,19 @@ module.exports = (server) => {
         )
       }
     )
+    /* timeline*/
+    socket.on('get_timeline_notice_details', async ({ offset, limit }, cb) => {
+      console.log(notice('伺服器收到事件 get_timeline_notice_details'))
+      const results = await socketService.getTimelineNoticeDetails(offset, limit, socket.id)
+      cb(results)
+    })
+    socket.on('seen_timeline', ({ timestamp }) => {
+      console.log(notice('伺服器收到事件 seen_timeline'))
+      socketService.seenTimeline(socket.id, timestamp)
+    })
+    socket.on('read_timeline', async ({ timelineId }) => {
+      console.log(notice('伺服器收到事件 read_timeline'))
+      await socketService.readTimeline(timelineId)
+    })
   })
 }
