@@ -86,7 +86,7 @@ module.exports = (server) => {
         )
       }
     )
-    /* timeline*/
+    /* timeline */
     socket.on('get_timeline_notice_details', async ({ offset, limit }, cb) => {
       console.log(notice('伺服器收到事件 get_timeline_notice_details'))
       const results = await socketService.getTimelineNoticeDetails(offset, limit, socket.id)

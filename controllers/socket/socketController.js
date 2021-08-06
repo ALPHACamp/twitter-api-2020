@@ -85,7 +85,7 @@ let socketController = {
     return roomId
   },
   leavePublicRoom: (userId, socket, io) => {
-    socketService.showLeavePublicRoomNotice(userId)
+    socketService.showLeavePublicRoomNotice(userId, socket.id)
     socketService.removeUserFromPublicRoom(socket.id)
     const user = socketService.getUserInfo(socket.id)
     io.emit('user_leave', {

@@ -22,6 +22,7 @@ const detail = chalk.magentaBright
 
 let socketService = {
   addNewSocketUser: (socket) => {
+    const currentUser = socket.request.user
     if (!userData[currentUser.id]) {
       userData[currentUser.id] = {
         name: currentUser.name,
@@ -30,7 +31,6 @@ let socketService = {
         timelineSeenAt: currentUser.timelineSeenAt,
       }
     }
-    const currentUser = socket.request.user
     /* connect */
     // 儲存socket物件
     sockets.push(socket)
@@ -484,7 +484,7 @@ let socketService = {
       console.log(notice(`leave_public_room: userID ${userId}`))
       return
     }
-    console.log(notice(`leave PublicRoom: userID ${socketUsers[socketId].id}`))
+    console.log(notice(`leave_public_room: socketId|${socketId}  userID|${socketUsers[socketId].id}`))
   },
   showLeavePrivatePageNotice: (socketId) => {
     console.log(notice(`leave Private Page: userID ${socketUsers[socketId].id}`))
@@ -498,7 +498,8 @@ let socketService = {
   showAllSocketDetails: (ids) => {
     console.log(detail('all sockets [伺服器紀錄]'), '\n', sockets.map(item => item.id))
     console.log(detail('all sockets [系統偵測]'), '\n', Array.from(ids))
-    console.log(detail('all socketUsers [詳細資料]'), '\n', socketUsers)
+    console.log(detail('all socketUsers [socketID-userID]'), '\n', socketUsers)
+    console.log(detail('all userData [詳細資料]'), '\n', userData)
     console.log(detail('all publicRoomUsers '), '\n', publicRoomUsers)
     console.log(detail('all privateRoomUsers '), '\n', privateRoomUsers)
   }
