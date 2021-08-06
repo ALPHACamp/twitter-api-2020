@@ -71,8 +71,8 @@ let socketService = {
         users.push(userData[socketUsers[socketId]])
       }
     })
-    let allId = users.map((item) => item.id)
-    users = users.filter((user, i, arr) => allId.indexOf(user.id) === i)
+    let allId = users.map((item) => item.account)
+    users = users.filter((user, i, arr) => allId.indexOf(user.account) === i)
     return users
   },
   getUserInfo: (socketId) => {
