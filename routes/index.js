@@ -7,6 +7,10 @@ const db = require('../models/')
 const Room = db.Room
 const Message = db.Message
 const User = db.User
+const Tweet = db.Tweet
+const Like = db.Like
+const Reply = db.Reply
+const TimelineRecord = db.TimelineRecord
 const sequelize = require('sequelize')
 const { Op, QueryTypes } = require('sequelize')
 const socketService = require('../service/socketService')
@@ -18,16 +22,14 @@ module.exports = (app) => {
 
   // })
   app.get('/test', async (req, res) => {
-    let SenderId = +req.query.SenderId
-    let ReceiverId = +req.query.ReceiverId
-    let updateMsgNoticeDetails = await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
-    updateMsgNoticeDetails.lastMsg = {
-      fromRoomMember: true,
-      content: 'message.content',
-      createdAt: 'message.createdAt'
-    }
-    updateMsgNoticeDetails.unreadNum = 'unreadNum'
-    return res.json(updateMsgNoticeDetails)
+
+    let  data = await TimelineRecord.create({
+      UserId:2,
+      LikeId:10
+    })
+    data= data.toJSON()
+    console.log(data)
+    res.json(data)
   })
   app.use('/api/users', users)
   app.use('/api/tweets', tweets)
@@ -36,7 +38,7 @@ module.exports = (app) => {
   app.use('/', (req, res) => {
     res.status(404).json({
       status: 'error',
-      message: 'Page not found.',
+      message: 'Page not found.'
     })
   })
 }
