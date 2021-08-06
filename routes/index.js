@@ -4,7 +4,7 @@ let admins = require('./api/admin')
 let followships = require('./api/followships')
 const path = require('path')
 const db = require('../models/')
-const Room = db.Room
+const TimelineRecord = db.TimelineRecord
 const Message = db.Message
 const User = db.User
 const sequelize = require('sequelize')
@@ -18,16 +18,35 @@ module.exports = (app) => {
 
   // })
   app.get('/test', async (req, res) => {
-    let SenderId = +req.query.SenderId
-    let ReceiverId = +req.query.ReceiverId
-    let updateMsgNoticeDetails = await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
-    updateMsgNoticeDetails.lastMsg = {
-      fromRoomMember: true,
-      content: 'message.content',
-      createdAt: 'message.createdAt'
+    let offset = +req.query.offset
+    let limit = +req.query.limit
+    let userId = 1
+    let timestamp = new Date()
+    let SeenRecords = []
+    const UnseenRecords = await TimelineRecord.findAll({
+      offset,
+      limit,
+      where: {
+        UserId: userId,
+        createdAt: {
+          [Op.gt]: timestamp
+        }
+      },
+      order: [['createdAt', 'desc']]
+    })
+    if (limit - UnseenRecords.length > 0) {
+      SeenRecords = await TimelineRecord.findAll({
+        offset: offset + UnseenRecords.length,
+        limit: limit - UnseenRecords.length,
+        where: {
+          UserId: userId
+        },
+        order: [['createdAt', 'desc']]
+      })
     }
-    updateMsgNoticeDetails.unreadNum = 'unreadNum'
-    return res.json(updateMsgNoticeDetails)
+    const Unseen = await Promise.all(UnseenRecords.map(async (record) => { return await socketService.parseTimelineData(record) }))
+    const Seen = await Promise.all(SeenRecords.map(async (record) => { return await socketService.parseTimelineData(record) }))
+    return res.json({ Unseen, Seen })
   })
   app.use('/api/users', users)
   app.use('/api/tweets', tweets)

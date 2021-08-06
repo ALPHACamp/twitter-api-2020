@@ -1,5 +1,5 @@
 const sockets = [] // array of sockets  找到對應的socket物件
-const socketUsers = {} // key(socketid) to value(id, pageNum)  0-->other  1-->public  2-->timeline
+const socketUsers = {} // key(socketid) to value(id)
 const userData = {} // key(userid) to value(name, account, avatar, timelineSeenAt)
 const publicRoomUsers = [] // array of userIds 公開聊天室的socketId
 const privateRoomUsers = {} // key(socketid) to value(id, currentRoom)
@@ -9,6 +9,10 @@ const User = db.User
 const Room = db.Room
 const Message = db.Message
 const MessageRecord = db.MessageRecord
+const TimelineRecord = db.TimelineRecord
+const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
 const chalk = require('chalk')
@@ -18,7 +22,7 @@ const detail = chalk.magentaBright
 
 let socketService = {
   addNewSocketUser: (socket) => {
-    if(!userData[currentUser.id]){
+    if (!userData[currentUser.id]) {
       userData[currentUser.id] = {
         name: currentUser.name,
         account: currentUser.account,
@@ -271,6 +275,112 @@ let socketService = {
         return room.dataValues
       })
   },
+  getTimelineNotice: async (socket) => {
+    const userId = socketUsers[socket.id].id
+    const timestamp = userData[userId].timestamp
+    const { count } = await TimelineRecord.findAndCountAll({
+      where: {
+        UserId: userId,
+        createdAt: {
+          [Op.gt]: timestamp
+        }
+      }
+    })
+    return count
+  },
+  getTimelineNoticeDetails: async function (offset, limit, socketId) {
+    const userId = socketUsers[socketId].id
+    const timestamp = userData[userId].timestamp
+    let SeenRecords = []
+    const UnseenRecords = await TimelineRecord.findAll({
+      offset,
+      limit,
+      where: {
+        UserId: userId,
+        createdAt: {
+          [Op.gt]: timestamp
+        }
+      },
+      order: [['createdAt', 'desc']]
+    })
+    if (limit - UnseenRecords.length > 0) {
+      SeenRecords = await TimelineRecord.findAll({
+        offset: offset + UnseenRecords.length,
+        limit: limit - UnseenRecords.length,
+        where: {
+          UserId: userId
+        },
+        order: [['createdAt', 'desc']]
+      })
+    }
+    const Unseen = await Promise.all(UnseenRecords.map(async (record) => { return await socketService.parseTimelineData(record) }))
+    const Seen = await Promise.all(SeenRecords.map(async (record) => { return await socketService.parseTimelineData(record) }))
+    return { Unseen, Seen }
+  },
+  parseTimelineData: async (record) => {
+    const { id, ReplyId, LikeId, FollowerId, SubscribeTweetId, isRead, createdAt } = record.dataValues
+    const replyOptions = {
+      include: [
+        {
+          model: User,
+          attributes: ['name', 'avatar']
+        },
+        {
+          model: Tweet,
+          as: 'RepliedTweet',
+          attributes: ['id']
+        }
+      ],
+      attributes: ['id', 'comment', 'createdAt']
+    }
+    const likeOptions = {
+      include: [
+        {
+          model: User,
+          attributes: ['name', 'avatar']
+        },
+        {
+          model: Tweet,
+          as: 'LikedTweet',
+          attributes: ['id']
+        }
+      ],
+      attributes: ['createdAt']
+    }
+    const followerOptions = {
+      attributes: ['id', 'name', 'avatar']
+    }
+    const tweetOptions = {
+      attributes: ['id', 'description', 'createdAt'],
+      include: [
+        {
+          model: User,
+          attributes: ['name', 'avatar'],
+          as: 'Author'
+        }
+      ]
+    }
+    if (ReplyId) {
+      const reply = await Reply.findByPk(ReplyId, replyOptions)
+      return { id, Reply: reply.toJSON(), isRead }
+    }
+    if (LikeId) {
+      const like = await Like.findByPk(LikeId, likeOptions)
+      return { id, Like: like.toJSON(), isRead }
+    }
+    if (FollowerId) {
+      const Follower = await User.findByPk(FollowerId, followerOptions)
+      return { id, Follower: Follower.toJSON(), isRead, createdAt }
+    }
+    if (SubscribeTweetId) {
+      const tweet = await Tweet.findByPk(SubscribeTweetId, tweetOptions)
+      const Subscribing = {}
+      Subscribing.User = tweet.dataValues.Author
+      delete tweet.dataValues.Author
+      Subscribing.Tweet = tweet
+      return { id, Subscribing, isRead }
+    }
+  },
   checkSocketExists: (socket) => {
     return sockets.includes(socket)
   },
@@ -342,6 +452,17 @@ let socketService = {
       unreadNum: 0
     })
     return record
+  },
+  seenTimeline: (socketId, timestamp) => {
+    userData[socketUsers[socketId]].timestamp = timestamp
+    return
+  },
+  readTimeline: async (timelineId) => {
+    return await TimelineRecord.update({ isRead: true }, {
+      where: {
+        id: timelineId
+      }
+    })
   },
   showNewUserOnline: (socketId) => {
     console.log(
