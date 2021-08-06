@@ -7,6 +7,10 @@ const db = require('../models/')
 const TimelineRecord = db.TimelineRecord
 const Message = db.Message
 const User = db.User
+const Tweet = db.Tweet
+const Like = db.Like
+const Reply = db.Reply
+const TimelineRecord = db.TimelineRecord
 const sequelize = require('sequelize')
 const { Op, QueryTypes } = require('sequelize')
 const socketService = require('../service/socketService')
@@ -55,7 +59,7 @@ module.exports = (app) => {
   app.use('/', (req, res) => {
     res.status(404).json({
       status: 'error',
-      message: 'Page not found.',
+      message: 'Page not found.'
     })
   })
 }

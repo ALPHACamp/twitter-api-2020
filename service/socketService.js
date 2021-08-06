@@ -8,20 +8,33 @@ const db = require('../models')
 const User = db.User
 const Room = db.Room
 const Message = db.Message
+const Reply = db.Reply
+const Like = db.Like
+const Tweet = db.Tweet
 const MessageRecord = db.MessageRecord
 const TimelineRecord = db.TimelineRecord
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+const Followship = db.Followship
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
 const chalk = require('chalk')
+const socket = require('../socket/socket')
 const highlight = chalk.bgYellow.black
 const notice = chalk.bgBlue.white
 const detail = chalk.magentaBright
 
 let socketService = {
   addNewSocketUser: (socket) => {
+    if (!userData[currentUser.id]) {
+      userData[currentUser.id] = {
+        name: currentUser.name,
+        account: currentUser.account,
+        avatar: currentUser.avatar,
+        timelineSeenAt: currentUser.timelineSeenAt
+      }
+    }
     const currentUser = socket.request.user
     if (!userData[currentUser.id]) {
       userData[currentUser.id] = {
@@ -105,11 +118,11 @@ let socketService = {
     const room = await Room.findOne(roomOptions)
     let roomId
     if (room) {
-      console.log(detail("room已存在，roomId為:"), room.id)
+      console.log(detail('room已存在，roomId為:'), room.id)
       roomId = room.id
     } else {
       roomId = await Room.create({ User1Id, User2Id })
-      console.log(detail("建立新的room，roomId為:"), room.toJSON())
+      console.log(detail('建立新的room，roomId為:'), room.toJSON())
       roomId = roomId.toJSON().id
     }
     return roomId
@@ -133,8 +146,8 @@ let socketService = {
             {
               model: User,
               as: 'User',
-              attributes: ['id'],
-            },
+              attributes: ['id']
+            }
           ],
           order: [['createdAt', 'desc']]
         },
@@ -152,27 +165,37 @@ let socketService = {
       attributes: {
         exclude: ['updatedAt', 'User1Id', 'User2Id', 'createdAt']
       },
-      order: [[sequelize.literal(
-        '(select createdAt from Messages where Messages.RoomId = Room.id order by Messages.createdAt DESC LIMIT 1)'
-      ), 'DESC']],
+      order: [
+        [
+          sequelize.literal(
+            '(select createdAt from Messages where Messages.RoomId = Room.id order by Messages.createdAt DESC LIMIT 1)'
+          ),
+          'DESC'
+        ]
+      ],
       limit: 5
     }
-    const rooms = await Room.findAll(roomOption)
-      .then((rooms) => {
-        rooms.forEach((room) => {
-          const user = room.dataValues.User1.dataValues.id !== userId ? room.dataValues.User1.dataValues : room.dataValues.User2.dataValues
-          room.dataValues.lastMsg = {}
-          room.dataValues.lastMsg.fromRoomMember = room.dataValues.Messages[0].dataValues.User.id !== userId
-          room.dataValues.lastMsg.content = room.dataValues.Messages[0].dataValues.content
-          room.dataValues.lastMsg.createdAt = room.dataValues.Messages[0].dataValues.createdAt
-          room.dataValues.roomMember = user
-          delete room.dataValues.Messages
-          delete room.dataValues.User1
-          delete room.dataValues.User2
-          return room.dataValues
-        })
-        return rooms
+    const rooms = await Room.findAll(roomOption).then((rooms) => {
+      rooms.forEach((room) => {
+        const user =
+          room.dataValues.User1.dataValues.id !== userId
+            ? room.dataValues.User1.dataValues
+            : room.dataValues.User2.dataValues
+        room.dataValues.lastMsg = {}
+        room.dataValues.lastMsg.fromRoomMember =
+          room.dataValues.Messages[0].dataValues.User.id !== userId
+        room.dataValues.lastMsg.content =
+          room.dataValues.Messages[0].dataValues.content
+        room.dataValues.lastMsg.createdAt =
+          room.dataValues.Messages[0].dataValues.createdAt
+        room.dataValues.roomMember = user
+        delete room.dataValues.Messages
+        delete room.dataValues.User1
+        delete room.dataValues.User2
+        return room.dataValues
       })
+      return rooms
+    })
     return rooms
   },
   getRoomHistory: async (offset, limit, RoomId) => {
@@ -266,14 +289,16 @@ let socketService = {
         }
       ]
     }
-    return await Room.findOne(roomOption)
-      .then((room) => {
-        const user = room.dataValues.User1.dataValues.id !== ReceiverId ? room.dataValues.User1.dataValues : room.dataValues.User2.dataValues
-        room.dataValues.roomMember = user
-        delete room.dataValues.User1
-        delete room.dataValues.User2
-        return room.dataValues
-      })
+    return await Room.findOne(roomOption).then((room) => {
+      const user =
+        room.dataValues.User1.dataValues.id !== ReceiverId
+          ? room.dataValues.User1.dataValues
+          : room.dataValues.User2.dataValues
+      room.dataValues.roomMember = user
+      delete room.dataValues.User1
+      delete room.dataValues.User2
+      return room.dataValues
+    })
   },
   getTimelineNotice: async (socket) => {
     const userId = socketUsers[socket.id].id
@@ -425,7 +450,7 @@ let socketService = {
       attributes: ['id']
     }
     await MessageRecord.findAll(MsgRecordOption).then((records) => {
-      records = records.map(record => record.id)
+      records = records.map((record) => record.id)
       MessageRecord.update({ isSeen: true }, { where: { id: records } })
     })
     return
@@ -496,13 +521,242 @@ let socketService = {
     console.log(notice(`post_public_msg:`, { content, userId }))
   },
   showAllSocketDetails: (ids) => {
-    console.log(detail('all sockets [伺服器紀錄]'), '\n', sockets.map(item => item.id))
+    console.log(
+      detail('all sockets [伺服器紀錄]'),
+      '\n',
+      sockets.map((item) => item.id)
+    )
     console.log(detail('all sockets [系統偵測]'), '\n', Array.from(ids))
     console.log(detail('all socketUsers [socketID-userID]'), '\n', socketUsers)
     console.log(detail('all userData [詳細資料]'), '\n', userData)
     console.log(detail('all publicRoomUsers '), '\n', publicRoomUsers)
     console.log(detail('all privateRoomUsers '), '\n', privateRoomUsers)
+  },
+  createTimelineRecord: async (ReceiverId, PostId, type, currentUser) => {
+    const currentUserId = currentUser
+    if (type === 1) {
+      const followOptions = {
+        where: {
+          followingId: currentUserId,
+          isSubscribing: true
+        },
+        attributes: ['id', 'followerId'],
+        raw: true
+      }
+      let subscribersData = await Followship.findAll(followOptions)
+      subscribersData = subscribersData.map((follower) => ({
+        userId: follower.followerId,
+        SubscribeTweetId: PostId
+      }))
+      let data = await TimelineRecord.bulkCreate(subscribersData)
+      data = data.map((item) => item.dataValues)
+      return {
+        receiver: data.map((item) => item.UserId),
+        record: data.map((item) => item.id)
+      }
+    }
+    if (type === 2) {
+      let record = await TimelineRecord.create({
+        userId: ReceiverId,
+        ReplyId: PostId
+      })
+      record = record.toJSON()
+      return {
+        record: [record.id]
+      }
+    }
+    if (type === 3) {
+      let record = await TimelineRecord.create({
+        userId: ReceiverId,
+        LikeId: PostId
+      })
+      record = record.toJSON()
+      return {
+        record: [record.id]
+      }
+    }
+    if (type === 4) {
+      let record = await TimelineRecord.create({
+        userId: ReceiverId,
+        SubscribeTweetId: PostId
+      })
+      record = record.toJSON()
+      return {
+        record: [record.id]
+      }
+    }
+  },
+  checkReceiverOnTimelinePage: (socketIds) => {
+    const users = []
+    for (let socketId of socketIds) {
+      if (timelineUsers[socketId]) {
+        users.push(socketId)
+        return users
+      }
+    }
+    return false
+  },
+  sendTimeNotice: () => {
+    return {
+      message: 'new timeline_notice'
+    }
+  },
+  updateTimelineSeenAt: (receiver) => {
+    userData[receiver].timelineSeenAt = new Date()
+  },
+  getNoticeDetail: async function (type, recordId, PostId) {
+    let option = {
+      attributes: ['id', 'description', 'createdAt', 'UserId'],
+      include: { model: User, as: 'Author' }
+    }
+    if (type === 1) {
+      option = {
+        attributes: ['id', 'description', 'createdAt', 'UserId'],
+        include: { model: User, as: 'Author' }
+      }
+      let tweet = await Tweet.findByPk(PostId, option)
+      tweet = tweet.toJSON()
+      const Subscribing = {
+        User: tweet.Author,
+        Tweet: tweet
+      }
+      delete tweet.Author
+      delete tweet.UserId
+      return {
+        Subscribing,
+        isRead: false
+      }
+    }
+    if (type === 2) {
+      option = {
+        attributes: ['id', 'isRead'],
+        include: {
+          model: Reply,
+          as: 'Reply',
+          include: [
+            {
+              model: User,
+              attributes: ['name', 'avatar']
+            },
+            {
+              model: Tweet,
+              as: 'RepliedTweet',
+              attributes: ['id']
+            }
+          ],
+          attributes: ['id', 'comment', 'createdAt']
+        }
+      }
+      let data = await TimelineRecord.findByPk(recordId, option)
+      data = data.toJSON()
+      data.Reply.Tweet = data.Reply.RepliedTweet
+      delete data.Reply.RepliedTweet
+      return data
+    }
+    if (type === 3) {
+      option = {
+        attributes: ['id', 'isRead'],
+        include: {
+          model: Like,
+          as: 'Like',
+          attributes: ['id', 'createdAt'],
+          include: [
+            {
+              model: User,
+              attributes: ['name', 'avatar']
+            },
+            {
+              model: Tweet,
+              as: 'LikedTweet',
+              attributes: ['id']
+            }
+          ]
+        }
+      }
+      let data = await TimelineRecord.findByPk(recordId, option)
+      data = data.toJSON()
+      data.Like.Tweet = data.Like.RepliedTweet
+      delete data.Like.RepliedTweet
+      return data
+    }
+    if (type === 4) {
+      option = {
+        attributes: ['id', 'isRead', 'createdAt'],
+        include: {
+          model: User,
+          as: 'Follower',
+          attributes: ['id', 'name', 'avatar']
+        }
+      }
+      let data = await TimelineRecord.findByPk(recordId, option)
+      data = data.toJSON()
+      data.Follower = {
+        User: data.Follower
+      }
+      return data
+    }
+  },
+  isUserOnline: (UserId) => {
+    for (let socketId in socketUsers) {
+      if (socketUsers[socketId].id === UserId) {
+        return true
+      }
+    }
+    return false
+  },
+  atLeastOneUserOnline: function (receivers) {
+    for (let receiver of receivers) {
+      if (this.isUserOnline(receiver)) {
+        return true
+      }
+    }
+    return false
   }
+  // typeDbOption: (type) => {
+  //   if (type === 1) {
+  //     return {
+  //       attributes: ['id', 'description', 'createdAt', 'UserId'],
+  //       include: { model: User, as: 'Author' }
+  //     }
+  //   }
+  //   if (type === 2) {
+  //     return {
+  //       include: [
+  //         {
+  //           model: User,
+  //           attributes: ['name', 'avatar']
+  //         },
+  //         {
+  //           model: Tweet,
+  //           as: 'RepliedTweet',
+  //           attributes: ['id']
+  //         }
+  //       ],
+  //       attributes: ['id', 'comment', 'createdAt']
+  //     }
+  //   }
+  //   if (type === 3) {
+  //     return {
+  //       include: [
+  //         {
+  //           model: User,
+  //           attributes: ['name', 'avatar']
+  //         },
+  //         {
+  //           model: Tweet,
+  //           as: 'LikedTweet',
+  //           attributes: ['id']
+  //         }
+  //       ],
+  //       attributes: ['createdAt']
+  //     }
+  //   }
+  //   if (type === 4) {
+  //     return {
+  //       attributes: ['id', 'name', 'avatar']
+  //     }
+  //   }
+  // }
 }
 
 module.exports = socketService
