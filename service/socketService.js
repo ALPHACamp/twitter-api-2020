@@ -5,18 +5,17 @@ const publicRoomUsers = [] // array of userIds 公開聊天室的socketId
 const privateRoomUsers = {} // key(socketid) to value(id, currentRoom)
 const timelineUsers = {} // key(socketid) to value(id)
 const db = require('../models')
-const User = db.User
-const Room = db.Room
-const Message = db.Message
-const Reply = db.Reply
-const Like = db.Like
-const Tweet = db.Tweet
-const MessageRecord = db.MessageRecord
-const TimelineRecord = db.TimelineRecord
-const Tweet = db.Tweet
-const Reply = db.Reply
-const Like = db.Like
-const Followship = db.Followship
+const {
+  User,
+  Room,
+  Message,
+  Reply,
+  Like,
+  Tweet,
+  Followship,
+  MessageRecord,
+  TimelineRecord
+} = db
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
 const chalk = require('chalk')
@@ -27,21 +26,13 @@ const detail = chalk.magentaBright
 
 let socketService = {
   addNewSocketUser: (socket) => {
-    if (!userData[currentUser.id]) {
-      userData[currentUser.id] = {
-        name: currentUser.name,
-        account: currentUser.account,
-        avatar: currentUser.avatar,
-        timelineSeenAt: currentUser.timelineSeenAt
-      }
-    }
     const currentUser = socket.request.user
     if (!userData[currentUser.id]) {
       userData[currentUser.id] = {
         name: currentUser.name,
         account: currentUser.account,
         avatar: currentUser.avatar,
-        timelineSeenAt: currentUser.timelineSeenAt,
+        timelineSeenAt: currentUser.timelineSeenAt
       }
     }
     /* connect */
@@ -302,7 +293,7 @@ let socketService = {
   },
   getTimelineNotice: async (socket) => {
     const userId = socketUsers[socket.id].id
-    const timestamp = userData[userId].timestamp
+    const timestamp = userData[userId].timelineSeenAt
     const { count } = await TimelineRecord.findAndCountAll({
       where: {
         UserId: userId,
@@ -315,7 +306,7 @@ let socketService = {
   },
   getTimelineNoticeDetails: async function (offset, limit, socketId) {
     const userId = socketUsers[socketId].id
-    const timestamp = userData[userId].timestamp
+    const timestamp = userData[userId].timelineSeenAt
     let SeenRecords = []
     const UnseenRecords = await TimelineRecord.findAll({
       offset,
@@ -338,12 +329,28 @@ let socketService = {
         order: [['createdAt', 'desc']]
       })
     }
-    const Unseen = await Promise.all(UnseenRecords.map(async (record) => { return await socketService.parseTimelineData(record) }))
-    const Seen = await Promise.all(SeenRecords.map(async (record) => { return await socketService.parseTimelineData(record) }))
+    const Unseen = await Promise.all(
+      UnseenRecords.map(async (record) => {
+        return await socketService.parseTimelineData(record)
+      })
+    )
+    const Seen = await Promise.all(
+      SeenRecords.map(async (record) => {
+        return await socketService.parseTimelineData(record)
+      })
+    )
     return { Unseen, Seen }
   },
   parseTimelineData: async (record) => {
-    const { id, ReplyId, LikeId, FollowerId, SubscribeTweetId, isRead, createdAt } = record.dataValues
+    const {
+      id,
+      ReplyId,
+      LikeId,
+      FollowerId,
+      SubscribeTweetId,
+      isRead,
+      createdAt
+    } = record.dataValues
     const replyOptions = {
       include: [
         {
@@ -429,7 +436,7 @@ let socketService = {
     const userId = socketUsers[socket.id].id
     sockets.splice(sockets.indexOf(socket), 1)
     delete socketUsers[socket.id]
-    if (!Object.keys(socketUsers).find(key => socketUsers[key] === userId)) {
+    if (!Object.keys(socketUsers).find((key) => socketUsers[key] === userId)) {
       delete userData[userId]
     }
     return
@@ -483,11 +490,14 @@ let socketService = {
     return
   },
   readTimeline: async (timelineId) => {
-    return await TimelineRecord.update({ isRead: true }, {
-      where: {
-        id: timelineId
+    return await TimelineRecord.update(
+      { isRead: true },
+      {
+        where: {
+          id: timelineId
+        }
       }
-    })
+    )
   },
   showNewUserOnline: (socketId) => {
     console.log(
@@ -509,10 +519,16 @@ let socketService = {
       console.log(notice(`leave_public_room: userID ${userId}`))
       return
     }
-    console.log(notice(`leave_public_room: socketId|${socketId}  userID|${socketUsers[socketId].id}`))
+    console.log(
+      notice(
+        `leave_public_room: socketId|${socketId}  userID|${socketUsers[socketId].id}`
+      )
+    )
   },
   showLeavePrivatePageNotice: (socketId) => {
-    console.log(notice(`leave Private Page: userID ${socketUsers[socketId].id}`))
+    console.log(
+      notice(`leave Private Page: userID ${socketUsers[socketId].id}`)
+    )
   },
   showGetPublicHistoryNotice: () => {
     console.log(notice(`get_public_history: roomId ${1}`))
@@ -552,7 +568,7 @@ let socketService = {
       data = data.map((item) => item.dataValues)
       return {
         receiver: data.map((item) => item.UserId),
-        record: data.map((item) => item.id)
+        record
       }
     }
     if (type === 2) {
@@ -562,7 +578,7 @@ let socketService = {
       })
       record = record.toJSON()
       return {
-        record: [record.id]
+        record: [record]
       }
     }
     if (type === 3) {
@@ -572,7 +588,7 @@ let socketService = {
       })
       record = record.toJSON()
       return {
-        record: [record.id]
+        record: [record]
       }
     }
     if (type === 4) {
@@ -582,7 +598,7 @@ let socketService = {
       })
       record = record.toJSON()
       return {
-        record: [record.id]
+        record: [record]
       }
     }
   },
@@ -604,98 +620,6 @@ let socketService = {
   updateTimelineSeenAt: (receiver) => {
     userData[receiver].timelineSeenAt = new Date()
   },
-  getNoticeDetail: async function (type, recordId, PostId) {
-    let option = {
-      attributes: ['id', 'description', 'createdAt', 'UserId'],
-      include: { model: User, as: 'Author' }
-    }
-    if (type === 1) {
-      option = {
-        attributes: ['id', 'description', 'createdAt', 'UserId'],
-        include: { model: User, as: 'Author' }
-      }
-      let tweet = await Tweet.findByPk(PostId, option)
-      tweet = tweet.toJSON()
-      const Subscribing = {
-        User: tweet.Author,
-        Tweet: tweet
-      }
-      delete tweet.Author
-      delete tweet.UserId
-      return {
-        Subscribing,
-        isRead: false
-      }
-    }
-    if (type === 2) {
-      option = {
-        attributes: ['id', 'isRead'],
-        include: {
-          model: Reply,
-          as: 'Reply',
-          include: [
-            {
-              model: User,
-              attributes: ['name', 'avatar']
-            },
-            {
-              model: Tweet,
-              as: 'RepliedTweet',
-              attributes: ['id']
-            }
-          ],
-          attributes: ['id', 'comment', 'createdAt']
-        }
-      }
-      let data = await TimelineRecord.findByPk(recordId, option)
-      data = data.toJSON()
-      data.Reply.Tweet = data.Reply.RepliedTweet
-      delete data.Reply.RepliedTweet
-      return data
-    }
-    if (type === 3) {
-      option = {
-        attributes: ['id', 'isRead'],
-        include: {
-          model: Like,
-          as: 'Like',
-          attributes: ['id', 'createdAt'],
-          include: [
-            {
-              model: User,
-              attributes: ['name', 'avatar']
-            },
-            {
-              model: Tweet,
-              as: 'LikedTweet',
-              attributes: ['id']
-            }
-          ]
-        }
-      }
-      let data = await TimelineRecord.findByPk(recordId, option)
-      data = data.toJSON()
-      data.Like.Tweet = data.Like.RepliedTweet
-      delete data.Like.RepliedTweet
-      return data
-    }
-    if (type === 4) {
-      option = {
-        attributes: ['id', 'isRead', 'createdAt'],
-        include: {
-          model: User,
-          as: 'Follower',
-          attributes: ['id', 'name', 'avatar']
-        }
-      }
-      let data = await TimelineRecord.findByPk(recordId, option)
-      data = data.toJSON()
-      data.Follower = {
-        User: data.Follower
-      }
-      return data
-    }
-  },
   isUserOnline: (UserId) => {
     for (let socketId in socketUsers) {
       if (socketUsers[socketId].id === UserId) {
@@ -712,51 +636,6 @@ let socketService = {
     }
     return false
   }
-  // typeDbOption: (type) => {
-  //   if (type === 1) {
-  //     return {
-  //       attributes: ['id', 'description', 'createdAt', 'UserId'],
-  //       include: { model: User, as: 'Author' }
-  //     }
-  //   }
-  //   if (type === 2) {
-  //     return {
-  //       include: [
-  //         {
-  //           model: User,
-  //           attributes: ['name', 'avatar']
-  //         },
-  //         {
-  //           model: Tweet,
-  //           as: 'RepliedTweet',
-  //           attributes: ['id']
-  //         }
-  //       ],
-  //       attributes: ['id', 'comment', 'createdAt']
-  //     }
-  //   }
-  //   if (type === 3) {
-  //     return {
-  //       include: [
-  //         {
-  //           model: User,
-  //           attributes: ['name', 'avatar']
-  //         },
-  //         {
-  //           model: Tweet,
-  //           as: 'LikedTweet',
-  //           attributes: ['id']
-  //         }
-  //       ],
-  //       attributes: ['createdAt']
-  //     }
-  //   }
-  //   if (type === 4) {
-  //     return {
-  //       attributes: ['id', 'name', 'avatar']
-  //     }
-  //   }
-  // }
 }
 
 module.exports = socketService

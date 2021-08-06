@@ -216,15 +216,13 @@ let socketController = {
       socket.request.user
     )
     const receivers = records.receiver
-    const recordIds = records.record
+    const record = records.record
     //確認至少有1 User在線，為了預載 noticeDetail
     let atLeastOneUserOnline = socketService.atLeastOneUserOnline(receivers)
 
     if (atLeastOneUserOnline) {
-      let noticeDetail = await socketService.getNoticeDetail(
-        type,
-        recordIds[0],
-        PostId
+      let noticeDetail = await socketService.parseTimelineData(
+        record[0]
       )
       receivers.forEach(async (receiver,i) => {
         const getUserSocketIds = socketService.getUserSocketIds(receiver)
@@ -234,15 +232,6 @@ let socketController = {
           if (isOnTimelinePage) {
             // 更新動態isSeen
             socketService.updateTimelineSeenAt(receiver)
-            //更新資料庫isRead
-            const option = {
-              where: {
-                id: recordIds[i]
-              }
-            }
-            await TimelineRecord.update({ isRead: true }, option)
-            //更新傳出去的isRead
-            noticeDetail.isRead = true
             isOnTimelinePage.forEach((socketId) => {
               socket
                 .to(socketId)
