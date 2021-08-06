@@ -4,6 +4,7 @@ const socket = require('../../socket/socket')
 const highlight = chalk.bgYellow.black
 const notice = chalk.bgBlue.white
 const detail = chalk.magentaBright
+const TimelineRecord = db.TimelineRecord
 
 let socketController = {
   postSocket: (socket) => {
@@ -21,7 +22,7 @@ let socketController = {
       socketService.removeUserFromPublicRoom(socket.id)
       const users = socketService.getPublicRoomUsers(socket.id)
       io.emit('online_users', {
-        users
+        users,
       })
     }
     if (socketService.checkSocketExists(socket)) {
@@ -36,11 +37,11 @@ let socketController = {
     socketService.showAllSocketDetails(ids)
     const user = socketService.getUserInfo(socket.id)
     io.emit('new_join', {
-      name: user.name
+      name: user.name,
     })
     const users = socketService.getPublicRoomUsers(socket.id)
     io.emit('online_users', {
-      users
+      users,
     })
   },
   joinPrivatePage: async function (userId, socket) {
@@ -90,11 +91,11 @@ let socketController = {
     socketService.removeUserFromPublicRoom(socket.id)
     const user = socketService.getUserInfo(socket.id)
     io.emit('user_leave', {
-      name: user.name
+      name: user.name,
     })
     const users = socketService.getPublicRoomUsers()
     io.emit('online_users', {
-      users
+      users,
     })
   },
   leavePrivatePage: (socket) => {
@@ -133,7 +134,7 @@ let socketController = {
     socket.broadcast.emit('get_public_msg', {
       content: message.content,
       createdAt: message.createdAt,
-      avatar: user.avatar
+      avatar: user.avatar,
     })
   },
   postPrivateMsg: async (SenderId, ReceiverId, RoomId, content, socket) => {
@@ -141,7 +142,7 @@ let socketController = {
       SenderId,
       ReceiverId,
       RoomId,
-      content
+      content,
     })
     if (!content) {
       return
@@ -164,7 +165,7 @@ let socketController = {
         RoomId,
         content,
         avatar,
-        createdAt
+        createdAt,
       })
       console.log(detail(`send message to ${ReceiverId}`))
       return
@@ -188,7 +189,7 @@ let socketController = {
         updateMsgNoticeDetails.lastMsg = {
           fromRoomMember: true,
           content: message.content,
-          createdAt: message.createdAt
+          createdAt: message.createdAt,
         }
         updateMsgNoticeDetails.unreadNum = unreadNum
         isUserOnline.forEach((socketid) => {
@@ -215,28 +216,68 @@ let socketController = {
       type,
       socket.request.user
     )
-    const receivers = data.receivers
-    receivers.forEach(async (receiver,index) => {
-      const isUserOnline = socketService.getUserSocketIds(receiver)
-      if (isUserOnline) {
-        const isOnTimelinePage =
-          socketService.checkReceiverOnTimelinePage(isUserOnline)
-        if (isOnTimelinePage) {
-          isOnTimelinePage.forEach(socketId => {
+    const receivers = data.receiver
+    let noticeDetail
+    if (type === 1) {
+      noticeDetail = await socketService.getTimeRecord(PostId, null)
+      receivers.forEach(async (receiver, index) => {
+        const isUserOnline = socketService.getUserSocketIds(receiver)
+        if (isUserOnline) {
+          const isOnTimelinePage =
+            socketService.checkReceiverOnTimelinePage(isUserOnline)
+          if (isOnTimelinePage) {
             socketService.updateTimelineSeenAt(receiver)
-            socket.to(socketId).emit('update_timeline_notice_detail', data.data[i])
+            const option = {
+              where: {
+                id: data.dataId[index],
+              },
+            }
+            await TimelineRecord.update({ isRead: true }, option)
+            noticeDetail.isRead = true
+            isOnTimelinePage.forEach((socketId) => {
+              socket
+                .to(socketId)
+                .emit('update_timeline_notice_detail', noticeDetail)
+            })
+            return
+          }
+          //on other page
+          isUserOnline.forEach((socketId) => {
+            socket
+              .to(socketId)
+              .emit('update_timeline_notice', socketService.sendTimeNotice())
           })
-          return
         }
-        //on other page
-        isUserOnline.forEach((socketId) => {
+      })
+    }
+    const isUserOnline = socketService.getUserSocketIds(ReceiverId)
+    if (isUserOnline) {
+      const isOnTimelinePage =
+        socketService.checkReceiverOnTimelinePage(isUserOnline)
+      if (isOnTimelinePage) {
+        socketService.updateTimelineSeenAt(receiver)
+        const option = {
+          where: {
+            id: data.dataId,
+          },
+        }
+        await TimelineRecord.update({ isRead: true }, option)
+        noticeDetail.isRead = true
+        isOnTimelinePage.forEach((socketId) => {
           socket
             .to(socketId)
-            .emit('update_timeline_notice', socketService.sendTimeNotice())
+            .emit('update_timeline_notice_detail', noticeDetail)
         })
+        return
       }
-    })
-  }
+      //on other page
+      isUserOnline.forEach((socketId) => {
+        socket
+          .to(socketId)
+          .emit('update_timeline_notice', socketService.sendTimeNotice())
+      })
+    }
+  },
 }
 
 module.exports = socketController
