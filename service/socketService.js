@@ -19,7 +19,6 @@ const {
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
 const chalk = require('chalk')
-const socket = require('../socket/socket')
 const highlight = chalk.bgYellow.black
 const notice = chalk.bgBlue.white
 const detail = chalk.magentaBright
@@ -98,6 +97,11 @@ let socketService = {
     return false
   },
   getRoomId: async (User1Id, User2Id) => {
+    //for frontend test
+    if(!User1Id || !User2Id){
+      return 
+    }
+    //======================
     const roomOptions = {
       where: {
         [Op.or]: [
@@ -113,7 +117,7 @@ let socketService = {
       roomId = room.id
     } else {
       roomId = await Room.create({ User1Id, User2Id })
-      console.log(detail('建立新的room，roomId為:'), room.toJSON())
+      console.log(detail('建立新的room，roomId為:'), roomId.toJSON())
       roomId = roomId.toJSON().id
     }
     return roomId

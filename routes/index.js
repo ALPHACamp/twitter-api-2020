@@ -10,7 +10,6 @@ const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
-const TimelineRecord = db.TimelineRecord
 const sequelize = require('sequelize')
 const { Op, QueryTypes } = require('sequelize')
 const socketService = require('../service/socketService')
