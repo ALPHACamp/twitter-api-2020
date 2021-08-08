@@ -87,7 +87,7 @@ let socketService = {
   getUserSocketIds: (UserId) => {
     const users = []
     for (socketId in socketUsers) {
-      if (socketUsers[socketId].id === UserId) {
+      if (socketUsers[socketId] === UserId) {
         users.push(socketId)
       }
     }
@@ -98,8 +98,8 @@ let socketService = {
   },
   getRoomId: async (User1Id, User2Id) => {
     //for frontend test
-    if(!User1Id || !User2Id){
-      return 
+    if (!User1Id || !User2Id) {
+      return
     }
     //======================
     const roomOptions = {
@@ -227,7 +227,7 @@ let socketService = {
   },
   getMsgNotice: async (userId, socket) => {
     if (socket) {
-      userId = socketUsers[socket.id].id
+      userId = socketUsers[socket.id]
     }
     const { count } = await MessageRecord.findAndCountAll({
       where: {
@@ -296,7 +296,7 @@ let socketService = {
     })
   },
   getTimelineNotice: async (socket) => {
-    const userId = socketUsers[socket.id].id
+    const userId = socketUsers[socket.id]
     const timestamp = userData[userId].timelineSeenAt
     const { count } = await TimelineRecord.findAndCountAll({
       where: {
@@ -309,7 +309,7 @@ let socketService = {
     return count
   },
   getTimelineNoticeDetails: async function (offset, limit, socketId) {
-    const userId = socketUsers[socketId].id
+    const userId = socketUsers[socketId]
     const timestamp = userData[userId].timelineSeenAt
     let SeenRecords = []
     const UnseenRecords = await TimelineRecord.findAll({
@@ -437,7 +437,7 @@ let socketService = {
     return false
   },
   removeSocketFromList: (socket) => {
-    const userId = socketUsers[socket.id].id
+    const userId = socketUsers[socket.id]
     sockets.splice(sockets.indexOf(socket), 1)
     delete socketUsers[socket.id]
     if (!Object.keys(socketUsers).find((key) => socketUsers[key] === userId)) {
@@ -525,13 +525,13 @@ let socketService = {
     }
     console.log(
       notice(
-        `leave_public_room: socketId|${socketId}  userID|${socketUsers[socketId].id}`
+        `leave_public_room: socketId|${socketId}  userID|${socketUsers[socketId]}`
       )
     )
   },
   showLeavePrivatePageNotice: (socketId) => {
     console.log(
-      notice(`leave Private Page: userID ${socketUsers[socketId].id}`)
+      notice(`leave Private Page: userID ${socketUsers[socketId]}`)
     )
   },
   showGetPublicHistoryNotice: () => {
@@ -626,7 +626,7 @@ let socketService = {
   },
   isUserOnline: (UserId) => {
     for (let socketId in socketUsers) {
-      if (socketUsers[socketId].id === UserId) {
+      if (socketUsers[socketId] === UserId) {
         return true
       }
     }

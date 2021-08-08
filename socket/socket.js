@@ -99,9 +99,10 @@ module.exports = (server) => {
     })
     socket.on('read_timeline', async ({ timelineId }) => {
       console.log(notice('伺服器收到事件 read_timeline'))
-      await socketService.readTimeline(timelineId)})
+      await socketService.readTimeline(timelineId)
+    })
     /* notification  */
-    socket.on('post_timeline', async ({ ReceiverId, type, PostId}) => {
+    socket.on('post_timeline', async ({ ReceiverId, type, PostId }) => {
       await socketController.postTimeline(
         ReceiverId,
         type,
