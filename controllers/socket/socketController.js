@@ -183,6 +183,7 @@ let socketController = {
       if (isReceiverOnPrivatePage) {
         /* Receiver is not in room */
         record.isSeen = true
+        await record.save()
         const updateMsgNoticeDetails =
           await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
         updateMsgNoticeDetails.lastMsg = {
@@ -197,13 +198,16 @@ let socketController = {
             .emit('update_msg_notice_details', updateMsgNoticeDetails)
         })
         console.log(notice(`update_msg_notice_details to ${ReceiverId}`))
+        return
       } else {
+        await record.save()
         /* Receiver is not on private page  */
         const getMsgNotice = await socketService.getMsgNotice(ReceiverId, null)
         isUserOnline.forEach((socketid) => {
           socket.to(socketid).emit('get_msg_notice', getMsgNotice)
         })
         console.log(notice(`get_msg_notice to ${ReceiverId}`))
+        return
       }
     }
     await record.save()
@@ -224,7 +228,7 @@ let socketController = {
       let noticeDetail = await socketService.parseTimelineData(
         record[0]
       )
-      receivers.forEach(async (receiver,i) => {
+      receivers.forEach(async (receiver, i) => {
         const getUserSocketIds = socketService.getUserSocketIds(receiver)
         if (getUserSocketIds) {
           const isOnTimelinePage =
