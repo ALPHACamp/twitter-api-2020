@@ -8,8 +8,7 @@ let socketController = {
   /* ---------------- PUBLIC PAGE ---------------- */
   joinPublicRoom: async (socket, io) => {
     /* -------- renew data -------- */
-    await io.in(socket.id).socketsLeave(Array.from(socket.rooms))
-    await socket.join(['PublicRoom', socket.id, 'User' + socket.data.user.id])
+    await socket.join('PublicRoom')
     /* -------- logs -------- */
     socketService.showJoinPublicRoomNotice(socket)
     await socketService.showAllSocketDetails(io)
@@ -86,8 +85,8 @@ let socketController = {
     /* -------- renew data -------- */
     const roomId = await socketService.getRoomId(User1Id, User2Id)
     await socketService.toggleReadPrivateMsg(User1Id, User2Id)
-    await io.in(socket.id).socketsLeave(Array.from(socket.rooms))
-    await socket.join([roomId, 'PrivatePage', socket.id, 'User' + socket.data.user.id])
+    await io.in(socket.id).socketsLeave(Array.from(socket.rooms).filter(roomID => Number.isInteger(roomID)))
+    await socket.join(roomId)
     await socketService.showAllSocketDetails(io)
     console.log(detail(`最後roomId結果: ${roomId} `))
     return roomId

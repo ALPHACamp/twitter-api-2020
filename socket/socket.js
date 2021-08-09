@@ -46,7 +46,7 @@ module.exports = (server) => {
     })
     /* get public history */
     socket.on('get_public_history', async ({ offset, limit }, cb) => {
-      console.log(notice('[ON EVENT] get_public_history\n', { offset, limit }))
+      console.log(notice('[ON EVENT] get_public_history\n'), { offset, limit })
       const messages = await socketService.getRoomHistory(offset, limit, 1) //roomId 1 is PublicRoom
       cb(messages)
     })
