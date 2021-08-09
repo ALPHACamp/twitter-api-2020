@@ -68,10 +68,6 @@ let socketController = {
     socketService.showJoinPrivatePageNotice(socket, isAdded)
     await socketService.showAllSocketDetails(io)
     /* -------- emits -------- */
-    // get_private_rooms
-    const rooms = await socketService.getPrivateRooms(socket.data.user.id)
-    socket.emit('get_private_rooms', rooms)
-    console.log(notice(`[EMIT] get_private_rooms → ${socket.data.user.id}`, detail('\n', JSON.stringify(rooms))))
     // get_msg_notice_details
     const getMsgNoticeDetails = await socketService.getMsgNoticeDetails(socket.data.user.id)
     socket.emit('get_msg_notice_details', getMsgNoticeDetails)

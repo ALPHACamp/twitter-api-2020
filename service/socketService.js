@@ -103,7 +103,7 @@ let socketService = {
     }
     return roomId
   },
-  getPrivateRooms: async (userId) => {
+  getPrivateRooms: async (userId, offset, limit) => {
     const roomOption = {
       where: {
         [Op.or]: [{ User1Id: userId }, { User2Id: userId }],
@@ -149,7 +149,8 @@ let socketService = {
           'DESC'
         ]
       ],
-      limit: 5
+      offset,
+      limit
     }
     const rooms = await Room.findAll(roomOption).then((rooms) => {
       rooms.forEach((room) => {

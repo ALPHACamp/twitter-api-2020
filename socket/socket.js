@@ -90,6 +90,12 @@ module.exports = (server) => {
       console.log(notice('[ON EVENT] post_private_msg\n'), { SenderId, ReceiverId, RoomId, content })
       socketController.postPrivateMsg(SenderId, ReceiverId, RoomId, content, socket, io)
     })
+    /* get private rooms */
+    socket.on('get_private_rooms', async ({ offset, limit }, cb) => {
+      console.log(notice('[ON EVENT] get_private_rooms\n'), { offset, limit })
+      const rooms = await socketService.getPrivateRooms(socket.data.user.id, offset, limit)
+      cb(rooms)
+    })
     /* timeline */
     socket.on('get_timeline_notice_details', async ({ offset, limit }, cb) => {
       console.log(notice('[ON EVENT] get_timeline_notice_details'))
