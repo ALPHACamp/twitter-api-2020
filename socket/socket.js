@@ -7,7 +7,7 @@ const notice = chalk.keyword('aqua').underline
 module.exports = (server) => {
   const io = socketio(server, {
     cors: {
-      origin: ['http://localhost:8081', 'https://ryanhsun.github.io'],
+      origin: ['http://localhost:8080', 'http://localhost:8081', 'https://ryanhsun.github.io'],
       credentials: true
     },
     allowEIO3: true
