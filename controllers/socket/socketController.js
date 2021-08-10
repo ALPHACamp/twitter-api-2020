@@ -67,13 +67,15 @@ let socketController = {
     socket.emit('get_msg_notice_details', getMsgNoticeDetails)
     console.log(notice(`[EMIT] get_msg_notice_details → ${socket.data.user.id}`, detail('\n', JSON.stringify(getMsgNoticeDetails))))
   },
-  joinPrivateRoom: async function (User1Id, User2Id, socket, io) {
+  joinPrivateRoom: async function (User1Id, User2Id, roomId, socket, io) {
     /* -------- check missing event -------- */
     if (!socket.rooms.has('PrivatePage')) {
       this.joinPrivatePage(socket, io, true)
     }
     /* -------- renew data -------- */
-    const roomId = await socketService.getRoomId(User1Id, User2Id)
+    if (!roomId) {
+      roomId = await socketService.getRoomId(User1Id, User2Id)
+    }
     await socketService.toggleReadPrivateMsg(User1Id, User2Id)
     await io.in(socket.id).socketsLeave(Array.from(socket.rooms).filter(roomID => Number.isInteger(roomID)))
     await socket.join(roomId)
@@ -128,16 +130,14 @@ let socketController = {
     }
     /* update record */
     const unreadNum = record.unreadNum + 1
-    record.isSeen = false
-    await record.increment({ unreadNum: 1 })
+    await record.update({ isSeen: false, unreadNum: ++record.unreadNum })
     if (receiverRooms.size) {
       /* ---- Receiver is online ---- */
       console.log(detail(`Receiver ${ReceiverId} is online`))
       if (receiverRooms.has('PrivatePage')) {
         /* ---- Receiver is on private page ---- */
         /* find data */
-        record.isSeen = true
-        await record.save()
+        await record.update({isSeen: true})
         const updateMsgNoticeDetails =
           await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
         updateMsgNoticeDetails.lastMsg = {
