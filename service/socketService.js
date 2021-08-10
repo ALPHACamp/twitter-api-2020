@@ -467,12 +467,6 @@ let socketService = {
     console.log(detail('room result:'), Array.from(socket.rooms), '\n')
   },
   showLeavePublicRoomNotice: (socket) => {
-    if (userId) {
-      console.log(notice(`[Leave Public Room] userID: ${socket.data.user.idd}`))
-      console.log(detail(`socket ID: ${socket.id}`))
-      console.log(detail('room result:'), Array.from(socket.rooms), '\n')
-      return
-    }
     console.log(notice(`[Leave Public Room] userID|${socket.data.user.id}`))
     console.log(detail(`socket ID: ${socket.id}`))
     console.log(detail('room result:'), Array.from(socket.rooms), '\n')
