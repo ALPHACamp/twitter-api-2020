@@ -430,11 +430,8 @@ let socketService = {
     return record
   },
   seenTimeline: (userID, timestamp) => {
-    if (timestamp) {
-      userTimelineSeenAt[userID] = timestamp
-      return
-    }
-    userTimelineSeenAt[receiver] = new Date()
+    userTimelineSeenAt[userID] = timestamp
+    return
   },
   readTimeline: async (timelineId) => {
     return await TimelineRecord.update(
