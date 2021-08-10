@@ -60,11 +60,12 @@ module.exports = (server) => {
       console.log(notice('[ON EVENT] leave_private_page'))
       socketController.leavePrivatePage(socket, io)
     })
-    socket.on('join_private_room', async ({ User1Id, User2Id }) => {
+    socket.on('join_private_room', async ({ User1Id, User2Id, RoomId }) => {
       console.log(notice('[ON EVENT] join_private_room'), { User1Id, User2Id })
       const RoomId = await socketController.joinPrivateRoom(
         User1Id,
         User2Id,
+        RoomId,
         socket,
         io
       )
