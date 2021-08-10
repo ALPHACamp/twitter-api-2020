@@ -5,7 +5,7 @@ const notice = chalk.keyword('lawngreen').underline
 const detail = chalk.keyword('yellowgreen')
 
 let socketController = {
-  /* ---------------- PUBLIC PAGE ---------------- */
+  /* ---------------- PUBLIC ROOM ---------------- */
   joinPublicRoom: async (socket, io) => {
     /* -------- renew data -------- */
     await socket.join('PublicRoom')
@@ -47,17 +47,11 @@ let socketController = {
       publicRoomId,
       content
     )
-    socket.broadcast.emit('get_public_msg', {
+    socket.broadcast.to('PublicRoom').emit('get_public_msg', {
       content: message.content,
       createdAt: message.createdAt,
       avatar: socket.data.user.avatar
     })
-    // /* -------- better option ??? -------- */
-    // io.to('PublicRoom').emit('get_public_msg', {
-    //   content: message.content,
-    //   createdAt: message.createdAt,
-    //   avatar: user.avatar
-    // })
   },
   /* ---------------- PRIVATE PAGE ---------------- */
   joinPrivatePage: async function (socket, io, isAdded) {
@@ -197,13 +191,15 @@ let socketController = {
           const receiverRooms = await socketService.getUserRooms(receiver, io)
           /* -------- receiver on Timeline Page -------- */
           if (receiverRooms.has('TimelinePage')) {
-            // 更新動態isSeen
-            socketService.seenTimeline(receiver, null)
+            /* update timelineSeenAt */
+            socketService.seenTimeline(receiver, record[0].createdAt)
+            /* emit: send details to receiver */
             await io.to('User' + receiver).emit('update_timeline_notice_detail', noticeDetail)
             console.log(notice(`[EMIT] update_timeline_notice_detail → Receiver ${receiver}`))
             return
           }
           /* -------- receiver not on Timeline Page -------- */
+          /* emit: send notice to receiver */
           socket.to('User' + receiver).emit('update_timeline_notice', socketService.sendTimelineNotice())
           console.log(notice(`[EMIT] update_timeline_notice → Receiver ${receiver}`))
         }
