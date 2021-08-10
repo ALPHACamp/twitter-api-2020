@@ -7,7 +7,11 @@ const notice = chalk.keyword('aqua').underline
 module.exports = (server) => {
   const io = socketio(server, {
     cors: {
-      origin: ['http://localhost:8080', 'http://localhost:8081', 'https://ryanhsun.github.io'],
+      origin: [
+        'http://localhost:8080',
+        'http://localhost:8081',
+        'https://ryanhsun.github.io'
+      ],
       credentials: true
     },
     allowEIO3: true
@@ -62,7 +66,7 @@ module.exports = (server) => {
     })
     socket.on('join_private_room', async ({ User1Id, User2Id, RoomId }) => {
       console.log(notice('[ON EVENT] join_private_room'), { User1Id, User2Id })
-      const RoomId = await socketController.joinPrivateRoom(
+      RoomId = await socketController.joinPrivateRoom(
         User1Id,
         User2Id,
         RoomId,
@@ -71,20 +75,45 @@ module.exports = (server) => {
       )
       //return roomId to client
       socket.emit('join_private_room', RoomId)
-      console.log(notice(`[EMIT] join_private_room RoomId: ${RoomId} → ${socket.id}`))
+      console.log(
+        notice(`[EMIT] join_private_room RoomId: ${RoomId} → ${socket.id}`)
+      )
     })
     socket.on('get_private_history', async ({ offset, limit, RoomId }, cb) => {
-      console.log(notice('[ON EVENT] get_private_history\n'), { offset, limit, RoomId })
+      console.log(notice('[ON EVENT] get_private_history\n'), {
+        offset,
+        limit,
+        RoomId
+      })
       const messages = await socketService.getRoomHistory(offset, limit, RoomId)
       cb(messages)
     })
-    socket.on('post_private_msg', async ({ SenderId, ReceiverId, RoomId, content }) => {
-      console.log(notice('[ON EVENT] post_private_msg\n'), { SenderId, ReceiverId, RoomId, content })
-      socketController.postPrivateMsg(SenderId, ReceiverId, RoomId, content, socket, io)
-    })
+    socket.on(
+      'post_private_msg',
+      async ({ SenderId, ReceiverId, RoomId, content }) => {
+        console.log(notice('[ON EVENT] post_private_msg\n'), {
+          SenderId,
+          ReceiverId,
+          RoomId,
+          content
+        })
+        socketController.postPrivateMsg(
+          SenderId,
+          ReceiverId,
+          RoomId,
+          content,
+          socket,
+          io
+        )
+      }
+    )
     socket.on('get_private_rooms', async ({ offset, limit }, cb) => {
       console.log(notice('[ON EVENT] get_private_rooms\n'), { offset, limit })
-      const rooms = await socketService.getPrivateRooms(socket.data.user.id, offset, limit)
+      const rooms = await socketService.getPrivateRooms(
+        socket.data.user.id,
+        offset,
+        limit
+      )
       cb(rooms)
     })
     /* ---------------- TIMELINE ---------------- */
@@ -93,17 +122,27 @@ module.exports = (server) => {
       socketService.seenTimeline(socket.data.user.id, timestamp)
       /* logs */
       console.log(notice('[ON EVENT] join_timeline_page'))
-      console.log(detail(`${socket.id}room result:\n`), Array.from(socket.rooms))
+      console.log(
+        detail(`${socket.id}room result:\n`),
+        Array.from(socket.rooms)
+      )
     })
     socket.on('leave_timeline_page', () => {
       socket.leave('TimelinePage')
       /* logs */
       console.log(notice('[ON EVENT] leave_timeline_page'))
-      console.log(detail(`${socket.id}room result:\n`), Array.from(socket.rooms))
+      console.log(
+        detail(`${socket.id}room result:\n`),
+        Array.from(socket.rooms)
+      )
     })
     socket.on('get_timeline_notice_details', async ({ offset, limit }, cb) => {
       console.log(notice('[ON EVENT] get_timeline_notice_details'))
-      const results = await socketService.getTimelineNoticeDetails(offset, limit, socket)
+      const results = await socketService.getTimelineNoticeDetails(
+        offset,
+        limit,
+        socket
+      )
       cb(results)
     })
     socket.on('read_timeline', async ({ timelineId }) => {
@@ -112,7 +151,7 @@ module.exports = (server) => {
     })
     socket.on('post_timeline', async ({ ReceiverId, type, PostId }) => {
       console.log(notice('[ON EVENT] post_timeline'))
-      await socketController.postTimeline( ReceiverId, type, PostId, socket, io )
+      await socketController.postTimeline(ReceiverId, type, PostId, socket, io)
     })
   })
 }
