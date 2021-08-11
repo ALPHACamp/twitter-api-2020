@@ -7,15 +7,18 @@ const detail = chalk.keyword('yellowgreen')
 let socketController = {
   /* ---------------- PUBLIC ROOM ---------------- */
   joinPublicRoom: async (socket, io) => {
+    const userRooms = await socketService.getUserRooms(socket.data.user.id, io)
     /* -------- renew data -------- */
     await socket.join('PublicRoom')
     /* -------- logs -------- */
     socketService.showJoinPublicRoomNotice(socket)
     await socketService.showAllSocketDetails(io)
     /* -------- emits -------- */
-    io.emit('new_join', {
-      name: socket.data.user.name
-    })
+    if (!userRooms.has('PublicRoom')) {
+      io.emit('new_join', {
+        name: socket.data.user.name
+      })
+    }
     const users = await socketService.getPublicRoomUsers(io)
     io.emit('online_users', {
       users
@@ -137,7 +140,7 @@ let socketController = {
       if (receiverRooms.has('PrivatePage')) {
         /* ---- Receiver is on private page ---- */
         /* find data */
-        await record.update({isSeen: true})
+        await record.update({ isSeen: true })
         const updateMsgNoticeDetails =
           await socketService.getRoomDetailsForReceiver(SenderId, ReceiverId)
         updateMsgNoticeDetails.lastMsg = {
