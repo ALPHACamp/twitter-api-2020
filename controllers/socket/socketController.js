@@ -31,9 +31,12 @@ let socketController = {
     /* -------- logs -------- */
     await socketService.showAllSocketDetails(io)
     /* -------- emits -------- */
-    io.emit('user_leave', {
-      name: socket.data.user.name
-    })
+    const userRooms = await socketService.getUserRooms(socket.data.user.id, io)
+    if (!userRooms.has('PublicRoom')) {
+      io.emit('user_leave', {
+        name: socket.data.user.name
+      })
+    }
     const users = await socketService.getPublicRoomUsers(io)
     io.emit('online_users', {
       users
