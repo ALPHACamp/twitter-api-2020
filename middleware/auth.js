@@ -53,10 +53,9 @@ module.exports = {
             attributes: ['id', 'name', 'account', 'avatar', 'timelineSeenAt']
           }
           let user = await User.findById(decoded.id, options)
-          // console.log(user)
           user = user.toJSON()
-          user.socketId = socket.id
-          socket.request.user = user
+          socket.data.user = user
+          socket.join('User' + user.id)
           return next()
         }
       )
