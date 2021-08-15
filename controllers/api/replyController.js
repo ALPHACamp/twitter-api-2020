@@ -53,17 +53,17 @@ let replyController = {
         //if tweet exists
         if (tweet) {
           Reply.create(data)
-            .then((reply) => {
-              tweet.increment({ replyNum: 1 })
-            }).then(() => {
+            .then(async (reply) => {
+              await tweet.increment({ replyNum: 1 })
               return res.status(200).json({
                 status: '200',
                 message: 'Successfully posted new reply.',
+                Reply: reply
               })
             })
         }
         //if tweet doesn't exists
-        else { 
+        else {
           return res
             .status(404)
             .json({

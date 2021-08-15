@@ -77,7 +77,8 @@ let likeController = {
             .then(() =>
               res.status(200).json({
                 status: 'success',
-                message: 'Successfully liked tweet.'
+                message: 'Successfully liked tweet.',
+                Like: like
               })
             )
             .catch((error) =>
