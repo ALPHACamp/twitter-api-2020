@@ -15,7 +15,6 @@ const {
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
 const chalk = require('chalk')
-const user = require('../models/user')
 const highlight = chalk.bgYellow.black
 const notice = chalk.keyword('coral').underline
 const detail = chalk.keyword('lightcoral')

@@ -91,7 +91,7 @@ let tweetController = {
   },
   getTweet: (req, res) => {
     const options = {
-      attributes: [ 'id', 'description', 'likeNum', 'replyNum', 'createdAt', 'updatedAt' ],
+      attributes: ['id', 'description', 'likeNum', 'replyNum', 'createdAt', 'updatedAt'],
       include: [
         {
           model: User,
@@ -166,7 +166,8 @@ let tweetController = {
           .then(() =>
             res.status(200).json({
               status: '200',
-              message: 'Successfully posted new tweet.'
+              message: 'Successfully posted new tweet.',
+              Tweet: tweet
             })
           )
       })
