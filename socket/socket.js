@@ -3,112 +3,155 @@ const { authenticatedSocket } = require('../middleware/auth')
 const socketController = require('../controllers/socket/socketController')
 const socketService = require('../service/socketService')
 const chalk = require('chalk')
-const notice = chalk.cyanBright.underline.italic
+const notice = chalk.keyword('aqua').underline
 module.exports = (server) => {
   const io = socketio(server, {
     cors: {
-      origin: ['http://localhost:8080', 'https://ryanhsun.github.io'],
+      origin: [
+        'http://localhost:8080',
+        'http://localhost:8081',
+        'https://ryanhsun.github.io'
+      ],
       credentials: true
     },
     allowEIO3: true
   })
   io.use(authenticatedSocket).on('connection', async (socket) => {
     /* connect */
-    socketController.postSocket(socket)
+    socketService.showUserOnline(socket)
+    socketService.addNewSocketUserTimelineSeenAt(socket)
+    await socketService.showAllSocketDetails(io)
+
+    /* ================= EMITS ================= */
+    socket.emit('message', `Your socket id is  ${socket.id}`)
+    /* Message Notice */
     const getMsgNotice = await socketService.getMsgNotice(null, socket)
     socket.emit('get_msg_notice', getMsgNotice)
-    console.log(notice(`get_msg_notice to ${socket.id}`))
+    console.log(notice(`[EMIT] get_msg_notice → ${socket.id}`))
+
+    /* ================= LISTENERS ================= */
     socket.on('sendMessage', (data) => console.log(data))
+
     /* disconnect */
     socket.on('disconnecting', () => {
-      socketController.deleteSocket(socket, io)
+      socketService.deleteAndUpdateTimelineSeenAt(socket, io)
+      socketService.showUserOffline(socket.id)
     })
-
-    /* join public room */
+    /* ---------------- PUBLIC ROOM ---------------- */
     socket.on('join_public_room', async ({ userId }) => {
-      socketController.joinPublicRoom(userId, socket, io)
+      console.log(notice('[ON EVENT] join_public_room'))
+      socketController.joinPublicRoom(socket, io)
     })
-    /* leave public room */
     socket.on('leave_public_room', ({ userId }) => {
-      console.log(notice('伺服器收到事件 leave_public_room'))
-      socketController.leavePublicRoom(userId, socket, io)
+      console.log(notice('[ON EVENT] leave_public_room'))
+      socketController.leavePublicRoom(socket, io)
     })
-    /* get public history */
     socket.on('get_public_history', async ({ offset, limit }, cb) => {
-      console.log(notice('伺服器收到事件 get_public_history'))
-      const messages = await socketController.getPublicHistory(offset, limit)
+      console.log(notice('[ON EVENT] get_public_history\n'), { offset, limit })
+      const messages = await socketService.getRoomHistory(offset, limit, 1) //roomId 1 is PublicRoom
       cb(messages)
     })
-    /* public message (get and send) */
     socket.on('post_public_msg', ({ content, userId }) => {
-      socketController.postPublicMsg(content, userId, socket)
+      console.log(notice('[ON EVENT] post_public_msg', { content, userId }))
+      socketController.postPublicMsg(content, socket)
     })
-    /* join private page */
+    /* ---------------- PRIVATE PAGE ---------------- */
     socket.on('join_private_page', async ({ userId }) => {
-      socketController.joinPrivatePage(userId, socket)
+      console.log(notice('[ON EVENT] join_private_page'))
+      socketController.joinPrivatePage(socket, io, false)
     })
-    /* leave private page */
     socket.on('leave_private_page', () => {
-      socketController.leavePrivatePage(socket)
+      console.log(notice('[ON EVENT] leave_private_page'))
+      socketController.leavePrivatePage(socket, io)
     })
-    /* join private room */
-    socket.on('join_private_room', async ({ User1Id, User2Id }) => {
-      const RoomId = await socketController.joinPrivateRoom(
+    socket.on('join_private_room', async ({ User1Id, User2Id, RoomId }) => {
+      console.log(notice('[ON EVENT] join_private_room'), { User1Id, User2Id })
+      RoomId = await socketController.joinPrivateRoom(
         User1Id,
         User2Id,
+        RoomId,
         socket,
         io
       )
       //return roomId to client
       socket.emit('join_private_room', RoomId)
-      console.log('emit join_private_room to user', RoomId)
+      console.log(
+        notice(`[EMIT] join_private_room RoomId: ${RoomId} → ${socket.id}`)
+      )
     })
-
-    /* get private history */
     socket.on('get_private_history', async ({ offset, limit, RoomId }, cb) => {
-      console.log(notice('伺服器收到事件 get_private_history'))
-      const messages = await socketController.getPrivateHistory(
+      console.log(notice('[ON EVENT] get_private_history\n'), {
         offset,
         limit,
         RoomId
-      )
+      })
+      const messages = await socketService.getRoomHistory(offset, limit, RoomId)
       cb(messages)
     })
-    /* private message (get and send) */
     socket.on(
       'post_private_msg',
       async ({ SenderId, ReceiverId, RoomId, content }) => {
+        console.log(notice('[ON EVENT] post_private_msg\n'), {
+          SenderId,
+          ReceiverId,
+          RoomId,
+          content
+        })
         socketController.postPrivateMsg(
           SenderId,
           ReceiverId,
           RoomId,
           content,
-          socket
+          socket,
+          io
         )
       }
     )
-    /* timeline */
+    socket.on('get_private_rooms', async ({ offset, limit }, cb) => {
+      console.log(notice('[ON EVENT] get_private_rooms\n'), { offset, limit })
+      const rooms = await socketService.getPrivateRooms(
+        socket.data.user.id,
+        offset,
+        limit
+      )
+      cb(rooms)
+    })
+    /* ---------------- TIMELINE ---------------- */
+    socket.on('join_timeline_page', ({ timestamp }) => {
+      socket.join('TimelinePage')
+      socketService.seenTimeline(socket.data.user.id, timestamp)
+      /* logs */
+      console.log(notice('[ON EVENT] join_timeline_page'))
+      console.log(
+        detail(`${socket.id}room result:\n`),
+        Array.from(socket.rooms)
+      )
+    })
+    socket.on('leave_timeline_page', () => {
+      socket.leave('TimelinePage')
+      /* logs */
+      console.log(notice('[ON EVENT] leave_timeline_page'))
+      console.log(
+        detail(`${socket.id}room result:\n`),
+        Array.from(socket.rooms)
+      )
+    })
     socket.on('get_timeline_notice_details', async ({ offset, limit }, cb) => {
-      console.log(notice('伺服器收到事件 get_timeline_notice_details'))
-      const results = await socketService.getTimelineNoticeDetails(offset, limit, socket.id)
-      cb(results)
-    })
-    socket.on('seen_timeline', ({ timestamp }) => {
-      console.log(notice('伺服器收到事件 seen_timeline'))
-      socketService.seenTimeline(socket.id, timestamp)
-    })
-    socket.on('read_timeline', async ({ timelineId }) => {
-      console.log(notice('伺服器收到事件 read_timeline'))
-      await socketService.readTimeline(timelineId)
-    })
-    /* notification  */
-    socket.on('post_timeline', async ({ ReceiverId, type, PostId }) => {
-      await socketController.postTimeline(
-        ReceiverId,
-        type,
-        PostId,
+      console.log(notice('[ON EVENT] get_timeline_notice_details'))
+      const results = await socketService.getTimelineNoticeDetails(
+        offset,
+        limit,
         socket
       )
+      cb(results)
+    })
+    socket.on('read_timeline', async ({ timelineId }) => {
+      console.log(notice('[ON EVENT] read_timeline'))
+      await socketService.readTimeline(timelineId)
+    })
+    socket.on('post_timeline', async ({ ReceiverId, type, PostId }) => {
+      console.log(notice('[ON EVENT] post_timeline'))
+      await socketController.postTimeline(ReceiverId, type, PostId, socket, io)
     })
   })
 }

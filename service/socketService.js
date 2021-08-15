@@ -1,8 +1,4 @@
-const sockets = [] // array of sockets  找到對應的socket物件
-const socketUsers = {} // key(socketid) to value(id)
-const userData = {} // key(userid) to value(name, account, avatar, timelineSeenAt)
-const publicRoomUsers = [] // array of userIds 公開聊天室的socketId
-const privateRoomUsers = {} // key(socketid) to value(id, currentRoom)
+const userTimelineSeenAt = {} // key(userid) to value(timelineSeenAt)
 const timelineUsers = {} // key(socketid) to value(id)
 const db = require('../models')
 const {
@@ -20,81 +16,65 @@ const sequelize = require('sequelize')
 const { Op } = require('sequelize')
 const chalk = require('chalk')
 const highlight = chalk.bgYellow.black
-const notice = chalk.bgBlue.white
-const detail = chalk.magentaBright
+const notice = chalk.keyword('coral').underline
+const detail = chalk.keyword('lightcoral')
 
 let socketService = {
-  addNewSocketUser: (socket) => {
-    const currentUser = socket.request.user
-    if (!userData[currentUser.id]) {
-      userData[currentUser.id] = {
-        name: currentUser.name,
-        account: currentUser.account,
-        avatar: currentUser.avatar,
-        timelineSeenAt: currentUser.timelineSeenAt
-      }
+  addNewSocketUserTimelineSeenAt: (socket) => {
+    const currentUser = socket.data.user
+    if (!userTimelineSeenAt[currentUser.id]) {
+      userTimelineSeenAt[currentUser.id] = currentUser.timelineSeenAt
     }
-    /* connect */
-    // 儲存socket物件
-    sockets.push(socket)
-    // 建立socketId 與使用者資訊的對照表
-    socketUsers[socket.id] = currentUser.id
   },
-  addSocketIdToPublicRoom: (socketId) => {
-    publicRoomUsers.push(socketId)
-  },
-  addUserInfoToPrivateRoomSockets: (userId, socketId) => {
-    const userInfo = {
-      id: userId,
-      currentRoom: null
+  deleteAndUpdateTimelineSeenAt: async function (socket, io) {
+    const userId = socket.data.user.id
+    /* find user's other sockets */
+    const users = await io.in('User' + userId).allSockets()
+    if (users.size > 1) {
+      return
     }
-    //加入privateRoomUsers
-    privateRoomUsers[socketId] = userInfo
-    return
+    console.log(notice(`[Delete And Update timelineSeenAt] UserID ${userId}`))
+    await User.update({ timelineSeenAt: userTimelineSeenAt[userId] }, { where: { id: userId } })
+    delete userTimelineSeenAt[userId]
+    await this.showAllSocketDetails(io)
   },
   addMessage: async (UserId, RoomId, content) => {
     const message = await Message.create({ UserId, RoomId, content })
     return message
   },
-  addUserToRoom: (userSocketIds, roomId) => {
-    userSocketIds.forEach((socketId) => {
-      const targetSocket = sockets.find((element) => element.id === socketId)
-      console.log(targetSocket.id)
-      targetSocket.join(roomId)
-    })
-  },
-  setPrivateRoomId: (socketId, roomId) => {
-    privateRoomUsers[socketId].currentRoom = roomId
-    return
-  },
-  getPublicRoomUsers: (socketId) => {
+  getPublicRoomUsers: async (io) => {
+    const publicRoomUsers = Array.from(await io.in('PublicRoom').allSockets())
     let users = []
-    publicRoomUsers.forEach((socketId) => {
-      if (socketUsers[socketId]) {
-        users.push(userData[socketUsers[socketId]])
-      }
+    publicRoomUsers.forEach((socketID) => {
+      let data = io.sockets.sockets.get(socketID).data.user
+      users.push(data)
     })
-    let allId = users.map((item) => item.account)
-    users = users.filter((user, i, arr) => allId.indexOf(user.account) === i)
+    let allId = users.map((item) => item.id)
+    users = users.filter((user, i, arr) => allId.indexOf(user.id) === i)
     return users
   },
-  getUserInfo: (socketId) => {
-    return userData[socketUsers[socketId]]
-  },
-  getPrivateRoomUserInfo: (socketId) => {
-    return privateRoomUsers[socketId]
-  },
-  getUserSocketIds: (UserId) => {
+  getUserSocketIds: async (UserId, io) => {
     const users = []
-    for (socketId in socketUsers) {
-      if (socketUsers[socketId] === UserId) {
-        users.push(socketId)
+    const socketUsers =  io.sockets.sockets
+    socketUsers.forEach((socket, socketID) => {
+      if (socket.data.user.id === UserId) {
+        users.push(socketID)
       }
-    }
+    })
+    console.log(detail('socketUsers@getUserSocketIds'), users)
     if (users.length) {
       return users
     }
     return false
+  },
+  getUserRooms: async (UserId, io) => {
+    let Rooms = new Set()
+    const sockets = await io.in('User' + UserId).fetchSockets()
+    for (const socket of sockets) {
+      socket.rooms.forEach(room => Rooms.add(room))
+    }
+    console.log(notice('Get User Rooms:\n'), Rooms)
+    return Rooms
   },
   getRoomId: async (User1Id, User2Id) => {
     //for frontend test
@@ -122,7 +102,7 @@ let socketService = {
     }
     return roomId
   },
-  getPrivateRooms: async (userId) => {
+  getPrivateRooms: async (userId, offset, limit) => {
     const roomOption = {
       where: {
         [Op.or]: [{ User1Id: userId }, { User2Id: userId }],
@@ -168,7 +148,8 @@ let socketService = {
           'DESC'
         ]
       ],
-      limit: 5
+      offset,
+      limit
     }
     const rooms = await Room.findAll(roomOption).then((rooms) => {
       rooms.forEach((room) => {
@@ -227,7 +208,7 @@ let socketService = {
   },
   getMsgNotice: async (userId, socket) => {
     if (socket) {
-      userId = socketUsers[socket.id]
+      userId = socket.data.user.id
     }
     const { count } = await MessageRecord.findAndCountAll({
       where: {
@@ -296,8 +277,8 @@ let socketService = {
     })
   },
   getTimelineNotice: async (socket) => {
-    const userId = socketUsers[socket.id]
-    const timestamp = userData[userId].timelineSeenAt
+    const userId = socket.data.user.id
+    const timestamp = socket.data.user.timelineSeenAt
     const { count } = await TimelineRecord.findAndCountAll({
       where: {
         UserId: userId,
@@ -308,9 +289,9 @@ let socketService = {
     })
     return count
   },
-  getTimelineNoticeDetails: async function (offset, limit, socketId) {
-    const userId = socketUsers[socketId]
-    const timestamp = userData[userId].timelineSeenAt
+  getTimelineNoticeDetails: async function (offset, limit, socket) {
+    const userId = socket.data.user.id
+    const timestamp = socket.data.user.timelineSeenAt
     let SeenRecords = []
     const UnseenRecords = await TimelineRecord.findAll({
       offset,
@@ -346,15 +327,7 @@ let socketService = {
     return { Unseen, Seen }
   },
   parseTimelineData: async (record) => {
-    const {
-      id,
-      ReplyId,
-      LikeId,
-      FollowerId,
-      SubscribeTweetId,
-      isRead,
-      createdAt
-    } = record.dataValues
+    const { id, ReplyId, LikeId, FollowerId, SubscribeTweetId, isRead, createdAt } = record.dataValues
     const replyOptions = {
       include: [
         {
@@ -417,40 +390,6 @@ let socketService = {
       return { id, Subscribing, isRead }
     }
   },
-  checkSocketExists: (socket) => {
-    return sockets.includes(socket)
-  },
-  checkSocketIdInPublicRoom: (socketId) => {
-    return publicRoomUsers.includes(socketId)
-  },
-  checkReceiverOnPrivatePage: (ReceiverId) => {
-    const receiverRooms = []
-    for (socketId in privateRoomUsers) {
-      if (privateRoomUsers[socketId].id === ReceiverId) {
-        receiverRooms.push(privateRoomUsers[socketId].currentRoom)
-      }
-    }
-    if (receiverRooms.length) {
-      console.log(detail('receiverRooms:'), receiverRooms)
-      return receiverRooms
-    }
-    return false
-  },
-  removeSocketFromList: (socket) => {
-    const userId = socketUsers[socket.id]
-    sockets.splice(sockets.indexOf(socket), 1)
-    delete socketUsers[socket.id]
-    if (!Object.keys(socketUsers).find((key) => socketUsers[key] === userId)) {
-      delete userData[userId]
-    }
-    return
-  },
-  removeUserFromPrivateRoom: (socketId) => {
-    delete privateRoomUsers[socketId]
-  },
-  removeUserFromPublicRoom: (socketId) => {
-    publicRoomUsers.splice(publicRoomUsers.indexOf(socketId), 1)
-  },
   toggleSeenMsgRecord: async (userId) => {
     //更新isSeen為true
     const MsgRecordOption = {
@@ -489,8 +428,8 @@ let socketService = {
     })
     return record
   },
-  seenTimeline: (socketId, timestamp) => {
-    userData[socketUsers[socketId]].timestamp = timestamp
+  seenTimeline: (userID, timestamp) => {
+    userTimelineSeenAt[userID] = timestamp
     return
   },
   readTimeline: async (timelineId) => {
@@ -503,57 +442,46 @@ let socketService = {
       }
     )
   },
-  showNewUserOnline: (socketId) => {
-    console.log(
-      highlight(
-        ` User is online: ${userData[socketUsers[socketId]].name} / ${socketId}`
-      )
-    )
+  showUserOnline: (socket) => {
+    console.log(highlight(` User is online: ${socket.data.user.id} / ${socket.id}`))
+    console.log(notice('User Info (socket.data.user)\n'), socket.data.user)
   },
   showUserOffline: (socketId) => {
     console.log(highlight(`User is offline: ${socketId}`))
     return
   },
-  showJoinPublicRoomNotice: (userId, socketId) => {
-    console.log(notice(`join_public_room: ${userId}`))
-    console.log(notice(`加入公開的socket ID: ${socketId}`))
+  showJoinPublicRoomNotice: (socket) => {
+    console.log(notice(`[Join Public Room] userID: ${socket.data.user.id}`))
+    console.log(detail(`socket ID: ${socket.id}`))
+    console.log(detail('room result:'), Array.from(socket.rooms), '\n')
   },
-  showLeavePublicRoomNotice: (userId, socketId) => {
-    if (userId) {
-      console.log(notice(`leave_public_room: userID ${userId}`))
+  showJoinPrivatePageNotice: (socket, isAdded) => {
+    if (isAdded) {
+      console.log(notice(`[補 Join Private Page] userID: ${socket.data.user.id}`))
+      console.log(detail(`socket ID: ${socket.id}`))
       return
     }
-    console.log(
-      notice(
-        `leave_public_room: socketId|${socketId}  userID|${socketUsers[socketId]}`
-      )
-    )
+    console.log(notice(`[Join Private Page] userID: ${socket.data.user.id}`))
+    console.log(detail(`socket ID: ${socket.id}`))
+    console.log(detail('room result:'), Array.from(socket.rooms), '\n')
   },
-  showLeavePrivatePageNotice: (socketId) => {
-    console.log(
-      notice(`leave Private Page: userID ${socketUsers[socketId]}`)
-    )
+  showLeavePublicRoomNotice: (socket) => {
+    console.log(notice(`[Leave Public Room] userID|${socket.data.user.id}`))
+    console.log(detail(`socket ID: ${socket.id}`))
+    console.log(detail('room result:'), Array.from(socket.rooms), '\n')
   },
-  showGetPublicHistoryNotice: () => {
-    console.log(notice(`get_public_history: roomId ${1}`))
+  showAllSocketDetails: async (io) => {
+    const allIDs = Array.from(await io.allSockets())
+    console.log(detail('all sockets [系統偵測]'), '\n', allIDs)
+    const userData = {}
+    allIDs.forEach( (socketID) => userData[socketID] =  io.sockets.sockets.get(socketID).data.user)
+    console.log(detail('socket data'), '\n', userData)
+    const userRoom = {}
+    allIDs.forEach(async (socketID) => userRoom[socketID] = Array.from( io.sockets.sockets.get(socketID).rooms))
+    console.log(detail('socket rooms'), '\n', userRoom)
+    console.log(detail('user timestamps for timeline:'), '\n', userTimelineSeenAt)
   },
-  showPostPublicHistoryNotice: (content, userId) => {
-    console.log(notice(`post_public_msg:`, { content, userId }))
-  },
-  showAllSocketDetails: (ids) => {
-    console.log(
-      detail('all sockets [伺服器紀錄]'),
-      '\n',
-      sockets.map((item) => item.id)
-    )
-    console.log(detail('all sockets [系統偵測]'), '\n', Array.from(ids))
-    console.log(detail('all socketUsers [socketID-userID]'), '\n', socketUsers)
-    console.log(detail('all userData [詳細資料]'), '\n', userData)
-    console.log(detail('all publicRoomUsers '), '\n', publicRoomUsers)
-    console.log(detail('all privateRoomUsers '), '\n', privateRoomUsers)
-  },
-  createTimelineRecord: async (ReceiverId, PostId, type, currentUser) => {
-    const currentUserId = currentUser
+  createTimelineRecord: async (ReceiverId, PostId, type, currentUserId) => {
     if (type === 1) {
       const followOptions = {
         where: {
@@ -571,7 +499,7 @@ let socketService = {
       let data = await TimelineRecord.bulkCreate(subscribersData)
       data = data.map((item) => item.dataValues)
       return {
-        receiver: data.map((item) => item.UserId),
+        receiverId: data.map((item) => item.UserId),
         record
       }
     }
@@ -582,6 +510,7 @@ let socketService = {
       })
       record = record.toJSON()
       return {
+        receiverId: [ReceiverId],
         record: [record]
       }
     }
@@ -592,6 +521,7 @@ let socketService = {
       })
       record = record.toJSON()
       return {
+        receiverId: [ReceiverId],
         record: [record]
       }
     }
@@ -602,39 +532,22 @@ let socketService = {
       })
       record = record.toJSON()
       return {
+        receiverId: [ReceiverId],
         record: [record]
       }
     }
   },
-  checkReceiverOnTimelinePage: (socketIds) => {
-    const users = []
-    for (let socketId of socketIds) {
-      if (timelineUsers[socketId]) {
-        users.push(socketId)
-        return users
-      }
-    }
-    return false
-  },
-  sendTimeNotice: () => {
+  sendTimelineNotice: () => {
     return {
       message: 'new timeline_notice'
     }
   },
   updateTimelineSeenAt: (receiver) => {
-    userData[receiver].timelineSeenAt = new Date()
+    /* User table update timelineSeenAt */
   },
-  isUserOnline: (UserId) => {
-    for (let socketId in socketUsers) {
-      if (socketUsers[socketId] === UserId) {
-        return true
-      }
-    }
-    return false
-  },
-  atLeastOneUserOnline: function (receivers) {
-    for (let receiver of receivers) {
-      if (this.isUserOnline(receiver)) {
+  atLeastOneUserOnline: async function (receivers, io) {
+    for (const receiver of receivers) {
+      if (await io.in('User' + receiver).allSockets().size) {
         return true
       }
     }
