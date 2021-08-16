@@ -55,7 +55,7 @@ let socketService = {
   },
   getUserSocketIds: async (UserId, io) => {
     const users = []
-    const socketUsers =  io.sockets.sockets
+    const socketUsers = io.sockets.sockets
     socketUsers.forEach((socket, socketID) => {
       if (socket.data.user.id === UserId) {
         users.push(socketID)
@@ -474,10 +474,10 @@ let socketService = {
     const allIDs = Array.from(await io.allSockets())
     console.log(detail('all sockets [系統偵測]'), '\n', allIDs)
     const userData = {}
-    allIDs.forEach( (socketID) => userData[socketID] =  io.sockets.sockets.get(socketID).data.user)
+    allIDs.forEach((socketID) => userData[socketID] = io.sockets.sockets.get(socketID).data.user)
     console.log(detail('socket data'), '\n', userData)
     const userRoom = {}
-    allIDs.forEach(async (socketID) => userRoom[socketID] = Array.from( io.sockets.sockets.get(socketID).rooms))
+    allIDs.forEach(async (socketID) => userRoom[socketID] = Array.from(io.sockets.sockets.get(socketID).rooms))
     console.log(detail('socket rooms'), '\n', userRoom)
     console.log(detail('user timestamps for timeline:'), '\n', userTimelineSeenAt)
   },
@@ -500,7 +500,7 @@ let socketService = {
       data = data.map((item) => item.dataValues)
       return {
         receiverId: data.map((item) => item.UserId),
-        record
+        record: data
       }
     }
     if (type === 2) {
