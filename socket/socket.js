@@ -29,6 +29,10 @@ module.exports = (server) => {
     const getMsgNotice = await socketService.getMsgNotice(null, socket)
     socket.emit('get_msg_notice', getMsgNotice)
     console.log(notice(`[EMIT] get_msg_notice → ${socket.id}`))
+    /* Timeline Notice */
+    const getTimelineNotice = await socketService.getTimelineNotice(socket)
+    socket.emit('get_timeline_notice', getTimelineNotice)
+    console.log(notice(`[EMIT] get_timeline_notice → ${socket.id}\n`), getTimelineNotice)
 
     /* ================= LISTENERS ================= */
     socket.on('sendMessage', (data) => console.log(data))

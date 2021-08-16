@@ -61,7 +61,7 @@ let socketService = {
         users.push(socketID)
       }
     })
-    console.log(detail('socketUsers@getUserSocketIds'), users)
+    console.log(detail('[Get User SocketIds]'), users)
     if (users.length) {
       return users
     }
@@ -287,6 +287,7 @@ let socketService = {
         }
       }
     })
+    console.log(notice(`[Get Timeline Notice] result: ${count}`))
     return count
   },
   getTimelineNoticeDetails: async function (offset, limit, socket) {
