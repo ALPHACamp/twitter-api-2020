@@ -4,6 +4,7 @@ const socketController = require('../controllers/socket/socketController')
 const socketService = require('../service/socketService')
 const chalk = require('chalk')
 const notice = chalk.keyword('aqua').underline
+const detail = chalk.keyword('powderblue')
 module.exports = (server) => {
   const io = socketio(server, {
     cors: {
