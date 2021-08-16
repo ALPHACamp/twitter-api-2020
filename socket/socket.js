@@ -151,7 +151,7 @@ module.exports = (server) => {
       await socketService.readTimeline(timelineId)
     })
     socket.on('post_timeline', async ({ ReceiverId, type, PostId }) => {
-      console.log(notice('[ON EVENT] post_timeline'))
+      console.log(notice('[ON EVENT] post_timeline\n'), { ReceiverId, type, PostId })
       await socketController.postTimeline(ReceiverId, type, PostId, socket, io)
     })
   })

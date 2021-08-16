@@ -1,5 +1,6 @@
 const db = require('../../models')
 const User = db.User
+const Followship = db.Followship
 const sequelize = require('sequelize')
 const bcrypt = require('bcrypt-nodejs')
 const jwt = require('jsonwebtoken')
@@ -79,42 +80,46 @@ let userController = {
         })
       })
   },
-  getUser: (req, res) => {
+  getUser: async (req, res) => {
     const id = +req.params.id
     const userId = +req.user.id
-    const options = {
+    const followshipOptions = {
+      where: {
+        followerId: userId,
+        followingId: id
+      }
+    }
+    const userOptions = {
       attributes: ['id', 'account', 'name', 'email', 'introduction', 'avatar', 'cover', 'tweetNum', 'likeNum', 'followingNum', 'followerNum', 'lastLoginAt'],
-      include: [
-        {
-          model: User,
-          as: 'Followers',
-          attributes: ['id']
-        }
-      ],
       where: { role: 'user' }
     }
-    User.findByPk(id, options)
-      .then((user) => {
-        if (user) {
-          user.dataValues.isFollowing = user.dataValues.Followers.some(
-            (follower) => follower.id === userId
-          )
-          delete user.dataValues.Followers
-          return res.json(user)
+    const [user, followship] = await Promise.all([
+      User.findByPk(id, userOptions),
+      Followship.findOne(followshipOptions)
+    ])
+    try {
+      if (user) {
+        user.dataValues.isFollowing = false
+        user.dataValues.isSubscribing = false
+        if (followship) {
+          user.dataValues.isFollowing = true
+          user.dataValues.isSubscribing = followship.dataValues.isSubscribing
         }
-        return res
-          .status(404)
-          .json({
-            status: 'error',
-            message: 'User not found.'
-          })
-      })
-      .catch((error) => {
-        return res.status(500).json({
+        return res.json(user)
+      }
+      return res
+        .status(404)
+        .json({
           status: 'error',
-          message: error
+          message: 'User not found.'
         })
+    }
+    catch (error) {
+      return res.status(500).json({
+        status: 'error',
+        message: error
       })
+    }
   },
   getCurrentUser: (req, res) => {
     const options = {
