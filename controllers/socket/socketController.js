@@ -185,31 +185,33 @@ let socketController = {
     )
     const receivers = records.receiverId // Array
     const record = records.record
-    console.log(notice(`[Create Timeline Record]\n`), record[0])
-    /* -------- at least one receiver online -------- */
-    let atLeastOneUserOnline = await socketService.atLeastOneUserOnline(receivers, io)
-    if (atLeastOneUserOnline) {
-      const noticeDetail = await socketService.parseTimelineData(record[0])
-      receivers.forEach(async (receiver, i) => {
-        const getUserSocketIds = await io.in('User' + receiver).allSockets()
-        /* -------- receiver online -------- */
-        if (getUserSocketIds.size) {
-          const receiverRooms = await socketService.getUserRooms(receiver, io)
-          /* -------- receiver on Timeline Page -------- */
-          if (receiverRooms.has('TimelinePage')) {
-            /* update timelineSeenAt */
-            socketService.seenTimeline(receiver, record[0].createdAt)
-            /* emit: send details to receiver */
-            await io.to('User' + receiver).emit('update_timeline_notice_detail', noticeDetail)
-            console.log(notice(`[EMIT] update_timeline_notice_detail → Receiver ${receiver}`))
-            return
+    if (record.length) {
+      console.log(notice(`[Create Timeline Record]\n`), record[0])
+      /* -------- at least one receiver online -------- */
+      let atLeastOneUserOnline = await socketService.atLeastOneUserOnline(receivers, io)
+      if (atLeastOneUserOnline) {
+        const noticeDetail = await socketService.parseTimelineData(record[0])
+        receivers.forEach(async (receiver, i) => {
+          const getUserSocketIds = await io.in('User' + receiver).allSockets()
+          /* -------- receiver online -------- */
+          if (getUserSocketIds.size) {
+            const receiverRooms = await socketService.getUserRooms(receiver, io)
+            /* -------- receiver on Timeline Page -------- */
+            if (receiverRooms.has('TimelinePage')) {
+              /* update timelineSeenAt */
+              socketService.seenTimeline(receiver, record[0].createdAt)
+              /* emit: send details to receiver */
+              await io.to('User' + receiver).emit('update_timeline_notice_detail', noticeDetail)
+              console.log(notice(`[EMIT] update_timeline_notice_detail → Receiver ${receiver}`))
+              return
+            }
+            /* -------- receiver not on Timeline Page -------- */
+            /* emit: send notice to receiver */
+            socket.to('User' + receiver).emit('update_timeline_notice', socketService.sendTimelineNotice())
+            console.log(notice(`[EMIT] update_timeline_notice → Receiver ${receiver}`))
           }
-          /* -------- receiver not on Timeline Page -------- */
-          /* emit: send notice to receiver */
-          socket.to('User' + receiver).emit('update_timeline_notice', socketService.sendTimelineNotice())
-          console.log(notice(`[EMIT] update_timeline_notice → Receiver ${receiver}`))
-        }
-      })
+        })
+      }
     }
   }
 }
