@@ -493,7 +493,7 @@ let socketService = {
       }
       let subscribersData = await Followship.findAll(followOptions)
       subscribersData = subscribersData.map((follower) => ({
-        userId: follower.followerId,
+        UserId: follower.followerId,
         SubscribeTweetId: PostId
       }))
       let data = await TimelineRecord.bulkCreate(subscribersData)
@@ -505,7 +505,7 @@ let socketService = {
     }
     if (type === 2) {
       let record = await TimelineRecord.create({
-        userId: ReceiverId,
+        UserId: ReceiverId,
         ReplyId: PostId
       })
       record = record.toJSON()
@@ -516,7 +516,7 @@ let socketService = {
     }
     if (type === 3) {
       let record = await TimelineRecord.create({
-        userId: ReceiverId,
+        UserId: ReceiverId,
         LikeId: PostId
       })
       record = record.toJSON()
@@ -527,7 +527,7 @@ let socketService = {
     }
     if (type === 4) {
       let record = await TimelineRecord.create({
-        userId: ReceiverId,
+        UserId: ReceiverId,
         SubscribeTweetId: PostId
       })
       record = record.toJSON()
