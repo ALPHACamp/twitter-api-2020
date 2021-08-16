@@ -278,7 +278,7 @@ let socketService = {
   },
   getTimelineNotice: async (socket) => {
     const userId = socket.data.user.id
-    const timestamp = socket.data.user.timelineSeenAt
+    const timestamp = socket.data.user.timelineSeenAt || new Date(2020, 0, 1)
     const { count } = await TimelineRecord.findAndCountAll({
       where: {
         UserId: userId,
@@ -292,7 +292,7 @@ let socketService = {
   },
   getTimelineNoticeDetails: async function (offset, limit, socket) {
     const userId = socket.data.user.id
-    const timestamp = socket.data.user.timelineSeenAt
+    const timestamp = socket.data.user.timelineSeenAt || new Date(2020, 0, 1)
     let SeenRecords = []
     const UnseenRecords = await TimelineRecord.findAll({
       offset,
