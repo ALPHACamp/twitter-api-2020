@@ -327,7 +327,7 @@ let socketService = {
     return { Unseen, Seen }
   },
   parseTimelineData: async (record) => {
-    const { id, ReplyId, LikeId, FollowerId, SubscribeTweetId, isRead, createdAt } = record.dataValues
+    const { id, ReplyId, LikeId, FollowerId, SubscribeTweetId, isRead, createdAt } = record
     const replyOptions = {
       include: [
         {
@@ -547,7 +547,8 @@ let socketService = {
   },
   atLeastOneUserOnline: async function (receivers, io) {
     for (const receiver of receivers) {
-      if (await io.in('User' + receiver).allSockets().size) {
+      const result = await io.in('User' + receiver).allSockets()
+      if (result.size) {
         return true
       }
     }
