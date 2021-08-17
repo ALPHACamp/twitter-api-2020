@@ -2,6 +2,7 @@ const db = require('../../models')
 const Like = db.Like
 const User = db.User
 const Tweet = db.Tweet
+const TimelineRecord = db.TimelineRecord
 const defaultLimit = 10
 
 let likeController = {
@@ -97,14 +98,19 @@ let likeController = {
         UserId: +req.user.id
       }
     })
-      .then((Like) => {
+      .then(async (Like) => {
         if (!Like) {
           return res.status(400).json({
             status: 'error',
             message: 'This Like does not exist.'
           })
         }
-        Like.destroy().then(() =>
+        await TimelineRecord.destroy({
+          where: {
+            LikeId: Like.id
+          }
+        })
+        Like.destroy().then(() => {
           Promise.all([
             Tweet.findByPk(+req.params.tweetId)
               .then((tweet) =>
@@ -127,6 +133,7 @@ let likeController = {
                 message: error
               })
             )
+        }
         )
       }
       )
