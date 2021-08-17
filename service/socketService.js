@@ -529,7 +529,7 @@ let socketService = {
     if (type === 4) {
       let record = await TimelineRecord.create({
         UserId: ReceiverId,
-        SubscribeTweetId: PostId
+        FollowerId: PostId
       })
       record = record.toJSON()
       return {
