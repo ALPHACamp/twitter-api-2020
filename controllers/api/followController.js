@@ -1,6 +1,7 @@
 const db = require('../../models')
 const { Op } = require('sequelize')
 const Followship = db.Followship
+const TimelineRecord = db.TimelineRecord
 const User = db.User
 const defaultLimit = 10
 
@@ -163,13 +164,19 @@ let followController = {
         followerId: +req.user.id,
         followingId: +req.params.id
       }
-    }).then((followship) => {
+    }).then(async (followship) => {
       if (!followship) {
         return res.status(400).json({
           status: 'error',
           message: 'This Follow does not exist.'
         })
       }
+      await TimelineRecord.destroy({
+        where: {
+          UserId: +req.params.id,
+          FollowerId: +req.user.id
+        }
+      })
       followship.destroy().then(() => {
         Promise.all([
           User.findByPk(+req.user.id).then((currentUser) =>
