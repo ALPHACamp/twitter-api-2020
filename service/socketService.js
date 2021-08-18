@@ -333,7 +333,7 @@ let socketService = {
       include: [
         {
           model: User,
-          attributes: ['name', 'avatar']
+          attributes: ['id','name', 'avatar']
         },
         {
           model: Tweet,
@@ -347,7 +347,7 @@ let socketService = {
       include: [
         {
           model: User,
-          attributes: ['name', 'avatar']
+          attributes: ['id','name', 'avatar']
         },
         {
           model: Tweet,
@@ -365,7 +365,7 @@ let socketService = {
       include: [
         {
           model: User,
-          attributes: ['name', 'avatar'],
+          attributes: ['id','name', 'avatar'],
           as: 'Author'
         }
       ]
