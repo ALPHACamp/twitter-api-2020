@@ -375,15 +375,20 @@ const userController = {
       }
       replies = replies.map(reply => {
         return {
-          id: reply.id,
-          UserId: reply.UserId,
-          TweetId: reply.TweetId,
+          tweetId: reply.Tweet.id,
+          tweetDescription: reply.Tweet.description,
+          tweetCreatedAt: reply.Tweet.createdAt,
+          tweetAuthorId: reply.Tweet.User.id,
           tweetAuthorAccount: reply.Tweet.User.account,
-          comment: reply.comment,
-          createdAt: reply.createdAt,
-          commentAccount: reply.User.account,
-          name: reply.User.name,
-          avatar: reply.User.avatar
+          tweetAuthorName: reply.Tweet.User.name,
+          tweetAuthorAvatar: reply.Tweet.User.avatar,
+          replyId: reply.id,
+          replyUserId: reply.UserId,
+          replyComment: reply.comment,
+          replyCreatedAt: reply.CreatedAt,
+          replyAccount: reply.User.account,
+          replyName: reply.User.name,
+          replyAvatar: reply.User.avatar
         }
       })
       return res.status(200).json(replies)
@@ -406,7 +411,7 @@ const userController = {
         include: [{
           model: Tweet,
           include: [{ model: User },
-            { model: Reply, include: [{ model: User }] }, Like]
+          { model: Reply, include: [{ model: User }] }, Like]
         }],
         order: [['createdAt', 'DESC']]
       })
