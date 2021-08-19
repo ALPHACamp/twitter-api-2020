@@ -1,5 +1,4 @@
 const userTimelineSeenAt = {} // key(userid) to value(timelineSeenAt)
-const timelineUsers = {} // key(socketid) to value(id)
 const db = require('../models')
 const {
   User,
@@ -333,7 +332,7 @@ let socketService = {
       include: [
         {
           model: User,
-          attributes: ['id','name', 'avatar']
+          attributes: ['id', 'name', 'avatar']
         },
         {
           model: Tweet,
@@ -347,7 +346,7 @@ let socketService = {
       include: [
         {
           model: User,
-          attributes: ['id','name', 'avatar']
+          attributes: ['id', 'name', 'avatar']
         },
         {
           model: Tweet,
@@ -365,7 +364,7 @@ let socketService = {
       include: [
         {
           model: User,
-          attributes: ['id','name', 'avatar'],
+          attributes: ['id', 'name', 'avatar'],
           as: 'Author'
         }
       ]
@@ -429,8 +428,9 @@ let socketService = {
     })
     return record
   },
-  seenTimeline: (userID, timestamp) => {
-    userTimelineSeenAt[userID] = timestamp
+  seenTimeline: (socket, timestamp) => {
+    socket.data.user.timelineSeenAt = userTimelineSeenAt[socket.data.user.id]
+    userTimelineSeenAt[socket.data.user.id] = timestamp
     return
   },
   readTimeline: async (timelineId) => {

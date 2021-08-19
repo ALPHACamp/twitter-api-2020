@@ -124,7 +124,7 @@ module.exports = (server) => {
     /* ---------------- TIMELINE ---------------- */
     socket.on('join_timeline_page', ({ timestamp }) => {
       socket.join('TimelinePage')
-      socketService.seenTimeline(socket.data.user.id, timestamp)
+      socketService.seenTimeline(socket, timestamp)
       /* logs */
       console.log(notice('[ON EVENT] join_timeline_page'))
       console.log(
