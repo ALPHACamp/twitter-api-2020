@@ -33,7 +33,10 @@ let socketService = {
       return
     }
     console.log(notice(`[Delete And Update timelineSeenAt] UserID ${userId}`))
-    await User.update({ timelineSeenAt: userTimelineSeenAt[userId] }, { where: { id: userId } })
+    await User.update(
+      { timelineSeenAt: userTimelineSeenAt[userId] },
+      { where: { id: userId } }
+    )
     delete userTimelineSeenAt[userId]
     await this.showAllSocketDetails(io)
   },
@@ -42,29 +45,18 @@ let socketService = {
     return message
   },
   getPublicRoomUsers: async (io) => {
-    const publicRoomUsers = Array.from(await io.in('PublicRoom').allSockets())
-    let users = []
-    publicRoomUsers.forEach((socketID) => {
-      let data = io.sockets.sockets.get(socketID).data.user
-      users.push(data)
-    })
-    let allId = users.map((item) => item.id)
-    users = users.filter((user, i, arr) => allId.indexOf(user.id) === i)
-    return users
-  },
-  getUserSocketIds: async (UserId, io) => {
-    const users = []
-    const socketUsers = io.sockets.sockets
-    socketUsers.forEach((socket, socketID) => {
-      if (socket.data.user.id === UserId) {
-        users.push(socketID)
+    const publicRoomUsers = Array.from(await io.in('PublicRoom').fetchSockets())
+      .map((socket) => socket.data.user)
+      .sort((a, b) => a.id - b.id)
+    let pointer = 0 
+    for(let i = 1, len = publicRoomUsers.length; i < len; i++){
+      if(publicRoomUsers[pointer].id ===publicRoomUsers[pointer + 1].id){
+        publicRoomUsers.splice(pointer,1)
+      }else {
+        ++pointer
       }
-    })
-    console.log(detail('[Get User SocketIds]'), users)
-    if (users.length) {
-      return users
     }
-    return false
+    return publicRoomUsers
   },
   getUserRooms: async (UserId, io) => {
     let Rooms = new Set()
@@ -151,23 +143,27 @@ let socketService = {
       limit
     }
     const rooms = await Room.findAll(roomOption).then((rooms) => {
-      rooms.forEach((room) => {
+      rooms = rooms.map((room) => {
+        room = room.toJSON()
         const user =
-          room.dataValues.User1.dataValues.id !== userId
-            ? room.dataValues.User1.dataValues
-            : room.dataValues.User2.dataValues
-        room.dataValues.lastMsg = {}
-        room.dataValues.lastMsg.fromRoomMember =
-          room.dataValues.Messages[0].dataValues.User.id !== userId
-        room.dataValues.lastMsg.content =
-          room.dataValues.Messages[0].dataValues.content
-        room.dataValues.lastMsg.createdAt =
-          room.dataValues.Messages[0].dataValues.createdAt
-        room.dataValues.roomMember = user
-        delete room.dataValues.Messages
-        delete room.dataValues.User1
-        delete room.dataValues.User2
-        return room.dataValues
+          room.User1.id !== userId
+            ? room.User1
+            : room.User2
+        const fromRoomMember = room.Messages[0].User.id !== userId
+        const { content, createdAt } = room.Messages[0]
+        room = {
+          ...room,
+          roomMember: user,
+          lastMsg: {
+            fromRoomMember,
+            content,
+            createdAt
+          }
+        }
+        delete room.User1
+        delete room.User2   
+        delete room.Messages
+        return room
       })
       return rooms
     })
@@ -189,10 +185,12 @@ let socketService = {
         RoomId
       }
     }
-    const messages = await Message.findAll(options)
-    messages.forEach((message) => {
-      message.dataValues.avatar = message.dataValues.User.avatar
-      delete message.dataValues.User
+    let messages = await Message.findAll(options)
+    messages = messages.map((message) => {
+      message = message.toJSON()
+      message.avatar = message.User.avatar
+      delete message.User
+      return message
     })
     return messages
   },
@@ -265,14 +263,12 @@ let socketService = {
       ]
     }
     return await Room.findOne(roomOption).then((room) => {
-      const user =
-        room.dataValues.User1.dataValues.id !== ReceiverId
-          ? room.dataValues.User1.dataValues
-          : room.dataValues.User2.dataValues
-      room.dataValues.roomMember = user
-      delete room.dataValues.User1
-      delete room.dataValues.User2
-      return room.dataValues
+      room = room.toJSON()
+      const user = room.User1.id !== ReceiverId ? room.User1 : room.User2
+      room.roomMember = user
+      delete room.User1
+      delete room.User2
+      return room
     })
   },
   getTimelineNotice: async (socket) => {
@@ -382,10 +378,11 @@ let socketService = {
       return { id, Follower: Follower.toJSON(), isRead, createdAt }
     }
     if (SubscribeTweetId) {
-      const tweet = await Tweet.findByPk(SubscribeTweetId, tweetOptions)
+      let tweet = await Tweet.findByPk(SubscribeTweetId, tweetOptions)
+      tweet = tweet.toJSON()
       const Subscribing = {}
-      Subscribing.User = tweet.dataValues.Author
-      delete tweet.dataValues.Author
+      Subscribing.User = tweet.Author
+      delete tweet.Author
       Subscribing.Tweet = tweet
       return { id, Subscribing, isRead }
     }
@@ -433,8 +430,8 @@ let socketService = {
     userTimelineSeenAt[socket.data.user.id] = timestamp
     return
   },
-  readTimeline: async (timelineId) => {
-    return await TimelineRecord.update(
+  readTimeline:  (timelineId) => {
+    return  TimelineRecord.update(
       { isRead: true },
       {
         where: {
@@ -542,9 +539,6 @@ let socketService = {
     return {
       message: 'new timeline_notice'
     }
-  },
-  updateTimelineSeenAt: (receiver) => {
-    /* User table update timelineSeenAt */
   },
   atLeastOneUserOnline: async function (receivers, io) {
     for (const receiver of receivers) {
