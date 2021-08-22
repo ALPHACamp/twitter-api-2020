@@ -48,11 +48,11 @@ let socketService = {
     const publicRoomUsers = Array.from(await io.in('PublicRoom').fetchSockets())
       .map((socket) => socket.data.user)
       .sort((a, b) => a.id - b.id)
-    let pointer = 0 
-    for(let i = 1, len = publicRoomUsers.length; i < len; i++){
-      if(publicRoomUsers[pointer].id ===publicRoomUsers[pointer + 1].id){
-        publicRoomUsers.splice(pointer,1)
-      }else {
+    let pointer = 0
+    for (let i = 1, len = publicRoomUsers.length; i < len; i++) {
+      if (publicRoomUsers[pointer].id === publicRoomUsers[pointer + 1].id) {
+        publicRoomUsers.splice(pointer, 1)
+      } else {
         ++pointer
       }
     }
@@ -62,7 +62,7 @@ let socketService = {
     let Rooms = new Set()
     const sockets = await io.in('User' + UserId).fetchSockets()
     for (const socket of sockets) {
-      socket.rooms.forEach(room => Rooms.add(room))
+      socket.rooms.forEach((room) => Rooms.add(room))
     }
     console.log(notice('Get User Rooms:\n'), Rooms)
     return Rooms
@@ -145,10 +145,7 @@ let socketService = {
     const rooms = await Room.findAll(roomOption).then((rooms) => {
       rooms = rooms.map((room) => {
         room = room.toJSON()
-        const user =
-          room.User1.id !== userId
-            ? room.User1
-            : room.User2
+        const user = room.User1.id !== userId ? room.User1 : room.User2
         const fromRoomMember = room.Messages[0].User.id !== userId
         const { content, createdAt } = room.Messages[0]
         room = {
@@ -161,7 +158,7 @@ let socketService = {
           }
         }
         delete room.User1
-        delete room.User2   
+        delete room.User2
         delete room.Messages
         return room
       })
@@ -323,7 +320,15 @@ let socketService = {
     return { Unseen, Seen }
   },
   parseTimelineData: async (record) => {
-    const { id, ReplyId, LikeId, FollowerId, SubscribeTweetId, isRead, createdAt } = record
+    const {
+      id,
+      ReplyId,
+      LikeId,
+      FollowerId,
+      SubscribeTweetId,
+      isRead,
+      createdAt
+    } = record
     const replyOptions = {
       include: [
         {
@@ -425,13 +430,12 @@ let socketService = {
     })
     return record
   },
-  seenTimeline: (socket, timestamp) => {
-    socket.data.user.timelineSeenAt = userTimelineSeenAt[socket.data.user.id]
-    userTimelineSeenAt[socket.data.user.id] = timestamp
+  seenTimeline: (receiver, timestamp) => {
+    userTimelineSeenAt[receiver] = timestamp
     return
   },
-  readTimeline:  (timelineId) => {
-    return  TimelineRecord.update(
+  readTimeline: (timelineId) => {
+    return TimelineRecord.update(
       { isRead: true },
       {
         where: {
@@ -441,7 +445,9 @@ let socketService = {
     )
   },
   showUserOnline: (socket) => {
-    console.log(highlight(` User is online: ${socket.data.user.id} / ${socket.id}`))
+    console.log(
+      highlight(` User is online: ${socket.data.user.id} / ${socket.id}`)
+    )
     console.log(notice('User Info (socket.data.user)\n'), socket.data.user)
   },
   showUserOffline: (socketId) => {
@@ -455,7 +461,9 @@ let socketService = {
   },
   showJoinPrivatePageNotice: (socket, isAdded) => {
     if (isAdded) {
-      console.log(notice(`[補 Join Private Page] userID: ${socket.data.user.id}`))
+      console.log(
+        notice(`[補 Join Private Page] userID: ${socket.data.user.id}`)
+      )
       console.log(detail(`socket ID: ${socket.id}`))
       return
     }
@@ -472,12 +480,24 @@ let socketService = {
     const allIDs = Array.from(await io.allSockets())
     console.log(detail('all sockets [系統偵測]'), '\n', allIDs)
     const userData = {}
-    allIDs.forEach((socketID) => userData[socketID] = io.sockets.sockets.get(socketID).data.user)
+    allIDs.forEach(
+      (socketID) =>
+        (userData[socketID] = io.sockets.sockets.get(socketID).data.user)
+    )
     console.log(detail('socket data'), '\n', userData)
     const userRoom = {}
-    allIDs.forEach(async (socketID) => userRoom[socketID] = Array.from(io.sockets.sockets.get(socketID).rooms))
+    allIDs.forEach(
+      async (socketID) =>
+        (userRoom[socketID] = Array.from(
+          io.sockets.sockets.get(socketID).rooms
+        ))
+    )
     console.log(detail('socket rooms'), '\n', userRoom)
-    console.log(detail('user timestamps for timeline:'), '\n', userTimelineSeenAt)
+    console.log(
+      detail('user timestamps for timeline:'),
+      '\n',
+      userTimelineSeenAt
+    )
   },
   createTimelineRecord: async (ReceiverId, PostId, type, currentUserId) => {
     if (type === 1) {
