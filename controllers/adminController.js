@@ -42,7 +42,7 @@ let adminController = {
         order: [['createdAt', 'DESC']],
         raw: true
       })
-      const data = tweets.map(t => ({
+      const data = tweets.map((t) => ({
         ...t,
         description: t.description.substring(0, 50)
       }))
@@ -98,6 +98,10 @@ let adminController = {
       const tweet = await Tweet.findByPk(req.params.tweetId)
       if (!tweet) throw new Error("this tweet doesn't exist")
       await tweet.destroy()
+
+      await Reply.destroy({ where: { TweetId: req.params.tweetId } })
+      await Like.destroy({ where: { TweetId: req.params.tweetId } })
+
       return res.json({ status: 'success', message: 'Successfully delete this tweet' })
     } catch (error) {
       next(error)
