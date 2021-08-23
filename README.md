@@ -2,10 +2,10 @@
 
 #### A simple web application build from Node.js & Express
 
-[<img align="center" src="" height="400" width="800" />]()
-[<img align="center" src="" height="400" width="800" />]()
-[<img align="center" src="" height="400" width="800" />]()
-[<img align="center" src="" height="400" width="800" />]()
+[<img align="center" src="https://github.com/lewislu327/simple-twitter-api-2021/blob/master/public/images/homepage.png" height="400" width="800" />]()
+[<img align="center" src="https://github.com/lewislu327/simple-twitter-api-2021/blob/master/public/images/user_page.png" height="400" width="800" />]()
+[<img align="center" src="https://github.com/lewislu327/simple-twitter-api-2021/blob/master/public/images/reply_page.png" height="400" width="800" />]()
+[<img align="center" src="https://github.com/lewislu327/simple-twitter-api-2021/blob/master/public/images/chat_room.png" height="400" width="800" />]()
 
 ##### Example User Information
 
