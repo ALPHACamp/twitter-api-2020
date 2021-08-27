@@ -9,9 +9,9 @@
 
 ##### Example User Information
 
-| Email             | Password |
+| Account             | Password |
 | ----------------- | :------: |
-| user1@example.com | 12345678 |
+| user1 | 12345678 |
 
 [網站連結](https://guanyi608.github.io/simple-twitter-frontend/#/signin)
 
