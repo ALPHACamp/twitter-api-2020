@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const sequelize = require('sequelize')
+const { Op } = require('sequelize')
 
 const uploadImg = path => {
   return new Promise((resolve, reject) => {
@@ -131,8 +133,17 @@ const userController = {
       let users = await User.findAll({
         where: { role: 'user' },
         include: [
-          { model: User, as: 'Followers' }
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
         ],
+        attributes: {
+          include: [
+            [
+              sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followCount'
+            ]
+          ]
+        },
+        order: [[sequelize.literal('followCount'), 'DESC']],
         limit: 10
       })
       if (!users) {
@@ -146,7 +157,7 @@ const userController = {
         followerCount: user.Followers.length,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
-      users = users.sort((a, b) => b.followerCount - a.followerCount)
+      // users = users.sort((a, b) => b.followerCount - a.followerCount)
       return res.status(200).json({
         status: 'success',
         message: 'Get top ten users successfully',
@@ -182,7 +193,7 @@ const userController = {
         message.push('Name can not be longer than 50 characters.')
       }
       // check account length and type
-      if (account && !validator.isByteLength(account, { min: 0, max: 20 })) {
+      if (account && !validator.isByteLength(account, { min: 0, max: 50 })) {
         message.push('Account can not be longer than 20 characters.')
       }
       // check email validation
@@ -385,7 +396,7 @@ const userController = {
           replyId: reply.id,
           replyUserId: reply.UserId,
           replyComment: reply.comment,
-          replyCreatedAt: reply.CreatedAt,
+          replyCreatedAt: reply.createdAt,
           replyAccount: reply.User.account,
           replyName: reply.User.name,
           replyAvatar: reply.User.avatar
@@ -423,10 +434,10 @@ const userController = {
           id: like.id,
           UserId: like.UserId,
           TweetId: like.TweetId,
-          likedTweetUserId: like.Tweet.User.id,
           likeCreatedAt: like.createdAt,
-          account: like.Tweet.User.account,
+          likedTweetUserId: like.Tweet.UserId,
           name: like.Tweet.User.name,
+          account: like.Tweet.User.account,
           avatar: like.Tweet.User.avatar,
           description: like.Tweet.description,
           tweetCreatedAt: like.Tweet.createdAt,

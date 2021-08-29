@@ -25,7 +25,7 @@ module.exports = {
       account: 'LyviaLee',
       introduction: faker.lorem.text().substring(0, 160),
       avatar: 'https://i.pravatar.cc/150?img=29',
-      cover: `https://loremflickr.com/660/240/paris/?lock=${Math.random() * 100}`,
+      cover: 'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=967&q=80',
       role: 'user',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
@@ -37,7 +37,7 @@ module.exports = {
       account: 'AaronWang',
       introduction: faker.lorem.text().substring(0, 160),
       avatar: 'https://i.pravatar.cc/150?img=56',
-      cover: `https://loremflickr.com/660/240/paris/?lock=${Math.random() * 100}`,
+      cover: 'https://images.unsplash.com/photo-1507608158173-1dcec673a2e5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
       role: 'user',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
@@ -49,8 +49,7 @@ module.exports = {
       account: 'BeatricePai',
       introduction: faker.lorem.text().substring(0, 160),
       avatar: 'https://i.pravatar.cc/150?img=28',
-      cover: `https://loremflickr.com/660/240/paris/?lock=${Math.random() * 100}`,
-      role: 'user',
+      cover: 'https://images.unsplash.com/photo-1531685250784-7569952593d2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1934&q=80',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
     }, {
@@ -61,7 +60,7 @@ module.exports = {
       account: 'TimChien',
       introduction: faker.lorem.text().substring(0, 160),
       avatar: 'https://i.pravatar.cc/150?img=60',
-      cover: `https://loremflickr.com/660/240/restaurant,food/?lock=${Math.random() * 100}`,
+      cover: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
       role: 'user',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
@@ -74,7 +73,7 @@ module.exports = {
       account: 'Twitter',
       introduction: 'what’s happening?!',
       avatar: 'https://pbs.twimg.com/profile_images/1354479643882004483/Btnfm47p_400x400.jpg',
-      cover: 'https://pbs.twimg.com/profile_banners/783214/1625080505/1500x500',
+      cover: 'https://images.unsplash.com/photo-1476820865390-c52aeebb9891?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
       role: 'user',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
@@ -87,7 +86,7 @@ module.exports = {
       account: 'cnnbrk',
       introduction: 'Breaking news from CNN Digital. Now 61M strong. Check @cnn for all things CNN, breaking and more.',
       avatar: 'https://pbs.twimg.com/profile_images/925092227667304448/fAY1HUu3_400x400.jpg',
-      cover: 'https://pbs.twimg.com/profile_banners/428333/1531855520/1500x500',
+      cover: 'https://images.unsplash.com/photo-1508615039623-a25605d2b022?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1050&q=80',
       role: 'user',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
@@ -100,7 +99,7 @@ module.exports = {
       account: 'nytimes',
       introduction: 'News tips? Share them here: http://nyti.ms/2FVHq9v',
       avatar: 'https://pbs.twimg.com/profile_images/1098244578472280064/gjkVMelR_400x400.png',
-      cover: 'https://pbs.twimg.com/profile_banners/807095/1584666392/1500x500',
+      cover: 'https://images.unsplash.com/photo-1530543787849-128d94430c6b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
       role: 'user',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
@@ -113,7 +112,7 @@ module.exports = {
       account: 'YouTube',
       introduction: 'Like and subscribe.',
       avatar: 'https://pbs.twimg.com/profile_images/1415106724504109059/3Q4zmxjQ_400x400.jpg',
-      cover: 'https://pbs.twimg.com/profile_banners/10228272/1626222710/1500x500',
+      cover: 'https://images.unsplash.com/photo-1519751138087-5bf79df62d5b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
       role: 'user',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
@@ -126,7 +125,7 @@ module.exports = {
       account: 'elonmark',
       introduction: faker.lorem.text().substring(0, 160),
       avatar: 'https://i.pravatar.cc/150?img=33',
-      cover: 'https://pbs.twimg.com/profile_banners/44196397/1576183471/1500x500',
+      cover: 'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
       role: 'user',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
       updatedAt: functions.randomDate(new Date(2021, 0, 1), new Date())
@@ -138,7 +137,7 @@ module.exports = {
       name: 'root',
       account: 'root',
       avatar: 'https://i.pravatar.cc/150?img=31',
-      cover: `https://loremflickr.com/660/240/paris/?lock=${Math.random() * 100}`,
+      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80',
       introduction: faker.lorem.text().substring(0, 160),
       role: 'admin',
       createdAt: functions.randomDate(new Date(2021, 0, 1), new Date()),
