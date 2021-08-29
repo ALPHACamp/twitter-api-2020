@@ -80,7 +80,7 @@ const TweetController = {
       if (!description) {
         return res.status(400).json({ status: 'error', message: 'Please input tweet.' })
       }
-      if (description && description > 140) {
+      if (description && description.length > 140) {
         return res.status(409).json({ status: 'error', message: 'Tweet can\'t be more than 140 words.' })
       }
       await Tweet.create({
@@ -136,7 +136,7 @@ const TweetController = {
       if (!comment) {
         return res.status(400).json({ status: 'error', message: 'Please input comment.' })
       }
-      if (comment && comment > 50) {
+      if (comment && comment.length > 50) {
         return res.status(409).json({ status: 'error', message: 'Comment can\'t be more than 50 words.' })
       }
       await Reply.create({
