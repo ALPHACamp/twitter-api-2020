@@ -11,6 +11,9 @@ module.exports = {
       email: {
         type: Sequelize.STRING
       },
+      account: {
+        type: Sequelize.STRING
+      },
       password: {
         type: Sequelize.STRING
       },
@@ -18,13 +21,18 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatar: {
+        type: Sequelize.STRING,
+        defaultValue: 'https://image.flaticon.com/icons/png/512/149/149071.png',
+      },
+      cover: {
         type: Sequelize.STRING
       },
       introduction: {
-        type: Sequelize.TEXT
+        type: Sequelize.STRING
       },
       role: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'user',
       },
       createdAt: {
         allowNull: false,
