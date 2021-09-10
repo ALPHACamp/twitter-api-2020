@@ -12,7 +12,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       account: {
-        type: Sequelize.STRING(50)
+        type: Sequelize.STRING(50),
+        unique: true,
       },
       password: {
         type: Sequelize.STRING
