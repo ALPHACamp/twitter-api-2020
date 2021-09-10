@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       account: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(50)
       },
       password: {
         type: Sequelize.STRING
@@ -28,7 +28,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       introduction: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(160)
       },
       role: {
         type: Sequelize.STRING,
