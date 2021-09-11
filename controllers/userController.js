@@ -42,6 +42,25 @@ const userController = {
         role: user.role
       }
     })
+  },
+
+  getCurrentUser: async (req, res) => {
+    const currentUser = await userService.getCurrentUser(
+      helpers.getUser(req).id
+    )
+
+    // Check whether the current user exists by user id
+    if (!currentUser) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No such user found' })
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'ok',
+      user: currentUser
+    })
   }
 }
 
