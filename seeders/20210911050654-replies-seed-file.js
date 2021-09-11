@@ -8,7 +8,7 @@ module.exports = {
       'Replies',
       Array.from({ length: 150 }).map((reply, index) => ({
         id: index * 10 + 5,
-        comment: faker.lorem.sentence(),
+        comment: faker.lorem.sentence(3),
         userId: ((index % 3) + 1) * 10 + 5,
         tweetId: Math.floor(index / 3) * 10 + 5,
         createdAt: new Date(),
