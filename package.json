@@ -6,28 +6,34 @@
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "test": "mocha test --exit --recursive --timeout 5000",
+    "standard": "standard && node app.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
+    "dotenv": "^10.0.0",
     "express": "^4.16.4",
     "express-handlebars": "^3.0.0",
-    "express-session": "^1.15.6",
-    "faker": "^4.1.0",
+    "express-session": "^1.17.2",
+    "faker": "^5.5.3",
+    "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
     "mocha": "^6.0.2",
-    "mysql2": "^1.6.4",
-    "passport": "^0.4.0",
+    "mysql2": "^2.3.0",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
-    "sequelize": "^4.42.0",
-    "sequelize-cli": "^5.5.0",
+    "sequelize": "^6.6.5",
+    "sequelize-cli": "^6.2.0",
     "sinon": "^7.2.3",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.3.0",
+    "standard": "^16.0.3"
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",

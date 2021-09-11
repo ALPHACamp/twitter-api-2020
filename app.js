@@ -1,15 +1,31 @@
 const express = require('express')
-const helpers = require('./_helpers');
+const helpers = require('./_helpers')
 
 const app = express()
-const port = 3000
+const methodOverride = require('method-override')
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const routes = require('./routes')
+const passport = require('./config/passport')
+const PORT = process.env.PORT || 3000
+
+// Setting body-parser
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
+// Setting passport
+app.use(passport.initialize())
+
+// Setting middleware: method-override
+app.use(methodOverride('_method'))
+
+app.use(routes)
+
+app.listen(PORT, () =>
+  console.log(`Example app listening at http://localhost:${PORT}`)
+)
 
 module.exports = app
