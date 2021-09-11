@@ -6,18 +6,13 @@ const helpers = require('../_helpers')
 // use helpers.getUser(req) to replace req.user
 const authenticated = (req, res, next) =>
   passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (err) {
-      return new Error(err)
+    if (err || !user) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' })
     }
-    // Check if the user exists
-    if (!user) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'Permission denied' })
-    }
+    req.user = user
 
     return next()
-  })
+  })(req, res, next)
 
 // authenticatedRole('user') to verify req is user
 // authenticatedRole('admin') to verify req is admin
@@ -25,8 +20,8 @@ const authenticatedRole = (role) => {
   return (req, res, next) => {
     if (helpers.getUser(req).role !== role) {
       return res
-      .status(401)
-      .json({ status: 'error', message: 'Permission denied' })
+        .status(401)
+        .json({ status: 'error', message: 'Permission denied' })
     }
     return next()
   }
