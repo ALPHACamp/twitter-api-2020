@@ -1,9 +1,20 @@
 const jwt = require('jsonwebtoken')
-const { User, sequelize } = require('../models')
+const { User } = require('../models')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
 // use helpers.getUser(req) to replace req.user
-const authenticated = (req, res, next) => {}
+const authenticated = passport.authenticate('jwt', { session: false })
 
-module.exports = authenticated
+// authenticatedRole('user') to verify req is user
+// authenticatedRole('admin') to verify req is admin
+const authenticatedRole = (role) => {
+  return (req, res, next) => {
+    if (helpers.getUser(req).role !== role) {
+      return res.json({ status: 'error', message: 'Permission denied' })
+    }
+    return next()
+  }
+}
+
+module.exports = { authenticated, authenticatedRole }
