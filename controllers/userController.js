@@ -5,16 +5,16 @@ const userService = require('../services/userService')
 
 const userController = {
   signIn: async (req, res) => {
-    const { email, password } = req.body
+    const { account, password } = req.body
     // Check required data
-    if (!email || !password) {
+    if (!account || !password) {
       return res.json({
         status: 'error',
         message: "Required fields didn't exist"
       })
     }
     // Check whether the user exists by email
-    const user = await userService.signIn(email)
+    const user = await userService.signIn(account)
 
     if (!user) {
       return res
