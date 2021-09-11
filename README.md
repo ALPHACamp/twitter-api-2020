@@ -88,6 +88,6 @@ IMGUR_CLIENT_ID= Your Imgur Application Client ID
 
 ## Developers - 開發人員
 
-Brady - https://github.com/bradychen2
-Chris - https://github.com/chriszychen
+Brady - https://github.com/bradychen2 <br>
+Chris - https://github.com/chriszychen <br>
 Leslie - https://github.com/lesliezsy
