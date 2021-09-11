@@ -1,6 +1,7 @@
 const db = require('../models')
 const User = db.User
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const userService = {
   signUp: async (req, res, cb) => {
@@ -28,6 +29,28 @@ const userService = {
       } else {
         return cb({ status: '400', message: errors })
       }
+    } catch (err) {
+      return cb({ status: '500', message: err })
+    }
+  },
+
+  login: async (req, res, cb) => {
+    try {
+      const { account, password } = req.body
+      if (!account || !password) {
+        return cb({ status: '401', message: '所有欄位都是必填項', data: { account, password } })
+      }
+      const user = await User.findOne({ where: { account } })
+      if (!user) {
+        return cb({ status: '401', message: '帳號不存在', data: { account, password } })
+      }
+      if (!bcrypt.compareSync(password, user.password)) {
+        return cb({ status: '401', message: '密碼錯誤', data: { account, password } })
+      }
+      // 簽發token
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.TOKEN_SECRET)
+      return cb({ status: '200', message: '登入成功', token, user })
     } catch (err) {
       return cb({ status: '500', message: err })
     }
