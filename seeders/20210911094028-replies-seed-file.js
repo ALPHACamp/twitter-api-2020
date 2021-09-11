@@ -1,5 +1,7 @@
 'use strict'
 const faker = require('faker')
+const db = require('../models')
+const Tweet = db.Tweet
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -13,9 +15,11 @@ module.exports = {
         updatedAt: new Date()
       })
       ), {})
+    await Tweet.update({ replyCount: 3 }, { where: { id: Array.from({ length: 50 }, (d, i) => i + 1) } })
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Replies', null, {})
+    await Tweet.update({ replyCount: 0 }, { where: { id: Array.from({ length: 50 }, (d, i) => i + 1) } })
   }
 }
