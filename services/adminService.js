@@ -1,5 +1,5 @@
-const { User, Tweet, Like, Reply, sequelize } = require('../models')
-const Sequelize = require('sequelize')
+const { User, Tweet, Like, Reply, sequelize } = require('../models');
+const Sequelize = require('sequelize');
 
 const adminService = {
   getUsers: async () => {
@@ -23,6 +23,10 @@ const adminService = {
         { model: Tweet, attributes: [] }
       ],
       group: ['user.id'],
+      order: [
+        [Sequelize.literal('tweetsCount'), 'DESC'],
+        ['createdAt', 'DESC']
+      ],
       attributes: [
         'id',
         'name',
@@ -54,8 +58,8 @@ const adminService = {
           'followingsCount'
         ]
       ]
-    })
+    });
   }
-}
+};
 
-module.exports = adminService
+module.exports = adminService;
