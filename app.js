@@ -19,6 +19,8 @@ function authenticated(req, res, next) {
 app.use(methodOverride('_method'))
 
 app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(PORT, () =>
+  console.log(`Example app listening at http://localhost:${PORT}`)
+)
 
 module.exports = app
