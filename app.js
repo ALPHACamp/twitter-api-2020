@@ -8,7 +8,11 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
+const passport = require('./config/passport')
 const PORT = process.env.PORT || 3000
+
+// Setting passport
+app.use(passport.initialize())
 
 // Setting middleware: method-override
 app.use(methodOverride('_method'))
