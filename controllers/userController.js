@@ -3,6 +3,9 @@ const User = db.User
 
 const bcrypt = require('bcryptjs')
 
+// 引入驗證欄位
+const { registerCheck } = require('../middleware/validator.js')
+
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -60,6 +63,34 @@ const userController = {
           role: user.role,
         },
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 註冊
+  register: async (req, res, next) => {
+    try {
+      const { name, account, email, password, checkPassword } = req.body
+      // validation middleware
+      const message = await registerCheck(req)
+      if (message) {
+        return res
+          .status(422)
+          .json({ status: 'error', message, userFilledForm: req.body })
+      }
+      // create user
+      await User.create({
+        name,
+        account,
+        email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+        role: 'user',
+        avatar: 'https://i.ibb.co/y6FYGKT/user-256.jpg',
+        cover: 'https://i.ibb.co/Y0VVPVY/hex-999999.jpg'
+      })
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'Registration success.' })
     } catch (err) {
       next(err)
     }
