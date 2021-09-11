@@ -17,4 +17,4 @@ const authenticatedRole = (role) => {
   }
 }
 
-module.exports = authenticated
+module.exports = { authenticated, authenticatedRole }
