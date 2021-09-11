@@ -2,10 +2,8 @@ const { User, Tweet, Like, sequelize } = require('../models')
 const Sequelize = require('sequelize')
 
 const adminService = {
-  getUsers: async (req, res) => {
-    return await User.findAll({
-      raw: true,
-      subQuery: false,
+  getUsers: async () => {
+    return await User.findAll({  
       where: { role: 'user' },
       attributes: [
         'id',
