@@ -48,10 +48,10 @@ const adminService = {
           'followersCount'
         ],
         [
-          (Sequelize.literal(
+          Sequelize.literal(
             '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
           ),
-          'followingsCount')
+          'followingsCount'
         ]
       ]
     })
