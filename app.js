@@ -11,6 +11,10 @@ if (process.env.NODE_ENV !== 'production') {
 const passport = require('./config/passport')
 const PORT = process.env.PORT || 3000
 
+// Setting body-parser
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
 // Setting passport
 app.use(passport.initialize())
 
