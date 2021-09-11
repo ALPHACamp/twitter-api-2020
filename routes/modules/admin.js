@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
+const adminController = require('../../controllers/adminController')
+const { authenticated } = require('../../middlewares/auth')
 
-router.get('/', async (req, res) => {
-  res.json('Hello world')
-})
+router.get('/users', authenticated, adminController.getUsers)
 
 module.exports = router
