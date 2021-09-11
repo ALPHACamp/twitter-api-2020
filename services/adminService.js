@@ -1,28 +1,59 @@
-const { User, Tweet, Like, sequelize } = require('../models')
+const { User, Tweet, Like, Reply, sequelize } = require('../models')
 const Sequelize = require('sequelize')
 
 const adminService = {
   getUsers: async () => {
-    return await User.findAll({  
+    return await User.findAll({
+      raw: true,
       where: { role: 'user' },
+      include: [
+        {
+          model: User,
+          as: 'Followings',
+          attributes: [],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: 'Followers',
+          attributes: [],
+          through: { attributes: [] }
+        },
+        { model: Like, attributes: [] },
+        { model: Tweet, attributes: [] }
+      ],
+      group: ['user.id'],
       attributes: [
         'id',
         'name',
-        [Sequelize.fn('concat', '@', Sequelize.col('users.account')), 'account'],
+        [Sequelize.fn('concat', '@', Sequelize.col('User.account')), 'account'],
         'avatar',
         'cover',
-        [Sequelize.fn('count', Sequelize.col('followships.followingId')), 'followerCount'],
-        [Sequelize.fn('count', Sequelize.col('followships.followerId')), 'followingCount'],
-        [Sequelize.fn('count', Sequelize.col('likes.userId')), 'likeCount'],
-        [Sequelize.fn('count', Sequelize.col('replies.userId')), 'replyCount']
-      ],
-      include: [
-        { model: User, as: 'Followings' },
-        { model: User, as: 'followers' },
-        { model: Like, attributes: [] },
-        { model: Reply, attributes: [] }
-      ],
-      group: ['id']
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Tweets WHERE Tweets.userId = User.id)'
+          ),
+          'tweetsCount'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.userId = User.id)'
+          ),
+          'likesCount'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+          ),
+          'followersCount'
+        ],
+        [
+          (Sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
+          ),
+          'followingsCount')
+        ]
+      ]
     })
   }
 }
