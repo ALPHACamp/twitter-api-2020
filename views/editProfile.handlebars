@@ -1,0 +1,22 @@
+<form action="/users/{{user.id}}?_method=PUT" class="edit-profile-form" method="POST" enctype="multipart/form-data">
+  <div class="profile-container">
+    <div class="user-photo">
+      <img src="{{user.image}}" alt="user picture">
+      <div class="form-group">
+        <label for="image">Image</label>
+        <input type="file" class="form-control-file" id="image" name="image">
+      </div>
+    </div>
+    <div class="user-info">
+      <div class="form-group">
+        <label for="tel">New Name</label>
+        <input type="text" class="form-control" name="name" id="tel" value="{{user.name}}" placeholder="Enter tel">
+      </div>
+      <div class="form-group">
+        <label for="tel">New Email</label>
+        <input type="text" class="form-control" name="email" id="tel" value="{{user.email}}" placeholder="Enter tel">
+      </div>
+      <button type="submit" class="post-profile">Submit</button>
+    </div>
+  </div>
+</form>

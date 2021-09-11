@@ -1,0 +1,85 @@
+<div class="profile-container">
+  <div class="profile-box">
+    <div class="user-photo">
+      <img src="{{userData.image}}" alt="user picture">
+    </div>
+    <div class="user-info">
+      <span>{{userData.name}}</span>
+      <span>{{userData.email}}</span>
+      <span>{{commentCount}} 已評論餐廳</span>
+      <span>{{favoriteCount}} 已收藏餐廳</span>
+      <span>{{followingsCount}} following(追蹤者)</span>
+      <span>{{followersCount}} follower(追隨者)</span>
+      <a href="/users/{{user.id}}/edit" class="edit-profile">Edit</a>
+    </div>
+  </div>
+  <div class="user-details">
+    <div class="user-details-left">
+      <div>
+        <p>{{followingsCount}} following(追蹤者)</p>
+        <div class="following pic-box">
+        {{#each followingsList}}
+          <a href="/users/{{this.dataValues.id}}" class="commented-restaurant">
+          {{#if this.dataValues.image}}
+          <img src="{{this.dataValues.image}}" alt="">
+          {{else}}
+          <img
+            src="https://thumbs.dreamstime.com/b/not-available-stamp-seal-watermark-distress-style-designed-rectangle-circles-stars-black-vector-rubber-print-title-138796185.jpg"
+            alt="">
+          {{/if}}
+          </a>
+        {{/each}}
+        </div>
+      </div>
+      <div>
+        <p>{{followersCount}} follower(追隨者)</p>
+        <div class="follower pic-box">
+        {{#each followersList}}
+          <a href="/users/{{this.dataValues.id}}" class="commented-restaurant">
+          {{#if this.dataValues.image}}
+          <img src="{{this.dataValues.image}}" alt="">
+          {{else}}
+          <img
+            src="https://thumbs.dreamstime.com/b/not-available-stamp-seal-watermark-distress-style-designed-rectangle-circles-stars-black-vector-rubber-print-title-138796185.jpg"
+            alt="">
+          {{/if}}
+          </a>
+        {{/each}}
+        </div>
+      </div>
+    </div>
+    <div class="user-details-right">
+      <div>
+        <p>{{commentCount}} 已評論餐廳</p>
+        <div class="commented pic-box">
+        {{#each commentList}}
+          <a href="/restaurants/{{this.dataValues.id}}">
+          {{#if this.dataValues.image}}
+          <img src="{{this.dataValues.image}}" alt="">
+          {{else}}
+          <img
+            src="https://thumbs.dreamstime.com/b/not-available-stamp-seal-watermark-distress-style-designed-rectangle-circles-stars-black-vector-rubber-print-title-138796185.jpg"
+            alt="">
+          {{/if}}
+          </a>
+        {{/each}}
+        </div>
+      </div>
+      <div>
+        <p>{{favoriteCount}} 已收藏餐廳</p>
+        <div class="favorite pic-box">
+        {{#each favoriteList}}
+          <a href="/restaurants/{{this.dataValues.id}}">
+          {{#if this.dataValues.image}}
+          <img src="{{this.dataValues.image}}" alt="">
+          {{else}}
+          <img src="https://thumbs.dreamstime.com/b/not-available-stamp-seal-watermark-distress-style-designed-rectangle-circles-stars-black-vector-rubber-print-title-138796185.jpg" alt="">
+          {{/if}}
+          </a>
+        {{/each}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
