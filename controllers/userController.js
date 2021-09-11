@@ -16,11 +16,11 @@ const userController = {
     // Check whether the user exists by email
     const user = await userService.signIn(email)
 
-    if (!user)
+    if (!user) {
       return res
         .status(401)
         .json({ status: 'error', message: 'No such user found' })
-
+    }
     // Check if the user password is correct
     if (!bcrypt.compareSync(password, user.password)) {
       return res
