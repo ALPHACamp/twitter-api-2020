@@ -1,5 +1,6 @@
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
@@ -52,6 +53,51 @@ const userService = {
       const token = jwt.sign(payload, process.env.TOKEN_SECRET)
       return cb({ status: '200', message: '登入成功', token, user })
     } catch (err) {
+      return cb({ status: '500', message: err })
+    }
+  },
+
+  getUser: async (req, res, cb) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover'],
+        include: [{
+          model: User,
+          as: 'Followings',
+          attributes: ['id'],
+          through: { attributes: [] }
+        },
+        {
+          model: User,
+          as: 'Followers',
+          attributes: ['id'],
+          through: { attributes: [] }
+        },
+        {
+          model: Tweet,
+          attributes: ['id'],
+        }
+        ]
+      })
+      const totalFollowings = user.Followings.length
+      const totalFollowers = user.Followers.length
+      const totalTweets = user.Tweets.length
+      // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
+      return cb({
+        status: '200',
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        introduction: user.introduction,
+        avatar: user.avatar,
+        cover: user.cover,
+        Followings: user.Followings,
+        Followers: user.Followers,
+        Tweets: user.Tweets,
+        totalFollowings, totalFollowers, totalTweets
+      })
+    } catch (err) {
+      console.warn(err)
       return cb({ status: '500', message: err })
     }
   }

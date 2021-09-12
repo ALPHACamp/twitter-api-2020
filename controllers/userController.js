@@ -6,6 +6,9 @@ const userController = {
   },
   login: (req, res) => {
     userService.login(req, res, (data) => res.status(data.status).json(data))
+  },
+  getUser: (req, res) => {
+    userService.getUser(req, res, data => res.status(data.status).json(data))
   }
 }
 
