@@ -37,6 +37,12 @@ const userService = {
     }
 
     return { status: 'success', message: 'Registration success' }
+  },
+
+  getUser: async (id) => {
+    return await User.findByPk(id, {
+      attributes: { exclude: ['password'] }
+    })
   }
 }
 
