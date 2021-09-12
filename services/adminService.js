@@ -59,6 +59,26 @@ const adminService = {
         ]
       ]
     })
+  },
+
+  getTweets: async () => {
+    return await Tweet.findAll({
+      include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+      attributes: [
+        'id',
+        [
+          Sequelize.literal(
+            '(SELECT id FROM Users WHERE Users.id = Tweet.userId)'
+          ),
+          'UserId'
+        ],
+        'description',
+        'createdAt',
+        'updatedAt'
+      ],
+      group: ['id'],
+      order: [['createdAt', 'DESC']]
+    })
   }
 }
 
