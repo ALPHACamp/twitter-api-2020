@@ -5,20 +5,16 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
       email: {
         type: DataTypes.STRING,
         unique: true,
-        allowNull: false,
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
       role: {
         type: DataTypes.STRING,
-        allowNull: false,
         defaultValue: "user",
       },
       avatar: {
@@ -28,8 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       introduction: DataTypes.STRING,
       account: {
         type: DataTypes.STRING,
-        unique: true,
-        allowNull: false,
+        unique: true
       },
       cover: {
         type: DataTypes.STRING,
