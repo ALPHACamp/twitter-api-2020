@@ -47,7 +47,6 @@ const userService = {
 
   getUserTweets: async (targetUserId, currentUserId) => {
     return await Tweet.findAll({
-      raw: true,
       where: { UserId: targetUserId },
       attributes: [
         ['id', 'TweetId'],
