@@ -1,4 +1,5 @@
 const { User, Tweet, Reply, Like } = require('../models')
+const bcrypt = require('bcryptjs')
 
 const userService = {
   signIn: async (account) => {
@@ -26,7 +27,7 @@ const userService = {
         account,
         name,
         email,
-        password
+        password: bcrypt.hashSync(password, bcrypt.genSalt(10))
       }
     })
     
