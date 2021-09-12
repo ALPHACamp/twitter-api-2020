@@ -79,6 +79,10 @@ const adminService = {
       group: ['id'],
       order: [['createdAt', 'DESC']]
     })
+  },
+
+  deleteTweet: async (id) => {
+    return await Tweet.findByPk(id)
   }
 }
 
