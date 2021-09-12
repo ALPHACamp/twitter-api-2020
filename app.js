@@ -7,10 +7,9 @@ const port = 3000
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
-  // passport.authenticate('jwt', { ses...
-};
+
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 require('./routes')(app)
