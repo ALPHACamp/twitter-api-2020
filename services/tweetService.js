@@ -93,6 +93,26 @@ const tweetService = {
   postUnlikeTweet: async (UserId, TweetId) => {
     await Like.destroy({ where: { UserId, TweetId } })
     return { status: 'success', message: 'A like has deleted' }
+  },
+
+  getTweetAllReplies: async (TweetId) => {
+    return await Tweet.findByPk(TweetId, {
+      attributes: [],
+      include: [
+        {
+          model: Reply,
+          attributes: ['id', 'comment', 'createdAt'],
+          include: [
+            {
+              model: User,
+              nest: true,
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          ]
+        }
+      ],
+      order: [['createdAt', 'ASC']]
+    })
   }
 }
 
