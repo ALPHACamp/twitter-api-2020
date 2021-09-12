@@ -8,10 +8,8 @@ const passport = require('./config/passport')
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use(passport.initialize())
 
