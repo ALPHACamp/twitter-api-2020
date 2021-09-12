@@ -115,3 +115,7 @@ typings/
 
 temp/
 upload/
+
+# vscode settings
+
+.vscode
