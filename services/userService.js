@@ -27,7 +27,7 @@ const userService = {
         account,
         name,
         email,
-        password: bcrypt.hashSync(password, bcrypt.genSalt(10))
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
       }
     })
     
