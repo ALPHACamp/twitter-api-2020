@@ -78,6 +78,13 @@ const tweetService = {
       ],
       group: 'Replies.id'
     })
+  },
+  postTweet: async (UserId, description) => {
+    await Tweet.create({
+      UserId,
+      description
+    })
+    return { status: 'success', message: 'A tweet has created' }
   }
 }
 
