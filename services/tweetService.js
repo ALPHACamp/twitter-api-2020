@@ -116,7 +116,7 @@ const tweetService = {
   },
   postReply: async (UserId, TweetId, comment) => {
     await Reply.create({ UserId, TweetId, comment })
-    return { status: 'success', message: 'A reply has created' }
+    return { status: 'success', message: 'A reply has successfully left' }
   }
 }
 
