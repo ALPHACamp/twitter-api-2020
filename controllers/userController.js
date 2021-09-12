@@ -90,7 +90,7 @@ const userController = {
   },
 
   getUser: async (req, res) => {
-    const user = await userService.getUser(helpers.getUser(req).id)
+    const user = await userService.getUser(req.params.id)
 
     // Check whether the user exists
     if (!user) {
