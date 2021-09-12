@@ -32,23 +32,18 @@ const adminController = {
   },
 
   deleteTweet: async (req, res) => {
-    const tweet = await adminService.deleteTweet(req.params.id)
+    const data = await adminService.deleteTweet(req.params.id)
 
-    // Check whether tweet exists
-    if (!tweet) {
+    // Check data status
+    if (data.status === 'error') {
       return res
         .status(401)
-        .json({ status: 'error', message: 'No tweet found' })
+        .json(data)
     }
     
-    await tweet.destroy()
     return res
       .status(200)
-      .json({
-        status: 'success',
-        message: `The tweet id ${tweet.id} deleted successfully`
-      })
-
+      .json(data)
   }
 }
 
