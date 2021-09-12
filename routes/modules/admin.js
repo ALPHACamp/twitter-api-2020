@@ -9,4 +9,7 @@ router.get('/users', authenticated, authenticatedRole('admin'), adminController.
 // Get all tweets
 router.get('/tweets', authenticated, authenticatedRole('admin'), adminController.getTweets)
 
+// Delete certain tweet
+router.delete('/tweets/:id', authenticated, authenticatedRole('admin'), adminController.deleteTweet)
+
 module.exports = router
