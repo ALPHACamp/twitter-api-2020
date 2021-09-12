@@ -7,15 +7,12 @@ const userService = {
   getCurrentUser: async (id) => {
     return await User.findOne({
       where: { id },
-      attributes: [
-        'id',
-        'name',
-        'account',
-        'avatar',
-        'introduction',
-        'role',
-        'cover',
-      ],
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' },
+        { model: Like }
+      ]
     })
   },
 }
