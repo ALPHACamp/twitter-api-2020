@@ -68,7 +68,7 @@ const adminService = {
       ],
       attributes: ['id', 'description', 'createdAt'],
       group: ['id'],
-      order: ['createdAt', 'DESC']
+      order: [['createdAt', 'DESC']]
     })
   }
 }
