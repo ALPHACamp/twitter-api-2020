@@ -60,6 +60,11 @@ const tweetController = {
     )
 
     return res.status(200).json(data)
+  },
+  getTweetAllReplies: async (req, res) => {
+    const data = await tweetService.getTweetAllReplies(req.params.tweetId)
+
+    return res.status(200).json(data.Replies)
   }
 }
 
