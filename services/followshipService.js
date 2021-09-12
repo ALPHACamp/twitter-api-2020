@@ -3,15 +3,15 @@ const { Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const followshipService = {
-  addFollowing: async (req, res, callback) => {
+  addFollowing: async (req, res) => {
     const followerId = Number(helpers.getUser(req).id)
     const followingId = Number(req.body.id)
 
     if (followerId === followingId) {
-      return callback({
+      return {
         status: 'error',
         message: 'You cannot follow yourself.'
-      })
+      }
     }
 
     await Followship.create({
