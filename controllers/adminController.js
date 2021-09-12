@@ -14,6 +14,21 @@ const adminController = {
     return res
       .status(200)
       .json(users)
+  },
+
+  getTweets: async (req, res) => {
+    const tweets = await adminService.getTweets()
+
+    // Check whether tweets exists
+    if (!tweets.length) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No tweets found' })
+    }
+
+    return res
+      .status(200)
+      .json(tweets)
   }
 }
 
