@@ -19,6 +19,15 @@ const followshipService = {
       followingId
     })
     return callback({ status: 'success', message: 'Followed successfully' })
+  },
+  deleteFollowing: async (req, res) => {
+    await Followship.destroy({
+      where: {
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
+      }
+    })
+    return { status: 'success', message: 'Unfollowed successfully' }
   }
 }
 
