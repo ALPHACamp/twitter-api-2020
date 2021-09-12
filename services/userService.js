@@ -22,7 +22,7 @@ const userService = {
     const { account, name, email, password } = body
     // If the account is not duplicate, register the account
     const [user, created] = await User.findOrCreate({
-      where: { account },
+      where: { account, email },
       defaults: {
         account,
         name,
