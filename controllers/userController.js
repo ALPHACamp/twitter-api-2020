@@ -14,21 +14,30 @@ const userController = {
   userHomePage: async (req, res) => {
     const userData = req.user
     try {
-      const id = req.user.id
+      const id = (req.user.id === req.params.id)? req.user.id: req.params.id
       // 取出使用者跟蹤對象的清單
-      let following = await Followship.findAll({
+      let followings = await Followship.findAll({
         where: { followerId: { [Op.eq]: id } },
         raw: true,
         nest: true
       })
-      // 轉成陣列
-      following = following.map(item => item = item['followingId'])
-      // 取出所有推文 按照時間排序
-      const tweets = await Tweet.findAll({
+
+      // 取出跟蹤使用者的清單
+      let followers = await Followship.findAll({
+        where: { followingId: { [Op.eq]: id } },
         raw: true,
-        nest: true,
-        order: [[Sequelize.literal('createdAt'), "DESC"]]
+        nest: true
       })
+
+      // 轉成陣列
+      followings = followings.map(item => item = item['followingId'])
+      followers = followers.map(item => item = item['followingId'])
+
+      // 取出user所有推文
+      const userData = await User.findByPk(id, {
+        include: [{ model: Tweet, as: 'userTweets' }],
+      })
+    
       // 取出最多人追蹤的使用者 按照追蹤人數排序
       const popular = await sequelize.query('SELECT count(`followerId`) AS`followCount`, `User`.`id` AS`userId`, `User`.`avatar` AS`avatar`, `User`.`account` AS`account`, `User`.`name` AS`name` FROM `Followships` AS `Followship` LEFT OUTER JOIN `Users` AS `User` ON`Followship`.`followingId` = `User`.`id` GROUP BY `followingId` ORDER BY followCount DESC LIMIT 10',
         {
@@ -37,11 +46,20 @@ const userController = {
           nest: true,
         }
       )
+
       // 送出前整理一下 標出使用者有追蹤的其他用戶
       popular.map(element => {
-        return following.includes(element.userId) ? element['isFollowed'] = true : element['isFollowed'] = false
+        return followings.includes(element.userId) ? element['isFollowed'] = true : element['isFollowed'] = false
       })
-      return res.json({ userData, tweets, popular })
+
+      let isFollowed = false
+      if (!(req.user.id === req.params.id)) {
+        followers.includes(req.user.id) ? isFollowed = true : isFollowed
+      } else {
+        isFollowed = 'self'
+      }
+      
+      return res.json({ userData, popular, isFollowed })
     }
     catch (error) {
       console.log(error)
@@ -51,24 +69,55 @@ const userController = {
   getUserTweets: async (req, res) => {
     const userId = req.user.id
     const requestId = Number(req.params.id)
-    const userData = await User.findByPk(userId, {
-      include: [{ model: Tweet, as: 'userTweets' }],
+    const id = userId === requestId? userId: requestId
+    // 取出user所有推文
+    const userTweets = await Tweet.findAll({
+      where: { UserId: { [Op.eq]: id } },
+      include: [
+        { model: Reply, as: 'replies' },
+        { model: Like, as: 'likes' }
+      ],
     })
-    let following = await Followship.findAll({
-      where: { followerId: { [Op.eq]: userId } },
-      raw: true,
-      nest: true
+    
+    return res.json({ userTweets })
+  },
+
+  getRepliedTweets: async (req, res) => {
+    const userId = req.user.id
+    const requestId = Number(req.params.id)
+    const id = userId === requestId ? userId : requestId
+    // 取出user所有推文
+    const repliedTweets = await Reply.findAll({
+      where: { UserId: { [Op.eq]: id } },
+      include: [
+        { model: Tweet, as: 'tweet' },
+      ]
     })
-    // 轉成陣列
-    following = following.map(item => item = item['followingId'])
-    let isFollowed = false
-    if (!userId === requestId) {
-      following.includes(requestId) ? isFollowed = true : isFollowed
-    } else {
-      isFollowed = 'self'
+
+    return res.json({ repliedTweets })
+  },
+
+  getLikes: async (req, res) => {
+    const userId = req.user.id
+    const requestId = Number(req.params.id)
+    const id = userId === requestId ? userId : requestId
+    try {
+      const likedTweets = await User.findByPk(id, {
+        include: [
+          { model: Tweet, as: 'likingTweets' },
+          // { model: Tweet, as: 'user' },
+          // { model: Tweet, as: 'likeList' },
+          // { model: Tweet, as: 'replyList' }
+        ],
+      })
+
+      return res.json({ likedTweets })
     }
-    return res.json({ userData, isFollowed })
+    catch (error) {
+
+    }
   }
 }
+
 
 module.exports = userController

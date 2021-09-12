@@ -8,7 +8,10 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Reply.associate = function (models) {
     Reply.belongsTo(models.User)
-    Reply.belongsTo(models.Tweet)
+    Reply.belongsTo(models.Tweet, {
+      foreignKey: 'TweetId',
+      as: 'tweet'
+    })
   };
   return Reply;
 };

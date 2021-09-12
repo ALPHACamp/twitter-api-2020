@@ -8,6 +8,9 @@
 // function authenticated(req, res, next){
 //   // passport.authenticate('jwt', { ses...
 // };
+// function ensureAuthenticated(req) {
+//   return req.isAuthenticated();
+// }
 
 // app.get('/', (req, res) => res.send('Hello World!'))
 // app.listen(port, () => console.log(`Example app listening on port ${port}!`))
@@ -21,6 +24,8 @@ const handlebars = require('express-handlebars')
 const helpers = require('./_helpers')
 const passport = require('passport')
 const routes = require('./routes')
+const flash = require('connect-flash')
+const methodOverride = require('method-override')
 const app = express()
 const PORT = process.env.PORT || 3000
 
@@ -29,6 +34,10 @@ app.set('view engine', 'handlebars')
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use(methodOverride('_method'))
+
+app.use(flash())
+app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use(session({ secret: 'iamrex', resave: false, saveUninitialized: false }))
 
