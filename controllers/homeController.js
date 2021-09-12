@@ -20,7 +20,10 @@ const homeController = {
   },
 
   postSignIn: (req, res) => {
-    (req.user.role === 'admin')? res.redirect('/api/admin'): res.redirect('/api/tweets')
+    if (req.user.role === 'admin') {
+      return res.redirect('/api/admin')
+    }
+    return res.redirect('/api/tweets')
   },
 
   postSignUp: (req, res) => {

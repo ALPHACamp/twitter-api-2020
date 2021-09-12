@@ -102,19 +102,28 @@ const userController = {
     const requestId = Number(req.params.id)
     const id = userId === requestId ? userId : requestId
     try {
-      const likedTweets = await User.findByPk(id, {
+      const likedTweets = await Like.findAll({
+        where: { UserId: { [Op.eq]: id } },
         include: [
-          { model: Tweet, as: 'likingTweets' },
-          // { model: Tweet, as: 'user' },
-          // { model: Tweet, as: 'likeList' },
-          // { model: Tweet, as: 'replyList' }
-        ],
+          { model: Tweet, as: 'tweet' },
+          { model: User, as: 'user' },
+        ]
       })
 
-      return res.json({ likedTweets })
+      const likeStatistic = await Like.findAll({
+        attributes: ['TweetId', [sequelize.fn('count', sequelize.col('UserId')), 'likeCount']],
+        group: ['Like.TweetId']
+      })
+
+      const replyStatistic = await Reply.findAll({
+        attributes: ['TweetId', [sequelize.fn('count', sequelize.col('UserId')), 'replyCount']],
+        group: ['Reply.TweetId']
+      }) 
+
+      return res.json({ likedTweets, likeStatistic, replyStatistic })
     }
     catch (error) {
-
+      console.log(error)
     }
   }
 }
