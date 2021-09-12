@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs')
 const db = require('../../models')
 const User = db.User
 
@@ -31,7 +32,10 @@ const userController = {
         res.json('success', 'Registration successful')
       })
     }
-  }
+  },
+  signIn: (req, res) => {
+    res.json('success', 'Login successful')
+  },
 }
 
 module.exports = userController
