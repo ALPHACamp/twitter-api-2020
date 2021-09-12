@@ -44,6 +44,14 @@ const tweetController = {
     const data = await tweetService.postTweet(req.user.id, description)
 
     return res.status(200).json(data)
+  },
+  postLikeTweet: async (req, res) => {
+    const data = await tweetService.postLikeTweet(
+      req.user.id,
+      req.params.tweetId
+    )
+
+    return res.status(200).json(data)
   }
 }
 
