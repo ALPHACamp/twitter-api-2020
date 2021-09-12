@@ -32,11 +32,11 @@ const userService = {
     })
     
     // Check whether the user is already exists
-    if (created) {
+    if (!created) {
       return { status: 'error', message: 'Account already exists' }
     }
 
-    return { status: 'success', message: 'Account already exists' }
+    return { status: 'success', message: 'Registration success' }
   }
 }
 
