@@ -85,6 +85,10 @@ const tweetService = {
       description
     })
     return { status: 'success', message: 'A tweet has created' }
+  },
+  postLikeTweet: async (UserId, TweetId) => {
+    await Like.create({ UserId, TweetId })
+    return { status: 'success', message: 'A like has created' }
   }
 }
 
