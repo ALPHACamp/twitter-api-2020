@@ -13,11 +13,11 @@ module.exports = {
         unique: true,
       },
       account: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         unique: true,
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(50),
       },
       name: {
         type: Sequelize.STRING(50),
