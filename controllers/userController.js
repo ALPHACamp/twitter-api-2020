@@ -57,11 +57,9 @@ const userController = {
         .json({ status: 'error', message: 'No such user found' })
     }
 
-    return res.status(200).json({
-      status: 'success',
-      message: 'ok',
-      user: currentUser
-    })
+    return res
+      .status(200)
+      .json(currentUser)
   }
 }
 
