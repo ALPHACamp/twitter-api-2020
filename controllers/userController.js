@@ -57,9 +57,36 @@ const userController = {
         .json({ status: 'error', message: 'No such user found' })
     }
 
-    return res
-      .status(200)
-      .json(currentUser)
+    return res.status(200).json(currentUser)
+  },
+
+  postUser: async (req, res) => {
+    const { account, name, email, password, checkPassword } = req.body
+
+    // Check required data
+    if (!account || !email || !name || !password || !checkPassword) {
+      return res.status(401).json({
+        status: 'error',
+        message: "Required fields didn't exist"
+      })
+    }
+
+    // Check if password equal to checkPassword
+    if (password !== checkPassword) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Password value is not equal to checkPassword'
+      })
+    }
+
+    // Call userService to create account
+    const data = await userService.postUser(req.body)
+
+    if (data['status'] === 'error') {
+      return res.status(401).json(data)
+    }
+
+    return res.status(200).json(data)
   }
 }
 
