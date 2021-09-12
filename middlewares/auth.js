@@ -9,19 +9,23 @@ const authenticated = (req, res, next) =>
     if (err || !user) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' })
     }
-    req.user = user
+    req.user = user.dataValues
 
     return next()
   })(req, res, next)
 
 // authenticatedRole('user') to verify req is user
 // authenticatedRole('admin') to verify req is admin
-const authenticatedRole = (role) => {
+const authenticatedRole = (role = 'user') => {
   return (req, res, next) => {
-    if (helpers.getUser(req).role !== role) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'Permission denied' })
+    if (helpers.getUser(req).role) {
+      if (helpers.getUser(req).role !== role) {
+        return next(
+          res
+            .status(401)
+            .json({ status: 'error', message: 'Permission denied' })
+        )
+      }
     }
     return next()
   }
