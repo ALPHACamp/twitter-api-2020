@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const userService = require('../services/userService')
+const helpers = require('../_helpers')
 
 const userController = {
   signIn: async (req, res) => {
@@ -33,7 +34,7 @@ const userController = {
 
     return res.json({
       status: 'success',
-      message: 'ok',
+      message: 'Success to login',
       token: token,
       user: {
         id: user.id,
@@ -42,6 +43,23 @@ const userController = {
         role: user.role
       }
     })
+  },
+
+  getCurrentUser: async (req, res) => {
+    const currentUser = await userService.getCurrentUser(
+      helpers.getUser(req).id
+    )
+
+    // Check whether the current user exists by user id
+    if (!currentUser) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No such user found' })
+    }
+
+    return res
+      .status(200)
+      .json(currentUser)
   }
 }
 
