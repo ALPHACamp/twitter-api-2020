@@ -75,10 +75,10 @@ const userController = {
     if (password !== checkPassword) {
       return res.status(401).json({
         status: 'error',
-        message: "Password value is not equal to checkPassword"
+        message: 'Password value is not equal to checkPassword'
       })
     }
-    
+
     // Call userService to create account
     const data = await userService.postUser(req.body)
 
