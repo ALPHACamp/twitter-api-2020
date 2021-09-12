@@ -3,7 +3,7 @@ const { Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const followshipService = {
-  addFollowing: (req, res, callback) => {
+  addFollowing: async (req, res, callback) => {
     const followerId = Number(helpers.getUser(req).id)
     const followingId = Number(req.body.id)
 
@@ -14,12 +14,11 @@ const followshipService = {
       })
     }
 
-    return Followship.create({
+    await Followship.create({
       followerId,
       followingId
-    }).then(() => {
-      callback({ status: 'success', message: 'Followed successfully' })
     })
+    return callback({ status: 'success', message: 'Followed successfully' })
   }
 }
 
