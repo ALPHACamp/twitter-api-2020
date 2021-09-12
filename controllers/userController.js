@@ -87,6 +87,19 @@ const userController = {
     }
 
     return res.status(200).json(data)
+  },
+
+  getUser: async (req, res) => {
+    const user = await userService.getUser(helpers.getUser(req).id)
+
+    // Check whether the user exists
+    if (!user) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No such user found' })
+    }
+
+    return res.status(200).json(user)
   }
 }
 
