@@ -9,4 +9,6 @@ router.post('/:tweetId/like', tweetController.postLikeTweet)
 router.post('/:tweetId/unlike', tweetController.postUnlikeTweet)
 router.get('/:tweetId', tweetController.getTweet)
 router.get('/:tweetId/replies', tweetController.getTweetAllReplies)
+router.post('/:tweetId/replies', tweetController.postReply)
+
 module.exports = router
