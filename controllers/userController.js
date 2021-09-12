@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const userService = require('../services/userService')
+const helpers = require('../_helpers')
 
 const userController = {
   signIn: async (req, res) => {
