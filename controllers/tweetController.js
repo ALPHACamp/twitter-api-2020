@@ -52,6 +52,14 @@ const tweetController = {
     )
 
     return res.status(200).json(data)
+  },
+  postUnlikeTweet: async (req, res) => {
+    const data = await tweetService.postUnlikeTweet(
+      req.user.id,
+      req.params.tweetId
+    )
+
+    return res.status(200).json(data)
   }
 }
 
