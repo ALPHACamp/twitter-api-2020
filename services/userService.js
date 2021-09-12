@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userService = {
@@ -30,7 +30,7 @@ const userService = {
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
       }
     })
-    
+
     // Check whether the user is already exists
     if (!created) {
       return { status: 'error', message: 'Account already exists' }
@@ -42,6 +42,43 @@ const userService = {
   getUser: async (id) => {
     return await User.findByPk(id, {
       attributes: { exclude: ['password'] }
+    })
+  },
+
+  getUserTweets: async (targetUserId, currentUserId) => {
+    return await Tweet.findAll({
+      raw: true,
+      where: { UserId: targetUserId },
+      attributes: [
+        ['id', 'TweetId'],
+        'createdAt',
+        'description',
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+          ),
+          'likesCount'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+          ),
+          'RepliesCount'
+        ],
+        [
+          Sequelize.literal(
+            `exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`
+          ),
+          'isLike'
+        ]
+      ],
+      include: [
+        { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+        { model: Like, attributes: [] },
+        { model: Reply, attributes: [] }
+      ],
+      order: [['createdAt', 'DESC']],
+      group: ['TweetId']
     })
   }
 }
