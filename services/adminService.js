@@ -59,6 +59,17 @@ const adminService = {
         ]
       ]
     })
+  },
+
+  getTweets: async () => {
+    return await Tweet.findAll({
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar']}
+      ],
+      attributes: ['id', 'description', 'createdAt'],
+      group: ['id'],
+      order: ['createdAt', 'DESC']
+    })
   }
 }
 
