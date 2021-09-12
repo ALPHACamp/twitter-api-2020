@@ -1,6 +1,9 @@
 const db = require('../models')
 const User = db.User
+const Reply = db.Reply
+const Like = db.Like
 
+const { sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 
 // JWT
@@ -27,8 +30,7 @@ const adminController = {
       if (user.role === 'user') {
         return res.status(401).json({
           status: 'error',
-          message:
-            'User can only login to frontend.',
+          message: 'User can only login to frontend.',
         })
       }
       // 無此使用者
@@ -60,6 +62,42 @@ const adminController = {
           role: user.role,
         },
       })
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 後台：取得所有使用者資料
+  getAllUsers: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        raw: true,
+        nest: true,
+        where: { role: 'user' },
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'role',
+          'cover',
+          'followerCount',
+          'followingCount',
+          'tweetCount',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)'
+            ),
+            'replyCount',
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'
+            ),
+            'likeCount',
+          ],
+        ],
+      })
+      res.status(200).json(users)
     } catch (err) {
       next(err)
     }

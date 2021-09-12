@@ -16,18 +16,17 @@ jwtOptions.secretOrKey = process.env.JWT_SECRET
 
 let strategy = new JwtStrategy(jwtOptions, async (jwr_payload, next) => {
   try {
-    User.findByPk(jwr_payload.id, {
+    const user = await User.findByPk(jwr_payload.id, {
       include: [
         { model: User, as: 'Followers' },
         { model: User, as: 'Followings' },
       ],
     })
-
     if (!user) {
       return next(null, false)
     }
     return next(null, user)
-  } catch {
+  } catch (err) {
     return next(err, false)
   }
 })

@@ -13,5 +13,12 @@ router.post('/users', userController.register)
 
 // 後台 Login
 router.post('/adminLogin', adminController.adminLogIn)
+// 後台：取得所有使用者資料
+router.get(
+  '/admin/users',
+  authenticated,
+  authenticatedAdmin,
+  adminController.getAllUsers
+)
 
 module.exports = router
