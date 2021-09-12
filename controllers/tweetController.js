@@ -65,6 +65,30 @@ const tweetController = {
     const data = await tweetService.getTweetAllReplies(req.params.tweetId)
 
     return res.status(200).json(data.Replies)
+  },
+  postReply: async (req, res) => {
+    const { comment } = req.body
+
+    if (!comment.trim().length) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'The comment cannot be blank' })
+    }
+
+    if (!comment.trim().length > 140) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'The comment should not exceed 140 words'
+      })
+    }
+
+    const data = await tweetService.postReply(
+      req.user.id,
+      req.params.tweetId,
+      comment
+    )
+
+    return res.status(200).json(data)
   }
 }
 
