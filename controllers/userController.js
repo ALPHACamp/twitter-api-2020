@@ -34,7 +34,7 @@ const userController = {
 
     return res.json({
       status: 'success',
-      message: 'ok',
+      message: 'Success to login',
       token: token,
       user: {
         id: user.id,
