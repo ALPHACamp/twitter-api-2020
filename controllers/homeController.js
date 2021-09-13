@@ -1,5 +1,7 @@
 const db = require('../models')
 const User = db.User
+const bcrypt = require('bcryptjs')
+const issueJwt = require('../public/javascripts/tokenIssue')
 
 const homeController = {
   signUp: (req, res) => {
@@ -15,29 +17,42 @@ const homeController = {
   },
 
   logout: (req, res) => {
-    req.logout()
+    res.clearCookie('jwt')
     res.redirect('/api/signin')
   },
 
   postSignIn: (req, res) => {
-    if (req.user.role === 'admin') {
-      return res.redirect('/api/admin')
-    }
-    return res.redirect('/api/tweets')
+      // 檢查必要資料
+      if (!req.body.email || !req.body.password) {
+        return res.json({ status: 'error', message: "required fields didn't exist" })
+      }
+      // 檢查 user 是否存在與密碼是否正確
+      let username = req.body.email
+      let password = req.body.password
+
+      User.findOne({ where: { email: username } }).then(user => {
+        if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
+        if (!bcrypt.compareSync(password, user.password)) {
+          return res.status(401).json({ status: 'error', message: 'passwords did not match' })
+        }
+        // 簽發 token
+        const tokenInfo = issueJwt(user)
+        const allInfo = {
+          token: tokenInfo.token,
+          userId: user.id,
+        }
+        res.cookie('jwt', allInfo, { httpOnly: true })
+        res.redirect('/api/admin')
+      })
   },
 
-  postSignUp: (req, res) => {
+  postSignUp: async (req, res) => {
     const userData = req.body
     if (req.body.passwordCheck !== req.body.password) {
       return res.redirect('/signup')
     }
-    User.create({ ...userData })
-      .then(user => {
-        return res.redirect('/api/signin')
-      })
-      .catch(err => {
-        return res.redirect('/api/signup')
-      })
+    const user = await User.create({ ...userData })
+    user? res.status(200).json({user}): res.status(401)
   }
 }
 

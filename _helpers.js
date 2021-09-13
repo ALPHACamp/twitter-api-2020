@@ -1,8 +1,8 @@
-function ensureAuthenticated(req) {
-  return req.isAuthenticated();
-}
+const passport = require('passport')
 
-function getUser(req) {
+const ensureAuthenticated = passport.authenticate('jwt', { session: false, failureRedirect: '/api/signin' });
+
+const getUser = (req) => {
   return req.user;
 }
 

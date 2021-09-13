@@ -6,36 +6,17 @@ const followships = require('./followships')
 const admin = require('./admin')
 const helpers = require('../_helpers')
 
-
-const authenticatedLogin = (req, res, next) => {
-  if (helpers.ensureAuthenticated(req)) {
-    return res.redirect('/api/tweets')
-  }
-  return next()
-}
-
 const authenticated = (req, res, next) => {
-  if (helpers.ensureAuthenticated(req)) {
-    return next()
-  }
-  return res.redirect('/api/signin')
+  helpers.getUser(req).role === 'user' ? next() : res.redirect('/api/signin')
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (helpers.ensureAuthenticated(req)) {
-    if (helpers.getUser(req).role === 'admin') { 
-      return next() 
-    } else {
-      return res.redirect('/api/tweets')
-    }
-  }
-  return res.redirect('/api/signin')
+  helpers.getUser(req).role === 'admin' ? next() : res.redirect('/api/tweets')
 }
-
-router.use('/api/users', authenticated, users)
-router.use('/api/admin', authenticatedAdmin, admin)
-router.use('/api/followships', authenticated, followships)
-router.use('/api/tweets', authenticated, tweets)
-router.use('/api', authenticatedLogin, home)
+router.use('/api', home)
+router.use('/api/users', helpers.ensureAuthenticated, authenticated, users)
+router.use('/api/admin', helpers.ensureAuthenticated, authenticatedAdmin, admin)
+router.use('/api/followships', helpers.ensureAuthenticated, authenticated, followships)
+router.use('/api/tweets', helpers.ensureAuthenticated, authenticated, tweets)
 
 module.exports = router

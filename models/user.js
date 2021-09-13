@@ -1,5 +1,8 @@
 
 'use strict';
+
+const bcrypt = require('bcryptjs')
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     email: {
@@ -15,7 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     cover: DataTypes.STRING,
-    role: DataTypes.STRING
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: 'user'
+    }
   }, {
     hooks: {
       beforeCreate: async (User, next) => {

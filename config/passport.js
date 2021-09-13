@@ -1,29 +1,44 @@
-const passport = require('passport')
-const strategy = require('passport-local').Strategy
-const bcrypt = require('bcryptjs')
+const passportJWT = require('passport-jwt')
+const jwtStrategy = require('passport-jwt').Strategy
+const ExtractJwt = passportJWT.ExtractJwt
 const db = require('../models')
 const User = db.User
+const fs = require('fs')
+const PUB_KEY = fs.readFileSync(__dirname + '/../rsaPublicKey.pem', 'utf8')
 
-const localStrategy = new strategy({
-  usernameField: 'email',
-  passwordField: 'password',
-  passReqToCallback: true
-},
-  async (req, email, password, done) => {
-    try {
-      const userInfo = await User.findOne({ where: { email } })
-      if (!userInfo) return done(null, false, req.flash('error_messages', '帳號輸入錯誤'))
-      if (!bcrypt.compareSync(password, userInfo.password)) return done(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤！'))
-      return done(null, userInfo)
-    }
-    catch (error) {
-      console.log(error)
+const cookieExtractor = (req) => {
+  let token = null
+  if (req && req.cookies['jwt']) {
+    token = req.cookies['jwt']['token']
+  } else {
+    return
+  }
+  return token
+}
+
+const options = {
+  jwtFromRequest: cookieExtractor,
+  secretOrKey: PUB_KEY,
+  algorithms: ['RS256']
+}
+
+const jwt = new jwtStrategy(options, async (payload, done) => {
+  try {
+    const user = await User.findOne({ where: { id: payload.sub } })
+    if (user) {
+      return done(null, user)
+    } else {
+      return done(null, false)
     }
   }
-)
+  catch (error) {
+    console.log(error)
+  }
+})
 
+// pack middleware
 function passportSet(passport) {
-  passport.use(localStrategy)
+  passport.use(jwt)
 
   passport.serializeUser((user, done) => {
     done(null, user.id);

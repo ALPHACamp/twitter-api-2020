@@ -16,16 +16,19 @@
 // app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 // module.exports = app
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 
 const express = require('express')
 const session = require('express-session')
 const bodyParser = require('body-parser')
 const handlebars = require('express-handlebars')
-const helpers = require('./_helpers')
 const passport = require('passport')
 const routes = require('./routes')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
+const cookieParser = require('cookie-parser')
 const app = express()
 const PORT = process.env.PORT || 3000
 
@@ -39,15 +42,13 @@ app.use(methodOverride('_method'))
 app.use(flash())
 app.use('/upload', express.static(__dirname + '/upload'))
 
-app.use(session({ secret: 'iamrex', resave: false, saveUninitialized: false }))
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
 
 // Passport middleware
 require('./config/passport')(passport)
 app.use(passport.initialize())
 app.use(passport.session())
-
-app.use('/upload', express.static(__dirname + '/upload'))
-
+app.use(cookieParser())
 app.use(routes)
 
 app.listen(PORT, () => {

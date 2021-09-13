@@ -8,7 +8,7 @@ const Sequelize = db.Sequelize
 const sequelize = db.sequelize
 const Op = db.Sequelize.Op
 const { QueryTypes } = require('sequelize')
-const popularQty = 10
+const popularQty = 10 //暫時沒有用到
 
 const userController = {
   userHomePage: async (req, res) => {
