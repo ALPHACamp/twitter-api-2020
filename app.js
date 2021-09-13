@@ -1,6 +1,6 @@
 const express = require('express')
 const helpers = require('./_helpers')
-
+const bodyParser = require('body-parser')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -19,9 +19,12 @@ function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
-
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 app.use(express.json())
 app.use(passport.initialize())
+
+require('./routes')(app)
 
 app.use((err, req, res, next) => {
   res.status(422).json({
@@ -30,6 +33,5 @@ app.use((err, req, res, next) => {
   })
 })
 
-require('./routes')(app)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 module.exports = app
