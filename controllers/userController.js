@@ -73,7 +73,7 @@ const userController = {
     }
 
     // Check name characters
-    if (!name.trim().length > 50) {
+    if (name.trim().length > 50) {
       return res.status(401).json({
         status: 'error',
         message: 'The name should not exceed 50 words'
