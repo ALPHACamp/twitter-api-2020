@@ -1,40 +1,53 @@
-const bcrypt = require('bcryptjs')
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
 const db = require('../../models')
 const User = db.User
+const bcrypt = require('bcryptjs')
 
 const userController = {
   signUp: (req, res) => {
     // confirm password
     if (req.body.password !== req.body.checkPassword) {
-      return res.json('error', 'Inconsistent password!')
+      return res.json({ status: 'error', message: 'Inconsistent password' })
     } else {
-      return Promise.all([
-        // confirm unique user by email and account
-        User.findOne({ where: { email: req.body.email } }).then(user => {
-          if (user) {
-            return res.json('error', 'This email is already registered')
-          }
-        }),
-        User.findOne({ where: { account: req.body.account.trim } }).then(user => {
-          if (user) {
-            res.json('error', 'This account has already been used.')
-          }
-        })
-      ]).then(user => {
-        User.create({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
-          checkPassword = req.body.checkPassword
-        })
+      // confirm unique user
+      User.findOne({
+        where: {
+          [Op.or]: [
+            { email: req.body.email },
+            { account: req.body.account }
+          ]
+        }
       }).then(user => {
-        res.json('success', 'Registration successful')
+        if (user) {
+          if (user.email === req.body.email) {
+            return res.json({ status: 'error', message: 'This email is already registered.' })
+          }
+          if (user.account === req.body.account) {
+            return res.json({ status: 'error', message: 'This account is existed.' })
+          }
+        }
+        else {
+          User.create({
+            name: req.body.name,
+            email: req.body.email,
+            account: req.body.account,
+            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
+            cover: req.body.cover,
+            avatar: req.body.avatar
+          }).then(user => {
+            return res.json({ status: 'success', message: 'Registration successful' })
+          })
+        }
       })
+        .catch(error => console.log(error))
     }
   },
-  signIn: (req, res) => {
-    res.json('success', 'Login successful')
+  logout: (req, res) => {
+    req.flash('success_message', 'Logout successful')
+    req.logout()
+    res.redirect('/signin')
   },
 }
 

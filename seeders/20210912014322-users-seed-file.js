@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+const faker = require('faker')
+
+>>>>>>> signup
 'use strict'
 const bcrypt = require('bcryptjs')
 module.exports = {
@@ -10,6 +15,10 @@ module.exports = {
       role: 'admin',
       cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/paris,girl/?lock=${Math.random() * 100}`,
+<<<<<<< HEAD
+=======
+      introduction: faker.lorem.text().substring(0, 30),
+>>>>>>> signup
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -20,6 +29,10 @@ module.exports = {
       role: 'user',
       cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/paris,girl/?lock=${Math.random() * 100}`,
+<<<<<<< HEAD
+=======
+      introduction: faker.lorem.text().substring(0, 30),
+>>>>>>> signup
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -30,6 +43,10 @@ module.exports = {
       role: 'user',
       cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/paris,girl/?lock=${Math.random() * 100}`,
+<<<<<<< HEAD
+=======
+      introduction: faker.lorem.text().substring(0, 30),
+>>>>>>> signup
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -41,6 +58,10 @@ module.exports = {
       role: 'user',
       cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/paris,girl/?lock=${Math.random() * 100}`,
+<<<<<<< HEAD
+=======
+      introduction: faker.lorem.text().substring(0, 30),
+>>>>>>> signup
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -52,6 +73,10 @@ module.exports = {
       role: 'user',
       cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/paris,girl/?lock=${Math.random() * 100}`,
+<<<<<<< HEAD
+=======
+      introduction: faker.lorem.text().substring(0, 30),
+>>>>>>> signup
       createdAt: new Date(),
       updatedAt: new Date()
     },
@@ -63,6 +88,10 @@ module.exports = {
       role: 'user',
       cover: `https://loremflickr.com/320/240/landscape/?lock=${Math.random() * 100}`,
       avatar: `https://loremflickr.com/320/240/paris,girl/?lock=${Math.random() * 100}`,
+<<<<<<< HEAD
+=======
+      introduction: faker.lorem.text().substring(0, 30),
+>>>>>>> signup
       createdAt: new Date(),
       updatedAt: new Date()
     },
