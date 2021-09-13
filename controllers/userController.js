@@ -1,5 +1,6 @@
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
 
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers.js')
@@ -145,6 +146,17 @@ const userController = {
         loginUserId
       )
       return res.status(200).json({ user, isFollowed })
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得該使用者的所有推文
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+      })
+      return res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
