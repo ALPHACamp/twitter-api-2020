@@ -1,5 +1,6 @@
+const db = require('../models')
 const passport = require('passport')
-const { User } = require('../models')
+const { User, Tweet} = require('../models')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
@@ -11,6 +12,7 @@ const jwtOptions = {
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   User.findByPk(jwt_payload.id).then(user => {
+    console.log(user)
     if (!user) return next(null, false)
     return next(null, user)
   })
