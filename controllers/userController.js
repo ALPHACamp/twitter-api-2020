@@ -1,8 +1,13 @@
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+const Reply = db.Reply
+const Like = db.Like
+const Followship = db.Followship
 
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers.js')
+const { sequelize } = require('../models')
 
 // 引入驗證欄位
 const { registerCheck } = require('../middleware/validator.js')
@@ -10,6 +15,7 @@ const { registerCheck } = require('../middleware/validator.js')
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
+const { replace } = require('sinon')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -123,28 +129,134 @@ const userController = {
     try {
       const id = req.params.user_id
       const loginUserId = helpers.getUser(req).id
-      const user = await User.findByPk(id, {
+      let user = await User.findByPk(id, {
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
-        ],
-        attributes: [
-          'id',
-          'name',
-          'account',
-          'avatar',
-          'role',
-          'cover',
-          'followerCount',
-          'followingCount',
-          'tweetCount',
         ],
       })
       // 是否已追蹤此 user
       const isFollowed = await user.Followers.map((d) => d.id).includes(
         loginUserId
       )
-      return res.status(200).json({ user, isFollowed })
+      user = {
+        id: user.id,
+        account: user.account,
+        name: user.name,
+        avatar: user.avatar,
+        cover: user.cover,
+        role: user.role,
+        followerCount: user.followerCount,
+        followingCount: user.followingCount,
+        tweetCount: user.tweetCount,
+        isFollowed,
+      }
+      return res.status(200).json(user)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得該使用者的所有推文
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+      })
+      return res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得該使用者的所有回覆
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      let repliedTweets = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet }],
+      })
+      // 剔除被刪掉的 tweet (Tweet === null)
+      await repliedTweets.map((replyTweet) => {
+        if (replyTweet.Tweet === null) {
+          const id = replyTweet.TweetId
+          repliedTweets = repliedTweets.filter((replyTweet) => {
+            return replyTweet.TweetId !== id
+          })
+        }
+      })
+      return res.status(200).json(repliedTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得該使用者 Like 過的推文
+  getLikedTweets: async (req, res, next) => {
+    try {
+      let likedTweets = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet }],
+      })
+      // 剔除被刪掉的 tweet (Tweet === null)
+      await likedTweets.map((likeTweet) => {
+        if (likeTweet.Tweet === null) {
+          const id = likeTweet.TweetId
+          likedTweets = likedTweets.filter((likeTweet) => {
+            return likeTweet.TweetId !== id
+          })
+        }
+      })
+      return res.status(200).json(likedTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得使用者追蹤的 user 名單
+  getFollowingUsers: async (req, res, next) => {
+    try {
+      let followingUsers = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: [
+              ['id', 'followingId'],
+              'name',
+              'account',
+              'avatar',
+              'cover',
+            ],
+          },
+        ],
+        attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+      })
+      // 取出正在追蹤的人
+      followingUsers = followingUsers.Followings
+      return res.status(200).json(followingUsers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得追蹤使用者的 user 名單
+  getFollowerUsers: async (req, res, next) => {
+    try {
+      let followerUsers = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: [
+              ['id', 'followerId'],
+              'name',
+              'account',
+              'avatar',
+              'cover',
+            ],
+          },
+        ],
+        attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+      })
+      // 取出被哪些人追蹤
+      followerUsers = followerUsers.Followers
+      return res.status(200).json(followerUsers)
     } catch (err) {
       next(err)
     }
