@@ -82,7 +82,7 @@ const userController = {
 
     // Check account format
     const regex = new RegExp(/^\w+$/)
-    if (account.match(regex) === null) {
+    if (!account.match(regex)) {
       return res.status(401).json({
         status: 'error',
         message: 'The account should only include number, letter and underline'
