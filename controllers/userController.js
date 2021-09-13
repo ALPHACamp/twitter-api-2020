@@ -128,7 +128,20 @@ const userController = {
 
     const tweets = await userService.getUserTweets(targetUserId, currentUserId)
 
-    // Check whether the user exists
+    // Check whether the tweets exist
+    if (!tweets) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No tweets found' })
+    }
+
+    return res.status(200).json(tweets)
+  },
+
+  getUserRepliedTweets: async (req, res) => {
+    const tweets = await userService.getUserRepliedTweets(req.params.id)
+
+    // Check whether the tweets exist
     if (!tweets) {
       return res
         .status(401)

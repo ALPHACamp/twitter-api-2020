@@ -39,7 +39,7 @@ const userService = {
       email,
       password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
     })
-    
+
     return { status: 'success', message: 'Registration success' }
   },
 
@@ -82,6 +82,23 @@ const userService = {
       ],
       order: [['createdAt', 'DESC']],
       group: ['TweetId']
+    })
+  },
+
+  getUserRepliedTweets: async (UserId) => {
+    return await Reply.findAll({
+      where: { UserId },
+      include: [
+        { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+        {
+          model: Tweet,
+          attributes: ['description'],
+          include: [{ model: User, attributes: ['id', 'account'] }]
+        }
+      ],
+      attributes: ['id', [Sequelize.col('Tweet.id'), 'TweetId'], 'comment', 'createdAt'],
+      order: [['createdAt', 'DESC']],
+      group: ['id']
     })
   }
 }
