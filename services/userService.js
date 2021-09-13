@@ -59,7 +59,7 @@ const userService = {
 
   getUser: async (req, res, cb) => {
     try {
-      const user = await User.findByPk(req.params.id, {
+      let user = await User.findByPk(req.params.id, {
         attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover'],
         include: [{
           model: User,
@@ -79,22 +79,17 @@ const userService = {
         }
         ]
       })
-      const totalFollowings = user.Followings.length
-      const totalFollowers = user.Followers.length
-      const totalTweets = user.Tweets.length
+      user = user.toJSON()
+      user.totalFollowings = user.Followings.length
+      user.totalFollowers = user.Followers.length
+      user.totalTweets = user.Tweets.length
+      delete user.Followings
+      delete user.Followers
+      delete user.Tweets
       // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
       return cb({
         status: '200',
-        id: user.id,
-        name: user.name,
-        account: user.account,
-        introduction: user.introduction,
-        avatar: user.avatar,
-        cover: user.cover,
-        Followings: user.Followings,
-        Followers: user.Followers,
-        Tweets: user.Tweets,
-        totalFollowings, totalFollowers, totalTweets
+        ...user,
       })
     } catch (err) {
       console.warn(err)
