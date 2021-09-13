@@ -1,5 +1,5 @@
 const express = require('express')
-const helpers = require('./_helpers');
+const helpers = require('./_helpers')
 const routes = require('./routes')
 const bodyParser = require('body-parser')
 const flash = require('connect-flash')
@@ -9,9 +9,9 @@ const app = express()
 const port = 3000
 
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+// function authenticated(req, res, next){
+// passport.authenticate('jwt', { ses...
+// }
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(flash())
