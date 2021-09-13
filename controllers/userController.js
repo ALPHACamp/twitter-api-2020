@@ -2,6 +2,7 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
+const Like = db.Like
 
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers.js')
@@ -180,6 +181,27 @@ const userController = {
         }
       })
       return res.status(200).json(repliedTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得該使用者 Like 過的推文
+  getLikedTweets: async (req, res, next) => {
+    try {
+      let likedTweets = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet }],
+      })
+      // 剔除被刪掉的 tweet (Tweet === null)
+      await likedTweets.map((likeTweet) => {
+        if (likeTweet.Tweet === null) {
+          const id = likeTweet.TweetId
+          likedTweets = likedTweets.filter((likeTweet) => {
+            return likeTweet.TweetId !== id
+          })
+        }
+      })
+      return res.status(200).json(likedTweets)
     } catch (err) {
       next(err)
     }
