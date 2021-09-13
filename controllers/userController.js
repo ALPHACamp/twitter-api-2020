@@ -193,6 +193,29 @@ const userController = {
     })
 
     return res.status(200).json(users)
+  },
+
+  getUserFollowers: async (req, res) => {
+    const [targetUserId, currentUserId] = [
+      req.params.id,
+      helpers.getUser(req).id
+    ]
+
+    let users = await userService.getUserFollowers(targetUserId, currentUserId)
+
+    // Check whether the users exist
+    if (!users) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No users found' })
+    }
+
+    // translate to boolean in isFollowed attribute
+    users.forEach((user) => {
+      user.isFollowed = user.isFollowed ? true : false
+    })
+
+    return res.status(200).json(users)
   }
 }
 
