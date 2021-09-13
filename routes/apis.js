@@ -30,5 +30,6 @@ router.delete(
 )
 
 router.get('/tweets', tweetController.getTweets)
+router.get('/tweets/:tweet_id', tweetController.getTweet)
 
 module.exports = router
