@@ -9,6 +9,11 @@ const tweetController = {
   postReply: (req, res) => {
     tweetService.postReply(req, res, data => res.status(data.status).json(data))
   },
+
+  getTweet: (req, res) => {
+    tweetService.getTweet(req, res, data => res.status(data.status).json(data)
+    )
+  }
 }
 
 module.exports = tweetController
