@@ -9,7 +9,7 @@ const userController = {
     const { account, password } = req.body
     // Check required data
     if (!account || !password) {
-      return res.json({
+      return res.status(400).json({
         status: 'error',
         message: "Required fields didn't exist"
       })
@@ -26,14 +26,14 @@ const userController = {
     // Check if the user password is correct
     if (!bcrypt.compareSync(password, user.password)) {
       return res
-        .status(401)
+        .status(400)
         .json({ status: 'error', message: 'Incorrect password' })
     }
     // sign user token
     const payload = { id: user.id }
     const token = jwt.sign(payload, process.env.JWT_SECRET)
 
-    return res.json({
+    return res.status(200).json({
       status: 'success',
       message: 'Success to login',
       token: token,
@@ -66,7 +66,7 @@ const userController = {
 
     // Check required data
     if (!account || !email || !name || !password || !checkPassword) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: "Required fields didn't exist"
       })
@@ -74,7 +74,7 @@ const userController = {
 
     // Check name characters
     if (name.trim().length > 50) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: 'The name should not exceed 50 words'
       })
@@ -83,7 +83,7 @@ const userController = {
     // Check account format
     const regex = new RegExp(/^\w+$/)
     if (!account.match(regex)) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: 'The account should only include number, letter and underline'
       })
@@ -91,7 +91,7 @@ const userController = {
 
     // Check if password equal to checkPassword
     if (password !== checkPassword) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: 'Password value is not equal to checkPassword'
       })
@@ -178,10 +178,7 @@ const userController = {
       helpers.getUser(req).id
     ]
 
-    let users = await userService.getUserFollowings(
-      targetUserId,
-      currentUserId
-    )
+    let users = await userService.getUserFollowings(targetUserId, currentUserId)
 
     // Check whether the users exist
     if (!users) {
@@ -191,7 +188,7 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    users.forEach(user => {
+    users.forEach((user) => {
       user.isFollowed = user.isFollowed ? true : false
     })
 
