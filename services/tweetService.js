@@ -78,6 +78,45 @@ const tweetService = {
       ],
       group: 'Replies.id'
     })
+  },
+  postTweet: async (UserId, description) => {
+    await Tweet.create({
+      UserId,
+      description
+    })
+    return { status: 'success', message: 'A tweet has created' }
+  },
+  postLikeTweet: async (UserId, TweetId) => {
+    await Like.create({ UserId, TweetId })
+    return { status: 'success', message: 'Liked successfully' }
+  },
+  postUnlikeTweet: async (UserId, TweetId) => {
+    await Like.destroy({ where: { UserId, TweetId } })
+    return { status: 'success', message: 'Unliked successfully' }
+  },
+
+  getTweetAllReplies: async (TweetId) => {
+    return await Tweet.findByPk(TweetId, {
+      attributes: [],
+      include: [
+        {
+          model: Reply,
+          attributes: ['id', 'comment', 'createdAt'],
+          include: [
+            {
+              model: User,
+              nest: true,
+              attributes: ['id', 'name', 'account', 'avatar']
+            }
+          ]
+        }
+      ],
+      order: [['createdAt', 'ASC']]
+    })
+  },
+  postReply: async (UserId, TweetId, comment) => {
+    await Reply.create({ UserId, TweetId, comment })
+    return { status: 'success', message: 'A reply has successfully left' }
   }
 }
 
