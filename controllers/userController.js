@@ -216,6 +216,84 @@ const userController = {
     })
 
     return res.status(200).json(users)
+  },
+
+  putUser: async (req, res) => {
+    const { account, name, email, password, checkPassword, cover, avatar, introduction } = req.body
+    
+    // update account info
+    if (account && name && email && password && checkPassword) {
+      // Check name characters
+      if (name.trim().length > 50) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'The name should not exceed 50 words'
+        })
+      }
+
+      // Check account format
+      const regex = new RegExp(/^\w+$/)
+      if (!account.match(regex)) {
+        return res.status(400).json({
+          status: 'error',
+          message:
+            'The account should only include number, letter and underline'
+        })
+      }
+
+      // Check if password equal to checkPassword
+      if (password !== checkPassword) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Password value is not equal to checkPassword'
+        })
+      }
+
+      const user = await userService.putUser(req.body)
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Account info has updated',
+        account: user.account,
+        name: user.name,
+        email: user.email
+      })
+    }
+
+    // Update person info
+    if (name && avatar && introduction && cover) {
+      // Check name characters
+      if (name.trim().length > 50) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'The name should not exceed 50 words'
+        })
+      }
+
+      // Check introduction characters
+      if (introduction.trim().length > 160) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'The introduction should not exceed 160 words'
+        })
+      }
+
+      const user = await userService.putUser(req.body)
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Person info has updated',
+        avatar: user.avatar,
+        name: user.name,
+        cover: user.cover,
+        introduction: user.introduction
+      })
+    }
+
+    return res.status(400).json({
+      status: 'error',
+      message: "Required fields didn't exist"
+    })
   }
 }
 
