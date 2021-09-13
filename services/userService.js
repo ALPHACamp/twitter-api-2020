@@ -205,6 +205,10 @@ const userService = {
       group: ['User.id'],
       order: [['createdAt', 'DESC']]
     })
+  },
+
+  putUser: async (body) => {
+    return await User.update(body)
   }
 }
 
