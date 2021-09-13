@@ -232,6 +232,16 @@ const userController = {
 
     const errors = []
 
+    // Check if the user is current user
+    if (helpers.getUser(req).id !== Number(req.params.id)) {
+      return res
+        .status(403)
+        .json({
+          status: 'error',
+          message: "Should not edit the other user's profile"
+        })
+    }
+
     // Check name characters
     if (name && name.trim().length > 50) {
       errors.push('The name should not exceed 50 words')
