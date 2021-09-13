@@ -85,9 +85,9 @@ const userService = {
     })
   },
 
-  getUserRepliedTweets: async (userId) => {
+  getUserRepliedTweets: async (UserId) => {
     return await Reply.findAll({
-      where: { userId },
+      where: { UserId },
       include: [
         { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
         {
@@ -96,7 +96,7 @@ const userService = {
           include: [{ model: User, attributes: ['id', 'account'] }]
         }
       ],
-      attributes: ['id', ['Tweets.id', 'TweetId'], 'comment', 'createdAt'],
+      attributes: ['id', [Sequelize.col('Tweet.id'), 'TweetId'], 'comment', 'createdAt'],
       order: [['createdAt', 'DESC']],
       group: ['id']
     })
