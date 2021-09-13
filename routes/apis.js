@@ -42,6 +42,7 @@ router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 // 前台：取得登入中使用者
 router.get('/current_user', authenticated, userController.getCurrentUser)
