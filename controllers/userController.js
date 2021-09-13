@@ -80,6 +80,15 @@ const userController = {
       })
     }
 
+    // Check account format
+    const regex = new RegExp(/^\w+$/)
+    if (account.match(regex) === null) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'The account should only include number, letter and underline'
+      })
+    }
+
     // Check if password equal to checkPassword
     if (password !== checkPassword) {
       return res.status(401).json({
