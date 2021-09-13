@@ -1,14 +1,14 @@
 {
   "development": {
     "username": "root",
-    "password": "password",
+    "password": "root",
     "database": "ac_twitter_workspace",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "test": {
     "username": "root",
-    "password": "password",
+    "password": "root",
     "database": "ac_twitter_workspace_test",
     "host": "127.0.0.1",
     "dialect": "mysql",
