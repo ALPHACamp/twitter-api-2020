@@ -20,22 +20,26 @@ const userService = {
 
   postUser: async (body) => {
     const { account, name, email, password } = body
-    // If the account is not duplicate, register the account
-    const [user, created] = await User.findOrCreate({
-      where: { account, email },
-      defaults: {
-        account,
-        name,
-        email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-      }
-    })
+    // Check if user is exists by email
+    const checkEmail = await User.findOne({ where: { email } })
+    if (checkEmail) {
+      return { status: 'error', message: 'Email already exists' }
+    }
 
-    // Check whether the user is already exists
-    if (!created) {
+    // Check if user is exists by account
+    const checkAccount = await User.findOne({ where: { account } })
+    if (checkAccount) {
       return { status: 'error', message: 'Account already exists' }
     }
 
+    // Create user
+    await User.create({
+      account,
+      name,
+      email,
+      password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+    })
+    
     return { status: 'success', message: 'Registration success' }
   },
 
