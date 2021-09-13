@@ -24,10 +24,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/boy/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?man/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -41,10 +41,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/boy/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?man/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -58,10 +58,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/boy/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?man/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -75,10 +75,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/boy/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?man/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -92,10 +92,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/boy/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?man/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -109,10 +109,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/girl/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?woman/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -126,10 +126,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/girl/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?woman/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -143,10 +143,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/girl/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?woman/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -160,10 +160,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/girl/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?woman/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
@@ -177,10 +177,10 @@ module.exports = {
         password: bcrypt.hashSync("12345678", bcrypt.genSaltSync(10), null),
         role: "user",
         introduction: faker.lorem.paragraph(3),
-        avatar: `https://loremflickr.com/320/240/girl/?random=${
+        avatar: `https://source.unsplash.com/1600x1200/?woman/?random=${
           Math.random() * 100
         }`,
-        cover: `https://loremflickr.com/640/360/cat/?random=${
+        cover: `https://source.unsplash.com/1600x900/?nature/?random=${
           Math.random() * 100
         }`,
         createdAt: new Date(),
