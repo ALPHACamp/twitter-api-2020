@@ -24,6 +24,20 @@ const likeService = {
       console.warn(err)
       return cb({ status: '500', message: err })
     }
+  },
+
+  unlikeTweet: async (req, res, cb) => {
+    try {
+      const like = await Like.findOne({ where: { UserId: req.user.id, TweetId: req.params.id } })
+      if (like) {
+        await like.destroy()
+        return cb({ status: '200', message: '成功取消推文讚' })
+      }
+      return cb({ status: '400', message: '找不到按讚紀錄' })
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
   }
 }
 
