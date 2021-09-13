@@ -230,16 +230,6 @@ const userController = {
       introduction
     } = req.body
 
-    // Check if user is current user
-    if (helpers.getUser(req).id !== req.params.id) {
-      return res
-        .status(403)
-        .json({
-          status: 'error',
-          message: "Should not edit other user's data"
-        })
-    }
-
     const errors = []
 
     // Check name characters
@@ -274,11 +264,10 @@ const userController = {
 
     const user = await userService.putUser(req.params.id, req.body)
 
-    console.log(user)
-
     const responseData = {
       status: 'success',
-      message: 'Account info has updated'
+      message: 'Account info has updated',
+      user: user.dataValues
     }
 
     return res.status(200).json(responseData)
