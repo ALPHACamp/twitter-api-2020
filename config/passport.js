@@ -11,7 +11,15 @@ const jwtOptions = {
 }
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
-  User.findByPk(jwt_payload.id).then(user => {
+  User.findByPk(jwt_payload.id,{
+    include: [
+      // TODO 被追蹤/追蹤對象 喜歡的貼文 和回覆
+      { model: User, as: 'RepliedTweets' },
+      { model: User, as: 'LikedTweets' },
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
+  }).then(user => {
     console.log(user)
     if (!user) return next(null, false)
     return next(null, user)
