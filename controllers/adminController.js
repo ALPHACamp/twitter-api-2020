@@ -2,6 +2,7 @@ const db = require('../models')
 const User = db.User
 const Reply = db.Reply
 const Like = db.Like
+const Tweet = db.Tweet
 
 const { sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
@@ -98,6 +99,19 @@ const adminController = {
         ],
       })
       res.status(200).json(users)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 後台：刪除單一 tweet
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      tweet.destroy()
+      return res.status(200).json({
+        status: 'success',
+        message: `Tweet id: ${tweet.id} is deleted. `,
+      })
     } catch (err) {
       next(err)
     }

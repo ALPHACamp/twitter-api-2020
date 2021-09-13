@@ -20,5 +20,12 @@ router.get(
   authenticatedAdmin,
   adminController.getAllUsers
 )
+// 後台：刪除單一 tweet
+router.delete(
+  '/admin/tweets/:id',
+  authenticated,
+  authenticatedAdmin,
+  adminController.deleteTweet
+)
 
 module.exports = router
