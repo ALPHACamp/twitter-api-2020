@@ -1,15 +1,12 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
-const { Op } = require("sequelize")
-
-// JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+
+const { User, Tweet, Like } = require('../models')
 
 let userController = {
-  signIn: (req, res) => {
+  userLogin: (req, res) => {
     const { email, password } = req.body
 
     // 檢查必要資料
@@ -63,14 +60,19 @@ let userController = {
       })
       .catch(err => {console.log(err)})
   },
-  putUserSetting: (req, res) => {
-    
-  },
   getUser: (req, res) => {
-    
-  },
-  putUser: (req, res) => {
-    
+    //TODO: 不確定需要甚麼資料
+    User.findByPk(req.params.id,{
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' },
+        { model: Like },
+        { model: Tweet },
+      ]
+    })
+    .then(user => res.status(200).json(user))
+    .catch(err => {console.log(err)})
+
   }
 }
 
