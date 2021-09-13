@@ -96,9 +96,52 @@ const userService = {
           include: [{ model: User, attributes: ['id', 'account'] }]
         }
       ],
-      attributes: ['id', [Sequelize.col('Tweet.id'), 'TweetId'], 'comment', 'createdAt'],
+      attributes: [
+        'id',
+        [Sequelize.col('Tweet.id'), 'TweetId'],
+        'comment',
+        'createdAt'
+      ],
       order: [['createdAt', 'DESC']],
       group: ['id']
+    })
+  },
+
+  getUserLikedTweets: async (UserId) => {
+    return await Like.findAll({
+      raw: true,
+      nest: true,
+      where: { UserId },
+      include: [
+        { model: Tweet, attributes: [] },
+        { model: Reply, attributes: [] },
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      attributes: [
+        [Sequelize.col('Tweet.id'), 'TweetId'],
+        'createdAt',
+        [Sequelize.col('Tweet.description'), 'description'],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+          ),
+          'likesCount'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+          ),
+          'repliesCount'
+        ],
+        [
+          Sequelize.literal(
+            `exists(select 1 from Likes where UserId = ${UserId} and TweetId = Tweet.id)`
+          ),
+          'isLike'
+        ]
+      ],
+      group: ['TweetId'],
+      order: [['createdAt', 'DESC']]
     })
   }
 }
