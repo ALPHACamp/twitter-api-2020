@@ -9,6 +9,9 @@ const userController = {
   },
   getUser: (req, res) => {
     userService.getUser(req, res, data => res.status(data.status).json(data))
+  },
+  getUserTweets: (req, res) => {
+    userService.getUserTweets(req, res, data => res.status(200).json(data))
   }
 }
 
