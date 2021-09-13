@@ -207,8 +207,9 @@ const userService = {
     })
   },
 
-  putUser: async (body) => {
-    return await User.update(body)
+  putUser: async (id, body) => {
+    const user = await User.findByPk(id)
+    return await user.update(body)  
   }
 }
 

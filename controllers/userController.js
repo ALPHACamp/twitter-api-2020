@@ -272,7 +272,7 @@ const userController = {
       })
     }
 
-    const user = await userService.putUser(req.body)
+    const user = await userService.putUser(req.params.id, req.body)
 
     console.log(user)
 
