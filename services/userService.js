@@ -148,8 +148,10 @@ const userService = {
   getUserFollowings: async (targetUserId, currentUserId) => {
     return await User.findAll({
       include: {
-        model: Followship,
-        where: { followerId: targetUserId }
+        model: User,
+        as: 'Followers',
+        where: { id: targetUserId },
+        attributes: []
       },
       attributes: [
         [
@@ -158,7 +160,7 @@ const userService = {
           ),
           'isFollowed'
         ],
-        [Sequelize.col('Followship.followingId'), 'followingId'],
+        ['id', 'followingId'],
         'name',
         'avatar',
         'introduction',
