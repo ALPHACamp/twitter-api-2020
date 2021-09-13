@@ -107,11 +107,11 @@ const userService = {
     })
   },
 
-  getUserLikedTweets: async (UserId) => {
+  getUserLikedTweets: async (targetUserId, currentUserId) => {
     return await Like.findAll({
       raw: true,
       nest: true,
-      where: { UserId },
+      where: { UserId: targetUserId },
       include: [
         { model: Tweet, attributes: [] },
         { model: Reply, attributes: [] },
@@ -135,7 +135,7 @@ const userService = {
         ],
         [
           Sequelize.literal(
-            `exists(select 1 from Likes where UserId = ${UserId} and TweetId = Tweet.id)`
+            `exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`
           ),
           'isLike'
         ]
