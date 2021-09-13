@@ -6,9 +6,9 @@ const helpers = require('../_helpers')
 
 const userController = {
   signIn: async (req, res) => {
-    const { account, password } = req.body
+    const { account, password, role } = req.body
     // Check required data
-    if (!account || !password) {
+    if (!account || !password || !role) {
       return res.status(400).json({
         status: 'error',
         message: "Required fields didn't exist"
@@ -16,7 +16,7 @@ const userController = {
     }
 
     // Check whether the user exists by email
-    const user = await userService.signIn(account)
+    const user = await userService.signIn(account, role)
 
     if (!user) {
       return res
