@@ -14,4 +14,12 @@ router.post('/users', userController.register)
 // 後台 Login
 router.post('/adminLogin', adminController.adminLogIn)
 
+// 後台：刪除單一 tweet
+router.delete(
+  '/admin/tweets/:id',
+  authenticated,
+  authenticatedAdmin,
+  adminController.deleteTweet
+)
+
 module.exports = router
