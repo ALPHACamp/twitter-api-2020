@@ -10,5 +10,4 @@ router.get('/:id', authenticated, userController.getUser)
 
 
 
-
 module.exports = router
