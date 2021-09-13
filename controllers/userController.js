@@ -3,9 +3,11 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
+const Followship = db.Followship
 
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers.js')
+const { sequelize } = require('../models')
 
 // 引入驗證欄位
 const { registerCheck } = require('../middleware/validator.js')
@@ -202,6 +204,42 @@ const userController = {
         }
       })
       return res.status(200).json(likedTweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得使用者追蹤的 user 名單
+  getFollowingUsers: async (req, res, next) => {
+    try {
+      const followingUsers = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+          },
+        ],
+        attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+      })
+      return res.status(200).json(followingUsers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得追蹤使用者的 user 名單
+  getFollowerUsers: async (req, res, next) => {
+    try {
+      const followerUsers = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+          },
+        ],
+        attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+      })
+      return res.status(200).json(followerUsers)
     } catch (err) {
       next(err)
     }
