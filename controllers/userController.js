@@ -156,6 +156,7 @@ const userController = {
       req.params.id,
       helpers.getUser(req).id
     ]
+
     const tweets = await userService.getUserLikedTweets(
       targetUserId,
       currentUserId
@@ -169,6 +170,27 @@ const userController = {
     }
 
     return res.status(200).json(tweets)
+  },
+
+  getUserFollowings: async (req, res) => {
+    const [targetUserId, currentUserId] = [
+      req.params.id,
+      helpers.getUser(req).id
+    ]
+
+    const users = await userService.getUserFollowings(
+      targetUserId,
+      currentUserId
+    )
+
+    // Check whether the users exist
+    if (!users) {
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'No users found' })
+    }
+
+    return res.status(200).json(users)
   }
 }
 
