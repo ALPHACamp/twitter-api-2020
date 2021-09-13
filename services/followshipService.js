@@ -24,6 +24,23 @@ const followshipService = {
         console.warn(err)
         return cb({ status: '500', message: err })
       })
+  },
+  unFollowUser: async (req, res, cb) => {
+    try {
+      const followship = await Followship.findOne({
+        where: {
+          followerId: req.user.id,
+          followingId: req.params.followingId,
+        }
+      })
+      if (followship !== null) {
+        await followship.destroy()
+        return cb({ status: '200', message: '取消追蹤成功' })
+      }
+      return cb({ status: '400', message: '不存在的追蹤關係，故取消追蹤動作失敗' })
+    } catch (err) {
+      return cb({ status: '500', message: err })
+    }
   }
 }
 
