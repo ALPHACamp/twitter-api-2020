@@ -1,6 +1,7 @@
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Reply = db.Reply
 
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers.js')
@@ -11,6 +12,7 @@ const { registerCheck } = require('../middleware/validator.js')
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
+const { replace } = require('sinon')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -157,6 +159,27 @@ const userController = {
         where: { UserId: req.params.id },
       })
       return res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得該使用者的所有回覆
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      let repliedTweets = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [{ model: Tweet }],
+      })
+      // 剔除被刪掉的 tweet (Tweet === null)
+      await repliedTweets.map((replyTweet) => {
+        if (replyTweet.Tweet === null) {
+          const id = replyTweet.TweetId
+          repliedTweets = repliedTweets.filter((replyTweet) => {
+            return replyTweet.TweetId !== id
+          })
+        }
+      })
+      return res.status(200).json(repliedTweets)
     } catch (err) {
       next(err)
     }
