@@ -1,3 +1,4 @@
+const helpers = require('../_helpers')
 const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
@@ -28,6 +29,19 @@ const tweetController = {
       ]
     }).then(tweet => {
       res.json(tweet)
+    })
+  },
+  postTweet: (req, res) => {
+    if (!req.body.description) {
+      const data = { status: 'error', message: "content didn't exist" }
+      return res.json(data)
+    }
+    Tweet.create({
+      UserId: helpers.getUser(req).id,
+      description: req.body.description
+    }).then(() => {
+      const data = { status: 'success', message: 'a new tweet was successfully posted' }
+      res.json(data)
     })
   }
 }

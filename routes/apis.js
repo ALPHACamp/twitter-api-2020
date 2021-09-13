@@ -31,5 +31,6 @@ router.delete(
 
 router.get('/tweets', tweetController.getTweets)
 router.get('/tweets/:tweet_id', tweetController.getTweet)
+router.post('/tweets', authenticated, tweetController.postTweet)
 
 module.exports = router
