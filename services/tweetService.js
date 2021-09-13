@@ -88,11 +88,11 @@ const tweetService = {
   },
   postLikeTweet: async (UserId, TweetId) => {
     await Like.create({ UserId, TweetId })
-    return { status: 'success', message: 'Liked successfully"' }
+    return { status: 'success', message: 'Liked successfully' }
   },
   postUnlikeTweet: async (UserId, TweetId) => {
     await Like.destroy({ where: { UserId, TweetId } })
-    return { status: 'success', message: 'Unliked successfully"' }
+    return { status: 'success', message: 'Unliked successfully' }
   },
 
   getTweetAllReplies: async (TweetId) => {
