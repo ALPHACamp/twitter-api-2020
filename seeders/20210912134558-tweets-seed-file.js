@@ -7,7 +7,7 @@ module.exports = {
       Array.from({ length: 100 }).map((d, index) =>
         ({
           id: index * 10 + 1,
-          UserId: Math.ceil((index + 1) / 10) * 10 - 9,
+          UserId: Math.ceil((index + 1) / 10) * 10 + 1,
           description: faker.lorem.sentence(5),
           createdAt: new Date(),
           updatedAt: new Date()

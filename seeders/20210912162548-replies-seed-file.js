@@ -1,7 +1,7 @@
 'use strict'
 const faker = require('faker')
 // 每篇 post 有隨機 3 個留言者
-const totalUserId = [1, 11, 21, 31, 41, 51, 61, 71, 81, 91]
+const totalUserId = [11, 21, 31, 41, 51, 61, 71, 81, 91, 101]
 const randomUserId = []
 
 module.exports = {
