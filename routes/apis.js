@@ -5,6 +5,7 @@ const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
+const tweetController = require('../controllers/tweetController')
 
 // 前台 Login
 router.post('/login', userController.logIn)
@@ -27,5 +28,7 @@ router.delete(
   authenticatedAdmin,
   adminController.deleteTweet
 )
+
+router.get('/tweets', tweetController.getTweets)
 
 module.exports = router
