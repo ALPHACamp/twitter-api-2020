@@ -1,5 +1,6 @@
-const { User, Tweet, Reply, Like, Sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
+const followshipController = require('../controllers/followshipController')
 
 const userService = {
   signIn: async (account) => {
@@ -140,6 +141,30 @@ const userService = {
         ]
       ],
       group: ['TweetId'],
+      order: [['createdAt', 'DESC']]
+    })
+  },
+
+  getUserFollowings: async (targetUserId, currentUserId) => {
+    return await User.findAll({
+      include: {
+        model: Followship,
+        where: { followerId: targetUserId }
+      },
+      attributes: [
+        [
+          Sequelize.literal(
+            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+          ),
+          'isFollowed'
+        ],
+        [Sequelize.col('Followship.followingId'), 'followingId'],
+        'name',
+        'avatar',
+        'introduction',
+        'account'
+      ],
+      group: ['id'],
       order: [['createdAt', 'DESC']]
     })
   }
