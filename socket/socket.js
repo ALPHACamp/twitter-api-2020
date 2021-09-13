@@ -11,7 +11,8 @@ module.exports = (server) => {
       origin: [
         'http://localhost:8080',
         'http://localhost:8081',
-        'https://ryanhsun.github.io'
+        'https://ryanhsun.github.io',
+        'https://alphacamp-zhih.github.io'
       ],
       credentials: true
     },
