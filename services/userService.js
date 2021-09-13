@@ -108,19 +108,18 @@ const userService = {
   },
 
   getUserLikedTweets: async (targetUserId, currentUserId) => {
-    return await Like.findAll({
+    return await Tweet.findAll({
       raw: true,
       nest: true,
-      where: { UserId: targetUserId },
       include: [
-        { model: Tweet, attributes: [] },
+        { model: Like, attributes: [], where: { UserId: targetUserId } },
         { model: Reply, attributes: [] },
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
       attributes: [
-        [Sequelize.col('Tweet.id'), 'TweetId'],
+        ['id', 'TweetId'],
         'createdAt',
-        [Sequelize.col('Tweet.description'), 'description'],
+        'description',
         [
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
