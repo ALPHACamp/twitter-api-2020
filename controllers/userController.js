@@ -129,28 +129,29 @@ const userController = {
     try {
       const id = req.params.user_id
       const loginUserId = helpers.getUser(req).id
-      const user = await User.findByPk(id, {
+      let user = await User.findByPk(id, {
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
-        ],
-        attributes: [
-          'id',
-          'name',
-          'account',
-          'avatar',
-          'role',
-          'cover',
-          'followerCount',
-          'followingCount',
-          'tweetCount',
         ],
       })
       // 是否已追蹤此 user
       const isFollowed = await user.Followers.map((d) => d.id).includes(
         loginUserId
       )
-      return res.status(200).json({ user, isFollowed })
+      user = {
+        id: user.id,
+        account: user.account,
+        name: user.name,
+        avatar: user.avatar,
+        cover: user.cover,
+        role: user.role,
+        followerCount: user.followerCount,
+        followingCount: user.followingCount,
+        tweetCount: user.tweetCount,
+        isFollowed,
+      }
+      return res.status(200).json(user)
     } catch (err) {
       next(err)
     }
@@ -211,16 +212,24 @@ const userController = {
   // 取得使用者追蹤的 user 名單
   getFollowingUsers: async (req, res, next) => {
     try {
-      const followingUsers = await User.findByPk(req.params.id, {
+      let followingUsers = await User.findByPk(req.params.id, {
         include: [
           {
             model: User,
             as: 'Followings',
-            attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+            attributes: [
+              ['id', 'followingId'],
+              'name',
+              'account',
+              'avatar',
+              'cover',
+            ],
           },
         ],
         attributes: ['id', 'name', 'account', 'avatar', 'cover'],
       })
+      // 取出正在追蹤的人
+      followingUsers = followingUsers.Followings
       return res.status(200).json(followingUsers)
     } catch (err) {
       next(err)
@@ -229,16 +238,24 @@ const userController = {
   // 取得追蹤使用者的 user 名單
   getFollowerUsers: async (req, res, next) => {
     try {
-      const followerUsers = await User.findByPk(req.params.id, {
+      let followerUsers = await User.findByPk(req.params.id, {
         include: [
           {
             model: User,
             as: 'Followers',
-            attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+            attributes: [
+              ['id', 'followerId'],
+              'name',
+              'account',
+              'avatar',
+              'cover',
+            ],
           },
         ],
         attributes: ['id', 'name', 'account', 'avatar', 'cover'],
       })
+      // 取出被哪些人追蹤
+      followerUsers = followerUsers.Followers
       return res.status(200).json(followerUsers)
     } catch (err) {
       next(err)
