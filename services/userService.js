@@ -1,8 +1,8 @@
 const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
+const { User, Tweet, Reply, Like } = db
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
 const userService = {
   signUp: async (req, res, cb) => {
@@ -91,6 +91,32 @@ const userService = {
         status: '200',
         ...user,
       })
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
+  },
+
+  getUserTweets: async (req, res, cb) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        group: `Tweet.id`,
+        attributes: ['id', 'description', 'createdAt', 'updatedAt',
+          [sequelize.fn('COUNT', sequelize.col('replies.id')), 'totalReplies'],
+          [sequelize.fn('COUNT', sequelize.col('likes.id')), 'totalLikes']
+        ],
+        include: [{
+          model: Reply,
+          attributes: []
+        },
+        {
+          model: Like,
+          attributes: [],
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+      return cb(tweets)
     } catch (err) {
       console.warn(err)
       return cb({ status: '500', message: err })
