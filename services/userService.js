@@ -174,6 +174,37 @@ const userService = {
       group: ['User.id'],
       order: [['createdAt', 'DESC']]
     })
+  },
+
+  getUserFollowers: async (targetUserId, currentUserId) => {
+    return await User.findAll({
+      raw: true,
+      nest: true,
+      include: {
+        model: User,
+        as: 'Followings',
+        where: { id: targetUserId },
+        attributes: [],
+        through: {
+          attributes: []
+        }
+      },
+      attributes: [
+        [
+          Sequelize.literal(
+            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+          ),
+          'isFollowed'
+        ],
+        ['id', 'followerId'],
+        'name',
+        'avatar',
+        'introduction',
+        'account'
+      ],
+      group: ['User.id'],
+      order: [['createdAt', 'DESC']]
+    })
   }
 }
 
