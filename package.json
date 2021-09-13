@@ -36,5 +36,14 @@
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",
     "supertest": "^3.3.0"
+  },
+  "standard": {
+    "ignore": [
+      "/seeders",
+      "/models",
+      "/migrations",
+      "/test",
+      "_helpers.js"
+    ]
   }
 }

@@ -6,6 +6,7 @@ const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 const tweetController = require('../controllers/tweetController')
+const replyController = require('../controllers/replyController')
 
 // 前台 Login
 router.post('/login', userController.logIn)
@@ -39,6 +40,9 @@ router.delete(
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.postTweet)
+
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+
 // 前台：取得登入中使用者
 router.get('/current_user', authenticated, userController.getCurrentUser)
 // 前台：取得特定使用者資料
