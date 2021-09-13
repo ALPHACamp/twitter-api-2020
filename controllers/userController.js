@@ -2,6 +2,7 @@ const db = require('../models')
 const User = db.User
 
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers.js')
 
 // 引入驗證欄位
 const { registerCheck } = require('../middleware/validator.js')
@@ -86,11 +87,64 @@ const userController = {
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         role: 'user',
         avatar: 'https://i.ibb.co/y6FYGKT/user-256.jpg',
-        cover: 'https://i.ibb.co/Y0VVPVY/hex-999999.jpg'
+        cover: 'https://i.ibb.co/Y0VVPVY/hex-999999.jpg',
       })
       return res
         .status(200)
         .json({ status: 'success', message: 'Registration success.' })
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得登入中使用者
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const id = helpers.getUser(req).id
+      const currentUser = await User.findByPk(id, {
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'role',
+          'cover',
+          'followerCount',
+          'followingCount',
+          'tweetCount',
+        ],
+      })
+      return res.status(200).json(currentUser)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得特定使用者
+  getUser: async (req, res, next) => {
+    try {
+      const id = req.params.user_id
+      const loginUserId = helpers.getUser(req).id
+      const user = await User.findByPk(id, {
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' },
+        ],
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'role',
+          'cover',
+          'followerCount',
+          'followingCount',
+          'tweetCount',
+        ],
+      })
+      // 是否已追蹤此 user
+      const isFollowed = await user.Followers.map((d) => d.id).includes(
+        loginUserId
+      )
+      return res.status(200).json({ user, isFollowed })
     } catch (err) {
       next(err)
     }

@@ -39,5 +39,9 @@ router.delete(
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.postTweet)
+// 前台：取得登入中使用者
+router.get('/current_user', authenticated, userController.getCurrentUser)
+// 前台：取得特定使用者資料
+router.get('/users/:user_id', authenticated, userController.getUser)
 
 module.exports = router
