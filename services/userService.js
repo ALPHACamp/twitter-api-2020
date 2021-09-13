@@ -147,11 +147,16 @@ const userService = {
 
   getUserFollowings: async (targetUserId, currentUserId) => {
     return await User.findAll({
+      raw: true,
+      nest: true,
       include: {
         model: User,
         as: 'Followers',
         where: { id: targetUserId },
-        attributes: []
+        attributes: [],
+        through: {
+          attributes: []
+        }
       },
       attributes: [
         [
@@ -166,7 +171,7 @@ const userService = {
         'introduction',
         'account'
       ],
-      group: ['id'],
+      group: ['User.id'],
       order: [['createdAt', 'DESC']]
     })
   }

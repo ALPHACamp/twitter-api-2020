@@ -178,7 +178,7 @@ const userController = {
       helpers.getUser(req).id
     ]
 
-    const users = await userService.getUserFollowings(
+    let users = await userService.getUserFollowings(
       targetUserId,
       currentUserId
     )
@@ -189,6 +189,11 @@ const userController = {
         .status(401)
         .json({ status: 'error', message: 'No users found' })
     }
+
+    // translate to boolean in isFollowed attribute
+    users.forEach(user => {
+      user.isFollowed = user.isFollowed ? true : false
+    })
 
     return res.status(200).json(users)
   }
