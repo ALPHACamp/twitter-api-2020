@@ -14,6 +14,7 @@ const userController = {
         message: "Required fields didn't exist"
       })
     }
+
     // Check whether the user exists by email
     const user = await userService.signIn(account)
 
@@ -68,6 +69,14 @@ const userController = {
       return res.status(401).json({
         status: 'error',
         message: "Required fields didn't exist"
+      })
+    }
+
+    // Check name characters
+    if (!name.trim().length > 50) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'The name should not exceed 50 words'
       })
     }
 
