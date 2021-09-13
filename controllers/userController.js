@@ -219,81 +219,69 @@ const userController = {
   },
 
   putUser: async (req, res) => {
-    const { account, name, email, password, checkPassword, cover, avatar, introduction } = req.body
-    
-    // update account info
-    if (account && name && email && password && checkPassword) {
-      // Check name characters
-      if (name.trim().length > 50) {
-        return res.status(400).json({
+    const {
+      account,
+      name,
+      email,
+      password,
+      checkPassword,
+      cover,
+      avatar,
+      introduction
+    } = req.body
+
+    // Check if user is current user
+    if (helpers.getUser(req).id !== req.params.id) {
+      return res
+        .status(403)
+        .json({
           status: 'error',
-          message: 'The name should not exceed 50 words'
+          message: "Should not edit other user's data"
         })
-      }
+    }
 
-      // Check account format
-      const regex = new RegExp(/^\w+$/)
-      if (!account.match(regex)) {
-        return res.status(400).json({
-          status: 'error',
-          message:
-            'The account should only include number, letter and underline'
-        })
-      }
+    const errors = []
 
-      // Check if password equal to checkPassword
-      if (password !== checkPassword) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Password value is not equal to checkPassword'
-        })
-      }
+    // Check name characters
+    if (name && name.trim().length > 50) {
+      errors.push('The name should not exceed 50 words')
+    }
 
-      const user = await userService.putUser(req.body)
+    // Check account format
+    const regex = new RegExp(/^\w+$/)
+    if (account && !account.match(regex)) {
+      errors.push(
+        'The account should only include number, letter and underline'
+      )
+    }
 
-      return res.status(200).json({
-        status: 'success',
-        message: 'Account info has updated',
-        account: user.account,
-        name: user.name,
-        email: user.email
+    // Check if password equal to checkPassword
+    if (checkPassword && password !== checkPassword) {
+      errors.push('Password value is not equal to checkPassword')
+    }
+
+    // Check introduction characters
+    if (introduction && introduction.trim().length > 160) {
+      errors.push('The introduction should not exceed 160 words')
+    }
+
+    if (errors[0]) {
+      return res.status(400).json({
+        status: 'error',
+        message: errors
       })
     }
 
-    // Update person info
-    if (name && avatar && introduction && cover) {
-      // Check name characters
-      if (name.trim().length > 50) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'The name should not exceed 50 words'
-        })
-      }
+    const user = await userService.putUser(req.body)
 
-      // Check introduction characters
-      if (introduction.trim().length > 160) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'The introduction should not exceed 160 words'
-        })
-      }
+    console.log(user)
 
-      const user = await userService.putUser(req.body)
-
-      return res.status(200).json({
-        status: 'success',
-        message: 'Person info has updated',
-        avatar: user.avatar,
-        name: user.name,
-        cover: user.cover,
-        introduction: user.introduction
-      })
+    const responseData = {
+      status: 'success',
+      message: 'Account info has updated'
     }
 
-    return res.status(400).json({
-      status: 'error',
-      message: "Required fields didn't exist"
-    })
+    return res.status(200).json(responseData)
   }
 }
 
