@@ -139,7 +139,7 @@ const userController = {
   },
 
   getUserRepliedTweets: async (req, res) => {
-    const tweets = await userService.getUserRepliedTweets(req.user.id)
+    const tweets = await userService.getUserRepliedTweets(req.params.id)
 
     // Check whether the tweets exist
     if (!tweets) {
