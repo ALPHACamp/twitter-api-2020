@@ -66,15 +66,19 @@ const adminController = {
   },
   // 後台：刪除單一 tweet
   deleteTweet: async (req, res, next) => {
-    try{
+    try {
       const tweet = await Tweet.findByPk(req.params.id)
       tweet.destroy()
-      return res.status(200).json({status: 'success', message: `Tweet id: ${tweet.id} is deleted. `})
-    }
-    catch (err) {
+      return res
+        .status(200)
+        .json({
+          status: 'success',
+          message: `Tweet id: ${tweet.id} is deleted. `,
+        })
+    } catch (err) {
       next(err)
     }
-  }
+  },
 }
 
 module.exports = adminController
