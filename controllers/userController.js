@@ -16,7 +16,7 @@ const userController = {
     }
 
     // Check whether the user exists by email
-    const user = await userService.signIn(account)
+    const user = await userService.signIn(account, 'user')
 
     if (!user) {
       return res
