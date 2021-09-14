@@ -3,7 +3,6 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
-const Followship = db.Followship
 
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers.js')
@@ -257,6 +256,38 @@ const userController = {
       // 取出被哪些人追蹤
       followerUsers = followerUsers.Followers
       return res.status(200).json(followerUsers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得追蹤人數最多的前十名使用者
+  getTopUsers: async (req, res, next) => {
+    try {
+      const loginId = await helpers.getUser(req).id
+      const topUsers = await User.findAll({
+        order: [['followerCount', 'DESC']],
+        limit: 10,
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          'followerCount',
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${loginId} AND followingId = User.id )`
+            ),
+            'isFollowed',
+          ],
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Users WHERE User.id = ${loginId})`
+            ),'isCurrentUser'
+          ],
+        ],
+      })
+      return res.status(200).json(topUsers)
     } catch (err) {
       next(err)
     }
