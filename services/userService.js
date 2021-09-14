@@ -3,8 +3,8 @@ const bcrypt = require('bcryptjs')
 const followshipController = require('../controllers/followshipController')
 
 const userService = {
-  signIn: async (account, role) => {
-    return await User.findOne({ where: { account, role } })
+  signIn: async (account) => {
+    return await User.findOne({ where: { account, role: 'user' } })
   },
 
   getCurrentUser: async (id) => {
@@ -209,7 +209,7 @@ const userService = {
 
   putUser: async (id, body) => {
     const user = await User.findByPk(id)
-    return await user.update(body)  
+    return await user.update(body)
   }
 }
 
