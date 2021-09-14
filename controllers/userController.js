@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
-const { User, Tweet, Like, Sequelize } = require('../models')
+const { User, Tweet, Like, Sequelize, Reply } = require('../models')
 
 let userController = {
   userLogin: (req, res) => {
@@ -64,19 +64,31 @@ let userController = {
       .catch(err => {console.log(err)})
   },
   getUser: (req, res) => {
-    //TODO: 不確定需要甚麼資料
-    User.findByPk(req.params.id,{
+    Promise.all([
+      User.findByPk(req.params.id,{
       attributes: [
-        'id', 'name', 'avatar', 'introduction', 'account', 'cover'
+        'id', 'name', 'avatar', 'introduction', 'account', 'cover', 'role',
+        [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount'],
+        [Sequelize.literal('COUNT(DISTINCT Followers.id)'), 'followersCount'],
+        [Sequelize.literal('COUNT(DISTINCT Followings.id)'), 'followingsCount'] 
       ],
       include: [
-        Tweet,
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
-        { model: Like }
+        { model: Tweet, attributes: []},
+        { model: User, as: 'Followers' , attributes: []},
+        { model: User, as: 'Followings' , attributes: []},
+        { model: Like , attributes: []},
+      ]
+    }),
+    Tweet.findAll({
+      where: {UserId : req.params.id},
+      include: [
+        { model: Reply },
+        { model: Like },
+        { model: User ,attributes: ['id', 'name', 'avatar', 'account', 'role']},
       ]
     })
-    .then(user => {
+    ])  
+    .then(([user, tweets]) => {
       //不可看到admin資料 或是空用戶
       if(user.role === 'admin' || !user){
         return res.status(403).json({
@@ -84,7 +96,15 @@ let userController = {
           'message': '此用戶不存在'
         })
       }
-      return res.status(200).json(user)
+      let tweetSet = tweets.map(tweet =>({
+          'id': tweet.id,
+          'description': tweet.description,
+          'updatedAt': tweet.updatedAt,
+          'replyCount': tweet.Replies.length,
+          'likeCount': tweet.Likes.length,
+          'user': tweet.User
+      }))
+      return res.status(200).json({user,tweetSet})
     })
     .catch(err => {console.log(err)})
 
