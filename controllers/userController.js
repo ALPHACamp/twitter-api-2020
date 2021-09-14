@@ -132,7 +132,7 @@ const userController = {
     if (!tweets) {
       return res
         .status(200)
-        .json({ status: 'error', message: 'No tweets found' })
+        .json({ status: 'success', message: 'No tweets found' })
     }
 
     return res.status(200).json(tweets)
@@ -145,7 +145,7 @@ const userController = {
     if (!tweets) {
       return res
         .status(200)
-        .json({ status: 'error', message: 'No tweets found' })
+        .json({ status: 'success', message: 'No tweets found' })
     }
 
     return res.status(200).json(tweets)
@@ -166,7 +166,7 @@ const userController = {
     if (!tweets) {
       return res
         .status(200)
-        .json({ status: 'error', message: 'No tweets found' })
+        .json({ status: 'success', message: 'No tweets found' })
     }
 
     return res.status(200).json(tweets)
@@ -184,7 +184,7 @@ const userController = {
     if (!users) {
       return res
         .status(200)
-        .json({ status: 'error', message: 'No users found' })
+        .json({ status: 'success', message: 'No users found' })
     }
 
     // translate to boolean in isFollowed attribute
@@ -207,7 +207,7 @@ const userController = {
     if (!users) {
       return res
         .status(200)
-        .json({ status: 'error', message: 'No users found' })
+        .json({ status: 'success', message: 'No users found' })
     }
 
     // translate to boolean in isFollowed attribute
@@ -234,12 +234,10 @@ const userController = {
 
     // Check if the user is current user
     if (helpers.getUser(req).id !== Number(req.params.id)) {
-      return res
-        .status(403)
-        .json({
-          status: 'error',
-          message: "Should not edit the other user's profile"
-        })
+      return res.status(403).json({
+        status: 'error',
+        message: "Should not edit the other user's profile"
+      })
     }
 
     // Check name characters
