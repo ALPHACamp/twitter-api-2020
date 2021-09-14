@@ -3,10 +3,10 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('followships',
-      Array.from({ length: 12 }).map((item, index) =>
+      Array.from({ length: 20 }).map((item, index) =>
       ({
-        followerId: (index + 2) % 6 === 1 ? 2: (index + 2) % 6,
-        followingId: (index + 2) % 7 === 1 ? 3 : (index + 2) % 7,
+        followerId: Math.floor(Math.random() * 6),
+        followingId: Math.floor(Math.random() * 7),
         createdAt: new Date(),
         updatedAt: new Date(),
       })

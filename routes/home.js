@@ -1,5 +1,7 @@
+// 整個路由結構改寫 此檔案暫時不用 但保留
+
 // const router = require('express').Router()
-const homeController = require('../controllers/homeController')
+// const homeController = require('../controllers/homeController')
 
 // module.exports = (app, passport) => {
 //   app.get('/signup', homeController.signUp)
@@ -14,16 +16,16 @@ const homeController = require('../controllers/homeController')
   
 //   app.post('/users', homeController.postSignUp)
 // }
-router.get('/signup', homeController.signUp)
+// router.get('/signup', homeController.signUp)
 
-router.get('/signin', homeController.signIn)
+// router.get('/signin', homeController.signIn)
 
-router.get('/signin/admin', homeController.signInAdmin)
+// router.get('/signin/admin', homeController.signInAdmin)
 
-router.get('/logout', homeController.logout)
+// router.get('/logout', homeController.logout)
 
-router.post('/signin', homeController.postSignIn)
+// router.post('/signin', homeController.postSignIn)
 
-router.post('/users', homeController.postSignUp)
+// router.post('/users', homeController.postSignUp)
 
-module.exports = router
+// module.exports = router

@@ -13,8 +13,10 @@ const popularQty = 10 //暫時沒有用到
 const userController = {
   userHomePage: async (req, res) => {
     const userData = req.user
+    const userId = req.user.id
+    const requestId = Number(req.params.id)
     try {
-      const id = (req.user.id === req.params.id)? req.user.id: req.params.id
+      const id = (userId === requestId) ? userId : requestId
       // 取出使用者跟蹤對象的清單
       let followings = await Followship.findAll({
         where: { followerId: { [Op.eq]: id } },
@@ -33,11 +35,15 @@ const userController = {
       followings = followings.map(item => item = item['followingId'])
       followers = followers.map(item => item = item['followingId'])
 
-      // 取出user所有推文
-      const userData = await User.findByPk(id, {
-        include: [{ model: Tweet, as: 'userTweets' }],
+      //取出user所有推文 含按讚 含回覆
+      const userTweets = await Tweet.findAll({
+        where: { UserId: { [Op.eq]: id } },
+        include: [
+          { model: Reply, as: 'replies' },
+          { model: Like, as: 'likes' }
+        ]
       })
-    
+
       // 取出最多人追蹤的使用者 按照追蹤人數排序
       const popular = await sequelize.query('SELECT count(`followerId`) AS`followCount`, `User`.`id` AS`userId`, `User`.`avatar` AS`avatar`, `User`.`account` AS`account`, `User`.`name` AS`name` FROM `Followships` AS `Followship` LEFT OUTER JOIN `Users` AS `User` ON`Followship`.`followingId` = `User`.`id` GROUP BY `followingId` ORDER BY followCount DESC LIMIT 10',
         {
@@ -53,13 +59,13 @@ const userController = {
       })
 
       let isFollowed = false
-      if (!(req.user.id === req.params.id)) {
-        followers.includes(req.user.id) ? isFollowed = true : isFollowed
+      if (!(userId === requestId)) {
+        followers.includes(userId) ? isFollowed = true : isFollowed
       } else {
         isFollowed = 'self'
       }
       
-      return res.json({ userData, popular, isFollowed })
+      return res.json({ userTweets, popular, isFollowed })
     }
     catch (error) {
       console.log(error)
@@ -102,19 +108,23 @@ const userController = {
     const requestId = Number(req.params.id)
     const id = userId === requestId ? userId : requestId
     try {
+      // 取出user like的推文 並且包括推文作者
       const likedTweets = await Like.findAll({
         where: { UserId: { [Op.eq]: id } },
         include: [
-          { model: Tweet, as: 'tweet' },
-          { model: User, as: 'user' },
+          { model: Tweet, as: 'tweet', 
+            include: [{ model: User, as: 'user' }]
+          },
         ]
       })
 
+      // 統計所有推文按讚數
       const likeStatistic = await Like.findAll({
         attributes: ['TweetId', [sequelize.fn('count', sequelize.col('UserId')), 'likeCount']],
         group: ['Like.TweetId']
       })
 
+      // 統計所有推文回覆數
       const replyStatistic = await Reply.findAll({
         attributes: ['TweetId', [sequelize.fn('count', sequelize.col('UserId')), 'replyCount']],
         group: ['Reply.TweetId']
@@ -125,6 +135,32 @@ const userController = {
     catch (error) {
       console.log(error)
     }
+  },
+
+  getFollowings: async (req, res) => {
+    const userId = req.user.id
+    const followings = await User.findByPk(userId, {
+      include: [{ model: User, as: 'Followings' }]
+    })
+
+    const followersId = await Followship.findAll({
+      where: { followingId: { [Op.eq]: userId } },
+    })
+
+    return res.json({ followings, followersId })
+  },
+
+  getFollowers: async (req, res) => {
+    const userId = req.user.id
+    const followers = await User.findByPk(userId, {
+      include: [{ model: User, as: 'Followers' }]
+    })
+
+    const followingsId = await Followship.findAll({
+      where: { followerId: { [Op.eq]: userId } },
+    })
+
+    return res.json({ followers, followingsId })
   }
 }
 

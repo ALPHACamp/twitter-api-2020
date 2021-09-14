@@ -15,17 +15,23 @@ const tweetController = {
       const id = req.user.id
       let userData = { ...req.user.dataValues, password: '', email: '' }
 
-      // 取出所有推文 按照時間排序
-      const tweets = await Tweet.findAll({
-        raw: true,
-        nest: true,
-        order: [[Sequelize.literal('createdAt'), "DESC"]],
-        include: [
-          { model: Reply, as: 'replies'},
-          { model: Like, as: 'likes'},
-          { model: User, as: 'user'},
-        ]
-      })
+      // 取出所有推文 按照時間排序 包含推文作者以及按讚數
+      const tweets = await sequelize.query('SELECT count(`Like`.`UserId`) AS`likeCount`, `Tweet`.`id` AS`tweetId`, `Tweet`.`description` AS`tweetDescription`, `Tweet`.`createdAt` AS`tweetCreate`, `User`.`account` AS `userAccount`, `User`.`name` AS `userName`, `User`.`avatar` AS `userAvatar`  FROM `Tweets` AS `Tweet` LEFT OUTER JOIN `Likes` AS `Like` ON`Like`.`TweetId` = `Tweet`.`id` LEFT OUTER JOIN `Users` AS `User` ON`Tweet`.`UserId` = `User`.`id` GROUP BY `TweetId`',
+        {
+          type: QueryTypes.SELECT,
+          raw: true,
+          nest: true,
+        }
+      )
+
+      // 取出所有推文 按照時間排序 以及回復數
+      const tweetsReply = await sequelize.query('SELECT count(`Reply`.`UserId`) AS`replyCount`, `Tweet`.`id` AS`tweetId` FROM `Tweets` AS `Tweet` LEFT OUTER JOIN `Replies` AS `Reply` ON`Reply`.`TweetId` = `Tweet`.`id` GROUP BY `TweetId`',
+        {
+          type: QueryTypes.SELECT,
+          raw: true,
+          nest: true,
+        }
+      )
 
       // 取出使用者跟蹤對象的清單
       let following = await Followship.findAll({
@@ -51,7 +57,7 @@ const tweetController = {
         return following.includes(element.userId) ? element['isFollowed'] = true : element['isFollowed'] = false
       })
 
-      return res.json({ tweets, popular, userData })
+      return res.json({ tweets, tweetsReply, popular, userData })
     }
     catch (error) {
       console.log(error)

@@ -43,8 +43,6 @@ app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
 
-// Passport middleware
-// require('./config/passport')(passport)
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(cookieParser())

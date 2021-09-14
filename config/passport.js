@@ -1,6 +1,4 @@
-const passportJWT = require('passport-jwt')
 const jwtStrategy = require('passport-jwt').Strategy
-const ExtractJwt = passportJWT.ExtractJwt
 const db = require('../models')
 const User = db.User
 const fs = require('fs')
@@ -49,10 +47,5 @@ passport.deserializeUser((id, done) => {
     })
     .catch(err => done(null, err))
 });
-// pack middleware
-// function passportSet(passport) {
-//   passport.use(jwt)
-
-// }
 
 module.exports = passport
