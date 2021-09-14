@@ -11,7 +11,7 @@ module.exports = {
 
     // 所有欄位不能為空值
     if (!name || !account || !email || !password || !checkPassword) {
-      message.push({ error: 'All column are required.' })
+      message.push({ error: 'All columns are required.' })
     }
     // email 格式需正確
     if (email && !validator.isEmail(email)) {
@@ -47,7 +47,7 @@ module.exports = {
 
     // 所有欄位不能為空值
     if (!name || !account || !email || !password || !checkPassword) {
-      message.push({ error: 'All column are required.' })
+      message.push({ error: 'All columns are required.' })
     }
     // email 格式需正確
     if (email && !validator.isEmail(email)) {
@@ -72,6 +72,27 @@ module.exports = {
     })
     if (emailExist.dataValues.id !== helpers.getUser(req).id) {
       message.push({ error: 'Email is exists.' })
+    }
+    if (message.length > 0) {
+      return message
+    }
+  },
+  updateProfile: async (req) => {
+    // name 欄位無資料
+    const { name, introduction } = req.body
+    const message = []
+    if (!name) {
+      message.push({ error: 'Name is required.' })
+    }
+    if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+      message.push({ error: 'Name length can not over 50 characters' })
+    }
+    if (introduction) {
+      if (!validator.isByteLength(introduction, { min: 0, max: 160 })) {
+        message.push({
+          error: 'Introduction length can not over 160 characters',
+        })
+      }
     }
     if (message.length > 0) {
       return message

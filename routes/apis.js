@@ -2,6 +2,13 @@ const express = require('express')
 const router = express.Router()
 
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
+// 引入 multer 並設定上傳資料夾 
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+const cpUpload = upload.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'cover', maxCount: 1 },
+])
 
 const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
@@ -45,6 +52,7 @@ router.get('/current_user', authenticated, userController.getCurrentUser)
 // 取得追蹤人數最多的前十名使用者
 router.get('/users/top_users', authenticated, userController.getTopUsers)
 router.put('/users/:id/setting', authenticated, userController.putUserSetting)
+router.put('/users/:id/profile', authenticated, cpUpload, userController.putUserProfile)
 // 前台：取得特定使用者資料
 router.get('/users/:user_id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
