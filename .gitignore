@@ -1,6 +1,8 @@
 .DS_Store
 *.DS_Store
 
+# image uploads
+/uploads
 # Logs
 logs
 *.log
