@@ -112,16 +112,14 @@ const userController = {
     if (data['status'] === 'error') {
       return res.status(401).json(data)
     }
+
+    // Delete password attributes in response data
+    delete data.dataValues.password
     
     const responseData = {
       status: 'success', 
       message: 'Registration success',
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      account: data.account,
-      avatar: data.avatar,
-      role: data.role
+      User: data
     }
     return res.status(200).json(responseData)
   },
