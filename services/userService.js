@@ -1,6 +1,6 @@
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
-const followshipController = require('../controllers/followshipController')
+const { Op } = require('sequelize')
 
 const userService = {
   signIn: async (account) => {
@@ -214,8 +214,7 @@ const userService = {
 
   getTopUsers: async (currentUserId) => {
     return await User.findAll({
-      raw: true,
-      nest: true,
+      where: { id: { [Op.not]: currentUserId } },
       include: [
         {
           model: User,
@@ -244,7 +243,7 @@ const userService = {
         ]
       ],
       group: ['id'],
-      order: [['FollowersCount', 'DESC']],
+      order: [[Sequelize.col('FollowersCount'), 'DESC']],
       limit: 10
     })
   }
