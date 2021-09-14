@@ -12,6 +12,9 @@ const userController = {
   },
   getUserTweets: (req, res) => {
     userService.getUserTweets(req, res, data => res.status(200).json(data))
+  },
+  putUser: (req, res) => {
+    userService.putUser(req, res, data => res.status(data.status).json(data))
   }
 }
 
