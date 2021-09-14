@@ -7,6 +7,7 @@ const userController = require('../controllers/userController.js')
 const adminController = require('../controllers/adminController.js')
 const tweetController = require('../controllers/tweetController')
 const replyController = require('../controllers/replyController')
+const likeController = require('../controllers/likeController')
 
 // 前台 Login
 router.post('/login', userController.logIn)
@@ -43,6 +44,8 @@ router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
+
+router.post('/tweets/:tweet_id/like', authenticated, likeController.like)
 
 // 前台：取得登入中使用者
 router.get('/current_user', authenticated, userController.getCurrentUser)
