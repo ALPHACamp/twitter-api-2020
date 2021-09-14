@@ -20,6 +20,7 @@ const authenticatedAdmin = (req, res, next) => {
   }
 };
 
-router.use("/admin", admin);
+router.use('/api/users', users)
+router.use("/api/admin", admin);
 
 module.exports = router;
