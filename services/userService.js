@@ -186,6 +186,35 @@ const userService = {
       console.warn(err)
       return cb({ status: '500', message: err })
     }
+  },
+
+  getUserFollowings: async (req, res, cb) => {
+    // 取得登入使用者的追蹤名單
+    const loginUser = await User.findOne({
+      attributes: ['id'],
+      where: { id: req.user.id },
+      include: {
+        model: User, as: 'Followings', attributes: ['id'], through: { attributes: [] },
+      }
+    })
+    // 取得該特定使用者的追蹤名單
+    let user = await User.findOne({
+      attributes: ['id', 'name'],
+      where: { id: req.params.id },
+      include: { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'], through: { attributes: [] }, }
+    })
+    // 比對id，看登入使用者是否也有在追蹤這些人
+    user = user.toJSON()
+    loginUser.Followings.map((d, i) => {
+      // 也有追蹤就返回true
+      user.Followings[i].isFollowings = user.Followings.map(u => u.id).includes(d.id)
+    })
+    // 將id改成followingsId
+    user.Followings.forEach(user => {
+      user.followingId = user.id
+      delete user.id
+    })
+    return cb(user.Followings)
   }
 }
 

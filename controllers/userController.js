@@ -15,6 +15,9 @@ const userController = {
   },
   putUser: (req, res) => {
     userService.putUser(req, res, data => res.status(data.status).json(data))
+  },
+  getUserFollowings: (req, res) => {
+    userService.getUserFollowings(req, res, data => res.status(200).json(data))
   }
 }
 
