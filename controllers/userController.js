@@ -113,7 +113,15 @@ const userController = {
       return res.status(401).json(data)
     }
 
-    return res.status(200).json(data)
+    // Delete password attributes in response data
+    delete data.dataValues.password
+    
+    const responseData = {
+      status: 'success', 
+      message: 'Registration success',
+      user: data.dataValues
+    }
+    return res.status(200).json(responseData)
   },
 
   getUser: async (req, res) => {
