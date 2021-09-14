@@ -37,25 +37,25 @@ const adminService = {
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Tweets WHERE Tweets.userId = User.id)'
           ),
-          'tweetsCount'
+          'TweetsCount'
         ],
         [
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Likes WHERE Likes.userId = User.id)'
           ),
-          'likesCount'
+          'LikesCount'
         ],
         [
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
           ),
-          'followersCount'
+          'FollowersCount'
         ],
         [
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
           ),
-          'followingsCount'
+          'FollowingsCount'
         ]
       ]
     })

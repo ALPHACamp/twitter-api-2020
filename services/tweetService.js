@@ -22,13 +22,13 @@ const tweetService = {
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
           ),
-          'likesCount'
+          'LikesCount'
         ],
         [
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
           ),
-          'repliesCount'
+          'RepliesCount'
         ],
         'description',
         'createdAt',
@@ -64,13 +64,13 @@ const tweetService = {
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
           ),
-          'likesCount'
+          'LikesCount'
         ],
         [
           Sequelize.literal(
             '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
           ),
-          'repliesCount'
+          'RepliesCount'
         ],
         'description',
         'createdAt',
