@@ -1,9 +1,10 @@
-const { User, Tweet, Reply, Like, Sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
+const followshipController = require('../controllers/followshipController')
 
 const userService = {
   signIn: async (account) => {
-    return await User.findOne({ where: { account } })
+    return await User.findOne({ where: { account, role: 'user' } })
   },
 
   getCurrentUser: async (id) => {
@@ -96,10 +97,119 @@ const userService = {
           include: [{ model: User, attributes: ['id', 'account'] }]
         }
       ],
-      attributes: ['id', [Sequelize.col('Tweet.id'), 'TweetId'], 'comment', 'createdAt'],
+      attributes: [
+        'id',
+        [Sequelize.col('Tweet.id'), 'TweetId'],
+        'comment',
+        'createdAt'
+      ],
       order: [['createdAt', 'DESC']],
       group: ['id']
     })
+  },
+
+  getUserLikedTweets: async (targetUserId, currentUserId) => {
+    return await Tweet.findAll({
+      raw: true,
+      nest: true,
+      include: [
+        { model: Like, attributes: [], where: { UserId: targetUserId } },
+        { model: Reply, attributes: [] },
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      attributes: [
+        ['id', 'TweetId'],
+        'createdAt',
+        'description',
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+          ),
+          'likesCount'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+          ),
+          'repliesCount'
+        ],
+        [
+          Sequelize.literal(
+            `exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`
+          ),
+          'isLike'
+        ]
+      ],
+      group: ['TweetId'],
+      order: [['createdAt', 'DESC']]
+    })
+  },
+
+  getUserFollowings: async (targetUserId, currentUserId) => {
+    return await User.findAll({
+      raw: true,
+      nest: true,
+      include: {
+        model: User,
+        as: 'Followers',
+        where: { id: targetUserId },
+        attributes: [],
+        through: {
+          attributes: []
+        }
+      },
+      attributes: [
+        [
+          Sequelize.literal(
+            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+          ),
+          'isFollowed'
+        ],
+        ['id', 'followingId'],
+        'name',
+        'avatar',
+        'introduction',
+        'account'
+      ],
+      group: ['User.id'],
+      order: [['createdAt', 'DESC']]
+    })
+  },
+
+  getUserFollowers: async (targetUserId, currentUserId) => {
+    return await User.findAll({
+      raw: true,
+      nest: true,
+      include: {
+        model: User,
+        as: 'Followings',
+        where: { id: targetUserId },
+        attributes: [],
+        through: {
+          attributes: []
+        }
+      },
+      attributes: [
+        [
+          Sequelize.literal(
+            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+          ),
+          'isFollowed'
+        ],
+        ['id', 'followerId'],
+        'name',
+        'avatar',
+        'introduction',
+        'account'
+      ],
+      group: ['User.id'],
+      order: [['createdAt', 'DESC']]
+    })
+  },
+
+  putUser: async (id, body) => {
+    const user = await User.findByPk(id)
+    return await user.update(body)
   }
 }
 
