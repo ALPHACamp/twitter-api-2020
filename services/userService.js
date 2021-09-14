@@ -210,6 +210,43 @@ const userService = {
   putUser: async (id, body) => {
     const user = await User.findByPk(id)
     return await user.update(body)
+  },
+
+  getTopUsers: async (currentUserId) => {
+    return await User.findAll({
+      raw: true,
+      nest: true,
+      include: [
+        {
+          model: User,
+          as: 'Followers',
+          attributes: [],
+          through: { attributes: [] }
+        }
+      ],
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'introduction',
+        [
+          Sequelize.literal(
+            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+          ),
+          'isFollowed'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+          ),
+          'FollowersCount'
+        ]
+      ],
+      group: ['id'],
+      order: [['FollowersCount', 'DESC']],
+      limit: 10
+    })
   }
 }
 
