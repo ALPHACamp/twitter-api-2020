@@ -7,8 +7,8 @@ const tweetController = {
     // Check whether tweets exists
     if (!tweets) {
       return res
-        .status(401)
-        .json({ status: 'error', message: 'No tweets found' })
+        .status(200)
+        .json({ status: 'success', message: 'No tweets found' })
     }
 
     return res.status(200).json(tweets)
@@ -19,8 +19,8 @@ const tweetController = {
     // Check whether tweets exists
     if (!tweet) {
       return res
-        .status(401)
-        .json({ status: 'error', message: 'No tweet found' })
+        .status(200)
+        .json({ status: 'success', message: 'No tweet found' })
     }
 
     return res.status(200).json(tweet)
@@ -30,12 +30,12 @@ const tweetController = {
 
     if (!description.trim().length) {
       return res
-        .status(401)
+        .status(400)
         .json({ status: 'error', message: 'The description cannot be blank' })
     }
 
     if (!description.trim().length > 140) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: 'The description should not exceed 140 words'
       })
@@ -71,12 +71,12 @@ const tweetController = {
 
     if (!comment.trim().length) {
       return res
-        .status(401)
+        .status(400)
         .json({ status: 'error', message: 'The comment cannot be blank' })
     }
 
     if (!comment.trim().length > 140) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: 'error',
         message: 'The comment should not exceed 140 words'
       })
