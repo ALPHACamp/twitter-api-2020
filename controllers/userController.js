@@ -50,6 +50,7 @@ const userController = {
     }
   },
   signIn: async (req, res) => {
+    try {
     const { account, password } = req.body
     // Check required data
     if (!account || !password ) {
@@ -58,30 +59,40 @@ const userController = {
         message: 'Please enter both account and password'
       })
     }
-    User.findOne({ where: { account } })
-      .then(user => {
-        if (!user) {
-          return res.status(401).json({ status: "error", message: "no such user found" });
-        }
-        if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: 'passwords did not match' })
-        }
-        // Give token
-        const payload = { id: user.id };
-        const token = jwt.sign(payload, process.env.JWT_SECRET);
-        return res.status(200).
-        json({
-          status: "success",
-          message: "Successfully login",
-          token,
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          },
-        });
-      })
+    const { status, message, user } = await userService.signIn(account, password)
+    return res.json({
+      status,
+      message,
+      user
+    })
+  } catch (error) {
+    console.log('signIn error', error)
+    res.sendStatus(500)
+  }
+    // User.findOne({ where: { account } })
+    //   .then(user => {
+    //     if (!user) {
+    //       return res.status(401).json({ status: "error", message: "no such user found" });
+    //     }
+    //     if (!bcrypt.compareSync(password, user.password)) {
+    //     return res.status(401).json({ status: 'error', message: 'passwords did not match' })
+    //     }
+    //     // Give token
+    //     const payload = { id: user.id };
+    //     const token = jwt.sign(payload, process.env.JWT_SECRET);
+    //     return res.status(200).
+    //     json({
+    //       status: "success",
+    //       message: "Successfully login",
+    //       token,
+    //       user: {
+    //         id: user.id,
+    //         name: user.name,
+    //         email: user.email,
+    //         role: user.role,
+    //       },
+    //     });
+    //   })
   }
 };
 
