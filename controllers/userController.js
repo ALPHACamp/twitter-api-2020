@@ -15,7 +15,7 @@ const userController = {
       })
     }
 
-    // Check whether the user exists by email
+    // Check whether the user exists by account
     const user = await userService.signIn(account)
 
     if (!user) {
@@ -23,7 +23,16 @@ const userController = {
         .status(401)
         .json({ status: 'error', message: 'No such user found' })
     }
-    // Check if the user password is correct
+
+    // Check user role by baseUrl
+    if (!req.baseUrl.split('/')[2].includes(user.role)) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Permission denied'
+      })
+    }
+
+    // Check whether the user password is correct
     if (!bcrypt.compareSync(password, user.password)) {
       return res
         .status(400)

@@ -4,7 +4,7 @@ const followshipController = require('../controllers/followshipController')
 
 const userService = {
   signIn: async (account) => {
-    return await User.findOne({ where: { account, role: 'user' } })
+    return await User.findOne({ where: { account } })
   },
 
   getCurrentUser: async (id) => {
