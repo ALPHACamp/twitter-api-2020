@@ -112,8 +112,18 @@ const userController = {
     if (data['status'] === 'error') {
       return res.status(401).json(data)
     }
-
-    return res.status(200).json(data)
+    
+    const responseData = {
+      status: 'success', 
+      message: 'Registration success',
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      account: data.account,
+      avatar: data.avatar,
+      role: data.role
+    }
+    return res.status(200).json(responseData)
   },
 
   getUser: async (req, res) => {

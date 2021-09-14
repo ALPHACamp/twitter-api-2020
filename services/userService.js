@@ -34,14 +34,12 @@ const userService = {
     }
 
     // Create user
-    await User.create({
+    return await User.create({
       account,
       name,
       email,
       password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
     })
-
-    return { status: 'success', message: 'Registration success' }
   },
 
   getUser: async (id) => {
