@@ -9,7 +9,10 @@ const helpers = require('../_helpers.js')
 const { sequelize } = require('../models')
 
 // 引入驗證欄位
-const { registerCheck } = require('../middleware/validator.js')
+const {
+  registerCheck,
+  updateSettingCheck,
+} = require('../middleware/validator.js')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -283,11 +286,47 @@ const userController = {
           [
             sequelize.literal(
               `EXISTS (SELECT 1 FROM Users WHERE User.id = ${loginId})`
-            ),'isCurrentUser'
+            ),
+            'isCurrentUser',
           ],
         ],
       })
       return res.status(200).json(topUsers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 修改使用者設定
+  putUserSetting: async (req, res, next) => {
+    try {
+      // 確認只能修改自己的設定
+      const id = Number(req.params.id)
+      const loginId = helpers.getUser(req).id
+      if (id !== loginId) {
+        return res.json({
+          status: 'error',
+          message: 'User can only edit their setting.',
+        })
+      }
+      const { name, account, email, password, checkPassword } = req.body
+      // validation middleware
+      const message = await updateSettingCheck(req)
+      if (message) {
+        return res
+          .status(422)
+          .json({ status: 'error', message, userFilledForm: req.body })
+      }
+      // update user
+      const user = await User.findByPk(req.params.id)
+      await user.update({
+        name,
+        email,
+        account,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+      })
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'Update user successfully.' })
     } catch (err) {
       next(err)
     }
