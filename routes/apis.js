@@ -46,6 +46,7 @@ router.post('/tweets/:tweet_id/replies', authenticated, replyController.postRepl
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 router.post('/tweets/:tweet_id/like', authenticated, likeController.like)
+router.post('/tweets/:tweet_id/unlike', authenticated, likeController.unlike)
 
 // 前台：取得登入中使用者
 router.get('/current_user', authenticated, userController.getCurrentUser)
