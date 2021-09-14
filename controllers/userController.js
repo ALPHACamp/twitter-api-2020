@@ -19,7 +19,7 @@ const userController = {
         return res.json({ status: 'error', message: 'Passwords are not the same'})
       }
     try { 
-      const { status, message } = await userService.signUp( email, account, password ) 
+      const { status, message } = await userService.signUp( account, email, password ) 
       return res.json({status, message})
     // const duplicate_email = await User.findOne({ where: { email } });
     // if (duplicate_email) {
