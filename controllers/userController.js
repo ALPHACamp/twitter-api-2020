@@ -280,7 +280,7 @@ const userController = {
     }
 
     const user = await userService.putUser(req.params.id, req.body)
-
+    delete user.dataValues.password
     const responseData = {
       status: 'success',
       message: 'Account info has updated',
