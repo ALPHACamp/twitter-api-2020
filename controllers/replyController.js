@@ -11,6 +11,8 @@ const replyController = {
       TweetId: req.params.tweet_id,
       comment: req.body.comment
     })
+    const tweet = await Tweet.findByPk(req.params.tweet_id)
+    tweet.increment(['replyCount'], { by: 1 })
     const data = { status: 'success', message: 'a new comment was successfully replied' }
     return res.json(data)
   },
