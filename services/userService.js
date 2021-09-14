@@ -1,6 +1,6 @@
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
-const followshipController = require('../controllers/followshipController')
+const { Op } = require('sequelize')
 
 const userService = {
   signIn: async (account) => {
@@ -210,6 +210,42 @@ const userService = {
   putUser: async (id, body) => {
     const user = await User.findByPk(id)
     return await user.update(body)
+  },
+
+  getTopUsers: async (currentUserId) => {
+    return await User.findAll({
+      where: { id: { [Op.not]: currentUserId } },
+      include: [
+        {
+          model: User,
+          as: 'Followers',
+          attributes: [],
+          through: { attributes: [] }
+        }
+      ],
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'introduction',
+        [
+          Sequelize.literal(
+            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+          ),
+          'isFollowed'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+          ),
+          'FollowersCount'
+        ]
+      ],
+      group: ['id'],
+      order: [[Sequelize.col('FollowersCount'), 'DESC']],
+      limit: 10
+    })
   }
 }
 
