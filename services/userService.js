@@ -206,12 +206,8 @@ const userService = {
       })
       // 比對id，看登入使用者是否也有在追蹤這些人
       user = user.toJSON()
-      loginUser.Followings.map((d, i) => {
-        // 也有追蹤就返回true
-        user.Followings[i].isFollowings = user.Followings.map(u => u.id).includes(d.id)
-      })
-      // 將id改成followingsId
       user.Followings.forEach(user => {
+        user.isFollowings = loginUser.Followings.map(u => (u.id)).includes(user.id)
         user.followingId = user.id
         delete user.id
       })
@@ -221,6 +217,38 @@ const userService = {
       return cb(err)
     }
   },
+
+  getUserFollowers: async (req, res, cb) => {
+    try {
+      const loginUser = await User.findOne({
+        attributes: [],
+        where: { id: req.user.id },
+        include: {
+          model: User, as: 'Followings',
+          attributes: ['id'], through: { attributes: [] }
+        }
+      })
+      let user = await User.findOne({
+        attributes: [],
+        where: { id: req.params.id },
+        include: [{
+          model: User, as: 'Followers',
+          attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+          through: { attributes: [] }
+        }]
+      })
+      user = user.toJSON()
+      user.Followers.map(user => {
+        user.isFollowings = loginUser.Followings.map(u => (u.id)).includes(user.id)
+        user.followerId = user.id
+        delete user.id
+      })
+      return cb(user.Followers)
+    } catch (err) {
+      console.warn(err)
+      return cb(err)
+    }
+  }
 }
 
 module.exports = userService

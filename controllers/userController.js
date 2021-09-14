@@ -18,6 +18,9 @@ const userController = {
   },
   getUserFollowings: (req, res) => {
     userService.getUserFollowings(req, res, data => res.status(200).json(data))
+  },
+  getUserFollowers: (req, res) => {
+    userService.getUserFollowers(req, res, data => res.status(200).json(data))
   }
 }
 
