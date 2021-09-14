@@ -50,7 +50,7 @@ const tweetController = {
         description: req.body.description
       })
       const user = await User.findByPk(helpers.getUser(req).id)
-      user.increment(['tweetCount'], { by: 1 })
+      await user.increment(['tweetCount'], { by: 1 })
       const data = { status: 'success', message: 'a new tweet was successfully posted' }
       return res.json(data)
     } catch (err) {

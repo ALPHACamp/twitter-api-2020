@@ -11,7 +11,7 @@ const likeController = {
         TweetId: req.params.tweet_id
       })
       const tweet = await Tweet.findByPk(req.params.tweet_id)
-      tweet.increment(['likeCount'], { by: 1 })
+      await tweet.increment(['likeCount'], { by: 1 })
       const data = { status: 'success', message: 'the tweet was successfully liked' }
       return res.json(data)
     } catch (err) {
