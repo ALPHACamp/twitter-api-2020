@@ -64,8 +64,7 @@ let userController = {
       .catch(err => {console.log(err)})
   },
   getUser: (req, res) => {
-    Promise.all([
-      User.findByPk(req.params.id,{
+    User.findByPk(req.params.id,{
       attributes: [
         'id', 'name', 'avatar', 'introduction', 'account', 'cover', 'role',
         [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount'],
@@ -73,18 +72,37 @@ let userController = {
         [Sequelize.literal('COUNT(DISTINCT Followings.id)'), 'followingsCount'] 
       ],
       include: [
-        { model: Tweet, attributes: []},
+        Tweet,
         { model: User, as: 'Followers' , attributes: []},
         { model: User, as: 'Followings' , attributes: []},
         { model: Like , attributes: []},
       ]
+    })
+    .then((user) => {
+      //不可看到admin資料 或是空用戶
+      if(user.role === 'admin' || !user){
+        return res.status(403).json({
+          'status': 'error',
+          'message': '此用戶不存在'
+        })
+      }
+      return res.status(200).json(user)
+    })
+    .catch(err => {console.log(err)})
+  },
+  getUserTweets: (req, res) => {
+    Promise.all([
+      User.findByPk(req.params.id,{
+      attributes: [
+        'role',
+      ]
     }),
     Tweet.findAll({
-      where: {UserId : req.params.id},
+      where: { UserId : req.params.id },
       include: [
         { model: Reply },
         { model: Like },
-        { model: User ,attributes: ['id', 'name', 'avatar', 'account', 'role']},
+        { model: User , attributes: ['id', 'name', 'avatar', 'account']},
       ]
     })
     ])  
@@ -104,11 +122,11 @@ let userController = {
           'likeCount': tweet.Likes.length,
           'user': tweet.User
       }))
-      return res.status(200).json({user,tweetSet})
+      return res.status(200).json(tweetSet)
     })
-    .catch(err => {console.log(err)})
-
+    .catch(err => {console.log(err)})    
   }
+
 }
 
 module.exports = userController
