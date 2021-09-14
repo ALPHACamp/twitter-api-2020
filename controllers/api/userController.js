@@ -49,6 +49,12 @@ const userController = {
     req.logout()
     res.redirect('/signin')
   },
+  editUser: (req, res) => {
+    User.findByPk(Number(req.params.id))
+    .then(user => {
+      return res.json({ user })
+    })
+  }
 }
 
 module.exports = userController
