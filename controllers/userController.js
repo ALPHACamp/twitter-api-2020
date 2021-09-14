@@ -59,10 +59,11 @@ const userController = {
         message: 'Please enter both account and password'
       })
     }
-    const { status, message, user } = await userService.signIn(account, password)
+    const { status, message, token, user } = await userService.signIn(account, password)
     return res.json({
       status,
       message,
+      token,
       user
     })
   } catch (error) {

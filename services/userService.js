@@ -37,10 +37,11 @@ const userService = {
     // Give token
     const payload = { id: user.id };
     const token = jwt.sign(payload, process.env.JWT_SECRET);
+
     return {
       status: "success",
       message: "Successfully login",
-      token,
+      token: token,
       user: {
         id: user.id,
         name: user.name,
