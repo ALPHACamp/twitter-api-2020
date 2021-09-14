@@ -302,7 +302,7 @@ const userController = {
 
     // translate to boolean in isFollowed attribute
     users.forEach((user) => {
-      user.isFollowed = user.isFollowed ? true : false
+      user.dataValues.isFollowed = user.dataValues.isFollowed ? true : false
     })
 
     return res.status(200).json(users)
