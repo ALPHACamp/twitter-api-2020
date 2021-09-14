@@ -131,7 +131,7 @@ const userController = {
     // Check whether the tweets exist
     if (!tweets) {
       return res
-        .status(401)
+        .status(200)
         .json({ status: 'error', message: 'No tweets found' })
     }
 
@@ -144,7 +144,7 @@ const userController = {
     // Check whether the tweets exist
     if (!tweets) {
       return res
-        .status(401)
+        .status(200)
         .json({ status: 'error', message: 'No tweets found' })
     }
 
