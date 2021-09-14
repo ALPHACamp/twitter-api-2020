@@ -50,6 +50,7 @@ router.post('/tweets/:tweet_id/like', authenticated, likeController.like)
 router.post('/tweets/:tweet_id/unlike', authenticated, likeController.unlike)
 
 router.post('/followships', authenticated, followshipController.addFollowing)
+router.delete('/followships/:followingId', authenticated, followshipController.removeFollowing)
 
 // 前台：取得登入中使用者
 router.get('/current_user', authenticated, userController.getCurrentUser)

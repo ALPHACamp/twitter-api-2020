@@ -20,6 +20,26 @@ const followshipController = {
       const data = { status: 'error', message: err }
       return res.json(data)
     }
+  },
+  removeFollowing: async (req, res) => {
+    try {
+      const followship = await Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: req.params.followingId
+        }
+      })
+      followship.destroy()
+      const follower = await User.findByPk(helpers.getUser(req).id)
+      await follower.decrement(['followingCount'], { by: 1 })
+      const following = await User.findByPk(req.params.followingId)
+      await following.decrement(['followerCount'], { by: 1 })
+      const data = { status: 'success', message: 'the user was successfully unfollowed' }
+      return res.json(data)
+    } catch (err) {
+      const data = { status: 'error', message: err }
+      return res.json(data)
+    }
   }
 }
 
