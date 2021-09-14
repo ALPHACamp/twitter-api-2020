@@ -15,40 +15,29 @@ const userController = {
     if ( !account || !email || !password || !passwordCheck) {
       return res.json({ status: 'error', message: 'All fields are required'})
     }
-    if (req.body.passwordCheck !== req.body.password) {
+    if (passwordCheck !== password) {
       return res.json({ status: 'error', message: 'Passwords are not the same'})
-    } else {
-      User.findOne({where: { email  }})
-        .then( user => {
-          if ( !user ) {
-            User.findOne({ where: { account }})
-              .then(user => {
-                if (!user) {
-                  User.create({
-                    account,
-                    email,
-                    password: bcrypt.hashSync(
-                      password,
-                      bcrypt.genSaltSync(10),
-                      null
-                    ),
-                  }).then(() => {
-                    return res.json({
-                      status: "success",
-                      message: "Successfully registered",
-                    });
-                  });
-                } else {
-                  return res.json({
-                    status: "error",
-                    message: "This account name has been registered",
-                  });
-                }
-              })
-          } else {
-            return res.json({ status: 'error', message: 'This email has been registered'})
-          }
+    }
+    const duplicate_email = await User.findOne({ where: { email }})
+    if (duplicate_email) {
+      return res.status(422).json({ status: 'error', message: 'This email has been registered'})
+    }
+    const duplicate_account = await User.findOne({ where: { account }})
+    if (duplicate_account) {
+      return res.status(422).json({ status: "error", message: "This account name has been registered" });
+    }
+    
+    try {
+      const user = await User.create({
+        account,
+        email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
       })
+      return res.status(200).json({
+        status: 'success', message: 'Successfully sign up'
+      })
+    } catch {
+      return next()
     }
   },
   signIn: async (req, res) => {
@@ -71,7 +60,8 @@ const userController = {
         // Give token
         const payload = { id: user.id };
         const token = jwt.sign(payload, process.env.JWT_SECRET);
-        return res.json({
+        return res.status(200).
+        json({
           status: "success",
           message: "Successfully login",
           token,
@@ -83,8 +73,6 @@ const userController = {
           },
         });
       })
-
-
   }
 };
  
