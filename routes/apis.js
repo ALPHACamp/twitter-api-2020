@@ -52,7 +52,7 @@ router.get('/current_user', authenticated, userController.getCurrentUser)
 // 取得追蹤人數最多的前十名使用者
 router.get('/users/top_users', authenticated, userController.getTopUsers)
 router.put('/users/:id/setting', authenticated, userController.putUserSetting)
-router.put('/users/:id/profile', authenticated, cpUpload, userController.putUserProfile)
+router.put('/users/:id', authenticated, cpUpload, userController.putUserProfile)
 // 前台：取得特定使用者資料
 router.get('/users/:user_id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getTweets)

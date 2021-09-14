@@ -388,7 +388,7 @@ const userController = {
         }
       } else {
         const user = await User.findByPk(loginId)
-        user.update({
+        await user.update({
           name,
           introduction,
           avatar: user.avatar,
