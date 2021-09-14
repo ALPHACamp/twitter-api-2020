@@ -31,6 +31,9 @@ const userService = {
     if (!bcrypt.compareSync(password, user.password)) {
       return { status: "error", message: "passwords did not match" };
     }
+    if (user.role === "admin") {
+      return { status: 'error', message: 'This account does not have permission to access'}
+    }
     // Give token
     const payload = { id: user.id };
     const token = jwt.sign(payload, process.env.JWT_SECRET);
