@@ -3,14 +3,17 @@ const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
-const Followship = db.Followship
 
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers.js')
 const { sequelize } = require('../models')
 
 // 引入驗證欄位
-const { registerCheck } = require('../middleware/validator.js')
+const {
+  registerCheck,
+  updateSettingCheck,
+  updateProfile,
+} = require('../middleware/validator.js')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -18,6 +21,10 @@ const passportJWT = require('passport-jwt')
 const { replace } = require('sinon')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
+
+// 引入 imgur
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
   // 前台登入
@@ -257,6 +264,140 @@ const userController = {
       // 取出被哪些人追蹤
       followerUsers = followerUsers.Followers
       return res.status(200).json(followerUsers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 取得追蹤人數最多的前十名使用者
+  getTopUsers: async (req, res, next) => {
+    try {
+      const loginId = await helpers.getUser(req).id
+      const topUsers = await User.findAll({
+        order: [['followerCount', 'DESC']],
+        limit: 10,
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          'followerCount',
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${loginId} AND followingId = User.id )`
+            ),
+            'isFollowed',
+          ],
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Users WHERE User.id = ${loginId})`
+            ),
+            'isCurrentUser',
+          ],
+        ],
+      })
+      return res.status(200).json(topUsers)
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 修改使用者設定
+  putUserSetting: async (req, res, next) => {
+    try {
+      // 確認只能修改自己的設定
+      const id = Number(req.params.id)
+      const loginId = helpers.getUser(req).id
+      if (id !== loginId) {
+        return res.json({
+          status: 'error',
+          message: 'User can only edit their setting.',
+        })
+      }
+      const { name, account, email, password, checkPassword } = req.body
+      // validation middleware
+      const message = await updateSettingCheck(req)
+      if (message) {
+        return res
+          .status(422)
+          .json({ status: 'error', message, userFilledForm: req.body })
+      }
+      // update user
+      const user = await User.findByPk(req.params.id)
+      await user.update({
+        name,
+        email,
+        account,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+      })
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'Update user successfully.' })
+    } catch (err) {
+      next(err)
+    }
+  },
+  // 修改使用者個人資料
+  putUserProfile: async (req, res, next) => {
+    try {
+      const { name, introduction } = req.body
+      // 確認只能修改自己的資料
+      const id = Number(req.params.id)
+      const loginId = helpers.getUser(req).id
+      if (id !== loginId) {
+        return res.json({
+          status: 'error',
+          message: 'User can only edit their profile.',
+        })
+      }
+      // validator name & introduction
+      const message = await updateProfile(req)
+      if (message) {
+        return res
+          .status(422)
+          .json({ status: 'error', message, userFilledForm: req.body })
+      }
+      // 是否上傳圖片
+      const { files } = req
+      if (files) {
+        if (files['avatar'][0]) {
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          imgur.upload(files['avatar'][0].path, async (err, img) => {
+            const user = await User.findByPk(loginId)
+            await user.update({
+              name,
+              introduction,
+              avatar: files.avatar ? img.data.link : user.avatar,
+              cover: user.cover,
+            })
+          })
+        }
+        if (files['cover'][0]) {
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          imgur.upload(files['cover'][0].path, async (err, img) => {
+            const user = await User.findByPk(loginId)
+            await user.update({
+              name,
+              introduction,
+              avatar: user.avatar,
+              cover: files.cover ? img.data.link : user.cover,
+            })
+            return res
+              .status(200)
+              .json({ status: 'success', message: 'Update user successfully.' })
+          })
+        }
+      } else {
+        const user = await User.findByPk(loginId)
+        await user.update({
+          name,
+          introduction,
+          avatar: user.avatar,
+          cover: user.cover,
+        })
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'Update user successfully.' })
+      }
     } catch (err) {
       next(err)
     }
