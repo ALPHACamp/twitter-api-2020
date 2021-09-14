@@ -119,7 +119,7 @@ const userController = {
     const responseData = {
       status: 'success', 
       message: 'Registration success',
-      User: data
+      user: data.dataValues
     }
     return res.status(200).json(responseData)
   },
