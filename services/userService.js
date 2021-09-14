@@ -38,7 +38,7 @@ const userService = {
       account,
       name,
       email,
-      password: bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+      password
     })
 
     return { status: 'success', message: 'Registration success' }
