@@ -1,0 +1,36 @@
+<h1>Twitter 後台</h1>
+
+<a href='/admin/tweets'>所有推文清單</a> | <a href='/api/admin/tweets'>所有推文清單api</a>
+ | <a href='/admin/users'>使用者清單</a> | <a href='/api/admin/users'>使用者清單api</a>
+
+<br />
+<br />
+
+<table class="table">
+  <thead class="table-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Role</th>
+      <th scope="col">推文數量</th>
+      <th scope="col">關注人數</th>
+      <th scope="col">跟隨者人數</th>
+      <th scope="col">推文被 like 的數量</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each users}}
+    <tr>
+      <th scope="row">{{this.id}}</th>
+      <td>{{this.name}}</td>
+      <td>{{this.email}}</td>
+      <td>{{this.role}}</td>
+      <td>{{this.tweetsCount}}</td>
+      <td>{{this.followingsCount}}</td>
+      <td>{{this.followersCount}}</td>
+      <td>{{this.likesCount}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
