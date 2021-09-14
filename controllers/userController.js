@@ -11,33 +11,42 @@ const JwtStrategy = passportJWT.Strategy
 
 const userController = {
   signUp: async (req, res) => {
-    const { account, email, password, passwordCheck } = req.body
-    if ( !account || !email || !password || !passwordCheck) {
-      return res.json({ status: 'error', message: 'All fields are required'})
-    }
-    if (passwordCheck !== password) {
-      return res.json({ status: 'error', message: 'Passwords are not the same'})
-    }
-    const duplicate_email = await User.findOne({ where: { email }})
-    if (duplicate_email) {
-      return res.status(422).json({ status: 'error', message: 'This email has been registered'})
-    }
-    const duplicate_account = await User.findOne({ where: { account }})
-    if (duplicate_account) {
-      return res.status(422).json({ status: "error", message: "This account name has been registered" });
-    }
-    
-    try {
-      const user = await User.create({
-        account,
-        email,
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
-      })
-      return res.status(200).json({
-        status: 'success', message: 'Successfully sign up'
-      })
-    } catch {
-      return next()
+      const { account, email, password, passwordCheck } = req.body
+      if ( !account || !email || !password || !passwordCheck) {
+        return res.json({ status: 'error', message: 'All fields are required'})
+      }
+      if (passwordCheck !== password) {
+        return res.json({ status: 'error', message: 'Passwords are not the same'})
+      }
+    try { 
+      const { status, message } = await userService.signUp( email, account, password ) 
+      return res.json({status, message})
+    // const duplicate_email = await User.findOne({ where: { email } });
+    // if (duplicate_email) {
+    //   return res
+    //     .status(422)
+    //     .json({ status: "error", message: "This email has been registered" });
+    // }
+    // const duplicate_account = await User.findOne({ where: { account } });
+    // if (duplicate_account) {
+    //   return res.status(422).json({
+    //     status: "error",
+    //     message: "This account name has been registered",
+    //   });
+    // }
+
+    // const user = await User.create({
+    //   account,
+    //   email,
+    //   password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+    // });
+    // return res.status(200).json({
+    //   status: "success",
+    //   message: "Successfully sign up",
+    // });
+    } catch (error) {
+      console.log("signUp error", error);
+      res.sendStatus(500)
     }
   },
   signIn: async (req, res) => {
@@ -75,5 +84,5 @@ const userController = {
       })
   }
 };
- 
+
 module.exports = userController;
