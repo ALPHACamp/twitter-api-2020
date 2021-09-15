@@ -8,6 +8,7 @@ router.post('/tweets', tweetController.postTweet)
 
 // GET /tweets - 所有推文，包括推文作者
 // get('/api/tweets')
+router.get('/tweets', tweetController.getTweets)
 
 // GET /tweets/:tweet_id - 一筆推文與回覆
 // get('/api/tweets/1')

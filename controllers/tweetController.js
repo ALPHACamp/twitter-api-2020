@@ -5,8 +5,11 @@ const TweetService = require('../services/tweetService.js')
 const tweetController = {
   postTweet: (req, res) => {
     TweetService.postTweet(req, res, (status, data) => {
-      console.log(status)
-      console.log(data)
+      return res.status(status).json(data)
+    })
+  },
+  getTweets: (req, res) => {
+    TweetService.getTweets(req, res, (status, data) => {
       return res.status(status).json(data)
     })
   }
