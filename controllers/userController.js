@@ -76,7 +76,7 @@ let userController = {
       })
       .catch(err => {console.log(err)})
   },
-  getUser: (req, res) => {
+  getUser: (req, res, next) => {
     User.findByPk(req.params.id,{
       attributes: [
         'id', 'name', 'avatar', 'introduction', 'account', 'cover', 'role',
@@ -103,7 +103,7 @@ let userController = {
     })
     .catch(err => {next(err)})
   },
-  getUserTweets: (req, res) => {
+  getUserTweets: (req, res, next) => {
     Promise.all([
       User.findByPk(req.params.id,{
       attributes: [
@@ -210,7 +210,7 @@ let userController = {
       })
       .catch(err => {console.log(err)})
   },
-  getTweets: (req, res) => {
+  getTweets: (req, res, next) => {
     User.findByPk(req.user.id,{
       include: [
         { model: User, as: 'Followers', attributes: ['id']},
@@ -223,7 +223,7 @@ let userController = {
       })
         .then((tweet) =>{
           return res.json({tweet})
-        }).catch(err => {next(err)})
+        }).catch(err => { next(err) })
     })
 
   }
