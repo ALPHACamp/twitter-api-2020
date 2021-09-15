@@ -20,7 +20,7 @@ let adminController = {
 
       //確定只有admin通過
       if(user.role !== 'admin') return res.status(403).json({ status: 'error', message: '權限不足' })
-      
+
       // 簽發 token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -36,6 +36,23 @@ let adminController = {
         }
       })
     })
+  },
+  getAdminTweets: (req, res, next) => {
+    Tweet.findAll({ 
+      attributes: [
+        'id','updatedAt',
+        [Sequelize.literal('substring(description,1,50)'), 'description']
+      ],
+      include: [
+        { model: User, attributes:[
+          'name', 'account', 'avatar'
+        ]}
+      ],
+      order: [['createdAt', 'DESC']]
+    }).then((tweets) => {
+      return res.status(200).json({tweets})
+    })
+    .catch(err => next(err))
   }
 
 }
