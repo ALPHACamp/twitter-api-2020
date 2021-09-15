@@ -1,9 +1,22 @@
 const db = require('../models')
-const { User, Tweet, Reply, Like } = db
+const { User, Tweet, Reply, Like, Followship } = db
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
+
+async function getFollowingList(req) {
+  let user = await User.findOne({
+    attributes: [],
+    where: { id: req.user.id },
+    include: {
+      model: User, as: 'Followings',
+      attributes: ['id'], through: { attributes: [] }
+    }
+  })
+  user = user.toJSON()
+  return user.Followings //[{id:1}, {id:5}]
+}
 
 const userService = {
   signUp: async (req, res, cb) => {
@@ -191,13 +204,7 @@ const userService = {
   getUserFollowings: async (req, res, cb) => {
     try {
       // 取得登入使用者的追蹤名單
-      const loginUser = await User.findOne({
-        attributes: ['id'],
-        where: { id: req.user.id },
-        include: {
-          model: User, as: 'Followings', attributes: ['id'], through: { attributes: [] },
-        }
-      })
+      const followingList = await getFollowingList(req)
       // 取得該特定使用者的追蹤名單
       let user = await User.findOne({
         attributes: ['id', 'name'],
@@ -207,7 +214,7 @@ const userService = {
       // 比對id，看登入使用者是否也有在追蹤這些人
       user = user.toJSON()
       user.Followings.forEach(user => {
-        user.isFollowings = loginUser.Followings.map(u => (u.id)).includes(user.id)
+        user.isFollowings = followingList.map(u => (u.id)).includes(user.id)
         user.followingId = user.id
         delete user.id
       })
@@ -220,14 +227,7 @@ const userService = {
 
   getUserFollowers: async (req, res, cb) => {
     try {
-      const loginUser = await User.findOne({
-        attributes: [],
-        where: { id: req.user.id },
-        include: {
-          model: User, as: 'Followings',
-          attributes: ['id'], through: { attributes: [] }
-        }
-      })
+      const followingList = await getFollowingList(req)
       let user = await User.findOne({
         attributes: [],
         where: { id: req.params.id },
@@ -239,7 +239,7 @@ const userService = {
       })
       user = user.toJSON()
       user.Followers.map(user => {
-        user.isFollowings = loginUser.Followings.map(u => (u.id)).includes(user.id)
+        user.isFollowings = followingList.map(u => (u.id)).includes(user.id)
         user.followerId = user.id
         delete user.id
       })
@@ -309,7 +309,7 @@ const userService = {
       console.warn(err)
       return cb({ status: '500', message: err })
     }
-  }
+  },
 }
 
 module.exports = userService
