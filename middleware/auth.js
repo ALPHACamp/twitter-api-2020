@@ -16,9 +16,9 @@ const authenticated = (req, res, next) =>
     }
 
     return next();
-  });
+  })(req, res, next)
 
-const checkRole = (role) => {
+const checkRole = (role = 'user') => {
   return (req, res, next) => {
     if (helpers.getUser(req).role !== role) {
       return res.status(403).json({
