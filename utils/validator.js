@@ -10,7 +10,7 @@ const userInfoSchema = Joi.object({
     .messages({
       'string.base':'Data type of account must be a string',
       'string.pattern.base':'The account should only include number, letter and underline',
-      'string.empty': 'Required fields did not exist',
+      'string.empty': 'The account cannot be blank',
       'string.max': 'The account should not exceed 50 words'
 
   }),
@@ -20,7 +20,7 @@ const userInfoSchema = Joi.object({
     .max(50)
     .messages({
       'string.base':'Data type of name must be a string',
-      'string.empty': 'Required fields did not exist',
+      'string.empty': 'The name cannot be blank',
       'string.max': 'The name should not exceed 50 words'
     }),
   email: Joi.string()
@@ -29,7 +29,7 @@ const userInfoSchema = Joi.object({
     .messages({
       'string.base':'Data type of email must be a string',
       'string.email': 'Email must be a valid email',
-      'string.empty': 'Required fields did not exist'
+      'string.empty': 'The email cannot be blank'
     }),
   password: Joi.string()
     .trim()
@@ -37,7 +37,7 @@ const userInfoSchema = Joi.object({
     .max(50)
     .messages({
       'string.base':'Data type of password must be a string',
-      'string.empty': 'Required fields did not exist',
+      'string.empty': 'The password cannot be blank',
       'string.max': 'The password should not exceed 50 words'
     }),
   checkPassword: Joi.ref('password'),
