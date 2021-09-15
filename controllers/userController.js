@@ -51,13 +51,13 @@ let userController = {
   },
   register: (req, res) => {
     //TODO 使用者註冊，account、email必須唯一
-    const { account, email, password, confirmPassword } = req.body
+    const { account, email, password, checkPassword } = req.body
     // 檢查必要資料
-    if (!account.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (!account.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) {
       return res.status(422).json({ status: 'error', message: "欄位不可空白" }) //case1
     }
-    if(password !== confirmPassword) return res.status(401).json({ status: 'error', message: "兩次密碼輸入不同！" }) //case2
-    Promise.all([User.findOne({ where: { email }}), User.findOne({ where: {account}})])
+    if(password !== checkPassword) return res.status(401).json({ status: 'error', message: "兩次密碼輸入不同！" }) //case2
+    Promise.all([User.findOne({ where: { email }}), User.findOne({ where: { account }})])
       .then(([userHasEmail, userHasAccount]) => {
         if(userHasEmail && userHasAccount) return res.status(409).json({ status: 'error', message: "email 和 account 已重覆註冊！" }) //TODO 問前端case5
         if(userHasEmail) return res.status(409).json({ status: 'error', message: "email 已重覆註冊！" }) //case3
@@ -175,6 +175,40 @@ let userController = {
         message: 'Update successfully'
     })
 
+  },
+  putUserSetting: (req, res) => {
+    //修改使用者設定(修改使用者設定(account、name、email、password)，account、email必須唯一
+    const { account, email, password, checkPassword } = req.body
+
+   //1.確定是登入者
+    if(req.user.id !== Number(req.params.id)){
+      return res.status(403).json({ status: 'error', message: "並非該用戶，無訪問權限！"})
+    }
+
+    // 檢查必要資料
+    if (!account.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) {
+      return res.status(422).json({ status: 'error', message: "欄位不可空白" }) //case1
+    }
+
+    if(password !== checkPassword) return res.status(401).json({ status: 'error', message: "兩次密碼輸入不同！" }) //case2
+    Promise.all([User.findOne({ where: { email }}), User.findOne({ where: { account }})])
+      .then(([userHasEmail, userHasAccount]) => {
+        if(userHasEmail && userHasAccount) return res.status(409).json({ status: 'error', message: "email 和 account 已有註冊！" }) 
+        if(userHasEmail) return res.status(409).json({ status: 'error', message: "email 已有註冊，請重新輸入！" }) //case3
+        if(userHasAccount) return res.status(409).json({ status: 'error', message: "account 已有註冊，請重新輸入！" }) //case4
+        User.findByPk(req.params.id)
+          .then((user) =>{
+            user.update({
+              account,
+              email,
+              password : bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+            })
+          })
+          .then(user => {
+            return res.json({ status: 'success', message: '已成功修正！'}) 
+          })
+      })
+      .catch(err => {console.log(err)})
   }
 }
 
