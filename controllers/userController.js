@@ -84,7 +84,7 @@ const userController = {
   // 註冊
   register: async (req, res) => {
     try {
-      const { name, account, email, password, checkPassword } = req.body
+      const { name, account, email, password } = req.body
       // validation middleware
       const message = await registerCheck(req)
       if (message) {
@@ -289,6 +289,7 @@ const userController = {
     try {
       const loginId = await helpers.getUser(req).id
       const topUsers = await User.findAll({
+        where: { role: 'user' },
         order: [['followerCount', 'DESC']],
         limit: 10,
         attributes: [
@@ -312,7 +313,7 @@ const userController = {
           ],
         ],
       })
-      return res.status(200).json(topUsers)
+      return res.status(200).json({ topUsers })
     } catch (err) {
       const data = { status: 'error', message: err }
       return res.json(data)
