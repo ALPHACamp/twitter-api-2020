@@ -4,6 +4,7 @@ const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require("../models");
 const sequelize = require("sequelize");
+const { helpers } = require("faker");
 
 const userService = {
   signUp : async (account, email, password) => {
@@ -53,6 +54,8 @@ const userService = {
   getUser: async(userId) => {
 
     const user = await User.findOne({
+      raw: true,
+      nest: true,
       where: { id: userId },
       attributes: [
         "account",
@@ -89,6 +92,8 @@ const userService = {
   },
   getCurrentUser: async (userId) => {
     const currentUser = await User.findOne({
+      raw: true,
+      nest: true,
       where: { id: userId },
       attributes: [
         "account",
@@ -117,7 +122,7 @@ const userService = {
         ],
       ],
     });
-
+    currentUser.isCurrent = true 
     return currentUser
   },
   putUser: async (id, files, body) => {

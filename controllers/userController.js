@@ -47,10 +47,16 @@ const userController = {
   getUser: async (req, res) => {
     try {
       const id = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
       const user = await userService.getUser(id)
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'No such user found'})
       }
+      if ( id === currentUserId ) {
+        user.isCurrent = true
+        return res.status(200).json(user)
+      }
+      user.isCurrent = false
       return res.status(200).json(user)
     } catch (error) {
       console.log('getUser error', error)
