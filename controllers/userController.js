@@ -75,38 +75,13 @@ const userController = {
   },
 
   postUser: async (req, res) => {
-    const { account, name, email, password, checkPassword } = req.body
+    // Check request body data format with Joi schema
+    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
 
-    // Check required data
-    if (!account || !email || !name || !password || !checkPassword) {
+    if (error) {
       return res.status(400).json({
         status: 'error',
-        message: "Required fields didn't exist"
-      })
-    }
-
-    // Check name characters
-    if (name.trim().length > 50) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'The name should not exceed 50 words'
-      })
-    }
-
-    // Check account format
-    const regex = new RegExp(/^\w+$/)
-    if (!account.match(regex)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'The account should only include number, letter and underline'
-      })
-    }
-
-    // Check if password equal to checkPassword
-    if (password !== checkPassword) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Password value is not equal to checkPassword'
+        message: joiMessageHandler(error.details)
       })
     }
 
@@ -119,9 +94,9 @@ const userController = {
 
     // Delete password attributes in response data
     delete data.dataValues.password
-    
+
     const responseData = {
-      status: 'success', 
+      status: 'success',
       message: 'Registration success',
       user: data.dataValues
     }
