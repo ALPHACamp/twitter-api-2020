@@ -236,6 +236,9 @@ const userController = {
           },
         ],
         attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+        order: [
+          [sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC'],
+        ],
       })
       // 取出正在追蹤的人
       followingUsers = followingUsers.Followings
@@ -262,6 +265,9 @@ const userController = {
           },
         ],
         attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+        order: [
+          [sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC'],
+        ],
       })
       // 取出被哪些人追蹤
       followerUsers = followerUsers.Followers
