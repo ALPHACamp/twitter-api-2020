@@ -45,11 +45,6 @@ const userController = {
         .catch(error => console.log(error))
     }
   },
-  logout: (req, res) => {
-    req.flash('success_message', 'Logout successful')
-    req.logout()
-    res.redirect('/signin')
-  },
   editUser: (req, res) => {
     User.findByPk(req.params.id)
       .then(user => {
@@ -81,6 +76,11 @@ const userController = {
           })
       })
       .catch(error => console.log(error))
+  },
+  logout: (req, res) => {
+    res.json({ status: 'success', message: 'Logout successful.' })
+    req.logout()
+    res.redirect('/signin')
   }
 }
 
