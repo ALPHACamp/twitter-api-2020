@@ -60,4 +60,7 @@ const joiMessageHandler = (errors) => {
     return messages
 }
 
-module.exports = joiMessageHandler, userInfoSchema
+module.exports = {
+  joiMessageHandler,
+  userInfoSchema
+}
