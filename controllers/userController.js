@@ -18,7 +18,6 @@ const {
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
-const { replace } = require('sinon')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -28,7 +27,7 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
   // 前台登入
-  logIn: async (req, res, next) => {
+  logIn: async (req, res) => {
     try {
       const { email, password } = req.body
       // 檢查是否輸入帳號密碼
@@ -78,11 +77,12 @@ const userController = {
         },
       })
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 註冊
-  register: async (req, res, next) => {
+  register: async (req, res) => {
     try {
       const { name, account, email, password, checkPassword } = req.body
       // validation middleware
@@ -106,11 +106,12 @@ const userController = {
         .status(200)
         .json({ status: 'success', message: 'Registration success.' })
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 取得登入中使用者
-  getCurrentUser: async (req, res, next) => {
+  getCurrentUser: async (req, res) => {
     try {
       const id = helpers.getUser(req).id
       const currentUser = await User.findByPk(id, {
@@ -128,11 +129,12 @@ const userController = {
       })
       return res.status(200).json(currentUser)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 取得特定使用者
-  getUser: async (req, res, next) => {
+  getUser: async (req, res) => {
     try {
       const id = req.params.user_id
       const loginUserId = helpers.getUser(req).id
@@ -160,22 +162,24 @@ const userController = {
       }
       return res.status(200).json(user)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 取得該使用者的所有推文
-  getTweets: async (req, res, next) => {
+  getTweets: async (req, res) => {
     try {
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
       })
       return res.status(200).json(tweets)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 取得該使用者的所有回覆
-  getRepliedTweets: async (req, res, next) => {
+  getRepliedTweets: async (req, res) => {
     try {
       let repliedTweets = await Reply.findAll({
         where: { UserId: req.params.id },
@@ -193,11 +197,12 @@ const userController = {
       })
       return res.status(200).json(repliedTweets)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 取得該使用者 Like 過的推文
-  getLikedTweets: async (req, res, next) => {
+  getLikedTweets: async (req, res) => {
     try {
       let likedTweets = await Like.findAll({
         where: { UserId: req.params.id },
@@ -215,11 +220,12 @@ const userController = {
       })
       return res.status(200).json(likedTweets)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 取得使用者追蹤的 user 名單
-  getFollowingUsers: async (req, res, next) => {
+  getFollowingUsers: async (req, res) => {
     try {
       let followingUsers = await User.findByPk(req.params.id, {
         include: [
@@ -244,11 +250,12 @@ const userController = {
       followingUsers = followingUsers.Followings
       return res.status(200).json(followingUsers)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 取得追蹤使用者的 user 名單
-  getFollowerUsers: async (req, res, next) => {
+  getFollowerUsers: async (req, res) => {
     try {
       let followerUsers = await User.findByPk(req.params.id, {
         include: [
@@ -273,11 +280,12 @@ const userController = {
       followerUsers = followerUsers.Followers
       return res.status(200).json(followerUsers)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 取得追蹤人數最多的前十名使用者
-  getTopUsers: async (req, res, next) => {
+  getTopUsers: async (req, res) => {
     try {
       const loginId = await helpers.getUser(req).id
       const topUsers = await User.findAll({
@@ -306,11 +314,12 @@ const userController = {
       })
       return res.status(200).json(topUsers)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 修改使用者設定
-  putUserSetting: async (req, res, next) => {
+  putUserSetting: async (req, res) => {
     try {
       // 確認只能修改自己的設定
       const id = Number(req.params.id)
@@ -341,11 +350,12 @@ const userController = {
         .status(200)
         .json({ status: 'success', message: 'Update user successfully.' })
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 修改使用者個人資料
-  putUserProfile: async (req, res, next) => {
+  putUserProfile: async (req, res) => {
     try {
       const { name, introduction } = req.body
       // 確認只能修改自己的資料
@@ -407,7 +417,8 @@ const userController = {
           .json({ status: 'success', message: 'Update user successfully.' })
       }
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
 }
