@@ -1,9 +1,22 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const fs = require('fs')
+
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const { User, Tweet, Like, Sequelize, Reply } = require('../models')
+
+const uploadImg = path => {
+  return new Promise((resolve, reject) => {
+    imgur.upload(path, (err, img) => {
+      if (err) {
+        return reject(err)
+      }
+      resolve(img)
+    })
+  })
+}
 
 let userController = {
   userLogin: (req, res) => {
@@ -125,8 +138,44 @@ let userController = {
       return res.status(200).json(tweetSet)
     })
     .catch(err => {console.log(err)})    
-  }
+  },
+  putUser: async(req, res) => {
+    //前台：修改使用者個人資料(avatar、cover、name、introduction)
+    const { name, introduction } = req.body
+    //上傳至imgur
+    
+    const { files } = req
+    //1.確定是登入者
+    if(Number(req.params.id) !== req.user.id){
+      return res.status(403).json({ status: 'error', message: "並非該用戶，無訪問權限！"})
+    }
+    // 確定introduction(160)、name(50)
+    if(name && name.length > 50){
+      return res.status(422).json({ status: 'error', message: "名稱字數超出上限！"})
+    }
+    if(introduction && introduction.length > 160){
+      return res.status(422).json({ status: 'error', message: "自我介紹字數超出上限！"})
+    }
+    let images = {}
+    if(files){
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      for (const key in files) {
+          images[key] = await uploadImg(files[key][0].path)
+        }
+    }
+    let user = await User.findByPk(req.params.id)
+    await user.update({
+        name,
+        introduction,
+        avatar: images.avatar ? images.avatar.data.link : user.avatar,
+        cover: images.cover ? images.cover.data.link : user.cover
+      })
+    return res.status(200).json({
+        status: 'success',
+        message: 'Update successfully'
+    })
 
+  }
 }
 
 module.exports = userController

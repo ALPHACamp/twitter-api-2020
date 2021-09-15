@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(express.json())
 app.use(passport.initialize())
-
+app.use('/upload', express.static(__dirname + '/upload'))
 require('./routes')(app)
 
 app.use((err, req, res, next) => {
