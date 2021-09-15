@@ -1,5 +1,5 @@
 const tweetService = require('../services/tweetService')
-const { joiMessageHandler, tweetSchema } = require('../utils/validator')
+const { joiMessageHandler, tweetSchema, replySchema } = require('../utils/validator')
 
 const tweetController = {
   getTweets: async (req, res) => {
@@ -38,7 +38,7 @@ const tweetController = {
         message: joiMessageHandler(error.details)
       })
     }
-    
+
     // Create new tweet
     const data = await tweetService.postTweet(req.user.id, description)
 
@@ -68,19 +68,17 @@ const tweetController = {
   postReply: async (req, res) => {
     const { comment } = req.body
 
-    if (!comment.trim().length) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: 'The comment cannot be blank' })
-    }
+    // Check request body data format with Joi schema
+    const { error } = replySchema.validate(req.body, { abortEarly: false })
 
-    if (!comment.trim().length > 140) {
+    if (error) {
       return res.status(400).json({
         status: 'error',
-        message: 'The comment should not exceed 140 words'
+        message: joiMessageHandler(error.details)
       })
     }
-
+    
+    // Create new reply
     const data = await tweetService.postReply(
       req.user.id,
       req.params.tweetId,
