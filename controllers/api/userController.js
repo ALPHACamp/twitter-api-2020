@@ -92,6 +92,36 @@ const userController = {
           console.log(error)
         }
       })
+  },
+  putUserProfile: async (req, res) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        // console.log('req.params.id:', req.params.id)
+        // console.log('req.user.id:', req.user.id)
+        // if (helpers.getUser(req).id !== Number(req.params.id)) {
+        //   res.json({ status: 'error', message: "Cannot edit other's profile." })
+        //   return res.redirect('back')
+        // }
+        if (!req.body.name) {
+          res.json({ status: 'error', message: 'Name must have value.' })
+          return res.redirect('back')
+        }
+        try {
+          return User.findByPk(req.params.id)
+            .then(user => {
+              user.update({
+                name: req.body.name,
+                introduction: req.body.introduction
+              })
+                .then((user) => {
+                  res.json({ status: 'success', message: 'Profile update successful.' })
+                  return res.redirect(`/users/${user.id}/profile`)
+                })
+            })
+        } catch (err) {
+          console.log(error)
+        }
+      })
   }
 }
 
