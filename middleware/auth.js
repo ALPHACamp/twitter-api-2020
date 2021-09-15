@@ -16,10 +16,17 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 
-
-
-
+const authenticatedAdmin = (req, res, next) => {
+  if (req.user && req.user.role !== 'admin'){
+    return res.status(401).json({
+      status: 'error',
+      message: '非Admin，無此權限'
+    })  
+  }
+  next()
+}
 
 module.exports = {
-  authenticated
+  authenticated,
+  authenticatedAdmin
 }
