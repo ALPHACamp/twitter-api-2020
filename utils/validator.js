@@ -65,6 +65,18 @@ const tweetSchema = Joi.object({
     })
 })
 
+// Joi schema for validating reply format
+const replySchema = Joi.object({
+  comment: Joi.string()
+    .trim()
+    .max(140)
+    .messages({
+      'string.base':'Data type of comment must be a string',
+      'string.empty': 'The comment cannot be blank',
+      'string.max': 'The comment should not exceed 140 words'
+    })
+})
+
 // Filter Joi error details to a single array
 const joiMessageHandler = (errors) => {
     const messages = []
@@ -74,5 +86,7 @@ const joiMessageHandler = (errors) => {
 
 module.exports = {
   joiMessageHandler,
-  userInfoSchema
+  userInfoSchema,
+  tweetSchema,
+  replySchema
 }
