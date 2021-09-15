@@ -101,7 +101,7 @@ let userController = {
       }
       return res.status(200).json(user)
     })
-    .catch(err => {console.log(err)})
+    .catch(err => {next(err)})
   },
   getUserTweets: (req, res) => {
     Promise.all([
@@ -137,7 +137,7 @@ let userController = {
       }))
       return res.status(200).json(tweetSet)
     })
-    .catch(err => {console.log(err)})    
+    .catch(err => {next(err)})    
   },
   putUser: async(req, res) => {
     //前台：修改使用者個人資料(avatar、cover、name、introduction)
@@ -223,7 +223,7 @@ let userController = {
       })
         .then((tweet) =>{
           return res.json({tweet})
-        })
+        }).catch(err => {next(err)})
     })
 
   }
