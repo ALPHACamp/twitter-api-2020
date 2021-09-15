@@ -51,14 +51,16 @@ const userService = {
     }
   },
   getUser: async(userId) => {
-    
+
     const user = await User.findOne({
       where: { id: userId },
       attributes: [
         "account",
         "name",
         "avatar",
+        "cover",
         "introduction",
+        "role",
         [
           Sequelize.literal(
             `(SELECT COUNT(*) FROM TWEETS WHERE Tweets.UserId = ${userId})`
@@ -79,6 +81,9 @@ const userService = {
         ], 
       ]     
     })
+    if (user.role === "admin") {
+      return { status: 'error', message: "Can't access admin's profile"}
+    }
 
     return user
   },

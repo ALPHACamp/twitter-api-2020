@@ -47,9 +47,6 @@ const userController = {
   getUser: async (req, res) => {
     try {
       const id = Number(req.params.id)
-      if ( id === 1 ) {
-        return res.status(422).json({ status: 'error', message: "Cannot access admin's profile" })
-      }
       const user = await userService.getUser(id)
       if (!user) {
         return res.status(401).json({ status: 'error', message: 'No such user found'})
