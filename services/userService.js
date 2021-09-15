@@ -1,12 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken')
-const imgur = require('imgur-node-api')
+const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require("../models");
 const sequelize = require("sequelize");
-
-
-
 
 const userService = {
   signUp : async (account, email, password) => {
@@ -82,31 +79,30 @@ const userService = {
           "FollowingCount",
         ],
       ],
-      // include: [
-      //   { model: User, as: "Followings" },
-      //   { model: User, as: "Followers" },
-      //   { model: Tweet },
-      // ],
     });
 
     return currentUser
   },
-  putUserProfile: async (id, file, body) => {
+  putUser: async (id, files, body) => {
     const user = await User.findByPk(id)
-    if (file) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      imgur.upload(file.path, (err, img) => {
-        const updatedUser = user.update({
-          ...body, 
-          avatar: file ? img.data.link : user.avatar, })
-        return {
-          status: 'success', message: 'successfully edited', updatedUser
-        }
+
+    if (files) {
+      imgur.setClientId(IMGUR_CLIENT_ID);
+      const avatar = files.avatar ? await imgur.uploadFile((files.avatar[0].path)) : null
+      const cover = files.cover ? await imgur.uploadFile((files.cover[0].path)) : null
+
+      await user.update({
+        ...body,
+        avatar: files.avatar ? avatar.link : user.avatar,
+        cover: files.cover ? cover.link : user.cover
       })
+      return {
+        status: 'success',
+        message: 'Successfully edited'
+      }
     }
-    console.log(body)
-    const updatedUser = await user.update({ ...body, avatar: user.avatar })
-    return { status: 'success', message: 'successfully edited', updatedUser }
+    await user.update({ ...body, avatar: user.avatar, cover: user.cover })
+    return { status: 'success', message: 'successfully edited' }
   }
 }
 
