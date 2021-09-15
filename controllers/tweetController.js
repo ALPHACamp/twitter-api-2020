@@ -1,4 +1,5 @@
 const tweetService = require('../services/tweetService')
+const { joiMessageHandler, tweetSchema } = require('../utils/validator')
 
 const tweetController = {
   getTweets: async (req, res) => {
@@ -28,19 +29,17 @@ const tweetController = {
   postTweet: async (req, res) => {
     const { description } = req.body
 
-    if (!description.trim().length) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: 'The description cannot be blank' })
-    }
+    // Check request body data format with Joi schema
+    const { error } = tweetSchema.validate(req.body, { abortEarly: false })
 
-    if (!description.trim().length > 140) {
+    if (error) {
       return res.status(400).json({
         status: 'error',
-        message: 'The description should not exceed 140 words'
+        message: joiMessageHandler(error.details)
       })
     }
-
+    
+    // Create new tweet
     const data = await tweetService.postTweet(req.user.id, description)
 
     return res.status(200).json(data)
