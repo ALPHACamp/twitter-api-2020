@@ -63,14 +63,14 @@ module.exports = {
       attributes: ['id', 'email', 'account'],
       where: { account },
     })
-    if (accountExist.dataValues.id !== helpers.getUser(req).id) {
+    if (accountExist && accountExist.dataValues.id !== helpers.getUser(req).id) {
       message.push({ error: 'Account is exists.' })
     }
     const emailExist = await User.findOne({
       attributes: ['id', 'email', 'account'],
       where: { email },
     })
-    if (emailExist.dataValues.id !== helpers.getUser(req).id) {
+    if (emailExist && emailExist.dataValues.id !== helpers.getUser(req).id) {
       message.push({ error: 'Email is exists.' })
     }
     if (message.length > 0) {
