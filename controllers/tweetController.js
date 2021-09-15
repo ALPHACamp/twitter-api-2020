@@ -41,13 +41,18 @@ const tweetController = {
   },
   postTweet: async (req, res) => {
     try {
-      if (!req.body.description) {
+      const description = req.body.description
+      if (description.trim() === '') {
         const data = { status: 'error', message: "content didn't exist" }
+        return res.json(data)
+      }
+      if (description.length > 140) {
+        const data = { status: 'error', message: 'the word count of a tweet is limited to 140' }
         return res.json(data)
       }
       await Tweet.create({
         UserId: helpers.getUser(req).id,
-        description: req.body.description
+        description
       })
       const user = await User.findByPk(helpers.getUser(req).id)
       await user.increment(['tweetCount'], { by: 1 })
