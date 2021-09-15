@@ -80,7 +80,12 @@ const replySchema = Joi.object({
 // Filter Joi error details to a single array
 const joiMessageHandler = (errors) => {
     const messages = []
-    errors.forEach(error => messages.push(error.message))
+    errors.forEach(error => {
+      if (error.message === '"checkPassword" must be [ref:password]') {
+        error.message = 'Password value is not equal to checkPassword'
+      }
+        messages.push(error.message)
+    })
     return messages
 }
 
