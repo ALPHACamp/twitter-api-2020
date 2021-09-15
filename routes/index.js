@@ -10,7 +10,7 @@ const { authenticated, checkRole } = require('../middleware/auth')
 
 
 
-router.use('/api/users', users)
+router.use("/api/users", users)
 router.use("/api/admin", admin);
 
 module.exports = router;

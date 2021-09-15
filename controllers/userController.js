@@ -7,15 +7,15 @@ const userService = require('../services/userService')
 
 const userController = {
   signUp: async (req, res) => {
-      const { account, email, password, passwordCheck } = req.body
-      if ( !account || !email || !password || !passwordCheck) {
+      const { account, name, email, password, checkPassword } = req.body
+      if ( !account || !email || !password || !checkPassword) {
         return res.json({ status: 'error', message: 'All fields are required'})
       }
-      if (passwordCheck !== password) {
+      if (checkPassword !== password) {
         return res.json({ status: 'error', message: 'Passwords are not the same'})
       }
     try { 
-      const { status, message } = await userService.signUp( account, email, password ) 
+      const { status, message } = await userService.signUp( account, name, email, password ) 
       return res.json({status, message})
     } catch (error) {
       console.log("signUp error", error);

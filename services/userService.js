@@ -7,7 +7,7 @@ const sequelize = require("sequelize");
 const { helpers } = require("faker");
 
 const userService = {
-  signUp : async (account, email, password) => {
+  signUp : async (account, name, email, password) => {
     const duplicate_email = await User.findOne({ where: { email } });
     if (duplicate_email) {
       return { status: "error", message: "This email has been registered" };
@@ -19,6 +19,7 @@ const userService = {
 
     const newUser = await User.create({
       account,
+      name,
       email,
       password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
     });

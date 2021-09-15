@@ -7,7 +7,7 @@ const upload = multer({ dest: 'temp/' })
 const userController = require('../../controllers/userController')
 const cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
-router.post('/signup', userController.signUp)
+router.post('/', userController.signUp)
 
 router.post('/signin', userController.signIn)
 
