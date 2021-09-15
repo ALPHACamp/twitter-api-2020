@@ -293,6 +293,22 @@ const userService = {
       console.warn(err)
       return cb(err)
     }
+  },
+
+  getUserReplies: async (req, res, cb) => {
+    try {
+      // 取得特定使用者的所有回覆、回覆給誰、哪則推文
+      const replies = await Reply.findAll({
+        raw: true, nest: true,
+        attributes: { exclude: ['id', 'UserId'] },
+        where: { UserId: req.params.id },
+        include: { model: Tweet, attributes: [], include: { model: User, attributes: ['name'] } }
+      })
+      return cb(replies)
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
   }
 }
 
