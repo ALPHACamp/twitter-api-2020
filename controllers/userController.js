@@ -30,6 +30,12 @@ const userController = {
       if (data.status) return res.status(data.status).json(data)
       res.status(200).json(data)
     })
+  },
+  getTopUser: (req, res) => {
+    userService.getTopUser(req, res, data => {
+      if (data.status) return res.status(data.status).json(data)
+      res.status(200).json(data)
+    })
   }
 }
 

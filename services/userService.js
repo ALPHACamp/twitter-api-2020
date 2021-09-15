@@ -310,6 +310,35 @@ const userService = {
       return cb({ status: '500', message: err })
     }
   },
+
+  getTopUser: async (req, res, cb) => {
+    try {
+      const followingList = await getFollowingList(req)
+      // 找到熱門的10個使用者 ps:追蹤數是0不會出現
+      let user = await Followship.findAll({
+        raw: true, nest: true,
+        group: 'followingId',
+        attributes: ['followingId',
+          [sequelize.fn('COUNT', sequelize.col('followingId')), 'followingCount']],
+        order: [[sequelize.col('followingCount'), 'DESC']],
+        limit: 10,
+      })
+      user = user.map(d => d.followingId)
+      // 取得熱門使用者的詳細資料，ps:前10不照順序排
+      user = await User.findAll({
+        raw: true, where: { id: user },
+        attributes: ['id', 'name', 'account', 'avatar'],
+      })
+      // 登入者有否有追蹤
+      user.forEach(user => {
+        user.isFollowings = followingList.map(u => (u.id)).includes(user.id)
+      })
+      return cb(user)
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
+  }
 }
 
 module.exports = userService
