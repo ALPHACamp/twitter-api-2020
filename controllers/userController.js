@@ -233,15 +233,14 @@ let userController = {
         include: [{ model: User, as: 'Followers' }],
         attributes: [
           'id', 'name', 'avatar', 'account',
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followersCount'
+          [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followersCount'
           ]
         ],
-        order: [Sequelize.literal('followersCount'), 'DESC'],
+        order: [[Sequelize.literal('followersCount'), 'DESC']],
         limit: 10,
         raw: true,
         nest: true
       })
-      console.log(user)
       return res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -251,7 +250,8 @@ let userController = {
     try {
       const { id } = req.params
       let user = await User.findByPk(id, {
-        include: [{ model: User, as: 'Followers' }]
+        include: [{ model: User, as: 'Followers' }],
+        order: [[Sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']]
       })
 
       if (!user) {
@@ -261,7 +261,7 @@ let userController = {
         })
       }
       Followers = user.Followers.map(i => ({
-        id: i.id,
+        followerId: i.id,
         name: i.name,
         avatar: i.avatar,
         account: i.account
@@ -269,13 +269,15 @@ let userController = {
       return res.status(200).json(Followers)
     } catch (err) {
       next(err)
+      console.log(err)
     }
   },
   getFollowings: async (req, res, next) => {
     try {
       const { id } = req.params
       let user = await User.findByPk(id, {
-        include: [{ model: User, as: 'Followings' }]
+        include: [{ model: User, as: 'Followings' }],
+        order: [[Sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']]
       })
 
       if (!user) {
@@ -284,13 +286,40 @@ let userController = {
           message: 'Can not find this user'
         })
       }
+
       Followings = user.Followings.map(i => ({
-        id:i.id,
-        name:i.name,
+        followingId: i.id,
+        name: i.name,
         avatar: i.avatar,
         account: i.account
       }))
       return res.status(200).json(Followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getLikedTweets: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      let user = await User.findByPk(id, {
+        include: [{model:Like, include:[{model:Tweet}]}],
+        order: [[Sequelize.literal('createdAt'), 'DESC']]
+      })
+
+      if (!user) {
+        return res.status(422).json({
+          status: 'error',
+          message: 'Can not find this user'
+        })
+      }
+      const likeTweets = user.Likes.map(i => ({
+        TweetId: i.TweetId,
+        UserId: i.UserId,
+        Tweet: i.Tweet,
+        createdAt: i.createdAt,
+        updatedAt: i.updatedAt
+      }))
+      return res.status(200).json(likeTweets)
     } catch (err) {
       next(err)
     }
