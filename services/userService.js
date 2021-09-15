@@ -186,6 +186,68 @@ const userService = {
       console.warn(err)
       return cb({ status: '500', message: err })
     }
+  },
+
+  getUserFollowings: async (req, res, cb) => {
+    try {
+      // 取得登入使用者的追蹤名單
+      const loginUser = await User.findOne({
+        attributes: ['id'],
+        where: { id: req.user.id },
+        include: {
+          model: User, as: 'Followings', attributes: ['id'], through: { attributes: [] },
+        }
+      })
+      // 取得該特定使用者的追蹤名單
+      let user = await User.findOne({
+        attributes: ['id', 'name'],
+        where: { id: req.params.id },
+        include: { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'], through: { attributes: [] }, }
+      })
+      // 比對id，看登入使用者是否也有在追蹤這些人
+      user = user.toJSON()
+      user.Followings.forEach(user => {
+        user.isFollowings = loginUser.Followings.map(u => (u.id)).includes(user.id)
+        user.followingId = user.id
+        delete user.id
+      })
+      return cb(user.Followings)
+    } catch (err) {
+      console.warn(err)
+      return cb(err)
+    }
+  },
+
+  getUserFollowers: async (req, res, cb) => {
+    try {
+      const loginUser = await User.findOne({
+        attributes: [],
+        where: { id: req.user.id },
+        include: {
+          model: User, as: 'Followings',
+          attributes: ['id'], through: { attributes: [] }
+        }
+      })
+      let user = await User.findOne({
+        attributes: [],
+        where: { id: req.params.id },
+        include: [{
+          model: User, as: 'Followers',
+          attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+          through: { attributes: [] }
+        }]
+      })
+      user = user.toJSON()
+      user.Followers.map(user => {
+        user.isFollowings = loginUser.Followings.map(u => (u.id)).includes(user.id)
+        user.followerId = user.id
+        delete user.id
+      })
+      return cb(user.Followers)
+    } catch (err) {
+      console.warn(err)
+      return cb(err)
+    }
   }
 }
 
