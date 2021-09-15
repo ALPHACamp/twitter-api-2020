@@ -10,7 +10,6 @@ router.get('/logout', userController.logout)
 // route: /api/users
 router.get('/users/:id/edit', userController.editUser) // 帳戶設定
 router.get('/users/:id/profile', userController.editUserProfile) // 編輯個人資料
-router.put('/users/:id', userController.putEditUser) // 儲存帳戶設定
-router.put('/users/:id/profile', userController.putUserProfile) // 儲存個人資料
+router.put('/users/:id', userController.putUser) // 儲存帳戶設定 & 個人資料 共用路由
 
 module.exports = router
