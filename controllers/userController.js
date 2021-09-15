@@ -55,6 +55,30 @@ const userController = {
       console.log('currentUser error', error)
       res.sendStatus(500)
     }
+  },
+  putUserProfile: async (req, res) => {
+    try {
+      const id = req.params.id
+      const { file } = req
+
+
+      if (helpers.getUser(req).id !== Number(id)) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Cannot edit others user profile'
+        })
+      }
+
+      const { status, message, user } = await userService.putUserProfile(id, file, req.body)
+      return res.status(200).json({
+        status,
+        message,
+        user
+      })
+    } catch (error) {
+      console.log('editProfile error', error)
+      res.sendStatus(500)
+    }
   }
 };
 

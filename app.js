@@ -19,6 +19,8 @@ app.use(passport.initialize())
 
 app.use(methodOverride('_method'))
 
+app.use("/upload", express.static(__dirname + "/upload"));
+
 app.use(routes)
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))

@@ -1,6 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship } = require("../models");
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const { User, Tweet, Reply, Like, Followship, Sequelize } = require("../models");
+const sequelize = require("sequelize");
 
 
 
@@ -53,14 +56,57 @@ const userService = {
   getCurrentUser: async (userId) => {
     const currentUser = await User.findOne({
       where: { id: userId },
-      attributes: { exclude: ['password'] },
-      include: [
-        { model: User, as: 'Followings' },
-        { model: User, as: 'Followers' }
-      ]
-    })
+      attributes: [
+        "account",
+        "name",
+        "email",
+        "avatar",
+        "cover",
+        "introduction",
+        [
+          Sequelize.literal(
+            `(SELECT COUNT(*) FROM TWEETS WHERE Tweets.UserId = ${userId})`
+          ),
+          "TweetsCount",
+        ],
+        [
+          Sequelize.literal(
+            `(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followingId = ${userId})`
+          ),
+          "FollowersCount",
+        ],
+        [
+          Sequelize.literal(
+            `(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followerId = ${userId})`
+          ),
+          "FollowingCount",
+        ],
+      ],
+      // include: [
+      //   { model: User, as: "Followings" },
+      //   { model: User, as: "Followers" },
+      //   { model: Tweet },
+      // ],
+    });
 
     return currentUser
+  },
+  putUserProfile: async (id, file, body) => {
+    const user = await User.findByPk(id)
+    if (file) {
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      imgur.upload(file.path, (err, img) => {
+        const updatedUser = user.update({
+          ...body, 
+          avatar: file ? img.data.link : user.avatar, })
+        return {
+          status: 'success', message: 'successfully edited', updatedUser
+        }
+      })
+    }
+    console.log(body)
+    const updatedUser = await user.update({ ...body, avatar: user.avatar })
+    return { status: 'success', message: 'successfully edited', updatedUser }
   }
 }
 
