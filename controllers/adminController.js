@@ -15,7 +15,7 @@ const JwtStrategy = passportJWT.Strategy
 
 const adminController = {
   // 後台登入
-  adminLogIn: async (req, res, next) => {
+  adminLogIn: async (req, res) => {
     try {
       const { email, password } = req.body
       // 檢查是否輸入帳號密碼
@@ -64,15 +64,14 @@ const adminController = {
         },
       })
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 後台：取得所有使用者資料
-  getAllUsers: async (req, res, next) => {
+  getAllUsers: async (req, res) => {
     try {
       const users = await User.findAll({
-        raw: true,
-        nest: true,
         where: { role: 'user' },
         attributes: [
           'id',
@@ -97,14 +96,16 @@ const adminController = {
             'likeCount',
           ],
         ],
+        order: [['TweetCount', 'DESC']],
       })
       res.status(200).json(users)
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
   // 後台：刪除單一 tweet
-  deleteTweet: async (req, res, next) => {
+  deleteTweet: async (req, res) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
       tweet.destroy()
@@ -113,7 +114,8 @@ const adminController = {
         message: `Tweet id: ${tweet.id} is deleted. `,
       })
     } catch (err) {
-      next(err)
+      const data = { status: 'error', message: err }
+      return res.json(data)
     }
   },
 }
