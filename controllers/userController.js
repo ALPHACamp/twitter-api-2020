@@ -3,15 +3,19 @@ const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const userService = require('../services/userService')
 const helpers = require('../_helpers')
+const { joiMessageHandler, userInfoSchema } = require('../utils/validator')
 
 const userController = {
   signIn: async (req, res) => {
     const { account, password } = req.body
-    // Check required data
-    if (!account || !password) {
+
+    // Check request body data format with Joi schema
+    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
+
+    if (error) {
       return res.status(400).json({
         status: 'error',
-        message: "Required fields didn't exist"
+        message: joiMessageHandler(error.details)
       })
     }
 
