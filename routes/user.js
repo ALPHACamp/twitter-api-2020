@@ -7,6 +7,7 @@ const { authenticated } = require('../middlewares/auth')
 
 router.post('/', userController.signUp)
 router.put('/:id', authenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
+router.get('/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/:id/likes', authenticated, userController.getUserLikedTweets)
 router.get('/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/:id/followings', authenticated, userController.getUserFollowings)
