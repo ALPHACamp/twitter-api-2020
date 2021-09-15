@@ -215,19 +215,6 @@ const userController = {
   },
 
   putUser: async (req, res) => {
-    const {
-      account,
-      name,
-      email,
-      password,
-      checkPassword,
-      cover,
-      avatar,
-      introduction
-    } = req.body
-
-    const errors = []
-
     // Check if the user is current user
     if (helpers.getUser(req).id !== Number(req.params.id)) {
       return res.status(403).json({
@@ -236,36 +223,17 @@ const userController = {
       })
     }
 
-    // Check name characters
-    if (name && name.trim().length > 50) {
-      errors.push('The name should not exceed 50 words')
-    }
+    // Check request body data format with Joi schema
+    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
 
-    // Check account format
-    const regex = new RegExp(/^\w+$/)
-    if (account && !account.match(regex)) {
-      errors.push(
-        'The account should only include number, letter and underline'
-      )
-    }
-
-    // Check if password equal to checkPassword
-    if (checkPassword && password !== checkPassword) {
-      errors.push('Password value is not equal to checkPassword')
-    }
-
-    // Check introduction characters
-    if (introduction && introduction.trim().length > 160) {
-      errors.push('The introduction should not exceed 160 words')
-    }
-
-    if (errors[0]) {
+    if (error) {
       return res.status(400).json({
         status: 'error',
-        message: errors
+        message: joiMessageHandler(error.details)
       })
     }
-
+    
+    // Update user data
     const user = await userService.putUser(req.params.id, req.body)
     delete user.dataValues.password
     const responseData = {
