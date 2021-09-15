@@ -7,10 +7,15 @@ const Tweet = db.Tweet
 const replyController = {
   postReply: async (req, res) => {
     try {
+      const comment = req.body.comment
+      if (comment.trim() === '') {
+        const data = { status: 'error', message: 'comment can not be empty!' }
+        return res.json(data)
+      }
       await Reply.create({
         UserId: helpers.getUser(req).id,
         TweetId: req.params.tweet_id,
-        comment: req.body.comment
+        comment
       })
       const tweet = await Tweet.findByPk(req.params.tweet_id)
       await tweet.increment(['replyCount'], { by: 1 })
