@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken')
-const db = require("../models");
-const User = db.User;
+const { User, Tweet, Reply, Like, Followship } = require("../models");
+
 
 
 
@@ -49,6 +49,18 @@ const userService = {
         role: user.role,
       },
     }
+  },
+  getCurrentUser: async (userId) => {
+    const currentUser = await User.findOne({
+      where: { id: userId },
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: User, as: 'Followings' },
+        { model: User, as: 'Followers' }
+      ]
+    })
+
+    return currentUser
   }
 }
 
