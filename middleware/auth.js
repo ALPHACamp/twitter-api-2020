@@ -1,6 +1,7 @@
 const helpers = require('../_helpers')
 const jwt = require("jsonwebtoken");
 const passport = require("../config/passport");
+const { User } = require('../models')
 
 
 const authenticated = (req, res, next) =>
@@ -14,17 +15,20 @@ const authenticated = (req, res, next) =>
         .status(401)
         .json({ status: "error", message: "Access denied" });
     }
+    req.user = user.dataValues
 
     return next();
   })(req, res, next)
 
 const checkRole = (role = 'user') => {
   return (req, res, next) => {
-    if (helpers.getUser(req).role !== role) {
-      return res.status(403).json({
-        status: 'error',
-        message: 'Access denied'
-      })
+    if (helpers.getUser(req).role) {
+      if (helpers.getUser(req).role !== role) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Access denied'
+        })
+      }
     }
     return next()
   }
