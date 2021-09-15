@@ -180,6 +180,7 @@ const userController = {
       let repliedTweets = await Reply.findAll({
         where: { UserId: req.params.id },
         include: [{ model: Tweet }],
+        order: [['createdAt', 'DESC']],
       })
       // 剔除被刪掉的 tweet (Tweet === null)
       await repliedTweets.map((replyTweet) => {
@@ -201,6 +202,7 @@ const userController = {
       let likedTweets = await Like.findAll({
         where: { UserId: req.params.id },
         include: [{ model: Tweet }],
+        order: [['createdAt', 'DESC']],
       })
       // 剔除被刪掉的 tweet (Tweet === null)
       await likedTweets.map((likeTweet) => {
