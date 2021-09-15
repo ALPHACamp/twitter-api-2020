@@ -62,6 +62,77 @@ const tweetController = {
     catch (error) {
       console.log(error)
     }
+  },
+
+  getTweet: async (req, res) => {
+    const tweetId = req.params.id
+    const tweetData = await Tweet.findByPk(tweetId, {
+      include: [
+        { model: Reply, as: 'replies',
+          include: [{ model: User, as: 'user' }]
+        },
+        { model: Like, as: 'likes' },
+      ]
+    })
+    return res.json({tweetData})
+  },
+
+  postTweet: async (req, res) => {
+    try {
+      const data = {}
+      data.UserId = req.user.id
+      data.description = req.body.description
+      const tweet = await Tweet.create({ ...data })
+      return res.status(200).json({ tweet })
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(417)
+    }
+  },
+
+  postTweetReply: async(req, res) => {
+    try {
+      const data = {}
+      data.UserId = req.user.id
+      data.TweetId = req.params.id
+      data.comment = req.body.comment
+      const tweetComment = await Reply.create({ ...data })
+      return res.status(200).json({ tweetComment })
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(417)
+    }
+  },
+
+  postLike: async (req, res) => {
+    try {
+      const data = {}
+      data.UserId = req.user.id
+      data.TweetId = req.params.id
+      const like = await Like.findOrCreate({ ...data })
+      return res.status(200).json({ like })
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(417)
+    }
+  },
+
+  postUnlike: async (req, res) => {
+    try {
+      const likeId = req.params.id
+      const unlike = await Like.findByPk({ 
+        where: { id: { [Op.eq]: likeId } }
+       })
+      await unlike.destroy()
+      return res.status(200)
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(417)
+    }
   }
 }
 

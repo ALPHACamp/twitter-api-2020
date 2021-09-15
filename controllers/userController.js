@@ -84,8 +84,9 @@ const userController = {
         { model: Like, as: 'likes' }
       ],
     })
+    const userData = await User.findByPk(userId)
     
-    return res.json({ userTweets })
+    return res.json({ userTweets, userData })
   },
 
   getRepliedTweets: async (req, res) => {
