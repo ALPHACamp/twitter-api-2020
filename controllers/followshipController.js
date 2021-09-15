@@ -7,11 +7,11 @@ const Followship = db.Followship
 const followshipController = {
   addFollowing: async (req, res, next) => {
     try {
-
-      const followingId = req.params.userId
+      const { id } = req.body
+      const followingId = Number(id)
       const followerId = req.user.id
 
-      if (followerId === Number(followingId)) {
+      if (followerId === followingId) {
         return res.status(422).json({
           status: 'error',
           message: 'Can not follow yourself'
@@ -32,8 +32,8 @@ const followshipController = {
       }
 
       await Followship.create({
-        followerId,
-        followingId
+        followingId,
+        followerId
       })
 
       return res.status(200).json({

@@ -6,7 +6,7 @@ const Like = db.Like
 
 const tweetController = {
   getTweets: (req, res, next) => {
-    //TODO:有req.user存在時，是user有追蹤的人才會出現推文
+    
     return Tweet.findAll({
       include: [User, Reply, Like],
       order: [['createdAt', 'DESC']],

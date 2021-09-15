@@ -13,7 +13,7 @@ router.get('/:tweetId/replies', authenticated, tweetController.getReply)
 // router.put('/replies/:replyId', authenticated, tweetController.putReply)
 // router.delete('/replies/:replyId', authenticated, tweetController.deleteReply)
 router.post('/:tweetId/like', authenticated, tweetController.addLike)
-router.post('/:tweetId/unlike', authenticated, tweetController.removeLike)
+router.delete('/:tweetId/unlike', authenticated, tweetController.removeLike)
 
 
 module.exports = router
