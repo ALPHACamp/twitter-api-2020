@@ -21,6 +21,9 @@ const userController = {
   },
   getUserFollowers: (req, res) => {
     userService.getUserFollowers(req, res, data => res.status(200).json(data))
+  },
+  getUserLikedTweets: (req, res) => {
+    userService.getUserLikedTweets(req, res, data => res.status(200).json(data))
   }
 }
 
