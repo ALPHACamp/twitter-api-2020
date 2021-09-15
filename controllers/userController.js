@@ -209,6 +209,23 @@ let userController = {
           })
       })
       .catch(err => {console.log(err)})
+  },
+  getTweets: (req, res) => {
+    User.findByPk(req.user.id,{
+      include: [
+        { model: User, as: 'Followers', attributes: ['id']},
+      ]
+    })
+    .then((user) => {
+      let followers = user.Followers.map(user => {return user.id}) //array去裝followers
+      Tweet.findAll({
+        where: {UserId: followers}
+      })
+        .then((tweet) =>{
+          return res.json({tweet})
+        })
+    })
+
   }
 }
 
