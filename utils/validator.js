@@ -53,7 +53,19 @@ const userInfoSchema = Joi.object({
   cover: Joi.string().trim()
 })
 
-// Filter joi error details to a single array
+// Joi schema for validating tweet format
+const tweetSchema = Joi.object({
+  description: Joi.string()
+    .trim()
+    .max(140)
+    .messages({
+      'string.base':'Data type of description must be a string',
+      'string.empty': 'The description cannot be blank',
+      'string.max': 'The description should not exceed 140 words'
+    })
+})
+
+// Filter Joi error details to a single array
 const joiMessageHandler = (errors) => {
     const messages = []
     errors.forEach(error => messages.push(error.message))
