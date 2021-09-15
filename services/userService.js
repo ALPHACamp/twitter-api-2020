@@ -248,6 +248,51 @@ const userService = {
       console.warn(err)
       return cb(err)
     }
+  },
+
+  getUserLikedTweets: async (req, res, cb) => {
+    try {
+      const loginUser = await User.findOne({
+        attributes: [],
+        where: { id: req.user.id },
+        include: { model: Like, attributes: ['TweetId'] }
+      })
+      let likedTweets = await User.findOne({
+        attributes: [],
+        where: { id: req.params.id },
+        include: {
+          model: Like,
+          include: {
+            model: Tweet,
+            attributes: { exclude: ['UserId'] },
+            include: [{ model: Like, attributes: ['id'] }, { model: Reply, attributes: ['id'] }]
+          }
+        },
+        order: [
+          [{ model: Like }, { model: Tweet }, 'createdAt', 'DESC']
+        ]
+      })
+      if (likedTweets === null) return cb({ message: '查無使用者' })
+      likedTweets = likedTweets.toJSON()
+      // 取得該使用者按讚過的推文id陣列['1','3','4']
+      likedTweets = likedTweets.Likes.map(like => (like.Tweet))
+      likedTweets.forEach(tweet => {
+        // 每則推文的回覆數/讚數
+        tweet.totalLikes = tweet.Likes.length
+        tweet.totalReplies = tweet.Replies.length
+        // 登入者是否也點過讚
+        tweet.isLiked = loginUser.Likes.map(t => (t.TweetId)).includes(tweet.id)
+        // 刪除前端不要的資訊、將id->TweetId
+        tweet.TweetId = tweet.id
+        delete tweet.id
+        delete tweet.Likes
+        delete tweet.Replies
+      });
+      return cb(likedTweets)
+    } catch (err) {
+      console.warn(err)
+      return cb(err)
+    }
   }
 }
 
