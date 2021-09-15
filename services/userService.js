@@ -50,6 +50,38 @@ const userService = {
       },
     }
   },
+  getUser: async(userId) => {
+    
+    const user = await User.findOne({
+      where: { id: userId },
+      attributes: [
+        "account",
+        "name",
+        "avatar",
+        "introduction",
+        [
+          Sequelize.literal(
+            `(SELECT COUNT(*) FROM TWEETS WHERE Tweets.UserId = ${userId})`
+          ),
+          "TweetsCount",
+        ],
+        [
+          Sequelize.literal(
+            `(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followingId = ${userId})`
+          ),
+          "FollowersCount",
+        ],
+        [
+          Sequelize.literal(
+            `(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followerId = ${userId})`
+          ),
+          "FollowingCount",
+        ], 
+      ]     
+    })
+
+    return user
+  },
   getCurrentUser: async (userId) => {
     const currentUser = await User.findOne({
       where: { id: userId },

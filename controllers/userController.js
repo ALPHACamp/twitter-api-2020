@@ -44,6 +44,22 @@ const userController = {
       res.sendStatus(500)
     }
   },
+  getUser: async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      if ( id === 1 ) {
+        return res.status(422).json({ status: 'error', message: "Cannot access admin's profile" })
+      }
+      const user = await userService.getUser(id)
+      if (!user) {
+        return res.status(401).json({ status: 'error', message: 'No such user found'})
+      }
+      return res.status(200).json(user)
+    } catch (error) {
+      console.log('getUser error', error)
+      res.sendStatus(500)
+    }
+  },
   getCurrentUser: async (req, res) => {
     try {
       const currentUser = await userService.getCurrentUser(helpers.getUser(req).id)

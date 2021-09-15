@@ -14,6 +14,8 @@ router.post('/signin', userController.signIn)
 
 router.get('/currentuser', authenticated, userController.getCurrentUser)
 
+router.get('/:id', authenticated, userController.getUser)
+
 router.put('/:id', authenticated, cpUpload, userController.putUser)
 
 module.exports = router
