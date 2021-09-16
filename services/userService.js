@@ -214,7 +214,7 @@ const userService = {
               Sequelize.literal(
                 "(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)"
               ),
-              "RepliesCount",
+              "LikesCount",
             ],
             [
               Sequelize.literal(
