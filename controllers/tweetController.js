@@ -43,23 +43,29 @@ const tweetController = {
       next(error)
     }
   },
-  postTweet: async (req, res) => {
-    const { description } = req.body
+  postTweet: async (req, res, next) => {
+    try {
+      const { description } = req.body
+      console.log(description)
 
-    // Check request body data format with Joi schema
-    const { error } = tweetSchema.validate(req.body, { abortEarly: false })
+      // Check request body data format with Joi schema
+      const { error } = tweetSchema.validate(req.body, { abortEarly: false })
 
-    if (error) {
-      return res.status(400).json({
-        status: 'error',
-        message: joiMessageHandler(error.details)
-      })
+      if (error) {
+        throw new ApiError(
+          'postTweetFormatError',
+          400,
+          joiMessageHandler(error.details)
+        )
+      }
+
+      // Create new tweet
+      const data = await tweetService.postTweet(req.user.id, description)
+
+      return res.status(200).json(data)
+    } catch (error) {
+      next(error)
     }
-
-    // Create new tweet
-    const data = await tweetService.postTweet(req.user.id, description)
-
-    return res.status(200).json(data)
   },
   postLikeTweet: async (req, res) => {
     const data = await tweetService.postLikeTweet(
