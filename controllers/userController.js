@@ -3,15 +3,19 @@ const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const userService = require('../services/userService')
 const helpers = require('../_helpers')
+const { joiMessageHandler, userInfoSchema } = require('../utils/validator')
 
 const userController = {
   signIn: async (req, res) => {
     const { account, password } = req.body
-    // Check required data
-    if (!account || !password) {
+
+    // Check request body data format with Joi schema
+    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
+
+    if (error) {
       return res.status(400).json({
         status: 'error',
-        message: "Required fields didn't exist"
+        message: joiMessageHandler(error.details)
       })
     }
 
@@ -71,38 +75,13 @@ const userController = {
   },
 
   postUser: async (req, res) => {
-    const { account, name, email, password, checkPassword } = req.body
+    // Check request body data format with Joi schema
+    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
 
-    // Check required data
-    if (!account || !email || !name || !password || !checkPassword) {
+    if (error) {
       return res.status(400).json({
         status: 'error',
-        message: "Required fields didn't exist"
-      })
-    }
-
-    // Check name characters
-    if (name.trim().length > 50) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'The name should not exceed 50 words'
-      })
-    }
-
-    // Check account format
-    const regex = new RegExp(/^\w+$/)
-    if (!account.match(regex)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'The account should only include number, letter and underline'
-      })
-    }
-
-    // Check if password equal to checkPassword
-    if (password !== checkPassword) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Password value is not equal to checkPassword'
+        message: joiMessageHandler(error.details)
       })
     }
 
@@ -115,9 +94,9 @@ const userController = {
 
     // Delete password attributes in response data
     delete data.dataValues.password
-    
+
     const responseData = {
-      status: 'success', 
+      status: 'success',
       message: 'Registration success',
       user: data.dataValues
     }
@@ -236,19 +215,6 @@ const userController = {
   },
 
   putUser: async (req, res) => {
-    const {
-      account,
-      name,
-      email,
-      password,
-      checkPassword,
-      cover,
-      avatar,
-      introduction
-    } = req.body
-
-    const errors = []
-
     // Check if the user is current user
     if (helpers.getUser(req).id !== Number(req.params.id)) {
       return res.status(403).json({
@@ -257,36 +223,17 @@ const userController = {
       })
     }
 
-    // Check name characters
-    if (name && name.trim().length > 50) {
-      errors.push('The name should not exceed 50 words')
-    }
+    // Check request body data format with Joi schema
+    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
 
-    // Check account format
-    const regex = new RegExp(/^\w+$/)
-    if (account && !account.match(regex)) {
-      errors.push(
-        'The account should only include number, letter and underline'
-      )
-    }
-
-    // Check if password equal to checkPassword
-    if (checkPassword && password !== checkPassword) {
-      errors.push('Password value is not equal to checkPassword')
-    }
-
-    // Check introduction characters
-    if (introduction && introduction.trim().length > 160) {
-      errors.push('The introduction should not exceed 160 words')
-    }
-
-    if (errors[0]) {
+    if (error) {
       return res.status(400).json({
         status: 'error',
-        message: errors
+        message: joiMessageHandler(error.details)
       })
     }
-
+    
+    // Update user data
     const user = await userService.putUser(req.params.id, req.body)
     delete user.dataValues.password
     const responseData = {
