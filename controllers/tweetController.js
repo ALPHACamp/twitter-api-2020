@@ -1,23 +1,30 @@
 const tweetService = require('../services/tweetService')
-const { joiMessageHandler, tweetSchema, replySchema } = require('../utils/validator')
+const {
+  joiMessageHandler,
+  tweetSchema,
+  replySchema
+} = require('../utils/validator')
+const ApiError = require('../utils/customError')
 
 const tweetController = {
-  getTweets: async (req, res) => {
-    let tweets = await tweetService.getTweets(req.user.id)
+  getTweets: async (req, res, next) => {
+    try {
+      let tweets = await tweetService.getTweets(req.user.id)
 
-    // Check whether tweets exists
-    if (!tweets) {
-      return res
-        .status(200)
-        .json({ status: 'success', message: 'No tweets found' })
+      // Check whether tweets exists
+      if (!tweets.length) {
+        throw new ApiError('GetTweetsError', 401, 'No tweets found')
+      }
+
+      // translate to boolean in isFollowed attribute
+      tweets.forEach((tweet) => {
+        tweet.isLike = !!tweet.isLike
+      })
+
+      return res.status(200).json(tweets)
+    } catch (error) {
+      next(error)
     }
-
-    // translate to boolean in isFollowed attribute
-    tweets.forEach(tweet => {
-      tweet.isLike = !!tweet.isLike
-    })
-
-    return res.status(200).json(tweets)
   },
   getTweet: async (req, res) => {
     let tweet = await tweetService.getTweet(req.user.id, req.params.tweetId)
@@ -85,7 +92,7 @@ const tweetController = {
         message: joiMessageHandler(error.details)
       })
     }
-    
+
     // Create new reply
     const data = await tweetService.postReply(
       req.user.id,
