@@ -1,17 +1,20 @@
 const adminService = require('../services/adminService')
+const ApiError = require('../utils/customError')
 
 const adminController = {
-  getUsers: async (req, res) => {
-    const users = await adminService.getUsers()
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await adminService.getUsers()
 
-    // Check whether users exists
-    if (!users) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'No users found' })
+      // Check whether users exists
+      if (!users) {
+        throw new ApiError('AdminGetUsersError', 401, 'No users found')
+      }
+
+      return res.status(200).json(users)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(users)
   },
 
   getTweets: async (req, res) => {
