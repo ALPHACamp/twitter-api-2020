@@ -9,57 +9,55 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const ApiError = require('../utils/customError')
 
 const userController = {
-  signIn: async (req, res) => {
-    const { account, password } = req.body
+  signIn: async (req, res, next) => {
+    try {
+      const { account, password } = req.body
 
-    // Check request body data format with Joi schema
-    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
+      // Check request body data format with Joi schema
+      const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
 
-    if (error) {
-      return res.status(400).json({
-        status: 'error',
-        message: joiMessageHandler(error.details)
-      })
-    }
-
-    // Check whether the user exists by account
-    const user = await userService.signIn(account)
-
-    if (!user) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'No such user found' })
-    }
-
-    // Check user role by baseUrl
-    if (!req.baseUrl.split('/')[2].includes(user.role)) {
-      return res.status(403).json({
-        status: 'error',
-        message: 'Permission denied'
-      })
-    }
-
-    // Check whether the user password is correct
-    if (!bcrypt.compareSync(password, user.password)) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: 'Incorrect password' })
-    }
-    // sign user token
-    const payload = { id: user.id }
-    const token = jwt.sign(payload, process.env.JWT_SECRET)
-
-    return res.status(200).json({
-      status: 'success',
-      message: 'Success to login',
-      token: token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
+      if (error) {
+        throw new ApiError(
+          'UserSingInFormatError',
+          400,
+          joiMessageHandler(error.details)
+        )
       }
-    })
+
+      // Check whether the user exists by account
+      const user = await userService.signIn(account)
+
+      if (!user) {
+        throw new ApiError('UserSingInFindError', 401, 'No such user found')
+      }
+
+      // Check user role by baseUrl
+      if (!req.baseUrl.split('/')[2].includes(user.role)) {
+        throw new ApiError('UserSingInRoleError', 403, 'Permission denied')
+      }
+
+      // Check whether the user password is correct
+      if (!bcrypt.compareSync(password, user.password)) {
+        throw new ApiError('UserSingInPasswordError', 400, 'Incorrect password')
+      }
+      // sign user token
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'Success to login',
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      })
+    } catch (error) {
+      next(error)
+    }
   },
 
   getCurrentUser: async (req, res) => {
