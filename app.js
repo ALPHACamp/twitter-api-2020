@@ -27,7 +27,7 @@ const handlebars = require('express-handlebars')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
 const cookieParser = require('cookie-parser')
-const passport = require('./config/passport')
+const passport = require('./config/passport')  
 const app = express()
 const PORT = process.env.PORT || 3000
 

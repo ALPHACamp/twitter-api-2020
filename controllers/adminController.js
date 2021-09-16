@@ -12,7 +12,7 @@ const adminController = {
     try {
       const allTweets = await Tweet.findAll({
         order: [[Sequelize.literal('createdAt'), "DESC"]],
-        include: [{ model: User, as: 'user' }]
+        include: [{ model: User, as: 'user', attributes: ['name', 'account', 'avatar'] }]
       })
       return res.json({ allTweets })
     }
@@ -24,6 +24,7 @@ const adminController = {
   getUsers: async (req, res) => {
     try {
       const allUsers = await User.findAll({
+        attributes: ['name', 'account', 'avatar', 'cover'],
         include: [
           { model: Reply, as: 'replies' },
           { model: Followship, as: 'followings' },

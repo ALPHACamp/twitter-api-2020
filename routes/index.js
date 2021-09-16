@@ -5,15 +5,28 @@ const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
 const followshipController = require('../controllers/followshipController')
 
-const authenticated = (req, res, next) => {
-  helpers.getUser(req).role === 'user' ? next() : res.redirect('/api/signin')
-}
-
-const authenticatedAdmin = (req, res, next) => {
-  helpers.getUser(req).role === 'admin' ? next() : res.redirect('/api/tweets')
-}
 
 module.exports = (app, passport) => {
+  
+  const authenticated = (req, res, next) => {
+    if (helpers.getUser(req).role === 'user') {
+      return next()
+    }
+    res.redirect('/api/signin')
+  }
+  
+  const authenticatedAdmin = (req, res, next) => {
+    if (helpers.getUser(req).role === 'admin') {
+      return next()
+    }
+    res.redirect('/api/tweets')
+  }
+
+  // const help = (req, res, next) => {
+  //   console.log(req.isAuthenticated())
+  //   return next()
+  // }
+
     // home 路由
   app.get('/api/signup', homeController.signUp)
 
@@ -24,6 +37,8 @@ module.exports = (app, passport) => {
   app.get('/api/logout', homeController.logout)
 
   app.post('/api/signin', homeController.postSignIn)
+
+  // app.post('/api/signin/admin', homeController.postSignInAdmin)
 
   app.post('/api/users', homeController.postSignUp)
 
@@ -63,5 +78,5 @@ module.exports = (app, passport) => {
 
   app.get('/api/admin/users', helpers.ensureAuthenticated, authenticatedAdmin, adminController.getUsers)
 
-  app.delete('/api/admin/tweets/id', helpers.ensureAuthenticated, authenticatedAdmin, adminController.deleteTweet)
+  app.delete('/api/admin/tweets/:id', helpers.ensureAuthenticated, authenticatedAdmin, adminController.deleteTweet)
 }

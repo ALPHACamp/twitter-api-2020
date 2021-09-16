@@ -1,6 +1,6 @@
 'use strict';
 const bcrypt = require('bcryptjs')
-
+const faker = require('faker');
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Users', [{
@@ -10,7 +10,7 @@ module.exports = {
       name: 'root',
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       introduction: faker.lorem.text(),
-      account: faker.lorem.text(),
+      account: faker.lorem.text().slice(0, 5),
       cover: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -21,7 +21,7 @@ module.exports = {
       name: 'user1',
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       introduction: faker.lorem.text(),
-      account: faker.lorem.text(),
+      account: faker.lorem.text().slice(0, 5),
       cover: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -32,7 +32,7 @@ module.exports = {
       name: 'user2',
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       introduction: faker.lorem.text(),
-      account: faker.lorem.text(),
+      account: faker.lorem.text().slice(0, 5),
       cover: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -43,7 +43,7 @@ module.exports = {
       name: 'user3',
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       introduction: faker.lorem.text(),
-      account: faker.lorem.text(),
+      account: faker.lorem.text().slice(0, 5),
       cover: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -54,7 +54,7 @@ module.exports = {
       name: 'user4',
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       introduction: faker.lorem.text(),
-      account: faker.lorem.text(),
+      account: faker.lorem.text().slice(0, 5),
       cover: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -65,7 +65,7 @@ module.exports = {
       name: 'user5',
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       introduction: faker.lorem.text(),
-      account: faker.lorem.text(),
+      account: faker.lorem.text().slice(0, 5),
       cover: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       createdAt: new Date(),
       updatedAt: new Date()
