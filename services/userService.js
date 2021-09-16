@@ -59,6 +59,7 @@ const userService = {
       nest: true,
       where: { id: userId },
       attributes: [
+        "id",
         "account",
         "name",
         "avatar",
@@ -97,6 +98,7 @@ const userService = {
       nest: true,
       where: { id: userId },
       attributes: [
+        "id",
         "account",
         "name",
         "email",
