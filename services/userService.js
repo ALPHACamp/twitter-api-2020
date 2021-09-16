@@ -12,8 +12,8 @@ const userService = {
       where: { id },
       attributes: { exclude: ['password'] },
       include: [
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
+        { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
+        { model: User, as: 'Followings', attributes: { exclude: ['password'] } },
         { model: Like }
       ]
     })
@@ -212,7 +212,7 @@ const userService = {
 
   getTopUsers: async (currentUserId) => {
     return await User.findAll({
-      where: { id: { [Op.not]: currentUserId } },
+      where: { id: { [Op.not]: currentUserId }, role: 'user' },
       include: [
         {
           model: User,
