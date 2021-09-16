@@ -109,25 +109,27 @@ const userController = {
     }
   },
 
-  getUser: async (req, res) => {
-    const [targetUserId, currentUserId] = [
-      req.params.id,
-      helpers.getUser(req).id
-    ]
+  getUser: async (req, res, next) => {
+    try {
+      const [targetUserId, currentUserId] = [
+        req.params.id,
+        helpers.getUser(req).id
+      ]
 
-    let user = await userService.getUser(targetUserId, currentUserId)
+      let user = await userService.getUser(targetUserId, currentUserId)
 
-    // Check whether the user exists
-    if (!user) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'No such user found' })
+      // Check whether the user exists
+      if (!user) {
+        throw new ApiError('GetUserFindError', 401, 'No such user found')
+      }
+
+      // translate to boolean in isFollowed attribute
+      user.dataValues.isFollowed = !!user.dataValues.isFollowed
+
+      return res.status(200).json(user)
+    } catch (error) {
+      next(error)
     }
-
-    // translate to boolean in isFollowed attribute
-    user.dataValues.isFollowed = !!user.dataValues.isFollowed
-
-    return res.status(200).json(user)
   },
 
   getUserTweets: async (req, res) => {
