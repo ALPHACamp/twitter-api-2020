@@ -27,6 +27,8 @@ app.use(passport.initialize())
 app.use(methodOverride('_method'))
 
 app.use(routes)
+
+// Setting custom error handling
 app.use(apiErrorHandler)
 
 app.listen(PORT, () =>
