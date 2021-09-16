@@ -120,6 +120,18 @@ const userController = {
       console.log('getUserRepliedTweets error', error)
       res.sendStatus(400)
     }
+  },
+  getUserLikedTweets: async (req, res) => {
+    const id = Number(req.params.id);
+    const currentUserId = helpers.getUser(req).id;
+
+    try {
+      const tweets = await userService.getUserLikedTweets(id, currentUserId)
+      return res.status(200).json(tweets)
+    } catch (error) {
+      console.log('getUserLikedTweets error', error)
+      res.sendStatus(400)
+    }
   }
 };
 

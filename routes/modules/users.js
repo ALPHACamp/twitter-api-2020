@@ -21,4 +21,6 @@ router.get('/:id/tweets', authenticated, checkRole(), userController.getUserTwee
 
 router.get("/:id/replied_tweets", authenticated, checkRole(), userController.getUserRepliedTweets);
 
+router.get('/:id/likes', authenticated, checkRole(), userController.getUserLikedTweets)
+
 module.exports = router

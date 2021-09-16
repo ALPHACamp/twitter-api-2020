@@ -239,6 +239,47 @@ const userService = {
       }
     }
     return replies
+  },
+  getUserLikedTweets: async (id, currentUserId) => {
+    const user = await User.findByPk(id);
+    if (!user) {
+      return {
+        status: "error",
+        message: "Can't find this user",
+      };
+    }
+    const tweets = await Tweet.findAll({
+      include: [
+        { model: Like, where: { UserId: id }, attributes: ['UserId']},
+        { model: User, attributes: ["id", "name", "account", "avatar"] },
+      ],
+      attributes: [
+        ["id", "TweetId"],
+        "description",
+        "createdAt",
+        [
+          Sequelize.literal(
+            "(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)"
+          ),
+          "RepliesCount",
+        ],
+        [
+          Sequelize.literal(
+            "(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)"
+          ),
+          "LikesCount",
+        ],
+        [
+          Sequelize.literal(
+            `exists(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} and TweetId = Tweet.id)`
+          ),
+          "isLike",
+        ],
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    return tweets
   }
 }
 
