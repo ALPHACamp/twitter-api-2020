@@ -6,6 +6,7 @@ const helpers = require('../_helpers')
 const { joiMessageHandler, userInfoSchema } = require('../utils/validator')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const ApiError = require('../utils/customError')
 
 const userController = {
   signIn: async (req, res) => {
@@ -76,33 +77,36 @@ const userController = {
     return res.status(200).json(currentUser)
   },
 
-  postUser: async (req, res) => {
-    // Check request body data format with Joi schema
-    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
-
-    if (error) {
-      return res.status(400).json({
-        status: 'error',
-        message: joiMessageHandler(error.details)
+  postUser: async (req, res, next) => {
+    try {
+      // Check the user registration format
+      const { error } = userInfoSchema.validate(req.body, {
+        abortEarly: false
       })
+
+      if (error) {
+        throw new ApiError(
+          'UserSingnupError',
+          400,
+          joiMessageHandler(error.details)
+        )
+      }
+
+      // Call userService to create account
+      const data = await userService.postUser(req.body)
+
+      // Delete password attributes in response data
+      delete data.dataValues.password
+
+      const responseData = {
+        status: 'success',
+        message: 'Registration success',
+        user: data.dataValues
+      }
+      return res.status(200).json(responseData)
+    } catch (error) {
+      return next(error)
     }
-
-    // Call userService to create account
-    const data = await userService.postUser(req.body)
-
-    if (data['status'] === 'error') {
-      return res.status(401).json(data)
-    }
-
-    // Delete password attributes in response data
-    delete data.dataValues.password
-
-    const responseData = {
-      status: 'success',
-      message: 'Registration success',
-      user: data.dataValues
-    }
-    return res.status(200).json(responseData)
   },
 
   getUser: async (req, res) => {
@@ -140,9 +144,9 @@ const userController = {
         .status(200)
         .json({ status: 'success', message: 'No tweets found' })
     }
-    
+
     // translate to boolean in isFollowed attribute
-    tweets.forEach(tweet => {
+    tweets.forEach((tweet) => {
       tweet.dataValues.isLike = !!tweet.dataValues.isLike
     })
 
@@ -181,7 +185,7 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    tweets.forEach(tweet => {
+    tweets.forEach((tweet) => {
       tweet.isLike = !!tweet.isLike
     })
 
@@ -227,7 +231,7 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    users.forEach(user => {
+    users.forEach((user) => {
       user.isFollowed = !!user.isFollowed
     })
 
@@ -255,7 +259,7 @@ const userController = {
 
     // handle image upload
     const { files } = req
-    
+
     if (files) {
       imgur.setClientId(IMGUR_CLIENT_ID)
       if (files.avatar) {
@@ -267,7 +271,7 @@ const userController = {
         req.body.cover = coverData.link
       }
     }
-    
+
     // Update user data
     const user = await userService.putUser(req.params.id, req.body)
     delete user.dataValues.password
@@ -291,7 +295,7 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    users.forEach(user => {
+    users.forEach((user) => {
       user.dataValues.isFollowed = !!user.dataValues.isFollowed
     })
 
