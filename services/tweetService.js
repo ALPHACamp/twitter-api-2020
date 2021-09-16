@@ -1,12 +1,11 @@
 const { Tweet, Reply, Like, User, Sequelize } = require('../models')
 const helpers = require('../_helpers')
-// 新增推文 - POST /tweets
-// post('/api/tweets')
+
 const TweetService = {
   postTweet: async (req, res, callback) => {
     const { description } = req.body
     if (!description.trim().length) {
-      return callback({ status: 'error', message: "tweet content can't be blank" })
+      return callback(400, { status: 'error', message: "tweet content can't be blank" })
     }
 
     try {
@@ -73,7 +72,36 @@ const TweetService = {
       console.log('getTweet error', err)
       res.sendStatus(500)
     }
+  },
+  postReply: async (req, res, callback) => {
+    const { comment } = req.body
+    const { tweet_id } = req.params
+
+    try {
+      const tweet = await Tweet.findByPk(tweet_id)
+
+      if (!tweet) {
+        return callback(400, { status: 'error', message: "tweet doesn't exist" })
+      }
+
+      if (!comment.trim().length) {
+        return callback(400, { status: 'error', message: "reply content can't be blank" })
+      }
+
+      await Reply.create({
+        TweetId: tweet_id,
+        UserId: helpers.getUser(req).id,
+        comment: comment.trim()
+      })
+      callback(200, { status: 'success', message: 'reply tweet successfully' })
+    } catch (err) {
+      console.log('postReply error', err)
+      res.sendStatus(500)
+    }
+  },
+  getReplies: async (req, res, callback) => {
   }
+
 }
 
 module.exports = TweetService
