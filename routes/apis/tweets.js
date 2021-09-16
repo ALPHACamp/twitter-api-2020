@@ -1,17 +1,17 @@
 const express = require('express')
 const router = express.Router()
 const tweetController = require('../../controllers/tweetController')
-const { authenticated } = require('../../middleware/auth')
+const { authenticated, checkRoleIsUser } = require('../../middleware/auth')
 
-router.get('/', authenticated, tweetController.getTweets)
-router.get('/:id', authenticated, tweetController.getTweet)
-router.delete('/:id', authenticated, tweetController.deleteTweet)
-router.post('/', authenticated, tweetController.postTweet)
-router.put('/:id', authenticated, tweetController.putTweet)
-router.post('/:tweetId/replies', authenticated, tweetController.postReply)
-router.get('/:tweetId/replies', authenticated, tweetController.getReply)
-router.post('/:tweetId/like', authenticated, tweetController.addLike)
-router.post('/:tweetId/unlike', authenticated, tweetController.removeLike)
+router.get('/', authenticated, checkRoleIsUser, tweetController.getTweets)
+router.get('/:id', authenticated, checkRoleIsUser, tweetController.getTweet)
+router.delete('/:id', authenticated, checkRoleIsUser, tweetController.deleteTweet)
+router.post('/', authenticated, checkRoleIsUser, tweetController.postTweet)
+router.put('/:id', authenticated, checkRoleIsUser, tweetController.putTweet)
+router.post('/:tweetId/replies', authenticated, checkRoleIsUser, tweetController.postReply)
+router.get('/:tweetId/replies', authenticated, checkRoleIsUser, tweetController.getReply)
+router.post('/:tweetId/like', authenticated, checkRoleIsUser, tweetController.addLike)
+router.post('/:tweetId/unlike', authenticated, checkRoleIsUser, tweetController.removeLike)
 
 
 module.exports = router
