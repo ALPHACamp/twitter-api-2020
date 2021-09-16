@@ -26,20 +26,22 @@ const tweetController = {
       next(error)
     }
   },
-  getTweet: async (req, res) => {
-    let tweet = await tweetService.getTweet(req.user.id, req.params.tweetId)
+  getTweet: async (req, res, next) => {
+    try {
+      let tweet = await tweetService.getTweet(req.user.id, req.params.tweetId)
 
-    // Check whether tweets exists
-    if (!tweet) {
-      return res
-        .status(200)
-        .json({ status: 'success', message: 'No tweet found' })
+      // Check whether tweets exists
+      if (!tweet) {
+        throw new ApiError('GetTweetError', 401, 'No tweet found')
+      }
+
+      // translate to boolean in isFollowed attribute
+      tweet.dataValues.isLike = !!tweet.dataValues.isLike
+
+      return res.status(200).json(tweet)
+    } catch (error) {
+      next(error)
     }
-
-    // translate to boolean in isFollowed attribute
-    tweet.dataValues.isLike = !!tweet.dataValues.isLike
-
-    return res.status(200).json(tweet)
   },
   postTweet: async (req, res) => {
     const { description } = req.body
