@@ -121,7 +121,7 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    user.dataValues.isFollowed = user.dataValues.isFollowed ? true : false
+    user.dataValues.isFollowed = !!user.dataValues.isFollowed
 
     return res.status(200).json(user)
   },
@@ -132,7 +132,7 @@ const userController = {
       helpers.getUser(req).id
     ]
 
-    const tweets = await userService.getUserTweets(targetUserId, currentUserId)
+    let tweets = await userService.getUserTweets(targetUserId, currentUserId)
 
     // Check whether the tweets exist
     if (!tweets) {
@@ -140,6 +140,11 @@ const userController = {
         .status(200)
         .json({ status: 'success', message: 'No tweets found' })
     }
+    
+    // translate to boolean in isFollowed attribute
+    tweets.forEach(tweet => {
+      tweet.dataValues.isLike = !!tweet.dataValues.isLike
+    })
 
     return res.status(200).json(tweets)
   },
@@ -163,7 +168,7 @@ const userController = {
       helpers.getUser(req).id
     ]
 
-    const tweets = await userService.getUserLikedTweets(
+    let tweets = await userService.getUserLikedTweets(
       targetUserId,
       currentUserId
     )
@@ -174,6 +179,11 @@ const userController = {
         .status(200)
         .json({ status: 'success', message: 'No tweets found' })
     }
+
+    // translate to boolean in isFollowed attribute
+    tweets.forEach(tweet => {
+      tweet.isLike = !!tweet.isLike
+    })
 
     return res.status(200).json(tweets)
   },
@@ -195,7 +205,7 @@ const userController = {
 
     // translate to boolean in isFollowed attribute
     users.forEach((user) => {
-      user.isFollowed = user.isFollowed ? true : false
+      user.isFollowed = !!user.isFollowed
     })
 
     return res.status(200).json(users)
@@ -217,8 +227,8 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    users.forEach((user) => {
-      user.isFollowed = user.isFollowed ? true : false
+    users.forEach(user => {
+      user.isFollowed = !!user.isFollowed
     })
 
     return res.status(200).json(users)
@@ -281,8 +291,8 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    users.forEach((user) => {
-      user.dataValues.isFollowed = user.dataValues.isFollowed ? true : false
+    users.forEach(user => {
+      user.dataValues.isFollowed = !!user.dataValues.isFollowed
     })
 
     return res.status(200).json(users)

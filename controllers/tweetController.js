@@ -3,7 +3,7 @@ const { joiMessageHandler, tweetSchema, replySchema } = require('../utils/valida
 
 const tweetController = {
   getTweets: async (req, res) => {
-    const tweets = await tweetService.getTweets(req.user.id)
+    let tweets = await tweetService.getTweets(req.user.id)
 
     // Check whether tweets exists
     if (!tweets) {
@@ -12,10 +12,15 @@ const tweetController = {
         .json({ status: 'success', message: 'No tweets found' })
     }
 
+    // translate to boolean in isFollowed attribute
+    tweets.forEach(tweet => {
+      tweet.isLike = !!tweet.isLike
+    })
+
     return res.status(200).json(tweets)
   },
   getTweet: async (req, res) => {
-    const tweet = await tweetService.getTweet(req.user.id, req.params.tweetId)
+    let tweet = await tweetService.getTweet(req.user.id, req.params.tweetId)
 
     // Check whether tweets exists
     if (!tweet) {
@@ -23,6 +28,9 @@ const tweetController = {
         .status(200)
         .json({ status: 'success', message: 'No tweet found' })
     }
+
+    // translate to boolean in isFollowed attribute
+    tweet.dataValues.isLike = !!tweet.dataValues.isLike
 
     return res.status(200).json(tweet)
   },
