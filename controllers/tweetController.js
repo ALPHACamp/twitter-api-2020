@@ -1,5 +1,3 @@
-// const db = require('../models')
-// const Tweet = db.Tweet
 const TweetService = require('../services/tweetService.js')
 
 const tweetController = {

@@ -1,6 +1,5 @@
 const { Tweet, Reply, Like, User, Sequelize } = require('../models')
 const helpers = require('../_helpers')
-
 // 新增推文 - POST /tweets
 // post('/api/tweets')
 const TweetService = {
@@ -20,7 +19,7 @@ const TweetService = {
         message: 'tweet was successfully created'
       })
     } catch (err) {
-      console.log('postTweet', err)
+      console.log('postTweet error', err)
       res.sendStatus(500)
     }
   },
@@ -37,7 +36,7 @@ const TweetService = {
         createdAt: r.createdAt,
         LikesCount: r.Likes.length,
         RepliesCount: r.Replies.length,
-        isLike: false,
+        isLike: r.Likes.find(like => like.UserId === helpers.getUser(req).id) !== undefined,
         User: {
           id: r.User.id,
           name: r.User.name,
@@ -47,7 +46,7 @@ const TweetService = {
       }))
       callback(200, data)
     } catch (err) {
-      console.log('getTweets', err)
+      console.log('getTweets error', err)
       res.sendStatus(500)
     }
   },
@@ -63,16 +62,15 @@ const TweetService = {
         ],
         order: [[Reply, 'createdAt', 'DESC']]
       })
-      console.log(tweet)
       const data = tweet.toJSON()
       data.RepliesCount = tweet.Replies.length
       data.LikesCount = tweet.Likes.length
-      data.isLike = false
+      data.isLike = tweet.Likes.find(like => like.UserId === helpers.getUser(req).id) !== undefined
       delete data.Likes
 
       callback(200, data)
     } catch (err) {
-      console.log('getTweet', err)
+      console.log('getTweet error', err)
       res.sendStatus(500)
     }
   }
