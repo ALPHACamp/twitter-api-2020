@@ -22,11 +22,6 @@ module.exports = (app, passport) => {
     res.redirect('/api/tweets')
   }
 
-  // const help = (req, res, next) => {
-  //   console.log(req.isAuthenticated())
-  //   return next()
-  // }
-
     // home 路由
   app.get('/api/signup', homeController.signUp)
 
@@ -37,8 +32,6 @@ module.exports = (app, passport) => {
   app.get('/api/logout', homeController.logout)
 
   app.post('/api/signin', homeController.postSignIn)
-
-  // app.post('/api/signin/admin', homeController.postSignInAdmin)
 
   app.post('/api/users', homeController.postSignUp)
 
