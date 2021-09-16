@@ -77,11 +77,11 @@ const userController = {
   },
   putUser: async (req, res) => {
     try {
-      const id = req.params.id
+      const id = Number(req.params.id)
       const { files } = req
 
 
-      if (helpers.getUser(req).id !== Number(id)) {
+      if (helpers.getUser(req).id !== id) {
         return res.status(403).json({
           status: 'error',
           message: 'Cannot edit others user profile'
@@ -96,6 +96,17 @@ const userController = {
     } catch (error) {
       console.log('editProfile error', error)
       res.sendStatus(500)
+    }
+  },
+  getUserTweets: async (req, res) => {
+    const id = Number(req.params.id);
+    const currentUserId = helpers.getUser(req).id;
+    try {
+      const tweets = await userService.getUserTweets(id, currentUserId)
+      return res.status(200).json(tweets)
+    } catch (error) {
+      console.log('getUserTweets error', error)
+      res.sendStatus(400)
     }
   }
 };
