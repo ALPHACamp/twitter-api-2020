@@ -4,6 +4,8 @@ const { User } = require('../models')
 const userService = require('../services/userService')
 const helpers = require('../_helpers')
 const { joiMessageHandler, userInfoSchema } = require('../utils/validator')
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
   signIn: async (req, res) => {
@@ -104,7 +106,12 @@ const userController = {
   },
 
   getUser: async (req, res) => {
-    const user = await userService.getUser(req.params.id)
+    const [targetUserId, currentUserId] = [
+      req.params.id,
+      helpers.getUser(req).id
+    ]
+
+    let user = await userService.getUser(targetUserId, currentUserId)
 
     // Check whether the user exists
     if (!user) {
@@ -112,6 +119,9 @@ const userController = {
         .status(401)
         .json({ status: 'error', message: 'No such user found' })
     }
+
+    // translate to boolean in isFollowed attribute
+    user.dataValues.isFollowed = !!user.dataValues.isFollowed
 
     return res.status(200).json(user)
   },
@@ -122,7 +132,7 @@ const userController = {
       helpers.getUser(req).id
     ]
 
-    const tweets = await userService.getUserTweets(targetUserId, currentUserId)
+    let tweets = await userService.getUserTweets(targetUserId, currentUserId)
 
     // Check whether the tweets exist
     if (!tweets) {
@@ -130,6 +140,11 @@ const userController = {
         .status(200)
         .json({ status: 'success', message: 'No tweets found' })
     }
+    
+    // translate to boolean in isFollowed attribute
+    tweets.forEach(tweet => {
+      tweet.dataValues.isLike = !!tweet.dataValues.isLike
+    })
 
     return res.status(200).json(tweets)
   },
@@ -153,7 +168,7 @@ const userController = {
       helpers.getUser(req).id
     ]
 
-    const tweets = await userService.getUserLikedTweets(
+    let tweets = await userService.getUserLikedTweets(
       targetUserId,
       currentUserId
     )
@@ -164,6 +179,11 @@ const userController = {
         .status(200)
         .json({ status: 'success', message: 'No tweets found' })
     }
+
+    // translate to boolean in isFollowed attribute
+    tweets.forEach(tweet => {
+      tweet.isLike = !!tweet.isLike
+    })
 
     return res.status(200).json(tweets)
   },
@@ -185,7 +205,7 @@ const userController = {
 
     // translate to boolean in isFollowed attribute
     users.forEach((user) => {
-      user.isFollowed = user.isFollowed ? true : false
+      user.isFollowed = !!user.isFollowed
     })
 
     return res.status(200).json(users)
@@ -207,8 +227,8 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    users.forEach((user) => {
-      user.isFollowed = user.isFollowed ? true : false
+    users.forEach(user => {
+      user.isFollowed = !!user.isFollowed
     })
 
     return res.status(200).json(users)
@@ -231,6 +251,21 @@ const userController = {
         status: 'error',
         message: joiMessageHandler(error.details)
       })
+    }
+
+    // handle image upload
+    const { files } = req
+    
+    if (files) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      if (files.avatar) {
+        const avatarData = await imgur.uploadFile(files.avatar[0].path)
+        req.body.avatar = avatarData.link
+      }
+      if (files.cover) {
+        const coverData = await imgur.uploadFile(files.cover[0].path)
+        req.body.cover = coverData.link
+      }
     }
     
     // Update user data
@@ -256,8 +291,8 @@ const userController = {
     }
 
     // translate to boolean in isFollowed attribute
-    users.forEach((user) => {
-      user.dataValues.isFollowed = user.dataValues.isFollowed ? true : false
+    users.forEach(user => {
+      user.dataValues.isFollowed = !!user.dataValues.isFollowed
     })
 
     return res.status(200).json(users)
