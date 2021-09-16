@@ -1,3 +1,4 @@
+const sequelize = require('sequelize')
 const db = require('../models')
 const { Tweet, Reply, Like, Followship, User } = db
 const { getLikedTweets } = require('../tools/helper')
@@ -45,19 +46,19 @@ const tweetService = {
       // 取得推文及回覆總數跟按讚總數
       let tweet = await Tweet.findOne({
         where: { id: req.params.tweet_id },
-        attributes: ['id', 'description', 'updatedAt'],
+        attributes: ['id', 'description', 'updatedAt',
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReply'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLike'],
+        ],
         include: [
-          { model: Reply, attributes: ['id'] },
-          { model: Like, attributes: ['id'] },
+          { model: Reply, attributes: [] },
+          { model: Like, attributes: [] },
         ]
       })
+      if (tweet.id === null) return cb({ status: '400', message: '推文不存在' })
       tweet = tweet.toJSON()
       tweet.isLiked = likedTweets.includes(tweet.id)
-      const totalReply = tweet.Replies.length
-      const totalLike = tweet.Likes.length
-      delete tweet.Replies
-      delete tweet.Likes
-      return cb({ status: '200', ...tweet, totalReply, totalLike })
+      return cb({ status: '200', ...tweet })
     } catch (err) {
       console.warn(err)
       return cb({ status: '500', message: err })
