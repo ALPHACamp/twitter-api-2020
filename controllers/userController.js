@@ -308,22 +308,24 @@ const userController = {
     }
   },
 
-  getTopUsers: async (req, res) => {
-    const users = await userService.getTopUsers(helpers.getUser(req).id)
+  getTopUsers: async (req, res, next) => {
+    try {
+      const users = await userService.getTopUsers(helpers.getUser(req).id)
 
-    // Check whether the users exist
-    if (!users) {
-      return res
-        .status(200)
-        .json({ status: 'success', message: 'No users found' })
+      // Check whether the users exist
+      if (!users.length) {
+        throw new ApiError('getTopUsersError', 401, 'No users found')
+      }
+
+      // translate to boolean in isFollowed attribute
+      users.forEach((user) => {
+        user.dataValues.isFollowed = !!user.dataValues.isFollowed
+      })
+
+      return res.status(200).json(users)
+    } catch (error) {
+      next(error)
     }
-
-    // translate to boolean in isFollowed attribute
-    users.forEach((user) => {
-      user.dataValues.isFollowed = !!user.dataValues.isFollowed
-    })
-
-    return res.status(200).json(users)
   }
 }
 
