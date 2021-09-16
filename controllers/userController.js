@@ -172,30 +172,32 @@ const userController = {
     }
   },
 
-  getUserLikedTweets: async (req, res) => {
-    const [targetUserId, currentUserId] = [
-      req.params.id,
-      helpers.getUser(req).id
-    ]
+  getUserLikedTweets: async (req, res, next) => {
+    try {
+      const [targetUserId, currentUserId] = [
+        req.params.id,
+        helpers.getUser(req).id
+      ]
 
-    let tweets = await userService.getUserLikedTweets(
-      targetUserId,
-      currentUserId
-    )
+      let tweets = await userService.getUserLikedTweets(
+        targetUserId,
+        currentUserId
+      )
 
-    // Check whether the tweets exist
-    if (!tweets) {
-      return res
-        .status(200)
-        .json({ status: 'success', message: 'No tweets found' })
+      // Check whether the tweets exist
+      if (!tweets.length) {
+        throw new ApiError('GetUserLikedTweetsError', 401, 'No tweets found')
+      }
+
+      // translate to boolean in isFollowed attribute
+      tweets.forEach((tweet) => {
+        tweet.isLike = !!tweet.isLike
+      })
+
+      return res.status(200).json(tweets)
+    } catch (error) {
+      next(error)
     }
-
-    // translate to boolean in isFollowed attribute
-    tweets.forEach((tweet) => {
-      tweet.isLike = !!tweet.isLike
-    })
-
-    return res.status(200).json(tweets)
   },
 
   getUserFollowings: async (req, res) => {
