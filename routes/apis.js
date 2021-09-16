@@ -18,5 +18,7 @@ router.get('/tweets', tweetController.getTweets) // 推文首頁
 router.get('/tweets/:tweet_id', tweetController.getTweet) // 特定推文頁
 router.post('/tweets', tweetController.postTweet) // 新增推文
 router.get('/tweets/:tweet_id/replies', tweetController.getReplies) // 特定推文的所有回覆
+router.post('/tweets/:tweet_id/like', tweetController.likeTweet) // 喜歡一則推文
+router.post('/tweets/:tweet_id/unlike', tweetController.unlikeTweet) // 喜歡一則推文
 
 module.exports = router

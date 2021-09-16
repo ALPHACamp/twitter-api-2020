@@ -5,7 +5,7 @@ const db = require('../../models')
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
-// const helpers = require('../../_helpers')
+const helpers = require('../../_helpers')
 
 const tweetController = {
   getTweets: (req, res) => {
@@ -38,7 +38,7 @@ const tweetController = {
   },
   postTweet: (req, res) => {
     return Tweet.create({
-      UserId: req.user.id,
+      UserId: helpers.getUser(req).id,
       description: req.body.description
     }).then(tweet => {
       res.json({ status: 'success', message: 'Tweet was successfully posted', tweet: tweet })
@@ -53,6 +53,27 @@ const tweetController = {
       where: { id: req.params.tweet_id }
     }).then(tweet => {
       return res.json({ tweet: tweet })
+    })
+  },
+  likeTweet: (req, res) => {
+    return Like.create({
+      UserId: helpers.getUser(req).id,
+      TweetId: req.params.tweet_id
+    }).then(like => {
+      return res.json({ status: 'success', message: 'Tweet was liked.' })
+    })
+  },
+  unlikeTweet: (req, res) => {
+    return Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweet_id
+      }
+    }).then(like => {
+      like.destroy()
+      .then(like => {
+        return res.json({ status: 'success', message: 'Tweet was unliked.' })
+      })
     })
   },
 }
