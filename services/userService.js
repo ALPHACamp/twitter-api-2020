@@ -59,6 +59,7 @@ const userService = {
       nest: true,
       where: { id: userId },
       attributes: [
+        "id",
         "account",
         "name",
         "avatar",
@@ -97,6 +98,7 @@ const userService = {
       nest: true,
       where: { id: userId },
       attributes: [
+        "id",
         "account",
         "name",
         "email",
@@ -146,6 +148,45 @@ const userService = {
     }
     await user.update({ ...body, avatar: user.avatar, cover: user.cover })
     return { status: 'success', message: 'successfully edited' }
+  },
+  getUserTweets: async (id, currentUserId) => {
+    const user = await User.findByPk(id)
+    if (!user) {
+      return {
+        status: 'error',
+        message: "Couldn't find this user"
+      }
+    }
+    return await Tweet.findAll({
+      where: { UserId: id },
+      attributes: [
+        ["id", "TweetId"],
+        "description",
+        "createdAt",
+        [
+          Sequelize.literal(
+            "(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)"
+          ),
+          "RepliesCount",
+        ],
+        [
+          Sequelize.literal(
+            "(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)"
+          ),
+          "LikesCount",
+        ],
+        [
+          Sequelize.literal(
+            `exists(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} and TweetId = Tweet.id)`
+          ),
+          "isLike",
+        ],
+      ],
+      include: [
+        { model: User, attributes: ['id', 'avatar', 'name', 'account']}
+      ],
+      order: [['createdAt', 'DESC']]
+    });
   }
 }
 
