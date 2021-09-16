@@ -67,13 +67,17 @@ const tweetController = {
       next(error)
     }
   },
-  postLikeTweet: async (req, res) => {
-    const data = await tweetService.postLikeTweet(
-      req.user.id,
-      req.params.tweetId
-    )
+  postLikeTweet: async (req, res, next) => {
+    try {
+      const data = await tweetService.postLikeTweet(
+        req.user.id,
+        req.params.tweetId
+      )
 
-    return res.status(200).json(data)
+      return res.status(200).json(data)
+    } catch (error) {
+      next(error)
+    }
   },
   postUnlikeTweet: async (req, res) => {
     const data = await tweetService.postUnlikeTweet(
