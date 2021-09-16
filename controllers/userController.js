@@ -256,50 +256,56 @@ const userController = {
     }
   },
 
-  putUser: async (req, res) => {
-    // Check if the user is current user
-    if (helpers.getUser(req).id !== Number(req.params.id)) {
-      return res.status(403).json({
-        status: 'error',
-        message: "Should not edit the other user's profile"
-      })
-    }
-
-    // Check request body data format with Joi schema
-    const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
-
-    if (error) {
-      return res.status(400).json({
-        status: 'error',
-        message: joiMessageHandler(error.details)
-      })
-    }
-
-    // handle image upload
-    const { files } = req
-
-    if (files) {
-      imgur.setClientId(IMGUR_CLIENT_ID)
-      if (files.avatar) {
-        const avatarData = await imgur.uploadFile(files.avatar[0].path)
-        req.body.avatar = avatarData.link
+  putUser: async (req, res, next) => {
+    try {
+      // Check if the user is current user
+      if (helpers.getUser(req).id !== Number(req.params.id)) {
+        throw new ApiError(
+          'PutUserPermissionError',
+          403,
+          "Should not edit the other user's profile"
+        )
       }
-      if (files.cover) {
-        const coverData = await imgur.uploadFile(files.cover[0].path)
-        req.body.cover = coverData.link
+
+      // Check request body data format with Joi schema
+      const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
+
+      if (error) {
+        throw new ApiError(
+          'PutUserFormatError',
+          400,
+          joiMessageHandler(error.details)
+        )
       }
-    }
 
-    // Update user data
-    const user = await userService.putUser(req.params.id, req.body)
-    delete user.dataValues.password
-    const responseData = {
-      status: 'success',
-      message: 'Account info has updated',
-      user: user.dataValues
-    }
+      // handle image upload
+      const { files } = req
 
-    return res.status(200).json(responseData)
+      if (files) {
+        imgur.setClientId(IMGUR_CLIENT_ID)
+        if (files.avatar) {
+          const avatarData = await imgur.uploadFile(files.avatar[0].path)
+          req.body.avatar = avatarData.link
+        }
+        if (files.cover) {
+          const coverData = await imgur.uploadFile(files.cover[0].path)
+          req.body.cover = coverData.link
+        }
+      }
+
+      // Update user data
+      const user = await userService.putUser(req.params.id, req.body)
+      delete user.dataValues.password
+      const responseData = {
+        status: 'success',
+        message: 'Account info has updated',
+        user: user.dataValues
+      }
+
+      return res.status(200).json(responseData)
+    } catch (error) {
+      next(error)
+    }
   },
 
   getTopUsers: async (req, res) => {
