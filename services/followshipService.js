@@ -1,4 +1,5 @@
 const { Followship } = require('../models')
+const ApiError = require('../utils/customError')
 
 const helpers = require('../_helpers')
 
@@ -8,10 +9,7 @@ const followshipService = {
     const followingId = Number(req.body.id)
 
     if (followerId === followingId) {
-      return {
-        status: 'error',
-        message: 'You cannot follow yourself.'
-      }
+      throw new ApiError('addFollowingError', 400, 'You cannot follow yourself')
     }
 
     await Followship.create({
