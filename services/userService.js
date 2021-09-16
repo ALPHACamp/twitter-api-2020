@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
+const { getLikedTweets } = require('../tools/helper')
 
 async function getFollowingList(req) {
   let user = await User.findOne({
@@ -114,6 +115,7 @@ const userService = {
   getUserTweets: async (req, res, cb) => {
     try {
       const tweets = await Tweet.findAll({
+        raw: true,
         where: { UserId: req.params.id },
         group: `Tweet.id`,
         attributes: ['id', 'description', 'createdAt', 'updatedAt',
@@ -129,6 +131,11 @@ const userService = {
           attributes: [],
         }],
         order: [['createdAt', 'DESC']]
+      })
+      // isLiked,貼文是否有按讚過
+      const likedTweets = await getLikedTweets(req)
+      tweets.forEach(tweet => {
+        tweet.isLiked = likedTweets.includes(tweet.id)
       })
       return cb(tweets)
     } catch (err) {
