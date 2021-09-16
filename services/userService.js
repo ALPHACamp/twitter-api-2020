@@ -345,6 +345,19 @@ const userService = {
       console.warn(err)
       return cb({ status: '500', message: err })
     }
+  },
+
+  getCurrentUser: async (req, res, cb) => {
+    try {
+      const user = await User.findOne({
+        attributes: { exclude: ['password'] },
+        where: { id: req.user.id }
+      })
+      return cb(user)
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
   }
 }
 
