@@ -91,10 +91,14 @@ const tweetController = {
       next(error)
     }
   },
-  getTweetAllReplies: async (req, res) => {
-    const data = await tweetService.getTweetAllReplies(req.params.tweetId)
+  getTweetAllReplies: async (req, res, next) => {
+    try {
+      const data = await tweetService.getTweetAllReplies(req.params.tweetId)
 
-    return res.status(200).json(data.Replies)
+      return res.status(200).json(data.Replies)
+    } catch (error) {
+      next(error)
+    }
   },
   postReply: async (req, res) => {
     const { comment } = req.body
