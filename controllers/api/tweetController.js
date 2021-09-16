@@ -19,14 +19,21 @@ const tweetController = {
     })
   },
   getTweet: (req, res) => {
-    Tweet.findAll({
-      include: [
-        { model: Reply, as: 'replies' },
-        { model: Like, as: 'likes' }
-      ],
-      where: { id: req.params.id }
-    }).then(tweet => {
-      res.json({ tweet: tweet })
+    return Promise.all([
+      Tweet.findAndCountAll({
+        include: [
+          { model: Reply, as: 'replies' }
+        ],
+        where: { id: req.params.id }
+      }),
+      Tweet.findAndCountAll({
+        include: [
+          { model: Like, as: 'likes' }
+        ],
+        where: { id: req.params.id }
+      })
+    ]).then(([replies, likes]) => {
+      res.json({ replyCount: replies.count, likeCount: likes.count })
     })
   },
   postTweet: (req, res) => {
