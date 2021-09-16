@@ -79,13 +79,17 @@ const tweetController = {
       next(error)
     }
   },
-  postUnlikeTweet: async (req, res) => {
-    const data = await tweetService.postUnlikeTweet(
-      req.user.id,
-      req.params.tweetId
-    )
+  postUnlikeTweet: async (req, res, next) => {
+    try {
+      const data = await tweetService.postUnlikeTweet(
+        req.user.id,
+        req.params.tweetId
+      )
 
-    return res.status(200).json(data)
+      return res.status(200).json(data)
+    } catch (error) {
+      next(error)
+    }
   },
   getTweetAllReplies: async (req, res) => {
     const data = await tweetService.getTweetAllReplies(req.params.tweetId)
