@@ -1,12 +1,24 @@
-const db = require('../models')
-const Reply = db.Reply
-const Tweet = db.Tweet
-const User = db.User
-const Like = db.Like
+const { Reply, Tweet, User, Like, Sequelize } = require('../models')
+const { Op } = Sequelize
 
 const tweetController = {
-  getTweets: (req, res, next) => {
-    
+  getTweets: async (req, res, next) => {
+    try {
+      const Tweets = await Tweet.findAll({
+        include: [{ model: User, include: [{ model: User, as: 'Followers', attributes: ['id'], }] }],
+        attributes: [
+          'id', 'UserId', 'description'
+        ],
+        where: {}
+      })
+
+      return res.status(200).json(Tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweetss: (req, res, next) => {
+
     return Tweet.findAll({
       include: [User, Reply, Like],
       order: [['createdAt', 'DESC']],
@@ -30,33 +42,22 @@ const tweetController = {
         return res.status(200).json(tweets)
       }).catch(err => next(err))
   },
-  getTweet: (req, res, next) => {
-    Tweet.findByPk(req.params.id,
-      { include: [User, Reply, Like] })
-      .then(tweet => {
-        if (!tweet) {
-          return res.status(422).json({
-            status: 'error',
-            message: 'Can not find this tweet!'
-          })
-        }
-        tweet = {
-          id: tweet.id,
-          description: tweet.description,
-          createdAt: tweet.createdAt,
-          updatedAt: tweet.updatedAt,
-          replies: tweet.Replies,
-          replyCounts: tweet.Replies.length,
-          likeCounts: tweet.Likes.length,
-          isLike: req.user.LikedTweets.map(like => like.id).includes(tweet.id),
-          user: {
-            name: tweet.User.name,
-            avatar: tweet.User.avatar,
-            account: tweet.User.account,
-          }
-        }
-        res.status(200).json(tweet)
-      }).catch(err => next(err))
+  getTweet: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const Tweet = await Tweet.findByPk({
+        id,
+        attributes: [
+          'id', 'description', 'createdAt',
+          [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
+        ],
+        where: {}
+      })
+
+      return res.status(200).json(Tweets)
+    } catch (err) {
+      next(err)
+    }
   },
   deleteTweet: (req, res, next) => {
     Tweet.findByPk(req.params.id)
@@ -191,38 +192,38 @@ const tweetController = {
       next(err)
     }
   },
-  addLike: async(req, res,next)=> {
-  try {
-    const {tweetId} = req.params
-    
-    const like = await Like.findOne({
-      where: {
+  addLike: async (req, res, next) => {
+    try {
+      const { tweetId } = req.params
+
+      const like = await Like.findOne({
+        where: {
+          UserId: req.user.id,
+          TweetId: tweetId
+        }
+      })
+
+      if (like) {
+        return res.status(409).json({
+          status: 'error',
+          message: 'already liked'
+        })
+      }
+      await Like.create({
         UserId: req.user.id,
         TweetId: tweetId
-      }
-    })
-
-    if (like){
-      return res.status(409).json({
-        status: 'error',
-        message: 'already liked'
       })
-    }
-    await Like.create({
-      UserId: req.user.id,
-      TweetId: tweetId
-    })
 
-    return res.status(200).json({
-      status: 'success',
-      message: 'Add like successfully'
-    })
-  } catch (err) {
-    next(err)
-  }
-},
-  removeLike: async (req,res,next)=> {
-    try{
+      return res.status(200).json({
+        status: 'success',
+        message: 'Add like successfully'
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  removeLike: async (req, res, next) => {
+    try {
       const { tweetId } = req.params
 
       const like = await Like.findOne({
@@ -240,12 +241,12 @@ const tweetController = {
       }
 
       await like.destroy()
-      
+
       return res.status(200).json({
         status: 'success',
         message: 'Remove like successfully'
       })
-    }catch(err){
+    } catch (err) {
       next(err)
     }
   }

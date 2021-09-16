@@ -33,6 +33,8 @@ let userController = {
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
       }
+      if(user.role === 'admin') return res.status(401).json({ status: 'error', message: 'no such user found(admin)' })
+      console.log(user.toJSON())
       // 簽發 token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -76,8 +78,8 @@ let userController = {
       })
       .catch(err => { console.log(err) })
   },
-  getUser: (req, res) => {
-    User.findByPk(req.params.id, {
+  getUser: (req, res, next) => {
+    User.findByPk(req.params.id,{
       attributes: [
         'id', 'name', 'avatar', 'introduction', 'account', 'cover', 'role',
         [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount'],
@@ -91,19 +93,19 @@ let userController = {
         { model: Like, attributes: [] },
       ]
     })
-      .then((user) => {
-        //不可看到admin資料 或是空用戶
-        if (user.role === 'admin' || !user) {
-          return res.status(403).json({
-            'status': 'error',
-            'message': '此用戶不存在'
-          })
-        }
-        return res.status(200).json(user)
-      })
-      .catch(err => { console.log(err) })
+    .then((user) => {
+      //不可看到admin資料 或是空用戶
+      if(user.role === 'admin' || !user){
+        return res.status(403).json({
+          'status': 'error',
+          'message': '此用戶不存在'
+        })
+      }
+      return res.status(200).json(user)
+    })
+    .catch(err => {next(err)})
   },
-  getUserTweets: (req, res) => {
+  getUserTweets: (req, res, next) => {
     Promise.all([
       User.findByPk(req.params.id, {
         attributes: [
@@ -134,10 +136,10 @@ let userController = {
           'replyCount': tweet.Replies.length,
           'likeCount': tweet.Likes.length,
           'user': tweet.User
-        }))
-        return res.status(200).json(tweetSet)
-      })
-      .catch(err => { console.log(err) })
+      }))
+      return res.status(200).json(tweetSet)
+    })
+    .catch(err => {next(err)}) 
   },
   putUser: async (req, res) => {
     //前台：修改使用者個人資料(avatar、cover、name、introduction)
@@ -210,8 +212,8 @@ let userController = {
       })
       .catch(err => { console.log(err) })
   },
-  getTweets: (req, res) => {
-    User.findByPk(req.user.id, {
+  getTweets: (req, res, next) => {
+    User.findByPk(req.user.id,{
       include: [
         { model: User, as: 'Followers', attributes: ['id'] },
       ]
@@ -223,7 +225,7 @@ let userController = {
         })
           .then((tweet) => {
             return res.json({ tweet })
-          })
+          }).catch(err => { next(err) })
       })
 
   },
@@ -323,6 +325,34 @@ let userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserReliedTweets: (req, res) => {
+    const UserId = req.params.id
+    Reply.findAll({
+      where: {
+        UserId
+      },
+      attributes: [
+        'TweetId', 'comment', 'updatedAt', 'createdAt'
+      ],
+      include: [
+        {
+          model: User,
+          attributes: [ 'id', 'name', 'avatar', 'account']
+        },
+        {
+          model: Tweet,
+          attributes: ['description'],
+          include: { model: User, attributes: ['id', 'account'] }
+        },
+      ],
+      order: [
+        ['createdAt', 'DESC']
+      ]
+    })
+    .then((tweet) => {
+      return res.json([...tweet])
+    })
   }
 }
 
