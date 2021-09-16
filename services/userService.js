@@ -19,6 +19,15 @@ async function getFollowingList(req) {
   return user.Followings //[{id:1}, {id:5}]
 }
 
+async function getLoginUserLikedTweetsId(req) {
+  let likedTweets = await Like.findAll({
+    raw: true,
+    where: { UserId: req.user.id },
+    attributes: ['TweetId']
+  })
+  return likedTweets = likedTweets.map(d => (d.TweetId))
+}
+
 const userService = {
   signUp: async (req, res, cb) => {
     try {
@@ -259,42 +268,33 @@ const userService = {
 
   getUserLikedTweets: async (req, res, cb) => {
     try {
-      const loginUser = await User.findOne({
-        attributes: [],
-        where: { id: req.user.id },
-        include: { model: Like, attributes: ['TweetId'] }
+      const loginUserLikedTweetsId = await getLoginUserLikedTweetsId(req)
+      // 該使用者喜歡的推文id
+      let likedTweetsId = await Like.findAll({
+        raw: true, attributes: ['TweetId'],
+        where: { UserId: req.params.id },
       })
-      let likedTweets = await User.findOne({
-        attributes: [],
-        where: { id: req.params.id },
-        include: {
-          model: Like,
-          include: {
-            model: Tweet,
-            attributes: { exclude: ['UserId'] },
-            include: [{ model: Like, attributes: ['id'] }, { model: Reply, attributes: ['id'] }]
-          }
+      likedTweetsId = likedTweetsId.map(d => (d.TweetId))
+      // 取得該使用者喜歡的推文
+      let likedTweets = await Tweet.findAll({
+        raw: true, nest: true,
+        where: { id: likedTweetsId }, //僅限他按過讚的
+        group: 'Tweet.id',
+        attributes: [['id', 'TweetId'], 'description', 'createdAt', 'updatedAt',
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes'],
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies']
+        ],
+        include: [{
+          model: Like, attributes: []
         },
-        order: [
-          [{ model: Like }, { model: Tweet }, 'createdAt', 'DESC']
-        ]
+        { model: Reply, attributes: [] }
+        ],
+        order: [['createdAt', 'DESC']]
       })
-      if (likedTweets === null) return cb({ message: '查無使用者' })
-      likedTweets = likedTweets.toJSON()
-      // 取得該使用者按讚過的推文id陣列['1','3','4']
-      likedTweets = likedTweets.Likes.map(like => (like.Tweet))
+      // isLiked 這些貼文，登入者是否有按讚
       likedTweets.forEach(tweet => {
-        // 每則推文的回覆數/讚數
-        tweet.totalLikes = tweet.Likes.length
-        tweet.totalReplies = tweet.Replies.length
-        // 登入者是否也點過讚
-        tweet.isLiked = loginUser.Likes.map(t => (t.TweetId)).includes(tweet.id)
-        // 刪除前端不要的資訊、將id->TweetId
-        tweet.TweetId = tweet.id
-        delete tweet.id
-        delete tweet.Likes
-        delete tweet.Replies
-      });
+        tweet.isLiked = loginUserLikedTweetsId.includes(tweet.TweetId)
+      })
       return cb(likedTweets)
     } catch (err) {
       console.warn(err)
