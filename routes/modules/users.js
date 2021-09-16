@@ -4,21 +4,14 @@ const userController = require('../../controllers/userController')
 const { authenticated, authenticatedRole } = require('../../middlewares/auth')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
+const uploadImage = upload.fields([{ name: 'avatar', maxCount: 1}, { name: 'cover', maxCount: 1}])
 
 // Sign in or Sign up
 router.post('/signin', userController.signIn)
 router.post('/', userController.postUser)
 
 // Edit user's profile or account setting
-router.put(
-  '/:id',
-  authenticated,
-  authenticatedRole(),
-  upload.fields([
-    { name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }
-  ]),
-  userController.putUser
-)
+router.put('/:id', authenticated, authenticatedRole(), uploadImage, userController.putUser)
 
 // Get current user or top 10 recommend users
 router.get('/current_user', authenticated, userController.getCurrentUser)
