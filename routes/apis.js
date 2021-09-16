@@ -15,8 +15,8 @@ router.put('/users/:id', userController.putUser) // 儲存帳戶設定 & 個人�
 
 // route: /api/tweets
 router.get('/tweets', tweetController.getTweets) // 推文首頁
-router.get('/tweets/:id', tweetController.getTweet) // 特定推文頁（含回覆）
-router.post('/tweets', tweetController.postTweet) // 特定推文頁（含回覆）
-router.get('/tweets/:id/replies', tweetController.getReplies) // 特定推文的所有回覆
+router.get('/tweets/:tweet_id', tweetController.getTweet) // 特定推文頁
+router.post('/tweets', tweetController.postTweet) // 新增推文
+router.get('/tweets/:tweet_id/replies', tweetController.getReplies) // 特定推文的所有回覆
 
 module.exports = router

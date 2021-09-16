@@ -5,17 +5,17 @@ const db = require('../../models')
 const Tweet = db.Tweet
 const Reply = db.Reply
 const Like = db.Like
-const helpers = require('../../_helpers');
+// const helpers = require('../../_helpers')
 
 const tweetController = {
   getTweets: (req, res) => {
-    Tweet.findAll({
+    return Tweet.findAll({
       include: [
         { model: Reply, as: 'replies' },
         { model: Like, as: 'likes' }
       ]
     }).then(tweets => {
-      res.json({ tweets: tweets })
+      return res.json({ tweets: tweets })
     })
   },
   getTweet: (req, res) => {
@@ -33,7 +33,7 @@ const tweetController = {
         where: { id: req.params.id }
       })
     ]).then(([replies, likes]) => {
-      res.json({ replyCount: replies.count, likeCount: likes.count })
+      return res.json({ replyCount: replies.count, likeCount: likes.count })
     })
   },
   postTweet: (req, res) => {
@@ -46,13 +46,13 @@ const tweetController = {
     })
   },
   getReplies: (req, res) => {
-    Tweet.findAll({
+    return Tweet.findAll({
       include: [
         { model: Reply, as: 'replies' }
       ],
       where: { id: req.params.id }
     }).then(tweet => {
-      res.json({ tweet: tweet })
+      return res.json({ tweet: tweet })
     })
   },
 }
