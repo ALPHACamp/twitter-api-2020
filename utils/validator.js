@@ -33,12 +33,13 @@ const userInfoSchema = Joi.object({
     }),
   password: Joi.string()
     .trim()
-    .min(1)
+    .min(4)
     .max(50)
     .messages({
       'string.base':'Data type of password must be a string',
       'string.empty': 'The password cannot be blank',
-      'string.max': 'The password should not exceed 50 words'
+      'string.max': 'The password should not exceed 50 words',
+      'string.min': 'Your password needs to be at least 4 characters. Please enter a longer one'
     }),
   checkPassword: Joi.ref('password'),
   introduction: Joi.string()
