@@ -32,15 +32,14 @@ const adminController = {
     }
   },
 
-  deleteTweet: async (req, res) => {
-    const data = await adminService.deleteTweet(req.params.id)
+  deleteTweet: async (req, res, next) => {
+    try {
+      const data = await adminService.deleteTweet(req.params.id)
 
-    // Check data status
-    if (data['status'] === 'error') {
-      return res.status(401).json(data)
+      return res.status(200).json(data)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(data)
   }
 }
 
