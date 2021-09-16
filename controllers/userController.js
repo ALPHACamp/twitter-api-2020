@@ -60,19 +60,21 @@ const userController = {
     }
   },
 
-  getCurrentUser: async (req, res) => {
-    const currentUser = await userService.getCurrentUser(
-      helpers.getUser(req).id
-    )
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const currentUser = await userService.getCurrentUser(
+        helpers.getUser(req).id
+      )
 
-    // Check whether the current user exists by user id
-    if (!currentUser) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'No such user found' })
+      // Check whether the current user exists by user id
+      if (!currentUser) {
+        throw new ApiError('CurrentUserFindError', 401, 'No such user found')
+      }
+
+      return res.status(200).json(currentUser)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(currentUser)
   },
 
   postUser: async (req, res, next) => {
