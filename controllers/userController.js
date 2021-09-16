@@ -214,7 +214,7 @@ const userController = {
 
       // Check whether the users exist
       if (!users.length) {
-        throw new ApiError('GetUserFollowingsError', 401, 'No users found')
+        throw new ApiError('GetUserFollowingsError', 401, 'No followings found')
       }
 
       // translate to boolean in isFollowed attribute
@@ -228,27 +228,32 @@ const userController = {
     }
   },
 
-  getUserFollowers: async (req, res) => {
-    const [targetUserId, currentUserId] = [
-      req.params.id,
-      helpers.getUser(req).id
-    ]
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const [targetUserId, currentUserId] = [
+        req.params.id,
+        helpers.getUser(req).id
+      ]
 
-    let users = await userService.getUserFollowers(targetUserId, currentUserId)
+      let users = await userService.getUserFollowers(
+        targetUserId,
+        currentUserId
+      )
 
-    // Check whether the users exist
-    if (!users) {
-      return res
-        .status(200)
-        .json({ status: 'success', message: 'No users found' })
+      // Check whether the users exist
+      if (!users.length) {
+        throw new ApiError('GetUserFollowersError', 401, 'No followers found')
+      }
+
+      // translate to boolean in isFollowed attribute
+      users.forEach((user) => {
+        user.isFollowed = !!user.isFollowed
+      })
+
+      return res.status(200).json(users)
+    } catch (error) {
+      next(error)
     }
-
-    // translate to boolean in isFollowed attribute
-    users.forEach((user) => {
-      user.isFollowed = !!user.isFollowed
-    })
-
-    return res.status(200).json(users)
   },
 
   putUser: async (req, res) => {
