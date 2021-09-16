@@ -10,10 +10,8 @@ router.post('/', authenticated, tweetController.postTweet)
 router.put('/:id', authenticated, tweetController.putTweet)
 router.post('/:tweetId/replies', authenticated, tweetController.postReply)
 router.get('/:tweetId/replies', authenticated, tweetController.getReply)
-// router.put('/replies/:replyId', authenticated, tweetController.putReply)
-// router.delete('/replies/:replyId', authenticated, tweetController.deleteReply)
 router.post('/:tweetId/like', authenticated, tweetController.addLike)
-router.delete('/:tweetId/unlike', authenticated, tweetController.removeLike)
+router.post('/:tweetId/unlike', authenticated, tweetController.removeLike)
 
 
 module.exports = router

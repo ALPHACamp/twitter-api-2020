@@ -4,57 +4,50 @@ const { Op } = Sequelize
 const tweetController = {
   getTweets: async (req, res, next) => {
     try {
-      const Tweets = await Tweet.findAll({
-        include: [{ model: User, include: [{ model: User, as: 'Followers', attributes: ['id'], }] }],
-        attributes: [
-          'id', 'UserId', 'description'
-        ],
-        where: {}
+      let user = await User.findByPk(req.user.id, {
+        include: [
+          { model: User, as: 'Followers', attributes: ['id'] },
+        ]
       })
-
-      return res.status(200).json(Tweets)
+      let followers = user.Followers.map(user => { return user.id })
+      let tweets = await Tweet.findAll({
+        where: { UserId: followers }
+      })
+      return res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
   },
-  getTweetss: (req, res, next) => {
-
-    return Tweet.findAll({
-      include: [User, Reply, Like],
-      order: [['createdAt', 'DESC']],
-    })
-      .then(tweets => {
-        tweets = tweets.map(tweet => ({
-          id: tweet.id,
-          UserId: tweet.UserId,
-          description: tweet.description,
-          createdAt: tweet.createdAt,
-          updatedAt: tweet.updatedAt,
-          replyCounts: tweet.Replies.length,
-          likeCounts: tweet.Likes.length,
-          isLike: req.user.LikedTweets.map(like => like.id).includes(tweet.id),
-          user: {
-            name: tweet.User.name,
-            avatar: tweet.User.avatar,
-            account: tweet.User.account,
-          }
-        }))
-        return res.status(200).json(tweets)
-      }).catch(err => next(err))
-  },
   getTweet: async (req, res, next) => {
     try {
       const { id } = req.params
-      const Tweet = await Tweet.findByPk({
-        id,
-        attributes: [
-          'id', 'description', 'createdAt',
-          [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
-        ],
-        where: {}
-      })
+      let tweet = await Tweet.findByPk(id,
+        { include: [User, Like, Reply] }
+      )
 
-      return res.status(200).json(Tweets)
+      if (!tweet) {
+        return res.status(409).json({
+          status: 'error',
+          message: 'You didn\'t like the tweet'
+        })
+      }
+
+      tweet = {
+        id: tweet.id,
+        UserId: tweet.UserId,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        updatedAt: tweet.updatedAt,
+        replyCounts: tweet.Replies.length,
+        likeCounts: tweet.Likes.length,
+        isLike: req.user.LikedTweets.map(like => like.id).includes(tweet.id),
+        user: {
+          name: tweet.User.name,
+          avatar: tweet.User.avatar,
+          account: tweet.User.account,
+        }
+      }
+      return res.status(200).json(tweet)
     } catch (err) {
       next(err)
     }
