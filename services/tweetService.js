@@ -1,5 +1,6 @@
 const db = require('../models')
 const { Tweet, Reply, Like, Followship, User } = db
+const { getLikedTweets } = require('../tools/helper')
 
 const tweetService = {
   postTweet: async (req, res, cb) => {
@@ -40,6 +41,7 @@ const tweetService = {
 
   getTweet: async (req, res, cb) => {
     try {
+      const likedTweets = await getLikedTweets(req)
       // 取得推文及回覆總數跟按讚總數
       let tweet = await Tweet.findOne({
         where: { id: req.params.tweet_id },
@@ -50,6 +52,7 @@ const tweetService = {
         ]
       })
       tweet = tweet.toJSON()
+      tweet.isLiked = likedTweets.includes(tweet.id)
       const totalReply = tweet.Replies.length
       const totalLike = tweet.Likes.length
       delete tweet.Replies
