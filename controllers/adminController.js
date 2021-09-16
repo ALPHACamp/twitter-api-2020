@@ -17,17 +17,19 @@ const adminController = {
     }
   },
 
-  getTweets: async (req, res) => {
-    const tweets = await adminService.getTweets()
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await adminService.getTweets()
 
-    // Check whether tweets exists
-    if (!tweets.length) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'No tweets found' })
+      // Check whether tweets exists
+      if (!tweets.length) {
+        throw new ApiError('AdminGetTweetsError', 401, 'No tweets found')
+      }
+
+      return res.status(200).json(tweets)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(tweets)
   },
 
   deleteTweet: async (req, res) => {
