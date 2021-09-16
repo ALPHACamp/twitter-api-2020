@@ -9,6 +9,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const cors = require('cors')
 const routes = require('./routes')
+const apiErrorHandler = require('./middlewares/apiErrorHandler')
 const passport = require('./config/passport')
 const PORT = process.env.PORT || 3000
 
@@ -26,6 +27,7 @@ app.use(passport.initialize())
 app.use(methodOverride('_method'))
 
 app.use(routes)
+app.use(apiErrorHandler)
 
 app.listen(PORT, () =>
   console.log(`Example app listening at http://localhost:${PORT}`)
