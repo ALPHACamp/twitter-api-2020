@@ -13,6 +13,10 @@ module.exports = {
     if (!name || !account || !email || !password || !checkPassword) {
       message.push({ error: 'All columns are required.' })
     }
+    // name 字數限制 50 
+    if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
+      message.push({ error: 'Name length can not over 50 characters' })
+    }
     // email 格式需正確
     if (email && !validator.isEmail(email)) {
       message.push({ error: 'Incorrect email format.' })
