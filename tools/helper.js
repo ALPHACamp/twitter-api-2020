@@ -1,7 +1,7 @@
 const db = require('../models')
 const { Like } = db
 
-async function getLikedTweets(req) {
+async function getLoginUserLikedTweetsId(req) {
   let likedTweets = await Like.findAll({
     raw: true,
     attributes: ['TweetId'],
@@ -13,4 +13,4 @@ async function getLikedTweets(req) {
   return likedTweets
 }
 
-module.exports = { getLikedTweets }
+module.exports = { getLoginUserLikedTweetsId }

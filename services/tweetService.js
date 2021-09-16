@@ -1,7 +1,7 @@
 const sequelize = require('sequelize')
 const db = require('../models')
-const { Tweet, Reply, Like, Followship, User } = db
-const { getLikedTweets } = require('../tools/helper')
+const { Tweet, Reply, Like, User } = db
+const { getLoginUserLikedTweetsId } = require('../tools/helper')
 
 const tweetService = {
   postTweet: async (req, res, cb) => {
@@ -42,7 +42,7 @@ const tweetService = {
 
   getTweet: async (req, res, cb) => {
     try {
-      const likedTweets = await getLikedTweets(req)
+      const likedTweets = await getLoginUserLikedTweetsId(req)
       // 取得推文及回覆總數跟按讚總數
       let tweet = await Tweet.findOne({
         where: { id: req.params.tweet_id },
@@ -67,7 +67,7 @@ const tweetService = {
 
   getTweets: async (req, res, cb) => {
     try {
-      const loginUserLikedTweetsId = await getLikedTweets(req)
+      const loginUserLikedTweetsId = await getLoginUserLikedTweetsId(req)
       // 取得追蹤中清單
       // let followings = await Followship.findAll({
       //   raw: true, nest: true,
