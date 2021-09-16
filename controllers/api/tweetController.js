@@ -24,13 +24,13 @@ const tweetController = {
         include: [
           { model: Reply, as: 'replies' }
         ],
-        where: { id: req.params.id }
+        where: { id: req.params.tweet_id }
       }),
       Tweet.findAndCountAll({
         include: [
           { model: Like, as: 'likes' }
         ],
-        where: { id: req.params.id }
+        where: { id: req.params.tweet_id }
       })
     ]).then(([replies, likes]) => {
       return res.json({ replyCount: replies.count, likeCount: likes.count })
@@ -50,7 +50,7 @@ const tweetController = {
       include: [
         { model: Reply, as: 'replies' }
       ],
-      where: { id: req.params.id }
+      where: { id: req.params.tweet_id }
     }).then(tweet => {
       return res.json({ tweet: tweet })
     })
