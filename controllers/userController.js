@@ -33,6 +33,8 @@ let userController = {
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
       }
+      if(user.role === 'admin') return res.status(401).json({ status: 'error', message: 'no such user found(admin)' })
+      console.log(user.toJSON())
       // 簽發 token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -226,6 +228,26 @@ let userController = {
         }).catch(err => { next(err) })
     })
 
+  },
+  getUserReliedTweets: (req, res) => {
+    const UserId = req.params.id
+    Reply.findAll({
+      where: {
+        UserId
+      },
+      attributes: [
+        'TweetId', 'comment', 'updatedAt'
+      ],
+      include: [
+        { model: User, attributes: [ 'id', 'name', 'avatar', 'account']}
+      ],
+      order: [
+        ['createdAt', 'DESC']
+      ]
+    })
+    .then((tweet) => {
+      return res.json([...tweet])
+    })
   }
 }
 

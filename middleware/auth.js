@@ -25,8 +25,18 @@ const authenticatedAdmin = (req, res, next) => {
   }
   next()
 }
+const checkRoleIsUser = (req, res, next) => {
+  if (req.user && req.user.role === 'admin'){
+    return res.status(401).json({
+      status: 'error',
+      message: '無帳戶'
+    })  
+  }
+  next()
+}
 
 module.exports = {
   authenticated,
-  authenticatedAdmin
+  authenticatedAdmin,
+  checkRoleIsUser
 }
