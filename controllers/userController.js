@@ -39,6 +39,12 @@ const userController = {
       }
       // 確認使用者資料
       const user = await User.findOne({ where: { email } })
+      // 無此使用者
+      if (!user) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'User does not exist.' })
+      }
       // 檢查前台登入權限
       if (user.role === 'admin') {
         return res.status(401).json({
@@ -46,12 +52,6 @@ const userController = {
           message:
             'Admin can only login to backend, please register a user account to login frontend',
         })
-      }
-      // 無此使用者
-      if (!user) {
-        return res
-          .status(401)
-          .json({ status: 'error', message: 'User does not exist.' })
       }
       // 檢查密碼是否正確
       if (!bcrypt.compareSync(password, user.password)) {
