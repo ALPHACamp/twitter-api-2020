@@ -183,9 +183,7 @@ const userService = {
         ],
       ],
       include: [
-        { model: User, attributes: ['id', 'avatar', 'name', 'account']},
-        { model: Like },
-        { model: Reply }
+        { model: User, attributes: ['id', 'avatar', 'name', 'account']}
       ],
       order: [['createdAt', 'DESC']]
     });
