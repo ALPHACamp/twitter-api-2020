@@ -10,7 +10,7 @@ for (let i = 0; i < 50; i++) {
   let updatedEnd = new Date(2020, 0, 1)
 
   let tweet = {
-    userId: Math.floor(Math.random() * 10),
+    UserId: Math.floor(Math.random() * 10),
     description: faker.lorem.text().substring(0, 140),
     createdAt: new Date(createdStart.getTime() + Math.random() * (createdEnd.getTime() - createdStart.getTime())),
     updatedAt: new Date(updatedStart.getTime() + Math.random() * (updatedEnd.getTime() - updatedStart.getTime()))

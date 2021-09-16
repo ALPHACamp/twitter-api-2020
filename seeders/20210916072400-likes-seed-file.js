@@ -10,8 +10,8 @@ for (let i = 0; i < 150; i++) {
   let updatedEnd = new Date(2020, 0, 1)
 
   let like = {
-    userId: Math.floor(Math.random() * 10),
-    tweetId: Math.floor(Math.random() * 50),
+    UserId: Math.floor(Math.random() * 10),
+    TweetId: Math.floor(Math.random() * 50),
     createdAt: new Date(createdStart.getTime() + Math.random() * (createdEnd.getTime() - createdStart.getTime())),
     updatedAt: new Date(updatedStart.getTime() + Math.random() * (updatedEnd.getTime() - updatedStart.getTime()))
   }
