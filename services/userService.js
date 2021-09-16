@@ -212,7 +212,7 @@ const userService = {
 
   getTopUsers: async (currentUserId) => {
     return await User.findAll({
-      where: { id: { [Op.not]: currentUserId } },
+      where: { id: { [Op.not]: currentUserId }, role: 'user' },
       include: [
         {
           model: User,
