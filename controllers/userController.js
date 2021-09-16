@@ -236,10 +236,18 @@ let userController = {
         UserId
       },
       attributes: [
-        'TweetId', 'comment', 'updatedAt'
+        'TweetId', 'comment', 'updatedAt', 'createdAt'
       ],
       include: [
-        { model: User, attributes: [ 'id', 'name', 'avatar', 'account']}
+        {
+          model: User,
+          attributes: [ 'id', 'name', 'avatar', 'account']
+        },
+        {
+          model: Tweet,
+          attributes: ['description'],
+          include: { model: User, attributes: ['id', 'account'] }
+        },
       ],
       order: [
         ['createdAt', 'DESC']
