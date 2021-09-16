@@ -17,4 +17,6 @@ router.get("/:id", authenticated, checkRole(), userController.getUser);
 
 router.put('/:id', authenticated, checkRole(), cpUpload, userController.putUser)
 
+router.get('/:id/tweets', authenticated, checkRole(), userController.getUserTweets)
+
 module.exports = router
