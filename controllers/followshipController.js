@@ -9,9 +9,13 @@ const followshipController = {
       next(error)
     }
   },
-  deleteFollowing: async (req, res) => {
-    const data = await followshipService.deleteFollowing(req, res)
-    return res.status(200).json(data)
+  deleteFollowing: async (req, res, next) => {
+    try {
+      const data = await followshipService.deleteFollowing(req, res)
+      return res.status(200).json(data)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
