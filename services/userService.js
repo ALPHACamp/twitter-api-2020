@@ -187,6 +187,58 @@ const userService = {
       ],
       order: [['createdAt', 'DESC']]
     });
+  },
+  getUserRepliedTweets: async (id, currentUserId) => {
+    const user = await User.findByPk(id)
+    if (!user) {
+      return {
+        status: 'error',
+        message: "Can't find this user"
+      }
+    }
+    const replies = await Reply.findAll({
+      where: { UserId: id },
+      include: [
+        {
+          model: Tweet,
+          attributes: [
+            "id",
+            "description",
+            [
+              Sequelize.literal(
+                "(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)"
+              ),
+              "RepliesCount",
+            ],
+            [
+              Sequelize.literal(
+                "(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)"
+              ),
+              "LikesCount",
+            ],
+            [
+              Sequelize.literal(
+                `exists(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} and TweetId = Tweet.id)`
+              ),
+              "isLike",
+            ],
+          ],
+          include: [
+            { model: User, attributes: ["id", "name", "account", "avatar"] }
+          ]
+        },
+        { model: User, attributes: ["id", "name", "avatar", "account"] }    
+      ],
+      attributes: ['id', 'comment', 'createdAt'],
+      order: [['createdAt', 'DESC']]
+    });
+    if (!replies) {
+      return {
+        status: 'error',
+        message: 'This user does not have any replies'
+      }
+    }
+    return replies
   }
 }
 
