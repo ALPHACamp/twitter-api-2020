@@ -106,7 +106,12 @@ const userController = {
   },
 
   getUser: async (req, res) => {
-    const user = await userService.getUser(req.params.id)
+    const [targetUserId, currentUserId] = [
+      req.params.id,
+      helpers.getUser(req).id
+    ]
+
+    let user = await userService.getUser(targetUserId, currentUserId)
 
     // Check whether the user exists
     if (!user) {
@@ -114,6 +119,9 @@ const userController = {
         .status(401)
         .json({ status: 'error', message: 'No such user found' })
     }
+
+    // translate to boolean in isFollowed attribute
+    user.dataValues.isFollowed = user.dataValues.isFollowed ? true : false
 
     return res.status(200).json(user)
   },

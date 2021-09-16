@@ -42,9 +42,64 @@ const userService = {
     })
   },
 
-  getUser: async (id) => {
-    return await User.findByPk(id, {
-      attributes: { exclude: ['password'] }
+  getUser: async (targetUserId, currentUserId) => {
+    return await User.findOne({
+      where: { id: targetUserId },
+      include: [
+        { model: Tweet, attributes: [] },
+        {
+          model: User,
+          as: 'Followers',
+          attributes: [],
+          through: {
+            attributes: []
+          }
+        },
+        {
+          model: User,
+          as: 'Followings',
+          attributes: [],
+          through: {
+            attributes: []
+          }
+        }
+      ],
+      attributes: [
+        'id',
+        'email',
+        'name',
+        'avatar',
+        'introduction',
+        'role',
+        'account',
+        'cover',
+        'createdAt',
+        'updatedAt',
+        [
+          Sequelize.literal(
+            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+          ),
+          'isFollowed'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Tweets WHERE Tweets.userId = User.id)'
+          ),
+          'TweetsCount'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+          ),
+          'FollowersCount'
+        ],
+        [
+          Sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
+          ),
+          'FollowingsCount'
+        ]
+      ]
     })
   },
 
