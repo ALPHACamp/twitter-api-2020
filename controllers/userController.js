@@ -142,7 +142,7 @@ const userController = {
       let tweets = await userService.getUserTweets(targetUserId, currentUserId)
 
       // Check whether the tweets exist
-      if (!tweets) {
+      if (!tweets.length) {
         throw new ApiError('GetUserTweetsError', 401, 'No tweets found')
       }
 
@@ -157,17 +157,19 @@ const userController = {
     }
   },
 
-  getUserRepliedTweets: async (req, res) => {
-    const tweets = await userService.getUserRepliedTweets(req.params.id)
+  getUserRepliedTweets: async (req, res, next) => {
+    try {
+      const tweets = await userService.getUserRepliedTweets(req.params.id)
 
-    // Check whether the tweets exist
-    if (!tweets) {
-      return res
-        .status(200)
-        .json({ status: 'success', message: 'No tweets found' })
+      // Check whether the tweets exist
+      if (!tweets.length) {
+        throw new ApiError('GetUserRepliedTweetsError', 401, 'No tweets found')
+      }
+
+      return res.status(200).json(tweets)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(tweets)
   },
 
   getUserLikedTweets: async (req, res) => {
