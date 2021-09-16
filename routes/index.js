@@ -13,4 +13,6 @@ const { authenticated, checkRole } = require('../middleware/auth')
 router.use("/api/users", users)
 router.use("/api/admin", admin);
 
+router.use('/api/tweets', tweets)
+
 module.exports = router;
