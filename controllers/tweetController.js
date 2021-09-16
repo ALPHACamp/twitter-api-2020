@@ -12,6 +12,11 @@ const tweetController = {
     TweetService.getTweets(req, res, (status, data) => {
       return res.status(status).json(data)
     })
+  },
+  getTweet: (req, res) => {
+    TweetService.getTweet(req, res, (status, data) => {
+      return res.status(status).json(data)
+    })
   }
 }
 

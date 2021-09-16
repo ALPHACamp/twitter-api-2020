@@ -30,7 +30,7 @@ const TweetService = {
         order: [['createdAt', 'DESC']],
         include: [User, Reply, Like]
       })
-    
+
       const data = tweets.map(r => ({
         TweetId: r.id,
         description: r.description,
@@ -48,6 +48,31 @@ const TweetService = {
       callback(200, data)
     } catch (err) {
       console.log('getTweets', err)
+      res.sendStatus(500)
+    }
+  },
+  getTweet: async (req, res, callback) => {
+    try {
+      const id = req.params.tweet_id
+      const tweet = await Tweet.findByPk(id, {
+        attributes: { exclude: ['UserId', 'updatedAt'] },
+        include: [
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+          { model: Reply, attributes: ['id', 'comment', 'createdAt'], include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] } },
+          Like
+        ],
+        order: [[Reply, 'createdAt', 'DESC']]
+      })
+      console.log(tweet)
+      const data = tweet.toJSON()
+      data.RepliesCount = tweet.Replies.length
+      data.LikesCount = tweet.Likes.length
+      data.isLike = false
+      delete data.Likes
+
+      callback(200, data)
+    } catch (err) {
+      console.log('getTweet', err)
       res.sendStatus(500)
     }
   }

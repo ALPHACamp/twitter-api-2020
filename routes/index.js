@@ -22,6 +22,6 @@ const authenticatedAdmin = (req, res, next) => {
 
 router.use("/admin", admin);
 
-router.use('/api', tweets)
+router.use('/api/tweets', tweets)
 
 module.exports = router;
