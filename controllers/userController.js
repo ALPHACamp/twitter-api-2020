@@ -4,6 +4,8 @@ const { User } = require('../models')
 const userService = require('../services/userService')
 const helpers = require('../_helpers')
 const { joiMessageHandler, userInfoSchema } = require('../utils/validator')
+const imgur = require('imgur')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
   signIn: async (req, res) => {
@@ -231,6 +233,21 @@ const userController = {
         status: 'error',
         message: joiMessageHandler(error.details)
       })
+    }
+
+    // handle image upload
+    const { files } = req
+    
+    if (files) {
+      imgur.setClientId(IMGUR_CLIENT_ID)
+      if (files.avatar) {
+        const avatarData = await imgur.uploadFile(files.avatar[0].path)
+        req.body.avatar = avatarData.link
+      }
+      if (files.cover) {
+        const coverData = await imgur.uploadFile(files.cover[0].path)
+        req.body.cover = coverData.link
+      }
     }
     
     // Update user data

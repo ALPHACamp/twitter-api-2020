@@ -15,7 +15,7 @@ router.put(
   authenticated,
   authenticatedRole(),
   upload.fields([
-    ({ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 })
+    { name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }
   ]),
   userController.putUser
 )
