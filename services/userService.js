@@ -249,15 +249,14 @@ const userService = {
         where: { id: req.params.id },
         include: [{
           model: User, as: 'Followers',
-          attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover'],
           through: { attributes: [] }
         }]
       })
+      if (user === null) return cb({ status: '400', message: '使用者不存在' })
       user = user.toJSON()
       user.Followers.map(user => {
-        user.isFollowings = followingList.map(u => (u.id)).includes(user.id)
-        user.followerId = user.id
-        delete user.id
+        user.isFollowings = followingList.map(u => (u.id)).includes(user.followerId)
       })
       return cb(user.Followers)
     } catch (err) {
