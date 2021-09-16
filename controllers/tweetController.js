@@ -7,11 +7,18 @@ const Reply = db.Reply
 const tweetController = {
   getTweets: async (req, res) => {
     try {
+      let offset = 0
+      const limit = req.query.limit || 20
+      if (req.query.page) {
+        offset = (req.query.page - 1) * limit
+      }
       const tweet = await Tweet.findAll({
         include: User,
         order: [
           ['createdAt', 'DESC']
-        ]
+        ],
+        offset,
+        limit
       })
       const tweetdata = tweet.map(tweet => ({
         ...tweet.dataValues,
