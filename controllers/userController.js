@@ -86,7 +86,7 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      let user = await User.findOne({
+      const user = await User.findOne({
         where: { id: req.params.id },
         include: [
           { model: User, as: 'Followers' },
@@ -130,7 +130,7 @@ const userController = {
   },
   getLikedTweets: async (req, res, next) => {
     try {
-      let likes = await Like.findAll({
+      const likes = await Like.findAll({
         raw: true,
         nest: true,
         where: { UserId: req.params.id },
@@ -179,7 +179,7 @@ const userController = {
       const replies = results.map(reply => {
         reply.createdAt = formatTime(reply.createdAt)
         reply.Tweet.createdAt = formatTime(reply.Tweet.createdAt)
-        reply.Tweet.isLiked = reply.Tweet.isLiked ? true : false
+        reply.Tweet.isLiked = reply.Tweet.isLiked === 1 // raw SQL query拿到的boolean值會是1或0
         return reply
       })
       return res.json(replies)
@@ -209,7 +209,7 @@ const userController = {
       const tweets = results.map(tweet => ({
         ...tweet,
         createdAt: formatTime(tweet.createdAt),
-        isLiked: tweet.isLiked === 1
+        isLiked: tweet.isLiked === 1 // raw SQL query拿到的boolean值會是1或0
       }))
       return res.json(tweets)
     } catch (err) {
@@ -268,8 +268,8 @@ const userController = {
         return res.json({ status: 'error', message: '名稱不可空白！' })
       }
       if (files) {
-        let avatar = undefined
-        let cover = undefined
+        let avatar
+        let cover
         // 上傳頭像
         if (files.avatar) {
           avatar = await imgurUpload(files.avatar[0])

@@ -1,9 +1,8 @@
 const passport = require('passport')
-const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
-const { User, Tweet } = require('../models')
+const { User } = require('../models')
 
 // JWT strategy
 

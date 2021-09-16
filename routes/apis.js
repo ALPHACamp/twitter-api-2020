@@ -16,12 +16,12 @@ const replyController = require('../controllers/replyController.js')
 // jwt驗證
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, async (err, user, info) => {
-    if (err) { return next(err); }
+    if (err) { return next(err) }
     if (!user) {
-      if (info.name === "TokenExpiredError") {
-        return res.status(401).json({ message: 'Token已過期！' });
+      if (info.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: 'Token已過期！' })
       } else {
-        return res.status(401).json({ message: info.message });
+        return res.status(401).json({ message: info.message })
       }
     }
     user = await User.findByPk(user.dataValues.id, {
@@ -30,8 +30,8 @@ const authenticated = (req, res, next) => {
         { model: User, as: 'Followings' }
       ]
     })
-    req.user = user.dataValues;
-    return next();
+    req.user = user.dataValues
+    return next()
   })(req, res, next)
 }
 // 驗證登入者是否為管理者=>用於後台路由
