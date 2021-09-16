@@ -119,8 +119,8 @@ const userService = {
         where: { UserId: req.params.id },
         group: `Tweet.id`,
         attributes: ['id', 'description', 'createdAt', 'updatedAt',
-          [sequelize.fn('COUNT', sequelize.col('replies.id')), 'totalReplies'],
-          [sequelize.fn('COUNT', sequelize.col('likes.id')), 'totalLikes']
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes']
         ],
         include: [{
           model: Reply,
