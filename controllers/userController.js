@@ -3,7 +3,7 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const Sequelize = require('sequelize')
 const bcrypt = require('bcryptjs')
-const moment = require('moment')
+const { formatTime } = require('../utils/helper.js')
 const jwt = require('jsonwebtoken')
 
 const imgurUpload = (file) => {
@@ -145,7 +145,7 @@ const userController = {
         return {
           ...like.Tweet,
           TweetId: like.Tweet.id,
-          createdAt: moment(like.Tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+          createdAt: formatTime(like.Tweet.createdAt)
         }
       })
       return res.json(Tweets)
@@ -177,8 +177,8 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
       const replies = results.map(reply => {
-        reply.createdAt = moment(reply.createdAt).format('YYYY-MM-DD hh:mm:ss a')
-        reply.Tweet.createdAt = moment(reply.Tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        reply.createdAt = formatTime(reply.createdAt)
+        reply.Tweet.createdAt = formatTime(reply.Tweet.createdAt)
         reply.Tweet.isLiked = reply.Tweet.isLiked ? true : false
         return reply
       })
@@ -208,7 +208,7 @@ const userController = {
       })
       const tweets = results.map(tweet => ({
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a'),
+        createdAt: formatTime(tweet.createdAt),
         isLiked: tweet.isLiked === 1
       }))
       return res.json(tweets)
