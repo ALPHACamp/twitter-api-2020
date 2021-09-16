@@ -166,6 +166,17 @@ const userController = {
     })
 
     return res.json({ followers, followingsId })
+  },
+
+  editUserData: async (req, res) => {
+    try {
+      const updateData = req.body
+      const user = await User.update({ ...updateData })
+      res.status(200).json({ user })
+    }
+    catch (error) {
+      console.log(error)
+    }
   }
 }
 

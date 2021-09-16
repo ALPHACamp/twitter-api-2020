@@ -40,6 +40,8 @@ module.exports = (app, passport) => {
 
   app.get('/api/tweets/:id', helpers.ensureAuthenticated, authenticated, tweetController.getTweet)
 
+  app.get('/api/tweets/:id/replies', helpers.ensureAuthenticated, authenticated, tweetController.getTweetReplies) //增加
+
   app.post('/api/tweets', helpers.ensureAuthenticated, authenticated, tweetController.postTweet)
 
   app.post('/api/tweets/:id/replies', helpers.ensureAuthenticated, authenticated, tweetController.postTweetReply)
@@ -61,8 +63,10 @@ module.exports = (app, passport) => {
 
   app.get('/api/users/:id/followers', helpers.ensureAuthenticated, authenticated, userController.getFollowers)
 
+  app.put('/api/users/:id', helpers.ensureAuthenticated, authenticated, userController.editUserData) //增加
+
     //followship路由
-  app.post('/api/followships/:id', helpers.ensureAuthenticated, authenticated, followshipController.follow)
+  app.post('/api/followships', helpers.ensureAuthenticated, authenticated, followshipController.follow) //路由要改
 
   app.delete('/api/followships/:id', helpers.ensureAuthenticated, authenticated, followshipController.unfollow)
 

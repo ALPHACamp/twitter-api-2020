@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
 const privateKey = fs.readFileSync(__dirname + '/../../rsaPrivateKey.pem', 'utf8')
+// const privateKey = process.env.PRIVATE_KEY
 
 module.exports = (user) => {
   const id = user.id

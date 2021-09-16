@@ -6,7 +6,7 @@ const followshipController = {
     try {
       const data = {}
       data.followerId = req.user.id
-      data.followingId = req.params.id
+      data.followingId = req.dataset.id
       const followship = await Followship.findOrCreate({ ...data })
       return res.status(200).json({ followship })
     }

@@ -133,6 +133,22 @@ const tweetController = {
       console.log(error)
       return res.status(417)
     }
+  },
+
+  getTweetReplies: async (req, res) => {
+    try {
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId, {
+        include: [{ model: Reply, as: 'replies',
+            include: [{ model: User, as: 'user', attributes: ['avatar', 'account', 'name'] }]
+      }]
+      })
+      res.json({ tweet })
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(417)
+    }
   }
 }
 

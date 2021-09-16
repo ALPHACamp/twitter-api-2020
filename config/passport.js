@@ -3,6 +3,7 @@ const db = require('../models')
 const User = db.User
 const fs = require('fs')
 const PUB_KEY = fs.readFileSync(__dirname + '/../rsaPublicKey.pem', 'utf8')
+// const PUB_KEY = process.env.PUBLIC_KEY
 const passport = require('passport')
 
 const cookieExtractor = (req) => {
