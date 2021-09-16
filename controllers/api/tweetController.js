@@ -37,7 +37,17 @@ const tweetController = {
       res.json({ status: 'success', message: 'Tweet was successfully posted', tweet: tweet })
       return res.redirect(`/tweets/${tweet.id}`)
     })
-  }
+  },
+  getReplies: (req, res) => {
+    Tweet.findAll({
+      include: [
+        { model: Reply, as: 'replies' }
+      ],
+      where: { id: req.params.id }
+    }).then(tweet => {
+      res.json({ tweet: tweet })
+    })
+  },
 }
 
 module.exports = tweetController
