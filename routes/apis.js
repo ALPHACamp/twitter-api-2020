@@ -4,6 +4,7 @@ const flash = require('connect-flash')
 
 const userController = require('../controllers/api/userController.js')
 const tweetController = require('../controllers/api/tweetController.js')
+const followController = require('../controllers/api/followController.js')
 
 router.post('/users', userController.signUp)
 router.get('/logout', userController.logout)
@@ -20,5 +21,9 @@ router.post('/tweets', tweetController.postTweet) // 新增推文
 router.get('/tweets/:tweet_id/replies', tweetController.getReplies) // 特定推文的所有回覆
 router.post('/tweets/:tweet_id/like', tweetController.likeTweet) // 喜歡一則推文
 router.post('/tweets/:tweet_id/unlike', tweetController.unlikeTweet) // 喜歡一則推文
+
+//route: /api/followships
+router.get('/followships/:id', followController.getFollowships) // 取得跟隨者(follower)及正在跟隨(following)
+// router.get('/followships', followController.getFollowships) // 取得跟隨者(follower)及正在跟隨(following)
 
 module.exports = router
