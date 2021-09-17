@@ -212,15 +212,12 @@ const userController = {
         currentUserId
       )
 
-      // Check whether the users exist
-      if (!users.length) {
-        throw new ApiError('GetUserFollowingsError', 401, 'No followings found')
-      }
-
       // translate to boolean in isFollowed attribute
-      users.forEach((user) => {
-        user.isFollowed = !!user.isFollowed
-      })
+      if (users.length) {
+        users.forEach((user) => {
+          user.isFollowed = !!user.isFollowed
+        })
+      }
 
       return res.status(200).json(users)
     } catch (error) {
@@ -240,15 +237,12 @@ const userController = {
         currentUserId
       )
 
-      // Check whether the users exist
-      if (!users.length) {
-        throw new ApiError('GetUserFollowersError', 401, 'No followers found')
-      }
-
       // translate to boolean in isFollowed attribute
-      users.forEach((user) => {
-        user.isFollowed = !!user.isFollowed
-      })
+      if (!users.length) {
+        users.forEach((user) => {
+          user.isFollowed = !!user.isFollowed
+        })
+      }
 
       return res.status(200).json(users)
     } catch (error) {
@@ -300,7 +294,7 @@ const userController = {
       if (user.dataValues.password) {
         delete user.dataValues.password
       }
-      
+
       const responseData = {
         status: 'success',
         message: 'Account info has updated',
