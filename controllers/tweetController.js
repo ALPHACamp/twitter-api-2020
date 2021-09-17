@@ -3,16 +3,31 @@ const { Op } = Sequelize
 
 const tweetController = {
   getTweets: async (req, res, next) => {
+    //登入者追蹤的人的tweets(reply、likes)、本人資訊
     try {
-      let user = await User.findByPk(req.user.id, {
+/*       let user = await User.findByPk(req.user.id, {
         include: [
           { model: User, as: 'Followers', attributes: ['id'] },
         ]
       })
-      let followers = user.Followers.map(user => { return user.id })
+      let followers = user.Followers.map(user => { return user.id }) */
       let tweets = await Tweet.findAll({
-        where: { UserId: followers }
+        attributes: [
+          ['id', 'TweetId'], 'createdAt','description',
+          [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
+          [Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount'],
+        ],
+        group: 'TweetId',
+       /*  where: { UserId: followers }, */
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] },
+          { model: User, attributes: ['id', 'name', 'avatar','account'] }
+        ],
+        order:[['createdAt', 'DESC']]
       })
+      console.log(tweets)
+      
       return res.status(200).json(tweets)
     } catch (err) {
       next(err)
