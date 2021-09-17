@@ -46,7 +46,6 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     try {
       const { description } = req.body
-      console.log(description)
 
       // Check request body data format with Joi schema
       const { error } = tweetSchema.validate(req.body, { abortEarly: false })

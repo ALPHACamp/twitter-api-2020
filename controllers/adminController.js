@@ -7,7 +7,7 @@ const adminController = {
       const users = await adminService.getUsers()
 
       // Check whether users exists
-      if (!users) {
+      if (!users.length) {
         throw new ApiError('AdminGetUsersError', 401, 'No users found')
       }
 
