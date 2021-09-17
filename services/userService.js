@@ -265,6 +265,23 @@ const userService = {
   },
 
   putUser: async (id, body) => {
+    const { account, name, email } = body
+
+    // Check if user is exists by email
+    if (email) {
+      const checkEmail = await User.findOne({ where: { email } })
+      if (checkEmail) {
+        throw new ApiError('EmailExistsError', 401, 'Email already exists')
+      }
+    }
+    // Check if user is exists by account
+    if (account) {
+      const checkAccount = await User.findOne({ where: { account } })
+      if (checkAccount) {
+        throw new ApiError('AccountExistsError', 401, 'Account already exists')
+      }
+    }
+
     const user = await User.findByPk(id)
     return await user.update(body)
   },
