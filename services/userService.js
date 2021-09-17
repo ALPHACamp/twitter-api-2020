@@ -275,7 +275,8 @@ const userService = {
         include: [{
           model: Like, attributes: []
         },
-        { model: Reply, attributes: [] }
+        { model: Reply, attributes: [] },
+        { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
         order: [['createdAt', 'DESC']]
       })
