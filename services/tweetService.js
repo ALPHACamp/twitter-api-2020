@@ -141,6 +141,28 @@ const TweetService = {
     }
   },
   removeLike: async (req, res, callback) => {
+    const { tweet_id } = req.params
+    const userId = helpers.getUser(req).id
+
+    try {
+      const tweet = await Tweet.findByPk(tweet_id)
+      if (!tweet) {
+        return callback(400, { status: 'error', message: "tweet doesn't exist" })
+      }
+
+      const like = await Like.findOne({ where: { UserId: userId, TweetId: tweet_id } })
+
+      if (!like) {
+        return callback(400, { status: 'error', message: 'you have not like this tweet' })
+      }
+
+      await like.destroy()
+
+      callback(200, { status: 'success', message: 'unliked successfully' })
+    } catch (err) {
+      console.log('removeLike error', err)
+      res.sendStatus(500)
+    }
   }
 
 }
