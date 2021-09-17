@@ -113,6 +113,34 @@ const TweetService = {
       console.log('getReplies error', err)
       res.sendStatus(500)
     }
+  },
+  addLike: async (req, res, callback) => {
+    const { tweet_id } = req.params
+    const userId = helpers.getUser(req).id
+
+    try {
+      const tweet = await Tweet.findByPk(tweet_id)
+      if (!tweet) {
+        return callback(400, { status: 'error', message: "tweet doesn't exist" })
+      }
+
+      const like = await Like.findOne({ where: { UserId: userId, TweetId: tweet_id } })
+
+      if (like) {
+        return callback(400, { status: 'error', message: 'you already liked this tweet' })
+      }
+
+      await Like.create({
+        UserId: userId,
+        TweetId: tweet_id
+      })
+      callback(200, { status: 'success', message: 'liked successfully' })
+    } catch (err) {
+      console.log('addLike error', err)
+      res.sendStatus(500)
+    }
+  },
+  removeLike: async (req, res, callback) => {
   }
 
 }
