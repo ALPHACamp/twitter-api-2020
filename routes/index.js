@@ -1,5 +1,5 @@
 const router = require('express').Router()
-let apis = require('./apis')
+const apis = require('./apis')
 
 router.use('/api', apis)
 
