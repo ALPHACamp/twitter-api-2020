@@ -170,8 +170,24 @@ const userController = {
   // 取得該使用者的所有推文
   getTweets: async (req, res) => {
     try {
+      const loginId = helpers.getUser(req).id
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt',
+          'likeCount',
+          'replyCount',
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${loginId} AND TweetId = Tweet.id)`
+            ),
+            'isLiked',
+          ],
+        ],
       })
       return res.status(200).json(tweets)
     } catch (err) {
@@ -182,9 +198,24 @@ const userController = {
   // 取得該使用者的所有回覆
   getRepliedTweets: async (req, res) => {
     try {
+      const loginId = helpers.getUser(req).id
       let repliedTweets = await Reply.findAll({
         where: { UserId: req.params.id },
         include: [{ model: Tweet }],
+        attributes: [
+          'id',
+          'UserId',
+          'TweetId',
+          'comment',
+          'createdAt',
+          'updatedAt',
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${loginId} AND TweetId = Tweet.id)`
+            ),
+            'isLiked',
+          ],
+        ],
         order: [['createdAt', 'DESC']],
       })
       // 剔除被刪掉的 tweet (Tweet === null)
@@ -205,9 +236,23 @@ const userController = {
   // 取得該使用者 Like 過的推文
   getLikedTweets: async (req, res) => {
     try {
+      const loginId = helpers.getUser(req).id
       let likedTweets = await Like.findAll({
         where: { UserId: req.params.id },
         include: [{ model: Tweet }],
+        attributes: [
+          'id',
+          'UserId',
+          'TweetId',
+          'createdAt',
+          'updatedAt',
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${loginId} AND TweetId = Tweet.id)`
+            ),
+            'isLiked',
+          ],
+        ],
         order: [['createdAt', 'DESC']],
       })
       // 剔除被刪掉的 tweet (Tweet === null)
