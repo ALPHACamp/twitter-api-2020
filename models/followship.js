@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followerId',
       as: 'followers'
     })
+    Followship.belongsTo(models.User, {
+      foreignKey: 'followingId',
+      as: 'userFollowings'
+    })
   }
   return Followship;
 }

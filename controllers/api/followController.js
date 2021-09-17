@@ -10,7 +10,7 @@ const helpers = require('../../_helpers');
 const followController = {
   getFollowships: (req, res) => {
     return Promise.all([
-      // 此人跟隨誰, followings
+      // 頁面主跟隨誰, followings
       Followship.findAll({
         include: [
           { model: User, as: 'followings' }
@@ -18,16 +18,24 @@ const followController = {
         where: { followerId: req.params.id }
         // where: { followerId: req.dataset.id }
       }),
-      // 此人的跟隨者, followers
+      // 頁面主的跟隨者, followers
       Followship.findAll({
         include: [
           { model: User, as: 'followers' }
         ],
         where: { followingId: req.params.id }
         // where: { followingId: req.dataset.id }
-      })
-    ]).then(([followings, followers]) => {
-      return res.json({ followings: followings, followers: followers })
+      }),
+      // 使用者跟隨誰, followings
+      Followship.findAll({
+        include: [
+          { model: User, as: 'userFollowings' }
+        ],
+        where: { followerId: 5 }
+        // where: { followerId: helpers.getUser(req).id }
+      }),
+    ]).then(([followings, followers, userFollowings]) => {
+      return res.json({ followings: followings, followers: followers, userFollowings: userFollowings })
     })
   }
 }
