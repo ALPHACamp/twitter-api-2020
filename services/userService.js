@@ -259,7 +259,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [['createdAt', 'DESC']],
+      order: [[Sequelize.col('isFollowed'), 'DESC']],
     })
     return followings
   },
@@ -291,7 +291,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [['createdAt', 'DESC']],
+      order: [[Sequelize.col('isFollowed'), 'DESC']],
     })
     return followers
   },
@@ -299,8 +299,25 @@ const userService = {
     const topUsers = await User.findAll({
       where: { role: 'user' },
       include: [{ model: User, as: 'Followers', attributes: [] }],
-      attributes: ['id', 'name', 'account', 'avatar', 'introduction', []],
+      attributes: [
+        'id', 
+        'name', 
+        'account', 
+        'avatar', 
+        'introduction', 
+        [
+          Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`),
+          'followersCount'
+        ],
+        [
+          Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id)`),
+          'isFollowed'
+        ]
+      ],
+      order: [[Sequelize.col('FollowersCount'), 'DESC']],
+      limit: 10
     })
+    return topUsers
   },
 }
 

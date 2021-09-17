@@ -182,6 +182,8 @@ const userController = {
   getTopUsers: async (req, res) => {
     const currentUserId = helpers.getUser(req).id
     try {
+      const topUsers = await userService.getTopUsers(currentUserId)
+      return res.status(200).json(topUsers)
     } catch (error) {
       console.log('getTopUsers error', error)
       res.sendStatus(400)
