@@ -76,7 +76,8 @@ const tweetService = {
         'createdAt',
         'updatedAt'
       ],
-      group: 'Replies.id'
+      group: 'Replies.id',
+      order: [['Replies', 'createdAt', 'DESC']]
     })
   },
   postTweet: async (UserId, description) => {
