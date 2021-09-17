@@ -3,11 +3,9 @@ const router = express.Router()
 const followshipController = require('../../controllers/followshipController')
 
 // 新增 POST /followships
+router.post('/', followshipController.addFollowing)
 
-router.post('/', followshipController.addFollow)
-
-router.get('/', followshipController.getTweets)
-
-router.get('/:tweet_id', followshipController.getTweet)
+// 刪除 DETELE /followships/:followingId
+router.delete('/:followingId', followshipController.removeFollowing)
 
 module.exports = router
