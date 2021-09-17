@@ -14,5 +14,6 @@ router.use("/api/users", users)
 router.use("/api/admin", admin);
 
 router.use('/api/tweets', authenticated, checkRole(), tweets)
+router.use('/api/followships/', authenticated, checkRole(), followships)
 
 module.exports = router;
