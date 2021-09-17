@@ -86,7 +86,7 @@ const userController = {
 
       if (error) {
         throw new ApiError(
-          'UserSingnupError',
+          'UserSingnUpError',
           400,
           joiMessageHandler(error.details)
         )
