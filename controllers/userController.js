@@ -185,6 +185,9 @@ const userController = {
       res.sendStatus(400);
     }
   },
+  getTopUsers: async (req, res) => {
+    const currentUserId = helpers.getUser(req).id;
+  }
 };
 
 module.exports = userController;

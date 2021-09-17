@@ -157,6 +157,12 @@ const userService = {
         message: "Couldn't find this user"
       }
     }
+    if (user.role !== "user") {
+      return {
+        status: "error",
+        message: "Invalid user",
+      };
+    }
     return await Tweet.findAll({
       where: { UserId: id },
       attributes: [
@@ -195,6 +201,12 @@ const userService = {
         status: 'error',
         message: "Can't find this user"
       }
+    }
+    if (user.role !== "user") {
+      return {
+        status: "error",
+        message: "Invalid user",
+      };
     }
     const replies = await Reply.findAll({
       where: { UserId: id },
@@ -248,6 +260,12 @@ const userService = {
         message: "Can't find this user",
       };
     }
+    if (user.role !== "user") {
+      return {
+        status: "error",
+        message: "Invalid user",
+      };
+    }
     const tweets = await Tweet.findAll({
       include: [
         { model: Like, where: { UserId: id }, attributes: ['UserId']},
@@ -288,6 +306,12 @@ const userService = {
         status: "error",
         message: "Can't find this user",
       };
+    }
+    if (user.role !== 'user') {
+      return {
+        status: 'error',
+        message: 'Invalid user'
+      }
     }
     const followings = await User.findAll({
       include: [
