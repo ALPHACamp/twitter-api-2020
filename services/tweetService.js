@@ -111,7 +111,7 @@ const tweetService = {
           ]
         }
       ],
-      order: [['createdAt', 'ASC']]
+      order: [['Replies', 'createdAt', 'DESC']]
     })
   },
   postReply: async (UserId, TweetId, comment) => {
