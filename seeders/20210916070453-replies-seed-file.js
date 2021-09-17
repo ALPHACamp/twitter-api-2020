@@ -1,5 +1,4 @@
 'use strict'
-const faker = require('faker')
 
 let replies = []
 for (let i = 0; i < 150; i++) {
