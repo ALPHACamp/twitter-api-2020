@@ -109,7 +109,7 @@ const tweetController = {
 
       if (error) {
         throw new ApiError(
-          'postTweetFormatError',
+          'postReplyFormatError',
           400,
           joiMessageHandler(error.details)
         )
