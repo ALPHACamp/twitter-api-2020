@@ -115,10 +115,11 @@ Express is running on http://localhost:3000
 | body-parser     | 1.18.3   |
 | cors            | 2.8.5    |
 | faker           | 5.5.3    |
-| imgur-node-api  | 0.1.0    |
+| imgur           | 1.0.2    |
 | jsonwebtoken    | 8.5.1    |
 | method-override | 3.0.0    |
 | mysql2          | 2.3.0    |
 | jsonwebtoken    | 8.5.1    |
 | sequelize       | 6.6.5    |
 | sequelize-cli   | 6.2.0    |
+| joi             | 17.4.2   |
