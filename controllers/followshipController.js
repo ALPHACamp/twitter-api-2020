@@ -1,5 +1,6 @@
 const db = require('../models')
 const Followship = db.Followship
+const Op = db.Sequelize.Op
 
 const followshipController = {
   follow: async (req, res) => {
@@ -12,22 +13,24 @@ const followshipController = {
     }
     catch (error) {
       console.log(error)
-      return res.status(417)
+      return res.status(404)
     }
   },
 
   unfollow: async (req, res) => {
     try {
       const followshipId = req.params.id
-      const unfollow = await Followship.findByPk({
-        where: { id: { [Op.eq]: followshipId } }
-      })
-      await unfollow.destroy()
-      return res.status(200)
+      const unfollow = await Followship.findByPk(followshipId)
+      if (unfollow) {
+        await unfollow.destroy()
+        return res.status(200)
+      } else {
+        return res.status(404)
+      }
     }
     catch (error) {
       console.log(error)
-      return res.status(417)
+      return res.status(404)
     }
   }
 }

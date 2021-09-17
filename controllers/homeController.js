@@ -33,8 +33,8 @@ const homeController = {
     User.findOne({ where: { email: username } }).then(user => {
       if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
       if (!bcrypt.compareSync(password, user.password)) {
-          return res.status(401).json({ status: 'error', message: 'passwords did not match' })
-        }
+        return res.status(401).json({ status: 'error', message: 'passwords did not match' })
+      }
       // 簽發 token
       const tokenInfo = issueJwt(user)
       const allInfo = {

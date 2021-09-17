@@ -44,8 +44,12 @@ const adminController = {
     try {
       const tweetId = req.params.id
       const tweet = await Tweet.findByPk(tweetId)
-      await tweet.destroy()
-      return res.status(200)
+      if (tweet) {
+        await tweet.destroy()
+        return res.status(200)
+      } else {
+        return res.status(404)
+      }
     }
     catch (error) {
       console.log(error)

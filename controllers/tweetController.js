@@ -16,13 +16,13 @@ const tweetController = {
       let userData = { ...req.user.dataValues, password: '', email: '' }
 
       // 取出所有推文 按照時間排序 包含推文作者以及按讚數
-      const tweets = await sequelize.query('SELECT count(`Like`.`UserId`) AS`likeCount`, `Tweet`.`id` AS`tweetId`, `Tweet`.`description` AS`tweetDescription`, `Tweet`.`createdAt` AS`tweetCreate`, `User`.`account` AS `userAccount`, `User`.`name` AS `userName`, `User`.`avatar` AS `userAvatar`  FROM `Tweets` AS `Tweet` LEFT OUTER JOIN `Likes` AS `Like` ON`Like`.`TweetId` = `Tweet`.`id` LEFT OUTER JOIN `Users` AS `User` ON`Tweet`.`UserId` = `User`.`id` GROUP BY `TweetId`',
-        {
-          type: QueryTypes.SELECT,
-          raw: true,
-          nest: true,
-        }
-      )
+      const tweets = await Tweet.findAll({
+        include: [
+          { model: Like, as: 'likes', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+          { model: Reply, as: 'replies', attributes: { exclude: ['comment', 'createdAt', 'updatedAt'] } },
+          { model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }
+        ]
+      })
 
       // 取出所有推文 按照時間排序 以及回復數
       const tweetsReply = await sequelize.query('SELECT count(`Reply`.`UserId`) AS`replyCount`, `Tweet`.`id` AS`tweetId` FROM `Tweets` AS `Tweet` LEFT OUTER JOIN `Replies` AS `Reply` ON`Reply`.`TweetId` = `Tweet`.`id` GROUP BY `TweetId`',
@@ -69,7 +69,7 @@ const tweetController = {
     const tweetData = await Tweet.findByPk(tweetId, {
       include: [
         { model: Reply, as: 'replies',
-          include: [{ model: User, as: 'user' }]
+          include: [{ model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
         },
         { model: Like, as: 'likes' },
       ]
@@ -87,7 +87,7 @@ const tweetController = {
     }
     catch (error) {
       console.log(error)
-      return res.status(417)
+      return res.status(404)
     }
   },
 
@@ -102,7 +102,7 @@ const tweetController = {
     }
     catch (error) {
       console.log(error)
-      return res.status(417)
+      return res.status(404)
     }
   },
 
@@ -116,22 +116,24 @@ const tweetController = {
     }
     catch (error) {
       console.log(error)
-      return res.status(417)
+      return res.status(404)
     }
   },
 
   postUnlike: async (req, res) => {
     try {
       const likeId = req.params.id
-      const unlike = await Like.findByPk({ 
-        where: { id: { [Op.eq]: likeId } }
-       })
-      await unlike.destroy()
-      return res.status(200)
+      const unlike = await Like.findByPk(likeId)
+      if (unlike) {
+        await unlike.destroy()
+        return res.status(200)
+      } else {
+        return res.status(404)
+      }
     }
     catch (error) {
       console.log(error)
-      return res.status(417)
+      return res.status(404)
     }
   },
 
@@ -147,7 +149,7 @@ const tweetController = {
     }
     catch (error) {
       console.log(error)
-      return res.status(417)
+      return res.status(404)
     }
   }
 }

@@ -7,20 +7,6 @@ const followshipController = require('../controllers/followshipController')
 
 
 module.exports = (app, passport) => {
-  
-  const authenticated = (req, res, next) => {
-    if (helpers.getUser(req).role === 'user') {
-      return next()
-    }
-    res.redirect('/api/signin')
-  }
-  
-  const authenticatedAdmin = (req, res, next) => {
-    if (helpers.getUser(req).role === 'admin') {
-      return next()
-    }
-    res.redirect('/api/tweets')
-  }
 
     // home 路由
   app.get('/api/signup', homeController.signUp)
@@ -36,44 +22,44 @@ module.exports = (app, passport) => {
   app.post('/api/users', homeController.postSignUp)
 
   // tweet路由
-  app.get('/api/tweets', helpers.ensureAuthenticated, authenticated, tweetController.homePage)
+  app.get('/api/tweets', helpers.ensureAuthenticated, tweetController.homePage)
 
-  app.get('/api/tweets/:id', helpers.ensureAuthenticated, authenticated, tweetController.getTweet)
+  app.get('/api/tweets/:id', helpers.ensureAuthenticated, tweetController.getTweet)
 
-  app.get('/api/tweets/:id/replies', helpers.ensureAuthenticated, authenticated, tweetController.getTweetReplies) //增加
+  app.get('/api/tweets/:id/replies', helpers.ensureAuthenticated, tweetController.getTweetReplies) //增加
 
-  app.post('/api/tweets', helpers.ensureAuthenticated, authenticated, tweetController.postTweet)
+  app.post('/api/tweets', helpers.ensureAuthenticated, tweetController.postTweet)
 
-  app.post('/api/tweets/:id/replies', helpers.ensureAuthenticated, authenticated, tweetController.postTweetReply)
+  app.post('/api/tweets/:id/replies', helpers.ensureAuthenticated, tweetController.postTweetReply)
 
-  app.post('/api/tweets/:id/like', helpers.ensureAuthenticated, authenticated, tweetController.postLike)
+  app.post('/api/tweets/:id/like', helpers.ensureAuthenticated, tweetController.postLike)
 
-  app.post('/api/tweets/:id/unlike', helpers.ensureAuthenticated, authenticated, tweetController.postUnlike)
+  app.post('/api/tweets/:id/unlike', helpers.ensureAuthenticated, tweetController.postUnlike)
 
     // user 路由
-  app.get('/api/users/:id', helpers.ensureAuthenticated, authenticated, userController.userHomePage)
+  app.get('/api/users/:id', helpers.ensureAuthenticated, userController.userHomePage)
 
-  app.get('/api/users/:id/tweets', helpers.ensureAuthenticated, authenticated, userController.getUserTweets)
+  app.get('/api/users/:id/tweets', helpers.ensureAuthenticated, userController.getUserTweets)
 
-  app.get('/api/users/:id/replied_tweets', helpers.ensureAuthenticated, authenticated, userController.getRepliedTweets)
+  app.get('/api/users/:id/replied_tweets', helpers.ensureAuthenticated, userController.getRepliedTweets)
 
-  app.get('/api/users/:id/likes', helpers.ensureAuthenticated, authenticated, userController.getLikes)
+  app.get('/api/users/:id/likes', helpers.ensureAuthenticated, userController.getLikes)
 
-  app.get('/api/users/:id/followings', helpers.ensureAuthenticated, authenticated, userController.getFollowings)
+  app.get('/api/users/:id/followings', helpers.ensureAuthenticated, userController.getFollowings)
 
-  app.get('/api/users/:id/followers', helpers.ensureAuthenticated, authenticated, userController.getFollowers)
+  app.get('/api/users/:id/followers', helpers.ensureAuthenticated, userController.getFollowers)
 
-  app.put('/api/users/:id', helpers.ensureAuthenticated, authenticated, userController.editUserData) //增加
+  app.put('/api/users/:id', helpers.ensureAuthenticated, userController.editUserData) //增加
 
     //followship路由
-  app.post('/api/followships', helpers.ensureAuthenticated, authenticated, followshipController.follow) //路由要改
+  app.post('/api/followships', helpers.ensureAuthenticated, followshipController.follow) //路由要改
 
-  app.delete('/api/followships/:id', helpers.ensureAuthenticated, authenticated, followshipController.unfollow)
+  app.delete('/api/followships/:id', helpers.ensureAuthenticated, followshipController.unfollow)
 
     //  admin 路由
-  app.get('/api/admin', helpers.ensureAuthenticated, authenticatedAdmin, adminController.getTweets)
+  app.get('/api/admin', helpers.ensureAuthenticatedAdmin, adminController.getTweets)
 
-  app.get('/api/admin/users', helpers.ensureAuthenticated, authenticatedAdmin, adminController.getUsers)
+  app.get('/api/admin/users', helpers.ensureAuthenticatedAdmin, adminController.getUsers)
 
-  app.delete('/api/admin/tweets/:id', helpers.ensureAuthenticated, authenticatedAdmin, adminController.deleteTweet)
+  app.delete('/api/admin/tweets/:id', helpers.ensureAuthenticatedAdmin, adminController.deleteTweet)
 }

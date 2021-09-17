@@ -1,24 +1,32 @@
 const passport = require('passport')
 
-// const ensureAuthenticated = passport.authenticate('jwt', { session: false, failureRedirect: '/api/signin' });
-
 const ensureAuthenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err) {
       return res.redirect('/api/signin')
+    }
+    if (user.role === 'user') {
+      req.user = { ...user }
+      return next()
     } else {
-      if (!user) {
-        return res.redirect('/api/signin')
-      } else {
-        return next()
-      }
+      return res.redirect('/api/signin')
     }
   })(req, res, next)
 }
 
-// function ensureAuthenticated(req) {
-//   return req.isAuthenticated();
-// }
+const ensureAuthenticatedAdmin = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err)  {
+      return res.redirect('/api/signin')
+    }
+    if (user.role === 'admin') {
+      req.user = { ...user }
+      return next()
+    } else {
+      return res.redirect('/api/tweets')
+    }
+  })(req, res, next)
+}
 
 const getUser = (req) => {
   return req.user;
@@ -26,5 +34,6 @@ const getUser = (req) => {
 
 module.exports = {
   ensureAuthenticated,
+  ensureAuthenticatedAdmin,
   getUser,
 };
