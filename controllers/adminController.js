@@ -1,41 +1,45 @@
 const adminService = require('../services/adminService')
+const ApiError = require('../utils/customError')
 
 const adminController = {
-  getUsers: async (req, res) => {
-    const users = await adminService.getUsers()
+  getUsers: async (req, res, next) => {
+    try {
+      const users = await adminService.getUsers()
 
-    // Check whether users exists
-    if (!users) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'No users found' })
+      // Check whether users exists
+      if (!users.length) {
+        throw new ApiError('AdminGetUsersError', 401, 'No users found')
+      }
+
+      return res.status(200).json(users)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(users)
   },
 
-  getTweets: async (req, res) => {
-    const tweets = await adminService.getTweets()
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await adminService.getTweets()
 
-    // Check whether tweets exists
-    if (!tweets.length) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: 'No tweets found' })
+      // Check whether tweets exists
+      if (!tweets.length) {
+        throw new ApiError('AdminGetTweetsError', 401, 'No tweets found')
+      }
+
+      return res.status(200).json(tweets)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(tweets)
   },
 
-  deleteTweet: async (req, res) => {
-    const data = await adminService.deleteTweet(req.params.id)
+  deleteTweet: async (req, res, next) => {
+    try {
+      const data = await adminService.deleteTweet(req.params.id)
 
-    // Check data status
-    if (data['status'] === 'error') {
-      return res.status(401).json(data)
+      return res.status(200).json(data)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(data)
   }
 }
 

@@ -1,6 +1,6 @@
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
-const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
+const ApiError = require('../utils/customError')
 
 const userService = {
   signIn: async (account) => {
@@ -13,7 +13,11 @@ const userService = {
       attributes: { exclude: ['password'] },
       include: [
         { model: User, as: 'Followers', attributes: { exclude: ['password'] } },
-        { model: User, as: 'Followings', attributes: { exclude: ['password'] } },
+        {
+          model: User,
+          as: 'Followings',
+          attributes: { exclude: ['password'] }
+        },
         { model: Like }
       ]
     })
@@ -21,16 +25,16 @@ const userService = {
 
   postUser: async (body) => {
     const { account, name, email, password } = body
+
     // Check if user is exists by email
     const checkEmail = await User.findOne({ where: { email } })
     if (checkEmail) {
-      return { status: 'error', message: 'Email already exists' }
+      throw new ApiError('EmailExistsError', 401, 'Email already exists')
     }
-
     // Check if user is exists by account
     const checkAccount = await User.findOne({ where: { account } })
     if (checkAccount) {
-      return { status: 'error', message: 'Account already exists' }
+      throw new ApiError('AccountExistsError', 401, 'Account already exists')
     }
 
     // Create user

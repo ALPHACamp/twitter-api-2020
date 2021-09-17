@@ -2,12 +2,13 @@ const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
+const ApiError = require('../utils/customError')
 
 // use helpers.getUser(req) to replace req.user
 const authenticated = (req, res, next) =>
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err || !user) {
-      return res.status(401).json({ status: 'error', message: 'Unauthorized' })
+      return next(new ApiError('AuthenticatedError', 401, 'Unauthorized'))
     }
     req.user = user.dataValues
 
@@ -21,9 +22,7 @@ const authenticatedRole = (role = 'user') => {
     if (helpers.getUser(req).role) {
       if (helpers.getUser(req).role !== role) {
         return next(
-          res
-            .status(401)
-            .json({ status: 'error', message: 'Permission denied' })
+          new ApiError('AuthenticatedRoleError', 403, 'Permission denied')
         )
       }
     }

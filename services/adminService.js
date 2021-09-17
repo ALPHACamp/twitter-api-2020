@@ -86,7 +86,7 @@ const adminService = {
 
     // Check whether tweet exists
     if (!tweet) {
-      return { status: 'error', message: 'No tweet found' }
+      throw new ApiError('AdminDeleteTweetsError', 401, 'No tweet found')
     }
 
     await tweet.destroy()
