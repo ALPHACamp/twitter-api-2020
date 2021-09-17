@@ -245,7 +245,7 @@ const userService = {
           model: User,
           as: 'Followers',
           where: { id },
-          attributes: [],
+          attributes: ['id'],
         },
       ],
       attributes: [
@@ -259,7 +259,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [[Sequelize.col('isFollowed'), 'DESC']],
+      order: [['Followers','createdAt', 'DESC']],
     })
     return followings
   },
@@ -277,7 +277,7 @@ const userService = {
           model: User,
           as: 'Followings',
           where: { id },
-          attributes: [],
+          attributes: ['id'],
         },
       ],
       attributes: [
@@ -291,7 +291,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [[Sequelize.col('isFollowed'), 'DESC']],
+      order: [['Followings', 'createdAt', 'DESC']],
     })
     return followers
   },
