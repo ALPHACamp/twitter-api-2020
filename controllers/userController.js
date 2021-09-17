@@ -28,7 +28,7 @@ const userController = {
       const user = await userService.signIn(account)
 
       if (!user) {
-        throw new ApiError('UserSingInFindError', 401, 'No such user found')
+        throw new ApiError('UserSingInError', 401, 'No such user found')
       }
 
       // Check user role by baseUrl
@@ -68,7 +68,7 @@ const userController = {
 
       // Check whether the current user exists by user id
       if (!currentUser) {
-        throw new ApiError('CurrentUserFindError', 401, 'No such user found')
+        throw new ApiError('GetCurrentUserError', 401, 'No such user found')
       }
 
       return res.status(200).json(currentUser)
@@ -120,7 +120,7 @@ const userController = {
 
       // Check whether the user exists
       if (!user) {
-        throw new ApiError('GetUserFindError', 401, 'No such user found')
+        throw new ApiError('GetUserError', 401, 'No such user found')
       }
 
       // translate to boolean in isFollowed attribute
@@ -314,7 +314,7 @@ const userController = {
 
       // Check whether the users exist
       if (!users.length) {
-        throw new ApiError('getTopUsersError', 401, 'No users found')
+        throw new ApiError('GetTopUsersError', 401, 'No users found')
       }
 
       // translate to boolean in isFollowed attribute
