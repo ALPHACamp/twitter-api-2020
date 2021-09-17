@@ -280,6 +280,72 @@ const userService = {
     });
 
     return tweets
+  },
+  getFollowings: async (id, currentUserId) => {
+    const user = await User.findByPk(id);
+    if (!user) {
+      return {
+        status: "error",
+        message: "Can't find this user",
+      };
+    }
+    const followings = await User.findAll({
+      include: [
+        { 
+          model: User,
+          as: 'Followers',
+          where: { id },
+          attributes: []
+        }
+      ],
+      attributes: [
+        ["id", 'followingId'],
+        "name",
+        "avatar",
+        "account",
+        "introduction",
+        [
+          Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id )`),
+          "isFollowed"
+        ]
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+    return followings
+  },
+  getFollowers: async (id, currentUserId) => {
+    const user = await User.findByPk(id);
+    if (!user) {
+      return {
+        status: "error",
+        message: "Can't find this user",
+      };
+    }
+    const followers = await User.findAll({
+      include: [
+        {
+          model: User,
+          as: "Followings",
+          where: { id },
+          attributes: [],
+        },
+      ],
+      attributes: [
+        ["id", "followerId"],
+        "name",
+        "avatar",
+        "account",
+        "introduction",
+        [
+          Sequelize.literal(
+            `exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id )`
+          ),
+          "isFollowed",
+        ],
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+    return followers;
   }
 }
 
