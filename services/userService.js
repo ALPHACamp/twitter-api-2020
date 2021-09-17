@@ -216,14 +216,12 @@ const userService = {
       let user = await User.findOne({
         attributes: ['id', 'name'],
         where: { id: req.params.id },
-        include: { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar', 'introduction'], through: { attributes: [] }, }
+        include: { model: User, as: 'Followings', attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'introduction'], through: { attributes: [] }, }
       })
       // 比對id，看登入使用者是否也有在追蹤這些人
       user = user.toJSON()
       user.Followings.forEach(user => {
-        user.isFollowings = followingList.map(u => (u.id)).includes(user.id)
-        user.followingId = user.id
-        delete user.id
+        user.isFollowings = followingList.map(u => (u.id)).includes(user.followingId)
       })
       return cb(user.Followings)
     } catch (err) {
