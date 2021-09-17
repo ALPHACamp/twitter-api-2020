@@ -118,6 +118,7 @@ const userService = {
       attributes: [
         ['id', 'TweetId'],
         'createdAt',
+        'updatedAt',
         'description',
         [
           Sequelize.literal(
@@ -163,7 +164,8 @@ const userService = {
         'id',
         [Sequelize.col('Tweet.id'), 'TweetId'],
         'comment',
-        'createdAt'
+        'createdAt',
+        'updatedAt'
       ],
       order: [['createdAt', 'DESC']],
       group: ['id']
@@ -182,6 +184,7 @@ const userService = {
       attributes: [
         ['id', 'TweetId'],
         'createdAt',
+        'updatedAt',
         'description',
         [
           Sequelize.literal(
