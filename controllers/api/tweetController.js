@@ -56,8 +56,10 @@ const tweetController = {
     })
   },
   postTweet: (req, res) => {
+    const userId = 5
+    // const userId = helpers.getUser(req).id
     return Tweet.create({
-      UserId: helpers.getUser(req).id,
+      UserId: userId,
       description: req.body.description
     }).then(tweet => {
       res.json({ status: 'success', message: 'Tweet was successfully posted', tweet: tweet })
@@ -89,23 +91,27 @@ const tweetController = {
     })
   },
   likeTweet: (req, res) => {
+    const userId = 5
+    // const userId = helpers.getUser(req).id
     return Like.create({
-      UserId: helpers.getUser(req).id,
+      UserId: userId,
       TweetId: req.params.tweet_id
     }).then(like => {
-      return res.json({ status: 'success', message: 'Tweet was liked.' })
+      return res.json({ status: 'success', message: 'Tweet was liked.', like: like })
     })
   },
   unlikeTweet: (req, res) => {
+    const userId = 5
+    // const userId = helpers.getUser(req).id
     return Like.findOne({
       where: {
-        UserId: helpers.getUser(req).id,
+        UserId: userId,
         TweetId: req.params.tweet_id
       }
     }).then(like => {
       like.destroy()
         .then(like => {
-          return res.json({ status: 'success', message: 'Tweet was unliked.' })
+          return res.json({ status: 'success', message: 'Tweet was unliked.', like: like })
         })
     })
   },
