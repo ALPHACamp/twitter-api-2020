@@ -39,7 +39,7 @@ const userService = {
     // Check if user is exists by name
     const checkName = await User.findOne({ where: { name } })
     if (checkName) {
-      throw new ApiError('AccountExistsError', 401, 'Name already exists')
+      throw new ApiError('NameExistsError', 401, 'Name already exists')
     }
 
     // Create user
@@ -290,7 +290,7 @@ const userService = {
     if (name) {
       const checkName = await User.findOne({ where: { name } })
       if (checkName) {
-        throw new ApiError('AccountExistsError', 401, 'Name already exists')
+        throw new ApiError('NameExistsError', 401, 'Name already exists')
       }
     }
 
