@@ -3,6 +3,7 @@ const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
+const Like = db.Like
 
 const tweetController = {
   getTweets: async (req, res) => {
@@ -20,11 +21,13 @@ const tweetController = {
         offset,
         limit
       })
+      const likeList = await Like.findAll({ where: { UserId: helpers.getUser(req).id } })
       const tweetdata = tweet.map(tweet => ({
         ...tweet.dataValues,
         name: tweet.User.name,
         avatar: tweet.User.avatar,
-        account: tweet.User.account
+        account: tweet.User.account,
+        isLiked: likeList.map(d => d.TweetId).includes(tweet.id)
       }))
       return res.json(tweetdata)
     } catch (err) {
@@ -40,6 +43,8 @@ const tweetController = {
           { model: Reply, include: [User] }
         ]
       })
+      const likeList = await Like.findAll({ where: { UserId: helpers.getUser(req).id } })
+      tweet.dataValues.isLiked = likeList.map(d => d.TweetId).includes(tweet.id)
       return res.json(tweet)
     } catch (err) {
       const data = { status: 'error', message: err }
