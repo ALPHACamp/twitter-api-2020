@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const tweetController = require('../../controllers/tweetController')
-const { authenticated, checkRole } = require('../../middleware/auth')
 
 // 新增推文 - POST /tweets
 // post('/api/tweets')
