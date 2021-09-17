@@ -16,6 +16,8 @@ router.post('/signin', userController.signIn)
 
 router.get('/currentuser', authenticated, checkRole(), userController.getCurrentUser)
 
+router.get('/topUsers', authenticated, checkRole(), userController.getTopUsers)
+
 router.get('/:id', authenticated, checkRole(), userController.getUser)
 
 router.put('/:id', authenticated, checkRole(), cpUpload, userController.putUser)
@@ -29,5 +31,8 @@ router.get('/:id/likes', authenticated, checkRole(), userController.getUserLiked
 router.get('/:id/followings', authenticated, checkRole(), userController.getFollowings)
 
 router.get('/:id/followers', authenticated, checkRole(), userController.getFollowers)
+
+router.put('/:id/settings', authenticated, checkRole(), userController.putUserSettings)
+
 
 module.exports = router

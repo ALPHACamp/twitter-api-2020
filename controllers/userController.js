@@ -182,11 +182,30 @@ const userController = {
   getTopUsers: async (req, res) => {
     const currentUserId = helpers.getUser(req).id
     try {
+      const topUsers = await userService.getTopUsers(currentUserId)
+      return res.status(200).json(topUsers)
     } catch (error) {
       console.log('getTopUsers error', error)
       res.sendStatus(400)
     }
   },
+  putUserSettings: async (req, res) => {
+    const id = Number(req.params.id)
+    const currentUserId = helpers.getUser(req).id
+    try {
+      if (id !== currentUserId) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Cannot edit others user settings',
+        })
+      }
+      const { status, message } = await userService.putUserSettings(id, req.body)
+      return res.status(200).json({ status, message })   
+    } catch (error) {
+      console.log('putUserSettings error', error)
+      res.sendStatus(500)
+    }
+  }
 }
 
 module.exports = userController
