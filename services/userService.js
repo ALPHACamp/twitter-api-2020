@@ -198,7 +198,7 @@ const userService = {
         ]
       ],
       group: ['TweetId'],
-      order: [['createdAt', 'DESC']]
+      order: [['Likes', 'createdAt', 'DESC']]
     })
   },
 
@@ -229,7 +229,7 @@ const userService = {
         'account'
       ],
       group: ['User.id'],
-      order: [['createdAt', 'DESC']]
+      order: [['Followers', 'createdAt', 'DESC']]
     })
   },
 
@@ -260,7 +260,7 @@ const userService = {
         'account'
       ],
       group: ['User.id'],
-      order: [['createdAt', 'DESC']]
+      order: [['Followings', 'createdAt', 'DESC']]
     })
   },
 
