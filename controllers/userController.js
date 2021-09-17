@@ -141,15 +141,12 @@ const userController = {
 
       let tweets = await userService.getUserTweets(targetUserId, currentUserId)
 
-      // Check whether the tweets exist
-      if (!tweets.length) {
-        throw new ApiError('GetUserTweetsError', 401, 'No tweets found')
-      }
-
       // translate to boolean in isFollowed attribute
-      tweets.forEach((tweet) => {
-        tweet.dataValues.isLike = !!tweet.dataValues.isLike
-      })
+      if (tweets.length) {
+        tweets.forEach((tweet) => {
+          tweet.dataValues.isLike = !!tweet.dataValues.isLike
+        })
+      }
 
       return res.status(200).json(tweets)
     } catch (error) {
@@ -160,11 +157,6 @@ const userController = {
   getUserRepliedTweets: async (req, res, next) => {
     try {
       const tweets = await userService.getUserRepliedTweets(req.params.id)
-
-      // Check whether the tweets exist
-      if (!tweets.length) {
-        throw new ApiError('GetUserRepliedTweetsError', 401, 'No tweets found')
-      }
 
       return res.status(200).json(tweets)
     } catch (error) {
@@ -184,15 +176,12 @@ const userController = {
         currentUserId
       )
 
-      // Check whether the tweets exist
-      if (!tweets.length) {
-        throw new ApiError('GetUserLikedTweetsError', 401, 'No tweets found')
-      }
-
       // translate to boolean in isFollowed attribute
-      tweets.forEach((tweet) => {
-        tweet.isLike = !!tweet.isLike
-      })
+      if (tweets.length) {
+        tweets.forEach((tweet) => {
+          tweet.isLike = !!tweet.isLike
+        })
+      }
 
       return res.status(200).json(tweets)
     } catch (error) {
@@ -238,7 +227,7 @@ const userController = {
       )
 
       // translate to boolean in isFollowed attribute
-      if (!users.length) {
+      if (users.length) {
         users.forEach((user) => {
           user.isFollowed = !!user.isFollowed
         })
