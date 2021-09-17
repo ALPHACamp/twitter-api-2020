@@ -32,5 +32,7 @@ router.get('/:id/followings', authenticated, checkRole(), userController.getFoll
 
 router.get('/:id/followers', authenticated, checkRole(), userController.getFollowers)
 
+router.put('/:id/settings', authenticated, checkRole(), userController.putUserSettings)
+
 
 module.exports = router

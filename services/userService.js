@@ -319,6 +319,30 @@ const userService = {
     })
     return topUsers
   },
+  putUserSettings: async (id, body) => {
+    const { account, name, email, password, checkPassword } = body
+    const user = await User.findByPk(id)
+    if (!user) {
+      return { status: 'error', message: 'No such user found' }
+    }
+    if (!account || !name || !email || !password || !checkPassword) {
+      return { status: 'error', message: 'All fields are required' }
+    }
+    if (password !== checkPassword) {
+      return { status: 'error', message: 'Password & checkPassword does not match' }
+    }
+
+    await user.update({
+      ...body,
+      password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+    })
+      
+    return {
+      status: 'success',
+      message: 'Successfully edited'
+    }
+    
+  }
 }
 
 module.exports = userService
