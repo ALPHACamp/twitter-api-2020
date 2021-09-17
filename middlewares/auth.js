@@ -1,3 +1,4 @@
+const helpers = require('../_helpers')
 const passport = require('../config/passport')
 
 const authenticated = (req, res, next) => {
@@ -11,6 +12,24 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 
+const authenticatedUser = (req, res, next) => {
+  if (req.user) {
+    if (req.user.role === 'user') { return next() }
+    return res.json({ status: 'error', message: 'permission denied' })
+  } else {
+    return res.json({ status: 'error', message: 'permission denied' })
+  }
+}
+
+const authenticatedAdmin = (req, res, next) => {
+  if (helpers.getUser(req)) {
+    if (helpers.getUser(req).role === 'admin') { return next() }
+    return res.json({ status: 'error', message: 'permission denied' })
+  } else {
+    return res.json({ status: 'error', message: 'permission denied' })
+  }
+}
+
 module.exports = {
-  authenticated
+  authenticated, authenticatedUser, authenticatedAdmin
 }
