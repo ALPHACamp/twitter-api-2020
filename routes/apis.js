@@ -25,5 +25,7 @@ router.post('/tweets/:tweet_id/unlike', tweetController.unlikeTweet) // 喜歡�
 //route: /api/followships
 router.get('/followships/:id', followController.getFollowships) // 取得跟隨者(follower)及正在跟隨(following)
 // router.get('/followships', followController.getFollowships) // 取得跟隨者(follower)及正在跟隨(following)
+router.post('/followships', followController.follow) // 跟隨一位使用者
+router.delete('/followships', followController.unfollow) // 取消跟隨一位使用者
 
 module.exports = router
