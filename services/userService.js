@@ -307,7 +307,7 @@ const userService = {
         'introduction', 
         [
           Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`),
-          'followersCount'
+          'FollowersCount'
         ],
         [
           Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id)`),
