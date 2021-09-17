@@ -23,4 +23,6 @@ router.get("/:id/replied_tweets", authenticated, checkRole(), userController.get
 
 router.get('/:id/likes', authenticated, checkRole(), userController.getUserLikedTweets)
 
+router.get('/:id/followings', authenticated, checkRole(), userController.getFollowings)
+
 module.exports = router

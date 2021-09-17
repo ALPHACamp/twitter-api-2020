@@ -132,6 +132,21 @@ const userController = {
       console.log('getUserLikedTweets error', error)
       res.sendStatus(400)
     }
+  },
+  getFollowings: async (req, res) => {
+    const id = Number(req.params.id)
+    const currentUserId = helpers.getUser(req).id;
+    try {
+      const followings = await userService.getFollowings(id, currentUserId)
+      if (!followings) {
+        return res.status(400)
+        .json({ status: 'error', messages: 'No followings yet'})
+      }
+      return res.status(200).json(followings)
+    } catch (error) {
+      console.log('getFollowings error', error)
+      res.sendStatus(400)
+    }
   }
 };
 
