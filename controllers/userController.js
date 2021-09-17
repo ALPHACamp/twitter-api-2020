@@ -141,31 +141,33 @@ const userController = {
   },
 
   getFollowings: async (req, res) => {
-    const userId = req.user.id
+    let data = []
+    const userId = req.user.dataValues.id
     const followings = await User.findByPk(userId, {
       attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] },
       include: [{ model: User, as: 'Followings', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
     })
-
+    data.push(followings)
     const followersId = await Followship.findAll({
       where: { followingId: { [Op.eq]: userId } },
     })
-
-    return res.json({ followings, followersId })
+    data.push(followersId)
+    return res.json(data)
   },
 
   getFollowers: async (req, res) => {
-    const userId = req.user.id
+    let data = []
+    const userId = req.user.dataValues.id
     const followers = await User.findByPk(userId, {
       attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] },
       include: [{ model: User, as: 'Followers', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
     })
-
+    data.push(followers)
     const followingsId = await Followship.findAll({
       where: { followerId: { [Op.eq]: userId } },
     })
-
-    return res.json({ followers, followingsId })
+    data.push(followingsId)
+    return res.json(data)
   },
 
   editUserData: async (req, res) => {

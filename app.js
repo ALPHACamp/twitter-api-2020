@@ -9,7 +9,7 @@ const handlebars = require('express-handlebars')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
 const cookieParser = require('cookie-parser')
-const passport = require('passport')
+const passport = require('./config/passport')
 const app = express()
 const PORT = process.env.PORT || 3000
 
@@ -26,7 +26,7 @@ app.use(flash())
 
 app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true }))
 
-require('./config/passport')(passport)  
+// require('./config/passport')(passport)  
 app.use(passport.initialize())
 app.use(passport.session())
 app.listen(PORT, () => {
