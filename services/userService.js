@@ -118,6 +118,7 @@ const userService = {
       attributes: [
         ['id', 'TweetId'],
         'createdAt',
+        'updatedAt',
         'description',
         [
           Sequelize.literal(
@@ -163,7 +164,8 @@ const userService = {
         'id',
         [Sequelize.col('Tweet.id'), 'TweetId'],
         'comment',
-        'createdAt'
+        'createdAt',
+        'updatedAt'
       ],
       order: [['createdAt', 'DESC']],
       group: ['id']
@@ -182,6 +184,7 @@ const userService = {
       attributes: [
         ['id', 'TweetId'],
         'createdAt',
+        'updatedAt',
         'description',
         [
           Sequelize.literal(
@@ -274,21 +277,27 @@ const userService = {
 
     // Check if user is exists by email
     if (email) {
-      const checkEmail = await User.findOne({ where: { email } })
+      const checkEmail = await User.findOne({
+        where: { id: { [Op.not]: id }, email }
+      })
       if (checkEmail) {
         throw new ApiError('EmailExistsError', 401, 'Email already exists')
       }
     }
     // Check if user is exists by account
     if (account) {
-      const checkAccount = await User.findOne({ where: { account } })
+      const checkAccount = await User.findOne({
+        where: { id: { [Op.not]: id }, account }
+      })
       if (checkAccount) {
         throw new ApiError('AccountExistsError', 401, 'Account already exists')
       }
     }
     // Check if user is exists by name
     if (name) {
-      const checkName = await User.findOne({ where: { name } })
+      const checkName = await User.findOne({
+        where: { id: { [Op.not]: id }, name }
+      })
       if (checkName) {
         throw new ApiError('NameExistsError', 401, 'Name already exists')
       }
