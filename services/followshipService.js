@@ -25,7 +25,7 @@ const followshipService = {
       if (isFollowed) {
         return callback(400, { status: 'error', message: 'you have already followed this user' })
       }
-      
+
       await Followship.create({
         followerId,
         followingId
