@@ -12,10 +12,12 @@ const followshipService = {
       throw new ApiError('addFollowingError', 400, 'You cannot follow yourself')
     }
 
-    await Followship.create({
-      followerId,
-      followingId
+    const [_, isCreated] = await Followship.findOrCreate({
+      where: { followerId, followingId }
     })
+    if (!isCreated) {
+      throw new ApiError('addFollowingError', 400, 'You have followed')
+    }
     return { status: 'success', message: 'Followed successfully' }
   },
   deleteFollowing: async (req, res) => {
