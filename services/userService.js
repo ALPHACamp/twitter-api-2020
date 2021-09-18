@@ -98,13 +98,13 @@ const userService = {
         ],
         [
           Sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+            '(SELECT COUNT(DISTINCT followerId) FROM Followships WHERE Followships.followingId = User.id)'
           ),
           'FollowersCount'
         ],
         [
           Sequelize.literal(
-            '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
+            '(SELECT COUNT(DISTINCT followingId) FROM Followships WHERE Followships.followerId = User.id)'
           ),
           'FollowingsCount'
         ]
