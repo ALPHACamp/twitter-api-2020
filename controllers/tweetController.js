@@ -13,7 +13,7 @@ const tweetController = {
   homePage: async (req, res) => {
     try{
       const id = req.user.id
-      let userData = { ...req.user.dataValues, password: '', email: '' }
+      let userData = { ...req.user, password: '', email: '' }
 
       // 取出所有推文 按照時間排序 包含推文作者以及按讚數
       const tweets = await Tweet.findAll({

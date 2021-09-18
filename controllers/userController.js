@@ -8,11 +8,11 @@ const Sequelize = db.Sequelize
 const sequelize = db.sequelize
 const Op = db.Sequelize.Op
 const { QueryTypes } = require('sequelize')
-const popularQty = 10 //暫時沒有用到
+// const popularQty = 10 //暫時沒有用到
 
 const userController = {
   userHomePage: async (req, res) => {
-    const userData = { ...req.user.dataValues, password: '', email: '' }
+    const userData = { ...req.user, password: '', email: '' }
     const userId = req.user.id
     const requestId = Number(req.params.id)
     try {
@@ -57,7 +57,7 @@ const userController = {
       popular.map(element => {
         return followings.includes(element.userId) ? element['isFollowed'] = true : element['isFollowed'] = false
       })
-
+      
       let isFollowed = false
       if (!(userId === requestId)) {
         followers.includes(userId) ? isFollowed = true : isFollowed
@@ -84,9 +84,9 @@ const userController = {
         { model: Like, as: 'likes' }
       ],
     })
-    let userData = await User.findByPk(userId)
-    userData = { ...req.user.dataValues, password: '', email: '' }
-    return res.json({ userTweets, userData })
+    // let userData = await User.findByPk(userId)
+    // userData = { ...req.user.dataValues, password: '', email: '' }
+    return res.json(userTweets)
   },
 
   getRepliedTweets: async (req, res) => {
@@ -142,7 +142,7 @@ const userController = {
 
   getFollowings: async (req, res) => {
     let data = []
-    const userId = req.user.dataValues.id
+    const userId = req.user.id
     const followings = await User.findByPk(userId, {
       attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] },
       include: [{ model: User, as: 'Followings', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
@@ -157,7 +157,7 @@ const userController = {
 
   getFollowers: async (req, res) => {
     let data = []
-    const userId = req.user.dataValues.id
+    const userId = req.user.id
     const followers = await User.findByPk(userId, {
       attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] },
       include: [{ model: User, as: 'Followers', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
