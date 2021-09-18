@@ -60,6 +60,23 @@ const adminService = {
       order: [[Sequelize.col('TweetsCount'), 'DESC']],
     })
     return users
+  },
+  getTweets: async () => {
+    const tweets = await Tweet.findAll({
+      include: [
+        { 
+          model: User,
+          attributes: [['id', 'UserId'], 'name', 'account', 'avatar']
+        }
+      ],
+      attributes: [
+        'id',
+        'description',
+        'createdAt'
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+    return tweets
   }
 }
 

@@ -1,4 +1,3 @@
-const tweetService = require('../services/tweetService')
 const adminService = require('../services/adminService')
 
 const adminController = {
@@ -30,6 +29,14 @@ const adminController = {
       return res.status(200).json(users)
     } catch (error) {
       console.log('Admin getUsers error', error)
+    }
+  },
+  getTweets: async (req, res) => {
+    try {
+      const tweets = await adminService.getTweets()
+      return res.status(200).json(tweets)
+    } catch (error) {
+      console.log('Admin getTweets error', error)
     }
   }
 }
