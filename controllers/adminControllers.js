@@ -38,6 +38,15 @@ const adminController = {
     } catch (error) {
       console.log('Admin getTweets error', error)
     }
+  },
+  deleteTweet: async (req, res) => {
+    try {
+      const id = Number(req.params.id)
+      const { status, message } = await adminService.deleteTweet(id)
+      return res.status(200).json({ status, message })
+    } catch (error) {
+      console.log('Admin deleteTweet error', error)
+    }
   }
 }
 

@@ -77,6 +77,18 @@ const adminService = {
       order: [['createdAt', 'DESC']]
     })
     return tweets
+  },
+  deleteTweet: async (id) => {
+    const tweet = await Tweet.findByPk(id)
+    if (!tweet) {
+      return {
+        status: 'error', message: 'Tweet does not exist'
+      }
+    }
+    await tweet.destroy()
+    return {
+      status: 'success', message: `Successfully deleted tweet TweetId: ${id}`
+    }
   }
 }
 
