@@ -245,7 +245,7 @@ const userService = {
           model: User,
           as: 'Followers',
           where: { id },
-          attributes: [],
+          attributes: ['id'],
         },
       ],
       attributes: [
@@ -259,7 +259,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [['createdAt', 'DESC']],
+      order: [['Followers','createdAt', 'DESC']],
     })
     return followings
   },
@@ -277,7 +277,7 @@ const userService = {
           model: User,
           as: 'Followings',
           where: { id },
-          attributes: [],
+          attributes: ['id'],
         },
       ],
       attributes: [
@@ -291,7 +291,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [['createdAt', 'DESC']],
+      order: [['Followings', 'createdAt', 'DESC']],
     })
     return followers
   },
@@ -299,9 +299,50 @@ const userService = {
     const topUsers = await User.findAll({
       where: { role: 'user' },
       include: [{ model: User, as: 'Followers', attributes: [] }],
-      attributes: ['id', 'name', 'account', 'avatar', 'introduction', []],
+      attributes: [
+        'id', 
+        'name', 
+        'account', 
+        'avatar', 
+        'introduction', 
+        [
+          Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`),
+          'FollowersCount'
+        ],
+        [
+          Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id)`),
+          'isFollowed'
+        ]
+      ],
+      order: [[Sequelize.col('FollowersCount'), 'DESC']],
+      limit: 10
     })
+    return topUsers
   },
+  putUserSettings: async (id, body) => {
+    const { account, name, email, password, checkPassword } = body
+    const user = await User.findByPk(id)
+    if (!user) {
+      return { status: 'error', message: 'No such user found' }
+    }
+    if (!account || !name || !email || !password || !checkPassword) {
+      return { status: 'error', message: 'All fields are required' }
+    }
+    if (password !== checkPassword) {
+      return { status: 'error', message: 'Password & checkPassword does not match' }
+    }
+
+    await user.update({
+      ...body,
+      password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+    })
+      
+    return {
+      status: 'success',
+      message: 'Successfully edited'
+    }
+    
+  }
 }
 
 module.exports = userService
