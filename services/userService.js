@@ -205,7 +205,7 @@ const userService = {
           'isLike'
         ]
       ],
-      group: ['TweetId'],
+      group: ['TweetId', 'Likes.createdAt'],
       order: [['Likes', 'createdAt', 'DESC']]
     })
   },
