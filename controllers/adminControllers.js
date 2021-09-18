@@ -2,7 +2,7 @@ const tweetService = require('../services/tweetService')
 const adminService = require('../services/adminService')
 
 const adminController = {
-  adminSignIn : async (req, res) => {
+  adminSignIn: async (req, res) => {
     try {
       const { account, password } = req.body
       // Check required data
@@ -20,10 +20,18 @@ const adminController = {
         user,
       })
     } catch (error) {
-      console.log('signIn error', error)
+      console.log('Admin signIn error', error)
       res.sendStatus(500)
-    }    
+    }
+  },
+  getUsers: async (req, res) => {
+    try {
+      const users = await adminService.getUsers()
+      return res.status(200).json(users)
+    } catch (error) {
+      console.log('Admin getUsers error', error)
+    }
   }
-};
+}
 
-module.exports = adminController;
+module.exports = adminController

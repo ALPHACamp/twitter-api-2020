@@ -34,6 +34,33 @@ const adminService = {
       },
     }
   },
+  getUsers: async () => {
+    const users = await User.findAll({
+      where: { role: 'user' },
+      include: [
+        {
+          model: Tweet,
+          attributes: [['id', 'TweetId']]
+        },
+      ],
+      attributes: [
+        'id',
+        'account',
+        'name',
+        'avatar',
+        'cover',
+        [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'TweetsCount'],
+        [
+          Sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'),
+          'LikesCount',
+        ],
+        [Sequelize.literal('(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followingId = User.id)'), 'FollowersCount'],
+        [Sequelize.literal('(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followerId = User.id)'), 'FollowingCount'],
+      ],
+      order: [[Sequelize.col('TweetsCount'), 'DESC']],
+    })
+    return users
+  }
 }
 
 module.exports = adminService
