@@ -1,8 +1,14 @@
-const express = require("express");
-const router = express.Router();
+const express = require('express')
+const { authenticated, checkRole } = require('../../middleware/auth')
+const adminController = require('../../controllers/adminControllers')
+const router = express.Router()
 
-router.get("/", async (req, res) => {
-  res.json("Hello world");
-});
+router.post('/signin', adminController.adminSignIn)
 
-module.exports = router;
+router.get('/users', authenticated, checkRole('admin'), adminController.getUsers)
+
+router.get('/tweets', authenticated, checkRole('admin'), adminController.getTweets)
+
+router.delete('/tweets/:id', authenticated, checkRole('admin'), adminController.deleteTweet)
+
+module.exports = router
