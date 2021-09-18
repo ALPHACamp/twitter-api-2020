@@ -25,6 +25,16 @@ const tweetController = {
     TweetService.getReplies(req, res, (status, data) => {
       return res.status(status).json(data)
     })
+  },
+  addLike: (req, res) => {
+    TweetService.addLike(req, res, (status, data) => {
+      return res.status(status).json(data)
+    })
+  },
+  removeLike: (req, res) => {
+    TweetService.removeLike(req, res, (status, data) => {
+      return res.status(status).json(data)
+    })
   }
 }
 
