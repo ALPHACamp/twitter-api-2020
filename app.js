@@ -4,7 +4,7 @@ const routes = require('./routes')
 const bodyParser = require('body-parser')
 const flash = require('connect-flash')
 const session = require('express-session')
-
+const cors = require('cors')
 const app = express()
 const port = 3000
 
@@ -12,6 +12,9 @@ const port = 3000
 function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
+
+// cors 的預設為全開放
+app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
