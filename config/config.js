@@ -22,6 +22,7 @@ module.exports = {
     "host": process.env.RDS_HOSTNAME,
     "username": process.env.RDS_USERNAME,
     "password": process.env.RDS_PASSWORD,
+    "port": '3306',
     "database": 'AWStwitter',
     "dialect": "mysql",
   },
