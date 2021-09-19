@@ -15,13 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "CLEARDB_DATABASE_URL",
-    "username": "process.env.RDS_USERNAME",
-    "password": "process.env.RDS_PASSWORD",
-    "database": "database-1",
-    "host": "process.env.RDS_HOSTNAME",
-    "port": "process.env.RDS_PORT",
-    "dialect": "mysql"
+    "use_env_variable": "CLEARDB_DATABASE_URL"
   },
   "travis": {
     "username": "travis",
