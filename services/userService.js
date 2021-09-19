@@ -329,16 +329,25 @@ const userService = {
     if (!user) {
       return { status: 'error', message: 'No such user found' }
     }
-    if (!account || !name || !email || !password || !checkPassword) {
+    if (!account || !name || !email ) {
       return { status: 'error', message: 'All fields are required' }
     }
-    if (password !== checkPassword) {
-      return { status: 'error', message: 'Password & checkPassword does not match' }
+    if (password) {
+      if (password !== checkPassword) {
+        return { status: 'error', message: 'Password & checkPassword does not match' }
+      }
+      await user.update({
+        ...body,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+      })
+      return {
+        status: 'success',
+        message: 'Successfully edited including password'
+      }
     }
 
     await user.update({
-      ...body,
-      password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+      ...body
     })
       
     return {
