@@ -57,7 +57,7 @@ const userController = {
     try {
       const id = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
-      const user = await userService.getUser(id)
+      const user = await userService.getUser(id, currentUserId)
       if (!user) {
         return res
           .status(401)

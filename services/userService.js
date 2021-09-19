@@ -58,7 +58,7 @@ const userService = {
       },
     }
   },
-  getUser: async (userId) => {
+  getUser: async (userId, currentUserId) => {
     const user = await User.findOne({
       raw: true,
       nest: true,
@@ -74,6 +74,10 @@ const userService = {
         [Sequelize.literal(`(SELECT COUNT(*) FROM TWEETS WHERE Tweets.UserId = ${userId})`), 'TweetsCount'],
         [Sequelize.literal(`(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followingId = ${userId})`), 'FollowersCount'],
         [Sequelize.literal(`(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followerId = ${userId})`), 'FollowingCount'],
+        [
+          Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id )`),
+          'isFollowed',
+        ],
       ],
     })
     if (user.role === 'admin') {
@@ -325,16 +329,25 @@ const userService = {
     if (!user) {
       return { status: 'error', message: 'No such user found' }
     }
-    if (!account || !name || !email || !password || !checkPassword) {
+    if (!account || !name || !email ) {
       return { status: 'error', message: 'All fields are required' }
     }
-    if (password !== checkPassword) {
-      return { status: 'error', message: 'Password & checkPassword does not match' }
+    if (password) {
+      if (password !== checkPassword) {
+        return { status: 'error', message: 'Password & checkPassword does not match' }
+      }
+      await user.update({
+        ...body,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+      })
+      return {
+        status: 'success',
+        message: 'Successfully edited including password'
+      }
     }
 
     await user.update({
-      ...body,
-      password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+      ...body
     })
       
     return {
