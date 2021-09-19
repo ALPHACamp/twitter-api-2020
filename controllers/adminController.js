@@ -4,24 +4,20 @@ const { User, Tweet, Like, Sequelize, Reply } = require('../models')
 const { Op } = Sequelize
 
 let adminController = {
-  adminLogin: (req, res) => {
-    const { email, password } = req.body
-
-    // 檢查必要資料
-    if (!email.trim() || !password.trim()) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
-    }
-
-   // 檢查 user 是否存在與密碼是否正確
-    User.findOne({ where: { email } }).then(user => {
-      if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
-      if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: 'passwords did not match' })
+  adminLogin: async (req, res, next) => {
+    try{
+      const { email, password } = req.body
+      // 檢查必要資料
+      if (!email.trim() || !password.trim()) {
+        return res.json({ status: 'error', message: "required fields didn't exist" })
       }
+      const user = await User.findOne({ where: { email } })
 
-      //確定只有admin通過
+      if (!user) return res.status(401).json({ status: 'error', message: 'No such user found' })
       if(user.role !== 'admin') return res.status(403).json({ status: 'error', message: '權限不足' })
-
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ status: 'error', message: 'Passwords did not match' })
+      }
       // 簽發 token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -36,52 +32,50 @@ let adminController = {
           isAdmin: user.isAdmin
         }
       })
-    })
+    }catch(err){
+      next(err)
+    }
   },
-  getAdminTweets: (req, res, next) => {
-    Tweet.findAll({ 
-      attributes: [
-        'id','updatedAt',
-        [Sequelize.literal('substring(description,1,50)'), 'description']
-      ],
-      include: [
-        { model: User, attributes:[
-          'name', 'account', 'avatar'
-        ]}
-      ],
-      order: [['createdAt', 'DESC']]
-    }).then((tweets) => {
+  getAdminTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        attributes: [
+          'id','updatedAt',
+          [Sequelize.literal('substring(description,1,50)'), 'description']
+        ],
+        include: [
+          { model: User, attributes:['name', 'account', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
       return res.status(200).json({tweets})
-    })
-    .catch(err => next(err))
+    }catch(err){
+      next(err)
+    }
   },
-  deleteAdminTweets: (req, res, next) => {
-    console.log('delete', req.params.id)
-    Tweet.findByPk(req.params.id)
-      .then((tweet) => {
-        if (!tweet) {
-          return res.status(404).json({
-            status: 'error',
-            message: 'Can not find this tweet!'
-          })
-        }
-        Promise.all([
-          tweet.destroy(),
-          Reply.destroy({ where: { TweetId: tweet.id } }),
-          Like.destroy({ where: { TweetId: tweet.id } })
-        ])
-          .then(() => {
-            res.status(200).json({
-              status: 'success',
-              message: 'delete successfully'
-            })
-          }).catch(err => next(err))
-      }).catch(err => next(err))
+  deleteAdminTweets: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'Can not find this tweet!'
+        })
+      }
+      await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: tweet.id } })
+      await Like.destroy({ where: { TweetId: tweet.id } })
+      return res.status(200).json({
+        status: 'success',
+        message: 'delete successfully'
+      })
+    }catch(err){
+      next(err)
+    }
   },
-  getAdminUsers: (req, res, next) => {
-    
-    //粉絲、跟隨、推文被 like、Reply 的數量
-    User.findAll({
+  getAdminUsers: async (req, res, next) => {
+    try{
+    const user = await User.findAll({
       attributes: [
         'id','name', 'account', 'cover', 'avatar',
         [Sequelize.literal('COUNT(distinct Tweets.id)'), 'TweetsCount'],
@@ -99,11 +93,13 @@ let adminController = {
       order: [
         [Sequelize.literal('TweetsCount'), 'DESC']
       ],
-      where: { role: { [Op.not]: 'admin' } },//不會顯示admin
+      where: { role: { [Op.not]: 'admin' } },
     })
-      .then((users) => {
-        return res.status(200).json([...users])
-      }).catch(err => next(err))
+    return res.status(200).json([...user])
+
+    }catch (err) {
+      next(err)
+    }
   }
 }
 
