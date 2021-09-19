@@ -1,5 +1,4 @@
-const { User, Tweet, Like, Reply, sequelize } = require('../models')
-const Sequelize = require('sequelize')
+const { User, Tweet, Like, Sequelize } = require('../models')
 
 const adminService = {
   getUsers: async () => {

@@ -14,7 +14,7 @@ const tweetService = {
         ['id', 'TweetId'],
         [
           Sequelize.literal(
-            `exists(select 1 from Likes where UserId = ${id} and TweetId = Tweet.id)`
+            `EXISTS(SELECT 1 FROM Likes WHERE UserId = ${id} AND TweetId = Tweet.id)`
           ),
           'isLike'
         ],
@@ -56,7 +56,7 @@ const tweetService = {
         'id',
         [
           Sequelize.literal(
-            `exists(select 1 from Likes where UserId = ${id} and TweetId = Tweet.id)`
+            `EXISTS(SELECT 1 FROM Likes WHERE UserId = ${id} AND TweetId = Tweet.id)`
           ),
           'isLike'
         ],

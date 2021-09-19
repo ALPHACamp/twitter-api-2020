@@ -1,5 +1,4 @@
 const express = require('express')
-const helpers = require('./_helpers')
 
 const app = express()
 const methodOverride = require('method-override')
@@ -26,6 +25,7 @@ app.use(passport.initialize())
 // Setting middleware: method-override
 app.use(methodOverride('_method'))
 
+// Setting express router
 app.use(routes)
 
 // Setting custom error handling
