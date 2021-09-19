@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
 const userService = require('../services/userService')
 const helpers = require('../_helpers')
 const { joiMessageHandler, userInfoSchema } = require('../utils/validator')
+const booleanTranslation = require('../utils/booleanTranslation')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const ApiError = require('../utils/customError')
@@ -124,7 +124,7 @@ const userController = {
       }
 
       // translate to boolean in isFollowed attribute
-      user.dataValues.isFollowed = !!user.dataValues.isFollowed
+      booleanTranslation(user.dataValues.isFollowed)
 
       return res.status(200).json(user)
     } catch (error) {
@@ -144,7 +144,7 @@ const userController = {
       // translate to boolean in isFollowed attribute
       if (tweets.length) {
         tweets.forEach((tweet) => {
-          tweet.dataValues.isLike = !!tweet.dataValues.isLike
+          booleanTranslation(tweet.dataValues.isLike)
         })
       }
 
@@ -179,7 +179,7 @@ const userController = {
       // translate to boolean in isFollowed attribute
       if (tweets.length) {
         tweets.forEach((tweet) => {
-          tweet.isLike = !!tweet.isLike
+          booleanTranslation(tweet.isLike)
         })
       }
 
@@ -204,7 +204,7 @@ const userController = {
       // translate to boolean in isFollowed attribute
       if (users.length) {
         users.forEach((user) => {
-          user.isFollowed = !!user.isFollowed
+          booleanTranslation(user.isFollowed)
         })
       }
 
@@ -229,7 +229,7 @@ const userController = {
       // translate to boolean in isFollowed attribute
       if (users.length) {
         users.forEach((user) => {
-          user.isFollowed = !!user.isFollowed
+          booleanTranslation(user.isFollowed)
         })
       }
 
@@ -307,7 +307,7 @@ const userController = {
 
       // translate to boolean in isFollowed attribute
       users.forEach((user) => {
-        user.dataValues.isFollowed = !!user.dataValues.isFollowed
+        booleanTranslation(user.dataValues.isFollowed)
       })
 
       return res.status(200).json(users)
