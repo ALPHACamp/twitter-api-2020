@@ -4,6 +4,7 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Users', [{
+      id: 5,
       email: 'root@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'admin',
@@ -15,6 +16,7 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
+      id: 15,
       email: 'user1@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
@@ -26,6 +28,7 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
+      id: 25,
       email: 'user2@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
@@ -37,6 +40,7 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
+      id: 35,
       email: 'user3@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
@@ -48,6 +52,7 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
+      id: 45,
       email: 'user4@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
@@ -59,6 +64,7 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
+      id: 55,
       email: 'user5@example.com',
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
