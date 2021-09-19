@@ -19,6 +19,12 @@ const tweetController = {
       if (data.status) return res.status(data.status).json(data)
       return res.status(200).json(data)
     })
+  },
+  putTweet: (req, res) => {
+    tweetService.putTweet(req, res, data => {
+      if (data.status) return res.status(data.status).json(data)
+      return res.status(200).json(data)
+    })
   }
 }
 

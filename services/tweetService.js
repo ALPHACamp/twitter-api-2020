@@ -103,6 +103,27 @@ const tweetService = {
       console.warn(err)
       return cb({ status: '500', message: err })
     }
+  },
+
+  putTweet: async (req, res, cb) => {
+    try {
+      const { description } = req.body
+      if (!description) return cb({ status: '400', message: '內容不可空白' })
+      const tweet = await Tweet.findOne({
+        where: {
+          UserId: req.user.id,
+          id: req.params.tweet_id
+        },
+        attributes: ['id', 'description']
+      })
+      if (tweet === null) return cb({ status: '401', massage: '無編輯權限或貼文不存在' })
+      tweet.description = description || tweet.description
+      await tweet.save()
+      return cb(tweet)
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
   }
 }
 
