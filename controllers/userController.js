@@ -188,6 +188,10 @@ const userController = {
             'isLiked',
           ],
         ],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        ],
+        order: [['createdAt', 'DESC']],
       })
       return res.status(200).json(tweets)
     } catch (err) {
@@ -201,7 +205,17 @@ const userController = {
       const loginId = helpers.getUser(req).id
       let repliedTweets = await Reply.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet }],
+        include: [
+          {
+            model: User,
+            where: { id: req.params.id },
+            attributes: ['id', 'account', 'name', 'avatar'],
+          },
+          {
+            model: Tweet,
+            include: [{ model: User, attributes: ['id', 'name', 'account'] }],
+          },
+        ],
         attributes: [
           'id',
           'UserId',
@@ -239,7 +253,15 @@ const userController = {
       const loginId = helpers.getUser(req).id
       let likedTweets = await Like.findAll({
         where: { UserId: req.params.id },
-        include: [{ model: Tweet }],
+        include: [
+          {
+            model: Tweet,
+            include: {
+              model: User,
+              attributes: ['id', 'account', 'name', 'avatar'],
+            },
+          },
+        ],
         attributes: [
           'id',
           'UserId',
@@ -273,6 +295,7 @@ const userController = {
   // 取得使用者追蹤的 user 名單
   getFollowingUsers: async (req, res) => {
     try {
+      const loginId = helpers.getUser(req).id
       let followingUsers = await User.findByPk(req.params.id, {
         include: [
           {
@@ -284,6 +307,12 @@ const userController = {
               'account',
               'avatar',
               'cover',
+              [
+                sequelize.literal(
+                  `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${loginId} AND followingId = ${req.params.id})`
+                ),
+                'isFollowed',
+              ],
             ],
           },
         ],
@@ -303,6 +332,7 @@ const userController = {
   // 取得追蹤使用者的 user 名單
   getFollowerUsers: async (req, res) => {
     try {
+      const loginId = helpers.getUser(req).id
       let followerUsers = await User.findByPk(req.params.id, {
         include: [
           {
@@ -314,6 +344,12 @@ const userController = {
               'account',
               'avatar',
               'cover',
+              [
+                sequelize.literal(
+                  `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${loginId} AND followingId = Followers.id)`
+                ),
+                'isFollowed',
+              ],
             ],
           },
         ],
