@@ -9,6 +9,7 @@ router.post('/:id/like', likeController.likeTweet)
 router.post('/:id/unlike', likeController.unlikeTweet)
 router.get('/:tweet_id/replies', replyController.getTweetReplies)
 router.get('/:tweet_id', tweetController.getTweet)
+router.put('/:tweet_id', tweetController.putTweet)
 router.post('/', tweetController.postTweet)
 router.get('/', tweetController.getTweets)
 
