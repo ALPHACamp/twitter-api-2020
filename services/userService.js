@@ -1,4 +1,4 @@
-const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
+const { User, Tweet, Reply, Like, Sequelize } = require('../models')
 const { Op } = require('sequelize')
 const ApiError = require('../utils/customError')
 
@@ -86,7 +86,7 @@ const userService = {
         'updatedAt',
         [
           Sequelize.literal(
-            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+            `EXISTS(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} AND followingId = User.id)`
           ),
           'isFollowed'
         ],
@@ -134,7 +134,7 @@ const userService = {
         ],
         [
           Sequelize.literal(
-            `exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`
+            `EXISTS(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} AND TweetId = Tweet.id)`
           ),
           'isLike'
         ]
@@ -200,7 +200,7 @@ const userService = {
         ],
         [
           Sequelize.literal(
-            `exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`
+            `EXISTS(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} AND TweetId = Tweet.id)`
           ),
           'isLike'
         ]
@@ -226,7 +226,7 @@ const userService = {
       attributes: [
         [
           Sequelize.literal(
-            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+            `EXISTS(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} AND followingId = User.id)`
           ),
           'isFollowed'
         ],
@@ -257,7 +257,7 @@ const userService = {
       attributes: [
         [
           Sequelize.literal(
-            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+            `EXISTS(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} AND followingId = User.id)`
           ),
           'isFollowed'
         ],
@@ -326,7 +326,7 @@ const userService = {
         'introduction',
         [
           Sequelize.literal(
-            `exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`
+            `EXISTS(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} AND followingId = User.id)`
           ),
           'isFollowed'
         ],
