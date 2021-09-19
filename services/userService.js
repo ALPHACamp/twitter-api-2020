@@ -58,7 +58,7 @@ const userService = {
       },
     }
   },
-  getUser: async (userId) => {
+  getUser: async (userId, currentUserId) => {
     const user = await User.findOne({
       raw: true,
       nest: true,
@@ -74,6 +74,10 @@ const userService = {
         [Sequelize.literal(`(SELECT COUNT(*) FROM TWEETS WHERE Tweets.UserId = ${userId})`), 'TweetsCount'],
         [Sequelize.literal(`(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followingId = ${userId})`), 'FollowersCount'],
         [Sequelize.literal(`(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followerId = ${userId})`), 'FollowingCount'],
+        [
+          Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id )`),
+          'isFollowed',
+        ],
       ],
     })
     if (user.role === 'admin') {
