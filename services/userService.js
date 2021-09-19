@@ -238,7 +238,7 @@ const userService = {
         where: { id: req.params.id },
         include: [{
           model: User, as: 'Followers',
-          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover'],
+          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
           through: { attributes: [] }
         }]
       })
