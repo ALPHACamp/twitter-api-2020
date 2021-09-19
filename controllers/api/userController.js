@@ -37,7 +37,7 @@ const userController = {
             cover: req.body.cover,
             avatar: req.body.avatar
           }).then(user => {
-            return res.json({ status: 'success', message: 'Registration successful' })
+            return res.status(200).json('Accept')
           })
         }
       })
@@ -70,7 +70,7 @@ const userController = {
           introduction: req.body.introduction
         })
           .then((user) => {
-            res.json({ status: 'success', message: 'Acccount update successful.' })
+            res.status(200).json('Accept')
             return res.redirect(`/users/${user.id}`)
           })
       })

@@ -5,10 +5,8 @@ const userController = require('../controllers/api/userController.js')
 const tweetController = require('../controllers/api/tweetController.js')
 const followController = require('../controllers/api/followController.js')
 
-router.post('/users', userController.signUp)
-router.get('/logout', userController.logout)
-
 // route: /api/users
+router.post('/users', userController.signUp) // 註冊
 router.get('/users/:id/edit', userController.editUser) // 帳戶設定
 router.get('/users/:id/profile', userController.editUserProfile) // 編輯個人資料
 router.put('/users/:id', userController.putUser) // 儲存帳戶設定 & 個人資料 共用路由
