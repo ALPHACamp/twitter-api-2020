@@ -8,8 +8,8 @@ module.exports = {
     await queryInterface.bulkInsert('Replies',
       Array.from({ length: 150 }).map((d, i) =>
       ({
-        UserId: i > 4 ? Math.floor(Math.random() * 5) + 2 : i + 2,
-        TweetId: Math.floor(i / 3) + 1,
+        UserId: i > 4 ? Math.floor(Math.random() * 5) * 10 + 15 : i * 10 + 15,
+        TweetId: Math.floor(i / 3) * 10 + 5,
         comment: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
