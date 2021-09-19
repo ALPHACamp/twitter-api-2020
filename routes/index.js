@@ -55,6 +55,7 @@ module.exports = (app, passport) => {
 
   app.put('/api/users/:id', helpers.ensureAuthenticated, userController.editUserData) //增加
 
+
     //followship路由
   app.post('/api/followships', helpers.ensureAuthenticated, followshipController.follow) //路由要改
 

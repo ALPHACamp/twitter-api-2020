@@ -48,11 +48,15 @@ const homeController = {
   
   postSignUp: async (req, res) => {
     const userData = req.body
-    if (req.body.passwordCheck !== req.body.password) {
+    if (req.body.checkPassword !== req.body.password) {
       return res.redirect('/signup')
     }
-    const user = await User.create({ ...userData })
-    user? res.status(200).json({user}): res.status(401)
+    const user = await User.create(userData)
+    if (user) {
+      res.status(200).json('Accept')
+    } else {
+      res.status(400)
+    }
   }
 }
 

@@ -138,10 +138,14 @@ const userController = {
   },
 
   editUserData: async (req, res) => {
+    const userId = req.user.id
+    const updateData = req.body
     try {
-      const updateData = req.body
-      const user = await User.update({ ...updateData })
-      res.status(200).json({ user })
+      await User.update(
+        updateData,
+        { where: { id: { [Op.eq]: userId } } }
+      )
+      res.status(200).json('Accept')
     }
     catch (error) {
       console.log(error)
