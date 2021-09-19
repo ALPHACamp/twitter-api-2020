@@ -37,7 +37,13 @@ const tweetController = {
     try {
       const { id } = req.params
       let tweet = await Tweet.findByPk(id,
-        { include: [User, Like, Reply] }
+        { include: [
+          User,
+          Like,
+          { model: Reply , include:[
+            {model: User, attributes: ['id', 'name', 'avatar', 'account']}
+          ] },
+        ] }
       )
 
       if (!tweet) {
@@ -55,12 +61,13 @@ const tweetController = {
         updatedAt: tweet.updatedAt,
         replyCounts: tweet.Replies.length,
         likeCounts: tweet.Likes.length,
-        isLike: req.user.LikedTweets.map(like => like.id).includes(tweet.id),
+        /* isLike: req.user.LikedTweets.map(like => like.id).includes(tweet.id), */
         user: {
           name: tweet.User.name,
           avatar: tweet.User.avatar,
           account: tweet.User.account,
-        }
+        },
+        reply: tweet.Replies
       }
       return res.status(200).json(tweet)
     } catch (err) {

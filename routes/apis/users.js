@@ -26,7 +26,7 @@ router.get('/:id/followers', authenticated, checkRoleIsUser,userController.getFo
 router.get('/:id/followings', authenticated, checkRoleIsUser,userController.getFollowings)
 router.get('/:id/likes', authenticated, checkRoleIsUser,userController.getLikedTweets)
 router.get('/:id/replied_tweets', authenticated, checkRoleIsUser, userController.getUserReliedTweets)
-router.post('/:id/setting', authenticated, checkRoleIsUser, userController.putUserSetting)
+router.put('/:id/setting', authenticated, checkRoleIsUser, userController.putUserSetting)
 router.get('/:id', authenticated, checkRoleIsUser, userController.getUser)
 router.put('/:id', authenticated, checkRoleIsUser, userImageUpload, userController.putUser)
 router.post('/', userController.register)
