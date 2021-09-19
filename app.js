@@ -1,6 +1,7 @@
 const express = require('express')
 const helpers = require('./_helpers')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -19,6 +20,7 @@ function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
+app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(express.json())
