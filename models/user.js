@@ -1,7 +1,7 @@
-'use strict';
+'use strict'
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
-    "User",
+    'User',
     {
       name: {
         type: DataTypes.STRING,
@@ -15,48 +15,40 @@ module.exports = (sequelize, DataTypes) => {
       },
       role: {
         type: DataTypes.STRING,
-        defaultValue: "user",
+        defaultValue: 'user',
       },
       avatar: {
         type: DataTypes.STRING,
-        defaultValue: "https://i.imgur.com/q6bwDGO.png",
+        defaultValue: 'https://i.imgur.com/q6bwDGO.png',
       },
       introduction: DataTypes.STRING,
       account: {
         type: DataTypes.STRING,
-        unique: true
+        unique: true,
       },
       cover: {
         type: DataTypes.STRING,
-        defaultValue: "https://i.imgur.com/1jDf2Me.png",
-      },
-      followerCount: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-      },
-      followingCount: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
+        defaultValue: 'https://htmlcolorcodes.com/assets/images/colors/gray-color-solid-background-1920x1080.png',
       },
     },
     {}
-  );
-  User.associate = function(models) {
-    User.hasMany(models.Tweet);
-    User.hasMany(models.Reply);
-    User.hasMany(models.Like);
+  )
+  User.associate = function (models) {
+    User.hasMany(models.Tweet)
+    User.hasMany(models.Reply)
+    User.hasMany(models.Like)
 
     User.belongsToMany(User, {
       through: models.Followship,
-      foreignKey: "followingId",
-      as: "Followers",
-    });
+      foreignKey: 'followingId',
+      as: 'Followers',
+    })
 
     User.belongsToMany(User, {
       through: models.Followship,
-      foreignKey: "followerId",
-      as: "Followings",
-    });
-  };
-  return User;
-};
+      foreignKey: 'followerId',
+      as: 'Followings',
+    })
+  }
+  return User
+}
