@@ -307,6 +307,7 @@ const userController = {
               'account',
               'avatar',
               'cover',
+              'introduction',
               [
                 sequelize.literal(
                   `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${loginId} AND followingId = ${req.params.id})`
@@ -344,6 +345,7 @@ const userController = {
               'account',
               'avatar',
               'cover',
+              'introduction',
               [
                 sequelize.literal(
                   `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${loginId} AND followingId = Followers.id)`
