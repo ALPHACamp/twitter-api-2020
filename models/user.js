@@ -24,8 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       account: DataTypes.STRING,
       cover: {
         type: DataTypes.STRING,
-        defaultValue:
-          'http://apy-ingenierie.fr/wp-content/plugins/uix-page-builder/uixpb_templates/images/UixPageBuilderTmpl/default-cover-6.jpg'
+        defaultValue: 'https://i.imgur.com/1L2chcu.jpg'
       }
     },
     {}
