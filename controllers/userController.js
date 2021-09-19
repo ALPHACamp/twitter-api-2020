@@ -17,12 +17,6 @@ const userController = {
     const requestId = Number(req.params.id)
     try {
       const id = (userId === requestId) ? userId : requestId
-      // 取出使用者跟蹤對象的清單
-      let followings = await Followship.findAll({
-        where: { followerId: { [Op.eq]: id } },
-        raw: true,
-        nest: true
-      })
 
       // 取出跟蹤使用者的清單
       let followers = await Followship.findAll({
@@ -32,46 +26,41 @@ const userController = {
       })
 
       // 轉成陣列
-      followings = followings.map(item => item = item['followingId'])
       followers = followers.map(item => item = item['followingId'])
 
-      //取出user所有推文 含按讚 含回覆
-      const userTweets = await Tweet.findAll({
-        where: { UserId: { [Op.eq]: id } },
-        include: [
-          { model: Reply, as: 'replies' },
-          { model: Like, as: 'likes' }
-        ]
-      })
-
-      // 取出最多人追蹤的使用者 按照追蹤人數排序
-      const popular = await sequelize.query('SELECT count(`followerId`) AS`followCount`, `User`.`id` AS`userId`, `User`.`avatar` AS`avatar`, `User`.`account` AS`account`, `User`.`name` AS`name` FROM `Followships` AS `Followship` LEFT OUTER JOIN `Users` AS `User` ON`Followship`.`followingId` = `User`.`id` GROUP BY `followingId` ORDER BY followCount DESC LIMIT 10',
-        {
-          type: QueryTypes.SELECT,
-          raw: true,
-          nest: true,
-        }
-      )
-
-      // 送出前整理一下 標出使用者有追蹤的其他用戶
-      popular.map(element => {
-        return followings.includes(element.userId) ? element['isFollowed'] = true : element['isFollowed'] = false
-      })
-      
       let isFollowed = false
       if (!(userId === requestId)) {
         followers.includes(userId) ? isFollowed = true : isFollowed
       } else {
         isFollowed = 'self'
       }
+
+      userData.isFollowed = isFollowed
       
-      return res.json({ userData, userTweets, popular, isFollowed })
+      return res.json(userData)
     }
     catch (error) {
       console.log(error)
     }
   },
 
+  // 取出使用者資訊
+  getUserInfo: async (req, res) => {
+    const userId = req.user.id
+    const requestId = Number(req.params.id)
+    const id = userId === requestId ? userId : requestId
+    const userData = await User.findByPk(id, {
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'role'] },
+      include: [
+        { model: User, as: 'Followings', attributes: ['id'] },
+        { model: User, as: 'Followers', attributes: ['id'] }
+      ]
+    })
+
+    return res.json(userData)
+  },
+
+  //取出使用者發過的推文
   getUserTweets: async (req, res) => {
     const userId = req.user.id
     const requestId = Number(req.params.id)
@@ -80,12 +69,10 @@ const userController = {
     const userTweets = await Tweet.findAll({
       where: { UserId: { [Op.eq]: id } },
       include: [
-        { model: Reply, as: 'replies' },
-        { model: Like, as: 'likes' }
+        { model: Reply, as: 'replies', attributes: ['id'] },
+        { model: Like, as: 'likes', attributes: ['id'] }
       ],
     })
-    // let userData = await User.findByPk(userId)
-    // userData = { ...req.user.dataValues, password: '', email: '' }
     return res.json(userTweets)
   },
 
@@ -103,7 +90,7 @@ const userController = {
       ]
     })
 
-    return res.json({ repliedTweets })
+    return res.json(repliedTweets)
   },
 
   getLikes: async (req, res) => {
@@ -116,24 +103,16 @@ const userController = {
         where: { UserId: { [Op.eq]: id } },
         include: [
           { model: Tweet, as: 'tweet', 
-            include: [{ model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] }
-            }]
+            include: [
+              { model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] }
+              },
+              { model: Like, as: 'likes', attributes: ['id'] },
+              { model: Reply, as: 'replies', attributes: ['id'] }
+            ]
         }]
       })
 
-      // 統計所有推文按讚數
-      const likeStatistic = await Like.findAll({
-        attributes: ['TweetId', [sequelize.fn('count', sequelize.col('UserId')), 'likeCount']],
-        group: ['TweetId']
-      })
-
-      // 統計所有推文回覆數
-      const replyStatistic = await Reply.findAll({
-        attributes: ['TweetId', [sequelize.fn('count', sequelize.col('UserId')), 'replyCount']],
-        group: ['Reply.TweetId']
-      }) 
-
-      return res.json({ likedTweets, likeStatistic, replyStatistic })
+      return res.json(likedTweets)
     }
     catch (error) {
       console.log(error)
@@ -141,33 +120,21 @@ const userController = {
   },
 
   getFollowings: async (req, res) => {
-    let data = []
-    const userId = req.user.id
-    const followings = await User.findByPk(userId, {
-      attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] },
-      include: [{ model: User, as: 'Followings', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
+    const userId = Number(req.params.id)
+    const followings = await Followship.findAll({
+      where: { followerId: { [Op.eq]: userId } },
+      include: [{ model: User, as: 'following', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
     })
-    data.push(followings)
-    const followersId = await Followship.findAll({
-      where: { followingId: { [Op.eq]: userId } },
-    })
-    data.push(followersId)
-    return res.json(data)
+    return res.json(followings)
   },
 
   getFollowers: async (req, res) => {
-    let data = []
-    const userId = req.user.id
-    const followers = await User.findByPk(userId, {
-      attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] },
-      include: [{ model: User, as: 'Followers', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
+    const userId = Number(req.params.id)
+    const followers = await Followship.findAll({
+      where: { followingId: { [Op.eq]: userId } },
+      include: [{ model: User, as: 'follower', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
     })
-    data.push(followers)
-    const followingsId = await Followship.findAll({
-      where: { followerId: { [Op.eq]: userId } },
-    })
-    data.push(followingsId)
-    return res.json(data)
+    return res.json(followers)
   },
 
   editUserData: async (req, res) => {

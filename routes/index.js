@@ -24,9 +24,11 @@ module.exports = (app, passport) => {
   // tweet路由
   app.get('/api/tweets', helpers.ensureAuthenticated, tweetController.homePage)
 
-  app.get('/api/tweets/:id', helpers.ensureAuthenticated, tweetController.getTweet)
-
+  app.get('/api/tweets/:id/top10', helpers.ensureAuthenticated, tweetController.getTop10Twitter)
+  
   app.get('/api/tweets/:id/replies', helpers.ensureAuthenticated, tweetController.getTweetReplies) //增加
+
+  app.get('/api/tweets/:id', helpers.ensureAuthenticated, tweetController.getTweet)
 
   app.post('/api/tweets', helpers.ensureAuthenticated, tweetController.postTweet)
 
@@ -36,18 +38,20 @@ module.exports = (app, passport) => {
 
   app.post('/api/tweets/:id/unlike', helpers.ensureAuthenticated, tweetController.postUnlike)
 
-    // user 路由
-  app.get('/api/users/:id', helpers.ensureAuthenticated, userController.userHomePage)
-
+  // user 路由
   app.get('/api/users/:id/tweets', helpers.ensureAuthenticated, userController.getUserTweets)
-
+  
   app.get('/api/users/:id/replied_tweets', helpers.ensureAuthenticated, userController.getRepliedTweets)
-
+  
   app.get('/api/users/:id/likes', helpers.ensureAuthenticated, userController.getLikes)
-
+  
   app.get('/api/users/:id/followings', helpers.ensureAuthenticated, userController.getFollowings)
-
+  
   app.get('/api/users/:id/followers', helpers.ensureAuthenticated, userController.getFollowers)
+
+  app.get('/api/users/:id/userInfo', helpers.ensureAuthenticated, userController.getUserInfo)
+
+  app.get('/api/users/:id', helpers.ensureAuthenticated, userController.userHomePage)
 
   app.put('/api/users/:id', helpers.ensureAuthenticated, userController.editUserData) //增加
 

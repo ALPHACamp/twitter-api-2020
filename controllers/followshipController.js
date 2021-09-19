@@ -5,10 +5,8 @@ const Op = db.Sequelize.Op
 const followshipController = {
   follow: async (req, res) => {
     try {
-      // const followerId = req.user.id
-      // const followingId = req.dataset.id
       await Followship.findOrCreate({ 
-        where: { followerId: req.user.id, followingId: req.params.id }
+        where: { followerId: req.user.id, followingId: req.body.id }
       })
       return res.status(200).json('Accept')
     }
@@ -20,14 +18,14 @@ const followshipController = {
 
   unfollow: async (req, res) => {
     try {
-      const followshipId = req.params.id
-      const unfollow = await Followship.findByPk(followshipId)
-      // if (unfollow) {
+      const followingId = req.params.id
+      const unfollow = await Followship.findOne({ where: { followingId: { [Op.eq]: followingId } } })
+      if (unfollow) {
         await unfollow.destroy()
         return res.status(200).json('Accept')
-      // } else {
-      //   return res.status(404)
-      // }
+      } else {
+        return res.status(404)
+      }
     }
     catch (error) {
       console.log(error)

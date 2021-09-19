@@ -12,7 +12,7 @@ const adminController = {
     try {
       const allTweets = await Tweet.findAll({
         order: [[Sequelize.literal('createdAt'), "DESC"]],
-        include: [{ model: User, as: 'user', attributes: ['name', 'account', 'avatar'] }]
+        include: [{ model: User, as: 'user', attributes: ['name', 'account', 'avatar', 'createdAt'] }]
       })
       return res.json({ allTweets })
     }
@@ -26,10 +26,10 @@ const adminController = {
       const allUsers = await User.findAll({
         attributes: ['name', 'account', 'avatar', 'cover'],
         include: [
-          { model: Reply, as: 'replies' },
-          { model: Followship, as: 'followings' },
-          { model: Followship, as: 'followers' },
-          { model: Like, as: 'likes' }
+          { model: Reply, as: 'replies', attributes: ['id'] },
+          { model: Followship, as: 'followings', attributes: ['id'] },
+          { model: Followship, as: 'followers', attributes: ['id'] },
+          { model: Like, as: 'likes', attributes: ['id'] }
         ]
       })
 

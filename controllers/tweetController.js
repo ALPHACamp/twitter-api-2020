@@ -13,7 +13,6 @@ const tweetController = {
   homePage: async (req, res) => {
     try{
       const id = req.user.id
-      let userData = { ...req.user, password: '', email: '' }
 
       // 取出所有推文 按照時間排序 包含推文作者以及按讚數
       const tweets = await Tweet.findAll({
@@ -21,60 +20,47 @@ const tweetController = {
           { model: Like, as: 'likes', attributes: { exclude: ['createdAt', 'updatedAt'] } },
           { model: Reply, as: 'replies', attributes: { exclude: ['comment', 'createdAt', 'updatedAt'] } },
           { model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }
-        ]
+        ],
+        order:[['createdAt', 'DESC']]
       })
 
-      // 取出所有推文 按照時間排序 以及回復數
-      const tweetsReply = await sequelize.query('SELECT count(`Reply`.`UserId`) AS`replyCount`, `Tweet`.`id` AS`tweetId` FROM `Tweets` AS `Tweet` LEFT OUTER JOIN `Replies` AS `Reply` ON`Reply`.`TweetId` = `Tweet`.`id` GROUP BY `TweetId`',
-        {
-          type: QueryTypes.SELECT,
-          raw: true,
-          nest: true,
-        }
-      )
-
-      // 取出使用者跟蹤對象的清單
-      let following = await Followship.findAll({
-        where: { followerId: { [Op.eq]: id } },
-        raw: true,
-        nest: true
-      })
-
-      // 轉成陣列
-      following = following.map(item => item = item['followingId'])
-
-      // 取出最多人追蹤的使用者 按照追蹤人數排序
-      const popular = await sequelize.query('SELECT count(`followerId`) AS`followCount`, `User`.`id` AS`userId`, `User`.`avatar` AS`avatar`, `User`.`account` AS`account`, `User`.`name` AS`name` FROM `Followships` AS `Followship` LEFT OUTER JOIN `Users` AS `User` ON`Followship`.`followingId` = `User`.`id` GROUP BY `followingId` ORDER BY followCount DESC LIMIT 10',
-        {
-          type: QueryTypes.SELECT,
-          raw: true,
-          nest: true,
-        }
-      )
-
-      // 送出前整理一下 標出使用者有追蹤的其他用戶
-      popular.map(element => {
-        return following.includes(element.userId) ? element['isFollowed'] = true : element['isFollowed'] = false
-      })
-
-      return res.json({ tweets, tweetsReply, popular, userData })
+      return res.json(tweets)
     }
     catch (error) {
       console.log(error)
     }
   },
 
+  //取出右邊top10 twitter
+  getTop10Twitter: async (req, res) => {
+    const userId = req.params.id
+    const topTwitters = await Followship.findAll({
+      attributes: ['followingId', [sequelize.fn('count', sequelize.col('followerId')), 'count']] ,
+      group: ['followingId'],
+      order: [[sequelize.col('count'), 'DESC']],
+      limit: 10,
+      include: [{ model: User, as: 'following', attributes: ['name', 'avatar', 'account'] }],
+    })
+
+    const userFollowingList = await Followship.findAll({
+      where: { followerId: { [Op.eq]: userId } }
+    })
+
+    res.json({ topTwitters, userFollowingList })
+  },
+
   getTweet: async (req, res) => {
     const tweetId = req.params.id
     const tweetData = await Tweet.findByPk(tweetId, {
       include: [
+        { model: User, as: 'user', attributes: ['name', 'account', 'avatar'] },
         { model: Reply, as: 'replies',
           include: [{ model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
         },
-        { model: Like, as: 'likes' },
+        { model: Like, as: 'likes', attributes: ['id'] },
       ]
     })
-    return res.json({tweetData})
+    return res.json(tweetData)
   },
 
   postTweet: async (req, res) => {
@@ -108,10 +94,9 @@ const tweetController = {
 
   postLike: async (req, res) => {
     try {
-      const data = {}
-      data.UserId = req.user.id
-      data.TweetId = req.params.id
-      const like = await Like.findOrCreate({ ...data })
+      UserId = req.user.id
+      TweetId = Number(req.params.id)
+      const like = await Like.findOrCreate({ where: { UserId, TweetId } })
       return res.status(200).json({ like })
     }
     catch (error) {
@@ -122,11 +107,11 @@ const tweetController = {
 
   postUnlike: async (req, res) => {
     try {
-      const likeId = req.params.id
-      const unlike = await Like.findByPk(likeId)
+      const TweetId = Number(req.params.id)
+      const unlike = await Like.findOne({ where: { TweetId: { [Op.eq]: TweetId } } })
       if (unlike) {
         await unlike.destroy()
-        return res.status(200)
+        return res.status(200).json('Accept')
       } else {
         return res.status(404)
       }
@@ -139,13 +124,12 @@ const tweetController = {
 
   getTweetReplies: async (req, res) => {
     try {
-      const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId, {
-        include: [{ model: Reply, as: 'replies',
-            include: [{ model: User, as: 'user', attributes: ['avatar', 'account', 'name'] }]
-      }]
+      const tweetId = Number(req.params.id)
+      const replies = await Reply.findAll({ 
+        where: { TweetId: { [Op.eq]: tweetId } },
+        include: [{ model: User, as: 'user', attributes: ['avatar', 'account', 'name'] }]
       })
-      res.json({ tweet })
+      res.json(replies)
     }
     catch (error) {
       console.log(error)
