@@ -124,7 +124,9 @@ const userController = {
       }
 
       // translate to boolean in isFollowed attribute
-      booleanTranslation(user.dataValues.isFollowed)
+      user.dataValues.isFollowed = booleanTranslation(
+        user.dataValues.isFollowed
+      )
 
       return res.status(200).json(user)
     } catch (error) {
@@ -144,7 +146,7 @@ const userController = {
       // translate to boolean in isFollowed attribute
       if (tweets.length) {
         tweets.forEach((tweet) => {
-          booleanTranslation(tweet.dataValues.isLike)
+          tweet.dataValues.isLike = booleanTranslation(tweet.dataValues.isLike)
         })
       }
 
@@ -179,7 +181,7 @@ const userController = {
       // translate to boolean in isFollowed attribute
       if (tweets.length) {
         tweets.forEach((tweet) => {
-          booleanTranslation(tweet.isLike)
+          tweet.isLike = booleanTranslation(tweet.isLike)
         })
       }
 
@@ -204,7 +206,7 @@ const userController = {
       // translate to boolean in isFollowed attribute
       if (users.length) {
         users.forEach((user) => {
-          booleanTranslation(user.isFollowed)
+          user.isFollowed = booleanTranslation(user.isFollowed)
         })
       }
 
@@ -229,7 +231,7 @@ const userController = {
       // translate to boolean in isFollowed attribute
       if (users.length) {
         users.forEach((user) => {
-          booleanTranslation(user.isFollowed)
+          user.isFollowed = booleanTranslation(user.isFollowed)
         })
       }
 
@@ -307,7 +309,9 @@ const userController = {
 
       // translate to boolean in isFollowed attribute
       users.forEach((user) => {
-        booleanTranslation(user.dataValues.isFollowed)
+        user.dataValues.isFollowed = booleanTranslation(
+          user.dataValues.isFollowed
+        )
       })
 
       return res.status(200).json(users)
