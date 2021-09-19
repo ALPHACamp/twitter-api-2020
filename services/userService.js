@@ -22,7 +22,7 @@ const userService = {
       ]
     })
   },
-
+  // FIXME: Maybe check account, name, email can be a function
   postUser: async (body) => {
     const { account, name, email, password } = body
 
@@ -272,6 +272,7 @@ const userService = {
     })
   },
 
+  // FIXME: Maybe check account, name, email can be a function
   putUser: async (id, body) => {
     const { account, name, email } = body
 
