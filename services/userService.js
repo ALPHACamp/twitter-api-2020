@@ -218,7 +218,7 @@ const userService = {
     }
     const tweets = await Tweet.findAll({
       include: [
-        { model: Like, where: { UserId: id }, attributes: ['UserId'] },
+        { model: Like, where: { UserId: id } },
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
       ],
       attributes: [
@@ -229,7 +229,7 @@ const userService = {
         [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikesCount'],
         [Sequelize.literal(`exists(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLike'],
       ],
-      order: [['createdAt', 'DESC']],
+      order: [[sequelize.literal('`Likes`.`createdAt`'), 'ASC']],
     })
 
     return tweets
