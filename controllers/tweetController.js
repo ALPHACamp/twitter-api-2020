@@ -39,10 +39,19 @@ const tweetController = {
       })
     }
   },
-  getTweet: (req, res) => {
-    TweetService.getTweet(req, res, (status, data) => {
-      return res.status(status).json(data)
-    })
+  getTweet: async (req, res) => {
+    const currentUserId = helpers.getUser(req).id
+    const { tweetId } = req.params
+
+    try {
+      const tweet = await TweetService.getTweet(currentUserId, tweetId)
+      return res.status(200).json(tweet)
+    } catch (error) {
+      return res.status(500).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
   postReply: (req, res) => {
     TweetService.postReply(req, res, (status, data) => {

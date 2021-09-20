@@ -27,29 +27,23 @@ const TweetService = {
       order: [['createdAt', 'DESC']]
     })
   },
-  getTweet: async (req, res, callback) => {
-    try {
-      const id = req.params.tweet_id
-      const tweet = await Tweet.findByPk(id, {
-        attributes: { exclude: ['UserId', 'updatedAt'] },
-        include: [
-          { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
-          { model: Reply, attributes: ['id', 'comment', 'createdAt'], include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] } },
-          Like
-        ],
-        order: [[Reply, 'createdAt', 'DESC']]
-      })
-      const data = tweet.toJSON()
-      data.RepliesCount = tweet.Replies.length
-      data.LikesCount = tweet.Likes.length
-      data.isLike = tweet.Likes.find(like => like.UserId === helpers.getUser(req).id) !== undefined
-      delete data.Likes
+  getTweet: async (currentUserId, tweetId) => {
+    return await Tweet.findByPk(tweetId, {
+      attributes: [
+        'id',
+        'description',
+        'createdAt',
+        [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'RepliesCount'],
+        [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikesCount'],
+        [Sequelize.literal(`exists(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLike']
 
-      callback(200, data)
-    } catch (err) {
-      console.log('getTweet error', err)
-      res.sendStatus(500)
-    }
+      ],
+      include: [
+        { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+        { model: Reply, attributes: ['id', 'comment', 'createdAt'], include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] } }
+      ],
+      order: [[Reply, 'createdAt', 'DESC']]
+    })
   },
   postReply: async (req, res, callback) => {
     const { comment } = req.body

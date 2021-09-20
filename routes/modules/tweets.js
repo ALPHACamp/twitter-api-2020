@@ -10,9 +10,9 @@ router.post('/', tweetController.postTweet)
 // get('/api/tweets')
 router.get('/', tweetController.getTweets)
 
-// GET /tweets/:tweet_id - 一筆推文與回覆
+// GET /tweets/:tweetId - 一筆推文與回覆
 // get('/api/tweets/1')
-router.get('/:tweet_id', tweetController.getTweet)
+router.get('/:tweetId', tweetController.getTweet)
 
 // 新增回覆 POST /tweets/:tweet_id/replies
 router.post('/:tweet_id/replies', tweetController.postReply)
