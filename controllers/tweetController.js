@@ -55,11 +55,11 @@ const tweetController = {
     try {
       const description = req.body.description
       if (description.trim() === '') {
-        const data = { status: 'error', message: "content didn't exist" }
+        const data = { status: 'empty_error', message: "content didn't exist" }
         return res.json(data)
       }
       if (description.length > 140) {
-        const data = { status: 'error', message: 'the word count of a tweet is limited to 140' }
+        const data = { status: 'length_error', message: 'the word count of a tweet is limited to 140' }
         return res.json(data)
       }
       await Tweet.create({

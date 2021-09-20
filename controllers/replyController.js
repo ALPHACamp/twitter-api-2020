@@ -9,7 +9,7 @@ const replyController = {
     try {
       const comment = req.body.comment
       if (comment.trim() === '') {
-        const data = { status: 'error', message: 'comment can not be empty!' }
+        const data = { status: 'empty_error', message: 'comment can not be empty!' }
         return res.json(data)
       }
       await Reply.create({
@@ -32,7 +32,7 @@ const replyController = {
         where: { TweetId: req.params.tweet_id },
         include: [
           User,
-          Tweet
+          { model: Tweet, include: User }
         ]
       })
       return res.json(replies)
