@@ -1,4 +1,5 @@
 const TweetService = require('../services/tweetService.js')
+const helpers = require('../_helpers')
 
 const tweetController = {
   postTweet: (req, res) => {
@@ -6,10 +7,16 @@ const tweetController = {
       return res.status(status).json(data)
     })
   },
-  getTweets: (req, res) => {
-    TweetService.getTweets(req, res, (status, data) => {
-      return res.status(status).json(data)
-    })
+  getTweets: async (req, res) => {
+    try {
+      const tweets = await TweetService.getTweets(helpers.getUser(req).id)
+      return res.status(200).json(tweets)
+    } catch (error) {
+      return res.status(500).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
   getTweet: (req, res) => {
     TweetService.getTweet(req, res, (status, data) => {
