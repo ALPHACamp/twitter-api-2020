@@ -269,7 +269,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [['Followers','createdAt', 'DESC']],
+      order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']],
     })
     return followings
   },
@@ -301,7 +301,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [['Followings', 'createdAt', 'DESC']],
+      order: [[sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']],
     })
     return followers
   },
