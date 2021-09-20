@@ -7,8 +7,8 @@ const followController = require('../controllers/api/followController.js')
 
 // route: /api/users
 router.post('/users', userController.signUp) // 註冊
-router.get('/users/:id/edit', userController.editUser) // 帳戶設定
-router.get('/users/:id/profile', userController.editUserProfile) // 編輯個人資料
+// router.get('/users/:id/edit', userController.editUser) // 帳戶設定
+// router.get('/users/:id/profile', userController.editUserProfile) // 編輯個人資料
 router.put('/users/:id', userController.putUser) // 儲存帳戶設定 & 個人資料 共用路由
 
 // route: /api/tweets
