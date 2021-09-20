@@ -22,32 +22,20 @@ const TweetService = {
       res.sendStatus(500)
     }
   },
-  getTweets: async (req, res, callback) => {
-    try {
-      const tweets = await Tweet.findAll({
-        order: [['createdAt', 'DESC']],
-        include: [User, Reply, Like]
-      })
+  getTweets: async (currentUserId) => {
+    return await Tweet.findAll({
+      attributes: [
+        ['id', 'TweetId'],
+        'description',
+        'createdAt',
+        [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikesCount'],
+        [Sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'RepliesCount'],
+        [Sequelize.literal(`exists(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLike']
 
-      const data = tweets.map(r => ({
-        TweetId: r.id,
-        description: r.description,
-        createdAt: r.createdAt,
-        LikesCount: r.Likes.length,
-        RepliesCount: r.Replies.length,
-        isLike: r.Likes.find(like => like.UserId === helpers.getUser(req).id) !== undefined,
-        User: {
-          id: r.User.id,
-          name: r.User.name,
-          avatar: r.User.avatar,
-          account: r.User.account
-        }
-      }))
-      callback(200, data)
-    } catch (err) {
-      console.log('getTweets error', err)
-      res.sendStatus(500)
-    }
+      ],
+      include: [{ model: User, attributes: ['id', 'avatar', 'name', 'account'] }],
+      order: [['createdAt', 'DESC']]
+    })
   },
   getTweet: async (req, res, callback) => {
     try {
