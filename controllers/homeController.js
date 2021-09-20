@@ -51,11 +51,16 @@ const homeController = {
     if (req.body.checkPassword !== req.body.password) {
       return res.redirect('/signup')
     }
-    const user = await User.create(userData)
-    if (user) {
-      res.status(200).json('Accept')
-    } else {
-      res.status(400)
+    try {
+      const user = await User.create(userData)
+      if (user) {
+        res.status(200).json('Accept')
+      } else {
+        res.status(400)
+      }
+    }
+    catch (error) {
+      console.log(error)
     }
   }
 }
