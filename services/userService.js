@@ -111,6 +111,11 @@ const userService = {
   putUser: async (id, files, body) => {
     const user = await User.findByPk(id)
 
+    if (body.deleteCover) {
+      await user.update({ cover: 'https://htmlcolorcodes.com/assets/images/colors/gray-color-solid-background-1920x1080.png' })
+      console.log(user)
+    }
+
     if (files) {
       imgur.setClientId(IMGUR_CLIENT_ID)
       const avatar = files.avatar ? await imgur.uploadFile(files.avatar[0].path) : null
