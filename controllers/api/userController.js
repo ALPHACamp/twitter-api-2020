@@ -3,7 +3,6 @@ const Op = Sequelize.Op
 
 const db = require('../../models')
 const User = db.User
-const bcrypt = require('bcryptjs')
 const helpers = require('../../_helpers');
 
 const userController = {
@@ -29,16 +28,11 @@ const userController = {
             return res.json({ status: 'error', message: '帳號已存在' })
           }
         } else {
-          User.create({
-            name: req.body.name,
-            email: req.body.email,
-            account: req.body.account,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
-            cover: req.body.cover,
-            avatar: req.body.avatar
-          }).then(user => {
-            return res.status(200).json('Accept')
-          })
+          const userData = req.body
+          User.create(userData)
+            .then(user => {
+              return res.status(200).json('Accept')
+            })
         }
       })
         .catch(error => console.log(error))
@@ -71,7 +65,6 @@ const userController = {
         })
           .then((user) => {
             res.status(200).json('Accept')
-            return res.redirect(`/users/${user.id}`)
           })
       })
       .catch(error => console.log(error))
