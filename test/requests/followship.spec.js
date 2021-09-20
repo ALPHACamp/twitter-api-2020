@@ -57,7 +57,7 @@ describe('# followship requests', () => {
 
   context('# DELETE ', () => {
 
-    describe(' /api/followships/:followingId', () => {
+    describe('/api/followships/:followingId', () => {
       before(async() => {
         await db.User.destroy({where: {},truncate: true})
         await db.Followship.destroy({where: {},truncate: true})
