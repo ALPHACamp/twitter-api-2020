@@ -14,24 +14,56 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     cover: DataTypes.STRING,
-    role: DataTypes.STRING
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: 'user'
+    }
   }, {
-    sequelize,
-    modelName: 'User'
-  })
+    hooks: {
+      beforeCreate: async (User, next) => {
+        const password = User.dataValues.password
+        if (password) {
+          try {
+            const salt = await bcrypt.genSalt(10)
+            User.dataValues.password = await bcrypt.hash(password, salt)
+          }
+          catch (error) {
+            console.log(error)
+          }
+        }
+      }
+    }
+  }, {})
   User.associate = function (models) {
-    User.hasMany(models.Reply)
-    User.hasMany(models.Tweet)
-    User.hasMany(models.Like)
-    User.belongsToMany(User, {
-      through: models.Followship,
-      foreignKey: 'followingId',
-      as: 'Followers'
+    User.hasMany(models.Tweet, {
+      foreignKey: 'UserId',
+      as: 'userTweets'
     })
-    User.belongsToMany(User, {
+    User.hasMany(models.Reply, {
+      foreignKey: 'UserId',
+      as: 'replies'
+    })
+    User.hasMany(models.Followship, {
+      foreignKey: 'followerId',
+      as: 'followings'
+    })
+    User.hasMany(models.Followship, {
+      foreignKey: 'followingId',
+      as: 'followers'
+    })
+    User.hasMany(models.Like, {
+      foreignKey: 'UserId',
+      as: 'likes'
+    })
+    User.belongsToMany(models.User, {
       through: models.Followship,
       foreignKey: 'followerId',
       as: 'Followings'
+    })
+    User.belongsToMany(models.User, {
+      through: models.Followship,
+      foreignKey: 'followingId',
+      as: 'Followers'
     })
   }
   return User

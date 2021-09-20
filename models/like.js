@@ -14,5 +14,5 @@ module.exports = (sequelize, DataTypes) => {
       as: 'tweet'
     })
   }
-  return Like;
+  return Like
 }

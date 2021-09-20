@@ -1,6 +1,6 @@
 .DS_Store
 *.DS_Store
-
+*.pem
 # Logs
 logs
 *.log
@@ -85,3 +85,5 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+*.pem
