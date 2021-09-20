@@ -32,6 +32,7 @@ const homeController = {
 
     User.findOne({ where: { email: username } }).then(user => {
       if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
+      if (user.role === 'admin') return res.status(401).json({ status: 'error', message: 'admin 不可登入前台' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
       }
