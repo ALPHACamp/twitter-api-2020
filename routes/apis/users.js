@@ -20,6 +20,7 @@ const userImageUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 
 
 router.post('/login', userController.userLogin)
 router.get('/tweets', authenticated, checkRoleIsUser, userController.getTweets)
+router.get('/get-current-user', authenticated, userController.getCurrentUser)
 router.get('/top', authenticated, checkRoleIsUser, userController.getTopUsers)
 router.get('/:id/tweets', authenticated, checkRoleIsUser, userController.getUserTweets)
 router.get('/:id/followers', authenticated, checkRoleIsUser, userController.getFollowers)

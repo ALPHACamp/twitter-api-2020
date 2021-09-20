@@ -401,6 +401,17 @@ let userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getCurrentUser: async (req, res, next) => {
+    const user = {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      avatar: req.user.avatar,
+      role: req.user.role,
+      isAuthenticated: req.user ? true : false
+    }
+    return res.status(200).json(user)
   }
 }
 
