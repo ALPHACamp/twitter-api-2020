@@ -2,24 +2,14 @@ const { Tweet, Reply, Like, User, Sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const TweetService = {
-  postTweet: async (req, res, callback) => {
-    const { description } = req.body
-    if (!description.trim().length) {
-      return callback(400, { status: 'error', message: "tweet content can't be blank" })
-    }
-
-    try {
-      await Tweet.create({
-        UserId: helpers.getUser(req).id,
-        description
-      })
-      callback(200, {
-        status: 'success',
-        message: 'tweet was successfully created'
-      })
-    } catch (err) {
-      console.log('postTweet error', err)
-      res.sendStatus(500)
+  postTweet: async (UserId, description) => {
+    await Tweet.create({
+      UserId,
+      description
+    })
+    return {
+      status: 'success',
+      message: 'tweet was successfully created'
     }
   },
   getTweets: async (currentUserId) => {
