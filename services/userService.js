@@ -99,6 +99,7 @@ const userService = {
         'avatar',
         'cover',
         'introduction',
+        'role',
         [Sequelize.literal(`(SELECT COUNT(*) FROM TWEETS WHERE Tweets.UserId = ${userId})`), 'TweetsCount'],
         [Sequelize.literal(`(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followingId = ${userId})`), 'FollowersCount'],
         [Sequelize.literal(`(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followerId = ${userId})`), 'FollowingCount'],
@@ -109,6 +110,10 @@ const userService = {
   },
   putUser: async (id, files, body) => {
     const user = await User.findByPk(id)
+
+    if (body.deleteCover) {
+      await user.update({ cover: 'https://htmlcolorcodes.com/assets/images/colors/gray-color-solid-background-1920x1080.png' })
+    }
 
     if (files) {
       imgur.setClientId(IMGUR_CLIENT_ID)
@@ -213,7 +218,7 @@ const userService = {
     }
     const tweets = await Tweet.findAll({
       include: [
-        { model: Like, where: { UserId: id }, attributes: ['UserId'] },
+        { model: Like, where: { UserId: id } },
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
       ],
       attributes: [
@@ -224,7 +229,7 @@ const userService = {
         [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikesCount'],
         [Sequelize.literal(`exists(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLike'],
       ],
-      order: [['createdAt', 'DESC']],
+      order: [[sequelize.literal('`Likes`.`createdAt`'), 'DESC']],
     })
 
     return tweets
@@ -263,7 +268,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [['Followers','createdAt', 'DESC']],
+      order: [[sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']],
     })
     return followings
   },
@@ -295,7 +300,7 @@ const userService = {
           'isFollowed',
         ],
       ],
-      order: [['Followings', 'createdAt', 'DESC']],
+      order: [[sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']],
     })
     return followers
   },
