@@ -3,31 +3,27 @@ const { Op } = Sequelize
 
 const tweetController = {
   getTweets: async (req, res, next) => {
-    //登入者追蹤的人的tweets(reply、likes)、本人資訊
     try {
-/*       let user = await User.findByPk(req.user.id, {
-        include: [
-          { model: User, as: 'Followers', attributes: ['id'] },
-        ]
-      })
-      let followers = user.Followers.map(user => { return user.id }) */
       let tweets = await Tweet.findAll({
         attributes: [
-          ['id', 'TweetId'], 'createdAt','description',
+          ['id', 'TweetId'], 'createdAt', 'description',
           [Sequelize.literal('count(distinct Likes.id)'), 'LikesCount'],
           [Sequelize.literal('count(distinct Replies.id)'), 'RepliesCount'],
         ],
         group: 'TweetId',
-       /*  where: { UserId: followers }, */
         include: [
           { model: Like, attributes: [] },
           { model: Reply, attributes: [] },
-          { model: User, attributes: ['id', 'name', 'avatar','account'] }
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
-        order:[['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-      console.log(tweets)
-      
+      tweets = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: req.user.LikedTweets ? req.user.LikedTweets.map(like => like.id).includes(tweet.TweetId) : null,
+      }))
       return res.status(200).json(tweets)
     } catch (err) {
       next(err)
@@ -37,19 +33,14 @@ const tweetController = {
     try {
       const { id } = req.params
       let tweet = await Tweet.findByPk(id,
-        { include: [
-          User,
-          Like,
-          { model: Reply , include:[
-            {model: User, attributes: ['id', 'name', 'avatar', 'account']}
-          ] },
-        ] }
-      )
+        {
+          include: [User, Like, Reply]
+        })
 
       if (!tweet) {
         return res.status(409).json({
           status: 'error',
-          message: 'You didn\'t like the tweet'
+          message: 'Can not find this tweet!'
         })
       }
 
@@ -61,13 +52,12 @@ const tweetController = {
         updatedAt: tweet.updatedAt,
         replyCounts: tweet.Replies.length,
         likeCounts: tweet.Likes.length,
-        /* isLike: req.user.LikedTweets.map(like => like.id).includes(tweet.id), */
+        isLiked: req.user.LikedTweets ? req.user.LikedTweets.map(like => like.id).includes(tweet.id) : null,
         user: {
           name: tweet.User.name,
           avatar: tweet.User.avatar,
           account: tweet.User.account,
-        },
-        reply: tweet.Replies
+        }
       }
       return res.status(200).json(tweet)
     } catch (err) {
@@ -113,6 +103,13 @@ const tweetController = {
         })
       }
 
+      if (description.length > 140) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'tweet can not be longer than 150 characters!'
+        })
+      }
+
       await Tweet.create({
         description: description,
         UserId: req.user.id
@@ -148,6 +145,13 @@ const tweetController = {
         })
       }
 
+      if (description.length > 140) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'tweet can not be longer than 150 characters!'
+        })
+      }
+
       await tweet.update({
         id: tweet.id,
         UserId: tweet.UserId,
@@ -158,7 +162,7 @@ const tweetController = {
         status: 'success',
         message: 'edit successfully'
       })
-       
+
     } catch (err) {
       next(err)
     }
@@ -214,7 +218,8 @@ const tweetController = {
       const replies = await Reply.findAll({
         raw: true,
         nest: true,
-        where: { TweetId: tweetId }
+        where: { TweetId: tweetId },
+        include: { model: User, attributes: ['avatar', 'account', 'name'] }
       })
 
       return res.status(200).json(replies)

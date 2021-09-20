@@ -17,6 +17,14 @@ const followshipController = {
           message: 'Can not follow yourself'
         })
       }
+      const Following = await User.findByPk(followingId)
+      if (!Following || Following.role === 'admin'){
+        return res.status(422).json({
+          status: 'error',
+          message: '此用戶不存在'
+        })
+      }
+      
       const followship = await Followship.findOne({
         where: {
           followingId,

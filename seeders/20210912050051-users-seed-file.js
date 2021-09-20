@@ -1,5 +1,6 @@
 'use strict';
 const bcrypt = require('bcryptjs')
+const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -11,6 +12,7 @@ module.exports = {
       account: 'root',
       createdAt: new Date(),
       updatedAt: new Date(),
+      introduction: faker.lorem.text()
     }, {
       name: 'user1',
       email: 'user1@example.com',
@@ -20,7 +22,8 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}`,
-      cover: 'https://images.unsplash.com/photo-1631291944493-9fc60898569c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=667&q=80'
+      cover: 'https://images.unsplash.com/photo-1631291944493-9fc60898569c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=667&q=80',
+      introduction: faker.lorem.text()
     }, {
       name: 'user2',
       email: 'user2@example.com',
@@ -30,7 +33,8 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}`,
-      cover: 'https://images.unsplash.com/photo-1631116618069-041bbcaf2e3c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80'
+      cover: 'https://images.unsplash.com/photo-1631116618069-041bbcaf2e3c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80',
+      introduction: faker.lorem.text()
     }, {
       name: 'user3',
       email: 'user3@example.com',
@@ -40,7 +44,8 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}`,
-      cover: 'https://images.unsplash.com/photo-1631119461477-8865032b7520?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=626&q=80'
+      cover: 'https://images.unsplash.com/photo-1631119461477-8865032b7520?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=626&q=80',
+      introduction: faker.lorem.text()
     }, {
       name: 'user4',
       email: 'user4@example.com',
@@ -50,7 +55,8 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}`,
-      cover: 'https://images.unsplash.com/photo-1631116617822-e100bd7e6e06?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80'
+      cover: 'https://images.unsplash.com/photo-1631116617822-e100bd7e6e06?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80',
+      introduction: faker.lorem.text()
     },], {})
   },
 

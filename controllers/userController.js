@@ -2,10 +2,12 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
 
+
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const { User, Tweet, Like, Sequelize, Reply } = require('../models')
+const { Op } = Sequelize
 
 const uploadImg = path => {
   return new Promise((resolve, reject) => {
@@ -31,7 +33,7 @@ let userController = {
 
       if (!user) return res.status(401).json({ status: 'error', message: 'No such user found' })
 
-      if(user.role === 'admin') return res.status(401).json({ status: 'error', message: 'No such user found, admin can not login.' })
+      if (user.role === 'admin') return res.status(401).json({ status: 'error', message: 'No such user found, admin can not login.' })
 
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'Passwords did not match' })
@@ -47,10 +49,11 @@ let userController = {
           id: user.id,
           name: user.name,
           email: user.email,
+          avatar: user.avatar,
           isAdmin: user.isAdmin
         }
       })
-    }catch (err) {
+    } catch (err) {
       next(err)
     }
   },
@@ -98,14 +101,14 @@ let userController = {
         cover: 'https://images.unsplash.com/photo-1575905283836-a741eb65a192?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1377&q=80'
       })
       return res.json({ status: 'success', message: '成功註冊帳號！' })
-    }catch (err) {
+    } catch (err) {
       next(err)
     }
   },
   getUser: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId,{
+      const user = await User.findByPk(userId, {
         attributes: [
           'id', 'name', 'avatar', 'introduction', 'account', 'cover', 'role',
           [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount'],
@@ -118,22 +121,22 @@ let userController = {
           { model: User, as: 'Followings', attributes: [] },
           { model: Like, attributes: [] },
         ]
-      })      
-      if(user.id === null){
+      })
+      if (user.id === null) {
         return res.status(403).json({
           'status': 'error',
           'message': '此用戶不存在'
         })
       }
       return res.status(200).json(user)
-    }catch (err) {
+    } catch (err) {
       next(err)
     }
   },
   getUserTweets: async (req, res, next) => {
-    try{
+    try {
       const user = await User.findByPk(req.params.id, { attributes: ['role'] })
-      if(!user){
+      if (!user) {
         return res.status(403).json({
           'status': 'error',
           'message': '此用戶不存在'
@@ -146,8 +149,8 @@ let userController = {
           { model: Like },
           { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
         ]
-      }) 
-      
+      })
+
       let tweetSet = userTweets.map(tweet => ({
         'id': tweet.id,
         'description': tweet.description,
@@ -156,13 +159,13 @@ let userController = {
         'likeCount': tweet.Likes.length,
         'user': tweet.User
       }))
-      return res.status(200).json(tweetSet)      
-    }catch (err) {
+      return res.status(200).json(tweetSet)
+    } catch (err) {
       next(err)
     }
   },
   putUser: async (req, res, next) => {
-    try{
+    try {
       //前台：修改使用者個人資料(avatar、cover、name、introduction)
       const { name, introduction } = req.body
       //上傳至imgur
@@ -196,7 +199,7 @@ let userController = {
         status: 'success',
         message: 'Update successfully'
       })
-    }catch (err) {
+    } catch (err) {
       next(err)
     }
 
@@ -214,7 +217,7 @@ let userController = {
 
       // 檢查必要資料
       if (!account.trim() || !email.trim() || !password.trim() || !checkPassword.trim()) {
-        return res.status(422).json({ status: 'error', message: "欄位不可空白" }) 
+        return res.status(422).json({ status: 'error', message: "欄位不可空白" })
       }
       if (!regex.test(email)) {
         return res.status(401).json({ status: 'error', message: "不符合信箱格式！" })
@@ -227,19 +230,19 @@ let userController = {
       const userHasEmail = User.findOne({ where: { email } })
       const userHasAccount = User.findOne({ where: { account } })
       if (userHasEmail && userHasAccount) return res.status(409).json({ status: 'error', message: "email 和 account 已有註冊！" })
-      if (userHasEmail) return res.status(409).json({ status: 'error', message: "email 已有註冊，請重新輸入！" }) 
-      if (userHasAccount) return res.status(409).json({ status: 'error', message: "account 已有註冊，請重新輸入！" }) 
-      
+      if (userHasEmail) return res.status(409).json({ status: 'error', message: "email 已有註冊，請重新輸入！" })
+      if (userHasAccount) return res.status(409).json({ status: 'error', message: "account 已有註冊，請重新輸入！" })
+
       const user = await User.findByPk(req.params.id)
-      user.update({ account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })    
+      user.update({ account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
       return res.json({ status: 'success', message: '已成功修正！' })
-    }catch (err) {
+    } catch (err) {
       next(err)
     }
   },
-  getTweets: async(req, res, next) => {
-    try{
-      const user = await User.findByPk(req.user.id,{
+  getTweets: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.user.id, {
         include: [
           { model: User, as: 'Followers', attributes: ['id'] },
         ]
@@ -247,13 +250,13 @@ let userController = {
       let followers = user.Followers.map(user => { return user.id }) //array去裝followers
       const tweet = await Tweet.findAll({ where: { UserId: followers } })
       return res.status(200).json({ tweet })
-    }catch (err) {
+    } catch (err) {
       next(err)
     }
   },
   getTopUsers: async (req, res, next) => {
     try {
-      const user = await User.findAll({
+      let user = await User.findAll({
         include: [{ model: User, as: 'Followers' }],
         attributes: [
           'id', 'name', 'avatar', 'account',
@@ -262,9 +265,15 @@ let userController = {
         ],
         order: [[Sequelize.literal('followersCount'), 'DESC']],
         limit: 10,
-        raw: true,
-        nest: true
+
       })
+      user = user.map(user => ({
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+        account: user.account,
+        isFollowed: req.user.Followings.map(user => user.id).includes(user.id)
+      }))
       return res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -288,7 +297,9 @@ let userController = {
         followerId: i.id,
         name: i.name,
         avatar: i.avatar,
-        account: i.account
+        account: i.account,
+        introduction: i.introduction,
+        isFollowed: req.user.Followings ? req.user.Followings.map(user => user.id).includes(i.id) : null
       }))
       return res.status(200).json(Followers)
     } catch (err) {
@@ -315,7 +326,9 @@ let userController = {
         followingId: i.id,
         name: i.name,
         avatar: i.avatar,
-        account: i.account
+        account: i.account,
+        introduction: i.introduction,
+        isFollowed: req.user.Followings ? req.user.Followings.map(user => user.id).includes(i.id) : null
       }))
       return res.status(200).json(Followings)
     } catch (err) {
@@ -325,34 +338,51 @@ let userController = {
   getLikedTweets: async (req, res, next) => {
     try {
       const { id } = req.params
-      let user = await User.findByPk(id, {
-        include: [{ model: Like, include: [{ model: Tweet }] }],
-        order: [[Sequelize.literal('createdAt'), 'DESC']]
-      })
+      let tweet = await Tweet.findAll(
+        {
+          where: { id: { [Op.in]: [Sequelize.literal(`SELECT TweetId FROM Likes WHERE UserId = ${id}`)] } },
+          attributes: [['id', 'TweetId'], 'createdAt',
+          [Sequelize.literal('Likes.createdAt'), 'LikesCreatedAt'],
+          [Sequelize.literal('SUBSTRING(description,1,50)'), 'description'],
+          [Sequelize.literal('COUNT(DISTINCT Likes.id)'), 'LikesCount'],
+          [Sequelize.literal('COUNT(DISTINCT Replies.id)'), 'RepliesCount']
+          ],
+          group: ['TweetId', 'Likes.createdAt'],
+          include: [
+            { model: Like, attributes: ['createdAt'] },
+            { model: Reply, attributes: [] },
+            {
+              model: User,
+              attributes:
+                ['id', 'name', 'avatar', 'account']
+            }
+          ],
+          order: [[Sequelize.col('Likes.createdAt'), 'DESC']],
+          nest: true,
+          raw: true
+        })
 
-      if (!user) {
+      if (!tweet) {
         return res.status(422).json({
           status: 'error',
           message: 'Can not find this user'
         })
       }
-      const likeTweets = user.Likes.map(i => ({
-        TweetId: i.TweetId,
-        UserId: i.UserId,
-        Tweet: i.Tweet,
-        createdAt: i.createdAt,
-        updatedAt: i.updatedAt
+      tweet = tweet.map(tweet => ({
+        ...tweet,
+        isliked: req.user.LikedTweets ? req.user.LikedTweets.map(like => like.id).includes(tweet.TweetId) : null,
       }))
-      return res.status(200).json(likeTweets)
+
+      return res.status(200).json(tweet)
     } catch (err) {
       next(err)
     }
   },
   getUserReliedTweets: async (req, res) => {
-    try{
+    try {
       const UserId = req.params.id
       const user = await User.findByPk(UserId, { attributes: ['role'] })
-      if(!user){
+      if (!user) {
         return res.status(403).json({
           'status': 'error',
           'message': '此用戶不存在'
@@ -360,12 +390,12 @@ let userController = {
       }
       const userTweetReply = await Reply.findAll({
         where: { UserId },
-        attributes: [ 'TweetId', 'comment', 'updatedAt', 'createdAt' ],
+        attributes: ['TweetId', 'comment', 'updatedAt', 'createdAt'],
         include: [
-          { model: User, attributes: [ 'id', 'name', 'avatar', 'account'] },
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
           { model: Tweet, attributes: ['description'], include: { model: User, attributes: ['id', 'account'] } },
         ],
-        order: [ ['createdAt', 'DESC'] ]
+        order: [['createdAt', 'DESC']]
       })
       return res.json([...userTweetReply])
     } catch (err) {
