@@ -229,7 +229,7 @@ const userService = {
         [Sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikesCount'],
         [Sequelize.literal(`exists(SELECT 1 FROM Likes WHERE UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLike'],
       ],
-      order: [[sequelize.literal('`Likes`.`createdAt`'), 'ASC']],
+      order: [[sequelize.literal('`Likes`.`createdAt`'), 'DESC']],
     })
 
     return tweets
