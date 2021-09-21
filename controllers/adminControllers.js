@@ -3,15 +3,15 @@ const adminService = require('../services/adminService')
 const adminController = {
   adminSignIn: async (req, res) => {
     try {
-      const { account, password } = req.body
+      const { email, password } = req.body
       // Check required data
-      if (!account || !password) {
+      if (!email || !password) {
         return res.json({
           status: 'error',
           message: 'Please enter both account and password',
         })
       }
-      const { status, message, token, user } = await adminService.adminSignIn(account, password)
+      const { status, message, token, user } = await adminService.adminSignIn(email, password)
       return res.json({
         status,
         message,

@@ -352,7 +352,8 @@ const userService = {
     }
 
     await user.update({
-      ...body
+      ...body,
+      password: user.password
     })
       
     return {
