@@ -66,7 +66,7 @@ const tweetSchema = {
 const replySchema = {
   type: 'object',
   properties: {
-    comment: { type: 'string', minLength: 1, maxLength: 50 }
+    comment: { type: 'string', minLength: 1, maxLength: 140 }
   },
   required: ['comment']
 }
