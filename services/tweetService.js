@@ -45,31 +45,19 @@ const TweetService = {
       order: [[Reply, 'createdAt', 'DESC']]
     })
   },
-  postReply: async (req, res, callback) => {
-    const { comment } = req.body
-    const { tweet_id } = req.params
+  postReply: async (UserId, TweetId, comment) => {
+    const tweet = await Tweet.findByPk(TweetId)
 
-    try {
-      const tweet = await Tweet.findByPk(tweet_id)
-
-      if (!tweet) {
-        return callback(400, { status: 'error', message: "tweet doesn't exist" })
-      }
-
-      if (!comment.trim().length) {
-        return callback(400, { status: 'error', message: "reply content can't be blank" })
-      }
-
-      await Reply.create({
-        TweetId: tweet_id,
-        UserId: helpers.getUser(req).id,
-        comment: comment.trim()
-      })
-      callback(200, { status: 'success', message: 'reply tweet successfully' })
-    } catch (err) {
-      console.log('postReply error', err)
-      res.sendStatus(500)
+    if (!tweet) {
+      return { status: 'error', message: "tweet doesn't exist" }
     }
+
+    await Reply.create({
+      UserId,
+      TweetId,
+      comment
+    })
+    return { status: 'success', message: 'reply tweet successfully' }
   },
   getReplies: async (req, res, callback) => {
     try {
