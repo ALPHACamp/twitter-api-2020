@@ -10,10 +10,11 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      RoomUser.belongsTo(models.User)
     }
   };
   RoomUser.init({
+    socketId: DataTypes.STRING,
     RoomId: DataTypes.INTEGER,
     UserId: DataTypes.INTEGER
   }, {

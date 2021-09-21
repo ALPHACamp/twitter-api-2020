@@ -8,6 +8,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      socketId: {
+        type: Sequelize.STRING,
+      },
       RoomId: {
         type: Sequelize.INTEGER
       },
