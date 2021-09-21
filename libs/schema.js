@@ -10,7 +10,7 @@ const signUpSchema = {
     checkPassword: { type: 'string' }
   },
   required: ['account', 'name', 'email', 'password', 'checkPassword'],
-  additionalProperties: false
+  additionalProperties: false,
 }
 
 const signUp = ajvInstance.compile(signUpSchema)
