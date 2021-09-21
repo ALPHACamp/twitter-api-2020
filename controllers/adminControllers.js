@@ -1,7 +1,8 @@
+
 const adminService = require('../services/adminService')
 
 const adminController = {
-  adminSignIn: async (req, res) => {
+  adminSignIn: async (req, res, next) => {
     try {
       const { email, password } = req.body
       // Check required data
@@ -18,9 +19,8 @@ const adminController = {
         token,
         user,
       })
-    } catch (error) {
-      console.log('Admin signIn error', error)
-      res.sendStatus(500)
+    } catch (err) {
+      next(err)
     }
   },
   getUsers: async (req, res) => {
