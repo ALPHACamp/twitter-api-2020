@@ -1,17 +1,18 @@
+
 const adminService = require('../services/adminService')
 
 const adminController = {
-  adminSignIn: async (req, res) => {
+  adminSignIn: async (req, res, next) => {
     try {
-      const { account, password } = req.body
+      const { email, password } = req.body
       // Check required data
-      if (!account || !password) {
+      if (!email || !password) {
         return res.json({
           status: 'error',
           message: 'Please enter both account and password',
         })
       }
-      const { status, message, token, user } = await adminService.adminSignIn(account, password)
+      const { status, message, token, user } = await adminService.adminSignIn(email, password)
       return res.json({
         status,
         message,
@@ -19,33 +20,32 @@ const adminController = {
         user,
       })
     } catch (error) {
-      console.log('Admin signIn error', error)
-      res.sendStatus(500)
+      next(error)
     }
   },
-  getUsers: async (req, res) => {
+  getUsers: async (req, res, next) => {
     try {
       const users = await adminService.getUsers()
       return res.status(200).json(users)
     } catch (error) {
-      console.log('Admin getUsers error', error)
+      next(error)
     }
   },
-  getTweets: async (req, res) => {
+  getTweets: async (req, res, next) => {
     try {
       const tweets = await adminService.getTweets()
       return res.status(200).json(tweets)
     } catch (error) {
-      console.log('Admin getTweets error', error)
+      next(error)
     }
   },
-  deleteTweet: async (req, res) => {
+  deleteTweet: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
       const { status, message } = await adminService.deleteTweet(id)
       return res.status(200).json({ status, message })
     } catch (error) {
-      console.log('Admin deleteTweet error', error)
+      next(error)
     }
   }
 }

@@ -1,10 +1,12 @@
 const express = require('express')
+const validate = require('../../middleware/validate')
+const { tweet, reply } = require('../../libs/schema')
 const router = express.Router()
 const tweetController = require('../../controllers/tweetController')
 
 // 新增推文 - POST /tweets
 // post('/api/tweets')
-router.post('/', tweetController.postTweet)
+router.post('/', validate(tweet), tweetController.postTweet)
 
 // GET /tweets - 所有推文，包括推文作者
 // get('/api/tweets')
@@ -14,8 +16,10 @@ router.get('/', tweetController.getTweets)
 // get('/api/tweets/1')
 router.get('/:tweetId', tweetController.getTweet)
 
-// 新增回覆 POST /tweets/:tweetId/replies
-router.post('/:tweetId/replies', tweetController.postReply)
+
+// 新增回覆 POST /tweets/:tweet_id/replies
+router.post('/:tweet_id/replies', validate(reply), tweetController.postReply)
+
 
 // 瀏覽 GET /tweets/:tweetId/replies
 router.get('/:tweetId/replies', tweetController.getReplies)

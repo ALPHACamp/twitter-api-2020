@@ -1,22 +1,19 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
-const sequelize = require('sequelize')
+const apiError = require('../libs/apiError')
 
 const adminService = {
-  adminSignIn: async (account, password) => {
-    const user = await User.findOne({ where: { account } })
+  adminSignIn: async (email, password) => {
+    const user = await User.findOne({ where: { email } })
     if (!user) {
-      return { status: 'error', message: 'no such user found' }
+      throw apiError.badRequest(404, 'User not found')
     }
     if (!bcrypt.compareSync(password, user.password)) {
-      return { status: 'error', message: 'passwords did not match' }
+      throw apiError.badRequest(404, 'Password incorrect')
     }
     if (user.role !== 'admin') {
-      return {
-        status: 'error',
-        message: 'Cannot access this account',
-      }
+      throw apiError.badRequest(403, 'Access denied due to role')
     }
     // Give token
     const payload = { id: user.id }
@@ -81,9 +78,7 @@ const adminService = {
   deleteTweet: async (id) => {
     const tweet = await Tweet.findByPk(id)
     if (!tweet) {
-      return {
-        status: 'error', message: 'Tweet does not exist'
-      }
+      throw apiError.badRequest(404, 'Tweet does not exist')
     }
     await tweet.destroy()
     return {

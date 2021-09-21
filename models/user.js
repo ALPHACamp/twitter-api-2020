@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       cover: {
         type: DataTypes.STRING,
-        defaultValue: 'https://i.imgur.com/1jDf2Me.png',
+        defaultValue: 'https://htmlcolorcodes.com/assets/images/colors/gray-color-solid-background-1920x1080.png',
       },
     },
     {}
