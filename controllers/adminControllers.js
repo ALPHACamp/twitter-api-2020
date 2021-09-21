@@ -19,16 +19,16 @@ const adminController = {
         token,
         user,
       })
-    } catch (err) {
-      next(err)
+    } catch (error) {
+      next(error)
     }
   },
   getUsers: async (req, res, next) => {
     try {
       const users = await adminService.getUsers()
       return res.status(200).json(users)
-    } catch (err) {
-      next(err)
+    } catch (error) {
+      next(error)
     }
   },
   getTweets: async (req, res, next) => {
@@ -36,7 +36,7 @@ const adminController = {
       const tweets = await adminService.getTweets()
       return res.status(200).json(tweets)
     } catch (error) {
-      next(err)
+      next(error)
     }
   },
   deleteTweet: async (req, res, next) => {
@@ -45,7 +45,7 @@ const adminController = {
       const { status, message } = await adminService.deleteTweet(id)
       return res.status(200).json({ status, message })
     } catch (error) {
-      next(err)
+      next(error)
     }
   }
 }
