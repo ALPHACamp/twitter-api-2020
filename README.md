@@ -1,4 +1,4 @@
-# Simple Twitter API (v1.1.5)
+# Simple Twitter API (v1.1.6)
 
 此專案使用前/後端分離進行開發一個簡易版的 Twitter 專案，此 Repo 為 Simple-Twitter-Backend。
 
