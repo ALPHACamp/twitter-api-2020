@@ -31,7 +31,7 @@ const adminController = {
       next(err)
     }
   },
-  getTweets: async (req, res) => {
+  getTweets: async (req, res, next) => {
     try {
       const tweets = await adminService.getTweets()
       return res.status(200).json(tweets)
@@ -39,7 +39,7 @@ const adminController = {
       next(err)
     }
   },
-  deleteTweet: async (req, res) => {
+  deleteTweet: async (req, res, next) => {
     try {
       const id = Number(req.params.id)
       const { status, message } = await adminService.deleteTweet(id)
