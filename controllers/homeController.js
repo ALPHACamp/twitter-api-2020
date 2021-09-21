@@ -46,24 +46,57 @@ const homeController = {
       res.redirect('/api/admin')
     })
   },
+
+  postSignUp: (req, res) => {
+    // confirm password
+    if (req.body.password !== req.body.checkPassword) {
+      return res.json({ status: 'error', message: '密碼錯誤' })
+    } else {
+      // confirm unique user
+      User.findOne({
+        where: {
+          [Op.or]: [
+            { email: req.body.email },
+            { account: req.body.account }
+          ]
+        }
+      }).then(user => {
+        if (user) {
+          if (user.email === req.body.email) {
+            return res.json({ status: 'error', message: 'Email 已重複註冊！' })
+          }
+          if (user.account === req.body.account) {
+            return res.json({ status: 'error', message: '帳號已存在' })
+          }
+        } else {
+          const userData = req.body
+          User.create(userDat)
+            .then(user => {
+              return res.status(200).json('Accept')
+            })
+        }
+      })
+        .catch(error => console.log(error))
+    }
+  },
   
-  postSignUp: async (req, res) => {
-    const userData = req.body
-    if (req.body.checkPassword !== req.body.password) {
-      return res.redirect('/signup')
-    }
-    try {
-      const user = await User.create(userData)
-      if (user) {
-        res.status(200).json('Accept')
-      } else {
-        res.status(400)
-      }
-    }
-    catch (error) {
-      console.log(error)
-    }
-  }
+  // postSignUp: async (req, res) => {
+  //   const userData = req.body
+  //   if (req.body.checkPassword !== req.body.password) {
+  //     return res.redirect('/signup')
+  //   }
+  //   try {
+  //     const user = await User.create(userData)
+  //     if (user) {
+  //       res.status(200).json('Accept')
+  //     } else {
+  //       res.status(400)
+  //     }
+  //   }
+  //   catch (error) {
+  //     console.log(error)
+  //   }
+  // }
 }
 
 module.exports = homeController
