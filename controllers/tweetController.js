@@ -59,10 +59,19 @@ const tweetController = {
       })
     }
   },
-  getReplies: (req, res) => {
-    TweetService.getReplies(req, res, (status, data) => {
-      return res.status(status).json(data)
-    })
+  getReplies: async (req, res) => {
+    const { tweetId } = req.params
+
+    try {
+      const replies = await TweetService.getReplies(tweetId)
+
+      return res.status(200).json(replies)
+    } catch (error) {
+      return res.status(500).json({
+        status: error.name,
+        message: error.message
+      })
+    }
   },
   addLike: (req, res) => {
     TweetService.addLike(req, res, (status, data) => {

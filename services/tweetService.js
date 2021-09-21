@@ -59,20 +59,16 @@ const TweetService = {
     })
     return { status: 'success', message: 'reply tweet successfully' }
   },
-  getReplies: async (req, res, callback) => {
-    try {
-      const replies = await Reply.findAll({
-        where: { TweetId: req.params.tweet_id },
-        order: [['createdAt', 'DESC']]
-      })
-      if (!replies.length) {
-        return callback(400, { status: 'error', message: "reply doesn't exist" })
-      }
-      callback(200, replies)
-    } catch (err) {
-      console.log('getReplies error', err)
-      res.sendStatus(500)
+  getReplies: async (TweetId) => {
+    const replies = await Reply.findAll({
+      where: { TweetId },
+      order: [['createdAt', 'DESC']]
+    })
+    if (!replies.length) {
+      return { status: 'error', message: "reply doesn't exist" }
     }
+
+    return replies
   },
   addLike: async (req, res, callback) => {
     const { tweet_id } = req.params
