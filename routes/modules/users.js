@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { authenticated, checkRole } = require('../../middleware/auth')
 const validate = require('../../middleware/validate')
-const { signUp, signIn } = require('../../libs/schema')
+const { signUp, signIn, user } = require('../../libs/schema')
 const passport = require('../../config/passport')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
@@ -22,7 +22,7 @@ router.get('/topUsers', authenticated, checkRole(), userController.getTopUsers)
 
 router.get('/:id', authenticated, checkRole(), userController.getUser)
 
-router.put('/:id', authenticated, checkRole(), cpUpload, userController.putUser)
+router.put('/:id', authenticated, checkRole(), validate(user), cpUpload, userController.putUser)
 
 router.get('/:id/tweets', authenticated, checkRole(), userController.getUserTweets)
 

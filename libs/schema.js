@@ -3,11 +3,11 @@ const ajvInstance = require('./ajv-instance')
 const signUpSchema = {
   type: 'object',
   properties: {
-    account: { type: 'string', maxLength: 50 },
-    name: { type: 'string', maxLength: 50 },
+    account: { type: 'string', maxLength: 50, minLength: 1 },
+    name: { type: 'string', maxLength: 50, minLength: 1 },
     email: { type: 'string', format: 'email' },
-    password: { type: 'string' },
-    checkPassword: { type: 'string' }
+    password: { type: 'string', minLength: 1 },
+    checkPassword: { type: 'string', minLength: 1 },
   },
   required: ['account', 'name', 'email', 'password', 'checkPassword'],
   additionalProperties: false,
@@ -16,12 +16,23 @@ const signUpSchema = {
 const signInSchema = {
   type: 'object',
   properties: {
-    account: { type: 'string' },
-    password: { type: 'string' }
+    account: { type: 'string', minLength: 1 },
+    password: { type: 'string', minLength: 1 },
   },
-  required: ['account', 'password']
+  required: ['account', 'password'],
+  additionalProperties: false
+}
+
+const userSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', maxLength: 50, minLength: 1 },
+    introduction: { type: 'string', maxLength: 160 }
+  },
+  additionalProperties: false
 }
 
 const signUp = ajvInstance.compile(signUpSchema)
 const signIn = ajvInstance.compile(signInSchema)
-module.exports = { signUp, signIn }
+const user = ajvInstance.compile(userSchema)
+module.exports = { signUp, signIn, user }
