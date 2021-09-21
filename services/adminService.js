@@ -4,8 +4,8 @@ const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
 const sequelize = require('sequelize')
 
 const adminService = {
-  adminSignIn: async (account, password) => {
-    const user = await User.findOne({ where: { account } })
+  adminSignIn: async (email, password) => {
+    const user = await User.findOne({ where: { email } })
     if (!user) {
       return { status: 'error', message: 'no such user found' }
     }
