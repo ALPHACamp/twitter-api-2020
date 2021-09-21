@@ -67,7 +67,8 @@ const replySchema = {
   type: 'object',
   properties: {
     comment: { type: 'string', minLength: 1, maxLength: 50 }
-  }
+  },
+  required: ['comment']
 }
 
 const signUp = ajvInstance.compile(signUpSchema)
