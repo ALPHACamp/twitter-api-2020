@@ -21,8 +21,7 @@ function authenticated(req, res, next) {
 };
 const corsOptions = {
   origin: [
-    'http://www.example.com',
-    'http://localhost:8080',
+    '*'
   ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization'],
