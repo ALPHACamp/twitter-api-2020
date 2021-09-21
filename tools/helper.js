@@ -1,5 +1,6 @@
 const db = require('../models')
-const { Like } = db
+const { Like, RoomUser, User } = db
+const sequelize = require('sequelize')
 
 async function getLoginUserLikedTweetsId(req) {
   let likedTweets = await Like.findAll({
@@ -13,4 +14,19 @@ async function getLoginUserLikedTweetsId(req) {
   return likedTweets
 }
 
-module.exports = { getLoginUserLikedTweetsId }
+async function getRoomUsers(RoomId) {
+  try {
+    return await RoomUser.findAll({
+      raw: true, nest: true,
+      attributes: [
+        [sequelize.fn('DISTINCT', sequelize.col('UserId')), 'UserId'],
+      ],
+      where: { RoomId },
+      include: { model: User, attributes: ['name', 'account', 'avatar'] }
+    })
+  } catch (err) {
+    console.warn(err)
+  }
+}
+
+module.exports = { getLoginUserLikedTweetsId, getRoomUsers }

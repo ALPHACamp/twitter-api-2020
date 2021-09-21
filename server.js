@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken')
 const db = require('./models')
-const { User, Room, Message } = db
+const { User, Message, RoomUser } = db
+const { getRoomUsers } = require('./tools/helper')
+
 
 module.exports = (io) => {
   const public = io.of('/public')
@@ -33,6 +35,15 @@ module.exports = (io) => {
 
         socket.join('public')
         publicRoom = public.to('public')
+        // 更新在線名單
+        await RoomUser.create({
+          RoomId: 1,
+          UserId: user.id,
+          socketId: user.socketId
+        })
+        const userList = await getRoomUsers(1)
+        publicRoom.emit('online user', userList)
+        publicRoom.emit('connection', `${user.name} 上線`)
 
         // 更新歷史訊息
         const messages = await Message.findAll({
@@ -46,8 +57,6 @@ module.exports = (io) => {
           order: [['createdAt', 'ASC']]
         })
         publicRoom.emit('history', messages)
-
-        publicRoom.emit('connection', `${user.name} 上線`)
 
         // 事件監聽
         socket.on('send message', async obj => {
@@ -66,8 +75,21 @@ module.exports = (io) => {
         })
 
         socket.on('disconnect', async () => {
-          socket.leave("public")
-          publicRoom.emit('connection', `${user.name} 離線`)
+          try {
+            const user = socket.request.user
+            user.socketId = socket.id
+            // 下線
+            socket.leave("public")
+            await RoomUser.destroy({
+              where: { socketId: user.socketId }
+            })
+            publicRoom.emit('connection', `${user.name} 離線`)
+            // 回傳在線名單
+            const userList = await getRoomUsers(1)
+            publicRoom.emit('online user', userList)
+          } catch (err) {
+            console.warn(err)
+          }
         })
       } catch (err) {
         console.warn(err)
