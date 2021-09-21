@@ -9,9 +9,9 @@ const tweetController = {
   getTweets: async (req, res) => {
     try {
       let offset = 0
-      const limit = req.query.limit || 20
+      const limit = Number(req.query.limit) || 20
       if (req.query.page) {
-        offset = (req.query.page - 1) * limit
+        offset = (Number(req.query.page - 1)) * limit
       }
       const tweet = await Tweet.findAll({
         include: User,
