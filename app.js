@@ -1,5 +1,6 @@
 const express = require('express')
 const helpers = require('./_helpers')
+const apiErrorHandler = require('./middleware/errorHandler')
 const cors = require('cors')
 const methodOverride = require('method-override')
 if (process.env.NODE_ENV !== 'production') {
@@ -22,6 +23,8 @@ app.use(methodOverride('_method'))
 app.use('/upload', express.static(__dirname + '/upload'))
 
 app.use(routes)
+
+app.use(apiErrorHandler)
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
