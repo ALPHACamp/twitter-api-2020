@@ -26,5 +26,23 @@ module.exports = (io) => {
       next(new Error('請先登入在使用'));
     }
   })
+    .on('connection', async (socket) => {
+      const user = socket.request.user
+      user.socketId = socket.id
 
+      socket.join('public')
+      publicRoom = public.to('public')
+      publicRoom.emit('connection', `${user.name} 上線`)
+
+      // 事件監聽
+      socket.on('send message', obj => {
+        obj.user = user
+        publicRoom.emit('updated message', obj)
+      })
+
+      socket.on('disconnect', async () => {
+        socket.leave("public")
+        publicRoom.emit('connection', `${user.name} 離線`)
+      })
+    })
 }
