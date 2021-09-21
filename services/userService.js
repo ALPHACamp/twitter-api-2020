@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
-const { sequelize, Op } = require('sequelize')
+const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const apiError = require('../libs/apiError')
 
 
