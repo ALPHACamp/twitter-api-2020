@@ -4,20 +4,18 @@ const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
 const sequelize = require('sequelize')
+const apiError = require('../libs/apiError')
 const { helpers } = require('faker')
 
 const userService = {
   signUp: async (account, name, email, password) => {
     const duplicate_email = await User.findOne({ where: { email } })
     if (duplicate_email) {
-      return { status: 'error', message: 'This email has been registered' }
+      throw apiError.badRequest(404, 'This email has been registered')
     }
     const duplicate_account = await User.findOne({ where: { account } })
     if (duplicate_account) {
-      return {
-        status: 'error',
-        message: 'This account name has been registered',
-      }
+      throw apiError.badRequest(404, 'This account name has been registered')
     }
 
     const newUser = await User.create({
@@ -31,16 +29,13 @@ const userService = {
   signIn: async (account, password) => {
     const user = await User.findOne({ where: { account } })
     if (!user) {
-      return { status: 'error', message: 'no such user found' }
+      throw apiError.badRequest(404, 'User does not exist')
     }
     if (!bcrypt.compareSync(password, user.password)) {
-      return { status: 'error', message: 'passwords did not match' }
+      throw apiError.badRequest(403, 'Password incorrect')
     }
     if (user.role === 'admin') {
-      return {
-        status: 'error',
-        message: 'This account does not have permission to access',
-      }
+      throw apiError.badRequest(403, 'Access denied due to role')
     }
     // Give token
     const payload = { id: user.id }
@@ -80,8 +75,11 @@ const userService = {
         ],
       ],
     })
+    if (!user) {
+      throw apiError.badRequest(404, 'User does not exist')
+    }
     if (user.role === 'admin') {
-      return { status: 'error', message: "Can't access admin's profile" }
+      throw apiError.badRequest(403, 'Access denied due to role')
     }
 
     return user
@@ -106,11 +104,13 @@ const userService = {
       ],
     })
     currentUser.isCurrent = true
+    if (!currentUser) {
+      throw apiError.badRequest(404, 'User does not exist')
+    }
     return currentUser
   },
   putUser: async (id, files, body) => {
     const user = await User.findByPk(id)
-
     if (body.deleteCover) {
       await user.update({ cover: 'https://htmlcolorcodes.com/assets/images/colors/gray-color-solid-background-1920x1080.png' })
     }
@@ -136,16 +136,10 @@ const userService = {
   getUserTweets: async (id, currentUserId) => {
     const user = await User.findByPk(id)
     if (!user) {
-      return {
-        status: 'error',
-        message: "Couldn't find this user",
-      }
+      throw apiError.badRequest(404, 'User does not exist')
     }
     if (user.role !== 'user') {
-      return {
-        status: 'error',
-        message: 'Invalid user',
-      }
+      throw apiError.badRequest(403, 'Invalid user')
     }
     return await Tweet.findAll({
       where: { UserId: id },
@@ -164,16 +158,10 @@ const userService = {
   getUserRepliedTweets: async (id, currentUserId) => {
     const user = await User.findByPk(id)
     if (!user) {
-      return {
-        status: 'error',
-        message: "Can't find this user",
-      }
+      throw apiError.badRequest(404, 'User does not exist')
     }
     if (user.role !== 'user') {
-      return {
-        status: 'error',
-        message: 'Invalid user',
-      }
+      throw apiError.badRequest(403, 'Invalid user')
     }
     const replies = await Reply.findAll({
       where: { UserId: id },
@@ -194,27 +182,16 @@ const userService = {
       attributes: ['id', 'comment', 'createdAt'],
       order: [['createdAt', 'DESC']],
     })
-    if (!replies) {
-      return {
-        status: 'error',
-        message: 'This user does not have any replies',
-      }
-    }
+
     return replies
   },
   getUserLikedTweets: async (id, currentUserId) => {
     const user = await User.findByPk(id)
     if (!user) {
-      return {
-        status: 'error',
-        message: "Can't find this user",
-      }
+      throw apiError.badRequest(404, 'User does not exist')
     }
     if (user.role !== 'user') {
-      return {
-        status: 'error',
-        message: 'Invalid user',
-      }
+      throw apiError.badRequest(403, 'Invalid user')
     }
     const tweets = await Tweet.findAll({
       include: [
@@ -237,16 +214,10 @@ const userService = {
   getFollowings: async (id, currentUserId) => {
     const user = await User.findByPk(id)
     if (!user) {
-      return {
-        status: 'error',
-        message: "Can't find this user",
-      }
+      throw apiError.badRequest(404, 'User does not exist')
     }
     if (user.role !== 'user') {
-      return {
-        status: 'error',
-        message: 'Invalid user',
-      }
+      throw apiError.badRequest(403, 'Invalid user')
     }
     const followings = await User.findAll({
       include: [
@@ -275,10 +246,10 @@ const userService = {
   getFollowers: async (id, currentUserId) => {
     const user = await User.findByPk(id)
     if (!user) {
-      return {
-        status: 'error',
-        message: "Can't find this user",
-      }
+      throw apiError.badRequest(404, 'User does not exist')
+    }
+    if (user.role !== 'user') {
+      throw apiError.badRequest(403, 'Invalid user')
     }
     const followers = await User.findAll({
       include: [
@@ -332,15 +303,11 @@ const userService = {
     const { account, name, email, password, checkPassword } = body
     const user = await User.findByPk(id)
     if (!user) {
-      return { status: 'error', message: 'No such user found' }
+      throw apiError.badRequest(404, 'User does not exist')
     }
-    if (!account || !name || !email ) {
-      return { status: 'error', message: 'All fields are required' }
-    }
+
     if (password) {
-      if (password !== checkPassword) {
-        return { status: 'error', message: 'Password & checkPassword does not match' }
-      }
+
       await user.update({
         ...body,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
