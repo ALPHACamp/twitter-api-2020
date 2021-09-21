@@ -38,7 +38,7 @@ const userSettingsSchema = {
     name: { type: 'string', maxLength: 50, minLength: 1 },
     account: { type: 'string', maxLength: 50, minLength: 1 },
     email: { type: 'string', format: 'email' },
-    password: { type: 'string', minLength: 1 },
+    password: { type: 'string' },
     checkPassword: { const: { $data: '1/password' } }
   },
   required: ['name', 'account', 'email'],
