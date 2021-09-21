@@ -1,4 +1,5 @@
 const db = require('../models')
+const Op = db.Sequelize.Op
 const User = db.User
 const bcrypt = require('bcryptjs')
 const issueJwt = require('../public/javascripts/tokenIssue')
@@ -70,7 +71,7 @@ const homeController = {
           }
         } else {
           const userData = req.body
-          User.create(userDat)
+          User.create(userData)
             .then(user => {
               return res.status(200).json('Accept')
             })
@@ -79,24 +80,6 @@ const homeController = {
         .catch(error => console.log(error))
     }
   },
-  
-  // postSignUp: async (req, res) => {
-  //   const userData = req.body
-  //   if (req.body.checkPassword !== req.body.password) {
-  //     return res.redirect('/signup')
-  //   }
-  //   try {
-  //     const user = await User.create(userData)
-  //     if (user) {
-  //       res.status(200).json('Accept')
-  //     } else {
-  //       res.status(400)
-  //     }
-  //   }
-  //   catch (error) {
-  //     console.log(error)
-  //   }
-  // }
 }
 
 module.exports = homeController
