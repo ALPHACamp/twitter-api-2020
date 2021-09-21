@@ -23,12 +23,12 @@ const adminController = {
       next(err)
     }
   },
-  getUsers: async (req, res) => {
+  getUsers: async (req, res, next) => {
     try {
       const users = await adminService.getUsers()
       return res.status(200).json(users)
-    } catch (error) {
-      console.log('Admin getUsers error', error)
+    } catch (err) {
+      next(err)
     }
   },
   getTweets: async (req, res) => {
@@ -36,7 +36,7 @@ const adminController = {
       const tweets = await adminService.getTweets()
       return res.status(200).json(tweets)
     } catch (error) {
-      console.log('Admin getTweets error', error)
+      next(err)
     }
   },
   deleteTweet: async (req, res) => {
@@ -45,7 +45,7 @@ const adminController = {
       const { status, message } = await adminService.deleteTweet(id)
       return res.status(200).json({ status, message })
     } catch (error) {
-      console.log('Admin deleteTweet error', error)
+      next(err)
     }
   }
 }
