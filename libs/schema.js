@@ -45,8 +45,19 @@ const userSettingsSchema = {
   additionalProperties: false
 }
 
+const adminSignInSchema = {
+  type: 'object',
+  properties: {
+    email: { type: 'string', format: 'email' },
+    password: { type: 'string', minLength: 1 }
+  },
+  required: ['email', 'password'],
+  additionalProperties: false
+}
+
 const signUp = ajvInstance.compile(signUpSchema)
 const signIn = ajvInstance.compile(signInSchema)
 const user = ajvInstance.compile(userSchema)
 const userSettings = ajvInstance.compile(userSettingsSchema)
-module.exports = { signUp, signIn, user, userSettings }
+const adminSignIn = ajvInstance.compile(adminSignInSchema)
+module.exports = { signUp, signIn, user, userSettings, adminSignIn }
