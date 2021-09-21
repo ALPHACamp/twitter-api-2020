@@ -13,5 +13,15 @@ const signUpSchema = {
   additionalProperties: false,
 }
 
+const signInSchema = {
+  type: 'object',
+  properties: {
+    account: { type: 'string' },
+    password: { type: 'string' }
+  },
+  required: ['account', 'password']
+}
+
 const signUp = ajvInstance.compile(signUpSchema)
-module.exports = { signUp }
+const signIn = ajvInstance.compile(signInSchema)
+module.exports = { signUp, signIn }

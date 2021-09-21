@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { authenticated, checkRole } = require('../../middleware/auth')
 const validate = require('../../middleware/validate')
-const { signUp } = require('../../libs/schema')
+const { signUp, signIn } = require('../../libs/schema')
 const passport = require('../../config/passport')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
@@ -14,7 +14,7 @@ const cpUpload = upload.fields([
 
 router.post('/', validate(signUp), userController.signUp)
 
-router.post('/signin', userController.signIn)
+router.post('/signin', validate(signIn), userController.signIn)
 
 router.get('/currentuser', authenticated, checkRole(), userController.getCurrentUser)
 
