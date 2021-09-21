@@ -267,14 +267,18 @@ const userController = {
       const { files } = req
 
       if (files) {
-        imgur.setClientId(IMGUR_CLIENT_ID)
-        if (files.avatar) {
-          const avatarData = await imgur.uploadFile(files.avatar[0].path)
-          req.body.avatar = avatarData.link
-        }
-        if (files.cover) {
-          const coverData = await imgur.uploadFile(files.cover[0].path)
-          req.body.cover = coverData.link
+        try {
+          imgur.setClientId(IMGUR_CLIENT_ID)
+          if (files.avatar) {
+            const avatarData = await imgur.uploadFile(files.avatar[0].path)
+            req.body.avatar = avatarData.link
+          }
+          if (files.cover) {
+            const coverData = await imgur.uploadFile(files.cover[0].path)
+            req.body.cover = coverData.link
+          }
+        } catch (error) {
+          next(new ApiError('UploadImageError', 400, 'Upload image Failed'))
         }
       }
 
