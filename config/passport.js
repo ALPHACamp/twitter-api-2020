@@ -2,7 +2,7 @@ const jwtStrategy = require('passport-jwt').Strategy
 const db = require('../models')
 const User = db.User
 const fs = require('fs')
-const PUB_KEY = fs.readFileSync(__dirname + '/../rsaPublicKey.pem', 'utf8')
+const PUB_KEY = process.env.tokenKey || fs.readFileSync(__dirname + '/../rsaPublicKey.pem', 'utf8')
 const passport = require('passport')
 
 const cookieExtractor = (req) => {
@@ -16,7 +16,7 @@ const cookieExtractor = (req) => {
 const options = {
   jwtFromRequest: cookieExtractor,
   secretOrKey: PUB_KEY,
-  algorithms: ['RS256']
+  // algorithms: ['RS256']
 }
 
 // module.exports = (passport) => {

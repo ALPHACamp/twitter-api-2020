@@ -1,6 +1,4 @@
-
-'use strict';
-
+'use strict'
 const bcrypt = require('bcryptjs')
 
 module.exports = (sequelize, DataTypes) => {
@@ -37,22 +35,12 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     }
-  }, {});
+  }, {})
   User.associate = function (models) {
     User.hasMany(models.Tweet, {
       foreignKey: 'UserId',
       as: 'userTweets'
     })
-    // User.belongsToMany(models.Tweet, {
-    //   through: models.Reply,
-    //   foreignKey: 'UserId',
-    //   as: 'repliedTweets'
-    // })
-    // User.belongsToMany(models.Tweet, {
-    //   through: models.Like,
-    //   foreignKey: 'UserId',
-    //   as: 'likingTweets'
-    // })
     User.hasMany(models.Reply, {
       foreignKey: 'UserId',
       as: 'replies'
@@ -79,6 +67,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followingId',
       as: 'Followers'
     })
-  };
-  return User;
-};
+  }
+  return User
+}
