@@ -31,9 +31,5 @@ app.listen(PORT, () => {
   console.log('server on')
 })
 
-require('./routes')(app, passport)
-
-// const router = require('./routes')
-// router(app, passport)
-
+require('./routes')(app)
 module.exports = app

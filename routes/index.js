@@ -1,6 +1,5 @@
-// const router = require('express').Router()
 const apis = require('./apis')
 
-module.exports = (app, passport) => {
+module.exports = (app) => {
   app.use('/api', apis)
 }
