@@ -49,9 +49,7 @@ const userInfoSchema = Joi.object({
     .messages({
       'string.base':'Data type of introduction must be a string',
       'string.max': 'The introduction should not exceed 160 words'
-    }),
-  avatar: Joi.string().trim().allow(''),
-  cover: Joi.string().trim().allow('')
+    })
 })
 
 // Joi schema for validating tweet format
