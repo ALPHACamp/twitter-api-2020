@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const db = require('./models')
-const { User } = db
+const { User, Room, Message } = db
 
 module.exports = (io) => {
   const public = io.of('/public')
@@ -27,22 +27,50 @@ module.exports = (io) => {
     }
   })
     .on('connection', async (socket) => {
-      const user = socket.request.user
-      user.socketId = socket.id
+      try {
+        const user = socket.request.user
+        user.socketId = socket.id
 
-      socket.join('public')
-      publicRoom = public.to('public')
-      publicRoom.emit('connection', `${user.name} 上線`)
+        socket.join('public')
+        publicRoom = public.to('public')
 
-      // 事件監聽
-      socket.on('send message', obj => {
-        obj.user = user
-        publicRoom.emit('updated message', obj)
-      })
+        // 更新歷史訊息
+        const messages = await Message.findAll({
+          raw: true, nest: true,
+          attributes: ['content', 'createdAt'],
+          where: { RoomId: 1 },
+          include: {
+            model: User,
+            attributes: ['id', 'avatar']
+          },
+          order: [['createdAt', 'ASC']]
+        })
+        publicRoom.emit('history', messages)
 
-      socket.on('disconnect', async () => {
-        socket.leave("public")
-        publicRoom.emit('connection', `${user.name} 離線`)
-      })
+        publicRoom.emit('connection', `${user.name} 上線`)
+
+        // 事件監聽
+        socket.on('send message', async obj => {
+          try {
+            obj.user = user
+            // 加入到歷史訊息
+            await Message.create({
+              content: obj.message,
+              RoomId: 1,
+              UserId: user.id
+            })
+            publicRoom.emit('updated message', obj)
+          } catch (err) {
+            console.warn(err)
+          }
+        })
+
+        socket.on('disconnect', async () => {
+          socket.leave("public")
+          publicRoom.emit('connection', `${user.name} 離線`)
+        })
+      } catch (err) {
+        console.warn(err)
+      }
     })
 }
