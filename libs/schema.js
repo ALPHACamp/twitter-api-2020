@@ -55,9 +55,26 @@ const adminSignInSchema = {
   additionalProperties: false
 }
 
+const tweetSchema = {
+  type: 'object',
+  properties: {
+    description: { type: 'string', minLength: 1, maxLength: 140}
+  },
+  required: ['description']
+}
+
+const replySchema = {
+  type: 'object',
+  properties: {
+    comment: { type: 'string', minLength: 1, maxLength: 50 }
+  }
+}
+
 const signUp = ajvInstance.compile(signUpSchema)
 const signIn = ajvInstance.compile(signInSchema)
 const user = ajvInstance.compile(userSchema)
 const userSettings = ajvInstance.compile(userSettingsSchema)
 const adminSignIn = ajvInstance.compile(adminSignInSchema)
-module.exports = { signUp, signIn, user, userSettings, adminSignIn }
+const tweet = ajvInstance.compile(tweetSchema)
+const reply = ajvInstance.compile(replySchema)
+module.exports = { signUp, signIn, user, userSettings, adminSignIn, tweet, reply }
