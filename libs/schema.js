@@ -7,7 +7,7 @@ const signUpSchema = {
     name: { type: 'string', maxLength: 50, minLength: 1 },
     email: { type: 'string', format: 'email' },
     password: { type: 'string', minLength: 1 },
-    checkPassword: { type: 'string', minLength: 1 },
+    checkPassword: { const: { $data: '1/password' } },
   },
   required: ['account', 'name', 'email', 'password', 'checkPassword'],
   additionalProperties: false,
@@ -39,7 +39,7 @@ const userSettingsSchema = {
     account: { type: 'string', maxLength: 50, minLength: 1 },
     email: { type: 'string', format: 'email' },
     password: { type: 'string', minLength: 1 },
-    checkPassword: { type: 'string', minLength: 1 }
+    checkPassword: { const: { $data: '1/password' } }
   },
   required: ['name', 'account', 'email'],
   additionalProperties: false
