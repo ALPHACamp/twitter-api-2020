@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship, Sequelize } = require('../models')
-const sequelize = require('sequelize')
+const { sequelize, Op } = require('sequelize')
 const apiError = require('../libs/apiError')
-const { helpers } = require('faker')
+
 
 const userService = {
   signUp: async (account, name, email, password) => {
@@ -300,14 +300,24 @@ const userService = {
     return topUsers
   },
   putUserSettings: async (id, body) => {
-    const { account, name, email, password, checkPassword } = body
-    const duplicate_email = await User.findOne({ where: { email } })
-    if (duplicate_email) {
-      throw apiError.badRequest(404, 'This email has been registered')
+    const { account, email, password } = body
+    
+    if (email) {
+      const duplicate_email = await User.findOne({
+        where: { id: { [Op.not]: id }, email },
+      })
+      if (duplicate_email) {
+        throw apiError.badRequest(401, 'This email has been registered')
+      }
     }
-    const duplicate_account = await User.findOne({ where: { account } })
-    if (duplicate_account) {
-      throw apiError.badRequest(404, 'This account name has been registered')
+    
+    if (account) {
+      const duplicate_account = await User.findOne({
+        where: { id: { [Op.not]: id }, account },
+      })
+      if (duplicate_account) {
+        throw apiError.badRequest(401, 'This account name has been registered')
+      }
     }
     const user = await User.findByPk(id)
     if (!user) {
@@ -315,27 +325,25 @@ const userService = {
     }
 
     if (password) {
-
       await user.update({
         ...body,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
       })
       return {
         status: 'success',
-        message: 'Successfully edited including password'
+        message: 'Successfully edited including password',
       }
     }
 
     await user.update({
       ...body,
-      password: user.password
+      password: user.password,
     })
-      
+
     return {
       status: 'success',
-      message: 'Successfully edited'
+      message: 'Successfully edited',
     }
-    
   }
 }
 
