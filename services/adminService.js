@@ -78,9 +78,7 @@ const adminService = {
   deleteTweet: async (id) => {
     const tweet = await Tweet.findByPk(id)
     if (!tweet) {
-      return {
-        status: 'error', message: 'Tweet does not exist'
-      }
+      throw apiError.badRequest(404, 'Tweet does not exist')
     }
     await tweet.destroy()
     return {
