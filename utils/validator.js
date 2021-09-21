@@ -87,7 +87,7 @@ const joiMessageHandler = (errors) => {
       }
         messages.push(error.message)
     })
-    return messages
+    return messages.join('|')
 }
 
 module.exports = {
