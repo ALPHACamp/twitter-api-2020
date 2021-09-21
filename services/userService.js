@@ -301,6 +301,14 @@ const userService = {
   },
   putUserSettings: async (id, body) => {
     const { account, name, email, password, checkPassword } = body
+    const duplicate_email = await User.findOne({ where: { email } })
+    if (duplicate_email) {
+      throw apiError.badRequest(404, 'This email has been registered')
+    }
+    const duplicate_account = await User.findOne({ where: { account } })
+    if (duplicate_account) {
+      throw apiError.badRequest(404, 'This account name has been registered')
+    }
     const user = await User.findByPk(id)
     if (!user) {
       throw apiError.badRequest(404, 'User does not exist')
