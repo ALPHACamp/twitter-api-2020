@@ -32,7 +32,21 @@ const userSchema = {
   additionalProperties: false
 }
 
+const userSettingsSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', maxLength: 50, minLength: 1 },
+    account: { type: 'string', maxLength: 50, minLength: 1 },
+    email: { type: 'string', format: 'email' },
+    password: { type: 'string', minLength: 1 },
+    checkPassword: { type: 'string', minLength: 1 }
+  },
+  required: ['name', 'account', 'email'],
+  additionalProperties: false
+}
+
 const signUp = ajvInstance.compile(signUpSchema)
 const signIn = ajvInstance.compile(signInSchema)
 const user = ajvInstance.compile(userSchema)
-module.exports = { signUp, signIn, user }
+const userSettings = ajvInstance.compile(userSettingsSchema)
+module.exports = { signUp, signIn, user, userSettings }
