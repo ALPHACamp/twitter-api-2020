@@ -278,7 +278,7 @@ const userController = {
             req.body.cover = coverData.link
           }
         } catch (error) {
-          next(new ApiError('UploadImageError', 400, 'Upload image Failed'))
+          next(new ApiError('UploadImageError', 400, 'Upload image failed'))
         }
       }
 
