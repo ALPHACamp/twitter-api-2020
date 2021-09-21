@@ -298,7 +298,8 @@ const userService = {
         raw: true, nest: true,
         attributes: { exclude: ['id', 'UserId'] },
         where: { UserId: req.params.id },
-        include: { model: Tweet, attributes: [], include: { model: User, attributes: ['name'] } }
+        include: { model: Tweet, attributes: [], include: { model: User, attributes: ['name'] } },
+        order: [['createdAt', 'DESC']]
       })
       return cb(replies)
     } catch (err) {
