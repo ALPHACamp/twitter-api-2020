@@ -37,17 +37,19 @@ const homeController = {
       }
       // 簽發 token
       const tokenInfo = issueJwt(user)
-      const allInfo = {
-          token: tokenInfo.token,
-          userId: user.id,
+      // 下面是給cookie用的
+      // const allInfo = {
+      //     token: tokenInfo.token,
+      //     userId: user.id,
+      //   }
+      res.json({
+        status: 'success',
+        message: 'ok',
+        token: tokenInfo,
+        user: {
+          id: user.id, name: user.name, avatar: user.avatar, role: user.role
         }
-        if (user.role === 'admin') {
-        res.cookie('jwt', allInfo, { httpOnly: false, expireIn: '3h' })
-        res.redirect('https://actwitter.herokuapp.com/api/admin')
-      } else if (user.role === 'user') {
-        res.cookie('jwt', allInfo, { httpOnly: false, expireIn: '3h' })
-        res.redirect('https://actwitter.herokuapp.com/api/tweets')
-      }
+      })
     })
   },
   
