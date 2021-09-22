@@ -104,8 +104,75 @@ https://twitter-apis-demo.herokuapp.com/api
 
 Run the the API server by following instructions below.
 
+### Environment setup
+- GIT
+- Express
+- MySQL WorkBench
 
+### Installing
 
+1. Clone into local repo 
+```
+$ git clone https://github.com/pooppicker/twitter-api-2020.git
+```
+2. Install project dependencies 
+```
+$ cd twitter-api-2020
+$ npm install
+```
+3. Add .env file 
+```
+JWT_SECRET=<your_jwt_secret>
+IMGUR_CLIENT_ID=<your_imgur_client_id>
+```
+4. Enter your MySQL Workbench password in config.json 
+```
+{
+  "development": {
+    "username": "root",
+    "password": "<your_mysql_workbench_password>",
+    "database": "forum",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": "<your_mysql_workbench_password>",
+    "database": "forum_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+}
+```
+5. Create database in MySQL WorkBench
+
+run the following syntax in WorkBench
+```drop database if exists ac_twitter_workspace;
+create database ac_twitter_workspace;
+drop database if exists ac_twitter_workspace_test;
+create database ac_twitter_workspace_test;
+```
+6. Use Sequelize CLI to create tables in database
+```
+$ npx sequelize db:migrate
+$ NODE_ENV=test
+$ npx sequelize db:migrate
+```
+7. Import seed data 
+```
+$ NODE_ENV=development
+$ npx sequelize db:seed:all
+```
+8. Run test
+```
+$ npm test
+```
+9. Start the server & check if the following message shows
+```
+$ npm run dev
+$ Example app listening on port 3000!
+
+```
 
 
 
