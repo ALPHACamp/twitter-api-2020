@@ -119,6 +119,7 @@ const userController = {
           'id',
           'name',
           'account',
+          'email',
           'avatar',
           'role',
           'cover',
