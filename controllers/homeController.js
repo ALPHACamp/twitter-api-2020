@@ -42,7 +42,7 @@ const homeController = {
       //     token: tokenInfo.token,
       //     userId: user.id,
       //   }
-      res.json({
+      return res.json({
         status: 'success',
         message: 'ok',
         token: tokenInfo,
