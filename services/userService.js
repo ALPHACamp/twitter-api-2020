@@ -149,8 +149,8 @@ const userService = {
       let client = new ImgurClient({ clientId: process.env.CLIENT_ID })
       const { name, account, password, checkPassword, introduction, email } = req.body
       // 使用者只能修改自己的資料
+      if (req.user.id != req.params.id) return cb({ status: '401', message: '無法修改他人資料' })
       let user = await User.findByPk(req.user.id, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
-
       // 後端驗證
       // 密碼雙重確認
       if (password && password !== checkPassword) {
@@ -175,25 +175,34 @@ const userService = {
         })
         if (isUser !== null) return cb({ status: '409', message: '帳號已被使用' })
       }
+
+      if (req.body.cover === 'delete') user.cover = ''
+
       // 圖片上傳網路，取得網址
       if (req.files) {
         const { avatar, cover } = req.files
         if (avatar && cover) {
-          Promise.all([
-            client.upload(avatar[0].path),
-            client.upload(cover[0].path),
-          ]).then(([avatar, cover]) => {
-            user.avatar = avatar.data.link || 'https://image.flaticon.com/icons/png/512/149/149071.png'
-            user.cover = cover.data.link || user.cover
-          }).catch(err => cb({ status: '400', message: '圖片上傳失敗', err }))
+          const images = await client.upload([
+            {
+              image: avatar[0].path,
+              title: 'avatar'
+            },
+            {
+              image: cover[0].path,
+              title: 'cover'
+            }
+          ])
+          user.avatar = images[0].data.link || user.avatar
+          user.cover = images[1].data.link || user.cover
         } else if (avatar && !cover) {
           const imageURL = await client.upload(avatar[0].path)
           user.avatar = imageURL.data.link || 'https://image.flaticon.com/icons/png/512/149/149071.png'
-        } else {
+        } else if (!avatar && cover) {
           const imageURL = await client.upload(cover[0].path)
           user.cover = imageURL.data.link || user.cover
         }
       }
+
       user.name = name || user.name
       user.account = account || user.account
       user.email = email || user.email
