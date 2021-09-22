@@ -25,20 +25,16 @@ const followshipService = {
       message: 'Add following successfully'
     }
   },
-  removeFollowing: async (req, res, callback) => {
-    const { followingId } = req.params
-    const followerId = helpers.getUser(req).id
+  removeFollowing: async (followingId, followerId) => {
+    const removeResult = await Followship.destroy({ where: { followerId, followingId } })
 
-    try {
-      const removeResult = await Followship.destroy({ where: { followerId, followingId } })
+    if (removeResult === 0) {
+      throw apiError.badRequest(403, 'Unable to remove no follow user')
+    }
 
-      if (removeResult === 0) {
-        return callback(400, { status: 'error', message: 'unable to remove no follow user' })
-      }
-      callback(200, { status: 'success', message: 'remove following successfully' })
-    } catch (err) {
-      console.log('removeFollowing error', err)
-      res.sendStatus(500)
+    return {
+      status: 'success',
+      message: 'Remove following successfully'
     }
   }
 }

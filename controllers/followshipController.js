@@ -22,10 +22,19 @@ const followshipController = {
       next(error)
     }
   },
-  removeFollowing: (req, res) => {
-    followshipService.removeFollowing(req, res, (status, data) => {
-      return res.status(status).json(data)
-    })
+  removeFollowing: async (req, res, next) => {
+    const { followingId } = req.params
+    const followerId = helpers.getUser(req).id
+
+    try {
+      const { status, message } = await followshipService.removeFollowing(followingId, followerId)
+      return res.status(200).json({
+        status,
+        message
+      })
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
