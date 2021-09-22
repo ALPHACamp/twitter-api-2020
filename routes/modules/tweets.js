@@ -16,10 +16,8 @@ router.get('/', tweetController.getTweets)
 // get('/api/tweets/1')
 router.get('/:tweetId', tweetController.getTweet)
 
-
-// 新增回覆 POST /tweets/:tweet_id/replies
-router.post('/:tweet_id/replies', validate(reply), tweetController.postReply)
-
+// 新增回覆 POST /tweets/:tweetId/replies
+router.post('/:tweetId/replies', validate(reply), tweetController.postReply)
 
 // 瀏覽 GET /tweets/:tweetId/replies
 router.get('/:tweetId/replies', tweetController.getReplies)
