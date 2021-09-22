@@ -14,12 +14,16 @@ if (button) {
 
 if (talk) {
   talk.addEventListener('click', event => {
-    socket.emit('chatMessage', { msg: 'Hello', roomId: '3' })
+    socket.emit('chatMessage', { msg: 'Hello', roomId: '3', targetId: 2 })
   })
 }
 
 socket.on('chatMessage', (message) => {
   console.log(message)
+})
+
+socket.on('unread', (msg) => {
+  console.log(msg.message)
 })
 
 

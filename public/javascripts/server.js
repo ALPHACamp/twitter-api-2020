@@ -1,4 +1,5 @@
 let onlineList = {}
+let offlineRecord = {}
 const db = require('../../models')
 const User = db.User
 const Friendship = db.Friendship
@@ -10,6 +11,10 @@ function socketConnection (io) {
     socket.on('connectServer', async ({ userId }) => {
       // 建立上線用戶表
       onlineList[userId] = socket.id
+      if (offlineRecord[userId]) {
+        socket.to(socket.id).emit('unread', {message: offlineRecord[userId]})
+        offlineRecord[userId] = []
+      }
 
       const user = Number(userId)
 
@@ -41,6 +46,8 @@ function socketConnection (io) {
         if (onlineList[targetId]) {
           const target = onlineList[targetId].socket
           target.join(data.roomId)
+        } else {
+          offlineRecord[targetId] = [data.roomId]
         }
         console.log("🚀 ~ file: server.js ~ line 43 ~ socket.on ~ socket", socket.rooms)
         socket.emit(data.roomId, 'hello') //for testing 單獨使用emit會產生廣播
@@ -50,10 +57,14 @@ function socketConnection (io) {
       socket.on('chatMessage', (data) => {
         const room = data.roomId
         const message = data.msg
-        console.log("🚀 ~ file: server.js ~ line 52 ~ socket.on ~ message", message)
-        socket.broadcast
-        .to(room)
-        .emit('chatMessage', message)
+        const targetId = data.targetId.toString()
+        if (onlineList[targetId]) {
+          socket.broadcast
+          .to(room)
+          .emit('chatMessage', message)
+        } else {
+          offlineRecord[targetId].push(message)
+        }
       })
 
       
