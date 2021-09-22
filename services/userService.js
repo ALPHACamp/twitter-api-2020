@@ -61,6 +61,7 @@ const userService = {
 
   getUser: async (req, res, cb) => {
     try {
+      const followingList = await getFollowingList(req)
       let user = await User.findByPk(req.params.id, {
         group: 'User.id',
         attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover',
@@ -87,6 +88,7 @@ const userService = {
         ]
       })
       user = user.toJSON()
+      user.isFollowings = followingList.includes(user.id)
       // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
       return cb({
         status: '200',
