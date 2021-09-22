@@ -51,8 +51,8 @@ const adminService = {
           Sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'),
           'LikesCount',
         ],
-        [Sequelize.literal('(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followingId = User.id)'), 'FollowersCount'],
-        [Sequelize.literal('(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followerId = User.id)'), 'FollowingCount'],
+        [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'FollowersCount'],
+        [Sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'FollowingCount'],
       ],
       order: [[Sequelize.col('TweetsCount'), 'DESC']],
     })
