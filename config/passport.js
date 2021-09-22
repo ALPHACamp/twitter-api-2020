@@ -2,7 +2,7 @@ const jwtStrategy = require('passport-jwt').Strategy
 const db = require('../models')
 const User = db.User
 const fs = require('fs')
-const PUB_KEY = process.env.tokenKey || fs.readFileSync(__dirname + '/../rsaPublicKey.pem', 'utf8')
+const PUB_KEY = process.env.PUB_KEY
 const passport = require('passport')
 
 const cookieExtractor = (req) => {
