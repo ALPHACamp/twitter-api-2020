@@ -1,0 +1,152 @@
+const db = require('../models')
+const User = db.User
+const Tweet = db.Tweet
+const Reply = db.Reply
+const Followship = db.Followship
+const Like = db.Like
+const Sequelize = db.Sequelize
+const sequelize = db.sequelize
+const Op = db.Sequelize.Op
+const { QueryTypes } = require('sequelize')
+
+const tweetController = {
+  homePage: async (req, res) => {
+    try{
+      const id = req.user.id
+
+      // 取出所有推文 按照時間排序 包含推文作者以及按讚數
+      const tweets = await Tweet.findAll({
+        include: [
+          { model: Like, as: 'likes', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+          { model: Reply, as: 'replies', attributes: { exclude: ['comment', 'createdAt', 'updatedAt'] } },
+          { model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }
+        ],
+        order:[['createdAt', 'DESC']]
+      })
+
+      return res.json(tweets)
+    }
+    catch (error) {
+      console.log(error)
+    }
+  },
+
+  //取出右邊top10 twitter
+  getTop10Twitter: async (req, res) => {
+    const userId = req.params.id
+    try{
+      const topTwitters = await Followship.findAll({
+        attributes: ['followingId', [sequelize.fn('count', sequelize.col('followerId')), 'count']] ,
+        group: ['followingId'],
+        order: [[sequelize.col('count'), 'DESC']],
+        limit: 10,
+        include: [{ model: User, as: 'following', attributes: ['name', 'avatar', 'account'] }],
+      })
+  
+      const userFollowingList = await Followship.findAll({
+        where: { followerId: { [Op.eq]: userId } }
+      })
+  
+      res.json({ topTwitters, userFollowingList })
+    }
+    catch (error) {
+      console.log(error)
+    }
+  },
+
+  getTweet: async (req, res) => {
+    const tweetId = req.params.id
+    try {
+      const tweetData = await Tweet.findByPk(tweetId, {
+        include: [
+          { model: User, as: 'user', attributes: ['name', 'account', 'avatar'] },
+          { model: Reply, as: 'replies',
+            include: [{ model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
+          },
+          { model: Like, as: 'likes', attributes: ['id'] },
+        ]
+      })
+      return res.json(tweetData)
+    }
+    catch (error) {
+      console.log(error)
+    }
+  },
+
+  postTweet: async (req, res) => {
+    try {
+      const data = {}
+      data.UserId = req.user.id
+      data.description = req.body.description
+      const tweet = await Tweet.create({ ...data })
+      return res.status(200).json({ tweet })
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(404)
+    }
+  },
+
+  postTweetReply: async(req, res) => {
+    try {
+      const data = {}
+      data.UserId = req.user.id
+      data.TweetId = req.params.id
+      data.comment = req.body.comment
+      const tweetComment = await Reply.create({ ...data })
+      return res.status(200).json({ tweetComment })
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(404)
+    }
+  },
+
+  postLike: async (req, res) => {
+    try {
+      UserId = req.user.id
+      TweetId = Number(req.params.id)
+      const like = await Like.findOrCreate({ where: { UserId, TweetId } })
+      return res.status(200).json({ like })
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(404)
+    }
+  },
+
+  postUnlike: async (req, res) => {
+    try {
+      const TweetId = Number(req.params.id)
+      const unlike = await Like.findOne({ where: { TweetId: { [Op.eq]: TweetId } } })
+      if (unlike) {
+        await unlike.destroy()
+        return res.status(200).json('Accept')
+      } else {
+        return res.status(404)
+      }
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(404)
+    }
+  },
+
+  getTweetReplies: async (req, res) => {
+    try {
+      const tweetId = Number(req.params.id)
+      const replies = await Reply.findAll({ 
+        where: { TweetId: { [Op.eq]: tweetId } },
+        include: [{ model: User, as: 'user', attributes: ['avatar', 'account', 'name'] }]
+      })
+      res.json(replies)
+    }
+    catch (error) {
+      console.log(error)
+      return res.status(404)
+    }
+  }
+}
+
+
+module.exports = tweetController
