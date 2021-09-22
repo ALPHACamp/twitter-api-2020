@@ -62,32 +62,31 @@ const userService = {
   getUser: async (req, res, cb) => {
     try {
       let user = await User.findByPk(req.params.id, {
-        attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover'],
+        group: 'User.id',
+        attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover',
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'totalFollowings'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'totalFollowers'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'totalTweets'],
+        ],
         include: [{
           model: User,
           as: 'Followings',
-          attributes: ['id'],
+          attributes: [],
           through: { attributes: [] }
         },
         {
           model: User,
           as: 'Followers',
-          attributes: ['id'],
+          attributes: [],
           through: { attributes: [] }
         },
         {
           model: Tweet,
-          attributes: ['id'],
+          attributes: [],
         }
         ]
       })
       user = user.toJSON()
-      user.totalFollowings = user.Followings.length
-      user.totalFollowers = user.Followers.length
-      user.totalTweets = user.Tweets.length
-      delete user.Followings
-      delete user.Followers
-      delete user.Tweets
       // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
       return cb({
         status: '200',
