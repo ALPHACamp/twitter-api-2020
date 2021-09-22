@@ -1,5 +1,5 @@
 const { Tweet, Reply, Like, User, Sequelize } = require('../models')
-const helpers = require('../_helpers')
+const apiError = require('../libs/apiError')
 
 const TweetService = {
   postTweet: async (UserId, description) => {
@@ -49,7 +49,7 @@ const TweetService = {
     const tweet = await Tweet.findByPk(TweetId)
 
     if (!tweet) {
-      return { status: 'error', message: "tweet doesn't exist" }
+      throw apiError.badRequest(404, "Tweet doesn't exist")
     }
 
     await Reply.create({
@@ -65,62 +65,51 @@ const TweetService = {
       order: [['createdAt', 'DESC']]
     })
     if (!replies.length) {
-      return { status: 'error', message: "reply doesn't exist" }
+      throw apiError.badRequest(404, "Reply doesn't exist")
     }
 
     return replies
   },
-  addLike: async (req, res, callback) => {
-    const { tweet_id } = req.params
-    const userId = helpers.getUser(req).id
+  addLike: async (UserId, TweetId) => {
+    const tweet = await Tweet.findByPk(TweetId)
 
-    try {
-      const tweet = await Tweet.findByPk(tweet_id)
-      if (!tweet) {
-        return callback(400, { status: 'error', message: "tweet doesn't exist" })
-      }
+    if (!tweet) {
+      throw apiError.badRequest(404, "Tweet doesn't exist")
+    }
 
-      const like = await Like.findOne({ where: { UserId: userId, TweetId: tweet_id } })
+    const [_, isLike] = await Like.findOrCreate({
+      where: { UserId, TweetId }
+    })
 
-      if (like) {
-        return callback(400, { status: 'error', message: 'you already liked this tweet' })
-      }
+    if (!isLike) {
+      throw apiError.badRequest(403, 'You already liked this tweet')
+    }
 
-      await Like.create({
-        UserId: userId,
-        TweetId: tweet_id
-      })
-      callback(200, { status: 'success', message: 'liked successfully' })
-    } catch (err) {
-      console.log('addLike error', err)
-      res.sendStatus(500)
+    return {
+      status: 'success',
+      message: 'Liked successfully'
     }
   },
-  removeLike: async (req, res, callback) => {
-    const { tweet_id } = req.params
-    const userId = helpers.getUser(req).id
+  removeLike: async (UserId, TweetId) => {
+    const tweet = await Tweet.findByPk(TweetId)
 
-    try {
-      const tweet = await Tweet.findByPk(tweet_id)
-      if (!tweet) {
-        return callback(400, { status: 'error', message: "tweet doesn't exist" })
-      }
+    if (!tweet) {
+      throw apiError.badRequest(404, "Tweet doesn't exist")
+    }
 
-      const like = await Like.findOne({ where: { UserId: userId, TweetId: tweet_id } })
+    const like = await Like.findOne({ where: { UserId, TweetId } })
 
-      if (!like) {
-        return callback(400, { status: 'error', message: 'you have not like this tweet' })
-      }
+    if (!like) {
+      throw apiError.badRequest(403, 'You have not like this tweet')
+    }
 
-      await like.destroy()
+    await like.destroy()
 
-      callback(200, { status: 'success', message: 'unliked successfully' })
-    } catch (err) {
-      console.log('removeLike error', err)
-      res.sendStatus(500)
+    return {
+      status: 'success',
+      message: 'Unliked successfully'
     }
   }
-
 }
 
 module.exports = TweetService
