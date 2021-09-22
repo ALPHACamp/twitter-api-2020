@@ -308,20 +308,20 @@ const userService = {
   getTopUser: async (req, res, cb) => {
     try {
       const followingList = await getFollowingList(req)
-      // 找到熱門的10個使用者 ps:追蹤數是0不會出現
-      let user = await Followship.findAll({
+      const user = await User.findAll({
         raw: true, nest: true,
-        group: 'followingId',
-        attributes: ['followingId',
-          [sequelize.fn('COUNT', sequelize.col('followingId')), 'followingCount']],
-        order: [[sequelize.col('followingCount'), 'DESC']],
-        limit: 10,
-      })
-      user = user.map(d => d.followingId)
-      // 取得熱門使用者的詳細資料，ps:前10不照順序排
-      user = await User.findAll({
-        raw: true, where: { id: user },
-        attributes: ['id', 'name', 'account', 'avatar'],
+        group: 'User.id',
+        attributes: ['id', 'name', 'account', 'avatar',
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'totalFollowers']
+        ],
+        include: {
+          model: User, as: 'Followers',
+          attributes: [], through: { attributes: [] }
+        },
+        order: [[sequelize.col('totalFollowers'), 'DESC']],
+        subQuery: false, //避免因查詢多張表造成limit失常
+        having: { totalFollowers: { [sequelize.Op.gt]: 0 } }, //只要粉絲大於0的人
+        limit: 10
       })
       // 登入者有否有追蹤
       user.forEach(user => {
