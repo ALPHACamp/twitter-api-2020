@@ -5,7 +5,7 @@ const { checkUserInfoUniqueness } = require('../utils/validator')
 
 const userService = {
   signIn: async (account) => {
-    return await User.findOne({ where: { account } })
+    return await User.findOne({ where: { account: Sequelize.where(Sequelize.literal(`BINARY account`), `${account}`) } })
   },
 
   getCurrentUser: async (id) => {
