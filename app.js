@@ -23,7 +23,6 @@ app.use('/upload', express.static(__dirname + '/upload'))
 app.use(flash())
 app.use(session({ secret: 'alphacamp', resave: false, saveUninitialized: false }))
 
-// require('./config/passport')(passport)  
 app.use(passport.initialize())
 app.use(passport.session())
 app.get('/', (req, res) => res.send('Hello World!'))

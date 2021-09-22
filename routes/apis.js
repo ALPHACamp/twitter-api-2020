@@ -9,12 +9,6 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
   // home 路由
-router.get('/signup', homeController.signUp)
-
-router.get('/signin', homeController.signIn)
-
-router.get('/signin/admin', homeController.signInAdmin)
-
 router.get('/logout', homeController.logout)
 
 router.post('/signin', homeController.postSignIn)

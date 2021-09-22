@@ -18,14 +18,14 @@ const ensureAuthenticated = (req, res, next) => {
 const ensureAuthenticatedAdmin = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     req.user = { ...user.dataValues }
-    if (err)  {
+    if (err) {
       return res.redirect('/api/signin')
     }
     if (user.role === 'admin') {
       return next()
     } else {
       return next()
-      // return res.redirect('/api/tweets')
+      // return res.redirect('/api/signin')
     }
   })(req, res, next)
 }

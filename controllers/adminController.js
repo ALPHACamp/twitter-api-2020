@@ -33,7 +33,7 @@ const adminController = {
         ]
       })
 
-      return res.json( allUsers )
+      return res.json(allUsers)
     }
     catch (error) {
       console.log(error)
@@ -44,12 +44,8 @@ const adminController = {
     try {
       const tweetId = req.params.id
       const tweet = await Tweet.findByPk(tweetId)
-      // if (tweet) {
-        await tweet.destroy()
-        return res.status(200).json('Accept')
-      // } else {
-      //   return res.status(200)
-      // }
+      await tweet.destroy()
+      return res.status(200).json('Accept')
     }
     catch (error) {
       console.log(error)
