@@ -5,7 +5,7 @@ const Like = db.Like
 
 const adminService = {
   getTweets: (req, res, cb) => {
-    Tweet.findAll({ include: User, raw: true, nest: true })
+    Tweet.findAll({ include: { model: User }, raw: true, nest: true, order: [['createdAt', 'DESC']] })
       .then(tweets => {
         tweets = tweets.map(tweet => ({
           ...tweet,
@@ -33,6 +33,9 @@ const adminService = {
           name: user.name,
           email: user.email,
           role: user.role,
+          account: user.account,
+          avatar: user.avatar,
+          cover: user.cover,
           tweetsCount: user.Tweets.length,
           likesCount: user.Likes.length,
           followingsCount: user.Followings.length,
