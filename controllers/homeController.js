@@ -42,7 +42,11 @@ const homeController = {
           userId: user.id,
         }
       res.cookie('jwt', allInfo, { httpOnly: false, expireIn: '3h' })
-      res.redirect('/api/admin')
+      if (user.role === 'admin') {
+        res.redirect('/api/admin')
+      } else if (user.role === 'user') {
+        res.redirect('/api/tweets')
+      }
     })
   },
   
