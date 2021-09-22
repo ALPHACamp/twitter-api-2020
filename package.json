@@ -34,7 +34,8 @@
     "sequelize": "^4.44.4",
     "sequelize-cli": "^5.5.1",
     "sinon": "^7.5.0",
-    "sinon-chai": "^3.7.0"
+    "sinon-chai": "^3.7.0",
+    "socket.io": "^4.2.0"
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",

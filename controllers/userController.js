@@ -182,7 +182,11 @@ const userController = {
     catch (error) {
       console.log(error)
     }
-  }
+  },
+
+  // userok: (req, res) => {
+
+  // }
 }
 
 

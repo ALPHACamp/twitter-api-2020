@@ -14,7 +14,8 @@ const adminController = {
         order: [[Sequelize.literal('createdAt'), "DESC"]],
         include: [{ model: User, as: 'user', attributes: ['name', 'account', 'avatar', 'createdAt'] }]
       })
-      return res.json({ allTweets })
+      res.render('chat', { layout: 'chatbackground' }) //for testing
+      // return res.json({ allTweets })
     }
     catch (error) {
       console.log(error)
@@ -27,8 +28,8 @@ const adminController = {
         attributes: ['name', 'account', 'avatar', 'cover'],
         include: [
           { model: Reply, as: 'replies', attributes: ['id'] },
-          { model: Followship, as: 'followings', attributes: ['id'] },
-          { model: Followship, as: 'followers', attributes: ['id'] },
+          { model: Followship, as: 'following', attributes: ['id'] },
+          { model: Followship, as: 'follower', attributes: ['id'] },
           { model: Like, as: 'likes', attributes: ['id'] }
         ]
       })

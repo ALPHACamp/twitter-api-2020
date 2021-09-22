@@ -9,13 +9,15 @@ const handlebars = require('express-handlebars')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
 const cookieParser = require('cookie-parser')
+const socket = require('socket.io')
 const passport = require('./config/passport')
+const socketConnection = require('./public/javascripts/server')
 const app = express()
 const PORT = process.env.PORT || 3000
 
 app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
-
+app.use(express.static('public'))//for testing
 app.use(methodOverride('_method'))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -28,9 +30,11 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUniniti
 // require('./config/passport')(passport)  
 app.use(passport.initialize())
 app.use(passport.session())
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log('server on')
 })
 
 require('./routes')(app)
-module.exports = app
+const io = socket(server)
+socketConnection(io)
+module.exports = app 
