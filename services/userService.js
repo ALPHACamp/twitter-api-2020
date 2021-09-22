@@ -1,6 +1,7 @@
 const { User, Tweet, Reply, Like, Sequelize } = require('../models')
 const { Op } = require('sequelize')
 const ApiError = require('../utils/customError')
+const { checkUserInfoUniqueness } = require('../utils/validator')
 
 const userService = {
   signIn: async (account) => {
@@ -22,25 +23,10 @@ const userService = {
       ]
     })
   },
-  // FIXME: Maybe check account, name, email can be a function
+
   postUser: async (body) => {
     const { account, name, email, password } = body
-
-    // Check if user is exists by email
-    const checkEmail = await User.findOne({ where: { email } })
-    if (checkEmail) {
-      throw new ApiError('EmailExistsError', 401, 'Email already exists')
-    }
-    // Check if user is exists by account
-    const checkAccount = await User.findOne({ where: { account } })
-    if (checkAccount) {
-      throw new ApiError('AccountExistsError', 401, 'Account already exists')
-    }
-    // Check if user is exists by name
-    const checkName = await User.findOne({ where: { name } })
-    if (checkName) {
-      throw new ApiError('NameExistsError', 401, 'Name already exists')
-    }
+    await checkUserInfoUniqueness(body, null)
 
     // Create user
     return await User.create({
@@ -272,37 +258,8 @@ const userService = {
     })
   },
 
-  // FIXME: Maybe check account, name, email can be a function
   putUser: async (id, body) => {
-    const { account, name, email } = body
-
-    // Check if user is exists by email
-    if (email) {
-      const checkEmail = await User.findOne({
-        where: { id: { [Op.not]: id }, email }
-      })
-      if (checkEmail) {
-        throw new ApiError('EmailExistsError', 401, 'Email already exists')
-      }
-    }
-    // Check if user is exists by account
-    if (account) {
-      const checkAccount = await User.findOne({
-        where: { id: { [Op.not]: id }, account }
-      })
-      if (checkAccount) {
-        throw new ApiError('AccountExistsError', 401, 'Account already exists')
-      }
-    }
-    // Check if user is exists by name
-    if (name) {
-      const checkName = await User.findOne({
-        where: { id: { [Op.not]: id }, name }
-      })
-      if (checkName) {
-        throw new ApiError('NameExistsError', 401, 'Name already exists')
-      }
-    }
+    await checkUserInfoUniqueness(body, id)
 
     const user = await User.findByPk(id)
     return await user.update(body)
