@@ -41,11 +41,12 @@ const homeController = {
           token: tokenInfo.token,
           userId: user.id,
         }
-      res.cookie('jwt', allInfo, { httpOnly: false, expireIn: '3h' })
-      if (user.role === 'admin') {
-        res.redirect('/api/admin')
+        if (user.role === 'admin') {
+        res.cookie('jwt', allInfo, { httpOnly: false, expireIn: '3h' })
+        res.redirect('https://actwitter.herokuapp.com/api/admin')
       } else if (user.role === 'user') {
-        res.redirect('/api/tweets')
+        res.cookie('jwt', allInfo, { httpOnly: false, expireIn: '3h' })
+        res.redirect('https://actwitter.herokuapp.com/api/tweets')
       }
     })
   },
