@@ -1,4 +1,4 @@
-const { Followship, User, Sequelize } = require('../models')
+const { Followship, User } = require('../models')
 const apiError = require('../libs/apiError')
 
 const followshipService = {
