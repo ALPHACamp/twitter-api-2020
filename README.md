@@ -1,6 +1,6 @@
 # Simple Twitter API
 
-A RESTFUL API server for [Simple Twitter](https://pooppicker.github.io/simple-twitter-vue/#/twitter/Setting) build with Node.js, Express & MySQL.
+A RESTFUL API server for [Simple Twitter](https://pooppicker.github.io/simple-twitter-vue/#/twitter/Home) build with Node.js, Express & MySQL.
 
 Testing accounts
 ```
@@ -100,7 +100,7 @@ https://twitter-apis-demo.herokuapp.com/api
 [**POST /tweets/:tweetId/like**](https://twitter-apis-demo.herokuapp.com/api/tweets/:tweetId/like)
 
 #### unLike tweet
-[**POST /tweets/:tweetId/like**](https://twitter-apis-demo.herokuapp.com/api/tweets/:tweetId/unlike)
+[**POST /tweets/:tweetId/unlike**](https://twitter-apis-demo.herokuapp.com/api/tweets/:tweetId/unlike)
 
 ## Installation Guidelines
 
@@ -133,14 +133,14 @@ IMGUR_CLIENT_ID=<your_imgur_client_id>
   "development": {
     "username": "root",
     "password": "<your_mysql_workbench_password>",
-    "database": "forum",
+    "database": "ac_twitter_workspace",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "test": {
     "username": "root",
     "password": "<your_mysql_workbench_password>",
-    "database": "forum_test",
+    "database": "ac_twitter_workspace_test",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "logging": false
