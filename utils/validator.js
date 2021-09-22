@@ -71,7 +71,13 @@ const checkUserInfoUniqueness = async (body, id) => {
   // Check if user is exists by account
   if (account) {
     const checkAccount = await User.findOne({
-      where: { id: { [Op.not]: id }, account }
+      where: {
+        id: { [Op.not]: id },
+        account: Sequelize.where(
+          Sequelize.literal(`BINARY account`),
+          `${account}`
+        )
+      }
     })
     if (checkAccount) {
       throw new ApiError('AccountExistsError', 401, 'Account already exists')
@@ -81,7 +87,13 @@ const checkUserInfoUniqueness = async (body, id) => {
   // Check if user is exists by email
   if (email) {
     const checkEmail = await User.findOne({
-      where: { id: { [Op.not]: id }, email }
+      where: {
+        id: { [Op.not]: id },
+        email: Sequelize.where(
+          Sequelize.literal(`BINARY email`),
+          `${email}`
+        )
+      }
     })
     if (checkEmail) {
       throw new ApiError('EmailExistsError', 401, 'Email already exists')
@@ -91,7 +103,13 @@ const checkUserInfoUniqueness = async (body, id) => {
   // Check if user is exists by name
   if (name) {
     const checkName = await User.findOne({
-      where: { id: { [Op.not]: id }, name }
+      where: {
+        id: { [Op.not]: id },
+        name: Sequelize.where(
+          Sequelize.literal(`BINARY name`),
+          `${name}`
+        )
+      }
     })
     if (checkName) {
       throw new ApiError('NameExistsError', 401, 'Name already exists')
