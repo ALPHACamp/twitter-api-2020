@@ -72,7 +72,6 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
   const { token } = sessionStorage
   const public = io.connect('/public', { auth: { token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTYzMjA0MjkzMn0.XOU_z7FEclIKLU8hLwrhZfm-7yRzNmNtpZKg0dDF2jM' } })
   const messages = document.getElementById('messages');
@@ -89,17 +88,24 @@
   });
 
   public.on('updated message', (obj) => {
+    console.log(JSON.stringify(obj))
     displayMessage(obj.message)
     window.scrollTo(0, document.body.scrollHeight);
   });
 
   public.on('connection', msg => {
     //發送上線/離線消息
-    //更新房間的歷史訊息
     displayMessage(msg)
   })
 
+  public.on('history', msg => {
+    console.log(msg)
+  })
 
+  public.on('online user', users => {
+    console.log('上線名單')
+    console.log(users)
+  })
   function displayMessage(msg) {
     const item = document.createElement('li');
     item.innerHTML = msg
