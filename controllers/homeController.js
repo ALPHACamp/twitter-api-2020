@@ -23,6 +23,7 @@ const homeController = {
   
   postSignIn: (req, res) => {
     // 檢查必要資料
+    console.log("🚀 ~ file: homeController.js ~ line 27 ~ req.body", req.body)
     if (!req.body.email || !req.body.password) {
         return res.json({ status: 'error', message: "required fields didn't exist" })
       }
