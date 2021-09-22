@@ -25,7 +25,7 @@ const ensureAuthenticatedAdmin = (req, res, next) => {
       return next()
     } else {
       return next()
-      // return res.redirect('/api/tweets')
+      // return res.redirect('/api/signin')
     }
   })(req, res, next)
 }
