@@ -3,14 +3,15 @@ const passport = require('passport')
 const ensureAuthenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     req.user = { ...user.dataValues }
+    console.log("🚀 ~ file: _helpers.js ~ line 6 ~ passport.authenticate ~ req.user", req.user)
     if (err) {
       return res.redirect('/api/signin')
     }
     if (user.role === 'user') {
       return next()
     } else {
-      return next()
-      // return res.redirect('/api/signin')
+      // return next()
+      return res.redirect('/api/signin')
     }
   })(req, res, next)
 }
@@ -24,8 +25,8 @@ const ensureAuthenticatedAdmin = (req, res, next) => {
     if (user.role === 'admin') {
       return next()
     } else {
-      return next()
-      // return res.redirect('/api/tweets')
+      // return next()
+      return res.redirect('/api/tweets')
     }
   })(req, res, next)
 }
