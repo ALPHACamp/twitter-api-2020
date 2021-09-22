@@ -9,7 +9,7 @@ const upload = multer({
   dest: 'temp/',
   fileFilter(req, files, cb) {
     if (!files.originalname.match(/\.(jpg|jpeg|png)$/)) {
-      cb(apiError.badRequest(401, 'Image file should be jpg, jpeg or png'))
+      cb(apiError.badRequest(415, 'Image file should be jpg, jpeg or png'))
     }
     cb(null, true)
   }

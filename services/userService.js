@@ -12,11 +12,11 @@ const userService = {
   signUp: async (account, name, email, password) => {
     const duplicate_email = await User.findOne({ where: { email } })
     if (duplicate_email) {
-      throw apiError.badRequest(404, 'This email has been registered')
+      throw apiError.badRequest(400, 'This email has been registered')
     }
     const duplicate_account = await User.findOne({ where: { account } })
     if (duplicate_account) {
-      throw apiError.badRequest(404, 'This account name has been registered')
+      throw apiError.badRequest(400, 'This account name has been registered')
     }
 
     const newUser = await User.create({
@@ -308,7 +308,7 @@ const userService = {
         where: { id: { [Op.not]: id }, email },
       })
       if (duplicate_email) {
-        throw apiError.badRequest(401, 'This email has been registered')
+        throw apiError.badRequest(400, 'This email has been registered')
       }
     }
     
@@ -317,7 +317,7 @@ const userService = {
         where: { id: { [Op.not]: id }, account },
       })
       if (duplicate_account) {
-        throw apiError.badRequest(401, 'This account name has been registered')
+        throw apiError.badRequest(400, 'This account name has been registered')
       }
     }
     const user = await User.findByPk(id)
