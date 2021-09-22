@@ -42,8 +42,18 @@ function socketConnection (io) {
           const target = onlineList[targetId].socket
           target.join(data.roomId)
         }
-        console.log("🚀 ~ file: server.js ~ line 43 ~ socket.on ~ socket", socket)
-        socket.emit(data.roomId, 'hello') //for testing
+        console.log("🚀 ~ file: server.js ~ line 43 ~ socket.on ~ socket", socket.rooms)
+        socket.emit(data.roomId, 'hello') //for testing 單獨使用emit會產生廣播
+      })
+
+      //建立通話 使用broadcast不會傳送給發訊者
+      socket.on('chatMessage', (data) => {
+        const room = data.roomId
+        const message = data.msg
+        console.log("🚀 ~ file: server.js ~ line 52 ~ socket.on ~ message", message)
+        socket.broadcast
+        .to(room)
+        .emit('chatMessage', message)
       })
 
       
