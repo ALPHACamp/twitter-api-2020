@@ -16,7 +16,7 @@ const ensureAuthenticated = (req, res, next) => {
 }
 
 const ensureAuthenticatedAdmin = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user) => {
+  passport.authenticate('jwt', { session: true }, (err, user) => {
     req.user = { ...user.dataValues }
     if (err)  {
       return res.redirect('/api/signin')

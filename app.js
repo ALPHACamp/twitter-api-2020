@@ -23,7 +23,7 @@ app.use(bodyParser.json())
 
 app.use('/upload', express.static(__dirname + '/upload'))
 app.use(flash())
-app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
+app.use(session({ secret: 'iamrexalsoturagon', resave: false, saveUninitialized: false }))
 
 // require('./config/passport')(passport)  
 app.use(passport.initialize())
