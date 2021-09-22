@@ -41,7 +41,7 @@ const homeController = {
           token: tokenInfo.token,
           userId: user.id,
         }
-      res.cookie('jwt', allInfo, { httpOnly: true, expireIn: '3h' })
+      res.cookie('jwt', allInfo, { httpOnly: false, expireIn: '3h' })
       res.redirect('/api/admin')
     })
   },
