@@ -1,5 +1,6 @@
 const { Tweet, Reply, Like, User, Sequelize } = require('../models')
 const helpers = require('../_helpers')
+const apiError = require('../libs/apiError')
 
 const TweetService = {
   postTweet: async (UserId, description) => {
@@ -49,7 +50,7 @@ const TweetService = {
     const tweet = await Tweet.findByPk(TweetId)
 
     if (!tweet) {
-      return { status: 'error', message: "tweet doesn't exist" }
+      throw apiError.badRequest(404, "Tweet doesn't exist")
     }
 
     await Reply.create({
@@ -65,7 +66,7 @@ const TweetService = {
       order: [['createdAt', 'DESC']]
     })
     if (!replies.length) {
-      return { status: 'error', message: "reply doesn't exist" }
+      throw apiError.badRequest(404, "Reply doesn't exist")
     }
 
     return replies
