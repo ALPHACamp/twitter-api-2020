@@ -21,7 +21,7 @@ app.use(cors()) // cors 的預設為全開放
 
 app.use('/upload', express.static(__dirname + '/upload'))
 app.use(flash())
-app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
+app.use(session({ secret: 'alphacamp', resave: false, saveUninitialized: false }))
 
 // require('./config/passport')(passport)  
 app.use(passport.initialize())
