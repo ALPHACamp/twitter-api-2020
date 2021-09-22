@@ -12,6 +12,9 @@ User
 account: User1
 password: 12345678
 ```
+## Live demo URL 
+https://pooppicker.github.io/simple-twitter-vue/#/twitter/Home
+
 ## Base URL 
 ```
 https://twitter-apis-demo.herokuapp.com/api
