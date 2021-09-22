@@ -3,9 +3,17 @@ const router = express.Router()
 const { authenticated, checkRole } = require('../../middleware/auth')
 const validate = require('../../middleware/validate')
 const { signUp, signIn, user, userSettings } = require('../../libs/schema')
-const passport = require('../../config/passport')
+const apiError = require('../../libs/apiError')
 const multer = require('multer')
-const upload = multer({ dest: 'temp/' })
+const upload = multer({ 
+  dest: 'temp/',
+  fileFilter(req, files, cb) {
+    if (!files.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      cb(apiError.badRequest(415, 'Image file should be jpg, jpeg or png'))
+    }
+    cb(null, true)
+  }
+})
 const userController = require('../../controllers/userController')
 const cpUpload = upload.fields([
   { name: 'avatar', maxCount: 1 },

@@ -5,7 +5,7 @@ function apiErrorHandler(err, req, res, next) {
 
   if (err instanceof apiError) {
     return res.status(err.code || 500).json({
-      status: `${err.code} error` || 'error',
+      status: 'error',
       message: err.message || 'Internal server error'
     })
   }
