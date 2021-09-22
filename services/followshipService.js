@@ -1,55 +1,40 @@
-const { Followship, User, Sequelize } = require('../models')
-const helpers = require('../_helpers')
+const { Followship, User } = require('../models')
+const apiError = require('../libs/apiError')
 
 const followshipService = {
-  addFollowing: async (req, res, callback) => {
-    const followingId = Number(req.body.id)
-    const followerId = Number(helpers.getUser(req).id)
-    if (followingId === followerId) {
-      return callback(400, { status: 'error', message: 'cannot follow yourself' })
+  addFollowing: async (followingId, followerId) => {
+    const user = await User.findByPk(followingId, { raw: true })
+    if (!user) {
+      throw apiError.badRequest(404, "User doesn't exist")
     }
 
-    try {
-      const user = await User.findByPk(followingId, { raw: true })
-      if (!user) {
-        return callback(404, { status: 'error', message: "user doesn't exist" })
-      }
+    if (user.role === 'admin') {
+      throw apiError.badRequest(403, 'Cannot follow administrator')
+    }
 
-      if (user.role === 'admin') {
-        return callback(400, { status: 'error', message: 'cannot follow administrator' })
-      }
+    const [_, isFollowed] = await Followship.findOrCreate({
+      where: { followerId, followingId }
+    })
 
-      const followingsList = await User.findByPk(followerId, { include: { model: User, as: 'Followings' }, attributes: [] })
-      const isFollowed = followingsList.Followings.find(following => following.dataValues.id === followingId) !== undefined
+    if (!isFollowed) {
+      throw apiError.badRequest(403, 'You have already followed this user')
+    }
 
-      if (isFollowed) {
-        return callback(400, { status: 'error', message: 'you have already followed this user' })
-      }
-
-      await Followship.create({
-        followerId,
-        followingId
-      })
-      callback(200, { status: 'success', message: 'add following successfully' })
-    } catch (err) {
-      console.log('addFollowing error', err)
-      res.sendStatus(500)
+    return {
+      status: 'success',
+      message: 'Add following successfully'
     }
   },
-  removeFollowing: async (req, res, callback) => {
-    const { followingId } = req.params
-    const followerId = helpers.getUser(req).id
+  removeFollowing: async (followingId, followerId) => {
+    const removeResult = await Followship.destroy({ where: { followerId, followingId } })
 
-    try {
-      const removeResult = await Followship.destroy({ where: { followerId, followingId } })
+    if (removeResult === 0) {
+      throw apiError.badRequest(403, 'Unable to remove no follow user')
+    }
 
-      if (removeResult === 0) {
-        return callback(400, { status: 'error', message: 'unable to remove no follow user' })
-      }
-      callback(200, { status: 'success', message: 'remove following successfully' })
-    } catch (err) {
-      console.log('removeFollowing error', err)
-      res.sendStatus(500)
+    return {
+      status: 'success',
+      message: 'Remove following successfully'
     }
   }
 }
