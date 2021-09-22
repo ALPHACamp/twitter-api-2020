@@ -22,10 +22,10 @@ router.post('/:tweetId/replies', validate(reply), tweetController.postReply)
 // 瀏覽 GET /tweets/:tweetId/replies
 router.get('/:tweetId/replies', tweetController.getReplies)
 
-// POST /tweets/:tweet_id/like  喜歡一則推文
-router.post('/:tweet_id/like', tweetController.addLike)
+// POST /tweets/:tweetId/like  喜歡一則推文
+router.post('/:tweetId/like', tweetController.addLike)
 
-// POST /tweets/:tweet_id/unlike 取消喜歡
-router.post('/:tweet_id/unlike', tweetController.removeLike)
+// POST /tweets/:tweetId/unlike 取消喜歡
+router.post('/:tweetId/unlike', tweetController.removeLike)
 
 module.exports = router
