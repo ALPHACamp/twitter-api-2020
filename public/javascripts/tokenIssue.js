@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const PRIVATE_KEY = process.env.PRIVATE_KEY
+const PRIVATE_KEY = process.env.PRIVATE_KEY || 'iamrexalsoturagon'
 // const fs = require('fs') 暫時用不到 是讀取私鑰用的
 module.exports = (user) => {
   const id = user.id

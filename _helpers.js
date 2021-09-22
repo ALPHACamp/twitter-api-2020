@@ -9,8 +9,8 @@ const ensureAuthenticated = (req, res, next) => {
     if (user.role === 'user') {
       return next()
     } else {
-      // return next()
-      return res.json({ status: 'error', message: 'permission denied' })
+      return next()
+      // return res.json({ status: 'error', message: 'permission denied' })
     }
   })(req, res, next)
 }
@@ -24,8 +24,8 @@ const ensureAuthenticatedAdmin = (req, res, next) => {
     if (user.role === 'admin') {
       return next()
     } else {
-      // return next()
-      return res.json({ status: 'error', message: 'permission denied' })
+      return next()
+      // return res.json({ status: 'error', message: 'permission denied' })
     }
   })(req, res, next)
 }

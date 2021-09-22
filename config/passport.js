@@ -3,7 +3,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const jwtStrategy = passportJWT.Strategy
 const db = require('../models')
 const User = db.User
-const PUB_KEY = process.env.PUB_KEY
+const PUB_KEY = process.env.PUB_KEY || 'iamrexalsoturagon'
 const passport = require('passport')
 // const fs = require('fs') 暫時用不到
 
