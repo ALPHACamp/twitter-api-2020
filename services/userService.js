@@ -4,20 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
-const { getLoginUserLikedTweetsId } = require('../tools/helper')
-
-async function getFollowingList(req) {
-  let user = await User.findOne({
-    attributes: [],
-    where: { id: req.user.id },
-    include: {
-      model: User, as: 'Followings',
-      attributes: ['id'], through: { attributes: [] }
-    }
-  })
-  user = user.toJSON()
-  return user.Followings //[{id:1}, {id:5}]
-}
+const { getLoginUserLikedTweetsId, getFollowingList } = require('../tools/helper')
 
 const userService = {
   signUp: async (req, res, cb) => {
@@ -230,7 +217,7 @@ const userService = {
       // 比對id，看登入使用者是否也有在追蹤這些人
       user = user.toJSON()
       user.Followings.forEach(user => {
-        user.isFollowings = followingList.map(u => (u.id)).includes(user.followingId)
+        user.isFollowings = followingList.includes(user.followingId)
       })
       return cb(user.Followings)
     } catch (err) {
@@ -254,7 +241,7 @@ const userService = {
       if (user === null) return cb({ status: '400', message: '使用者不存在' })
       user = user.toJSON()
       user.Followers.map(user => {
-        user.isFollowings = followingList.map(u => (u.id)).includes(user.followerId)
+        user.isFollowings = followingList.includes(user.followerId)
       })
       return cb(user.Followers)
     } catch (err) {
@@ -337,7 +324,7 @@ const userService = {
       })
       // 登入者有否有追蹤
       user.forEach(user => {
-        user.isFollowings = followingList.map(u => (u.id)).includes(user.id)
+        user.isFollowings = followingList.includes(user.id)
       })
       return cb(user)
     } catch (err) {

@@ -1,5 +1,5 @@
 const db = require('../models')
-const { Like } = db
+const { Like, User } = db
 
 async function getLoginUserLikedTweetsId(req) {
   let likedTweets = await Like.findAll({
@@ -13,4 +13,17 @@ async function getLoginUserLikedTweetsId(req) {
   return likedTweets
 }
 
-module.exports = { getLoginUserLikedTweetsId }
+async function getFollowingList(req) {
+  let user = await User.findOne({
+    attributes: [],
+    where: { id: req.user.id },
+    include: {
+      model: User, as: 'Followings',
+      attributes: ['id'], through: { attributes: [] }
+    }
+  })
+  user = user.toJSON()
+  return user.Followings.map(user => (user.id)) //[1,5]
+}
+
+module.exports = { getLoginUserLikedTweetsId, getFollowingList }
