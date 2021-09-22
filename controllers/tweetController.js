@@ -58,10 +58,20 @@ const tweetController = {
       next(error)
     }
   },
-  addLike: (req, res) => {
-    TweetService.addLike(req, res, (status, data) => {
-      return res.status(status).json(data)
-    })
+  addLike: async (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id
+    const { tweetId } = req.params
+
+    try {
+      const { status, message } = await TweetService.addLike(currentUserId, tweetId)
+
+      return res.status(200).json({
+        status,
+        message
+      })
+    } catch (error) {
+      next(error)
+    }
   },
   removeLike: (req, res) => {
     TweetService.removeLike(req, res, (status, data) => {
