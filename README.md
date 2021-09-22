@@ -12,7 +12,6 @@ User
 account: User1
 password: 12345678
 ```
-
 ## Base URL 
 ```
 https://twitter-apis-demo.herokuapp.com/api
@@ -20,7 +19,7 @@ https://twitter-apis-demo.herokuapp.com/api
 
 ## API Guidelines
 
-### Users API
+### **Users API**
 
 
 #### Sign In 
@@ -53,7 +52,7 @@ https://twitter-apis-demo.herokuapp.com/api
 #### User followings
 [**GET users/:userId/followings**](https://twitter-apis-demo.herokuapp.com/api/users/:userId/followings)
 
-### Tweets API
+### **Tweets API**
 
 #### GET all tweets
 [**GET /tweets**](https://twitter-apis-demo.herokuapp.com/api/tweets)
@@ -70,7 +69,7 @@ https://twitter-apis-demo.herokuapp.com/api
 #### Add replies
 [**POST /tweets**](https://twitter-apis-demo.herokuapp.com/api/tweets/:tweetId/replies)
 
-### Followings API 
+### **Followings API**
 
 #### Follow user
 [**POST /followships**](https://twitter-apis-demo.herokuapp.com/api/followships)
@@ -78,7 +77,7 @@ https://twitter-apis-demo.herokuapp.com/api
 #### unFollow user
 [**DELETE /followships**](https://twitter-apis-demo.herokuapp.com/api/followships/:followingId)
 
-### Admins API
+### **Admins API**
 
 #### Admin sign in 
 [**POST /admin/signin**](https://twitter-apis-demo.herokuapp.com/api/admin/signin)
@@ -92,7 +91,7 @@ https://twitter-apis-demo.herokuapp.com/api
 #### Delete tweet (one at a time)
 [**DELETE /admin/tweets/:tweetId**](https://twitter-apis-demo.herokuapp.com/api/admin/tweets/:tweetId)
 
-### Likes API
+### **Likes API**
 
 #### Like tweet
 [**POST /tweets/:tweetId/like**](https://twitter-apis-demo.herokuapp.com/api/tweets/:tweetId/like)
