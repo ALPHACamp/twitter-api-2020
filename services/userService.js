@@ -220,10 +220,11 @@ const userService = {
         'name',
         'avatar',
         'introduction',
-        'account'
+        'account',
+        [Sequelize.col('Followers.Followship.createdAt'), 'createdAt']
       ],
       group: ['User.id'],
-      order: [['Followers', 'createdAt', 'DESC']]
+      order: [[Sequelize.col('Followers.Followship.createdAt'), 'DESC']]
     })
   },
 
@@ -251,10 +252,11 @@ const userService = {
         'name',
         'avatar',
         'introduction',
-        'account'
+        'account',
+        [Sequelize.col('Followings.Followship.createdAt'), 'createdAt']
       ],
       group: ['User.id'],
-      order: [['Followings', 'createdAt', 'DESC']]
+      order: [[Sequelize.col('Followings.Followship.createdAt'), 'DESC']]
     })
   },
 
