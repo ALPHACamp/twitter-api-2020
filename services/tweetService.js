@@ -67,7 +67,6 @@ const tweetService = {
 
   getTweets: async (req, res, cb) => {
     try {
-      const loginUserLikedTweetsId = await getLoginUserLikedTweetsId(req)
       // 取得追蹤中清單
       // let followings = await Followship.findAll({
       //   raw: true, nest: true,
