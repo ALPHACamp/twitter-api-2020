@@ -36,7 +36,6 @@ const homeController = {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
       }
       // 簽發 token
-      console.log("🚀 ~ file: homeController.js ~ line 43 ~ User.findOne ~ user", user)
       const tokenInfo = issueJwt(user)
       return res.json({
         status: 'success',
