@@ -66,7 +66,7 @@ const userService = {
         attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover',
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'totalFollowings'],
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'totalFollowers'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'totalTweets'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets'],
           [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings']
         ],
         include: [{
