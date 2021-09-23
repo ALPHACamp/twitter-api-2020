@@ -301,6 +301,11 @@ const userService = {
       const followingList = await getFollowingList(req)
       const user = await User.findAll({
         raw: true, nest: true,
+        where: {
+          role: {
+            [sequelize.Op.ne]: 'admin'
+          }
+        },
         group: 'User.id',
         attributes: ['id', 'name', 'account', 'avatar',
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'totalFollowers']
