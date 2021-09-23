@@ -213,7 +213,8 @@ const userService = {
             sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = Followings.id)`), 'isFollowings'
           ]],
           through: { attributes: [] },
-        }
+        },
+        order: [[sequelize.col('Followings.Followship.createdAt'), 'DESC']]
       })
       if (user === null) return cb({ status: '400', message: '使用者不存在' })
       // 比對id，看登入使用者是否也有在追蹤這些人
@@ -236,7 +237,8 @@ const userService = {
           model: User, as: 'Followers',
           attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
           through: { attributes: [] }
-        }]
+        }],
+        order: [[sequelize.col('Followers.Followship.createdAt'), 'DESC']]
       })
       if (user === null) return cb({ status: '400', message: '使用者不存在' })
       user = user.toJSON()
@@ -268,7 +270,7 @@ const userService = {
         { model: Reply, attributes: [] },
         { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['Likes', 'createdAt', 'DESC']]
       })
       turnToBoolean(likedTweets, 'isLiked')
       return cb(likedTweets)
