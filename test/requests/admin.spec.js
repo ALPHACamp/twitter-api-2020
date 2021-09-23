@@ -35,6 +35,7 @@ describe('# admin requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
+            console.log(err)
             if (err) return done(err);
             console.log('見站內所有的使用者', res.body)
             expect(res.body).to.be.an('array');

@@ -69,6 +69,7 @@ describe('# user requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
+            console.log(err)
             if (err) return done(err);
             console.log('使用者', res.body)
             res.body.name.should.equal('root');
