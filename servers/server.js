@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
-const db = require('./models')
-const { User, Message, RoomUser } = db
-const { getRoomUsers } = require('./tools/helper')
+const db = require('../models')
+const { User, Message, RoomUser, Room } = db
+const { getRoomUsers } = require('../tools/helper')
 
 
 module.exports = (io) => {
@@ -91,6 +91,7 @@ module.exports = (io) => {
             console.warn(err)
           }
         })
+
       } catch (err) {
         console.warn(err)
       }
