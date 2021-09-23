@@ -93,6 +93,7 @@ let userController = {
       if (userHasAccount) return res.status(409).json({ status: 'error', message: "account 已重覆註冊！" })
 
       User.create({
+        name,
         account,
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
