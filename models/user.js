@@ -33,6 +33,8 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Tweet)
     User.hasMany(models.Reply)
     User.hasMany(models.Like)
+    User.hasMany(models.Member)
+    User.hasMany(models.Message)
 
     User.belongsToMany(User, {
       through: models.Followship,
