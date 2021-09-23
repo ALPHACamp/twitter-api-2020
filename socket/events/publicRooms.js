@@ -1,3 +1,4 @@
+const messageService = require('../../services/messageService')
 const publicUsers = []
 module.exports = (io, socket) => {
   const { name, id } = socket.user
@@ -27,6 +28,7 @@ module.exports = (io, socket) => {
       // mayble let public RoomID === 5
       // io.emit to send an event to everyone
       //socket.emit sending to sender-client onlyt
+      await messageService.postMessage(msg)
       return io.emit('chatMessage', msg)
     } catch (error) {
       return socket.emit('error', {
