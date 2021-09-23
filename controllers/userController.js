@@ -409,6 +409,7 @@ let userController = {
       email: req.user.email,
       avatar: req.user.avatar,
       role: req.user.role,
+      account: req.user.account,
       isAuthenticated: req.user ? true : false
     }
     return res.status(200).json(user)
