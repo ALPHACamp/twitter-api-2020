@@ -90,6 +90,7 @@ let userController = {
       if (userHasAccount) return res.status(409).json({ status: 'error', message: "account 已重覆註冊！" })
 
       User.create({
+        name,
         account,
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
@@ -240,19 +241,12 @@ let userController = {
   getTweets: async (req, res, next) => {
     try {
       //找user's followers
-      const userFollowers = await User.findByPk(req.user.id, {
-        attributes: [],
+      const user = await User.findByPk(req.user.id, {
         include: [
-          { model: User, as: 'Followers', attributes: ['id', 'role'], where: { role: { [Op.not]: 'admin' }}},
+          { model: User, as: 'Followers', attributes: ['id']},
         ]
       })
-      if(!userFollowers){
-        return res.status(422).json({
-          status: 'error',
-          message: 'Can not find any followers for this user'
-        })
-      }
-      let followers = userFollowers.Followers.map(user => { return user.id }) //array去裝followers
+      let followers = user.Followers.map(user => { return user.id }) //array去裝followers
       const tweet = await Tweet.findAll({ where: { UserId: followers } })
       return res.status(200).json({ tweet })
     } catch (err) {
