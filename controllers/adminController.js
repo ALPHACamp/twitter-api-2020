@@ -108,13 +108,36 @@ const adminController = {
   deleteTweet: async (req, res) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
-      if(!tweet) {
+      if (!tweet) {
         return res.json({
           status: 'error',
           message: `Tweet does not exist.`,
         })
       }
       tweet.destroy()
+
+      // 將 user 的 tweetCount - 1  (tweet.dataValues.UserId)
+      const user = await User.findByPk(tweet.dataValues.UserId)
+      await user.decrement(['tweetCount'], { by: 1 })
+
+      // 將 like 有此筆 tweet 刪掉
+      const likedTweets = await Like.findAll({
+        where: { TweetId: tweet.dataValues.id },
+      })
+      likedTweets.map((d) => {
+        Like.findByPk(d.dataValues.id)
+        d.destroy()
+      })
+
+      // 將 reply 有此筆 tweet 狀況刪掉
+      const repliedTweets = await Reply.findAll({
+        where: { TweetId: tweet.dataValues.id },
+      })
+      repliedTweets.map((d) => {
+        Reply.findByPk(d.dataValues.id)
+        d.destroy()
+      })
+
       return res.status(200).json({
         status: 'success',
         message: `Tweet id: ${tweet.id} is deleted.`,
