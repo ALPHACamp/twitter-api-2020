@@ -1,16 +1,37 @@
 module.exports = (io, socket) => {
-  socket.on('joinPrivateRoom', async (targetUserId, currentUserId) => {
-    // messageController.getPrivateRoom (currentUserId) : return member and room
-    // const Room name = targetUserId-currentUserId
-    // Create if room can't be found : messageController.createRoom(name) and createMember
+  socket.on('unReadMessage', async (currentUserId) => {
+    // Check if current user has unread messages
+    // TODO 1: messageService.checkUnread(currentUserId)
+    // TODO 2: return unRead message count
+    socket.emit('unReadMessage', {})
+  })
 
+  socket.on('joinPrivateRoom', async (targetUserId, currentUserId) => {
+    // Create if room can't be found
+    //TODO 1: messageService.getPrivateRooms(targetUserId, currentUserId) to get member and room
+    //TODO 2: if room does not exists, messageService.postPrivateRoom(targetUserId, currentUserId) to post new private room
+    //TODO 3: messageService.postMember(room, targetUserId, currentUserId) to add room member
+
+    // If room can be found
     socket.join(Room.name)
+
+    // Update unread message status
+    // TODO : messageService.updateMessageStatus(room.id, currentUserId)
+
+
   })
 
   socket.on('privateMessage', async (msg, targetUserId) => {
     try {
       // Frontend : return Room name = targetUserId-currentUserId
-      // messageController.saveMessage({UserId,RoomID,content})
+      // TODO: add messageService.postMessage({UserId, RoomId, content})
+      
+      // check if target user is in room or not
+      const privateRoomUsers = io.sockets.adapter.rooms.get(Room.name)
+      // if not, send unread notification
+      socket.to(Room.name).emit('unReadMessage', {})
+
+      // Send message to all the private room user
       return socket.to(Room.name).emit('chatMessage', msg)
     } catch (error) {
       return socket.emit('error', {
