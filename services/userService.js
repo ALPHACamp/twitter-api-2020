@@ -132,11 +132,13 @@ const userService = {
 
   putUser: async (req, res, cb) => {
     try {
+      const loginUserId = req.user.id
+      const targetUserId = req.params.id
       let client = new ImgurClient({ clientId: process.env.CLIENT_ID })
       const { name, account, password, checkPassword, introduction, email } = req.body
       // 使用者只能修改自己的資料
-      if (req.user.id != req.params.id) return cb({ status: '401', message: '無法修改他人資料' })
-      let user = await User.findByPk(req.user.id, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
+      if (loginUserId != targetUserId) return cb({ status: '401', message: '無法修改他人資料' })
+      let user = await User.findByPk(loginUserId, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
       // 後端驗證
       if (name && name.length > 50) return cb({ status: '400', message: '名稱需小於50字' })
       // 密碼雙重確認
