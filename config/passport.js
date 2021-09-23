@@ -3,23 +3,12 @@ const ExtractJwt = passportJWT.ExtractJwt
 const jwtStrategy = passportJWT.Strategy
 const db = require('../models')
 const User = db.User
-const PUB_KEY = process.env.PUB_KEY || 'iamrexalsoturagon'
+const USER_KEY = process.env.USER_KEY
 const passport = require('passport')
-// const fs = require('fs') 暫時用不到
-
-//以下這段是給cookie作為token載體時用
-// const cookieExtractor = (req) => {
-//   let token = null
-//   if (req && req.cookies['jwt']) {
-//     token = req.cookies['jwt']['token']
-//   } 
-//   return token
-// }
 
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: PUB_KEY //保留公鑰系統命名方式
-  // algorithms: ['RS256'] 給公鑰系統使用
+  secretOrKey: USER_KEY //保留公鑰系統命名方式
 }
 
 passport.use(new jwtStrategy(options, async (payload, done) => {

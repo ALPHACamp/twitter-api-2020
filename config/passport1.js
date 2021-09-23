@@ -3,13 +3,12 @@ const ExtractJwt = passportJWT.ExtractJwt
 const jwtStrategy = passportJWT.Strategy
 const db = require('../models')
 const User = db.User
-const PUB_KEY = process.env.PUB_KEY || 'rexrubyarmokaiyu'
+const ADMIN_KEY = process.env.ADMIN_KEY
 const passport = require('passport')
 
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: PUB_KEY //保留公鑰系統命名方式
-  // algorithms: ['RS256'] 給公鑰系統使用
+  secretOrKey: ADMIN_KEY //保留公鑰系統命名方式
 }
 
 passport.use(new jwtStrategy(options, async (payload, done) => {
