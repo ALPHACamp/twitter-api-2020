@@ -14,6 +14,19 @@ async function getLoginUserLikedTweetsId(req) {
   return likedTweets
 }
 
+async function getFollowingList(req) {
+  let user = await User.findOne({
+    attributes: [],
+    where: { id: req.user.id },
+    include: {
+      model: User, as: 'Followings',
+      attributes: ['id'], through: { attributes: [] }
+    }
+  })
+  user = user.toJSON()
+  return user.Followings.map(user => (user.id)) //[1,5]
+}
+
 async function getRoomUsers(RoomId) {
   try {
     return await RoomUser.findAll({
@@ -29,4 +42,4 @@ async function getRoomUsers(RoomId) {
   }
 }
 
-module.exports = { getLoginUserLikedTweetsId, getRoomUsers }
+module.exports = { getLoginUserLikedTweetsId, getFollowingList, getRoomUsers }
