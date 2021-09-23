@@ -25,7 +25,6 @@ app.use('/upload', express.static(__dirname + '/upload'))
 app.use(flash())
 app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
 
-// require('./config/passport')(passport)  
 app.use(passport.initialize())
 app.use(passport.session())
 app.listen(PORT, () => {

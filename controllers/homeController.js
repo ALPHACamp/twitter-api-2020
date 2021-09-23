@@ -23,7 +23,6 @@ const homeController = {
   
   postSignIn: (req, res) => {
     // 檢查必要資料
-    console.log("🚀 ~ file: homeController.js ~ line 27 ~ req.body", req.body)
     if (!req.body.email || !req.body.password) {
         return res.json({ status: 'error', message: "required fields didn't exist" })
       }
@@ -39,11 +38,6 @@ const homeController = {
       // 簽發 token
       console.log("🚀 ~ file: homeController.js ~ line 43 ~ User.findOne ~ user", user)
       const tokenInfo = issueJwt(user)
-      // 下面是給cookie用的
-      // const allInfo = {
-      //     token: tokenInfo.token,
-      //     userId: user.id,
-      //   }
       return res.json({
         status: 'success',
         message: 'ok',
