@@ -1,4 +1,5 @@
 const { Reply, Tweet, User, Like, Sequelize } = require('../models')
+const { Op } = Sequelize
 
 const tweetController = {
   getTweets: async (req, res, next) => {
