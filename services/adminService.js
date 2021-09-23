@@ -37,7 +37,6 @@ const adminService = {
           [sequelize.literal('COUNT(DISTINCT Followings.id)'), 'followersCount']
         ],
         group: 'User.id',
-        order: [['createdAt', 'ASC']],
         include: [
           { model: Tweet, attributes: [] },
           { model: Like, attributes: [] },
