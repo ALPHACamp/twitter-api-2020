@@ -24,8 +24,9 @@ app.use(cors())
 app.get('/', (req, res) => {
   res.render('index')
 })
+app.get('/private', (req, res) => res.render('private'))
 require('./routes')(app)
-require('./server')(io)
+require('./servers/server')(io)
 
 server.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
