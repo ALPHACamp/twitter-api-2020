@@ -17,7 +17,7 @@ const homeController = {
   },
   
   logout: (req, res) => {
-    res.clearCookie('jwt')
+    // res.clearCookie('jwt')  
     res.redirect('/api/signin')
   },
   
@@ -62,7 +62,7 @@ const homeController = {
       }
     }
     catch (error) {
-      console.log(error)
+      res.status(400)
     }
   }
 }

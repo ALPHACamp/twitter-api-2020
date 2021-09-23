@@ -1,4 +1,5 @@
-const passport = require('passport')
+const passport = require('./config/passport')
+const passport1 = require('./config/passport1')
 
 const ensureAuthenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -6,27 +7,17 @@ const ensureAuthenticated = (req, res, next) => {
     if (err) {
       return res.json({ status: 'error', message: 'permission denied' })
     }
-    if (user.role === 'user') {
-      return next()
-    } else {
-      return next()
-      // return res.json({ status: 'error', message: 'permission denied' })
-    }
+    return next()
   })(req, res, next)
 }
 
 const ensureAuthenticatedAdmin = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user) => {
+  passport1.authenticate('jwt', { session: false }, (err, user) => {
     req.user = { ...user.dataValues }
     if (err)  {
       return res.json({ status: 'error', message: 'permission denied' })
     }
-    if (user.role === 'admin') {
-      return next()
-    } else {
-      return next()
-      // return res.json({ status: 'error', message: 'permission denied' })
-    }
+    return next()
   })(req, res, next)
 }
 
