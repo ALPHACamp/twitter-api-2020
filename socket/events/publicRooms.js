@@ -36,7 +36,7 @@ module.exports = (io, socket, publicUsers) => {
       // mayble let public RoomID === 5
       // io.emit to send an event to everyone
       //socket.emit sending to sender-client onlyt
-      return io.emit('chatMessage', msg)
+      return io.emit('publicMessage', msg)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
