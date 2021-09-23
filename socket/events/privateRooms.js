@@ -33,7 +33,7 @@ module.exports = (io, socket) => {
       socket.to(targetUserId).emit('unReadMessage', {})
 
       // Send message to all the private room user
-      return socket.to(Room.name).emit('chatMessage', msg)
+      return socket.to(Room.name).emit('privateMessage', msg)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
