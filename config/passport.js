@@ -16,35 +16,33 @@ const cookieExtractor = (req) => {
 const options = {
   jwtFromRequest: cookieExtractor,
   secretOrKey: PUB_KEY,
-  // algorithms: ['RS256']
 }
 
-// module.exports = (passport) => {
-  passport.use(new jwtStrategy(options, async (payload, done) => {
-      try {
-        const user = await User.findByPk(payload.sub)
-        if (user) {
-          return done(null, user)
-        } else {
-          return done(null, false)
-        }
+passport.use(new jwtStrategy(options, async (payload, done) => {
+    try {
+      const user = await User.findByPk(payload.sub)
+      if (user) {
+        return done(null, user)
+      } else {
+        return done(null, false)
       }
-      catch (error) {
-        console.log(error)
-      }
+    }
+    catch (error) {
+      console.log(error)
+    }
+  })
+)
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  User.findByPk(id)
+    .then(user => {
+      done(null, user);
     })
-  )
-  
-  passport.serializeUser((user, done) => {
-    done(null, user.id);
-  });
-  
-  passport.deserializeUser((id, done) => {
-    User.findByPk(id)
-      .then(user => {
-        done(null, user);
-      })
-      .catch(err => done(null, err))
-  });
-// }
+    .catch(err => done(null, err))
+});
+
 module.exports = passport

@@ -1,4 +1,4 @@
-const passport = require('passport')
+const passport = require('./config/passport')
 
 const ensureAuthenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {

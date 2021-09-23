@@ -10,7 +10,7 @@ function socketConnection (io) {
   io.on('connection', socket => {
     socket.on('connectServer', async ({ userId }) => {
       // 建立上線用戶表
-      onlineList[userId] = socket.id
+      onlineList[userId] = socket
       if (offlineRecord[userId]) {
         socket.to(socket.id).emit('unread', {message: offlineRecord[userId]})
         offlineRecord[userId] = []
@@ -36,7 +36,7 @@ function socketConnection (io) {
       // 對每個在線上的朋友發出上線通知
       friendList.forEach(async (element) => {
         element = element.toString()
-        await io.to(onlineList[element]).emit('online-notice', 'on')
+        await io.to(onlineList[element].id).emit('online-notice', 'on')
       })
 
       // 監聽並建立房間
@@ -44,12 +44,11 @@ function socketConnection (io) {
         socket.join(data.roomId)
         const targetId = data.targetId.toString()
         if (onlineList[targetId]) {
-          const target = onlineList[targetId].socket
+          const target = onlineList[targetId]
           target.join(data.roomId)
         } else {
           offlineRecord[targetId] = [data.roomId]
         }
-        console.log("🚀 ~ file: server.js ~ line 43 ~ socket.on ~ socket", socket.rooms)
         socket.emit(data.roomId, 'hello') //for testing 單獨使用emit會產生廣播
       })
 
@@ -67,6 +66,10 @@ function socketConnection (io) {
         }
       })
 
+      socket.on('disconnect', () => {
+      console.log("🚀 ~ file: server.js ~ line 71 ~ socket.on ~ socket", socket)
+        
+      })
       
     })
   })
