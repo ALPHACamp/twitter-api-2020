@@ -204,19 +204,20 @@ const userService = {
 
   getUserFollowings: async (req, res, cb) => {
     try {
-      // 取得登入使用者的追蹤名單
-      const followingList = await getFollowingList(req)
       // 取得該特定使用者的追蹤名單
       let user = await User.findOne({
-        attributes: ['id', 'name'],
         where: { id: req.params.id },
-        include: { model: User, as: 'Followings', attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'introduction'], through: { attributes: [] }, }
+        include: {
+          model: User, as: 'Followings', attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'introduction',
+          [
+            sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = Followings.id)`), 'isFollowings'
+          ]],
+          through: { attributes: [] },
+        }
       })
       // 比對id，看登入使用者是否也有在追蹤這些人
       user = user.toJSON()
-      user.Followings.forEach(user => {
-        user.isFollowings = followingList.includes(user.followingId)
-      })
+      turnToBoolean(user.Followings, 'isFollowings')
       return cb(user.Followings)
     } catch (err) {
       console.warn(err)
