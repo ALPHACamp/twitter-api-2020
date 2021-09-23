@@ -1,9 +1,9 @@
 module.exports = (io, socket) => {
   socket.on('unReadMessage', async (currentUserId) => {
     // Check if current user has unread messages
-    // TODO 1: messageService.checkUnread(currentUserId)
+    // TODO 1: const unread = await messageService.checkUnread(currentUserId)
     // TODO 2: return unRead message count
-    socket.emit('unReadMessage', {})
+    socket.emit('unReadMessage', { unread })
   })
 
   socket.on('joinPrivateRoom', async (targetUserId, currentUserId) => {
@@ -25,12 +25,13 @@ module.exports = (io, socket) => {
     try {
       // Frontend : return Room name = targetUserId-currentUserId
       // TODO: add messageService.postMessage({UserId, RoomId, content})
-      
+
       // check if target user is in room or not
       const privateRoomUsers = io.sockets.adapter.rooms.get(Room.name)
       // if not, send unread notification
-      // TODO: find a way to change targetUserId to socketId  
-      socket.to(targetUserId).emit('unReadMessage', {})
+      // const unread = await messageService.checkUnread(targetUserId)
+      // TODO: find a way to change targetUserId to socketId
+      socket.to(targetUserId).emit('unReadMessage', { unread })
 
       // Send message to all the private room user
       return socket.to(Room.name).emit('privateMessage', msg)
