@@ -21,7 +21,7 @@ const adminService = {
         { model: Like, attributes: [] },
         { model: Tweet, attributes: [] }
       ],
-      group: ['user.id'],
+      group: ['id'],
       order: [
         [Sequelize.literal('tweetsCount'), 'DESC'],
         ['id', 'ASC']
