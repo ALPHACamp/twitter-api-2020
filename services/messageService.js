@@ -24,6 +24,11 @@ const messageService = {
       ],
       order: [['createdAt', 'ASC']]
     })
+  },
+
+  postPrivateRoom: async (targetUserId, currentUserId) => {
+    const name = `${currentUserId}-${targetUserId}`
+    return await Room.create({ name })
   }
 }
 
