@@ -1,11 +1,9 @@
-const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
-const Like = db.Like
+const sequelize = require('sequelize')
+const { User, Tweet, Reply, Like } = require('../models')
 
 const adminService = {
   getTweets: (req, res, cb) => {
-    Tweet.findAll({ include: User, raw: true, nest: true })
+    Tweet.findAll({ include: { model: User }, raw: true, nest: true, order: [['createdAt', 'DESC']] })
       .then(tweets => {
         tweets = tweets.map(tweet => ({
           ...tweet,
@@ -16,30 +14,36 @@ const adminService = {
       .catch(error => res.status(422).json(error))
   },
   removeTweet: (req, res, cb) => {
-    return Tweet.findByPk(req.params.id)
-      .then(tweet => {
-        tweet.destroy()
-          .then(() => cb({ status: 'success', message: '' }))
-          .catch(error => res.status(422).json(error))
+    TweetId = req.params.id
+    return Promise.all([
+      Tweet.destroy({ where: { id: TweetId } }),
+      Like.destroy({ where: { TweetId } }),
+      Reply.destroy({ where: { TweetId } })
+    ])
+      .then(([tweet, like, reply]) => {
+        cb({ tweet, like, reply, status: '200' })
       })
+      .catch(error => res.status(422).json(error))
   },
   getUsers: (req, res, cb) => {
     User.findAll({
-      include: [Tweet, Like, { model: User, as: 'Followings' }, { model: User, as: 'Followers' }]
+      group: 'User.id',
+      attributes: ['id', 'name', 'email', 'role', 'account', 'avatar', 'cover',
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'tweetsCount'],
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'likesCount'],
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'followingsCount'],
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'followersCount']
+      ],
+      include: [
+        { model: Tweet, attributes: [] },
+        { model: Like, attributes: [] },
+        { model: User, as: 'Followings', attributes: [] },
+        { model: User, as: 'Followers', attributes: [] }
+      ],
+      order: [[sequelize.col('tweetsCount'), 'DESC']],
+      raw: false, nest: true
     })
       .then(users => {
-        users = users.map(user => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          tweetsCount: user.Tweets.length,
-          likesCount: user.Likes.length,
-          followingsCount: user.Followings.length,
-          followersCount: user.Followers.length
-        }))
-        users = users.sort((a, b) => b.tweetsCount - a.tweetsCount)
-        // console.log('users', users)
         cb({ users: users, status: '200' })
       })
       .catch(error => res.status(422).json(error))

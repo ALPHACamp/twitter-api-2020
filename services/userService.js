@@ -4,20 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
-const { getLoginUserLikedTweetsId } = require('../tools/helper')
-
-async function getFollowingList(req) {
-  let user = await User.findOne({
-    attributes: [],
-    where: { id: req.user.id },
-    include: {
-      model: User, as: 'Followings',
-      attributes: ['id'], through: { attributes: [] }
-    }
-  })
-  user = user.toJSON()
-  return user.Followings //[{id:1}, {id:5}]
-}
+const { getLoginUserLikedTweetsId, getFollowingList } = require('../tools/helper')
 
 const userService = {
   signUp: async (req, res, cb) => {
@@ -74,33 +61,34 @@ const userService = {
 
   getUser: async (req, res, cb) => {
     try {
+      const followingList = await getFollowingList(req)
       let user = await User.findByPk(req.params.id, {
-        attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover'],
+        group: 'User.id',
+        attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover',
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'totalFollowings'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'totalFollowers'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'totalTweets'],
+        ],
         include: [{
           model: User,
           as: 'Followings',
-          attributes: ['id'],
+          attributes: [],
           through: { attributes: [] }
         },
         {
           model: User,
           as: 'Followers',
-          attributes: ['id'],
+          attributes: [],
           through: { attributes: [] }
         },
         {
           model: Tweet,
-          attributes: ['id'],
+          attributes: [],
         }
         ]
       })
       user = user.toJSON()
-      user.totalFollowings = user.Followings.length
-      user.totalFollowers = user.Followers.length
-      user.totalTweets = user.Tweets.length
-      delete user.Followings
-      delete user.Followers
-      delete user.Tweets
+      user.isFollowings = followingList.includes(user.id)
       // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
       return cb({
         status: '200',
@@ -149,8 +137,8 @@ const userService = {
       let client = new ImgurClient({ clientId: process.env.CLIENT_ID })
       const { name, account, password, checkPassword, introduction, email } = req.body
       // 使用者只能修改自己的資料
+      if (req.user.id != req.params.id) return cb({ status: '401', message: '無法修改他人資料' })
       let user = await User.findByPk(req.user.id, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
-
       // 後端驗證
       // 密碼雙重確認
       if (password && password !== checkPassword) {
@@ -175,25 +163,34 @@ const userService = {
         })
         if (isUser !== null) return cb({ status: '409', message: '帳號已被使用' })
       }
+
+      if (req.body.cover === 'delete') user.cover = ''
+
       // 圖片上傳網路，取得網址
       if (req.files) {
         const { avatar, cover } = req.files
         if (avatar && cover) {
-          Promise.all([
-            client.upload(avatar[0].path),
-            client.upload(cover[0].path),
-          ]).then(([avatar, cover]) => {
-            user.avatar = avatar.data.link || 'https://image.flaticon.com/icons/png/512/149/149071.png'
-            user.cover = cover.data.link || user.cover
-          }).catch(err => cb({ status: '400', message: '圖片上傳失敗', err }))
+          const images = await client.upload([
+            {
+              image: avatar[0].path,
+              title: 'avatar'
+            },
+            {
+              image: cover[0].path,
+              title: 'cover'
+            }
+          ])
+          user.avatar = images[0].data.link || user.avatar
+          user.cover = images[1].data.link || user.cover
         } else if (avatar && !cover) {
           const imageURL = await client.upload(avatar[0].path)
           user.avatar = imageURL.data.link || 'https://image.flaticon.com/icons/png/512/149/149071.png'
-        } else {
+        } else if (!avatar && cover) {
           const imageURL = await client.upload(cover[0].path)
           user.cover = imageURL.data.link || user.cover
         }
       }
+
       user.name = name || user.name
       user.account = account || user.account
       user.email = email || user.email
@@ -221,7 +218,7 @@ const userService = {
       // 比對id，看登入使用者是否也有在追蹤這些人
       user = user.toJSON()
       user.Followings.forEach(user => {
-        user.isFollowings = followingList.map(u => (u.id)).includes(user.followingId)
+        user.isFollowings = followingList.includes(user.followingId)
       })
       return cb(user.Followings)
     } catch (err) {
@@ -245,7 +242,7 @@ const userService = {
       if (user === null) return cb({ status: '400', message: '使用者不存在' })
       user = user.toJSON()
       user.Followers.map(user => {
-        user.isFollowings = followingList.map(u => (u.id)).includes(user.followerId)
+        user.isFollowings = followingList.includes(user.followerId)
       })
       return cb(user.Followers)
     } catch (err) {
@@ -311,24 +308,24 @@ const userService = {
   getTopUser: async (req, res, cb) => {
     try {
       const followingList = await getFollowingList(req)
-      // 找到熱門的10個使用者 ps:追蹤數是0不會出現
-      let user = await Followship.findAll({
+      const user = await User.findAll({
         raw: true, nest: true,
-        group: 'followingId',
-        attributes: ['followingId',
-          [sequelize.fn('COUNT', sequelize.col('followingId')), 'followingCount']],
-        order: [[sequelize.col('followingCount'), 'DESC']],
-        limit: 10,
-      })
-      user = user.map(d => d.followingId)
-      // 取得熱門使用者的詳細資料，ps:前10不照順序排
-      user = await User.findAll({
-        raw: true, where: { id: user },
-        attributes: ['id', 'name', 'account', 'avatar'],
+        group: 'User.id',
+        attributes: ['id', 'name', 'account', 'avatar',
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'totalFollowers']
+        ],
+        include: {
+          model: User, as: 'Followers',
+          attributes: [], through: { attributes: [] }
+        },
+        order: [[sequelize.col('totalFollowers'), 'DESC']],
+        subQuery: false, //避免因查詢多張表造成limit失常
+        having: { totalFollowers: { [sequelize.Op.gt]: 0 } }, //只要粉絲大於0的人
+        limit: 10
       })
       // 登入者有否有追蹤
       user.forEach(user => {
-        user.isFollowings = followingList.map(u => (u.id)).includes(user.id)
+        user.isFollowings = followingList.includes(user.id)
       })
       return cb(user)
     } catch (err) {
