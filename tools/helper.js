@@ -1,19 +1,3 @@
-const db = require('../models')
-const { User } = db
-
-async function getFollowingList(req) {
-  let user = await User.findOne({
-    attributes: [],
-    where: { id: req.user.id },
-    include: {
-      model: User, as: 'Followings',
-      attributes: ['id'], through: { attributes: [] }
-    }
-  })
-  user = user.toJSON()
-  return user.Followings.map(user => (user.id)) //[1,5]
-}
-
 function turnToBoolean(data, attribute) {
   if (Array.isArray(data)) {
     data.forEach(data => {
@@ -28,4 +12,4 @@ function turnToBoolean(data, attribute) {
     } else data[`${attribute}`] = false
   }
 }
-module.exports = { getFollowingList, turnToBoolean }
+module.exports = { turnToBoolean }
