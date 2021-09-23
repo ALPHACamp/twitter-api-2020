@@ -1,7 +1,7 @@
 const sequelize = require('sequelize')
 const db = require('../models')
 const { Tweet, Reply, Like, User } = db
-const { getLoginUserLikedTweetsId } = require('../tools/helper')
+const { getLoginUserLikedTweetsId, turnToBoolean } = require('../tools/helper')
 
 const tweetService = {
   postTweet: async (req, res, cb) => {
@@ -42,13 +42,13 @@ const tweetService = {
 
   getTweet: async (req, res, cb) => {
     try {
-      const likedTweets = await getLoginUserLikedTweetsId(req)
       // 取得推文及回覆總數跟按讚總數
       let tweet = await Tweet.findOne({
         where: { id: req.params.tweet_id },
         attributes: ['id', 'description', 'updatedAt',
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReply'],
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLike'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         include: [
           { model: Reply, attributes: [] },
@@ -57,7 +57,7 @@ const tweetService = {
       })
       if (tweet.id === null) return cb({ status: '400', message: '推文不存在' })
       tweet = tweet.toJSON()
-      tweet.isLiked = likedTweets.includes(tweet.id)
+      turnToBoolean(tweet, 'isLiked')
       return cb({ status: '200', ...tweet })
     } catch (err) {
       console.warn(err)
