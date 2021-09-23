@@ -253,33 +253,29 @@ const userService = {
 
   getUserLikedTweets: async (req, res, cb) => {
     try {
-      const loginUserLikedTweetsId = await getLoginUserLikedTweetsId(req)
-      // 該使用者喜歡的推文id
-      let likedTweetsId = await Like.findAll({
-        raw: true, attributes: ['TweetId'],
-        where: { UserId: req.params.id },
-      })
-      likedTweetsId = likedTweetsId.map(d => (d.TweetId))
       // 取得該使用者喜歡的推文
       let likedTweets = await Tweet.findAll({
         raw: true, nest: true,
-        where: { id: likedTweetsId }, //僅限他按過讚的
+        // where: { id: likedTweetsId }, //僅限他按過讚的
         group: 'Tweet.id',
         attributes: [['id', 'TweetId'], 'description', 'createdAt', 'updatedAt',
         [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes'],
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies']
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies'],
+        [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         include: [{
-          model: Like, attributes: []
+          model: Like, attributes: [], where: { UserId: req.params.id } //僅限他按過讚的 INNER JOIN `Likes` AS `Likes` ON `Tweet`.`id` = `Likes`.`TweetId` AND `Likes`.`UserId` = '1'
         },
         { model: Reply, attributes: [] },
         { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
         order: [['createdAt', 'DESC']]
       })
-      // isLiked 這些貼文，登入者是否有按讚
+      // 將isLiked 1/0 改為true/false
       likedTweets.forEach(tweet => {
-        tweet.isLiked = loginUserLikedTweetsId.includes(tweet.TweetId)
+        if (tweet.isLiked === 1) {
+          tweet.isLiked = true
+        } else tweet.isLiked = false
       })
       return cb(likedTweets)
     } catch (err) {
@@ -291,14 +287,13 @@ const userService = {
   getUserReplies: async (req, res, cb) => {
     try {
       // 取得特定使用者的所有回覆、回覆給誰、哪則推文
-      const replies = await Reply.findAll({
+      return cb(await Reply.findAll({
         raw: true, nest: true,
         attributes: { exclude: ['id', 'UserId'] },
         where: { UserId: req.params.id },
         include: { model: Tweet, attributes: [], include: { model: User, attributes: ['name'] } },
         order: [['createdAt', 'DESC']]
-      })
-      return cb(replies)
+      }))
     } catch (err) {
       console.warn(err)
       return cb({ status: '500', message: err })
