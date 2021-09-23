@@ -1,99 +1,111 @@
-const jwt = require('jsonwebtoken')
 const db = require('../models')
-const { User, Message, RoomUser, Room } = db
+const { User, Message, RoomUser } = db
 const { getRoomUsers } = require('../tools/helper')
 
 
 module.exports = (io) => {
   const public = io.of('/public')
 
-  // 使用者驗證,並拿到user資料
-  public.use((socket, next) => {
-    if (socket.handshake.auth.token) {
-      jwt.verify(socket.handshake.auth.token, process.env.TOKEN_SECRET, async (err, decoded) => {
-        // decoded會拿到登入user的id
-        const id = decoded.id
-        if (err) return next(new Error('請先登入在使用'));
-        socket.decoded = decoded;
-        const user = await User.findOne({
-          attributes: ['id', 'avatar', 'name', 'account'],
-          where: { id }
-        })
-        // 將登入者存到socket.request中
-        socket.request.user = user.toJSON()
-        next();
-      });
-    }
-    else {
-      next(new Error('請先登入在使用'));
-    }
-  })
-    .on('connection', async (socket) => {
-      try {
-        const user = socket.request.user
-        user.socketId = socket.id
+  public.on('connection', async (socket) => {
+    try {
+      const user = socket.handshake.query
+      user.socketId = socket.id
 
-        socket.join('public')
-        publicRoom = public.to('public')
-        // 更新在線名單
-        await RoomUser.create({
+      socket.join('public')
+      public.emit('connection', '連線成功')
+      publicRoom = public.to('public')
+
+      // 先判斷使用者是否有在這個房間過
+      const result = await RoomUser.findAll({
+        raw: true, nest: true,
+        where: {
           RoomId: 1,
-          UserId: user.id,
-          socketId: user.socketId
-        })
-        const userList = await getRoomUsers(1)
-        publicRoom.emit('online user', userList)
-        publicRoom.emit('connection', `${user.name} 上線`)
+          UserId: user.id
+        }
+      })
+      if (!result.length) {
+        publicRoom.emit('connect status', `${user.name} 上線`)
+      }
 
-        // 更新歷史訊息
-        const messages = await Message.findAll({
-          raw: true, nest: true,
-          attributes: ['content', 'createdAt'],
-          where: { RoomId: 1 },
-          include: {
-            model: User,
-            attributes: ['id', 'avatar']
-          },
-          order: [['createdAt', 'ASC']]
-        })
-        publicRoom.emit('history', messages)
+      // 更新在線名單
+      await RoomUser.create({
+        RoomId: 1,
+        UserId: user.id,
+        socketId: user.socketId
+      })
 
-        // 事件監聽
-        socket.on('send message', async obj => {
-          try {
-            obj.user = user
-            // 加入到歷史訊息
-            await Message.create({
-              content: obj.message,
+      // 傳送public在線的名單
+      const userList = await getRoomUsers(1) // TODO: 1改為room name而非room id?
+      publicRoom.emit('online list', userList)
+
+      // 傳入房間歷史訊息
+      const messages = await Message.findAll({
+        raw: true, nest: true,
+        attributes: ['content', 'createdAt'],
+        where: { RoomId: 1 }, //TODO 房間要改？
+        include: {
+          model: User,
+          attributes: ['id', 'avatar']
+        },
+        order: [['createdAt', 'ASC']]
+      })
+      publicRoom.emit('history', messages)
+
+      socket.on('send message', async msg => {
+        try {
+          const sendUser = await User.findOne({
+            where: { id: user.id },
+            attributes: ['id', 'name', 'avatar', 'account']
+          })
+          // 加入到歷史訊息
+          await Message.create({
+            content: msg,
+            RoomId: 1,// TODO:房間id 1 ok?
+            UserId: user.id
+          })
+
+          const data = {
+            message: msg,
+            user: sendUser.toJSON() //回傳訊息及是誰傳的
+          }
+          publicRoom.emit('updated message', data)
+        } catch (err) {
+          console.warn(err)
+        }
+      })
+      // TODO:如果server重啟，要自動清空roomUser
+      socket.on('disconnect', async () => {
+        try {
+          // 下線
+          socket.leave("public")
+          await RoomUser.destroy({
+            where: {
+              socketId: user.socketId,
+              RoomId: 1
+            }
+          })
+          // TODO:跟上線邏輯很像，要重構
+          // 離線後，確認房間是否還有user，沒的話才傳
+          const result = await RoomUser.findAll({
+            raw: true, nest: true,
+            where: {
               RoomId: 1,
               UserId: user.id
-            })
-            publicRoom.emit('updated message', obj)
-          } catch (err) {
-            console.warn(err)
+            }
+          })
+          if (!result.length) {
+            publicRoom.emit('connect status', `${user.name} 離線`)
           }
-        })
 
-        socket.on('disconnect', async () => {
-          try {
-            const user = socket.request.user
-            user.socketId = socket.id
-            // 下線
-            socket.leave("public")
-            await RoomUser.destroy({
-              where: { socketId: user.socketId }
-            })
-            publicRoom.emit('connection', `${user.name} 離線`)
-            // 回傳在線名單
-            const userList = await getRoomUsers(1)
-            publicRoom.emit('online user', userList)
-          } catch (err) {
-            console.warn(err)
-          }
-        })
-
-      } catch (err) {
-        console.warn(err)
-      }
-    })
+          // 回傳在線名單
+          const userList = await getRoomUsers(1)
+          publicRoom.emit('online user', userList)
+        } catch (err) {
+          console.warn(err)
+        }
+      })
+    } catch (err) {
+      console.warn(err)
+    }
+  })
 }
