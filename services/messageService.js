@@ -29,6 +29,34 @@ const messageService = {
   postPrivateRoom: async (targetUserId, currentUserId) => {
     const name = `${currentUserId}-${targetUserId}`
     return await Room.create({ name })
+  },
+
+  getPrivateRooms: async (targetUserId, currentUserId) => {
+    return await Member.findAll({
+      where: {
+        UserId: targetUserId,
+        RoomId: [
+          Sequelize.literal(
+            `SELECT RoomId FROM Members WHERE UserId = ${currentUserId}`
+          )
+        ]
+      },
+      include: [
+        { model: Room, attributes: ['id', 'name'] },
+        {
+          model: User,
+          attributes: [
+            'id',
+            'avatar',
+            'name',
+            [
+              Sequelize.fn('concat', '@', Sequelize.col('User.account')),
+              'account'
+            ]
+          ]
+        }
+      ]
+    })
   }
 }
 
