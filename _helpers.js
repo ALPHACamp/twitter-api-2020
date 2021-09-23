@@ -2,7 +2,7 @@ const passport = require('./config/passport')
 const passport1 = require('./config/passport1')
 
 const ensureAuthenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user) => {
+  passport.authenticate('jwtUser', { session: false }, (err, user) => {
     console.log("🚀 ~ file: _helpers.js ~ line 6 ~ passport.authenticate ~ user", user)
     req.user = { ...user.dataValues }
     if (err) {

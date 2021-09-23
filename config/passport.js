@@ -11,6 +11,7 @@ const options = {
   secretOrKey: USER_KEY //保留公鑰系統命名方式
 }
 
+
 passport.use(new jwtStrategy(options, async (payload, done) => {
   try {
       const user = await User.findByPk(payload.sub)
@@ -25,6 +26,8 @@ passport.use(new jwtStrategy(options, async (payload, done) => {
     }
   })
 )
+
+passport._strategies.jwt.name = 'jwtUser'
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
