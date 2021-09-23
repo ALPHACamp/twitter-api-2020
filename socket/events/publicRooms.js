@@ -2,8 +2,6 @@ module.exports = (io, socket, publicUsers) => {
   const { name, id } = socket.user
   socket.on('joinPublicRoom', async () => {
     try {
-      // TODO : add chatService for getting public room history message 
-
       // Add current user to public user list
       const isUserExists = publicUsers
         .map((user) => user.id)
@@ -32,10 +30,7 @@ module.exports = (io, socket, publicUsers) => {
 
   socket.on('publicMessage', async (msg) => {
     try {
-      // chartController.saveMessage({UserId,RoomID,content})
-      // mayble let public RoomID === 5
-      // io.emit to send an event to everyone
-      //socket.emit sending to sender-client onlyt
+      // TODO: add messageService.postMessage({UserId,RoomID = null ,content})
       return io.emit('publicMessage', msg)
     } catch (error) {
       return socket.emit('error', {
@@ -57,9 +52,6 @@ module.exports = (io, socket, publicUsers) => {
           message: `${name} leaved`
         })
       }
-      
-      // Return public user list
-      return io.emit('totalUser', publicUsers)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
