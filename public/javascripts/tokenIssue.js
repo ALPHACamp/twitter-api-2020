@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const PRIVATE_KEY = process.env.PRIVATE_KEY || 'iamrexalsoturagon'
+
 module.exports = (user) => {
   const id = user.id
   const expiresIn = 12 * 60 * 60 //以秒計算
@@ -9,6 +10,5 @@ module.exports = (user) => {
   }
 
   const signToken = jwt.sign(payload, PRIVATE_KEY)
-
   return { token: signToken }
 }
