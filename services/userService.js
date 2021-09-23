@@ -4,8 +4,12 @@ const ApiError = require('../utils/customError')
 const { checkUserInfoUniqueness } = require('../utils/validator')
 
 const userService = {
-  signIn: async (account) => {
-    return await User.findOne({ where: { account: Sequelize.where(Sequelize.literal(`BINARY account`), `${account}`) } })
+  signIn: async (email) => {
+    return await User.findOne({
+      where: {
+        account: Sequelize.where(Sequelize.literal(`BINARY email`), `${email}`)
+      }
+    })
   },
 
   getCurrentUser: async (id) => {
@@ -222,8 +226,8 @@ const userService = {
         'introduction',
         'account'
       ],
-      group: ['User.id'],
-      order: [['Followers', 'createdAt', 'DESC']]
+      group: ['User.id', 'Followers.Followship.createdAt'],
+      order: [[Sequelize.col('Followers.Followship.createdAt'), 'DESC']]
     })
   },
 
@@ -253,8 +257,8 @@ const userService = {
         'introduction',
         'account'
       ],
-      group: ['User.id'],
-      order: [['Followings', 'createdAt', 'DESC']]
+      group: ['User.id', 'Followings.Followship.createdAt'],
+      order: [[Sequelize.col('Followings.Followship.createdAt'), 'DESC']]
     })
   },
 
