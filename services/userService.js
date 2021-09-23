@@ -67,9 +67,9 @@ const userService = {
         'cover',
         'introduction',
         'role',
-        [Sequelize.literal(`(SELECT COUNT(*) FROM TWEETS WHERE Tweets.UserId = ${userId})`), 'TweetsCount'],
-        [Sequelize.literal(`(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followingId = ${userId})`), 'FollowersCount'],
-        [Sequelize.literal(`(SELECT COUNT(*) FROM FOLLOWSHIPS WHERE Followships.followerId = ${userId})`), 'FollowingCount'],
+        [Sequelize.literal(`(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = ${userId})`), 'TweetsCount'],
+        [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = ${userId})`), 'FollowersCount'],
+        [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${userId})`), 'FollowingCount'],
         [
           Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id )`),
           'isFollowed',
@@ -308,9 +308,7 @@ const userService = {
         where: { id: { [Op.not]: id }, email },
       })
       if (duplicate_email) {
-
         throw apiError.badRequest(400, 'This email has been registered')
-
       }
     }
     
@@ -319,9 +317,7 @@ const userService = {
         where: { id: { [Op.not]: id }, account },
       })
       if (duplicate_account) {
-
         throw apiError.badRequest(400, 'This account name has been registered')
-
       }
     }
     const user = await User.findByPk(id)
