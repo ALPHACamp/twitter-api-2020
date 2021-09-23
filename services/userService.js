@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
-const { getLoginUserLikedTweetsId, getFollowingList } = require('../tools/helper')
+const { getLoginUserLikedTweetsId, getFollowingList, turnToBoolean } = require('../tools/helper')
 
 const userService = {
   signUp: async (req, res, cb) => {
@@ -108,7 +108,8 @@ const userService = {
         group: `Tweet.id`,
         attributes: ['id', 'description', 'createdAt', 'updatedAt',
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes']
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         include: [{
           model: Reply,
@@ -120,11 +121,7 @@ const userService = {
         }],
         order: [['createdAt', 'DESC']]
       })
-      // isLiked,貼文是否有按讚過
-      const likedTweets = await getLoginUserLikedTweetsId(req)
-      tweets.forEach(tweet => {
-        tweet.isLiked = likedTweets.includes(tweet.id)
-      })
+      turnToBoolean(tweets, 'isLiked')
       return cb(tweets)
     } catch (err) {
       console.warn(err)
@@ -256,27 +253,22 @@ const userService = {
       // 取得該使用者喜歡的推文
       let likedTweets = await Tweet.findAll({
         raw: true, nest: true,
-        // where: { id: likedTweetsId }, //僅限他按過讚的
         group: 'Tweet.id',
         attributes: [['id', 'TweetId'], 'description', 'createdAt', 'updatedAt',
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes'],
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies'],
+        [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
+        [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+          'totalReplies'],
         [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         include: [{
-          model: Like, attributes: [], where: { UserId: req.params.id } //僅限他按過讚的 INNER JOIN `Likes` AS `Likes` ON `Tweet`.`id` = `Likes`.`TweetId` AND `Likes`.`UserId` = '1'
+          model: Like, attributes: [], where: { UserId: req.params.id } //僅限目標用戶按過讚的
         },
         { model: Reply, attributes: [] },
         { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
         order: [['createdAt', 'DESC']]
       })
-      // 將isLiked 1/0 改為true/false
-      likedTweets.forEach(tweet => {
-        if (tweet.isLiked === 1) {
-          tweet.isLiked = true
-        } else tweet.isLiked = false
-      })
+      turnToBoolean(likedTweets, 'isLiked')
       return cb(likedTweets)
     } catch (err) {
       console.warn(err)

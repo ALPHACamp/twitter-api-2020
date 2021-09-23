@@ -26,4 +26,11 @@ async function getFollowingList(req) {
   return user.Followings.map(user => (user.id)) //[1,5]
 }
 
-module.exports = { getLoginUserLikedTweetsId, getFollowingList }
+function turnToBoolean(data, attribute) {
+  data.forEach(data => {
+    if (data[`${attribute}`] === 1) {
+      data[`${attribute}`] = true
+    } else data[`${attribute}`] = false
+  })
+}
+module.exports = { getLoginUserLikedTweetsId, getFollowingList, turnToBoolean }
