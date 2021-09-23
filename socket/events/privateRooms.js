@@ -29,7 +29,8 @@ module.exports = (io, socket) => {
       // check if target user is in room or not
       const privateRoomUsers = io.sockets.adapter.rooms.get(Room.name)
       // if not, send unread notification
-      socket.to(Room.name).emit('unReadMessage', {})
+      // TODO: find a way to change targetUserId to socketId  
+      socket.to(targetUserId).emit('unReadMessage', {})
 
       // Send message to all the private room user
       return socket.to(Room.name).emit('chatMessage', msg)
