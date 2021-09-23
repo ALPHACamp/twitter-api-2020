@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Reply, Like, Followship } = db
+const { User, Tweet, Reply, Like } = db
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
@@ -87,6 +87,7 @@ const userService = {
         }
         ]
       })
+      if (user === null) return cb({ status: '400', message: '該用戶不存在' })
       user = user.toJSON()
       turnToBoolean(user, 'isFollowings')
       // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
@@ -137,6 +138,7 @@ const userService = {
       if (req.user.id != req.params.id) return cb({ status: '401', message: '無法修改他人資料' })
       let user = await User.findByPk(req.user.id, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
       // 後端驗證
+      if (name && name.length > 50) return cb({ status: '400', message: '名稱需小於50字' })
       // 密碼雙重確認
       if (password && password !== checkPassword) {
         return cb({ status: '401', message: '兩次密碼輸入需相符' })
