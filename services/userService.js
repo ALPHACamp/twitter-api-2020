@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
-const { getFollowingList, turnToBoolean } = require('../tools/helper')
+const { turnToBoolean } = require('../tools/helper')
 
 const userService = {
   signUp: async (req, res, cb) => {
@@ -233,22 +233,21 @@ const userService = {
 
   getUserFollowers: async (req, res, cb) => {
     try {
-      const followingList = await getFollowingList(req)
       let user = await User.findOne({
         attributes: [],
         where: { id: req.params.id },
         include: [{
           model: User, as: 'Followers',
-          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
+          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction',
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = Followers.id)`), 'isFollowings'
+          ]],
           through: { attributes: [] }
         }],
         order: [[sequelize.col('Followers.Followship.createdAt'), 'DESC']]
       })
       if (user === null) return cb({ status: '400', message: '使用者不存在' })
       user = user.toJSON()
-      user.Followers.map(user => {
-        user.isFollowings = followingList.includes(user.followerId)
-      })
+      turnToBoolean(user.Followers, 'isFollowings')
       return cb(user.Followers)
     } catch (err) {
       console.warn(err)
@@ -263,8 +262,8 @@ const userService = {
         raw: true, nest: true,
         group: 'Tweet.id',
         attributes: [['id', 'TweetId'], 'description', 'createdAt', 'updatedAt',
-        [sequelize.literal('(SELECT COUNT(id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
-        [sequelize.literal('(SELECT COUNT(id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+        [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
+        [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
           'totalReplies'],
         [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
@@ -302,7 +301,6 @@ const userService = {
 
   getTopUser: async (req, res, cb) => {
     try {
-      const followingList = await getFollowingList(req)
       const user = await User.findAll({
         raw: true, nest: true,
         where: {
@@ -312,7 +310,9 @@ const userService = {
         },
         group: 'User.id',
         attributes: ['id', 'name', 'account', 'avatar',
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'totalFollowers']
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
+            'totalFollowers'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings'],
         ],
         include: {
           model: User, as: 'Followers',
@@ -324,9 +324,7 @@ const userService = {
         limit: 10
       })
       // 登入者有否有追蹤
-      user.forEach(user => {
-        user.isFollowings = followingList.includes(user.id)
-      })
+      turnToBoolean(user, 'isFollowings')
       return cb(user)
     } catch (err) {
       console.warn(err)
