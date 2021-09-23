@@ -35,6 +35,28 @@ const tweetController = {
       return res.json(data)
     }
   },
+  getTweetsAll: async (req, res) => {
+    try {
+      const tweet = await Tweet.findAll({
+        include: User,
+        order: [
+          ['createdAt', 'DESC']
+        ]
+      })
+      const likeList = await Like.findAll({ where: { UserId: helpers.getUser(req).id } })
+      const tweetdata = tweet.map(tweet => ({
+        ...tweet.dataValues,
+        name: tweet.User.name,
+        avatar: tweet.User.avatar,
+        account: tweet.User.account,
+        isLiked: likeList.map(d => d.TweetId).includes(tweet.id)
+      }))
+      return res.json(tweetdata)
+    } catch (err) {
+      const data = { status: 'error', message: err }
+      return res.json(data)
+    }
+  },
   getTweet: async (req, res) => {
     try {
       const tweet = await Tweet.findByPk(req.params.tweet_id, {

@@ -23,7 +23,7 @@ router.post('/login', userController.logIn)
 // 前台：註冊
 router.post('/users', userController.register)
 // 前台：tweet 相關
-router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets', authenticated, tweetController.getTweetsAll)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets', authenticated, tweetController.postTweet)
 // 前台：reply 相關
