@@ -13,7 +13,7 @@ const tweetController = {
         include: [
           { model: Like, attributes: [] },
           { model: Reply, attributes: [] },
-          { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'], where: { role: { [Op.not]: 'admin' } },}
         ],
         order: [['createdAt', 'DESC']],
         raw: true,
