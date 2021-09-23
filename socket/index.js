@@ -40,10 +40,13 @@ module.exports = (io) => {
       if (publicUsers.indexOf(user)) {
         publicUsers.splice(publicUsers.indexOf(user), 1)
 
-        socket.broadcast.emit('announce', {
-          publicUsers,
-          message: `${user.name} leaved`
-        })
+        // Send announce only if the public room still have remained users
+        if (publicUsers.length) {
+          socket.broadcast.emit('announce', {
+            publicUsers,
+            message: `${user.name} leaved`
+          })
+        }
       }
 
       console.log(publicUsers)

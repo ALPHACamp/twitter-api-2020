@@ -49,12 +49,17 @@ module.exports = (io, socket, publicUsers) => {
     try {
       // Remove current user from public user list
       publicUsers.splice(publicUsers.indexOf(socket.user), 1)
-      io.emit('totalUser', publicUsers)
-
-      return socket.broadcast.emit('announce', {
-        publicUsers,
-        message: `${name} leaved`
-      })
+      
+      // Send announce only if the public room still have remained users
+      if (publicUsers.length) {
+        return socket.broadcast.emit('announce', {
+          publicUsers,
+          message: `${name} leaved`
+        })
+      }
+      
+      // Return public user list
+      return io.emit('totalUser', publicUsers)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
