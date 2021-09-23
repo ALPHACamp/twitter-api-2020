@@ -1,8 +1,4 @@
-const db = require('../models')
-const Reply = db.Reply
-const Tweet = db.Tweet
-const User = db.User
-const Followship = db.Followship
+const { User, Followship } = require('../models')
 
 const followshipController = {
   addFollowing: async (req, res, next) => {
