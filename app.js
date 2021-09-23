@@ -13,21 +13,7 @@ const passport = require('./config/passport')
 
 const port = process.env.PORT || 3000
 
-
-
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
-  // passport.authenticate('jwt', { ses...
-};
-const corsOptions = {
-  origin: [
-    '*'
-  ],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(express.json())
