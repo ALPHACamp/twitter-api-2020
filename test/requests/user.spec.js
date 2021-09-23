@@ -57,6 +57,8 @@ describe('# user requests', () => {
         ).returns({id: 1, Followings: []});
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
         await db.User.create({account: 'User2', name: 'User2', email: 'User2', password: 'User2'})
+        const usertest =  await User.findAll()
+        console.log('Users預處理', usertest, usertest.toJSON())
       })
 
 
@@ -67,8 +69,9 @@ describe('# user requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
+            console.log(err)
             if (err) return done(err);
-
+            console.log('使用者', res.body)
             res.body.name.should.equal('root');
 
             return done();
