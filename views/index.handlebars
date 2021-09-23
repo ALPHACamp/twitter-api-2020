@@ -62,6 +62,7 @@
 </head>
 
 <body>
+  <h2>公開聊天室</h2>
   <ul id="messages"></ul>
   <form id="form" action="">
     <input id="input" name="message" autocomplete="off" /><button>Send</button>
@@ -73,7 +74,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const { token } = sessionStorage
-  const public = io.connect('/public', { auth: { token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTYzMjA0MjkzMn0.XOU_z7FEclIKLU8hLwrhZfm-7yRzNmNtpZKg0dDF2jM' } })
+  const public = io.connect('/public', { query: { id: '31', name: 'alicia' } })
   const messages = document.getElementById('messages');
   const form = document.getElementById('form');
   const input = document.getElementById('input');
@@ -82,18 +83,22 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (input.value) {
-      public.emit('send message', { message: input.value });
+      public.emit('send message', input.value);
       input.value = '';
     }
   });
 
-  public.on('updated message', (obj) => {
-    console.log(JSON.stringify(obj))
-    displayMessage(obj.message)
+  public.on('updated message', data => {
+    console.log(data)
+    displayMessage(data.message)
     window.scrollTo(0, document.body.scrollHeight);
   });
 
-  public.on('connection', msg => {
+  public.on('connect status', msg => {
+    //發送上線/離線消息
+    displayMessage(msg)
+  })
+  public.on('leave user', msg => {
     //發送上線/離線消息
     displayMessage(msg)
   })
@@ -102,10 +107,11 @@
     console.log(msg)
   })
 
-  public.on('online user', users => {
+  public.on('online list', users => {
     console.log('上線名單')
     console.log(users)
   })
+
   function displayMessage(msg) {
     const item = document.createElement('li');
     item.innerHTML = msg
