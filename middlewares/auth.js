@@ -33,7 +33,8 @@ const socketAuthenticated = (socket, next) => {
   // FIXME: The location of the token may be problematic
   // TODO: The frontend should put user/token information into socket.auth
   // TODO: socket.handshake.auth.token
-  const token = socket.handshake.headers.token
+
+  const token = socket.handshake.headers.authorization
 
   // token == null is true if the value of a is null or undefined.
   if (token == null) {
