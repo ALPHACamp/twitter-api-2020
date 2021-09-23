@@ -78,11 +78,12 @@ const tweetService = {
       // })
       // 追蹤中的id清單
       // followings = followings.map(d => (d.followingId))
-      let tweets = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
         group: 'Tweet.id',
         attributes: ['id', 'description', 'createdAt', 'updatedAt',
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLike'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReply']
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReply'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         order: [['createdAt', 'DESC']],
         raw: true, nest: true,
@@ -95,9 +96,7 @@ const tweetService = {
           { model: Like, attributes: [] }
         ]
       })
-      tweets.map(tweet => {
-        tweet.isLiked = loginUserLikedTweetsId.includes(tweet.id)
-      })
+      turnToBoolean(tweets, 'isLiked')
       return cb(tweets)
     } catch (err) {
       console.warn(err)
