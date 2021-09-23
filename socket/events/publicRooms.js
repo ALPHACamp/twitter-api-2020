@@ -1,4 +1,3 @@
-const publicUsers = []
 module.exports = (io, socket, publicUsers) => {
   const { name, id } = socket.user
   socket.on('joinPublicRoom', async () => {
