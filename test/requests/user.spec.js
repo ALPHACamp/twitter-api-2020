@@ -57,7 +57,7 @@ describe('# user requests', () => {
         ).returns({id: 1, Followings: []});
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
         await db.User.create({account: 'User2', name: 'User2', email: 'User2', password: 'User2'})
-        const usertest =  await User.findAll()
+        const usertest =  await db.User.findAll()
         console.log('Users預處理', usertest, usertest.toJSON())
       })
 
