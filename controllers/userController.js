@@ -93,6 +93,7 @@ let userController = {
       if (userHasAccount) return res.status(409).json({ status: 'error', message: "account 已重覆註冊！" })
 
       User.create({
+        name,
         account,
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
@@ -242,9 +243,10 @@ let userController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      //找user's followers
       const user = await User.findByPk(req.user.id, {
         include: [
-          { model: User, as: 'Followers', attributes: ['id'] },
+          { model: User, as: 'Followers', attributes: ['id']},
         ]
       })
       let followers = user.Followers.map(user => { return user.id }) //array去裝followers
@@ -257,6 +259,7 @@ let userController = {
   getTopUsers: async (req, res, next) => {
     try {
       let user = await User.findAll({
+        where: { role: { [Op.not]: 'admin' } },
         include: [{ model: User, as: 'Followers' }],
         attributes: [
           'id', 'name', 'avatar', 'account',
@@ -409,6 +412,7 @@ let userController = {
       email: req.user.email,
       avatar: req.user.avatar,
       role: req.user.role,
+      account: req.user.account,
       isAuthenticated: req.user ? true : false
     }
     return res.status(200).json(user)
