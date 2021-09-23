@@ -57,6 +57,19 @@ const messageService = {
         }
       ]
     })
+  },
+
+  postMember: async (room, targetUserId, currentUserId) => {
+    const { RoomId } = room
+    await Member.bulkCreate([
+      { RoomId, UserId: currentUserId },
+      { RoomId, UserId: targetUserId }
+    ])
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'A member has created'
+    })
   }
 }
 
