@@ -215,6 +215,7 @@ const userService = {
           through: { attributes: [] },
         }
       })
+      if (user === null) return cb({ status: '400', message: '使用者不存在' })
       // 比對id，看登入使用者是否也有在追蹤這些人
       user = user.toJSON()
       turnToBoolean(user.Followings, 'isFollowings')
