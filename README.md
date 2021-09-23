@@ -1,10 +1,12 @@
-# Simple Twitter API (v1.3.0)
+# Simple Twitter API (v1.3.2)
 
 此專案使用前/後端分離進行開發一個簡易版的 Twitter 專案，此 Repo 為 Simple-Twitter-Backend。
 
 Simple-Twitter-Frontend: https://github.com/WilliamTsou818/simple-twitter-frontend
 
 API 文件：https://whapsimpletwitter.docs.apiary.io/#
+
+Simple Twitter : https://williamtsou818.github.io/simple-twitter-frontend/#/
 
 ## Devolper:
 
@@ -97,6 +99,13 @@ $ npx sequelize db:seed:all
 $ export NODE_ENV=development
 $ npm run dev
 Express is running on http://localhost:3000
+```
+
+8. 測試帳號
+
+```bash
+user1@example.com
+12345678
 ```
 
 ## Development environment
