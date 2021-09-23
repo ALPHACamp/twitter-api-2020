@@ -13,6 +13,17 @@ const messageService = {
       status: 'success',
       message: 'A message has created'
     })
+  },
+
+  getMessages: async (room) => {
+    const { RoomId } = room
+    return await Message.findAll({
+      where: { RoomId },
+      include: [
+        { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
+      ],
+      order: [['createdAt', 'ASC']]
+    })
   }
 }
 
