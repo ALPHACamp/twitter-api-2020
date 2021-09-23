@@ -25,14 +25,16 @@ const homeController = {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
       }
       // 簽發 token
+      console.log("🚀 ~ file: homeController.js ~ line 43 ~ User.findOne ~ user", user)
       const tokenInfo = issueJwt(user)
-      const allInfo = {
-        token: tokenInfo.token,
-        userId: user.id,
-      }
-      res.cookie('jwt', allInfo, { httpOnly: true, expireIn: '3h' })
-      if (user.role === 'admin') return res.redirect('/api/admin')
-      return res.redirect('/api/tweets')
+      return res.json({
+        status: 'success',
+        message: 'ok',
+        token: tokenInfo,
+        user: {
+          id: user.id, name: user.name, avatar: user.avatar, role: user.role
+        }
+      })
     })
   },
 

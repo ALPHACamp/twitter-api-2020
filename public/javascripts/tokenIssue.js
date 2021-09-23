@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
-const fs = require('fs')
-const privateKey = 'rexrubyarmokaiyu'
+const PRIVATE_KEY = process.env.PRIVATE_KEY || 'iamrexalsoturagon'
+
 module.exports = (user) => {
   const id = user.id
   const expiresIn = 12 * 60 * 60 //以秒計算
@@ -9,7 +9,6 @@ module.exports = (user) => {
     iat: Date.now()
   }
 
-  const signToken = jwt.sign(payload, privateKey)
-
+  const signToken = jwt.sign(payload, PRIVATE_KEY)
   return { token: signToken }
 }

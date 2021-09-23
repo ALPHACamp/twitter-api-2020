@@ -9,7 +9,6 @@ const sequelize = db.sequelize
 const Op = db.Sequelize.Op
 const { QueryTypes } = require('sequelize')
 const readFile = require('../public/javascripts/fileRead')
-// const popularQty = 10 //暫時沒有用到
 
 const userController = {
   userHomePage: async (req, res) => {
