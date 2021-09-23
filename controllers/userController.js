@@ -242,9 +242,10 @@ let userController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      //找user's followers
       const user = await User.findByPk(req.user.id, {
         include: [
-          { model: User, as: 'Followers', attributes: ['id'] },
+          { model: User, as: 'Followers', attributes: ['id']},
         ]
       })
       let followers = user.Followers.map(user => { return user.id }) //array去裝followers
@@ -257,6 +258,7 @@ let userController = {
   getTopUsers: async (req, res, next) => {
     try {
       let user = await User.findAll({
+        where: { role: { [Op.not]: 'admin' } },
         include: [{ model: User, as: 'Followers' }],
         attributes: [
           'id', 'name', 'avatar', 'account',
