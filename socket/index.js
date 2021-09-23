@@ -4,6 +4,9 @@ const subscribes = require('./events/subscribes')
 const privateRooms = require('./events/privateRooms')
 
 module.exports = (io) => {
+  // Store current public users' list
+  const publicUsers = []
+
   io.use(socketAuthenticated).on('connection', (socket) => {
     // io.of("/").sockets and io.engine.clientsCount may be equal
     const clientsCount = io.engine.clientsCount
@@ -17,7 +20,7 @@ module.exports = (io) => {
       console.log(event, args)
     })
 
-    publicRooms(io, socket)
+    publicRooms(io, socket, publicUsers)
     privateRooms(io, socket)
 
     // Happened before disconnect
@@ -28,10 +31,22 @@ module.exports = (io) => {
         }
         console.log(reason)
       }
+
     })
 
     socket.on('disconnect', (reason) => {
       console.log(reason)
+      // Check if user is still in public room user list
+      if (publicUsers.indexOf(user)) {
+        publicUsers.splice(publicUsers.indexOf(user), 1)
+
+        socket.broadcast.emit('announce', {
+          publicUsers,
+          message: `${user.name} leaved`
+        })
+      }
+
+      console.log(publicUsers)
     })
   })
 }
