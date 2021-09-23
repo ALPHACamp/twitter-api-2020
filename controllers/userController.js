@@ -11,7 +11,7 @@ const ApiError = require('../utils/customError')
 const userController = {
   signIn: async (req, res, next) => {
     try {
-      const { account, password } = req.body
+      const { email, password } = req.body
 
       // Check request body data format with Joi schema
       const { error } = userInfoSchema.validate(req.body, { abortEarly: false })
@@ -24,8 +24,8 @@ const userController = {
         )
       }
 
-      // Check whether the user exists by account
-      const user = await userService.signIn(account)
+      // Check whether the user exists by email
+      const user = await userService.signIn(email)
 
       if (!user) {
         throw new ApiError('UserSingInError', 401, 'No such user found')
