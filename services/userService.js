@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
-const { getLoginUserLikedTweetsId, getFollowingList, turnToBoolean } = require('../tools/helper')
+const { getFollowingList, turnToBoolean } = require('../tools/helper')
 
 const userService = {
   signUp: async (req, res, cb) => {

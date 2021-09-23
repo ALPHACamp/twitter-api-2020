@@ -1,17 +1,5 @@
 const db = require('../models')
-const { Like, User } = db
-
-async function getLoginUserLikedTweetsId(req) {
-  let likedTweets = await Like.findAll({
-    raw: true,
-    attributes: ['TweetId'],
-    where: {
-      UserId: req.user.id
-    },
-  })
-  likedTweets = likedTweets.map(tweet => (tweet.TweetId))
-  return likedTweets
-}
+const { User } = db
 
 async function getFollowingList(req) {
   let user = await User.findOne({
@@ -40,4 +28,4 @@ function turnToBoolean(data, attribute) {
     } else data[`${attribute}`] = false
   }
 }
-module.exports = { getLoginUserLikedTweetsId, getFollowingList, turnToBoolean }
+module.exports = { getFollowingList, turnToBoolean }

@@ -1,7 +1,7 @@
 const sequelize = require('sequelize')
 const db = require('../models')
 const { Tweet, Reply, Like, User } = db
-const { getLoginUserLikedTweetsId, turnToBoolean } = require('../tools/helper')
+const { turnToBoolean } = require('../tools/helper')
 
 const tweetService = {
   postTweet: async (req, res, cb) => {
