@@ -2,15 +2,26 @@ module.exports = (io, socket, publicUsers) => {
   const { name, id } = socket.user
   socket.on('joinPublicRoom', async () => {
     try {
-      // Add current user to public user list
+      // Check if user is already in public room
       const isUserExists = publicUsers
         .map((user) => user.id)
         .includes(socket.user.id)
+      
+      // If user is already exists, joining room without announce
+      if (isUserExists) {
+        return socket.join('public')
+      }
+      
+      // If user is not exists, pushing to public user list
       isUserExists ? false : publicUsers.push(socket.user)
       console.log(publicUsers)
+
+      // Join public room
+      socket.join('public')
+      console.log(socket.rooms)
       
       // Send announce to other public room users
-      socket.broadcast.emit('announce', {
+      socket.to('public').emit('announce', {
         publicUsers,
         message: `${name} joined`
       })
@@ -31,7 +42,7 @@ module.exports = (io, socket, publicUsers) => {
   socket.on('publicMessage', async (msg) => {
     try {
       // TODO: add messageService.postMessage({UserId,RoomID = null ,content})
-      return io.emit('publicMessage', msg)
+      return io.in('public').emit('publicMessage', msg)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
@@ -47,7 +58,7 @@ module.exports = (io, socket, publicUsers) => {
       
       // Send announce only if the public room still have remained users
       if (publicUsers.length) {
-        return socket.broadcast.emit('announce', {
+        return socket.to('public').emit('announce', {
           publicUsers,
           message: `${name} leaved`
         })
