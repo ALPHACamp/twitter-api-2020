@@ -29,14 +29,18 @@ module.exports = (io) => {
     socket.on('disconnect', async (reason) => {
       console.log(reason)
       // Check if the same user has multiple client connection
-      const sameUserCount = await io.sockets.adapter.rooms.get(
-        `user-${socket.user.id}`
-      )
+      const sameUserCount = await io.in(`user-${socket.user.id}`).allSockets()
 
-      if ((sameUserCount.size = 1)) {
+      console.log(`=====${sameUserCount.size}======`)
+      if (sameUserCount.size === 0) {
         // Check if user is still in public room user list
-        if (publicUsers.indexOf(user)) {
-          publicUsers.splice(publicUsers.indexOf(user), 1)
+        const removedUserIndex = publicUsers.findIndex(
+          (user) => user.id === socket.user.id
+        )
+        console.log(removedUserIndex)
+
+        if (removedUserIndex !== -1) {
+          publicUsers.splice(removedUserIndex, 1)
 
           // Send announce only if the public room still have remained users
           if (publicUsers.length) {

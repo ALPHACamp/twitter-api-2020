@@ -8,8 +8,13 @@ module.exports = (io, socket, publicUsers) => {
         .map((user) => user.id)
         .includes(socket.user.id)
 
+      console.log(
+        `${socket.user.name} is already in publicUsers array: ${isUserExists}`
+      )
+
       // If user is already exists, joining room without announce
       if (isUserExists) {
+        console.log(publicUsers)
         return socket.join('public')
       }
 
@@ -47,7 +52,7 @@ module.exports = (io, socket, publicUsers) => {
 
       // Save message to database
       const message = await messageService.postMessage(msg)
-      
+
       // Handle response data
       const data = {
         userId: socket.user.id,
@@ -68,28 +73,35 @@ module.exports = (io, socket, publicUsers) => {
   socket.on('leavePublicRoom', async () => {
     try {
       // Check if the same user has multiple client connection
-      const sameUserCount = await io.sockets.adapter.rooms.get(
-        `user-${socket.user.id}`
-      )
+      const sameUserCount = await await io
+        .in(`user-${socket.user.id}`)
+        .allSockets()
+      console.log(sameUserCount)
 
-      if (sameUserCount.size > 1) {
-        return socket.leave('public')
+      console.log(`=====${sameUserCount.size}======`)
+
+      // If current user is the last client connection of the same user
+      if (sameUserCount.size === 1) {
+        // Remove current user from public user list
+        const removedUserIndex = publicUsers.findIndex(
+          (user) => user.id === socket.user.id
+        )
+        publicUsers.splice(removedUserIndex, 1)
+
+        // Leave public room
+        socket.leave('public')
+        console.log(socket.rooms)
+
+        // Send announce only if the public room still have remained users
+        if (publicUsers.length) {
+          return socket.to('public').emit('announce', {
+            publicUsers,
+            message: `${name} leaved`
+          })
+        }
       }
 
-      // Remove current user from public user list
-      publicUsers.splice(publicUsers.indexOf(socket.user), 1)
-
-      // Leave public room
-      socket.leave('public')
-      console.log(socket.rooms)
-
-      // Send announce only if the public room still have remained users
-      if (publicUsers.length) {
-        return socket.to('public').emit('announce', {
-          publicUsers,
-          message: `${name} leaved`
-        })
-      }
+      return socket.leave('public')
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
