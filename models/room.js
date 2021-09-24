@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Room.hasMany(models.Message)
+      Room.hasMany(models.User)
       Room.belongsToMany(models.User, {
         through: models.RoomUser,
         foreignKey: 'RoomId',
