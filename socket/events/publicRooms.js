@@ -7,12 +7,12 @@ module.exports = (io, socket, publicUsers) => {
       const isUserExists = publicUsers
         .map((user) => user.id)
         .includes(socket.user.id)
-      
+
       // If user is already exists, joining room without announce
       if (isUserExists) {
         return socket.join('public')
       }
-      
+
       // If user is not exists, pushing to public user list
       isUserExists ? false : publicUsers.push(socket.user)
       console.log(publicUsers)
@@ -20,13 +20,13 @@ module.exports = (io, socket, publicUsers) => {
       // Join public room
       socket.join('public')
       console.log(socket.rooms)
-      
+
       // Send announce to other public room users
       socket.to('public').emit('announce', {
         publicUsers,
         message: `${name} joined`
       })
-      
+
       // Send welcome message to current user
       socket.emit('announce', {
         publicUsers,
@@ -55,9 +55,22 @@ module.exports = (io, socket, publicUsers) => {
 
   socket.on('leavePublicRoom', async () => {
     try {
+      // Check if the same user has multiple client connection
+      const sameUserCount = await io.sockets.adapter.rooms.get(
+        `user-${socket.user.id}`
+      )
+
+      if (sameUserCount.size > 1) {
+        return socket.leave('public')
+      }
+
       // Remove current user from public user list
       publicUsers.splice(publicUsers.indexOf(socket.user), 1)
-      
+
+      // Leave public room
+      socket.leave('public')
+      console.log(socket.rooms)
+
       // Send announce only if the public room still have remained users
       if (publicUsers.length) {
         return socket.to('public').emit('announce', {

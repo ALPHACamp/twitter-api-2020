@@ -34,22 +34,30 @@ module.exports = (io) => {
         }
         console.log(reason)
       }
-
     })
 
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', async (reason) => {
       console.log(reason)
-      // Check if user is still in public room user list
-      if (publicUsers.indexOf(user)) {
-        publicUsers.splice(publicUsers.indexOf(user), 1)
+      // Check if the same user has multiple client connection
+      const sameUserCount = await io.sockets.adapter.rooms.get(
+        `user-${socket.user.id}`
+      )
 
-        // Send announce only if the public room still have remained users
-        if (publicUsers.length) {
-          socket.broadcast.emit('announce', {
-            publicUsers,
-            message: `${user.name} leaved`
-          })
+      if ((sameUserCount.size = 1)) {
+        // Check if user is still in public room user list
+        if (publicUsers.indexOf(user)) {
+          publicUsers.splice(publicUsers.indexOf(user), 1)
+
+          // Send announce only if the public room still have remained users
+          if (publicUsers.length) {
+            socket.to('public').emit('announce', {
+              publicUsers,
+              message: `${user.name} leaved`
+            })
+          }
         }
+
+        socket.leave('public')
       }
 
       console.log(publicUsers)
