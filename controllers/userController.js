@@ -283,14 +283,18 @@ let userController = {
     try {
       const { id } = req.params
       let user = await User.findByPk(id, {
-        include: [{ model: User, as: 'Followers' }],
+        include: [
+          { model: User, as: 'Followers' ,
+            where: { role: { [Op.not]: 'admin' } }
+          }
+        ],
         order: [[Sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']]
       })
 
       if (!user) {
         return res.status(422).json({
           status: 'error',
-          message: 'Can not find this user'
+          message: 'Can not find the follower for this user.'
         })
       }
       Followers = user.Followers.map(i => ({
@@ -311,14 +315,19 @@ let userController = {
     try {
       const { id } = req.params
       let user = await User.findByPk(id, {
-        include: [{ model: User, as: 'Followings' }],
+        include: [
+          { 
+            model: User, as: 'Followings',
+            where: { role: { [Op.not]: 'admin' } }
+          }
+        ],
         order: [[Sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']]
       })
 
       if (!user) {
         return res.status(422).json({
           status: 'error',
-          message: 'Can not find this user'
+          message: 'Can not find the following for this user'
         })
       }
       console.log(user)
@@ -361,7 +370,6 @@ let userController = {
           nest: true,
           raw: true
         })
-      console.log(tweet)
       if (!tweet) {
         return res.status(422).json({
           status: 'error',
