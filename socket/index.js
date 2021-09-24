@@ -26,16 +26,6 @@ module.exports = (io) => {
     publicRooms(io, socket, publicUsers)
     privateRooms(io, socket)
 
-    // Happened before disconnect
-    socket.on('disconnecting', (reason) => {
-      for (const room of socket.rooms) {
-        if (room !== socket.id) {
-          socket.to(room).emit('user has left', socket.id)
-        }
-        console.log(reason)
-      }
-    })
-
     socket.on('disconnect', async (reason) => {
       console.log(reason)
       // Check if the same user has multiple client connection
