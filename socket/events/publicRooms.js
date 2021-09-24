@@ -15,7 +15,10 @@ module.exports = (io, socket, publicUsers) => {
       // If user is already exists, joining room without announce
       if (isUserExists) {
         console.log(publicUsers)
-        return socket.join('public')
+
+        socket.join('public')
+        // Update new publicUsers to client side
+        return io.to('public').emit('publicUsers', publicUsers)
       }
 
       // If user is not exists, pushing to public user list
@@ -28,15 +31,16 @@ module.exports = (io, socket, publicUsers) => {
 
       // Send announce to other public room users
       socket.to('public').emit('announce', {
-        publicUsers,
         message: `${name} joined`
       })
 
       // Send welcome message to current user
       socket.emit('announce', {
-        publicUsers,
         message: `Welcome, ${name}!`
       })
+
+      // Update new publicUsers to client side
+      io.to('public').emit('publicUsers', publicUsers)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
@@ -94,14 +98,18 @@ module.exports = (io, socket, publicUsers) => {
 
         // Send announce only if the public room still have remained users
         if (publicUsers.length) {
-          return socket.to('public').emit('announce', {
-            publicUsers,
+          socket.to('public').emit('announce', {
             message: `${name} leaved`
           })
         }
+
+        // Update new publicUsers to client side
+        return io.to('public').emit('publicUsers', publicUsers)
       }
 
-      return socket.leave('public')
+      socket.leave('public')
+      // Update new publicUsers to client side
+      return io.to('public').emit('publicUsers', publicUsers)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,

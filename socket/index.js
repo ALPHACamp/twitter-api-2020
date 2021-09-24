@@ -45,15 +45,18 @@ module.exports = (io) => {
           // Send announce only if the public room still have remained users
           if (publicUsers.length) {
             socket.to('public').emit('announce', {
-              publicUsers,
               message: `${user.name} leaved`
             })
           }
+
+          // Update new publicUsers to client side
+          io.to('public').emit('publicUsers', publicUsers)
         }
 
         socket.leave('public')
       }
-
+      // Update new publicUsers to client side
+      io.to('public').emit('publicUsers', publicUsers)
       console.log(publicUsers)
     })
   })
