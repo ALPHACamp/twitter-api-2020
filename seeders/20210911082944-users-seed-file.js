@@ -9,10 +9,10 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'admin',
       name: 'root',
-      avatar: `https://loremflickr.com/240/240/?random=${Math.random() * 100}`,
+      avatar: `https://loremflickr.com/240/240/?lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, 160),
-      account: '@root',
-      cover: `https://loremflickr.com/720/240/?random=${Math.random() * 100}`,
+      account: 'root',
+      cover: `https://loremflickr.com/720/240/?lock=${Math.random() * 100}`,
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -21,10 +21,10 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user1',
-      avatar: `https://loremflickr.com/240/240/?random=${Math.random() * 100}`,
+      avatar: `https://loremflickr.com/240/240/?lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, 160),
-      account: '@user1',
-      cover: `https://loremflickr.com/720/240/?random=${Math.random() * 100}`,
+      account: 'user1',
+      cover: `https://loremflickr.com/720/240/?lock=${Math.random() * 100}`,
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -33,10 +33,10 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user2',
-      avatar: `https://loremflickr.com/240/240/?random=${Math.random() * 100}`,
+      avatar: `https://loremflickr.com/240/240/?lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, 160),
-      account: '@user2',
-      cover: `https://loremflickr.com/720/240/?random=${Math.random() * 100}`,
+      account: 'user2',
+      cover: `https://loremflickr.com/720/240/?lock=${Math.random() * 100}`,
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -45,10 +45,10 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user3',
-      avatar: `https://loremflickr.com/240/240/?random=${Math.random() * 100}`,
+      avatar: `https://loremflickr.com/240/240/?lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, 160),
-      account: '@user3',
-      cover: `https://loremflickr.com/720/240/?random=${Math.random() * 100}`,
+      account: 'user3',
+      cover: `https://loremflickr.com/720/240/?lock=${Math.random() * 100}`,
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -57,10 +57,10 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user4',
-      avatar: `https://loremflickr.com/240/240/?random=${Math.random() * 100}`,
+      avatar: `https://loremflickr.com/240/240/?lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, 160),
-      account: '@user4',
-      cover: `https://loremflickr.com/720/240/?random=${Math.random() * 100}`,
+      account: 'user4',
+      cover: `https://loremflickr.com/720/240/?lock=${Math.random() * 100}`,
       createdAt: new Date(),
       updatedAt: new Date()
     }, {
@@ -69,10 +69,10 @@ module.exports = {
       password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
       role: 'user',
       name: 'user5',
-      avatar: `https://loremflickr.com/240/240/?random=${Math.random() * 100}`,
+      avatar: `https://loremflickr.com/240/240/?lock=${Math.random() * 100}`,
       introduction: faker.lorem.text().substring(0, 160),
-      account: '@user5',
-      cover: `https://loremflickr.com/720/240/?random=${Math.random() * 100}`,
+      account: 'user5',
+      cover: `https://loremflickr.com/720/240/?lock=${Math.random() * 100}`,
       createdAt: new Date(),
       updatedAt: new Date()
     }], {})

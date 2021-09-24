@@ -461,46 +461,58 @@ const userController = {
           .json({ status: 'error', message, userFilledForm: req.body })
       }
       // 是否上傳圖片
-      const { files } = req
-      if (files) {
-        if (files['avatar'][0]) {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          imgur.upload(files['avatar'][0].path, async (err, img) => {
-            const user = await User.findByPk(loginId)
+      const user = await User.findByPk(loginId)
+      await user.update({name, introduction})
+      const { avatar, cover } = req.files
+      if (avatar && cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(avatar[0].path, async (err, avatarImg) => {
+          imgur.upload(cover[0].path, async (err, coverImg) => {
             await user.update({
               name,
               introduction,
-              avatar: files.avatar ? img.data.link : user.avatar,
-              cover: user.cover,
+              avatar: avatar ? avatarImg.data.link : user.avatar,
+              cover: cover ? coverImg.data.link : user.cover,
             })
           })
-        }
-        if (files['cover'][0]) {
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          imgur.upload(files['cover'][0].path, async (err, img) => {
-            const user = await User.findByPk(loginId)
-            await user.update({
-              name,
-              introduction,
-              avatar: user.avatar,
-              cover: files.cover ? img.data.link : user.cover,
-            })
-            return res
-              .status(200)
-              .json({ status: 'success', message: 'Update user successfully.' })
-          })
-        }
-      } else {
-        const user = await User.findByPk(loginId)
-        await user.update({
-          name,
-          introduction,
-          avatar: user.avatar,
-          cover: user.cover,
         })
         return res
           .status(200)
           .json({ status: 'success', message: 'Update user successfully.' })
+      } else if (!avatar && !cover) {
+        await user.update({
+          name,
+          introduction,
+        })
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'Update user successfully.' })
+      } else if (avatar && !cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(avatar[0].path, async (err, img) => {
+          await user.update({
+            name,
+            introduction,
+            avatar: avatar ? img.data.link : user.avatar,
+            cover: user.cover,
+          })
+          return res
+            .status(200)
+            .json({ status: 'success', message: 'Update user successfully.' })
+        })
+      } else if (!avatar && cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        imgur.upload(cover[0].path, async (err, img) => {
+          await user.update({
+            name,
+            introduction,
+            avatar: user.avatar,
+            cover: cover ? img.data.link : user.cover,
+          })
+          return res
+            .status(200)
+            .json({ status: 'success', message: 'Update user successfully.' })
+        })
       }
     } catch (err) {
       const data = { status: 'error', message: err }
