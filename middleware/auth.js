@@ -16,7 +16,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.role !== 'admin'){
+  if (req.user && req.user.role === 'user'){
     return res.status(401).json({
       status: 'error',
       message: '帳號不存在'
