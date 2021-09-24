@@ -3,10 +3,10 @@ const publicRooms = require('./events/publicRooms')
 const subscribes = require('./events/subscribes')
 const privateRooms = require('./events/privateRooms')
 
-module.exports = (io) => {
-  // Store current public users' list
-  const publicUsers = []
+// Store current public users' list
+const publicUsers = []
 
+module.exports = (io) => {
   io.use(socketAuthenticated).on('connection', (socket) => {
     // io.of("/").sockets and io.engine.clientsCount may be equal
     const clientsCount = io.engine.clientsCount
