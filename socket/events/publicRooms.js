@@ -44,18 +44,18 @@ module.exports = (io, socket, publicUsers) => {
     try {
       // Add public room id = 5
       msg.RoomId = 5
-      console.log(msg)
 
       // Save message to database
-      const message = await messageService.postMessage(msg).toJSON()
+      const message = await messageService.postMessage(msg)
       
       // Handle response data
       const data = {
         userId: socket.user.id,
         content: msg.content,
         avatar: socket.user.avatar,
-        createdAt: message.createdAt
+        createdAt: message.dataValues.createdAt
       }
+
       return io.in('public').emit('publicMessage', data)
     } catch (error) {
       return socket.emit('error', {
