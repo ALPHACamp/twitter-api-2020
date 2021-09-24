@@ -353,15 +353,15 @@ let userController = {
             { model: Reply, attributes: [] },
             {
               model: User,
-              attributes:
-                ['id', 'name', 'avatar', 'account']
+              attributes:['id', 'name', 'avatar', 'account', 'role'],
+              where: { role: { [Op.not]: 'admin' } }
             }
           ],
           order: [[Sequelize.col('Likes.createdAt'), 'DESC']],
           nest: true,
           raw: true
         })
-
+      console.log(tweet)
       if (!tweet) {
         return res.status(422).json({
           status: 'error',
