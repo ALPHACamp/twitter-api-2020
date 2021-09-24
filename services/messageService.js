@@ -1,4 +1,5 @@
 const { Message, Room, Member, User, Sequelize } = require('../models')
+const { Op } = require('sequelize')
 
 const messageService = {
   postMessage: async (message) => {
@@ -36,9 +37,12 @@ const messageService = {
   },
 
   getPrivateRooms: async (targetUserId, currentUserId) => {
+    const queryOption = targetUserId
+      ? { [Op.not]: currentUserId, [Op.eq]: targetUserId }
+      : { [Op.not]: currentUserId }
     return await Member.findAll({
       where: {
-        UserId: targetUserId,
+        UserId: queryOption,
         RoomId: [
           Sequelize.literal(
             `SELECT RoomId FROM Members WHERE UserId = ${currentUserId}`

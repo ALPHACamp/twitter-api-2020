@@ -17,15 +17,9 @@ const messageController = {
 
   getPrivateRooms: async (req, res, next) => {
     try {
-      const [targetUserId, currentUserId] = [
-        req.params.id,
-        helpers.getUser(req).id
-      ]
+      const currentUserId = helpers.getUser(req).id
 
-      const rooms = await messageService.getPrivateRooms(
-        targetUserId,
-        currentUserId
-      )
+      const rooms = await messageService.getPrivateRooms(null, currentUserId)
       return res.status(200).json(rooms)
     } catch (error) {
       next(error)
