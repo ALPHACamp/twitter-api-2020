@@ -11,6 +11,6 @@ router.use('/api/tweets', authenticated, authenticatedRole(), tweets)
 router.use('/api/followships', authenticated, authenticatedRole(), followships)
 router.use('/api/users', users)
 router.use('/api/admin', admin)
-router.use('/api/messages', messages)
+router.use('/api/messages', authenticated, authenticatedRole(), messages)
 
 module.exports = router
