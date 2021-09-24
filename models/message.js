@@ -11,7 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Message.belongsTo(models.Room)
-      Message.belongsTo(models.User)
+      Message.belongsTo(models.User, {
+        as: 'Senders',
+        foreignKey: 'senderId'
+      })
+      Message.belongsTo(models.User, {
+        as: 'Receivers',
+        foreignKey: 'receiverId'
+      })
     }
   };
   Message.init({

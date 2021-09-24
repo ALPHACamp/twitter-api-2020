@@ -14,8 +14,16 @@ module.exports = {
       RoomId: {
         type: Sequelize.INTEGER
       },
-      UserId: {
+      senderId: {
         type: Sequelize.INTEGER
+      },
+      receiverId: {
+        type: Sequelize.INTEGER
+      },
+      isRead: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
