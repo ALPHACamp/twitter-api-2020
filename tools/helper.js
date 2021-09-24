@@ -1,3 +1,5 @@
+const db = require('../models')
+const { RoomUser } = db
 function turnToBoolean(data, attribute) {
   if (Array.isArray(data)) {
     data.forEach(data => {
@@ -12,4 +14,19 @@ function turnToBoolean(data, attribute) {
     } else data[`${attribute}`] = false
   }
 }
-module.exports = { turnToBoolean }
+
+async function getRoomUsers(RoomId) {
+  try {
+    return await RoomUser.findAll({
+      raw: true, nest: true,
+      attributes: [
+        [sequelize.fn('DISTINCT', sequelize.col('UserId')), 'UserId'],
+      ],
+      where: { RoomId },
+      include: { model: User, attributes: ['name', 'account', 'avatar'] }
+    })
+  } catch (err) {
+    console.warn(err)
+  }
+}
+module.exports = { turnToBoolean, getRoomUsers }
