@@ -1,5 +1,4 @@
 const express = require('express')
-const helpers = require('./_helpers')
 const apiErrorHandler = require('./middleware/errorHandler')
 const cors = require('cors')
 const methodOverride = require('method-override')
@@ -10,9 +9,7 @@ const routes = require('./routes')
 const passport = require('./config/passport')
 const app = express()
 const PORT = process.env.PORT || 3000
-const socketio = require('socket.io')
 const server = require('http').createServer(app)
-const io = socketio(server)
 
 app.use(cors())
 
@@ -36,29 +33,7 @@ app.get('/', (req, res) => {
   res.sendFile(`${__dirname}/public/index.html`)
 })
 
-io.on('connection', function (socket) {
-  console.log('user connected')
-  // 建立一個 "sendMessage" 的監聽
-  socket.on('sendMessage', function (message) {
-    console.log(message)
-    // 當收到事件的時候，也發送一個 "allMessage" 事件給所有的連線用戶
-    io.emit('allMessage', message)
-  })
-})
-
-// io.on('connection', (socket) => {
-//   socket.on('new-user', (name) => {
-//     users[socket.id] = name
-//     socket.broadcast.emit('user-connected', name)
-//   })
-//   socket.on('send-chat-message', (message) => {
-//     socket.broadcast.emit('chat-message', { message: message, name: users[socket.id] })
-//   })
-//   socket.on('disconnect', () => {
-//     socket.broadcast.emit('user-disconnected', users[socket.id])
-//     delete users[socket.id]
-//   })
-// })
+require('./socket/server')(server)
 
 server.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
