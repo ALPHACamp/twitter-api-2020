@@ -1,5 +1,4 @@
 const express = require('express')
-const helpers = require('./_helpers')
 const apiErrorHandler = require('./middleware/errorHandler')
 const cors = require('cors')
 const methodOverride = require('method-override')
@@ -10,6 +9,7 @@ const routes = require('./routes')
 const passport = require('./config/passport')
 const app = express()
 const PORT = process.env.PORT || 3000
+const server = require('http').createServer(app)
 
 app.use(cors())
 
@@ -26,6 +26,15 @@ app.use(routes)
 
 app.use(apiErrorHandler)
 
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
+app.use(express.static('public'))
+
+// when user go to the website return index.html
+app.get('/', (req, res) => {
+  res.sendFile(`${__dirname}/public/index.html`)
+})
+
+require('./socket/server')(server)
+
+server.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
 module.exports = app
