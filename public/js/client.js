@@ -3,13 +3,12 @@ console.log('this is client')
 // listen client
 const socket = io('/');
 
-socket.on('connect', (server) => {
-  console.log(server)
+socket.on('connect', () => {
   console.log(`Client Successfully connected：${socket.id}`);
 });
 
 socket.emit('sendMessage', {
-  name: 'majer',
+  name: 'major',
   message: 'hello everyone',
 })
 

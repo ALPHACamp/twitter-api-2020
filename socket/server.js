@@ -3,17 +3,15 @@ const { getCurrentUser } = require('../services/userService')
 
 
 module.exports = (server) => {
-  const io = socketio(server)
-
-  // const io = socketio(server, {
-  //   cors: {
-  //     origin: ['http://localhost:3000', 'https://pooppicker.github.io'],
-  //     methods: ['GET', 'POST'],
-  //     transports: ['websocket', 'polling'],
-  //     credentials: true,
-  //   },
-  //   allowEIO3: true,
-  // })
+  const io = require('socket.io')(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
+    pingTimeout: 30000,
+    rejectUnauthorized: false,
+    maxHttpBufferSize: 100000000,
+  })
 
 
   io.on('connection', (socket) => {
@@ -24,7 +22,7 @@ module.exports = (server) => {
       console.log(message)
       
       // 當收到事件的時候，也發送一個 "allMessage" 事件給所有的連線用戶
-      socket.broadcast.emit('allMessage', message)
+      io.emit('allMessage', '哈囉這是後端')
     })
   })
 
