@@ -42,9 +42,21 @@ module.exports = (io, socket, publicUsers) => {
 
   socket.on('publicMessage', async (msg) => {
     try {
-      // TODO: add messageService.postMessage({UserId,RoomID = 5 ,content})
-      await messageService.postMessage(msg)
-      return io.in('public').emit('publicMessage', msg)
+      // Add public room id = 5
+      msg.RoomId = 5
+      console.log(msg)
+
+      // Save message to database
+      const message = await messageService.postMessage(msg).toJSON()
+      
+      // Handle response data
+      const data = {
+        userId: socket.user.id,
+        content: msg.content,
+        avatar: socket.user.avatar,
+        createdAt: message.createdAt
+      }
+      return io.in('public').emit('publicMessage', data)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
