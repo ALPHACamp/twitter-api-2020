@@ -71,10 +71,8 @@
 
 </html>
 
-<script src="/socket.io/socket.io.js"></script>
+
 <script>
-  const { token } = sessionStorage
-  const public = io.connect('/public', { query: { id: '31', name: 'alicia' } })
   const messages = document.getElementById('messages');
   const form = document.getElementById('form');
   const input = document.getElementById('input');
@@ -83,31 +81,30 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (input.value) {
-      public.emit('send message', input.value);
+      socket.emit('send message', input.value);
       input.value = '';
     }
   });
+  // socket這台server是在main layout設定好的
+  socket.emit('join public')
 
-  public.on('updated message', data => {
+  socket.on('updated message', data => {
     console.log(data)
     displayMessage(data.message)
     window.scrollTo(0, document.body.scrollHeight);
   });
 
-  public.on('connect status', msg => {
-    //發送上線/離線消息
-    displayMessage(msg)
-  })
-  public.on('leave user', msg => {
+  socket.on('connect status', msg => {
+    console.log(msg)
     //發送上線/離線消息
     displayMessage(msg)
   })
 
-  public.on('history', msg => {
+  socket.on('history', msg => {
     console.log(msg)
   })
 
-  public.on('online list', users => {
+  socket.on('online list', users => {
     console.log('上線名單')
     console.log(users)
   })

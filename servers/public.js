@@ -3,18 +3,10 @@ const { User, Message, RoomUser } = db
 const { getRoomUsers } = require('../tools/helper')
 
 
-module.exports = (io) => {
-  const public = io.of('/public')
-
-  public.on('connection', async (socket) => {
+module.exports = (io, socket, user) => {
+  socket.on('join public', async () => {
     try {
-      const user = socket.handshake.query
-      user.socketId = socket.id
-
-      socket.join(1)
-      public.emit('connection', '連線成功')
-      publicRoom = public.to(1)
-
+      socket.join(1) //連線者加入公開房間
       // 先判斷使用者是否有在這個房間過
       const result = await RoomUser.findAll({
         raw: true, nest: true,
@@ -24,7 +16,8 @@ module.exports = (io) => {
         }
       })
       if (!result.length) {
-        publicRoom.emit('connect status', `${user.name} 上線`)
+        // socket伺服器向公開房間發送消息
+        io.to(1).emit('connect status', `${user.name} 上線`)
       }
 
       // 更新在線名單
@@ -36,7 +29,7 @@ module.exports = (io) => {
 
       // 傳送public在線的名單
       const userList = await getRoomUsers(1)
-      publicRoom.emit('online list', userList)
+      io.to(1).emit('online list', userList)
 
       // 傳入房間歷史訊息
       const messages = await Message.findAll({
@@ -50,8 +43,8 @@ module.exports = (io) => {
         },
         order: [['createdAt', 'ASC']]
       })
-
-      publicRoom.emit('history', messages)
+      // 伺服器向房間1更新歷史訊息
+      io.to(1).emit('history', messages)
 
       socket.on('typing', () => {
         socket.emit('typing', `${user.name}正在輸入...`)
@@ -70,12 +63,12 @@ module.exports = (io) => {
             senderId: user.id,
             receiver: null,
           })
-
+          // 包成物件傳到前端，訊息內容＋發送者的個人資料
           const data = {
             message: msg,
-            user: sendUser.toJSON() //回傳訊息及是誰傳的
+            user: sendUser.toJSON()
           }
-          publicRoom.emit('updated message', data)
+          io.to(1).emit('updated message', data)
         } catch (err) {
           console.warn(err)
         }
@@ -84,7 +77,7 @@ module.exports = (io) => {
       socket.on('disconnect', async () => {
         try {
           // 下線
-          socket.leave("public")
+          socket.leave(1)
           await RoomUser.destroy({
             where: {
               socketId: user.socketId,
@@ -101,12 +94,12 @@ module.exports = (io) => {
             }
           })
           if (!result.length) {
-            publicRoom.emit('connect status', `${user.name} 離線`)
+            io.to(1).emit('connect status', `${user.name} 離線`)
           }
 
           // 回傳在線名單
           const userList = await getRoomUsers(1)
-          publicRoom.emit('online user', userList)
+          io.to(1).emit('online user', userList)
         } catch (err) {
           console.warn(err)
         }
