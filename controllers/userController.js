@@ -321,7 +321,7 @@ let userController = {
           message: 'Can not find this user'
         })
       }
-
+      console.log(user)
       Followings = user.Followings.map(i => ({
         followingId: i.id,
         name: i.name,
