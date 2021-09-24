@@ -4,20 +4,7 @@ const bcrypt = require('bcryptjs')
 const issueJwt = require('../public/javascripts/tokenIssue')
 
 const homeController = {
-  signUp: (req, res) => {
-    res.render('signup')
-  },
-
-  signIn: (req, res) => {
-    res.render('signin')
-  },
-  
-  signInAdmin: (req, res) => {
-    res.render('signinAdmin')
-  },
-  
   logout: (req, res) => {
-    // res.clearCookie('jwt')  
     res.redirect('/api/signin')
   },
   
