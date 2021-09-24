@@ -15,6 +15,9 @@ module.exports = (io) => {
       ` ${user.name} connected and number of connections ${clientsCount}`
     )
 
+    // Join user room to act as same user with multiple browser tabs
+    socket.join(`user-${user.id}`)
+
     // Add catch-all listener when during development
     socket.onAny((event, ...args) => {
       console.log(event, args)

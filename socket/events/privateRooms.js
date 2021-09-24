@@ -31,7 +31,7 @@ module.exports = (io, socket) => {
       // if not, send unread notification
       // const unread = await messageService.checkUnread(targetUserId)
       // TODO: find a way to change targetUserId to socketId
-      socket.to(targetUserId).emit('unReadMessage', { unread })
+      socket.to(`user-${targetUserId}`).emit('unReadMessage', { unread })
 
       // Send message to all the private room user
       return socket.to(Room.name).emit('privateMessage', msg)
