@@ -8,7 +8,6 @@ module.exports = (io, socket, loginUser) => {
 
   socket.on('join room', async targetUserId => {
     try {
-      loginUser.id = Number(loginUser.id)
       // 找房間or創新房間
       let room = await Room.findOne({
         attributes: ['id'],
