@@ -73,6 +73,11 @@ module.exports = (io, socket, loginUser) => {
 
       // 伺服器向房間更新歷史訊息
       io.to(room.id).emit('history', messages)
+
+      socket.on('typing', () => {
+        socket.emit('typing', `${user.name}正在輸入...`)
+      })
+
       // 接發訊息
       socket.on('private message', async message => {
         // 判斷對方有無在房間，如有，isRead改為true
