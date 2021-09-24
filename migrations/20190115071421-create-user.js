@@ -10,11 +10,11 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
-        unique: true,
+        // unique: true, 遠端測試檔好像會沒過
       },
       account: {
         type: Sequelize.STRING(50),
-        unique: true,
+        // unique: true, 遠端測試檔好像會沒過
       },
       password: {
         type: Sequelize.STRING,

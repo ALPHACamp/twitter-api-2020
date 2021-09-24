@@ -1,10 +1,10 @@
 const db = require('../models')
-const { User, Tweet, Reply, Like, Followship } = db
+const { User, Tweet, Reply, Like } = db
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
-const { getLoginUserLikedTweetsId, getFollowingList } = require('../tools/helper')
+const { turnToBoolean } = require('../tools/helper')
 
 const userService = {
   signUp: async (req, res, cb) => {
@@ -61,13 +61,13 @@ const userService = {
 
   getUser: async (req, res, cb) => {
     try {
-      const followingList = await getFollowingList(req)
       let user = await User.findByPk(req.params.id, {
         group: 'User.id',
         attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover',
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'totalFollowings'],
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'totalFollowers'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'totalTweets'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings']
         ],
         include: [{
           model: User,
@@ -87,8 +87,9 @@ const userService = {
         }
         ]
       })
+      if (user === null) return cb({ status: '400', message: '該用戶不存在' })
       user = user.toJSON()
-      user.isFollowings = followingList.includes(user.id)
+      turnToBoolean(user, 'isFollowings')
       // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
       return cb({
         status: '200',
@@ -107,8 +108,9 @@ const userService = {
         where: { UserId: req.params.id },
         group: `Tweet.id`,
         attributes: ['id', 'description', 'createdAt', 'updatedAt',
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes']
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReplies'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLikes'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         include: [{
           model: Reply,
@@ -120,11 +122,7 @@ const userService = {
         }],
         order: [['createdAt', 'DESC']]
       })
-      // isLiked,貼文是否有按讚過
-      const likedTweets = await getLoginUserLikedTweetsId(req)
-      tweets.forEach(tweet => {
-        tweet.isLiked = likedTweets.includes(tweet.id)
-      })
+      turnToBoolean(tweets, 'isLiked')
       return cb(tweets)
     } catch (err) {
       console.warn(err)
@@ -134,12 +132,15 @@ const userService = {
 
   putUser: async (req, res, cb) => {
     try {
+      const loginUserId = req.user.id
+      const targetUserId = req.params.id
       let client = new ImgurClient({ clientId: process.env.CLIENT_ID })
       const { name, account, password, checkPassword, introduction, email } = req.body
       // 使用者只能修改自己的資料
-      if (req.user.id != req.params.id) return cb({ status: '401', message: '無法修改他人資料' })
-      let user = await User.findByPk(req.user.id, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
+      if (loginUserId != targetUserId) return cb({ status: '401', message: '無法修改他人資料' })
+      let user = await User.findByPk(loginUserId, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
       // 後端驗證
+      if (name && name.length > 50) return cb({ status: '400', message: '名稱需小於50字' })
       // 密碼雙重確認
       if (password && password !== checkPassword) {
         return cb({ status: '401', message: '兩次密碼輸入需相符' })
@@ -207,19 +208,22 @@ const userService = {
 
   getUserFollowings: async (req, res, cb) => {
     try {
-      // 取得登入使用者的追蹤名單
-      const followingList = await getFollowingList(req)
       // 取得該特定使用者的追蹤名單
       let user = await User.findOne({
-        attributes: ['id', 'name'],
         where: { id: req.params.id },
-        include: { model: User, as: 'Followings', attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'introduction'], through: { attributes: [] }, }
+        include: {
+          model: User, as: 'Followings', attributes: [['id', 'followingId'], 'name', 'account', 'avatar', 'introduction',
+          [
+            sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = Followings.id)`), 'isFollowings'
+          ]],
+          through: { attributes: [] },
+        },
+        order: [[sequelize.col('Followings.Followship.createdAt'), 'DESC']]
       })
+      if (user === null) return cb({ status: '400', message: '使用者不存在' })
       // 比對id，看登入使用者是否也有在追蹤這些人
       user = user.toJSON()
-      user.Followings.forEach(user => {
-        user.isFollowings = followingList.includes(user.followingId)
-      })
+      turnToBoolean(user.Followings, 'isFollowings')
       return cb(user.Followings)
     } catch (err) {
       console.warn(err)
@@ -229,21 +233,21 @@ const userService = {
 
   getUserFollowers: async (req, res, cb) => {
     try {
-      const followingList = await getFollowingList(req)
       let user = await User.findOne({
         attributes: [],
         where: { id: req.params.id },
         include: [{
           model: User, as: 'Followers',
-          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction'],
+          attributes: [['id', 'followerId'], 'name', 'account', 'avatar', 'cover', 'introduction',
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = Followers.id)`), 'isFollowings'
+          ]],
           through: { attributes: [] }
-        }]
+        }],
+        order: [[sequelize.col('Followers.Followship.createdAt'), 'DESC']]
       })
       if (user === null) return cb({ status: '400', message: '使用者不存在' })
       user = user.toJSON()
-      user.Followers.map(user => {
-        user.isFollowings = followingList.includes(user.followerId)
-      })
+      turnToBoolean(user.Followers, 'isFollowings')
       return cb(user.Followers)
     } catch (err) {
       console.warn(err)
@@ -253,34 +257,25 @@ const userService = {
 
   getUserLikedTweets: async (req, res, cb) => {
     try {
-      const loginUserLikedTweetsId = await getLoginUserLikedTweetsId(req)
-      // 該使用者喜歡的推文id
-      let likedTweetsId = await Like.findAll({
-        raw: true, attributes: ['TweetId'],
-        where: { UserId: req.params.id },
-      })
-      likedTweetsId = likedTweetsId.map(d => (d.TweetId))
       // 取得該使用者喜歡的推文
       let likedTweets = await Tweet.findAll({
         raw: true, nest: true,
-        where: { id: likedTweetsId }, //僅限他按過讚的
         group: 'Tweet.id',
         attributes: [['id', 'TweetId'], 'description', 'createdAt', 'updatedAt',
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLikes'],
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReplies']
+        [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'totalLikes'],
+        [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+          'totalReplies'],
+        [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         include: [{
-          model: Like, attributes: []
+          model: Like, attributes: [], where: { UserId: req.params.id } //僅限目標用戶按過讚的
         },
         { model: Reply, attributes: [] },
         { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['Likes', 'createdAt', 'DESC']]
       })
-      // isLiked 這些貼文，登入者是否有按讚
-      likedTweets.forEach(tweet => {
-        tweet.isLiked = loginUserLikedTweetsId.includes(tweet.TweetId)
-      })
+      turnToBoolean(likedTweets, 'isLiked')
       return cb(likedTweets)
     } catch (err) {
       console.warn(err)
@@ -291,14 +286,13 @@ const userService = {
   getUserReplies: async (req, res, cb) => {
     try {
       // 取得特定使用者的所有回覆、回覆給誰、哪則推文
-      const replies = await Reply.findAll({
+      return cb(await Reply.findAll({
         raw: true, nest: true,
         attributes: { exclude: ['id', 'UserId'] },
         where: { UserId: req.params.id },
         include: { model: Tweet, attributes: [], include: { model: User, attributes: ['name'] } },
         order: [['createdAt', 'DESC']]
-      })
-      return cb(replies)
+      }))
     } catch (err) {
       console.warn(err)
       return cb({ status: '500', message: err })
@@ -307,12 +301,18 @@ const userService = {
 
   getTopUser: async (req, res, cb) => {
     try {
-      const followingList = await getFollowingList(req)
       const user = await User.findAll({
         raw: true, nest: true,
+        where: {
+          role: {
+            [sequelize.Op.ne]: 'admin'
+          }
+        },
         group: 'User.id',
         attributes: ['id', 'name', 'account', 'avatar',
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.id'))), 'totalFollowers']
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
+            'totalFollowers'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings'],
         ],
         include: {
           model: User, as: 'Followers',
@@ -324,9 +324,7 @@ const userService = {
         limit: 10
       })
       // 登入者有否有追蹤
-      user.forEach(user => {
-        user.isFollowings = followingList.includes(user.id)
-      })
+      turnToBoolean(user, 'isFollowings')
       return cb(user)
     } catch (err) {
       console.warn(err)

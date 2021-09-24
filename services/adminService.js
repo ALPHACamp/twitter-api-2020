@@ -25,28 +25,34 @@ const adminService = {
       })
       .catch(error => res.status(422).json(error))
   },
-  getUsers: (req, res, cb) => {
-    User.findAll({
-      group: 'User.id',
-      attributes: ['id', 'name', 'email', 'role', 'account', 'avatar', 'cover',
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'tweetsCount'],
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'likesCount'],
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'followingsCount'],
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'followersCount']
-      ],
-      include: [
-        { model: Tweet, attributes: [] },
-        { model: Like, attributes: [] },
-        { model: User, as: 'Followings', attributes: [] },
-        { model: User, as: 'Followers', attributes: [] }
-      ],
-      order: [[sequelize.col('tweetsCount'), 'DESC']],
-      raw: false, nest: true
-    })
-      .then(users => {
-        cb({ users: users, status: '200' })
+  getUsers: async (req, res, cb) => {
+    try {
+      const users = await User.findAll({
+        raw: true, nest: true,
+        where: { role: { [sequelize.Op.not]: 'admin' } },
+        attributes: ['id', 'name', 'email', 'role', 'account', 'avatar', 'cover',
+          [sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount'],
+          [sequelize.literal('COUNT(DISTINCT Likes.id)'), 'likesCount'],
+          [sequelize.literal('COUNT(DISTINCT Followers.id)'), 'followingsCount'],
+          [sequelize.literal('COUNT(DISTINCT Followings.id)'), 'followersCount']
+        ],
+        group: 'User.id',
+        include: [
+          { model: Tweet, attributes: [] },
+          { model: Like, attributes: [] },
+          { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
+          { model: User, as: 'Followings', attributes: [], through: { attributes: [] } }
+        ],
+        order: [
+          [sequelize.literal('tweetsCount'), 'DESC'],
+          ['id', 'ASC']
+        ],
       })
-      .catch(error => res.status(422).json(error))
+      return cb({ users, status: '200' })
+    } catch (error) {
+      console.warn(error)
+      return res.status(422).json(error)
+    }
   }
 }
 

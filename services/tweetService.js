@@ -1,7 +1,7 @@
 const sequelize = require('sequelize')
 const db = require('../models')
 const { Tweet, Reply, Like, User } = db
-const { getLoginUserLikedTweetsId } = require('../tools/helper')
+const { turnToBoolean } = require('../tools/helper')
 
 const tweetService = {
   postTweet: async (req, res, cb) => {
@@ -42,13 +42,13 @@ const tweetService = {
 
   getTweet: async (req, res, cb) => {
     try {
-      const likedTweets = await getLoginUserLikedTweetsId(req)
       // 取得推文及回覆總數跟按讚總數
       let tweet = await Tweet.findOne({
         where: { id: req.params.tweet_id },
         attributes: ['id', 'description', 'updatedAt',
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReply'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLike'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLike'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         include: [
           { model: Reply, attributes: [] },
@@ -57,7 +57,7 @@ const tweetService = {
       })
       if (tweet.id === null) return cb({ status: '400', message: '推文不存在' })
       tweet = tweet.toJSON()
-      tweet.isLiked = likedTweets.includes(tweet.id)
+      turnToBoolean(tweet, 'isLiked')
       return cb({ status: '200', ...tweet })
     } catch (err) {
       console.warn(err)
@@ -67,7 +67,6 @@ const tweetService = {
 
   getTweets: async (req, res, cb) => {
     try {
-      const loginUserLikedTweetsId = await getLoginUserLikedTweetsId(req)
       // 取得追蹤中清單
       // let followings = await Followship.findAll({
       //   raw: true, nest: true,
@@ -78,11 +77,12 @@ const tweetService = {
       // })
       // 追蹤中的id清單
       // followings = followings.map(d => (d.followingId))
-      let tweets = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
         group: 'Tweet.id',
         attributes: ['id', 'description', 'createdAt', 'updatedAt',
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'totalLike'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'totalReply']
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLike'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
         ],
         order: [['createdAt', 'DESC']],
         raw: true, nest: true,
@@ -95,9 +95,7 @@ const tweetService = {
           { model: Like, attributes: [] }
         ]
       })
-      tweets.map(tweet => {
-        tweet.isLiked = loginUserLikedTweetsId.includes(tweet.id)
-      })
+      turnToBoolean(tweets, 'isLiked')
       return cb(tweets)
     } catch (err) {
       console.warn(err)
