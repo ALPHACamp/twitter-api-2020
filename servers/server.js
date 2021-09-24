@@ -11,9 +11,9 @@ module.exports = (io) => {
       const user = socket.handshake.query
       user.socketId = socket.id
 
-      socket.join('public')
+      socket.join(1)
       public.emit('connection', '連線成功')
-      publicRoom = public.to('public')
+      publicRoom = public.to(1)
 
       // 先判斷使用者是否有在這個房間過
       const result = await RoomUser.findAll({
@@ -35,21 +35,27 @@ module.exports = (io) => {
       })
 
       // 傳送public在線的名單
-      const userList = await getRoomUsers(1) // TODO: 1改為room name而非room id?
+      const userList = await getRoomUsers(1)
       publicRoom.emit('online list', userList)
 
       // 傳入房間歷史訊息
       const messages = await Message.findAll({
         raw: true, nest: true,
         attributes: ['content', 'createdAt'],
-        where: { RoomId: 1 }, //TODO 房間要改？
+        where: { RoomId: 1 },
         include: {
           model: User,
+          as: 'Senders',
           attributes: ['id', 'avatar']
         },
         order: [['createdAt', 'ASC']]
       })
+
       publicRoom.emit('history', messages)
+
+      socket.on('typing', () => {
+        socket.emit('typing', `${user.name}正在輸入...`)
+      })
 
       socket.on('send message', async msg => {
         try {
@@ -60,8 +66,9 @@ module.exports = (io) => {
           // 加入到歷史訊息
           await Message.create({
             content: msg,
-            RoomId: 1,// TODO:房間id 1 ok?
-            UserId: user.id
+            RoomId: 1,
+            senderId: user.id,
+            receiver: null,
           })
 
           const data = {
