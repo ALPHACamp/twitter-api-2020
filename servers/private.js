@@ -1,6 +1,5 @@
 const db = require('../models')
 const sequelize = require('sequelize')
-const room = require('../models/room')
 const { Room, Message, User, RoomUser } = db
 
 
@@ -9,25 +8,45 @@ module.exports = (io, socket, loginUser) => {
   socket.on('join room', async targetUserId => {
     try {
       // 找房間or創新房間
-      let room = await Room.findOne({
+      let [room, created] = await Room.findOrCreate({
         attributes: ['id'],
         where: {
           [sequelize.Op.and]: sequelize.literal(`(Room.creatorId = ${loginUser.id} OR Room.creatorId =${targetUserId})AND (Room.joinerId =${loginUser.id} OR Room.joinerId = ${targetUserId})`)
+        },
+        defaults: {
+          creatorId: loginUser.id,
+          joinerId: targetUserId
         }
       })
-      if (room === null) {
-        room = await Room.create({
-          creatorId: loginUser.id,
-          joinerId: targetUserId,
-        })
-      }
-      room = room.toJSON()
-
+      room = room.get({ plain: true })
       // 加入房間
       socket.join(room.id)
       await RoomUser.create({ where: { RoomId: room.id, UserId: loginUser.id } })
 
       io.to(room.id).emit('join room success', room.id)
+      // TODO:更新聊天紀錄人員列表，回傳的使用者資料排除登入使用者的，只回傳對方資料
+      const chatList = await Room.findAll({
+        raw: true, nest: true,
+        attributes: ['id'],
+        where: {
+          [sequelize.Op.or]: [
+            { joinerId: loginUser.id },
+            { creatorId: loginUser.id }
+          ]
+        },
+        include: [{
+          model: User,
+          as: 'Creator',
+          attributes: ['id', 'account', 'avatar', 'name']
+        },
+        {
+          model: User,
+          as: 'Joiner',
+          attributes: ['id', 'account', 'avatar', 'name']
+        }
+        ]
+      })
+      io.to(room.id).emit('chat member list', chatList)
 
       // 將該房間傳給我的訊息改為已讀
       await Message.update({

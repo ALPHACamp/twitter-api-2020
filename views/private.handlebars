@@ -98,6 +98,11 @@
 
     console.log(`房間：${roomId}`)
 
+    socket.on('chat member list', list => {
+      console.log('所有私人房間')
+      console.log(list)
+    })
+
     socket.on('update message', (obj) => {
       console.log(obj)
       displayMessage(obj.message)

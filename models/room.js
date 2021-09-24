@@ -11,7 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Room.hasMany(models.Message)
-      Room.hasMany(models.User)
+      Room.belongsTo(models.User, {
+        foreignKey: 'creatorId',
+        as: 'Creator'
+      })
+      Room.belongsTo(models.User, {
+        foreignKey: 'joinerId',
+        as: 'Joiner'
+      })
       Room.belongsToMany(models.User, {
         through: models.RoomUser,
         foreignKey: 'RoomId',
