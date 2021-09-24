@@ -1,5 +1,6 @@
 const db = require('../models')
-const { RoomUser } = db
+const sequelize = require('sequelize')
+const { RoomUser, User } = db
 function turnToBoolean(data, attribute) {
   if (Array.isArray(data)) {
     data.forEach(data => {
