@@ -462,6 +462,7 @@ const userController = {
       }
       // 是否上傳圖片
       const user = await User.findByPk(loginId)
+      await user.update({name, introduction})
       const { avatar, cover } = req.files
       if (avatar && cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
@@ -470,8 +471,8 @@ const userController = {
             await user.update({
               name,
               introduction,
-              avatar: files.avatar ? img.data.link : user.avatar,
-              cover: user.cover,
+              avatar: avatar ? avatarImg.data.link : user.avatar,
+              cover: cover ? coverImg.data.link : user.avatar,
             })
           })
         })
@@ -506,7 +507,7 @@ const userController = {
             name,
             introduction,
             avatar: user.avatar,
-            cover: cover ? img.data.link : cover.avatar,
+            cover: cover ? img.data.link : user.cover,
           })
           return res
             .status(200)
