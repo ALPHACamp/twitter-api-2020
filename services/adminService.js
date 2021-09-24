@@ -42,7 +42,11 @@ const adminService = {
           { model: Like, attributes: [] },
           { model: User, as: 'Followers', attributes: [], through: { attributes: [] } },
           { model: User, as: 'Followings', attributes: [], through: { attributes: [] } }
-        ]
+        ],
+        order: [
+          [sequelize.literal('tweetsCount'), 'DESC'],
+          ['id', 'ASC']
+        ],
       })
       return cb({ users, status: '200' })
     } catch (error) {
