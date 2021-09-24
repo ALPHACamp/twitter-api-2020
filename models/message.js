@@ -24,7 +24,9 @@ module.exports = (sequelize, DataTypes) => {
   Message.init({
     content: DataTypes.TEXT,
     RoomId: DataTypes.INTEGER,
-    UserId: DataTypes.INTEGER
+    receiverId: DataTypes.INTEGER,
+    senderId: DataTypes.INTEGER,
+    isRead: DataTypes.BOOLEAN,
   }, {
     sequelize,
     modelName: 'Message',

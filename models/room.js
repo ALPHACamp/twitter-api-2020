@@ -20,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Room.init({
-    name: DataTypes.STRING
+    creatorId: DataTypes.INTEGER,
+    joinerId: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'Room',
