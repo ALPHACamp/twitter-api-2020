@@ -472,7 +472,7 @@ const userController = {
               name,
               introduction,
               avatar: avatar ? avatarImg.data.link : user.avatar,
-              cover: cover ? coverImg.data.link : user.avatar,
+              cover: cover ? coverImg.data.link : user.cover,
             })
           })
         })
