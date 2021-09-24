@@ -27,8 +27,6 @@ passport.use('jwt', new jwtStrategy(options, async (payload, done) => {
   })
 )
 
-// passport._strategies.jwt.name = 'jwtUser'
-
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
