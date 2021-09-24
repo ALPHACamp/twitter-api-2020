@@ -62,14 +62,7 @@
 </head>
 
 <body>
-  <ul>
-    <li>
-      Alicia
-    </li>
-    <li>
-      Bob
-    </li>
-  </ul>
+  <h2>私人聊天室</h2>
   <ul id="messages"></ul>
   <form id="form" action="">
     <input id="input" name="message" autocomplete="off" /><button>Send</button>
@@ -104,6 +97,7 @@
     })
 
     socket.on('update message', (obj) => {
+      console.log('傳送者發來的訊息')
       console.log(obj)
       displayMessage(obj.message)
       window.scrollTo(0, document.body.scrollHeight);

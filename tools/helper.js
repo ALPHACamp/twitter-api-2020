@@ -30,4 +30,25 @@ async function getRoomUsers(RoomId) {
     console.warn(err)
   }
 }
-module.exports = { turnToBoolean, getRoomUsers }
+
+function addClientToMap(UserId, socketId, userSocketIdMap) {
+  if (!userSocketIdMap.has(UserId)) {
+    // 剛登入，加入在線名單
+    userSocketIdMap.set(UserId, new Set([socketId]));
+  } else {
+    // 使用者開多個視窗在線，就添加socketId
+    userSocketIdMap.get(UserId).add(socketId); //取得此人的socket set，並用set add方法加入
+  }
+}
+
+function removeClientFromMap(UserId, socketId, userSocketIdMap) {
+  if (userSocketIdMap.has(UserId)) {
+    let socketIdSet = userSocketIdMap.get(UserId) //取得值，也就是socketId陣列
+    socketIdSet.delete(socketId) //將socketId從set中刪除
+    // 如果都刪光了，代表說使用者真的下線了
+    if (socketIdSet.length === 0) {
+      userSocketIdMap.delete(UserId)
+    }
+  }
+}
+module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap }
