@@ -16,6 +16,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
+  console.log(req.user)
   if (req.user && req.user.role !== 'admin'){
     return res.status(401).json({
       status: 'error',
