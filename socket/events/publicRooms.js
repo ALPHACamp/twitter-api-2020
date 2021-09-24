@@ -1,3 +1,4 @@
+const messageService = require('../../services/messageService')
 module.exports = (io, socket, publicUsers) => {
   const { name, id } = socket.user
   socket.on('joinPublicRoom', async () => {
@@ -41,7 +42,8 @@ module.exports = (io, socket, publicUsers) => {
 
   socket.on('publicMessage', async (msg) => {
     try {
-      // TODO: add messageService.postMessage({UserId,RoomID = null ,content})
+      // TODO: add messageService.postMessage({UserId,RoomID = 5 ,content})
+      await messageService.postMessage(msg)
       return io.in('public').emit('publicMessage', msg)
     } catch (error) {
       return socket.emit('error', {
