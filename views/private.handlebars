@@ -78,35 +78,38 @@
 
 </html>
 
-<script src="/socket.io/socket.io.js"></script>
 <script>
-  const { token } = sessionStorage
-  const private = io.connect('/private', { auth: { token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTYzMjA0MjkzMn0.XOU_z7FEclIKLU8hLwrhZfm-7yRzNmNtpZKg0dDF2jM' } })
   const messages = document.getElementById('messages');
   const form = document.getElementById('form');
   const input = document.getElementById('input');
 
-
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (input.value) {
-      private.emit('send message', { message: input.value });
+      socket.emit('private message', input.value);
       input.value = '';
     }
-  });
-
-  private.emit('private connect', '11')
-
-  private.on('updated message', (obj) => {
-    console.log(JSON.stringify(obj))
-    displayMessage(obj.message)
-    window.scrollTo(0, document.body.scrollHeight);
-  });
-
-
-  private.on('private history', msg => {
-    console.log(msg)
   })
+
+
+  socket.emit('join room', 11)
+
+  socket.on('join room success', roomId => {
+
+    console.log(`房間：${roomId}`)
+
+    socket.on('update message', (obj) => {
+      console.log(obj)
+      displayMessage(obj.message)
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    socket.on('history', msg => {
+      console.log('歷史訊息')
+      console.log(msg)
+    })
+  })
+
 
 
   function displayMessage(msg) {

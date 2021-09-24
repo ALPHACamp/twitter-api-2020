@@ -16,7 +16,7 @@ module.exports = (server) => {
     console.log('a user is connect')
 
     require('./public')(io, socket, user)
-
+    require('./private')(io, socket, user)
 
     socket.on('disconnect', () => {
       console.log('a user disconnected')
