@@ -12,7 +12,7 @@ const options = {
 }
 
 
-passport.use(new jwtStrategy(options, async (payload, done) => {
+passport.use('jwt', new jwtStrategy(options, async (payload, done) => {
   try {
       const user = await User.findByPk(payload.sub)
       if (user) {

@@ -37,6 +37,7 @@ const homeController = {
       }
       // 簽發 token
       const tokenInfo = issueJwt(user)
+      console.log("🚀 ~ file: homeController.js ~ line 40 ~ User.findOne ~ tokenInfo", tokenInfo)
       return res.json({
         status: 'success',
         message: 'ok',
