@@ -10,9 +10,11 @@ module.exports = {
       },
       creatorId: {
         type: Sequelize.INTEGER,
+        allowNull: true,
       },
       joinerId: {
         type: Sequelize.INTEGER,
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,
