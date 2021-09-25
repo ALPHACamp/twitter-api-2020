@@ -1,4 +1,4 @@
-const { Message, User } = require('../models')
+const { Message, User, Sequelize } = require('../models')
 
 const socketService = {
   getUser: async (userId, next) => {
@@ -20,6 +20,18 @@ const socketService = {
     } catch (error) {
       next(error)
     }
+  },
+  getMessages: async (roomId) => {
+    return await Message.findAll({
+      where: { roomId },
+      include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+      attributes: [
+        'content',
+        'createdAt'
+      ],
+      order: [['createdAt', 'ASC']]
+
+    })
   }
 }
 
