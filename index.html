@@ -77,11 +77,19 @@
       e.preventDefault();
       if (input.value) {
         socket.emit('chat message', input.value);
+        socket.emit('userPro', { message: `i am user2 , i said ${input.value}` })
         input.value = '';
       }
     });
-    socket.emit('giveServer', { message: 'i am user2' })
-    // 接收廣播
+    socket.emit('giveServer', { message: 'user2 is online' })
+    
+    // 接收廣播 byeMsg
+    socket.on('byeMsg', (msg) => {
+        var item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      })
     socket.on('welcome message', (msg) => {
       var item = document.createElement('li');
       item.textContent = msg;
