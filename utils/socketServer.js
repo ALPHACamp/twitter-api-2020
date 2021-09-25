@@ -21,7 +21,7 @@ module.exports = async (io) => {
       })
       socket.user = user
       const ifExist = onlineUser.some(user => user.id === socket.user.id)
-      if (ifExist) {
+      if (!ifExist) {
         onlineUser.push(user)
       }
       next()
@@ -57,7 +57,12 @@ module.exports = async (io) => {
         message: msg.message
       })
       // 廣播收到的訊息給大家
-      io.emit('chatMsg', { message: msg.message })
+      const current = {
+        User: socket.user,
+        message: msg.message,
+        createdAt: msg.createdAt,
+      }
+      io.emit('chatMsg', current)
       console.log('message: ' + msg.message)
     })
     socket.on('disconnect', () => {
