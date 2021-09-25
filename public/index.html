@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Client</title>
+
+</head>
+
+<body>
+    
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+    const socket = io.connect("http://localhost:3000")
+    socket.emit("joinPublic", 'user 上線')
+    socket.on('announce',(data) => {
+      console.log(data)
+    })
+    socket.on("chatmessage", obj => {
+      console.log('received all messages')
+    })
+  </script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+</body>
+
+</html>

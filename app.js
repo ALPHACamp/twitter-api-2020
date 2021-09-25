@@ -8,18 +8,22 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const app = express()
+// use express to handle http server
+const server = require('http').createServer(app)
 
 const passport = require('./config/passport')
-
 const port = process.env.PORT || 3000
-
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(express.json())
 app.use(passport.initialize())
 app.use('/upload', express.static(__dirname + '/upload'))
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public'))); // load static resource
+
 require('./routes')(app)
+require('./utils/socketio').socket(server)
 
 app.use((err, req, res, next) => {
   res.status(422).json({
@@ -28,5 +32,5 @@ app.use((err, req, res, next) => {
   })
 })
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+server.listen(port, () => console.log(`Example app listening on port ${port}!`))
 module.exports = app
