@@ -9,6 +9,17 @@ const socketService = {
     } catch (error) {
       next(error)
     }
+  },
+  storeMessage: async (message, next) => {
+    try {
+      await Message.create({
+        UserId: message.userId,
+        roomId: message.roomId,
+        content: message.content
+      })
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
