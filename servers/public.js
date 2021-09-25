@@ -17,7 +17,7 @@ module.exports = (io, socket, user) => {
       })
       if (!result.length) {
         // socket伺服器向公開房間發送消息
-        io.to(1).emit('connect status', `${user.name} 上線`)
+        io.to(1).emit('connect status', `${user.name} 進入聊天室`)
       }
 
       // 更新在線名單
@@ -95,7 +95,7 @@ module.exports = (io, socket, user) => {
             }
           })
           if (!result.length) {
-            io.to(1).emit('connect status', `${user.name} 離線`)
+            io.to(1).emit('connect status', `${user.name} 離開聊天室`)
           }
 
           // 回傳在線名單
