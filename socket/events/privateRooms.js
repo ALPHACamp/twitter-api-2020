@@ -1,27 +1,40 @@
+const messageService = require('../../services/messageService')
 module.exports = (io, socket) => {
   socket.on('unReadMessage', async (currentUserId) => {
     // Check if current user has unread messages
-    // TODO 1: const unread = await messageService.checkUnread(currentUserId)
+    // TODO 1: const unread = await messageService.checkUnreadMessage(currentUserId)
     // TODO 2: return unRead message count
     socket.emit('unReadMessage', { unread })
   })
 
-  socket.on('joinPrivateRoom', async (targetUserId, currentUserId) => {
-    // Create if room can't be found
-    //TODO 1: messageService.getPrivateRooms(targetUserId, currentUserId) to get member and room
-    //TODO 2: if room does not exists, messageService.postPrivateRoom(targetUserId, currentUserId) to post new private room
-    //TODO 3: messageService.postMember(room, targetUserId, currentUserId) to add room member
+  socket.on('joinPrivateRoom', async (msg, callback) => {
+    // Find or create if private room can't be found
+    const { targetUserId, currentUserId } = msg
+    const privateRoom = await messageService.postPrivateRoom(
+      targetUserId,
+      currentUserId
+    )
 
-    // If room can be found
-    socket.join(Room.name)
+    console.log(privateRoom)
+
+    // Join private room
+    socket.join(privateRoom.name)
+
+    // Send RoomId back to client
+    callback({ RoomId: privateRoom.id })
+
+    // Set private room name to socket.user
+    socket.user.privateRoom = privateRoom.name
 
     // Update unread message status
     // TODO : messageService.updateMessageStatus(room.id, currentUserId)
 
-
+    // Send new unread message status
+    // TODO : messageService.checkUnreadMessage(currentUserId)
+    // TODO : socket.emit('unReadMessage')
   })
 
-  socket.on('privateMessage', async (msg, targetUserId) => {
+  socket.on('privateMessage', async (msg) => {
     try {
       // Frontend : return Room name = targetUserId-currentUserId
       // TODO: add messageService.postMessage({UserId, RoomId, content})
@@ -45,7 +58,11 @@ module.exports = (io, socket) => {
 
   socket.on('leavePrivateRoom', async () => {
     try {
-      return socket.leave(Room.name)
+      // If user is in private room, leave private room
+      if (socket.user.privateRoom) {
+        socket.leave(socket.user.privateRoom)
+        console.log(socket.rooms)
+      }
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
