@@ -31,6 +31,11 @@ module.exports = (server) => {
       console.log('socket.rooms', socket.rooms)
       io.emit('debug notice', '安安這是後端, 有收到上線訊息')
       if (roomId === PUBLIC_ROOM_ID) {
+        const isActiveUser = activeUsers.filter(i => i.id === userId)
+        if (!isActiveUser.length) {
+          // notify everyone except the user
+          io.to(`${PUBLIC_ROOM_ID}`).emit('message', { message: `${user.name}上線`, type: 'notice' })
+        }
         activeUsers.push(user)
         const set = new Set()
         activeUsers = activeUsers.filter(i => !set.has(i.id)?set.add(i.id):false)
@@ -39,9 +44,6 @@ module.exports = (server) => {
           activeUsers,
           userCount: activeUsers.length,
         })
-
-        // notify everyone except the user
-        io.to(`${PUBLIC_ROOM_ID}`).emit('message', { message: `${user.name}上線`, type: 'notice' })
       }
     })
 
@@ -65,7 +67,7 @@ module.exports = (server) => {
       console.log('=== receive public chat message ===')
       await socketService.storeMessage(message, userId)
       io.to(`${PUBLIC_ROOM_ID}`).emit('debug notice', '安安這是後端, 有收到公共聊天室訊息')
-      io.to(`${PUBLIC_ROOM_ID}`).emit('public chat', generateMessage(message, userId, user.avatar))
+      io.to(`${PUBLIC_ROOM_ID}`).emit('public chat', generateMessage(message, userId, user.avatar, 'message'))
     })
 
     socket.on('private chat', async (message) => {
@@ -73,8 +75,6 @@ module.exports = (server) => {
       await socketService.storeMessage(message, userId)
 
     })
-
-
   })
 }
 
