@@ -1,3 +1,5 @@
+const moment = require('moment')
+
 const generateMessage = (text, userId, avatar, type) => {
   console.log('==== generateMessage function ====')
   
@@ -7,7 +9,7 @@ const generateMessage = (text, userId, avatar, type) => {
     userId,
     avatar,
     type,
-    createdAt: date.toLocaleString()
+    createdAt: moment(date)
   }
 }
 
