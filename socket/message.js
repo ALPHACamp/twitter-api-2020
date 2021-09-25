@@ -1,10 +1,11 @@
-const generateMessage = (text, userId, avatar, isNew) => {
+const generateMessage = (text, userId, avatar, type) => {
   console.log('==== generateMessage function ====')
-  console.log('isNew', isNew)
+  
   return {
     text,
     userId,
     avatar,
+    type,
     createdAt: new Date().getTime(),
   }
 }

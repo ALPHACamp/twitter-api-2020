@@ -55,7 +55,7 @@ module.exports = (server) => {
         })
 
         // notify everyone except the user
-        io.to(`${PUBLIC_ROOM_ID}`).emit('message', `${user.name}上線`)
+        io.to(`${PUBLIC_ROOM_ID}`).emit('message', generateMessage(`${user.name}已上線`, user.id, user.avatar, notice))
       }
     })
 
