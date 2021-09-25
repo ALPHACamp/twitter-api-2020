@@ -57,8 +57,11 @@ module.exports = (server) => {
           activeUsers = activeUsers.filter(i => {
             return i.id !== userId
           })
-          console.log(activeUsers)
-          io.to(`${PUBLIC_ROOM_ID}`).emit('message', `${user.name}下線`)
+          io.to(`${PUBLIC_ROOM_ID}`).emit('message', { message: `${user.name}下線`, type: 'notice' })
+          io.to(`${PUBLIC_ROOM_ID}`).emit('active users', {
+            activeUsers,
+            userCount: activeUsers.length,
+          })
         }
       }
     })
