@@ -8,6 +8,7 @@ module.exports = (io, socket) => {
       // TODO 2: return unRead message count
       socket.emit('unReadMessage', { unread })
     } catch (error) {
+      console.log(error)
       return socket.emit('error', {
         statusCode: error.statusCode || 400,
         errType: error.errType || 'unReadMessageError',
@@ -43,6 +44,7 @@ module.exports = (io, socket) => {
       // TODO : messageService.checkUnreadMessage(currentUserId)
       // TODO : socket.emit('unReadMessage')
     } catch (error) {
+      console.log(error)
       return socket.emit('error', {
         statusCode: error.statusCode || 400,
         errType: error.errType || 'joinPrivateRoomError',
@@ -96,6 +98,7 @@ module.exports = (io, socket) => {
       // TODO: const unread = await messageService.checkUnread(targetUserId) 
       socket.to(`user-${targetUserId}`).emit('unReadMessage', { unread })
     } catch (error) {
+      console.log(error)
       return socket.emit('error', {
         statusCode: error.statusCode || 400,
         errType: error.errType || 'privateMessageError',
@@ -112,6 +115,7 @@ module.exports = (io, socket) => {
         console.log(socket.rooms)
       }
     } catch (error) {
+      console.log(error)
       return socket.emit('error', {
         statusCode: error.statusCode || 400,
         errType: error.errType || 'leavePrivateRoomError',
