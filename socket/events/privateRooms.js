@@ -2,37 +2,53 @@ const messageService = require('../../services/messageService')
 const ApiError = require('../../utils/customError')
 module.exports = (io, socket) => {
   socket.on('unReadMessage', async (currentUserId) => {
-    // Check if current user has unread messages
-    // TODO 1: const unread = await messageService.checkUnreadMessage(currentUserId)
-    // TODO 2: return unRead message count
-    socket.emit('unReadMessage', { unread })
+    try {
+      // Check if current user has unread messages
+      // TODO 1: const unread = await messageService.checkUnreadMessage(currentUserId)
+      // TODO 2: return unRead message count
+      socket.emit('unReadMessage', { unread })
+    } catch (error) {
+      return socket.emit('error', {
+        statusCode: error.statusCode || 400,
+        errType: error.errType || 'unReadMessageError',
+        message: error.message
+      })
+    }
   })
 
   socket.on('joinPrivateRoom', async (msg, callback) => {
-    // Find or create if private room can't be found
-    const { targetUserId, currentUserId } = msg
-    const privateRoom = await messageService.postPrivateRoom(
-      targetUserId,
-      currentUserId
-    )
+    try {
+      // Find or create if private room can't be found
+      const { targetUserId, currentUserId } = msg
+      const privateRoom = await messageService.postPrivateRoom(
+        targetUserId,
+        currentUserId
+      )
 
-    console.log(privateRoom)
+      console.log(privateRoom)
 
-    // Join private room
-    socket.join(privateRoom.name)
+      // Join private room
+      socket.join(privateRoom.name)
 
-    // Send RoomId back to client
-    callback({ RoomId: privateRoom.id })
+      // Send RoomId back to client
+      callback({ RoomId: privateRoom.id })
 
-    // Set private room name to socket.user
-    socket.user.privateRoom = privateRoom.name
+      // Set private room name to socket.user
+      socket.user.privateRoom = privateRoom.name
 
-    // Update unread message status
-    // TODO : messageService.updateMessageStatus(room.id, currentUserId)
+      // Update unread message status
+      // TODO : messageService.updateMessageStatus(room.id, currentUserId)
 
-    // Send new unread message status
-    // TODO : messageService.checkUnreadMessage(currentUserId)
-    // TODO : socket.emit('unReadMessage')
+      // Send new unread message status
+      // TODO : messageService.checkUnreadMessage(currentUserId)
+      // TODO : socket.emit('unReadMessage')
+    } catch (error) {
+      return socket.emit('error', {
+        statusCode: error.statusCode || 400,
+        errType: error.errType || 'joinPrivateRoomError',
+        message: error.message
+      })
+    }
   })
 
   socket.on('privateMessage', async (msg) => {
@@ -81,7 +97,8 @@ module.exports = (io, socket) => {
       socket.to(`user-${targetUserId}`).emit('unReadMessage', { unread })
     } catch (error) {
       return socket.emit('error', {
-        status: error.name,
+        statusCode: error.statusCode || 400,
+        errType: error.errType || 'privateMessageError',
         message: error.message
       })
     }
@@ -96,7 +113,8 @@ module.exports = (io, socket) => {
       }
     } catch (error) {
       return socket.emit('error', {
-        status: error.name,
+        statusCode: error.statusCode || 400,
+        errType: error.errType || 'leavePrivateRoomError',
         message: error.message
       })
     }
