@@ -77,6 +77,9 @@ const memberSchema = Joi.object({
   }),
   RoomId: Joi.required().messages({
     'any.required': 'The RoomId cannot be blank'
+  }),
+  isRead: Joi.required().messages({
+    'any.required': 'The isRead cannot be blank'
   })
 })
 

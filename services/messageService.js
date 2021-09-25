@@ -10,8 +10,8 @@ const ApiError = require('../utils/customError')
 
 const messageService = {
   postMessage: async (message) => {
-    const { UserId, RoomId, content } = message
-
+    let { UserId, RoomId, content, isRead } = message
+    isRead ? true : false
     // Check message format with Joi schema
     const { error } = messageSchema.validate(message, { abortEarly: false })
 
@@ -26,7 +26,8 @@ const messageService = {
     return await Message.create({
       UserId,
       RoomId,
-      content
+      content,
+      isRead
     })
   },
 
@@ -112,6 +113,36 @@ const messageService = {
       { RoomId, UserId: currentUserId },
       { RoomId, UserId: targetUserId }
     ])
+  },
+
+  getPrivateUnreadMessageCount: async (currentUserId) => {
+    return await Message.count({
+      where: {
+        UserId: { [Op.not]: currentUserId },
+        RoomId: [
+          Sequelize.literal(
+            `SELECT name FROM Rooms WHERE name LIKE '%${currentUserId}%'`
+          )
+        ],
+        isRead: false
+      }
+    })
+  },
+
+  putMessageIsReadStatus: async (RoomId, currentUserId) => {
+    if (!RoomId) {
+      throw new ApiError(
+        'getUnreadMessageCountError',
+        401,
+        'The RoomId cannot be blank'
+      )
+    }
+    return await Message.update(
+      { isRead: true },
+      {
+        where: { UserId: { [Op.not]: currentUserId }, RoomId }
+      }
+    )
   }
 }
 
