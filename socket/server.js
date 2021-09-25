@@ -1,6 +1,5 @@
-const socketio = require('socket.io')
-const { getCurrentUser } = require('../services/userService')
-
+const PUBLIC_ROOM_ID = 1
+const activeUsers = new Set()
 
 module.exports = (server) => {
   const io = require('socket.io')(server, {
@@ -26,46 +25,40 @@ module.exports = (server) => {
     })
   })
 
-  // io.on('connection', async (socket) => {
+  io.on('connection', async (socket) => {
     
-  //   console.log(socket.userId)
-  //   const userId = socket.data.userId
+    console.log(socket.userId)
+    const userId = socket.userId
 
-  //   const user = socketService.getCurrentUser(userId)
-  //   socket.on('join', async ({ username, roomId }) => {
-  //     // console.log('===== receive join =====')
-  //     // console.log('username', username)
-  //     // console.log('roomId', roomId)
-  //     // console.log('PUBLIC_ROOM_ID', PUBLIC_ROOM_ID)
-  //     const activeUsers = new Set()
-  //     roomId = Number(roomId)
-  //     socket.join(`${roomId}`)
-  //     console.log('socket.rooms', socket.rooms)
+    const user = socketService.getUser(userId)
 
-  //     await updateTime(userId, roomId)
+    socket.on('join', async ({ roomId }) => {
 
-  //     if (roomId === PUBLIC_ROOM_ID) {
-  //       activeUsers.add(user)
+      roomId = Number(roomId)
+      socket.join(`${roomId}`)
+      console.log('socket.rooms', socket.rooms)
 
-  //       io.to(`${roomId}`).emit('users count', {
-  //         activeUsers: [...activeUsers],
-  //         userCount: activeUsers.length,
-  //       })
+      if (roomId === PUBLIC_ROOM_ID) {
+        activeUsers.add(user)
+        io.to(`${roomId}`).emit('active users', {
+          activeUsers: [...activeUsers],
+          userCount: activeUsers.length,
+        })
 
-  //       // notify everyone except the user
-  //       socket.broadcast.to(`${roomId}`).emit('message', generateMessage(`${username} 上線`))
-  //     }
-  //   })
+        // notify everyone except the user
+        socket.broadcast.to(`${PUBLIC_ROOM_ID}`).emit('message', `${user.name}上線`)
+      }
+    })
 
-  //   socket.on('public chat', async (msg) => {
-
-  //   })
-
-  //   socket.on('private chat', async (msg) => {
+    socket.on('public chat', async (msg) => {
       
-  //   })
+    })
+
+    socket.on('private chat', async (msg) => {
+      
+    })
 
 
-  // })
+  })
 }
 
