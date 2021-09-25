@@ -53,7 +53,7 @@ module.exports = (server) => {
       io.emit('debug notice', `安安這是後端, 有收到來自UserId:${userId} 離開 RoomId${roomId}的訊息`)
       if (roomId) {
         socket.leave(`${roomId}`)
-        if (roomId === PUBLIC.PUBLIC_ROOM_ID) {
+        if (roomId === PUBLIC_ROOM_ID) {
           activeUsers = activeUsers.filter(i => {
             return i.id !== userId
           })
