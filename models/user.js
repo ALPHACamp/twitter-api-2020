@@ -29,26 +29,17 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'UserId',
       as: 'UserInRooms'
     })
-    User.belongsToMany(models.User, {
-      through: models.Subscribeship,
-      foreignKey: 'subscriberId',
-      as: 'Subscribings'
-    })
-    User.belongsToMany(models.User, {
-      through: models.Subscribeship,
-      foreignKey: 'subscribingId',
-      as: 'Subscribers'
-    })
-    User.belongsToMany(models.User, {
-      through: models.Notification,
-      foreignKey: 'triggerId',
-      as: 'Trigger'
-    })
-    User.belongsToMany(models.User, {
-      through: models.Notification,
-      foreignKey: 'targetId',
-      as: 'Target'
-    })
+    // 如果定義以下關係，則notification無法正常關聯到subscribeship,可能要改成belongsTo，並到Notification去定義
+    // User.belongsToMany(models.User, {
+    //   through: models.Subscribeship,
+    //   foreignKey: 'subscriberId',
+    //   as: 'Subscribings'
+    // })
+    // User.belongsToMany(models.User, {
+    //   through: models.Subscribeship,
+    //   foreignKey: 'subscribingId',
+    //   as: 'Subscribers'
+    // })
   };
   return User;
 };

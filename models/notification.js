@@ -10,11 +10,21 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
+      Notification.belongsTo(models.Subscribeship)
       Notification.belongsTo(models.Tweet)
       Notification.belongsTo(models.Reply)
       Notification.belongsTo(models.Like)
       Notification.belongsTo(models.Followship)
-      Notification.belongsTo(models.Subscribeship)
+      Notification.belongsTo(models.User, {
+        through: models.Notification,
+        foreignKey: 'triggerId',
+        as: 'Trigger'
+      })
+      Notification.belongsTo(models.User, {
+        through: models.Notification,
+        foreignKey: 'targetId',
+        as: 'Target'
+      })
     }
   };
   Notification.init({
