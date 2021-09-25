@@ -49,6 +49,8 @@ router.get('/users/:id', helpers.ensureAuthenticated, userController.userHomePag
 
 router.put('/users/:id', helpers.ensureAuthenticated, upload.array('files', 2), userController.editUserData) //增加
 
+// router.get('/userok', helpers.ensureAuthenticated, userController.userok) //for testing
+
 
   //followship路由
 router.post('/followships', helpers.ensureAuthenticated, followshipController.follow) //路由要改
