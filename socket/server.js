@@ -2,7 +2,7 @@ const PUBLIC_ROOM_ID = 1
 const socketService = require('../services/socketService')
 const { authenticatedSocket } = require('../middleware/auth')
 const { generateMessage } = require('./message')
-
+let activeUsers = []
 module.exports = (server) => {
   const io = require('socket.io')(server, {
     cors: {
@@ -24,7 +24,6 @@ module.exports = (server) => {
 
     const user = await socketService.getUser(userId)
     console.log(user)
-    let activeUsers = []
     socket.on('join', async ({ roomId }) => {
 
       roomId = Number(roomId)
