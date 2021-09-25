@@ -8,6 +8,14 @@ const messageController = {
   getMessages: async (req, res, next) => {
     try {
       const RoomId = req.params.RoomId
+
+      if (!RoomId) {
+        throw new ApiError(
+          'getMessagesError',
+          401,
+          'The RoomId cannot be blank'
+        )
+      }
       const messages = await messageService.getMessages(RoomId)
       return res.status(200).json(messages)
     } catch (error) {
@@ -19,6 +27,13 @@ const messageController = {
     try {
       const currentUserId = helpers.getUser(req).id
 
+      if (!currentUserId) {
+        throw new ApiError(
+          'getPrivateRoomsError',
+          401,
+          'The currentUserId cannot be blank'
+        )
+      }
       const rooms = await messageService.getPrivateRooms(null, currentUserId)
       return res.status(200).json(rooms)
     } catch (error) {

@@ -67,6 +67,26 @@ const messageSchema = Joi.object({
   })
 })
 
+// Joi schema for validating message format
+const memberSchema = Joi.object({
+  currentUserId: Joi.required().messages({
+    'any.required': 'The currentUserId cannot be blank'
+  }),
+  targetUserId: Joi.required().messages({
+    'any.required': 'The targetUserId cannot be blank'
+  }),
+  RoomId: Joi.required().messages({
+    'any.required': 'The RoomId cannot be blank'
+  })
+})
+
+const roomSchema = Joi.object({
+  name: Joi.string().trim().required().messages({
+    'string.base': 'Data type of name must be a string',
+    'any.required': 'The currentUserId cannot be blank'
+  })
+})
+
 // Filter Joi error details to a single array
 const joiMessageHandler = (errors) => {
   const messages = []
@@ -131,5 +151,7 @@ module.exports = {
   tweetSchema,
   replySchema,
   messageSchema,
+  memberSchema,
+  roomSchema,
   checkUserInfoUniqueness
 }
