@@ -115,25 +115,17 @@ const messageService = {
     ])
   },
 
-  getUnreadMessageCount: async (currentUserId) => {
-    return await User.findOne({
-      where: { id: currentUserId },
-      include: [{ model: Message, attributes: [] }],
-      attributes: [
-        ['id', 'UserId'],
-        [
+  getPrivateUnreadMessageCount: async (currentUserId) => {
+    return await Message.count({
+      where: {
+        UserId: { [Op.not]: currentUserId },
+        RoomId: [
           Sequelize.literal(
-            `(SELECT COUNT(*) FROM Messages WHERE isRead = 0 AND RoomId = 5 AND UserId = ${currentUserId})`
-          ),
-          'PublicUnreadCount'
+            `SELECT name FROM Rooms WHERE name LIKE '%${currentUserId}%'`
+          )
         ],
-        [
-          Sequelize.literal(
-            `(SELECT COUNT(*) FROM Messages WHERE isRead = 0 AND RoomId != 5 AND UserId = ${currentUserId})`
-          ),
-          'PrivateUnreadCount'
-        ]
-      ]
+        isRead: false
+      }
     })
   },
 
@@ -148,9 +140,7 @@ const messageService = {
     return await Message.update(
       { isRead: true },
       {
-        where: {
-          [Op.and]: [{ UserId: currentUserId }, { RoomId: RoomId }]
-        }
+        where: { UserId: { [Op.not]: currentUserId }, RoomId }
       }
     )
   }
