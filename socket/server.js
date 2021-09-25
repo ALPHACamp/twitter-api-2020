@@ -47,12 +47,12 @@ module.exports = (server) => {
       }
     })
 
-    socket.on('disconnect', async ({ roomId }) => {
+    socket.on('leave', async ({ roomId }) => {
       console.log('== receive leave message===')
       console.log(userId)
       io.emit('debug notice', `安安這是後端, 有收到來自UserId:${userId} 離開 RoomId${roomId}的訊息`)
       if (roomId) {
-        // socket.leave(`${roomId}`)
+        socket.leave(`${roomId}`)
         if (roomId === PUBLIC.PUBLIC_ROOM_ID) {
           activeUsers = activeUsers.filter(i => {
             return i.id !== userId
@@ -73,7 +73,7 @@ module.exports = (server) => {
     socket.on('private chat', async (message) => {
       console.log('=== receive public chat message ===')
       await socketService.storeMessage(message, userId)
-
+      io.to(`${message.roomId}`).emit('message', generateMessage(message, userId, user.avatar, 'message'))
     })
   })
 }
