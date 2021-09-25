@@ -24,20 +24,33 @@ module.exports = (io, socket) => {
     try {
       // Find or create if private room can't be found
       const { targetUserId, currentUserId } = msg
-      const privateRoom = await messageService.postPrivateRoom(
+      let privateRoom = await messageService.postPrivateRoom(
         targetUserId,
         currentUserId
       )
-      const RoomId = privateRoom.Room.dataValues.id
+      
+      // Set RoomId and roomName due to new private room or existed private room
+      privateRoom = privateRoom.toJSON()
+      let RoomId
+      let roomName
+      console.log(privateRoom)
+
+      if (privateRoom.Room) {
+        RoomId = privateRoom.RoomId
+        roomName = privateRoom.Room.name
+      } else {
+        RoomId = privateRoom.id
+        roomName = privateRoom.name
+      }
 
       // Join private room
-      socket.join(privateRoom.Room.dataValues.name)
+      socket.join(roomName)
 
       // Send RoomId back to client
       callback({ RoomId })
 
       // Set private room name to socket.user
-      socket.user.privateRoom = privateRoom.Room.dataValues.name
+      socket.user.privateRoom = roomName
 
       console.log(socket.user)
       console.log(socket.rooms)
