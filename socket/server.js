@@ -1,6 +1,6 @@
 const PUBLIC_ROOM_ID = 1
 const socketService = require('../services/socketService')
-const { authernticatedSocket, authenticatedSocket } = require('../middleware/auth')
+const { authenticatedSocket } = require('../middleware/auth')
 const { generateMessage } = require('./message')
 
 module.exports = (server) => {
@@ -13,19 +13,6 @@ module.exports = (server) => {
     rejectUnauthorized: false,
     maxHttpBufferSize: 100000000,
   })
-
-
-  // io.on('connection', (socket) => {
-  //   console.log('========user connected=========')
-    
-  //   // 建立一個 "sendMessage" 的監聽
-  //   socket.on('sendMessage', function (message) {
-  //     console.log(message)
-      
-  //     // 當收到事件的時候，也發送一個 "allMessage" 事件給所有的連線用戶
-  //     io.emit('allMessage', '哈囉這是後端')
-  //   })
-  // })
 
   io.use(authenticatedSocket).on('connection', async socket => {
     console.log('== connected! ===')
@@ -77,6 +64,7 @@ module.exports = (server) => {
 
     socket.on('public chat', async (message) => {
       console.log('=== receive public chat message ===')
+      await socketService.storeMessage(message)
       io.to(`${PUBLIC_ROOM_ID}`).emit('debug notice', '安安這是後端, 有收到公共聊天室訊息')
       io.to(`${PUBLIC_ROOM_ID}`).emit('public chat', generateMessage(message, userId, user.avatar))
     })
