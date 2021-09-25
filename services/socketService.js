@@ -10,10 +10,10 @@ const socketService = {
       next(error)
     }
   },
-  storeMessage: async (message, next) => {
+  storeMessage: async (message, userId, next) => {
     try {
       await Message.create({
-        UserId: message.userId,
+        UserId: userId,
         roomId: message.roomId,
         content: message.content
       })

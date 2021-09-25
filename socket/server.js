@@ -41,11 +41,11 @@ module.exports = (server) => {
         })
 
         // notify everyone except the user
-        io.to(`${PUBLIC_ROOM_ID}`).emit('message', generateMessage(`${user.name}已上線`, user.id, user.avatar, notice))
+        io.to(`${PUBLIC_ROOM_ID}`).emit('message', { message: `${user.name}以上線`, type: 'notice' })
       }
     })
 
-    socket.on('leave', async ({ roomId }) => {
+    socket.on('disconnect', async ({ roomId }) => {
       console.log('== receive leave message===')
       console.log(userId)
       io.emit('debug notice', `安安這是後端, 有收到來自UserId:${userId} 離開 RoomId${roomId}的訊息`)
@@ -63,13 +63,15 @@ module.exports = (server) => {
 
     socket.on('public chat', async (message) => {
       console.log('=== receive public chat message ===')
-      await socketService.storeMessage(message)
+      await socketService.storeMessage(message, userId)
       io.to(`${PUBLIC_ROOM_ID}`).emit('debug notice', '安安這是後端, 有收到公共聊天室訊息')
       io.to(`${PUBLIC_ROOM_ID}`).emit('public chat', generateMessage(message, userId, user.avatar))
     })
 
-    socket.on('private chat', async (msg) => {
+    socket.on('private chat', async (message) => {
       console.log('=== receive public chat message ===')
+      await socketService.storeMessage(message, userId)
+
     })
 
 
