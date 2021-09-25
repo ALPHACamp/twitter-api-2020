@@ -53,6 +53,20 @@ const replySchema = Joi.object({
   })
 })
 
+// Joi schema for validating message format
+const messageSchema = Joi.object({
+  UserId: Joi.required().messages({
+    'any.required': 'The UserId cannot be blank'
+  }),
+  RoomId: Joi.required().messages({
+    'any.required': 'The RoomId cannot be blank'
+  }),
+  content: Joi.string().trim().max(140).messages({
+    'string.base': 'Data type of content must be a string',
+    'string.max': 'The content should not exceed 140 words'
+  })
+})
+
 // Filter Joi error details to a single array
 const joiMessageHandler = (errors) => {
   const messages = []
@@ -89,10 +103,7 @@ const checkUserInfoUniqueness = async (body, id) => {
     const checkEmail = await User.findOne({
       where: {
         id: { [Op.not]: id },
-        email: Sequelize.where(
-          Sequelize.literal(`BINARY email`),
-          `${email}`
-        )
+        email: Sequelize.where(Sequelize.literal(`BINARY email`), `${email}`)
       }
     })
     if (checkEmail) {
@@ -105,10 +116,7 @@ const checkUserInfoUniqueness = async (body, id) => {
     const checkName = await User.findOne({
       where: {
         id: { [Op.not]: id },
-        name: Sequelize.where(
-          Sequelize.literal(`BINARY name`),
-          `${name}`
-        )
+        name: Sequelize.where(Sequelize.literal(`BINARY name`), `${name}`)
       }
     })
     if (checkName) {
@@ -122,5 +130,6 @@ module.exports = {
   userInfoSchema,
   tweetSchema,
   replySchema,
+  messageSchema,
   checkUserInfoUniqueness
 }

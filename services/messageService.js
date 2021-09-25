@@ -1,9 +1,25 @@
 const { Message, Room, Member, User, Sequelize } = require('../models')
 const { Op } = require('sequelize')
+const { joiMessageHandler, messageSchema } = require('../utils/validator')
+const ApiError = require('../utils/customError')
 
 const messageService = {
   postMessage: async (message) => {
     const { UserId, RoomId, content } = message
+
+    // Check message format with Joi schema
+    const { error } = messageSchema.validate(message, { abortEarly: false })
+
+    // FIXME: I didn’t see the error correctly, but it was interrupted.
+    if (error) {
+      console.log(joiMessageHandler(error.details))
+      throw new ApiError(
+        'postTweetFormatError',
+        400,
+        joiMessageHandler(error.details)
+      )
+    }
+
     return await Message.create({
       UserId,
       RoomId,
@@ -12,6 +28,7 @@ const messageService = {
   },
 
   getMessages: async (RoomId) => {
+    console.log(typeof RoomId)
     return await Message.findAll({
       where: { RoomId },
       include: [
