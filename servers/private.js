@@ -21,7 +21,7 @@ module.exports = (io, socket, loginUser) => {
       room = room.get({ plain: true })
       // 加入房間
       socket.join(room.id)
-      await RoomUser.create({ where: { RoomId: room.id, UserId: loginUser.id } })
+      await RoomUser.create({ RoomId: room.id, UserId: loginUser.id, socketId: loginUser.socketId })
 
       io.to(room.id).emit('join room success', room.id)
       // TODO:更新聊天紀錄人員列表，回傳的使用者資料排除登入使用者的，只回傳對方資料
@@ -58,7 +58,7 @@ module.exports = (io, socket, loginUser) => {
           delete Object.assign(data, { ['user']: data['Creator'] })['Creator']
         }
       })
-      console.log(chatList)
+
       io.to(room.id).emit('chat member list', chatList)
 
       // 將該房間傳給我的訊息改為已讀
@@ -114,6 +114,14 @@ module.exports = (io, socket, loginUser) => {
         io.to(room.id).emit('update message', { message, user: loginUser })
       })
 
+      socket.on('leave private', async () => {
+        try {
+          await RoomUser.destroy({ where: { RoomId: room.id, UserId: loginUser.id } })
+          socket.leave(room.id)
+        } catch (err) {
+          console.warn(err)
+        }
+      })
 
     } catch (err) {
       console.warn(err)

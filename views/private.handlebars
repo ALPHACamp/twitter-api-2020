@@ -63,6 +63,7 @@
 
 <body>
   <h2>私人聊天室</h2>
+  <button id="offline">離開私人聊天室</button>
   <ul id="messages"></ul>
   <form id="form" action="">
     <input id="input" name="message" autocomplete="off" /><button>Send</button>
@@ -75,6 +76,7 @@
   const messages = document.getElementById('messages');
   const form = document.getElementById('form');
   const input = document.getElementById('input');
+  const offline = document.getElementById('offline');
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -83,7 +85,9 @@
       input.value = '';
     }
   })
-
+  offline.addEventListener('click', () => {
+    socket.emit('leave private')
+  })
 
   socket.emit('join room', 11)
 
