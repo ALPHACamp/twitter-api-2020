@@ -74,37 +74,38 @@ module.exports = (io, socket, user) => {
           console.warn(err)
         }
       })
-      // TODO:如果server重啟，要自動清空roomUser
-      socket.on('leave public', async () => {
-        try {
-          // 下線
-          socket.leave(1)
-          await RoomUser.destroy({
-            where: {
-              socketId: user.socketId,
-              RoomId: 1
-            }
-          })
-          // TODO:跟上線邏輯很像，要重構
-          // 離線後，確認房間是否還有user，沒的話才傳
-          const result = await RoomUser.findAll({
-            raw: true, nest: true,
-            where: {
-              RoomId: 1,
-              UserId: user.id
-            }
-          })
-          if (!result.length) {
-            io.to(1).emit('connect status', `${user.name} 離開聊天室`)
-          }
+    } catch (err) {
+      console.warn(err)
+    }
+  })
 
-          // 回傳在線名單
-          const userList = await getRoomUsers(1)
-          io.to(1).emit('online user', userList)
-        } catch (err) {
-          console.warn(err)
+  // TODO:如果server重啟，要自動清空roomUser
+  socket.on('leave public', async () => {
+    try {
+      // 下線
+      socket.leave(1)
+      await RoomUser.destroy({
+        where: {
+          socketId: user.socketId,
+          RoomId: 1
         }
       })
+      // TODO:跟上線邏輯很像，要重構
+      // 離線後，確認房間是否還有user，沒的話才傳
+      const result = await RoomUser.findAll({
+        raw: true, nest: true,
+        where: {
+          RoomId: 1,
+          UserId: user.id
+        }
+      })
+      if (!result.length) {
+        io.to(1).emit('connect status', `${user.name} 離開聊天室`)
+      }
+
+      // 回傳在線名單
+      const userList = await getRoomUsers(1)
+      io.to(1).emit('online user', userList)
     } catch (err) {
       console.warn(err)
     }
