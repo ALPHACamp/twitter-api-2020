@@ -34,7 +34,7 @@ module.exports = (io, socket, user) => {
       // 傳入房間歷史訊息
       const messages = await Message.findAll({
         raw: true, nest: true,
-        attributes: ['content', 'createdAt'],
+        attributes: ['id', 'content', 'createdAt'],
         where: { RoomId: 1 },
         include: {
           model: User,
