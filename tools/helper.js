@@ -1,6 +1,6 @@
 const db = require('../models')
 const sequelize = require('sequelize')
-const { RoomUser, User } = db
+const { RoomUser, User, Subscribeship, Notification } = db
 function turnToBoolean(data, attribute) {
   if (Array.isArray(data)) {
     data.forEach(data => {
@@ -69,4 +69,32 @@ function getEmitSockets(subscribers, userSocketIdMap) {
   // 將set轉為陣列 [set {'abc','dec'}, set {'123'}] => ['abc','dec','123']
   return Array.from(...notifySockets)
 }
-module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets }
+
+async function CreateNotification(sourceKey, sourceValue, subscribingId) {
+  try {
+    // 撈出該用戶的訂閱者(通知對象)
+    let subscribers = await Subscribeship.findAll({
+      attributes: [['subscriberId', 'targetId'], ['subscribingId', 'triggerId']],
+      raw: true,
+      where: {
+        subscribingId
+      }
+    })
+
+    // 整理要紀錄到notification的資料,加上推文id
+    subscribers.forEach(data => {
+      data[`${sourceKey}`] = sourceValue  // [ { targetId: 11, triggerId: 31, TweetId: 1 } ]
+    })
+
+    // 紀錄通知到 Notifications table
+    await Notification.bulkCreate(
+      subscribers
+      , { returning: true })
+
+    return subscribers
+  } catch (err) {
+    console.warn(err)
+  }
+}
+
+module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification }

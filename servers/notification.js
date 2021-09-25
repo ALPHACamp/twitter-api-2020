@@ -1,27 +1,11 @@
 const db = require('../models')
 const { Notification, Subscribeship, Tweet, User, Reply, Followship, Like } = db
-const { getEmitSockets } = require('../tools/helper')
+const { getEmitSockets, CreateNotification } = require('../tools/helper')
 module.exports = async (io, socket, loginUser, userSocketIdMap) => {
 
   socket.on('post tweet', async (TweetId) => {
     try {
-      // 撈出該用戶的訂閱者(通知對象)
-      let subscribers = await Subscribeship.findAll({
-        attributes: [['subscriberId', 'targetId'], ['subscribingId', 'triggerId']],
-        raw: true,
-        where: {
-          subscribingId: loginUser.id
-        }
-      })
-      // 整理要紀錄到notification的資料,加上推文id
-      subscribers.forEach(data => {
-        data.TweetId = TweetId   // [ { targetId: 11, triggerId: 31, TweetId: 1 } ]
-      })
-
-      // 紀錄到 Notifications table
-      await Notification.bulkCreate(
-        subscribers
-        , { returning: true })
+      const subscribers = await CreateNotification('TweetId', TweetId, loginUser.id)
 
       // 要通知訂閱戶的資料本身
       const tweet = await Tweet.findOne({
@@ -32,7 +16,6 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
       //發送通知
       const notifySockets = getEmitSockets(subscribers, userSocketIdMap)
       io.to(notifySockets).emit('tweet notify', { tweet: tweet.toJSON() })
-
     } catch (err) {
       console.warn(err)
     }
