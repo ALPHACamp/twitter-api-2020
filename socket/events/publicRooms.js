@@ -30,12 +30,12 @@ module.exports = (io, socket, publicUsers) => {
 
         // Send announce to other public room users
         socket.to('public').emit('announce', {
-          message: `${name} joined`
+          content: `${name} joined`
         })
 
         // Send welcome message to current user
         socket.emit('announce', {
-          message: `Welcome, ${name}!`
+          content: `Welcome, ${name}!`
         })
 
         // Update new publicUsers to client side
@@ -99,7 +99,7 @@ module.exports = (io, socket, publicUsers) => {
         // Send announce only if the public room still have remained users
         if (publicUsers.length) {
           socket.to('public').emit('announce', {
-            message: `${name} leaved`
+            content: `${name} leaved`
           })
         }
 

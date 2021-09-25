@@ -45,7 +45,7 @@ module.exports = (io) => {
           // Send announce only if the public room still have remained users
           if (publicUsers.length) {
             socket.to('public').emit('announce', {
-              message: `${user.name} leaved`
+              content: `${user.name} leaved`
             })
           }
 
