@@ -1,5 +1,6 @@
 const db = require('../models')
 const { Notification, Subscribeship, Tweet, User, Reply, Followship, Like } = db
+const { getEmitSockets } = require('../tools/helper')
 module.exports = async (io, socket, loginUser, userSocketIdMap) => {
 
   socket.on('post tweet', async (TweetId) => {
@@ -28,23 +29,8 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
         where: { id: TweetId },
         include: { model: User, attributes: ['id', 'avatar', 'name'] },
       })
-
-      // 發送通知給有在線的訂閱戶 
-
-      // 將通知對象整理成id陣列
-      subscribers = subscribers.map(d => (d.targetId))
-      let notifySockets = []
-      // 判斷是否有在線，如果有則取得該訂閱戶的sockets
-      for (let entry of userSocketIdMap) {  // entry = [11, set {'socketId','socketId'}]
-        const isOnline = subscribers.includes(entry[0])
-        if (isOnline) {
-          notifySockets.push(entry[1])
-        }
-      }
-      // 將set轉為陣列 [set {'abc','dec'}, set {'123'}] => ['abc','dec','123']
-      notifySockets = Array.from(...notifySockets)
-
       //發送通知
+      const notifySockets = getEmitSockets(subscribers, userSocketIdMap)
       io.to(notifySockets).emit('tweet notify', { tweet: tweet.toJSON() })
 
     } catch (err) {
@@ -52,10 +38,10 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
     }
   })
 
-
   socket.on('join notification', async () => {
     try {
       // 送給前端 登入使用者所有的通知
+      // TODO: 重構成getAllNotification 放在services
       // TODO: 一定要撈出所有的嗎？有無更有效率的方式
       const notifications = await Notification.findAll({
         raw: true, nest: true,

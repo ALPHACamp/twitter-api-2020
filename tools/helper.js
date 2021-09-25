@@ -50,5 +50,23 @@ function removeClientFromMap(UserId, socketId, userSocketIdMap) {
       userSocketIdMap.delete(UserId)
     }
   }
+
+
 }
-module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap }
+
+function getEmitSockets(subscribers, userSocketIdMap) {
+  // 發送通知給有在線的訂閱戶 
+  let notifySockets = []
+  // 將通知對象整理成id陣列
+  subscribers = subscribers.map(d => (d.targetId))
+  // 判斷是否有在線，如果有則取得該訂閱戶的sockets
+  for (let entry of userSocketIdMap) {  // entry = [11, set {'socketId','socketId'}]
+    const isOnline = subscribers.includes(entry[0])
+    if (isOnline) {
+      notifySockets.push(entry[1])
+    }
+  }
+  // 將set轉為陣列 [set {'abc','dec'}, set {'123'}] => ['abc','dec','123']
+  return Array.from(...notifySockets)
+}
+module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets }
