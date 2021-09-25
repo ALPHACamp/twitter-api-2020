@@ -316,7 +316,7 @@ const userService = {
       order: [[Sequelize.col('FollowersCount'), 'DESC']],
       limit: 6,
     })
-    return topSixUsers
+    return topUsers
   },
   putUserSettings: async (id, body) => {
     const { account, email, password } = body
