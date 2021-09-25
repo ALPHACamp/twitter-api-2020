@@ -30,10 +30,25 @@ const subscribeshipService = {
       console.warn(err)
       return cb({ status: '500', message: err })
     }
+  },
+
+  unSubscribeUser: async (req, res, cb) => {
+    try {
+      const targetId = req.params.subscribingId
+      const loginUserId = req.user.id
+      const record = await Subscribeship.destroy({
+        where: {
+          subscriberId: loginUserId,
+          subscribingId: targetId,
+        }
+      })
+      if (!record) return cb({ status: '400', message: '該訂閱紀錄不存在，故取消訂閱無效' })
+      return cb({ status: '200', message: '取消訂閱成功' })
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
   }
-
-
-  // unsubscribeUser:
 }
 
 module.exports = subscribeshipService
