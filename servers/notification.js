@@ -1,5 +1,5 @@
 const db = require('../models')
-const { Notification, Subscribeship, Tweet, User } = db
+const { Notification, Subscribeship, Tweet, User, Reply, Followship, Like } = db
 module.exports = async (io, socket, loginUser, userSocketIdMap) => {
 
   socket.on('post tweet', async (TweetId) => {
@@ -44,7 +44,7 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
       // 將set轉為陣列 [set {'abc','dec'}, set {'123'}] => ['abc','dec','123']
       notifySockets = Array.from(...notifySockets)
 
-      //前端要自己根據資料拼湊出： xxx有新的推文通知
+      //發送通知
       io.to(notifySockets).emit('tweet notify', { tweet: tweet.toJSON() })
 
     } catch (err) {
@@ -53,12 +53,37 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
   })
 
 
-
-
-
-
-
-
-  // console.log(userSocketIdMap) //1 => set[ ‘abc001’, ‘def002’]
-
+  socket.on('join notification', async () => {
+    try {
+      // 送給前端 登入使用者所有的通知
+      // TODO: 一定要撈出所有的嗎？有無更有效率的方式
+      const notifications = await Notification.findAll({
+        raw: true, nest: true,
+        attributes: ['id', 'isRead', 'createdAt'], //讓前端可以顯示出來互動時間點，就像臉書
+        where: {
+          targetId: loginUser.id
+        },
+        include: [
+          { model: Tweet, attributes: ['id', 'description'] },
+          { model: Reply, attributes: ['id', 'comment', 'TweetId'] }, //如果未來需要推文內容，在關聯Tweet
+          { model: Followship, attributes: ['id'] }, //有人追蹤我
+          { model: Subscribeship, attributes: ['id'] }, //因為沒有黑單功能，所以不須傳對方的id，讓你可以取消
+          { model: Like, attributes: ['TweetId'] },
+          { model: User, as: 'Trigger', attributes: ['id', 'name', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      // 將沒資料的欄位刪掉
+      notifications.forEach(data => {
+        if (data.Tweet.id === null) delete data.Tweet
+        if (data.Reply.id === null) delete data.Reply
+        if (data.Like.TweetId === null) delete data.Like
+        if (data.Subscribeship.id === null) delete data.Subscribeship
+        if (data.Followship.id === null) delete data.Followship
+      })
+      io.to(loginUser.socketId).emit('all notification', notifications)
+    } catch (err) {
+      console.warn(err)
+    }
+  })
 }

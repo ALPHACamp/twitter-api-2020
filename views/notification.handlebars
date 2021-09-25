@@ -4,7 +4,12 @@
   socket.emit('post tweet', 1)
   // 新增推文的頁面
 
-
+  //一進通知頁面時，通知伺服器（索取所有通知）
+  socket.emit('join notification')
+  socket.on('all notification', data => {
+    console.log('所有通知')
+    console.log(data)
+  })
   //通知頁面會監聽以下事件：
 
   // TODO:進入通知頁面
