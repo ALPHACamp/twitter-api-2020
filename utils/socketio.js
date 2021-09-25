@@ -24,18 +24,18 @@ const socket = server => {
   if (!io) throw new Error('No socket io server instance')
 
   io.use(authenticatedSocket).on('connection', socket => {
-    console.log(socket.user)
-    //先隨便設定username
+
+
     console.log('===== connected!!! =====')
-    //計算目前使用io的人
+
     const { clientsCount } = io.engine
     console.log('有人加入公開聊天室，目前人數:', clientsCount)
-    // socket.broadcast.emit("announce", {
-    //     message: `User${socket.username} 上線`
-    //   })
+  
 
     socket.on('joinPublic', (d) => {
+      userList.push(socket.user)
       console.log(`${d.name} 上線`)
+      console.log(userList)
       socket.broadcast.emit("announce", d)
     })
 
@@ -45,16 +45,18 @@ const socket = server => {
       //TODO 建立message database
     })
 
-    // socket.on('leavePublic',  () => {
-    //   clientsCount-=1
-    //   console.log("A user leaved.")
-    //   io.emit("announce", {
-    //     message: 'user 離線'
-    //   })
-    // })
+/*     socket.on('leavePublic',  () => {
+      clientsCount-=1
+      console.log("A user leaved.")
+      io.emit("announce", {
+        message: 'user 離線'
+      })
+    }) */
     socket.on('disconnect', () => {
+      console
 
-      console.log(`有人離開：目前人數:', clientsCount`)
+      console.log(`有人離開：目前人數:', ${clientsCount}`)
+
 
     })
 

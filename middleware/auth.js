@@ -1,6 +1,7 @@
 const passport = require('../config/passport')
 const jwt = require('jsonwebtoken')
 const { User } = require('../models')
+const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -17,7 +18,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'user') {
+  if (helpers.getUser(req) && helpers.getUser(req).role === 'user') {
     return res.status(401).json({
       status: 'error',
       message: '帳號不存在'
@@ -26,7 +27,7 @@ const authenticatedAdmin = (req, res, next) => {
   next()
 }
 const checkRoleIsUser = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (helpers.getUser(req) && helpers.getUser(req).role === 'admin') {
     return res.status(401).json({
       status: 'error',
       message: '無帳戶'
