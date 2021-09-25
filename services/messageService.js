@@ -135,6 +135,24 @@ const messageService = {
         ]
       ]
     })
+  },
+
+  putMessageIsReadStatus: async (RoomId, currentUserId) => {
+    if (!RoomId) {
+      throw new ApiError(
+        'getUnreadMessageCountError',
+        401,
+        'The RoomId cannot be blank'
+      )
+    }
+    return await Message.update(
+      { isRead: true },
+      {
+        where: {
+          [Op.and]: [{ UserId: currentUserId }, { RoomId: RoomId }]
+        }
+      }
+    )
   }
 }
 
