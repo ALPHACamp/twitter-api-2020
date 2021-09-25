@@ -59,10 +59,13 @@ module.exports = (io, socket, publicUsers) => {
 
       // Handle response data
       const data = {
-        userId: socket.user.id,
+        RoomId: msg.RoomId,
+        User: socket.user,
+        UserId: socket.user.id,
         content: msg.content,
-        avatar: socket.user.avatar,
-        createdAt: message.dataValues.createdAt
+        createdAt: message.dataValues.createdAt,
+        id: message.dataValues.id,
+        updatedAt: message.dataValues.updatedAt
       }
 
       return io.in('public').emit('publicMessage', data)
