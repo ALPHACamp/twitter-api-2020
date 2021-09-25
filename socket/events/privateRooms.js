@@ -28,19 +28,24 @@ module.exports = (io, socket) => {
         targetUserId,
         currentUserId
       )
-      
+
       // Set RoomId and roomName due to new private room or existed private room
       privateRoom = privateRoom.toJSON()
       let RoomId
       let roomName
       console.log(privateRoom)
-
+      
+      // private room is already exists
       if (privateRoom.Room) {
         RoomId = privateRoom.RoomId
         roomName = privateRoom.Room.name
+      // a new private room
       } else {
         RoomId = privateRoom.id
         roomName = privateRoom.name
+        io.to(`user-${targetUserId}`).emit('newPrivateRoom', {
+          message: `New private room: ${roomName} is created by ${socket.user.name}`
+        })
       }
 
       // Join private room
@@ -117,7 +122,7 @@ module.exports = (io, socket) => {
       console.log(`currentUser: ${currentUserId}, targetUser: ${targetUserId}`)
       const privateUnreadMessageCount =
         await messageService.getPrivateUnreadMessageCount(targetUserId)
-      // TODO: const unread = await messageService.checkUnread(targetUserId)
+    
       io.to(`user-${targetUserId}`).emit('unReadMessage', {
         privateUnreadMessageCount
       })
