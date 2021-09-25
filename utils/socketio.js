@@ -29,34 +29,33 @@ const socket = server => {
     //計算目前使用io的人
     const { clientsCount } = io.engine
     console.log('有人加入公開聊天室，目前人數:', clientsCount)
-    
-    socket.on('joinPublic', () => {
-      socket.username = Math.floor(Math.random() * 1000)
-      userList.push(socket.username)
-      console.log(userList)
-      socket.broadcast.emit("announce", {
-        message: `User${socket.username} 上線`
-      })
+    // socket.broadcast.emit("announce", {
+    //     message: `User${socket.username} 上線`
+    //   })
+
+    socket.on('joinPublic', (d) => {
+      console.log(`${d.name} 上線`)
+      socket.broadcast.emit("announce", d)
     })
 
     socket.on('chatmessage', (msg) => {
       console.log('msg', msg)
-
-      socket.broadcast.emit('new message', { 
-        username: socket.username,
-        message: data
-      })
+      io.emit('new message', msg)
       //TODO 建立message database
     })
 
-    socket.on('leavePublic',  () => {
-      clientsCount-=1
-      console.log("A user leaved.")
-      io.emit("announce", {
-        message: 'user 離線'
-      })
-    })
+    // socket.on('leavePublic',  () => {
+    //   clientsCount-=1
+    //   console.log("A user leaved.")
+    //   io.emit("announce", {
+    //     message: 'user 離線'
+    //   })
+    // })
+    socket.on('disconnect', () => {
 
+      console.log(`有人離開：目前人數:', clientsCount`)
+
+    })
 
   })
 }

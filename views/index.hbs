@@ -1,5 +1,6 @@
 <h1>chat room</h1>
 <input type="text" id="nowuser" value="{{user.name}}">
+<input type="text" id="nowtoken" value="{{token}}">
 <div id="container">
   <div id="left">
     <div id="user">
@@ -35,7 +36,15 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io()
+  const nowtoken = document.getElementById("nowtoken")
+  const token = document.getElementById("nowtoken").value
+  console.log(token)
+  const socket = io.connect('http://localhost:3000', {
+    auth: {
+      token: token
+    }
+  })
+  console.log(socket.auth)
   document.addEventListener("DOMContentLoaded", () => {
 
     const status = document.getElementById("status")
@@ -47,47 +56,31 @@
 
     socket.on("connect", function () {
       status.innerText = "Connected.";
-      socket.emit("userin", { name: nowuser.value })
+      socket.emit("joinPublic", { name: nowuser.value })
     })
 
-    socket.on("userin", function (d) {
+    socket.on("announce", function (d) {
+      console.log(d)
       const joinAndout = document.createElement("div")
       joinAndout.className = "joinAndout"
 
-      const usermsg = document.createTextNode(d.name + 'joined the room')
+      const usermsg = document.createTextNode(d.name + ' joined the room')
       joinAndout.appendChild(usermsg)
       content.appendChild(joinAndout)
-    })
-
-    socket.on("disconnect", function () {
-      status.innerText = "Disconnected."
-      socket.emit("userout", { name: nowuser.value })
-    })
-
-    socket.on("userout", function (d) {
-      const joinAndout = document.createElement("div")
-      joinAndout.className = "joinAndout"
-
-      const usermsg = document.createTextNode(d.name + 'out of the room')
-      joinAndout.appendChild(usermsg)
-      content.appendChild(joinAndout)
-    })
-    socket.on("online", function (amount) {
-      online.innerText = amount;
     })
 
     sendForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const formData = { name: nowuser.value, msg: msg.value };
-      socket.emit("send", formData);
+      socket.emit("chatmessage", formData);
     })
-    socket.on("msg", function (d) {
+    socket.on("new message", function (d) {
       const msgBox = document.createElement("div")
       const nameBox = document.createElement("span")
 
       const name = document.createTextNode(d.name);
       const msg = document.createTextNode(d.msg);
-
+      8
       nameBox.appendChild(name);
       msgBox.appendChild(nameBox);
       msgBox.appendChild(msg);
@@ -173,5 +166,9 @@
 
   span {
     margin-right: 10px;
+  }
+
+  #nowtoken {
+    display: none;
   }
 </style>
