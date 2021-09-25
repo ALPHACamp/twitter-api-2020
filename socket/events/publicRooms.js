@@ -42,8 +42,10 @@ module.exports = (io, socket, publicUsers) => {
         io.to('public').emit('publicUsers', publicUsers)
       }
     } catch (error) {
+      console.log(error)
       return socket.emit('error', {
-        status: error.name,
+        statusCode: error.statusCode || 400,
+        errType: error.errType || 'joinPublicRoomError',
         message: error.message
       })
     }
@@ -70,8 +72,10 @@ module.exports = (io, socket, publicUsers) => {
 
       return io.in('public').emit('publicMessage', data)
     } catch (error) {
+      console.log(error)
       return socket.emit('error', {
-        status: error.name,
+        statusCode: error.statusCode || 400,
+        errType: error.errType || 'publicMessageError',
         message: error.message
       })
     }
@@ -114,8 +118,10 @@ module.exports = (io, socket, publicUsers) => {
       // Update new publicUsers to client side
       return io.to('public').emit('publicUsers', publicUsers)
     } catch (error) {
+      console.log(error)
       return socket.emit('error', {
-        status: error.name,
+        statusCode: error.statusCode || 400,
+        errType: error.errType || 'leavePublicRoomError',
         message: error.message
       })
     }
