@@ -82,7 +82,6 @@ function socketConnection (io) {
             where: { roomId: { [Op.eq]: roomId } }
           })
 
-          roomId = roomId[0]
           socket.join(roomId)
   
           const targetId = data.targetId.toString()
