@@ -64,6 +64,9 @@ const messageSchema = Joi.object({
   content: Joi.string().trim().max(140).messages({
     'string.base': 'Data type of content must be a string',
     'string.max': 'The content should not exceed 140 words'
+  }),
+  isRead: Joi.required().messages({
+    'any.required': 'The isRead cannot be blank'
   })
 })
 
@@ -77,9 +80,6 @@ const memberSchema = Joi.object({
   }),
   RoomId: Joi.required().messages({
     'any.required': 'The RoomId cannot be blank'
-  }),
-  isRead: Joi.required().messages({
-    'any.required': 'The isRead cannot be blank'
   })
 })
 

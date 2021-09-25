@@ -117,13 +117,13 @@ const messageService = {
 
   getPrivateUnreadMessageCount: async (currentUserId) => {
     return await Message.count({
+      include: {
+        model: Room,
+        attributes: [],
+        where: { name: { [Op.substring]: currentUserId } }
+      },
       where: {
         UserId: { [Op.not]: currentUserId },
-        RoomId: [
-          Sequelize.literal(
-            `SELECT name FROM Rooms WHERE name LIKE '%${currentUserId}%'`
-          )
-        ],
         isRead: false
       }
     })
