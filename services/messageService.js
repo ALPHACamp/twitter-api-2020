@@ -89,15 +89,11 @@ const messageService = {
   },
 
   postMember: async (RoomId, targetUserId, currentUserId) => {
+    const member = { RoomId, targetUserId, currentUserId }
     // Check member format with Joi schema
-    const { error } = memberSchema.validate(
-      targetUserId,
-      currentUserId,
-      RoomId,
-      {
-        abortEarly: false
-      }
-    )
+    const { error } = memberSchema.validate(member, {
+      abortEarly: false
+    })
 
     if (error) {
       throw new ApiError(
