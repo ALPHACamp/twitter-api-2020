@@ -75,7 +75,7 @@ module.exports = (io, socket, user) => {
         }
       })
       // TODO:如果server重啟，要自動清空roomUser
-      socket.on('disconnect', async () => {
+      socket.on('leave public', async () => {
         try {
           // 下線
           socket.leave(1)
