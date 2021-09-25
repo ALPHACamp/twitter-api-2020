@@ -1,5 +1,6 @@
 const passport = require('../config/passport')
-
+const jwt = require('jsonwebtoken')
+const { User } = require('../models')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -35,23 +36,24 @@ const checkRoleIsUser = (req, res, next) => {
 }
 const authenticatedSocket = (socket, next) => {
   if (socket.handshake.auth == null || socket.handshake.auth.token == null) {
-    console.log(socket.handshake)
     console.log('no handshake.auth')
     return next(new RequestError('user\'s token required.'))
   }
-  console.log('socket.handshake', socket.handshake)
-  console.log('socket.handshake.auth', socket.handshake.auth)
+
   if (socket.handshake.auth && socket.handshake.auth.token) {
+    const token = socket.handshake.auth.token
+    const SECRET = process.env.JWT_SECRET
     jwt.verify(
-      socket.handshake.auth.token,
-      process.env.JWTSECRET,
-      (err, decoded) => {
+      token,SECRET, async (err, decoded) => {
         if (err) {
           console.log(err.message)
           return next(new RequestError('jwt auth error.'))
         }
-        socket.userId = decoded.id
-        console.log('socket.userId', socket.userId)
+        socket.user = (await User.findByPk(decoded.id, {
+          attributes:[
+            'id', 'name', 'avatar', 'account'
+          ]
+        })).toJSON()
         next()
       }
     )

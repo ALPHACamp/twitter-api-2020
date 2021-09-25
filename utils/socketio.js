@@ -24,6 +24,7 @@ const socket = server => {
   if (!io) throw new Error('No socket io server instance')
 
   io.use(authenticatedSocket).on('connection', socket => {
+    console.log(socket.user)
     //先隨便設定username
     console.log('===== connected!!! =====')
     //計算目前使用io的人
