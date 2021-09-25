@@ -6,7 +6,7 @@ const generateMessage = (text, userId, avatar, type) => {
     userId,
     avatar,
     type,
-    createdAt: new Date().getTime(),
+    createdAt: new Date().getTime().toTimeString(),
   }
 }
 
