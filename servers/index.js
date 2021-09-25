@@ -11,7 +11,7 @@ module.exports = (server) => {
       methods: ['GET', 'POST']
     },
   })
-  const userSocketIdMap = new Map() //‘Alicia’ => [ ‘socketId1234’, ‘socketIdabcde’]
+  const userSocketIdMap = new Map() //1(userId) => [ ‘socketId1234’, ‘socketIdabcde’]
   io.on('connection', async socket => {
     try {
       const user = socket.handshake.query //id,name,avatar,account
@@ -36,6 +36,7 @@ module.exports = (server) => {
 
       require('./public')(io, socket, user)
       require('./private')(io, socket, user)
+      require('./notification')(io, socket, user, userSocketIdMap)
 
       socket.on('disconnect', () => {
         // TODO:將更新在線名單這件事包成function

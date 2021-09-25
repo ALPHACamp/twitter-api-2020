@@ -1,0 +1,18 @@
+<h2>通知測試</h2>
+<script>
+  // 新增推文的頁面
+  socket.emit('post tweet', 1)
+  // 新增推文的頁面
+
+
+  //通知頁面會監聽以下事件：
+
+  // TODO:進入通知頁面
+
+  //通知事件
+  //更新通知頁面（左側欄位）
+  socket.on('tweet notify', data => {
+    console.log('推文通知')
+    console.log(data)
+  })
+</script>
