@@ -113,6 +113,28 @@ const messageService = {
       { RoomId, UserId: currentUserId },
       { RoomId, UserId: targetUserId }
     ])
+  },
+
+  getUnreadMessageCount: async (currentUserId) => {
+    return await User.findOne({
+      where: { id: currentUserId },
+      include: [{ model: Message, attributes: [] }],
+      attributes: [
+        ['id', 'UserId'],
+        [
+          Sequelize.literal(
+            `(SELECT COUNT(*) FROM Messages WHERE isRead = 0 AND RoomId = 5 AND UserId = ${currentUserId})`
+          ),
+          'PublicUnreadCount'
+        ],
+        [
+          Sequelize.literal(
+            `(SELECT COUNT(*) FROM Messages WHERE isRead = 0 AND RoomId != 5 AND UserId = ${currentUserId})`
+          ),
+          'PrivateUnreadCount'
+        ]
+      ]
+    })
   }
 }
 
