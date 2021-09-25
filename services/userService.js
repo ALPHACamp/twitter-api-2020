@@ -281,28 +281,46 @@ const userService = {
       where: { role: 'user' },
       include: [{ model: User, as: 'Followers', attributes: [] }],
       attributes: [
-        'id', 
-        'name', 
-        'account', 
-        'avatar', 
-        'introduction', 
-        [
-          Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`),
-          'FollowersCount'
-        ],
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'introduction',
+        [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`), 'FollowersCount'],
         [
           Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id)`),
-          'isFollowed'
-        ]
+          'isFollowed',
+        ],
       ],
       order: [[Sequelize.col('FollowersCount'), 'DESC']],
-      limit: 10
+      limit: 10,
     })
     return topUsers
   },
+  getTopSixUsers: async (currentUserId) => {
+    const topUsers = await User.findAll({
+      where: { role: 'user' },
+      include: [{ model: User, as: 'Followers', attributes: [] }],
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'introduction',
+        [Sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`), 'FollowersCount'],
+        [
+          Sequelize.literal(`exists(SELECT 1 FROM Followships WHERE followerId = ${currentUserId} and followingId = User.id)`),
+          'isFollowed',
+        ],
+      ],
+      order: [[Sequelize.col('FollowersCount'), 'DESC']],
+      limit: 6,
+    })
+    return topSixUsers
+  },
   putUserSettings: async (id, body) => {
     const { account, email, password } = body
-    
+
     if (email) {
       const duplicate_email = await User.findOne({
         where: { id: { [Op.not]: id }, email },
@@ -311,7 +329,7 @@ const userService = {
         throw apiError.badRequest(400, 'This email has been registered')
       }
     }
-    
+
     if (account) {
       const duplicate_account = await User.findOne({
         where: { id: { [Op.not]: id }, account },
@@ -345,7 +363,7 @@ const userService = {
       status: 'success',
       message: 'Successfully edited',
     }
-  }
+  },
 }
 
 module.exports = userService

@@ -141,6 +141,15 @@ const userController = {
       next(error)
     }
   },
+  getTopSixUsers: async (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id
+    try {
+      const topUsers = await userService.getTopSixUsers(currentUserId)
+      return res.status(200).json(topUsers)
+    } catch (error) {
+      next(error)
+    }
+  },
   putUserSettings: async (req, res, next) => {
     const id = Number(req.params.id)
     const currentUserId = helpers.getUser(req).id
