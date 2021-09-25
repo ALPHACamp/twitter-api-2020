@@ -33,6 +33,8 @@ router.post('/tweets/:id/like', helpers.ensureAuthenticated, tweetController.pos
 router.post('/tweets/:id/unlike', helpers.ensureAuthenticated, tweetController.postUnlike)
 
 // user 路由
+router.get('/users/chatRecords', helpers.ensureAuthenticated, userController.getChatRecords) //新增給私人聊天室紀錄
+
 router.get('/users/:id/tweets', helpers.ensureAuthenticated, userController.getUserTweets)
 
 router.get('/users/:id/replied_tweets', helpers.ensureAuthenticated, userController.getRepliedTweets)

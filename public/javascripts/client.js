@@ -16,13 +16,20 @@ if (button) {
   })
 }
 
+if (button) {
+  button.addEventListener('click', event => {
+    // 向公開聊天室發送訊息
+    socket.emit('public-msg', { userId, message })
+  })
+}
+
 //監聽接收公開聊天室的紀錄
 socket.on('public-chat-record', (publicChatRecord) => {
 
 })
 
 // 監聽接收線上使用者列表及所有使用者資料
-socket.on('online-list', (onlineIdList, allUsers) => {
+socket.on('online-list', (inRoomUsers) => {
 
 })
 
@@ -41,8 +48,7 @@ socket.on('public-msg', ({ userId, message }) => {
 
 })
 
-// 向公開聊天室發送訊息
-socket.emit('public-msg', { userId, message })
+
 
 // 以上公開聊天室
 
@@ -50,7 +56,7 @@ socket.emit('public-msg', { userId, message })
 // 加入私人房間
 if (button) {
   button.addEventListener('click', event => {
-    socket.emit('join-room', { userId: '3', targetId: '2', roomId: '2' })
+    socket.emit('join-room', { roomId: '2' })
   })
 }
 

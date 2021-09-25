@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     userBId: DataTypes.INTEGER
   }, {});
   Chatmate.associate = function(models) {
-    // associations can be defined here
+    Chatmate.hasMany(models.ChatRecord)
   };
   return Chatmate;
 };

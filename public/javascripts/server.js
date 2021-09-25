@@ -76,7 +76,7 @@ function socketConnection (io) {
       // 以下私人聊天室
 
       // 監聽並建立房間
-      socket.on('join-room', async ({ userId, targetId, roomId }) => {
+      socket.on('join-room', async ({ roomId }) => {
         try {
           const chatRecord = await ChatRecord.findAll({
             where: { roomId: { [Op.eq]: roomId } }

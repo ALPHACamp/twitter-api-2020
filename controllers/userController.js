@@ -5,6 +5,7 @@ const Reply = db.Reply
 const Followship = db.Followship
 const Like = db.Like
 const Chatmate = db.Chatmate
+const ChatRecord = db.ChatRecord
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
 const Op = Sequelize.Op
@@ -58,18 +59,21 @@ const userController = {
           { model: User, as: 'Followers', attributes: ['id'] }
         ]
       })
+      
+      if (userId !== requestId) {
+        const roomId = await Chatmate.findOrCreate({
+          raw: true,
+          where: {
+            [Op.and]: [
+              { userAId: { [Op.in]: [userId, requestId] } },
+              { userBId: { [Op.in]: [userId, requestId] } }
+            ]
+          },
+          attributes: ['id']
+        })
+        userData.roomId = roomId
+      }
 
-      const roomId = await Chatmate.findOrCreate({
-        where: {
-          [Op.and]: [
-            { userAId: { [Op.in]: [userId, requestId] } },
-            { userBId: { [Op.in]: [userId, requestId] } }
-          ]
-        },
-        attributes: ['id']
-      })
-
-      userData.roomId = roomId
   
       return res.json(userData)
     }
@@ -196,9 +200,26 @@ const userController = {
     }
   },
 
-  // userok: (req, res) => {
+  getChatRecords: async (req, res) => {
+    const userId = req.user.id
+    try {
+      const chatRecords = await Chatmate.findAll({
+        raw: true,
+        where: { 
+          [Op.or]: [
+            { userAId: { [Op.eq]: userId } },
+            { userBId: { [Op.eq]: userId } }
+          ]
+         },
+        include: [{ model: ChatRecord, as: 'records', order: [['createdAt', 'DESC']], limit: 1 }]
+      })
 
-  // }
+      return res.status(200).json(chatRecords)
+    }
+    catch (err) {
+      console.log(err)
+    }
+  }
 }
 
 
