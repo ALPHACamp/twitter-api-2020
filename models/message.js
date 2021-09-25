@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       content: DataTypes.STRING,
       UserId: DataTypes.INTEGER,
-      RoomId: DataTypes.INTEGER
+      RoomId: DataTypes.INTEGER,
+      isRead: DataTypes.BOOLEAN
     },
     {
       sequelize,
