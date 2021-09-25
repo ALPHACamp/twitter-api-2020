@@ -1,5 +1,6 @@
 const PUBLIC_ROOM_ID = 1
-const activeUsers = new Set()
+const socketService = require('../services/socketService')
+const { generateMessage } = require('./message')
 
 module.exports = (server) => {
   const io = require('socket.io')(server, {
@@ -13,49 +14,72 @@ module.exports = (server) => {
   })
 
 
-  io.on('connection', (socket) => {
-    console.log('========user connected=========')
+  // io.on('connection', (socket) => {
+  //   console.log('========user connected=========')
     
-    // 建立一個 "sendMessage" 的監聽
-    socket.on('sendMessage', function (message) {
-      console.log(message)
+  //   // 建立一個 "sendMessage" 的監聽
+  //   socket.on('sendMessage', function (message) {
+  //     console.log(message)
       
-      // 當收到事件的時候，也發送一個 "allMessage" 事件給所有的連線用戶
-      io.emit('allMessage', '哈囉這是後端')
-    })
-  })
+  //     // 當收到事件的時候，也發送一個 "allMessage" 事件給所有的連線用戶
+  //     io.emit('allMessage', '哈囉這是後端')
+  //   })
+  // })
 
-  io.on('connection', async (socket) => {
+  io.on('connection', async socket => {
+    console.log('== connected! ===')
+    console.log(socket.id)
     
-    console.log(socket.userId)
     const userId = socket.userId
 
-    const user = socketService.getUser(userId)
-
+    const user = await socketService.getUser(userId)
+    console.log(user)
+    let activeUsers = []
     socket.on('join', async ({ roomId }) => {
 
       roomId = Number(roomId)
       socket.join(`${roomId}`)
       console.log('socket.rooms', socket.rooms)
-
+      io.emit('debug notice', '安安這是後端, 有收到上線訊息')
       if (roomId === PUBLIC_ROOM_ID) {
-        activeUsers.add(user)
-        io.to(`${roomId}`).emit('active users', {
-          activeUsers: [...activeUsers],
+        activeUsers.push(user)
+        const set = new Set()
+        activeUsers = activeUsers.filter(i => !set.has(i.id)?set.add(i.id):false)
+        
+        io.to(`${PUBLIC_ROOM_ID}`).emit('active users', {
+          activeUsers,
           userCount: activeUsers.length,
         })
 
         // notify everyone except the user
-        socket.broadcast.to(`${PUBLIC_ROOM_ID}`).emit('message', `${user.name}上線`)
+        io.to(`${PUBLIC_ROOM_ID}`).emit('message', `${user.name}上線`)
       }
     })
 
-    socket.on('public chat', async (msg) => {
-      
+    socket.on('leave', async ({ roomId }) => {
+      console.log('== receive leave message===')
+      console.log(userId)
+      io.emit('debug notice', `安安這是後端, 有收到來自UserId:${userId} 離開 RoomId${roomId}的訊息`)
+      if (roomId) {
+        // socket.leave(`${roomId}`)
+        if (roomId === PUBLIC.PUBLIC_ROOM_ID) {
+          activeUsers = activeUsers.filter(i => {
+            return i.id !== userId
+          })
+          console.log(activeUsers)
+          io.to(`${PUBLIC_ROOM_ID}`).emit('message', `${user.name}下線`)
+        }
+      }
+    })
+
+    socket.on('public chat', async (message) => {
+      console.log('=== receive public chat message ===')
+      io.to(`${PUBLIC_ROOM_ID}`).emit('debug notice', '安安這是後端, 有收到公共聊天室訊息')
+      io.to(`${PUBLIC_ROOM_ID}`).emit('public chat', generateMessage(message, userId, user.avatar))
     })
 
     socket.on('private chat', async (msg) => {
-      
+      console.log('=== receive public chat message ===')
     })
 
 
