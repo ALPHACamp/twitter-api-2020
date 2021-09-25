@@ -9,13 +9,12 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const app = express()
+// use express to handle http server
+const server = require('http').createServer(app)
 
 const passport = require('./config/passport')
-
 const port = process.env.PORT || 3000
 
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
 
 app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs' }))
 app.set('view engine', 'hbs')
@@ -26,36 +25,10 @@ app.use(bodyParser.json())
 app.use(express.json())
 app.use(passport.initialize())
 app.use('/upload', express.static(__dirname + '/upload'))
+
+
 require('./routes')(app)
-
-let onlineCount = 0;
-
-// 修改 connection 事件
-io.on('connection', (socket) => {
-  onlineCount++;
-  io.emit("online", onlineCount);
-
-  socket.on("greet", () => {
-    socket.emit("greet", onlineCount)
-  })
-
-  socket.on('disconnect', () => {
-    onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1;
-    io.emit("online", onlineCount)
-  })
-
-  socket.on("send", (msg) => {
-    io.emit("msg", msg)
-  })
-
-  socket.on("userin", (msg) => {
-    io.emit("userin", msg)
-  })
-
-  socket.on("userout", (msg) => {
-    io.emit("userout", msg)
-  })
-})
+require('./utils/socketio').socket(server)
 
 
 app.use((err, req, res, next) => {

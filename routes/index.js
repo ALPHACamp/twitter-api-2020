@@ -2,6 +2,7 @@ const users = require('./apis/users')
 const admin = require('./apis/admin')
 const tweets = require('./apis/tweets')
 const followships = require('./apis/followships')
+const chatroom = require('./apis/chatroom')
 const userController = require('../controllers/userController')
 
 
@@ -10,6 +11,7 @@ module.exports = app => {
   app.use('/api/admin', admin)
   app.use('/api/tweets', tweets)
   app.use('/api/followships', followships)
+  app.use('/api/chatroom', chatroom)
 
   app.get('/', (req, res) => {
     res.render('index')
