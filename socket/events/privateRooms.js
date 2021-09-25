@@ -1,4 +1,5 @@
 const messageService = require('../../services/messageService')
+const ApiError = require('../../utils/customError')
 module.exports = (io, socket) => {
   socket.on('unReadMessage', async (currentUserId) => {
     // Check if current user has unread messages
@@ -36,18 +37,48 @@ module.exports = (io, socket) => {
 
   socket.on('privateMessage', async (msg) => {
     try {
-      // Frontend : return Room name = targetUserId-currentUserId
-      // TODO: add messageService.postMessage({UserId, RoomId, content})
+      const { currentUserId, RoomId, content, targetUserId } = msg
+      const roomName = socket.user.privateRoom
+      
+      // current user did not join private room
+      if (!roomName) {
+        throw new ApiError(
+          'privateMessageError',
+          400,
+          'Current user did not join private room'
+        )
+      }
+
+      const messageToCreate = { UserId: currentUserId, RoomId, content }
 
       // check if target user is in room or not
-      const privateRoomUsers = io.sockets.adapter.rooms.get(Room.name)
-      // if not, send unread notification
-      // const unread = await messageService.checkUnread(targetUserId)
-      // TODO: find a way to change targetUserId to socketId
-      socket.to(`user-${targetUserId}`).emit('unReadMessage', { unread })
+      const sockets = await io.in(roomName).fetchSockets()
+      const userIsOnline = sockets.find((client) => {
+        return client.user.id === targetUserId
+      })
+
+      // set new message reading status base on target user is online or not
+      messageToCreate.isRead = userIsOnline
+
+      // create message
+      const createdMessage = await messageService.postMessage(messageToCreate)
 
       // Send message to all the private room user
-      return socket.to(Room.name).emit('privateMessage', msg)
+      const responseMessage = {
+        RoomId,
+        User: socket.user,
+        UserId: socket.user.id,
+        content: createdMessage.content,
+        createdAt: createdMessage.dataValues.createdAt,
+        id: createdMessage.dataValues.id,
+        updatedAt: createdMessage.dataValues.updatedAt
+      }
+
+      io.in(roomName).emit('privateMessage', responseMessage)
+
+      // Send unread notification
+      // TODO: const unread = await messageService.checkUnread(targetUserId) 
+      socket.to(`user-${targetUserId}`).emit('unReadMessage', { unread })
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
