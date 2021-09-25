@@ -3,7 +3,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const jwtStrategy = passportJWT.Strategy
 const db = require('../models')
 const User = db.User
-const USER_KEY = 'process.env.USER_KEY'
+const USER_KEY = process.env.USER_KEY
 const passport = require('passport')
 
 const options = {

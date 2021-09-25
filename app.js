@@ -28,7 +28,7 @@ app.use(cors())
 
 app.use('/upload', express.static(__dirname + '/upload'))
 app.use(flash())
-app.use(session({ secret: 'process.env.SESSION_SECRET', resave: false, saveUninitialized: false }))
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
 
 app.use(passport.initialize())
 app.use(passport.session())
