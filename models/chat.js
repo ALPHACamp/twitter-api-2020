@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
   Chat.associate = function(models) {
-    // associations can be defined here
+    Chat.belongsTo(models.User)
   };
   return Chat;
 };

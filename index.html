@@ -72,6 +72,7 @@
 
     var form = document.getElementById('form');
     var input = document.getElementById('input');
+    const board = document.querySelector('#messages')
     const userId = 55
 
     form.addEventListener('submit', function (e) {
@@ -83,6 +84,7 @@
       }
     });
     socket.emit('giveServer', { message: 'user2 is online' })
+    socket.emit('joinRoom', { message: '我來了' })
     
     // 接收廣播 byeMsg
     socket.on('byeMsg', (msg) => {
@@ -91,7 +93,7 @@
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       })
-    socket.on('welcome message', (msg) => {
+    socket.on('welcome', (msg) => {
       var item = document.createElement('li');
       item.textContent = msg;
       messages.appendChild(item);
@@ -104,7 +106,8 @@
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     });
-    socket.on('chat message', function (msg) {
+    socket.on('chatMsg', function (msg) {
+      console.log(msg)
         var item = document.createElement('li');
         item.textContent = msg;
         messages.appendChild(item);

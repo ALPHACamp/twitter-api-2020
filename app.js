@@ -16,13 +16,17 @@ app.use(cors())
 
 // socket
 const server = require('http').Server(app)
-const io = require('socket.io')(server)
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+    credentials: true
+  }
+})
 // 前端頁面 for 測試
 app.get('/chat', (req, res) => {
   res.sendFile(__dirname + '/index.html')
 })
 require('./utils/socketServer.js')(io)
-
 
 app.get('/', (req, res) => res.send('Hello World!'))
 server.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
