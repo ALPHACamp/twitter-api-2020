@@ -2,18 +2,23 @@ const { socketAuthenticated } = require('../middlewares/auth')
 const publicRooms = require('./events/publicRooms')
 const subscribes = require('./events/subscribes')
 const privateRooms = require('./events/privateRooms')
+const messageService = require('../services/messageService')
 
 // Store current public users' list
 const publicUsers = []
 
 module.exports = (io) => {
-  io.use(socketAuthenticated).on('connection', (socket) => {
+  io.use(socketAuthenticated).on('connection', async (socket) => {
     // io.of("/").sockets and io.engine.clientsCount may be equal
     const clientsCount = io.engine.clientsCount
     const user = socket.user
     console.log(
       ` ${user.name} connected and number of connections ${clientsCount}`
     )
+
+    // Check if current user has unread messages
+      const privateUnreadMessageCount =
+        await messageService.getPrivateUnreadMessageCount(user.id)
 
     // Join user room to act as same user with multiple browser tabs
     socket.join(`user-${user.id}`)
