@@ -83,13 +83,6 @@ const memberSchema = Joi.object({
   })
 })
 
-const roomSchema = Joi.object({
-  name: Joi.string().trim().required().messages({
-    'string.base': 'Data type of name must be a string',
-    'any.required': 'The currentUserId cannot be blank'
-  })
-})
-
 // Filter Joi error details to a single array
 const joiMessageHandler = (errors) => {
   const messages = []
@@ -155,6 +148,5 @@ module.exports = {
   replySchema,
   messageSchema,
   memberSchema,
-  roomSchema,
   checkUserInfoUniqueness
 }

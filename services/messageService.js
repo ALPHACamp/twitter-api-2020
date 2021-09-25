@@ -3,8 +3,7 @@ const { Op } = require('sequelize')
 const {
   joiMessageHandler,
   messageSchema,
-  memberSchema,
-  roomSchema
+  memberSchema
 } = require('../utils/validator')
 const ApiError = require('../utils/customError')
 
@@ -49,14 +48,12 @@ const messageService = {
 
     if (!privateRoom) {
       const name = `${currentUserId}-${targetUserId}`
-      // Check room format with Joi schema
-      const { error } = roomSchema.validate(name, { abortEarly: false })
 
-      if (error) {
+      if (!name) {
         throw new ApiError(
           'postPrivateRoomError',
           401,
-          joiMessageHandler(error.details)
+          'The name cannot be blank'
         )
       }
 
@@ -92,15 +89,11 @@ const messageService = {
   },
 
   postMember: async (RoomId, targetUserId, currentUserId) => {
+    const member = { RoomId, targetUserId, currentUserId }
     // Check member format with Joi schema
-    const { error } = memberSchema.validate(
-      targetUserId,
-      currentUserId,
-      RoomId,
-      {
-        abortEarly: false
-      }
-    )
+    const { error } = memberSchema.validate(member, {
+      abortEarly: false
+    })
 
     if (error) {
       throw new ApiError(
