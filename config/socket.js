@@ -5,7 +5,7 @@ module.exports = {
       cors: {
         origin: [
           'http://localhost:8080',
-          'https://williamtsou818.github.io/',
+          'https://williamtsou818.github.io/simple-twitter-frontend/',
           'http://localhost:3000'
         ],
         methods: ['GET', 'POST'],
