@@ -4,9 +4,12 @@ module.exports = (io, socket) => {
   socket.on('unReadMessage', async (currentUserId) => {
     try {
       // Check if current user has unread messages
+      const privateUnreadMessageCount =
+        await messageService.getPrivateUnreadMessageCount(currentUserId)
+      console.log(privateUnreadMessageCount)
       // TODO 1: const unread = await messageService.checkUnreadMessage(currentUserId)
       // TODO 2: return unRead message count
-      socket.emit('unReadMessage', { unread })
+      socket.emit('unReadMessage', { privateUnreadMessageCount })
     } catch (error) {
       console.log(error)
       return socket.emit('error', {
@@ -25,12 +28,13 @@ module.exports = (io, socket) => {
         targetUserId,
         currentUserId
       )
+      const RoomId = privateRoom.Room.dataValues.id
 
       // Join private room
       socket.join(privateRoom.Room.dataValues.name)
 
       // Send RoomId back to client
-      callback({ RoomId: privateRoom.Room.dataValues.id })
+      callback({ RoomId })
 
       // Set private room name to socket.user
       socket.user.privateRoom = privateRoom.Room.dataValues.name
@@ -38,11 +42,12 @@ module.exports = (io, socket) => {
       console.log(socket.user)
       console.log(socket.rooms)
       // Update unread message status
-      // TODO : messageService.updateMessageStatus(room.id, currentUserId)
+      await messageService.putMessageIsReadStatus(RoomId, currentUserId)
 
       // Send new unread message status
-      // TODO : messageService.checkUnreadMessage(currentUserId)
-      // TODO : socket.emit('unReadMessage')
+      const privateUnreadMessageCount =
+        await messageService.getPrivateUnreadMessageCount(currentUserId)
+      socket.emit('unReadMessage', { privateUnreadMessageCount })
     } catch (error) {
       console.log(error)
       return socket.emit('error', {
@@ -57,7 +62,7 @@ module.exports = (io, socket) => {
     try {
       const { currentUserId, RoomId, content, targetUserId } = msg
       const roomName = socket.user.privateRoom
-      
+
       // current user did not join private room
       if (!roomName) {
         throw new ApiError(
@@ -76,7 +81,8 @@ module.exports = (io, socket) => {
       })
 
       // set new message reading status base on target user is online or not
-      messageToCreate.isRead = userIsOnline
+      messageToCreate.isRead = userIsOnline ? true : false
+      console.log(messageToCreate)
 
       // create message
       const createdMessage = await messageService.postMessage(messageToCreate)
@@ -95,8 +101,13 @@ module.exports = (io, socket) => {
       io.in(roomName).emit('privateMessage', responseMessage)
 
       // Send unread notification
-      // TODO: const unread = await messageService.checkUnread(targetUserId) 
-      socket.to(`user-${targetUserId}`).emit('unReadMessage', { unread })
+      console.log(`currentUser: ${currentUserId}, targetUser: ${targetUserId}`)
+      const privateUnreadMessageCount =
+        await messageService.getPrivateUnreadMessageCount(targetUserId)
+      // TODO: const unread = await messageService.checkUnread(targetUserId)
+      io.to(`user-${targetUserId}`).emit('unReadMessage', {
+        privateUnreadMessageCount
+      })
     } catch (error) {
       console.log(error)
       return socket.emit('error', {
