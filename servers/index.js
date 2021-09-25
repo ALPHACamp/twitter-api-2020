@@ -10,6 +10,7 @@ module.exports = (server) => {
       origin: '*',
       methods: ['GET', 'POST']
     },
+    allowEIO3: true
   })
   const userSocketIdMap = new Map() //1(userId) => [ ‘socketId1234’, ‘socketIdabcde’]
   io.on('connection', async socket => {
