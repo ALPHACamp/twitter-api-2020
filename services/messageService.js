@@ -10,8 +10,8 @@ const ApiError = require('../utils/customError')
 
 const messageService = {
   postMessage: async (message) => {
-    const { UserId, RoomId, content } = message
-
+    let { UserId, RoomId, content, isRead } = message
+    isRead ? true : false
     // Check message format with Joi schema
     const { error } = messageSchema.validate(message, { abortEarly: false })
 
@@ -26,7 +26,8 @@ const messageService = {
     return await Message.create({
       UserId,
       RoomId,
-      content
+      content,
+      isRead
     })
   },
 
