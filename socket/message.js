@@ -1,5 +1,3 @@
-const { DataTypes } = require("sequelize/types")
-
 const generateMessage = (text, userId, avatar, type) => {
   console.log('==== generateMessage function ====')
   
