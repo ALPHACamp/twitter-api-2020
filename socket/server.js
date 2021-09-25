@@ -1,5 +1,6 @@
 const PUBLIC_ROOM_ID = 1
 const socketService = require('../services/socketService')
+const { authernticatedSocket, authenticatedSocket } = require('../middleware/auth')
 const { generateMessage } = require('./message')
 
 module.exports = (server) => {
@@ -26,9 +27,11 @@ module.exports = (server) => {
   //   })
   // })
 
-  io.on('connection', async socket => {
+  io.use(authenticatedSocket).on('connection', async socket => {
     console.log('== connected! ===')
-    console.log(socket.id)
+    console.log(socket.userId)
+
+    io.emit('debug notice', `安安收到token${socket.handshake.auth.token}`)
     
     const userId = socket.userId
 

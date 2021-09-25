@@ -5,7 +5,7 @@ const socket = io('/');
 
 socket.on('connect', () => {
   socket.userId = 11
-  console.log(socket)
+  console.log(socket.handshake)
   console.log(`Client Successfully connected：${socket.id}`);
 });
 
