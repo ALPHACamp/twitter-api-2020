@@ -81,11 +81,11 @@ const messageService = {
         ]
       },
       include: [
-        { model: Room, attributes: ['id', 'name'] },
         {
           model: User,
           attributes: ['id', 'avatar', 'name', 'account']
-        }
+        },
+        { model: Room, attributes: ['id', 'name'] }
       ]
     })
   },
