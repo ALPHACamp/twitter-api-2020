@@ -17,10 +17,10 @@ module.exports = async (io) => {
       const user = await User.findByPk(decoded.id, {
         raw: true,
         nest: true,
-        attributes: ['id', 'name', 'account', 'avatar']
+        attributes: ['id', 'name', 'account', 'avatar'],
       })
       socket.user = user
-      const ifExist = onlineUser.some(user => user.id === socket.user.id)
+      const ifExist = onlineUser.some((user) => user.id === socket.user.id)
       if (!ifExist) {
         onlineUser.push(user)
       }
@@ -37,9 +37,9 @@ module.exports = async (io) => {
         include: [
           {
             model: User,
-            attributes: ['id', 'name', 'account', 'avatar']
-          }
-        ]
+            attributes: ['id', 'name', 'account', 'avatar'],
+          },
+        ],
       })
       // 載入歷史訊息
       socket.emit('allMsg', record)
@@ -54,7 +54,7 @@ module.exports = async (io) => {
     socket.on('chat message', (msg) => {
       Chat.create({
         UserId: msg.UserId,
-        message: msg.message
+        message: msg.message,
       })
       // 廣播收到的訊息給大家
       const current = {
@@ -66,9 +66,10 @@ module.exports = async (io) => {
       console.log('message: ' + msg.message)
     })
     socket.on('disconnect', () => {
-      io.emit('disconnectMsg', `${socket.user.name} 下線了，掰掰！`)
+      const byeMsg = `${socket.user.name} 下線了，掰掰！`
+      io.emit('disconnectMsg', { broadcast: byeMsg })
       // 刪除 onlineUser
-      onlineUser = onlineUser.filter(user => user.id !== socket.user.name)
+      onlineUser = onlineUser.filter((user) => user.id !== socket.user.name)
       console.log('user disconnected')
     })
   })
