@@ -19,28 +19,28 @@ module.exports = (io, socket, publicUsers) => {
         socket.join('public')
         // Update new publicUsers to client side
         return io.to('public').emit('publicUsers', publicUsers)
+      } else {
+        // If user is not exists, pushing to public user list
+        publicUsers.push(socket.user)
+        console.log(publicUsers)
+
+        // Join public room
+        socket.join('public')
+        console.log(socket.rooms)
+
+        // Send announce to other public room users
+        socket.to('public').emit('announce', {
+          message: `${name} joined`
+        })
+
+        // Send welcome message to current user
+        socket.emit('announce', {
+          message: `Welcome, ${name}!`
+        })
+
+        // Update new publicUsers to client side
+        io.to('public').emit('publicUsers', publicUsers)
       }
-
-      // If user is not exists, pushing to public user list
-      isUserExists ? false : publicUsers.push(socket.user)
-      console.log(publicUsers)
-
-      // Join public room
-      socket.join('public')
-      console.log(socket.rooms)
-
-      // Send announce to other public room users
-      socket.to('public').emit('announce', {
-        message: `${name} joined`
-      })
-
-      // Send welcome message to current user
-      socket.emit('announce', {
-        message: `Welcome, ${name}!`
-      })
-
-      // Update new publicUsers to client side
-      io.to('public').emit('publicUsers', publicUsers)
     } catch (error) {
       return socket.emit('error', {
         status: error.name,
