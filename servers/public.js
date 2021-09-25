@@ -57,15 +57,16 @@ module.exports = (io, socket, user) => {
             attributes: ['id', 'name', 'avatar', 'account']
           })
           // 加入到歷史訊息
-          await Message.create({
+          const message = await Message.create({
             content: msg,
             RoomId: 1,
             senderId: user.id,
             receiver: null,
           })
+          // TODO: 前端說他要message的id，所以才又撈了一次資料，而不是直接接著他傳的msg在回傳給他
           // 包成物件傳到前端，訊息內容＋發送者的個人資料
           const data = {
-            message: msg,
+            message: message.toJSON(),
             user: sendUser.toJSON()
           }
           io.to(1).emit('updated message', data)
