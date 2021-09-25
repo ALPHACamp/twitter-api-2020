@@ -26,17 +26,17 @@ module.exports = (io, socket) => {
         currentUserId
       )
 
-      console.log(privateRoom)
-
       // Join private room
-      socket.join(privateRoom.name)
+      socket.join(privateRoom.Room.dataValues.name)
 
       // Send RoomId back to client
-      callback({ RoomId: privateRoom.id })
+      callback({ RoomId: privateRoom.Room.dataValues.id })
 
       // Set private room name to socket.user
-      socket.user.privateRoom = privateRoom.name
+      socket.user.privateRoom = privateRoom.Room.dataValues.name
 
+      console.log(socket.user)
+      console.log(socket.rooms)
       // Update unread message status
       // TODO : messageService.updateMessageStatus(room.id, currentUserId)
 
