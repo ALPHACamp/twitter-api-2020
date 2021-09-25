@@ -7,6 +7,7 @@ module.exports = (io, socket, user) => {
   socket.on('join public', async () => {
     try {
       socket.join(1) //連線者加入公開房間
+
       // 先判斷使用者是否有在這個房間過
       const result = await RoomUser.findAll({
         raw: true, nest: true,
@@ -43,53 +44,58 @@ module.exports = (io, socket, user) => {
         },
         order: [['createdAt', 'ASC']]
       })
+
       // 伺服器向房間1更新歷史訊息
       io.to(1).emit('history', messages)
 
-      socket.on('typing', () => {
-        socket.emit('typing', `${user.name}正在輸入...`)
-      })
-
-      socket.on('send message', async msg => {
-        try {
-          const sendUser = await User.findOne({
-            where: { id: user.id },
-            attributes: ['id', 'name', 'avatar', 'account']
-          })
-          // 加入到歷史訊息
-          const message = await Message.create({
-            content: msg,
-            RoomId: 1,
-            senderId: user.id,
-            receiver: null,
-          })
-          // TODO: 前端說他要message的id，所以才又撈了一次資料，而不是直接接著他傳的msg在回傳給他
-          // 包成物件傳到前端，訊息內容＋發送者的個人資料
-          const data = {
-            message: message.toJSON(),
-            user: sendUser.toJSON()
-          }
-          io.to(1).emit('updated message', data)
-        } catch (err) {
-          console.warn(err)
-        }
-      })
     } catch (err) {
       console.warn(err)
     }
   })
 
+  socket.on('send message', async msg => {
+    try {
+      const sendUser = await User.findOne({
+        where: { id: user.id },
+        attributes: ['id', 'name', 'avatar', 'account']
+      })
+      // 加入到歷史訊息
+      const message = await Message.create({
+        content: msg,
+        RoomId: 1,
+        senderId: user.id,
+        receiver: null,
+      })
+      // TODO: 前端說他要message的id，所以才又撈了一次資料，而不是直接接著他傳的msg在回傳給他
+      // 包成物件傳到前端，訊息內容＋發送者的個人資料
+      const data = {
+        message: message.toJSON(),
+        user: sendUser.toJSON()
+      }
+      io.to(1).emit('updated message', data)
+
+    } catch (err) {
+      console.warn(err)
+    }
+  })
+
+  socket.on('typing', () => {
+    socket.emit('typing', `${user.name}正在輸入...`)
+  })
+
   // TODO:如果server重啟，要自動清空roomUser
-  socket.on('leave public', async () => {
+  socket.on('leave public', async (msg) => {
     try {
       // 下線
       socket.leave(1)
       await RoomUser.destroy({
         where: {
+          UserId: user.id,
           socketId: user.socketId,
           RoomId: 1
         }
       })
+
       // TODO:跟上線邏輯很像，要重構
       // 離線後，確認房間是否還有user，沒的話才傳
       const result = await RoomUser.findAll({
@@ -99,7 +105,8 @@ module.exports = (io, socket, user) => {
           UserId: user.id
         }
       })
-      if (!result.length) {
+
+      if (result.length === 0) {
         io.to(1).emit('connect status', `${user.name} 離開聊天室`)
       }
 
