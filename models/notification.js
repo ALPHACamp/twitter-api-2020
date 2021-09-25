@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     FollowshipId: DataTypes.INTEGER,
     SubscribeshipId: DataTypes.INTEGER,
     LikeId: DataTypes.INTEGER,
+    isRead: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Notification',

@@ -34,6 +34,11 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true,
       },
+      isRead: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
