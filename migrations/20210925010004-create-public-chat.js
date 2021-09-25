@@ -1,18 +1,18 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('friendships', {
+    return queryInterface.createTable('PublicChats', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      adder: {
+      speakerId: {
         type: Sequelize.INTEGER
       },
-      added: {
-        type: Sequelize.INTEGER
+      chatContent: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -25,6 +25,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('friendships');
+    return queryInterface.dropTable('PublicChats');
   }
 };

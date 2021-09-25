@@ -4,9 +4,10 @@ const Tweet = db.Tweet
 const Reply = db.Reply
 const Followship = db.Followship
 const Like = db.Like
+const Chatmate = db.Chatmate
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
-const Op = db.Sequelize.Op
+const Op = Sequelize.Op
 const { QueryTypes } = require('sequelize')
 const readFile = require('../public/javascripts/fileRead')
 // const popularQty = 10 //暫時沒有用到
@@ -58,6 +59,18 @@ const userController = {
           { model: User, as: 'Followers', attributes: ['id'] }
         ]
       })
+
+      const roomId = await Chatmate.findOrCreate({
+        where: {
+          [Op.and]: [
+            { userAId: { [Op.in]: [userId, requestId] } },
+            { userBId: { [Op.in]: [userId, requestId] } }
+          ]
+        },
+        attributes: ['id']
+      })
+
+      userData.roomId = roomId
   
       return res.json(userData)
     }
