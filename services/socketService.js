@@ -50,9 +50,9 @@ const socketService = {
     let result = data.filter(i => !set.has(i.roomId)?set.add(i.roomId):false)
     for (const i of result) {
       if (UserId === i.UserId) {
-        i.user = await User.findByPk(i.UserId, { attributes: ['id', 'account', 'name', 'avatar'] })
+        i.user = await User.findByPk(i.receiverId, { attributes: ['id', 'account', 'name', 'avatar'] })
       }
-      i.user = await User.findByPk(i.receiverId, { attributes: ['id', 'account', 'name', 'avatar'] })
+      i.user = await User.findByPk(i.UserId, { attributes: ['id', 'account', 'name', 'avatar'] })
     }
 
     return result
