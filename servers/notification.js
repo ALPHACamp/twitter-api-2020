@@ -33,14 +33,19 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
         include: [{ model: User, attributes: ['id', 'avatar', 'name'] }, //觸發者
         {
           model: Tweet, attributes: ['id'],
-          include: { model: User, attributes: ['id'] }, //推文owner
+          include: { model: User, attributes: [['id', 'targetId']] }, //推文owner
         }
         ]
       })
       like = like.toJSON()
       //發送通知
-      const notifySocket = getEmitSockets([like.Tweet.User.id], userSocketIdMap)
-      io.to(notifySocket).emit('like notify', like)
+      const notifySocket = getEmitSockets([like.Tweet.User], userSocketIdMap)
+
+      // 有上線才發
+      if (notifySocket.length) {
+        io.to(notifySocket).emit('like notify', like)
+      }
+
     } catch (err) {
       console.warn(err)
     }
@@ -56,14 +61,48 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
         include: [{ model: User, attributes: ['id', 'avatar', 'name'] },
         {
           model: Tweet, attributes: ['id', 'description'],
-          include: { model: User, attributes: ['id'] }
+          include: { model: User, attributes: [['id', 'targetId']] }
         } //TODO:待前端決定他要DOM出推文的內文還是回覆的內文，擇一，或都要
         ]
       })
       reply = reply.toJSON()
+
       //發送通知給推文主人(如果他有上線的話)
-      const notifySocket = getEmitSockets([reply.Tweet.User.id], userSocketIdMap)
-      io.to(notifySocket).emit('reply notify', reply)
+      const notifySocket = getEmitSockets([reply.Tweet.User], userSocketIdMap)
+
+      // 有上線才發通知
+      if (notifySocket.length) {
+        io.to(notifySocket).emit('reply notify', reply)
+      }
+      // Mary有新的回應
+    } catch (err) {
+      console.warn(err)
+    }
+  })
+
+  // 追蹤對方時，通知對方是誰追蹤了你
+  socket.on('post follow', async (FollowshipId) => {
+    try {
+      // 追隨中的資料
+      let followship = await Followship.findOne({
+        attributes: ['id', 'createdAt', ['followingId', 'targetId']],
+        where: {
+          id: FollowshipId
+        },
+        include: {
+          model: User, as: 'Follower', attributes: ['id', 'name']
+        }
+      })
+
+      followship = followship.toJSON()
+
+      //發送通知給被追的人 (如果他有上線的話)
+      const notifySocket = getEmitSockets([followship], userSocketIdMap)
+
+      if (notifySocket.length) {
+        io.to(notifySocket).emit('follow notify', followship)
+      }
+
       // Mary有新的回應
     } catch (err) {
       console.warn(err)
