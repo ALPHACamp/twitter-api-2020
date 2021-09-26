@@ -1,7 +1,7 @@
 const db = require('../models')
 const { Op } = require('sequelize')
 const { Message, RoomUser } = db
-const { removeClientFromMap, addClientToMap, getRoomUsers } = require('../tools/helper')
+const { removeClientFromMap, addClientToMap, getRoomUsers, leavePublicRoom } = require('../tools/helper')
 // 登入成功以後，更新上線名單
 
 module.exports = (server) => {
@@ -49,37 +49,12 @@ module.exports = (server) => {
           io.emit('online user list', onlineUser)
 
           // 斷線之後，離開聊天室
-
           io.in(user.socketId).socketsLeave(1);
-          // TODO:將離開這件事打包起來
-          await RoomUser.destroy({
-            where: {
-              UserId: user.id,
-              socketId: user.socketId,
-              RoomId: 1
-            }
-          })
-
-
-
-          // TODO:跟上線邏輯很像，要重構
-          // 離線後，確認房間是否還有user，沒的話才傳
-          const result = await RoomUser.findAll({
-            raw: true, nest: true,
-            where: {
-              RoomId: 1,
-              UserId: user.id
-            }
-          })
-
-          if (result.length === 0) {
-            io.to(1).emit('connect status', `${user.name} 離開聊天室`)
-          }
+          await leavePublicRoom(io, user)
 
           // 回傳在線名單
           const userList = await getRoomUsers(1)
           io.to(1).emit('online list', userList)
-
           console.log('a user disconnected')
         } catch (err) {
           console.warn(err)

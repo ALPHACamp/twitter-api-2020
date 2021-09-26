@@ -1,6 +1,6 @@
 const db = require('../models')
 const { User, Message, RoomUser } = db
-const { getRoomUsers } = require('../tools/helper')
+const { getRoomUsers, leavePublicRoom } = require('../tools/helper')
 
 
 module.exports = (io, socket, user) => {
@@ -88,28 +88,7 @@ module.exports = (io, socket, user) => {
     try {
       // 下線
       socket.leave(1)
-      // TODO:將離開這件事打包起來
-      await RoomUser.destroy({
-        where: {
-          UserId: user.id,
-          socketId: user.socketId,
-          RoomId: 1
-        }
-      })
-
-      // TODO:跟上線邏輯很像，要重構
-      // 離線後，確認房間是否還有user，沒的話才傳
-      const result = await RoomUser.findAll({
-        raw: true, nest: true,
-        where: {
-          RoomId: 1,
-          UserId: user.id
-        }
-      })
-
-      if (result.length === 0) {
-        io.to(1).emit('connect status', `${user.name} 離開聊天室`)
-      }
+      await leavePublicRoom(io, user)
 
       // 回傳在線名單
       const userList = await getRoomUsers(1)

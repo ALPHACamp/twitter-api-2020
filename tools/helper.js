@@ -102,4 +102,32 @@ async function CreateNotification(sourceKey, sourceValue, subscribingId) {
   }
 }
 
-module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification }
+async function leavePublicRoom(io, user) {
+  try {
+    // 清除在房資料
+    await RoomUser.destroy({
+      where: {
+        UserId: user.id,
+        socketId: user.socketId,
+        RoomId: 1
+      }
+    })
+
+    // 離線後，確認房間是否還有user，沒的話才傳
+    const result = await RoomUser.findAll({
+      raw: true, nest: true,
+      where: {
+        RoomId: 1,
+        UserId: user.id
+      }
+    })
+
+    if (result.length === 0) {
+      io.to(1).emit('connect status', `${user.name} 離開聊天室`)
+    }
+  } catch (err) {
+    console.warn(err)
+  }
+}
+
+module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom }
