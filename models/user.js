@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
       cover: {
         type: DataTypes.STRING,
         defaultValue: 'https://i.imgur.com/1L2chcu.jpg'
+      },
+      lastLogin: {
+        type: DataTypes.DATE,
+        defaultValue: new Date()
       }
     },
     {}
