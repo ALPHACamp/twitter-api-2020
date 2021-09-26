@@ -70,6 +70,8 @@ const messageService = {
       : { [Op.not]: currentUserId }
 
     return await Member.findAll({
+      raw: true,
+      nest: true,
       where: {
         UserId: queryOption,
         RoomId: [
@@ -131,6 +133,7 @@ const messageService = {
       include: [
         {
           model: Room,
+          attributes: [],
           where: {
             name: { [Op.substring]: currentUserId }
           },
@@ -138,26 +141,16 @@ const messageService = {
         },
         {
           model: User,
-          attributes: ['id', 'avatar', 'name', 'account']
+          attributes: []
         }
       ],
-      where: {
-        UserId: { [Op.not]: currentUserId }
-      },
-      attributes: [
-        'id',
-        'createdAt',
-        'updatedAt',
-        'content',
-        'RoomId',
-        'UserId'
-      ],
-      group: ['id', 'RoomId'],
+      attributes: ['id', 'createdAt', 'content', 'RoomId'],
+      group: ['id'],
       order: [['createdAt', 'DESC']]
     })
 
     const latestMessages = messages.filter((message) =>
-      set.has(message.UserId) ? false : set.add(message.UserId)
+      set.has(message.RoomId) ? false : set.add(message.RoomId)
     )
 
     return latestMessages
