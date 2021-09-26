@@ -3,6 +3,8 @@ const socketService = require('../services/socketService')
 const { authenticatedSocket } = require('../middleware/auth')
 const { generateMessage } = require('./message')
 let activeUsers = []
+
+
 module.exports = (server) => {
   const io = require('socket.io')(server, {
     cors: {
@@ -14,9 +16,14 @@ module.exports = (server) => {
     maxHttpBufferSize: 100000000,
   })
 
+
   io.use(authenticatedSocket).on('connection', async socket => {
     console.log('== connected! ===')
     console.log(socket.userId)
+
+    socket.onAny((event, ...args) => {
+      console.log(event, args)
+    })
 
     io.emit('debug notice', `安安收到token${socket.handshake.auth.token}`)
     
@@ -76,7 +83,9 @@ module.exports = (server) => {
     socket.on('private chat', async (message) => {
       console.log('=== receive public chat message ===')
       await socketService.storeMessage(message, userId)
-      io.to(`${message.roomId}`).emit('message', generateMessage(message, userId, user.avatar, 'message'))
+      io.to(`${message.roomId}`).emit('debug notice', '安安這是後端, 有收到私訊訊息')
+      io.to(`${message.roomId}`).emit('private chat', generateMessage(message, userId, user.avatar, 'message'))
+      socket.broadcast.to(`${message.roomId}`).emit('private notice', { message: '這是一個私訊通知', type: 'notice'})
     })
   })
 }
