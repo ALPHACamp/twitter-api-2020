@@ -70,6 +70,8 @@ const messageService = {
       : { [Op.not]: currentUserId }
 
     return await Member.findAll({
+      raw: true,
+      nest: true,
       where: {
         UserId: queryOption,
         RoomId: [
@@ -136,6 +138,38 @@ const messageService = {
         where: { UserId: { [Op.not]: currentUserId }, RoomId }
       }
     )
+  },
+
+  // FIXME: Directly through Sequlize, no further processing is required.
+  getLatestMessages: async (currentUserId) => {
+    const set = new Set()
+    const messages = await Message.findAll({
+      raw: true,
+      nest: true,
+      include: [
+        {
+          model: Room,
+          attributes: [],
+          where: {
+            name: { [Op.substring]: currentUserId }
+          },
+          order: [['createdAt', 'DESC']]
+        },
+        {
+          model: User,
+          attributes: []
+        }
+      ],
+      attributes: ['id', 'createdAt', 'content', 'RoomId'],
+      group: ['id'],
+      order: [['createdAt', 'DESC']]
+    })
+
+    const latestMessages = messages.filter((message) =>
+      set.has(message.RoomId) ? false : set.add(message.RoomId)
+    )
+
+    return latestMessages
   }
 }
 

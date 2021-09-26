@@ -39,6 +39,37 @@ const messageController = {
     } catch (error) {
       next(error)
     }
+  },
+
+  getLatestMessages: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+
+      if (!currentUserId) {
+        throw new ApiError(
+          'getLatestMessageError',
+          401,
+          'The currentUserId cannot be blank'
+        )
+      }
+      const rooms = await messageService.getPrivateRooms(null, currentUserId)
+      const latestMessages = await messageService.getLatestMessages(
+        currentUserId
+      )
+
+      latestMessages.forEach((message) => {
+        rooms.forEach((room) => {
+          if (room.RoomId === message.RoomId) {
+            message.User = room.User
+            message.Room = room.Room
+          }
+        })
+      })
+
+      return res.status(200).json(latestMessages)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
