@@ -86,7 +86,7 @@
     }
   })
   offline.addEventListener('click', () => {
-    socket.emit('leave private')
+    socket.emit('leave room')
   })
 
   socket.emit('join private page')

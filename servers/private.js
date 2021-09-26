@@ -91,7 +91,8 @@ module.exports = (io, socket, loginUser) => {
         io.to(room.id).emit('update message', { message, user: loginUser })
       })
 
-      socket.on('leave private', async () => {
+      // TODO: 斷線以後也要離開
+      socket.on('leave room', async () => {
         try {
           await RoomUser.destroy({ where: { RoomId: room.id, UserId: loginUser.id } })
           socket.leave(room.id)
