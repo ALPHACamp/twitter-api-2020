@@ -41,7 +41,7 @@ const messageController = {
     }
   },
 
-  getLatestMessage: async (req, res, next) => {
+  getLatestMessages: async (req, res, next) => {
     try {
       const currentUserId = helpers.getUser(req).id
 
@@ -52,7 +52,7 @@ const messageController = {
           'The currentUserId cannot be blank'
         )
       }
-      const latestMessages = await messageService.getLatestMessage(
+      const latestMessages = await messageService.getLatestMessages(
         currentUserId
       )
       return res.status(200).json(latestMessages)

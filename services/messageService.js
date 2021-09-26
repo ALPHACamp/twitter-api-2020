@@ -123,9 +123,9 @@ const messageService = {
   },
 
   // FIXME: Directly through Sequlize, no further processing is required.
-  getLatestMessage: async (currentUserId) => {
+  getLatestMessages: async (currentUserId) => {
     const set = new Set()
-    const messgaes = await Message.findAll({
+    const messages = await Message.findAll({
       raw: true,
       nest: true,
       include: [
@@ -156,8 +156,8 @@ const messageService = {
       order: [['createdAt', 'DESC']]
     })
 
-    const latestMessages = messgaes.filter((messgae) =>
-      set.has(messgae.UserId) ? false : set.add(messgae.UserId)
+    const latestMessages = messages.filter((message) =>
+      set.has(message.UserId) ? false : set.add(message.UserId)
     )
 
     return latestMessages
