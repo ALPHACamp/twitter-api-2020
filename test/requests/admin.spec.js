@@ -22,7 +22,6 @@ describe('# admin requests', () => {
         this.getUser = sinon.stub(
           helpers, 'getUser'
         ).returns({ id: 1, Followings: [], role: 'admin' });
-        console.log(rootUser)
         await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1', role: 'admin' })
         await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
       })
