@@ -14,12 +14,12 @@ module.exports = (io, socket, publicUsers) => {
       )
 
       // Update user's public unread message status
-      const updatedUser = await socketHelpers.updateUserLastLogin(
+      const updatedUser = await socketHelpers.updateUserLastJoinPublic(
         socket.user.id
       )
-      socket.user.lastLogin = updatedUser.dataValues.lastLogin
+      socket.user.lastJoinPublic = updatedUser.dataValues.lastJoinPublic
       const hasUnreadPublicMessage = await socketHelpers.hasUnreadPublicMessage(
-        socket.user.lastLogin
+        socket.user.lastJoinPublic
       )
       socket.emit('publicUnreadMessage', { hasUnreadPublicMessage })
 

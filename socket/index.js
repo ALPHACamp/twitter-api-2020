@@ -24,7 +24,7 @@ module.exports = (io) => {
 
     // Check if current user has public unread messages
     const hasUnreadPublicMessage = await socketHelpers.hasUnreadPublicMessage(
-      socket.user.lastLogin
+      socket.user.lastJoinPublic
     )
     console.log(hasUnreadPublicMessage)
 
@@ -74,9 +74,6 @@ module.exports = (io) => {
       // Update new publicUsers to client side
       io.to('public').emit('publicUsers', publicUsers)
       console.log(publicUsers)
-
-      // Update user's last login time
-      await socketHelpers.updateUserLastLogin(socket.user.id)
     })
   })
 }

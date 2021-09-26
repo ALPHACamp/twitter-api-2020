@@ -49,7 +49,7 @@ const socketAuthenticated = (socket, next) => {
     }
     socket.user = await User.findByPk(decoded.id, {
       raw: true,
-      attributes: ['id', 'name', 'avatar', 'account', 'lastLogin']
+      attributes: ['id', 'name', 'avatar', 'account', 'lastJoinPublic']
     })
     return next()
   })

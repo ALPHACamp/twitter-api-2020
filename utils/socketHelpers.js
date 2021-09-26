@@ -8,15 +8,15 @@ const hasUnreadPublicMessage = async (lastLogin) => {
   return lastMessagesCreatedAt > lastLogin
 }
 
-const updateUserLastLogin = async (currentUserId) => {
+const updateUserLastJoinPublic = async (currentUserId) => {
   await User.update(
     {
-      lastLogin: new Date()
+      lastJoinPublic: new Date()
     },
     { where: { id: currentUserId } }
   )
 
-  return User.findByPk(currentUserId, { attributes: ['lastLogin'] })
+  return User.findByPk(currentUserId, { attributes: ['lastJoinPublic'] })
 }
 
-module.exports = { hasUnreadPublicMessage, updateUserLastLogin }
+module.exports = { hasUnreadPublicMessage, updateUserLastJoinPublic }
