@@ -3,6 +3,7 @@ const { Notification, Subscribeship, Tweet, User, Reply, Followship, Like } = db
 const { getEmitSockets, CreateNotification } = require('../tools/helper')
 module.exports = async (io, socket, loginUser, userSocketIdMap) => {
 
+  // 通知訂閱戶
   socket.on('post tweet', async (TweetId) => {
     try {
       const subscribers = await CreateNotification('TweetId', TweetId, loginUser.id)
@@ -21,21 +22,25 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
     }
   })
 
+  // TODO: 將相似的邏輯變成同一個事件 通知對方 notify 事件類型+紀錄id(Like, LikeId)
   socket.on('post like', async (LikeId) => {
     try {
-      const subscribers = await CreateNotification('LikeId', LikeId, loginUser.id)
-
-      // 要通知訂閱戶的資料本身
-      const like = await Like.findOne({
+      //只要我讚推文，我就會通知推文者
+      // 要通知對方的資料本身
+      let like = await Like.findOne({
         attributes: ['id'],
         where: { id: LikeId },
-        include: [{ model: User, attributes: ['id', 'avatar', 'name'] },
-        { model: Tweet, attributes: ['id'] }
+        include: [{ model: User, attributes: ['id', 'avatar', 'name'] }, //觸發者
+        {
+          model: Tweet, attributes: ['id'],
+          include: { model: User, attributes: ['id'] }, //推文owner
+        }
         ]
       })
+      like = like.toJSON()
       //發送通知
-      const notifySockets = getEmitSockets(subscribers, userSocketIdMap)
-      io.to(notifySockets).emit('like notify', { like: like.toJSON() })
+      const notifySocket = getEmitSockets([like.Tweet.User.id], userSocketIdMap)
+      io.to(notifySocket).emit('like notify', like)
     } catch (err) {
       console.warn(err)
     }
@@ -59,6 +64,7 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
       //發送通知給推文主人(如果他有上線的話)
       const notifySocket = getEmitSockets([reply.Tweet.User.id], userSocketIdMap)
       io.to(notifySocket).emit('reply notify', reply)
+      // Mary有新的回應
     } catch (err) {
       console.warn(err)
     }
