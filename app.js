@@ -37,6 +37,15 @@ const server = app.listen(PORT, () => {
 })
 
 require('./routes')(app)
-const io = socket(server)
+
+const io = socket(server, {
+  cors: {
+    origin: ["*"],
+    methods: ["GET", "POST"]
+  }
+})
+
+app.set('socketio', io)
+
 socketConnection(io)
 module.exports = app 

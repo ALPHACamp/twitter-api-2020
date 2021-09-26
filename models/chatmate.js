@@ -5,7 +5,10 @@ module.exports = (sequelize, DataTypes) => {
     userBId: DataTypes.INTEGER
   }, {});
   Chatmate.associate = function(models) {
-    Chatmate.hasMany(models.ChatRecord)
+    Chatmate.hasMany(models.ChatRecord, {
+      foreignKey: 'roomId',
+      as: 'records'
+    })
   };
   return Chatmate;
 };

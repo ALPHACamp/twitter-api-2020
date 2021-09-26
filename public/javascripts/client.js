@@ -9,6 +9,23 @@ const socket = io(window.location.origin)
 // 連線並送出user id
 socket.emit('connectServer', userId);
 
+// 接收通知  new
+socket.on('notices', (notice) => {
+
+})
+
+socket.on('read-notice', (notice) => {
+
+})
+
+// 讀取通知  new
+if (button) {
+  button.addEventListener('click', event => {
+    socket.emit('read-notice', userId)
+  })
+}
+
+
 // 觸發加入公開聊天室
 if (button) {
   button.addEventListener('click', event => {
@@ -65,6 +82,10 @@ if (talk) {
     socket.emit('chatMessage', { msg: 'Hello', roomId: '3', userId: 2 })
   })
 }
+
+socket.on('personal-online-notice', (userId) => {
+
+})
 
 socket.on('room-info', { roomId, targetId, chatRecord })
 

@@ -6,6 +6,8 @@ const User = db.User
 const Chatmate = db.Chatmate
 const ChatRecord = db.ChatRecord
 const PublicChat = db.PublicChat
+const Subscribe = db.Subscribe
+const Unread = db.Unread
 const Sequelize = db.Sequelize
 const Op = Sequelize.Op
 
@@ -17,6 +19,63 @@ function socketConnection (io) {
       // 建立上線用戶表
       onlineList[userId] = socket
       onlineIdList.push(userId)
+
+      // 取出該用戶所有聊天室
+      Chatmate.findAll({
+        raw: true,
+        where: {
+          [Op.or]: [
+            { userAId: { [Op.eq]: userId } },
+            { userBId: { [Op.eq]: userId } }
+          ]
+        }})
+        .then(userChatrooms => {
+          // 將該使用者直接加入所有房間
+          userChatrooms.map(item => {
+            socket.join(item)
+            socket.broadcast.to(item).emit('personal-online-notice', userId)
+          })
+        })
+      
+      // 取出該用戶所有訂閱channel
+      Subscribe.findAll({
+        raw: true,
+        where: { subscribing: { [Op.eq]: userId } }
+      })
+      .then(subscribeChannel => {
+        // 直接加入訂閱channel
+        subscribeChannel.map(item => {
+          const roomName = 's' + item.id
+          socket.join(roomName)
+        })
+      })
+
+      // 取出user所有未讀取的通知
+      Unread.findAll({
+        raw: true,
+        where: { receiveId: { [Op.eq]: userId } }
+      })
+      .then(unreads => {
+        socket.emit('notices', unreads)
+      })
+
+      socket.on('read-notice', async (userId) => {
+        try {
+          const unreads = await Unread.findAll({
+            raw: true,
+            where: { receiveId: { [Op.eq]: userId } }
+          })
+
+          socket.emit('read-notice', unreads)
+
+          await Unread.destroy({
+            where: { receiveId: { [Op.eq]: userId } }
+          })
+        }
+        catch (err) {
+          console.log(err)
+        }
+      })
 
       // 公開聊天室部分
       // 加入公開聊天室
@@ -82,14 +141,6 @@ function socketConnection (io) {
             where: { roomId: { [Op.eq]: roomId } }
           })
 
-          socket.join(roomId)
-  
-          const targetId = data.targetId.toString()
-          if (onlineList[targetId]) {
-            const target = onlineList[targetId]
-            target.join(roomId)
-          } 
-  
           io.to(roomId).emit('room-info', { roomId, targetId, chatRecord })
         }
         catch (err) {
@@ -125,8 +176,7 @@ function socketConnection (io) {
           .to('public-room')
           .emit('public-offline-notice', userId)
         
-        const rooms = socket.rooms
-        rooms.map(item => {
+        userChatrooms.map(item => {
           socket.broadcast
             .to(item)
             .emit('chat-offline-notice', userId)

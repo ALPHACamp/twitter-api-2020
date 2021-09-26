@@ -6,10 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     chatContent: DataTypes.TEXT
   }, {});
   ChatRecord.associate = function(models) {
-    ChatRecord.belongsTo(models.Chatmate, {
-      foreignKey: 'roomId',
-      as: 'records'
-    })
+    ChatRecord.belongsTo(models.Chatmate)
   };
   return ChatRecord;
 };

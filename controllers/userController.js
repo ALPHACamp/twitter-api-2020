@@ -6,6 +6,8 @@ const Followship = db.Followship
 const Like = db.Like
 const Chatmate = db.Chatmate
 const ChatRecord = db.ChatRecord
+const Subscribe = db.Subscribe
+const Unread = db.Unread
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
 const Op = Sequelize.Op
@@ -215,6 +217,32 @@ const userController = {
       })
 
       return res.status(200).json(chatRecords)
+    }
+    catch (err) {
+      console.log(err)
+    }
+  },
+
+  subscribeUser: async (req, res) => {
+    try {
+      const channel = await Subscribe.findOrCreate({
+        subscribing: req.params.id,
+        subscriber: req.user.id
+      }, { raw: true })
+  
+      channel.type = 'subscribe'
+      channel.user = req.user
+  
+      await Unread.create({
+        sendId: req.user.id,
+        receiveId: req.params.id,
+        unread: channel
+      })
+  
+      const roomId = 's' + channel.id
+      const io = req.app.get('socketio')
+      io.broadcast.to(roomId).emit('notices', 'subscribe')
+      res.status(200)
     }
     catch (err) {
       console.log(err)
