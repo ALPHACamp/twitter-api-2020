@@ -6,7 +6,7 @@ Simple-Twitter-Frontend: https://github.com/WilliamTsou818/simple-twitter-fronte
 
 API 文件：https://whapsimpletwitter.docs.apiary.io/#
 
-Simple Twitter : https://williamtsou818.github.io/simple-twitter-frontend/#/
+Live Demo : https://williamtsou818.github.io/simple-twitter-frontend/#/
 
 ## Devolper:
 
@@ -23,6 +23,11 @@ Avery: https://github.com/Kcih4518
 - 使用者能新增推文
 - 使用者能進行互動(Reply、Following、Like)
 - 使用者能編輯個人與帳戶資訊
+- 使用者能使用公開聊天室
+- 使用者能使用私人聊天室
+- 使用者公開、私人的訊息都會保存
+- 使用者能收到私人訊息知
+- 使用者能得到目前未讀通知
 - 管理者可瀏覽社群狀況(所有貼文、用戶概覽)
 - 管理者可以瀏覽站內所有的使用者清單
 - 管理者可以瀏覽站內所有的使用者的資訊 (推文數、關注數、跟隨者人數、like 數)
@@ -86,8 +91,12 @@ $ npx sequelize db:migrate
   - 5 名使用者每人共按 30 筆讚
 
 - Followship ：
+
   - 新增 5 筆追隨資料
   - 每位 user 追隨 1 位本人以外的 user
+
+- Public Room :
+  - 新增 5 筆公開訊息
 
 ```bash
 $ npx sequelize db:seed:all
@@ -132,3 +141,4 @@ user1@example.com
 | sequelize       | 6.6.5    |
 | sequelize-cli   | 6.2.0    |
 | joi             | 17.4.2   |
+| socket.io       | 4.2.0    |
