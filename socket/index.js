@@ -3,6 +3,7 @@ const publicRooms = require('./events/publicRooms')
 const subscribes = require('./events/subscribes')
 const privateRooms = require('./events/privateRooms')
 const messageService = require('../services/messageService')
+const socketHelpers = require('../utils/socketHelpers')
 
 // Store current public users' list
 const publicUsers = []
@@ -16,10 +17,19 @@ module.exports = (io) => {
       ` ${user.name} connected and number of connections ${clientsCount}`
     )
 
-    // Check if current user has unread messages
+    // Check if current user has private unread messages
     const privateUnreadMessageCount =
       await messageService.getPrivateUnreadMessageCount(user.id)
     socket.emit('unReadMessage', { privateUnreadMessageCount })
+
+    // Check if current user has public unread messages
+    const hasUnreadPublicMessage = await socketHelpers.hasUnreadPublicMessage(
+      socket.user.lastJoinPublic
+    )
+    console.log(hasUnreadPublicMessage)
+
+    socket.emit('publicUnreadMessage', { hasUnreadPublicMessage })
+    
     
     // Join user room to act as same user with multiple browser tabs
     socket.join(`user-${user.id}`)

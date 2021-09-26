@@ -1,4 +1,5 @@
 const messageService = require('../../services/messageService')
+const socketHelpers = require('../../utils/socketHelpers')
 module.exports = (io, socket, publicUsers) => {
   const { name, id } = socket.user
   socket.on('joinPublicRoom', async () => {
@@ -11,6 +12,16 @@ module.exports = (io, socket, publicUsers) => {
       console.log(
         `${socket.user.name} is already in publicUsers array: ${isUserExists}`
       )
+
+      // Update user's public unread message status
+      const updatedUser = await socketHelpers.updateUserLastJoinPublic(
+        socket.user.id
+      )
+      socket.user.lastJoinPublic = updatedUser.dataValues.lastJoinPublic
+      const hasUnreadPublicMessage = await socketHelpers.hasUnreadPublicMessage(
+        socket.user.lastJoinPublic
+      )
+      socket.emit('publicUnreadMessage', { hasUnreadPublicMessage })
 
       // If user is already exists, joining room without announce
       if (isUserExists) {
@@ -70,6 +81,12 @@ module.exports = (io, socket, publicUsers) => {
         updatedAt: message.dataValues.updatedAt
       }
 
+      // Send unread notification to online users except public room users
+      io.except('public').emit('publicUnreadMessage', {
+        hasUnreadPublicMessage: true
+      })
+
+      // Send public message to public room users
       return io.in('public').emit('publicMessage', data)
     } catch (error) {
       console.log(error)
