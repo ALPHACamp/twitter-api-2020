@@ -1,6 +1,6 @@
 const db = require('../models')
 const { User, Message, RoomUser } = db
-const { getRoomUsers, leavePublicRoom } = require('../tools/helper')
+const { getRoomUsers, leavePublicRoom, updateMessage } = require('../tools/helper')
 
 
 module.exports = (io, socket, user) => {
@@ -53,27 +53,9 @@ module.exports = (io, socket, user) => {
     }
   })
 
-  socket.on('send message', async msg => {
+  socket.on('send message', async message => {
     try {
-      const sendUser = await User.findOne({
-        where: { id: user.id },
-        attributes: ['id', 'name', 'avatar', 'account']
-      })
-      // 加入到歷史訊息
-      const message = await Message.create({
-        content: msg,
-        RoomId: 1,
-        senderId: user.id,
-        receiver: null,
-      })
-      // TODO: 前端說他要message的id，所以才又撈了一次資料，而不是直接接著他傳的msg在回傳給他
-      // 包成物件傳到前端，訊息內容＋發送者的個人資料
-      const data = {
-        message: message.toJSON(),
-        user: sendUser.toJSON()
-      }
-      io.to(1).emit('updated message', data)
-
+      await updateMessage(io, message, user, 1)
     } catch (err) {
       console.warn(err)
     }

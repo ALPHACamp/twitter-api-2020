@@ -101,7 +101,7 @@
 
     console.log(`房間：${roomId}`)
 
-    socket.on('update message', (obj) => {
+    socket.on('updated message', (obj) => {
       console.log('傳送者發來的訊息')
       console.log(obj)
       displayMessage(obj.message)

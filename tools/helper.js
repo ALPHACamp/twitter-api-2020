@@ -1,6 +1,6 @@
 const db = require('../models')
 const sequelize = require('sequelize')
-const { RoomUser, User, Subscribeship, Notification, Room } = db
+const { RoomUser, User, Subscribeship, Notification, Room, Message } = db
 function turnToBoolean(data, attribute) {
   if (Array.isArray(data)) {
     data.forEach(data => {
@@ -205,4 +205,50 @@ async function emitChatList(io, loginUser) {
   }
 }
 
-module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom, emitChatList, leaveAllPrivateRoom }
+async function updateMessage(io, message, user, RoomId, targetUserId) {
+  try {
+    const sendUser = await User.findOne({
+      where: { id: user.id },
+      attributes: ['id', 'name', 'avatar', 'account']
+    })
+    // 寫入歷史訊息
+    if (RoomId === 1) {
+      message = await Message.create({
+        content: message,
+        RoomId,
+        senderId: user.id,
+        receiver: null,
+      })
+    } else {
+      // 判斷對方有無在該私人房間，如有，isRead改為true
+      // TODO:既然已經在加入房間時更新訊息，是否這裡就不需要了，應該不行，如果同時在線就還是未讀吧？
+      const isTargetOnline = await RoomUser.findOne({
+        where: {
+          RoomId,
+          UserId: targetUserId
+        }
+      })
+
+      const isRead = isTargetOnline ? true : false
+
+      message = await Message.create({
+        RoomId,
+        content: message,
+        senderId: user.id,
+        receiverId: targetUserId,
+        isRead
+      })
+    }
+
+    // 包成物件傳到前端，訊息內容＋發送者的個人資料
+    const data = {
+      message: message.toJSON(),
+      user: sendUser.toJSON()
+    }
+    io.to(RoomId).emit('updated message', data)
+  } catch (err) {
+    console.warn(err)
+  }
+}
+
+module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom, emitChatList, leaveAllPrivateRoom, updateMessage }

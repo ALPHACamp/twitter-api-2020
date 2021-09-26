@@ -1,7 +1,7 @@
 const db = require('../models')
 const sequelize = require('sequelize')
 const { Room, Message, User, RoomUser } = db
-const { emitChatList } = require('../tools/helper')
+const { emitChatList, updateMessage } = require('../tools/helper')
 
 module.exports = (io, socket, loginUser) => {
 
@@ -63,7 +63,7 @@ module.exports = (io, socket, loginUser) => {
 
       // TODO: 是否能更指定，哪個房間的哪個使用者？
       // 伺服器向登入者更新房間歷史訊息
-      io.to(user.socketId).emit('history', messages)
+      io.to(loginUser.socketId).emit('history', messages)
 
       socket.on('typing', () => {
         socket.emit('typing', `${user.name}正在輸入...`)
@@ -71,25 +71,11 @@ module.exports = (io, socket, loginUser) => {
 
       // 接發訊息
       socket.on('private message', async message => {
-        // 判斷對方有無在房間，如有，isRead改為true
-        // TODO:既然已經在加入房間時更新訊息，是否這裡就不需要了，應該不行，如果同時在線就還是未讀吧？
-        const isTargetOnline = await RoomUser.findOne({
-          where: {
-            RoomId: room.id,
-            UserId: targetUserId
-          }
-        })
-        const isRead = isTargetOnline ? true : false
-        // 創建訊息
-        await Message.create({
-          senderId: loginUser.id,
-          receiverId: targetUserId,
-          RoomId: room.id,
-          content: message,
-          isRead
-        })
-        // 更新訊息給前端
-        io.to(room.id).emit('update message', { message, user: loginUser })
+        try {
+          await updateMessage(io, message, loginUser, room.id, targetUserId)
+        } catch (err) {
+          console.warn(err)
+        }
       })
 
       // TODO: 斷線以後也要離開
