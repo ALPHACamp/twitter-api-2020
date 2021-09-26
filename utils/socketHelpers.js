@@ -1,11 +1,11 @@
 const messageService = require('../services/messageService')
 const { User } = require('../models')
 
-const hasUnreadPublicMessage = async (lastLogin) => {
+const hasUnreadPublicMessage = async (lastJoinPublic) => {
   const publicMessages = await messageService.getMessages(5)
   const lastMessagesCreatedAt =
     publicMessages[publicMessages.length - 1].createdAt
-  return lastMessagesCreatedAt > lastLogin
+  return lastMessagesCreatedAt > lastJoinPublic
 }
 
 const updateUserLastJoinPublic = async (currentUserId) => {
