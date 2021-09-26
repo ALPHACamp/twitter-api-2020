@@ -122,20 +122,45 @@ const messageService = {
     })
   },
 
-  putMessageIsReadStatus: async (RoomId, currentUserId) => {
-    if (!RoomId) {
-      throw new ApiError(
-        'getUnreadMessageCountError',
-        401,
-        'The RoomId cannot be blank'
-      )
-    }
-    return await Message.update(
-      { isRead: true },
-      {
-        where: { UserId: { [Op.not]: currentUserId }, RoomId }
-      }
+  // FIXME: Directly through Sequlize, no further processing is required.
+  getLatestMessage: async (currentUserId) => {
+    const set = new Set()
+    const messgaes = await Message.findAll({
+      raw: true,
+      nest: true,
+      include: [
+        {
+          model: Room,
+          where: {
+            name: { [Op.substring]: currentUserId }
+          },
+          order: [['createdAt', 'DESC']]
+        },
+        {
+          model: User,
+          attributes: ['id', 'avatar', 'name', 'account']
+        }
+      ],
+      where: {
+        UserId: { [Op.not]: currentUserId }
+      },
+      attributes: [
+        'id',
+        'createdAt',
+        'updatedAt',
+        'content',
+        'RoomId',
+        'UserId'
+      ],
+      group: ['id', 'RoomId'],
+      order: [['createdAt', 'DESC']]
+    })
+
+    const latestMessages = messgaes.filter((messgae) =>
+      set.has(messgae.UserId) ? false : set.add(messgae.UserId)
     )
+
+    return latestMessages
   }
 }
 
