@@ -84,9 +84,9 @@ module.exports = (server) => {
       console.log('=== receive private chat message ===')
       await socketService.storeMessage(message, userId)
       console.log(message.roomId)
-      socket.to(`${message.roomId}`).emit('debug notice', '安安這是後端, 有收到私訊訊息')
-      socket.to(`${message.roomId}`).emit('private chat', generateMessage(message, userId, user.avatar, 'message'))
-      socket.broadcast.to(`${message.roomId}`).emit('private notice', { message: '這是一個私訊通知', type: 'notice'})
+      io.emit('debug notice', `安安這是後端, 有收到來自${userId}私訊訊息`)
+      io.to(`${message.roomId}`).emit('private chat', generateMessage(message, userId, user.avatar, 'message'))
+      io.to(`${message.roomId}`).emit('private notice', { message: '這是一個私訊通知', type: 'notice'})
     })
   })
 }
