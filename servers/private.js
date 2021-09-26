@@ -51,7 +51,7 @@ module.exports = (io, socket, loginUser) => {
       //傳入歷史訊息
       const messages = await Message.findAll({
         raw: true, nest: true,
-        attributes: ['content', 'createdAt'],
+        attributes: ['id', 'content', 'createdAt'],
         where: { RoomId: room.id },
         include: {
           model: User,
@@ -61,8 +61,9 @@ module.exports = (io, socket, loginUser) => {
         order: [['createdAt', 'ASC']]
       })
 
-      // 伺服器向房間更新歷史訊息
-      io.to(room.id).emit('history', messages)
+      // TODO: 是否能更指定，哪個房間的哪個使用者？
+      // 伺服器向登入者更新房間歷史訊息
+      io.to(user.socketId).emit('history', messages)
 
       socket.on('typing', () => {
         socket.emit('typing', `${user.name}正在輸入...`)
