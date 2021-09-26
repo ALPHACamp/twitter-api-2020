@@ -39,6 +39,26 @@ const messageController = {
     } catch (error) {
       next(error)
     }
+  },
+
+  getLatestMessages: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+
+      if (!currentUserId) {
+        throw new ApiError(
+          'getLatestMessageError',
+          401,
+          'The currentUserId cannot be blank'
+        )
+      }
+      const latestMessages = await messageService.getLatestMessages(
+        currentUserId
+      )
+      return res.status(200).json(latestMessages)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
