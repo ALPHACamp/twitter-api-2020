@@ -3,6 +3,7 @@ const publicRooms = require('./events/publicRooms')
 const subscribes = require('./events/subscribes')
 const privateRooms = require('./events/privateRooms')
 const messageService = require('../services/messageService')
+const socketHelpers = require('../utils/socketHelpers')
 
 // Store current public users' list
 const publicUsers = []
@@ -22,9 +23,9 @@ module.exports = (io) => {
     socket.emit('unReadMessage', { privateUnreadMessageCount })
 
     // Check if current user has public unread messages
-    const publicMessages = await messageService.getMessages(5)
-    const lastMessagesCreatedAt = publicMessages[publicMessages.length - 1].createdAt
-    const hasUnreadPublicMessage = lastMessagesCreatedAt > socket.user.lastLogin
+    const hasUnreadPublicMessage = await socketHelpers.hasUnreadPublicMessage(
+      socket.user.lastLogin
+    )
     console.log(hasUnreadPublicMessage)
 
     if (hasUnreadPublicMessage) {
