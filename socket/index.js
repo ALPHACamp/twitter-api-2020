@@ -16,10 +16,20 @@ module.exports = (io) => {
       ` ${user.name} connected and number of connections ${clientsCount}`
     )
 
-    // Check if current user has unread messages
+    // Check if current user has private unread messages
     const privateUnreadMessageCount =
       await messageService.getPrivateUnreadMessageCount(user.id)
     socket.emit('unReadMessage', { privateUnreadMessageCount })
+
+    // Check if current user has public unread messages
+    const publicMessages = await messageService.getMessages(5)
+    const lastMessagesCreatedAt = publicMessages[publicMessages.length - 1].createdAt
+    const hasUnreadPublicMessage = lastMessagesCreatedAt > socket.user.lastLogin
+    console.log(hasUnreadPublicMessage)
+
+    if (hasUnreadPublicMessage) {
+      socket.emit('publicUnreadMessage', { hasUnreadPublicMessage })
+    }
     
     // Join user room to act as same user with multiple browser tabs
     socket.join(`user-${user.id}`)
