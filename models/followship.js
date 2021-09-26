@@ -16,6 +16,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {});
   Followship.associate = function (models) {
+    Followship.belongsTo(models.User, {
+      through: models.Followship,
+      foreignKey: 'followerId',
+      as: 'Follower'
+    })
   };
   return Followship;
 };

@@ -17,18 +17,19 @@ const userService = {
       if (name && name.length > 50) errors.push('名稱需小於50字')
       if (password !== checkPassword) errors.push('兩次密碼輸入需相符')
 
-      const userEmail = await User.findOne({ where: { email }, attributes: ['email'] })
-      if (userEmail) cb({ status: '409', message: 'Email已存在' })
-
-      const userAccount = await User.findOne({ where: { account }, attributes: ['account'] })
-      if (userAccount) cb({ status: '409', message: 'Account已被使用' })
-
-      // 通過驗證，建立帳號
+      // 通過初步驗證
       if (!errors.length) {
         const salt = await bcrypt.genSalt(10)
         password = await bcrypt.hash(password, salt)
-        await User.create({ account, name, email, password })
-        return cb({ status: '200', message: '帳號建立成功' })
+        // 查看是否已存在
+        const userEmail = await User.findOne({ where: { email }, attributes: ['email'] })
+        const userAccount = await User.findOne({ where: { account }, attributes: ['account'] })
+        if (userEmail || userAccount) {
+          return cb({ status: '409', message: 'Email or 帳號已存在' })
+        } else {
+          await User.create({ account, name, email, password })
+          return cb({ status: '200', message: '帳號建立成功' })
+        }
       } else {
         return cb({ status: '400', message: errors })
       }
@@ -67,7 +68,10 @@ const userService = {
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'totalFollowings'],
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'totalFollowers'],
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets'],
-          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings']
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings'],
+          [
+            sequelize.literal(`EXISTS (SELECT 1 FROM Subscribeships WHERE subscriberId = ${req.user.id} AND subscribingId = User.id)`), 'isSubscribing'
+          ]
         ],
         include: [{
           model: User,
@@ -90,6 +94,7 @@ const userService = {
       if (user === null) return cb({ status: '400', message: '該用戶不存在' })
       user = user.toJSON()
       turnToBoolean(user, 'isFollowings')
+      turnToBoolean(user, 'isSubscribing')
       // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
       return cb({
         status: '200',
