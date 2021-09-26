@@ -46,7 +46,7 @@ module.exports = (io, socket, user) => {
       })
 
       // 伺服器向房間1更新歷史訊息
-      io.to(1).emit('history', messages)
+      io.to(user.socketId).emit('history', messages)
 
     } catch (err) {
       console.warn(err)
