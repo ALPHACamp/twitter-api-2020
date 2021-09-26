@@ -450,7 +450,7 @@ const userController = {
       if (id !== loginId) {
         return res.json({
           status: 'error',
-          message: 'User can only edit their profile.',
+          message: 'User can only edit their profile.'
         })
       }
       // validator name & introduction
