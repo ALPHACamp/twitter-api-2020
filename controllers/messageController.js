@@ -57,16 +57,16 @@ const messageController = {
         currentUserId
       )
 
-      latestMessages.forEach((message) => {
-        rooms.forEach((room) => {
+      rooms.forEach((room) => {
+        latestMessages.forEach((message) => {
           if (room.RoomId === message.RoomId) {
-            message.User = room.User
-            message.Room = room.Room
+            room.content = message.content
+            room.createdAt = message.createdAt
           }
         })
       })
 
-      return res.status(200).json(latestMessages)
+      return res.status(200).json(rooms)
     } catch (error) {
       next(error)
     }
