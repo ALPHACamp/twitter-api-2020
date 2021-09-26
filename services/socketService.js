@@ -1,4 +1,5 @@
 const { Message, User, Sequelize } = require('../models')
+const { Op } = require('sequelize')
 
 const socketService = {
   getUser: async (userId, next) => {
@@ -36,22 +37,23 @@ const socketService = {
   },
   getPrivateMessages: async (UserId) => {
     const data = await Message.findAll({ 
-      where: { roomId: {[Op.like]: `${UserId}`}},
+      raw: true, 
+      nest: true,
+      where: { [Op.or]: [{ UserId: UserId}, {receiverId: UserId }],
+        roomId: {
+          [Op.ne]: 1
+        }},
       order: [['createdAt', 'DESC']]
     })
 
     const set = new Set()
     let result = data.filter(i => !set.has(i.roomId)?set.add(i.roomId):false)
-    result.forEach( i => {
-      if (i.UserId === UserId) {
-        i.user = User.findByPk(i.receiverId, {
-          attributes: ['id', 'name', 'account', 'avatar']
-        })
+    for (const i of result) {
+      if (UserId === i.UserId) {
+        i.user = await User.findByPk(i.UserId, { attributes: ['id', 'account', 'name', 'avatar'] })
       }
-      i.user = User.findByPk(i.UserId, {
-        attributes: ['id', 'name', 'account', 'avatar'],
-      })
-    })
+      i.user = await User.findByPk(i.receiverId, { attributes: ['id', 'account', 'name', 'avatar'] })
+    }
 
     return result
   }
