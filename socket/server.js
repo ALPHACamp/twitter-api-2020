@@ -86,7 +86,7 @@ module.exports = (server) => {
       console.log(message.roomId)
       io.emit('debug notice', `安安這是後端, 有收到來自${userId}私訊訊息`)
       io.to(`${message.roomId}`).emit('private chat', generateMessage(message, userId, user.avatar, 'message'))
-      io.to(`${message.roomId}`).emit('private notice', { message: '這是一個私訊通知', type: 'notice'})
+      io.to(`${message.roomId}`).emit('private notice', { message: '這是一個私訊通知', userId, type: 'notice'})
     })
   })
 }
