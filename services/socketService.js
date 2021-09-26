@@ -51,8 +51,9 @@ const socketService = {
     for (const i of result) {
       if (UserId === i.UserId) {
         i.user = await User.findByPk(i.receiverId, { attributes: ['id', 'account', 'name', 'avatar'] })
+      } else if (UserId !== i.UserId) {
+        i.user = await User.findByPk(i.UserId, { attributes: ['id', 'account', 'name', 'avatar'] })
       }
-      i.user = await User.findByPk(i.UserId, { attributes: ['id', 'account', 'name', 'avatar'] })
     }
 
     return result
