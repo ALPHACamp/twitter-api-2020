@@ -28,6 +28,8 @@ router.get('/currentuser', authenticated, checkRole(), userController.getCurrent
 
 router.get('/topUsers', authenticated, checkRole(), userController.getTopUsers)
 
+router.get('/topSixUsers', authenticated, checkRole(), userController.getTopSixUsers)
+
 router.get('/:id', authenticated, checkRole(), userController.getUser)
 
 router.put('/:id', authenticated, checkRole(), validate(user), cpUpload, userController.putUser)
