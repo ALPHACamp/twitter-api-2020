@@ -31,7 +31,7 @@ module.exports = (server) => {
 
     const user = await socketService.getUser(userId)
     console.log(user)
-    socket.on('join', async ({ roomId }) => {
+    socket.on('join', ({ roomId }) => {
 
       roomId = Number(roomId)
       socket.join(`${roomId}`)
@@ -54,7 +54,7 @@ module.exports = (server) => {
       }
     })
 
-    socket.on('leave', async ({ roomId }) => {
+    socket.on('leave', ({ roomId }) => {
       console.log('== receive leave message===')
       console.log(userId)
       io.emit('debug notice', `安安這是後端, 有收到來自UserId:${userId} 離開 RoomId${roomId}的訊息`)
