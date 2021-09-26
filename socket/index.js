@@ -75,6 +75,9 @@ module.exports = (io) => {
       // Update new publicUsers to client side
       io.to('public').emit('publicUsers', publicUsers)
       console.log(publicUsers)
+
+      // Update user's last login time
+      await socketHelpers.updateUserLastLogin(socket.user.id)
     })
   })
 }

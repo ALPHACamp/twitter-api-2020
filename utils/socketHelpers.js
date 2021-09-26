@@ -1,4 +1,5 @@
 const messageService = require('../services/messageService')
+const { User } = require('../models')
 
 const hasUnreadPublicMessage = async (lastLogin) => {
   const publicMessages = await messageService.getMessages(5)
@@ -7,4 +8,13 @@ const hasUnreadPublicMessage = async (lastLogin) => {
   return lastMessagesCreatedAt > lastLogin
 }
 
-module.exports = { hasUnreadPublicMessage }
+const updateUserLastLogin = async (currentUserId) => {
+  return await User.update(
+    {
+      lastLogin: new Date()
+    },
+    { where: { id: currentUserId } }
+  )
+}
+
+module.exports = { hasUnreadPublicMessage, updateUserLastLogin }
