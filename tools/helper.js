@@ -66,7 +66,7 @@ function getEmitSockets(subscribers, userSocketIdMap) {
       notifySockets.push(entry[1])
     }
   }
-  // 將set轉為陣列 [set {'abc','dec'}, set {'123'}] => ['abc','dec','123']
+  // 將set轉為陣列 [Set {'abc','dec'}, set {'123'}] => ['abc','dec','123']
   return Array.from(...notifySockets)
 }
 

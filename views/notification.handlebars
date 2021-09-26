@@ -2,7 +2,8 @@
 <script>
   // 新增推文的頁面
   socket.emit('post tweet', 1)
-  // 新增推文的頁面
+  // 按讚後觸發 傳like的id
+  socket.emit('post like', 1)
 
   //一進通知頁面時，通知伺服器（索取所有通知）
   socket.emit('join notification')
@@ -18,6 +19,11 @@
   //更新通知頁面（左側欄位）
   socket.on('tweet notify', data => {
     console.log('推文通知')
+    console.log(data)
+  })
+
+  socket.on('like notify', data => {
+    console.log('有人按你讚通知')
     console.log(data)
   })
 </script>

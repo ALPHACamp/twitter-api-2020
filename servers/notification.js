@@ -21,6 +21,26 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
     }
   })
 
+  socket.on('post like', async (LikeId) => {
+    try {
+      const subscribers = await CreateNotification('LikeId', LikeId, loginUser.id)
+
+      // 要通知訂閱戶的資料本身
+      const like = await Like.findOne({
+        attributes: ['id'],
+        where: { id: LikeId },
+        include: [{ model: User, attributes: ['id', 'avatar', 'name'] },
+        { model: Tweet, attributes: ['id'] }
+        ]
+      })
+      //發送通知
+      const notifySockets = getEmitSockets(subscribers, userSocketIdMap)
+      io.to(notifySockets).emit('like notify', { like: like.toJSON() })
+    } catch (err) {
+      console.warn(err)
+    }
+  })
+
   socket.on('join notification', async () => {
     try {
       // 送給前端 登入使用者所有的通知
