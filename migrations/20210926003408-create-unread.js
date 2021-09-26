@@ -15,7 +15,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       unread: {
-        type: Sequelize.JSON
+        type: Sequelize.TEXT
       },
       createdAt: {
         allowNull: false,
