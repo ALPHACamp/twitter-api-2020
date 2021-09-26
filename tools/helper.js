@@ -1,6 +1,6 @@
 const db = require('../models')
 const sequelize = require('sequelize')
-const { RoomUser, User, Subscribeship, Notification } = db
+const { RoomUser, User, Subscribeship, Notification, Room } = db
 function turnToBoolean(data, attribute) {
   if (Array.isArray(data)) {
     data.forEach(data => {
@@ -130,4 +130,46 @@ async function leavePublicRoom(io, user) {
   }
 }
 
-module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom }
+async function emitChatList(io, loginUser) {
+  try {
+    // TODO:更新聊天紀錄人員列表，回傳的使用者資料排除登入使用者的，只回傳對方資料
+    let chatList = await Room.findAll({
+      raw: true, nest: true,
+      attributes: [],
+      where: {
+        [sequelize.Op.or]: [
+          { joinerId: loginUser.id },
+          { creatorId: loginUser.id }
+        ]
+      },
+      include: [{
+        model: User,
+        as: 'Creator',
+        attributes: ['id', 'account', 'avatar', 'name']
+      },
+      {
+        model: User,
+        as: 'Joiner',
+        attributes: ['id', 'account', 'avatar', 'name']
+      }
+      ]
+    }) //TODO:根據聊天紀錄排序，越新的越上面，或是說先排沒已讀的在最上，在根據時間排序
+    // 只回傳聊天對象的個人資料。 [{user: {個人資料}}, {user: {個人資料}}]
+    chatList.forEach(data => {
+      if (data.Creator.id === loginUser.id) {
+        delete data.Creator
+        // 沒被刪掉的就是聊天對象，將key改為user
+        delete Object.assign(data, { ['user']: data['Joiner'] })['Joiner']
+      } else {
+        // 如果A不是登入者，就是聊天對象，此時刪掉B，並將key(A)改為user
+        delete data.Joiner
+        delete Object.assign(data, { ['user']: data['Creator'] })['Creator']
+      }
+    })
+    return io.except(1).emit('chat member list', chatList)
+  } catch (err) {
+    console.warn(err)
+  }
+}
+
+module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom, emitChatList }

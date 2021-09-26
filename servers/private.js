@@ -1,10 +1,18 @@
 const db = require('../models')
 const sequelize = require('sequelize')
 const { Room, Message, User, RoomUser } = db
-
+const { emitChatList } = require('../tools/helper')
 
 module.exports = (io, socket, loginUser) => {
 
+  socket.on('join private page', async () => {
+    try {
+      await emitChatList(io, loginUser)
+    } catch (err) {
+      console.warn(err)
+    }
+  })
+  // 第一次跟人聊天的時候，也要更新聊天列表
   socket.on('join room', async targetUserId => {
     try {
       // 找房間or創新房間
@@ -19,48 +27,17 @@ module.exports = (io, socket, loginUser) => {
         }
       })
       room = room.get({ plain: true })
+
+      // 如果是第一次聊天,更新聊天列表
+      if (created) {
+        await emitChatList(io, loginUser)
+      }
+
       // 加入房間
       socket.join(room.id)
       await RoomUser.create({ RoomId: room.id, UserId: loginUser.id, socketId: loginUser.socketId })
 
       io.to(room.id).emit('join room success', room.id)
-      // TODO:更新聊天紀錄人員列表，回傳的使用者資料排除登入使用者的，只回傳對方資料
-      let chatList = await Room.findAll({
-        raw: true, nest: true,
-        attributes: [],
-        where: {
-          [sequelize.Op.or]: [
-            { joinerId: loginUser.id },
-            { creatorId: loginUser.id }
-          ]
-        },
-        include: [{
-          model: User,
-          as: 'Creator',
-          attributes: ['id', 'account', 'avatar', 'name']
-        },
-        {
-          model: User,
-          as: 'Joiner',
-          attributes: ['id', 'account', 'avatar', 'name']
-        }
-        ]
-      }) //TODO:根據聊天紀錄排序，越新的越上面，或是說先排沒已讀的在最上，在根據時間排序
-      // 只回傳聊天對象的個人資料。 [{user: {個人資料}}, {user: {個人資料}}]
-      chatList.forEach(data => {
-        if (data.Creator.id === loginUser.id) {
-          delete data.Creator
-          // 沒被刪掉的就是聊天對象，將key改為user
-          delete Object.assign(data, { ['user']: data['Joiner'] })['Joiner']
-        } else {
-          // 如果A不是登入者，就是聊天對象，此時刪掉B，並將key(A)改為user
-          delete data.Joiner
-          delete Object.assign(data, { ['user']: data['Creator'] })['Creator']
-        }
-      })
-
-      io.to(room.id).emit('chat member list', chatList)
-
       // 將該房間傳給我的訊息改為已讀
       await Message.update({
         isRead: true

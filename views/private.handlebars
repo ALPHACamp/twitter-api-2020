@@ -89,16 +89,17 @@
     socket.emit('leave private')
   })
 
+  socket.emit('join private page')
   socket.emit('join room', 11)
+
+  socket.on('chat member list', list => {
+    console.log('所有私人房間')
+    console.log(list)
+  })
 
   socket.on('join room success', roomId => {
 
     console.log(`房間：${roomId}`)
-
-    socket.on('chat member list', list => {
-      console.log('所有私人房間')
-      console.log(list)
-    })
 
     socket.on('update message', (obj) => {
       console.log('傳送者發來的訊息')
