@@ -45,7 +45,7 @@ module.exports = async (io) => {
       socket.emit('allMsg', record)
       // 一連線後的廣播
       const welcomeMsg = `歡迎${socket.user.name}來到公開聊天室！`
-      io.emit('welcome message', { broadcast: welcomeMsg })
+      io.emit('broadcast', { broadcast: welcomeMsg })
       // 丟 onlineUser 給前端
       io.emit('onlineUser', onlineUser)
     })
@@ -66,10 +66,12 @@ module.exports = async (io) => {
       console.log('message: ' + msg.message)
     })
     socket.on('disconnect', () => {
-      const byeMsg = `${socket.user.name} 下線了，掰掰！`
-      io.emit('disconnectMsg', { broadcast: byeMsg })
+      console.log(socket.user.name)
+      const {id, name} = socket.user
+      const byeMsg = `${name} 下線了，掰掰！`
+      io.emit('broadcast', { broadcast: byeMsg })
       // 刪除 onlineUser
-      onlineUser = onlineUser.filter((user) => user.id !== socket.user.name)
+      onlineUser = onlineUser.filter((user) => user.id !== id)
       console.log('user disconnected')
     })
   })
