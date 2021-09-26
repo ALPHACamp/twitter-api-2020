@@ -28,9 +28,8 @@ module.exports = (io) => {
     )
     console.log(hasUnreadPublicMessage)
 
-    if (hasUnreadPublicMessage) {
-      socket.emit('publicUnreadMessage', { hasUnreadPublicMessage })
-    }
+    socket.emit('publicUnreadMessage', { hasUnreadPublicMessage })
+    
     
     // Join user room to act as same user with multiple browser tabs
     socket.join(`user-${user.id}`)

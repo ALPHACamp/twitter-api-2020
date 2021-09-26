@@ -9,12 +9,14 @@ const hasUnreadPublicMessage = async (lastLogin) => {
 }
 
 const updateUserLastLogin = async (currentUserId) => {
-  return await User.update(
+  await User.update(
     {
       lastLogin: new Date()
     },
     { where: { id: currentUserId } }
   )
+
+  return User.findByPk(currentUserId, { attributes: ['lastLogin'] })
 }
 
 module.exports = { hasUnreadPublicMessage, updateUserLastLogin }
