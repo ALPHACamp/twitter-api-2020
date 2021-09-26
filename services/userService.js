@@ -68,7 +68,10 @@ const userService = {
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'totalFollowings'],
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'totalFollowers'],
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets'],
-          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings']
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings'],
+          [
+            sequelize.literal(`EXISTS (SELECT 1 FROM Subscribeships WHERE subscriberId = ${req.user.id} AND subscribingId = User.id)`), 'isSubscribing'
+          ]
         ],
         include: [{
           model: User,
@@ -91,6 +94,7 @@ const userService = {
       if (user === null) return cb({ status: '400', message: '該用戶不存在' })
       user = user.toJSON()
       turnToBoolean(user, 'isFollowings')
+      turnToBoolean(user, 'isSubscribing')
       // 為了配合測試檔，不能多包一層user，不然res.body.name會取不到，要res.body.user.name才能拿到
       return cb({
         status: '200',
