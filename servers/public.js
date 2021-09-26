@@ -88,6 +88,7 @@ module.exports = (io, socket, user) => {
     try {
       // 下線
       socket.leave(1)
+      // TODO:將離開這件事打包起來
       await RoomUser.destroy({
         where: {
           UserId: user.id,
@@ -112,7 +113,7 @@ module.exports = (io, socket, user) => {
 
       // 回傳在線名單
       const userList = await getRoomUsers(1)
-      io.to(1).emit('online user', userList)
+      io.to(1).emit('online list', userList)
     } catch (err) {
       console.warn(err)
     }
