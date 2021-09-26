@@ -1,7 +1,7 @@
 const db = require('../models')
 const { Op } = require('sequelize')
 const { Message, RoomUser } = db
-const { removeClientFromMap, addClientToMap, getRoomUsers, leavePublicRoom } = require('../tools/helper')
+const { removeClientFromMap, addClientToMap, getRoomUsers, leavePublicRoom, leaveAllPrivateRoom } = require('../tools/helper')
 // 登入成功以後，更新上線名單
 
 module.exports = (server) => {
@@ -51,7 +51,7 @@ module.exports = (server) => {
           // 斷線之後，離開聊天室
           io.in(user.socketId).socketsLeave(1);
           await leavePublicRoom(io, user)
-
+          await leaveAllPrivateRoom(io, user)
           // 回傳在線名單
           const userList = await getRoomUsers(1)
           io.to(1).emit('online list', userList)

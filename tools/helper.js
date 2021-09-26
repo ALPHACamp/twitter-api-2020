@@ -130,12 +130,43 @@ async function leavePublicRoom(io, user) {
   }
 }
 
+async function leaveAllPrivateRoom(io, user) {
+  try {
+    let allRoom = await Room.findAll({
+      raw: true,
+      attributes: ['id'],
+      where: {
+        [sequelize.Op.or]: [{ creatorId: user.id }, { joinerId: user.id }]
+      }
+    })
+    // 轉成socketsLeave 接受的房間陣列 [{id: 12}, {id: 55}] => [12, 55]
+    allRoom = allRoom.map(room => (room.id))
+    // 清除在房資料
+    await RoomUser.destroy({
+      where: {
+        UserId: user.id,
+        socketId: user.socketId,
+      }
+    })
+    io.in(user.socketId).socketsLeave([allRoom]);
+  } catch (err) {
+    console.warn(err)
+  }
+}
+
 async function emitChatList(io, loginUser) {
   try {
     // TODO:更新聊天紀錄人員列表，回傳的使用者資料排除登入使用者的，只回傳對方資料
     let chatList = await Room.findAll({
       raw: true, nest: true,
-      attributes: [],
+      attributes: ['id',
+        [
+          sequelize.literal(`(SELECT content FROM Messages WHERE RoomId = Room.id ORDER BY createdAt DESC LIMIT 1)`), 'massage'
+        ],
+        [
+          sequelize.literal(`(SELECT createdAt FROM Messages WHERE RoomId = Room.id ORDER BY createdAt DESC LIMIT 1)`), 'createdAt'
+        ],
+      ],
       where: {
         [sequelize.Op.or]: [
           { joinerId: loginUser.id },
@@ -153,7 +184,8 @@ async function emitChatList(io, loginUser) {
         attributes: ['id', 'account', 'avatar', 'name']
       }
       ]
-    }) //TODO:根據聊天紀錄排序，越新的越上面，或是說先排沒已讀的在最上，在根據時間排序
+    }) //TODO:先排沒已讀的在最上，在根據時間排序
+
     // 只回傳聊天對象的個人資料。 [{user: {個人資料}}, {user: {個人資料}}]
     chatList.forEach(data => {
       if (data.Creator.id === loginUser.id) {
@@ -166,10 +198,11 @@ async function emitChatList(io, loginUser) {
         delete Object.assign(data, { ['user']: data['Creator'] })['Creator']
       }
     })
+
     return io.except(1).emit('chat member list', chatList)
   } catch (err) {
     console.warn(err)
   }
 }
 
-module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom, emitChatList }
+module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom, emitChatList, leaveAllPrivateRoom }
