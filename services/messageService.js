@@ -124,6 +124,22 @@ const messageService = {
     })
   },
 
+  putMessageIsReadStatus: async (RoomId, currentUserId) => {
+    if (!RoomId) {
+      throw new ApiError(
+        'getUnreadMessageCountError',
+        401,
+        'The RoomId cannot be blank'
+      )
+    }
+    return await Message.update(
+      { isRead: true },
+      {
+        where: { UserId: { [Op.not]: currentUserId }, RoomId }
+      }
+    )
+  },
+
   // FIXME: Directly through Sequlize, no further processing is required.
   getLatestMessages: async (currentUserId) => {
     const set = new Set()
