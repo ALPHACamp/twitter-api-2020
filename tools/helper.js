@@ -67,7 +67,12 @@ function getEmitSockets(subscribers, userSocketIdMap) {
     }
   }
   // 將set轉為陣列 [Set {'abc','dec'}, set {'123'}] => ['abc','dec','123']
-  return Array.from(...notifySockets)
+  if (notifySockets.length === 0) {
+    return Array.from(notifySockets) //不用通知
+  }
+  else {
+    return Array.from(...notifySockets)
+  }
 }
 
 async function CreateNotification(sourceKey, sourceValue, subscribingId) {

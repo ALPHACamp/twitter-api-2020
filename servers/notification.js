@@ -41,6 +41,29 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
     }
   })
 
+  socket.on('post reply', async (ReplyId) => {
+    try {
+      //我的推文，有新的回覆。只要我回覆推文，我就會通知推文者
+      // 要通知推文主人的資料本身
+      let reply = await Reply.findOne({
+        attributes: ['comment'],
+        where: { id: ReplyId },
+        include: [{ model: User, attributes: ['id', 'avatar', 'name'] },
+        {
+          model: Tweet, attributes: ['id', 'description'],
+          include: { model: User, attributes: ['id'] }
+        } //TODO:待前端決定他要DOM出推文的內文還是回覆的內文，擇一，或都要
+        ]
+      })
+      reply = reply.toJSON()
+      //發送通知給推文主人(如果他有上線的話)
+      const notifySocket = getEmitSockets([reply.Tweet.User.id], userSocketIdMap)
+      io.to(notifySocket).emit('reply notify', reply)
+    } catch (err) {
+      console.warn(err)
+    }
+  })
+
   socket.on('join notification', async () => {
     try {
       // 送給前端 登入使用者所有的通知
