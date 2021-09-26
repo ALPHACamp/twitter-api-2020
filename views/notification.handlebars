@@ -8,6 +8,8 @@
   socket.emit('post reply', 1)
   // 追蹤後觸發 傳followship資料本身的id
   socket.emit('post follow', 1)
+  // 訂閱後觸發 傳followship資料本身的id
+  socket.emit('post subscribe', 1)
 
   //一進通知頁面時，通知伺服器（索取所有通知）
   socket.emit('join notification')
@@ -37,6 +39,11 @@
   })
 
   socket.on('follow notify', data => {
+    console.log('有人開始追蹤你')
+    console.log(data)
+  })
+
+  socket.on('subscribe notify', data => {
     console.log('有人開始追蹤你')
     console.log(data)
   })

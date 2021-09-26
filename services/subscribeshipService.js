@@ -25,7 +25,7 @@ const subscribeshipService = {
 
       if (!isCreateNow) return cb({ status: '400', message: '不能重複訂閱同一使用者' })
 
-      return cb({ status: '200', message: '訂閱成功' })
+      return cb({ status: '200', message: '訂閱成功', id: subscribeship.id })
     } catch (err) {
       console.warn(err)
       return cb({ status: '500', message: err })

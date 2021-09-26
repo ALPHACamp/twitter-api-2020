@@ -90,7 +90,7 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
           id: FollowshipId
         },
         include: {
-          model: User, as: 'Follower', attributes: ['id', 'name']
+          model: User, as: 'Follower', attributes: ['id', 'name', 'avatar']
         }
       })
 
@@ -102,8 +102,33 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
       if (notifySocket.length) {
         io.to(notifySocket).emit('follow notify', followship)
       }
+    } catch (err) {
+      console.warn(err)
+    }
+  })
 
-      // Mary有新的回應
+  // 追蹤對方時，通知對方是誰追蹤了你
+  socket.on('post subscribe', async (SubscribeshipId) => {
+    try {
+      // 要通知的訂閱資料
+      let subscribeship = await Subscribeship.findOne({
+        attributes: ['id', 'createdAt', ['SubscribingId', 'targetId']],
+        where: {
+          id: SubscribeshipId
+        },
+        include: {
+          model: User, as: 'Subscriber', attributes: ['id', 'name', 'avatar']
+        }
+      })
+
+      subscribeship = subscribeship.toJSON()
+
+      //發送通知給被追的人 (如果他有上線的話)
+      const notifySocket = getEmitSockets([subscribeship], userSocketIdMap)
+
+      if (notifySocket.length) {
+        io.to(notifySocket).emit('subscribe notify', subscribeship)
+      }
     } catch (err) {
       console.warn(err)
     }
