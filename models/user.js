@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         defaultValue: 'https://i.imgur.com/1L2chcu.jpg'
       },
-      lastLogin: {
+      lastJoinPublic: {
         type: DataTypes.DATE,
         defaultValue: new Date()
       }
