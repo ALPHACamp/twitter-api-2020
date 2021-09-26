@@ -18,7 +18,7 @@ const followshipService = {
       Followship.create({
         followerId: req.user.id,
         followingId: req.body.id
-      }).then(() => cb({ status: '200', message: '追蹤成功' }))
+      }).then((followship) => cb({ status: '200', message: '追蹤成功', id: followship.id }))
     })
       .catch(err => {
         console.warn(err)
