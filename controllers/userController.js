@@ -355,7 +355,7 @@ let userController = {
           [Sequelize.literal('COUNT(DISTINCT Likes.id)'), 'LikesCount'],
           [Sequelize.literal('COUNT(DISTINCT Replies.id)'), 'RepliesCount']
           ],
-          group: ['TweetId', 'Likes.createdAt'],
+          group: ['TweetId'],
           include: [
             { model: Like, attributes: ['createdAt'] },
             { model: Reply, attributes: [] },
