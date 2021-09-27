@@ -115,7 +115,14 @@ const messageService = {
       include: {
         model: Room,
         attributes: [],
-        where: { name: { [Op.substring]: currentUserId } }
+        where: {
+          name: {
+            [Op.or]: [
+              { [Op.like]: `${currentUserId}-%` },
+              { [Op.like]: `%-${currentUserId}` }
+            ]
+          }
+        }
       },
       where: {
         UserId: { [Op.not]: currentUserId },
