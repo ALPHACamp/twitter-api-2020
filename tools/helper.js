@@ -164,6 +164,9 @@ async function emitChatList(io, loginUser) {
           sequelize.literal(`(SELECT content FROM Messages WHERE RoomId = Room.id ORDER BY createdAt DESC LIMIT 1)`), 'massage'
         ],
         [
+          sequelize.literal(`(SELECT isRead FROM Messages WHERE RoomId = Room.id ORDER BY createdAt DESC LIMIT 1)`), 'isRead'
+        ],
+        [
           sequelize.literal(`(SELECT createdAt FROM Messages WHERE RoomId = Room.id ORDER BY createdAt DESC LIMIT 1)`), 'createdAt'
         ],
       ],
@@ -183,8 +186,9 @@ async function emitChatList(io, loginUser) {
         as: 'Joiner',
         attributes: ['id', 'account', 'avatar', 'name']
       }
-      ]
-    }) //TODO:先排沒已讀的在最上，在根據時間排序
+      ],
+      order: sequelize.literal(`CASE WHEN isRead = 0 THEN 0 ELSE 1 END, createdAt DESC`)
+    })
 
     // 只回傳聊天對象的個人資料。 [{user: {個人資料}}, {user: {個人資料}}]
     chatList.forEach(data => {
