@@ -4,7 +4,11 @@
     "password": "password",
     "database": "ac_twitter_workspace",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "dialectOptions": {
+      "userUTC": "false"
+    },
+    "timezone": "+08:00"
   },
   "test": {
     "username": "root",
@@ -12,10 +16,18 @@
     "database": "ac_twitter_workspace_test",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "logging": false
+    "logging": false,
+    "dialectOptions": {
+      "userUTC": "false"
+    },
+    "timezone": "+08:00"
   },
   "production": {
-    "use_env_variable": "CLEARDB_DATABASE_URL"
+    "use_env_variable": "CLEARDB_DATABASE_URL",
+    "dialectOptions": {
+      "userUTC": "false"
+    },
+    "timezone": "+08:00"
   },
   "travis": {
     "username": "travis",
