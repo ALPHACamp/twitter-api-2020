@@ -2,9 +2,10 @@
 此為前後端分離的專案：
 [live demo](https://tzynwang.github.io/simple-twitter-frontend/)
 # 專案畫面
-![](https://i.imgur.com/pwQi4ub.jpg)
-![](https://i.imgur.com/qwNhSVQ.jpg)
-![](https://i.imgur.com/t7Mu2Wk.jpg)
+![](https://i.imgur.com/xDaAxkB.jpg)
+![](https://i.imgur.com/jXgvG67.jpg)
+![](https://i.imgur.com/mcgrbEz.png)
+![](https://i.imgur.com/tzIlhGr.png)
 
 # 功能
 前台：
@@ -12,6 +13,8 @@
 * 使用者能新增推文、回覆推文、喜歡推文
 * 使用者能追蹤其他使用者
 * 使用者能編輯個人資料（上傳背景及大頭照）
+* 公開聊天室
+* 私人聊天室
 
 後台：
 
