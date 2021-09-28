@@ -14,9 +14,10 @@ module.exports = async (io, socket, loginUser, userSocketIdMap) => {
         where: { id: TweetId },
         include: { model: User, attributes: ['id', 'avatar', 'name'] },
       })
-      //發送通知
       const notifySockets = getEmitSockets(subscribers, userSocketIdMap)
-      io.to(notifySockets).emit('tweet notify', { tweet: tweet.toJSON() })
+      if (notifySockets.length) {
+        io.to(notifySockets).emit('tweet notify', { tweet: tweet.toJSON() })
+      }
     } catch (err) {
       console.warn(err)
     }
