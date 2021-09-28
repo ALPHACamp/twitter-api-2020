@@ -232,11 +232,12 @@ const userController = {
   
       channel.type = 'subscribe'
       channel.user = req.user
+      const channelJson = JSON.stringify(channel)
   
       await Unread.create({
         sendId: req.user.id,
         receiveId: req.params.id,
-        unread: channel
+        unread: channelJson
       })
   
       const roomId = 's' + channel.id

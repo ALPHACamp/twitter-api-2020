@@ -40,8 +40,8 @@ require('./routes')(app)
 
 const io = socket(server, {
   cors: {
-    origin: ["*"],
-    methods: ["GET", "POST"]
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
   }
 })
 

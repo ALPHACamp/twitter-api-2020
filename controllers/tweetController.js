@@ -81,9 +81,9 @@ const tweetController = {
       data.UserId = req.user.id
       data.description = req.body.description
       const tweet = await Tweet.create({ ...data })
+      tweet.user = req.user
+      tweet.type = 'new-tweet'
       const tweetJson = JSON.stringify(tweet)
-      tweetJson.user = req.user
-      tweetJson.type = 'new-tweet'
 
       const subscribers = await Subscribe.findAll({
         where: { subscribing: { [Op.eq]: req.user.id }},
