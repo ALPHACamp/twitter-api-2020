@@ -48,9 +48,13 @@ module.exports = (server) => {
           const onlineUser = Array.from(userSocketIdMap, ([id]) => ({ id })) //將Map轉為陣列
           io.emit('online user list', onlineUser)
 
-          // 斷線之後，離開聊天室
-          io.in(user.socketId).socketsLeave(1);
-          await leavePublicRoom(io, user)
+          // 如果斷線後還在公開聊天室，我就幫他離開
+          if (socket.rooms.has(1)) {
+            io.in(user.socketId).socketsLeave(1);
+            await leavePublicRoom(io, user)
+          }
+
+          // 斷線之後，離開所有私人聊天室
           await leaveAllPrivateRoom(io, user)
           // 回傳在線名單
           const userList = await getRoomUsers(1)
