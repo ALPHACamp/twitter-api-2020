@@ -48,6 +48,12 @@ const userController = {
       if (data.status) return res.status(data.status).json(data)
       return res.json(data)
     })
+  },
+  getNotifications: (req, res) => {
+    userService.getNotifications(req, res, data => {
+      if (data.status) return res.status(data.status).json(data)
+      return res.json(data)
+    })
   }
 }
 

@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Reply, Like, Room } = db
+const { User, Tweet, Reply, Like, Room, Notification, Followship, Subscribeship } = db
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
@@ -352,7 +352,7 @@ const userService = {
 
   getChatList: async (req, res, cb) => {
     try {
-      const loginUser = req.params.userId
+      const loginUser = req.user.id
       // TODO:更新聊天紀錄人員列表，回傳的使用者資料排除登入使用者的，只回傳對方資料
       let chatList = await Room.findAll({
         raw: true, nest: true,
@@ -400,6 +400,40 @@ const userService = {
         }
       })
       return cb(chatList)
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
+  },
+
+  getNotifications: async (req, res, cb) => {
+    try {
+      const loginUser = req.user.id
+      const notifications = await Notification.findAll({
+        raw: true, nest: true,
+        attributes: ['id', 'isRead', 'createdAt'], //讓前端可以顯示出來互動時間點，就像臉書
+        where: {
+          targetId: loginUser
+        },
+        include: [
+          { model: Tweet, attributes: ['id', 'description'] },
+          { model: Reply, attributes: ['id', 'comment', 'TweetId'] }, //如果未來需要推文內容，在關聯Tweet
+          { model: Followship, attributes: ['id'] }, //有人追蹤我
+          { model: Subscribeship, attributes: ['id'] }, //因為沒有黑單功能，所以不須傳對方的id，讓你可以取消
+          { model: Like, attributes: ['TweetId'] },
+          { model: User, as: 'Trigger', attributes: ['id', 'name', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      // 將沒資料的欄位刪掉
+      notifications.forEach(data => {
+        if (data.Tweet.id === null) delete data.Tweet
+        if (data.Reply.id === null) delete data.Reply
+        if (data.Like.TweetId === null) delete data.Like
+        if (data.Subscribeship.id === null) delete data.Subscribeship
+        if (data.Followship.id === null) delete data.Followship
+      })
+      return cb(notifications)
     } catch (err) {
       console.warn(err)
       return cb({ status: '500', message: err })
