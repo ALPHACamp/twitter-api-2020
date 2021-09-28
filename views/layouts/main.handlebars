@@ -8,12 +8,11 @@
   <title>Document</title>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io()
+    const socket = io('', { query: { id: '31', name: 'Bob', avatar: '', account: '' } })
   </script>
 </head>
 
 <body>
-  <h2>main</h2>
   {{{body}}}
 
   <script>
