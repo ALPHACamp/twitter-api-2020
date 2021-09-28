@@ -7,7 +7,7 @@ const tweetService = {
   postTweet: async (req, res, cb) => {
     try {
       const { description } = req.body
-      if (description.trim()) {
+      if (description && description.trim()) {
         if (description.length > 140) return cb({ status: '400', message: '推文需在140字以內' })
         const tweet = await Tweet.create({
           UserId: req.user.id,
