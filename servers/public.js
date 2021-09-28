@@ -31,7 +31,7 @@ module.exports = (io, socket, user) => {
       // 傳送public在線的名單
       const userList = await getRoomUsers(1)
       io.to(1).emit('online list', userList)
-
+      // TODO:待刪除，已改成API
       // 傳入房間歷史訊息
       const messages = await Message.findAll({
         raw: true, nest: true,

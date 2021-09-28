@@ -47,7 +47,7 @@ module.exports = (io, socket, loginUser) => {
           receiverId: loginUser.id
         }
       })
-
+      // TODO:待刪除，已改成API
       //傳入歷史訊息
       const messages = await Message.findAll({
         raw: true, nest: true,
