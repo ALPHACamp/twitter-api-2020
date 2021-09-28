@@ -151,12 +151,13 @@ let userController = {
       })
 
       let tweetSet = userTweets.map(tweet => ({
-        'id': tweet.id,
-        'description': tweet.description,
-        'updatedAt': tweet.updatedAt,
-        'replyCount': tweet.Replies.length,
-        'likeCount': tweet.Likes.length,
-        'user': tweet.User
+        id: tweet.id,
+        description: tweet.description,
+        updatedAt: tweet.updatedAt,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length,
+        user: tweet.User,
+        isLiked: req.user.LikedTweets ? req.user.LikedTweets.map(like => like.id).includes(tweet.id) : null,
       }))
       return res.status(200).json(tweetSet)
     } catch (err) {
