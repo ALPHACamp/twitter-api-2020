@@ -1,5 +1,5 @@
 const db = require('../models')
-const { User, Tweet, Reply, Like } = db
+const { User, Tweet, Reply, Like, Room } = db
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
@@ -344,6 +344,62 @@ const userService = {
         where: { id: req.user.id }
       })
       return cb(user)
+    } catch (err) {
+      console.warn(err)
+      return cb({ status: '500', message: err })
+    }
+  },
+
+  getChatList: async (req, res, cb) => {
+    try {
+      const loginUser = req.params.userId
+      // TODO:更新聊天紀錄人員列表，回傳的使用者資料排除登入使用者的，只回傳對方資料
+      let chatList = await Room.findAll({
+        raw: true, nest: true,
+        attributes: ['id',
+          [
+            sequelize.literal(`(SELECT content FROM Messages WHERE RoomId = Room.id ORDER BY createdAt DESC LIMIT 1)`), 'massage'
+          ],
+          [
+            sequelize.literal(`(SELECT isRead FROM Messages WHERE RoomId = Room.id ORDER BY createdAt DESC LIMIT 1)`), 'isRead'
+          ],
+          [
+            sequelize.literal(`(SELECT createdAt FROM Messages WHERE RoomId = Room.id ORDER BY createdAt DESC LIMIT 1)`), 'createdAt'
+          ],
+        ],
+        where: {
+          [sequelize.Op.or]: [
+            { joinerId: loginUser },
+            { creatorId: loginUser }
+          ]
+        },
+        include: [{
+          model: User,
+          as: 'Creator',
+          attributes: ['id', 'account', 'avatar', 'name']
+        },
+        {
+          model: User,
+          as: 'Joiner',
+          attributes: ['id', 'account', 'avatar', 'name']
+        }
+        ],
+        order: sequelize.literal(`CASE WHEN isRead = 0 THEN 0 ELSE 1 END, createdAt DESC`)
+      })
+
+      // 只回傳聊天對象的個人資料。 [{user: {個人資料}}, {user: {個人資料}}]
+      chatList.forEach(data => {
+        if (data.Creator.id === loginUser) {
+          delete data.Creator
+          // 沒被刪掉的就是聊天對象，將key改為user
+          delete Object.assign(data, { ['user']: data['Joiner'] })['Joiner']
+        } else {
+          // 如果A不是登入者，就是聊天對象，此時刪掉B，並將key(A)改為user
+          delete data.Joiner
+          delete Object.assign(data, { ['user']: data['Creator'] })['Creator']
+        }
+      })
+      return cb(chatList)
     } catch (err) {
       console.warn(err)
       return cb({ status: '500', message: err })

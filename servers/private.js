@@ -73,6 +73,7 @@ module.exports = (io, socket, loginUser) => {
       socket.on('private message', async message => {
         try {
           await updateMessage(io, message, loginUser, room.id, targetUserId)
+          // TODO: 待刪除，已改成api。等前端串接
           // 推送最新的聊天列表
           await emitChatList(io, loginUser)
         } catch (err) {

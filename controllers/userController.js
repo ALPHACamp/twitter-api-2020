@@ -42,6 +42,12 @@ const userController = {
       if (data.status) return res.status(data.status).json(data)
       res.status(200).json(data)
     })
+  },
+  getChatList: (req, res) => {
+    userService.getChatList(req, res, data => {
+      if (data.status) return res.status(data.status).json(data)
+      return res.json(data)
+    })
   }
 }
 
