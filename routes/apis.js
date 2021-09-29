@@ -16,7 +16,7 @@ router.post('/signin', homeController.postSignIn)
 router.post('/users', homeController.postSignUp)
 
 // tweet路由
-router.get('/tweets', helpers.ensureAuthenticated, tweetController.homePage)
+router.get('/tweets', helpers.ensureAuthenticated, tweetController.allTweets)
 
 router.get('/tweets/:id/top10', helpers.ensureAuthenticated, tweetController.getTop10Twitter)
 
@@ -47,7 +47,7 @@ router.get('/users/:id/followers', helpers.ensureAuthenticated, userController.g
 
 router.get('/users/:id/userInfo', helpers.ensureAuthenticated, userController.getUserInfo)
 
-router.get('/users/:id', helpers.ensureAuthenticated, userController.userHomePage)
+router.get('/users/:id', helpers.ensureAuthenticated, userController.userPage)
 
 router.put('/users/:id', helpers.ensureAuthenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUserData) //增加
 

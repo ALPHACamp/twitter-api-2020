@@ -16,7 +16,6 @@ const Op = Sequelize.Op
 function socketConnection (io) {
   io.on('connection', socket => {
     socket.on('connectServer', (userId) => {
-    console.log("🚀 ~ file: server.js ~ line 19 ~ socket.on ~ userId", userId)
 
       // 建立上線用戶表
       onlineList[userId] = socket
@@ -39,10 +38,10 @@ function socketConnection (io) {
           })
         })
       
-      // 取出該用戶所有訂閱channel
+      // 取出該用戶訂閱的所有channel
       Subscribe.findAll({
         raw: true,
-        where: { subscribing: { [Op.eq]: userId } }
+        where: { subscriber: { [Op.eq]: userId } }
       })
       .then(subscribeChannel => {
         // 直接加入訂閱channel
@@ -52,7 +51,7 @@ function socketConnection (io) {
         })
       })
 
-      // 取出user所有未讀取的通知
+      // 取出user所有未讀取的通知數量
       Unread.findAll({
         where: { receiveId: { [Op.eq]: userId } },
         attributes: [[sequelize.fn('COUNT', sequelize.col('id')), 'unreadCount']]
@@ -71,12 +70,20 @@ function socketConnection (io) {
 
           socket.emit('read-notice', unreads)
 
-          await Unread.destroy({
-            where: { receiveId: { [Op.eq]: userId } }
-          })
+          if (unreads.length) {
+            await Unread.destroy({
+              where: { receiveId: { [Op.eq]: userId } }
+            })
+          }
         }
         catch (err) {
           console.log(err)
+        }
+      })
+
+      socket.on('notices', ({ targetId }) => {
+        if (onlineList[targetId]) {
+          socket.to(onlineList[targetId]).emit('notices', 1)
         }
       })
 
@@ -118,7 +125,6 @@ function socketConnection (io) {
 
       // 監聽公開聊天室訊息並廣播
       socket.on('public-msg', ({ userId, message }) => {
-          console.log("🚀 ~ file: server.js ~ line 120 ~ socket.on ~ message", message)
           PublicChat.create({
             speakerId: userId,
             chatContent: message

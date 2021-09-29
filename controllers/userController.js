@@ -15,14 +15,13 @@ const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { QueryTypes } = require('sequelize')
 const readFile = require('../public/javascripts/fileRead')
+const helpers = require('../_helpers')
 
 const userController = {
-  userHomePage: async (req, res) => {
+  userPage: async (req, res) => {
     const userData = { ...req.user, password: '', email: '' }
-    const userId = req.user.id
-    const requestId = Number(req.params.id)
+    const id = helpers.checkId(req)
     try {
-      const id = (userId === requestId) ? userId : requestId
 
       // 取出跟蹤使用者的清單
       let followers = await Followship.findAll({
@@ -77,7 +76,6 @@ const userController = {
         })
         userData.roomId = roomId
       }
-
   
       return res.json(userData)
     }
@@ -88,9 +86,7 @@ const userController = {
 
   //取出使用者發過的推文
   getUserTweets: async (req, res) => {
-    const userId = req.user.id
-    const requestId = Number(req.params.id)
-    const id = userId === requestId? userId: requestId
+    const id = helpers.checkId(req)
     // 取出user所有推文
     try {
       const userTweets = await Tweet.findAll({
@@ -108,9 +104,7 @@ const userController = {
   },
 
   getRepliedTweets: async (req, res) => {
-    const userId = req.user.id
-    const requestId = Number(req.params.id)
-    const id = userId === requestId ? userId : requestId
+    const id = helpers.checkId(req)
     // 取出user所有推文
     try {
       const repliedTweets = await Reply.findAll({
@@ -130,9 +124,7 @@ const userController = {
   },
 
   getLikes: async (req, res) => {
-    const userId = req.user.id
-    const requestId = Number(req.params.id)
-    const id = userId === requestId ? userId : requestId
+    const id = helpers.checkId(req)
     try {
       // 取出user like的推文 並且包括推文作者
       const likedTweets = await Like.findAll({
@@ -224,7 +216,15 @@ const userController = {
             { userBId: { [Op.eq]: userId } }
           ]
          },
-        include: [{ model: ChatRecord, as: 'records', order: [['createdAt', 'DESC']], limit: 1 }]
+        include: [
+          { 
+            model: ChatRecord, 
+            as: 'records', 
+            order: [['createdAt', 'DESC']], 
+            limit: 1,
+            include: [{ model: User, as: 'user', attributes: ['id', 'name', 'account', 'avatar'] }]
+          }
+        ]
       })
 
       return res.status(200).json(chatRecords)
