@@ -184,16 +184,17 @@ const userController = {
   editUserData: async (req, res) => {
     const userId = req.user.id
     const updateData = req.body
-    console.log("🚀 ~ file: userController.js ~ line 187 ~ editUserData: ~ updateData", updateData)
     let files = req.files
-    console.log("🚀 ~ file: userController.js ~ line 189 ~ editUserData: ~ files", files)
     try {
-      if (files) {
-        files = await files.map(file => readFile(file))
-        console.log("🚀 ~ file: userController.js ~ line 192 ~ editUserData: ~ files", files)
-        console.log("🚀 ~ file: userController.js ~ line 195 ~ editUserData: ~ files[0]", files[0])
+      if (files.length) {
+        files = await files.map(file => {
+          imgur.setClientID(IMGUR_CLIENT_ID)
+          imgur.upload(file.path, (err, img) => {
+            return img.data.link
+          })
+        })
+        console.log("🚀 ~ file: userController.js ~ line 197 ~ editUserData: ~ files", files)
         updateData.avatar = files[0]
-        console.log("🚀 ~ file: userController.js ~ line 197 ~ editUserData: ~ files[1]", files[1])
         updateData.cover = files[1]
       }
       await User.update(
