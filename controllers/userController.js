@@ -187,6 +187,7 @@ const userController = {
     const userId = req.user.id
     const updateData = req.body
     const files = req.files
+    console.log("🚀 ~ file: userController.js ~ line 190 ~ files", files)
     try {
       if (files['cover'][0]) {
         imgur.setClientID(IMGUR_CLIENT_ID);
