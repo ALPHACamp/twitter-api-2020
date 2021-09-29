@@ -189,8 +189,10 @@ const userController = {
     try {
       if (files.length) {
         files = files.map(file => {
+          console.log("🚀 ~ file: userController.js ~ line 198 ~ editUserData: ~ file", file)
           imgur.setClientID(IMGUR_CLIENT_ID)
-          imgur.upload(file.path, (err, img) => {
+          return imgur.upload(file.path, (err, img) => {
+            console.log("🚀 ~ file: userController.js ~ line 196 ~ imgur.upload ~ img", img)
             return img.data.link
           })
         })
