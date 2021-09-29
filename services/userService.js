@@ -7,10 +7,10 @@ const { ImgurClient } = require('imgur');
 const { turnToBoolean } = require('../tools/helper')
 
 const userService = {
-  signUp: async (req, res, cb) => {
+  signUp: async (body, cb) => {
     try {
-      const { account, name, email, checkPassword } = req.body
-      let { password } = req.body
+      const { account, name, email, checkPassword } = body
+      let { password } = body
       const errors = []
       // 後端驗證
       if (!name || !account || !email || !password || !checkPassword) errors.push('所有欄位都是必填項')
