@@ -210,7 +210,7 @@ let userController = {
   putUserSetting: async (req, res, next) => {
     try {
       //修改使用者設定(修改使用者設定(account、name、email、password)，account、email必須唯一
-      const { account, email, password, checkPassword } = req.body
+      const { name, account, email, password, checkPassword } = req.body
       const regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
       const userData = helpers.getUser(req)
       //1.確定是登入者
@@ -240,7 +240,7 @@ let userController = {
 
 
       const user = await User.findByPk(req.params.id)
-      user.update({ account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
+      user.update({ name, account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
       return res.json({ status: 'success', message: '已成功修正！' })
     } catch (err) {
       next(err)
