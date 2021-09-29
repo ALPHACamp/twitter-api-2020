@@ -5,7 +5,7 @@ const userController = {
     userService.signUp(req.body, (data) => res.status(data.status).json(data))
   },
   login: (req, res) => {
-    userService.login(req, res, (data) => res.status(data.status).json(data))
+    userService.login(req.body, (data) => res.status(data.status).json(data))
   },
   getUser: (req, res) => {
     userService.getUser(req, res, data => res.status(data.status).json(data))

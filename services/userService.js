@@ -1,10 +1,9 @@
 const db = require('../models')
 const { User, Tweet, Reply, Like, Room, Notification, Followship, Subscribeship } = db
-const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
-const { turnToBoolean } = require('../tools/helper')
+const { turnToBoolean, loginValidation } = require('../tools/helper')
 
 const userService = {
   signUp: async (body, cb) => {
@@ -38,24 +37,20 @@ const userService = {
     }
   },
 
-  login: async (req, res, cb) => {
+  login: async (body, cb) => {
     try {
-      const { account, password } = req.body
-      if (!account || !password) {
-        return cb({ status: '401', message: '所有欄位都是必填項', data: { account, password } })
+      const { account, password } = body
+      const result = await loginValidation(account, password)
+
+      if (result.user) {
+        // 簽發token
+        const payload = { id: result.user.id }
+        const token = jwt.sign(payload, process.env.TOKEN_SECRET)
+        return cb({ status: '200', message: '登入成功', token, user: result.user })
       }
-      const user = await User.findOne({ where: { account } })
-      if (!user) {
-        return cb({ status: '401', message: '帳號不存在', data: { account, password } })
-      }
-      if (!bcrypt.compareSync(password, user.password)) {
-        return cb({ status: '401', message: '密碼錯誤', data: { account, password } })
-      }
-      // 簽發token
-      const payload = { id: user.id }
-      const token = jwt.sign(payload, process.env.TOKEN_SECRET)
-      return cb({ status: '200', message: '登入成功', token, user })
+      return cb(result)
     } catch (err) {
+      console.warn(err)
       return cb({ status: '500', message: err })
     }
   },
