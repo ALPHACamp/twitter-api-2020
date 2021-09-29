@@ -189,7 +189,7 @@ const userController = {
     console.log("🚀 ~ file: userController.js ~ line 189 ~ editUserData: ~ files", files)
     try {
       if (files) {
-        files = await files.map(file => readFile(file.path))
+        files = await files.map(file => readFile(file))
         console.log("🚀 ~ file: userController.js ~ line 192 ~ editUserData: ~ files", files)
         console.log("🚀 ~ file: userController.js ~ line 195 ~ editUserData: ~ files[0]", files[0])
         updateData.avatar = files[0]
