@@ -193,6 +193,7 @@ const userController = {
           console.log("🚀 ~ file: userController.js ~ line 191 ~ editUserData: ~ file", file)
           imgur.setClientID(IMGUR_CLIENT_ID);
           let imgPath = imgur.upload(file.path, (err, img) => {
+            console.log("🚀 ~ file: userController.js ~ line 197 ~ imgPath ~ img.data.link", img.data.link)
             return img.data.link
           })
           console.log("🚀 ~ file: userController.js ~ line 197 ~ editUserData: ~ imgPath", imgPath)
