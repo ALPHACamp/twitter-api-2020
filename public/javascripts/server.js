@@ -7,6 +7,7 @@ const Chatmate = db.Chatmate
 const ChatRecord = db.ChatRecord
 const PublicChat = db.PublicChat
 const Subscribe = db.Subscribe
+const sequelize = db.sequelize
 const Unread = db.Unread
 const Sequelize = db.Sequelize
 const Op = Sequelize.Op
