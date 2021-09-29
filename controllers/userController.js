@@ -158,7 +158,7 @@ const userController = {
     try {
       const followings = await Followship.findAll({
         where: { followerId: { [Op.eq]: userId } },
-        include: [{ model: User, as: 'following', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
+        include: [{ model: User, as: 'followings', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
       })
       return res.json(followings)
     }
@@ -172,7 +172,7 @@ const userController = {
     try {
       const followers = await Followship.findAll({
         where: { followingId: { [Op.eq]: userId } },
-        include: [{ model: User, as: 'follower', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
+        include: [{ model: User, as: 'followers', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
       })
       return res.json(followers)
     }

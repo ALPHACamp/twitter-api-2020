@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+
 module.exports = (user) => {
   const TOKEN_KEY = user.role === 'user' ? process.env.USER_KEY : process.env.ADMIN_KEY
   const id = user.id

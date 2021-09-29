@@ -24,6 +24,7 @@ passport.use('jwt', new jwtStrategy(options, async (payload, done) => {
       console.log(error)
     }
   })
+
 )
 
 passport.serializeUser((user, done) => {
@@ -37,5 +38,5 @@ passport.deserializeUser((id, done) => {
     })
     .catch(err => done(null, err))
 });
-  
+
 module.exports = passport

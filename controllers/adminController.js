@@ -34,7 +34,7 @@ const adminController = {
         ]
       })
 
-      return res.json( allUsers )
+      return res.json(allUsers)
     }
     catch (error) {
       console.log(error)
