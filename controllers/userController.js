@@ -186,12 +186,11 @@ const userController = {
   editUserData: (req, res) => {
     const userId = req.user.id
     const updateData = req.body
-    console.log("🚀 ~ file: userController.js ~ line 191 ~ editUserData: ~ req.avatar", req.avatar)
-    console.log("🚀 ~ file: userController.js ~ line 202 ~ editUserData: ~ req.cover", req.cover)
+    const files = req.files
     try {
-      if (req.avatar) {
+      if (files[0]) {
         imgur.setClientID(IMGUR_CLIENT_ID);
-        imgur.upload(file.path, (err, img) => {
+        imgur.upload(files[0].path, (err, img) => {
           // if (err) {throw err}
           User.update(
             { ...updateData, avatar: img.data.link },
@@ -199,9 +198,9 @@ const userController = {
           )
         })
       }
-      if (req.cover) {
+      if (files[1]) {
         imgur.setClientID(IMGUR_CLIENT_ID);
-        imgur.upload(file.path, (err, img) => {
+        imgur.upload(files[1].path, (err, img) => {
           // if (err) { throw err }
           User.update(
             { ...updateData, cover: img.data.link },
