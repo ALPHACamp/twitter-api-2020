@@ -16,6 +16,7 @@ const Op = Sequelize.Op
 function socketConnection (io) {
   io.on('connection', socket => {
     socket.on('connectServer', (userId) => {
+    console.log("🚀 ~ file: server.js ~ line 19 ~ socket.on ~ userId", userId)
 
       // 建立上線用戶表
       onlineList[userId] = socket
