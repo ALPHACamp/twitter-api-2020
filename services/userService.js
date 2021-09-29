@@ -1,6 +1,7 @@
 const db = require('../models')
 const { User, Tweet, Reply, Like, Room, Notification, Followship, Subscribeship } = db
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 const sequelize = require('sequelize')
 const { ImgurClient } = require('imgur');
 const { turnToBoolean, loginValidation } = require('../tools/helper')
@@ -33,6 +34,7 @@ const userService = {
         return cb({ status: '400', message: errors })
       }
     } catch (err) {
+      console.warn(err)
       return cb({ status: '500', message: err })
     }
   },
@@ -55,17 +57,25 @@ const userService = {
     }
   },
 
-  getUser: async (req, res, cb) => {
+  getUser: async (targetId, cb) => {
     try {
-      let user = await User.findByPk(req.params.id, {
+      let user = await User.findByPk(targetId, {
         group: 'User.id',
         attributes: ['id', 'name', 'account', 'introduction', 'avatar', 'cover',
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'totalFollowings'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'totalFollowers'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets'],
-          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${req.user.id} AND followingId = User.id)`), 'isFollowings'],
           [
-            sequelize.literal(`EXISTS (SELECT 1 FROM Subscribeships WHERE subscriberId = ${req.user.id} AND subscribingId = User.id)`), 'isSubscribing'
+            sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followings.Followship.followingId'))), 'totalFollowings'
+          ],
+          [
+            sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Followers.Followship.followerId'))), 'totalFollowers'
+          ],
+          [
+            sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))), 'totalTweets'
+          ],
+          [
+            sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${targetId} AND followingId = User.id)`), 'isFollowings'
+          ],
+          [
+            sequelize.literal(`EXISTS (SELECT 1 FROM Subscribeships WHERE subscriberId = ${targetId} AND subscribingId = User.id)`), 'isSubscribing'
           ]
         ],
         include: [{

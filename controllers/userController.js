@@ -8,7 +8,8 @@ const userController = {
     userService.login(req.body, (data) => res.status(data.status).json(data))
   },
   getUser: (req, res) => {
-    userService.getUser(req, res, data => res.status(data.status).json(data))
+    const targetId = req.params.id
+    userService.getUser(targetId, data => res.status(data.status).json(data))
   },
   getUserTweets: (req, res) => {
     userService.getUserTweets(req, res, data => res.status(200).json(data))
