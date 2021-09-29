@@ -186,10 +186,10 @@ const userController = {
     const updateData = req.body
     console.log("🚀 ~ file: userController.js ~ line 187 ~ editUserData: ~ updateData", updateData)
     let files = req.files
-    console.log("🚀 ~ file: userController.js ~ line 188 ~ editUserData: ~ files", files)
     try {
       if (files) {
         files = files.map(async file => await readFile(file))
+        console.log("🚀 ~ file: userController.js ~ line 192 ~ editUserData: ~ files", files)
         updateData.avatar = files[0]
         updateData.cover = files[1]
       }
@@ -200,7 +200,7 @@ const userController = {
       res.status(200).json('Accept')
     }
     catch (error) {
-      console.log(error)
+      res.status(400).json('Bad process')
     }
   },
 
