@@ -186,6 +186,7 @@ const userController = {
     const updateData = req.body
     console.log("🚀 ~ file: userController.js ~ line 187 ~ editUserData: ~ updateData", updateData)
     let files = req.files
+    console.log("🚀 ~ file: userController.js ~ line 189 ~ editUserData: ~ files", files)
     try {
       if (files) {
         files = await files.map(async file => await readFile(file))
