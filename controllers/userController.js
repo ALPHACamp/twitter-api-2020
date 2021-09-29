@@ -183,7 +183,7 @@ const userController = {
     }
   },
   
-  editUserData: async (req, res) => {
+  editUserData: (req, res) => {
     const userId = req.user.id
     const updateData = req.body
     console.log("🚀 ~ file: userController.js ~ line 191 ~ editUserData: ~ req.avatar", req.avatar)
@@ -193,7 +193,7 @@ const userController = {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(file.path, (err, img) => {
           // if (err) {throw err}
-          await User.update(
+          User.update(
             { ...updateData, avatar: img.data.link },
             { where: { id: { [Op.eq]: userId } } }
           )
@@ -203,7 +203,7 @@ const userController = {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(file.path, (err, img) => {
           // if (err) { throw err }
-          await User.update(
+          User.update(
             { ...updateData, cover: img.data.link },
             { where: { id: { [Op.eq]: userId } } }
           )
