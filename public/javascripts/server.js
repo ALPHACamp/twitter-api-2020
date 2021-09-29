@@ -95,7 +95,7 @@ function socketConnection (io) {
           })
 
           const publicChatRecord = await PublicChat.findAll({
-            include: { model: User, as: 'speaker', attributes: ['name', 'account', 'avatar'] }
+            include: { model: User, as: 'user', attributes: ['name', 'account', 'avatar'] }
           })
 
           // 公告使用者上線

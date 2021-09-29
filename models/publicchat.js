@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
   PublicChat.associate = function(models) {
     PublicChat.belongsTo(models.User, {
       foreignKey: 'speakerId',
-      as: 'speaker'
+      as: 'user'
     })
   };
   return PublicChat;
