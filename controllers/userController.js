@@ -107,7 +107,7 @@ let userController = {
   getUser: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, {
+      let user = await User.findByPk(userId, {
         attributes: [
           'id', 'name', 'avatar', 'introduction', 'account', 'cover', 'role',
           [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount'],
@@ -127,6 +127,8 @@ let userController = {
           'message': '此用戶不存在'
         })
       }
+      user = user.toJSON()
+      user.isFollowed = req.user.Followings.map(user => user.id).includes(user.id)
       return res.status(200).json(user)
     } catch (err) {
       next(err)
