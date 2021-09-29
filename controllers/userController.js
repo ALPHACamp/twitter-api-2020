@@ -11,6 +11,8 @@ const Unread = db.Unread
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
 const Op = Sequelize.Op
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { QueryTypes } = require('sequelize')
 const readFile = require('../public/javascripts/fileRead')
 
