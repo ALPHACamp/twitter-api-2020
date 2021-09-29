@@ -185,6 +185,7 @@ const userController = {
     const userId = req.user.id
     const updateData = req.body
     let files = req.files
+    console.log("🚀 ~ file: userController.js ~ line 188 ~ editUserData: ~ files", files)
     try {
       if (files.length) {
         files = await files.map(file => {
