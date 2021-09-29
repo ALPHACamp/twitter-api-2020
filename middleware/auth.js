@@ -1,4 +1,5 @@
 const passport = require('../config/passport')
+const helpers = require('../_helpers.js')
 
 
 const authenticated = (req, res, next) => {
@@ -16,7 +17,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'user'){
+  if (helpers.getUser(req) && helpers.getUser(req).role === 'user'){
     return res.status(401).json({
       status: 'error',
       message: '帳號不存在'
@@ -25,7 +26,7 @@ const authenticatedAdmin = (req, res, next) => {
   next()
 }
 const checkRoleIsUser = (req, res, next) => {
-  if (req.user && req.user.role === 'admin'){
+  if (helpers.getUser(req) && helpers.getUser(req).role === 'admin'){
     return res.status(401).json({
       status: 'error',
       message: '無帳戶'
