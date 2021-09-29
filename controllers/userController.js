@@ -182,10 +182,12 @@ const userController = {
       console.log(error)
     }
   },
-
+  
   editUserData: async (req, res) => {
     const userId = req.user.id
     const updateData = req.body
+    console.log("🚀 ~ file: userController.js ~ line 191 ~ editUserData: ~ req.avatar", req.avatar)
+    console.log("🚀 ~ file: userController.js ~ line 202 ~ editUserData: ~ req.cover", req.cover)
     try {
       if (req.avatar) {
         imgur.setClientID(IMGUR_CLIENT_ID);
