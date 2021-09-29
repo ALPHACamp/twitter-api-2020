@@ -185,23 +185,22 @@ const userController = {
     const userId = req.user.id
     const updateData = req.body
     let files = req.files
-    console.log("🚀 ~ file: userController.js ~ line 188 ~ editUserData: ~ files", files)
     try {
       if (files.length) {
         files = files.map(file => {
-          console.log("🚀 ~ file: userController.js ~ line 198 ~ editUserData: ~ file", file)
-          imgur.setClientID(IMGUR_CLIENT_ID)
-          return imgur.upload(file.path, (err, img) => {
-            console.log("🚀 ~ file: userController.js ~ line 196 ~ imgur.upload ~ img", img)
+          imgur.setClientID(IMGUR_CLIENT_ID);
+          let imgPath = imgur.upload(file.path, (err, img) => {
             return img.data.link
           })
+          console.log("🚀 ~ file: userController.js ~ line 197 ~ editUserData: ~ imgPath", imgPath)
+          return imgPath
         })
-        console.log("🚀 ~ file: userController.js ~ line 197 ~ editUserData: ~ files", files)
+        console.log("🚀 ~ file: userController.js ~ line 199 ~ editUserData: ~  files",  files)
         updateData.avatar = files[0]
         updateData.cover = files[1]
       }
       await User.update(
-        updateData,
+        { ...updateData,  },
         { where: { id: { [Op.eq]: userId } } }
       )
       res.status(200).json('Accept')
