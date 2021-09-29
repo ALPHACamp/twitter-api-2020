@@ -54,7 +54,7 @@ function socketConnection (io) {
       // 取出user所有未讀取的通知
       Unread.findAll({
         where: { receiveId: { [Op.eq]: userId } },
-        attributes: [sequelize.fn('COUNT', sequelize.col('id')), 'unreadCount']
+        attributes: [[sequelize.fn('COUNT', sequelize.col('id')), 'unreadCount']]
       })
       .then(unreads => {
         socket.emit('notices', unreads)
