@@ -14,7 +14,8 @@ const adminController = {
         order: [[Sequelize.literal('createdAt'), "DESC"]],
         include: [{ model: User, as: 'user', attributes: ['name', 'account', 'avatar', 'createdAt'] }]
       })
-      return res.json({ allTweets })
+      res.render('chat', { layout: 'chatbackground' }) //for testing
+      // return res.json({ allTweets })
     }
     catch (error) {
       console.log(error)

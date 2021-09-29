@@ -3,28 +3,27 @@ const ExtractJwt = passportJWT.ExtractJwt
 const jwtStrategy = passportJWT.Strategy
 const db = require('../models')
 const User = db.User
-const USER_KEY = process.env.USER_KEY
+const ADMIN_KEY = process.env.ADMIN_KEY
 const passport = require('passport')
 
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: USER_KEY //保留公鑰系統命名方式
+  secretOrKey: ADMIN_KEY //保留公鑰系統命名方式
 }
 
-passport.use('jwt', new jwtStrategy(options, async (payload, done) => {
+passport.use('jwtAdmin', new jwtStrategy(options, async (payload, done) => {
   try {
-      const user = await User.findByPk(payload.sub)
-      if (user) {
-        return done(null, user)
-      } else {
-        return done(null, false)
-      }
+    const user = await User.findByPk(payload.sub)
+    if (user) {
+      return done(null, user)
+    } else {
+      return done(null, false)
     }
-    catch (error) {
-      console.log(error)
-    }
-  })
-
+  }
+  catch (error) {
+    console.log(error)
+  }
+})
 )
 
 passport.serializeUser((user, done) => {

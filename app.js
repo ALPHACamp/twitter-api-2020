@@ -8,16 +8,23 @@ const bodyParser = require('body-parser')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
 const cookieParser = require('cookie-parser')
-const passport = require('./config/passport')
 const cors = require('cors')
+
+const socket = require('socket.io')
+const passport = require('./config/passport')
+const socketConnection = require('./public/javascripts/server')
 const app = express()
 const PORT = process.env.PORT || 3000
+
+app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
+app.set('view engine', 'handlebars')
+app.use(express.static('public'))//for testing
 
 app.use(methodOverride('_method'))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-app.use(cors()) // cors 的預設為全開放
+app.use(cors())
 
 app.use('/upload', express.static(__dirname + '/upload'))
 app.use(flash())
@@ -25,10 +32,21 @@ app.use(session({ secret: 'alphacamp', resave: false, saveUninitialized: false }
 
 app.use(passport.initialize())
 app.use(passport.session())
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
+
   console.log('server on')
 })
 
 require('./routes')(app)
-module.exports = app
+
+const io = socket(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+  }
+})
+
+app.set('socketio', io)
+
+socketConnection(io)
+module.exports = app 

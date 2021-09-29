@@ -4,6 +4,8 @@ const Tweet = db.Tweet
 const Reply = db.Reply
 const Followship = db.Followship
 const Like = db.Like
+const Unread = db.Unread
+const Subscribe = db.Subscribe
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
 const Op = db.Sequelize.Op
@@ -79,6 +81,32 @@ const tweetController = {
       data.UserId = req.user.id
       data.description = req.body.description
       const tweet = await Tweet.create({ ...data })
+      tweet.user = req.user
+      tweet.type = 'new-tweet'
+      const tweetJson = JSON.stringify(tweet)
+
+      const subscribers = await Subscribe.findAll({
+        where: { subscribing: { [Op.eq]: req.user.id }},
+        attributes: ['subscriber']
+      })
+
+      const unreadUpdates = subscribers.map(element => {
+        return {
+          sendId: req.user.id,
+          receiveId: element,
+          unread: tweetJson
+        }
+      });
+
+      await Unread.bulkCreate(unreadUpdates)
+
+      const io = req.app.get('socketio')
+
+      subscribers.forEach(element => {
+        const roomId = 's' + element
+        io.broadcast.to(roomId).emit('notices', 'new-tweet')
+      });
+
       return res.status(200).json({ tweet })
     }
     catch (error) {

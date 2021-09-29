@@ -5,8 +5,8 @@ module.exports = {
     await queryInterface.bulkInsert('followships',
       Array.from({ length: 20 }).map((item, index) =>
       ({
-        followerId: Math.floor(Math.random() * 6),
-        followingId: Math.floor(Math.random() * 7),
+        followerId: Math.floor(Math.random() * 6) * 10 + 5,
+        followingId: Math.floor(Math.random() * 6) * 10 + 5,
         createdAt: new Date(),
         updatedAt: new Date(),
       })

@@ -1,14 +1,14 @@
 const jwt = require('jsonwebtoken')
-const PRIVATE_KEY = process.env.PRIVATE_KEY || 'iamrexalsoturagon'
 
 module.exports = (user) => {
+  const TOKEN_KEY = user.role === 'user' ? process.env.USER_KEY : process.env.ADMIN_KEY
   const id = user.id
-  const expiresIn = 12 * 60 * 60 //以秒計算
   const payload = {
     sub: id,
     iat: Date.now()
   }
 
-  const signToken = jwt.sign(payload, PRIVATE_KEY)
+  const signToken = jwt.sign(payload, TOKEN_KEY)
+
   return { token: signToken }
 }

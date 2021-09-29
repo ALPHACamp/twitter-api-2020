@@ -4,9 +4,13 @@ const Tweet = db.Tweet
 const Reply = db.Reply
 const Followship = db.Followship
 const Like = db.Like
+const Chatmate = db.Chatmate
+const ChatRecord = db.ChatRecord
+const Subscribe = db.Subscribe
+const Unread = db.Unread
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
-const Op = db.Sequelize.Op
+const Op = Sequelize.Op
 const { QueryTypes } = require('sequelize')
 const readFile = require('../public/javascripts/fileRead')
 
@@ -57,6 +61,21 @@ const userController = {
           { model: User, as: 'Followers', attributes: ['id'] }
         ]
       })
+      
+      if (userId !== requestId) {
+        const roomId = await Chatmate.findOrCreate({
+          raw: true,
+          where: {
+            [Op.and]: [
+              { userAId: { [Op.in]: [userId, requestId] } },
+              { userBId: { [Op.in]: [userId, requestId] } }
+            ]
+          },
+          attributes: ['id']
+        })
+        userData.roomId = roomId
+      }
+
   
       return res.json(userData)
     }
@@ -180,6 +199,54 @@ const userController = {
     }
     catch (error) {
       console.log(error)
+    }
+  },
+
+  getChatRecords: async (req, res) => {
+    const userId = req.user.id
+    try {
+      const chatRecords = await Chatmate.findAll({
+        raw: true,
+        where: { 
+          [Op.or]: [
+            { userAId: { [Op.eq]: userId } },
+            { userBId: { [Op.eq]: userId } }
+          ]
+         },
+        include: [{ model: ChatRecord, as: 'records', order: [['createdAt', 'DESC']], limit: 1 }]
+      })
+
+      return res.status(200).json(chatRecords)
+    }
+    catch (err) {
+      console.log(err)
+    }
+  },
+
+  subscribeUser: async (req, res) => {
+    try {
+      const channel = await Subscribe.findOrCreate({
+        subscribing: req.params.id,
+        subscriber: req.user.id
+      }, { raw: true })
+  
+      channel.type = 'subscribe'
+      channel.user = req.user
+      const channelJson = JSON.stringify(channel)
+  
+      await Unread.create({
+        sendId: req.user.id,
+        receiveId: req.params.id,
+        unread: channelJson
+      })
+  
+      const roomId = 's' + channel.id
+      const io = req.app.get('socketio')
+      io.broadcast.to(roomId).emit('notices', 'subscribe')
+      res.status(200)
+    }
+    catch (err) {
+      console.log(err)
     }
   }
 }
