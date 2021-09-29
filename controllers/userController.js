@@ -186,27 +186,27 @@ const userController = {
   editUserData: async (req, res) => {
     const userId = req.user.id
     const updateData = req.body
-    let files = req.files
     try {
-      if (files.length) {
-        files = files.map(file => {
-          console.log("🚀 ~ file: userController.js ~ line 191 ~ editUserData: ~ file", file)
-          imgur.setClientID(IMGUR_CLIENT_ID);
-          let imgPath = imgur.upload(file.path, (err, img) => {
-            console.log("🚀 ~ file: userController.js ~ line 197 ~ imgPath ~ img.data.link", img.data.link)
-            return img.data.link
-          })
-          console.log("🚀 ~ file: userController.js ~ line 197 ~ editUserData: ~ imgPath", imgPath)
-          return imgPath
+      if (req.avatar) {
+        imgur.setClientID(IMGUR_CLIENT_ID);
+        imgur.upload(file.path, (err, img) => {
+          // if (err) {throw err}
+          await User.update(
+            { ...updateData, avatar: img.data.link },
+            { where: { id: { [Op.eq]: userId } } }
+          )
         })
-        console.log("🚀 ~ file: userController.js ~ line 199 ~ editUserData: ~  files",  files)
-        updateData.avatar = files[0]
-        updateData.cover = files[1]
       }
-      await User.update(
-        { ...updateData,  },
-        { where: { id: { [Op.eq]: userId } } }
-      )
+      if (req.cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID);
+        imgur.upload(file.path, (err, img) => {
+          // if (err) { throw err }
+          await User.update(
+            { ...updateData, cover: img.data.link },
+            { where: { id: { [Op.eq]: userId } } }
+          )
+        })
+      }
       res.status(200).json('Accept')
     }
     catch (error) {
