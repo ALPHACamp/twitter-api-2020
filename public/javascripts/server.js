@@ -116,17 +116,12 @@ function socketConnection (io) {
       })
 
       // 監聽公開聊天室訊息並廣播
-      socket.on('public-msg', async ({ userId, message }) => {
-        try {
+      socket.on('public-msg', ({ userId, message }) => {
           console.log("🚀 ~ file: server.js ~ line 120 ~ socket.on ~ message", message)
           PublicChat.create({
             speakerId: userId,
             chatContent: message
           })
-        }
-        catch (err) {
-          console.log(err)
-        }
 
         socket.broadcast
           .to('public-room')
