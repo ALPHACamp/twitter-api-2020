@@ -155,7 +155,7 @@ async function leaveAllPrivateRoom(io, { id, socketId }) {
   }
 }
 
-async function emitChatList(io, loginUser) {
+async function emitChatList(io, { id: loginUserId }) {
   try {
     // TODO:更新聊天紀錄人員列表，回傳的使用者資料排除登入使用者的，只回傳對方資料
     let chatList = await Room.findAll({
@@ -173,8 +173,8 @@ async function emitChatList(io, loginUser) {
       ],
       where: {
         [sequelize.Op.or]: [
-          { joinerId: loginUser.id },
-          { creatorId: loginUser.id }
+          { joinerId: loginUserId },
+          { creatorId: loginUserId }
         ]
       },
       include: [{
@@ -193,7 +193,7 @@ async function emitChatList(io, loginUser) {
 
     // 只回傳聊天對象的個人資料。 [{user: {個人資料}}, {user: {個人資料}}]
     chatList.forEach(data => {
-      if (data.Creator.id === loginUser.id) {
+      if (data.Creator.id === loginUserId) {
         delete data.Creator
         // 沒被刪掉的就是聊天對象，將key改為user
         delete Object.assign(data, { ['user']: data['Joiner'] })['Joiner']
