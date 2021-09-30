@@ -180,9 +180,7 @@ const userController = {
   editUserData: (req, res) => {
     const userId = req.user.id
     const updateData = req.body
-    console.log("🚀 ~ file: userController.js ~ line 183 ~ updateData", updateData)
     const files = req.files
-    console.log("🚀 ~ file: userController.js ~ line 185 ~ files", files)
     try {
       if (files && files.length) {
         if (files['cover']) {
@@ -204,7 +202,6 @@ const userController = {
           })
         }
       } else {
-        console.log("🚀 ~ file: userController.js ~ line 210 ~ userId", userId)
         User.update(
           { ...updateData },
           { where: { id: { [Op.eq]: userId } } }

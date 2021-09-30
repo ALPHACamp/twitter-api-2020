@@ -90,6 +90,7 @@ const tweetController = {
         where: { subscribing: { [Op.eq]: req.user.id }},
         attributes: ['subscriber']
       })
+      console.log("🚀 ~ file: tweetController.js ~ line 93 ~ postTweet: ~ subscribers", subscribers)
 
       const unreadUpdates = subscribers.map(element => {
         return {
