@@ -20,6 +20,8 @@ const helpers = require('../_helpers')
 const userController = {
   userPage: async (req, res) => {
     const userData = { ...req.user, password: '', email: '' }
+    console.log("🚀 ~ file: userController.js ~ line 24 ~ userPage: ~ userData", userData)
+    console.log("🚀 ~ file: userController.js ~ line 25 ~ userPage: ~ id", id)
     const id = helpers.checkId(req)
     try {
 
