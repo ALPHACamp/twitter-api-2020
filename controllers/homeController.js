@@ -4,9 +4,6 @@ const bcrypt = require('bcryptjs')
 const issueJwt = require('../public/javascripts/tokenIssue')
 
 const homeController = {
-  logout: (req, res) => {
-    res.redirect('/api/signin')
-  },
   
   postSignIn: (req, res) => {
     // 檢查必要資料
