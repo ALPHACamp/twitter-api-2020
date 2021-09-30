@@ -33,8 +33,8 @@ function socketConnection (io) {
         .then(userChatrooms => {
           // 將該使用者直接加入所有房間
           userChatrooms.map(item => {
-            socket.join(item)
-            socket.broadcast.to(item).emit('personal-online-notice', userId)
+            socket.join(item.id)
+            socket.broadcast.to(item.id).emit('personal-online-notice', userId)
           })
         })
       
@@ -46,7 +46,7 @@ function socketConnection (io) {
       .then(subscribeChannel => {
         // 直接加入訂閱channel
         subscribeChannel.map(item => {
-          const roomName = 's' + item.id
+          const roomName = 's' + item.subscribing
           socket.join(roomName)
         })
       })
@@ -59,6 +59,22 @@ function socketConnection (io) {
       })
       .then(unreads => {
         socket.emit('notices', unreads)
+      })
+
+      socket.on('new-tweet', async (userId) => {
+        // 取出訂閱該使用者的清單
+        const subscribers = await Subscribe.findAll({
+          raw: true,
+          where: { subscribing: { [Op.eq]: userId } },
+          attributes: ['subscriber']
+        })
+        
+        // 對訂閱者發送通知(有新推文時)
+        subscribers.map(element => {
+          const roomId = 's' + element.subscriber
+          socket.join(roomId)
+          socket.broadcast.to(roomId).emit('notices', 1)
+        });
       })
 
       // 當user觸發讀取通知

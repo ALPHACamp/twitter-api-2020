@@ -103,16 +103,6 @@ const tweetController = {
       // 批次建立未讀資料進資料庫
       await Unread.bulkCreate(unreadUpdates)
 
-      const io = req.app.get('socketio')
-
-      // 對訂閱者發送通知
-      subscribers.map(element => {
-        const roomId = 's' + element.subscriber
-        console.log("🚀 ~ file: tweetController.js ~ line 111 ~ postTweet: ~ roomId", roomId)
-        io.join(roomId)
-        io.broadcast.to(roomId).emit('notices', 1)
-      });
-
       return res.status(200).json({ tweet })
     }
     catch (error) {
