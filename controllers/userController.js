@@ -21,8 +21,8 @@ const userController = {
   userPage: async (req, res) => {
     const userData = { ...req.user, password: '', email: '' }
     console.log("🚀 ~ file: userController.js ~ line 24 ~ userPage: ~ userData", userData)
-    console.log("🚀 ~ file: userController.js ~ line 25 ~ userPage: ~ id", id)
     const id = helpers.checkId(req)
+    console.log("🚀 ~ file: userController.js ~ line 25 ~ userPage: ~ id", id)
     try {
 
       // 取出跟蹤使用者的清單
