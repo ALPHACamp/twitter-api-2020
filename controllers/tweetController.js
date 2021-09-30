@@ -106,9 +106,10 @@ const tweetController = {
       const io = req.app.get('socketio')
 
       // 對訂閱者發送通知
-      subscribers.forEach(element => {
+      subscribers.map(element => {
         const roomId = 's' + element.subscriber
         console.log("🚀 ~ file: tweetController.js ~ line 111 ~ postTweet: ~ roomId", roomId)
+        io.join(roomId)
         io.broadcast.to(roomId).emit('notices', 1)
       });
 
