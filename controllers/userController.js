@@ -166,7 +166,7 @@ const userController = {
     try {
       const followers = await Followship.findAll({
         where: { followingId: { [Op.eq]: userId } },
-        include: [{ model: User, as: 'follower', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
+        include: [{ model: User, as: 'follower', attributes: { exclude: ['password', 'email', 'cover', 'createdAt', 'updatedAt'] } }]
       })
       return res.json(followers)
     }
