@@ -149,7 +149,8 @@ let userController = {
           { model: Reply },
           { model: Like },
           { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
-        ]
+        ],
+        order: [['createdAt', 'ASC']]
       })
 
       let tweetSet = userTweets.map(tweet => ({
