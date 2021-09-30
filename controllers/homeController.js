@@ -37,8 +37,6 @@ const homeController = {
   
   postSignUp: async (req, res) => {
     const userData = req.body.formData
-    console.log("🚀 ~ file: homeController.js ~ line 40 ~ postSignUp: ~ userData", userData)
-    for (let [name, value] of req.body.formData.entries()) { console.log(name + ": " + value); }
     if (req.body.checkPassword !== req.body.password) {
       return res.redirect('/signup')
     }
