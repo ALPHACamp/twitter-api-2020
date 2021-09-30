@@ -103,13 +103,13 @@ async function CreateNotification(sourceKey, sourceValue, subscribingId) {
   }
 }
 
-async function leavePublicRoom(io, user) {
+async function leavePublicRoom(io, { id: UserId, socketId, name }) {
   try {
     // 清除在房資料
     await RoomUser.destroy({
       where: {
-        UserId: user.id,
-        socketId: user.socketId,
+        UserId,
+        socketId,
         RoomId: 1
       }
     })
@@ -119,12 +119,12 @@ async function leavePublicRoom(io, user) {
       raw: true, nest: true,
       where: {
         RoomId: 1,
-        UserId: user.id
+        UserId
       }
     })
 
     if (result.length === 0) {
-      io.to(1).emit('connect status', `${user.name} 離開聊天室`)
+      io.to(1).emit('connect status', `${name} 離開聊天室`)
     }
   } catch (err) {
     console.warn(err)
@@ -256,7 +256,7 @@ async function updateMessage(io, message, { id: senderId }, RoomId, targetUserId
   }
 }
 
-async function loginValidation(account, password, cb) {
+async function loginValidation(account, password) {
   try {
     if (!account || !password) {
       return { status: '401', message: '所有欄位都是必填項', data: { account, password } }
