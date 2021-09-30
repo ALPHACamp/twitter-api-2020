@@ -131,13 +131,13 @@ async function leavePublicRoom(io, user) {
   }
 }
 
-async function leaveAllPrivateRoom(io, user) {
+async function leaveAllPrivateRoom(io, { id, socketId }) {
   try {
     let allRoom = await Room.findAll({
       raw: true,
       attributes: ['id'],
       where: {
-        [sequelize.Op.or]: [{ creatorId: user.id }, { joinerId: user.id }]
+        [sequelize.Op.or]: [{ creatorId: id }, { joinerId: id }]
       }
     })
     // 轉成socketsLeave 接受的房間陣列 [{id: 12}, {id: 55}] => [12, 55]
@@ -145,11 +145,11 @@ async function leaveAllPrivateRoom(io, user) {
     // 清除在房資料
     await RoomUser.destroy({
       where: {
-        UserId: user.id,
-        socketId: user.socketId,
+        UserId: id,
+        socketId
       }
     })
-    io.in(user.socketId).socketsLeave([allRoom]);
+    io.in(socketId).socketsLeave([allRoom]);
   } catch (err) {
     console.warn(err)
   }
