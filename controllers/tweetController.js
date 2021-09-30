@@ -87,6 +87,7 @@ const tweetController = {
 
       // 取出訂閱該使用者的清單
       const subscribers = await Subscribe.findAll({
+        raw: true,
         where: { subscribing: { [Op.eq]: req.user.id }},
         attributes: ['subscriber']
       })
