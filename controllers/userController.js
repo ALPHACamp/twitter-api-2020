@@ -181,6 +181,7 @@ const userController = {
     const userId = req.user.id
     const updateData = req.body
     const files = req.files
+    console.log("🚀 ~ file: userController.js ~ line 184 ~ files", files)
     try {
       if (files && files.length) {
         if (files['cover']) {
