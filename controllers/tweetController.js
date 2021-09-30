@@ -91,12 +91,11 @@ const tweetController = {
         where: { subscribing: { [Op.eq]: req.user.id }},
         attributes: ['subscriber']
       })
-      console.log("🚀 ~ file: tweetController.js ~ line 93 ~ postTweet: ~ subscribers", subscribers)
 
       const unreadUpdates = subscribers.map(element => {
         return {
           sendId: req.user.id,
-          receiveId: element,
+          receiveId: element.subscriber,
           unread: tweetJson
         }
       });
@@ -129,7 +128,7 @@ const tweetController = {
       const tweetComment = await Reply.create({ ...data })
 
       // 針對即時訊息做處理
-      const twitterId = Tweet.findByPk(TweetId, { attributes: ['UserId'] })
+      const twitterId = Tweet.findByPk(TweetId, { raw: true, attributes: ['UserId'] })
       tweetComment.user = req.user
       tweetComment.type = 'tweet-reply'
       const tweetCommentContent = JSON.stringify(tweetComment)

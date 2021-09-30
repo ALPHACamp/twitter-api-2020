@@ -53,6 +53,7 @@ function socketConnection (io) {
 
       // 取出user所有未讀取的通知數量
       Unread.findAll({
+        raw: true,
         where: { receiveId: { [Op.eq]: userId } },
         attributes: [[sequelize.fn('COUNT', sequelize.col('id')), 'unreadCount']]
       })
