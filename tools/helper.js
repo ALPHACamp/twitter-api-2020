@@ -210,10 +210,10 @@ async function emitChatList(io, { id: loginUserId }) {
   }
 }
 
-async function updateMessage(io, message, user, RoomId, targetUserId) {
+async function updateMessage(io, message, { id: senderId }, RoomId, targetUserId) {
   try {
     const sendUser = await User.findOne({
-      where: { id: user.id },
+      where: { id: senderId },
       attributes: ['id', 'name', 'avatar', 'account']
     })
     // 寫入歷史訊息
@@ -221,7 +221,7 @@ async function updateMessage(io, message, user, RoomId, targetUserId) {
       message = await Message.create({
         content: message,
         RoomId,
-        senderId: user.id,
+        senderId,
         receiver: null,
       })
     } else {
@@ -239,7 +239,7 @@ async function updateMessage(io, message, user, RoomId, targetUserId) {
       message = await Message.create({
         RoomId,
         content: message,
-        senderId: user.id,
+        senderId,
         receiverId: targetUserId,
         isRead
       })
