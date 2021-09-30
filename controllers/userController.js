@@ -202,7 +202,10 @@ const userController = {
           })
         }
       } else {
-        User.update({ ...updateData })
+        User.update(
+          { ...updateData },
+          { where: { id: { [Op.eq]: userId } } }
+        )
       }
       res.status(200).json('Accept')
     }
