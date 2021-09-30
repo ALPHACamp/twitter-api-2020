@@ -9,6 +9,9 @@ if (process.env.NODE_ENV !== 'production') {
 
 const app = express()
 
+// use express to handle http server
+const server = require('http').createServer(app)
+
 const passport = require('./config/passport')
 
 const port = process.env.PORT || 3000
@@ -19,7 +22,9 @@ app.use(bodyParser.json())
 app.use(express.json())
 app.use(passport.initialize())
 app.use('/upload', express.static(__dirname + '/upload'))
+
 require('./routes')(app)
+require('./utils/socketio').socket(server)
 
 app.use((err, req, res, next) => {
   res.status(422).json({
