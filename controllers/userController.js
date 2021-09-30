@@ -150,7 +150,7 @@ let userController = {
           { model: Like },
           { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
         ],
-        order: [['createdAt', 'ASC']]
+        order: [['createdAt', 'DESC']]
       })
 
       let tweetSet = userTweets.map(tweet => ({

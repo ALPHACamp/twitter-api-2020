@@ -1,5 +1,3 @@
-// announce 統一設定為廣播在Msg
-
 const { User, Sequelize } = require('../models')
 const socketio = require('socket.io')
 const { postChat, createRoom } = require('../controllers/chatroomController')
