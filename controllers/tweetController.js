@@ -107,7 +107,7 @@ const tweetController = {
 
       // 對訂閱者發送通知
       subscribers.forEach(element => {
-        const roomId = 's' + element
+        const roomId = 's' + element.subscriber
         io.broadcast.to(roomId).emit('notices', 1)
       });
 
