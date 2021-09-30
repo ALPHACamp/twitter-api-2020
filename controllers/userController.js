@@ -20,9 +20,7 @@ const helpers = require('../_helpers')
 const userController = {
   userPage: async (req, res) => {
     const userData = { ...req.user, password: '', email: '' }
-    console.log("🚀 ~ file: userController.js ~ line 24 ~ userPage: ~ userData", userData)
     const id = helpers.checkId(req)
-    console.log("🚀 ~ file: userController.js ~ line 25 ~ userPage: ~ id", id)
     try {
 
       // 取出跟蹤使用者的清單
@@ -31,9 +29,11 @@ const userController = {
         raw: true,
         nest: true
       })
+      console.log("🚀 ~ file: userController.js ~ line 32 ~ userPage: ~ followers", followers)
 
       // 轉成陣列
       followers = followers.map(item => item = item['followingId'])
+      console.log("🚀 ~ file: userController.js ~ line 36 ~ userPage: ~ followers", followers)
 
       let isFollowed = false
       if (!(userId === requestId)) {
@@ -41,8 +41,10 @@ const userController = {
       } else {
         isFollowed = 'self'
       }
+      console.log("🚀 ~ file: userController.js ~ line 46 ~ userPage: ~ isFollowed", isFollowed)
 
       userData.isFollowed = isFollowed
+      console.log("🚀 ~ file: userController.js ~ line 44 ~ userPage: ~ userData", userData)
       
       return res.json(userData)
     }
