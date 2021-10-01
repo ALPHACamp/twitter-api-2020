@@ -22,21 +22,15 @@ const socket = server => {
     allowEIO3: true
   })
   console.log('Socket.io init success')
-
   if (!io) throw new Error('No socket io server instance')
 
   io.on('connection', socket => {
-
     console.log(socket.user)
     console.log('===== connected!!! =====')
-    const { clientsCount } = io.engine
-    console.log('有人加入公開聊天室，目前人數:', clientsCount)
-
     /*-----------------PublicRoom--------------------- */
     socket.on('joinPublic', async (userId) => {
       await socket.join('PublicRoom')
       console.log('PublicRoom', io.of("/").adapter.rooms)
-      console.log('UserSocketID',socket.id)
       console.log('userId', userId)
       let user = await User.findByPk(userId, { attributes: ['id', 'name', 'account', 'avatar'] })
       user = user.toJSON()
@@ -45,7 +39,7 @@ const socket = server => {
       console.log('----onlineList----')
       console.log(onlineList)
       console.log('---clientsCount in ---')
-      console.log(clientsCount)
+      console.log('clientsCount', onlineList.length)
       const roomId = 1
       io.emit("announce", { user, roomId })
     })
