@@ -36,6 +36,7 @@ const tweetController = {
   //取出右邊top10 twitter
   getTop10Twitter: async (req, res) => {
     const userId = req.params.id
+    console.log("🚀 ~ file: tweetController.js ~ line 39 ~ getTop10Twitter: ~ userId", userId)
     try{
       const topTwitters = await Followship.findAll({
         attributes: ['followingId', [sequelize.fn('count', sequelize.col('followerId')), 'count']] ,
@@ -44,10 +45,12 @@ const tweetController = {
         limit: 10,
         include: [{ model: User, as: 'following', attributes: ['name', 'avatar', 'account'] }],
       })
+      console.log("🚀 ~ file: tweetController.js ~ line 48 ~ getTop10Twitter: ~ topTwitters", topTwitters)
   
       const userFollowingList = await Followship.findAll({
         where: { followerId: { [Op.eq]: userId } }
       })
+      console.log("🚀 ~ file: tweetController.js ~ line 52 ~ getTop10Twitter: ~ userFollowingList", userFollowingList)
   
       res.json({ topTwitters, userFollowingList })
     }
