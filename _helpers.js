@@ -35,7 +35,9 @@ const getUser = (req) => {
 
 const checkId = (req) => {
   const userId = req.user.id
+  console.log("🚀 ~ file: _helpers.js ~ line 38 ~ checkId ~ userId", userId)
   const requestId = Number(req.params.id)
+  console.log("🚀 ~ file: _helpers.js ~ line 40 ~ checkId ~ requestId", requestId)
   return (userId === requestId) ? userId : requestId
 }
 

@@ -89,6 +89,7 @@ const userController = {
   //取出使用者發過的推文
   getUserTweets: async (req, res) => {
     const id = helpers.checkId(req)
+    console.log("🚀 ~ file: userController.js ~ line 92 ~ getUserTweets: ~ id", id)
     // 取出user所有推文
     try {
       const userTweets = await Tweet.findAll({
