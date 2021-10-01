@@ -1,27 +1,51 @@
-'use strict'
+'use strict';
+const db = require('../models')
+const User = db.User
 
-let followships = []
-for (let i = 0; i < 50; i++) {
-  // set Start and End date to generate random date
-  let createdStart = new Date(2012, 0, 1)
-  let createdEnd = new Date(2015, 0, 1)
-  let updatedStart = new Date(2016, 0, 1)
-  let updatedEnd = new Date(2020, 0, 1)
+const getUserId = new Promise((resolve, reject) => {
+  User.findAll({
+    raw: true,
+    nest: true,
+    where: { role: 'user' }
+  })
+    .then(users => {
+      const userIds = []
+      users.forEach(user => {
+        userIds.push(user.id)
+      })
+      return resolve(userIds)
+    })
+})
 
-  let followship = {
-    followerId: Math.floor(Math.random() * 10),
-    followingId: Math.floor(Math.random() * 10),
-    createdAt: new Date(createdStart.getTime() + Math.random() * (createdEnd.getTime() - createdStart.getTime())),
-    updatedAt: new Date(updatedStart.getTime() + Math.random() * (updatedEnd.getTime() - updatedStart.getTime()))
-  }
-  followships.push(followship)
+function followships(userIds) {
+  const allFollowships = []
+  let followingCount = 4
+  userIds.forEach(userId => {
+    let currentFollowing = (Number(userId) + 10)
+    for (let i = followingCount; i >= 0; i--) {
+      const followship = {
+        followerId: userId,
+        followingId: currentFollowing,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      currentFollowing += 10
+      allFollowships.push(followship)
+    }
+    followingCount -= 1
+  })
+  return allFollowships
 }
+
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert('Followships', followships, {})
+    const userIds = await getUserId
+    const followshipSeed = followships(userIds)
+    await queryInterface.bulkInsert('Followships', followshipSeed, {})
   },
+
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Followships', null, {})
   }
-}
+};

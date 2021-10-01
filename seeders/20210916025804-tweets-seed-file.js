@@ -1,28 +1,48 @@
-'use strict'
-const faker = require('faker')
+'use strict';
+const faker = require('faker');
+const db = require('../models')
+const User = db.User
 
-let tweets = []
-for (let i = 0; i < 50; i++) {
-  // set Start and End date to generate random date
-  let createdStart = new Date(2012, 0, 1)
-  let createdEnd = new Date(2015, 0, 1)
-  let updatedStart = new Date(2016, 0, 1)
-  let updatedEnd = new Date(2020, 0, 1)
+const getUserId = new Promise((resolve, reject) => {
+  User.findAll({
+    raw: true,
+    nest: true,
+    where: { role: 'user' }
+  })
+    .then(users => {
+      const userIds = []
+      users.forEach(user => {
+        userIds.push(user.id)
+      })
+      return resolve(userIds)
+    })
+})
 
-  let tweet = {
-    UserId: Math.floor(Math.random() * 10),
-    description: faker.lorem.text().substring(0, 140),
-    createdAt: new Date(createdStart.getTime() + Math.random() * (createdEnd.getTime() - createdStart.getTime())),
-    updatedAt: new Date(updatedStart.getTime() + Math.random() * (updatedEnd.getTime() - updatedStart.getTime()))
-  }
-  tweets.push(tweet)
+function userTweets(userIds) {
+  const allUserTweets = []
+  userIds.forEach(userId => {
+    for (let i = 0; i < 10; i++) {
+      const userTweet = {
+        UserId: userId,
+        description: faker.lorem.text(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      allUserTweets.push(userTweet)
+    }
+  })
+  return allUserTweets
 }
+
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert('Tweets', tweets, {})
+    const userIds = await getUserId
+    const tweetSeed = userTweets(userIds)
+    await queryInterface.bulkInsert('Tweets', tweetSeed, {})
   },
+
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Tweets', null, {})
   }
-}
+};
