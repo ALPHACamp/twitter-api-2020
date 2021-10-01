@@ -27,8 +27,8 @@ const adminController = {
         attributes: ['name', 'account', 'avatar', 'cover'],
         include: [
           { model: Reply, as: 'replies', attributes: ['id'] },
-          { model: Followship, as: 'following', attributes: ['id'] },
-          { model: Followship, as: 'follower', attributes: ['id'] },
+          { model: User, as: 'Followings', attributes: ['id'] },
+          { model: User, as: 'Followers', attributes: ['id'] },
           { model: Like, as: 'likes', attributes: ['id'] }
         ]
       })
