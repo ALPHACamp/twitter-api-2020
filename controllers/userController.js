@@ -56,7 +56,6 @@ const userController = {
     const userId = req.user.id
     const requestId = Number(req.params.id)
     const id = userId === requestId ? userId : requestId
-    console.log("🚀 ~ file: userController.js ~ line 59 ~ getUserInfo: ~ id", id)
     try {
       const userData = await User.findByPk(id, {
         attributes: { exclude: ['password', 'createdAt', 'updatedAt', 'role'] },
