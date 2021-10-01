@@ -32,7 +32,6 @@ const adminController = {
           { model: Like, as: 'likes', attributes: ['id'] }
         ]
       })
-      console.log("🚀 ~ file: adminController.js ~ line 35 ~ getUsers: ~ allUsers", allUsers)
 
       return res.json( allUsers )
     }
