@@ -43,10 +43,10 @@ function tweetReplies(userIds, tweetIds) {
       }
       if (eachUserId < (userIds.length - 2) * 10) {
         eachUserId = 15
-      } else if (eachUserId < 55){
+      } else if (eachUserId < 65){
         eachUserId += 10
       } else {
-        eachUserId = 55
+        eachUserId = 65
       }
       allTweetReplies.push(tweetReply)
     }

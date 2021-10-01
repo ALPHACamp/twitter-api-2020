@@ -69,7 +69,18 @@ module.exports = {
       cover: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
       createdAt: new Date(),
       updatedAt: new Date()
-    }], {})
+      }, {
+        email: 'user6@example.com',
+        password: bcrypt.hashSync('11', bcrypt.genSaltSync(10), null),
+        role: 'user',
+        name: 'user6',
+        avatar: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
+        introduction: faker.lorem.text(),
+        account: faker.lorem.text().slice(0, 5),
+        cover: `https://loremflickr.com/320/240/restaurant,food/?random=${Math.random() * 100}&lock=${Number(Math.random() * 100)}`,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }], {})
   },
 
   down: async (queryInterface, Sequelize) => {
