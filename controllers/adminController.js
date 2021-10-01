@@ -29,7 +29,8 @@ const adminController = {
           { model: Reply, as: 'replies', attributes: ['id'] },
           { model: User, as: 'Followings', attributes: ['id'] },
           { model: User, as: 'Followers', attributes: ['id'] },
-          { model: Like, as: 'likes', attributes: ['id'] }
+          { model: Like, as: 'likes', attributes: ['id'] },
+          { model: Tweet, as: 'userTweets', attributes: ['id'] }
         ]
       })
 
