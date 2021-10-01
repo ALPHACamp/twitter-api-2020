@@ -10,13 +10,13 @@ const getUserId = new Promise((resolve, reject) => {
     nest: true,
     where: { role: 'user' }
   })
-    .then(users => {
-      const userIds = []
-      users.forEach(user => {
-        userIds.push(user.id)
-      })
-      return resolve(userIds)
+  .then(users => {
+    const userIds = []
+    users.forEach(user => {
+      userIds.push(user.id)
     })
+    return resolve(userIds)
+  })
 })
 const getTweetId = new Promise((resolve, reject) => {
   Tweet.findAll({ raw: true, nest: true })
@@ -41,10 +41,12 @@ function tweetReplies(userIds, tweetIds) {
         createdAt: new Date(),
         updatedAt: new Date()
       }
-      if (eachUserId > (userIds.length - 2)) {
-        eachUserId = 1
+      if (eachUserId < (userIds.length - 2) * 10) {
+        eachUserId = 15
+      } else if (eachUserId < 55){
+        eachUserId += 10
       } else {
-        eachUserId += 1
+        eachUserId = 55
       }
       allTweetReplies.push(tweetReply)
     }
