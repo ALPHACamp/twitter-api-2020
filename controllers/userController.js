@@ -177,18 +177,16 @@ const userController = {
     }
   },
   
-  editUserData: (req, res) => {
+  editUserData: async (req, res) => {
     const userId = req.user.id
     const updateData = req.body
-    console.log("🚀 ~ file: userController.js ~ line 183 ~ updateData", updateData)
     const files = req.files
-    console.log("🚀 ~ file: userController.js ~ line 185 ~ files", files)
     try {
       if (files['cover'] || files['avatar']) {
         console.log('am i?')
         if (files['cover']) {
           imgur.setClientID(IMGUR_CLIENT_ID);
-          imgur.upload(files['cover'][0].path, (err, img) => {
+          await imgur.upload(files['cover'][0].path, (err, img) => {
             User.update(
               { ...updateData, cover: img.data.link },
               { where: { id: { [Op.eq]: userId } } }
@@ -197,7 +195,7 @@ const userController = {
         }
         if (files['avatar']) {
           imgur.setClientID(IMGUR_CLIENT_ID);
-          imgur.upload(files['avatar'][0].path, (err, img) => {
+          await imgur.upload(files['avatar'][0].path, (err, img) => {
             User.update(
               { ...updateData, avatar: img.data.link },
               { where: { id: { [Op.eq]: userId } } }
@@ -205,8 +203,8 @@ const userController = {
           })
         }
       } else {
-        User.update(
-          { ...updateData },
+        await User.update(
+          updateData ,
           { where: { id: { [Op.eq]: userId } } }
         )
       }
