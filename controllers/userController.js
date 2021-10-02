@@ -188,6 +188,7 @@ const userController = {
     const checkedData = userEditValidate(updateData)
     console.log("🚀 ~ file: userController.js ~ line 189 ~ editUserData: ~ checkedData", checkedData)
     try {
+      console.log('am i')
       if (files['cover'] || files['avatar']) {
         console.log('am i?')
         if (files['cover']) {
@@ -209,8 +210,9 @@ const userController = {
           })
         }
       } else {
+        console.log('am i ?')
         await User.update(
-          { ...checkedData } ,
+          checkedData,
           { where: { id: { [Op.eq]: userId } } }
         )
       }
