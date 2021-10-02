@@ -11,7 +11,6 @@ if (process.env.NODE_ENV !== 'production') {
 const app = express()
 
 const server = require('http').createServer(app)
-
 const passport = require('./config/passport')
 const port = process.env.PORT || 3000
 
@@ -23,8 +22,8 @@ app.use(express.json())
 app.use(passport.initialize())
 app.use('/upload', express.static(__dirname + '/upload'))
 
-
-require('./routes')(app)
+const routes = require('./routes')
+app.use(routes)
 require('./utils/socketio').socket(server)
 
 

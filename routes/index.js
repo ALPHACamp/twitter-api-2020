@@ -1,3 +1,6 @@
+const express = require('express')
+const router = express.Router()
+
 const users = require('./apis/users')
 const admin = require('./apis/admin')
 const tweets = require('./apis/tweets')
@@ -6,10 +9,11 @@ const chatroom = require('./apis/chatroom')
 
 
 
-module.exports = app => {
-  app.use('/api/chat',  chatroom)
-  app.use('/api/users',  users)
-  app.use('/api/admin',  admin)
-  app.use('/api/tweets', tweets)
-  app.use('/api/followships',  followships)
-}
+router.use('/api/chat',  chatroom)
+router.use('/api/users',  users)
+router.use('/api/admin',  admin)
+router.use('/api/tweets', tweets)
+router.use('/api/followships',  followships)
+
+
+module.exports = router
