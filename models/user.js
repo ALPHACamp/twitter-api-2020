@@ -35,6 +35,18 @@ module.exports = (sequelize, DataTypes) => {
             console.log(error)
           }
         }
+      },
+      beforeUpdate: async (User, next) => {
+        const password = User.dataValues.password
+        if (password) {
+          try {
+            const salt = await bcrypt.genSalt(10)
+            User.dataValues.password = await bcrypt.hash(password, salt)
+          }
+          catch (error) {
+            console.log(error)
+          }
+        }
       }
     }
   }, {});
