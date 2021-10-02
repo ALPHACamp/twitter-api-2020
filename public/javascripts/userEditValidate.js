@@ -5,7 +5,8 @@ module.exports = (data) => {
     const emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
     if (emailRule.test(data.email) && (data.password === data.checkPassword)) {
       const salt = bcrypt.genSalt(10)
-      data.password = bcrypt.hash(data.password, salt)
+      const password = data.password
+      data.password = bcrypt.hash(password, salt)
       return {
         'name': data.name,
         'account': data.account,
