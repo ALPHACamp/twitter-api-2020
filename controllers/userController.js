@@ -94,8 +94,9 @@ const userController = {
         where: { UserId: { [Op.eq]: id } },
         include: [
           { model: Reply, as: 'replies', attributes: ['id'] },
-          { model: Like, as: 'likes', attributes: ['id'] }
+          { model: Like, as: 'likes', attributes: ['UserId'] }
         ],
+        order: [['createdAt', 'DESC']]
       })
       return res.json(userTweets)
     }
@@ -114,7 +115,8 @@ const userController = {
           { model: Tweet, as: 'tweet',
             include: [{ model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
           },
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
   
       return res.json(repliedTweets)
@@ -138,7 +140,8 @@ const userController = {
               { model: Like, as: 'likes', attributes: ['id'] },
               { model: Reply, as: 'replies', attributes: ['id'] }
             ]
-        }]
+        }],
+        order: [['createdAt', 'DESC']]
       })
 
       return res.json(likedTweets)
