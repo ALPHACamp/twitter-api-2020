@@ -4,6 +4,7 @@ const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const { User, Tweet, Like, Sequelize, Reply } = require('../models')
+const helpers = require('../_helpers.js')
 const { Op } = Sequelize
 
 const uploadImg = path => {
@@ -106,7 +107,7 @@ let userController = {
   getUser: async (req, res, next) => {
     try {
       const userId = req.params.id
-      const user = await User.findByPk(userId, {
+      let user = await User.findByPk(userId, {
         attributes: [
           'id', 'name', 'avatar', 'introduction', 'account', 'cover', 'role',
           [Sequelize.literal('COUNT(DISTINCT Tweets.id)'), 'tweetsCount'],
@@ -126,6 +127,8 @@ let userController = {
           'message': '此用戶不存在'
         })
       }
+      user = user.toJSON()
+      user.isFollowed = req.user.Followings.map(user => user.id).includes(user.id)
       return res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -146,16 +149,18 @@ let userController = {
           { model: Reply },
           { model: Like },
           { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
 
       let tweetSet = userTweets.map(tweet => ({
-        'id': tweet.id,
-        'description': tweet.description,
-        'updatedAt': tweet.updatedAt,
-        'replyCount': tweet.Replies.length,
-        'likeCount': tweet.Likes.length,
-        'user': tweet.User
+        id: tweet.id,
+        description: tweet.description,
+        updatedAt: tweet.updatedAt,
+        replyCount: tweet.Replies.length,
+        likeCount: tweet.Likes.length,
+        user: tweet.User,
+        isLiked: req.user.LikedTweets ? req.user.LikedTweets.map(like => like.id).includes(tweet.id) : null,
       }))
       return res.status(200).json(tweetSet)
     } catch (err) {
@@ -206,8 +211,9 @@ let userController = {
   putUserSetting: async (req, res, next) => {
     try {
       //修改使用者設定(修改使用者設定(account、name、email、password)，account、email必須唯一
-      const { account, email, password, checkPassword } = req.body
+      const { name, account, email, password, checkPassword } = req.body
       const regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+      const userData = helpers.getUser(req)
       //1.確定是登入者
       if (req.user.id !== Number(req.params.id)) {
         return res.status(403).json({ status: 'error', message: "並非該用戶，無訪問權限！" })
@@ -225,14 +231,17 @@ let userController = {
       }
       if (password !== checkPassword) return res.status(401).json({ status: 'error', message: "兩次密碼輸入不同！" })
 
-      const userHasEmail = User.findOne({ where: { email } })
-      const userHasAccount = User.findOne({ where: { account } })
-      if (userHasEmail && userHasAccount) return res.status(409).json({ status: 'error', message: "email 和 account 已有註冊！" })
-      if (userHasEmail) return res.status(409).json({ status: 'error', message: "email 已有註冊，請重新輸入！" })
-      if (userHasAccount) return res.status(409).json({ status: 'error', message: "account 已有註冊，請重新輸入！" })
+      const userHasEmail = await User.findOne({ where: { email } })
+      const userHasAccount = await User.findOne({ where: { account } })
+
+
+      if (userHasEmail && userHasEmail.id !== userData.id) return res.status(409).json({ status: 'error', message: "email 已有註冊，請重新輸入！" })
+      if (userHasAccount && userHasAccount.id !== userData.id) return res.status(409).json({ status: 'error', message: "account 已有註冊，請重新輸入！" })  
+      if (userHasAccount && userHasEmail && userHasEmail.id !== userData.id && userHasAccount.id !== userData.id) return res.status(409).json({ status: 'error', message: "email 和 account 已有註冊！" })      
+
 
       const user = await User.findByPk(req.params.id)
-      user.update({ account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
+      user.update({ name, account, email, password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null) })
       return res.json({ status: 'success', message: '已成功修正！' })
     } catch (err) {
       next(err)
@@ -355,7 +364,7 @@ let userController = {
           [Sequelize.literal('COUNT(DISTINCT Likes.id)'), 'LikesCount'],
           [Sequelize.literal('COUNT(DISTINCT Replies.id)'), 'RepliesCount']
           ],
-          group: ['TweetId', 'Likes.createdAt'],
+          group: ['TweetId'],
           include: [
             { model: Like, attributes: ['createdAt'] },
             { model: Reply, attributes: [] },

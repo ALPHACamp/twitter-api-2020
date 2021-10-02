@@ -6,10 +6,10 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const user = await User.findAll({ attributes: ['id'] })
     await queryInterface.bulkInsert('Tweets',
-      Array.from({ length: 50 }).map((d, i) =>
+      Array.from({ length: 40 }).map((d, i) =>
       ({
         description: faker.lorem.text(),
-        UserId: user[~~(i/10)].id,
+        UserId: user[~~(i / 10) + 1].id,
         createdAt: new Date(),
         updatedAt: new Date()
       })

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const helpers = require('../_helpers')
 
+
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err) return next(err)
@@ -18,7 +19,8 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (helpers.getUser(req) && helpers.getUser(req).role === 'user') {
+
+  if (helpers.getUser(req) && helpers.getUser(req).role === 'user'){
     return res.status(401).json({
       status: 'error',
       message: '帳號不存在'

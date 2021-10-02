@@ -1,17 +1,21 @@
-//server
-const socketio = require('socket.io')
 
-const { authenticatedSocket } = require('../middleware/auth') //TODO
+const { User, Sequelize } = require('../models')
+const socketio = require('socket.io')
+const { postChat, createRoom } = require('../controllers/chatroomController')
 
 let io
-let userList = []
+let onlineList = []
+
 
 const socket = server => {
   // Set up socket.io
   io = socketio(server, {
     cors: {
       origin: [
+        'https://danielgg1024.github.io/twitter-front-end-vue/',
         'http://localhost:3000',
+        'http://localhost:8080',
+        'https://tranquil-crag-64775.herokuapp.com/'
       ],
       methods: ['GET', 'POST'],
       transports: ['websocket', 'polling'],
@@ -20,47 +24,75 @@ const socket = server => {
     allowEIO3: true
   })
   console.log('Socket.io init success')
-
   if (!io) throw new Error('No socket io server instance')
 
-  io.use(authenticatedSocket).on('connection', socket => {
-
-
+  io.on('connection', socket => {
+    console.log(socket.user)
     console.log('===== connected!!! =====')
-
-    const { clientsCount } = io.engine
-    console.log('有人加入公開聊天室，目前人數:', clientsCount)
-  
-
-    socket.on('joinPublic', (d) => {
-      userList.push(socket.user)
-      console.log(`${d.name} 上線`)
-      console.log(userList)
-      socket.broadcast.emit("announce", d)
+    /*-----------------PublicRoom--------------------- */
+    socket.on('joinPublic', async (userId) => {
+      await socket.join('PublicRoom')
+      console.log('PublicRoom', io.of("/").adapter.rooms)
+      console.log('userId', userId)
+      let user = await User.findByPk(userId, { attributes: ['id', 'name', 'account', 'avatar'] })
+      user = user.toJSON()
+      console.log('user',user)
+      addUser(user)
+      console.log('----onlineList----')
+      console.log(onlineList)
+      console.log('---clientsCount in ---')
+      console.log('clientsCount', onlineList.length)
+      const roomId = 1
+      io.emit("announce", { user, roomId })
     })
 
-    socket.on('chatmessage', (msg) => {
-      console.log('msg', msg)
-      io.emit('new message', msg)
-      //TODO 建立message database
+    socket.on('chatmessage', async (data) => {
+      // 預設傳入data = {roomId, userId, msg}
+      const { roomId, userId, msg } = data
+      console.log(data)
+      let user = await User.findByPk(userId, { attributes: ['id', 'name', 'account', 'avatar'] })
+      console.log(user)
+      user = user.toJSON()
+      console.log(roomId)
+      console.log(user)
+      io.to(data.roomId).emit('newMessage', { user: user, msg: msg, date: new Date() })
+      postChat(user, data.msg, roomId)
     })
 
-/*     socket.on('leavePublic',  () => {
-      clientsCount-=1
-      console.log("A user leaved.")
-      io.emit("announce", {
-        message: 'user 離線'
-      })
-    }) */
-    socket.on('disconnect', () => {
-      console
-
-      console.log(`有人離開：目前人數:', ${clientsCount}`)
-
-
+    socket.on('leavePublic', async(userId) => {
+      console.log('============leavePublic===============')
+      console.log('onlineList', onlineList)
+      let userIndex = onlineList.findIndex(x => x.id === Number(userId))
+      if(userIndex !== -1){
+        getRemoveUser(userIndex)
+        await socket.leave('PublicRoom')
+        console.log('LeavePublicRoom', io.of("/").adapter.rooms)
+      }
     })
-
   })
 }
+
+function addUser(user) {
+  let exist = onlineList.some(u => u.id === user.id)
+  //console.log(exist)
+  if (exist) {
+    io.emit('onlineList', onlineList)
+  } else {
+    onlineList.push(user)
+    io.emit('onlineList', onlineList)
+  }
+}
+
+// GET removeUserName, 更新onlineList
+function getRemoveUser(userIndex){
+  const userName = onlineList[userIndex].name
+  console.log(userName,'離開')
+  io.emit("announce",　` ${userName} 離開`)
+  onlineList.splice(userIndex,1)
+  console.log('-------刪除後onlineList------')
+  console.log(onlineList)
+}
+
+
 
 module.exports = { socket }
