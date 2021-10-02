@@ -16,6 +16,7 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { QueryTypes } = require('sequelize')
 const readFile = require('../public/javascripts/fileRead')
 const helpers = require('../_helpers')
+const userEditValidate = require('../public/javascripts/userEditValidate')
 
 const userController = {
   userPage: async (req, res) => {
@@ -179,8 +180,12 @@ const userController = {
   
   editUserData: async (req, res) => {
     const userId = req.user.id
-    const updateData = req.body
+    let updateData = req.body
     const files = req.files
+    if (!userEditValidate(updateData)) {
+      return res.status(400).json('invalid data')
+    }
+    updateData = userEditValidate(updateData)
     try {
       if (files['cover'] || files['avatar']) {
         console.log('am i?')
