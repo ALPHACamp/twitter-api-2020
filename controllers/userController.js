@@ -182,6 +182,7 @@ const userController = {
     const userId = req.user.id
     const updateData = req.body
     const files = req.files
+    console.log("🚀 ~ file: userController.js ~ line 185 ~ editUserData: ~ files", files)
     if (!userEditValidate(updateData)) {
       return res.status(400).json('invalid data')
     }
@@ -189,6 +190,7 @@ const userController = {
     console.log("🚀 ~ file: userController.js ~ line 189 ~ editUserData: ~ checkedData", checkedData)
     try {
       console.log('am i')
+      console.log("🚀 ~ file: userController.js ~ line 193 ~ editUserData: ~ files['cover'] || files['avatar']", files['cover'] || files['avatar'])
       if (files['cover'] || files['avatar']) {
         console.log('am i?')
         if (files['cover']) {
