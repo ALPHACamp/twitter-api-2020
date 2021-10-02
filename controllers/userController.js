@@ -185,6 +185,7 @@ const userController = {
     console.log("🚀 ~ file: userController.js ~ line 185 ~ files", files)
     try {
       if (files['cover'] || files['avatar']) {
+        console.log('am i?')
         if (files['cover']) {
           imgur.setClientID(IMGUR_CLIENT_ID);
           imgur.upload(files['cover'][0].path, (err, img) => {
