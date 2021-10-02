@@ -283,7 +283,7 @@ const userService = {
         { model: Reply, attributes: [] },
         { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
-        order: [['Likes', 'createdAt', 'DESC']]
+        order: [[sequelize.fn('ANY_VALUE', sequelize.col('Likes.createdAt')), 'DESC']]
       })
       turnToBoolean(likedTweets, 'isLiked')
       return cb(likedTweets)
