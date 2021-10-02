@@ -120,7 +120,7 @@ const tweetController = {
       const tweetComment = await Reply.create({ ...data })
 
       // 針對即時訊息做處理
-      const twitterId = Tweet.findByPk(TweetId, { raw: true, attributes: ['UserId'] })
+      const twitterId = Tweet.findByPk(data.TweetId, { raw: true, attributes: ['UserId'] })
       tweetComment.user = req.user
       tweetComment.type = 'tweet-reply'
       const tweetCommentContent = JSON.stringify(tweetComment)

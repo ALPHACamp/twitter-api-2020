@@ -2,6 +2,7 @@ const db = require('../models')
 const User = db.User
 const bcrypt = require('bcryptjs')
 const issueJwt = require('../public/javascripts/tokenIssue')
+const userDataValidate = require('../public/javascripts/userDataValidate')
 
 const homeController = {
   
@@ -34,9 +35,8 @@ const homeController = {
   
   postSignUp: async (req, res) => {
     const userData = req.body
-    console.log("🚀 ~ file: homeController.js ~ line 37 ~ postSignUp: ~ userData", userData)
-    if (req.body.checkPassword !== req.body.password) {
-      return res.redirect('/signup')
+    if (!userDataValidate(userData)) {
+      return res.status(400).json('data invalid')
     }
     try {
       const user = await User.create(userData)
