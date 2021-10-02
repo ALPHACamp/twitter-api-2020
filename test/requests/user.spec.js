@@ -27,6 +27,7 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             db.User.findByPk(1).then(user => {
+              console.log('user', user);
               user.account.should.equal('User1');
               user.email.should.equal('User1@example.com');
               return done();
@@ -67,8 +68,8 @@ describe('# user requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
-            if (err) return done(err);
 
+            if (err) return done(err);
             res.body.name.should.equal('root');
 
             return done();
