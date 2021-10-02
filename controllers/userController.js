@@ -207,14 +207,14 @@ const userController = {
         })
       }
     }
-    if (!userEditValidate(updateData)) {
-      return res.status(400).json('invalid data')
-    } else {
+    // if (!userEditValidate(updateData)) {
+    //   return res.status(400).json('invalid data')
+    // } else {
       User.update(
         checkedData,
         { where: { id: { [Op.eq]: userId } } }
       )
-    }
+    // }
     res.status(200).json('Accept')
   },
 
