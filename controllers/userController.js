@@ -188,7 +188,7 @@ const userController = {
     const checkedData = userEditValidate(updateData)
     try {
       if (files) {
-        if (files['cover']) {
+        if (files.cover) {
           imgur.setClientID(IMGUR_CLIENT_ID);
           await imgur.upload(files['cover'][0].path, (err, img) => {
             User.update(
@@ -197,7 +197,7 @@ const userController = {
             )
           })
         }
-        if (files['avatar']) {
+        if (files.avatar) {
           imgur.setClientID(IMGUR_CLIENT_ID);
           await imgur.upload(files['avatar'][0].path, (err, img) => {
             User.update(
