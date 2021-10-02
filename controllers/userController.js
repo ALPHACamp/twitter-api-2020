@@ -180,12 +180,13 @@ const userController = {
   
   editUserData: async (req, res) => {
     const userId = req.user.id
-    let updateData = req.body
+    const updateData = req.body
     const files = req.files
     if (!userEditValidate(updateData)) {
       return res.status(400).json('invalid data')
     }
-    updateData = userEditValidate(updateData)
+    const checkedData = userEditValidate(updateData)
+    console.log("🚀 ~ file: userController.js ~ line 189 ~ editUserData: ~ checkedData", checkedData)
     try {
       if (files['cover'] || files['avatar']) {
         console.log('am i?')
@@ -209,7 +210,7 @@ const userController = {
         }
       } else {
         await User.update(
-          updateData ,
+          { ...checkedData } ,
           { where: { id: { [Op.eq]: userId } } }
         )
       }
