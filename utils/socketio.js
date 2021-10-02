@@ -1,9 +1,11 @@
+
 const { User, Sequelize } = require('../models')
 const socketio = require('socket.io')
 const { postChat, createRoom } = require('../controllers/chatroomController')
 
 let io
 let onlineList = []
+
 
 const socket = server => {
   // Set up socket.io
@@ -90,7 +92,6 @@ function getRemoveUser(userIndex){
   console.log('-------刪除後onlineList------')
   console.log(onlineList)
 }
-
 
 
 
