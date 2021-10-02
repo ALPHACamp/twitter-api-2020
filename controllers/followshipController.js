@@ -6,22 +6,26 @@ const Op = db.Sequelize.Op
 const followshipController = {
   follow: async (req, res) => {
     try {
-      await Followship.findOrCreate({ 
-        where: { followerId: req.user.id, followingId: req.body.id }
-      })
-
-      // 針對即時訊息做處理
-      const unread = {}
-      unread.type = 'twitter-follow'
-      unread.user = req.user
-      const unreadContent = JSON.stringify(unread)
-      await Unread.create({
-        sendId: req.user.id,
-        receiveId: req.body.id,
-        unread: unreadContent
-      })
-
-      return res.status(200).json('Accept')
+      if (req.user.id !== req.body.id) {
+        await Followship.findOrCreate({ 
+          where: { followerId: req.user.id, followingId: req.body.id }
+        })
+  
+        // 針對即時訊息做處理
+        const unread = {}
+        unread.type = 'twitter-follow'
+        unread.user = req.user
+        const unreadContent = JSON.stringify(unread)
+        await Unread.create({
+          sendId: req.user.id,
+          receiveId: req.body.id,
+          unread: unreadContent
+        })
+  
+        return res.status(200).json('Accept')
+      } else {
+        return res.status(404)
+      }
     }
     catch (error) {
       console.log(error)
