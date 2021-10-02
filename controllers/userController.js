@@ -190,9 +190,9 @@ const userController = {
     console.log("🚀 ~ file: userController.js ~ line 189 ~ editUserData: ~ checkedData", checkedData)
     try {
       console.log('am i')
-      console.log("🚀 ~ file: userController.js ~ line 193 ~ editUserData: ~ files['cover'] || files['avatar']", files['cover'] || files['avatar'])
-      if (files['cover'] || files['avatar']) {
-        console.log('am i?')
+      console.log("🚀 ~ file: userController.js ~ line 193 ~ editUserData: ~ files['cover'] || files['avatar']", files['cover'])
+      if (files) {
+        console.log('am i')
         if (files['cover']) {
           imgur.setClientID(IMGUR_CLIENT_ID);
           await imgur.upload(files['cover'][0].path, (err, img) => {
