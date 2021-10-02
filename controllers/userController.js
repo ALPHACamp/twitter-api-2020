@@ -14,9 +14,7 @@ const Op = Sequelize.Op
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { QueryTypes } = require('sequelize')
-const readFile = require('../public/javascripts/fileRead')
 const helpers = require('../_helpers')
-const userEditValidate = require('../public/javascripts/userEditValidate')
 
 const userController = {
   userPage: async (req, res) => {
@@ -181,12 +179,9 @@ const userController = {
   editUserData: (req, res) => {
     const userId = req.user.id
     const updateData = req.body
-    console.log("🚀 ~ file: userController.js ~ line 184 ~ updateData", updateData)
     const files = req.files
     
-    const checkedData = userEditValidate(updateData)
     if (files) {
-      console.log('1')
       if (files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['cover'][0].path, (err, img) => {
@@ -196,26 +191,25 @@ const userController = {
             )
           })
         }
-      console.log('2')
-      if (files.avatar) {
-        imgur.setClientID(IMGUR_CLIENT_ID);
-        imgur.upload(files['avatar'][0].path, (err, img) => {
-          User.update(
-            { ...updateData, avatar: img.data.link },
-            { where: { id: { [Op.eq]: userId } } }
-          )
-        })
-      }
-    }
-    // if (!userEditValidate(updateData)) {
-    //   return res.status(400).json('invalid data')
-    // } else {
+        if (files.avatar) {
+          imgur.setClientID(IMGUR_CLIENT_ID);
+          imgur.upload(files['avatar'][0].path, (err, img) => {
+            User.update(
+              { ...updateData, avatar: img.data.link },
+              { where: { id: { [Op.eq]: userId } } }
+              )
+          })
+        }
+      res.status(200).json('Accept')
+    } else if (updateData.name) {
       User.update(
-        checkedData,
+        { ...updateData },
         { where: { id: { [Op.eq]: userId } } }
       )
-    // }
-    res.status(200).json('Accept')
+      res.status(200).json('Accept')
+    } else {
+      res.status(400).json('invalid data')
+    }
   },
 
   getChatRecords: async (req, res) => {

@@ -6,9 +6,6 @@ module.exports = (data) => {
     if (emailRule.test(data.email) && (data.password === data.checkPassword)) {
       return {
         'name': data.name,
-        'account': data.account,
-        'email': data.email,
-        'password': data.password
       }
     }
     return false
