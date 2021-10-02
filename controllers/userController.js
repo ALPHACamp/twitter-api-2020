@@ -179,6 +179,7 @@ const userController = {
   editUserData: (req, res) => {
     const userId = req.user.id
     const updateData = req.body
+    console.log("🚀 ~ file: userController.js ~ line 182 ~ updateData", updateData)
     const files = req.files
     
     if (files) {
@@ -191,15 +192,15 @@ const userController = {
             )
           })
         }
-        if (files.avatar) {
-          imgur.setClientID(IMGUR_CLIENT_ID);
-          imgur.upload(files['avatar'][0].path, (err, img) => {
-            User.update(
-              { ...updateData, avatar: img.data.link },
-              { where: { id: { [Op.eq]: userId } } }
-              )
-          })
-        }
+      if (files.avatar) {
+        imgur.setClientID(IMGUR_CLIENT_ID);
+        imgur.upload(files['avatar'][0].path, (err, img) => {
+          User.update(
+            { ...updateData, avatar: img.data.link },
+            { where: { id: { [Op.eq]: userId } } }
+            )
+        })
+      }
       res.status(200).json('Accept')
     } else if (updateData.name) {
       User.update(
