@@ -178,7 +178,7 @@ const userController = {
     }
   },
   
-  editUserData: async (req, res) => {
+  editUserData: (req, res) => {
     const userId = req.user.id
     const updateData = req.body
     const files = req.files
@@ -187,39 +187,32 @@ const userController = {
       return res.status(400).json('invalid data')
     }
     const checkedData = userEditValidate(updateData)
-    try {
-      if (files) {
-        console.log("🚀 ~ file: userController.js ~ line 202 ~ editUserData: ~ files.avatar", files.avatar)
-        console.log("🚀 ~ file: userController.js ~ line 192 ~ editUserData: ~ files.cover", files.cover)
-        if (files.cover) {
-          imgur.setClientID(IMGUR_CLIENT_ID);
-          await imgur.upload(files['cover'][0].path, (err, img) => {
-            User.update(
-              { ...updateData, cover: img.data.link },
-              { where: { id: { [Op.eq]: userId } } }
-            )
-          })
-        }
-        if (files.avatar) {
-          imgur.setClientID(IMGUR_CLIENT_ID);
-          await imgur.upload(files['avatar'][0].path, (err, img) => {
-            User.update(
-              { ...updateData, avatar: img.data.link },
-              { where: { id: { [Op.eq]: userId } } }
-            )
-          })
-        }
-      } else {
-        await User.update(
-          checkedData,
-          { where: { id: { [Op.eq]: userId } } }
-        )
+    if (files) {
+      if (files.cover) {
+        imgur.setClientID(IMGUR_CLIENT_ID);
+        imgur.upload(files['cover'][0].path, (err, img) => {
+          User.update(
+            { ...updateData, cover: img.data.link },
+            { where: { id: { [Op.eq]: userId } } }
+          )
+        })
       }
-      res.status(200).json('Accept')
+      if (files.avatar) {
+        imgur.setClientID(IMGUR_CLIENT_ID);
+        imgur.upload(files['avatar'][0].path, (err, img) => {
+          User.update(
+            { ...updateData, avatar: img.data.link },
+            { where: { id: { [Op.eq]: userId } } }
+          )
+        })
+      }
+    } else if (checkedData.name) {
+      User.update(
+        checkedData,
+        { where: { id: { [Op.eq]: userId } } }
+      )
     }
-    catch (error) {
-      res.status(400).json('Bad process')
-    }
+    res.status(200).json('Accept')
   },
 
   getChatRecords: async (req, res) => {
