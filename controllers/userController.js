@@ -179,10 +179,9 @@ const userController = {
   editUserData: (req, res) => {
     const userId = req.user.id
     const updateData = req.body
-    console.log("🚀 ~ file: userController.js ~ line 182 ~ updateData", updateData)
     const files = req.files
     
-    if (Object.keys(files).length) {
+    if (files &&　Object.keys(files).length) {
       if (files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['cover'][0].path, (err, img) => {
