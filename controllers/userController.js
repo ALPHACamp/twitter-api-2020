@@ -183,7 +183,7 @@ const userController = {
     const files = req.files
     console.log("🚀 ~ file: userController.js ~ line 184 ~ files", files)
     
-    if (files) {
+    if (Object.keys(files).length) {
       console.log('"🚀 ~ file: userController.js ~ line 186')
       if (files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID);
