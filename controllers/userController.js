@@ -128,7 +128,7 @@ let userController = {
         })
       }
       user = user.toJSON()
-      user.isFollowed = req.user.Followings.map(user => user.id).includes(user.id)
+      user.isFollowed = req.user.Followings ? req.user.Followings.map(user => user.id).includes(user.id) : null
       return res.status(200).json(user)
     } catch (err) {
       next(err)
