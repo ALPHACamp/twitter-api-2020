@@ -179,12 +179,9 @@ const userController = {
   editUserData: (req, res) => {
     const userId = req.user.id
     const updateData = req.body
-    console.log("🚀 ~ file: userController.js ~ line 182 ~ updateData", updateData.name)
     const files = req.files
-    console.log("🚀 ~ file: userController.js ~ line 184 ~ files", files)
     
     if (Object.keys(files).length) {
-      console.log('"🚀 ~ file: userController.js ~ line 186')
       if (files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['cover'][0].path, (err, img) => {
@@ -205,7 +202,6 @@ const userController = {
       }
       res.status(200).json('Accept')
     } else if (updateData.name) {
-      console.log('am i')
       User.update(
         updateData,
         { where: { id: { [Op.eq]: userId } } }
