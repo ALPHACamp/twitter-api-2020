@@ -27,6 +27,7 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             db.User.findByPk(1).then(user => {
+              console.log('user', user);
               user.account.should.equal('User1');
               user.email.should.equal('User1@example.com');
               return done();

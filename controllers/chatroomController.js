@@ -31,6 +31,6 @@ let chatroomController = {
       next(err)
     }
   },
-}
+
 
 module.exports = chatroomController

@@ -1,0 +1,174 @@
+<h1>chat room</h1>
+<input type="text" id="nowuser" value="{{user.name}}">
+<input type="text" id="nowtoken" value="{{token}}">
+<div id="container">
+  <div id="left">
+    <div id="user">
+      <div class="img-wrapper">
+        <img src="{{user.avatar}}" alt="">
+      </div>
+      <div class="user-name">{{user.name}}</div>
+    </div>
+
+  </div>
+  <div id="right">
+    <div id="status-box">Server: <span id="status">-</span> / <span id="online">0</span> online.</div>
+    <div id="content">
+      <div class="msg">
+        <span class="name">Duye</span>
+        Hello!
+      </div>
+      <div class="msg">
+        <span class="name">Alice</span>
+        Hi!
+      </div>
+    </div>
+
+    <div id="send-box">
+      <form id="send-form">
+        <input type="text" name="msg" id="msg" placeholder="說點什麼？">
+        <input type="submit" value="送出">
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const nowtoken = document.getElementById("nowtoken")
+  const token = document.getElementById("nowtoken").value
+  console.log(token)
+  const socket = io.connect('http://localhost:3000', {
+    auth: {
+      token: token
+    }
+  })
+  console.log(socket.auth)
+  document.addEventListener("DOMContentLoaded", () => {
+
+    const status = document.getElementById("status")
+    const online = document.getElementById("online")
+    const content = document.getElementById("content")
+    const sendForm = document.getElementById("send-form")
+    const nowuser = document.getElementById("nowuser")
+    const msg = document.getElementById("msg")
+
+    socket.on("connect", function () {
+      status.innerText = "Connected.";
+      socket.emit("joinPublic", { name: nowuser.value })
+    })
+
+    socket.on("announce", function (d) {
+      console.log(d)
+      const joinAndout = document.createElement("div")
+      joinAndout.className = "joinAndout"
+
+      const usermsg = document.createTextNode(d.name + ' joined the room')
+      joinAndout.appendChild(usermsg)
+      content.appendChild(joinAndout)
+    })
+
+    sendForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = { name: nowuser.value, msg: msg.value };
+      socket.emit("chatmessage", formData);
+    })
+    socket.on("new message", function (d) {
+      const msgBox = document.createElement("div")
+      const nameBox = document.createElement("span")
+
+      const name = document.createTextNode(d.name);
+      const msg = document.createTextNode(d.msg);
+      8
+      nameBox.appendChild(name);
+      msgBox.appendChild(nameBox);
+      msgBox.appendChild(msg);
+      content.appendChild(msgBox);
+    });
+
+  })
+</script>
+<style>
+  html,
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  #container {
+    top: 50px;
+    width: 500px;
+    height: 50vh;
+    margin: 0 auto;
+    display: flex;
+    position: relative;
+    border: 1px solid rgb(0, 0, 0);
+    padding: 4px;
+  }
+
+  #right {
+    width: 70%;
+    height: 100vh;
+  }
+
+  #left {
+    width: 30%;
+    margin-right: 10px;
+    border: 1px solid rgb(0, 0, 0);
+  }
+
+  #send-box {
+    position: absolute;
+    bottom: 10px;
+  }
+
+  #user {
+    height: 40px;
+    padding: 10px;
+    border-bottom: 1px solid #000;
+    display: flex;
+    align-items: center;
+  }
+
+  .img__wrapper {
+    width: 30vmin;
+    height: 30vmin;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  #user img {
+    max-width: 40px;
+    height: 40px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+  }
+
+  .user-name {
+    margin-left: 20px;
+  }
+
+  .joinAndout {
+    font-size: 10px;
+    text-align: center;
+    background-color: #CCC;
+    width: 150px;
+    padding: 4px;
+    border-radius: 4px;
+    margin: 10px;
+  }
+
+  #nowuser {
+    display: none;
+  }
+
+  span {
+    margin-right: 10px;
+  }
+
+  #nowtoken {
+    display: none;
+  }
+</style>
