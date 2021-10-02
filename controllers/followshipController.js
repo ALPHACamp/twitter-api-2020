@@ -32,12 +32,9 @@ const followshipController = {
   unfollow: async (req, res) => {
     try {
       const followingId = req.params.id
-      console.log("🚀 ~ file: followshipController.js ~ line 35 ~ unfollow: ~ followingId", followingId)
       const unfollow = await Followship.findOne({ where: { followingId: { [Op.eq]: followingId } } })
-      console.log("🚀 ~ file: followshipController.js ~ line 37 ~ unfollow: ~  unfollow",  unfollow)
       if (unfollow) {
-        await unfollow.destroy()
-        console.log("🚀 ~ file: followshipController.js ~ line 40 ~ unfollow: ~ unfollow", unfollow)
+        await Followship.destroy({ where: { followingId: { [Op.eq]: followingId } } })
         return res.status(200).json('Accept')
       } else {
         return res.status(404)
