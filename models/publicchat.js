@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const PublicChat = sequelize.define('PublicChat', {
     speakerId: DataTypes.INTEGER,
-    chatContent: DataTypes.STRING
+    chatContent: DataTypes.STRING(189)
   }, {});
   PublicChat.associate = function(models) {
     PublicChat.belongsTo(models.User, {
