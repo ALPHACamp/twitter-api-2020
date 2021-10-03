@@ -94,8 +94,8 @@ const userController = {
       const userTweets = await Tweet.findAll({
         where: { UserId: { [Op.eq]: id } },
         include: [
-          { model: Reply, as: 'replies', attributes: ['id'] },
-          { model: Like, as: 'likes', attributes: ['UserId'] }
+          { model: Reply, as: 'replies', attributes: ['id', 'UserId'] },
+          { model: Like, as: 'likes', attributes: ['id', 'UserId'] }
         ],
         order: [['createdAt', 'DESC']]
       })
@@ -138,8 +138,8 @@ const userController = {
             include: [
               { model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] }
               },
-              { model: Like, as: 'likes', attributes: ['id'] },
-              { model: Reply, as: 'replies', attributes: ['id'] }
+              { model: Like, as: 'likes', attributes: ['id', 'UserId'] },
+              { model: Reply, as: 'replies', attributes: ['id', 'UserId'] }
             ]
         }],
         order: [['createdAt', 'DESC']]
