@@ -184,14 +184,19 @@ const userController = {
     const userId = req.user.id
     const updateData = req.body
     const files = req.files
+    console.log("🚀 ~ file: userController.js ~ line 187 ~ files", files)
+    console.log("🚀 ~ file: userController.js ~ line 188 ~ Object.keys(files).length", Object.keys(files).length)
 
     if (updateData.password) {
+      console.log("🚀 ~ file: userController.js ~ line 191 ~ files")
       const password = updateData.password
       const salt = bcrypt.genSalt(10)
       updateData.password = bcrypt.hash(password, salt)
     }
     
+
     if (files &&　Object.keys(files).length) {
+      console.log("🚀 ~ file: userController.js ~ line 199 ~ files")
       if (files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['cover'][0].path, (err, img) => {
@@ -202,6 +207,7 @@ const userController = {
           })
         }
       if (files.avatar) {
+        console.log("🚀 ~ file: userController.js ~ line 210 ~ files")
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['avatar'][0].path, (err, img) => {
           User.update(
