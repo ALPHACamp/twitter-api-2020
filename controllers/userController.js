@@ -184,6 +184,12 @@ const userController = {
     const updateData = req.body
     const files = req.files
     
+    if (updateData.password) {
+      const password = updateData.password
+      const salt = bcrypt.genSalt(10)
+      updateData.password = bcrypt.hash(password, salt)
+    }
+    
     if (files &&　Object.keys(files).length) {
       if (files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID);
