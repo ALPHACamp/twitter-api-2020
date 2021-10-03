@@ -9,30 +9,30 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       email: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(189),
         unique: true
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(189)
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(189)
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(189)
       },
       account: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(189),
         unique: true
       },
       cover: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(189)
       },
       introduction: {
         type: Sequelize.TEXT
       },
       role: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(189)
       },
       createdAt: {
         allowNull: false,
