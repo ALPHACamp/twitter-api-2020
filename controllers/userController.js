@@ -15,6 +15,7 @@ const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { QueryTypes } = require('sequelize')
 const helpers = require('../_helpers')
+const bcrypt = require('bcryptjs')
 
 const userController = {
   userPage: async (req, res) => {
@@ -183,7 +184,7 @@ const userController = {
     const userId = req.user.id
     const updateData = req.body
     const files = req.files
-    
+
     if (updateData.password) {
       const password = updateData.password
       const salt = bcrypt.genSalt(10)
