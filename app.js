@@ -6,10 +6,11 @@ const port = process.env.PORT || 3000
 const exphbs = require('express-handlebars')
 const http = require('http')
 const server = http.createServer(app)
-
+const Redis = require('ioredis')
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+const client = new Redis(process.env.REDIS_URL)
 
 // app.engine('handlebars', exphbs())
 // app.set('view engine', 'handlebars')
@@ -17,7 +18,10 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(cors())
-
+app.use((req, res, next) => {
+  req.redis = client
+  next()
+})
 // 引入socket server
 require('./servers/index')(server)
 
@@ -25,8 +29,9 @@ require('./servers/index')(server)
 // app.get('/public', (req, res) => res.render('index'))
 // app.get('/private', (req, res) => res.render('private'))
 // app.get('/notify', (req, res) => res.render('notification'))
-require('./routes')(app)
 
+client.on('connect', () => console.log('redis connected'))
+require('./routes')(app)
 server.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
