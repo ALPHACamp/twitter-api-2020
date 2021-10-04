@@ -275,4 +275,19 @@ async function loginValidation(account, password) {
   }
 }
 
-module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom, emitChatList, leaveAllPrivateRoom, updateMessage, loginValidation }
+function getOrSetCache(key, redis, cb) {
+  const DEFAULT_EXPIRATION = 300
+  return new Promise((resolve, reject) => {
+    // 查看是否有緩存
+    redis.get(key, async (err, data) => {
+      if (err) return reject(err)
+      if (data !== null) return resolve(JSON.parse(data)) //拿出來轉成物件
+      // 沒有-> cb，拿到要存取的資料
+      const freshData = await cb()
+      redis.setex(key, DEFAULT_EXPIRATION, JSON.stringify(freshData))
+      return resolve(freshData)
+    })
+  })
+
+}
+module.exports = { turnToBoolean, getRoomUsers, addClientToMap, removeClientFromMap, getEmitSockets, CreateNotification, leavePublicRoom, emitChatList, leaveAllPrivateRoom, updateMessage, loginValidation, getOrSetCache }
