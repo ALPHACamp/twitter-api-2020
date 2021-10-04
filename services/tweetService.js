@@ -1,7 +1,7 @@
 const sequelize = require('sequelize')
 const db = require('../models')
 const { Tweet, Reply, Like, User } = db
-const { turnToBoolean } = require('../tools/helper')
+const { turnToBoolean, getOrSetCache } = require('../tools/helper')
 
 const tweetService = {
   postTweet: async (req, res, cb) => {
@@ -65,7 +65,7 @@ const tweetService = {
     }
   },
 
-  getTweets: async (req, res, cb) => {
+  getTweets: async (redis, id, cb) => {
     try {
       // 取得追蹤中清單
       // let followings = await Followship.findAll({
@@ -77,24 +77,41 @@ const tweetService = {
       // })
       // 追蹤中的id清單
       // followings = followings.map(d => (d.followingId))
-      const tweets = await Tweet.findAll({
-        group: 'Tweet.id',
-        attributes: ['id', 'description', 'createdAt', 'updatedAt',
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLike'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'],
-          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${req.user.id} AND TweetId = Tweet.id)`), 'isLiked']
-        ],
-        order: [['createdAt', 'DESC']],
-        raw: true, nest: true,
-        // where: {
-        //   userId: followings //僅限有追蹤的人，但是測試檔會不過，因為他沒有先追蹤用戶
-        // },
-        include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          { model: Reply, attributes: [] },
-          { model: Like, attributes: [] }
-        ]
+      // TODO: 目前大家看到的推文都長一樣，所以key只需要一個。未來有變化則需要改key。
+      // TODO:當使用者離開主頁時（非disconnect），刪除緩存。 ＊是否要請前端傳使用者是否有dis/like/留言過，如有才清空->前端會需要＋一個累加器，如果action != 0，則回傳true，代表需要刪除緩存。
+      const tweets = await getOrSetCache('tweets', redis, async () => {
+        // 如果緩存沒資料，才去資料庫撈
+        return await Tweet.findAll({
+          group: 'Tweet.id',
+          where: {
+            createdAt: {
+              [sequelize.Op.gte]: sequelize.literal('CURDATE() + INTERVAL -7 DAY') //只要最近7天內推文
+            }
+          },
+          attributes: ['id', 'description', 'createdAt', 'updatedAt',
+            [
+              sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLike'
+            ],
+            [
+              sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'
+            ],
+            [
+              sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${id} AND TweetId = Tweet.id)`), 'isLiked'
+            ]
+          ],
+          order: [['createdAt', 'DESC']],
+          raw: true, nest: true,
+          // where: {
+          //   userId: followings //僅限有追蹤的人，但是測試檔會不過，因為他沒有先追蹤用戶
+          // },
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            { model: Reply, attributes: [] },
+            { model: Like, attributes: [] }
+          ]
+        })
       })
+      // 如果已有緩存，就直接返回資料
       turnToBoolean(tweets, 'isLiked')
       return cb(tweets)
     } catch (err) {
@@ -124,7 +141,5 @@ const tweetService = {
     }
   }
 }
-
-
 
 module.exports = tweetService

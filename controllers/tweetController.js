@@ -15,7 +15,9 @@ const tweetController = {
     )
   },
   getTweets: (req, res) => {
-    tweetService.getTweets(req, res, data => {
+    const id = req.user.id
+    const redis = req.redis
+    tweetService.getTweets(redis, id, data => {
       if (data.status) return res.status(data.status).json(data)
       return res.status(200).json(data)
     })
