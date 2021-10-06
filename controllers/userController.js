@@ -182,17 +182,35 @@ const userController = {
   
   editUserData: async (req, res) => {
     const userId = req.user.id
+    let user = await User.findByPk(userId, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
     const updateData = req.body
     const files = req.files
-    console.log(updateData.password)
+
+    // 確認account及email是否已被註冊
+    if (updateData.email && updateData.email !== user.email) {
+      const isUser = await User.findOne({
+        where: { email: updateData.email },
+        attributes: ['email'],
+      })
+      if (isUser !== null) return status(400).json('Email已被使用')
+    }
+    if (updateData.account && updateData.account !== user.account) {
+      const isUser = await User.findOne({
+        where: { account: updateData.account },
+        attributes: ['account'],
+      })
+      if (isUser !== null) return status(400).json('account已被使用')
+    }
+
+    // 確認password是否一致
+    if (updateData.password !== updateData.checkPassword) {
+      return status(400).json('password不一致')
+    }
 
     if (updateData.password) {
       const salt = await bcrypt.genSalt(10)
       updateData.password = await bcrypt.hash(updateData.password, salt)
     }
-     console.log('new', updateData.password)
-
-    
 
     if (files &&　Object.keys(files).length) {
       if (files.cover) {
