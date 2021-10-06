@@ -139,8 +139,8 @@ const tweetController = {
 
   postLike: async (req, res) => {
     try {
-      UserId = req.user.id
-      TweetId = Number(req.params.id)
+      const UserId = req.user.id
+      const TweetId = Number(req.params.id)
       const like = await Like.findOrCreate({ where: { UserId, TweetId } })
 
       // 針對即時訊息做處理
@@ -165,8 +165,9 @@ const tweetController = {
 
   postUnlike: async (req, res) => {
     try {
+      const UserId = req.user.id
       const TweetId = Number(req.params.id)
-      const unlike = await Like.findOne({ where: { TweetId: { [Op.eq]: TweetId } } })
+      const unlike = await Like.findOne({ where: { TweetId: { [Op.eq]: TweetId }, UserId: { [Op.eq]: UserId } } })
       if (unlike) {
         await unlike.destroy()
         return res.status(200).json('Accept')
