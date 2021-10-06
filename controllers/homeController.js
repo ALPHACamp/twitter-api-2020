@@ -35,6 +35,8 @@ const homeController = {
   
   postSignUp: async (req, res) => {
     const userData = req.body
+    const salt = await bcrypt.genSalt(10)
+    userData.password = await bcrypt.hash(userData.password, salt)
     if (!userDataValidate(userData)) {
       return res.status(400).json('data invalid')
     }

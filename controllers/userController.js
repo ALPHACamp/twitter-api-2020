@@ -180,16 +180,18 @@ const userController = {
     }
   },
   
-  editUserData: (req, res) => {
+  editUserData: async (req, res) => {
     const userId = req.user.id
     const updateData = req.body
     const files = req.files
+    console.log(updateData.password)
 
     if (updateData.password) {
-      const password = updateData.password
-      const salt = bcrypt.genSalt(10)
-      updateData.password = bcrypt.hash(password, salt)
+      const salt = await bcrypt.genSalt(10)
+      updateData.password = await bcrypt.hash(updateData.password, salt)
     }
+     console.log('new', updateData.password)
+
     
 
     if (files &&　Object.keys(files).length) {
@@ -212,7 +214,7 @@ const userController = {
         })
       }
       res.status(200).json('Accept')
-    } else if (updateData.name) {
+    } else if (updateData.name || updateData.account || updateData.password) {
       User.update(
         updateData,
         { where: { id: { [Op.eq]: userId } } }

@@ -13,26 +13,26 @@ module.exports = {
         unique: true
       },
       password: {
-        type: Sequelize.STRING(189)
+        type: Sequelize.STRING
       },
       name: {
-        type: Sequelize.STRING(189)
+        type: Sequelize.STRING
       },
       avatar: {
-        type: Sequelize.STRING(189)
+        type: Sequelize.STRING
       },
       account: {
         type: Sequelize.STRING(189),
         unique: true
       },
       cover: {
-        type: Sequelize.STRING(189)
+        type: Sequelize.STRING
       },
       introduction: {
         type: Sequelize.TEXT
       },
       role: {
-        type: Sequelize.STRING(189)
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
