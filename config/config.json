@@ -15,10 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "CLEARDB_BRONZE_URL",
-    "dialect": "mysql",
-    "charset": "utf8",
-    "collate": "utf8_unicode_ci"
+    "use_env_variable": "CLEARDB_DATABASE_URL"
   },
   "travis": {
     "username": "travis",
