@@ -65,7 +65,7 @@ const tweetController = {
           { model: Reply, as: 'replies',
             include: [{ model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
           },
-          { model: Like, as: 'likes', attributes: ['id'] },
+          { model: Like, as: 'likes', attributes: ['id', 'UserId'] },
         ]
       })
       return res.json(tweetData)
