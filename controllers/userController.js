@@ -216,7 +216,6 @@ const userController = {
       if (files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['cover'][0].path, (err, img) => {
-          console.log('=========================cover:', img.data.link)
           User.update(
             { ...updateData, cover: img.data.link },
             { where: { id: { [Op.eq]: userId } } }
@@ -226,7 +225,6 @@ const userController = {
       if (files.avatar) {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['avatar'][0].path, (err, img) => {
-          console.log('=========================avatar:', img.data.link)
           User.update(
             { ...updateData, avatar: img.data.link },
             { where: { id: { [Op.eq]: userId } } }

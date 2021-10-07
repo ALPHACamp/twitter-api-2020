@@ -24,8 +24,9 @@ const adminController = {
   getUsers: async (req, res) => {
     try {
       const allUsers = await User.findAll({
-        attributes: ['name', 'account', 'avatar', 'cover'],
-        include: [
+        attributes: ['name', 'account', 'avatar', 'cover', [sequelize.fn('count', sequelize.col('tweetId')), 'count']],
+        group: ['id'],
+        order: [[sequelize.col('count'), 'DESC']],        include: [
           { model: Reply, as: 'replies', attributes: ['id'] },
           { model: User, as: 'Followings', attributes: ['id'] },
           { model: User, as: 'Followers', attributes: ['id'] },
