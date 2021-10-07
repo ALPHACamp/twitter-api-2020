@@ -221,6 +221,7 @@ const userController = {
             { where: { id: { [Op.eq]: userId } } }
             )
           })
+        res.status(200).json('Cover and user profile are updated.')
         }
       if (files.avatar) {
         imgur.setClientID(IMGUR_CLIENT_ID);
@@ -230,14 +231,14 @@ const userController = {
             { where: { id: { [Op.eq]: userId } } }
             )
         })
+        res.status(200).json('Avatar and user profile are updated.')
       }
-      res.status(200).json('Accept')
     } else if (updateData.name || updateData.account || updateData.password) {
       User.update(
         updateData,
         { where: { id: { [Op.eq]: userId } } }
       )
-      res.status(200).json('Accept')
+      res.status(200).json('User profile is updated.')
     } else {
       res.status(400).json('invalid data')
     }
