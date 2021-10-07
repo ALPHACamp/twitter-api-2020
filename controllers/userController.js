@@ -203,7 +203,7 @@ const userController = {
     }
 
     // 確認password是否一致
-    if (updateData.password !== updateData.checkPassword) {
+    if (updateData.password && (updateData.password !== updateData.checkPassword)) {
       return status(400).json('password不一致')
     }
 
@@ -216,21 +216,21 @@ const userController = {
       if (files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['cover'][0].path, (err, img) => {
+          console.log('=========================cover:', img.data.link)
           User.update(
             { ...updateData, cover: img.data.link },
             { where: { id: { [Op.eq]: userId } } }
             )
-            console.log('cover:', img.data.link)
           })
         }
       if (files.avatar) {
         imgur.setClientID(IMGUR_CLIENT_ID);
         imgur.upload(files['avatar'][0].path, (err, img) => {
+          console.log('=========================avatar:', img.data.link)
           User.update(
             { ...updateData, avatar: img.data.link },
             { where: { id: { [Op.eq]: userId } } }
             )
-            console.log('avatar:', img.data.link)
         })
       }
       return res.status(200).json('Accept. Updated user profile and images')
