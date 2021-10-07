@@ -220,8 +220,8 @@ const userController = {
             { ...updateData, cover: img.data.link },
             { where: { id: { [Op.eq]: userId } } }
             )
+            console.log('cover:', img.data.link)
           })
-        res.status(200).json('Cover and user profile are updated.')
         }
       if (files.avatar) {
         imgur.setClientID(IMGUR_CLIENT_ID);
@@ -230,15 +230,16 @@ const userController = {
             { ...updateData, avatar: img.data.link },
             { where: { id: { [Op.eq]: userId } } }
             )
+            console.log('avatar:', img.data.link)
         })
-        res.status(200).json('Avatar and user profile are updated.')
       }
-    } else if (updateData.name || updateData.account || updateData.password) {
+      return res.status(200).json('Accept. Updated user profile and images')
+    } else if (updateData) {
       User.update(
         updateData,
         { where: { id: { [Op.eq]: userId } } }
       )
-      res.status(200).json('User profile is updated.')
+      return res.status(200).json('Accept. Updated user profile.')
     } else {
       res.status(400).json('invalid data')
     }
