@@ -26,19 +26,20 @@ const adminController = {
     try {
       const allUsers = await User.findAll({
         where: { role: 'user' },
-        attributes: { include: [[Sequelize.fn("COUNT", Sequelize.col("userTweets.id")), "tweetsCount"]]},
+        attributes: ['name', 'account', 'avatar', 'cover'],
+        // attributes: { include: [[Sequelize.fn("COUNT", Sequelize.col("userTweets.id")), "tweetsCount"]]},
         include: [
-          // { model: Reply, as: 'replies', attributes: ['id'] },
-          // { model: User, as: 'Followings', attributes: ['id'] },
-          // { model: User, as: 'Followers', attributes: ['id'] },
-          // { model: Like, as: 'likes', attributes: ['id'] },
+          { model: Reply, as: 'replies', attributes: ['id'] },
+          { model: User, as: 'Followings', attributes: ['id'] },
+          { model: User, as: 'Followers', attributes: ['id'] },
+          { model: Like, as: 'likes', attributes: ['id'] },
           { model: Tweet, as: 'userTweets', attributes: [] }
         ],
-        group: ['User.id'],
+        // group: ['User.id'],
         // order: ['tweetsCount', 'DESC'],
-        order: [
-          [sequelize.literal('tweetsCount'), 'DESC'],
-        ],
+        // order: [
+        //   [sequelize.literal('tweetsCount'), 'DESC'],
+        // ],
       })
 
       return res.json(allUsers)
