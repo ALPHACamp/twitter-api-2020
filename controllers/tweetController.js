@@ -42,7 +42,7 @@ const tweetController = {
         group: ['followingId'],
         order: [[sequelize.col('count'), 'DESC']],
         limit: 10,
-        include: [{ model: User, as: 'following', attributes: ['name', 'avatar', 'account'] }],
+        include: [{ model: User, as: 'follower', attributes: ['name', 'avatar', 'account'] }],
       })
   
       const userFollowingList = await Followship.findAll({
