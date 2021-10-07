@@ -167,7 +167,7 @@ const tweetController = {
     try {
       const UserId = req.user.id
       const TweetId = Number(req.params.id)
-      const unlike = await Like.findOne({ where: { TweetId: { [Op.eq]: TweetId }, UserId: { [Op.eq]: UserId } } })
+      const unlike = await Like.findOne({ where: { UserId, TweetId } })
       if (unlike) {
         await unlike.destroy()
         return res.status(200).json('Accept')
