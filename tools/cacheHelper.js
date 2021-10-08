@@ -42,4 +42,28 @@ async function postTweet(loginUser, description, redis, transaction) {
   }
 }
 
-module.exports = ({ postTweet })
+function getOrPushCache(key, redis, cb) {
+  const DEFAULT_EXPIRATION = 300
+
+  return new Promise((resolve, reject) => {
+    // 查看是否有緩存
+    redis.lrange(key, 0, -1, async (err, data) => {
+      if (err) return reject(err)
+      if (data.length > 0) {
+        // 將陣列中每一筆資料轉回js格式
+        data = data.map(d => (JSON.parse(d)))
+        return resolve(data)
+      }
+      // 沒有緩存-> cb，拿到要存取的資料
+      const freshData = await cb()
+      if (freshData.length > 0) {
+        // 將每一筆資料轉成字串，一個一個存入list
+        freshData.forEach(data => redis.lpush(key, JSON.stringify(data)))
+      }
+      redis.expire(key, DEFAULT_EXPIRATION)
+      return resolve(freshData)
+    })
+  })
+}
+
+module.exports = ({ getOrPushCache, postTweet })

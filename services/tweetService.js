@@ -1,8 +1,8 @@
 const { Op } = require('sequelize')
 const db = require('../models')
 const { Tweet, Reply, Like, User, sequelize } = db
-const { turnToBoolean, getOrSetCache } = require('../tools/helper')
-const { postTweet } = require('../tools/cacheHelper')
+const { turnToBoolean } = require('../tools/helper')
+const { getOrPushCache, postTweet } = require('../tools/cacheHelper')
 
 const tweetService = {
   postTweet: async (body, loginUser, redis, cb) => {
@@ -80,7 +80,7 @@ const tweetService = {
       // followings = followings.map(d => (d.followingId))
       // TODO: 目前大家看到的推文都長一樣，所以key只需要一個。未來有變化則需要改key。
       // TODO:當使用者離開主頁時（非disconnect），刪除緩存。 ＊是否要請前端傳使用者是否有dis/like/留言過，如有才清空->前端會需要＋一個累加器，如果action != 0，則回傳true，代表需要刪除緩存。
-      const tweets = await getOrSetCache('tweets', redis, async () => {
+      const tweets = await getOrPushCache('tweets', redis, async () => {
         // 如果緩存沒資料，才去資料庫撈
         return await Tweet.findAll({
           group: 'Tweet.id',
