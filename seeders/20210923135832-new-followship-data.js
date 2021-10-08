@@ -18,10 +18,11 @@ const getUserId = new Promise((resolve, reject) => {
 })
 
 function followships(userIds) {
+  const increment = userIds[1] - userIds[0]
   const allFollowships = []
   let followingCount = 4
   userIds.forEach(userId => {
-    let currentFollowing = (Number(userId) + 10)
+    let currentFollowing = (Number(userId) + increment)
     for (let i = followingCount; i >= 0; i--) {
       const followship = {
         followerId: userId,
@@ -29,7 +30,7 @@ function followships(userIds) {
         createdAt: new Date(),
         updatedAt: new Date()
       }
-      currentFollowing += 10
+      currentFollowing += increment
       allFollowships.push(followship)
     }
     followingCount -= 1

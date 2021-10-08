@@ -38,11 +38,12 @@ const tweetController = {
     const userId = req.params.id
     try{
       const topTwitters = await Followship.findAll({
-        attributes: ['followingId', [sequelize.fn('count', sequelize.col('followerId')), 'count']] ,
+        where: { role: 'user' },
+        attributes: ['followingId', [sequelize.fn('count', sequelize.col('followerId')), 'count']],
         group: ['followingId'],
         order: [[sequelize.col('count'), 'DESC']],
         limit: 10,
-        include: [{ model: User, as: 'follower', attributes: ['name', 'avatar', 'account'] }],
+        include: [{ model: User, as: 'following', attributes: ['name', 'avatar', 'account'] }],
       })
   
       const userFollowingList = await Followship.findAll({
