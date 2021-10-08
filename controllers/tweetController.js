@@ -36,9 +36,8 @@ const tweetController = {
   //取出右邊top10 twitter
   getTop10Twitter: async (req, res) => {
     const userId = req.params.id
-    try{
+    try {
       const topTwitters = await Followship.findAll({
-        where: { role: 'user' },
         attributes: ['followingId', [sequelize.fn('count', sequelize.col('followerId')), 'count']],
         group: ['followingId'],
         order: [[sequelize.col('count'), 'DESC']],
