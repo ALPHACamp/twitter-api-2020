@@ -1,22 +1,54 @@
-const sequelize = require('sequelize')
+const { Op } = require('sequelize')
 const db = require('../models')
-const { Tweet, Reply, Like, User } = db
+const { Tweet, Reply, Like, User, sequelize } = db
 const { turnToBoolean, getOrSetCache } = require('../tools/helper')
 
 const tweetService = {
-  postTweet: async (req, res, cb) => {
+  postTweet: async (body, loginUser, redis, cb) => {
+    const transaction = await sequelize.transaction({ autocommit: false })
     try {
-      const { description } = req.body
+      const { description } = body
       if (description && description.trim()) {
         if (description.length > 140) return cb({ status: '400', message: '推文需在140字以內' })
-        const tweet = await Tweet.create({
-          UserId: req.user.id,
-          description
+        // 確保緩存及資料庫都寫入成功，否則rollback
+        const { id } = await Tweet.create({
+          UserId: loginUser,
+          description,
+        }, { transaction })
+
+        const tweet = await Tweet.findOne({
+          raw: true, nest: true,
+          where: { id },
+          attributes: ['id', 'description', 'createdAt', 'updatedAt',
+            [
+              sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLike'
+            ],
+            [
+              sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'
+            ],
+            [
+              sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${loginUser} AND TweetId = Tweet.id)`), 'isLiked'
+            ]
+          ],
+          order: [['createdAt', 'DESC']],
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            { model: Reply, attributes: [] },
+            { model: Like, attributes: [] }
+          ],
+          transaction
         })
+
+        redis
+          .multi()
+          .lpush('tweets', JSON.stringify(tweet))
+          .exec()
+        await transaction.commit()
         return cb({ status: '200', message: '推文建立成功', tweetId: tweet.id })
       }
       return cb({ status: '400', message: '內容不可空白' })
     } catch (err) {
+      await transaction.rollback()
       console.warn(err)
       return cb({ status: '500', message: err })
     }
@@ -85,7 +117,7 @@ const tweetService = {
           group: 'Tweet.id',
           where: {
             createdAt: {
-              [sequelize.Op.gte]: sequelize.literal('CURDATE() + INTERVAL -7 DAY') //只要最近7天內推文
+              [Op.gte]: sequelize.literal('CURDATE() + INTERVAL -7 DAY') //只要最近7天內推文
             }
           },
           attributes: ['id', 'description', 'createdAt', 'updatedAt',
