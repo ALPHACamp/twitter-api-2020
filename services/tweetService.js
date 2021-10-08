@@ -2,6 +2,7 @@ const { Op } = require('sequelize')
 const db = require('../models')
 const { Tweet, Reply, Like, User, sequelize } = db
 const { turnToBoolean, getOrSetCache } = require('../tools/helper')
+const { postTweet } = require('../tools/cacheHelper')
 
 const tweetService = {
   postTweet: async (body, loginUser, redis, cb) => {
@@ -10,41 +11,9 @@ const tweetService = {
       const { description } = body
       if (description && description.trim()) {
         if (description.length > 140) return cb({ status: '400', message: '推文需在140字以內' })
-        // 確保緩存及資料庫都寫入成功，否則rollback
-        const { id } = await Tweet.create({
-          UserId: loginUser,
-          description,
-        }, { transaction })
-
-        const tweet = await Tweet.findOne({
-          raw: true, nest: true,
-          where: { id },
-          attributes: ['id', 'description', 'createdAt', 'updatedAt',
-            [
-              sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'totalLike'
-            ],
-            [
-              sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'totalReply'
-            ],
-            [
-              sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE UserId = ${loginUser} AND TweetId = Tweet.id)`), 'isLiked'
-            ]
-          ],
-          order: [['createdAt', 'DESC']],
-          include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-            { model: Reply, attributes: [] },
-            { model: Like, attributes: [] }
-          ],
-          transaction
-        })
-
-        redis
-          .multi()
-          .lpush('tweets', JSON.stringify(tweet))
-          .exec()
+        const tweetId = await postTweet(loginUser, description, redis, transaction)
         await transaction.commit()
-        return cb({ status: '200', message: '推文建立成功', tweetId: tweet.id })
+        return cb({ status: '200', message: '推文建立成功', tweetId })
       }
       return cb({ status: '400', message: '內容不可空白' })
     } catch (err) {
