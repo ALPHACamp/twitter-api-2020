@@ -1,5 +1,4 @@
 const db = require('../models')
-const { sequelize } = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Reply = db.Reply
@@ -27,19 +26,13 @@ const adminController = {
       const allUsers = await User.findAll({
         where: { role: 'user' },
         attributes: ['name', 'account', 'avatar', 'cover'],
-        // attributes: { include: [[Sequelize.fn("COUNT", Sequelize.col("userTweets.id")), "tweetsCount"]]},
         include: [
           { model: Reply, as: 'replies', attributes: ['id'] },
           { model: User, as: 'Followings', attributes: ['id'] },
           { model: User, as: 'Followers', attributes: ['id'] },
           { model: Like, as: 'likes', attributes: ['id'] },
-          { model: Tweet, as: 'userTweets', attributes: [] }
-        ],
-        // group: ['User.id'],
-        // order: ['tweetsCount', 'DESC'],
-        // order: [
-        //   [sequelize.literal('tweetsCount'), 'DESC'],
-        // ],
+          { model: Tweet, as: 'userTweets', attributes: ['id'] }
+        ]
       })
 
       return res.json(allUsers)
