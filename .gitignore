@@ -1,6 +1,8 @@
 .DS_Store
 *.DS_Store
-
+*vscode
+# image uploads
+/uploads
 # Logs
 logs
 *.log
@@ -85,3 +87,6 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+#redis
+dump.rdb

@@ -1,0 +1,50 @@
+<h2>通知測試</h2>
+<script>
+  // 新增推文的頁面
+  socket.emit('post tweet', 1)
+  // 按讚後觸發 傳like的id
+  socket.emit('post like', 1)
+  // 按讚後觸發 傳reply資料本身的id
+  socket.emit('post reply', 1)
+  // 追蹤後觸發 傳followship資料本身的id
+  socket.emit('post follow', 1)
+  // 訂閱後觸發 傳followship資料本身的id
+  socket.emit('post subscribe', 1)
+
+  //一進通知頁面時，通知伺服器（索取所有通知）
+  socket.emit('join notification')
+  socket.on('all notification', data => {
+    console.log('所有通知')
+    console.log(data)
+  })
+  //通知頁面會監聽以下事件：
+
+  // TODO:進入通知頁面
+
+  //通知事件
+  //更新通知頁面（左側欄位）
+  socket.on('tweet notify', data => {
+    console.log('推文通知')
+    console.log(data)
+  })
+
+  socket.on('like notify', data => {
+    console.log('有人按你讚通知')
+    console.log(data)
+  })
+
+  socket.on('reply notify', data => {
+    console.log('有人回覆你的推文')
+    console.log(data)
+  })
+
+  socket.on('follow notify', data => {
+    console.log('有人開始追蹤你')
+    console.log(data)
+  })
+
+  socket.on('subscribe notify', data => {
+    console.log('有人開始追蹤你')
+    console.log(data)
+  })
+</script>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io('', { query: { id: '31', name: 'Bob', avatar: '', account: '' } })
+  </script>
+</head>
+
+<body>
+  {{{body}}}
+
+  <script>
+    socket.on('total unread', (total) => {
+      console.log('私人聊天室總未讀訊息')
+      console.log(total)
+    })
+    socket.on('online user list', (list) => {
+      console.log('全站上線名單：')
+      console.log(list)
+    })
+  </script>
+</body>
+
+</html>
