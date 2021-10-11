@@ -120,13 +120,13 @@ const tweetController = {
       const tweetComment = await Reply.create({ ...data })
 
       // 針對即時訊息做處理
-      const twitterId = Tweet.findByPk(data.TweetId, { raw: true, attributes: ['UserId'] })
+      const twitterId = await Tweet.findByPk(data.TweetId, { raw: true, attributes: ['UserId'] })
       tweetComment.user = req.user
       tweetComment.type = 'tweet-reply'
       const tweetCommentContent = JSON.stringify(tweetComment)
       await Unread.create({
         sendId: req.user.id,
-        receiveId: twitterId,
+        receiveId: twitterId.UserId,
         unread: tweetCommentContent
       })
       return res.status(200).json({ tweetComment })
@@ -144,14 +144,14 @@ const tweetController = {
       const like = await Like.findOrCreate({ where: { UserId, TweetId } })
 
       // 針對即時訊息做處理
-      const twitterId = Tweet.findByPk(TweetId, { attributes: ['UserId'] })
+      const twitterId = await Tweet.findByPk(TweetId, {raw: true, attributes: ['UserId'] })
       const unread = {}
       unread.type = 'tweet-like'
       unread.user = req.user
       const unreadContent = JSON.stringify(unread)
       await Unread.create({
         sendId: req.user.id,
-        receiveId: twitterId,
+        receiveId: twitterId.UserId,
         unread: unreadContent
       })
 
