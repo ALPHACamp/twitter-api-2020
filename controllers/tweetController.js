@@ -2,8 +2,8 @@ const tweetService = require('../services/tweetService')
 
 const tweetController = {
   postTweet: (req, res) => {
-    const { redis, body, user: { id: loginUser } } = req
-    tweetService.postTweet(body, loginUser, redis, data => res.status(data.status).json(data)
+    const { body, user: { id: loginUser } } = req
+    tweetService.postTweet(body, loginUser, data => res.status(data.status).json(data)
     )
   },
 
@@ -16,8 +16,8 @@ const tweetController = {
     )
   },
   getTweets: (req, res) => {
-    const { redis, user: { id } } = req
-    tweetService.getTweets(redis, id, data => {
+    const { user: { id } } = req
+    tweetService.getTweets(id, data => {
       if (data.status) return res.status(data.status).json(data)
       return res.status(200).json(data)
     })
