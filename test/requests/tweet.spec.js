@@ -7,8 +7,6 @@ var should = chai.should();
 var expect = chai.expect;
 const db = require('../../models')
 const passport = require('../../config/passport')
-const Redis = require('ioredis')
-const redis = Redis.createClient()
 
 describe('# tweet requests', () => {
 
@@ -18,7 +16,6 @@ describe('# tweet requests', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
         await db.Tweet.destroy({ where: {}, truncate: true })
-        redis.flushall()
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
           return (req, res, next) => { };
@@ -51,7 +48,6 @@ describe('# tweet requests', () => {
         this.getUser.restore();
         await db.User.destroy({ where: {}, truncate: true })
         await db.Tweet.destroy({ where: {}, truncate: true })
-        redis.flushall()
       })
 
     });
@@ -64,7 +60,6 @@ describe('# tweet requests', () => {
       before(async () => {
         await db.User.destroy({ where: {}, truncate: true })
         await db.Tweet.destroy({ where: {}, truncate: true })
-        redis.flushall()
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
           return (req, res, next) => { };
@@ -109,7 +104,6 @@ describe('# tweet requests', () => {
         this.getUser.restore();
         await db.User.destroy({ where: {}, truncate: true })
         await db.Tweet.destroy({ where: {}, truncate: true })
-        redis.flushall()
       })
 
     });
