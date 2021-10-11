@@ -2,7 +2,8 @@ const db = require('../models')
 const { Op } = require('sequelize')
 const { Message, RoomUser } = db
 const { removeClientFromMap, addClientToMap, getRoomUsers, leavePublicRoom, leaveAllPrivateRoom } = require('../tools/helper')
-// 登入成功以後，更新上線名單
+
+const PUBLIC_ROOM_ID = 1
 
 module.exports = (server) => {
   const io = require('socket.io')(server, {
@@ -12,6 +13,7 @@ module.exports = (server) => {
     },
     allowEIO3: true
   })
+  // 登入成功以後，更新上線名單
   const userSocketIdMap = new Map() //1(userId) => [ ‘socketId1234’, ‘socketIdabcde’]
   io.on('connection', async socket => {
     try {
@@ -28,7 +30,7 @@ module.exports = (server) => {
       // 找出未讀訊息數量，傳給前端
       const unReadMessages = await Message.findAndCountAll({
         where: {
-          RoomId: { [Op.ne]: 1 },//不等於公開聊天室的
+          RoomId: { [Op.ne]: PUBLIC_ROOM_ID },
           receiverId: user.id,
           isRead: false,
         }
@@ -48,17 +50,15 @@ module.exports = (server) => {
           const onlineUser = Array.from(userSocketIdMap, ([id]) => ({ id })) //將Map轉為陣列
           io.emit('online user list', onlineUser)
 
-          // 如果斷線後還在公開聊天室，我就幫他離開
-          if (socket.rooms.has(1)) {
-            io.in(user.socketId).socketsLeave(1);
+          if (socket.rooms.has(PUBLIC_ROOM_ID)) {
+            io.in(user.socketId).socketsLeave(PUBLIC_ROOM_ID);
             await leavePublicRoom(io, user)
           }
 
-          // 斷線之後，離開所有私人聊天室
           await leaveAllPrivateRoom(io, user)
-          // 回傳在線名單
-          const userList = await getRoomUsers(1)
-          io.to(1).emit('online list', userList)
+          // 回傳在線名單給公開聊天室
+          const userList = await getRoomUsers(PUBLIC_ROOM_ID)
+          io.to(PUBLIC_ROOM_ID).emit('online list', userList)
           console.log('a user disconnected')
         } catch (err) {
           console.warn(err)
