@@ -181,11 +181,15 @@ const userController = {
   },
   
   editUserData: async (req, res) => {
-    const userId = req.user.id
+    const userId = Number(req.params.id)
     let user = await User.findByPk(userId, { attributes: { exclude: ['createdAt', 'updatedAt', 'role'] } })
     const updateData = req.body
     const files = req.files
 
+    // 確認是否編輯使用者自己的資料
+    if (userId !== req.user.id) {
+      return status(400).json('不能編輯他人的個人資料')
+    }
     // 確認account及email是否已被註冊
     if (updateData.email && updateData.email !== user.email) {
       const isUser = await User.findOne({
@@ -233,7 +237,7 @@ const userController = {
       }
       return res.status(200).json('Accept. Updated user profile and images')
     } else if (updateData) {
-      User.update(
+      await User.update(
         updateData,
         { where: { id: { [Op.eq]: userId } } }
       )

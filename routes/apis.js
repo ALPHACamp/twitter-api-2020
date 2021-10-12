@@ -47,13 +47,12 @@ router.get('/users/:id/userInfo', helpers.ensureAuthenticated, userController.ge
 
 router.get('/users/:id', helpers.ensureAuthenticated, userController.userPage)
 
-router.put('/users/1', helpers.ensureAuthenticatedAdmin, userController.editUserData) //增加，測試檔測試userId=1 (root)
-router.put('/users/:id', helpers.ensureAuthenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUserData) //增加
+router.put('/users/:id', helpers.ensureAuthenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUserData)
 
 router.post('/users/:id/subscribe', helpers.ensureAuthenticated, userController.subscribeUser)
 
   //followship路由
-router.post('/followships', helpers.ensureAuthenticated, followshipController.follow) //路由要改
+router.post('/followships', helpers.ensureAuthenticated, followshipController.follow)
 
 router.delete('/followships/:id', helpers.ensureAuthenticated, followshipController.unfollow)
 
