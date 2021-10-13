@@ -4,13 +4,15 @@ const Tweet = db.Tweet
 const Reply = db.Reply
 const Followship = db.Followship
 const Like = db.Like
+const Unread = db.Unread
+const Subscribe = db.Subscribe
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
 const Op = db.Sequelize.Op
 const { QueryTypes } = require('sequelize')
 
 const tweetController = {
-  homePage: async (req, res) => {
+  allTweets: async (req, res) => {
     try{
       const id = req.user.id
 
@@ -34,9 +36,9 @@ const tweetController = {
   //取出右邊top10 twitter
   getTop10Twitter: async (req, res) => {
     const userId = req.params.id
-    try{
+    try {
       const topTwitters = await Followship.findAll({
-        attributes: ['followingId', [sequelize.fn('count', sequelize.col('followerId')), 'count']] ,
+        attributes: ['followingId', [sequelize.fn('count', sequelize.col('followerId')), 'count']],
         group: ['followingId'],
         order: [[sequelize.col('count'), 'DESC']],
         limit: 10,
@@ -63,7 +65,7 @@ const tweetController = {
           { model: Reply, as: 'replies',
             include: [{ model: User, as: 'user', attributes: { exclude: ['password', 'email', 'introduction', 'cover', 'createdAt', 'updatedAt'] } }]
           },
-          { model: Like, as: 'likes', attributes: ['id'] },
+          { model: Like, as: 'likes', attributes: ['id', 'UserId'] },
         ]
       })
       return res.json(tweetData)
@@ -79,6 +81,28 @@ const tweetController = {
       data.UserId = req.user.id
       data.description = req.body.description
       const tweet = await Tweet.create({ ...data })
+      tweet.user = req.user
+      tweet.type = 'new-tweet'
+      const tweetJson = JSON.stringify(tweet)
+
+      // 取出訂閱該使用者的清單
+      const subscribers = await Subscribe.findAll({
+        raw: true,
+        where: { subscribing: { [Op.eq]: req.user.id }},
+        attributes: ['subscriber']
+      })
+
+      const unreadUpdates = subscribers.map(element => {
+        return {
+          sendId: req.user.id,
+          receiveId: element.subscriber,
+          unread: tweetJson
+        }
+      });
+
+      // 批次建立未讀資料進資料庫
+      await Unread.bulkCreate(unreadUpdates)
+
       return res.status(200).json({ tweet })
     }
     catch (error) {
@@ -94,6 +118,17 @@ const tweetController = {
       data.TweetId = req.params.id
       data.comment = req.body.comment
       const tweetComment = await Reply.create({ ...data })
+
+      // 針對即時訊息做處理
+      const twitterId = await Tweet.findByPk(data.TweetId, { raw: true, attributes: ['UserId'] })
+      tweetComment.user = req.user
+      tweetComment.type = 'tweet-reply'
+      const tweetCommentContent = JSON.stringify(tweetComment)
+      await Unread.create({
+        sendId: req.user.id,
+        receiveId: twitterId.UserId,
+        unread: tweetCommentContent
+      })
       return res.status(200).json({ tweetComment })
     }
     catch (error) {
@@ -104,9 +139,22 @@ const tweetController = {
 
   postLike: async (req, res) => {
     try {
-      UserId = req.user.id
-      TweetId = Number(req.params.id)
+      const UserId = req.user.id
+      const TweetId = Number(req.params.id)
       const like = await Like.findOrCreate({ where: { UserId, TweetId } })
+
+      // 針對即時訊息做處理
+      const twitterId = await Tweet.findByPk(TweetId, {raw: true, attributes: ['UserId'] })
+      const unread = {}
+      unread.type = 'tweet-like'
+      unread.user = req.user
+      const unreadContent = JSON.stringify(unread)
+      await Unread.create({
+        sendId: req.user.id,
+        receiveId: twitterId.UserId,
+        unread: unreadContent
+      })
+
       return res.status(200).json({ like })
     }
     catch (error) {
@@ -117,8 +165,9 @@ const tweetController = {
 
   postUnlike: async (req, res) => {
     try {
+      const UserId = req.user.id
       const TweetId = Number(req.params.id)
-      const unlike = await Like.findOne({ where: { TweetId: { [Op.eq]: TweetId } } })
+      const unlike = await Like.findOne({ where: { UserId, TweetId } })
       if (unlike) {
         await unlike.destroy()
         return res.status(200).json('Accept')

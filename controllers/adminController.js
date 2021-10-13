@@ -5,6 +5,7 @@ const Reply = db.Reply
 const Followship = db.Followship
 const Like = db.Like
 const Sequelize = db.Sequelize
+const sequelize = require('sequelize')
 
 
 const adminController = {
@@ -24,18 +25,22 @@ const adminController = {
   getUsers: async (req, res) => {
     try {
       const allUsers = await User.findAll({
-        attributes: ['name', 'account', 'avatar', 'cover'],
-        include: [
-          { model: Reply, as: 'replies', attributes: ['id'] },
-          { model: Followship, as: 'followings', attributes: ['id'] },
-          { model: Followship, as: 'followers', attributes: ['id'] },
-          { model: Like, as: 'likes', attributes: ['id'] }
-        ]
+        where: { role: 'user' },
+        attributes: [
+          'id', 'name', 'account', 'avatar', 'cover',
+          [sequelize.literal('(SELECT COUNT(*) FROM `tweets` WHERE tweets.UserId = User.id)'), 'tweetsCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM `likes` WHERE likes.UserId = User.id)'), 'likesCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM `followships` WHERE followships.followerId = User.id)'), 'followingsCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM `followships` WHERE followships.followingId = User.id)'), 'followersCount'],
+        ],
+        order: [
+          [sequelize.literal('tweetsCount'), 'DESC'],
+          ['id', 'ASC']
+        ],
       })
 
       return res.json(allUsers)
-    }
-    catch (error) {
+    } catch (error) {
       console.log(error)
     }
   },

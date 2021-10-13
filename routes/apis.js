@@ -9,14 +9,12 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
   // home 路由
-router.get('/logout', homeController.logout)
-
 router.post('/signin', homeController.postSignIn)
 
 router.post('/users', homeController.postSignUp)
 
 // tweet路由
-router.get('/tweets', helpers.ensureAuthenticated, tweetController.homePage)
+router.get('/tweets', helpers.ensureAuthenticated, tweetController.allTweets)
 
 router.get('/tweets/:id/top10', helpers.ensureAuthenticated, tweetController.getTop10Twitter)
 
@@ -33,6 +31,8 @@ router.post('/tweets/:id/like', helpers.ensureAuthenticated, tweetController.pos
 router.post('/tweets/:id/unlike', helpers.ensureAuthenticated, tweetController.postUnlike)
 
 // user 路由
+router.get('/users/chatRecords', helpers.ensureAuthenticated, userController.getChatRecords) //新增給私人聊天室紀錄
+
 router.get('/users/:id/tweets', helpers.ensureAuthenticated, userController.getUserTweets)
 
 router.get('/users/:id/replied_tweets', helpers.ensureAuthenticated, userController.getRepliedTweets)
@@ -45,13 +45,14 @@ router.get('/users/:id/followers', helpers.ensureAuthenticated, userController.g
 
 router.get('/users/:id/userInfo', helpers.ensureAuthenticated, userController.getUserInfo)
 
-router.get('/users/:id', helpers.ensureAuthenticated, userController.userHomePage)
+router.get('/users/:id', helpers.ensureAuthenticated, userController.userPage)
 
-router.put('/users/:id', helpers.ensureAuthenticated, upload.array('files', 2), userController.editUserData) //增加
+router.put('/users/:id', helpers.ensureAuthenticated, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUserData)
 
+router.post('/users/:id/subscribe', helpers.ensureAuthenticated, userController.subscribeUser)
 
   //followship路由
-router.post('/followships', helpers.ensureAuthenticated, followshipController.follow) //路由要改
+router.post('/followships', helpers.ensureAuthenticated, followshipController.follow)
 
 router.delete('/followships/:id', helpers.ensureAuthenticated, followshipController.unfollow)
 
