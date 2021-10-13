@@ -16,8 +16,6 @@ const socketConnection = require('./public/javascripts/server')
 const app = express()
 const PORT = process.env.PORT || 3000
 
-app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
-app.set('view engine', 'handlebars')
 app.use(express.static('public'))//for testing
 
 app.use(methodOverride('_method'))

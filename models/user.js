@@ -20,21 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: 'user'
     }
-  }, {
-    hooks: {
-      beforeCreate: async (User, next) => {
-        const password = User.dataValues.password
-        if (password) {
-          try {
-            const salt = await bcrypt.genSalt(10)
-            User.dataValues.password = await bcrypt.hash(password, salt)
-          }
-          catch (error) {
-            console.log(error)
-          }
-        }
-      }
-    }
+
   }, {})
   User.associate = function (models) {
     User.hasMany(models.Tweet, {
@@ -57,7 +43,14 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'UserId',
       as: 'likes'
     })
-    User.hasMany(models.PublicChat)
+    User.hasMany(models.PublicChat, {
+      foreignKey: 'speakerId',
+      as: 'userChat'
+    })
+    User.hasMany(models.ChatRecord, {
+      foreignKey: 'speakerId',
+      as: 'userPrivateChat'
+    })
     User.belongsToMany(models.User, {
       through: models.Followship,
       foreignKey: 'followerId',

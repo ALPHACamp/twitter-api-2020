@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       chatContent: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(189)
       },
       createdAt: {
         allowNull: false,

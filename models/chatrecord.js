@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   ChatRecord.associate = function(models) {
     ChatRecord.belongsTo(models.Chatmate)
+    ChatRecord.belongsTo(models.User, {
+      foreignKey: 'speakerId',
+      as: 'user'
+    })
   };
   return ChatRecord;
 };
