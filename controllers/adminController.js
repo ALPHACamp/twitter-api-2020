@@ -38,6 +38,7 @@ const adminController = {
           ['id', 'ASC']
         ],
       })
+
       return res.json(allUsers)
     } catch (error) {
       console.log(error)

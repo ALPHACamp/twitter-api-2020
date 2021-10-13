@@ -17,6 +17,7 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(express.static('public'))//for testing
+
 app.use(methodOverride('_method'))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -25,11 +26,12 @@ app.use(cors())
 
 app.use('/upload', express.static(__dirname + '/upload'))
 app.use(flash())
-app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }))
+app.use(session({ secret: 'alphacamp', resave: false, saveUninitialized: false }))
 
 app.use(passport.initialize())
 app.use(passport.session())
 const server = app.listen(PORT, () => {
+
   console.log('server on')
 })
 

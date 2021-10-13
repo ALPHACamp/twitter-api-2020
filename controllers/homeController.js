@@ -1,4 +1,5 @@
 const db = require('../models')
+const Op = db.Sequelize.Op
 const User = db.User
 const bcrypt = require('bcryptjs')
 const issueJwt = require('../public/javascripts/tokenIssue')
@@ -32,6 +33,7 @@ const homeController = {
       })
     })
   },
+
   
   postSignUp: async (req, res) => {
     const userData = req.body
@@ -72,8 +74,9 @@ const homeController = {
     }
     catch (error) {
       res.status(400)
+
     }
-  }
+  },
 }
 
 module.exports = homeController

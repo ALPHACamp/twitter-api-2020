@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: 'user'
     }
+
   }, {})
   User.associate = function (models) {
     User.hasMany(models.Tweet, {
