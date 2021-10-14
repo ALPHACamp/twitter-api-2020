@@ -5,7 +5,7 @@
 
 ## Live Demo
 
-URL: https://fogjogger1992.github.io/simple-twitter/#/
+[Demo Link](https://fogjogger1992.github.io/simple-twitter/#/)
 
 可使用以下帳號進行登入
 | 登入口 | Email | Password |
@@ -20,6 +20,10 @@ URL: https://fogjogger1992.github.io/simple-twitter/#/
 * 使用者可以瀏覽他人的公開個人資訊
 * 使用者可以跟他人進行互動(對貼文按喜歡、追蹤使用者)
 * 使用者可以進入公開聊天室與他人進行即時聊天
+
+## API文件
+
+[Swagger API Document](https://app.swaggerhub.com/apis-docs/chriszychen/simple-twitter-api/1.0.0)
 
 ## Installation - 安裝專案
 
@@ -74,7 +78,7 @@ IMGUR_CLIENT_ID= Your Imgur Application Client ID
 
 ### 即時聊天室
 
-* [Socker.io](https://socket.io/) v4.1.3
+* [Socket.io](https://socket.io/) v4.1.3
 
 ### 其他
 
