@@ -46,9 +46,12 @@ const adminController = {
 
   deleteTweet: async (req, res) => {
     try {
-      const tweetId = req.params.id
-      const tweet = await Tweet.findByPk(tweetId)
-      await tweet.destroy()
+      const TweetId = req.params.id
+      await Promise.all([
+        Tweet.destroy({ where: { id: TweetId } }),
+        Like.destroy({ where: { TweetId } }),
+        Reply.destroy({ where: { TweetId } })
+      ])
       return res.status(200).json('Accept')
     }
     catch (error) {
