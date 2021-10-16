@@ -51,8 +51,8 @@ Imgur官網：https://imgur.com/
 
 3. MySQL Workbench 新增資料庫
 
-開發環境的資料庫名稱：twitter
-測試環境的資料庫名稱：twitter_test
+開發環境的資料庫名稱：ac_twitter_workspace
+測試環境的資料庫名稱：ac_twitter_workspace_test
 可參考config.json
 
 ```bash
