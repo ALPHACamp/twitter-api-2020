@@ -1,5 +1,5 @@
 const { Reply, Tweet, User } = require('../models')
-const moment = require('moment')
+const { formatTime } = require('../utils/helper.js')
 
 const replyController = {
   postReply: async (req, res, next) => {
@@ -38,7 +38,7 @@ const replyController = {
       })
       const replies = results.map(reply => ({
         ...reply,
-        createdAt: moment(reply.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+        createdAt: formatTime(reply.createdAt)
       }))
       return res.json(replies)
     } catch (err) {

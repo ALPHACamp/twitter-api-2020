@@ -3,7 +3,7 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const Sequelize = require('sequelize')
 const bcrypt = require('bcryptjs')
-const moment = require('moment')
+const { formatTime } = require('../utils/helper.js')
 const jwt = require('jsonwebtoken')
 
 const imgurUpload = (file) => {
@@ -86,7 +86,7 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      let user = await User.findOne({
+      const user = await User.findOne({
         where: { id: req.params.id },
         include: [
           { model: User, as: 'Followers' },
@@ -130,7 +130,7 @@ const userController = {
   },
   getLikedTweets: async (req, res, next) => {
     try {
-      let likes = await Like.findAll({
+      const likes = await Like.findAll({
         raw: true,
         nest: true,
         where: { UserId: req.params.id },
@@ -145,7 +145,7 @@ const userController = {
         return {
           ...like.Tweet,
           TweetId: like.Tweet.id,
-          createdAt: moment(like.Tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
+          createdAt: formatTime(like.Tweet.createdAt)
         }
       })
       return res.json(Tweets)
@@ -177,9 +177,9 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
       const replies = results.map(reply => {
-        reply.createdAt = moment(reply.createdAt).format('YYYY-MM-DD hh:mm:ss a')
-        reply.Tweet.createdAt = moment(reply.Tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a')
-        reply.Tweet.isLiked = reply.Tweet.isLiked ? true : false
+        reply.createdAt = formatTime(reply.createdAt)
+        reply.Tweet.createdAt = formatTime(reply.Tweet.createdAt)
+        reply.Tweet.isLiked = reply.Tweet.isLiked === 1 // raw SQL query拿到的boolean值會是1或0
         return reply
       })
       return res.json(replies)
@@ -208,8 +208,8 @@ const userController = {
       })
       const tweets = results.map(tweet => ({
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a'),
-        isLiked: tweet.isLiked === 1
+        createdAt: formatTime(tweet.createdAt),
+        isLiked: tweet.isLiked === 1 // raw SQL query拿到的boolean值會是1或0
       }))
       return res.json(tweets)
     } catch (err) {
@@ -268,8 +268,8 @@ const userController = {
         return res.json({ status: 'error', message: '名稱不可空白！' })
       }
       if (files) {
-        let avatar = undefined
-        let cover = undefined
+        let avatar
+        let cover
         // 上傳頭像
         if (files.avatar) {
           avatar = await imgurUpload(files.avatar[0])

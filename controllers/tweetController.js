@@ -1,5 +1,5 @@
 const { Tweet, User } = require('../models')
-const moment = require('moment')
+const { formatTime } = require('../utils/helper.js')
 const Sequelize = require('sequelize')
 
 const tweetController = {
@@ -25,7 +25,7 @@ const tweetController = {
       // 將取得資料做整理
       const tweets = result.map(tweet => ({
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a'),
+        createdAt: formatTime(tweet.createdAt),
         isLiked: tweet.isLiked === 1
       }))
       return res.json(tweets)
@@ -73,7 +73,7 @@ const tweetController = {
       // 時間格式整理
       tweet = {
         ...tweet,
-        createdAt: moment(tweet.createdAt).format('YYYY-MM-DD hh:mm:ss a'),
+        createdAt: formatTime(tweet.createdAt),
         isLiked: tweet.isLiked === 1
       }
       return res.json(tweet)
