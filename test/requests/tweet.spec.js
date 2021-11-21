@@ -14,8 +14,10 @@ describe('# tweet requests', () => {
 
     describe('POST /api/tweets', () => {
       before(async() => {
+        // 清除測試資料庫資料
         await db.User.destroy({where: {},truncate: true})
         await db.Tweet.destroy({where: {},truncate: true})
+        // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
           return (req,res,next)=>{};
@@ -23,6 +25,7 @@ describe('# tweet requests', () => {
         this.getUser = sinon.stub(
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
+        // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
       })
 
@@ -35,6 +38,7 @@ describe('# tweet requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
+            // 檢查是否有回傳正確資料
             db.Tweet.findByPk(1).then(tweet => {
               tweet.description.should.equal('description');
               tweet.UserId.should.equal(1);
@@ -58,8 +62,10 @@ describe('# tweet requests', () => {
 
     describe('GET /api/tweets', () => {
       before(async() => {
+        // 清除測試資料庫資料
         await db.User.destroy({where: {},truncate: true})
         await db.Tweet.destroy({where: {},truncate: true})
+        // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
           return (req,res,next)=>{};
@@ -67,6 +73,7 @@ describe('# tweet requests', () => {
         this.getUser = sinon.stub(
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
+        // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
         await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
       })
@@ -80,6 +87,7 @@ describe('# tweet requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('array');
+            // 檢查是否回傳資料有 User1 的 Tweet1
             res.body[0].description.should.equal('User1 的 Tweet1');
             return done();
           })
@@ -94,6 +102,7 @@ describe('# tweet requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('object');
+            // 檢查是否回傳資料有 User1 的 Tweet1 
             res.body.description.should.equal('User1 的 Tweet1');
             return done();
           })
