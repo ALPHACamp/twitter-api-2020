@@ -262,7 +262,7 @@ describe('# user requests', () => {
             if (err) return done(err);
 
             expect(res.body).to.be.an('array');
-            // 有無跟跟跟隨中的人的 id = 2
+            //回傳資料中是否有跟隨中的人的 id = 2
             res.body[0].followingId.should.equal(2);
 
             return done();
