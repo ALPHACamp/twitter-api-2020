@@ -36,6 +36,9 @@ const userController = {
       if (!user) {
         return res.json({ status: 'error', message: "no such user found" })
       }
+      if (user.role !== 'user') {
+        return res.json({ status: 'error', message: "no such user found" })
+      }
       if (!bcrypt.compareSync(password, user.password)) {
         return res.json({ status: 'error', message: "passwords did not match" })
       }
