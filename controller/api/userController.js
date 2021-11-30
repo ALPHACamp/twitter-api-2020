@@ -4,7 +4,38 @@ const User = db.User
 const helper = require('../../_helpers')
 const bcrypt = require('bcryptjs')
 
+// JWT
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
 const userController = {
+  signIn: (req, res) => {
+    // 檢查必要資料
+    if (!req.body.email || !req.body.password) {
+      return res.json({ status: 'error', message: "required fields didn't exist" })
+    }
+    User.findOne({ where: { email: req.body.email}})
+      .then(user => {
+        if (!user) return res.status(401).json({ status: 'error', message: 'user is not exist.'})
+        if (!bcrypt.compareSync(req.body.password, user.password)) {
+          return res.status(401).json({ status: 'error', message: 'email or password incorrect.' })
+        }
+        // 簽發 token
+        var payload = { id: user.id }
+        var token = jwt.sign(payload, process.env.JWT_SECRET)
+        return res.json({
+          status: 'success',
+          message: 'ok',
+          token: token,
+          user: {
+            id: user.id, name: user.name, email: user.email, role: user.role
+          }
+        })
+      })
+  },
+
   signUp: async (req, res, cb) => {
     if (req.body.checkPassword !== req.body.password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不相同！' })

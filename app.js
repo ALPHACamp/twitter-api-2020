@@ -1,6 +1,10 @@
 const express = require('express')
 const helpers = require('./_helpers')
 
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const app = express()
 const port = 3000
 app.use(express.urlencoded({ extended: true }))
