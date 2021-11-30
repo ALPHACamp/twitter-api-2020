@@ -6,6 +6,7 @@ const express = require('express')
 const session = require('express-session')
 const flash = require('connect-flash')
 const methodOverride = require('method-override')
+const cors = require('cors')
 
 const helpers = require('./_helpers');
 const passport = require('./config/passport')
@@ -13,6 +14,7 @@ const passport = require('./config/passport')
 const app = express()
 const port = 3000
 
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(express.static('public'))
