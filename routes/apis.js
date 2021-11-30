@@ -18,7 +18,7 @@ const authenticatedAdmin = (req, res, next) => {
 
 router.get('/', authenticated, (req, res) => res.send('test'))
 
-router.post('/signup', userController.signUP)
+router.post('/users', userController.signUP)
 router.post('/signin', userController.signIn)
 
 module.exports = router
