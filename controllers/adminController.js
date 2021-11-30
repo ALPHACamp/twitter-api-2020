@@ -47,6 +47,13 @@ const adminController = {
   deleteTweet: (req, res) => {
     Tweet.destroy({ where: { id: req.params.id } })
       .then(() => res.json({ status: 'success', message: '' }))
+  },
+
+  getUsers: (req, res) => {
+    User.findAll({ order: [['name', 'ASC']] })
+      .then(users => {
+        return res.json(users)
+      })
   }
 }
 
