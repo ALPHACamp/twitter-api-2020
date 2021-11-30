@@ -3,6 +3,7 @@ const router = express.Router()
 const passport = require('passport')
 const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
+const tweetController = require('../controllers/tweetController')
 
 // const multer = require('multer')
 // const upload = multer({ dest: 'temp/' })
@@ -30,6 +31,9 @@ router.get('/', authenticated, authenticatedUser, (req, res) => res.send('test')
 //user
 router.post('/users', userController.signUP)
 router.post('/signin', userController.signIn)
+
+//tweet
+router.get('/tweets', tweetController.getTweets)
 
 //admin
 router.get('/admin', authenticated, authenticatedAdmin, adminController.getTweets)
