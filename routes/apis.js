@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const passport = require('passport')
+const passport = require('../config/passport')
 const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
 const tweetController = require('../controllers/tweetController')
@@ -22,7 +22,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedUser = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') return next()
+  if (req.user && req.user.role === 'user') return next()
   return res.status(401).json({
     status: 'error',
     message: 'permission denied'
@@ -30,7 +30,7 @@ const authenticatedUser = (req, res, next) => {
 }
 
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'user') return next()
+  if (req.user && req.user.role === 'admin') return next()
   return res.status(401).json({
     status: 'error',
     message: 'permission denied'
