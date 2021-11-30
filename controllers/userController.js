@@ -15,6 +15,7 @@ const userController = {
           return res.json({ status: 'error', message: '信箱重複！' })
         }
         User.create({
+          account: req.body.account,
           name: req.body.name,
           email: req.body.email,
           password: bcrypt.hashSync(req.body.password, 10)
