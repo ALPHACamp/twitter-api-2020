@@ -42,6 +42,11 @@ const adminController = {
         }))
         return res.json(tweets)
       })
+  },
+
+  deleteTweet: (req, res) => {
+    Tweet.destroy({ where: { id: req.params.id } })
+      .then(() => res.json({ status: 'success', message: '' }))
   }
 }
 
