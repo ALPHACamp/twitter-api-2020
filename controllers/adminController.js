@@ -1,31 +1,11 @@
 const bcrypt = require('bcryptjs')
-const db = require('../models')
-const User = db.User
 const jwt = require('jsonwebtoken')
 
+const db = require('../models')
+const User = db.User
+const Tweet = db.Tweet
 
-const userController = {
-  signUP: (req, res) => {
-    if (req.body.password !== req.body.checkPassword) {
-      return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
-    }
-    User.findOne({ where: { email: req.body.email } })
-      .then(user => {
-        if (user) {
-          return res.json({ status: 'error', message: '信箱重複！' })
-        }
-        User.create({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          password: bcrypt.hashSync(req.body.password, 10)
-        })
-      })
-      .then(() => {
-        return res.json({ status: 'success', message: '成功註冊帳號！' })
-      })
-  },
-
+const adminController = {
   signIn: (req, res) => {
     const { email, password } = req.body
     if (!email || !password) {
@@ -36,7 +16,7 @@ const userController = {
       if (!user) {
         return res.json({ status: 'error', message: "no such user found" })
       }
-      if (user.role !== 'user') {
+      if (user.role !== 'admin') {
         return res.json({ status: 'error', message: "no such user found" })
       }
       if (!bcrypt.compareSync(password, user.password)) {
@@ -51,8 +31,18 @@ const userController = {
         user: { id: user.id, name: user.name, email: user.email, role: user.role }
       })
     })
+  },
 
+  getTweets: (req, res) => {
+    Tweet.findAll({ order: [['createdAt', 'DESC']] })
+      .then(tweets => {
+        tweets = tweets.map(t => ({
+          ...t.dataValues,
+          description: t.description.substring(0, 50)
+        }))
+        return res.json(tweets)
+      })
   }
 }
 
-module.exports = userController
+module.exports = adminController
