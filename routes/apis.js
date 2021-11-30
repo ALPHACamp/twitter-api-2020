@@ -33,7 +33,7 @@ router.post('/users', userController.signUP)
 router.post('/signin', userController.signIn)
 
 //tweet
-router.get('/tweets', authenticated, tweetController.getTweets)
+router.get('/tweets', authenticated,authenticatedUser, tweetController.getTweets)
 
 //admin
 router.get('/admin', authenticated, authenticatedAdmin, adminController.getTweets)
