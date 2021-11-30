@@ -24,7 +24,7 @@ const tweetController = {
                     account: tweet.User.account,
                 }
             }))
-            return res.json({ status: 'success', message: 'successfully retrieved tweets data', tweets })
+            return res.json(tweets)
         })
     }
 }
