@@ -32,7 +32,7 @@ router.post('/users', userController.signUP)
 router.post('/signin', userController.signIn)
 
 //admin
-router.get('/admin', authenticated, authenticatedAdmin, (req, res) => res.send('admin test'))
+router.get('/admin', authenticated, authenticatedAdmin, adminController.getTweets)
 router.post('/admin/signin', adminController.signIn)
 
 module.exports = router

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
 
 const adminController = {
   signIn: (req, res) => {
@@ -30,6 +31,17 @@ const adminController = {
         user: { id: user.id, name: user.name, email: user.email, role: user.role }
       })
     })
+  },
+
+  getTweets: (req, res) => {
+    Tweet.findAll({ order: [['createdAt', 'DESC']] })
+      .then(tweets => {
+        tweets = tweets.map(t => ({
+          ...t.dataValues,
+          description: t.description.substring(0, 50)
+        }))
+        return res.json(tweets)
+      })
   }
 }
 
