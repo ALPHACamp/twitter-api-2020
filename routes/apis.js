@@ -51,5 +51,6 @@ router.get('/tweets/:tweet_id', authenticated,authenticatedUser, tweetController
 router.post('/admin/signin', adminController.signIn)
 router.get('/admin', authenticated, authenticatedAdmin, adminController.getTweets)
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
 module.exports = router
