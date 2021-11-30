@@ -26,7 +26,16 @@ const tweetController = {
             }))
             return res.json(tweets)
         })
+    },
+    getTweet:(req,res) =>{
+        return Tweet.findByPk(req.params.tweet_id,{
+            include: [ User, { model: Reply, include: [User] }]
+        }).then(tweet => {
+            return res.json(tweet)
+        })
     }
+
+
 }
 
 module.exports = tweetController
