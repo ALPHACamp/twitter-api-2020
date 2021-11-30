@@ -7,22 +7,33 @@ const adminController = require('../controllers/adminController')
 // const multer = require('multer')
 // const upload = multer({ dest: 'temp/' })
 
-const authenticated = passport.authenticate('jwt', { session: false })
-const authenticatedUser = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'user') { return next() }
-    return res.json({ status: 'error', message: 'permission denied' })
-  } else {
-    return res.json({ status: 'error', message: 'permission denied' })
-  }
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (!user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'No jwt token'
+      })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
 }
+
+const authenticatedUser = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') return next()
+  return res.status(401).json({
+    status: 'error',
+    message: 'permission denied'
+  })
+}
+
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'admin') { return next() }
-    return res.json({ status: 'error', message: 'permission denied' })
-  } else {
-    return res.json({ status: 'error', message: 'permission denied' })
-  }
+  if (req.user && req.user.role === 'user') return next()
+  return res.status(401).json({
+    status: 'error',
+    message: 'permission denied'
+  })
 }
 
 router.get('/', authenticated, authenticatedUser, (req, res) => res.send('test'))
