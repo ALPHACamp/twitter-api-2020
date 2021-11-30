@@ -1,8 +1,16 @@
-'use strict';
+'use strict'
+
+const { datatype } = require('faker')
+
 module.exports = (sequelize, DataTypes) => {
-  const Followship = sequelize.define('Followship', {
-  }, {});
-  Followship.associate = function(models) {
-  };
-  return Followship;
-};
+  const Followship = sequelize.define(
+    'Followship',
+    {
+      followerId: DataTypes.INTEGER,
+      followingId: DataTypes.INTEGER
+    },
+    {}
+  )
+  Followship.associate = function (models) {}
+  return Followship
+}
