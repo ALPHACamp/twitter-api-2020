@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 
 const userController = {
   signUP: (req, res) => {
-    if (req.body.password !== req.body.passwordCheck) {
+    if (req.body.password !== req.body.checkPassword) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     }
     User.findOne({ where: { email: req.body.email } })
