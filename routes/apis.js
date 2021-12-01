@@ -44,7 +44,7 @@ router.post('/users', userController.signUP)
 router.post('/signin', userController.signIn)
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getTweets)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
-router.get('/users/:id/replied_tweets', userController.getRepliedTweets)
+router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getRepliedTweets)
 
 
 //tweet
