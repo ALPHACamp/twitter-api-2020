@@ -4,6 +4,7 @@ const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 const passport = require('../config/passport')
 
+const adminController = require('../controllers/api/adminControllers')
 const userController = require('../controllers/api/userControllers')
 const tweetController = require('../controllers/api/tweetControllers')
 
@@ -18,6 +19,8 @@ const authenticatedAdmin = function authenticatedAdmin (req, res, next) {
     return res.json({ status: 'error', message: 'permission denied' })
   }
 }
+
+router.post('/admin/signin', adminController.signIn)
 
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
