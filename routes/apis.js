@@ -50,6 +50,7 @@ router.get('/users/:id', authenticated, authenticatedUser, userController.getUse
 router.get('/tweets', authenticated,authenticatedUser, tweetController.getTweets)
 router.post('/tweets', authenticated,authenticatedUser,tweetController.postTweet)
 router.get('/tweets/:tweet_id', authenticated,authenticatedUser, tweetController.getTweet)
+router.post('/tweets/:id/like', authenticated,authenticatedUser, tweetController.likeTweet)
 
 //admin
 router.post('/admin/signin', adminController.signIn)
