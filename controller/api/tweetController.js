@@ -25,7 +25,7 @@ const tweetController = {
         description: req.body.description,
         UserId: helper.getUser(req).id
       })
-      return res.json({ status: 200, message: 'cool' })
+      return res.json({ status: 200, message: '' })
     } catch (err) {
       console.error(err)
     }

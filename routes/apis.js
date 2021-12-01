@@ -10,8 +10,11 @@ router.delete('/tweets/:id', tweetController.deleteTweet)
 router.get('/users', userController.getUsers)
 router.get('/users/:id', userController.getUser)
 router.post('/users', userController.signUp)
+router.put('/users/:id', userController.putUser)
 router.get('/users/:id/tweets', userController.getUserTweets)
-router.get('/hello', (req, res) => {
-  res.send('hello world123')
-})
+router.get('/users/:id/replied_tweets', userController.getUserReplies)
+router.get('/users/:id/likes', userController.getUserLike)
+router.get('/users/:id/followings', userController.getUserFollowings)
+router.get('/users/:id/followers', userController.getUserFollowers)
+
 module.exports = router
