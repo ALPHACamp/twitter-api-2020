@@ -10,7 +10,7 @@ module.exports = {
       followArray.push({
         id: i + 1,
         followerId: i + 1,
-        followingId: numbers[Math.floor(Math.random() * 8)],
+        followingId: numbers[Math.floor(Math.random() * 9)],
         createdAt: new Date(),
         updatedAt: new Date()
       })
