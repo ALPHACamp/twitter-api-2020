@@ -26,11 +26,15 @@ const userController = {
         var payload = { id: user.id }
         var token = jwt.sign(payload, process.env.JWT_SECRET)
         return res.json({
-          status: 'success',
-          message: 'ok',
+          status: 200,
+          message: 'pass',
           token: token,
           user: {
-            id: user.id, name: user.name, email: user.email, role: user.role
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            avatar: user.avatar
           }
         })
       })
