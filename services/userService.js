@@ -31,7 +31,8 @@ const userService = {
         account,
         email,
         name,
-        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10))
+        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
+        role: 'user'
       })
       return callback({ status: 'success', message: '成功註冊' })
     }
