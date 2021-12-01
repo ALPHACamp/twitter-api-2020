@@ -9,7 +9,20 @@ const Reply = db.Reply
 const tweetController = {
   getTweets: async (req, res) => {
     try {
-      const tweets = await Tweet.findAll({ raw: true, nest: true })
+      const tweets = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        include: [
+          { model: User, attributes: ["account", "name", "avatar"] },
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] }
+        ],
+        attributes: ["id", "description",
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'likes_count'], //新增欄位計算每則tweet的like
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('replies.id'))), 'replies_count'] //新增欄位計算每則tweet的reply
+        ],
+        group: ['likes.tweetId']
+      })
       return res.json({tweets, status: 200, message: '' })
     } catch (err) {
       return console.log(err)
