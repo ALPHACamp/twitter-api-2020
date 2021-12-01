@@ -62,6 +62,11 @@ const userService = {
       }
     })
   },
+
+  getUser: async (req, res, callback) => {
+    const user = (await User.findByPk(req.params.id)).toJSON()
+    return callback(user)
+  },
 }
 
 // userController exports
