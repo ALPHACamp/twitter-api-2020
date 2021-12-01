@@ -37,16 +37,6 @@ app.use((req, res, next) => {
 function authenticated (req, res, next) {
   passport.authenticate('jwt', { session: false })
 }
-function authenticatedAdmin (req, res, next) {
-  if (helpers.getUser(req)) {
-    if (helpers.getUser(req).isAdmin) {
-      return next()
-    }
-    return res.json({ status: 'error', message: 'permission denied' })
-  } else {
-    return res.json({ status: 'error', message: 'permission denied' })
-  }
-}
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
