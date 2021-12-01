@@ -1,6 +1,8 @@
 const express = require('express')
 const helpers = require('./_helpers');
 
+const db = require('./models')
+
 //-----------
 const handlebars = require('express-handlebars')
 //-----------
