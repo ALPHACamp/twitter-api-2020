@@ -51,7 +51,17 @@ const userController = {
         user: { id: user.id, name: user.name, email: user.email, role: user.role }
       })
     })
+  },
 
+  getUser: (req, res) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        if (user.email === 'root@example.com') {
+          return res.json({ status: 'error', message: 'No user' })
+        } else {
+          return res.json(user)
+        }
+      })
   }
 }
 
