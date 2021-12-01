@@ -53,7 +53,6 @@ const userController = {
       })
     })
   },
-
   getTweets: (req, res) => {
     User.findByPk(req.params.id, { include: [Tweet] })
       .then(user => {
@@ -61,6 +60,16 @@ const userController = {
           return res.json({ status: 'error', message: 'No tweets' })
         } else {
           res.json(user.Tweets)
+        }
+    })
+    },
+  getUser: (req, res) => {
+    User.findByPk(req.params.id)
+      .then(user => {
+        if (user.email === 'root@example.com') {
+          return res.json({ status: 'error', message: 'No user' })
+        } else {
+          return res.json(user)
         }
       })
   }
