@@ -3,6 +3,7 @@ const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
 const Like = db.Like
+const helpers = require('../_helpers')
 
 const tweetController = {
     getTweets: (req, res) => {
@@ -33,9 +34,24 @@ const tweetController = {
         }).then(tweet => {
             return res.json(tweet)
         })
+    },
+    postTweet:(req,res) => {
+        if (req.body.description.length > 140) {
+            return res.json({ status: 'error', message: 'Tweet can\'t be more than 140 words.' })
+        }
+        if (!req.body.description) {
+            return res.json({status: 'error', message: 'description is empty'})
+        } else {
+            return Tweet.create({
+                UserId: helpers.getUser(req).id,
+                description: req.body.description
+            })
+                .then((tweet) => {
+                    res.json({status: 'successful', message: 'The tweet was created'})
+                })
+                .catch(error => console.log('error'))
+        }
     }
-
-
 }
 
 module.exports = tweetController
