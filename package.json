@@ -15,7 +15,7 @@
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "connect-flash": "^0.1.1",
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.15.6",
     "faker": "^4.1.0",
