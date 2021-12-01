@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Like = db.Like
+const Reply = db.Reply
 const jwt = require('jsonwebtoken')
 
 
@@ -54,15 +56,15 @@ const userController = {
     })
   },
   getTweets: (req, res) => {
-    User.findByPk(req.params.id, { include: [Tweet] })
+    User.findByPk(req.params.id, { include: [{ model: Tweet, include: [Like, Reply, User] }] })
       .then(user => {
         if (user.email === 'root@example.com') {
           return res.json({ status: 'error', message: 'No tweets' })
         } else {
           res.json(user.Tweets)
         }
-    })
-    },
+      })
+  },
   getUser: (req, res) => {
     User.findByPk(req.params.id)
       .then(user => {
