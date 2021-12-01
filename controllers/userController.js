@@ -17,6 +17,9 @@ const userController = {
     if (password !== checkPassword) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     }
+    if (account.length > 20 || name.length > 50 || password.length > 20) {
+      return res.json({ status: 'error', message: '超過字數上限' })
+    }
     User.findOne({ where: { [Op.or]: [{ email }, { account }] } })
       .then(user => {
         if (user) {
