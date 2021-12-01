@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const { Op } = require('sequelize')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
@@ -9,23 +10,27 @@ const jwt = require('jsonwebtoken')
 
 const userController = {
   signUP: (req, res) => {
-    if (req.body.password !== req.body.checkPassword) {
+    const { account, name, email, password, checkPassword } = req.body
+    if (!account || !name || !email || !password || !checkPassword) {
+      return res.json({ status: 'error', message: '所有欄位皆為必填' })
+    }
+    if (password !== checkPassword) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     }
-    User.findOne({ where: { email: req.body.email } })
+    User.findOne({ where: { [Op.or]: [{ email }, { account }] } })
       .then(user => {
         if (user) {
-          return res.json({ status: 'error', message: '信箱重複！' })
+          return res.json({ status: 'error', message: '信箱或帳戶重複！' })
         }
         User.create({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
+          account,
+          name,
+          email,
           password: bcrypt.hashSync(req.body.password, 10)
         })
-      })
-      .then(() => {
-        return res.json({ status: 'success', message: '成功註冊帳號！' })
+          .then(() => {
+            return res.json({ status: 'success', message: '成功註冊帳號！' })
+          })
       })
   },
 
@@ -35,7 +40,7 @@ const userController = {
       return res.json({ status: 'error', message: "required fields didn't exist" })
     }
 
-    User.findOne({ where: { email } }).then(user => {
+    return User.findOne({ where: { email } }).then(user => {
       if (!user) {
         return res.json({ status: 'error', message: "no such user found" })
       }
@@ -46,12 +51,13 @@ const userController = {
         return res.json({ status: 'error', message: "passwords did not match" })
       }
 
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET)
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
         message: 'ok',
         token: token,
-        user: { id: user.id, name: user.name, email: user.email, role: user.role }
+        user: { id: user.id, account: user.account, name: user.name, email: user.email, avatar: user.avatar, cover: user.cover, introduction: user.introduction, role: user.role }
       })
     })
   },
