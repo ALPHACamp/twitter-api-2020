@@ -8,11 +8,11 @@ module.exports = {
     for (let i = 0; i < 5; i++) {
       for (let j = 1; j < 11; j++) {
         const tweet = {
-          id: i * 10 + j,
+          id: (i * 10 + j) * 10,
           description: faker.lorem.words(),
           createdAt: new Date(),
           updatedAt: new Date(),
-          UserId: i + 2
+          UserId: (i + 1) * 10
         }
         mockTweets.push(tweet)
       }
