@@ -42,8 +42,9 @@ router.get('/', authenticated, authenticatedUser, (req, res) => res.send('test')
 //user
 router.post('/users', userController.signUP)
 router.post('/signin', userController.signIn)
-
+router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getTweets)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
+
 
 //tweet
 router.get('/tweets', authenticated,authenticatedUser, tweetController.getTweets)
