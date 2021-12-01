@@ -96,6 +96,40 @@ const userController = {
           return res.json(user.Replies)
         }
       })
+  },
+
+  putUser: (req, res) => {
+    const { account, name, email, password, cover, avatar, introduction } = req.body
+    return Promise.all([
+      User.findByPk(req.params.id),
+      User.findOne({ where: { email } }),
+      User.findOne({ where: { account } })
+    ])
+      .then(([user, anotherUserE, anotherUserA]) => {
+        if (account.length > 20 || password.length > 20 || name.length > 50 || introduction.length > 160) {
+          return res.json({ status: 'error', message: '超過字數上限' })
+        }
+        if (anotherUserE) {
+          if (anotherUserE.email !== user.email || anotherUserE.account !== user.account) {
+            return res.json({ status: 'error', message: '不能使用此email或account' })
+          }
+        }
+        if (anotherUserA) {
+          if (anotherUserA.email !== user.email || anotherUserA.account !== user.account) {
+            return res.json({ status: 'error', message: '不能使用此email或account' })
+          }
+        }
+        user.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(password, 10),
+          cover,
+          avatar,
+          introduction
+        })
+        return res.json({ status: 'success', message: '資料編輯成功' })
+      })
   }
 }
 
