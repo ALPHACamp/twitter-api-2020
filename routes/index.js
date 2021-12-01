@@ -11,4 +11,43 @@ const authenticated = (req, res, next) => {
 }
 
 
+//user相關
+router.post('/api/signin', authenticated, userController.signIn)
+
+
+
+
+
+
+//tweets相關
+
+
+
+
+
+
+//likes相關
+
+
+
+
+
+
+
+//replies相關
+
+
+
+//followships相關
+
+
+
+
+
+
+
+
+
+//admin相關
+
 module.exports = router
