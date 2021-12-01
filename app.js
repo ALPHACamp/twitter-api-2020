@@ -1,15 +1,20 @@
 const express = require('express')
 const helpers = require('./_helpers');
+const routes = require('./routes')
 
 const app = express()
 const port = 3000
 
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
+function authenticated(req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+app.use(routes)
 
 module.exports = app
