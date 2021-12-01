@@ -48,6 +48,7 @@ router.get('/users/:id', authenticated, authenticatedUser, userController.getUse
 
 //tweet
 router.get('/tweets', authenticated,authenticatedUser, tweetController.getTweets)
+router.post('/tweets', authenticated,authenticatedUser,tweetController.postTweet)
 router.get('/tweets/:tweet_id', authenticated,authenticatedUser, tweetController.getTweet)
 
 //admin
