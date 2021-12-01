@@ -6,7 +6,14 @@ module.exports = (sequelize, DataTypes) => {
       UserId: DataTypes.INTEGER,
       TweetId: DataTypes.INTEGER
     },
-    {}
+    {
+      indexes: [
+        {
+          unique: true,
+          fields: ['UserId', 'TweetId']
+        }
+      ]
+    }
   )
   Like.associate = function (models) {
     Like.belongsTo(models.User)
