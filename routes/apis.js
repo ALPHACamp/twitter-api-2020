@@ -21,7 +21,7 @@ const authenticatedAdmin = function authenticatedAdmin (req, res, next) {
 
 router.post('/signin', userController.signIn)
 
-router.get('/users', userController.getUsers)
-router.get('/tweets', tweetController.getTweets)
+router.get('/users', authenticated, userController.getUsers)
+router.get('/tweets', authenticated, tweetController.getTweets)
 
 module.exports = router
