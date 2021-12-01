@@ -11,7 +11,7 @@ const tweetService = {
         return callback({ status: 'error', message: '需輸入內文才能發文' })
       } else {
         await Tweet.create({
-          description: description,
+          description,
           UserId: helpers.getUser(req).id
         })
         return callback({ status: 'success', message: '成功發文' })
