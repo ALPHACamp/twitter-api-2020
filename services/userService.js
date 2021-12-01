@@ -1,11 +1,10 @@
 const bcrypt = require('bcryptjs')
-const fs = require('fs')
 const jwt = require('jsonwebtoken')
 
-const db = require('../models')
-const User = db.User
-const Followship = db.Followship
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
+const { User, Tweet } = require('../models')
 const helpers = require('../_helpers')
 
 const userService = {
@@ -71,6 +70,98 @@ const userService = {
         followerCount: user.Followers.length
       }))
       return callback(users)
+    })
+  },
+
+  getUser: (req, res, callback) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: Tweet, attributes: ['id'] },
+        { model: User, as: 'Followings', attributes: ['id'] },
+        { model: User, as: 'Followers', attributes: ['id'] }
+      ]
+    })
+      .then(user => {
+        user = {
+          ...user.toJSON(),
+          identify: (Number(req.params.id) === Number(helpers.getUser(req).id)),
+          TweetCount: user.Tweets.length,
+          followingCount: user.Followings.length,
+          followerCount: user.Followers.length
+        }
+        return callback({ user })
+      })
+  },
+
+  putUser: (req, res, callback) => {
+    if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
+      return callback({ status: 'error', message: '沒有編輯權限！' })
+    }
+
+    if (req.body.account) {
+      if (helpers.getUser(req).account !== req.body.account) {
+        User.findOne({ where: { account: req.body.account }, raw: true })
+          .then(user => {
+            if (user) {
+              return callback({ status: 'error', message: '此帳號已有人使用！' })
+            }
+          })
+      }
+    }
+
+    if (req.body.email) {
+      if (helpers.getUser(req).email !== req.body.email) {
+        User.findOne({ where: { email: req.body.email }, raw: true })
+          .then(user => {
+            console.log(user)
+            if (user) {
+              return callback({ status: 'error', message: '此 email 已註冊過！' })
+            }
+          })
+      }
+    }
+
+    const { file } = req
+    if (file) {
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      imgur.upload(file.path, (err, img) => {
+        return User.findByPk(req.params.id)
+          .then(user => {
+            user.update({
+              ...req.body,
+              avatar: file ? img.data.link : user.avatar
+            })
+              .then(() => {
+                callback({ status: 'success', message: '使用者資料編輯成功' })
+              })
+          })
+      })
+    } else {
+      return User.findByPk(req.params.id)
+        .then(user => {
+          user.update({
+            ...req.body,
+            avatar: user.avatar
+          }).then(() => {
+            return callback({ status: 'success', message: '使用者資料編輯成功' })
+          })
+        })
+    }
+  },
+
+  getTopUser: (req, res, callback) => {
+    return User.findAll({
+      include: [
+        { model: User, as: 'Followers', attributes: ['id'] }
+      ]
+    }).then(users => {
+      users = users.map(user => ({
+        ...user.dataValues,
+        FollowerCount: user.Followers.length,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
+      return callback({ users })
     })
   }
 }

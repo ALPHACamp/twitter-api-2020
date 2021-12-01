@@ -1,7 +1,5 @@
 'use strict'
 
-const { random } = require('faker')
-
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const followArray = []

@@ -1,7 +1,5 @@
 'use strict'
 
-const { datatype } = require('faker')
-
 module.exports = (sequelize, DataTypes) => {
   const Followship = sequelize.define(
     'Followship',
