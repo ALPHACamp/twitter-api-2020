@@ -51,6 +51,12 @@ const tweetController = {
                 })
                 .catch(error => console.log('error'))
         }
+    },
+    likeTweet: (req, res) => {
+            Like.create({UserId: helpers.getUser(req).id, TweetId: req.params.id})
+                .then(like => {
+                    res.json({status: 'success', message: 'The like was successfully created'})
+                })
     }
 }
 
