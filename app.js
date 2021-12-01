@@ -1,5 +1,6 @@
 const express = require('express')
 const helpers = require('./_helpers');
+const bodyParser = require('body-parser')
 
 const db = require('./models')
 
@@ -21,6 +22,9 @@ app.engine('handlebars', handlebars({
   // helpers: require('./config/handlebars-helpers')
 })) //{ defaultLayout: 'main' } could be ignored since it has become default in handlebars v3.1.0
 app.set('view engine', 'handlebars')
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
