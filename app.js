@@ -3,6 +3,8 @@ const helpers = require('./_helpers');
 const bodyParser = require('body-parser')
 
 const db = require('./models')
+const flash = require('connect-flash')
+const session = require('express-session')
 
 //-----------
 const handlebars = require('express-handlebars')
@@ -23,8 +25,20 @@ app.engine('handlebars', handlebars({
 })) //{ defaultLayout: 'main' } could be ignored since it has become default in handlebars v3.1.0
 app.set('view engine', 'handlebars')
 
+// setup bodyParser
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+
+// setup session and flash
+app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }))
+app.use(flash())
+
+// put req.flash into res.locals
+app.use((req, res, next) => {
+  res.locals.success_messages = req.flash('success_messages')
+  res.locals.error_messages = req.flash('error_messages')
+  next()
+})
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
