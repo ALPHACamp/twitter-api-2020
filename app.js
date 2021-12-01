@@ -3,7 +3,11 @@ const helpers = require('./_helpers');
 const routes = require('./routes')
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
+if (process.env.NODE_ENV !== "production") {
+  require('dotenv').config()
+}
+const passport = require('./config/passport')
 
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next) {
