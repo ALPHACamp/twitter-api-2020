@@ -10,14 +10,15 @@ const helpers = require('../_helpers')
 
 const userService = {
   signUp: (req, res, callback) => {
-    if (req.body.passwordCheck !== req.body.password) {
+    if (req.body.checkPassword !== req.body.password) {
       return callback({ status: 'error', message: '兩次密碼輸入不同！' })
     } else {
-      User.findOne({ where: { email: req.body.email } }).then(user => {
+      return User.findOne({ where: { email: req.body.email } }).then(user => {
         if (user) {
           return callback({ status: 'error', message: '信箱重複！' })
         } else {
           User.create({
+            account: req.body.account,
             name: req.body.name,
             email: req.body.email,
             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
@@ -52,6 +53,7 @@ const userService = {
         token: token,
         user: {
           id: user.id,
+          account: user.account,
           name: user.name,
           email: user.email,
           role: user.role
