@@ -28,10 +28,14 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 //JWT
 router.post('/users', userController.signUp)
+
 router.post('/users/signin', userController.signIn)
-//else
-router.get('/hello', (req, res) => {
-  res.send('hello world123')
-})
+router.put('/users/:id', userController.putUser)
+router.get('/users/:id/tweets', userController.getUserTweets)
+router.get('/users/:id/replied_tweets', userController.getUserReplies)
+router.get('/users/:id/likes', userController.getUserLike)
+router.get('/users/:id/followings', userController.getUserFollowings)
+router.get('/users/:id/followers', userController.getUserFollowers)
+
 
 module.exports = router

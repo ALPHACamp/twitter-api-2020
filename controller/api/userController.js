@@ -1,6 +1,8 @@
 const db = require('../../models')
 const Tweet = db.Tweet
 const User = db.User
+const Reply = db.Reply
+const Like = db.Like
 const helper = require('../../_helpers')
 const bcrypt = require('bcryptjs')
 
@@ -103,6 +105,82 @@ const userController = {
       return res.json([...tweets, { status: 200, message: '' }])
     } catch (err) {
       console.log(err)
+    }
+  },
+  getUserReplies: async (req, res) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        raw: true,
+        nest: true,
+        include: [{ model: Tweet, include: [User] }]
+      })
+      return res.json([...replies, { status: 200, message: '' }])
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  getUserLike: async (req, res) => {
+    try {
+      const likes = await Like.findAll({
+        where: { id: req.params.id },
+        include: [{ model: Tweet }],
+        raw: true,
+        nest: true
+      })
+      return res.json([...likes, { status: 200, message: '' }])
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  getUserFollowings: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followings' }]
+      })
+      let followings = user.dataValues.Followings
+      followings = followings.map(user => ({
+        followingId: user.dataValues.id,
+        followingAccount: user.dataValues.account,
+        followingName: user.dataValues.name,
+        followingAvatar: user.dataValues.avatar
+      }))
+      return res.json([...followings, { status: 200, message: '' }])
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  getUserFollowers: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: User, as: 'Followers' }]
+      })
+      let followers = user.dataValues.Followers
+      followers = followers.map(user => ({
+        followerId: user.dataValues.id,
+        followerAccount: user.dataValues.account,
+        followerName: user.dataValues.name,
+        followerAvatar: user.dataValues.avatar
+      }))
+      return res.json([...followers, { status: 200, message: '' }])
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  putUser: async (req, res) => {
+    // avatar, cover 尚未完成。
+    try {
+      await User.update(
+        {
+          introduction: req.body.introduction,
+          name: req.body.name
+        },
+        { where: { id: helper.getUser(req).id } }
+      )
+      return res.json({ status: 200, message: 'success!' })
+    } catch (err) {
+      console.log(err)
+      return res.json({ status: 'error', message: err })
     }
   }
 }
