@@ -52,6 +52,15 @@ const tweetController = {
                 .catch(error => console.log('error'))
         }
     },
+    unlikeTweet:(req,res) =>{
+        Like.destroy({
+            where: {
+                UserId: helpers.getUser(req).id,
+                TweetId: req.params.id
+            }
+        })
+           .then(() => res.json({ status: 'success', message: 'Like was deleted' }))
+    },
     likeTweet: (req, res) => {
             Like.create({UserId: helpers.getUser(req).id, TweetId: req.params.id})
                 .then(like => {
