@@ -58,7 +58,7 @@ const userController = {
   getTweets: (req, res) => {
     User.findByPk(req.params.id, { include: [{ model: Tweet, include: [Like, Reply, User] }] })
       .then(user => {
-        if (user.email === 'root@example.com') {
+        if (!user || user.role === 'admin') {
           return res.json({ status: 'error', message: 'No tweets' })
         } else {
           res.json(user.Tweets)
@@ -66,12 +66,28 @@ const userController = {
       })
   },
   getUser: (req, res) => {
-    User.findByPk(req.params.id)
+    return User.findByPk(req.params.id)
       .then(user => {
-        if (user.email === 'root@example.com') {
+        if (!user || user.role === 'admin') {
           return res.json({ status: 'error', message: 'No user' })
         } else {
           return res.json(user)
+        }
+      })
+  },
+
+  getRepliedTweets: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: Reply, include: [{ model: Tweet, include: [Like, Reply, User] }] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(user => {
+        if (!user || user.role === 'admin') {
+          return res.json({ status: 'error', message: 'No user' })
+        } else {
+          return res.json(user.Replies)
         }
       })
   }
