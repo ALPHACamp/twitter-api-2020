@@ -3,6 +3,7 @@ const { User } = require('../models')
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
 
 const userService = {
   signUp: async (req, res, callback) => {
@@ -31,7 +32,8 @@ const userService = {
         account,
         email,
         name,
-        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10))
+        password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
+        role: 'user'
       })
       return callback({ status: 'success', message: '成功註冊' })
     }
@@ -61,6 +63,10 @@ const userService = {
         id: user.id, account: user.account, name: user.name, email: user.email, avatar: user.avatar, cover: user.cover, introduction: user.introduction, role: user.role
       }
     })
+  },
+
+  getCurrentUser: async (req, res, callback) => {
+    return callback({ user: helpers.getUser(req) })
   },
 
   getUser: async (req, res, callback) => {

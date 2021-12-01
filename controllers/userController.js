@@ -17,6 +17,12 @@ const userController = {
     })
   },
 
+  getCurrentUser: (req, res) => {
+    userService.getCurrentUser(req, res, data => {
+      return res.json(data)
+    })
+  },
+
   getUser: (req, res) => {
     userService.getUser(req, res, data => {
       return res.json(data)
