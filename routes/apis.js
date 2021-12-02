@@ -19,6 +19,7 @@ router.get('/users/:id/tweets', authenticated, authenticatedUser, userController
 router.get('/users/currentUser', authenticated, authenticatedUser, userController.getCurrentUser)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getRepliedTweets)
+router.put('/users/:id/edit', authenticated, authenticatedUser, userController.editUser)
 router.put('/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getLikes)
 

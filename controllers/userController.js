@@ -137,6 +137,44 @@ const userController = {
       })
   },
 
+  editUser: (req, res) => {
+    const { account, name, email, password, checkPassword } = req.body
+    if (req.params.id !== String(req.user.id)) {
+      return res.json({ status: 'error', message: "權限錯誤" })
+    }
+    if (!account || !name || !email || !password || !checkPassword) {
+      return res.json({ status: 'error', message: '所有欄位都是必填' })
+    }
+    if (password !== checkPassword) {
+      return res.json({ status: 'error', message: '密碼與確認密碼不相符' })
+    }
+    if (account.length > 20 || password.length > 20 || name.length > 50) {
+      return res.json({ status: 'error', message: '超過字數上限' })
+    }
+    return Promise.all([
+      User.findByPk(req.params.id),
+      User.findOne({ where: { email } }),
+      User.findOne({ where: { account } })
+    ])
+      .then(([user, anotherUserE, anotherUserA]) => {
+        if (anotherUserE && anotherUserE.email !== user.email) {
+          return res.json({ status: 'error', message: '不能使用此email' })
+        }
+        if (anotherUserA && anotherUserA.account !== user.account) {
+          return res.json({ status: 'error', message: '不能使用此account' })
+        }
+        user.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(password, 10)
+        })
+          .then(() => {
+            return res.json({status:'success', message:'資料編輯成功'})
+          })
+      })
+  },
+
   getCurrentUser: (req, res) => {
     return User.findByPk(req.user.id)
       .then(user => {
