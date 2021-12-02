@@ -26,7 +26,7 @@ router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetControl
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.likeTweet)
 
 //followship
-router.get('/followships/:userId', authenticated, authenticatedUser, followshipController.postFollowship)
+router.post('/followships', authenticated, authenticatedUser, followshipController.postFollowship)
 
 //admin
 router.post('/admin/signin', adminController.signIn)
