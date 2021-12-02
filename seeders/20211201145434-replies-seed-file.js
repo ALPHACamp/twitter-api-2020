@@ -3,6 +3,7 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const faker = require('faker')
+const _ = require('lodash')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await User.findAll({ where: { role: null } })
@@ -26,7 +27,7 @@ module.exports = {
         }
         let reply = {
           comment: faker.lorem.text().substring(0, 10),
-          UserId: userArray[Math.floor(Math.random() * userArray.length)],
+          UserId: userArray[_.random(userArray.length - 1)],
           TweetId: tweetArray[a],
           createdAt: new Date(),
           updatedAt: new Date()

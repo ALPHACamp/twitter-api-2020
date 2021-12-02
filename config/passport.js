@@ -1,10 +1,13 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const passport = require('passport')
+const db = require('../models')
+const User = db.User
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
-const db = require('../models')
-const User = db.User
 
 //JWT 驗證
 let jwtOptions = {}
@@ -17,8 +20,7 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
-  })
-  .then(user => {
+  }).then(user => {
     if (!user) return next(null, false)
     return next(null, user)
   })
