@@ -37,6 +37,16 @@ const tweetController = {
       return res.json(tweet)
     })
   },
+  postTweet: (req, res) => {
+    if (!req.body.description) {
+      return res.json({ status: 'error', message: '內容不可空白' })
+    }
+    Tweet.create({
+      description: req.body.description,
+      UserId: helpers.getUser(req).id
+    })
+    return res.json({ status: 'success', message: "" })
+  }
 }
 
 module.exports = tweetController
