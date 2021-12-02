@@ -107,6 +107,13 @@ const userController = {
           return res.json(user.Likes)
         }
       })
+  },
+
+  getCurrentUser: (req, res) => {
+    return User.findByPk(req.user.id)
+      .then(user => {
+        return res.json(user)
+      })
   }
 }
 
