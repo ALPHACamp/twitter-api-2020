@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require("multer");
+const upload = multer({ dest: "temp/" });
 
 const tweetController = require('../controllers/tweetController.js')
 const adminController = require('../controllers/adminController.js')
@@ -25,11 +27,11 @@ router.get('/', authenticated, (req, res) => res.redirect('/tweets'))
 
 //在 /tweets 底下則交給 tweetController.getTweets 來處理
 router.get("/tweets", authenticated, tweetController.getTweets);
+//  使用者新增一篇推文
+router.post("/tweets", authenticated, tweetController.postTweet);
 
 // 連到 /admin 頁面就轉到 /admin/tweets
 router.get('/admin', authenticatedAdmin, (req, res) => res.redirect('/admin/tweets'))
-//  使用者新增一篇推文
-router.post("/tweets", authenticated, tweetController.postTweet);
 
 // 在 /admin/tweets 底下則交給 adminController.getTweets 處理
 router.get('/admin/tweets', adminController.getTweets)
@@ -41,12 +43,15 @@ router.get('/signin', userController.signInPage)
 router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
 router.get('/logout', userController.logout)
 
-// router.get('/', authenticated, (req, res) => res.redirect('/tweets'))
+//  使用者個人資料頁
+router.get('/users/:id', authenticated, userController.getUser)
+// 使用者到編輯頁
+router.get('/users/:id/edit', authenticated, userController.editUser)
+// 使用者到編輯個人資訊
+router.put("/users/:id", authenticated, upload.single('cover'), userController.putUser)
 
 
-
-
-router.get('/admin', authenticatedAdmin, (req, res) => res.redirect('/admin/tweets'))
-router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+// router.get('/admin', authenticatedAdmin, (req, res) => res.redirect('/admin/tweets'))
+// router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
 
 module.exports = router

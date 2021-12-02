@@ -16,7 +16,6 @@ const tweetController = {
     console.log(userId);
     Tweet.create({
       description: req.body.description,
-      // UserId: '1',
       UserId: Math.floor(Math.random() * 6),
     }).then((tweet) => {
       console.log(tweet);
