@@ -1,5 +1,6 @@
 const db = require('../../models')
 const Tweet = db.Tweet
+const Reply = db.Reply
 const helper = require('../../_helpers')
 const tweetController = {
   getTweets: async (req, res) => {
