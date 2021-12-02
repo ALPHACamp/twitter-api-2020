@@ -23,6 +23,8 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.postTwe
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.likeTweet)
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.addReply)
+
 
 //admin
 router.post('/admin/signin', adminController.signIn)
