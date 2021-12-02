@@ -42,18 +42,6 @@ const userController = {
       })
     })
   },
-  getUser: async (req, res) => {
-    try {
-      const user = (await User.findByPk(req.params.id)).toJSON()
-      return res.status(200).json({
-        status: 'success',
-        message: 'ok',
-        ...user,
-      })
-    } catch (error) {
-      console.log(error)
-    }
-  },
 }
 
 module.exports = userController

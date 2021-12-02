@@ -14,7 +14,6 @@ const authenticatedUser = (req, res, next) => {
 // use helpers.getUser(req) to replace req.user
 //驗後台身分
 const authenticatedAdmin = (req, res, next) => {
-  console.log('req.user', req.user)
   if (helpers.getUser(req).role === 'user') {
     return res.status(401).json({ status: 'error', message: '帳號不存在！' })
   }
@@ -39,12 +38,6 @@ const authenticated = (req, res, next) => {
 
 module.exports = (app) => {
   // JWT signin & signup
-  app.post('/api/signin', userController.signIn)
+  app.post('/api/users/signin', userController.signIn)
 
-  app.get(
-    '/api/users/:id',
-    authenticated,
-    authenticatedUser,
-    userController.getUser
-  )
 }
