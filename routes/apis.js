@@ -6,6 +6,7 @@ const router = express.Router()
 const tweetController = require('../controller/apis/tweetController')
 const userController = require('../controller/apis/userController')
 const replyController = require('../controller/apis/replyController')
+const adminController = require('../controller/apis/adminController')
 const passport = require('passport')
 
 //function
@@ -59,5 +60,10 @@ router.get('/users', userController.getUsers)
 router.get('/users/self', userController.getCurrentUser)
 router.get('/users/:id', userController.getUser)
 router.get('/users/:id/tweets', userController.getUserTweets)
+
+//admin
+router.get('/admin/users', adminController.getUsers)
+
+router.delete('/admin/tweets/:id', adminController.deleteTweet)
 
 module.exports = router
