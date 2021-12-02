@@ -78,7 +78,9 @@ const userService = {
       include: [
         { model: Tweet, attributes: ['id'] },
         { model: User, as: 'Followings', attributes: ['id'] },
-        { model: User, as: 'Followers', attributes: ['id'] }
+        { model: User, as: 'Followers', attributes: ['id'] },
+        { model: User, as: 'Noticings', attributes: ['id'] },
+        { model: User, as: 'Noticers', attributes: ['id'] }
       ]
     }).then(user => {
       user = {
@@ -86,7 +88,9 @@ const userService = {
         identify: Number(req.params.id) === Number(helpers.getUser(req).id),
         TweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
-        followerCount: user.Followers.length
+        followerCount: user.Followers.length,
+        isFollowed: user.Followers.some(i => (i.id === helpers.getUser(req).id)),
+        isNoticed: user.Noticers.some(i => (i.id === helpers.getUser(req).id))
       }
       return callback({ user })
     })
