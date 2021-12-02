@@ -12,7 +12,7 @@ const tweetController = {
       })
 
 
-      const results = tweets.map((tweet) => ({
+      let results = tweets.map((tweet) => ({
         id: tweet.dataValues.id,
         description: tweet.dataValues.description,
         createdAt: tweet.dataValues.createdAt,
@@ -20,6 +20,10 @@ const tweetController = {
         likeCounts: tweet.dataValues.Likes.length,
         replyCounts: tweet.dataValues.Replies.length
       }))
+
+      results = results.sort((a,z)=> z.createdAt - a.createdAt)
+
+      console.log(results)
 
       return res.status(200).json(results)
     } catch (error) {
