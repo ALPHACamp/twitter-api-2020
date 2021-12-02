@@ -2,7 +2,8 @@
 const { datatype } = require('faker')
 const {
   Model
-} = require('sequelize')
+} = require('sequelize');
+const tweet = require('./tweet');
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
@@ -16,6 +17,19 @@ module.exports = (sequelize, DataTypes) => {
     cover: DataTypes.STRING
   }, {});
   User.associate = function (models) {
+    User.hasMany(models.Tweet)
+    User.hasMany(models.Reply)
+    User.hasMany(models.Like)
+    User.belongsToMany(models.User, {
+      through: models.Followship,
+      foreignKey: 'followingId',
+      as: 'Followers'
+    })
+    User.belongsToMany(models.User, {
+      through: models.Followship,
+      foreignKey: 'followerId',
+      as: 'Followings'
+    })
   }
 
   return User;
