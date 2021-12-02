@@ -3,6 +3,14 @@ const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+
+// JWT
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JWTStrategy = passportJWT.Strategy
+require('dotenv').config()
 
 passport.use(new LocalStrategy(
   // customize user field
@@ -21,12 +29,39 @@ passport.use(new LocalStrategy(
   }
 ))
 
+// JWT strategy
+let jwtOptions = {}
+jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
+jwtOptions.secretOrKey = process.env.JWT_SECRET
+
+let strategy = new JWTStrategy(jwtOptions, function (jwt_payload, next) {
+  User.findByPk(jwt_payload.id, {
+    include: [
+      { model: db.Tweet, as: 'LikedTweets' },
+      { model: db.Tweet, as: 'RepliedTweets' },
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
+  })
+  .then(user => {
+    if (!user) return next(null, false)
+    return next(null, user)
+  })
+})
+
 // serialize and deserialize user
 passport.serializeUser((user, cb) => {
   cb(null, user.id)
 })
 passport.deserializeUser((id, cb) => {
-  User.findByPk(id)
+  User.findByPk(id, {
+    include: [
+      { model: Tweet, as: 'LikedTweets' },
+      { model: Tweet, as: 'RepliedTweets' },
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
+  })
     .then(user => {
       user = user.toJSON()
       return cb(null, user)
