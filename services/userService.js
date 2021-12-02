@@ -75,7 +75,7 @@ const userService = {
     }
 
     // 確認欄位是否皆有填寫
-    if (!account, !name, !email, !password, !checkPassword) {
+    if (!account || !name || !email || !password || !checkPassword) {
       return callback({ status: 'error', message: '所有欄位皆需填寫' })
     }
 
