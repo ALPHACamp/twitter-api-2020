@@ -62,7 +62,7 @@ describe('# tweet requests', () => {
     })
   })
 
-  context.only('# GET ', () => {
+  context('# GET ', () => {
     describe('GET /api/tweets', () => {
       before(async () => {
         // 清除測試資料庫資料
