@@ -8,11 +8,10 @@ const helpers = require('../_helpers')
 const tweetController = {
     getTweets: (req, res) => {
         Tweet.findAll({
-            include: [
-                User,
-                Reply,
-                Like
-            ]
+            raw: true,
+            nest: true,
+            include: User,
+            order: [['createdAt', 'DESC']]
         }).then(tweets=>{
             tweets.map(tweet => ({
                 id: tweet.id,
@@ -20,6 +19,11 @@ const tweetController = {
                 description: tweet.description,
                 createdAt: tweet.createdAt,
                 updatedAt: tweet.updatedAt,
+                user: {
+                    avatar: tweet.User.avatar,
+                    name: tweet.User.name,
+                    account: tweet.User.account,
+                }
             }))
             return res.json(tweets)
         })
@@ -65,20 +69,27 @@ const tweetController = {
     },
     addReply: (req, res) => {
         if (req.body.comment.length > 200) {
-            return res.json({ status: 'error', message: 'Tweet can\'t be more than 140 words.' })
+            return res.json({status: 'error', message: 'Tweet can\'t be more than 140 words.'})
         }
-        if(!req.body.comment){
-            return res.json({ status: 'error', message: '內容不可空白' })
+        if (!req.body.comment) {
+            return res.json({status: 'error', message: '內容不可空白'})
         }
         return Reply.create({
             UserId: helpers.getUser(req).id,
             TweetId: req.params.tweet_id,
             comment: req.body.comment
-        }).then(() =>{
-            res.json({status: 'successful', message:'The reply was created'})
+        }).then(() => {
+            res.json({status: 'successful', message: 'The reply was created'})
         })
             .catch(error => console.log('error'))
+    },
+    getTweetReplies: (req, res) => {
+        return Reply.findAll({
+            where: { TweetId: req.params.tweet_id }
+        })
+            .then(Replies => {
+            return res.json(Replies)
+        })
     }
 }
-
 module.exports = tweetController

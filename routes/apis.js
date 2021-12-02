@@ -25,7 +25,7 @@ router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetControlle
 router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.likeTweet)
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.addReply)
-
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
 
 //followship
 router.post('/followships', authenticated, authenticatedUser, followshipController.postFollowship)
