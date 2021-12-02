@@ -10,7 +10,7 @@ const tweetController = {
         Tweet.findAll({
             raw: true,
             nest: true,
-            include: [User, Reply, Like],
+            include: User,
             order: [['createdAt', 'DESC']]
         }).then(tweets=>{
             tweets.map(tweet => ({
@@ -59,13 +59,13 @@ const tweetController = {
                 TweetId: req.params.id
             }
         })
-           .then(() => res.json({ status: 'success', message: 'Like was deleted' }))
+            .then(() => res.json({ status: 'success', message: 'Like was deleted' }))
     },
     likeTweet: (req, res) => {
-            Like.create({UserId: helpers.getUser(req).id, TweetId: req.params.id})
-                .then(like => {
-                    res.json({status: 'success', message: 'The like was successfully created'})
-                })
+        Like.create({UserId: helpers.getUser(req).id, TweetId: req.params.id})
+            .then(like => {
+                res.json({status: 'success', message: 'The like was successfully created'})
+            })
     }
 }
 

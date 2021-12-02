@@ -12,10 +12,11 @@ router.get('/', authenticated, authenticatedUser, (req, res) => res.send('test')
 router.post('/users', userController.signUP)
 router.post('/signin', userController.signIn)
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getTweets)
+router.get('/users/currentUser', authenticated, authenticatedUser, userController.getCurrentUser)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getRepliedTweets)
 router.put('/users/:id', authenticated, authenticatedUser, userController.putUser)
-
+router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getLikes)
 
 //tweet
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)

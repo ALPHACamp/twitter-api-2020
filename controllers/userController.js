@@ -17,6 +17,9 @@ const userController = {
     if (password !== checkPassword) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     }
+    if (account.length > 20 || name.length > 50 || password.length > 20) {
+      return res.json({ status: 'error', message: '超過字數上限' })
+    }
     User.findOne({ where: { [Op.or]: [{ email }, { account }] } })
       .then(user => {
         if (user) {
@@ -83,17 +86,25 @@ const userController = {
   },
 
   getRepliedTweets: (req, res) => {
+    return Reply.findAll({
+      include: [User, { model: Tweet, include: [{ model: User, attributes: ['name'] }] }],
+      where: { UserId: req.params.id }
+    }).then(replies => {
+      return res.json(replies)
+    })
+  },
+
+  getLikes: (req, res) => {
     return User.findByPk(req.params.id, {
       include: [
-        { model: Reply, include: [{ model: Tweet, include: [Like, Reply, User] }] }
-      ],
-      order: [['createdAt', 'DESC']]
+        { model: Like, include: [{ model: Tweet, include: [Like, User] }] }
+      ]
     })
       .then(user => {
         if (!user || user.role === 'admin') {
           return res.json({ status: 'error', message: 'No user' })
         } else {
-          return res.json(user.Replies)
+          return res.json(user.Likes)
         }
       })
   },
@@ -129,6 +140,13 @@ const userController = {
           introduction
         })
         return res.json({ status: 'success', message: '資料編輯成功' })
+      })
+  },
+
+  getCurrentUser: (req, res) => {
+    return User.findByPk(req.user.id)
+      .then(user => {
+        return res.json(user)
       })
   }
 }
