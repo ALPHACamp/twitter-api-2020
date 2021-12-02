@@ -24,7 +24,7 @@ const authenticatedAdmin = (req, res, next) => {
 
 //user相關
 router.post('/api/signin', userController.signIn)
-
+router.post('/api/signup', userController.signUp)
 
 
 
