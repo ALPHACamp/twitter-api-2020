@@ -86,19 +86,12 @@ const userController = {
   },
 
   getRepliedTweets: (req, res) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        { model: Reply, include: [{ model: Tweet, include: [Like, Reply, User] }] }
-      ],
-      order: [['createdAt', 'DESC']]
+    return Reply.findAll({
+      include: [User, Tweet],
+      where: { UserId: req.params.id }
+    }).then(replies => {
+      return res.json(replies)
     })
-      .then(user => {
-        if (!user || user.role === 'admin') {
-          return res.json({ status: 'error', message: 'No user' })
-        } else {
-          return res.json(user.Replies)
-        }
-      })
   },
 
   getLikes: (req, res) => {
