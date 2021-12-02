@@ -35,6 +35,22 @@ const tweetService = {
     } catch (err) {
       console.log(err)
     }
+  },
+
+  getTweet: async (req, res, callback) => {
+    try {
+      //撈出特定:tweet_id的資料，並取得關聯User的資料
+      const tweet = await Tweet.findByPk(req.params.tweet_id,
+        {
+          raw: true,
+          nest: true,
+          include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+        })
+      console.log(tweet)
+      return callback(tweet)
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 

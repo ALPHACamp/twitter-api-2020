@@ -6,6 +6,7 @@ const { authenticated, checkNotAdmin } = require('../../middlewares/auth')
 
 router.post('/', authenticated, checkNotAdmin, tweetController.postTweet)
 router.get('/', authenticated, checkNotAdmin, tweetController.getTweets)
+router.get('/:tweet_id', authenticated, checkNotAdmin, tweetController.getTweet)
 
 // router exports
 module.exports = router
