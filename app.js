@@ -6,8 +6,6 @@ const helpers = require('./_helpers');
 const passport = require('./config/passport')
 const methodOverride = require('method-override')
 
-const db = require('./models')
-
 const app = express()
 const port = 3000
 
