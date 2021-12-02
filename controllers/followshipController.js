@@ -22,8 +22,7 @@ const followshipController = {
             }
           })
         })
-      })
-  },
+      },
 
   deleteFollowship: (req, res) => {
     return Followship.destroy({
