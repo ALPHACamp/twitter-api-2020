@@ -6,7 +6,14 @@ module.exports = (sequelize, DataTypes) => {
       followerId: DataTypes.INTEGER,
       followingId: DataTypes.INTEGER
     },
-    {}
+    {
+      indexes: [
+        {
+          unique: true,
+          fields: ['followerId', 'followingId']
+        }
+      ]
+    }
   )
   Followship.associate = function (models) {}
 

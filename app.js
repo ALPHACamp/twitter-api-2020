@@ -1,5 +1,6 @@
 const express = require('express')
 const helpers = require('./_helpers')
+const passport = require('./config/passport')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
