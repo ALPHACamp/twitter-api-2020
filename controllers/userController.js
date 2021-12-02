@@ -99,6 +99,21 @@ const userController = {
           return res.json(user.Replies)
         }
       })
+  },
+
+  getLikes: (req, res) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: Like, include: [{ model: Tweet, include: [Like, User] }] }
+      ]
+    })
+      .then(user => {
+        if (!user || user.role === 'admin') {
+          return res.json({ status: 'error', message: 'No user' })
+        } else {
+          return res.json(user.Likes)
+        }
+      })
   }
 }
 
