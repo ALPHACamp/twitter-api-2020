@@ -40,10 +40,8 @@ const userController = {
         },
       })
     })
+  },
 
-
-
-let userController = {
   signUp: async (req, res) => {
     try {
       // confirm password
