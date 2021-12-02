@@ -8,10 +8,11 @@ const helpers = require('../_helpers')
 const tweetController = {
     getTweets: (req, res) => {
         Tweet.findAll({
-            raw: true,
-            nest: true,
-            include: User,
-            order: [['createdAt', 'DESC']]
+            include: [
+                User,
+                Reply,
+                Like
+            ]
         }).then(tweets=>{
             tweets.map(tweet => ({
                 id: tweet.id,
@@ -19,11 +20,6 @@ const tweetController = {
                 description: tweet.description,
                 createdAt: tweet.createdAt,
                 updatedAt: tweet.updatedAt,
-                user: {
-                    avatar: tweet.User.avatar,
-                    name: tweet.User.name,
-                    account: tweet.User.account,
-                }
             }))
             return res.json(tweets)
         })

@@ -22,7 +22,7 @@ const followshipController = {
             }
           })
         })
-      },
+  },
 
   deleteFollowship: (req, res) => {
     return Followship.destroy({
@@ -33,9 +33,9 @@ const followshipController = {
         ]
       }
     })
-      .then(() => {
-        return res.json({ status: 'success', message: '' })
-      })
+        .then(() => {
+          return res.json({ status: 'success', message: '' })
+        })
   }
 }
 
