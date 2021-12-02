@@ -27,6 +27,9 @@ router.put('/users/:id', authenticated, upload.single('image'), userController.p
 router.get('/users', authenticated, userController.getUsers)
 router.get('/tweets', authenticated, tweetController.getTweets)
 
+router.post('/followships', authenticated, userController.addFollowing)
+router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
+
 router.post('/admin/signin', adminController.signIn)
 
 router.post('/signin', userController.signIn)

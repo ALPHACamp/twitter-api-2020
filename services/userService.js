@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
-const { User, Tweet } = require('../models')
+const { User, Tweet, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const userService = {
@@ -80,15 +80,16 @@ const userService = {
         { model: User, as: 'Followings', attributes: ['id'] },
         { model: User, as: 'Followers', attributes: ['id'] }
       ]
+    }).then(user => {
+      user = {
+        ...user.toJSON(),
+        identify: Number(req.params.id) === Number(helpers.getUser(req).id),
+        TweetCount: user.Tweets.length,
+        followingCount: user.Followings.length,
+        followerCount: user.Followers.length
+      }
+      return callback({ user })
     })
-      .then(user => {
-        user.identify = (Number(req.params.id) === Number(helpers.getUser(req).id))
-        user.TweetCount = user.Tweets.length
-        user.followingCount = user.Followings.length
-        user.followerCount = user.Followers.length
-        console.log(user.toJSON())
-        return callback({ user: user.toJSON() })
-      })
   },
 
   putUser: (req, res, callback) => {
@@ -98,24 +99,22 @@ const userService = {
 
     if (req.body.account) {
       if (helpers.getUser(req).account !== req.body.account) {
-        User.findOne({ where: { account: req.body.account }, raw: true })
-          .then(user => {
-            if (user) {
-              return callback({ status: 'error', message: '此帳號已有人使用！' })
-            }
-          })
+        User.findOne({ where: { account: req.body.account }, raw: true }).then(user => {
+          if (user) {
+            return callback({ status: 'error', message: '此帳號已有人使用！' })
+          }
+        })
       }
     }
 
     if (req.body.email) {
       if (helpers.getUser(req).email !== req.body.email) {
-        User.findOne({ where: { email: req.body.email }, raw: true })
-          .then(user => {
-            console.log(user)
-            if (user) {
-              return callback({ status: 'error', message: '此 email 已註冊過！' })
-            }
-          })
+        User.findOne({ where: { email: req.body.email }, raw: true }).then(user => {
+          console.log(user)
+          if (user) {
+            return callback({ status: 'error', message: '此 email 已註冊過！' })
+          }
+        })
       }
     }
 
@@ -123,35 +122,34 @@ const userService = {
     if (file) {
       imgur.setClientID(IMGUR_CLIENT_ID)
       imgur.upload(file.path, (err, img) => {
-        return User.findByPk(req.params.id)
-          .then(user => {
-            user.update({
+        return User.findByPk(req.params.id).then(user => {
+          user
+            .update({
               ...req.body,
               avatar: file ? img.data.link : user.avatar
             })
-              .then(() => {
-                callback({ status: 'success', message: '使用者資料編輯成功' })
-              })
-          })
+            .then(() => {
+              callback({ status: 'success', message: '使用者資料編輯成功' })
+            })
+        })
       })
     } else {
-      return User.findByPk(req.params.id)
-        .then(user => {
-          user.update({
+      return User.findByPk(req.params.id).then(user => {
+        user
+          .update({
             ...req.body,
             avatar: user.avatar
-          }).then(() => {
+          })
+          .then(() => {
             return callback({ status: 'success', message: '使用者資料編輯成功' })
           })
-        })
+      })
     }
   },
 
   getTopUser: (req, res, callback) => {
     return User.findAll({
-      include: [
-        { model: User, as: 'Followers', attributes: ['id'] }
-      ]
+      include: [{ model: User, as: 'Followers', attributes: ['id'] }]
     }).then(users => {
       users = users.map(user => ({
         ...user.dataValues,
@@ -160,6 +158,28 @@ const userService = {
       }))
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
       return callback({ users })
+    })
+  },
+
+  addFollowing: (req, res, callback) => {
+    return Followship.create({
+      followerId: helpers.getUser(req).id,
+      followingId: req.body.id
+    }).then(followship => {
+      return callback({ status: 'success', message: '追隨成功' })
+    })
+  },
+
+  removeFollowing: (req, res, callback) => {
+    return Followship.findOne({
+      where: {
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
+      }
+    }).then(followship => {
+      followship.destroy().then(followship => {
+        return callback({ status: 'success', message: '取消追隨成功' })
+      })
     })
   }
 }

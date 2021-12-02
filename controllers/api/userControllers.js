@@ -26,13 +26,25 @@ const userController = {
   },
 
   putUser: (req, res) => {
-    userService.putUser(req, res, (data) => {
+    userService.putUser(req, res, data => {
       return res.json(data)
     })
   },
 
   getTopUser: (req, res) => {
     userService.getTopUser(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  addFollowing: (req, res) => {
+    userService.addFollowing(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  removeFollowing: (req, res) => {
+    userService.removeFollowing(req, res, data => {
       return res.json(data)
     })
   }
