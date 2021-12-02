@@ -132,6 +132,17 @@ const userController = {
       .then(user => {
         return res.json(user)
       })
+  },
+  getFollowers:(req,res) =>{
+    return User.findByPk(req.params.id,{
+      include: [
+        {
+          model: User,
+          as: 'Followers'
+        }]
+    }).then(user => {
+      return res.json(user)
+    })
   }
 }
 
