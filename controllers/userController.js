@@ -28,6 +28,12 @@ const userController = {
       return res.json(data)
     })
   },
+
+  putUserSetting: (req, res) => {
+    userService.putUserSetting(req, res, data => {
+      return res.json(data)
+    })
+  }
 }
 
 // userService exports
