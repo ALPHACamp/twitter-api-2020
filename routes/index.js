@@ -12,7 +12,7 @@ const authenticated = (req, res, next) => {
 
 
 //user相關
-router.post('/api/signin', authenticated, userController.signIn)
+router.post('/api/signin', userController.signIn)
 
 
 
