@@ -1,5 +1,5 @@
 // 載入所需套件
-const { Tweet } = require('../models')
+const { Tweet, User } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetService = {
@@ -16,6 +16,22 @@ const tweetService = {
         })
         return callback({ status: 'success', message: '成功發文' })
       }
+    } catch (err) {
+      console.log(err)
+    }
+  },
+
+  getTweets: async (req, res, callback) => {
+    try {
+      //撈出tweet資料，並取得關聯User的資料
+      const tweets = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+        order: [['createdAt', 'DESC']]
+      })
+
+      return callback(tweets)
     } catch (err) {
       console.log(err)
     }
