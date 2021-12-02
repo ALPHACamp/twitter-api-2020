@@ -7,6 +7,8 @@ const Like = db.Like
 const Reply = db.Reply
 const jwt = require('jsonwebtoken')
 
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
   signUP: (req, res) => {
@@ -110,7 +112,7 @@ const userController = {
   },
 
   putUser: (req, res) => {
-    const { name, cover, avatar, introduction } = req.body
+    const { name, introduction } = req.body
     // 判斷當前使用者與更改資料為同一人，但測試無法通過故先註解
     // if (req.params.id !== String(req.user.id)) {
     //   return res.json({ status: 'error', message: "權限錯誤" })
