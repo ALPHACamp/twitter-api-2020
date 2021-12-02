@@ -23,20 +23,20 @@ const userController = {
       return res.json({ status: 'error', message: '超過字數上限' })
     }
     User.findOne({ where: { [Op.or]: [{ email }, { account }] } })
-      .then(user => {
-        if (user) {
-          return res.json({ status: 'error', message: '信箱或帳戶重複！' })
-        }
-        User.create({
-          account,
-          name,
-          email,
-          password: bcrypt.hashSync(req.body.password, 10)
-        })
-          .then(() => {
-            return res.json({ status: 'success', message: '成功註冊帳號！' })
+        .then(user => {
+          if (user) {
+            return res.json({ status: 'error', message: '信箱或帳戶重複！' })
+          }
+          User.create({
+            account,
+            name,
+            email,
+            password: bcrypt.hashSync(req.body.password, 10)
           })
-      })
+              .then(() => {
+                return res.json({ status: 'success', message: '成功註冊帳號！' })
+              })
+        })
   },
 
   signIn: (req, res) => {
@@ -68,23 +68,23 @@ const userController = {
   },
   getTweets: (req, res) => {
     User.findByPk(req.params.id, { include: [{ model: Tweet, include: [Like, Reply, User] }] })
-      .then(user => {
-        if (!user || user.role === 'admin') {
-          return res.json({ status: 'error', message: 'No tweets' })
-        } else {
-          res.json(user.Tweets)
-        }
-      })
+        .then(user => {
+          if (!user || user.role === 'admin') {
+            return res.json({ status: 'error', message: 'No tweets' })
+          } else {
+            res.json(user.Tweets)
+          }
+        })
   },
   getUser: (req, res) => {
     return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user || user.role === 'admin') {
-          return res.json({ status: 'error', message: 'No user' })
-        } else {
-          return res.json(user)
-        }
-      })
+        .then(user => {
+          if (!user || user.role === 'admin') {
+            return res.json({ status: 'error', message: 'No user' })
+          } else {
+            return res.json(user)
+          }
+        })
   },
 
   getRepliedTweets: (req, res) => {
@@ -102,29 +102,21 @@ const userController = {
         { model: Like, include: [{ model: Tweet, include: [Like, User] }] }
       ]
     })
-      .then(user => {
-        if (!user || user.role === 'admin') {
-          return res.json({ status: 'error', message: 'No user' })
-        } else {
-          return res.json(user.Likes)
-        }
-      })
+        .then(user => {
+          if (!user || user.role === 'admin') {
+            return res.json({ status: 'error', message: 'No user' })
+          } else {
+            return res.json(user.Likes)
+          }
+        })
   },
 
   getCurrentUser: (req, res) => {
     return User.findByPk(req.user.id)
-      .then(user => {
-        return res.json(user)
-      })
-  },
-  getFollowings:(req,res) =>{
-    return Followship.findAll({ where: { followerId: helpers.getUser(req).id } })
-        .then(followings => {
-          return res.json(followings)
+        .then(user => {
+          return res.json(user)
         })
   }
-
-
 }
 
 module.exports = userController
