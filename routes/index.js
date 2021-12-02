@@ -32,8 +32,8 @@ router.post('/api/signin', userController.signIn)
 
 
 //tweets相關  待加上authenticated,
-router.get('/api/tweets',  tweetController.getTweets)
-router.get('/api/tweets/:id', tweetController.getTweet)
+router.get('/api/tweets', authenticated, tweetController.getTweets)
+router.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 
 
