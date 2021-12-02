@@ -181,6 +181,22 @@ const userService = {
         return callback({ status: 'success', message: '取消追隨成功' })
       })
     })
+  },
+
+  getUserFollowings: (req, res, callback) => {
+    return User.findByPk(req.params.id, { include: [{ model: User, as: 'Followings' }] }).then(user => {
+      user = user.toJSON()
+      user.Followings.forEach(item => (item.followingId = item.id))
+      return callback({ user: user.Followings })
+    })
+  },
+
+  getUserFollowers: (req, res, callback) => {
+    return User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }] }).then(user => {
+      user = user.toJSON()
+      user.Followers.forEach(item => (item.followingId = item.id))
+      return callback({ user: user.Followers })
+    })
   }
 }
 
