@@ -74,6 +74,57 @@ const userController = {
         return res.json({ status: 'success', message: '成功註冊' })
       }
     })
+  },
+  getUserAccountSetting: (req, res) => {
+    const userId = req.params.id
+    return User.findByPk(userId)
+      .then(user => {
+        return res.json({
+          user: {
+            name: user.name, account: user.account, email: user.email
+          }
+        })
+      })
+  },
+  putUserAccountSetting: (req, res) => {
+    const { account, name, email, password, checkPassword } = req.body
+
+    // 確認欄位是否皆有填寫
+    if (!account || !name || !email || !password || !checkPassword) {
+      return res.json({ status: 'error', message: '須田' })
+    }
+    // 確認密碼
+    if (password !== checkPassword) {
+      return res.json({ status: 'error', message: '' })
+    }
+
+    // 確認email或account是否重複
+    User.findOne({
+      where: {
+        $or: [
+          { email },
+          { account }
+        ]
+      }
+    }).then(user => {
+      if (user) {
+        if (user.email === email) {
+          return res.json({ status: 'error', message: 'email已重覆註冊！' })
+        }
+        if (user.account === account) {
+          return res.json({ status: 'error', message: 'account已重覆註冊！' })
+        }
+      } else {
+        return User.findByPk(req.params.id).then(user => {
+          user.update({
+            account, email, name,
+            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
+          })
+          return res.json({ status: 'success', message: '成功編輯' })
+        })
+      }
+    })
+
   }
 }
 module.exports = userController
