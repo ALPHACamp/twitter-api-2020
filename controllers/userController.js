@@ -87,7 +87,7 @@ const userController = {
 
   getRepliedTweets: (req, res) => {
     return Reply.findAll({
-      include: [User, Tweet],
+      include: [User, { model: Tweet, include: User }],
       where: { UserId: req.params.id }
     }).then(replies => {
       return res.json(replies)
