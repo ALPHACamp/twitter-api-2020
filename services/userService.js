@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
-const { User, Tweet, Followship } = require('../models')
+const { User, Tweet, Followship, Notice } = require('../models')
 const helpers = require('../_helpers')
 
 const userService = {
@@ -203,6 +203,25 @@ const userService = {
       user = user.toJSON()
       user.Followers.forEach(item => (item.followerId = item.id))
       return callback({ user: user.Followers })
+    })
+  },
+
+  addNoticing: (req, res, callback) => {
+    return Notice.create({
+      noticerId: helpers.getUser(req).id,
+      noticingId: req.body.id
+    }).then(notice => {
+      return callback({ status: 'success', message: '已開啟訂閱' })
+    })
+  },
+  removeNoticing: (req, res, callback) => {
+    return Notice.destroy({
+      where: {
+        noticerId: helpers.getUser(req).id,
+        noticingId: req.params.noticeId
+      }
+    }).then(notice => {
+      return callback({ status: 'success', message: '已取消訂閱' })
     })
   }
 }
