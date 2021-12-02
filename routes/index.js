@@ -33,6 +33,7 @@ router.post('/api/signin', userController.signIn)
 
 //tweets相關  待加上authenticated,
 router.get('/api/tweets',  tweetController.getTweets)
+router.get('/api/tweets/:id', tweetController.getTweet)
 
 
 

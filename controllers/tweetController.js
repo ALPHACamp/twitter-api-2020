@@ -24,7 +24,19 @@ const tweetController = {
         res.json(tweets)
       })
   },
-  
+  getTweet: (req, res) => {
+    Tweet.findByPk(req.params.id, {
+      include: [
+        User,
+        { model: User, as: 'LikedUsers' },
+        { model: User, as: 'RepliedUsers' }
+      ]
+    }).then(tweet => {
+      tweet.dataValues.likedCount = tweet.LikedUsers.length
+      tweet.dataValues.repliedCount = tweet.RepliedUsers.length
+      return res.json(tweet)
+    })
+  },
 }
 
 module.exports = tweetController
