@@ -7,6 +7,7 @@ const { authenticated, checkNotAdmin } = require('../../middlewares/auth')
 router.post('/', userController.signUp)
 router.get('/current_user', authenticated, checkNotAdmin, userController.getCurrentUser)
 router.get('/:id', authenticated, checkNotAdmin, userController.getUser)
+router.put('/:id/setting', authenticated, checkNotAdmin, userController.putUserSetting)
 
 // router exports
 module.exports = router
