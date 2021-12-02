@@ -5,6 +5,7 @@ const { authenticated, authenticatedUser, authenticatedAdmin } = require('../mid
 const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
 const tweetController = require('../controllers/tweetController')
+const followshipController = require('../controllers/followshipController')
 
 router.get('/', authenticated, authenticatedUser, (req, res) => res.send('test'))
 
@@ -24,6 +25,11 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.postTwe
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.likeTweet)
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.addReply)
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
+
+//followship
+router.post('/followships', authenticated, authenticatedUser, followshipController.postFollowship)
 
 //admin
 router.post('/admin/signin', adminController.signIn)
