@@ -8,12 +8,16 @@ module.exports = (sequelize, DataTypes) => {
     Tweet.belongsTo(models.User)
     Tweet.hasMany(models.Reply)
     Tweet.hasMany(models.Like)
-    // 待確認是否需要LikedUsers 或增加Tweet欄位likesCount
-    // Tweet.belongsToMany(models.User, { 
-    //   through: models.Like,
-    //   foreignKey: 'TweetId',
-    //   as: 'LikedUsers'
-    // })
+    Tweet.belongsToMany(models.User, { 
+      through: models.Like,
+      foreignKey: 'TweetId',
+      as: 'LikedUsers'
+    })
+    Tweet.belongsToMany(models.User, {
+      through: models.Reply,
+      foreignKey: 'TweetId',
+      as: 'RepliedUsers'
+    })
   };
   return Tweet;
 };

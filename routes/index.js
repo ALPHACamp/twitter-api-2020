@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 const userController = require('../controllers/userController')
+const tweetController = require('../controllers/tweetController')
 
 
 // const authenticated = (req, res, next) => {
@@ -30,9 +31,8 @@ router.post('/api/signin', userController.signIn)
 
 
 
-//tweets相關
-
-
+//tweets相關  待加上authenticated,
+router.get('/api/tweets',  tweetController.getTweets)
 
 
 
