@@ -5,7 +5,9 @@ const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
+const Followship = db.Followship
 const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
 
 
 const userController = {
@@ -114,7 +116,15 @@ const userController = {
       .then(user => {
         return res.json(user)
       })
+  },
+  getFollowings:(req,res) =>{
+    return Followship.findAll({ where: { followerId: helpers.getUser(req).id } })
+        .then(followings => {
+          return res.json(followings)
+        })
   }
+
+
 }
 
 module.exports = userController
