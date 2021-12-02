@@ -30,6 +30,7 @@ router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetC
 
 //followship
 router.post('/followships', authenticated, authenticatedUser, followshipController.postFollowship)
+router.delete('/followships/:followingId', authenticated, authenticatedUser, followshipController.deleteFollowship)
 
 //admin
 router.post('/admin/signin', adminController.signIn)
