@@ -15,9 +15,9 @@ const app = express()
 const port = 3000
 
 // use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
+// function authenticated(req, res, next){
   // passport.authenticate('jwt', { ses...
-};
+// };
 
 //for handlebars
 app.engine('handlebars', handlebars({
