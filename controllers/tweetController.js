@@ -62,6 +62,22 @@ const tweetController = {
             .then(like => {
                 res.json({status: 'success', message: 'The like was successfully created'})
             })
+    },
+    addReply: (req, res) => {
+        if (req.body.comment.length > 200) {
+            return res.json({ status: 'error', message: 'Tweet can\'t be more than 140 words.' })
+        }
+        if(!req.body.comment){
+            return res.json({ status: 'error', message: '內容不可空白' })
+        }
+        return Reply.create({
+            UserId: helpers.getUser(req).id,
+            TweetId: req.params.tweet_id,
+            comment: req.body.comment
+        }).then(() =>{
+            res.json({status: 'successful', message:'The reply was created'})
+        })
+            .catch(error => console.log('error'))
     }
 }
 
