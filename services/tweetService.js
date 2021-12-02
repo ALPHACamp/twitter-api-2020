@@ -20,24 +20,18 @@ const tweetService = {
       console.log(err)
     }
   },
+
   getTweets: async (req, res, callback) => {
     try {
-      //撈出tweet資料，並關聯User資料
+      //撈出tweet資料，並取得關聯User的資料
       const tweets = await Tweet.findAll({
-        include: User,
+        raw: true,
+        nest: true,
+        include: [{ model: User, attribute: ['id', 'account', 'name', 'avatar',] }],
         order: [['createdAt', 'DESC']]
       })
-      
-      //將User關聯資料帶入(user.id, name, avatar, account)
-      const data = tweets.map(tweet => ({
-        ...tweet.dataValues,
-        id: tweet.User.id,
-        name: tweet.User.name,
-        avatar: tweet.User.avatar,
-        account: tweet.User.account
-      }))
 
-      return callback(res.json(data))
+      return callback(tweets)
     } catch (err) {
       console.log(err)
     }

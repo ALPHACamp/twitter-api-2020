@@ -7,6 +7,7 @@ const tweetController = {
       return res.json(data)
     })
   },
+
   getTweets: (req, res) => {
     tweetService.getTweets(req, res, data => {
       return res.json(data)
