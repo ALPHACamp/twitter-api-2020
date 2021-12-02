@@ -66,6 +66,8 @@ const tweetController = {
             .then(like => {
                 res.json({status: 'success', message: 'The like was successfully created'})
             })
+    },
+    getTweetReplies:(req,res) =>{
     }
 }
 
