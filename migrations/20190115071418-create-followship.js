@@ -1,30 +1,41 @@
 'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Followships', {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
+    return queryInterface.createTable(
+      'Followships',
+      {
+        id: {
+          allowNull: false,
+          autoIncrement: true,
+          primaryKey: true,
+          type: Sequelize.INTEGER
+        },
+        followerId: {
+          allowNull: false,
+          type: Sequelize.INTEGER
+        },
+        followingId: {
+          allowNull: false,
+          type: Sequelize.INTEGER
+        },
+        createdAt: {
+          allowNull: false,
+          type: Sequelize.DATE
+        },
+        updatedAt: {
+          allowNull: false,
+          type: Sequelize.DATE
+        }
       },
-      followerId: {
-        allowNull: false,
-        type: Sequelize.INTEGER
-      },
-      followingId: {
-        allowNull: false,
-        type: Sequelize.INTEGER
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
+      {
+        uniqueKeys: {
+          unique_tag: {
+            customIndex: true,
+            fields: ['followerId', 'followingId']
+          }
+        }
       }
-    })
+    )
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Followships')

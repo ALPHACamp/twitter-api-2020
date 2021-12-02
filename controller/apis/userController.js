@@ -9,6 +9,8 @@ const bcrypt = require('bcryptjs')
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
+const like = require('../../models/like')
+const { sequelize } = require('../../models')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -16,30 +18,37 @@ const userController = {
   signIn: (req, res) => {
     // 檢查必要資料
     if (!req.body.email || !req.body.password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
-    }
-    User.findOne({ where: { email: req.body.email}})
-      .then(user => {
-        if (!user) return res.status(401).json({ status: 'error', message: 'user is not exist.'})
-        if (!bcrypt.compareSync(req.body.password, user.password)) {
-          return res.status(401).json({ status: 'error', message: 'email or password incorrect.' })
-        }
-        // 簽發 token
-        var payload = { id: user.id }
-        var token = jwt.sign(payload, process.env.JWT_SECRET)
-        return res.json({
-          status: 200,
-          message: 'pass',
-          token: token,
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            avatar: user.avatar
-          }
-        })
+      return res.json({
+        status: 'error',
+        message: "required fields didn't exist"
       })
+    }
+    User.findOne({ where: { email: req.body.email } }).then(user => {
+      if (!user)
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'user is not exist.' })
+      if (!bcrypt.compareSync(req.body.password, user.password)) {
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'email or password incorrect.' })
+      }
+      // 簽發 token
+      var payload = { id: user.id }
+      var token = jwt.sign(payload, process.env.JWT_SECRET)
+      return res.json({
+        status: 200,
+        message: 'pass',
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar
+        }
+      })
+    })
   },
 
   signUp: async (req, res, cb) => {
@@ -73,7 +82,10 @@ const userController = {
   },
   getUser: async (req, res, cb) => {
     try {
-      const userProfile = (await User.findByPk(req.params.id)).toJSON()
+      const userProfile = await User.findByPk(req.params.id, {
+        raw: true,
+        nest: true
+      })
       return res.json({
         status: 'success',
         message: '',
@@ -115,7 +127,7 @@ const userController = {
         nest: true,
         include: [{ model: Tweet, include: [User] }]
       })
-      return res.json([...replies, { status: 200, message: '' }])
+      return res.status(200).json([...replies])
     } catch (err) {
       console.log(err)
     }
@@ -123,12 +135,17 @@ const userController = {
   getUserLike: async (req, res) => {
     try {
       const likes = await Like.findAll({
-        where: { id: req.params.id },
-        include: [{ model: Tweet }],
+        where: { UserId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [User, Reply]
+          }
+        ],
         raw: true,
         nest: true
       })
-      return res.json([...likes, { status: 200, message: '' }])
+      return res.status(200).json(likes)
     } catch (err) {
       console.log(err)
     }
@@ -181,6 +198,17 @@ const userController = {
     } catch (err) {
       console.log(err)
       return res.json({ status: 'error', message: err })
+    }
+  },
+  getCurrentUser: async (req, res) => {
+    try {
+      const user = await User.findByPk(helper.getUser(req).id, {
+        raw: true,
+        nest: true
+      })
+      return res.status(200).json(user)
+    } catch (err) {
+      console.log(err)
     }
   }
 }

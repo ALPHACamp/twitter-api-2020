@@ -5,7 +5,7 @@ const tweetController = {
   getTweets: async (req, res) => {
     try {
       const tweets = await Tweet.findAll({ raw: true, nest: true })
-      return res.json([...tweets, { status: 200, message: '' }])
+      return res.status(200).json([...tweets])
     } catch (err) {
       return console.log(err)
     }
@@ -14,7 +14,7 @@ const tweetController = {
     try {
       const id = req.params.id
       const tweet = await Tweet.findByPk(id, { raw: true })
-      return res.json({ status: 200, message: '', ...tweet })
+      return res.status(200).json({ ...tweet })
     } catch (err) {
       console.log(err)
     }
