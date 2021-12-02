@@ -17,6 +17,18 @@ const userController = {
     })
   },
 
+  putUserSetting: (req, res) => {
+    userService.putUserSetting(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  putUser: (req, res) => {
+    userService.putUser(req, res, data => {
+      return res.json(data)
+    })
+  },
+
   getCurrentUser: (req, res) => {
     userService.getCurrentUser(req, res, data => {
       return res.json(data)
@@ -28,12 +40,6 @@ const userController = {
       return res.json(data)
     })
   },
-
-  putUserSetting: (req, res) => {
-    userService.putUserSetting(req, res, data => {
-      return res.json(data)
-    })
-  }
 }
 
 // userService exports
