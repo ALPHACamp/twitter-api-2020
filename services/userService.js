@@ -14,7 +14,7 @@ const userService = {
     } else {
       return User.findOne({ where: { email: req.body.email } }).then(user => {
         if (user) {
-          return callback({ status: 'error', message: '信箱重複！' })
+          return callback({ status: 'error', message: 'email 已重覆註冊！' })
         } else {
           User.create({
             account: req.body.account,
@@ -32,23 +32,23 @@ const userService = {
   signIn: (req, res, callback) => {
     // 檢查必要資料
     if (!req.body.email || !req.body.password) {
-      return callback({ status: 'error', message: "required fields didn't exist" })
+      return callback({ status: 'error', message: '所有欄位皆為必填！' })
     }
     // 檢查 user 是否存在與密碼是否正確
     const username = req.body.email
     const password = req.body.password
 
     User.findOne({ where: { email: username } }).then(user => {
-      if (!user) return callback({ status: 'error', message: 'no such user found' })
+      if (!user) return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       if (!bcrypt.compareSync(password, user.password)) {
-        return callback({ status: 'error', message: 'passwords did not match' })
+        return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       }
       // 簽發 token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
       return callback({
         status: 'success',
-        message: '登入成功',
+        message: '登入成功！',
         token: token,
         user: {
           id: user.id,
@@ -101,7 +101,7 @@ const userService = {
       if (helpers.getUser(req).account !== req.body.account) {
         User.findOne({ where: { account: req.body.account }, raw: true }).then(user => {
           if (user) {
-            return callback({ status: 'error', message: '此帳號已有人使用！' })
+            return callback({ status: 'error', message: 'account 已重覆註冊！' })
           }
         })
       }
@@ -112,7 +112,7 @@ const userService = {
         User.findOne({ where: { email: req.body.email }, raw: true }).then(user => {
           console.log(user)
           if (user) {
-            return callback({ status: 'error', message: '此 email 已註冊過！' })
+            return callback({ status: 'error', message: 'email 已重覆註冊！' })
           }
         })
       }
@@ -141,7 +141,10 @@ const userService = {
             avatar: user.avatar
           })
           .then(() => {
-            return callback({ status: 'success', message: '使用者資料編輯成功' })
+            return callback({
+              status: 'success',
+              message: '使用者資料編輯成功！'
+            })
           })
       })
     }
