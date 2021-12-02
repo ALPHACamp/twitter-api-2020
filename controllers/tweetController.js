@@ -10,7 +10,7 @@ const tweetController = {
         Tweet.findAll({
             raw: true,
             nest: true,
-            include: [User, Reply, Like],
+            include: User,
             order: [['createdAt', 'DESC']]
         }).then(tweets=>{
             tweets.map(tweet => ({
