@@ -59,6 +59,18 @@ const userController = {
     userService.getUserFollowers(req, res, data => {
       return res.json(data.user)
     })
+  },
+
+  addNoticing: (req, res) => {
+    userService.addNoticing(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  removeNoticing: (req, res) => {
+    userService.removeNoticing(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 

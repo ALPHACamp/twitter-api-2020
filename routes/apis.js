@@ -31,6 +31,8 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 
 router.post('/followships', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
+router.post('/notice', authenticated, userController.addNoticing)
+router.delete('/notice/:noticeId', authenticated, userController.removeNoticing)
 
 router.post('/admin/signin', adminController.signIn)
 

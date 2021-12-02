@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
-const { User, Tweet, Followship } = require('../models')
+const { User, Tweet, Followship, Notice } = require('../models')
 const helpers = require('../_helpers')
 
 const userService = {
@@ -78,7 +78,9 @@ const userService = {
       include: [
         { model: Tweet, attributes: ['id'] },
         { model: User, as: 'Followings', attributes: ['id'] },
-        { model: User, as: 'Followers', attributes: ['id'] }
+        { model: User, as: 'Followers', attributes: ['id'] },
+        { model: User, as: 'Noticings', attributes: ['id'] },
+        { model: User, as: 'Noticers', attributes: ['id'] }
       ]
     }).then(user => {
       user = {
@@ -86,7 +88,9 @@ const userService = {
         identify: Number(req.params.id) === Number(helpers.getUser(req).id),
         TweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
-        followerCount: user.Followers.length
+        followerCount: user.Followers.length,
+        isFollowed: user.Followers.some(i => i.id === helpers.getUser(req).id),
+        isNoticed: user.Noticers.some(i => i.id === helpers.getUser(req).id)
       }
       return callback({ user })
     })
@@ -209,6 +213,25 @@ const userService = {
 
       user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       return callback({ user })
+    })
+  },
+
+  addNoticing: (req, res, callback) => {
+    return Notice.create({
+      noticerId: helpers.getUser(req).id,
+      noticingId: req.body.id
+    }).then(notice => {
+      return callback({ status: 'success', message: '已開啟訂閱' })
+    })
+  },
+  removeNoticing: (req, res, callback) => {
+    return Notice.destroy({
+      where: {
+        noticerId: helpers.getUser(req).id,
+        noticingId: req.params.noticeId
+      }
+    }).then(notice => {
+      return callback({ status: 'success', message: '已取消訂閱' })
     })
   }
 }
