@@ -2,6 +2,7 @@ const { Tweet, sequelize } = require('../models')
 const { User } = require('../models')
 const { Like } = require('../models')
 const { Reply } = require('../models')
+const {getUer} = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res) => {
@@ -9,6 +10,7 @@ const tweetController = {
       const tweets = await Tweet.findAll({
         include: [{ model: User }, { model: Like }, { model: Reply }]
       })
+
 
       const results = tweets.map((tweet) => ({
         id: tweet.dataValues.id,
@@ -21,7 +23,7 @@ const tweetController = {
 
       return res.status(200).json(results)
     } catch (error) {
-      console.log('>>>', error)
+      console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
     }
   }
