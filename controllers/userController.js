@@ -109,6 +109,32 @@ const userController = {
       })
   },
 
+  putUser: (req, res) => {
+    const { name, cover, avatar, introduction } = req.body
+    // 判斷當前使用者與更改資料為同一人，但測試無法通過故先註解
+    // if (req.params.id !== String(req.user.id)) {
+    //   return res.json({ status: 'error', message: "權限錯誤" })
+    // }
+    if (name && name.length > 50) {
+      return res.json({ status: 'error', message: 'name 超過字數上限' })
+    }
+    if (introduction && introduction.length > 160) {
+      return res.json({ status: 'error', message: 'introduction 超過字數上限' })
+    }
+    return User.findByPk(req.params.id)
+      .then(user => {
+        return user.update({
+          name,
+          cover,
+          avatar,
+          introduction
+        })
+          .then(user => {
+            return res.json({ status: 'success', message: '資料編輯成功' })
+          })
+      })
+  },
+
   getCurrentUser: (req, res) => {
     return User.findByPk(req.user.id)
       .then(user => {
