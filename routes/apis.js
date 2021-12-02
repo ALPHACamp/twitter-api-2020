@@ -27,6 +27,7 @@ router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetControlle
 
 //followship
 router.post('/followships', authenticated, authenticatedUser, followshipController.postFollowship)
+router.delete('/followships/:followingId', authenticated, authenticatedUser, followshipController.deleteFollowship)
 
 //admin
 router.post('/admin/signin', adminController.signIn)

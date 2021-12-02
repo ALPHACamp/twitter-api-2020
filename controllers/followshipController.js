@@ -1,3 +1,4 @@
+const { Op } = require("sequelize")
 const db = require('../models')
 const Followship = db.Followship
 const User = db.User
@@ -20,6 +21,20 @@ const followshipController = {
             return res.json({ status: 'success', message: '成功追蹤' })
           }
         })
+      })
+  },
+
+  deleteFollowship: (req, res) => {
+    return Followship.destroy({
+      where: {
+        [Op.and]: [
+          { followerId: helpers.getUser(req).id },
+          { followingId: req.params.followingId }
+        ]
+      }
+    })
+      .then(() => {
+        return res.json({ status: 'success', message: '' })
       })
   }
 }
