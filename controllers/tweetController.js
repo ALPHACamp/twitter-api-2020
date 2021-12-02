@@ -67,8 +67,13 @@ const tweetController = {
                 res.json({status: 'success', message: 'The like was successfully created'})
             })
     },
-    getTweetReplies:(req,res) =>{
+    getTweetReplies: (req, res) => {
+        return Reply.findAll({
+            where: { TweetId: req.params.tweet_id }
+        })
+            .then(Replies => {
+            return res.json(Replies)
+        })
     }
 }
-
 module.exports = tweetController
