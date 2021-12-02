@@ -197,7 +197,7 @@ const userService = {
   getUserFollowers: (req, res, callback) => {
     return User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }] }).then(user => {
       user = user.toJSON()
-      user.Followers.forEach(item => (item.followingId = item.id))
+      user.Followers.forEach(item => (item.followerId = item.id))
       return callback({ user: user.Followers })
     })
   }
