@@ -46,7 +46,7 @@ const tweetService = {
           nest: true,
           include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
         })
-      console.log(tweet)
+      
       return callback(tweet)
     } catch (err) {
       console.log(err)
