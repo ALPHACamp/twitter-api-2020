@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
+const imgur = require('imgur')
 
 const userService = {
   signUp: async (req, res, callback) => {
@@ -100,6 +101,39 @@ const userService = {
       }, { where: { id: userId } })
       return callback({ status: 'success', message: '成功修改使用者帳戶資訊' })
     }
+  },
+
+  putUser: async (req, res, callback) => {
+    const userId = helpers.getUser(req).id
+
+    // 確認當前使用者和欲修改使用者資料是相同的
+    if (userId !== Number(req.params.id)) {
+      return callback({ status: 'error', message: '無法變更其他使用者資料' })
+    }
+
+    // 確認name有填寫
+    if (!req.body.name) {
+      return callback({ status: 'error', message: 'name為必填欄位' })
+    }
+
+    // 如果有上傳圖片，就上傳到imgur中
+    const { files } = req
+    imgur.setClientId(process.env.IMGUR_CLIENT_ID) // 設定imgur的clientId
+    if (files) {
+      if (files.avatar) {
+        // 確認是否有avatar上傳，有就上傳到imgur
+        const avatar = await imgur.uploadFile(files.avatar[0].path)
+        req.body.avatar = avatar.link
+      }
+      if (files.cover) {
+        // 確認是否有cover上傳，有就上傳到imgur
+        const cover = await imgur.uploadFile(files.cover[0].path)
+        req.body.cover = cover.link
+      }
+    }
+
+    await User.update({ ...req.body }, { where: { id: userId } })
+    return callback({ status: 'success', message: '成功修改使用者Profile' })
   },
 
   getCurrentUser: async (req, res, callback) => {
