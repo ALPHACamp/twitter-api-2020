@@ -82,14 +82,12 @@ const userService = {
       ]
     })
       .then(user => {
-        user = {
-          ...user.toJSON(),
-          identify: (Number(req.params.id) === Number(helpers.getUser(req).id)),
-          TweetCount: user.Tweets.length,
-          followingCount: user.Followings.length,
-          followerCount: user.Followers.length
-        }
-        return callback({ user })
+        user.identify = (Number(req.params.id) === Number(helpers.getUser(req).id))
+        user.TweetCount = user.Tweets.length
+        user.followingCount = user.Followings.length
+        user.followerCount = user.Followers.length
+        console.log(user.toJSON())
+        return callback({ user: user.toJSON() })
       })
   },
 

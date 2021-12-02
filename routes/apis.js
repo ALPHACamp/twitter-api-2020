@@ -20,16 +20,16 @@ const authenticatedAdmin = function authenticatedAdmin (req, res, next) {
   }
 }
 
-router.post('/admin/signin', adminController.signIn)
-
-router.post('/signin', userController.signIn)
-router.post('/users', userController.signUp)
-
 router.get('/users/top', authenticated, userController.getTopUser)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, upload.single('image'), userController.putUser)
 
 router.get('/users', authenticated, userController.getUsers)
 router.get('/tweets', authenticated, tweetController.getTweets)
+
+router.post('/admin/signin', adminController.signIn)
+
+router.post('/signin', userController.signIn)
+router.post('/users', userController.signUp)
 
 module.exports = router
