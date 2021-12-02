@@ -27,7 +27,7 @@ const tweetService = {
       const tweets = await Tweet.findAll({
         raw: true,
         nest: true,
-        include: [{ model: User, attribute: ['id', 'account', 'name', 'avatar',] }],
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
         order: [['createdAt', 'DESC']]
       })
 
