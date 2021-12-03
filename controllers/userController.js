@@ -61,10 +61,11 @@ const userController = {
             message: '此信箱或帳號已註冊過！',
           })
         } else {
-          await User.create({
+          const user = await User.create({
             account: req.body.account,
             name: req.body.name,
             email: req.body.email,
+            role:'user',
             password: bcrypt.hashSync(
               req.body.password,
               bcrypt.genSaltSync(10)
@@ -72,7 +73,7 @@ const userController = {
           })
           return res
             .status(200)
-            .json({ status: 'success', message: '成功註冊帳號！' })
+            .json({ status: 'success', message: '成功註冊帳號！', user })
         }
       }
     } catch (error) {

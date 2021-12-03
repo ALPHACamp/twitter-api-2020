@@ -38,6 +38,7 @@ const authenticated = (req, res, next) => {
 
 module.exports = (app) => {
   // JWT signin & signup
+  app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
 
 }
