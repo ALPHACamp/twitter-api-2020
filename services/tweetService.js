@@ -24,6 +24,25 @@ const tweetService = {
     return Tweet.create({ UserId: helpers.getUser(req).id, description: req.body.description }).then(tweet => {
       callback({ status: 'success', message: '發文成功！' })
     })
+  },
+
+  getTweet: (req, res, callback) => {
+    Tweet.findByPk(req.params.tweet_id, {
+      include: [
+        {
+          model: Reply,
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+        },
+        { model: Like }
+      ]
+    }).then(tweet => {
+      tweet = tweet.toJSON()
+      tweet['isLiked'] = Number(helpers.getUser(req).id) === Number(tweet.UserId)
+      tweet['replyCount'] = tweet.Replies.length
+      tweet['likeCount'] = tweet.Likes.length
+
+      return callback({ tweet })
+    })
   }
 }
 
