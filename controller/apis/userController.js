@@ -3,6 +3,7 @@ const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
 const Like = db.Like
+const Followship = db.Followship
 const helper = require('../../_helpers')
 const bcrypt = require('bcryptjs')
 
@@ -11,6 +12,7 @@ const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const like = require('../../models/like')
 const { sequelize } = require('../../models')
+const { json } = require('body-parser')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -84,12 +86,24 @@ const userController = {
     try {
       const userProfile = await User.findByPk(req.params.id, {
         raw: true,
-        nest: true
+        nest: true,
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
       })
+      const followship = await Followship.findOne({
+        where: {
+          followerId: helper.getUser(req).id,
+          followingId: req.params.id
+        }
+      })
+      const isFollowed = followship ? true : false
       return res.json({
         status: 'success',
         message: '',
-        ...userProfile
+        ...userProfile,
+        isFollowed
       })
     } catch (err) {
       console.log(err)
@@ -134,18 +148,49 @@ const userController = {
   },
   getUserLike: async (req, res) => {
     try {
-      const likes = await Like.findAll({
-        where: { UserId: req.params.id },
-        include: [
-          {
-            model: Tweet,
-            include: [User, Reply]
-          }
+      const data = await Tweet.findAll({
+        attributes: [
+          ['id', 'TweetId'],
+          'description',
+          [sequelize.col('User.id'), 'tweet_user_id'],
+          [sequelize.col('User.name'), 'tweet_user_name'],
+          [sequelize.col('User.account'), 'tweet_user_account'],
+          [sequelize.col('User.avatar'), 'tweet_user_avatar'],
+
+          [
+            sequelize.fn(
+              'COUNT',
+              sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
+            ),
+            'reply_count'
+          ],
+          [
+            sequelize.fn(
+              'COUNT',
+              sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
+            ),
+            'like_count'
+          ],
+          'createdAt'
         ],
+        include: [
+          { model: Reply, attributes: [] },
+          { model: Like, attributes: [] },
+          { model: User, attributes: [] }
+        ],
+        where: {
+          id: [
+            sequelize.literal(`
+            SELECT TweetId
+	          FROM LIKES
+	          WHERE UserId = ${req.params.id}`)
+          ]
+        },
+        group: ['TweetId'],
         raw: true,
         nest: true
       })
-      return res.status(200).json(likes)
+      return res.status(200).json(data)
     } catch (err) {
       console.log(err)
     }
@@ -209,6 +254,32 @@ const userController = {
       return res.status(200).json(user)
     } catch (err) {
       console.log(err)
+    }
+  },
+  postFollow: async (req, res) => {
+    try {
+      await Followship.create({
+        followerId: helper.getUser(req).id,
+        followingId: req.body.id
+      })
+      return res.status(200).json({ status: 200, message: '追蹤成功！' })
+    } catch (err) {
+      console.log(err)
+      return res.json({ status: 'error', message: err })
+    }
+  },
+  deleteFollow: async (req, res) => {
+    try {
+      await Followship.destroy({
+        where: {
+          followerId: helper.getUser(req).id,
+          followingId: req.params.id
+        }
+      })
+      return res.status(200).json({ message: '成功移除 follow' })
+    } catch (err) {
+      console.log(err)
+      return res.json({ status: 'error', message: err })
     }
   }
 }
