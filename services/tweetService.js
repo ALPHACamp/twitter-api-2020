@@ -1,11 +1,11 @@
 const db = require('../models')
-const { Tweet, User, Reply } = db
+const { Tweet, User, Reply, Like, sequelize } = db
 const helpers = require('../_helpers')
 
 const tweetService = {
   getTweets: (req, res, callback) => {
     return Tweet.findAll({
-      include: [User, Reply, { model: User, as: 'LikedUsers' }],
+      include: [User, { model: User, as: 'LikedUsers' }],
       order: [['createdAt', 'DESC']]
     }).then((data) => {
       const tweets = data.map((tweet) => ({
@@ -17,7 +17,7 @@ const tweetService = {
           helpers.getUser(req).id
         )
       }))
-      return callback({ tweets: tweets.toJSON() })
+      callback(tweets)
     })
   },
   postTweet: (req, res, callback) => {
@@ -46,16 +46,14 @@ const tweetService = {
         { model: Reply, include: [User] }
       ],
       order: [['Replies', 'createdAt', 'DESC']]
-    })
-      .then((tweet) => {
-        callback({
-          tweet: tweet.toJSON(),
-          isLiked: tweet.LikedUsers.map((d) => d.id).includes(
-            helpers.getUser(req).id
-          )
-        })
+    }).then((tweet) => {
+      callback({
+        tweet,
+        isLiked: tweet.LikedUsers.map((d) => d.id).includes(
+          helpers.getUser(req).id
+        )
       })
-      .catch((err) => console.log(err))
+    })
   }
 }
 
