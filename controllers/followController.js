@@ -17,11 +17,11 @@ const followController = {
         avatar: user.dataValues.avatar,
         account: user.dataValues.account,
         name: user.dataValues.name,
-        followersCount: user.dataValues.Followers.length,
+        followerCounts: user.dataValues.Followers.length,
         isFollowing: helpers.getUser(req).Followings.some(following => following.id === user.dataValues.id)
       }))
 
-      result = result.sort((a, z) => z.followersCount - a.followersCount)
+      result = result.sort((a, z) => z.followerCounts - a.followerCounts)
       res.status(200).json({ status: 'success', results: result })
     } catch (error) {
       console.log(error)
