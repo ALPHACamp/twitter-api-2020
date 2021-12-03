@@ -100,20 +100,25 @@ const userService = {
     try {
       const { account, email } = req.body
 
+      // 不同人
       if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
         return callback({ status: 'error', message: '沒有編輯權限！' })
       }
 
+      // account 已重覆
       if (account && account !== helpers.getUser(req).account) {
         const existUser = await User.findOne({
-          where: { account }, raw: true
+          where: { account },
+          raw: true
         })
         if (existUser) return callback({ status: 'error', message: 'account 已重覆註冊！' })
       }
 
+      // email 已重覆
       if (email && email !== helpers.getUser(req).email) {
         const existUser = await User.findOne({
-          where: { email }, raw: true
+          where: { email },
+          raw: true
         })
         if (existUser) return callback({ status: 'error', message: 'email 已重覆註冊！' })
       }
@@ -121,15 +126,17 @@ const userService = {
       const user = await User.findByPk(req.params.id)
 
       const { files } = req
+
+      // 如果有圖
       if (files) {
-        imgur.setClientId(IMGUR_CLIENT_ID)
-        const avatar = files.avatar ? await imgur.upload(files.avatar[0].path) : null
-        const cover = files.cover ? await imgur.upload(files.cover[0].path) : null
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        const avatar = files.avatar ? files.avatar[0].path : null
+        const cover = files.cover ? files.cover[0].path : null
 
         await user.update({
           ...req.body,
-          avatar: files.avatar ? avatar.data.link : user.avatar,
-          cover: files.cover ? cover.data.link : user.cover
+          avatar: avatar,
+          cover: cover
         })
         return callback({ status: 'success', message: '使用者資料編輯成功！' })
       }
@@ -137,6 +144,7 @@ const userService = {
       await user.update({ ...req.body })
       return callback({ status: 'success', message: '使用者資料編輯成功！' })
     } catch (err) {
+      console.log(err)
       return callback({ status: 'error', message: '編輯未成功！' })
     }
   },
