@@ -2,13 +2,14 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
 
+const helpers = require('../_helpers')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
 
-const imgur = require('imgur-node-api')
+const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
@@ -121,11 +122,10 @@ const userController = {
   },
 
   putUser: async (req, res) => {
-    const { name, avatar, cover, introduction } = req.body
-    // 判斷當前使用者與更改資料為同一人，但測試無法通過故先註解
-    // if (req.params.id !== String(req.user.id)) {
-    //   return res.json({ status: 'error', message: "權限錯誤" })
-    // }
+    const { name, introduction } = req.body
+    if (req.params.id !== String(helpers.getUser(req).id)) {
+      return res.json({ status: 'error', message: "權限錯誤" })
+    }
     if (name && name.length > 50) {
       return res.json({ status: 'error', message: '名稱字數最多 50 字' })
     }
@@ -133,28 +133,21 @@ const userController = {
       return res.json({ status: 'error', message: '自我介紹字數最多 160 字' })
     }
     const { files } = req
-    imgur.setClientID(IMGUR_CLIENT_ID)
+    imgur.setClientId(IMGUR_CLIENT_ID)
     if (files) {
       if (files.avatar) {
-        const avatar = await imgur.upload(files.avatar[0].path)
+        const avatar = await imgur.uploadFile(files.avatar[0].path)
         req.body.avatar = avatar.link
       }
       if (files.cover) {
-        const cover = await imgur.upload(files.cover[0].path)
-          req.body.cover = res.data.link
+        const cover = await imgur.uploadFile(files.cover[0].path)
+        req.body.cover = cover.link
       }
     }
-    
-    const user = await User.findByPk(req.params.id)
-    await user.update({
-      name,
-      cover,
-      avatar,
-      introduction
-    })
+
+    await User.update({ ...req.body }, { where: { id: req.params.id } })
 
     return res.json({ status: 'success', message: '資料編輯成功' })
-
   },
 
   editUser: (req, res) => {
