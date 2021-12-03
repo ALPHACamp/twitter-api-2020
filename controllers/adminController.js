@@ -56,12 +56,15 @@ const adminController = {
       include: [
         Like,
         Reply,
-        { model: User, as: 'Followings'},
+        { model: User, as: 'Followings' },
         { model: User, as: 'Followers' }
       ],
       order: [['name', 'ASC']]
     })
       .then(users => {
+        users = users.filter(user => (
+          !user.role.includes('admin')
+        ))
         return res.json(users)
       })
   }
