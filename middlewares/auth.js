@@ -17,7 +17,7 @@ module.exports = {
     if (req.user && helpers.getUser(req).role !== 'admin') return next()
     return res.status(401).json({
       status: 'error',
-      message: 'permission denied'
+      message: '權限錯誤'
     })
   },
 
@@ -25,7 +25,7 @@ module.exports = {
     if (req.user && helpers.getUser(req).role === 'admin') return next()
     return res.status(401).json({
       status: 'error',
-      message: 'permission denied'
+      message: '權限錯誤'
     })
   }
 }
