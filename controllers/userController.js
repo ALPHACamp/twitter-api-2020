@@ -7,7 +7,6 @@ const Like = db.Like
 const Reply = db.Reply
 const Followship = db.Followship
 const jwt = require('jsonwebtoken')
-const should = require('should');
 
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
