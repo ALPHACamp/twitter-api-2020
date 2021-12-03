@@ -51,7 +51,7 @@ const tweetService = {
     } catch (err) {
       console.log(err)
     }
-  }
+  },
 }
 
 // tweetController exports
