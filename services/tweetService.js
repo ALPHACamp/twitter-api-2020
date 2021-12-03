@@ -8,7 +8,7 @@ const tweetService = {
       const { description } = req.body
       //確認發文欄是否有填寫
       if (!description) {
-        return callback({ status: 'error', message: '需輸入內文才能發文' })
+        return callback({ status: 'error', message: '內容不可空白' })
       } else {
         await Tweet.create({
           description,

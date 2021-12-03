@@ -1,5 +1,5 @@
 // 載入所需套件
-const { Reply, User, Tweet } = require('../models')
+const { Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const replyService = {
@@ -9,7 +9,7 @@ const replyService = {
 
       //確認回覆欄是否有填寫
       if (comment.trim() === '') {
-        return callback({ status: 'error', message: '需輸入內文才能回覆' })
+        return callback({ status: 'error', message: '內容不可空白' })
       } else {
         await Reply.create({
           comment,
