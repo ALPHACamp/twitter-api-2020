@@ -142,8 +142,27 @@ const userService = {
   },
 
   getUser: async (req, res, callback) => {
-    const user = (await User.findByPk(req.params.id)).toJSON()
-    return callback(user)
+    const currentUserId = helpers.getUser(req).id // 當前使用者id
+    const userId = req.params.id // 欲取得特定使用者資料的id
+
+    // 取得當前使用者的資訊
+    if (currentUserId === Number(userId)) {
+      const user = (await User.findByPk(userId, {
+        attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
+          // followings => 該使用者關注幾個其他人，followers => 該使用者被幾個其他人跟隨
+          [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers']]
+      })).toJSON()
+      return callback(user)
+    } else {
+      // 取得其他使用者資訊(要有isFollowed => 利用SQL原生語法判斷)
+      const user = (await User.findByPk(userId, {
+        attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
+          [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
+          [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed']
+        ]
+      })).toJSON()
+      return callback(user)
+    }
   },
 
   getUserTweets: async (req, res, callback) => {
