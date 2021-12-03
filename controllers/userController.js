@@ -1,12 +1,12 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
+
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
-const Followship = db.Followship
-const jwt = require('jsonwebtoken')
 
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -15,10 +15,10 @@ const userController = {
   signUP: (req, res) => {
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !name || !email || !password || !checkPassword) {
-      return res.json({ status: 'error', message: '所有欄位皆為必填' })
+      return res.json({ status: 'error', message: '所有欄位都是必填' })
     }
     if (password !== checkPassword) {
-      return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
+      return res.json({ status: 'error', message: '兩次密碼輸入不同' })
     }
     if (account.length > 20 || name.length > 50 || password.length > 20) {
       return res.json({ status: 'error', message: '超過字數上限' })
@@ -26,7 +26,7 @@ const userController = {
     User.findOne({ where: { [Op.or]: [{ email }, { account }] } })
       .then(user => {
         if (user) {
-          return res.json({ status: 'error', message: '信箱或帳戶重複！' })
+          return res.json({ status: 'error', message: '信箱或帳戶重複' })
         }
         User.create({
           account,
@@ -35,7 +35,7 @@ const userController = {
           password: bcrypt.hashSync(req.body.password, 10)
         })
           .then(() => {
-            return res.json({ status: 'success', message: '成功註冊帳號！' })
+            return res.json({ status: 'success', message: '成功註冊帳號' })
           })
       })
   },
@@ -43,25 +43,25 @@ const userController = {
   signIn: (req, res) => {
     const { email, password } = req.body
     if (!email || !password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
+      return res.json({ status: 'error', message: "所有欄位都是必填" })
     }
 
     return User.findOne({ where: { email } }).then(user => {
       if (!user) {
-        return res.json({ status: 'error', message: "no such user found" })
+        return res.json({ status: 'error', message: "帳號不存在" })
       }
       if (user.role !== 'user') {
-        return res.json({ status: 'error', message: "no such user found" })
+        return res.json({ status: 'error', message: "帳號不存在" })
       }
       if (!bcrypt.compareSync(password, user.password)) {
-        return res.json({ status: 'error', message: "passwords did not match" })
+        return res.json({ status: 'error', message: "密碼錯誤" })
       }
 
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
-        message: 'ok',
+        message: '登入成功',
         token: token,
         user: { id: user.id, account: user.account, name: user.name, email: user.email, avatar: user.avatar, cover: user.cover, introduction: user.introduction, role: user.role }
       })
@@ -69,21 +69,22 @@ const userController = {
   },
   getTweets: (req, res) => {
     User.findByPk(req.params.id,
-        { include: [{ model: Tweet, include: [Like, Reply, User] }] }
+      { include: [{ model: Tweet, include: [Like, Reply, User] }] }
     )
       .then(user => {
         if (!user || user.role === 'admin') {
-          return res.json({ status: 'error', message: 'No tweets' })
+          return res.json({ status: 'error', message: '權限錯誤' })
         } else {
           res.json(user.Tweets)
         }
       })
   },
+
   getUser: (req, res) => {
     return User.findByPk(req.params.id)
       .then(user => {
         if (!user || user.role === 'admin') {
-          return res.json({ status: 'error', message: 'No user' })
+          return res.json({ status: 'error', message: '權限錯誤' })
         } else {
           return res.json(user)
         }
@@ -104,14 +105,14 @@ const userController = {
       where: { UserId: req.params.id },
       include: [
         {
-          model:Tweet,
-          include:{ model:User }
+          model: Tweet,
+          include: { model: User }
         }
       ]
     })
-        .then(like => {
-          return res.json(like)
-        })
+      .then(like => {
+        return res.json(like)
+      })
   },
 
   putUser: (req, res) => {
@@ -121,10 +122,10 @@ const userController = {
     //   return res.json({ status: 'error', message: "權限錯誤" })
     // }
     if (name && name.length > 50) {
-      return res.json({ status: 'error', message: 'name 超過字數上限' })
+      return res.json({ status: 'error', message: '名稱字數最多 50 字' })
     }
     if (introduction && introduction.length > 160) {
-      return res.json({ status: 'error', message: 'introduction 超過字數上限' })
+      return res.json({ status: 'error', message: '自我介紹字數最多 160 字' })
     }
     return User.findByPk(req.params.id)
       .then(user => {
@@ -173,7 +174,7 @@ const userController = {
           password: bcrypt.hashSync(password, 10)
         })
           .then(() => {
-            return res.json({status:'success', message:'資料編輯成功'})
+            return res.json({ status: 'success', message: '資料編輯成功' })
           })
       })
   },
@@ -184,37 +185,41 @@ const userController = {
         return res.json(user)
       })
   },
-  getFollowers:(req,res) =>{
+
+  getFollowers: (req, res) => {
     return User.findByPk(req.params.id,
-        { include: [{
+      {
+        include: [{
           model: User, as: 'Followers',
-            attributes: [['id', 'followerId'],
-              'name',
-              'account',
-              'avatar',
-              'cover',
-              'introduction',]
+          attributes: [['id', 'followerId'],
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'introduction',]
         }],
-      attributes: ['id', 'name', 'account', 'avatar', 'cover']
-    }).then(user => {
-      return res.json(user.Followers)
-    })
+        attributes: ['id', 'name', 'account', 'avatar', 'cover']
+      }).then(user => {
+        return res.json(user.Followers)
+      })
   },
+
   getFollowings: (req, res) => {
     return User.findByPk(req.params.id,
-        { include: [{
-            model: User, as: 'Followings',
-            attributes: [['id', 'followingId'],
-              'name',
-              'account',
-              'avatar',
-              'cover',
-              'introduction',]
-          }],
-          attributes: ['id', 'name', 'account', 'avatar', 'cover'],
-        }).then(followings => {
-      return res.json(followings.Followings)
-    })
+      {
+        include: [{
+          model: User, as: 'Followings',
+          attributes: [['id', 'followingId'],
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'introduction',]
+        }],
+        attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+      }).then(followings => {
+        return res.json(followings.Followings)
+      })
   }
 }
 

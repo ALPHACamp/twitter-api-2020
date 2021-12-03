@@ -11,18 +11,18 @@ const adminController = {
   signIn: (req, res) => {
     const { email, password } = req.body
     if (!email || !password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
+      return res.json({ status: 'error', message: "所有欄位都是必填" })
     }
 
     User.findOne({ where: { email } }).then(user => {
       if (!user) {
-        return res.json({ status: 'error', message: "no such user found" })
+        return res.json({ status: 'error', message: "帳號不存在" })
       }
       if (user.role !== 'admin') {
-        return res.json({ status: 'error', message: "no such user found" })
+        return res.json({ status: 'error', message: "帳號不存在" })
       }
       if (!bcrypt.compareSync(password, user.password)) {
-        return res.json({ status: 'error', message: "passwords did not match" })
+        return res.json({ status: 'error', message: "密碼錯誤" })
       }
 
       const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET)
@@ -48,7 +48,7 @@ const adminController = {
 
   deleteTweet: (req, res) => {
     Tweet.destroy({ where: { id: req.params.id } })
-      .then(() => res.json({ status: 'success', message: '' }))
+      .then(() => res.json({ status: 'success', message: '成功刪除推文' }))
   },
 
   getUsers: (req, res) => {
@@ -74,7 +74,7 @@ const adminController = {
       .then(user => {
         return res.json(user)
       })
-  },
+  }
 }
 
 module.exports = adminController
