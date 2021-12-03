@@ -5,8 +5,11 @@ const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
+const Followship = db.Followship
 const jwt = require('jsonwebtoken')
 
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
 const userController = {
   signUP: (req, res) => {
@@ -65,7 +68,9 @@ const userController = {
     })
   },
   getTweets: (req, res) => {
-    User.findByPk(req.params.id, { include: [{ model: Tweet, include: [Like, Reply, User] }] })
+    User.findByPk(req.params.id,
+        { include: [{ model: Tweet, include: [Like, Reply, User] }] }
+    )
       .then(user => {
         if (!user || user.role === 'admin') {
           return res.json({ status: 'error', message: 'No tweets' })
@@ -102,7 +107,7 @@ const userController = {
   },
 
   putUser: (req, res) => {
-    const { name, cover, avatar, introduction } = req.body
+    const { name, introduction } = req.body
     // 判斷當前使用者與更改資料為同一人，但測試無法通過故先註解
     // if (req.params.id !== String(req.user.id)) {
     //   return res.json({ status: 'error', message: "權限錯誤" })
@@ -117,12 +122,50 @@ const userController = {
       .then(user => {
         return user.update({
           name,
-          cover,
-          avatar,
+          // cover,
+          // avatar,
           introduction
         })
           .then(user => {
             return res.json({ status: 'success', message: '資料編輯成功' })
+          })
+      })
+  },
+
+  editUser: (req, res) => {
+    const { account, name, email, password, checkPassword } = req.body
+    if (req.params.id !== String(req.user.id)) {
+      return res.json({ status: 'error', message: "權限錯誤" })
+    }
+    if (!account || !name || !email || !password || !checkPassword) {
+      return res.json({ status: 'error', message: '所有欄位都是必填' })
+    }
+    if (password !== checkPassword) {
+      return res.json({ status: 'error', message: '密碼與確認密碼不相符' })
+    }
+    if (account.length > 20 || password.length > 20 || name.length > 50) {
+      return res.json({ status: 'error', message: '超過字數上限' })
+    }
+    return Promise.all([
+      User.findByPk(req.params.id),
+      User.findOne({ where: { email } }),
+      User.findOne({ where: { account } })
+    ])
+      .then(([user, anotherUserE, anotherUserA]) => {
+        if (anotherUserE && anotherUserE.email !== user.email) {
+          return res.json({ status: 'error', message: '不能使用此email' })
+        }
+        if (anotherUserA && anotherUserA.account !== user.account) {
+          return res.json({ status: 'error', message: '不能使用此account' })
+        }
+        user.update({
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(password, 10)
+        })
+          .then(() => {
+            return res.json({status:'success', message:'資料編輯成功'})
           })
       })
   },
@@ -150,5 +193,7 @@ const userController = {
     })
   }
 }
+
+
 
 module.exports = userController
