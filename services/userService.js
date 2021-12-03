@@ -1,7 +1,8 @@
 // 載入所需套件
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
+const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const imgur = require('imgur')
@@ -143,6 +144,20 @@ const userService = {
   getUser: async (req, res, callback) => {
     const user = (await User.findByPk(req.params.id)).toJSON()
     return callback(user)
+  },
+
+  getUserTweets: async (req, res, callback) => {
+    const currentUserId = helpers.getUser(req).id
+    const tweets = await Tweet.findAll({
+      where: { UserId: req.params.id },
+      raw: true,
+      nest: true,
+      // 利用SQL原生語法判別tweet是否有被當前使用者按讚
+      attributes: ['id', 'description', 'likeCounts', 'commentCounts', 'createdAt', [sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLiked']],
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+      order: [['createdAt', 'DESC']]
+    })
+    return callback(tweets)
   },
 }
 

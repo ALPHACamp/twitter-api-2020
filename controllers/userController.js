@@ -40,6 +40,12 @@ const userController = {
       return res.json(data)
     })
   },
+
+  getUserTweets: (req, res) => {
+    userService.getUserTweets(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 // userService exports
