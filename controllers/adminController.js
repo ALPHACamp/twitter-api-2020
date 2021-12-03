@@ -64,7 +64,14 @@ const adminController = {
       .then(users => {
         return res.json(users)
       })
-  }
+  },
+
+  getCurrentUser: (req, res) => {
+    return User.findByPk(req.user.id)
+      .then(user => {
+        return res.json(user)
+      })
+  },
 }
 
 module.exports = adminController
