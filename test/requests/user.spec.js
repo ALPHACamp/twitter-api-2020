@@ -44,7 +44,7 @@ describe('# user requests', () => {
   })
 
   context('# GET ', () => {
-    describe('GET /users/:id', () => {
+    describe.only('GET /users/:id', () => {
       before(async () => {
         // 清除測試資料庫資料
         await db.User.destroy({ where: {}, truncate: true })

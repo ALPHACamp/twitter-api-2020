@@ -21,16 +21,14 @@ const authenticatedAdmin = (req, res, next) => {
   return next()
 }
 
-// 登入token驗證
+//登入token驗證
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) {
       return next(error)
     }
     if (!user) {
-      return res
-        .status(401)
-        .json({ status: 'error', message: '帳號不存在！' })
+      return res.status(401).json({ status: 'error', message: '帳號不存在！' })
     }
     req.user = user
     return next()
@@ -39,7 +37,15 @@ const authenticated = (req, res, next) => {
 
 module.exports = (app) => {
   // JWT signin & signup
+  app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
 
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
+  //users routes
+  app.get(
+    '/api/users/:id',
+    authenticated,
+    authenticatedUser,
+    userController.getUser
+  )
 }
