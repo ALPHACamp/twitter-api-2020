@@ -1,9 +1,15 @@
 // 載入所需套件
 const replyService = require('../services/replyService')
 
-const replyController ={
+const replyController = {
   postReply: (req, res) => {
     replyService.postReply(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  getReplies: (req, res) => {
+    replyService.getReplies(req, res, data => {
       return res.json(data)
     })
   }
