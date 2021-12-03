@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Followship } = require('../models')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -8,6 +8,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userController = {
+  //signIn & signUp
   signIn: (req, res) => {
     const { email, password } = req.body
     if (!email || !password) {
@@ -65,7 +66,7 @@ const userController = {
             account: req.body.account,
             name: req.body.name,
             email: req.body.email,
-            role:'user',
+            role: 'user',
             password: bcrypt.hashSync(
               req.body.password,
               bcrypt.genSaltSync(10)
@@ -78,6 +79,21 @@ const userController = {
       }
     } catch (error) {
       console.log(error)
+    }
+  },
+
+  //user
+  getUser: async (req, res) => {
+    try {
+      const user = (await User.findByPk(req.params.id)).toJSON()
+      return res.status(200).json({
+        status: 'success',
+        message: 'ok',
+        ...user,
+      })
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: 'service error!' })
     }
   },
 }
