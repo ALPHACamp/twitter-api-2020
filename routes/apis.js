@@ -16,6 +16,7 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
+
 // const adminController = require('../controllers/api/adminController.js')
 // const userController = require('../controllers/api/userController.js')
 // 還要宣告其他的controller

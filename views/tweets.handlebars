@@ -19,10 +19,10 @@
     </div>
     <ul class="list-group list-group-flush">
       <li class="list-group-item">推文者的id {{this.UserId}}</li>
-      <li class="list-group-item">推文者的名字 {{ user.name}}</li>
+      <li class="list-group-item">推文者的名字 {{ this.name}}</li>
     </ul>
     <div class="card-body">
-      <a href="/users/profile" class="card-link">profile</a>
+      <a href="/users/{{this.id}}" class="card-link">profile</a>
       <a href="/users/{{this.id}}/edit" class="card-link">edit</a>
     </div>
   </div>

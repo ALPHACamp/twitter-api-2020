@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const upload = multer({ dest: "temp/" });
 
+
 const tweetController = require('../controllers/tweetController.js')
 const adminController = require('../controllers/adminController.js')
 const userController = require('../controllers/userController.js')
@@ -49,7 +50,8 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/edit', authenticated, userController.editUser)
 // 使用者到編輯個人資訊
 router.put("/users/:id", authenticated, upload.single('cover'), userController.putUser)
-
+// router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
+// <--可以傳一個陣列 FILE
 
 // router.get('/admin', authenticatedAdmin, (req, res) => res.redirect('/admin/tweets'))
 // router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
