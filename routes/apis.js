@@ -7,6 +7,9 @@ const adminController = require('../controllers/adminController')
 const tweetController = require('../controllers/tweetController')
 const followshipController = require('../controllers/followshipController')
 
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
 router.get('/', authenticated, authenticatedUser, (req, res) => res.send('test'))
 
 //user
@@ -16,7 +19,8 @@ router.get('/users/:id/tweets', authenticated, authenticatedUser, userController
 router.get('/users/currentUser', authenticated, authenticatedUser, userController.getCurrentUser)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getRepliedTweets)
-router.put('/users/:id', authenticated, authenticatedUser, userController.putUser)
+router.put('/users/:id/edit', authenticated, authenticatedUser, userController.editUser)
+router.put('/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getLikes)
 
 //tweet
