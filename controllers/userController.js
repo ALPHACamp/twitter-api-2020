@@ -100,10 +100,18 @@ const userController = {
   },
 
   getLikes: (req, res) => {
-    Like.findAll({ where: { UserId: req.params.id }, include: [Tweet] })
-      .then(like => {
-        return res.json(like)
-      })
+    Like.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        {
+          model:Tweet,
+          include:{ model:User }
+        }
+      ]
+    })
+        .then(like => {
+          return res.json(like)
+        })
   },
 
   putUser: (req, res) => {
