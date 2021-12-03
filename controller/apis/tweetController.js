@@ -1,11 +1,56 @@
+const { sequelize } = require('../../models')
 const db = require('../../models')
+const _ = require('lodash')
 const Tweet = db.Tweet
+const Reply = db.Reply
+const User = db.User
+const Like = db.Like
 const helper = require('../../_helpers')
 const tweetController = {
   getTweets: async (req, res) => {
     try {
-      const tweets = await Tweet.findAll({ raw: true, nest: true })
-      return res.status(200).json([...tweets])
+      const tweets = await Tweet.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
+              ),
+              'like_count'
+            ],
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
+              ),
+              'reply_count'
+            ]
+          ]
+        },
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] }
+        ],
+        raw: true,
+        nest: true,
+        group: ['Tweet.id']
+      })
+      const likedArray = await Like.findAll({
+        where: { UserId: helper.getUser(req).id },
+        attributes: ['TweetId'],
+        raw: true,
+        nest: true
+      })
+      const abc = likedArray.map(a => {
+        return a.TweetId
+      })
+      const data = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: abc.includes(tweet.id) ? true : false
+      }))
+
+      return res.status(200).json([...data])
     } catch (err) {
       return console.log(err)
     }
@@ -13,8 +58,39 @@ const tweetController = {
   getTweet: async (req, res) => {
     try {
       const id = req.params.id
-      const tweet = await Tweet.findByPk(id, { raw: true })
-      return res.status(200).json({ ...tweet })
+      const tweet = await Tweet.findByPk(id, {
+        attributes: {
+          include: [
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
+              ),
+              'like_cont'
+            ],
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
+              ),
+              'reply_count'
+            ]
+          ]
+        },
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] },
+          { model: User }
+        ],
+        raw: true,
+        nest: true,
+        group: ['Tweet.id']
+      })
+      const like = await Like.findOne({
+        where: { UserId: helper.getUser(req).id, TweetId: req.params.id }
+      })
+      const isLiked = like ? true : false
+      return res.status(200).json({ ...tweet, isLiked })
     } catch (err) {
       console.log(err)
     }
@@ -49,7 +125,11 @@ const tweetController = {
   },
   deleteTweet: async (req, res) => {
     try {
-      await Tweet.destroy({ where: { id: req.params.id } })
+      await Promise.all([
+        Tweet.destroy({ where: { id: req.params.id } }),
+        Reply.destroy({ where: { TweetId: req.params.id } }),
+        Like.destroy({ where: { TweetId: req.params.id } })
+      ])
       return res.json({ status: 200, message: 'delete successfully' })
     } catch (err) {
       console.log(err)

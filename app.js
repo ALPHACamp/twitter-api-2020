@@ -1,6 +1,7 @@
 const express = require('express')
 const helpers = require('./_helpers')
 const passport = require('./config/passport')
+const bodyParser = require('body-parser')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -9,7 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
 const app = express()
 const port = 3000
 app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+app.use(bodyParser.json())
 app.use(passport.initialize())
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next) {
