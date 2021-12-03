@@ -84,8 +84,8 @@ const tweetController = {
             where: { TweetId: req.params.tweet_id }
         })
             .then(Replies => {
-            return res.json(Replies)
-        })
+                return res.json(Replies)
+            })
     }
 }
 module.exports = tweetController

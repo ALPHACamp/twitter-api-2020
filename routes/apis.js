@@ -22,6 +22,7 @@ router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userCo
 router.put('/users/:id/edit', authenticated, authenticatedUser, userController.editUser)
 router.put('/users/:id', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getLikes)
+router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
 
 //tweet
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
@@ -30,6 +31,7 @@ router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetControlle
 router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.likeTweet)
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.addReply)
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
 
 //followship

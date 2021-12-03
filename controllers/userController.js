@@ -5,7 +5,9 @@ const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
+const Followship = db.Followship
 const jwt = require('jsonwebtoken')
+const should = require('should');
 
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -67,7 +69,9 @@ const userController = {
     })
   },
   getTweets: (req, res) => {
-    User.findByPk(req.params.id, { include: [{ model: Tweet, include: [Like, Reply, User] }] })
+    User.findByPk(req.params.id,
+        { include: [{ model: Tweet, include: [Like, Reply, User] }] }
+    )
       .then(user => {
         if (!user || user.role === 'admin') {
           return res.json({ status: 'error', message: 'No tweets' })
@@ -172,7 +176,18 @@ const userController = {
       .then(user => {
         return res.json(user)
       })
+  },
+    getFollowings: (req, res) => {
+        return User.findByPk(req.params.id,
+            {
+                include: [{ model: User, as: 'Followings' }]
+            }
+        ).then(followings => {
+            return res.json(followings)
+        })
   }
 }
+
+
 
 module.exports = userController
