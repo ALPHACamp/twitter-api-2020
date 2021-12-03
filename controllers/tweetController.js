@@ -1,16 +1,16 @@
-const { Tweet, sequelize } = require('../models')
+const { Tweet } = require('../models')
 const { User } = require('../models')
 const { Like } = require('../models')
 const { Reply } = require('../models')
-const {getUer} = require('../_helpers')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getTweets: async (req, res) => {
     try {
+      console.log('in controller')
       const tweets = await Tweet.findAll({
         include: [{ model: User }, { model: Like }, { model: Reply }]
       })
-
 
       let results = tweets.map((tweet) => ({
         id: tweet.dataValues.id,
@@ -18,12 +18,11 @@ const tweetController = {
         createdAt: tweet.dataValues.createdAt,
         User: tweet.dataValues.User.toJSON(),
         likeCounts: tweet.dataValues.Likes.length,
-        replyCounts: tweet.dataValues.Replies.length
+        replyCounts: tweet.dataValues.Replies.length,
+        isLike: helpers.getUser(req).Likes ? helpers.getUser(req).Likes.some(like => like.TweetId === tweet.dataValues.id) : false
       }))
 
-      results = results.sort((a,z)=> z.createdAt - a.createdAt)
-
-      console.log(results)
+      results = results.sort((a, z) => z.createdAt - a.createdAt)
 
       return res.status(200).json(results)
     } catch (error) {
