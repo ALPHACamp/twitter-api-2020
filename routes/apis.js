@@ -3,20 +3,34 @@ const router = express.Router()
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 const passport = require('../config/passport')
+const helpers = require('../_helpers')
 
 const adminController = require('../controllers/api/adminControllers')
 const userController = require('../controllers/api/userControllers')
 const tweetController = require('../controllers/api/tweetControllers')
 
-const authenticated = passport.authenticate('jwt', { session: false })
-const authenticatedAdmin = function authenticatedAdmin (req, res, next) {
+function authenticated (req, res, next) {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (err) next(err)
+    if (!user) {
+      return res.status(401).json({
+        status: 'error',
+        message: '帳號不存在！'
+      })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
+}
+
+function authenticatedAdmin (req, res, next) {
   if (helpers.getUser(req)) {
     if ((helpers.getUser(req).role = 'admin')) {
       return next()
     }
-    return res.json({ status: 'error', message: 'permission denied' })
+    return res.json({ status: 'error', message: '帳號不存在！' })
   } else {
-    return res.json({ status: 'error', message: 'permission denied' })
+    return res.json({ status: 'error', message: '帳號不存在！' })
   }
 }
 

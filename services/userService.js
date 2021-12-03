@@ -195,7 +195,7 @@ const userService = {
       include: [{ model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'introduction', 'createdAt'] }]
     }).then(user => {
       user = user.toJSON()
-      user.Followings.forEach(item => (item.followerId = item.id))
+      user.Followings.forEach(item => (item.followingId = item.id))
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       return callback({ user })
     })
