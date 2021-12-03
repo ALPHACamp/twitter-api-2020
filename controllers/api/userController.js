@@ -4,7 +4,7 @@ const IMGUR_CLIENT_ID = 'e34bbea295f4825'
 const imgur = require('imgur-node-api')
 /* DB */
 const db = require('../../models')
-const User = db.User
+const { User, Tweet, Like, Reply } = db
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -14,6 +14,7 @@ const JwtStrategy = passportJWT.Strategy
 const helpers = require('../../_helpers')
 
 let userController = {
+  //註冊
   signIn: (req, res) => {
     // 檢查必要資料
     if (!req.body.email || !req.body.password) {
@@ -41,8 +42,9 @@ let userController = {
       })
     })
   },
+  //登入
   signUp: (req, res) => {
-    if (req.body.passwordCheck !== req.body.password) {
+    if (req.body.checkPassword !== req.body.password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
     } else {
       User.findOne({ where: { email: req.body.email } }).then(user => {
@@ -50,6 +52,7 @@ let userController = {
           return res.json({ status: 'error', message: '信箱重複！' })
         } else {
           User.create({
+            account: req.body.account,
             name: req.body.name,
             email: req.body.email,
             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
@@ -64,7 +67,7 @@ let userController = {
     try {
       // 確保只有自己能修改自己的資料
       if (helpers.getUser(req).id !== Number(req.params.id)) {
-        return res.json({ status: 'error', message: '無法變更他人Profile' })
+        return res.json({ status: 'error', message: '無法變更他人資料' })
       }
 
       // 確保name和email皆有輸入
@@ -109,6 +112,21 @@ let userController = {
       console.log(err)
     }
   },
+  getUser: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user || user.role === 'admin') {
+        return res.json({ status: 'error', message: 'No user' })
+      } else {
+        return res.json(user)
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  getTweets: (req, res) => {
+  }
+
 }
 
 module.exports = userController
