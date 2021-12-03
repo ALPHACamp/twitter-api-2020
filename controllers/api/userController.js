@@ -6,9 +6,40 @@ const db = require('../../models')
 const User = db.User
 
 
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
 let userController = {
   signUpPage: (req, res) => {
     return res.render('signup')
+  },
+  
+  signIn: (req, res) => {
+    if (!req.body.email || !req.body.password) {
+      return res.json({ status: 'error', message: '請填寫帳號或密碼。'})
+    } 
+    
+    let username = req.body.email
+    let password = req.body.password
+
+    User.findOne({ where: { email: username }}).then(user => {
+      if (!user) return res.status(401).json({ status: 'error', message: '此帳號不存在。' })
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ status: 'error', message: '密碼不正確'})
+      }
+       var payload = { id: user.id }
+       var token = jwt.sign(payload, 'JWT_SECRET')
+       return res.json({ 
+        status: 'success',
+        message: 'ok',
+        token: token,
+        user: {
+          id: user.id, name: user.name, email: user.email, role: user.role
+        }})
+    })
+
   },
 
   signUp: (req, res) => {
@@ -43,14 +74,14 @@ let userController = {
       });
     }
   },
-
-    getUser: (req, res) => {
+  
+  getUser: (req, res) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     console.log(currentUser, req.params);
     User.findOne({ where: { id: req.params.id } }).then((user) => {
-      console.log(user);
-      // User.findOne({ where: { id: currentUser.id } }).then((user) => {
-      return res.render("profile", { user: user });
+    console.log(user);
+    // User.findOne({ where: { id: currentUser.id } }).then((user) => {
+    return res.render("profile", { user: user });
     });
   }
 };

@@ -21,6 +21,8 @@ const authenticatedAdmin = (req, res, next) => {
 router.get("/signup", userController.signUpPage);
 //  使用者註冊路由
 router.post("/signup", userController.signUp);
+//  使用者登入
+router.post('/signIn', userController.signIn)
 // const adminController = require('../controllers/api/adminController.js')
 // const userController = require('../controllers/api/userController.js')
 // 還要宣告其他的controller
