@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
-const { User, Tweet } = require('../models')
+const { User, Tweet, Followship, Notice } = require('../models')
 const helpers = require('../_helpers')
 
 const userService = {
@@ -14,7 +14,7 @@ const userService = {
     } else {
       return User.findOne({ where: { email: req.body.email } }).then(user => {
         if (user) {
-          return callback({ status: 'error', message: '信箱重複！' })
+          return callback({ status: 'error', message: 'email 已重覆註冊！' })
         } else {
           User.create({
             account: req.body.account,
@@ -32,23 +32,23 @@ const userService = {
   signIn: (req, res, callback) => {
     // 檢查必要資料
     if (!req.body.email || !req.body.password) {
-      return callback({ status: 'error', message: "required fields didn't exist" })
+      return callback({ status: 'error', message: '所有欄位皆為必填！' })
     }
     // 檢查 user 是否存在與密碼是否正確
     const username = req.body.email
     const password = req.body.password
 
     User.findOne({ where: { email: username } }).then(user => {
-      if (!user) return callback({ status: 'error', message: 'no such user found' })
+      if (!user) return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       if (!bcrypt.compareSync(password, user.password)) {
-        return callback({ status: 'error', message: 'passwords did not match' })
+        return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       }
       // 簽發 token
       const payload = { id: user.id }
       const token = jwt.sign(payload, process.env.JWT_SECRET)
       return callback({
         status: 'success',
-        message: '登入成功',
+        message: '登入成功！',
         token: token,
         user: {
           id: user.id,
@@ -78,17 +78,22 @@ const userService = {
       include: [
         { model: Tweet, attributes: ['id'] },
         { model: User, as: 'Followings', attributes: ['id'] },
-        { model: User, as: 'Followers', attributes: ['id'] }
+        { model: User, as: 'Followers', attributes: ['id'] },
+        { model: User, as: 'Noticings', attributes: ['id'] },
+        { model: User, as: 'Noticers', attributes: ['id'] }
       ]
+    }).then(user => {
+      user = {
+        ...user.toJSON(),
+        identify: Number(req.params.id) === Number(helpers.getUser(req).id),
+        TweetCount: user.Tweets.length,
+        followingCount: user.Followings.length,
+        followerCount: user.Followers.length,
+        isFollowed: user.Followers.some(i => i.id === helpers.getUser(req).id),
+        isNoticed: user.Noticers.some(i => i.id === helpers.getUser(req).id)
+      }
+      return callback({ user })
     })
-      .then(user => {
-        user.identify = (Number(req.params.id) === Number(helpers.getUser(req).id))
-        user.TweetCount = user.Tweets.length
-        user.followingCount = user.Followings.length
-        user.followerCount = user.Followers.length
-        console.log(user.toJSON())
-        return callback({ user: user.toJSON() })
-      })
   },
 
   putUser: (req, res, callback) => {
@@ -98,24 +103,22 @@ const userService = {
 
     if (req.body.account) {
       if (helpers.getUser(req).account !== req.body.account) {
-        User.findOne({ where: { account: req.body.account }, raw: true })
-          .then(user => {
-            if (user) {
-              return callback({ status: 'error', message: '此帳號已有人使用！' })
-            }
-          })
+        User.findOne({ where: { account: req.body.account }, raw: true }).then(user => {
+          if (user) {
+            return callback({ status: 'error', message: 'account 已重覆註冊！' })
+          }
+        })
       }
     }
 
     if (req.body.email) {
       if (helpers.getUser(req).email !== req.body.email) {
-        User.findOne({ where: { email: req.body.email }, raw: true })
-          .then(user => {
-            console.log(user)
-            if (user) {
-              return callback({ status: 'error', message: '此 email 已註冊過！' })
-            }
-          })
+        User.findOne({ where: { email: req.body.email }, raw: true }).then(user => {
+          console.log(user)
+          if (user) {
+            return callback({ status: 'error', message: 'email 已重覆註冊！' })
+          }
+        })
       }
     }
 
@@ -123,35 +126,37 @@ const userService = {
     if (file) {
       imgur.setClientID(IMGUR_CLIENT_ID)
       imgur.upload(file.path, (err, img) => {
-        return User.findByPk(req.params.id)
-          .then(user => {
-            user.update({
+        return User.findByPk(req.params.id).then(user => {
+          user
+            .update({
               ...req.body,
               avatar: file ? img.data.link : user.avatar
             })
-              .then(() => {
-                callback({ status: 'success', message: '使用者資料編輯成功' })
-              })
-          })
+            .then(() => {
+              callback({ status: 'success', message: '使用者資料編輯成功' })
+            })
+        })
       })
     } else {
-      return User.findByPk(req.params.id)
-        .then(user => {
-          user.update({
+      return User.findByPk(req.params.id).then(user => {
+        user
+          .update({
             ...req.body,
             avatar: user.avatar
-          }).then(() => {
-            return callback({ status: 'success', message: '使用者資料編輯成功' })
           })
-        })
+          .then(() => {
+            return callback({
+              status: 'success',
+              message: '使用者資料編輯成功！'
+            })
+          })
+      })
     }
   },
 
   getTopUser: (req, res, callback) => {
     return User.findAll({
-      include: [
-        { model: User, as: 'Followers', attributes: ['id'] }
-      ]
+      include: [{ model: User, as: 'Followers', attributes: ['id'] }]
     }).then(users => {
       users = users.map(user => ({
         ...user.dataValues,
@@ -160,6 +165,73 @@ const userService = {
       }))
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
       return callback({ users })
+    })
+  },
+
+  addFollowing: (req, res, callback) => {
+    return Followship.create({
+      followerId: helpers.getUser(req).id,
+      followingId: req.body.id
+    }).then(followship => {
+      return callback({ status: 'success', message: '追隨成功' })
+    })
+  },
+
+  removeFollowing: (req, res, callback) => {
+    return Followship.findOne({
+      where: {
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
+      }
+    }).then(followship => {
+      followship.destroy().then(followship => {
+        return callback({ status: 'success', message: '取消追隨成功' })
+      })
+    })
+  },
+
+  getUserFollowings: (req, res, callback) => {
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'introduction', 'createdAt'] }]
+    }).then(user => {
+      user = user.toJSON()
+      user.Followings.forEach(item => (item.followingId = item.id))
+      user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+      return callback({ user })
+    })
+  },
+
+  getUserFollowers: (req, res, callback) => {
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'introduction', 'createdAt'] }]
+    }).then(user => {
+      user = user.toJSON()
+      user.Followers.forEach(item => {
+        item.followerId = item.id
+        item.isFollowed = Number(helpers.getUser(req).id) === Number(req.params.id)
+      })
+
+      user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+      return callback({ user })
+    })
+  },
+
+  addNoticing: (req, res, callback) => {
+    return Notice.create({
+      noticerId: helpers.getUser(req).id,
+      noticingId: req.body.id
+    }).then(notice => {
+      return callback({ status: 'success', message: '已開啟訂閱' })
+    })
+  },
+  removeNoticing: (req, res, callback) => {
+    return Notice.destroy({
+      where: {
+        noticerId: helpers.getUser(req).id,
+        noticingId: req.params.noticeId
+      }
+    }).then(notice => {
+      return callback({ status: 'success', message: '已取消訂閱' })
     })
   }
 }

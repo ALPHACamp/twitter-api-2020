@@ -2,22 +2,22 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const followArray = []
+    const noticeArray = []
     for (let i = 1; i < 11; i++) {
       const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter(number => number !== i)
-      followArray.push({
+      noticeArray.push({
         id: i,
-        followerId: i,
-        followingId: numbers[Math.floor(Math.random() * 9)],
+        noticerId: i,
+        noticingId: numbers[Math.floor(Math.random() * 9)],
         createdAt: new Date(),
         updatedAt: new Date()
       })
     }
 
-    await queryInterface.bulkInsert('Followships', followArray, {})
+    await queryInterface.bulkInsert('Notices', noticeArray, {})
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Followships', null, {})
+    await queryInterface.bulkDelete('Notices', null, {})
   }
 }
