@@ -7,7 +7,7 @@ const upload = multer({ dest: 'temp/' })
 const helpers = require('../_helpers')
 /* Controller */
 const userController = require('../controllers/api/userController')
-
+const adminController = require('../controllers/api/adminController.js')
 /* authenticated */
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
@@ -29,13 +29,15 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
-router.get('/', authenticated, (req, res) => res.send('test'))
 router.post('/users', userController.signUp) //signUp
-router.get('/users/:id', authenticated, userController.getUser) //覽該使用者的個人資料及推文
-router.get('/users/:id/tweets', authenticated, userController.getUser)
 router.post('/users/signin', userController.signIn) //signin
-
+router.get('/users/:id/tweets', authenticated, userController.getTweets) //覽該使用者推文
+router.get('/users/:id', authenticated, userController.getUser) //覽該使用者的個人資料
 router.put('/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 },
-{ name: 'cover', maxCount: 1 }]), userController.putUsers) //編輯自己資料
+{ name: 'cover', maxCount: 1 }]), authenticated, userController.putUsers) //編輯自己資料
+
+
+router.post('/admin/signin', adminController.signIn) //signin
+
 
 module.exports = router

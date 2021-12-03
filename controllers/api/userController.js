@@ -1,88 +1,96 @@
-/* necessary package */
-const bcrypt = require('bcryptjs')
-const IMGUR_CLIENT_ID = 'e34bbea295f4825'
-const imgur = require('imgur-node-api')
 /* DB */
 const db = require('../../models')
 const { User, Tweet, Like, Reply } = db
 
+/* necessary package */
+const bcrypt = require('bcryptjs')
+const IMGUR_CLIENT_ID = 'e34bbea295f4825'
+const imgur = require('imgur-node-api')
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
+//helpers
 const helpers = require('../../_helpers')
 
 let userController = {
-  //註冊
-  signIn: (req, res) => {
+  //登入
+  signIn: async (req, res) => {
     // 檢查必要資料
     if (!req.body.email || !req.body.password) {
       return res.json({ status: 'error', message: "required fields didn't exist" })
     }
-    // 檢查 user 是否存在與密碼是否正確
-    let username = req.body.email
-    let password = req.body.password
 
-    User.findOne({ where: { email: username } }).then(user => {
-      if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
-      if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: 'passwords did not match' })
-      }
-      // 簽發 token
-      var payload = { id: user.id }
-      var token = jwt.sign(payload, 'alphacamp')
-      return res.json({
-        status: 'success',
-        message: 'ok',
-        token: token,
-        user: {
-          id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin
-        }
-      })
+    let { email, password } = req.body
+    const user = await User.findOne({ where: { email } })
+    // 檢查 user 是否存在與密碼是否正確，是否為admin
+    if (!user || user.role === "admin") return res.status(401).json({ status: 'error', message: 'no such user found' })
+    if (!bcrypt.compareSync(password, user.password)) {
+      return res.status(401).json({ status: 'error', message: 'passwords did not match' })
+    }
+    // 簽發 token
+    var payload = { id: user.id }
+    var token = jwt.sign(payload, 'alphacamp')
+    return res.json({
+      status: 'success',
+      message: 'ok',
+      token: token,
+      user
     })
   },
-  //登入
-  signUp: (req, res) => {
-    if (req.body.checkPassword !== req.body.password) {
-      return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
-    } else {
-      User.findOne({ where: { email: req.body.email } }).then(user => {
+
+  //註冊
+  signUp: async (req, res) => {
+    try {
+      if (req.body.checkPassword !== req.body.password) {
+        return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
+      } else {
+        const user = await User.findOne({ where: { email: req.body.email } })
         if (user) {
           return res.json({ status: 'error', message: '信箱重複！' })
         } else {
-          User.create({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
+          const { account, name, email } = req.body
+          await User.create({
+            account, name, email,
             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
-            return res.json({ status: 'success', message: '成功註冊帳號！' })
           })
+          return res.json({ status: 'success', message: '成功註冊帳號！' })
         }
-      })
+      }
+    } catch (err) {
+      console.log(err)
     }
   },
+  //查看使用者資料
+  getUser: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user || user.role === 'admin') {
+        return res.json({ status: 'error', message: 'No user' })
+      } else {
+        return res.json(user)
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  //查看使用者推文 ****
+  getTweets: async (req, res) => {
+    try {
+      const userTweets = await User.findByPk(req.params.id, { include: Tweet })
+      return res.json(userTweets.Tweets)
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  //修改個人資料
   putUsers: async (req, res) => {
     try {
       // 確保只有自己能修改自己的資料
       if (helpers.getUser(req).id !== Number(req.params.id)) {
         return res.json({ status: 'error', message: '無法變更他人資料' })
       }
-
-      // 確保name和email皆有輸入
-      if (!req.body.name || !req.body.email) {
-        return res.json({ status: 'error', message: 'name或email尚未輸入' })
-      }
-
-      // 確認email在資料庫沒有重複
-      if (helpers.getUser(req).email !== req.body.email) {
-        const emailCheck = await User.findOne({ where: { email: req.body.email } })
-        if (JSON.stringify(emailCheck) !== '{}') {
-          return res.json({ status: 'error', message: '此email已註冊過' })
-        }
-      }
-
       // 如果有上傳圖片 update
       const { files } = req
       if (files) {
@@ -112,21 +120,7 @@ let userController = {
       console.log(err)
     }
   },
-  getUser: async (req, res) => {
-    try {
-      const user = await User.findByPk(req.params.id)
-      if (!user || user.role === 'admin') {
-        return res.json({ status: 'error', message: 'No user' })
-      } else {
-        return res.json(user)
-      }
-    } catch (err) {
-      console.log(err)
-    }
-  },
-  getTweets: (req, res) => {
-  }
-
 }
 
 module.exports = userController
+
