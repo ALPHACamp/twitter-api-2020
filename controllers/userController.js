@@ -81,13 +81,18 @@ const userController = {
   },
 
   getUser: (req, res) => {
-    return User.findByPk(req.params.id)
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followings' },
+        { model: User, as: 'Followers' }
+      ]
+    })
       .then(user => {
         if (!user || user.role === 'admin') {
           return res.json({ status: 'error', message: '權限錯誤' })
-        } else {
-          return res.json(user)
         }
+        user.dataValues.isFollowed = (user.Followers.map(u => u.id).includes(req.user.id))
+        return res.json(user)
       })
   },
 
