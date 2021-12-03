@@ -3,7 +3,7 @@ const passport = require('passport')
 const bcrypt = require('bcryptjs')
 // DB
 const db = require('../models')
-const { User, Restaurant, Comment } = db
+const { User } = db
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -16,8 +16,7 @@ jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
 jwtOptions.secretOrKey = 'alphacamp'
 
 let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
-  User.findByPk(jwt_payload.id, {
-  }).then(user => {
+  User.findByPk(jwt_payload.id, {}).then((user) => {
     if (!user) return next(null, false)
     return next(null, user)
   })

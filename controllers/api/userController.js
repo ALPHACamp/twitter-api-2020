@@ -2,7 +2,7 @@
 const bcrypt = require('bcryptjs')
 /* DB */
 const db = require('../../models')
-const User = db.User
+const { User } = db
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -10,53 +10,96 @@ const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
-let userController = {
+const userController = {
   signIn: (req, res) => {
+    const { email, password } = req.body
     // 檢查必要資料
-    if (!req.body.email || !req.body.password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
+    if (!email || !password) {
+      return res.json({
+        status: 'error',
+        message: 'Please fill both Email & Password fields!'
+      })
     }
     // 檢查 user 是否存在與密碼是否正確
-    let username = req.body.email
-    let password = req.body.password
-
-    User.findOne({ where: { email: username } }).then(user => {
-      if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
+    User.findOne({ where: { email } }).then((user) => {
+      if (!user)
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'Email do NOT exist!' })
       if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: 'passwords did not match' })
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'Passwords do NOT match!' })
       }
+      if (user.role === 'admin') {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Admin can only access backend!'
+        })
+      }
+      const { id, name, email, account, introduction, role } = user
       // 簽發 token
-      var payload = { id: user.id }
+      var payload = { id }
       var token = jwt.sign(payload, 'alphacamp')
       return res.json({
         status: 'success',
-        message: 'ok',
-        token: token,
+        message: 'Login successfully!',
+        token,
         user: {
-          id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin
+          id,
+          name,
+          email,
+          account,
+          introduction,
+          role
         }
       })
     })
   },
+
   signUp: (req, res) => {
-    if (req.body.passwordCheck !== req.body.password) {
-      return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
+    const { name, account, email, password, checkPassword } = req.body
+    if (checkPassword !== password) {
+      return res.json({ status: 'error', message: 'Passwords is not matched!' })
     } else {
-      User.findOne({ where: { email: req.body.email } }).then(user => {
+      User.findOne({ where: { account } }).then((user) => {
         if (user) {
-          return res.json({ status: 'error', message: '信箱重複！' })
-        } else {
-          User.create({
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
-            return res.json({ status: 'success', message: '成功註冊帳號！' })
+          return res.status(401).json({
+            status: 'error',
+            message: 'Account has already existed!'
           })
+        } else {
+          User.findOne({ where: { email } })
+            .then((user) => {
+              if (user) {
+                return res.status(401).json({
+                  status: 'error',
+                  message: 'Email has already existed!'
+                })
+              } else {
+                User.create({
+                  account,
+                  name,
+                  email,
+                  password: bcrypt.hashSync(
+                    password,
+                    bcrypt.genSaltSync(10),
+                    null
+                  ),
+                  role: 'user'
+                })
+              }
+            })
+            .then((user) => {
+              return res.status(200).json({
+                status: 'success',
+                message: 'Successfully register!'
+              })
+            })
         }
       })
     }
-  },
+  }
 }
 
 module.exports = userController
