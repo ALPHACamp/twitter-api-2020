@@ -21,11 +21,7 @@ const authenticatedAdmin = (req, res, next) => {
   return next()
 }
 
-<<<<<<< HEAD
-// 登入token驗證
-=======
 //登入token驗證
->>>>>>> origin
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) {
