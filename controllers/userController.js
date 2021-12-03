@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Followship } = require('../models')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -8,6 +8,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const userController = {
+  //signIn & signUp
   signIn: (req, res) => {
     const { email, password } = req.body
     if (!email || !password) {
@@ -61,10 +62,11 @@ const userController = {
             message: '此信箱或帳號已註冊過！',
           })
         } else {
-          await User.create({
+          const user = await User.create({
             account: req.body.account,
             name: req.body.name,
             email: req.body.email,
+            role: 'user',
             password: bcrypt.hashSync(
               req.body.password,
               bcrypt.genSaltSync(10)
@@ -72,11 +74,39 @@ const userController = {
           })
           return res
             .status(200)
-            .json({ status: 'success', message: '成功註冊帳號！' })
+            .json({ status: 'success', message: '成功註冊帳號！', user })
         }
       }
     } catch (error) {
       console.log(error)
+    }
+  },
+
+  //user
+  getUser: async (req, res) => {
+    try {
+      const user = (await User.findByPk(req.params.id,
+      {
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'email',
+          'avatar',
+          'cover',
+          'introduction',
+        ],
+      })).toJSON()
+      return res.status(200).json({
+        status: 'success',
+        message: 'ok',
+        ...user,
+      })
+    } catch (error) {
+      console.log(error)
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'service error!' })
     }
   },
 }
