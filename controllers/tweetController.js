@@ -33,10 +33,10 @@ const tweetController = {
     },
     postTweet:(req,res) => {
         if (req.body.description.length > 140) {
-            return res.json({ status: 'error', message: 'Tweet can\'t be more than 140 words.' })
+            return res.json({ status: 'error', message: '字數最多 140 字' })
         }
         if (!req.body.description) {
-            return res.json({status: 'error', message: 'description is empty'})
+            return res.json({status: 'error', message: '內容不可空白'})
         } else {
             return Tweet.create({
                 UserId: helpers.getUser(req).id,
@@ -65,7 +65,7 @@ const tweetController = {
     },
     addReply: (req, res) => {
         if (req.body.comment.length > 200) {
-            return res.json({status: 'error', message: 'Tweet can\'t be more than 140 words.'})
+            return res.json({status: 'error', message: '字數最多 200 字'})
         }
         if (!req.body.comment) {
             return res.json({status: 'error', message: '內容不可空白'})
