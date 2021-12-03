@@ -29,7 +29,7 @@ const userController = {
       if (!bcrypt.compareSync(password, user.password)) {
         return res
           .status(401)
-          .json({ status: 'error', message: 'Passwords do NOT match!' })
+          .json({ status: 'error', message: 'Passwords is incorrect!' })
       }
       if (user.role === 'admin') {
         return res.status(401).json({

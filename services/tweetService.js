@@ -17,15 +17,18 @@ const tweetService = {
           helpers.getUser(req).id
         )
       }))
-      callback({ tweets })
+      return callback({ tweets: tweets.toJSON() })
     })
   },
   postTweet: (req, res, callback) => {
-    const description = req.body.description
+    const { description } = req.body
     if (!description.trim()) {
-      return callback({ status: 'error', message: '貼文不可空白' })
+      return callback({ status: 'error', message: 'Content can NOT be empty!' })
     } else if (description.length > 140) {
-      return callback({ status: 'error', message: '貼文不得超過 140 個字' })
+      return callback({
+        status: 'error',
+        message: 'Content should be within 140 characters!'
+      })
     } else {
       return Tweet.create({
         UserId: helpers.getUser(req).id,
