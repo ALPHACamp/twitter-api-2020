@@ -22,7 +22,7 @@ const followController = {
       }))
 
       result = result.sort((a, z) => z.followersCount - a.followersCount)
-      res.status(200).json(result)
+      res.status(200).json({ status: 'success', results: result })
     } catch (error) {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
