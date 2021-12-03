@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Like = db.Like
+const Reply = db.Reply
 
 const adminController = {
   signIn: (req, res) => {
@@ -50,7 +52,15 @@ const adminController = {
   },
 
   getUsers: (req, res) => {
-    User.findAll({ order: [['name', 'ASC']] })
+    User.findAll({
+      include: [
+        Like,
+        Reply,
+        { model: User, as: 'Followings'},
+        { model: User, as: 'Followers' }
+      ],
+      order: [['name', 'ASC']]
+    })
       .then(users => {
         return res.json(users)
       })
