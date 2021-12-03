@@ -4,6 +4,7 @@ const followController = require('../controllers/followController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
+//驗前台是user身分
 const authenticatedUser = (req, res, next) => {
   if (helpers.getUser(req).role === 'admin') {
     return res.status(401).json({ status: 'error', message: '帳號不存在！' })
@@ -11,6 +12,7 @@ const authenticatedUser = (req, res, next) => {
   return next()
 }
 
+//驗後台身分
 // use helpers.getUser(req) to replace req.user
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req).role === 'user') {
