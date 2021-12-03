@@ -191,6 +191,22 @@ const userController = {
     }).then(user => {
       return res.json(user.Followers)
     })
+  },
+  getFollowings: (req, res) => {
+    return User.findByPk(req.params.id,
+        { include: [{
+            model: User, as: 'Followings',
+            attributes: [['id', 'followingId'],
+              'name',
+              'account',
+              'avatar',
+              'cover',
+              'introduction',]
+          }],
+          attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+        }).then(followings => {
+      return res.json(followings.Followings)
+    })
   }
 }
 
