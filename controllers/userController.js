@@ -115,8 +115,8 @@ const userController = {
       })
   },
 
-  putUser: (req, res) => {
-    const { name, introduction } = req.body
+  putUser: async (req, res) => {
+    const { name, avatar, cover, introduction } = req.body
     // 判斷當前使用者與更改資料為同一人，但測試無法通過故先註解
     // if (req.params.id !== String(req.user.id)) {
     //   return res.json({ status: 'error', message: "權限錯誤" })
@@ -127,18 +127,29 @@ const userController = {
     if (introduction && introduction.length > 160) {
       return res.json({ status: 'error', message: '自我介紹字數最多 160 字' })
     }
-    return User.findByPk(req.params.id)
-      .then(user => {
-        return user.update({
-          name,
-          // cover,
-          // avatar,
-          introduction
-        })
-          .then(user => {
-            return res.json({ status: 'success', message: '資料編輯成功' })
-          })
-      })
+    const { files } = req
+    imgur.setClientID(IMGUR_CLIENT_ID)
+    if (files) {
+      if (files.avatar) {
+        const avatar = await imgur.upload(files.avatar[0].path)
+        req.body.avatar = avatar.link
+      }
+      if (files.cover) {
+        const cover = await imgur.upload(files.cover[0].path)
+          req.body.cover = res.data.link
+      }
+    }
+    
+    const user = await User.findByPk(req.params.id)
+    await user.update({
+      name,
+      cover,
+      avatar,
+      introduction
+    })
+
+    return res.json({ status: 'success', message: '資料編輯成功' })
+
   },
 
   editUser: (req, res) => {
