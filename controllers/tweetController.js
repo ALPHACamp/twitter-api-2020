@@ -25,6 +25,7 @@ const tweetController = {
             return res.json(tweets)
         })
     },
+    
     getTweet: (req, res) => {
         return Tweet.findByPk(req.params.tweet_id, {
             include: [User, { model: Reply, include: [User] }]
@@ -49,49 +50,6 @@ const tweetController = {
                 })
                 .catch(error => console.log('error'))
         }
-    },
-
-    unlikeTweet: (req, res) => {
-        Like.destroy({
-            where: {
-                UserId: helpers.getUser(req).id,
-                TweetId: req.params.id
-            }
-        })
-            .then(() => res.json({ status: 'success', message: '取消Like推文' }))
-    },
-
-    likeTweet: (req, res) => {
-        Like.create({ UserId: helpers.getUser(req).id, TweetId: req.params.id })
-            .then(like => {
-                res.json({ status: 'success', message: '成功Like推文' })
-            })
-    },
-
-    addReply: (req, res) => {
-        if (req.body.comment.length > 200) {
-            return res.json({ status: 'error', message: '字數最多 200 字' })
-        }
-        if (!req.body.comment) {
-            return res.json({ status: 'error', message: '內容不可空白' })
-        }
-        return Reply.create({
-            UserId: helpers.getUser(req).id,
-            TweetId: req.params.tweet_id,
-            comment: req.body.comment
-        }).then(() => {
-            res.json({ status: 'success', message: '成功新增回覆' })
-        })
-            .catch(error => console.log('error'))
-    },
-
-    getTweetReplies: (req, res) => {
-        return Reply.findAll({
-            where: { TweetId: req.params.tweet_id }
-        })
-            .then(Replies => {
-                return res.json(Replies)
-            })
     }
 }
 module.exports = tweetController

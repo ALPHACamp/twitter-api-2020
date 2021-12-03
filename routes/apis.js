@@ -5,6 +5,8 @@ const { authenticated, authenticatedUser, authenticatedAdmin } = require('../mid
 const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
 const tweetController = require('../controllers/tweetController')
+const likeController = require('../controllers/likeController')
+const replyController = require('../controllers/replyController')
 const followshipController = require('../controllers/followshipController')
 
 const multer = require('multer')
@@ -29,13 +31,12 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.postTwe
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 
 //like
-router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.unlikeTweet)
-router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.likeTweet)
+router.post('/tweets/:id/unlike', authenticated, authenticatedUser, likeController.unlikeTweet)
+router.post('/tweets/:id/like', authenticated, authenticatedUser, likeController.likeTweet)
 
 //reply
-router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.addReply)
-router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
-router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.addReply)
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies)
 
 //followship
 router.post('/followships', authenticated, authenticatedUser, followshipController.postFollowship)
