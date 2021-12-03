@@ -96,61 +96,48 @@ const userService = {
     })
   },
 
-  putUser: (req, res, callback) => {
-    if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
-      return callback({ status: 'error', message: '沒有編輯權限！' })
-    }
+  putUser: async (req, res, callback) => {
+    try {
+      const { account, email } = req.body
 
-    if (req.body.account) {
-      if (helpers.getUser(req).account !== req.body.account) {
-        User.findOne({ where: { account: req.body.account }, raw: true }).then(user => {
-          if (user) {
-            return callback({ status: 'error', message: 'account 已重覆註冊！' })
-          }
-        })
+      if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
+        return callback({ status: 'error', message: '沒有編輯權限！' })
       }
-    }
 
-    if (req.body.email) {
-      if (helpers.getUser(req).email !== req.body.email) {
-        User.findOne({ where: { email: req.body.email }, raw: true }).then(user => {
-          console.log(user)
-          if (user) {
-            return callback({ status: 'error', message: 'email 已重覆註冊！' })
-          }
+      if (account && account !== helpers.getUser(req).account) {
+        const existUser = await User.findOne({
+          where: { account }, raw: true
         })
+        if (existUser) return callback({ status: 'error', message: 'account 已重覆註冊！' })
       }
-    }
 
-    const { file } = req
-    if (file) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      imgur.upload(file.path, (err, img) => {
-        return User.findByPk(req.params.id).then(user => {
-          user
-            .update({
-              ...req.body,
-              avatar: file ? img.data.link : user.avatar
-            })
-            .then(() => {
-              callback({ status: 'success', message: '使用者資料編輯成功' })
-            })
+      if (email && email !== helpers.getUser(req).email) {
+        const existUser = await User.findOne({
+          where: { email }, raw: true
         })
-      })
-    } else {
-      return User.findByPk(req.params.id).then(user => {
-        user
-          .update({
-            ...req.body,
-            avatar: user.avatar
-          })
-          .then(() => {
-            return callback({
-              status: 'success',
-              message: '使用者資料編輯成功！'
-            })
-          })
-      })
+        if (existUser) return callback({ status: 'error', message: 'email 已重覆註冊！' })
+      }
+
+      const user = await User.findByPk(req.params.id)
+
+      const { files } = req
+      if (files) {
+        imgur.setClientId(IMGUR_CLIENT_ID)
+        const avatar = files.avatar ? await imgur.upload(files.avatar[0].path) : null
+        const cover = files.cover ? await imgur.upload(files.cover[0].path) : null
+
+        await user.update({
+          ...req.body,
+          avatar: files.avatar ? avatar.data.link : user.avatar,
+          cover: files.cover ? cover.data.link : user.cover
+        })
+        return callback({ status: 'success', message: '使用者資料編輯成功！' })
+      }
+
+      await user.update({ ...req.body })
+      return callback({ status: 'success', message: '使用者資料編輯成功！' })
+    } catch (err) {
+      return callback({ status: 'error', message: '編輯未成功！' })
     }
   },
 
