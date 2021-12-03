@@ -1,5 +1,5 @@
 // 載入所需套件
-const { Reply } = require('../models')
+const { Reply, User } = require('../models')
 const helpers = require('../_helpers')
 
 const replyService = {
@@ -21,9 +21,23 @@ const replyService = {
     } catch (err) {
       console.log(err)
     }
+  },
+
+  getReplies: async (req, res, callback) => {
+    try {
+      //撈出特定:tweet_id的reply所有資料，並取得關聯User的資料
+      const replies = await Reply.findAll({
+        where: { TweetId: req.params.tweet_id },
+        raw: true,
+        nest: true,
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      })
+      return callback(replies)
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
-
 
 
 // replyController exports

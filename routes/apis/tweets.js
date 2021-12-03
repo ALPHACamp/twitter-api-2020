@@ -9,6 +9,7 @@ router.post('/', authenticated, checkNotAdmin, tweetController.postTweet)
 router.get('/', authenticated, checkNotAdmin, tweetController.getTweets)
 router.get('/:tweet_id', authenticated, checkNotAdmin, tweetController.getTweet)
 router.post('/:tweet_id/replies', authenticated, checkNotAdmin, replyController.postReply)
+router.get('/:tweet_id/replies', authenticated, checkNotAdmin, replyController.getReplies)
 
 
 // router exports
