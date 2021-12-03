@@ -15,11 +15,14 @@
     "logging": false
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "use_env_variable": "postgres://vhcgjgsnkovaro:187907642cfe2780a9dff6af4adce57fa3c368ed172a85bbd173ebd48b162397@ec2-54-225-46-224.compute-1.amazonaws.com:5432/dcgfne71j7h4sf",
+    "dialect": "postgres",
+    "protocol": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "rejectUnauthorized": false
+      }
+    }
   },
   "travis": {
     "username": "travis",
