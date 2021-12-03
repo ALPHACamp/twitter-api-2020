@@ -178,15 +178,13 @@ const userService = {
   },
 
   removeFollowing: (req, res, callback) => {
-    return Followship.findOne({
+    return Followship.destroy({
       where: {
         followerId: helpers.getUser(req).id,
         followingId: req.params.followingId
       }
     }).then(followship => {
-      followship.destroy().then(followship => {
-        return callback({ status: 'success', message: '取消追隨成功' })
-      })
+      return callback({ status: 'success', message: '取消追隨成功' })
     })
   },
 
