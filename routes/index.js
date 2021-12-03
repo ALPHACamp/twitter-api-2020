@@ -1,5 +1,6 @@
 const express = require('express')
 const userController = require('../controllers/userController.js')
+const followController = require('../controllers/followController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
@@ -20,7 +21,7 @@ const authenticatedAdmin = (req, res, next) => {
   return next()
 }
 
- //登入token驗證
+//登入token驗證
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (error, user, info) => {
     if (error) {
@@ -39,6 +40,8 @@ const authenticated = (req, res, next) => {
 module.exports = (app) => {
   // JWT signin & signup
   app.post('/api/users/signin', userController.signIn)
+
+  app.get('/api/followships/top', followController.getTopUser)
 
 }
 
