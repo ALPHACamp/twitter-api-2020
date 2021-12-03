@@ -134,14 +134,19 @@ const userController = {
       })
   },
   getFollowers:(req,res) =>{
-    return User.findByPk(req.params.id,{
-      include: [
-        {
-          model: User,
-          as: 'Followers'
-        }]
+    return User.findByPk(req.params.id,
+        { include: [{
+          model: User, as: 'Followers',
+            attributes: [['id', 'followerId'],
+              'name',
+              'account',
+              'avatar',
+              'cover',
+              'introduction',]
+        }],
+      attributes: ['id', 'name', 'account', 'avatar', 'cover']
     }).then(user => {
-      return res.json(user)
+      return res.json(user.Followers)
     })
   }
 }
