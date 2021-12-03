@@ -7,7 +7,6 @@ const Like = db.Like
 const Reply = db.Reply
 const Followship = db.Followship
 const jwt = require('jsonwebtoken')
-const should = require('should');
 
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
@@ -123,8 +122,8 @@ const userController = {
       .then(user => {
         return user.update({
           name,
-          cover,
-          avatar,
+          // cover,
+          // avatar,
           introduction
         })
           .then(user => {
@@ -177,13 +176,20 @@ const userController = {
         return res.json(user)
       })
   },
-    getFollowings: (req, res) => {
-        return User.findByPk(req.params.id,
-            {
-                include: [{ model: User, as: 'Followings' }]
-            }
-        ).then(followings => {
-            return res.json(followings)
+  getFollowings: (req, res) => {
+    return User.findByPk(req.params.id,
+        { include: [{
+          model: User, as: 'Followings',
+            attributes: [['id', 'followingId'],
+              'name',
+              'account',
+              'avatar',
+              'cover',
+              'introduction',]
+        }],
+          attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+        }).then(followings => {
+          return res.json(followings.Followings)
         })
   }
 }
