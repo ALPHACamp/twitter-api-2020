@@ -47,12 +47,10 @@ const tweetService = {
       ],
       order: [['Replies', 'createdAt', 'DESC']]
     }).then((tweet) => {
-      callback({
-        tweet,
-        isLiked: tweet.LikedUsers.map((d) => d.id).includes(
-          helpers.getUser(req).id
-        )
-      })
+      // const isLiked = tweet.LikedUsers.map((d) => d.id).includes(
+      //   helpers.getUser(req).id
+      // )
+      callback(tweet)
     })
   }
 }
