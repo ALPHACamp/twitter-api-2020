@@ -7,9 +7,11 @@ const fs = require('fs')
 const db = require('../models')
 const User = db.User
 
+const userService = require('../services/userService')
+
 const userController = {
   signUpPage: (req, res) => {
-    return res.render("signup");
+    return res.render("signup")
   },
 
   signUp: (req, res) => {
