@@ -85,7 +85,18 @@ const userController = {
   //user
   getUser: async (req, res) => {
     try {
-      const user = (await User.findByPk(req.params.id)).toJSON()
+      const user = (await User.findByPk(req.params.id,
+      {
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'email',
+          'avatar',
+          'cover',
+          'introduction',
+        ],
+      })).toJSON()
       return res.status(200).json({
         status: 'success',
         message: 'ok',
@@ -93,7 +104,9 @@ const userController = {
       })
     } catch (error) {
       console.log(error)
-      return res.status(500).json({ status: 'error', message: 'service error!' })
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'service error!' })
     }
   },
 }
