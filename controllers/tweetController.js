@@ -7,7 +7,6 @@ const helpers = require('../_helpers')
 const tweetController = {
   getTweets: async (req, res) => {
     try {
-      console.log('in controller')
       const tweets = await Tweet.findAll({
         include: [{ model: User }, { model: Like }, { model: Reply }]
       })
