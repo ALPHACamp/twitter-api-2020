@@ -10,8 +10,6 @@ const followshipController = require('../controllers/followshipController')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
-router.get('/', authenticated, authenticatedUser, (req, res) => res.send('test'))
-
 //user
 router.post('/users', userController.signUP)
 router.post('/signin', userController.signIn)
