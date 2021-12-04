@@ -1,6 +1,11 @@
 const express = require('express')
+<<<<<<< HEAD
+const userController = require('../controllers/userController')
+const tweetController = require('../controllers/tweetController')
+=======
 const userController = require('../controllers/userController.js')
 const followController = require('../controllers/followController')
+>>>>>>> master
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const tweetController = require('../controllers/tweetController.js')
@@ -14,11 +19,16 @@ const authenticatedUser = (req, res, next) => {
 }
 
 <<<<<<< HEAD
+// use helpers.getUser(req) to replace req.user
+// 驗後台身分
+=======
+<<<<<<< HEAD
 //驗後台身分
 // use helpers.getUser(req) to replace req.user
 =======
 // use helpers.getUser(req) to replace req.user
 // 驗後台身分
+>>>>>>> master
 >>>>>>> master
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req).role === 'user') {
@@ -52,9 +62,10 @@ module.exports = (app) => {
     authenticatedUser,
     userController.getUser
   )
+  // tweets
+  app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+  app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
+
   //followship    
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
-
-  // tweets
-  app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 }

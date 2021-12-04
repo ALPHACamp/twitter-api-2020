@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     'Tweet',
     {
       UserId: DataTypes.INTEGER,
-      description: DataTypes.STRING,
+      description: DataTypes.STRING
     },
     {}
   )
@@ -13,9 +13,8 @@ module.exports = (sequelize, DataTypes) => {
     Tweet.hasMany(models.Like)
     Tweet.belongsTo(models.User)
   }
-  //foreignKeyConstraint: true,onDelete: 'cascade',
-  //onDelete: 'cascade',foreignKey: { allowNull: false },hooks: true,
-    
+  // foreignKeyConstraint: true,onDelete: 'cascade',
+  // onDelete: 'cascade',foreignKey: { allowNull: false },hooks: true,
 
   return Tweet
 }
