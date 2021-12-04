@@ -13,7 +13,7 @@ const tweetController = {
         { model: User, as: 'LikedUsers' },    // Tweet belongsToMany User, through Like
         { model: User, as: 'RepliedUsers' }   // Tweet belongsToMany User, through Reply
       ],
-      order: ['createdAt']
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         tweets = tweets.map(tweet => ({
