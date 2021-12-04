@@ -74,7 +74,7 @@ const userController = {
           })
           return res
             .status(200)
-            .json({ status: 'success', message: '成功註冊帳號！', user })
+            .json({ status: 'success', message: '成功註冊帳號！', user:{id:user.id,email:user.email},})
         }
       }
     } catch (error) {
