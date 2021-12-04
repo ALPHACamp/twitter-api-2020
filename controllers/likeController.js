@@ -8,17 +8,15 @@ const likeController = {
     Like.destroy({
       where: {
         UserId: helpers.getUser(req).id,
-        TweetId: req.params.id
+        TweetId: req.params.tweet_id
       }
     })
       .then(() => res.json({ status: 'success', message: '取消Like推文' }))
   },
 
   likeTweet: (req, res) => {
-    Like.create({ UserId: helpers.getUser(req).id, TweetId: req.params.id })
-      .then(like => {
-        res.json({ status: 'success', message: '成功Like推文' })
-      })
+    Like.create({ UserId: helpers.getUser(req).id, TweetId: req.params.tweet_id })
+      .then(() => res.json({ status: 'success', message: '成功Like推文' }))
   }
 }
 module.exports = likeController
