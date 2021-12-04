@@ -78,13 +78,6 @@ const userController = {
         'description',
         'createdAt',
         'updatedAt',
-        'likeCount',
-        [
-          sequelize.literal(
-              `s (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
-          ),
-          'replyCount'
-        ],
         [
           sequelize.literal(
               `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
