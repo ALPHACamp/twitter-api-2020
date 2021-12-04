@@ -12,6 +12,7 @@ router.get('/:id', authenticated, checkNotAdmin, userController.getUser)
 router.put('/:id', authenticated, checkNotAdmin, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
 router.put('/:id/setting', authenticated, checkNotAdmin, userController.putUserSetting)
 router.get('/:id/tweets', authenticated, checkNotAdmin, userController.getUserTweets)
+router.get('/:id/replied_tweets', authenticated, checkNotAdmin, userController.getUserReplies)
 
 // router exports
 module.exports = router

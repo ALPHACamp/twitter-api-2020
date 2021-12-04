@@ -1,5 +1,5 @@
 // 載入所需套件
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
 const sequelize = require('sequelize')
@@ -150,7 +150,9 @@ const userService = {
       const user = (await User.findByPk(userId, {
         attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
           // followings => 該使用者關注幾個其他人，followers => 該使用者被幾個其他人跟隨
-          [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers']]
+          [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
+          [sequelize.literal(`(select count(UserId) from Tweets where UserId = User.id)`), 'tweetsCounts']
+        ]
       })).toJSON()
       return callback(user)
     } else {
@@ -158,7 +160,8 @@ const userService = {
       const user = (await User.findByPk(userId, {
         attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
           [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
-          [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed']
+          [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed'],
+          [sequelize.literal(`(select count(UserId) from Tweets where UserId = User.id)`), 'tweetsCounts']
         ]
       })).toJSON()
       return callback(user)
@@ -172,11 +175,30 @@ const userService = {
       raw: true,
       nest: true,
       // 利用SQL原生語法判別tweet是否有被當前使用者按讚
-      attributes: ['id', 'description', 'likeCounts', 'commentCounts', 'createdAt', [sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLiked']],
+      attributes: ['id', 'description', 'createdAt',
+        [sequelize.literal(`(select count(TweetId) from Likes where TweetId = Tweet.id)`), 'likeCounts'],
+        [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts'],
+        [sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLiked']
+      ],
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
     return callback(tweets)
+  },
+
+  getUserReplies: async (req, res, callback) => {
+    const replies = await Reply.findAll({
+      where: { UserId: req.params.id },
+      raw: true,
+      nest: true,
+      attributes: ['id', 'comment', 'createdAt'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['account'] }] } // 關聯出被回覆的推文資訊
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+    return callback(replies)
   },
 }
 
