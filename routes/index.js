@@ -2,6 +2,7 @@
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followController = require('../controllers/followController')
+const adminController = require('../controllers/adminController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
@@ -55,4 +56,7 @@ module.exports = (app) => {
 
   // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
+
+  // admin
+  app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 }
