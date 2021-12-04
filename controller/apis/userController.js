@@ -278,7 +278,6 @@ const userController = {
         followerIntro: u.Followers.introduction,
         followerAvatar: u.Followers.avatar,
         isFollowed: followingIds.includes(u.Followers.id)
-
       }))
 
       return res.status(200).json(follower)
@@ -297,7 +296,7 @@ const userController = {
             user.update({
               name: req.body.name,
               introduction: req.body.introduction,
-              avatar: avatarImg.data.link || user.avatar,
+              avatar: avatarImg.data.link || user.avatar
             })
           })
         })
@@ -308,22 +307,24 @@ const userController = {
             user.update({
               name: req.body.name,
               introduction: req.body.introduction,
-              cover: coverImg.data.link || user.cover,
+              cover: coverImg.data.link || user.cover
             })
           })
         })
       }
-      return res.status(200).json({message: 'success'})
+      return res.status(200).json({ message: 'success' })
     } else {
       return User.findByPk(req.params.id).then(user => {
-        user.update({
-          name: req.body.name,
-          introduction: req.body.introduction,
-          avatar: user.avatar,
-          cover: user.cover
-        }).then(() => {
-          return res.status(200).json({message: 'success'})
-        })
+        user
+          .update({
+            name: req.body.name,
+            introduction: req.body.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          })
+          .then(() => {
+            return res.status(200).json({ message: 'success' })
+          })
       })
     }
   },

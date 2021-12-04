@@ -125,11 +125,7 @@ const tweetController = {
   },
   deleteTweet: async (req, res) => {
     try {
-      await Promise.all([
-        Tweet.destroy({ where: { id: req.params.id } }),
-        Reply.destroy({ where: { TweetId: req.params.id } }),
-        Like.destroy({ where: { TweetId: req.params.id } })
-      ])
+      await Promise.all([Tweet.destroy({ where: { id: req.params.id } })])
       return res.json({ status: 200, message: 'delete successfully' })
     } catch (err) {
       console.log(err)
