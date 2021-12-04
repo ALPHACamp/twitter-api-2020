@@ -54,9 +54,7 @@ describe('# admin requests', () => {
         this.getUser.restore();
         await db.User.destroy({where: {},truncate: true})
       })
-
     });
-
   });
 
   context('# DELETE ', () => {
