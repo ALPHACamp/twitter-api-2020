@@ -1,5 +1,10 @@
 const bcrypt = require('bcryptjs')
 const { User, Followship } = require('../models')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+const imgur = require('imgur')
+// const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const helpers = require('../_helpers')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -74,7 +79,11 @@ const userController = {
           })
           return res
             .status(200)
-            .json({ status: 'success', message: '成功註冊帳號！', user })
+            .json({
+              status: 'success',
+              message: '成功註冊帳號！',
+              user: { id: user.id, email: user.email },
+            })
         }
       }
     } catch (error) {
@@ -85,18 +94,19 @@ const userController = {
   //user
   getUser: async (req, res) => {
     try {
-      const user = (await User.findByPk(req.params.id,
-      {
-        attributes: [
-          'id',
-          'account',
-          'name',
-          'email',
-          'avatar',
-          'cover',
-          'introduction',
-        ],
-      })).toJSON()
+      const user = (
+        await User.findByPk(req.params.id, {
+          attributes: [
+            'id',
+            'account',
+            'name',
+            'email',
+            'avatar',
+            'cover',
+            'introduction',
+          ],
+        })
+      ).toJSON()
       return res.status(200).json({
         status: 'success',
         message: 'ok',
@@ -107,6 +117,62 @@ const userController = {
       return res
         .status(500)
         .json({ status: 'error', message: 'service error!' })
+    }
+  },
+
+  putUser: async (req, res) => {
+    const { account, name, email, password } = req.body
+    try {
+      //只有自己能編輯自己的資料
+      //防止使用網址修改id切換使用者去修改別人的Profile
+      if (helpers.getUser(req).id !== Number(req.params.id)) {
+        return res.status(401).json({
+          status: 'error',
+          message: '無法變更其他使用者的Profile',
+        })
+      }
+      const { files } = req
+      if (files) {
+        //imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+        if (files.avatar) {
+          // 如果avatar已存在，直接上傳到imgur
+          const avatar = await imgur.uploadFile(files.avatar[0].path)
+          req.body.avatar = avatar.link
+        }
+        if (files.cover) {
+          // 如果cover已存在，直接上傳到imgur
+          const cover = await imgur.uploadFile(files.cover[0].path)
+          req.body.cover = cover.link
+        }
+      }
+      if (password) {
+        await User.update(
+          {
+            ...req.body,
+            password: bcrypt.hashSync(
+              req.body.password,
+              bcrypt.genSaltSync(10)
+            ),
+          },
+          { where: { id: helpers.getUser(req).id } }
+        )
+        return res.status(200).json({
+          status: 'success',
+          message: '已成功更新！',
+        })
+      } else {
+        await User.update(
+          { ...req.body },
+          { where: { id: helpers.getUser(req).id } }
+        )
+        return res.status(200).json({
+          status: 'success',
+          message: '已成功更新！',
+        })
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ status: 'error', message: 'service error!' })
     }
   },
 }
