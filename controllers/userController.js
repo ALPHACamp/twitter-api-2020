@@ -255,6 +255,10 @@ const userController = {
         users = users.filter(user => (
           !user.role.includes('admin')
         ))
+        users = users.map(user => ({
+          ...user.dataValues,
+          isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+        }))
         return res.json(users)
       })
   }
