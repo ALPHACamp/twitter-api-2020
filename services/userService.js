@@ -1,5 +1,5 @@
 // 載入所需套件
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
 const sequelize = require('sequelize')
@@ -199,6 +199,28 @@ const userService = {
       order: [['createdAt', 'DESC']]
     })
     return callback(replies)
+  },
+
+  getUserLikes: async (req, res, callback) => {
+    const currentUserId = helpers.getUser(req).id
+    const likes = await Like.findAll({
+      where: { UserId: req.params.id },
+      raw: true,
+      nest: true,
+      attributes: ['id', 'createdAt', 'TweetId'],
+      include: [{
+        model: Tweet,
+        // 利用SQL原生語法判別tweet是否有被當前使用者按讚
+        attributes: ['id', 'description',
+          [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts'],
+          [sequelize.literal(`(select count(TweetId) from Likes where TweetId = Tweet.id)`), 'likeCounts'],
+          [sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLiked']
+        ],
+        include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }] // 關聯出被喜歡推文的發文者資訊
+      }],
+      order: [['createdAt', 'DESC']]
+    })
+    return callback(likes)
   },
 }
 

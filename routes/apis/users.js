@@ -13,6 +13,7 @@ router.put('/:id', authenticated, checkNotAdmin, upload.fields([{ name: 'avatar'
 router.put('/:id/setting', authenticated, checkNotAdmin, userController.putUserSetting)
 router.get('/:id/tweets', authenticated, checkNotAdmin, userController.getUserTweets)
 router.get('/:id/replied_tweets', authenticated, checkNotAdmin, userController.getUserReplies)
+router.get('/:id/likes', authenticated, checkNotAdmin, userController.getUserLikes)
 
 // router exports
 module.exports = router
