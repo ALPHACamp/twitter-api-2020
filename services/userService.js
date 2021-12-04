@@ -1,5 +1,5 @@
 // 載入所需套件
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const bcrypt = require('bcryptjs')
 const { Op } = require('sequelize')
 const sequelize = require('sequelize')
@@ -184,6 +184,21 @@ const userService = {
       order: [['createdAt', 'DESC']]
     })
     return callback(tweets)
+  },
+
+  getUserReplies: async (req, res, callback) => {
+    const replies = await Reply.findAll({
+      where: { UserId: req.params.id },
+      raw: true,
+      nest: true,
+      attributes: ['id', 'comment', 'createdAt'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['account'] }] } // 關聯出被回覆的推文資訊
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+    return callback(replies)
   },
 }
 
