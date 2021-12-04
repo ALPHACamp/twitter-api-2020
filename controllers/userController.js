@@ -70,16 +70,26 @@ const userController = {
     })
   },
   getTweets: (req, res) => {
-    User.findByPk(req.params.id,
-      { include: [{ model: Tweet, include: [Like, Reply, User] }] }
-    )
-      .then(user => {
-        if (!user || user.role === 'admin') {
-          return res.json({ status: 'error', message: '權限錯誤' })
-        } else {
-          res.json(user.Tweets)
-        }
-      })
+    Tweet.findAll({
+      where: { UserId: req.params.id },
+      attributes: [
+        'id',
+        'UserId',
+        'description',
+        'createdAt',
+        'updatedAt',
+        [
+          sequelize.literal(
+              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
+          ),
+          'isLiked'
+        ],
+      ],
+      include: [{ model: User },],
+      order: [['createdAt', 'DESC']],
+    }).then( tweets => {
+      return res.json(tweets)
+    })
   },
 
   getUser: (req, res) => {
