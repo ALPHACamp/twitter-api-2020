@@ -33,7 +33,7 @@ router.put('/api/user/:id', userController.putUserAccountSetting)
 //router.get('/api/users/:userId', userController.getUser)(待討論)
 //user編輯個人資料
 router.get('/api/user/edit/:id', userController.getUserInfo)
-
+router.put('/api/user/edit/:id', userController.editUserInfo)
 
 
 //先讓前端使用的get_current)user

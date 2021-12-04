@@ -164,6 +164,38 @@ const userController = {
         })
       })
   },
+  editUserInfo: (req, res) => {
+    const userId = req.params.id
+    User.findByPk(userId)
+      .then(user => {
+        const { name, introduction, avatar, cover } = req.body
+        const { files } = req.body
+        imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+        if (!name) {
+          return res.json({ status: 'error', message: 'name為必填欄位' })
+        }
+        if (files) {
+          if (files.cover) {
+            // 如果cover更新, 就上傳
+            const cover = imgur.uploadFile(files.cover[0].path)
+            req.body.cover = cover.link
+          }
+          if (files.avatar) {
+            // 如果avatar更新, 就上傳
+            const avatar = imgur.uploadFile(files.avatar[0].path)
+            req.body.avatar = avatar.link
+          }
+        }
+        else {
+          return User.findByPk(req.params.id).then(user => {
+            user.update({
+              name, introduction, avatar, cover
+            })
+            return res.json({ status: 'success', message: '成功編輯' })
+          })
+        }
+      })
+  }
 
 
 }
