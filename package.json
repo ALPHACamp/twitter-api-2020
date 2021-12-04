@@ -1,11 +1,11 @@
 {
-  "name": "test",
+  "name": "AC3-Twitter-API",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "_helpers.js",
   "scripts": {
-    "start": "NODE_ENV=development node app.js",
-    "dev": "NODE_ENV=development nodemon app.js",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "test": "mocha test --exit --recursive --timeout 5000",
     "rebuild-database": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npx sequelize-cli db:migrate:all"
   },
