@@ -15,11 +15,7 @@
     "logging": false
   },
   "production": {
-    "username": "root",
-    "password": "aA28539951",
-    "database": "ac_twitter_workspace",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "use_env_variable": "CLEARDB_DATABASE_URL"
   },
   "travis": {
     "username": "travis",
