@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
-// const multer = require('multer')
-// const upload = multer({ dest: 'temp/' })
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
 const passport = require('../config/passport')
 const tweetController = require('../controllers/api/tweetController')
 
 const userController = require('../controllers/api/userController')
-const replyService = require('../service/replyService')
+const replyService = require('../services/replyService')
 const helpers = require('../_helpers')
 
 //JWT
@@ -29,10 +29,11 @@ router.post("/users", userController.signUp) //暫時測試用
 //  使用者登入
 router.post('/signIn', userController.signIn)
 //  拿到某位使用者資料
+
 router.get("/users/:id", authenticated, userController.getUser);
 // router.get("/users/:id", userController.getUser);
 //  使用者編輯自己所有資訊
-router.put("/users/:id", authenticated, userController.putUser);
+router.put("/users/:id", upload.single('cover'), authenticated, userController.putUser);
 // router.put("/users/:id", userController.putUser);
 // router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
 // <--可以傳一個陣列 FILE

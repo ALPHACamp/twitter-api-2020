@@ -62,10 +62,10 @@ let userController = {
         User.findOne({ where: { account: req.body.account } }),
       ]).then(([emailCheck, accountCheck]) => {
         if (emailCheck) {
-          return res.json({ status: 'error', message: '信箱重覆' })
+          return res.json({ status: "error", message: "信箱重覆" });
         }
         if (accountCheck) {
-          return res.json({ status: 'error', message: '帳號重覆' })
+          return res.json({ status: "error", message: "帳號重覆" });
         } else {
           User.create({
             name: req.body.name,
@@ -77,7 +77,7 @@ let userController = {
               null
             ),
           }).then((user) => {
-            return res.json({ status: 'success', message: '成功註冊帳號' })
+            return res.json({ status: "success", message: "成功註冊帳號" });
           });
         }
       });
