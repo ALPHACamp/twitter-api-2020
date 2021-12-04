@@ -51,30 +51,28 @@ let userController = {
   signUp: async (req, res) => {
     try {
       const { name, account, email, password, checkPassword } = req.body
+      if (!name || !account || !email || !password || !checkPassword) {
+        return res.json({
+          status: 'error',
+          message: 'Required fields must be filled！'
+        })
+      }
       if (checkPassword !== password) {
         return res.json({
           status: 'error',
           message: 'Passwords is not matched！'
         })
       } else {
-        const user = await User.findOne({
-          attributes: ['email', 'account'],
-          where: { account }
-        })
-        const accountCheck = await User.findOne({
-          attributes: ['email', 'account'],
-          where: { email }
-        })
+        const user = await User.findOne({ where: { email } })
+        const accountCheck = await User.findOne({ where: { account } })
 
         if (user) {
-          console.log(user)
           return res.json({
             status: 'error',
             message: 'Email has already existed!'
           })
         }
         if (accountCheck) {
-          console.log(accountCheck)
           return res.json({
             status: 'error',
             message: 'Account has already existed!'

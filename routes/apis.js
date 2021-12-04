@@ -9,7 +9,8 @@ const upload = multer({ dest: 'temp/' })
 /* Controller */
 const userController = require('../controllers/api/userController')
 const tweetController = require('../controllers/api/tweetController')
-const adminController = require('../controllers/api/adminController.js')
+const adminController = require('../controllers/api/adminController')
+const replyController = require('../controllers/api/replyController')
 
 /* authenticated */
 const authenticated = (req, res, next) => {
@@ -63,6 +64,9 @@ router.put(
 router.get('/tweets/', authenticated, tweetController.getTweets)
 router.post('/tweets/', authenticated, tweetController.postTweet)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
+
+// **reply**
+router.get('/tweets/:id/replies', authenticated, replyController.getReplies)
 
 // **admin**
 // signin
