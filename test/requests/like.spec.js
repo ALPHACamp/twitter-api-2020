@@ -42,6 +42,7 @@ describe('# like requests', () => {
             if (err) return done(err);
             // 檢查 Like 資料裡，是否有 UserId=1, TweetId =1 的資料
             db.Like.findByPk(1).then(like => {
+              console.log('=====', like, '=====')
               like.UserId.should.equal(1);
               like.TweetId.should.equal(1);
               return done();
