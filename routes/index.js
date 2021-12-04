@@ -1,15 +1,11 @@
-const express = require('express')
-<<<<<<< HEAD
+
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
-=======
-const userController = require('../controllers/userController.js')
 const followController = require('../controllers/followController')
->>>>>>> master
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
-const tweetController = require('../controllers/tweetController.js')
 
+// use helpers.getUser(req) to replace req.user
 // 驗前台是user身分
 const authenticatedUser = (req, res, next) => {
   if (helpers.getUser(req).role === 'admin') {
@@ -18,18 +14,7 @@ const authenticatedUser = (req, res, next) => {
   return next()
 }
 
-<<<<<<< HEAD
-// use helpers.getUser(req) to replace req.user
 // 驗後台身分
-=======
-<<<<<<< HEAD
-//驗後台身分
-// use helpers.getUser(req) to replace req.user
-=======
-// use helpers.getUser(req) to replace req.user
-// 驗後台身分
->>>>>>> master
->>>>>>> master
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req).role === 'user') {
     return res.status(401).json({ status: 'error', message: '帳號不存在！' })
@@ -55,17 +40,19 @@ module.exports = (app) => {
   // JWT signin & signup
   app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
-  //users routes
+  // users routes
   app.get(
     '/api/users/:id',
     authenticated,
     authenticatedUser,
     userController.getUser
   )
+
   // tweets
   app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
   app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
+  app.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
-  //followship    
+  // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
 }
