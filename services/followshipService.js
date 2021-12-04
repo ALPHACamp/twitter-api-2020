@@ -8,7 +8,7 @@ const followshipService = {
     try {
       const followerId = helpers.getUser(req).id
       const followingId = req.body.id
-      
+
       //使用者不能追蹤自己
       if (followerId === Number(followingId)) {
         return callback({ status: 'error', message: '不能追蹤自己' })
