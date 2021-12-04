@@ -1,11 +1,13 @@
+const helper = require('../../_helpers')
+const bcrypt = require('bcryptjs')
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = '820069e8ac75862'
 const db = require('../../models')
 const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
-const helper = require('../../_helpers')
-const bcrypt = require('bcryptjs')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -13,6 +15,7 @@ const passportJWT = require('passport-jwt')
 const like = require('../../models/like')
 const { sequelize } = require('../../models')
 const { json } = require('body-parser')
+const { image } = require('faker/locale/de')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -222,7 +225,7 @@ const userController = {
         followerId: user.dataValues.id,
         followerAccount: user.dataValues.account,
         followerName: user.dataValues.name,
-        followerAvatar: user.dataValues.avatar
+        followerAvatar: user.dataValues.avatar  
       }))
       return res.json([...followers, { status: 200, message: '' }])
     } catch (err) {
@@ -230,19 +233,43 @@ const userController = {
     }
   },
   putUser: async (req, res) => {
-    // avatar, cover 尚未完成。
-    try {
-      await User.update(
-        {
+    const { files } = req
+    if (files) {
+      imgur.setClientID(IMGUR_CLIENT_ID)
+      if (files.avatar) {
+        await imgur.upload(files.avatar[0].path, (err, avatarImg) => {
+          return User.findByPk(req.params.id).then(user => {
+            user.update({
+              name: req.body.name,
+              introduction: req.body.introduction,
+              avatar: avatarImg.data.link || user.avatar,
+            })
+          })
+        })
+      }
+      if (files.cover) {
+        await imgur.upload(files.cover[0].path, (err, coverImg) => {
+          return User.findByPk(req.params.id).then(user => {
+            user.update({
+              name: req.body.name,
+              introduction: req.body.introduction,
+              cover: coverImg.data.link || user.cover,
+            })
+          })
+        })
+      }
+      return res.status(200).json({message: 'success'})
+    } else {
+      return User.findByPk(req.params.id).then(user => {
+        user.update({
+          name: req.body.name,
           introduction: req.body.introduction,
-          name: req.body.name
-        },
-        { where: { id: helper.getUser(req).id } }
-      )
-      return res.json({ status: 200, message: 'success!' })
-    } catch (err) {
-      console.log(err)
-      return res.json({ status: 'error', message: err })
+          avatar: user.avatar,
+          cover: user.cover
+        }).then(() => {
+          return res.status(200).json({message: 'success'})
+        })
+      })
     }
   },
   getCurrentUser: async (req, res) => {

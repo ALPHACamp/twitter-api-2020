@@ -9,6 +9,8 @@ const replyController = require('../controller/apis/replyController')
 const adminController = require('../controller/apis/adminController')
 const likeController = require('../controller/apis/likeController')
 const passport = require('passport')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
 
 //function
 let authenticated = passport.authenticate('jwt', { session: false })
@@ -35,11 +37,10 @@ router.get('/tweets/:id/replies', authenticated, replyController.getReply)
 router.delete('/replies/:replyId', authenticated, replyController.deleteReply)
 
 //JWT
-
 router.post('/users', userController.signUp)
 
 router.post('/users/signin', userController.signIn)
-router.put('/users/:id', authenticated, userController.putUser)
+router.put('/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1}]),authenticated, userController.putUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get(
   '/users/:id/replied_tweets',
