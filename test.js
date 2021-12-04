@@ -1,14 +1,11 @@
-const { add } = require('lodash')
-const _ = require('lodash')
-const a = [
-  { UserId: 2, TweetID: 2 },
-  { UserId: 3, TweetID: 38 },
-  { UserId: 3, TweetID: 38 }
-]
-let u = _.uniqBy(a, function (a) {
-  return a.UserId + a.TweetID
+const a = new Promise((resolve, reject) => {
+  setTimeout(resolve('a'), 5000)
 })
-u = _.reject(u, function (a) {
-  return a.UserId === a.TweetID
+const b = new Promise((resolve, reject) => {
+  setTimeout(resolve('b'), 4000)
 })
-console.log(u)
+const c = new Promise((resolve, reject) => {
+  setTimeout(resolve('c'), 2000)
+})
+
+Promise.all([a, b, c]).then(result => console.log(result))
