@@ -37,10 +37,10 @@ const tweetService = {
       ]
     }).then(tweet => {
       console.log(tweet.User)
-      // const isLiked = tweet.User.map(d => d.id).includes(helpers.getUser(req).id)
+      const isLiked = tweet.User.map(d => d.id).includes(helpers.getUser(req).id)
       callback({
         tweet: tweet,
-        // isLiked: isLiked
+        isLiked: isLiked
       })
     })
   },
