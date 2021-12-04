@@ -52,6 +52,12 @@ const userController = {
       return res.json(data)
     })
   },
+
+  getUserLikes: (req, res) => {
+    userService.getUserLikes(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 // userService exports
