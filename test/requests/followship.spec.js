@@ -34,7 +34,7 @@ describe('# followship requests', () => {
       })
 
       // 新增 POST /followships
-      it(' - successfully', (done) => {
+      it.only(' - successfully', (done) => {
         request(app)
           .post('/api/followships')
           .send('id=2')
@@ -43,7 +43,17 @@ describe('# followship requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查 Followship 資料裡，是否有 followerId=1, followingId = 2 的資料
+            
+            // 這段是自己加的，測試檔可以在followship model中找到新增的資料
+            db.Followship.findOne({ where: {id: 1 }}).then(followship => {
+              console.log(followship)
+              followship.followerId.should.equal(1);
+              followship.followingId.should.equal(2);
+              return done();
+            })
+            //這段是原本的，測試檔無法在followship model中找到新增的資料
             db.Followship.findByPk(1).then(followship => {
+              console.log(followship)
               followship.followerId.should.equal(1);
               followship.followingId.should.equal(2);
               return done();
