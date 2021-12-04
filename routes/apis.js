@@ -67,6 +67,7 @@ router.get('/tweets/:id', authenticated, tweetController.getTweet)
 
 // **reply**
 router.get('/tweets/:id/replies', authenticated, replyController.getReplies)
+router.post('/tweets/:id/replies', authenticated, replyController.postReply)
 
 // **admin**
 // signin
