@@ -72,6 +72,7 @@ router.post('/tweets/:id/replies', authenticated, replyController.postReply)
 
 // **like**
 router.post('/tweets/:id/like', authenticated, likeController.like)
+router.post('/tweets/:id/unlike', authenticated, likeController.unlike)
 
 // **admin**
 // signin
