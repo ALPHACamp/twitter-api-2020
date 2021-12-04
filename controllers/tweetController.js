@@ -1,7 +1,4 @@
-const { Tweet } = require('../models')
-const { User } = require('../models')
-const { Like } = require('../models')
-const { Reply } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
