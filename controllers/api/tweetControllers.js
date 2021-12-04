@@ -1,17 +1,21 @@
-const db = require('../../models')
-const Tweet = db.Tweet
-const Reply = db.Reply
-const Like = db.Like
+const tweetService = require('../../services/tweetService')
 
 const tweetController = {
   getTweets: (req, res) => {
-    return Tweet.findAll({ include: [{ model: Reply }, { model: Like }] }).then(tweets => {
-      tweets = tweets.map(tweet => ({
-        ...tweet.toJSON(),
-        replyCount: tweet.Replies.length,
-        likeCount: tweet.Likes.length
-      }))
-      return res.json(tweets)
+    tweetService.getTweets(req, res, data => {
+      return res.json(data.tweets)
+    })
+  },
+
+  postTweet: (req, res) => {
+    tweetService.postTweet(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  getTweet: (req, res) => {
+    tweetService.getTweet(req, res, data => {
+      return res.json(data.tweet)
     })
   }
 }
