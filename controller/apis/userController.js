@@ -12,10 +12,11 @@ const Followship = db.Followship
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
-const like = require('../../models/like')
 const { sequelize } = require('../../models')
+
 const { json } = require('body-parser')
 const { image } = require('faker/locale/de')
+
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
@@ -127,9 +128,32 @@ const userController = {
   getUserTweets: async (req, res) => {
     try {
       const tweets = await Tweet.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
+              ),
+              'reply_count'
+            ],
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
+              ),
+              'like_count'
+            ]
+          ]
+        },
+        include: [
+          { model: Reply, attributes: [] },
+          { model: Like, attributes: [] }
+        ],
         where: { UserId: req.params.id },
         raw: true,
-        nest: true
+        nest: true,
+        group: ['Tweet.id']
       })
       return res.json([...tweets, { status: 200, message: '' }])
     } catch (err) {
@@ -200,36 +224,67 @@ const userController = {
   },
   getUserFollowings: async (req, res) => {
     try {
-      const user = await User.findByPk(req.params.id, {
-        include: [{ model: User, as: 'Followings' }]
+      const user = await User.findAll({
+        where: { id: req.params.id },
+        include: [{ model: User, as: 'Followings' }],
+        raw: true,
+        nest: true
       })
-      let followings = user.dataValues.Followings
-      followings = followings.map(user => ({
-        followingId: user.dataValues.id,
-        followingAccount: user.dataValues.account,
-        followingName: user.dataValues.name,
-        followingAvatar: user.dataValues.avatar
+      const following = user.map(u => ({
+        followingId: u.Followings.id,
+        followingName: u.Followings.name,
+        followingAccount: u.Followings.account,
+        followingAvatar: u.Followings.avatar,
+        followingIntro: u.Followings.introduction
       }))
-      return res.json([...followings, { status: 200, message: '' }])
+      if (!user) {
+        return res.status(400).json({ message: 'cannot find user' })
+      }
+
+      return res.status(200).json(following)
     } catch (err) {
       console.log(err)
+      return res.status(400).json({ message: err })
     }
   },
   getUserFollowers: async (req, res) => {
     try {
-      const user = await User.findByPk(req.params.id, {
-        include: [{ model: User, as: 'Followers' }]
+      const user = await User.findAll({
+        where: { id: req.params.id },
+        include: [
+          {
+            model: User,
+            as: 'Followers'
+          }
+        ],
+        raw: true,
+        nest: true
       })
-      let followers = user.dataValues.Followers
-      followers = followers.map(user => ({
-        followerId: user.dataValues.id,
-        followerAccount: user.dataValues.account,
-        followerName: user.dataValues.name,
-        followerAvatar: user.dataValues.avatar  
+
+      if (!user) {
+        return res.status(400).json({ message: 'cannot find user' })
+      }
+      const followingUsers = await Followship.findAll({
+        where: { followerId: helper.getUser(req).id },
+        attributes: ['followingId'],
+        raw: true,
+        nest: true
+      })
+      const followingIds = followingUsers.map(a => a.followingId)
+      const follower = user.map(u => ({
+        followerId: u.Followers.id,
+        followerAccount: u.Followers.account,
+        followerName: u.Followers.name,
+        followerIntro: u.Followers.introduction,
+        followerAvatar: u.Followers.avatar,
+        isFollowed: followingIds.includes(u.Followers.id)
+
       }))
-      return res.json([...followers, { status: 200, message: '' }])
+
+      return res.status(200).json(follower)
     } catch (err) {
       console.log(err)
+      return res.status(400).json({ message: err })
     }
   },
   putUser: async (req, res) => {
