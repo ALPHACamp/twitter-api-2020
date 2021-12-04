@@ -70,6 +70,12 @@ const userController = {
       return res.json(data)
     })
   },
+
+  getUserTop: (req, res) => {
+    userService.getUserTop(req, req, data => {
+      return res.json(data)
+    })
+  }
 }
 
 // userService exports

@@ -288,6 +288,19 @@ const userService = {
     }
     return callback(followers)
   },
+
+  getUserTop: async (req, res, callback) => {
+    const currentUserId = helpers.getUser(req).id
+    const users = await User.findAll({
+      attributes: ['id', 'name', 'account', 'avatar',
+        [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed'],
+        [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers']
+      ],
+      order: [[sequelize.literal('followers'), 'DESC']], // 利用SQL原生語法計算產生的每個使用者被多少人追蹤數字拿來排序
+      limit: 10
+    })
+    return callback(users)
+  }
 }
 
 // userController exports
