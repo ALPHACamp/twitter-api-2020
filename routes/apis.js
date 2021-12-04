@@ -48,6 +48,7 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 router.post('/followships', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)

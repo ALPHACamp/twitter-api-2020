@@ -11,6 +11,13 @@ const replyService = {
     }).then(reply => {
       return callback({ status: 'success', message: '成功回覆推文' })
     })
+  },
+
+  getReply: (req, res, callback) => {
+    Reply.findByPk(req.params.tweet_id, { include: [{ model: Tweet }, { model: User }] }).then(tweet => {
+      tweet = tweet.toJSON()
+      return callback([tweet])
+    })
   }
 }
 
