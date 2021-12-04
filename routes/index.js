@@ -2,6 +2,7 @@ const express = require('express')
 const userController = require('../controllers/userController.js')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
+const tweetController = require('../controllers/tweetController.js')
 
 //驗前台是user身分
 const authenticatedUser = (req, res, next) => {
@@ -46,4 +47,6 @@ module.exports = (app) => {
     authenticatedUser,
     userController.getUser
   )
+
+  app.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 }

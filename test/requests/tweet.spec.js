@@ -12,21 +12,21 @@ describe('# tweet requests', () => {
 
   context('# POST ', () => {
 
-    describe('POST /api/tweets', () => {
-      before(async() => {
+    describe.only('POST /api/tweets', () => {
+      before(async () => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
+        await db.User.destroy({ where: {}, truncate: true })
+        await db.Tweet.destroy({ where: {}, truncate: true })
         // 模擬登入資料
-        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
-          callback(null, {...rootUser}, null);
-          return (req,res,next)=>{};
+        const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+          callback(null, { ...rootUser }, null);
+          return (req, res, next) => { };
         });
         this.getUser = sinon.stub(
-            helpers, 'getUser'
-        ).returns({id: 1, Followings: []});
+          helpers, 'getUser'
+        ).returns({ id: 1, Followings: [] });
         // 在測試資料庫中，新增 mock 資料
-        await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
+        await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
       })
 
       // 新增推文 - POST /tweets
@@ -36,7 +36,7 @@ describe('# tweet requests', () => {
           .send('description=description')
           .set('Accept', 'application/json')
           .expect(200)
-          .end(function(err, res) {
+          .end(function (err, res) {
             if (err) return done(err);
             // 檢查是否有回傳正確資料
             db.Tweet.findByPk(1).then(tweet => {
@@ -50,8 +50,8 @@ describe('# tweet requests', () => {
       after(async () => {
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
+        await db.User.destroy({ where: {}, truncate: true })
+        await db.Tweet.destroy({ where: {}, truncate: true })
       })
 
     });
@@ -61,21 +61,21 @@ describe('# tweet requests', () => {
   context('# GET ', () => {
 
     describe('GET /api/tweets', () => {
-      before(async() => {
+      before(async () => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
+        await db.User.destroy({ where: {}, truncate: true })
+        await db.Tweet.destroy({ where: {}, truncate: true })
         // 模擬登入資料
-        const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
-          callback(null, {...rootUser}, null);
-          return (req,res,next)=>{};
+        const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+          callback(null, { ...rootUser }, null);
+          return (req, res, next) => { };
         });
         this.getUser = sinon.stub(
-            helpers, 'getUser'
-        ).returns({id: 1, Followings: []});
+          helpers, 'getUser'
+        ).returns({ id: 1, Followings: [] });
         // 在測試資料庫中，新增 mock 資料
-        await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
-        await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
+        await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
+        await db.Tweet.create({ UserId: 1, description: 'User1 的 Tweet1' })
       })
 
       // GET /tweets - 所有推文，包括推文作者
@@ -84,7 +84,7 @@ describe('# tweet requests', () => {
           .get('/api/tweets')
           .set('Accept', 'application/json')
           .expect(200)
-          .end(function(err, res) {
+          .end(function (err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('array');
             // 檢查是否回傳資料有 User1 的 Tweet1
@@ -99,7 +99,7 @@ describe('# tweet requests', () => {
           .get('/api/tweets/1')
           .set('Accept', 'application/json')
           .expect(200)
-          .end(function(err, res) {
+          .end(function (err, res) {
             if (err) return done(err);
             expect(res.body).to.be.an('object');
             // 檢查是否回傳資料有 User1 的 Tweet1 
@@ -111,8 +111,8 @@ describe('# tweet requests', () => {
       after(async () => {
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
+        await db.User.destroy({ where: {}, truncate: true })
+        await db.Tweet.destroy({ where: {}, truncate: true })
       })
 
     });
