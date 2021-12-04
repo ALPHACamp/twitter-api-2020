@@ -1,9 +1,17 @@
 const helpers = require('../_helpers')
+const sequelize = require('sequelize')
 const { Tweet, Reply, Like, User } = require('../models')
 
 const tweetService = {
   getTweets: (req, res, callback) => {
     return Tweet.findAll({
+      attributes: [
+        'id',
+        'UserId',
+        'description',
+        [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
+        [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount']
+      ],
       include: [
         { model: Reply, attributes: ['id'] },
         { model: Like, attributes: ['id'] },
@@ -12,8 +20,6 @@ const tweetService = {
     }).then(tweets => {
       tweets = tweets.map(tweet => ({
         ...tweet.toJSON(),
-        replyCount: tweet.Replies.length,
-        likeCount: tweet.Likes.length,
         isLiked: Number(helpers.getUser(req).id) === Number(tweet.UserId)
       }))
       return callback({ tweets })
@@ -38,6 +44,13 @@ const tweetService = {
 
   getTweet: (req, res, callback) => {
     Tweet.findByPk(req.params.tweet_id, {
+      attributes: [
+        'id',
+        'UserId',
+        'description',
+        [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
+        [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount']
+      ],
       include: [
         {
           model: Reply,
@@ -48,8 +61,6 @@ const tweetService = {
     }).then(tweet => {
       tweet = tweet.toJSON()
       tweet['isLiked'] = Number(helpers.getUser(req).id) === Number(tweet.UserId)
-      tweet['replyCount'] = tweet.Replies.length
-      tweet['likeCount'] = tweet.Likes.length
 
       return callback({ tweet })
     })
