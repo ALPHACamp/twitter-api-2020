@@ -44,7 +44,7 @@ describe('# user requests', () => {
   })
 
   context('# GET ', () => {
-    describe.only('GET /users/:id', () => {
+    describe('GET /users/:id', () => {
       before(async () => {
         // 清除測試資料庫資料
         await db.User.destroy({ where: {}, truncate: true })
@@ -54,7 +54,7 @@ describe('# user requests', () => {
           .stub(passport, 'authenticate')
           .callsFake((strategy, options, callback) => {
             callback(null, { ...rootUser }, null)
-            return (req, res, next) => {}
+            return (req, res, next) => { }
           })
         this.getUser = sinon
           .stub(helpers, 'getUser')
@@ -108,7 +108,7 @@ describe('# user requests', () => {
           .stub(passport, 'authenticate')
           .callsFake((strategy, options, callback) => {
             callback(null, { ...rootUser }, null)
-            return (req, res, next) => {}
+            return (req, res, next) => { }
           })
         this.getUser = sinon
           .stub(helpers, 'getUser')
@@ -161,7 +161,7 @@ describe('# user requests', () => {
           .stub(passport, 'authenticate')
           .callsFake((strategy, options, callback) => {
             callback(null, { ...rootUser }, null)
-            return (req, res, next) => {}
+            return (req, res, next) => { }
           })
         this.getUser = sinon
           .stub(helpers, 'getUser')
@@ -220,7 +220,7 @@ describe('# user requests', () => {
           .stub(passport, 'authenticate')
           .callsFake((strategy, options, callback) => {
             callback(null, { ...rootUser }, null)
-            return (req, res, next) => {}
+            return (req, res, next) => { }
           })
         this.getUser = sinon
           .stub(helpers, 'getUser')
@@ -280,7 +280,7 @@ describe('# user requests', () => {
           .stub(passport, 'authenticate')
           .callsFake((strategy, options, callback) => {
             callback(null, { ...rootUser }, null)
-            return (req, res, next) => {}
+            return (req, res, next) => { }
           })
         this.getUser = sinon
           .stub(helpers, 'getUser')
@@ -339,7 +339,7 @@ describe('# user requests', () => {
           .stub(passport, 'authenticate')
           .callsFake((strategy, options, callback) => {
             callback(null, { ...rootUser }, null)
-            return (req, res, next) => {}
+            return (req, res, next) => { }
           })
         this.getUser = sinon
           .stub(helpers, 'getUser')
@@ -399,7 +399,7 @@ describe('# user requests', () => {
           .stub(passport, 'authenticate')
           .callsFake((strategy, options, callback) => {
             callback(null, { ...rootUser }, null)
-            return (req, res, next) => {}
+            return (req, res, next) => { }
           })
         this.getUser = sinon
           .stub(helpers, 'getUser')
