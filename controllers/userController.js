@@ -126,7 +126,17 @@ const userController = {
         })
       }
     })
+  },
 
+  getCurrentUser: (req, res) => {
+    return res.json({
+      user: {
+        id: userId,
+        name: user.name,
+        account: user.account,
+        email: user.email
+      }
+    })
   }
 }
 module.exports = userController
