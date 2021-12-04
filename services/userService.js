@@ -175,7 +175,11 @@ const userService = {
       raw: true,
       nest: true,
       // 利用SQL原生語法判別tweet是否有被當前使用者按讚
-      attributes: ['id', 'description', 'likeCounts', 'commentCounts', 'createdAt', [sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLiked']],
+      attributes: ['id', 'description', 'createdAt',
+        [sequelize.literal(`(select count(TweetId) from Likes where TweetId = Tweet.id)`), 'likeCounts'],
+        [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts'],
+        [sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLiked']
+      ],
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
