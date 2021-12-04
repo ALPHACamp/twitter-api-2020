@@ -1,11 +1,12 @@
-
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followController = require('../controllers/followController')
+const adminController = require('../controllers/adminController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
+
 
 
 // use helpers.getUser(req) to replace req.user
@@ -40,6 +41,7 @@ const authenticated = (req, res, next) => {
 }
 
 module.exports = (app) => {
+
   // JWT signin & signup
   app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
@@ -69,4 +71,8 @@ module.exports = (app) => {
 
   // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
+
+  //admin
+  app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+
 }
