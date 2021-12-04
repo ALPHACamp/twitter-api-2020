@@ -62,10 +62,10 @@ let userController = {
         User.findOne({ where: { account: req.body.account } }),
       ]).then(([emailCheck, accountCheck]) => {
         if (emailCheck) {
-          return res.json({ status: "error", message: "信箱重覆" });
+          return res.json({ status: 'error', message: '信箱重覆' })
         }
         if (accountCheck) {
-          return res.json({ status: "error", message: "帳號重覆" });
+          return res.json({ status: 'error', message: '帳號重覆' })
         } else {
           User.create({
             name: req.body.name,
@@ -77,13 +77,12 @@ let userController = {
               null
             ),
           }).then((user) => {
-            return res.json({ status: "success", message: "成功註冊帳號" });
+            return res.json({ status: 'success', message: '成功註冊帳號' })
           });
         }
       });
     }
   },
-
   getUser: (req, res) => {
     // const currentUser = req.user ? req.user : helpers.getUser(req);
     userService.getUser(req, res, (data) => {
@@ -100,6 +99,31 @@ let userController = {
       return res.json(data)
     }) 
   },
+  addLike: (req, res) => {
+    userService.addLike(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  removeLike: (req, res) => {
+    userService.removeLike(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  addFollowing: (req, res) => {
+    userService.addFollowing(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  removeFollowing: (req, res) => {
+    userService.removeFollowing(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+};
+
+module.exports = userController
+
+
   // putUser: (req, res) => {
   //   const { file } = req;
   //   const currentUser = req.user ? req.user : helpers.getUser(req);
@@ -192,6 +216,3 @@ let userController = {
   //     }
   //   });
   // },
-};
-
-module.exports = userController

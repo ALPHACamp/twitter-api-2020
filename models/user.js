@@ -2,7 +2,8 @@
 const { datatype } = require('faker')
 const {
   Model
-} = require('sequelize')
+} = require('sequelize');
+const tweet = require('./tweet');
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
