@@ -36,7 +36,10 @@ const adminController = {
   },
 
   getTweets: (req, res) => {
-    Tweet.findAll({ order: [['createdAt', 'DESC']] })
+    Tweet.findAll({
+      include: [User],
+      order: [['createdAt', 'DESC']]
+    })
       .then(tweets => {
         tweets = tweets.map(t => ({
           ...t.dataValues,
