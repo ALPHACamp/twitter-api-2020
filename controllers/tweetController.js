@@ -1,7 +1,4 @@
-const { Tweet } = require('../models')
-const { User } = require('../models')
-const { Like } = require('../models')
-const { Reply } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -31,14 +28,10 @@ const tweetController = {
   },
   getTweet: async (req, res) => {
     try {
-      const id = req.params.tweet_id
-
-      const tweet = await Tweet.findByPk(id, {
+      const tweet = await Tweet.findByPk(req.params.tweet_id, {
         include: [{ model: User }, { model: Like }, { model: Reply }]
       })
-
       const data = tweet.toJSON()
-
       const result = {
         id: data.id,
         description: data.description,
