@@ -11,8 +11,8 @@ const tweetController = {
         Tweet.findAll({
             include: [
                 User,
-                Reply,
-                Like
+                Like,
+                { model: Reply, include:[User]}
             ]
         }).then(tweets => {
             tweets.map(tweet => ({
@@ -21,6 +21,7 @@ const tweetController = {
                 description: tweet.description,
                 createdAt: tweet.createdAt,
                 updatedAt: tweet.updatedAt,
+                isLiked: tweet.Likes.map(d => d.UserId).includes(helpers.getUser(req).id)
             }))
             return res.json(tweets)
         })
