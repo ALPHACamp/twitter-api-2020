@@ -1,10 +1,14 @@
 const express = require('express')
 const helpers = require('./_helpers');
 const bodyParser = require('body-parser')
+const methodOverride = require('method-override')
 
 const db = require('./models')
 const flash = require('connect-flash')
 const session = require('express-session')
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const passport = require('./config/passport')
 
 //-----------
@@ -29,10 +33,11 @@ app.set('view engine', 'handlebars')
 // setup bodyParser
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-
+app.use(methodOverride('_method'))
 // setup session and flash
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }))
 app.use(flash())
+app.use('/upload', express.static(__dirname + '/upload'))
 
 // setup passport
 app.use(passport.initialize())

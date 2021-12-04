@@ -4,22 +4,16 @@ const Tweet = db.Tweet;
 const tweetController = {
   getTweets: (req, res) => {
     Tweet.findAll().then((tweets) => {
-      console.log(tweets);
       return res.render("tweets", { tweets: tweets });
     });
   },
 
   postTweet: (req, res) => {
-    console.log('body',req.body)
-    console.log('user',req.user)
-    const userId = Math.floor(Math.random() * 6);
-    console.log(userId);
+    const currentUser = req.user ? req.user : helpers.getUser(req);
     Tweet.create({
       description: req.body.description,
-      // UserId: '1',
-      UserId: Math.floor(Math.random() * 6),
+      UserId: currentUser.id,
     }).then((tweet) => {
-      console.log(tweet);
       res.redirect("/tweets");
     });
   },
