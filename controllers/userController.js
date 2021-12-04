@@ -81,7 +81,9 @@ const userController = {
       .then(user => {
         return res.json({
           user: {
-            name: user.name, account: user.account, email: user.email
+            name: user.name,
+            account: user.account,
+            email: user.email
           }
         })
       })

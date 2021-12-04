@@ -24,8 +24,8 @@ const authenticatedAdmin = (req, res, next) => {
 
 
 //user相關
-router.post('/api/signin', userController.signIn)
-router.post('/api/signup', userController.signUp)
+router.post('/api/user/signin', userController.signIn)
+router.post('/api/user', userController.signUp)
 router.get('/api/user/:id', userController.getUserAccountSetting)
 router.put('/api/user/:id', userController.putUserAccountSetting)
 
