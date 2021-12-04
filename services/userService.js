@@ -5,7 +5,7 @@ const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const sequelize = require('sequelize')
 
-const { User, Tweet, Followship, Notice } = require('../models')
+const { User, Tweet, Reply, Like, Followship, Notice } = require('../models')
 const helpers = require('../_helpers')
 
 const userService = {
@@ -253,7 +253,7 @@ const userService = {
       Tweet.findAll({
         where: { UserId: user.id },
         attributes: [
-          'id',
+          ['id', 'TweetId'],
           'description',
           'createdAt',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
@@ -265,6 +265,41 @@ const userService = {
       }).then(tweets => {
         return callback(tweets)
       })
+    })
+  },
+
+  getUserLikes: (req, res, callback) => {
+    User.findByPk(req.params.id).then(user => {
+      if (!user || user.role === 'admin') {
+        return callback({ status: 'error', message: '帳號不存在！' })
+      }
+      Like.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: user.id },
+        attributes: [
+          ['id', 'LikeId'],
+          'TweetId',
+          'createdAt'
+        ],
+        include: [{
+          model: Tweet,
+          attributes: [
+            'description',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikeCount']
+          ]
+        },
+        { model: User, attributes: ['id', 'avatar', 'name', 'account'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+        .then(likes => {
+          likes.forEach(like => {
+            like.Tweet.isLiked = true
+          })
+          return callback(likes)
+        })
     })
   }
 }

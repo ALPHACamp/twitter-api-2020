@@ -45,6 +45,7 @@ router.get('/users/:id/followers', authenticated, userController.getUserFollower
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, uploadImage, userController.putUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 
 router.get('/users', authenticated, userController.getUsers)
 router.get('/tweets', authenticated, tweetController.getTweets)

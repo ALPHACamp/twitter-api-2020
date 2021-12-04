@@ -77,6 +77,12 @@ const userController = {
     userService.getUserTweets(req, res, data => {
       return res.json(data)
     })
+  },
+
+  getUserLikes: (req, res, callback) => {
+    userService.getUserLikes(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 
