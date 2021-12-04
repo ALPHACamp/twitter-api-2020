@@ -9,7 +9,6 @@ const followController = {
 
       const users = await User.findAll({
         include: [{ model: User, as: 'Followers' }],
-        limit: limit
       })
 
       let result = users.map((user) => ({
@@ -22,7 +21,7 @@ const followController = {
       }))
 
       result = result.sort((a, z) => z.followerCounts - a.followerCounts)
-      res.status(200).json({ status: 'success', results: result })
+      res.status(200).json({ status: 'success', results: result.slice(0, limit) })
     } catch (error) {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
