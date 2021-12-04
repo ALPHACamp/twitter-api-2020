@@ -12,7 +12,7 @@ describe('# tweet requests', () => {
 
   context('# POST ', () => {
 
-    describe.only('POST /api/tweets', () => {
+    describe('POST /api/tweets', () => {
       before(async () => {
         // 清除測試資料庫資料
         await db.User.destroy({ where: {}, truncate: true })
