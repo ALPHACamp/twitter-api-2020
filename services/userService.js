@@ -4,8 +4,9 @@ const jwt = require('jsonwebtoken')
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
-const { User, Tweet, Followship, Notice } = require('../models')
+const { User, Tweet, Followship, Notice, Reply } = require('../models')
 const helpers = require('../_helpers')
+const replyController = require('../controllers/api/replyController')
 
 const userService = {
   signUp: (req, res, callback) => {
@@ -225,6 +226,19 @@ const userService = {
       }
     }).then(notice => {
       return callback({ status: 'success', message: '已取消訂閱' })
+    })
+  },
+
+  getUserReplies: (req, res, callback) => {
+    return Reply.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Tweet, attributes: ['id', 'UserId'], include: [{ model: User, attributes: ['id', 'name'] }] }
+      ]
+    }).then(replies => {
+      replies = replies.sort((a, b) => b.createdAt - a.createdAt)
+      return callback(replies)
     })
   }
 }
