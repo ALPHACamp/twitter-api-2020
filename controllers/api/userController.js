@@ -27,9 +27,14 @@ let userController = {
     }
     const user = await User.findOne({ where: { email } })
     // 檢查 user 是否存在與密碼是否正確，是否為admin
-    if (!user || user.role === "admin") return res.status(401).json({ status: 'error', message: 'no such user found' })
+    if (!user || user.role === 'admin')
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'no such user found' })
     if (!bcrypt.compareSync(password, user.password)) {
-      return res.status(401).json({ status: 'error', message: 'passwords did not match' })
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'passwords did not match' })
     }
     // 簽發 token
     var payload = { id: user.id }
@@ -47,23 +52,48 @@ let userController = {
     try {
       const { name, account, email, password, checkPassword } = req.body
       if (checkPassword !== password) {
-        return res.json({ status: 'error', message: 'Passwords is not matched！' })
+        return res.json({
+          status: 'error',
+          message: 'Passwords is not matched！'
+        })
       } else {
-        const user = await User.findOne({ where: { email } })
-        const accountCheck = User.findOne({ where: { account } })
+        const user = await User.findOne({
+          attributes: ['email', 'account'],
+          where: { account }
+        })
+        const accountCheck = await User.findOne({
+          attributes: ['email', 'account'],
+          where: { email }
+        })
 
         if (user) {
-          return res.json({ status: 'error', message: 'Email has already existed!' })
+          console.log(user)
+          return res.json({
+            status: 'error',
+            message: 'Email has already existed!'
+          })
         }
         if (accountCheck) {
-          return res.json({ status: 'error', message: 'Account has already existed!' })
+          console.log(accountCheck)
+          return res.json({
+            status: 'error',
+            message: 'Account has already existed!'
+          })
         }
         await User.create({
-          account, name, email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
+          account,
+          name,
+          email,
+          password: bcrypt.hashSync(
+            req.body.password,
+            bcrypt.genSaltSync(10),
+            null
+          ),
           role: 'user'
         })
-        return res.status(200).json({ status: 'success', message: 'Successfully register!' })
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'Successfully register!' })
       }
     } catch (err) {
       console.log(err)
@@ -108,7 +138,7 @@ let userController = {
             await user.update({
               ...req.body,
               avatar: img1.data.link,
-              cover: img2.data.link,
+              cover: img2.data.link
             })
           })
         })
@@ -119,7 +149,7 @@ let userController = {
         await user.update({
           ...req.body,
           avatar: null,
-          cover: null,
+          cover: null
         })
         res.json({ status: 'success', message: '使用者資料編輯成功' })
       }
@@ -130,4 +160,3 @@ let userController = {
 }
 
 module.exports = userController
-
