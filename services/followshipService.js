@@ -32,7 +32,7 @@ const followshipService = {
 
   deleteFollowship: async (req, res, callback) => {
     try {
-      //刪除對該貼文的追蹤
+      //取消對他人的追蹤
       await Followship.destroy({
         where: {
           followerId: helpers.getUser(req).id,
