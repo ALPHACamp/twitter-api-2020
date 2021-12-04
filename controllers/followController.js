@@ -1,4 +1,3 @@
-const { Followship } = require('../models')
 const { User } = require('../models')
 const helpers = require('../_helpers')
 
