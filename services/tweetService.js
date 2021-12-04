@@ -53,6 +53,26 @@ const tweetService = {
 
       return callback({ tweet })
     })
+  },
+
+  likeTweet: (req, res, callback) => {
+    Like.create({
+      UserId: helpers.getUser(req).id,
+      TweetId: req.params.tweet_id
+    }).then(() => {
+      return callback({ status: 'success', message: '已讚！' })
+    })
+  },
+
+  unlikeTweet: (req, res, callback) => {
+    Like.destroy({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweet_id
+      }
+    }).then(() => {
+      return callback({ status: 'success', message: '收回讚！' })
+    })
   }
 }
 
