@@ -54,7 +54,7 @@ const tweetController = {
     }).then(tweets => {
       tweets = tweets.map(tweet => ({
         id: tweet.id,
-        description50: tweet.description.slice(0,50),
+        description50: tweet.description.slice(0, 50),
         createdAt: tweet.createdAt,
         User: tweet.User
       }))
@@ -62,10 +62,18 @@ const tweetController = {
     })
   },
   deleteTweet: (req, res) => {
-    Tweet.destroy({ where: {
-      id: req.params.id
-    }})
-      .then(() => {return res.json({status: 'success', message: '刪除成功' })})
+    Tweet.destroy({
+      where: {
+        id: req.params.id
+      }
+    })
+      .then(tweet => {
+        console.log(tweet)
+        if (tweet === 1) {  //確實有刪除成功
+          return res.json({ status: 'success', message: '刪除成功' })
+        } //tweet = 0 表示找不到推文
+        return res.json({ status: 'error', message: '找不到推文' })
+      })
   }
 }
 
