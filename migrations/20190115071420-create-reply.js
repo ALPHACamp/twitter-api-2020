@@ -10,19 +10,19 @@ module.exports = {
       },
       UserId: {
         type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
-          key: 'id',
-        },
-        onDelete: 'cascade',
+        // references: {
+        //   model: 'Users',
+        //   key: 'id',
+        // },
+        // onDelete: 'cascade',
       },
       TweetId: {
         type: Sequelize.INTEGER,
-        references: {
-          model: 'Tweets',
-          key: 'id',
-        },
-        onDelete: 'cascade',
+        // references: {
+        //   model: 'Tweets',
+        //   key: 'id',
+        // },
+        // onDelete: 'cascade',
       },
       comment: {
         type: Sequelize.TEXT,
