@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
 
 const helpers = require('../_helpers')
+const { sequelize } = require('../models')
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
@@ -228,6 +229,33 @@ const userController = {
         attributes: ['id', 'name', 'account', 'avatar', 'cover'],
       }).then(followings => {
         return res.json(followings.Followings)
+      })
+  },
+
+  getTopUsers: (req, res) => {
+    return User.findAll({
+      include: { model: User, as: 'Followers' },
+      attributes: [
+        'id',
+        'name',
+        'avatar',
+        'account',
+        'role',
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+          ),
+          'followersCount'
+        ]
+      ],
+      order: [[sequelize.literal('followersCount'), 'DESC']],
+      limit: 10
+    })
+      .then(users => {
+        users = users.filter(user => (
+          !user.role.includes('admin')
+        ))
+        return res.json(users)
       })
   }
 }
