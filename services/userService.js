@@ -150,7 +150,9 @@ const userService = {
       const user = (await User.findByPk(userId, {
         attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
           // followings => 該使用者關注幾個其他人，followers => 該使用者被幾個其他人跟隨
-          [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers']]
+          [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
+          [sequelize.literal(`(select count(UserId) from Tweets where UserId = User.id)`), 'tweetsCounts']
+        ]
       })).toJSON()
       return callback(user)
     } else {
@@ -158,7 +160,8 @@ const userService = {
       const user = (await User.findByPk(userId, {
         attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
           [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
-          [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed']
+          [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed'],
+          [sequelize.literal(`(select count(UserId) from Tweets where UserId = User.id)`), 'tweetsCounts']
         ]
       })).toJSON()
       return callback(user)
