@@ -8,9 +8,12 @@ if (process.env.NODE_ENV !== 'production') {
 /* necessary package */
 // express
 const express = require('express')
+const cors = require('cors')
 
 // passport
 const passport = require('./config/passport')
+// cors
+app.use(cors())
 // body-parser
 const bodyParser = require('body-parser')
 // methodOverride
