@@ -3,9 +3,11 @@ const jwt = require('jsonwebtoken')
 
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const sequelize = require('sequelize')
 
-const { User, Tweet, Followship, Notice } = require('../models')
+const { User, Tweet, Reply, Like, Followship, Notice } = require('../models')
 const helpers = require('../_helpers')
+const replyController = require('../controllers/api/replyController')
 
 const userService = {
   signUp: (req, res, callback) => {
@@ -74,25 +76,48 @@ const userService = {
   },
 
   getUser: (req, res, callback) => {
-    return User.findByPk(req.params.id, {
-      include: [
-        { model: Tweet, attributes: ['id'] },
-        { model: User, as: 'Followings', attributes: ['id'] },
-        { model: User, as: 'Followers', attributes: ['id'] },
-        { model: User, as: 'Noticings', attributes: ['id'] },
-        { model: User, as: 'Noticers', attributes: ['id'] }
+    const userId = req.params.id
+    return User.findOne({
+      where: { id: userId },
+      attributes: [
+        'id',
+        'account',
+        'name',
+        'avatar',
+        'cover',
+        'introduction',
+        'role',
+        [sequelize.literal(`(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = ${userId})`), 'TweetCount'],
+        [
+          sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = ${userId})`),
+          'FollowerCount'
+        ],
+        [
+          sequelize.literal(`(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = ${userId})`),
+          'FollowingCount'
+        ],
+        [
+          sequelize.literal(
+            `exists(SELECT 1 FROM Followships WHERE followerId = ${helpers.getUser(req).id} and followingId = User.id )`
+          ),
+          'isFollowed'
+        ],
+        [
+          sequelize.literal(
+            `exists(SELECT 1 FROM Notices WHERE noticerId = ${helpers.getUser(req).id} and noticingId = User.id )`
+          ),
+          'isNoticed'
+        ]
       ]
     }).then(user => {
       user = {
         ...user.toJSON(),
-        identify: Number(req.params.id) === Number(helpers.getUser(req).id),
-        TweetCount: user.Tweets.length,
-        followingCount: user.Followings.length,
-        followerCount: user.Followers.length,
-        isFollowed: user.Followers.some(i => i.id === helpers.getUser(req).id),
-        isNoticed: user.Noticers.some(i => i.id === helpers.getUser(req).id)
+        isCurrentUser: Number(req.params.id) === Number(helpers.getUser(req).id)
       }
-      return callback({ user })
+      if (user.role === 'admin') {
+        return callback({ status: 'error', message: '帳號不存在！' })
+      }
+      return callback(user)
     })
   },
 
@@ -130,13 +155,21 @@ const userService = {
       // 如果有圖
       if (files) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        const avatar = files.avatar ? files.avatar[0].path : null
-        const cover = files.cover ? files.cover[0].path : null
+        const uploadImg = file => {
+          return new Promise((resolve, reject) => {
+            imgur.upload(file, (err, res) => {
+              resolve(res.data.link)
+            })
+          })
+        }
+
+        const avatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
+        const cover = files.cover ? await uploadImg(files.cover[0].path) : null
 
         await user.update({
           ...req.body,
-          avatar: avatar,
-          cover: cover
+          avatar,
+          cover
         })
         return callback({ status: 'success', message: '使用者資料編輯成功！' })
       }
@@ -190,7 +223,7 @@ const userService = {
       user = user.toJSON()
       user.Followings.forEach(item => (item.followingId = item.id))
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
-      return callback({ user })
+      return callback(user)
     })
   },
 
@@ -205,7 +238,7 @@ const userService = {
       })
 
       user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
-      return callback({ user })
+      return callback(user)
     })
   },
 
@@ -217,6 +250,7 @@ const userService = {
       return callback({ status: 'success', message: '已開啟訂閱' })
     })
   },
+
   removeNoticing: (req, res, callback) => {
     return Notice.destroy({
       where: {
@@ -225,6 +259,78 @@ const userService = {
       }
     }).then(notice => {
       return callback({ status: 'success', message: '已取消訂閱' })
+    })
+  },
+
+  getUserReplies: (req, res, callback) => {
+    return Reply.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Tweet, attributes: ['id', 'UserId'], include: [{ model: User, attributes: ['id', 'name'] }] }
+      ]
+    }).then(replies => {
+      replies = replies.sort((a, b) => b.createdAt - a.createdAt)
+      return callback(replies)
+    })
+  },
+
+  getUserTweets: (req, res, callback) => {
+    User.findByPk(req.params.id).then(user => {
+      if (!user || user.role === 'admin') {
+        return callback({ status: 'error', message: '帳號不存在！' })
+      }
+      Tweet.findAll({
+        where: { UserId: user.id },
+        attributes: [
+          ['id', 'TweetId'],
+          'description',
+          'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikeCount'],
+          [
+            sequelize.literal(
+              `exists(SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} and TweetId = Tweet.id)`
+            ),
+            'isLiked'
+          ]
+        ],
+        include: [{ model: User, attributes: ['id', 'avatar', 'name', 'account'] }],
+        order: [['createdAt', 'DESC']]
+      }).then(tweets => {
+        return callback(tweets)
+      })
+    })
+  },
+
+  getUserLikes: (req, res, callback) => {
+    User.findByPk(req.params.id).then(user => {
+      if (!user || user.role === 'admin') {
+        return callback({ status: 'error', message: '帳號不存在！' })
+      }
+      Like.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: user.id },
+        attributes: [['id', 'LikeId'], 'TweetId', 'createdAt'],
+        include: [
+          {
+            model: Tweet,
+            attributes: [
+              'description',
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikeCount']
+            ]
+          },
+          { model: User, attributes: ['id', 'avatar', 'name', 'account'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      }).then(likes => {
+        likes.forEach(like => {
+          like.Tweet.isLiked = true
+        })
+        return callback(likes)
+      })
     })
   }
 }

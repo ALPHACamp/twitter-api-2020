@@ -51,13 +51,13 @@ const userController = {
 
   getUserFollowings: (req, res) => {
     userService.getUserFollowings(req, res, data => {
-      return res.json(data.user)
+      return res.json(data)
     })
   },
 
   getUserFollowers: (req, res) => {
     userService.getUserFollowers(req, res, data => {
-      return res.json(data.user)
+      return res.json(data)
     })
   },
 
@@ -69,6 +69,24 @@ const userController = {
 
   removeNoticing: (req, res) => {
     userService.removeNoticing(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  getUserReplies: (req, res) => {
+    userService.getUserReplies(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  getUserTweets: (req, res, callback) => {
+    userService.getUserTweets(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  getUserLikes: (req, res, callback) => {
+    userService.getUserLikes(req, res, data => {
       return res.json(data)
     })
   }

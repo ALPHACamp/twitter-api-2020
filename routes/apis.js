@@ -8,6 +8,7 @@ const helpers = require('../_helpers')
 const adminController = require('../controllers/api/adminControllers')
 const userController = require('../controllers/api/userControllers')
 const tweetController = require('../controllers/api/tweetControllers')
+const replyController = require('../controllers/api/replyController')
 
 function authenticated (req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
@@ -34,21 +35,23 @@ function authenticatedAdmin (req, res, next) {
   }
 }
 
-const uploadImage = upload.fields([
-  { name: 'avatar', maxCount: 1 },
-  { name: 'cover', maxCount: 1 }
-])
+const uploadImage = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }])
 
 router.get('/users/top', authenticated, userController.getTopUser)
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated, uploadImage, userController.putUser)
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 
 router.get('/users', authenticated, userController.getUsers)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
+router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 router.post('/followships', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)

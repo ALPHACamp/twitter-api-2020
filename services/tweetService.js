@@ -21,9 +21,19 @@ const tweetService = {
   },
 
   postTweet: (req, res, callback) => {
-    return Tweet.create({ UserId: helpers.getUser(req).id, description: req.body.description }).then(tweet => {
-      callback({ status: 'success', message: '發文成功！' })
-    })
+    try {
+      const re = /\s/
+      if (req.body.description.length >= 140 || req.body.description.match(re)) {
+        return callback({ status: 'error', message: '發文失敗！' })
+      }
+
+      return Tweet.create({ UserId: helpers.getUser(req).id, description: req.body.description }).then(tweet => {
+        callback({ status: 'success', message: '發文成功！' })
+      })
+    } catch (err) {
+      console.log(err)
+      return callback({ status: 'error', message: '發文失敗！' })
+    }
   },
 
   getTweet: (req, res, callback) => {
