@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
+const imgur = require('imgur')
 
 const userController = {
   signIn: (req, res) => {
@@ -87,6 +88,7 @@ const userController = {
       })
   },
   putUserAccountSetting: (req, res) => {
+    const userId = req.params.id
     const { account, name, email, password, checkPassword } = req.body
 
     // 確認欄位是否皆有填寫
@@ -104,7 +106,10 @@ const userController = {
         $or: [
           { email },
           { account }
-        ]
+        ],
+        $not: [
+          { id: userId }
+        ],
       }
     }).then(user => {
       if (user) {
@@ -124,7 +129,42 @@ const userController = {
         })
       }
     })
+  },
+  getCurrentUser: (req, res) => {
+    return User.findAll({
+      raw: true,
+      nest: true
+    }).then(user => {
+      return res.json(
+        { user }
+      )
+    })
+  },
+  /*getUser: (req, res) => {
+    const UserId = req.params.id
+    return User.findByPk(UserId).then(user => {
+      return res.json({
+        user: user
+      }
+      )
+    }
+    )
+  },*/
+  getUserInfo: (req, res) => {
+    const userId = req.params.id
+    return User.findByPk(userId)
+      .then(user => {
+        return res.json({
+          user: {
+            name: user.name,
+            introduction: user.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          }
+        })
+      })
+  },
 
-  }
+
 }
 module.exports = userController

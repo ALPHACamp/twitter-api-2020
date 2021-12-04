@@ -26,8 +26,18 @@ const authenticatedAdmin = (req, res, next) => {
 //user相關
 router.post('/api/signin', userController.signIn)
 router.post('/api/signup', userController.signUp)
+
+//user編輯個人帳號
 router.get('/api/user/:id', userController.getUserAccountSetting)
 router.put('/api/user/:id', userController.putUserAccountSetting)
+//router.get('/api/users/:userId', userController.getUser)(待討論)
+//user編輯個人資料
+router.get('/api/user/edit/:id', userController.getUserInfo)
+
+
+
+//先讓前端使用的get_current)user
+router.get('/get_current_user', userController.getCurrentUser)
 
 
 
