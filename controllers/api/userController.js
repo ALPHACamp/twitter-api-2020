@@ -18,11 +18,13 @@ let userController = {
   //登入
   signIn: async (req, res) => {
     // 檢查必要資料
-    if (!req.body.email || !req.body.password) {
-      return res.json({ status: 'error', message: "required fields didn't exist" })
+    const { email, password } = req.body
+    if (!email || !password) {
+      return res.json({
+        status: 'error',
+        message: 'Please fill both Email & Password fields!'
+      })
     }
-
-    let { email, password } = req.body
     const user = await User.findOne({ where: { email } })
     // 檢查 user 是否存在與密碼是否正確，是否為admin
     if (!user || user.role === "admin") return res.status(401).json({ status: 'error', message: 'no such user found' })
@@ -34,8 +36,8 @@ let userController = {
     var token = jwt.sign(payload, 'alphacamp')
     return res.json({
       status: 'success',
-      message: 'ok',
-      token: token,
+      message: 'Login successfully!',
+      token,
       user
     })
   },
@@ -43,20 +45,25 @@ let userController = {
   //註冊
   signUp: async (req, res) => {
     try {
-      if (req.body.checkPassword !== req.body.password) {
-        return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
+      const { name, account, email, password, checkPassword } = req.body
+      if (checkPassword !== password) {
+        return res.json({ status: 'error', message: 'Passwords is not matched！' })
       } else {
-        const user = await User.findOne({ where: { email: req.body.email } })
+        const user = await User.findOne({ where: { email } })
+        const accountCheck = User.findOne({ where: { account } })
+
         if (user) {
-          return res.json({ status: 'error', message: '信箱重複！' })
-        } else {
-          const { account, name, email } = req.body
-          await User.create({
-            account, name, email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          })
-          return res.json({ status: 'success', message: '成功註冊帳號！' })
+          return res.json({ status: 'error', message: 'Email has already existed!' })
         }
+        if (accountCheck) {
+          return res.json({ status: 'error', message: 'Account has already existed!' })
+        }
+        await User.create({
+          account, name, email,
+          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null),
+          role: 'user'
+        })
+        return res.status(200).json({ status: 'success', message: 'Successfully register!' })
       }
     } catch (err) {
       console.log(err)
@@ -119,7 +126,7 @@ let userController = {
     } catch (err) {
       console.log(err)
     }
-  },
+  }
 }
 
 module.exports = userController

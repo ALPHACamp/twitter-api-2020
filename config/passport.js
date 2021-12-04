@@ -21,7 +21,7 @@ let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
-  }).then(user => {
+  }).then((user) => {
     if (!user) return next(null, false)
     return next(null, user)
   })
