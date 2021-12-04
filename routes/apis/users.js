@@ -14,6 +14,7 @@ router.put('/:id/setting', authenticated, checkNotAdmin, userController.putUserS
 router.get('/:id/tweets', authenticated, checkNotAdmin, userController.getUserTweets)
 router.get('/:id/replied_tweets', authenticated, checkNotAdmin, userController.getUserReplies)
 router.get('/:id/likes', authenticated, checkNotAdmin, userController.getUserLikes)
+router.get('/:id/followings', authenticated, checkNotAdmin, userController.getUserFollowings)
 
 // router exports
 module.exports = router
