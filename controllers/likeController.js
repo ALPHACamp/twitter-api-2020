@@ -6,7 +6,13 @@ const likeController = {
     likeService.postLike(req, res, data => {
       return res.json(data)
     })
-  }
+  },
+
+  postUnlike: (req, res) => {
+    likeService.postUnlike(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 // likeService exports
