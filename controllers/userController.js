@@ -1,9 +1,7 @@
 const bcrypt = require('bcryptjs')
-const { User, Followship } = require('../models')
-const multer = require('multer')
-const upload = multer({ dest: 'temp/' })
+const { User} = require('../models')
 const imgur = require('imgur')
-// const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const helpers = require('../_helpers')
 
 // JWT
@@ -134,14 +132,14 @@ const userController = {
       }
       const { files } = req
       if (files) {
-        //imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+        imgur.setClientId(IMGUR_CLIENT_ID)
         if (files.avatar) {
-          // 如果avatar已存在，直接上傳到imgur
+          // 如果有上傳avatar，直接上傳到imgur
           const avatar = await imgur.uploadFile(files.avatar[0].path)
           req.body.avatar = avatar.link
         }
         if (files.cover) {
-          // 如果cover已存在，直接上傳到imgur
+          // 如果有上傳cover，直接上傳到imgur
           const cover = await imgur.uploadFile(files.cover[0].path)
           req.body.cover = cover.link
         }
