@@ -1,8 +1,9 @@
-const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+const passport = require('passport')
 
 // setup passport strategy
 passport.use(new LocalStrategy(
@@ -27,10 +28,41 @@ passport.serializeUser((user, cb) => {
   cb(null, user.id)
 })
 passport.deserializeUser((id, cb) => {
-  User.findByPk(id).then(user => {
-    user = user.toJSON() // 此處與影片示範不同
-    return cb(null, user)
-  })
+  User.findByPk(id, {
+    include: [
+      // { model: Tweet, as: "LikedTweets" },
+      { model: User, as: "Followers" },
+      { model: User, as: "Followings" },
+    ],
+  }).then((user) => {
+    user = user.toJSON(); // 此處與影片示範不同
+    return cb(null, user);
+  });
 })
+
+// // JWT
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
+let jwtOptions = {}
+jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
+jwtOptions.secretOrKey = process.env.JWT_SECRET
+
+let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
+  User.findByPk(jwt_payload.id, {
+    include: [
+      // { model: db.Tweet, as: "LikedTweets" },
+      { model: User, as: "Followers" },
+      { model: User, as: "Followings" },
+    ],
+  }).then((user) => {
+    console.log(user)
+    if (!user) return next(null, false);
+    return next(null, user);
+  });
+});
+passport.use(strategy)
 
 module.exports = passport
