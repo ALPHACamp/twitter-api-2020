@@ -60,6 +60,12 @@ const tweetController = {
       }))
       return res.json(tweets)
     })
+  },
+  deleteTweet: (req, res) => {
+    Tweet.destroy({ where: {
+      id: req.params.id
+    }})
+      .then(() => {return res.json({status: 'success', message: '刪除成功' })})
   }
 }
 

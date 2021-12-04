@@ -36,7 +36,7 @@ router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 router.get('/api/admin/tweets', tweetController.getAdminTweets)
-
+router.delete('/api/admin/tweets/:id', tweetController.deleteTweet)
 
 
 //likes相關
