@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
+const imgur = require('imgur')
 
 const userController = {
   signIn: (req, res) => {
@@ -89,6 +90,7 @@ const userController = {
       })
   },
   putUserAccountSetting: (req, res) => {
+    const userId = req.params.id
     const { account, name, email, password, checkPassword } = req.body
 
     // 確認欄位是否皆有填寫
@@ -106,7 +108,10 @@ const userController = {
         $or: [
           { email },
           { account }
-        ]
+        ],
+        $not: [
+          { id: userId }
+        ],
       }
     }).then(user => {
       if (user) {
@@ -127,16 +132,73 @@ const userController = {
       }
     })
   },
-
   getCurrentUser: (req, res) => {
-    return res.json({
-      user: {
-        id: userId,
-        name: user.name,
-        account: user.account,
-        email: user.email
-      }
+    return User.findAll({
+      raw: true,
+      nest: true
+    }).then(user => {
+      return res.json(
+        { user }
+      )
     })
+  },
+  /*getUser: (req, res) => {
+    const UserId = req.params.id
+    return User.findByPk(UserId).then(user => {
+      return res.json({
+        user: user
+      }
+      )
+    }
+    )
+  },*/
+  getUserInfo: (req, res) => {
+    const userId = req.params.id
+    return User.findByPk(userId)
+      .then(user => {
+        return res.json({
+          user: {
+            name: user.name,
+            introduction: user.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          }
+        })
+      })
+  },
+  editUserInfo: (req, res) => {
+    const userId = req.params.id
+    User.findByPk(userId)
+      .then(user => {
+        const { name, introduction, avatar, cover } = req.body
+        const { files } = req.body
+        imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+        if (!name) {
+          return res.json({ status: 'error', message: 'name為必填欄位' })
+        }
+        if (files) {
+          if (files.cover) {
+            // 如果cover更新, 就上傳
+            const cover = imgur.uploadFile(files.cover[0].path)
+            req.body.cover = cover.link
+          }
+          if (files.avatar) {
+            // 如果avatar更新, 就上傳
+            const avatar = imgur.uploadFile(files.avatar[0].path)
+            req.body.avatar = avatar.link
+          }
+        }
+        else {
+          return User.findByPk(req.params.id).then(user => {
+            user.update({
+              name, introduction, avatar, cover
+            })
+            return res.json({ status: 'success', message: '成功編輯' })
+          })
+        }
+      })
   }
+
+
 }
 module.exports = userController
