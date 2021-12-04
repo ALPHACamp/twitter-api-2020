@@ -62,7 +62,16 @@ let userController = {
       return res.json(data)
     })
   },
-  
+  addFollowing: (req, res) => {
+    userService.addFollowing(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  removeFollowing: (req, res) => {
+    userService.removeFollowing(req, res, (data) => {
+      return res.json(data)
+    })
+  },
 };
 
 module.exports = userController

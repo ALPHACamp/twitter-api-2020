@@ -39,7 +39,8 @@ router.get('/tweets/:id/replies', authenticated, replyService.getReplies) //瀏�
 router.post('/tweets/:id/like', authenticated, userController.addLike) //喜歡一則推文
 router.post('/tweets/:id/unlike', authenticated, userController.removeLike) //取消喜歡的貼文
 
-
+router.post('/followships/', authenticated, userController.addFollowing) //新增一位追蹤者
+router.delete('/followships/:id', authenticated, userController.removeFollowing) //新增一位追蹤者
 
 
 
