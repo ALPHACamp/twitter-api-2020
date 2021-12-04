@@ -46,6 +46,20 @@ const tweetController = {
       UserId: helpers.getUser(req).id
     })
     return res.json({ status: 'success', message: "" })
+  },
+  getAdminTweets: (req, res) => {
+    Tweet.findAll({
+      include: User,
+      order: [['createdAt', 'DESC']]
+    }).then(tweets => {
+      tweets = tweets.map(tweet => ({
+        id: tweet.id,
+        description50: tweet.description.slice(0,50),
+        createdAt: tweet.createdAt,
+        User: tweet.User
+      }))
+      return res.json(tweets)
+    })
   }
 }
 

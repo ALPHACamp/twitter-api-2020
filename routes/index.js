@@ -31,11 +31,11 @@ router.post('/api/signin', userController.signIn)
 
 
 
-//tweets相關  待加上authenticated,
+//tweets相關   待補authenticatedAdmin
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
-
+router.get('/api/admin/tweets', tweetController.getAdminTweets)
 
 
 
