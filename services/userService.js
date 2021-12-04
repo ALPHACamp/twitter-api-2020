@@ -100,7 +100,6 @@ const userService = {
       if (user.role === 'admin') {
         return callback({ status: 'error', message: '帳號不存在！' })
       }
-      console.log(user)
       return callback(user)
     })
   },
@@ -234,6 +233,7 @@ const userService = {
       return callback({ status: 'success', message: '已開啟訂閱' })
     })
   },
+
   removeNoticing: (req, res, callback) => {
     return Notice.destroy({
       where: {
@@ -242,6 +242,29 @@ const userService = {
       }
     }).then(notice => {
       return callback({ status: 'success', message: '已取消訂閱' })
+    })
+  },
+
+  getUserTweets: (req, res, callback) => {
+    User.findByPk(req.params.id).then(user => {
+      if (!user || user.role === 'admin') {
+        return callback({ status: 'error', message: '帳號不存在！' })
+      }
+      Tweet.findAll({
+        where: { UserId: user.id },
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikeCount'],
+          [sequelize.literal(`exists(SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} and TweetId = Tweet.id)`), 'isLiked']
+        ],
+        include: [{ model: User, attributes: ['id', 'avatar', 'name', 'account'] }],
+        order: [['createdAt', 'DESC']]
+      }).then(tweets => {
+        return callback(tweets)
+      })
     })
   }
 }

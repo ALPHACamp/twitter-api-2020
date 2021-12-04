@@ -71,6 +71,12 @@ const userController = {
     userService.removeNoticing(req, res, data => {
       return res.json(data)
     })
+  },
+
+  getUserTweets: (req, res, callback) => {
+    userService.getUserTweets(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 
