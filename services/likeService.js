@@ -21,6 +21,21 @@ const likeService = {
     } catch (err) {
       console.log(err)
     }
+  },
+
+  postUnlike: async (req, res, callback) => {
+    try {
+      //刪除該貼文的按讚
+      await Like.destroy({
+        where: {
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.tweet_id
+        }
+      })
+      return callback({ status: 'success', message: '已收回按讚' })
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 

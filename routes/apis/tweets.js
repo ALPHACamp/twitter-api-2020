@@ -14,6 +14,7 @@ router.post('/:tweet_id/replies', authenticated, checkNotAdmin, replyController.
 router.get('/:tweet_id/replies', authenticated, checkNotAdmin, replyController.getReplies)
 
 router.post('/:tweet_id/like', authenticated, checkNotAdmin, likeController.postLike)
+router.post('/:tweet_id/unlike', authenticated, checkNotAdmin, likeController.postUnlike)
 
 
 // router exports
