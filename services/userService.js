@@ -255,6 +255,39 @@ const userService = {
     }
     return callback(followings)
   },
+
+  getUserFollowers: async (req, res, callback) => {
+    const currentUserId = helpers.getUser(req).id
+
+    // 撈出該使用者follower的使用者資訊
+    const rawData = await User.findAll({
+      where: { id: req.params.id },
+      attributes: [], // 因為只想要關聯的資料，因此不回傳任何attributes
+      raw: true,
+      nest: true,
+      include: [
+        {
+          model: User, as: 'Followers',
+          attributes: ['id', 'name', 'account', 'avatar', 'introduction', [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = Followers.id)`), 'isFollowed']],
+          order: [['createdAt', 'DESC']]
+        }
+      ],
+    })
+
+    // 創造一個新陣列，只放入所需的資料即可
+    const followers = []
+    for (const data of rawData) {
+      let follower = new Object()
+      follower.followerId = data.Followers.id
+      follower.name = data.Followers.name
+      follower.account = data.Followers.account
+      follower.avatar = data.Followers.avatar
+      follower.introduction = data.Followers.introduction
+      follower.isFollowed = data.Followers.isFollowed
+      followers.push(follower)
+    }
+    return callback(followers)
+  },
 }
 
 // userController exports

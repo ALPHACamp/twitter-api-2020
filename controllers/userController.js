@@ -64,6 +64,12 @@ const userController = {
       return res.json(data)
     })
   },
+
+  getUserFollowers: (req, res) => {
+    userService.getUserFollowers(req, res, data => {
+      return res.json(data)
+    })
+  },
 }
 
 // userService exports
