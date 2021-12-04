@@ -41,7 +41,20 @@ const tweetController = {
         replyCounts: data.Replies.length,
         isLike: helpers.getUser(req).Likes ? helpers.getUser(req).Likes.some(like => like.TweetId === data.id) : false
       }
+
       return res.status(200).json(result)
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  postTweet: async (req, res) => {
+    try {
+      const { description } = req.body
+      await Tweet.create({
+        description: description.substring(0, 50),
+        UserId: helpers.getUser(req).id
+      })
+      return res.status(200).json({ status: 'success', message: '成功發送貼文' })
     } catch (error) {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
