@@ -1,10 +1,13 @@
-
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followController = require('../controllers/followController')
+const adminController = require('../controllers/adminController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
-const adminController = require('../controllers/adminController')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
+
+
 
 // use helpers.getUser(req) to replace req.user
 // 驗前台是user身分
@@ -48,6 +51,17 @@ module.exports = (app) => {
     authenticated,
     authenticatedUser,
     userController.getUser
+  )
+
+  app.put(
+    '/api/users/:id',
+    authenticated,
+    authenticatedUser,
+    upload.fields([
+      { name: 'avatar', maxCount: 1 },
+      { name: 'cover', maxCount: 1 },
+    ]),
+    userController.putUser
   )
 
   // tweets
