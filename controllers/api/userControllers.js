@@ -51,13 +51,13 @@ const userController = {
 
   getUserFollowings: (req, res) => {
     userService.getUserFollowings(req, res, data => {
-      return res.json(data.user)
+      return res.json(data)
     })
   },
 
   getUserFollowers: (req, res) => {
     userService.getUserFollowers(req, res, data => {
-      return res.json(data.user)
+      return res.json(data)
     })
   },
 

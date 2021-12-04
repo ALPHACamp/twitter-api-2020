@@ -190,7 +190,7 @@ const userService = {
       user = user.toJSON()
       user.Followings.forEach(item => (item.followingId = item.id))
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
-      return callback({ user })
+      return callback(user)
     })
   },
 
@@ -205,7 +205,7 @@ const userService = {
       })
 
       user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
-      return callback({ user })
+      return callback(user)
     })
   },
 
