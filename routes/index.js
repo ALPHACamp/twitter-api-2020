@@ -40,7 +40,7 @@ module.exports = (app) => {
   // JWT signin & signup
   app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
-  //users routes
+  // users routes
   app.get(
     '/api/users/:id',
     authenticated,
@@ -53,6 +53,6 @@ module.exports = (app) => {
   app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
   app.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
-  //followship    
+  // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
 }
