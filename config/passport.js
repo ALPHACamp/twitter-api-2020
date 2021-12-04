@@ -15,11 +15,7 @@ passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
   const user = (await User.findByPk(jwt_payload.id, {
     attributes: {
       exclude: ['password', 'createdAt', 'updatedAt']
-    },
-    include: [
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' }
-    ],
+    }
   })).toJSON()
   if (!user) {
     return next(null, false)

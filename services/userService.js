@@ -138,7 +138,8 @@ const userService = {
   },
 
   getCurrentUser: async (req, res, callback) => {
-    return callback({ user: helpers.getUser(req) })
+    const user = helpers.getUser(req)
+    return callback(user)
   },
 
   getUser: async (req, res, callback) => {
