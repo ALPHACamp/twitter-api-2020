@@ -10,9 +10,7 @@ const bcrypt = require('bcryptjs')
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
-const like = require('../../models/like')
 const { sequelize } = require('../../models')
-const { json } = require('body-parser')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
