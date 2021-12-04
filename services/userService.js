@@ -139,13 +139,21 @@ const userService = {
       // 如果有圖
       if (files) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        const avatar = files.avatar ? files.avatar[0].path : null
-        const cover = files.cover ? files.cover[0].path : null
+        const uploadImg = (file) => {
+          return new Promise((resolve, reject) => {
+            imgur.upload(file, (err, res) => {
+              resolve(res.data.link)
+            })
+          })
+        }
+
+        const avatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
+        const cover = files.cover ? await uploadImg(files.cover[0].path) : null
 
         await user.update({
           ...req.body,
-          avatar: avatar,
-          cover: cover
+          avatar,
+          cover
         })
         return callback({ status: 'success', message: '使用者資料編輯成功！' })
       }
