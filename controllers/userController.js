@@ -135,13 +135,33 @@ const userController = {
       include: [
         {
           model: Tweet,
-          include: { model: User }
+          include: [{ model: User },
+            Reply,
+            Like,
+          ],
+          attributes:[
+            'id',
+            'UserId',
+            'description',
+            'createdAt',
+            'updatedAt',
+            [
+              sequelize.literal(
+                  '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+              ),
+              'likeCount'
+            ],
+            [
+              sequelize.literal(
+                  '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+              ),
+              'replyCount'
+            ]]
         }
       ]
+    }).then(like => {
+      return res.json(like)
     })
-      .then(like => {
-        return res.json(like)
-      })
   },
 
   putUser: async (req, res) => {
