@@ -8,7 +8,7 @@ const upload = multer({ dest: 'temp/' })
 
 router.post('/', userController.signUp)
 router.get('/current_user', authenticated, checkNotAdmin, userController.getCurrentUser)
-router.get('/top', authenticated, checkNotAdmin, userController.getUserTop)
+router.get('/tops', authenticated, checkNotAdmin, userController.getUserTop)
 router.get('/:id', authenticated, checkNotAdmin, userController.getUser)
 router.put('/:id', authenticated, checkNotAdmin, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.putUser)
 router.put('/:id/setting', authenticated, checkNotAdmin, userController.putUserSetting)
