@@ -72,7 +72,8 @@ module.exports = (app) => {
   // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
 
-  //admin
+  // admin
+  app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
   app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 }
