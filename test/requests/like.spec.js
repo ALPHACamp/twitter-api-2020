@@ -19,7 +19,7 @@ describe('# like requests', () => {
         // 模擬登入資料
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null)
-          return (req, res, next) => {}
+          return (req, res, next) => { }
         })
         this.getUser = sinon.stub(
           helpers, 'getUser'
@@ -66,16 +66,16 @@ describe('# like requests', () => {
         // 模擬登入資料
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, 'authenticate').callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null)
-          return (req, res, next) => {}
+          return (req, res, next) => { }
         })
         this.getUser = sinon.stub(
           helpers, 'getUser'
         ).returns({ id: 1, Followings: [] })
         // 在測試資料庫中，新增 mock 資料
-        await db.User.create({ id: 1, account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
-        await db.User.create({ id: 2, account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
-        await db.Tweet.create({ id: 1, UserId: 2, description: 'User2 的 Tweet1' })
-        await db.Like.create({ id: 1, UserId: 1, TweetId: 1 })
+        await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
+        await db.User.create({ account: 'User2', name: 'User2', email: 'User2', password: 'User2' })
+        await db.Tweet.create({ UserId: 2, description: 'User2 的 Tweet1' })
+        await db.Like.create({ UserId: 1, TweetId: 1 })
       })
 
       // POST /tweets/:id/unlike 取消喜歡

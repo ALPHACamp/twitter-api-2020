@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User} = require('../models')
+const { User, Like, Tweet, Reply } = require('../models')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const helpers = require('../_helpers')
@@ -13,15 +13,15 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   //signIn & signUp
   signIn: (req, res) => {
-    const { email, password } = req.body
-    if (!email || !password) {
+    const { account, password } = req.body
+    if (!account || !password) {
       return res.json({
         status: 'error',
         message: "required fields didn't exist",
       })
     }
 
-    User.findOne({ where: { email } }).then((user) => {
+    User.findOne({ where: { account } }).then((user) => {
       if (!user)
         return res
           .status(401)
@@ -38,10 +38,7 @@ const userController = {
         status: 'success',
         message: 'ok',
         token: token,
-        user: {
-          id: user.id,
-          role: user.role,
-        },
+        user,
       })
     })
   },
@@ -81,7 +78,7 @@ const userController = {
             .json({
               status: 'success',
               message: '成功註冊帳號！',
-              user: { id: user.id, email: user.email },
+              user: { id: user.id, email: user.email, account: user.account },
             })
         }
       }
@@ -104,13 +101,24 @@ const userController = {
             'cover',
             'introduction',
           ],
+          include: { model: Tweet },
         })
       ).toJSON()
-      return res.status(200).json({
-        status: 'success',
-        message: 'ok',
-        ...user,
-      })
+      let result = {
+        id: user.id,
+        account: user.account,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        cover: user.cover,
+        introduction: user.introduction,
+        tweetCounts:  user.Tweets?.length,
+        followship: {
+          followerCounts: helpers.getUser(req).Followers?.length,
+          followingCounts: helpers.getUser(req).Followings?.length,
+        },
+      }
+      return res.status(200).json(result)
     } catch (error) {
       console.log(error)
       return res
@@ -172,6 +180,37 @@ const userController = {
     } catch (error) {
       console.log(error)
       res.status(500).json({ status: 'error', message: 'service error!' })
+    }
+  },
+  getUsersTweets: async (req, res) => {
+    try {
+      const userTweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Like },
+          { model: Reply },
+        ],
+        order: [['createdAt', 'DESC']],
+      })
+
+      let results = userTweets.map((userTweets) => ({
+        tweetsId: userTweets.dataValues.id,
+        description: userTweets.dataValues.description,
+        createdAt: userTweets.dataValues.createdAt,
+        User: userTweets.dataValues.User,
+        likeCounts: userTweets.dataValues.Likes.length,
+        replyCounts: userTweets.dataValues.Replies.length,
+        isLike: helpers.getUser(req).Likes
+          ? helpers
+              .getUser(req)
+              .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
+          : false,
+      }))
+      return res.status(200).json(results)
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: 'Server error' })
     }
   },
 }

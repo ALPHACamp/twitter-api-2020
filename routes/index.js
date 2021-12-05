@@ -2,6 +2,7 @@ const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
+const likeController = require('../controllers/likeController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
@@ -62,6 +63,13 @@ module.exports = (app) => {
     userController.putUser
   )
 
+  app.get(
+    '/api/users/:id/tweets',
+    authenticated,
+    authenticatedUser,
+    userController.getUsersTweets
+  )
+
   // tweets
   app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
   app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
@@ -72,6 +80,7 @@ module.exports = (app) => {
 
   // like
   app.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, likeController.postUnlike)
+  app.post('/api/tweets/:id/like', authenticated, authenticatedUser, likeController.likeTweet)
 
   // admin
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
