@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User} = require('../models')
+const { User } = require('../models')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const helpers = require('../_helpers')
@@ -13,15 +13,15 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   //signIn & signUp
   signIn: (req, res) => {
-    const { email, password } = req.body
-    if (!email || !password) {
+    const { account, password } = req.body
+    if (!account || !password) {
       return res.json({
         status: 'error',
         message: "required fields didn't exist",
       })
     }
 
-    User.findOne({ where: { email } }).then((user) => {
+    User.findOne({ where: { account } }).then((user) => {
       if (!user)
         return res
           .status(401)
@@ -38,10 +38,7 @@ const userController = {
         status: 'success',
         message: 'ok',
         token: token,
-        user: {
-          id: user.id,
-          role: user.role,
-        },
+        user,
       })
     })
   },
@@ -81,7 +78,7 @@ const userController = {
             .json({
               status: 'success',
               message: '成功註冊帳號！',
-              user: { id: user.id, email: user.email },
+              user: { id: user.id, email: user.email, account: user.account },
             })
         }
       }
