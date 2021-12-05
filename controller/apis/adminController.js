@@ -14,7 +14,6 @@ const adminController = {
         include: [
           { model: User, attributes: [] },
           { model: Like, attributes: [] }
-
         ],
         attributes: [
           [sequelize.col('User.id'), 'userId'],
