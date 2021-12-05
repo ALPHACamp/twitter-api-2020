@@ -8,6 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 /* necessary package */
 // express
 const express = require('express')
+const cors = require('cors')
 
 // passport
 const passport = require('./config/passport')
@@ -18,9 +19,10 @@ const methodOverride = require('method-override')
 
 /* app */
 const app = express()
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(passport.initialize())
-app.use(express.urlencoded({ extended: true }))
+app.use(cors())
 app.use(express.static('public'))
 app.use(methodOverride('_method'))
 app.use('/upload', express.static(__dirname + '/upload'))

@@ -14,18 +14,19 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 //helpers
 const helpers = require('../../_helpers')
+
 const sequelize = require('sequelize')
 const adminController = {
   //登入
   signIn: async (req, res) => {
     try {
+      const { account, password } = req.body
       // 檢查必要資料
-      if (!req.body.email || !req.body.password) {
+      if (!email || !password) {
         return res.json({ status: 'error', message: "required fields didn't exist" })
       }
       // 檢查 user 是否存在與密碼是否正確
-      let { email, password } = req.body
-      const user = await User.findOne({ where: { email } })
+      const user = await User.findOne({ where: { account } })
       if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })

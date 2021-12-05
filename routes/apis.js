@@ -9,12 +9,16 @@ const upload = multer({ dest: 'temp/' })
 /* Controller */
 const userController = require('../controllers/api/userController')
 const tweetController = require('../controllers/api/tweetController')
-const adminController = require('../controllers/api/adminController.js')
+const adminController = require('../controllers/api/adminController')
+const replyController = require('../controllers/api/replyController')
+const likeController = require('../controllers/api/likeController')
 
 /* authenticated */
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
-    if (err) { return next(err) }
+    if (err) {
+      return next(err)
+    }
     if (!user) {
       return res.status(401).json({ status: 'error', message: 'without jwt' })
     }
@@ -46,14 +50,29 @@ router.get('/users/:id/tweets', authenticated, userController.getTweets)
 // lookup user information
 router.get('/users/:id', authenticated, userController.getUser)
 // edit personal data
-router.put('/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 },
-{ name: 'cover', maxCount: 1 }]), authenticated, userController.putUsers)
+router.put(
+  '/users/:id',
+  upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover', maxCount: 1 }
+  ]),
+  authenticated,
+  userController.putUsers
+)
 
 // **tweet**
 // tweet
-router.get('/tweets/', tweetController.getTweets)
-router.post('/tweets/', tweetController.postTweet)
-router.get('/tweets/:id', tweetController.getTweet)
+router.get('/tweets/', authenticated, tweetController.getTweets)
+router.post('/tweets/', authenticated, tweetController.postTweet)
+router.get('/tweets/:id', authenticated, tweetController.getTweet)
+
+// **reply**
+router.get('/tweets/:id/replies', authenticated, replyController.getReplies)
+router.post('/tweets/:id/replies', authenticated, replyController.postReply)
+
+// **like**
+router.post('/tweets/:id/like', authenticated, likeController.like)
+router.post('/tweets/:id/unlike', authenticated, likeController.unlike)
 
 // **admin**
 // signin
