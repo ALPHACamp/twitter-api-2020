@@ -5,6 +5,7 @@ const adminController = require('../controllers/adminController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
+const replyController = require('../controllers/replyController')
 const upload = multer({ dest: 'temp/' })
 
 
@@ -64,6 +65,9 @@ module.exports = (app) => {
     userController.putUser
   )
 
+  //reply
+  app.get('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getTweetReply)
+  
   // tweets
   app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
   app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
@@ -71,6 +75,7 @@ module.exports = (app) => {
 
   // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
+
 
   //admin
   app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)

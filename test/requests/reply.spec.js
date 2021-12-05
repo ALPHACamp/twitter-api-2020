@@ -15,9 +15,9 @@ describe('# reply requests', () => {
     describe(' /api/tweets/:tweet_id/replies', () => {
       before(async() => {
         // 清除 User, Tweet, Reply table 的測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Reply.destroy({where: {},truncate: true})
+        await db.User.destroy({where: {},truncate: { cascade: true } })
+        await db.Tweet.destroy({where: {},truncate: { cascade: true } })
+        await db.Reply.destroy({where: {},truncate: { cascade: true } })
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -55,23 +55,23 @@ describe('# reply requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Reply.destroy({where: {},truncate: true})
+        await db.User.destroy({where: {},truncate: { cascade: true } })
+        await db.Tweet.destroy({where: {},truncate: { cascade: true } })
+        await db.Reply.destroy({where: {},truncate: { cascade: true } })
       })
 
     });
 
   });
 
-  context('# GET ', () => {
+  context.only('# GET ', () => {
 
     describe('GET /api/tweets/:tweet_id/replies', () => {
       before(async() => {
         // 清除 User table 的測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Reply.destroy({where: {},truncate: true})
+        await db.User.destroy({where: {},truncate: { cascade: true } })
+        await db.Tweet.destroy({where: {},truncate: { cascade: true } })
+        await db.Reply.destroy({where: {},truncate: { cascade: true } })
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -81,8 +81,8 @@ describe('# reply requests', () => {
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
         // 在測試資料庫中，新增 mock 資料
-        await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
-        await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
+        await db.User.create({id: 1,account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
+        await db.Tweet.create({id: 1, UserId: 1, description: 'User1 的 Tweet1'})
         await db.Reply.create({UserId: 1, TweetId: 1, comment: 'Tweet1 的 comment'})
       })
 
@@ -105,9 +105,9 @@ describe('# reply requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Reply.destroy({where: {},truncate: true})
+        await db.User.destroy({where: {},truncate: { cascade: true } })
+        await db.Tweet.destroy({where: {},truncate: { cascade: true } })
+        await db.Reply.destroy({where: {},truncate: { cascade: true } })
       })
 
     });
