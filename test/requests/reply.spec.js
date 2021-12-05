@@ -81,8 +81,8 @@ describe('# reply requests', () => {
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
         // 在測試資料庫中，新增 mock 資料
-        await db.User.create({id: 1,account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
-        await db.Tweet.create({id: 1, UserId: 1, description: 'User1 的 Tweet1'})
+        await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
+        await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
         await db.Reply.create({UserId: 1, TweetId: 1, comment: 'Tweet1 的 comment'})
       })
 
