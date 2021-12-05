@@ -262,20 +262,21 @@ const userController = {
             'account',
             'avatar',
             'cover',
-            'introduction',]
-        }],
+            'introduction',
+            [
+              sequelize.literal(
+                  `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helpers.getUser(req).id} AND followingId = Followers.id)`
+              ),
+              'isFollowed'
+            ]
+          ]}
+        ],
         attributes: [
             'id',
           'name',
           'account',
           'avatar',
-          'cover',
-          [
-            sequelize.literal(
-                `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helpers.getUser(req).id} AND followingId = ${req.params.id})`
-            ),
-            'isFollowed'
-          ]
+          'cover'
         ]
       }).then(followers => {
       return res.json(followers)
@@ -292,21 +293,21 @@ const userController = {
             'account',
             'avatar',
             'cover',
-            'introduction']
-        }],
+            'introduction',
+            [
+              sequelize.literal(
+                  `EXISTS (SELECT 1 FROM Followships WHERE followingId = ${helpers.getUser(req).id} AND followerId = Followings.id)`
+              ),
+              'isFollowed'
+            ]
+          ]}],
         attributes: [
             'id',
           'name',
           'account',
           'avatar',
-          'cover',
-          [
-              sequelize.literal(
-                  `EXISTS (SELECT 1 FROM Followships WHERE followingId = ${helpers.getUser(req).id} AND followerId = ${req.params.id})`
-              ),
-            'isFollowed'
-          ]],
-      }).then(followings => {
+          'cover'
+        ]}).then(followings => {
         return res.json(followings)
       })
   },
