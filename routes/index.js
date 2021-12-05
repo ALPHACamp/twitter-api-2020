@@ -8,8 +8,6 @@ const multer = require('multer')
 const replyController = require('../controllers/replyController')
 const upload = multer({ dest: 'temp/' })
 
-
-
 // use helpers.getUser(req) to replace req.user
 // 驗前台是user身分
 const authenticatedUser = (req, res, next) => {
@@ -42,7 +40,6 @@ const authenticated = (req, res, next) => {
 }
 
 module.exports = (app) => {
-
   // JWT signin & signup
   app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
@@ -60,12 +57,12 @@ module.exports = (app) => {
     authenticatedUser,
     upload.fields([
       { name: 'avatar', maxCount: 1 },
-      { name: 'cover', maxCount: 1 },
+      { name: 'cover', maxCount: 1 }
     ]),
     userController.putUser
   )
 
-  //replies
+  // replies
   app.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
 
   // tweets
@@ -76,7 +73,6 @@ module.exports = (app) => {
   // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
 
-  //admin
+  // admin
   app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
-
 }
