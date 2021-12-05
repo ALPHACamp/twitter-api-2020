@@ -40,6 +40,10 @@ router.get('/api/users/:id/likes', authenticated, userController.getOneLikes)
 router.get('/api/users/:id/replied_tweets', authenticated, userController.getOneRepliedTweets)
 //user觀看特定人士tweets
 router.get('/api/users/:id/tweets', authenticated, userController.getOneTweets)
+
+router.get('/api/users/:id/followers', userController.getOneFollowers)
+router.get('/api/users/:id/followings', userController.getOneFollowings)
+
 //先讓前端使用的get_current)user
 router.get('/get_current_user', authenticated, userController.getCurrentUser)
 

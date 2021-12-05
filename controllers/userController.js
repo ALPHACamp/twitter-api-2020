@@ -4,6 +4,7 @@ const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
+const Followship = db.Followship
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -220,6 +221,20 @@ const userController = {
     return Tweet.findAll({ where: { UserId } })
       .then(tweets => {
         return res.json({ tweets })
+      })
+  },
+  getOneFollowers: (req, res) => {
+    const followerId = req.params.id
+    return Followship.findAll({ where: { followerId } })
+      .then(users => {
+        return res.json({ users })
+      })
+  },
+  getOneFollowings: (req, res) => {
+    const followingId = req.params.id
+    return Followship.findAll({ where: { followingId } })
+      .then(users => {
+        return res.json({ users })
       })
   },
 }
