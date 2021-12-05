@@ -6,7 +6,7 @@ const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const replyController = require('../controllers/replyController')
 const likeController = require('../controllers/likeController')
-
+const followController = require('../controllers/followController')
 
 // const authenticated = (req, res, next) => {
 //   if (req.isAuthenticated()) {
@@ -53,7 +53,7 @@ router.get('/api/tweets/:tweetId/replies', authenticated, replyController.getRep
 router.post('/api/tweets/:tweetId/replies', authenticated, replyController.postReply)
 
 //followships相關
-
+router.post('/api/followships', authenticated, followController.addFollowship)
 
 
 
