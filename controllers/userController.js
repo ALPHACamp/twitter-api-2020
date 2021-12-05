@@ -183,8 +183,6 @@ const userController = {
         order: [['createdAt', 'DESC']],
       })
 
-      console.log('userTweets', userTweets)
-
       let results = userTweets.map((userTweets) => ({
         tweetsId: userTweets.dataValues.id,
         description: userTweets.dataValues.description,
