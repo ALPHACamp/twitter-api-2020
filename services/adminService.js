@@ -78,13 +78,7 @@ const adminService = {
       const users = await User.findAll({
         raw: true,
         nest: true,
-        where: { role: { [sequelize.Op.not]: 'admin' } },
-        include: [
-          {
-            model: Tweet, attributes: [['id', 'TweetId']]
-          }
-        ],
-        attributes: ['id', 'account', 'name', 'cover', 'avatar',
+        attributes: ['id', 'account', 'name', 'cover', 'avatar', 'role',
           [sequelize.literal(`(select count(Tweets.UserId) from Tweets inner join Likes on Tweets.id = Likes.TweetId where Tweets.UserId = User.id)`), 'likeCounts'],
           [sequelize.literal(`(select count(UserId) from Tweets where UserId = User.id)`), 'tweetCounts'],
           [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
