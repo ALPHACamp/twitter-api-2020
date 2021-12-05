@@ -19,9 +19,10 @@ const tweetController = {
     try {
       const { comment } = req.body
       if (comment.trim() === '') {
-        return (
-          res, json({ status: 'error', message: 'Comment can NOT be empty!' })
-        )
+        return res.json({
+          status: 'error',
+          message: 'Comment can NOT be empty!'
+        })
       }
       await Reply.create({
         UserId: helpers.getUser(req).id,
