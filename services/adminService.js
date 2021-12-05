@@ -61,6 +61,19 @@ const adminService = {
       users = users.sort((a, b) => b.tweetCount - a.tweetCount)
       return callback(users)
     })
+  },
+
+  getTweets: (req, res, callback) => {
+    return Tweet.findAll({
+      raw: true,
+      nest: true,
+      attributes: ['id', 'UserId', 'description', 'createdAt'],
+      order: [['createdAt', 'DESC']],
+      include: [{ model: User, attributes: ['name', 'account', 'avatar'] }]
+    }).then(tweets => {
+      tweets.forEach(tweet => tweet.description.substring(0, 50))
+      return callback(tweets)
+    })
   }
 }
 
