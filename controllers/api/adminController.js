@@ -20,13 +20,13 @@ const adminController = {
   //登入
   signIn: async (req, res) => {
     try {
-      const { account, password } = req.body
+      const { email, account, password } = req.body
       // 檢查必要資料
       if (!email || !password) {
         return res.json({ status: 'error', message: "required fields didn't exist" })
       }
       // 檢查 user 是否存在與密碼是否正確
-      const user = await User.findOne({ where: { account } })
+      const user = await User.findOne({ where: { email } })
       if (!user) return res.status(401).json({ status: 'error', message: 'no such user found' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: 'passwords did not match' })
@@ -45,61 +45,32 @@ const adminController = {
       })
     } catch (e) { console.log(e) }
   },
-
-  // getUsers: async (req, res) => {
-  //   try {
-  //     LikedUsers = await Tweet.findAll({
-  //       include: [{ model: User, as: 'LikedUsers' }],
-  //     })
-
-  //     let tweetID2LikedUsersCount = {}
-  //     LikedUsers.map((d, index) => {
-  //       tweetID2LikedUsersCount[d.id] = d.LikedUsers.length
-  //     })
-
-  //     const user = await User.findAll({
-  //       attributes: [
-  //         'User.id',
-  //         [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.userId = User.id)'), 'TweetCount'],
-  //         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'FollowersCount'],
-  //         [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'FollowingsCount'],
-  //       ],
-  //       raw: true,
-  //       nest: true,
-  //     })
-
-  //     let user2 = await User.findAll({
-  //       include: [{ model: Tweet }],
-  //     })
-
-  //     xx = {}
-  //     for (let ob of user) {
-  //       xx[ob.id] = {
-  //         'TweetCount': ob.TweetCount,
-  //         'FollowersCount': ob.FollowersCount,
-  //         'FollowingsCount': ob.FollowingsCount,
-  //         'LikedUsersCount': 0
-  //       }
-  //     }
-  //     console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx')
-
-  //     for (let user of user2) {
-  //       let total = 0
-  //       for (let Tweetdata of user.Tweets) {
-  //         total += tweetID2LikedUsersCount[Tweetdata.id]
-  //         console.log('Tweetdata.id', Tweetdata.id)
-  //         console.log('total', total)
-  //       }
-  //       console.log(xx)
-  //       console.log(user.id)
-  //       xx[String(user.id)]['LikedUsersCount'] = total
-  //     }
-  //     console.log('9999999999999999999')
-  //     console.log(xx)
-  //     console.log(user2)
-  //     // console.log(JSON.stringify(user2, null, 2))
-  //   } catch (e) { console.log(e) }
-  // },
+  //查看user資訊
+  getUsers: async (req, res) => {
+    try {
+      const users = await User.findAll({
+        attributes: ['account', 'id', 'name', 'avatar', 'role', 'cover',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+            'FollowingsCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+            'FollowersCount'
+          ],
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.id = User.id )'),
+            'TweetCount'
+          ],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets inner join Likes on Tweets.id = Likes.TweetId where Tweets.UserId = User.id)'), 'likeCounts']
+        ],
+        order: [[sequelize.literal('TweetCount'), 'DESC']],
+      })
+      return res.json(users)
+    } catch (err) {
+      console.log(err)
+    }
+  },
   getTweets: async (req, res) => {
     try {
       const result = await Tweet.findAndCountAll({ include: [User] })
@@ -122,23 +93,7 @@ const adminController = {
   }
 }
 
-
 module.exports = adminController
 
-// const user = await User.findAll({
-//   attributes: {
-//     include: [
-//       [sequelize.fn('count', sequelize.col('Tweets.id')), 'tweetCount'],
-//       [sequelize.fn('count', sequelize.col('Followers.id')), 'FollowersCount'],
-
-//       [sequelize.fn('count', sequelize.col('Followings.id')), 'FollowingsCount'],
-//       [sequelize.literal('(SELECT COUNT(*) FROM Tweets JOIN Likes ON TweetId)'), 'TweetsLikesCount']
-//     ]
-//   }, include:
-//     [{ model: Tweet, attributes: [] }, { model: Like, attributes: [] }, { model: User, attributes: [], as: 'Followers' }, { model: User, as: 'Followings', attributes: [] }],
-//   group: ['User.id'],
-//   raw: true,
-//   nest: true,
-//         order: [[sequelize.literal('tweetCount'), 'DESC']],
 
 

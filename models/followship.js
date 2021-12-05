@@ -14,6 +14,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     {}
   )
-  Followship.associate = function (models) {}
+  Followship.associate = function (models) { }
   return Followship
 }

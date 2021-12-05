@@ -162,7 +162,7 @@ let userController = {
   getTop: async (req, res) => {
     try {
       const Top = await User.findAll({
-        attributes: ['account', 'id', 'name', 'avatar',
+        attributes: ['account', 'id', 'name', 'avatar', 'role',
           [
             sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
             'FollowingsCount'
