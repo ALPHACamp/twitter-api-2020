@@ -156,7 +156,14 @@ const userController = {
                   '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
               ),
               'replyCount'
-            ]]
+            ],
+            [
+              sequelize.literal(
+                  `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
+              ),
+              'isLiked'
+            ]
+          ]
         }
       ]
     }).then(like => {
