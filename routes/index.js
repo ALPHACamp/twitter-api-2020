@@ -5,6 +5,7 @@ const adminController = require('../controllers/adminController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
+const replyController = require('../controllers/replyController')
 const upload = multer({ dest: 'temp/' })
 
 
@@ -63,6 +64,9 @@ module.exports = (app) => {
     ]),
     userController.putUser
   )
+
+  //replies
+  app.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
 
   // tweets
   app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
