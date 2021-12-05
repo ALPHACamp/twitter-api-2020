@@ -11,22 +11,26 @@ const replyController = {
       include: User,
       order: [['createdAt', 'DESC']]
     }).then((replies) => {
+      replies.forEach(reply => {  // 把User.password刪掉
+        reply.dataValues.User.password = ""
+        // delete reply.dataValues.User.password 無作用
+      })
       return res.json(replies)
     })
-  }, 
+  },
   postReply: (req, res) => {
     if (!req.body.comment) {
       return res.json({ status: 'error', message: 'No comment content' })
     }
-    if (req.body.comment.length >= 280 ) {
+    if (req.body.comment.length >= 280) {
       return res.json({ status: 'error', message: 'Comment exceeds limit' })
     }
     Reply.create({
       TweetId: req.params.tweetId,
-      UserId: helpers.getUser(req).id, 
+      UserId: helpers.getUser(req).id,
       comment: req.body.comment
     }).then(() => {
-      return res.json({ status: 'success', message: ''})
+      return res.json({ status: 'success', message: '' })
     })
   }
 }
