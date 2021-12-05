@@ -9,7 +9,6 @@ const likeController = {
       where: { $and: {
         UserId: helpers.getUser(req).id,
         TweetId: req.params.tweetId,
-        deletedAt: ""
       }}
     }).then(like => {
       if (like) {
@@ -31,21 +30,14 @@ const likeController = {
         $and: {
           UserId: helpers.getUser(req).id,
           TweetId: req.params.tweetId,
-          deletedAt: ""
         }
       }
     }).then(like => {
-      console.log('test Date.now(): ', Date.now())
       if (!like) {
-        console.log(like)
         return res.json({ status: 'error', message: "Haven't liked before" })
       }
-      like.update({
-        deletedAt: Date.now()
-        //若使用 new Date() 會有SequelizeValidationError: string violation: deletedAt cannot be an array or an object
-      })
+      like.destroy()
         .then(like => {
-          console.log(like)
           return res.json({ status: 'success', message: 'Removed like successfully'})
         })
     })
