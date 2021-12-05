@@ -18,7 +18,7 @@ module.exports = {
       const newIdList = userIdList.filter(id => id !== userId) // 回傳一個新陣列(去除自己的id，才不會自己追蹤自己)
       let index = Math.floor(Math.random() * newIdList.length) // 每個使用者追蹤不同人數(最大是追蹤除了自己以外其他所有人)
       for (let i = 0; i < index; i++) {
-        index = index + 1 > newIdList.length ? 0 : index + 1 // 確保不會追蹤同一人兩次
+        index = index + 1 > newIdList.length - 1 ? 0 : index + 1 // 確保不會追蹤同一人兩次
         let data = new Object()
         data.followerId = userId
         data.followingId = newIdList[index]
