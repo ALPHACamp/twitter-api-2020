@@ -43,12 +43,19 @@ const userController = {
   },
 
   signIn: (req, res) => {
-    const { email, password } = req.body
-    if (!email || !password) {
+    const { account, password } = req.body
+    if (!account || !password) {
       return res.json({ status: 'error', message: "所有欄位都是必填" })
     }
 
-    return User.findOne({ where: { email } }).then(user => {
+    return User.findOne({
+      where: {
+        [Op.or]: [
+          { account },
+          { email: account }
+        ]
+      }
+    }).then(user => {
       if (!user) {
         return res.json({ status: 'error', message: "帳號不存在" })
       }
