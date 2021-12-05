@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
-const db = require('../models')
-const User = db.User
+const { User, Tweet, Like, Followship } = require('../models')
 
 const adminService = {
   signIn: (req, res, callback) => {
@@ -32,6 +32,34 @@ const adminService = {
           role: user.role
         }
       })
+    })
+  },
+
+  getUsers: (req, res, callback) => {
+    return User.findAll({
+      raw: true,
+      nest: true,
+      where: { role: 'user' },
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'cover',
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'), 'likeCount'],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+          'followingCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+          'followerCount'
+        ]
+      ]
+    }).then(users => {
+      users = users.sort((a, b) => b.tweetCount - a.tweetCount)
+      return callback(users)
     })
   }
 }

@@ -61,6 +61,7 @@ router.post('/notice', authenticated, userController.addNoticing)
 router.delete('/notice/:noticeId', authenticated, userController.removeNoticing)
 
 router.post('/admin/signin', adminController.signIn)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
