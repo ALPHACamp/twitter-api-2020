@@ -279,7 +279,7 @@ const userController = {
           'cover'
         ]
       }).then(followers => {
-      return res.json(followers)
+      return res.json(followers.Followers)
     })
   },
 
@@ -308,7 +308,7 @@ const userController = {
           'avatar',
           'cover'
         ]}).then(followings => {
-        return res.json(followings)
+        return res.json(followings.Followings)
       })
   },
 
