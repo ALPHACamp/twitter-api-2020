@@ -42,15 +42,15 @@ const userService = {
   },
 
   signIn: async (req, res, callback) => {
-    const { email, password } = req.body
+    const { account, password } = req.body
 
     // 確認欄位是否皆有填寫
-    if (!email || !password) {
-      return callback({ status: 'error', message: 'email或password未填寫' })
+    if (!account || !password) {
+      return callback({ status: 'error', message: 'account或password未填寫' })
     }
 
-    // 檢查email＆password＆role
-    const user = await User.findOne({ where: { email } })
+    // 檢查account＆password＆role
+    const user = await User.findOne({ where: { account } })
     if (!user || !bcrypt.compareSync(password, user.password) || user.role === 'admin') {
       return callback({ status: 'error', message: '帳號不存在！' })
     }
