@@ -43,14 +43,16 @@ const authenticatedAdmin = (req, res, next) => {
 /* front desk */
 
 // **users**
+// lookup user Tweets
+router.get('/users/:id/tweets', authenticated, userController.getTweets)
+// api/users/top
+router.get('/users/top', authenticated, userController.getTop)
+// lookup user information
+router.get('/users/:id', authenticated, userController.getUser)
 // signin
 router.post('/users/signin', userController.signIn)
 // signUp
 router.post('/users', userController.signUp)
-// lookup user Tweets
-router.get('/users/:id/tweets', authenticated, userController.getTweets)
-// lookup user information
-router.get('/users/:id', authenticated, userController.getUser)
 // edit personal data
 router.put(
   '/users/:id',
@@ -61,6 +63,7 @@ router.put(
   authenticated,
   userController.putUsers
 )
+
 
 // **tweet**
 // tweet

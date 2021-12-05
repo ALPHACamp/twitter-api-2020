@@ -6,6 +6,9 @@ const { User, Tweet, Like, Reply } = db
 const bcrypt = require('bcryptjs')
 const IMGUR_CLIENT_ID = 'e34bbea295f4825'
 const imgur = require('imgur-node-api')
+// sequelize
+const sequelize = require('sequelize')
+const { Op } = require("sequelize")
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
@@ -154,7 +157,30 @@ let userController = {
     } catch (err) {
       console.log(err)
     }
-  }
+  },
+  //跟隨者 (followers) 數量排列前 10 的使用者推薦名單
+  getTop: async (req, res) => {
+    try {
+      const Top = await User.findAll({
+        attributes: ['account', 'id', 'name', 'avatar',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+            'FollowingsCount'
+          ],
+          [
+            sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id}  AND Followships.followingId = User.id )`),
+            'isFollowed'
+          ]
+        ],
+        order: [[sequelize.literal('FollowingsCount'), 'DESC']],
+        limit: 10
+      })
+      // console.log(JSON.stringify(Top, null, 2))
+      return res.json(Top)
+    } catch (err) {
+      console.log(err)
+    }
+  },
 }
 
 module.exports = userController
