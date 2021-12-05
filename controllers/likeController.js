@@ -4,7 +4,7 @@ const helpers = require('../_helpers')
 const likeController = {
   postUnlike: async (req, res) => {
     try {
-      const targetLike = await Like.findByPk(Number(req.params.id))
+      const targetLike = await Like.fineOne({ where: { TweetId: Number(req.params.id) } })
       if (targetLike.toJSON().UserId === helpers.getUser(req).id) {
         await Like.destroy({ where: { id: Number(req.params.id) } })
       } else {
