@@ -1,5 +1,5 @@
 // 載入所需套件
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -45,8 +45,29 @@ const adminService = {
     } catch (err) {
       console.log(err)
     }
-  }
+  },
 
+  deleteTweet: async (req, res, callback) => {
+    try {
+      const TweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(TweetId)
+
+      //確認該貼文是否存在
+      if (!tweet) {
+        return callback({ status: 'error', message: '該貼文不存在' })
+      } else {
+        //刪除該tweet_id之貼文，包含like以及reply一併刪除
+        Promise.all([
+          Tweet.destroy({ where: { id: TweetId } }),
+          Like.destroy({ where: { TweetId } }),
+          Reply.destroy({ where: { TweetId } })
+        ])
+        return callback({ status: 'success', message: '已刪除貼文' })
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
 }
 
 // adminController exports

@@ -15,6 +15,12 @@ const adminController = {
     adminService.getAllTweets(req, res, data => {
       return res.json(data)
     })
+  },
+
+  deleteTweet: (req, res) => {
+    adminService.deleteTweet(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 

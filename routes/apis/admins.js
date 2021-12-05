@@ -6,6 +6,7 @@ const { authenticated, checkNotUser } = require('../../middlewares/auth')
 
 router.post('/signin', adminController.adminLogin)
 router.get('/tweets', authenticated, checkNotUser, adminController.getAllTweets)
+router.delete('/tweets/:tweet_id', authenticated, checkNotUser, adminController.deleteTweet)
 
 // router exports
 module.exports = router
