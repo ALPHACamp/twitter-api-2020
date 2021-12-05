@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 
-const { User, Tweet, Like, Followship } = require('../models')
+const { User, Tweet, Like, Followship, Reply } = require('../models')
 
 const adminService = {
   signIn: (req, res, callback) => {
@@ -74,6 +74,14 @@ const adminService = {
       tweets.forEach(tweet => tweet.description.substring(0, 50))
       return callback(tweets)
     })
+  },
+
+  deleteTweet: async (req, res, callback) => {
+    await Tweet.destroy({ where: { id: req.params.id } })
+    await Reply.destroy({ where: { TweetId: req.params.id } })
+    await Like.destroy({ where: { TweetId: req.params.id } })
+
+    return callback({ status: 'success', message: '成功刪除' })
   }
 }
 
