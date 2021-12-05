@@ -43,10 +43,10 @@ let strategy = new JWTStrategy(jwtOptions, function (jwt_payload, next) {
       { model: User, as: 'Followings' }
     ]
   })
-  .then(user => {
-    if (!user) return next(null, false)
-    return next(null, user)
-  })
+    .then(user => {
+      if (!user) return next(null, false)
+      return next(null, user)
+    })
 })
 
 // serialize and deserialize user
