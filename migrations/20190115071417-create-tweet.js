@@ -14,12 +14,6 @@ module.exports = {
       description: {
         type: Sequelize.TEXT
       },
-      likeCounts: {
-        type: Sequelize.INTEGER
-      },
-      commentCounts: {
-        type: Sequelize.INTEGER
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
