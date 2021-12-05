@@ -4,6 +4,7 @@ const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
+const replyController = require('../controllers/replyController')
 
 
 // const authenticated = (req, res, next) => {
@@ -49,9 +50,8 @@ router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, tweetC
 
 
 
-//replies相關
-
-
+//replies相關  待補authenticated
+router.get('/api/tweets/:tweetId/replies', replyController.getReplies)
 
 //followships相關
 
