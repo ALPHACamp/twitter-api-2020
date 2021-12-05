@@ -24,7 +24,7 @@ const adminController = {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
     }
-  }
+  },
 
   deleteTweet: async (req, res) => {
     try {
