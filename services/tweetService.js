@@ -36,7 +36,8 @@ const tweetService = {
         { model: Reply, include: [User] }
       ]
     }).then(tweet => {
-      console.log(tweet.User)
+      console.log(tweet)
+      // console.log(tweet.User)
       const isLiked = tweet.User.map(d => d.id).includes(helpers.getUser(req).id)
       callback({
         tweet: tweet,
