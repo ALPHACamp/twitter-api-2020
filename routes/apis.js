@@ -12,6 +12,8 @@ const tweetController = require('../controllers/api/tweetController')
 const adminController = require('../controllers/api/adminController')
 const replyController = require('../controllers/api/replyController')
 const likeController = require('../controllers/api/likeController')
+const followshipController = require('../controllers/api/followshipController')
+const { follow } = require('../controllers/api/followshipController')
 
 /* authenticated */
 const authenticated = (req, res, next) => {
@@ -73,6 +75,10 @@ router.post('/tweets/:id/replies', authenticated, replyController.postReply)
 // **like**
 router.post('/tweets/:id/like', authenticated, likeController.like)
 router.post('/tweets/:id/unlike', authenticated, likeController.unlike)
+
+// **followship**
+router.post('/followships', authenticated, followshipController.follow)
+router.delete('/followships/:id', authenticated, followshipController.unFollow)
 
 // **admin**
 // signin
