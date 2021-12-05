@@ -14,6 +14,7 @@ const replyController = {
       return res.status(200).json(reply)
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   getReply: async (req, res) => {
@@ -26,6 +27,7 @@ const replyController = {
       return res.status(200).json(replies)
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   deleteReply: async (req, res) => {
@@ -38,6 +40,7 @@ const replyController = {
       return res.json({ status: 200, message: '刪除成功！' })
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   }
 }

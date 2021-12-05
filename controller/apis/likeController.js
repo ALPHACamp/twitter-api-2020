@@ -31,6 +31,7 @@ const likeController = {
       return res.status(200).json({ message: '重功移除' })
     } catch (err) {
       console.log(err)
+      console.log(err)
       return res.status(400).json({ message: err })
     }
   }
