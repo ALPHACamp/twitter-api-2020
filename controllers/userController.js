@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User} = require('../models')
+const { User } = require('../models')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const helpers = require('../_helpers')
@@ -78,7 +78,7 @@ const userController = {
             .json({
               status: 'success',
               message: '成功註冊帳號！',
-              user: { id: user.id, email: user.email },
+              user: { id: user.id, email: user.email, account: user.account },
             })
         }
       }
