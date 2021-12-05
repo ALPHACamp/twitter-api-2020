@@ -11,9 +11,10 @@ const likeController = require('../controller/apis/likeController')
 const passport = require('passport')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
+const { authenticated } = require('../middleware/auth')
 
 //function
-let authenticated = passport.authenticate('jwt', { session: false })
+// let authenticated = passport.authenticate('jwt', { session: false })
 
 const authenticatedAdmin = (req, res, next) => {
   if (req.user) {
@@ -32,6 +33,8 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
 router.put('/tweets/:id', authenticated, tweetController.putTweet)
 router.delete('/tweets/:id', authenticated, tweetController.deleteTweet)
+router.post('/tweets/:id/like', authenticated, likeController.postLike)
+router.post('/tweets/:id/unlike', authenticated, likeController.deleteLike)
 router.post('/tweets/:id/replies', authenticated, replyController.postReply)
 router.get('/tweets/:id/replies', authenticated, replyController.getReply)
 router.delete('/replies/:replyId', authenticated, replyController.deleteReply)
@@ -40,7 +43,15 @@ router.delete('/replies/:replyId', authenticated, replyController.deleteReply)
 router.post('/users', userController.signUp)
 
 router.post('/users/signin', userController.signIn)
-router.put('/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1}]),authenticated, userController.putUser)
+router.put(
+  '/users/:id',
+  upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover', maxCount: 1 }
+  ]),
+  authenticated,
+  userController.putUser
+)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get(
   '/users/:id/replied_tweets',
@@ -61,6 +72,7 @@ router.get(
 //user
 router.get('/users', authenticated, userController.getUsers)
 router.get('/users/self', authenticated, userController.getCurrentUser)
+router.get('/users/top', authenticated, userController.getTopUsers)
 router.get('/users/:id', authenticated, userController.getUser)
 
 //followship
@@ -69,13 +81,7 @@ router.delete('/followships/:id', authenticated, userController.deleteFollow)
 
 //admin
 router.get('/admin/users', authenticated, adminController.getUsers)
+router.get('/admin/tweets', authenticated, adminController.getTweets)
 router.delete('/admin/tweets/:id', authenticated, adminController.deleteTweet)
-
-router.post('/users/tweets/:id/like', authenticated, likeController.postLike)
-router.post(
-  '/users/tweets/:id/unlike',
-  authenticated,
-  likeController.deleteLike
-)
 
 module.exports = router

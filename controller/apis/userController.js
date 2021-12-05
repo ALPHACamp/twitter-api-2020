@@ -84,18 +84,38 @@ const userController = {
       return res.json({ status: 'success', message: '成功註冊帳號！' })
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   getUser: async (req, res, cb) => {
     try {
       const userProfile = await User.findByPk(req.params.id, {
+        attributes: {
+          include: [
+            [
+              sequelize.literal(
+                `(SELECT Count(*) FROM Followships AS f WHERE f.followerId=${req.params.id})`
+              ),
+              'following_count'
+            ],
+            [
+              sequelize.literal(
+                `(SELECT Count(*) FROM Followships AS f WHERE f.followingId=${req.params.id})`
+              ),
+              'follower_count'
+            ],
+            [
+              sequelize.literal(
+                `(SELECT Count(*) FROM Tweets AS t WHERE t.UserId=${req.params.id})`
+              ),
+              'tweets_count'
+            ]
+          ]
+        },
         raw: true,
-        nest: true,
-        include: [
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ]
+        nest: true
       })
+
       const followship = await Followship.findOne({
         where: {
           followerId: helper.getUser(req).id,
@@ -104,13 +124,12 @@ const userController = {
       })
       const isFollowed = followship ? true : false
       return res.json({
-        status: 'success',
-        message: '',
         ...userProfile,
         isFollowed
       })
     } catch (err) {
       console.log(err)
+      return res.status(401).message({ status: 'error', message: err })
     }
   },
   getUsers: async (req, res, cb) => {
@@ -123,6 +142,43 @@ const userController = {
       })
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
+    }
+  },
+  getTopUsers: async (req, res) => {
+    try {
+      const users = await User.findAll({
+        attributes: [
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`
+            ),
+            'follower_count'
+          ],
+          'id',
+          'name',
+          'account'
+        ],
+        limit: 10,
+        raw: true,
+        nest: true,
+        order: [[sequelize.col('follower_count'), 'DESC']]
+      })
+      const followingUsers = await Followship.findAll({
+        where: { followerId: helper.getUser(req).id },
+        attributes: ['followingId'],
+        raw: true,
+        nest: true
+      })
+      const followingIds = followingUsers.map(a => a.followingId)
+      const topUser = users.map(user => ({
+        ...user,
+        isFollowed: followingIds.includes(user.id)
+      }))
+      return res.status(200).json(topUser)
+    } catch (err) {
+      console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   getUserTweets: async (req, res) => {
@@ -155,9 +211,21 @@ const userController = {
         nest: true,
         group: ['Tweet.id']
       })
-      return res.json([...tweets, { status: 200, message: '' }])
+      const likedTweets = await Like.findAll({
+        where: { UserId: helper.getUser(req).id },
+        attributes: ['TweetId'],
+        raw: true,
+        nest: true
+      })
+      const likedTweetIds = likedTweets.map(a => a.TweetId)
+      const tweetTable = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: likedTweetIds.includes(tweet.id)
+      }))
+      return res.status(200).json(tweetTable)
     } catch (err) {
       console.log(err)
+      res.status(401).json({ status: 'error', message: err })
     }
   },
   getUserReplies: async (req, res) => {
@@ -170,7 +238,7 @@ const userController = {
       })
       return res.status(200).json([...replies])
     } catch (err) {
-      console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   getUserLike: async (req, res) => {
@@ -205,9 +273,20 @@ const userController = {
         ],
         group: ['TweetId']
       })
-      return res.status(200).json(data)
+      const likedTweets = await Like.findAll({
+        where: { UserId: helper.getUser(req).id },
+        raw: true,
+        nest: true
+      })
+      const likedTweetIds = likedTweets.map(a => a.TweetId)
+      const userLikes = data.map(like => ({
+        ...like,
+        isLiked: likedTweetIds.includes(like.TweetId)
+      }))
+      return res.status(200).json(userLikes)
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   getUserFollowings: async (req, res) => {
@@ -266,7 +345,6 @@ const userController = {
         followerIntro: u.Followers.introduction,
         followerAvatar: u.Followers.avatar,
         isFollowed: followingIds.includes(u.Followers.id)
-
       }))
 
       return res.status(200).json(follower)
@@ -285,7 +363,7 @@ const userController = {
             user.update({
               name: req.body.name,
               introduction: req.body.introduction,
-              avatar: avatarImg.data.link || user.avatar,
+              avatar: avatarImg.data.link || user.avatar
             })
           })
         })
@@ -296,22 +374,24 @@ const userController = {
             user.update({
               name: req.body.name,
               introduction: req.body.introduction,
-              cover: coverImg.data.link || user.cover,
+              cover: coverImg.data.link || user.cover
             })
           })
         })
       }
-      return res.status(200).json({message: 'success'})
+      return res.status(200).json({ message: 'success' })
     } else {
       return User.findByPk(req.params.id).then(user => {
-        user.update({
-          name: req.body.name,
-          introduction: req.body.introduction,
-          avatar: user.avatar,
-          cover: user.cover
-        }).then(() => {
-          return res.status(200).json({message: 'success'})
-        })
+        user
+          .update({
+            name: req.body.name,
+            introduction: req.body.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          })
+          .then(() => {
+            return res.status(200).json({ message: 'success' })
+          })
       })
     }
   },
@@ -324,18 +404,19 @@ const userController = {
       return res.status(200).json(user)
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   postFollow: async (req, res) => {
     try {
+      console.log(req.user.id)
       await Followship.create({
         followerId: helper.getUser(req).id,
         followingId: req.body.id
       })
-      return res.status(200).json({ status: 200, message: '追蹤成功！' })
     } catch (err) {
       console.log(err)
-      return res.json({ status: 'error', message: err })
+      return res.status(401).json({ message: err })
     }
   },
   deleteFollow: async (req, res) => {
@@ -349,7 +430,7 @@ const userController = {
       return res.status(200).json({ message: '成功移除 follow' })
     } catch (err) {
       console.log(err)
-      return res.json({ status: 'error', message: err })
+      return res.status(401).json({ status: 'error', message: err })
     }
   }
 }

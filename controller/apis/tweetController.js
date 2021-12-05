@@ -30,7 +30,8 @@ const tweetController = {
         },
         include: [
           { model: Like, attributes: [] },
-          { model: Reply, attributes: [] }
+          { model: Reply, attributes: [] },
+          { model: User, attributes: ['name', 'account', 'avatar'] }
         ],
         raw: true,
         nest: true,
@@ -42,17 +43,18 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      const abc = likedArray.map(a => {
+      const likedIdArray = likedArray.map(a => {
         return a.TweetId
       })
       const data = tweets.map(tweet => ({
         ...tweet,
-        isLiked: abc.includes(tweet.id) ? true : false
+        isLiked: likedIdArray.includes(tweet.id) ? true : false
       }))
 
       return res.status(200).json([...data])
     } catch (err) {
-      return console.log(err)
+      console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   getTweet: async (req, res) => {
@@ -93,6 +95,7 @@ const tweetController = {
       return res.status(200).json({ ...tweet, isLiked })
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   postTweet: async (req, res) => {
@@ -104,6 +107,7 @@ const tweetController = {
       return res.json({ status: 200, message: '' })
     } catch (err) {
       console.error(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   putTweet: async (req, res) => {
@@ -121,6 +125,7 @@ const tweetController = {
       return res.json({ status: 200, message: '' })
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   },
   deleteTweet: async (req, res) => {
@@ -133,6 +138,7 @@ const tweetController = {
       return res.json({ status: 200, message: 'delete successfully' })
     } catch (err) {
       console.log(err)
+      return res.status(401).json({ status: 'error', message: err })
     }
   }
 }
