@@ -217,7 +217,7 @@ const userController = {
   },
   getOneTweets: (req, res) => {
     const UserId = req.params.id
-    return Tweet.findAll({ where: { UserId }, include: [Tweet] })
+    return Tweet.findAll({ where: { UserId } })
       .then(tweets => {
         return res.json({ tweets })
       })

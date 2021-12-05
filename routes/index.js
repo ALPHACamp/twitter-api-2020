@@ -38,7 +38,7 @@ router.put('/api/users/edit/:id', userController.editUserInfo)
 router.get('/api/users/:id/likes', userController.getOneLikes)
 //user觀看特定人士已reply
 router.get('/api/users/:id/replied_tweets', userController.getOneRepliedTweets)
-
+router.get('/api/users/:id/tweets', userController.getOneTweets)
 //先讓前端使用的get_current)user
 router.get('/get_current_user', userController.getCurrentUser)
 
