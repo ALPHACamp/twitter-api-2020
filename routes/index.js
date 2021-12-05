@@ -65,6 +65,8 @@ module.exports = (app) => {
 
   // reply
   app.get('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getTweetReply)
+  // replies
+  app.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
 
   // tweets
   app.get(
