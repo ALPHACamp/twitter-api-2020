@@ -149,13 +149,13 @@ const userController = {
               sequelize.literal(
                   '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
               ),
-              'likeCount'
+              'likeTweetCount'
             ],
             [
               sequelize.literal(
                   '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
               ),
-              'replyCount'
+              'replyTweetCount'
             ],
             [
               sequelize.literal(
