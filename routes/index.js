@@ -51,7 +51,8 @@ router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, tweetC
 
 
 //replies相關  待補authenticated
-router.get('/api/tweets/:tweetId/replies', replyController.getReplies)
+router.get('/api/tweets/:tweetId/replies', authenticated, replyController.getReplies)
+router.post('/api/tweets/:tweetId/replies', authenticated, replyController.postReply)
 
 //followships相關
 
