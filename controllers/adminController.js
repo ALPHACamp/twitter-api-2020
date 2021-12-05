@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { Op } = require('sequelize')
 
 const db = require('../models')
 const User = db.User
@@ -9,12 +10,19 @@ const Reply = db.Reply
 
 const adminController = {
   signIn: (req, res) => {
-    const { email, password } = req.body
-    if (!email || !password) {
+    const { account, password } = req.body
+    if (!account || !password) {
       return res.json({ status: 'error', message: "所有欄位都是必填" })
     }
 
-    User.findOne({ where: { email } }).then(user => {
+    User.findOne({
+      where: {
+        [Op.or]: [
+          { account },
+          { email: account }
+        ]
+      }
+    }).then(user => {
       if (!user) {
         return res.json({ status: 'error', message: "帳號不存在" })
       }
