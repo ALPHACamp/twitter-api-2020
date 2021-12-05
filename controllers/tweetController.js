@@ -45,6 +45,7 @@ const tweetController = {
       return res.status(200).json(result)
     } catch (error) {
       console.log(error)
+      return res.status(500).json({ status: 'error', message: 'Server error' })
     }
   },
   postTweet: async (req, res) => {
