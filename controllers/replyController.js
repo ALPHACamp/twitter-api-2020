@@ -3,13 +3,19 @@ const helpers = require('../_helpers')
 
 const replyController = {
   getTweetReply: async(req, res) => {
+    console.log('here')
     try{
       const tweetid = Number(req.params.tweet_id)
       const replies = await Reply.findAll({raw: true, nest: true, where: {tweetid: tweetid}, include: [{model: User}]})
 
       let results  = replies.map(data => ({
         id: data.id, 
-        User: data.User,
+        User: {
+          id: data.User.id,
+          name: data.User.name,
+          account: data.User.account,
+          avatar: data.User.avatar
+        },
         comment: data.comment, 
         createdAt:data.createdAt
       }))
