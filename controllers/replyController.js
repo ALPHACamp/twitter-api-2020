@@ -6,8 +6,6 @@ const replyController = {
     try{
       const tweetid = Number(req.params.tweet_id)
       const replies = await Reply.findAll({raw: true, nest: true, where: {tweetid: tweetid}, include: [{model: User}]})
-  
-      console.log(replies)
 
       let results  = replies.map(data => ({
         id: data.id, 
