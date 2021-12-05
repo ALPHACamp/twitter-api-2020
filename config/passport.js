@@ -43,10 +43,10 @@ let strategy = new JWTStrategy(jwtOptions, function (jwt_payload, next) {
       { model: User, as: 'Followings' }
     ]
   })
-  .then(user => {
-    if (!user) return next(null, false)
-    return next(null, user)
-  })
+    .then(user => {
+      if (!user) return next(null, false)
+      return next(null, user)
+    })
 })
 
 // serialize and deserialize user
@@ -56,7 +56,7 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((id, cb) => {
   User.findByPk(id, {
     include: [
-      { model: Tweet, as: 'LikedTweets' },
+      { model: db.Tweet, as: 'LikedTweets' },
       { model: Tweet, as: 'RepliedTweets' },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }

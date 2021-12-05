@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
+const Like = db.Like
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -8,6 +10,7 @@ const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 const imgur = require('imgur')
+const tweet = require('../models/tweet')
 
 const userController = {
   signIn: (req, res) => {
@@ -187,7 +190,7 @@ const userController = {
           }
         }
         else {
-          return User.findByPk(req.params.id).then(user => {
+          return User.findByPk(userId).then(user => {
             user.update({
               name, introduction, avatar, cover
             })
@@ -195,8 +198,17 @@ const userController = {
           })
         }
       })
-  }
-
-
+  },
+  //取得特定瀏覽人次id
+  getOneLikes: (req, res) => {
+    const UserId = req.params.id
+    return Like.findAll({ where: { UserId }, include: [Tweet] })
+      .then(tweet => {
+        return res.json({ tweet })
+      })
+  },
 }
+
+
+
 module.exports = userController

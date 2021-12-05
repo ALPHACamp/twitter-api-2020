@@ -24,17 +24,18 @@ const authenticatedAdmin = (req, res, next) => {
 
 
 //user相關
-router.post('/api/signin', userController.signIn)
-router.post('/api/signup', userController.signUp)
+router.post('/api/users/signin', userController.signIn)
+router.post('/api/users', userController.signUp)
 
 //user編輯個人帳號
-router.get('/api/user/:id', userController.getUserAccountSetting)
-router.put('/api/user/:id', userController.putUserAccountSetting)
+router.get('/api/users/account/:id', userController.getUserAccountSetting)
+router.put('/api/users/account/:id', userController.putUserAccountSetting)
 //router.get('/api/users/:userId', userController.getUser)(待討論)
 //user編輯個人資料
-router.get('/api/user/edit/:id', userController.getUserInfo)
-router.put('/api/user/edit/:id', userController.editUserInfo)
-
+router.get('/api/users/edit/:id', userController.getUserInfo)
+router.put('/api/users/edit/:id', userController.editUserInfo)
+//user觀看特定人士已like
+router.get('/api/users/:id/likes', userController.getOneLikes)
 
 //先讓前端使用的get_current)user
 router.get('/get_current_user', userController.getCurrentUser)
