@@ -29,8 +29,25 @@ const followController = {
 
   addFollowing: async (req, res) => {
     try {
+      console.log('>>>here')
+      const following = await Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: Number(req.body.id) } })
+      if (following) {
+        return res.status(500).json({ status: 'error', message: 'already following he/her' })
+      }
       await Followship.create({ followerId: helpers.getUser(req).id, followingId: Number(req.body.id) })
-      return res.status(200).json({ status: 'success', message: '成功送出請求' })
+      return res.status(200).json({ status: 'success', message: '成功新增追蹤者' })
+    } catch (error) {
+      console.log(error)
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'service error!' })
+    }
+  },
+
+  deleteFollowing: async (req, res) => {
+    try {
+      await Followship.destroy({ where: { followerId: helpers.getUser(req).id, followingId: Number(req.params.followingId) } })
+      return res.status(200).json({ status: 'success', message: '成功退追蹤' })
     } catch (error) {
       console.log(error)
       return res
@@ -38,6 +55,7 @@ const followController = {
         .json({ status: 'error', message: 'service error!' })
     }
   }
+
 }
 
 module.exports = followController
