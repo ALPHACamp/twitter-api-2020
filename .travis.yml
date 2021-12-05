@@ -13,6 +13,7 @@ env:
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS ac_twitter_workspace_test default character set utf8mb4 collate utf8mb4_unicode_ci;'
   - npm install sequelize-cli -g
+  - export JWT_SECRET=alphacamp
 
 # 在執行測試之前的指令
 before_script:
