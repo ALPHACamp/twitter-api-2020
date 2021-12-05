@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Like, Tweet, Reply } = require('../models')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const helpers = require('../_helpers')
@@ -169,6 +169,37 @@ const userController = {
     } catch (error) {
       console.log(error)
       res.status(500).json({ status: 'error', message: 'service error!' })
+    }
+  },
+  getUsersTweets: async (req, res) => {
+    try {
+      const userTweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Like },
+          { model: Reply },
+        ],
+        order: [['createdAt', 'DESC']],
+      })
+
+      let results = userTweets.map((userTweets) => ({
+        tweetsId: userTweets.dataValues.id,
+        description: userTweets.dataValues.description,
+        createdAt: userTweets.dataValues.createdAt,
+        User:userTweets.dataValues.User,
+        likeCounts: userTweets.dataValues.Likes.length,
+        replyCounts: userTweets.dataValues.Replies.length,
+        isLike: helpers.getUser(req).Likes
+          ? helpers
+              .getUser(req)
+              .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
+          : false,
+      }))
+      return res.status(200).json(results)
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: 'Server error' })
     }
   },
 }
