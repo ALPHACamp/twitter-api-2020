@@ -185,11 +185,22 @@ const userService = {
 
   getTopUser: (req, res, callback) => {
     return User.findAll({
+      raw: true,
+      nest: true,
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE User.id = Followships.followingId)'),
+          'FollowerCount'
+        ]
+      ],
       include: [{ model: User, as: 'Followers', attributes: ['id'] }]
     }).then(users => {
       users = users.map(user => ({
-        ...user.dataValues,
-        FollowerCount: user.Followers.length,
+        ...user,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
@@ -269,9 +280,9 @@ const userService = {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Tweet, attributes: ['id', 'UserId'], include: [{ model: User, attributes: ['id', 'name'] }] }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     }).then(replies => {
-      replies = replies.sort((a, b) => b.createdAt - a.createdAt)
       return callback(replies)
     })
   },
