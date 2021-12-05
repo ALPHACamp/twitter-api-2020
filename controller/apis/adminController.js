@@ -1,32 +1,28 @@
-const helper = require('../../_helpers')
 const db = require('../../models')
 const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
-
-const Reply = db.Reply
 const helper = require('../../_helpers')
 const { sequelize } = require('../../models')
 
 const adminController = {
   getUsers: async (req, res, next) => {
     try {
-      const users = await Tweet.findAll({
+      const users = await User.findAll({
+        where: { role: null},
         raw: true,
         nest: true,
         include: [
-          { model: User, attributes: [] },
+          { model: Tweet, attributes: [] },
           { model: Like, attributes: [] }
         ],
         attributes: [
           [sequelize.col('User.id'), 'userId'],
-
-          [sequelize.col('User.name'), 'userName'],
-          [sequelize.col('User.cover'), 'userCover'],
-          [sequelize.col('User.avatar'), 'userAvatar'],
+          [sequelize.col('User.name'), 'name'],
+          [sequelize.col('User.cover'), 'cover'],
+          [sequelize.col('User.avatar'), 'avatar'],
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'likesCount'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweet.id'))), 'tweetsCount'],
-
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'tweetsCount'],
           [
             sequelize.literal(
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)`
@@ -38,17 +34,15 @@ const adminController = {
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`
             ),
             `followersCount`
-
           ],
         ],
         group: ['User.id'],
         order: [
-          [sequelize.literal('followersCount DESC')],
-          [sequelize.literal('userName ASC')] //追蹤人數一樣時，依userName排序
+          [sequelize.literal('tweetsCount DESC')],
+          [sequelize.literal('name ASC')] //推文一樣時，依userName排序
         ]
-
       })
-      return res.json(users)
+      return res.status(200).json(users)
     } catch (err) {
       console.log(err)
       return res.status(401).json({ status: 'error', message: err })
