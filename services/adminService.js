@@ -1,5 +1,5 @@
 // 載入所需套件
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -25,10 +25,26 @@ const adminService = {
       message: '成功登入',
       token: token,
       user: {
-        id: user.id, 
+        id: user.id,
         role: user.role
       }
     })
+  },
+
+  getAllTweets: async (req, res, callback) => {
+    try {
+      //撈出所有tweet資料，並取得關聯User的資料
+      const tweets = await Tweet.findAll({
+        raw: true,
+        nest: true,
+        attributes: ['id', 'description', 'createdAt'],
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+        order: [['createdAt', 'DESC']]
+      })
+      return callback(tweets)
+    } catch (err) {
+      console.log(err)
+    }
   }
 
 }

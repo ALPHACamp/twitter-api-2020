@@ -9,6 +9,12 @@ const adminController = {
       }
       return res.json(data)
     })
+  },
+
+  getAllTweets: (req, res) => {
+    adminService.getAllTweets(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 
