@@ -54,7 +54,7 @@ router.post('/api/tweets/:tweetId/replies', authenticated, replyController.postR
 
 //followships相關
 router.post('/api/followships', authenticated, followController.addFollowship)
-
+router.delete('/api/followships/:followingId', authenticated, followController.deleteFollowship)
 
 
 
