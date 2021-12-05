@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { Use, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const followController = {
@@ -24,6 +24,18 @@ const followController = {
     } catch (error) {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
+    }
+  },
+
+  addFollowing: async (req, res) => {
+    try {
+      await Followship.create({ followerId: helpers.getUser(req).id, followingId: Number(req.body.id) })
+      return res.status(200).json({ status: 'success', message: '成功送出請求' })
+    } catch (error) {
+      console.log(error)
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'service error!' })
     }
   }
 }

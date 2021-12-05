@@ -81,6 +81,7 @@ module.exports = (app) => {
 
   // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
+  app.post('/api/followships', authenticated, authenticatedUser, followController.addFollowing)
 
   // like
   app.post('/api/tweets/:id/like', authenticated, authenticatedUser, likeController.likeTweet)

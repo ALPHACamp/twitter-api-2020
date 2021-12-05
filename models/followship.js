@@ -3,11 +3,13 @@ module.exports = (sequelize, DataTypes) => {
   const Followship = sequelize.define(
     'Followship',
     {
+      id: { type: DataTypes.INTEGER, primaryKey: true },
       followerId: DataTypes.INTEGER,
       followingId: DataTypes.INTEGER
     },
     {}
   )
-  Followship.associate = function (models) {}
+  Followship.associate = function (models) {
+  }
   return Followship
 }
