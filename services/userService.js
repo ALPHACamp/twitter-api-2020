@@ -234,26 +234,48 @@ const userService = {
   },
 
   addLike: (req, res, callback) => {
-    return Like.create({
-      UserId: helpers.gerUser(req).id,
-      TweetId: req.params.tweetId,
-    }).then(() => {
-      return callback({ status: "success", message: "" });
-    });
-  },
-
-  removeLike: (req, res, callback) => {
-    return Like.findOne({
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    Like.findOne({
       where: {
-        UserId: helpers.gerUser(req).id,
-        TweetId: req.params.tweetId,
+        UserId: currentUser.id,
+        TweetId: req.params.id,
       },
     }).then((like) => {
-      like.destroy().then(() => {
-        return callback({ status: "success", message: "" });
-      });
+      if (!like) {
+        return Like.create({
+          UserId: currentUser.id,
+          TweetId: req.params.id,
+          isLike: true,
+        }).then((like) => {
+          return callback({ status: "error", message: "" });
+        });
+      } 
+      if (like.isLike === false) {
+        return like.update({ ...like, isLike: !like.isLike }).then((like) => {
+          return callback({ status: "success", message: "" });
+        });
+      }
+      return callback({ status: "error", message: "" });    
     });
   },
+  removeLike: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    Like.findOne({
+      where: {
+        UserId: currentUser.id,
+        TweetId: req.params.id,
+      },
+    }).then((like) => {
+      if (!like) return callback({ status: "error", message: "" });
+      if (like.isLike === true) {
+        return like.update({ ...like, isLike: false }).then((like) => {
+          return callback({ status: "success ", message: "" });
+        });
+      }
+      return callback({ status: "error", message: "" });
+    });
+  },
+ 
   addFollowing: (req, res, callback) => {
     return Followship.create({
       followerId: helpers.gerUser(req).id,

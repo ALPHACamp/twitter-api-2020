@@ -4,12 +4,7 @@ const helpers = require('../_helpers')
 
 let replyService = {
   postReply: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    // return Reply.create({
-    //   comment: req.body.text,
-    //   TweetId: req.body.tweetId,
-    //   UserId: helpers.getUser(req).id
-    // }).then(console.log(req.body))
+    const currentUser = req.user ? req.user : helpers.getUser(req)
     return Reply.create({
       comment: req.body.reply,
       TweetId: req.params.tweet_id,

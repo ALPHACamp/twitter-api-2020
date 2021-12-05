@@ -15,11 +15,36 @@
     </div>
     <ul class="list-group list-group-flush">
       <li class="list-group-item d-flex justify-content-between">
-        <p>{{tweet.Replies.length}} 則回覆</p>
-        <p> 次喜歡次數</p>
+        <p>{{tweetReplyCount}} 則回覆</p>
+        <p>{{tweetLikeCount}} 次喜歡次數</p>
       </li>
-      <li class="list-group-item d-flex justify-content-around"><i class="far fa-comment"></i><i
-          class="far fa-heart"></i></li>
+      <li class="list-group-item d-flex justify-content-around">
+        <i class="far fa-comment"></i>
+        <i class="far fa-heart"></i></li>
+      <li  class="list-group-item">
+
+      {{!-- {{#if isLike}} --}}
+      <form action="/tweets/{{tweet.id}}/unlike" method="POST">
+        <button type="submit"><i class="fas fa-heart"></i></button>
+        <span>{{tweetLikeCount}} 喜歡數</span>
+      </form>
+      {{!-- {{else}} --}}
+      <form action="/tweets/{{tweet.id}}/like" method="POST">
+        <button type="submit"><i class="far fa-heart"></i></button>
+        <span>{{tweetLikeCount}} 喜歡數</span>
+      </form>
+      {{!-- {{/if}} --}}
+        </li>
+
+      <form action="/tweets/{{tweet.id}}/replies" method="POST">
+        <div class="form-group">
+          <label for="reply">回覆</label>
+          <textarea class="form-control" id="reply" rows="3" name="reply" placeholder="請留言"></textarea>
+        </div>
+        <button type="submit" class="btn">留言</button>
+      </form>
+
+
     </ul>
 
     <ul class="list-group list-group-flush ">
@@ -42,7 +67,7 @@
       </li>
       {{/each}}
     </ul>
-  
+
   </div>
   <!-- {{!-- {{/each}} --}} -->
 </div>

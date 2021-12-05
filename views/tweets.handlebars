@@ -23,8 +23,52 @@
       <li class="list-group-item">推文的時間 {{this.createdAt}}</li>
       <li class="list-group-item">推文者的帳號 @{{this.User.account}}</li>
       <li class="list-group-item">推文者的名字 {{ this.User.name}}</li>
-      <li class="list-group-item d-flex justify-content-around"><i class="far fa-comment">{{this.Replies.length}} 回覆數</i><i
-          class="far fa-heart"> 喜歡數</i></li>
+      <li class="list-group-item d-flex justify-content-around">
+        <div class="left">
+          <i class="far fa-comment"></i>
+          <span>{{this.Replies.length}} 回覆數</span>
+        </div>
+        <div class="right inline-block">
+
+        推文者{{this.UserId}} 使用者{{../userId}}
+        推文ID {{this.id}}
+        {{this.Likes.UserId}}
+            {{#if this.Likes.isLike}}
+          <form action="/tweets/{{this.id}}/unlike" method="POST">
+            <button type="submit"><i class="fas fa-heart"></i></button>
+            <span>{{this.Likes.length}} 喜歡數</span>
+          </form>
+          {{else}}
+          <form action="/tweets/{{this.id}}/like" method="POST">
+            <button type="submit"><i class="far fa-heart"></i></button>
+            <span>{{this.Likes.length}} 喜歡數</span>
+          </form>
+          {{/if}}
+
+            {{#ifCond UserId ../userId}}
+            <p>不能喜歡</p>
+            {{else}}
+            <p>可以喜歡</p>
+            {{/ifCond}}
+
+
+          <!-- {{#if this.likes.isLike}}
+          <form action="/tweets/{{this.id}}/like" method="POST">
+            <button type="submit"><i class="far fa-heart"></i></button>
+            <span>{{this.Likes.length}} 喜歡數</span>
+          </form>
+          {{else}}
+          <form action="/tweets/{{this.id}}/unlike" method="POST">
+            <button type="submit"><i class="fas fa-heart"></i></button>
+            <span>{{this.Likes.length}} 喜歡數</span>
+          </form>
+          {{/if}} -->
+        </div>
+        <!-- <div class="right">
+         <i class="far fa-heart"> </i>
+         <span>  喜歡數</span>
+       </div> -->
+      </li>
     </ul>
     <div class="card-body">
       <a href="/users/{{this.id}}" class="card-link">profile</a>
@@ -41,3 +85,8 @@
   </div>
   {{/each}}
 </div>
+          <!-- {{#ifCond Tweets userId}}
+                    <p>對的</p>
+                    {else}
+                    <p>錯的</p>
+                    {{/ifCond}} -->

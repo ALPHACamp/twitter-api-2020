@@ -40,11 +40,14 @@ router.get('/tweets', authenticated, tweetController.getTweets)
 router.post("/tweets", authenticated, tweetController.postTweet)
 //  拿到特定一筆推文
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
-//新增一筆推文的回覆
+//  新增一筆推文的回覆
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply) 
-//瀏覽一筆推文的所有回覆
+//  瀏覽一筆推文的所有回覆
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplies) 
-
+//  對特定一筆推文喜歡
+router.post('/tweets/:id/like', authenticated, userController.addLike)
+//  對特定一筆推文取消喜歡
+router.post('/tweets/:id/unlike', authenticated, userController.removeLike)
 
 // 連到 /admin 頁面就轉到 /admin/tweets
 router.get('/admin', authenticatedAdmin, (req, res) => res.redirect('/admin/tweets'))

@@ -9,7 +9,7 @@ const replyController = {
         TweetId: req.params.tweet_id,
         UserId: currentUser.id,
       }).then((reply) => {
-        return res.redirect("/tweets")
+        return res.redirect("back")
       })
   //   replyService.postReply(req, res, (data) => {
   //     return res.json(data);
