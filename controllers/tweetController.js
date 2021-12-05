@@ -12,7 +12,7 @@ const tweetController = {
             include: [
                 User,
                 Like,
-                { model: Reply, include:[User]}
+                { model: Reply, include: [User] }
             ]
         }).then(tweets => {
             tweets.map(tweet => ({
@@ -26,7 +26,7 @@ const tweetController = {
             return res.json(tweets)
         })
     },
-    
+
     getTweet: (req, res) => {
         return Tweet.findByPk(req.params.tweet_id, {
             include: [User, { model: Reply, include: [User] }]

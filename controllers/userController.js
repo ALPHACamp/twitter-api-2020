@@ -80,26 +80,26 @@ const userController = {
         'updatedAt',
         [
           sequelize.literal(
-              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
           ),
           'likeCount'
         ],
         [
           sequelize.literal(
-              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
           ),
           'replyCount'
         ],
         [
           sequelize.literal(
-              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
+            `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
           ),
           'isLiked'
         ],
       ],
       include: [{ model: User },],
       order: [['createdAt', 'DESC']],
-    }).then( tweets => {
+    }).then(tweets => {
       return res.json(tweets)
     })
   },
@@ -139,7 +139,7 @@ const userController = {
             Reply,
             Like,
           ],
-          attributes:[
+          attributes: [
             'id',
             'UserId',
             'description',
@@ -147,19 +147,19 @@ const userController = {
             'updatedAt',
             [
               sequelize.literal(
-                  '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+                '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
               ),
               'likeTweetCount'
             ],
             [
               sequelize.literal(
-                  '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+                '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
               ),
               'replyTweetCount'
             ],
             [
               sequelize.literal(
-                  `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
+                `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
               ),
               'isLiked'
             ]
