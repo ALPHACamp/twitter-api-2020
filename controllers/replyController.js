@@ -6,18 +6,11 @@ const helpers = require('../_helpers')
 
 const replyController = {
   getReplies: (req, res) => {
-    Promise.all([
-      Tweet.findOne({
-        where: { id: req.params.tweetId },
-        include: [User]
-      }),
-      Reply.findAll({
-        where: { TweetId: req.params.tweetId },
-        include: User,
-        order: [['createdAt', 'DESC']]
-      })
-    ]).then(([tweet, replies]) => {
-      replies.push({ TweetOwner: tweet.User.account })
+    Reply.findAll({
+      where: { TweetId: req.params.tweetId },
+      include: User,
+      order: [['createdAt', 'DESC']]
+    }).then((replies) => {
       return res.json(replies)
     })
   }, 
