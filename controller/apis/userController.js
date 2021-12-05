@@ -244,6 +244,17 @@ const userController = {
   getUserLike: async (req, res) => {
     try {
       const data = await Tweet.findAll({
+        where: {
+          id: [ //使用SQL原生語法 subQuery出user like的tweetId,在以此條件與主查詢進行查找
+            sequelize.literal(`
+              SELECT TweetId
+              FROM LIKES
+              WHERE UserId = ${req.params.id}`
+            )
+          ]
+        },
+        raw: true,
+        nest: true,
         attributes: [
           ['id', 'TweetId'],
           'description',
@@ -251,21 +262,8 @@ const userController = {
           [sequelize.col('User.name'), 'tweet_user_name'],
           [sequelize.col('User.account'), 'tweet_user_account'],
           [sequelize.col('User.avatar'), 'tweet_user_avatar'],
-
-          [
-            sequelize.fn(
-              'COUNT',
-              sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
-            ),
-            'reply_count'
-          ],
-          [
-            sequelize.fn(
-              'COUNT',
-              sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
-            ),
-            'like_count'
-          ],
+          [sequelize.fn('COUNT',sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'reply_count'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'like_count'],
           'createdAt'
         ],
         include: [
@@ -273,17 +271,7 @@ const userController = {
           { model: Like, attributes: [] },
           { model: User, attributes: [] }
         ],
-        where: {
-          id: [
-            sequelize.literal(`
-            SELECT TweetId
-	          FROM LIKES
-	          WHERE UserId = ${req.params.id}`)
-          ]
-        },
-        group: ['TweetId'],
-        raw: true,
-        nest: true
+        group: ['TweetId']
       })
       const likedTweets = await Like.findAll({
         where: { UserId: helper.getUser(req).id },

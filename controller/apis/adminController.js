@@ -1,10 +1,13 @@
+const helper = require('../../_helpers')
 const db = require('../../models')
 const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
+
 const Reply = db.Reply
 const helper = require('../../_helpers')
 const { sequelize } = require('../../models')
+
 const adminController = {
   getUsers: async (req, res, next) => {
     try {
@@ -17,23 +20,13 @@ const adminController = {
         ],
         attributes: [
           [sequelize.col('User.id'), 'userId'],
-          [sequelize.col('User.name'), 'name'],
+
+          [sequelize.col('User.name'), 'userName'],
           [sequelize.col('User.cover'), 'userCover'],
           [sequelize.col('User.avatar'), 'userAvatar'],
-          [
-            sequelize.fn(
-              'COUNT',
-              sequelize.fn('DISTINCT', sequelize.col('likes.id'))
-            ),
-            'likesCount'
-          ],
-          [
-            sequelize.fn(
-              'COUNT',
-              sequelize.fn('DISTINCT', sequelize.col('Tweet.id'))
-            ),
-            'tweetsCount'
-          ],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'likesCount'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Tweet.id'))), 'tweetsCount'],
+
           [
             sequelize.literal(
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)`
@@ -45,9 +38,15 @@ const adminController = {
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`
             ),
             `followersCount`
-          ]
+
+          ],
         ],
-        group: ['User.id']
+        group: ['User.id'],
+        order: [
+          [sequelize.literal('followersCount DESC')],
+          [sequelize.literal('userName ASC')] //追蹤人數一樣時，依userName排序
+        ]
+
       })
       return res.json(users)
     } catch (err) {
