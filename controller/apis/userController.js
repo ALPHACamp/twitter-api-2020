@@ -211,7 +211,18 @@ const userController = {
         nest: true,
         group: ['Tweet.id']
       })
-      return res.json([...tweets, { status: 200, message: '' }])
+      const likedTweets = await Like.findAll({
+        where: { UserId: helper.getUser(req).id },
+        attributes: ['TweetId'],
+        raw: true,
+        nest: true
+      })
+      const likedTweetIds = likedTweets.map(a => a.TweetId)
+      const tweetTable = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: likedTweetIds.includes(tweet.id)
+      }))
+      return res.status(200).json(tweetTable)
     } catch (err) {
       console.log(err)
       res.status(401).json({ status: 'error', message: err })
@@ -274,7 +285,17 @@ const userController = {
         raw: true,
         nest: true
       })
-      return res.status(200).json(data)
+      const likedTweets = await Like.findAll({
+        where: { UserId: helper.getUser(req).id },
+        raw: true,
+        nest: true
+      })
+      const likedTweetIds = likedTweets.map(a => a.TweetId)
+      const userLikes = data.map(like => ({
+        ...like,
+        isLiked: likedTweetIds.includes(like.TweetId)
+      }))
+      return res.status(200).json(userLikes)
     } catch (err) {
       console.log(err)
       return res.status(401).json({ status: 'error', message: err })

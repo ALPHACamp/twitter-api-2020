@@ -43,12 +43,12 @@ const tweetController = {
         raw: true,
         nest: true
       })
-      const abc = likedArray.map(a => {
+      const likedIdArray = likedArray.map(a => {
         return a.TweetId
       })
       const data = tweets.map(tweet => ({
         ...tweet,
-        isLiked: abc.includes(tweet.id) ? true : false
+        isLiked: likedIdArray.includes(tweet.id) ? true : false
       }))
 
       return res.status(200).json([...data])
