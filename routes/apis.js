@@ -76,6 +76,9 @@ router.post('/tweets/:id/unlike', authenticated, likeController.unlike)
 
 // **admin**
 // signin
-router.post('/admin/signin', adminController.signIn) //signin
-
+router.post('/admin/signin', adminController.signIn)
+//getUsers
+//router.get('/admin/users', adminController.getUsers)
+router.get('/admin/tweets', adminController.getTweets)
+router.delete('/admin/tweets/:id', adminController.getTweet)
 module.exports = router
