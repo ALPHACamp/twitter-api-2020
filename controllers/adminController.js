@@ -21,6 +21,12 @@ const adminController = {
     adminService.deleteTweet(req, res, data => {
       return res.json(data)
     })
+  },
+
+  getAllUsers: (req, res) => {
+    adminService.getAllUsers(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 
