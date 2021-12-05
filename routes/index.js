@@ -64,6 +64,13 @@ module.exports = (app) => {
     userController.putUser
   )
 
+    app.get(
+      '/api/users/:id/tweets',
+      authenticated,
+      authenticatedUser,
+      userController.getUsersTweets
+    )
+
   // tweets
   app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
   app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
