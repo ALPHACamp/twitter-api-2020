@@ -2,12 +2,11 @@ const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
+const likeController = require('../controllers/likeController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
-
-
 
 // use helpers.getUser(req) to replace req.user
 // 驗前台是user身分
@@ -41,7 +40,6 @@ const authenticated = (req, res, next) => {
 }
 
 module.exports = (app) => {
-
   // JWT signin & signup
   app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
@@ -59,7 +57,7 @@ module.exports = (app) => {
     authenticatedUser,
     upload.fields([
       { name: 'avatar', maxCount: 1 },
-      { name: 'cover', maxCount: 1 },
+      { name: 'cover', maxCount: 1 }
     ]),
     userController.putUser
   )
@@ -79,8 +77,10 @@ module.exports = (app) => {
   // followship
   app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
 
+  // like
+  app.post('/api/tweets/:id/like', authenticated, authenticatedUser, likeController.likeTweet)
+
   // admin
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
   app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
-
 }
