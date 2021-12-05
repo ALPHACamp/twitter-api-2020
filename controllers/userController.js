@@ -3,6 +3,7 @@ const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
+const Reply = db.Reply
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -203,8 +204,22 @@ const userController = {
   getOneLikes: (req, res) => {
     const UserId = req.params.id
     return Like.findAll({ where: { UserId }, include: [Tweet] })
-      .then(tweet => {
-        return res.json({ tweet })
+      .then(tweets => {
+        return res.json({ tweets })
+      })
+  },
+  getOneRepliedTweets: (req, res) => {
+    const UserId = req.params.id
+    return Reply.findAll({ where: { UserId }, include: [Tweet] })
+      .then(replies => {
+        return res.json({ replies })
+      })
+  },
+  getOneTweets: (req, res) => {
+    const UserId = req.params.id
+    return Tweet.findAll({ where: { UserId }, include: [Tweet] })
+      .then(tweets => {
+        return res.json({ tweets })
       })
   },
 }
