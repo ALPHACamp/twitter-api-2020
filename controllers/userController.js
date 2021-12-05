@@ -101,13 +101,24 @@ const userController = {
             'cover',
             'introduction',
           ],
+          include: { model: Tweet },
         })
       ).toJSON()
-      return res.status(200).json({
-        status: 'success',
-        message: 'ok',
-        ...user,
-      })
+      let result = {
+        id: user.id,
+        account: user.account,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        cover: user.cover,
+        introduction: user.introduction,
+        tweetCounts:  user.Tweets?.length,
+        followship: {
+          followerCounts: helpers.getUser(req).Followers?.length,
+          followingCounts: helpers.getUser(req).Followings?.length,
+        },
+      }
+      return res.status(200).json(result)
     } catch (error) {
       console.log(error)
       return res
@@ -187,7 +198,7 @@ const userController = {
         tweetsId: userTweets.dataValues.id,
         description: userTweets.dataValues.description,
         createdAt: userTweets.dataValues.createdAt,
-        User:userTweets.dataValues.User,
+        User: userTweets.dataValues.User,
         likeCounts: userTweets.dataValues.Likes.length,
         replyCounts: userTweets.dataValues.Replies.length,
         isLike: helpers.getUser(req).Likes
