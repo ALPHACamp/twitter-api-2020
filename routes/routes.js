@@ -68,6 +68,8 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/edit', authenticated, userController.editUser)
 // 使用者到編輯個人資訊
 router.put('/users/:id', authenticated, upload.single('cover'), userController.putUser)
+//  查詢user的所有留言
+router.get('/users/:userId/tweets', authenticated,upload.single('cover'), userController.getUserTweets)
 // router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
 // <--可以傳一個陣列 FILE
 

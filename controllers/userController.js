@@ -7,6 +7,8 @@ const fs = require('fs')
 const db = require('../models')
 const User = db.User
 const Like = db.Like
+const Tweet = db.Tweet
+const Reply = db.Reply
 
 
 const userService = require("../services/userService");
@@ -193,6 +195,28 @@ const userController = {
   //       }
   //     });
   //   },
+  getUserTweets: (req, res) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    // return User.findOne({ where: { id: currentUser.id }, include: [[Tweet], [Reply]] })
+    // return User.findByPk( currentUser.id, {
+    return Tweet.findAll({
+      where: {
+        id: currentUser.id,
+      },
+      include: [
+        User,
+        // { model: Tweet, include: [Reply] },
+        // { model: Tweet, include: [Like] }
+      ],
+    }).then((Tweet) => {
+      // const tweets = user.Tweets;
+      // console.log(tweets.length);
+      console.log(Tweet);
+      res.render("profile", { Tweet: Tweet });
+      // res.render("profile", { user: user, tweets: tweets });
+    });
+  },
+
   addLike: (req, res) => {
     userService.addLike(req, res, (data) => {
       return res.redirect("back")
@@ -203,48 +227,7 @@ const userController = {
       return res.redirect("back")
     })
   },
-  // addLike: (req, res) => {
-  //   const currentUser = req.user ? req.user : helpers.getUser(req)
-  //   Like.findOne({
-  //     where: {
-  //       UserId: currentUser.id,
-  //       TweetId: req.params.id,
-  //     }
-  //   }).then(like => {
-  //     if (!like) {
-  //       return Like.create({
-  //       UserId: currentUser.id,
-  //       TweetId: req.params.id,
-  //       isLike: true
-  //     }).then(like => {
-  //       return res.redirect("back")
-  //     })
-  //     } else {
-  //       if (like.isLike === false) {
-  //         return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-  //           return res.redirect("back")
-  //         });
-  //       } return res.redirect("back")
-  //     }
-  //   })
-  // },
-  // removeLike: (req, res) => {
-  //   const currentUser = req.user ? req.user : helpers.getUser(req);
-  //   Like.findOne({
-  //     where: {
-  //       UserId: currentUser.id,
-  //       TweetId: req.params.id,
-  //     },
-  //   }).then((like) => {
-  //     if (!like) {
-  //       return res.redirect("back");
-  //     } else {
-  //       return like.update({ ...like, isLike: false }).then((like) => {
-  //         return res.redirect("back");
-  //       });
-  //     }
-  //   });
-  // },
+
 };
 
 module.exports = userController

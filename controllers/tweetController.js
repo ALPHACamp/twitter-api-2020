@@ -23,13 +23,15 @@ const tweetController = {
   },
 
   postTweet: (req, res) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    Tweet.create({
-      description: req.body.description,
-      UserId: currentUser.id,
-    }).then((tweet) => {
-      res.redirect("/tweets");
-    });
+    tweetService.postTweet(req, res, (data) => {
+      if (data['status'] === 'error') {
+        req.flash('error_messages', data['message'])
+        return res.redirect('/tweets')
+      } else {
+        req.flash('success_messages', data['message'])
+        return res.redirect('/tweets')
+      }
+    })
   },
 
   getTweet: (req, res) => {
