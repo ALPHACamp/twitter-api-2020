@@ -45,6 +45,7 @@ const tweetService = {
         'id',
         'UserId',
         'description',
+        'createdAt',
         [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
         [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount']
       ],
