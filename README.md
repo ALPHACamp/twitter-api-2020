@@ -43,7 +43,7 @@ npm run dev
 ## 執行測試(利用終端機)
 1. 創建測試所需資料庫(利用MySQLＷorkbench)
 ```
-create database create database ac_twitter_workspace_test;
+create database ac_twitter_workspace_test;
 ```
 2. 切換環境
 ```
@@ -61,6 +61,12 @@ npx sequelize db:seed:all
 ```
 npm run test
 ```
+## 測試帳號
+* 管理員帳號： root  
+  管理員密碼： 12345678
+* 一般使用者帳號： user1  
+  一般使用者密碼： 12345678
+
 ## 開發人員
 * Emily (email: emily81926@gmail.com)
 * Kerwin (email: tkoleo84119@gmail.com)
