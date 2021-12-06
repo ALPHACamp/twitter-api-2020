@@ -52,14 +52,11 @@ router.post('/api/tweets/:tweetId/unlike', authenticated, likeController.postUnl
 router.get('/api/tweets/:tweetId/replies', authenticated, replyController.getReplies)
 router.post('/api/tweets/:tweetId/replies', authenticated, replyController.postReply)
 
+
 //followships相關
 router.post('/api/followships', authenticated, followController.addFollowship)
 router.delete('/api/followships/:followingId', authenticated, followController.deleteFollowship)
-
-
-
-
-
+router.get('/api/followers/top', authenticated, followController.getTopFollowers)
 
 
 //admin相關
