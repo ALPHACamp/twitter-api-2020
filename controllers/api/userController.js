@@ -248,7 +248,6 @@ let userController = {
       console.log(err)
     }
   },
-
   //跟隨者 (followers) 數量排列前 10 的使用者推薦名單
   getTop: async (req, res) => {
     try {
@@ -319,25 +318,30 @@ let userController = {
 
   //找Likes自己的用戶
   getLikes: async (req, res) => {
-    const like = await Like.findAll({
-      where: { UserId: req.params.id },
-      include: [
-        {
-          model: Tweet, include: [User, Reply,],
-          attributes: ['id', 'UserId', 'description', 'createdAt', 'updatedAt',
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'),
-              'likeCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
-              'replyCount'
-            ],
-            [sequelize.literal(`EXISTS (SELECT * FROM Likes WHERE UserId = ${req.params.id} AND TweetId = Tweet.id)`),
-              'isLiked'
-            ],
-          ]
-        }
-      ]
-    })
-    return res.json(like)
+    try {
+      const like = await Like.findAll({
+        where: { UserId: req.params.id }, attributes: [['id', 'LikeId'], 'TweetId', 'createdAt'],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['id', 'description', 'createdAt',
+              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'),
+                'likeCount'],
+              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+                'replyCount'
+              ],
+              [sequelize.literal(`EXISTS (SELECT * FROM Likes WHERE UserId = ${req.params.id} AND TweetId = Tweet.id)`),
+                'isLiked'
+              ],
+            ]
+            , include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }]
+          }
+        ], order: [['createdAt', 'DESC']]
+      })
+      return res.json(like)
+    } catch (err) {
+      console.log(err)
+    }
   },
   //找自己的Replies
   getReplies: async (req, res) => {
