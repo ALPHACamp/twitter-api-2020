@@ -25,7 +25,7 @@ const adminService = {
       .then((tweet) => {
         console.log('tweet.Replies', tweet.Replies)
         tweet.Replies.map(reply => {
-          console.log('comment.id', reply.id)
+          console.log('reply.id', reply.id)
           reply.destroy()
         })
         tweet.destroy()
