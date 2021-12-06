@@ -309,15 +309,14 @@ const userService = {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     return Tweet.findAll({
       where: {
-        UserId: currentUser.id,
+        UserId: Number(req.params.userId)
       },
       order: [["createdAt", "DESC"]],
       include: [User, Reply, Like],
     }).then((tweets) => {
+      console.log(tweets)
       let newTweets = tweets.map((tweet) => {
-        let isLike = tweet.Likes.find(
-          (d, index) => d.UserId === currentUser.id
-        );
+        let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
         isLike = !isLike ? false : isLike.isLike;
         let likeCount = tweet.Likes.filter((d) => d.isLike === true).length;
         return {
