@@ -115,7 +115,7 @@ const userController = {
         raw: true,
         nest: true
       })
-
+      
       const followship = await Followship.findOne({
         where: {
           followerId: helper.getUser(req).id,
@@ -123,10 +123,11 @@ const userController = {
         }
       })
       const isFollowed = followship ? true : false
-      return res.json({
-        ...userProfile,
-        isFollowed
-      })
+
+      if (userProfile.role === 'Admin') { //防止使用者搜尋Admin
+        return res.status(401).json({ status: 'error', message: 'User is not exist' })
+      }
+      return res.status(200).json({ ...userProfile, isFollowed })
     } catch (err) {
       console.log(err)
       return res.status(401).message({ status: 'error', message: err })
