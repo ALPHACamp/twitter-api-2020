@@ -339,10 +339,10 @@ let userController = {
   getReplies: async (req, res) => {
     const replies = await Reply.findAll({
       where: { UserId: req.params.id },
-      attributes: ['id', 'comment', 'createdAt'],
+      attributes: [['id', 'ReplyID'], 'comment', 'createdAt'],
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['account'] }] }
+        { model: User, attributes: ['id', 'name', 'account'] },
+        { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account', 'avatar'] }] }
       ],
       order: [['createdAt', 'DESC']],
     })
