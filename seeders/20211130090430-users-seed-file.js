@@ -11,7 +11,7 @@ module.exports = {
         id: i + 1,
         email: `user${i + 1}@example.com`,
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-        name: `user${i + 1}`,
+        name: faker.name.findName().split(' ')[1],
         account: `user${i + 1}`,
         avatar: `https://randomuser.me/api/portraits/women/${Math.ceil(Math.random() * 100)}.jpg`,
         cover: `https://loremflickr.com/320/240/city/?random=${Math.ceil(Math.random() * 100)}`,
