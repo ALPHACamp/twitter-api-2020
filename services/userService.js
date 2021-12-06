@@ -128,11 +128,14 @@ const userService = {
         return callback({ status: 'error', message: '沒有編輯權限！' })
       }
 
-      const user = await User.findByPk(req.params.id)
-
+      const { name, introduction, avatar, cover } = req.body
       const { files } = req
+      const user = await User.findByPk(req.params.id)
+      if (cover === '') {
+        user.cover = 'https://i.imgur.com/Qqb0a7S.png'
+      }
 
-      if (files) {
+      if (files.avatar || files.cover) {
         imgur.setClientID(IMGUR_CLIENT_ID)
         const uploadImg = file => {
           return new Promise((resolve, reject) => {
@@ -142,21 +145,26 @@ const userService = {
           })
         }
 
-        const avatar = files.avatar ? await uploadImg(files.avatar[0].path) : null
-        const cover = files.cover ? await uploadImg(files.cover[0].path) : null
+        const newAvatar = files.avatar ? await uploadImg(files.avatar[0].path) : user.avatar
+        const newCover = files.cover ? await uploadImg(files.cover[0].path) : user.cover
 
         await user.update({
-          ...req.body,
-          avatar,
-          cover
+          name,
+          introduction,
+          avatar: newAvatar,
+          cover: newCover
         })
-        return callback({ status: 'success', message: '使用者資料編輯成功！' })
+        return callback({ status: 'success', message: '使用者資料編輯成功！(有傳圖）' })
+      } else {
+        await user.update({
+          name,
+          introduction,
+          avatar,
+          cover: user.cover
+        })
+        return callback({ status: 'success', message: '使用者資料編輯成功！(沒傳圖）' })
       }
-
-      await user.update({ ...req.body })
-      return callback({ status: 'success', message: '使用者資料編輯成功！' })
     } catch (err) {
-      console.log(err)
       return callback({ status: 'error', message: '編輯未成功！' })
     }
   },
