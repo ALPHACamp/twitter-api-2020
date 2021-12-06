@@ -2,13 +2,14 @@
 const adminService = require('../services/adminService')
 
 const adminController = {
-  adminLogin: (req, res) => {
-    adminService.adminLogin(req, res, data => {
-      if (data.status === 'error') {
-        return res.status(401).json(data)
-      }
-      return res.json(data)
-    })
+  adminLogin: async (req, res) => {
+    try {
+      await adminService.adminLogin(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(401).json({ status: err.name, message: err.message })
+    }
   },
 
   getAllTweets: (req, res) => {
@@ -17,10 +18,14 @@ const adminController = {
     })
   },
 
-  deleteTweet: (req, res) => {
-    adminService.deleteTweet(req, res, data => {
-      return res.json(data)
-    })
+  deleteTweet: async (req, res) => {
+    try {
+      await adminService.deleteTweet(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   getAllUsers: (req, res) => {

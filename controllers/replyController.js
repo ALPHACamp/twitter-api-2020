@@ -2,10 +2,14 @@
 const replyService = require('../services/replyService')
 
 const replyController = {
-  postReply: (req, res) => {
-    replyService.postReply(req, res, data => {
-      return res.json(data)
-    })
+  postReply: async (req, res) => {
+    try {
+      await replyService.postReply(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   getReplies: (req, res) => {
