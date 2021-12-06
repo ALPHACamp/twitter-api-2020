@@ -62,4 +62,5 @@ router.get('/api/followers/top', authenticated, followController.getTopFollowers
 
 //admin相關     待補authenticated, authenticatedAdmin
 router.get('/api/admin/users', adminController.getUsers)
+router.post('/api/admin/signin', userController.adminSignIn)
 module.exports = router
