@@ -136,7 +136,15 @@ const userService = {
         user.cover = 'https://i.imgur.com/Qqb0a7S.png'
       }
 
-      if (files.avatar || files.cover) {
+      if (!files) {
+        await user.update({
+          name,
+          introduction,
+          avatar,
+          cover: user.cover
+        })
+        return callback({ status: 'success', message: '使用者資料編輯成功！(沒傳圖）' })
+      } else {
         imgur.setClientID(IMGUR_CLIENT_ID)
         const uploadImg = file => {
           return new Promise((resolve, reject) => {
@@ -156,14 +164,6 @@ const userService = {
           cover: newCover
         })
         return callback({ status: 'success', message: '使用者資料編輯成功！(有傳圖）' })
-      } else {
-        await user.update({
-          name,
-          introduction,
-          avatar,
-          cover: user.cover
-        })
-        return callback({ status: 'success', message: '使用者資料編輯成功！(沒傳圖）' })
       }
     } catch (err) {
       return callback({ status: 'error', message: '編輯未成功！' })
