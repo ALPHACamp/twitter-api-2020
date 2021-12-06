@@ -7,6 +7,7 @@ const tweetController = require('../controllers/tweetController')
 const replyController = require('../controllers/replyController')
 const likeController = require('../controllers/likeController')
 const followController = require('../controllers/followController')
+const adminController = require('../controllers/adminController')
 
 // const authenticated = (req, res, next) => {
 //   if (req.isAuthenticated()) {
@@ -63,7 +64,7 @@ router.get('/api/admin/tweets',authenticated, authenticatedAdmin, tweetControlle
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, tweetController.deleteTweet)
 
 
-//likes相關   待補authenticated
+//likes相關
 router.post('/api/tweets/:tweetId/like', authenticated, likeController.postLike)
 router.post('/api/tweets/:tweetId/unlike', authenticated, likeController.postUnlike)
 
@@ -79,6 +80,6 @@ router.delete('/api/followships/:followingId', authenticated, followController.d
 router.get('/api/followers/top', authenticated, followController.getTopFollowers)
 
 
-//admin相關
-
+//admin相關     待補authenticated, authenticatedAdmin
+router.get('/api/admin/users', adminController.getUsers)
 module.exports = router
