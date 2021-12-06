@@ -74,7 +74,7 @@ const userService = {
 
     // 確認當前使用者和欲修改使用者資料是相同的
     if (userId !== Number(req.params.id)) {
-      return callback({ status: 'error', message: '無法變更其他使用者資料' })
+      throw new ReqError('無法變更其他使用者資料')
     }
 
     // 確認欄位是否皆有填寫
@@ -84,17 +84,17 @@ const userService = {
 
     // 確認密碼是否一致
     if (password !== checkPassword) {
-      return callback({ status: 'error', message: '兩次密碼不相同' })
+      throw new ReqError('兩次密碼不相同')
     }
 
     // 確認email或account是否重複(要排除自己的)
     const check = await User.findOne({ where: { [Op.or]: [{ email }, { account }], [Op.not]: [{ id: userId }] } }) // 利用[Op.not]忽略自己email和account
     if (check) {
       if (check.email === email) {
-        return callback({ status: 'error', message: 'email已重覆註冊！' })
+        throw new ReqError('email已重覆註冊！')
       }
       if (check.account === account) {
-        return callback({ status: 'error', message: 'account已重覆註冊！' })
+        throw new ReqError('account已重覆註冊！')
       }
     } else {
       await User.update({

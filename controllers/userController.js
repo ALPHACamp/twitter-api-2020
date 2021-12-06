@@ -22,10 +22,14 @@ const userController = {
     }
   },
 
-  putUserSetting: (req, res) => {
-    userService.putUserSetting(req, res, data => {
-      return res.json(data)
-    })
+  putUserSetting: async (req, res) => {
+    try {
+      await userService.putUserSetting(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   putUser: (req, res) => {
