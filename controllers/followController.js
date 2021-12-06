@@ -1,4 +1,4 @@
-const { Use, Followship } = require('../models')
+const { User, Followship } = require('../models')
 const helpers = require('../_helpers')
 
 const followController = {
@@ -31,7 +31,7 @@ const followController = {
     try {
       const following = await Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: Number(req.body.id) } })
       if (following) {
-        return res.status(500).json({ status: 'error', message: 'already following he/her' })
+        return res.status(409).json({ status: 'error', message: 'already following this user' })
       }
       await Followship.create({ followerId: helpers.getUser(req).id, followingId: Number(req.body.id) })
       return res.status(200).json({ status: 'success', message: '成功新增追蹤者' })
