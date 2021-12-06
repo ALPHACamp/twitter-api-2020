@@ -40,8 +40,6 @@ router.put('/api/user/:id', userController.putUserAccountSetting)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
-router.get('/api/admin/tweets',authenticated, authenticatedAdmin, tweetController.getAdminTweets)
-router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, tweetController.deleteTweet)
 
 
 //likes相關
@@ -60,7 +58,10 @@ router.delete('/api/followships/:followingId', authenticated, followController.d
 router.get('/api/followers/top', authenticated, followController.getTopFollowers)
 
 
-//admin相關     待補authenticated, authenticatedAdmin
-router.get('/api/admin/users', adminController.getUsers)
+//admin相關
+router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.post('/api/admin/signin', userController.adminSignIn)
+router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getAdminTweets)
+router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+
 module.exports = router

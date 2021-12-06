@@ -22,12 +22,38 @@ const adminController = {
         Followers: user.Followers.length, //追蹤者人數
         Followings: user.Followings.length,  //追蹤其他使用者的人數
         TweetCount: user.Tweets.length,  // 推文數量
-        // LikesCount: user.Likes.length  // 須改為推文"被"like的數量
-        // TweetLikedCount: ,
       }))
       users.forEach(user => { delete user.Tweets })
       return res.json(users)
     })
+  },
+  getAdminTweets: (req, res) => {
+    Tweet.findAll({
+      include: User,
+      order: [['createdAt', 'DESC']]
+    }).then(tweets => {
+      tweets = tweets.map(tweet => ({
+        id: tweet.id,
+        description50: tweet.description.slice(0, 50),
+        createdAt: tweet.createdAt,
+        User: tweet.User
+      }))
+      return res.json(tweets)
+    })
+  },
+  deleteTweet: (req, res) => {
+    Tweet.destroy({
+      where: {
+        id: req.params.id
+      }
+    })
+      .then(tweet => {
+        console.log(tweet)
+        if (tweet === 1) {  //確實有刪除成功
+          return res.json({ status: 'success', message: '刪除成功' })
+        } //tweet = 0 表示找不到推文
+        return res.json({ status: 'error', message: '找不到推文' })
+      })
   }
 }
 
