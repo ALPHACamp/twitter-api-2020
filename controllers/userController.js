@@ -6,7 +6,6 @@ const helpers = require('../_helpers')
 
 // JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
 
 const userController = {
   // signIn & signUp
@@ -215,8 +214,8 @@ const userController = {
         replyCounts: userTweets.dataValues.Replies.length,
         isLike: helpers.getUser(req).Likes
           ? helpers
-            .getUser(req)
-            .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
+              .getUser(req)
+              .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
           : false
       }))
       return res.status(200).json(results)
