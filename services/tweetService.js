@@ -45,6 +45,7 @@ const tweetService = {
         'id',
         'UserId',
         'description',
+        'createdAt',
         [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
         [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount']
       ],
@@ -53,7 +54,8 @@ const tweetService = {
           model: Reply,
           include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
         },
-        { model: Like }
+        { model: Like },
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
       ]
     }).then(tweet => {
       tweet = tweet.toJSON()
