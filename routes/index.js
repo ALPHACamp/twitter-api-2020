@@ -6,7 +6,11 @@ const likeController = require('../controllers/likeController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
+<<<<<<< HEAD
 const likeController = require('../controllers/likeController')
+=======
+const replyController = require('../controllers/replyController')
+>>>>>>> master
 const upload = multer({ dest: 'temp/' })
 
 // use helpers.getUser(req) to replace req.user
@@ -69,8 +73,18 @@ module.exports = (app) => {
     authenticatedUser,
     userController.getUsersTweets
   )
+  // reply
+  app.get('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getTweetReply)
+  // replies
+  app.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
 
   // tweets
+  app.get(
+    '/api/users/:id/tweets',
+    authenticated,
+    authenticatedUser,
+    userController.getUsersTweets
+  )
   app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
   app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
   app.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
