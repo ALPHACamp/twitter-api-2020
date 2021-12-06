@@ -421,12 +421,15 @@ const userController = {
   },
   postFollow: async (req, res) => {
     try {
-      console.log(req.user.id)
-      await Followship.create({
-        followerId: helper.getUser(req).id,
-        followingId: req.body.id
+      const user = await Followship.findOrCreate({
+        where: {
+          followerId: helper.getUser(req).id,
+          followingId: req.body.id
+        }
       })
-      return res.status(200).json({ message: `成功追蹤 UserId:${req.body.id}` })
+      return res
+        .status(200)
+        .json({ message: `成功追蹤 UserId:${req.body.id}`, user })
     } catch (err) {
       console.log(err)
       return res.status(401).json({ message: err })
