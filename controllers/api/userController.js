@@ -195,6 +195,27 @@ let userController = {
       console.log(err)
     }
   },
+  
+  //跟隨者 (followers) 數量排列前 10 的使用者推薦名單
+  getTop: async (req, res) => {
+    try {
+      const Top = await User.findAll({
+        attributes: ['account', 'id', 'name', 'avatar', 'role',
+          [
+            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+            'FollowingsCount'
+          ],
+          [
+            sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id}  AND Followships.followingId = User.id )`),
+            'isFollowed'
+          ]
+        ],
+        order: [[sequelize.literal('FollowingsCount'), 'DESC']],
+        limit: 10
+      })
+      // console.log(JSON.stringify(Top, null, 2))
+      return res.json(Top)
+
   //找追蹤中的用戶
   getFollowings: async (req, res) => {
     try {
@@ -233,6 +254,7 @@ let userController = {
       console.log(err)
     }
   },
+
   //找Likes自己的用戶
   getLikes: async (req, res) => {
     const like = await Like.findAll({
