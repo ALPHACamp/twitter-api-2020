@@ -41,9 +41,10 @@ const authenticated = (req, res, next) => {
 }
 
 module.exports = (app) => {
-  // JWT signin & signup
+  //  signin & signup
   app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
+
   // users routes
   app.get(
     '/api/users/:id',
@@ -63,20 +64,13 @@ module.exports = (app) => {
     userController.putUser
   )
 
-  // reply
   app.get(
-    '/api/tweets/:tweet_id/replies',
+    '/api/users/:id/tweets',
     authenticated,
     authenticatedUser,
-    replyController.getTweetReply
+    userController.getUsersTweets
   )
-  // replies
-  app.post(
-    '/api/tweets/:tweet_id/replies',
-    authenticated,
-    authenticatedUser,
-    replyController.postReply
-  )
+
   app.get(
     '/api/users/:id/replied_tweets',
     authenticated,
@@ -84,13 +78,21 @@ module.exports = (app) => {
     userController.getUsersRepliesTweets
   )
 
-  // tweets
+  // replies
   app.get(
-    '/api/users/:id/tweets',
+    '/api/tweets/:tweet_id/replies',
     authenticated,
     authenticatedUser,
-    userController.getUsersTweets
+    replyController.getTweetReply
   )
+  app.post(
+    '/api/tweets/:tweet_id/replies',
+    authenticated,
+    authenticatedUser,
+    replyController.postReply
+  )
+
+  // tweets
 
   app.get(
     '/api/tweets',
