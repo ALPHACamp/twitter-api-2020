@@ -6,7 +6,7 @@ const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const imgur = require('imgur')
-const ReqError = require('../helps/ReqError')
+const ReqError = require('../helpers/ReqError')
 
 const userService = {
   signUp: async (req, res, callback) => {
@@ -14,21 +14,21 @@ const userService = {
 
     // 確認欄位是否皆有填寫
     if (!account || !name || !email || !password || !checkPassword) {
-      return callback({ status: 'error', message: '所有欄位皆為必填' })
+      throw new ReqError('所有欄位皆為必填')
     }
     // 確認密碼是否一致
     if (password !== checkPassword) {
-      return callback({ status: 'error', message: '兩次密碼不相同' })
+      throw new ReqError('兩次密碼不相同')
     }
 
     // 確認email或account是否重複
     const user = await User.findOne({ where: { [Op.or]: [{ email }, { account }] } })
     if (user) {
       if (user.email === email) {
-        return callback({ status: 'error', message: 'email已重覆註冊！' })
+        throw new ReqError('email已重覆註冊！')
       }
       if (user.account === account) {
-        return callback({ status: 'error', message: 'account已重覆註冊！' })
+        throw new ReqError('account已重覆註冊！')
       }
     } else {
       await User.create({

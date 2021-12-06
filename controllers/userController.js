@@ -2,10 +2,14 @@
 const userService = require('../services/userService')
 
 const userController = {
-  signUp: (req, res) => {
-    userService.signUp(req, res, data => {
-      return res.json(data)
-    })
+  signUp: async (req, res) => {
+    try {
+      await userService.signUp(req, res, data => {
+        return res.status(201).json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   signIn: async (req, res) => {
