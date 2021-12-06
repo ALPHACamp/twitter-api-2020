@@ -448,6 +448,39 @@ const userController = {
       console.log(err)
       return res.status(401).json({ status: 'error', message: err })
     }
+  },
+  accountSetting: async (req, res) => {
+    try {
+      const { account, password, checkPassword, name, email } = req.body
+      if (!account || !password || !checkPassword || !name || !email) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '所有欄位必填' })
+      }
+      if (password !== checkPassword) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '兩次密碼輸入不一樣' })
+      }
+      const accountCheck = await User.findOne({ where: { account } })
+      const emailCheck = await User.findOne({ where: { email } })
+      if (accountCheck || emailCheck) {
+        return res.status(400).json({ message: '帳號或信箱已被使用！' })
+      }
+      await User.update(
+        {
+          account,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+          name,
+          email
+        },
+        { where: { id: helper.getUser(req).id } }
+      )
+      return res.status(200).json({ message: '成功更新 User 資料！' })
+    } catch (err) {
+      console.log(err)
+      return res.status(200).json({ message: err })
+    }
   }
 }
 

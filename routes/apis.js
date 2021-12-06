@@ -43,6 +43,7 @@ router.delete('/replies/:replyId', authenticated, replyController.deleteReply)
 router.post('/users', userController.signUp)
 
 router.post('/users/signin', userController.signIn)
+router.put('/users/account', authenticated, userController.accountSetting)
 router.put(
   '/users/:id',
   upload.fields([
