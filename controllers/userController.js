@@ -229,7 +229,6 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']],
       })
-      console.log('usersReplies', usersReplies)
       return res
         .status(200)
         .json( usersReplies )
