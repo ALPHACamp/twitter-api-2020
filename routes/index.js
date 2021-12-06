@@ -27,13 +27,15 @@ const authenticatedAdmin = (req, res, next) => {
 router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
 
+//user取得編輯個人帳號資訊
+router.get('/api/users/account', authenticated, userController.getUserAccountSetting)
 //user編輯個人帳號
-router.get('/api/users/account/:id', authenticated, userController.getUserAccountSetting)
-router.put('/api/users/account/:id', authenticated, userController.putUserAccountSetting)
+router.put('/api/users/account', authenticated, userController.putUserAccountSetting)
 //router.get('/api/users/:userId', userController.getUser)(待討論)
-//user編輯個人資料
-router.get('/api/users/edit/:id', authenticated, userController.getUserInfo)
-router.put('/api/users/edit/:id', authenticated, userController.editUserInfo)
+//user取得編輯個人資訊頁面
+router.get('/api/users/edit', authenticated, userController.getUserInfo)
+//user編輯個人資訊頁面
+router.put('/api/users/edit', authenticated, userController.editUserInfo)
 //user觀看特定人士已like
 router.get('/api/users/:id/likes', authenticated, userController.getOneLikes)
 //user觀看特定人士已reply
