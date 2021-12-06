@@ -8,6 +8,7 @@ const User = db.User
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
+const { Op } = require("sequelize");
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -25,18 +26,18 @@ const userController = {
     // 檢查必要資料
     if (!req.body.account || !req.body.password) {
       return res
-        .status(401)
+        .status(400)
         .json({ status: 'error',message: "required fields didn't exist" })
     }
     User.findOne({ where: { account: req.body.account } }).then(user => {
       if (!user) { //if user is not exist
         return res
-          .status(401)
+          .status(400)
           .json({ status: 'error', message: 'user is not exist.' })
       }
       if (!bcrypt.compareSync(req.body.password, user.password)) { 
         return res //if password not match
-          .status(401)
+          .status(400)
           .json({ status: 'error', message: 'email or password incorrect.' })
       }
       // 簽發 token
@@ -58,17 +59,22 @@ const userController = {
     })
   },
   signUp: async (req, res, cb) => {
-    if (req.body.checkPassword !== req.body.password) {
-      return res.json({ status: 'error', message: '兩次密碼輸入不相同！' })
-    } else {
-      try {
-        const user = await User.findOne({ where: { email: req.body.email } })
-        if (user) {
-          return res.json({ status: 'error', message: '信箱重複！' })
-        }
-      } catch (err) {
-        console.log(err)
+    const { account ,name, email, password, checkPassword } = req.body
+    if (!account || !name || !email || !password || !checkPassword) {
+      return res.status(400).json({ status: 'error', message: '所有欄位都是必填。' })
+    }
+    if (checkPassword !== password) {
+      return res.status(400).json({ status: 'error', message: '兩次密碼輸入不相同！' })
+    }
+    try {
+      const user = await User.findOne({ 
+        where: { [Op.or]: [{email: req.body.email}, {account: req.body.account}] } 
+      })
+      if (user) {
+        return res.status(400).json({ status: 'error', message: '信箱或帳號重複！' })
       }
+    } catch (err) {
+      console.log(err)
     }
     try {
       await User.create({
@@ -81,10 +87,10 @@ const userController = {
           null
         )
       })
-      return res.json({ status: 'success', message: '成功註冊帳號！' })
+      return res.status(200).json({ status: 200, message: '成功註冊帳號！' })
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   getUser: async (req, res, cb) => {
@@ -123,12 +129,12 @@ const userController = {
       })
       const isFollowed = followship ? true : false
       if (userProfile.role === 'Admin') { //防止使用者搜尋Admin
-        return res.status(401).json({ status: 'error', message: 'User is not exist' })
+        return res.status(400).json({ status: 'error', message: 'User is not exist' })
       }
       return res.status(200).json({ ...userProfile, isFollowed })
     } catch (err) {
       console.log(err)
-      return res.status(401).message({ status: 'error', message: err })
+      return res.status(400).message({ status: 'error', message: err })
     }
   },
   getUsers: async (req, res, cb) => {
@@ -138,10 +144,10 @@ const userController = {
         nest: true,
         where: { role: null }
       })
-      return res.status(200).json({ status: '200', message: 'success', users})
+      return res.status(200).json({ status: 200, message: 'success', users})
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   getTopUsers: async (req, res) => {
@@ -177,7 +183,7 @@ const userController = {
       return res.status(200).json(topUser)
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   getUserTweets: async (req, res) => {
@@ -224,7 +230,7 @@ const userController = {
       return res.status(200).json(tweetTable)
     } catch (err) {
       console.log(err)
-      res.status(401).json({ status: 'error', message: err })
+      res.status(400).json({ status: 'error', message: err })
     }
   },
   getUserReplies: async (req, res) => {
@@ -237,7 +243,7 @@ const userController = {
       })
       return res.status(200).json([...replies])
     } catch (err) {
-      return res.status(401).json({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   getUserLike: async (req, res) => {
@@ -285,7 +291,7 @@ const userController = {
       return res.status(200).json(userLikes)
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   getUserFollowings: async (req, res) => {
@@ -312,12 +318,12 @@ const userController = {
         isFollowed: followingIds.includes(u.Followings.id) //compare status with currentUser and User
       }))
       if (!user) {
-        return res.status(400).json({ status: '400', message: 'cannot find user' })
+        return res.status(400).json({ status: 400, message: 'cannot find user' })
       }
       return res.status(200).json(following)
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   getUserFollowers: async (req, res) => {
@@ -334,7 +340,7 @@ const userController = {
         nest: true,
       })
       if (!user) {
-        return res.status(400).json({ message: 'cannot find user' })
+        return res.status(400).json({ status: 400, message: 'cannot find user' })
       }
       const followingUsers = await Followship.findAll({
         where: { followerId: helper.getUser(req).id },
@@ -355,7 +361,7 @@ const userController = {
       return res.status(200).json(follower)
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   putUser: async (req, res) => {
@@ -395,7 +401,7 @@ const userController = {
             cover: user.cover
           })
           .then(() => {
-            return res.status(200).json({ message: 'success' })
+            return res.status(200).json({ status: 200, message: 'success' })
           })
       })
     }
@@ -409,7 +415,7 @@ const userController = {
       return res.status(200).json(user)
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   postFollow: async (req, res) => {
@@ -435,7 +441,7 @@ const userController = {
       return res.status(200).json({ message: '成功移除 follow' })
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   }
 }

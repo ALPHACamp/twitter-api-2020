@@ -45,7 +45,7 @@ const adminController = {
       return res.status(200).json(users)
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   getTweets: async (req, res) => {
