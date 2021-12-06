@@ -24,6 +24,7 @@ const adminController = {
         TweetCount: user.Tweets.length,  // 推文數量
       }))
       users.forEach(user => { delete user.Tweets })
+      users = users.sort((a, b) => b.TweetCount - a.TweetCount)
       return res.json(users)
     })
   },
