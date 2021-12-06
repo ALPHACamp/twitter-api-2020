@@ -6,20 +6,13 @@ const cors = require('cors');
 const app = express()
 const port = process.env.PORT || 3000
 
-const allowCrossDomain = function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  next();
-}
-
-app.use(allowCrossDomain)
-
-app.use(cors())
 
 if (process.env.NODE_ENV !== "production") {
   require('dotenv').config()
 }
 const passport = require('./config/passport')
+
+app.use(cors())
 
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next) {
