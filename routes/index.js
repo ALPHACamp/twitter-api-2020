@@ -3,14 +3,10 @@ const tweetController = require('../controllers/tweetController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
 const likeController = require('../controllers/likeController')
+const replyController = require('../controllers/replyController')
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
 const multer = require('multer')
-<<<<<<< HEAD
-const likeController = require('../controllers/likeController')
-=======
-const replyController = require('../controllers/replyController')
->>>>>>> master
 const upload = multer({ dest: 'temp/' })
 
 // use helpers.getUser(req) to replace req.user
@@ -45,9 +41,10 @@ const authenticated = (req, res, next) => {
 }
 
 module.exports = (app) => {
-  // JWT signin & signup
+  //  signin & signup
   app.post('/api/users', userController.signUp)
   app.post('/api/users/signin', userController.signIn)
+
   // users routes
   app.get(
     '/api/users/:id',
@@ -62,7 +59,7 @@ module.exports = (app) => {
     authenticatedUser,
     upload.fields([
       { name: 'avatar', maxCount: 1 },
-      { name: 'cover', maxCount: 1 }
+      { name: 'cover', maxCount: 1 },
     ]),
     userController.putUser
   )
@@ -73,23 +70,56 @@ module.exports = (app) => {
     authenticatedUser,
     userController.getUsersTweets
   )
-  // replies
-  app.get('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getTweetReply)
-  app.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
 
-  // tweets
   app.get(
-    '/api/users/:id/tweets',
+    '/api/users/:id/replied_tweets',
     authenticated,
     authenticatedUser,
-    userController.getUsersTweets
+    userController.getUsersRepliesTweets
   )
-  app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
-  app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
-  app.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
+
+  // replies
+  app.get(
+    '/api/tweets/:tweet_id/replies',
+    authenticated,
+    authenticatedUser,
+    replyController.getTweetReply
+  )
+  app.post(
+    '/api/tweets/:tweet_id/replies',
+    authenticated,
+    authenticatedUser,
+    replyController.postReply
+  )
+
+  // tweets
+
+  app.get(
+    '/api/tweets',
+    authenticated,
+    authenticatedUser,
+    tweetController.getTweets
+  )
+  app.get(
+    '/api/tweets/:tweet_id',
+    authenticated,
+    authenticatedUser,
+    tweetController.getTweet
+  )
+  app.post(
+    '/api/tweets',
+    authenticated,
+    authenticatedUser,
+    tweetController.postTweet
+  )
 
   // followship
-  app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
+  app.get(
+    '/api/followships/top',
+    authenticated,
+    authenticatedUser,
+    followController.getTopUser
+  )
 
   // like
   app.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, likeController.postUnlike)
@@ -102,6 +132,16 @@ module.exports = (app) => {
   )
 
   // admin
-  app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
-  app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+  app.get(
+    '/api/admin/users',
+    authenticated,
+    authenticatedAdmin,
+    adminController.getUsers
+  )
+  app.delete(
+    '/api/admin/tweets/:id',
+    authenticated,
+    authenticatedAdmin,
+    adminController.deleteTweet
+  )
 }
