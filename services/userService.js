@@ -6,6 +6,7 @@ const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const imgur = require('imgur')
+const ReqError = require('../helps/ReqError')
 
 const userService = {
   signUp: async (req, res, callback) => {
@@ -46,13 +47,13 @@ const userService = {
 
     // 確認欄位是否皆有填寫
     if (!account || !password) {
-      return callback({ status: 'error', message: 'account或password未填寫' })
+      throw new ReqError('account或password未填寫')
     }
 
     // 檢查account＆password＆role
     const user = await User.findOne({ where: { account } })
     if (!user || !bcrypt.compareSync(password, user.password) || user.role === 'admin') {
-      return callback({ status: 'error', message: '帳號不存在！' })
+      throw new ReqError('帳號不存在！')
     }
 
     const payload = { id: user.id }
@@ -78,7 +79,7 @@ const userService = {
 
     // 確認欄位是否皆有填寫
     if (!account || !name || !email || !password || !checkPassword) {
-      return callback({ status: 'error', message: '所有欄位皆需填寫' })
+      throw new ReqError('所有欄位皆需填寫')
     }
 
     // 確認密碼是否一致

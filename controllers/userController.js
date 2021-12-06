@@ -8,13 +8,14 @@ const userController = {
     })
   },
 
-  signIn: (req, res) => {
-    userService.signIn(req, res, data => {
-      if (data.status === 'error') {
-        return res.status(401).json(data)
-      }
-      return res.json(data)
-    })
+  signIn: async (req, res) => {
+    try {
+      await userService.signIn(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(401).json({ status: err.name, message: err.message })
+    }
   },
 
   putUserSetting: (req, res) => {
