@@ -53,6 +53,14 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users/signin', userController.signIn)
 // signUp
 router.post('/users', userController.signUp)
+// lookup user followings
+router.get('/users/:id/followings', authenticated, userController.getFollowings)
+// lookup user followers
+router.get('/users/:id/followers', authenticated, userController.getFollowers)
+// lookup user likes
+router.get('/users/:id/likes', authenticated, userController.getLikes)
+// lookup user replied_tweets
+router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
 // edit personal data
 router.put(
   '/users/:id',
