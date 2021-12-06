@@ -24,15 +24,15 @@ module.exports = {
           allowNull: false,
           type: Sequelize.DATE
         }
-      },
-      {
-        uniqueKeys: {
-          unique_tag: {
-            customIndex: true,
-            fields: ['UserId', 'TweetId']
-          }
-        }
       }
+      // {
+      //   uniqueKeys: {
+      //     unique_tag: {
+      //       customIndex: true,
+      //       fields: ['UserId', 'TweetId']
+      //     }
+      //   }
+      // }
     )
   },
   down: (queryInterface, Sequelize) => {

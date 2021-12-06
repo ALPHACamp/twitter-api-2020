@@ -245,12 +245,12 @@ const userController = {
     try {
       const data = await Tweet.findAll({
         where: {
-          id: [ //使用SQL原生語法 subQuery出user like的tweetId,在以此條件與主查詢進行查找
+          id: [
+            //使用SQL原生語法 subQuery出user like的tweetId,在以此條件與主查詢進行查找
             sequelize.literal(`
               SELECT TweetId
               FROM LIKES
-              WHERE UserId = ${req.params.id}`
-            )
+              WHERE UserId = ${req.params.id}`)
           ]
         },
         raw: true,
@@ -262,8 +262,20 @@ const userController = {
           [sequelize.col('User.name'), 'tweet_user_name'],
           [sequelize.col('User.account'), 'tweet_user_account'],
           [sequelize.col('User.avatar'), 'tweet_user_avatar'],
-          [sequelize.fn('COUNT',sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'reply_count'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'like_count'],
+          [
+            sequelize.fn(
+              'COUNT',
+              sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
+            ),
+            'reply_count'
+          ],
+          [
+            sequelize.fn(
+              'COUNT',
+              sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
+            ),
+            'like_count'
+          ],
           'createdAt'
         ],
         include: [
@@ -414,6 +426,7 @@ const userController = {
         followerId: helper.getUser(req).id,
         followingId: req.body.id
       })
+      return res.status(200).json({ message: `成功追蹤 UserId:${req.body.id}` })
     } catch (err) {
       console.log(err)
       return res.status(401).json({ message: err })
