@@ -2,10 +2,14 @@
 const followshipService = require('../services/followshipService')
 
 const followshipController = {
-  postFollowship: (req, res) => {
-    followshipService.postFollowship(req, res, data => {
-      return res.json(data)
-    })
+  postFollowship: async (req, res) => {
+    try {
+      await followshipService.postFollowship(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   deleteFollowship: (req, res) => {
