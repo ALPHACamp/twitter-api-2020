@@ -123,6 +123,7 @@ const userController = {
           followerCounts: helpers.getUser(req).Followers?.length,
           followingCounts: helpers.getUser(req).Followings?.length,
         },
+        isFollowing: helpers.getUser(req).Followings.some(user => user.id === Number(req.params.id))
       }
       return res.status(200).json(result)
     } catch (error) {
@@ -201,7 +202,7 @@ const userController = {
       })
 
       let results = userTweets.map((userTweets) => ({
-        tweetsId: userTweets.dataValues.id,
+        id: userTweets.dataValues.id,
         description: userTweets.dataValues.description,
         createdAt: userTweets.dataValues.createdAt,
         User: userTweets.dataValues.User,
@@ -209,8 +210,8 @@ const userController = {
         replyCounts: userTweets.dataValues.Replies.length,
         isLike: helpers.getUser(req).Likes
           ? helpers
-              .getUser(req)
-              .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
+            .getUser(req)
+            .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
           : false,
       }))
       return res.status(200).json(results)
