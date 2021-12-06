@@ -9,9 +9,9 @@ const app = express()
 const port = process.env.PORT || 3000
 const passport = require('./config/passport')
 
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(cors())
 app.use(passport.initialize())
 
 app.listen(port, () =>
