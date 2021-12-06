@@ -296,17 +296,24 @@ const userController = {
         raw: true,
         nest: true
       })
+      const followingUsers = await Followship.findAll({ //find currentUser'followings
+        where: { followerId: helper.getUser(req).id },
+        attributes: ['followingId'],
+        raw: true,
+        nest: true
+      })
+      const followingIds = followingUsers.map(a => a.followingId)
       const following = user.map(u => ({
         followingId: u.Followings.id,
         followingName: u.Followings.name,
         followingAccount: u.Followings.account,
         followingAvatar: u.Followings.avatar,
-        followingIntro: u.Followings.introduction
+        followingIntro: u.Followings.introduction,
+        isFollowed: followingIds.includes(u.Followings.id) //compare status with currentUser and User
       }))
       if (!user) {
-        return res.status(400).json({ message: 'cannot find user' })
+        return res.status(400).json({ status: '400', message: 'cannot find user' })
       }
-
       return res.status(200).json(following)
     } catch (err) {
       console.log(err)
@@ -324,9 +331,8 @@ const userController = {
           }
         ],
         raw: true,
-        nest: true
+        nest: true,
       })
-
       if (!user) {
         return res.status(400).json({ message: 'cannot find user' })
       }
