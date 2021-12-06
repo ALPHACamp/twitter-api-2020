@@ -50,18 +50,39 @@ const tweetController = {
       console.log(err)
     }
   },
+
   getTweet: async (req, res) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id, {
-        include: [
-          User,
-          { model: User, as: 'LikedUsers' },
-          { model: Reply, include: [User] }
+      const { id } = req.params
+      let tweet = await Tweet.findByPk(id, {
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt',
+          [Sequelize.literal('count(distinct Likes.id)'), 'likeCounts'],
+          [Sequelize.literal('count(distinct Replies.id)'), 'replyCounts']
         ],
-        order: [['Replies', 'createdAt', 'DESC']]
+        include: [
+          { model: User, attributes: ['name', 'avatar', 'account'] },
+          { model: Reply, attributes: [] },
+          { model: Like, attributes: [] }
+        ]
       })
+
+      if (!tweet) {
+        return res.json({
+          status: 'error',
+          message: 'Can not find this tweet!'
+        })
+      }
+      tweet = tweet.toJSON()
+      tweet.isLiked = req.user.LikedTweets
+        ? req.user.LikedTweets.map((like) => like.id).includes(tweet.id)
+        : null
       return res.json(tweet)
-    } catch {
+    } catch (err) {
       console.log(err)
     }
   }
