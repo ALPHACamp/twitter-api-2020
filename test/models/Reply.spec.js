@@ -1,6 +1,6 @@
-var chai = require('chai');
-var sinon = require('sinon');
-chai.use(require('sinon-chai'));
+const chai = require('chai')
+const sinon = require('sinon')
+chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
 const {
@@ -16,18 +16,18 @@ const ReplyModel = require('../../models/reply')
 describe('# Reply Model', () => {
   // 使用寫好的 Reply Model
   const Reply = ReplyModel(sequelize, dataTypes)
-  // 創建 reply instance 
+  // 創建 reply instance
   const like = new Reply()
   // 檢查 Model name
   checkModelName(Reply)('Reply')
 
-   // 檢查 reply 是否有 __ 屬性(由於希望學員可以彈性命名 model 欄位，因此這邊留空)
+  // 檢查 reply 是否有 __ 屬性(由於希望學員可以彈性命名 model 欄位，因此這邊留空)
   context('properties', () => {
     ;[
     ].forEach(checkPropertyExists(like))
   })
 
-  // 檢查 reply 的關聯是否正確   
+  // 檢查 reply 的關聯是否正確
   context('associations', () => {
     const User = 'User'
     const Tweet = 'Tweet'
@@ -51,40 +51,38 @@ describe('# Reply Model', () => {
 
   // 檢查 model 的新增、修改、刪除、更新
   context('action', () => {
-
     let data = null
     // 檢查 db.Reply 是否真的可以新增一筆資料
     it('create', (done) => {
-      db.Reply.create({}).then((reply) => {   
+      db.Reply.create({}).then((reply) => {
         data = reply
         done()
       })
     })
     // 檢查 db.Reply 是否真的可以讀取一筆資料
     it('read', (done) => {
-      db.Reply.findByPk(data.id).then((reply) => {  
+      db.Reply.findByPk(data.id).then((reply) => {
         expect(data.id).to.be.equal(reply.id)
-          done()
-        })
+        done()
+      })
     })
     // 檢查 db.Reply 是否真的可以更新一筆資料
     it('update', (done) => {
-      db.Reply.update({}, { where: { id: data.id }}).then(() => {
-        db.Reply.findByPk(data.id).then((reply) => { 
-          expect(data.updatedAt).to.be.not.equal(reply.updatedAt) 
+      db.Reply.update({}, { where: { id: data.id } }).then(() => {
+        db.Reply.findByPk(data.id).then((reply) => {
+          expect(data.updatedAt).to.be.not.equal(reply.updatedAt)
           done()
         })
       })
     })
     // 檢查 db.Reply 是否真的可以刪除一筆資料
     it('delete', (done) => {
-      db.Reply.destroy({ where: { id: data.id }}).then(() => {
-        db.Reply.findByPk(data.id).then((reply) => { 
-          expect(reply).to.be.equal(null) 
+      db.Reply.destroy({ where: { id: data.id } }).then(() => {
+        db.Reply.findByPk(data.id).then((reply) => {
+          expect(reply).to.be.equal(null)
           done()
         })
       })
     })
   })
-
 })

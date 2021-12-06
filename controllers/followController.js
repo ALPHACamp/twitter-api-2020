@@ -7,7 +7,7 @@ const followController = {
       const limit = Number(req.body.limit)
 
       const users = await User.findAll({
-        include: [{ model: User, as: 'Followers' }],
+        include: [{ model: User, as: 'Followers' }]
       })
 
       let result = users.map((user) => ({
