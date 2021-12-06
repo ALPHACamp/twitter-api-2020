@@ -9,14 +9,16 @@ const tweetService = {
         'id',
         'UserId',
         'description',
+        'createdAt',
         [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
         [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount']
       ],
       include: [
         { model: Reply, attributes: ['id'] },
         { model: Like, attributes: ['id'] },
-        { model: User, attributes: ['id', 'name', 'account'] }
-      ]
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
     }).then(tweets => {
       tweets = tweets.map(tweet => ({
         ...tweet.toJSON(),
@@ -28,11 +30,6 @@ const tweetService = {
 
   postTweet: (req, res, callback) => {
     try {
-      const re = /\s/
-      if (req.body.description.length >= 140 || req.body.description.match(re)) {
-        return callback({ status: 'error', message: '發文失敗！' })
-      }
-
       return Tweet.create({ UserId: helpers.getUser(req).id, description: req.body.description }).then(tweet => {
         callback({ status: 'success', message: '發文成功！' })
       })

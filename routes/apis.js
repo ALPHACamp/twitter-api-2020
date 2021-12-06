@@ -14,7 +14,7 @@ function authenticated (req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) next(err)
     if (!user) {
-      return res.status(401).json({
+      return res.json({
         status: 'error',
         message: '帳號不存在！'
       })
