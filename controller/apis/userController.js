@@ -134,12 +134,12 @@ const userController = {
   },
   getUsers: async (req, res, cb) => {
     try {
-      const users = await User.findAll({ raw: true, nest: true })
-      return res.json({
-        status: 'success',
-        message: '',
-        users
+      const users = await User.findAll({ 
+        raw: true,
+        nest: true,
+        where: { role: null }
       })
+      return res.status(200).json({ status: '200', message: 'success', users})
     } catch (err) {
       console.log(err)
       return res.status(401).json({ status: 'error', message: err })
