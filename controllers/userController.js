@@ -195,39 +195,22 @@ const userController = {
   //       }
   //     });
   //   },
-  getUserTweets: (req, res) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    // return User.findOne({ where: { id: currentUser.id }, include: [[Tweet], [Reply]] })
-    // return User.findByPk( currentUser.id, {
-    return Tweet.findAll({
-      where: {
-        id: currentUser.id,
-      },
-      include: [
-        User,
-        // { model: Tweet, include: [Reply] },
-        // { model: Tweet, include: [Like] }
-      ],
-    }).then((Tweet) => {
-      // const tweets = user.Tweets;
-      // console.log(tweets.length);
-      console.log(Tweet);
-      res.render("profile", { Tweet: Tweet });
-      // res.render("profile", { user: user, tweets: tweets });
-    });
-  },
 
+  getUserTweets: (req, res) => {
+    userService.getUserTweets(req, res, (data) => {
+      return res.render('profile', data)
+    })
+  },
   addLike: (req, res) => {
     userService.addLike(req, res, (data) => {
-      return res.redirect("back")
-    })
+      return res.redirect("back");
+    });
   },
   removeLike: (req, res) => {
     userService.removeLike(req, res, (data) => {
-      return res.redirect("back")
-    })
+      return res.redirect("back");
+    });
   },
-
 };
 
 module.exports = userController

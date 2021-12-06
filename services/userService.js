@@ -271,16 +271,16 @@ const userService = {
           UserId: currentUser.id,
           TweetId: req.params.id,
           isLike: false,
-        }).then(like => {
-          return callback({ status: 'error', message: ''})
-        }) 
-      } 
-      if (like.isLike === true) {
-        return like.update({ ...like, isLike: !like.isLike }).then(like => {
-          return callback({ status: 'success', message: '' })
-        })
+        }).then((like) => {
+          return callback({ status: "error", message: "" });
+        });
       }
-      return callback({ status: 'error', message: ''})
+      if (like.isLike === true) {
+        return like.update({ ...like, isLike: !like.isLike }).then((like) => {
+          return callback({ status: "success", message: "" });
+        });
+      }
+      return callback({ status: "error", message: "" });
     });
   },
 
@@ -302,6 +302,32 @@ const userService = {
       followship.destroy().then((followship) => {
         return callback({ status: "success", message: "" });
       });
+    });
+  },
+
+  getUserTweets: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    return Tweet.findAll({
+      where: {
+        UserId: currentUser.id,
+      },
+      order: [["createdAt", "DESC"]],
+      include: [User, Reply, Like],
+    }).then((tweets) => {
+      let newTweets = tweets.map((tweet) => {
+        let isLike = tweet.Likes.find(
+          (d, index) => d.UserId === currentUser.id
+        );
+        isLike = !isLike ? false : isLike.isLike;
+        let likeCount = tweet.Likes.filter((d) => d.isLike === true).length;
+        return {
+          ...tweet.dataValues,
+          tweetReplyCount: tweet.Replies.length,
+          tweetLikeCount: likeCount,
+          isLike: isLike,
+        };
+      });
+      callback({ tweets: newTweets });
     });
   },
 };
