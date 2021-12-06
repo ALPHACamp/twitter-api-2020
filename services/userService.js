@@ -249,13 +249,13 @@ const userService = {
         }).then((like) => {
           return callback({ status: "error", message: "" });
         });
-      } 
+      }
       if (like.isLike === false) {
         return like.update({ ...like, isLike: !like.isLike }).then((like) => {
           return callback({ status: "success", message: "" });
         });
       }
-      return callback({ status: "error", message: "" });    
+      return callback({ status: "error", message: "" });
     });
   },
   removeLike: (req, res, callback) => {
@@ -266,16 +266,24 @@ const userService = {
         TweetId: req.params.id,
       },
     }).then((like) => {
-      if (!like) return callback({ status: "error", message: "" });
+      if (!like) {
+        return Like.create({
+          UserId: currentUser.id,
+          TweetId: req.params.id,
+          isLike: false,
+        }).then(like => {
+          return callback({ status: 'error', message: ''})
+        }) 
+      } 
       if (like.isLike === true) {
-        return like.update({ ...like, isLike: false }).then((like) => {
-          return callback({ status: "success ", message: "" });
-        });
+        return like.update({ ...like, isLike: !like.isLike }).then(like => {
+          return callback({ status: 'success', message: '' })
+        })
       }
-      return callback({ status: "error", message: "" });
+      return callback({ status: 'error', message: ''})
     });
   },
- 
+
   addFollowing: (req, res, callback) => {
     return Followship.create({
       followerId: helpers.gerUser(req).id,

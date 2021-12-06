@@ -23,7 +23,7 @@ const tweetController = {
   },
 
   postTweet: (req, res) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
+    const currentUser = req.user ? req.user : helpers.getUser(req)
     Tweet.create({
       description: req.body.description,
       UserId: currentUser.id,

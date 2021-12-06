@@ -27,19 +27,18 @@ const tweetService = {
     });
   },
   getTweet: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return Tweet.findByPk(req.params.id, {
       include: [User, { model: Like }, { model: Reply, include: [User] }]
     }).then((tweet) => {
-      const tweetReplyCount = tweet.Replies.length;
+      const tweetReplyCount = tweet.Replies.length
       const tweetLikeCount = tweet.Likes.filter((d) => d.isLike === true
       ).length;
-      let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
-      isLike = isLike.isLike;
+      let isLike = tweet.Likes.length !== 0 ? tweet.Likes.map((d) => d.isLike) : false
       callback({ tweet: tweet.toJSON(),
         tweetReplyCount: tweetReplyCount,
         tweetLikeCount: tweetLikeCount,
-        isLike: isLike,})
+        isLike: isLike
+        })
     });
   },
 };
