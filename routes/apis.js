@@ -29,6 +29,7 @@ router.post('/users', userController.signUp)
 
 //user
 router.post('/users/signin', userController.signIn)
+router.put('/users/account', authenticated, userController.accountSetting)
 router.put(
   '/users/:id',
   upload.fields([
