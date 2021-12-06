@@ -12,7 +12,7 @@ const Followship = db.Followship;
 
 const adminService = {
   getUsers: (req, res, callback) => {
-    return Users.findAll({ include: Followship })
+    return User.findAll()
     .then(users => {
       console.log(users[0])
       callback({
