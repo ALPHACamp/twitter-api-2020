@@ -268,8 +268,6 @@ const userService = {
         item.followingId = item.id
         item.isFollowed = Number(helpers.getUser(req).is) === Number(item.followerId)
       })
-      console.log(helpers.getUser(req).id)
-      console.log(req.params.id)
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       return callback(user)
     })
