@@ -30,6 +30,9 @@ const followController = {
   addFollowing: async (req, res) => {
     try {
       const following = await Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: Number(req.body.id) } })
+      if (helpers.getUser(req).id === Number(req.body.id)) {
+        return res.status(400).json({ status: 'error', message: '不可以追蹤自己' })
+      }
       if (following) {
         return res.status(409).json({ status: 'error', message: 'already following this user' })
       }

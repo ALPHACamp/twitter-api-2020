@@ -1,5 +1,5 @@
 const { Reply, User } = require('../models')
-const { helpers } = require('../_helpers')
+const helpers = require('../_helpers')
 
 const replyController = {
   postReply: async (req, res) => {
