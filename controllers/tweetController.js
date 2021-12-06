@@ -3,9 +3,13 @@ const tweetService = require('../services/tweetService')
 
 const tweetController = {
   postTweet: (req, res) => {
-    tweetService.postTweet(req, res, data => {
-      return res.json(data)
-    })
+    try {
+      tweetService.postTweet(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   getTweets: (req, res) => {
@@ -18,7 +22,7 @@ const tweetController = {
     tweetService.getTweet(req, res, data => {
       return res.json(data)
     })
-  } 
+  }
 }
 
 // tweetService exports
