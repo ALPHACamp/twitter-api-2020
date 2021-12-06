@@ -8,6 +8,7 @@ const tweetController = require('../controllers/api/tweetController')
 const userController = require('../controllers/api/userController')
 const replyController = require('../controllers/api/replyController')
 const helpers = require('../_helpers')
+const adminController = require('../controllers/api/adminController')
 
 //JWT
 const authenticated = passport.authenticate('jwt', { session: false })
@@ -59,6 +60,8 @@ router.post('/tweets/:id/unlike', authenticated, userController.removeLike) //�
 router.post('/followships/', authenticated, userController.addFollowing) //新增一位追蹤者
 router.delete('/followships/:id', authenticated, userController.removeFollowing) //新增一位追蹤者
 
+router.get('admin/users', authenticated, adminController.getUsers) //管理者可以看見站內所有的使用者 //還要補authenticatedAdmin
+router.get('admin/users', authenticated, adminController.deleteTweet) //還要補authenticatedAdmin
 
 
 
