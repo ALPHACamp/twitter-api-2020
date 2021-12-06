@@ -122,10 +122,24 @@ let userController = {
   getUser: async (req, res) => {
     try {
       const user = await User.findByPk(req.params.id, {
-        include: [
-          { model: User, as: 'Followings' },
-          { model: User, as: 'Followers' }
+        attributes: [['id', 'UserId'], 'avatar', 'account', 'name', 'cover', 'introduction', 'role',
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
+          'TweetCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+          'FollowingsCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+          'FollowersCount'
+        ],
+        [
+          sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id}  AND Followships.followingId = User.id )`),
+          'isFollowed'
         ]
+        ],
       })
       if (!user) {
         return res.json({ status: 'error', message: 'no such user found' })
