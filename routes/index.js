@@ -94,6 +94,12 @@ module.exports = (app) => {
   // like
   app.post('/api/tweets/:id/unlike', authenticated, authenticatedUser, likeController.postUnlike)
   app.post('/api/tweets/:id/like', authenticated, authenticatedUser, likeController.likeTweet)
+  app.get(
+    '/api/users/:id/likes',
+    authenticated,
+    authenticatedUser,
+    userController.getUserLikes
+  )
 
   // admin
   app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)

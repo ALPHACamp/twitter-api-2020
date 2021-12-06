@@ -121,7 +121,7 @@ const userController = {
         avatar: user.avatar,
         cover: user.cover,
         introduction: user.introduction,
-        tweetCounts:  user.Tweets?.length,
+        tweetCounts: user.Tweets?.length,
         followship: {
           followerCounts: helpers.getUser(req).Followers?.length,
           followingCounts: helpers.getUser(req).Followings?.length,
@@ -216,6 +216,45 @@ const userController = {
               .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
           : false,
       }))
+      return res.status(200).json(results)
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: 'Server error' })
+    }
+  },
+  getUserLikes: async (req, res) => {
+    try {
+      const UserLikes = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: Reply },
+              { model: Like },
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            ],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      })
+
+      let results = UserLikes.map((UserLikes) => {
+        const Tweet = {
+          id: UserLikes.dataValues.Tweet.id,
+          description: UserLikes.dataValues.Tweet.description,
+          createdAt: UserLikes.dataValues.Tweet.createdAt,
+          replyCounts: UserLikes.dataValues.Tweet.Replies.length,
+          likeCounts: UserLikes.dataValues.Tweet.Likes.length,
+          User: UserLikes.dataValues.Tweet.User,
+        }
+        const result = {
+          id: UserLikes.dataValues.id,
+          TweetId: UserLikes.dataValues.TweetId,
+          Tweet,
+        }
+        return result
+      })
       return res.status(200).json(results)
     } catch (error) {
       console.log(error)
