@@ -119,6 +119,20 @@ let userController = {
       return res.json(data)
     })
   },
+
+  getCurrentUser: (req, res) => {
+    console.log(req.user)
+    return res.json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      account: req.user.account,
+      avatar: req.user.avatar,
+      cover: req.user.cover,
+      introduction: req.user.introduction,
+      role: req.user.role
+    })
+  },
 };
 
 module.exports = userController

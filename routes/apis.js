@@ -21,6 +21,8 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
+// 拿到當下使用者資料
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 // 使用者拿到登入路由也許不需要 ??
 router.get("/signup", userController.signUpPage);
 //  使用者註冊路由
