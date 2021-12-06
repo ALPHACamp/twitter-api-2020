@@ -8,10 +8,13 @@ const session = require('express-session')
 const passport = require('./config/passport')
 const methodOverride = require('method-override')
 const helpers = require('./_helpers')
+const cors = require('cors')
 const db = require('./models')
 
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT
+
+app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())

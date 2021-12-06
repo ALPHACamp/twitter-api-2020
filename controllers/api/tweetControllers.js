@@ -17,6 +17,18 @@ const tweetController = {
     tweetService.getTweet(req, res, data => {
       return res.json(data.tweet)
     })
+  },
+
+  likeTweet: (req, res) => {
+    tweetService.likeTweet(req, res, data => {
+      return res.json(data)
+    })
+  },
+
+  unlikeTweet: (req, res) => {
+    tweetService.unlikeTweet(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 module.exports = tweetController

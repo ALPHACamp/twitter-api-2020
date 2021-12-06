@@ -33,14 +33,15 @@ const userService = {
 
   signIn: (req, res, callback) => {
     // 檢查必要資料
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.account || !req.body.password) {
       return callback({ status: 'error', message: '所有欄位皆為必填！' })
     }
+
     // 檢查 user 是否存在與密碼是否正確
-    const username = req.body.email
+    const account = req.body.account
     const password = req.body.password
 
-    User.findOne({ where: { email: username } }).then(user => {
+    User.findOne({ where: { account: account } }).then(user => {
       if (!user) return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       if (!bcrypt.compareSync(password, user.password)) {
         return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
@@ -184,11 +185,22 @@ const userService = {
 
   getTopUser: (req, res, callback) => {
     return User.findAll({
+      raw: true,
+      nest: true,
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE User.id = Followships.followingId)'),
+          'FollowerCount'
+        ]
+      ],
       include: [{ model: User, as: 'Followers', attributes: ['id'] }]
     }).then(users => {
       users = users.map(user => ({
-        ...user.dataValues,
-        FollowerCount: user.Followers.length,
+        ...user,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
@@ -268,9 +280,9 @@ const userService = {
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: Tweet, attributes: ['id', 'UserId'], include: [{ model: User, attributes: ['id', 'name'] }] }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     }).then(replies => {
-      replies = replies.sort((a, b) => b.createdAt - a.createdAt)
       return callback(replies)
     })
   },

@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
-const db = require('../models')
-const User = db.User
+const { User, Tweet, Like, Followship, Reply } = require('../models')
 
 const adminService = {
   signIn: (req, res, callback) => {
@@ -33,6 +33,55 @@ const adminService = {
         }
       })
     })
+  },
+
+  getUsers: (req, res, callback) => {
+    return User.findAll({
+      raw: true,
+      nest: true,
+      where: { role: 'user' },
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'cover',
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'), 'likeCount'],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+          'followingCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+          'followerCount'
+        ]
+      ]
+    }).then(users => {
+      users = users.sort((a, b) => b.tweetCount - a.tweetCount)
+      return callback(users)
+    })
+  },
+
+  getTweets: (req, res, callback) => {
+    return Tweet.findAll({
+      raw: true,
+      nest: true,
+      attributes: ['id', 'UserId', 'description', 'createdAt'],
+      order: [['createdAt', 'DESC']],
+      include: [{ model: User, attributes: ['name', 'account', 'avatar'] }]
+    }).then(tweets => {
+      tweets.forEach(tweet => tweet.description.substring(0, 50))
+      return callback(tweets)
+    })
+  },
+
+  deleteTweet: async (req, res, callback) => {
+    await Tweet.destroy({ where: { id: req.params.id } })
+    await Reply.destroy({ where: { TweetId: req.params.id } })
+    await Like.destroy({ where: { TweetId: req.params.id } })
+
+    return callback({ status: 'success', message: '成功刪除' })
   }
 }
 

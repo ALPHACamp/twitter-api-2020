@@ -14,7 +14,7 @@ function authenticated (req, res, next) {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) next(err)
     if (!user) {
-      return res.status(401).json({
+      return res.json({
         status: 'error',
         message: '帳號不存在！'
       })
@@ -52,6 +52,8 @@ router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
+router.post('/tweets/:tweet_id/like', authenticated, tweetController.likeTweet)
+router.post('/tweets/:tweet_id/unlike', authenticated, tweetController.unlikeTweet)
 
 router.post('/followships', authenticated, userController.addFollowing)
 router.delete('/followships/:followingId', authenticated, userController.removeFollowing)
@@ -59,6 +61,9 @@ router.post('/notice', authenticated, userController.addNoticing)
 router.delete('/notice/:noticeId', authenticated, userController.removeNoticing)
 
 router.post('/admin/signin', adminController.signIn)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
