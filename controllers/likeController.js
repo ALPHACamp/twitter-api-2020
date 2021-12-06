@@ -2,10 +2,14 @@
 const likeService = require('../services/likeService')
 
 const likeController = {
-  postLike: (req, res) => {
-    likeService.postLike(req, res, data => {
-      return res.json(data)
-    })
+  postLike: async (req, res) => {
+    try {
+      await likeService.postLike(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   postUnlike: (req, res) => {
