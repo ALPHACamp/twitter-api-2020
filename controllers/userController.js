@@ -84,29 +84,17 @@ const userController = {
         'UserId',
         'description',
         'createdAt',
-        'updatedAt',
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
-          ),
-          'likeCount'
-        ],
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
-          ),
-          'replyCount'
-        ],
-        [
-          sequelize.literal(
-            `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
-          ),
-          'isLiked'
-        ],
+        'updatedAt'
       ],
-      include: [{ model: User },],
+      include: [User, Reply, Like],
       order: [['createdAt', 'DESC']],
     }).then(tweets => {
+      tweets = tweets.map(tweet => ({
+        ...tweet.dataValues,
+        likeCount: tweet.Likes.length,
+        replyCount: tweet.Replies.length,
+        isLiked: tweet.Likes.map(u => u.UserId).includes(req.user.id)
+      }))
       return res.json(tweets)
     })
   },
