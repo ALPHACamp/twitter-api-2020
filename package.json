@@ -6,7 +6,8 @@
   "scripts": {
     "start": "NODE_ENV=development node app.js",
     "dev": "NODE_ENV=development nodemon app.js",
-    "test": "mocha test --exit --recursive --timeout 5000"
+    "test": "mocha test --exit --recursive --timeout 5000",
+    "style": "standard --fix"
   },
   "author": "",
   "license": "ISC",
@@ -38,6 +39,14 @@
   },
   "devDependencies": {
     "sequelize-test-helpers": "^1.0.7",
-    "supertest": "^3.3.0"
+    "supertest": "^3.3.0",
+    "standard": "^16.0.4"
+  },
+  "standard": {
+    "ignore": [
+      "/node_modules",
+      "/test",
+      "/models/index.js"
+    ]
   }
 }

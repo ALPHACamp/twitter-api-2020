@@ -3,7 +3,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const helpers = require('./_helpers')
 const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000

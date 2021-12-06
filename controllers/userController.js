@@ -6,26 +6,24 @@ const helpers = require('../_helpers')
 
 // JWT
 const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
 
 const userController = {
-  //signIn & signUp
+  // signIn & signUp
   signIn: (req, res) => {
     const { account, password } = req.body
     if (!account || !password) {
       return res.json({
         status: 'error',
-        message: "required fields didn't exist",
+        message: "required fields didn't exist"
       })
     }
 
     User.findOne({ where: { account } }).then((user) => {
-      if (!user)
+      if (!user) {
         return res
           .status(401)
           .json({ status: 'error', message: 'no such user found' })
+      }
       if (!bcrypt.compareSync(password, user.password)) {
         return res
           .status(401)
@@ -46,8 +44,8 @@ const userController = {
           introduction: user.introduction,
           avatar: user.avatar,
           cover: user.cover,
-          role: user.role,
-        },
+          role: user.role
+        }
       })
     })
   },
@@ -63,12 +61,12 @@ const userController = {
         // confirm unique user
         const email = await User.findOne({ where: { email: req.body.email } })
         const account = await User.findOne({
-          where: { account: req.body.account },
+          where: { account: req.body.account }
         })
         if (email || account) {
           return res.status(401).json({
             status: 'error',
-            message: '此信箱或帳號已註冊過！',
+            message: '此信箱或帳號已註冊過！'
           })
         } else {
           const user = await User.create({
@@ -79,12 +77,12 @@ const userController = {
             password: bcrypt.hashSync(
               req.body.password,
               bcrypt.genSaltSync(10)
-            ),
+            )
           })
           return res.status(200).json({
             status: 'success',
             message: '成功註冊帳號！',
-            user: { id: user.id, email: user.email, account: user.account },
+            user: { id: user.id, email: user.email, account: user.account }
           })
         }
       }
@@ -93,7 +91,7 @@ const userController = {
     }
   },
 
-  //user
+  // user
   getUser: async (req, res) => {
     try {
       const user = (
@@ -105,16 +103,16 @@ const userController = {
             'email',
             'avatar',
             'cover',
-            'introduction',
+            'introduction'
           ],
           include: [
             { model: Tweet },
             { model: User, as: 'Followings' },
-            { model: User, as: 'Followers' },
-          ],
+            { model: User, as: 'Followers' }
+          ]
         })
       ).toJSON()
-      let result = {
+      const result = {
         id: user.id,
         account: user.account,
         name: user.name,
@@ -125,11 +123,11 @@ const userController = {
         tweetCounts: user.Tweets?.length,
         followship: {
           followerCounts: user.Followers?.length,
-          followingCounts: user.Followings?.length,
+          followingCounts: user.Followings?.length
         },
         isFollowing: helpers
           .getUser(req)
-          .Followings.some((user) => user.id === Number(req.params.id)),
+          .Followings.some((user) => user.id === Number(req.params.id))
       }
       return res.status(200).json(result)
     } catch (error) {
@@ -141,14 +139,14 @@ const userController = {
   },
 
   putUser: async (req, res) => {
-    const { account, name, email, password } = req.body
+    const { password } = req.body
     try {
-      //只有自己能編輯自己的資料
-      //防止使用網址修改id切換使用者去修改別人的Profile
+      // 只有自己能編輯自己的資料
+      // 防止使用網址修改id切換使用者去修改別人的Profile
       if (helpers.getUser(req).id !== Number(req.params.id)) {
         return res.status(401).json({
           status: 'error',
-          message: '無法變更其他使用者的Profile',
+          message: '無法變更其他使用者的Profile'
         })
       }
       const { files } = req
@@ -172,13 +170,13 @@ const userController = {
             password: bcrypt.hashSync(
               req.body.password,
               bcrypt.genSaltSync(10)
-            ),
+            )
           },
           { where: { id: helpers.getUser(req).id } }
         )
         return res.status(200).json({
           status: 'success',
-          message: '已成功更新！',
+          message: '已成功更新！'
         })
       } else {
         await User.update(
@@ -187,7 +185,7 @@ const userController = {
         )
         return res.status(200).json({
           status: 'success',
-          message: '已成功更新！',
+          message: '已成功更新！'
         })
       }
     } catch (error) {
@@ -202,12 +200,12 @@ const userController = {
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           { model: Like },
-          { model: Reply },
+          { model: Reply }
         ],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC']]
       })
 
-      let results = userTweets.map((userTweets) => ({
+      const results = userTweets.map((userTweets) => ({
         id: userTweets.dataValues.id,
         description: userTweets.dataValues.description,
         createdAt: userTweets.dataValues.createdAt,
@@ -216,9 +214,9 @@ const userController = {
         replyCounts: userTweets.dataValues.Replies.length,
         isLike: helpers.getUser(req).Likes
           ? helpers
-            .getUser(req)
-            .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
-          : false,
+              .getUser(req)
+              .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
+          : false
       }))
       return res.status(200).json(results)
     } catch (error) {
@@ -238,10 +236,10 @@ const userController = {
           {
             model: Tweet,
             attributes: ['id'],
-            include: [{ model: User, attributes: ['id', 'account'] }],
-          },
+            include: [{ model: User, attributes: ['id', 'account'] }]
+          }
         ],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC']]
       })
       return res.status(200).json(usersReplies)
     } catch (error) {
@@ -259,26 +257,26 @@ const userController = {
             include: [
               { model: Reply },
               { model: Like },
-              { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-            ],
-          },
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            ]
+          }
         ],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC']]
       })
 
-      let results = UserLikes.map((UserLikes) => {
+      const results = UserLikes.map((UserLikes) => {
         const Tweet = {
           id: UserLikes.dataValues.Tweet.id,
           description: UserLikes.dataValues.Tweet.description,
           createdAt: UserLikes.dataValues.Tweet.createdAt,
           replyCounts: UserLikes.dataValues.Tweet.Replies.length,
           likeCounts: UserLikes.dataValues.Tweet.Likes.length,
-          User: UserLikes.dataValues.Tweet.User,
+          User: UserLikes.dataValues.Tweet.User
         }
         const result = {
           id: UserLikes.dataValues.id,
           TweetId: UserLikes.dataValues.TweetId,
-          Tweet,
+          Tweet
         }
         return result
       })
@@ -287,7 +285,7 @@ const userController = {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
     }
-  },
+  }
 }
 
 module.exports = userController

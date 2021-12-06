@@ -6,38 +6,38 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER
       },
       UserId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
-          key: 'id',
+          key: 'id'
         },
-        onDelete: 'cascade',
+        onDelete: 'cascade'
       },
       TweetId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Tweets',
-          key: 'id',
+          key: 'id'
         },
-        onDelete: 'cascade',
+        onDelete: 'cascade'
       },
       comment: {
-        type: Sequelize.TEXT,
+        type: Sequelize.TEXT
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     })
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Replies')
-  },
+  }
 }

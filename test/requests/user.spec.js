@@ -1,10 +1,10 @@
-var chai = require('chai')
-var request = require('supertest')
-var sinon = require('sinon')
-var app = require('../../app')
-var helpers = require('../../_helpers')
-var should = chai.should()
-var expect = chai.expect
+const chai = require('chai')
+const request = require('supertest')
+const sinon = require('sinon')
+const app = require('../../app')
+const helpers = require('../../_helpers')
+const should = chai.should()
+const expect = chai.expect
 const db = require('../../models')
 const passport = require('../../config/passport')
 
@@ -64,13 +64,13 @@ describe('# user requests', () => {
           account: 'User1',
           name: 'User1',
           email: 'User1',
-          password: 'User1',
+          password: 'User1'
         })
         await db.User.create({
           account: 'User2',
           name: 'User2',
           email: 'User2',
-          password: 'User2',
+          password: 'User2'
         })
       })
 
@@ -118,7 +118,7 @@ describe('# user requests', () => {
           account: 'User1',
           name: 'User1',
           email: 'User1',
-          password: 'User1',
+          password: 'User1'
         })
         await db.Tweet.create({ UserId: 1, description: 'User1 的 Tweet1' })
       })
@@ -171,13 +171,13 @@ describe('# user requests', () => {
           account: 'User1',
           name: 'User1',
           email: 'User1',
-          password: 'User1',
+          password: 'User1'
         })
         await db.Tweet.create({ UserId: 1, description: 'User1 的 Tweet1' })
         await db.Reply.create({
           UserId: 1,
           TweetId: 1,
-          comment: 'Tweet1 的 comment',
+          comment: 'Tweet1 的 comment'
         })
       })
 
@@ -230,13 +230,13 @@ describe('# user requests', () => {
           account: 'User1',
           name: 'User1',
           email: 'User1',
-          password: 'User1',
+          password: 'User1'
         })
         await db.User.create({
           account: 'User2',
           name: 'User2',
           email: 'User2',
-          password: 'User2',
+          password: 'User2'
         })
         await db.Tweet.create({ UserId: 2, description: 'User2 的 Tweet1' })
         await db.Like.create({ UserId: 1, TweetId: 1 })
@@ -289,13 +289,13 @@ describe('# user requests', () => {
           account: 'User1',
           name: 'User1',
           email: 'User1',
-          password: 'User1',
+          password: 'User1'
         })
         await db.User.create({
           account: 'User2',
           name: 'User2',
           email: 'User2',
-          password: 'User2',
+          password: 'User2'
         })
         await db.Followship.create({ followerId: 1, followingId: 2 })
       })
@@ -310,7 +310,7 @@ describe('# user requests', () => {
             if (err) return done(err)
 
             expect(res.body).to.be.an('array')
-            //回傳資料中是否有跟隨中的人的 id = 2
+            // 回傳資料中是否有跟隨中的人的 id = 2
             res.body[0].followingId.should.equal(2)
 
             return done()
@@ -349,13 +349,13 @@ describe('# user requests', () => {
           account: 'User1',
           name: 'User1',
           email: 'User1',
-          password: 'User1',
+          password: 'User1'
         })
         await db.User.create({
           account: 'User2',
           name: 'User2',
           email: 'User2',
-          password: 'User2',
+          password: 'User2'
         })
         await db.Followship.create({ followerId: 1, followingId: 2 })
       })
@@ -410,7 +410,7 @@ describe('# user requests', () => {
           name: 'User1',
           email: 'User1',
           password: 'User1',
-          introduction: 'User1',
+          introduction: 'User1'
         })
       })
 
