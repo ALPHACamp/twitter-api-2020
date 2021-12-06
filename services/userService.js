@@ -259,10 +259,15 @@ const userService = {
 
   getUserFollowings: (req, res, callback) => {
     return User.findByPk(req.params.id, {
-      include: [{ model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'introduction', 'createdAt'] }]
+      include: [
+        { model: User, as: 'Followings', attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'createdAt'] }
+      ]
     }).then(user => {
       user = user.toJSON()
-      user.Followings.forEach(item => (item.followingId = item.id))
+      user.Followings.forEach(item => {
+        item.followingId = item.id
+        item.isFollowed = Number(helpers.getUser(req).is) === Number(item.Followship.followerId)
+      })
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       return callback(user)
     })
@@ -270,14 +275,15 @@ const userService = {
 
   getUserFollowers: (req, res, callback) => {
     return User.findByPk(req.params.id, {
-      include: [{ model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'introduction', 'createdAt'] }]
+      include: [
+        { model: User, as: 'Followers', attributes: ['id', 'account', 'name', 'avatar', 'introduction', 'createdAt'] }
+      ]
     }).then(user => {
       user = user.toJSON()
       user.Followers.forEach(item => {
         item.followerId = item.id
-        item.isFollowed = Number(helpers.getUser(req).id) === Number(req.params.id)
+        item.isFollowed = Number(helpers.getUser(req).id) === Number(item.Followship.followingId)
       })
-
       user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       return callback(user)
     })
