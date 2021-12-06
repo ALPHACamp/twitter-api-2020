@@ -6,14 +6,14 @@ const { User, Tweet, Like, Followship, Reply } = require('../models')
 
 const adminService = {
   signIn: (req, res, callback) => {
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.account || !req.body.password) {
       return callback({ status: 'error', message: '所有欄位皆為必填！' })
     }
 
-    const username = req.body.email
+    const account = req.body.account
     const password = req.body.password
 
-    return User.findOne({ where: { email: username } }).then(async user => {
+    return User.findOne({ where: { account: account } }).then(async user => {
       if (!user) return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       if (!bcrypt.compareSync(password, user.password)) {
         return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
