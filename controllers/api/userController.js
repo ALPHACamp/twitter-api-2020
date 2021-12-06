@@ -24,15 +24,14 @@ let userController = {
   signIn: async (req, res) => {
     try {
       // 檢查必要資料
-      const { email, password } = req.body
-      if (!email || !password) {
-
+      const { account, password } = req.body
+      if (!account || !password) {
         return res.json({
           status: 'error',
-          message: 'Please fill both Email & Password fields!'
+          message: 'Please fill both Account & Password fields!'
         })
       }
-      const user = await User.findOne({ where: { email } })
+      const user = await User.findOne({ where: { account } })
       // 檢查 user 是否存在與
       if (!user)
         return res
@@ -273,6 +272,7 @@ let userController = {
             ]]
           }
         ],
+        order: [[sequelize.literal('Followers.createdAt'), 'DESC']],
       })
       return res.json(followings[0].Followings)
     } catch (err) {
@@ -291,6 +291,7 @@ let userController = {
             'isFollowed'
           ]]
         }],
+        order: [[sequelize.literal('Followers.createdAt'), 'DESC']],
       })
       return res.json(followers[0].Followers) //followers[0].Followers
     } catch (err) {
@@ -311,9 +312,10 @@ let userController = {
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
               'replyCount'
             ],
-            [sequelize.literal('(SELECT tweetID FROM Likes WHERE Likes.UserID = )'),
-              'replyCount'
-            ]],
+            [sequelize.literal(`EXISTS (SELECT * FROM Likes WHERE UserId = ${req.params.id} AND TweetId = Tweet.id)`),
+              'isLiked'
+            ],
+          ]
         }
       ]
     })
