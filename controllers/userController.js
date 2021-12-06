@@ -149,7 +149,10 @@ const userController = {
         ...like.dataValues,
         likeTweetCount: like.Tweet.Likes.length,
         replyTweetCount: like.Tweet.Replies.length,
-        isLiked: like.Tweet.Likes.map(u => u.UserId).includes(req.user.id)
+        isLiked: like.Tweet.Likes.map(u => u.UserId).includes(req.user.id),
+        userAvatar: like.Tweet.User.avatar,
+        userName: like.Tweet.User.name,
+        userAccount: like.Tweet.User.account,
       }))
       return res.json(likes)
     })
