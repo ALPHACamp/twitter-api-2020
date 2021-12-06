@@ -5,10 +5,9 @@ module.exports = (sequelize, DataTypes) => {
     TweetId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Like'
+    modelName: 'Like',
     paranoid: true,
     timestamps: true
-
   });
   Like.associate = function (models) {
     Like.belongsTo(models.User)
