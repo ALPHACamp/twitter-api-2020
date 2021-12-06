@@ -5,7 +5,8 @@ const helpers = require('../_helpers')
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
 const replyController = require('../controllers/replyController')
-
+const likeController = require('../controllers/likeController')
+const followController = require('../controllers/followController')
 
 // const authenticated = (req, res, next) => {
 //   if (req.isAuthenticated()) {
@@ -42,21 +43,18 @@ router.get('/api/admin/tweets',authenticated, authenticatedAdmin, tweetControlle
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, tweetController.deleteTweet)
 
 
-//likes相關
+//likes相關   待補authenticated
+router.post('/api/tweets/:tweetId/like', authenticated, likeController.postLike)
+router.post('/api/tweets/:tweetId/unlike', authenticated, likeController.postUnlike)
 
 
-
-
-
-
-
-//replies相關  待補authenticated
+//replies相關
 router.get('/api/tweets/:tweetId/replies', authenticated, replyController.getReplies)
 router.post('/api/tweets/:tweetId/replies', authenticated, replyController.postReply)
 
 //followships相關
-
-
+router.post('/api/followships', authenticated, followController.addFollowship)
+router.delete('/api/followships/:followingId', authenticated, followController.deleteFollowship)
 
 
 
