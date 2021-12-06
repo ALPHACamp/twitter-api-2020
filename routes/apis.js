@@ -60,8 +60,8 @@ router.post('/tweets/:id/unlike', authenticated, userController.removeLike) //�
 router.post('/followships/', authenticated, userController.addFollowing) //新增一位追蹤者
 router.delete('/followships/:id', authenticated, userController.removeFollowing) //新增一位追蹤者
 
-router.get('admin/users', authenticated, adminController.getUsers) //管理者可以看見站內所有的使用者 //還要補authenticatedAdmin
-router.delete('admin/tweets/:id', authenticated, adminController.deleteTweet) //還要補authenticatedAdmin
+router.get('/admin/users', authenticated, adminController.getUsers) //管理者可以看見站內所有的使用者 //還要補authenticatedAdmin
+router.delete('/admin/tweets/:id', authenticated, adminController.deleteTweet) //還要補authenticatedAdmin
 
 
 

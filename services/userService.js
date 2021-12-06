@@ -304,6 +304,14 @@ const userService = {
       });
     });
   },
+  getFollowers: (req, res, callback) => {
+    //撈出這個使用者
+    //include他的followship
+    //呈現他的follower數量、哪些人
+  },
+  getFollowedUsers: (req, res, callback) => {
+    //撈出這個使用者
+  }
 };
 
 module.exports = userService
