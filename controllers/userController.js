@@ -38,7 +38,16 @@ const userController = {
         status: 'success',
         message: 'ok',
         token: token,
-        user,
+        user: {
+          id: user.id,
+          account: user.account,
+          name: user.name,
+          email: user.email,
+          introduction: user.introduction,
+          avatar: user.avatar,
+          cover: user.cover,
+          role: user.role,
+        },
       })
     })
   },
@@ -72,13 +81,11 @@ const userController = {
               bcrypt.genSaltSync(10)
             ),
           })
-          return res
-            .status(200)
-            .json({
-              status: 'success',
-              message: '成功註冊帳號！',
-              user: { id: user.id, email: user.email, account: user.account },
-            })
+          return res.status(200).json({
+            status: 'success',
+            message: '成功註冊帳號！',
+            user: { id: user.id, email: user.email, account: user.account },
+          })
         }
       }
     } catch (error) {
@@ -224,14 +231,51 @@ const userController = {
           {
             model: Tweet,
             attributes: ['id'],
-            include: [{ model: User, attributes: ['id','account'] }],
+            include: [{ model: User, attributes: ['id', 'account'] }],
           },
         ],
         order: [['createdAt', 'DESC']],
       })
-      return res
-        .status(200)
-        .json( usersReplies )
+      return res.status(200).json(usersReplies)
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: 'Server error' })
+    }
+  },
+  getUserLikes: async (req, res) => {
+    try {
+      const UserLikes = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: Reply },
+              { model: Like },
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+            ],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      })
+
+      let results = UserLikes.map((UserLikes) => {
+        const Tweet = {
+          id: UserLikes.dataValues.Tweet.id,
+          description: UserLikes.dataValues.Tweet.description,
+          createdAt: UserLikes.dataValues.Tweet.createdAt,
+          replyCounts: UserLikes.dataValues.Tweet.Replies.length,
+          likeCounts: UserLikes.dataValues.Tweet.Likes.length,
+          User: UserLikes.dataValues.Tweet.User,
+        }
+        const result = {
+          id: UserLikes.dataValues.id,
+          TweetId: UserLikes.dataValues.TweetId,
+          Tweet,
+        }
+        return result
+      })
+      return res.status(200).json(results)
     } catch (error) {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
