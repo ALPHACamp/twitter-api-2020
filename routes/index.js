@@ -58,15 +58,31 @@ module.exports = (app) => {
     authenticatedUser,
     upload.fields([
       { name: 'avatar', maxCount: 1 },
-      { name: 'cover', maxCount: 1 }
+      { name: 'cover', maxCount: 1 },
     ]),
     userController.putUser
   )
 
   // reply
-  app.get('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getTweetReply)
+  app.get(
+    '/api/tweets/:tweet_id/replies',
+    authenticated,
+    authenticatedUser,
+    replyController.getTweetReply
+  )
   // replies
-  app.post('/api/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
+  app.post(
+    '/api/tweets/:tweet_id/replies',
+    authenticated,
+    authenticatedUser,
+    replyController.postReply
+  )
+  app.get(
+    '/api/users/:id/replied_tweets',
+    authenticated,
+    authenticatedUser,
+    userController.getUsersRepliesTweets
+  )
 
   // tweets
   app.get(
@@ -75,17 +91,53 @@ module.exports = (app) => {
     authenticatedUser,
     userController.getUsersTweets
   )
-  app.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
-  app.get('/api/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
-  app.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
+
+  app.get(
+    '/api/tweets',
+    authenticated,
+    authenticatedUser,
+    tweetController.getTweets
+  )
+  app.get(
+    '/api/tweets/:tweet_id',
+    authenticated,
+    authenticatedUser,
+    tweetController.getTweet
+  )
+  app.post(
+    '/api/tweets',
+    authenticated,
+    authenticatedUser,
+    tweetController.postTweet
+  )
 
   // followship
-  app.get('/api/followships/top', authenticated, authenticatedUser, followController.getTopUser)
+  app.get(
+    '/api/followships/top',
+    authenticated,
+    authenticatedUser,
+    followController.getTopUser
+  )
 
   // like
-  app.post('/api/tweets/:id/like', authenticated, authenticatedUser, likeController.likeTweet)
+  app.post(
+    '/api/tweets/:id/like',
+    authenticated,
+    authenticatedUser,
+    likeController.likeTweet
+  )
 
   // admin
-  app.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
-  app.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+  app.get(
+    '/api/admin/users',
+    authenticated,
+    authenticatedAdmin,
+    adminController.getUsers
+  )
+  app.delete(
+    '/api/admin/tweets/:id',
+    authenticated,
+    authenticatedAdmin,
+    adminController.deleteTweet
+  )
 }

@@ -74,7 +74,6 @@ const userController = {
           })
           return res
             .status(200)
-
             .json({
               status: 'success',
               message: '成功註冊帳號！',
@@ -112,7 +111,7 @@ const userController = {
         avatar: user.avatar,
         cover: user.cover,
         introduction: user.introduction,
-        tweetCounts:  user.Tweets?.length,
+        tweetCounts: user.Tweets?.length,
         followship: {
           followerCounts: helpers.getUser(req).Followers?.length,
           followingCounts: helpers.getUser(req).Followings?.length,
@@ -208,6 +207,32 @@ const userController = {
           : false,
       }))
       return res.status(200).json(results)
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: 'Server error' })
+    }
+  },
+  getUsersRepliesTweets: async (req, res) => {
+    try {
+      const usersReplies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        raw: true,
+        nest: true,
+        attributes: ['id', 'comment', 'createdAt'],
+        include: [
+          { model: User, attributes: ['id', 'name', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: ['id'],
+            include: [{ model: User, attributes: ['id','account'] }],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+      })
+      console.log('usersReplies', usersReplies)
+      return res
+        .status(200)
+        .json( usersReplies )
     } catch (error) {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
