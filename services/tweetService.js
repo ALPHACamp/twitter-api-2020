@@ -1,6 +1,7 @@
 // 載入所需套件
 const { Tweet, User } = require('../models')
 const helpers = require('../_helpers')
+const sequelize = require('sequelize')
 const ReqError = require('../helpers/ReqError')
 
 const tweetService = {
@@ -23,7 +24,15 @@ const tweetService = {
     const tweets = await Tweet.findAll({
       raw: true,
       nest: true,
-      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
+      attributes: [
+        'id',
+        'description',
+        [sequelize.literal(`(select count(TweetId) from Likes where TweetId = Tweet.id)`), 'likeCounts'],
+        [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts']
+      ],
+      include: [{
+        model: User, attributes: ['id', 'account', 'name', 'avatar']
+      }],
       order: [['createdAt', 'DESC']]
     })
     return callback(tweets)
@@ -35,6 +44,12 @@ const tweetService = {
       {
         raw: true,
         nest: true,
+        attributes: [
+          'id',
+          'description',
+          [sequelize.literal(`(select count(TweetId) from Likes where TweetId = Tweet.id)`), 'likeCounts'],
+          [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts']
+        ],
         include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       })
     return callback(tweet)

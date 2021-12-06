@@ -42,7 +42,6 @@ const adminService = {
       include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     })
-    console.log(tweets)
     return callback(tweets)
   },
 
