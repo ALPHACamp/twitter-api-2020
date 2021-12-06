@@ -26,6 +26,7 @@ let userController = {
       // 檢查必要資料
       const { email, password } = req.body
       if (!email || !password) {
+
         return res.json({
           status: 'error',
           message: 'Please fill both Email & Password fields!'
@@ -162,9 +163,38 @@ let userController = {
   //修改個人資料
   putUsers: async (req, res) => {
     try {
+      // 資料不可為空白
+      const { name, account, email, password } = req.body
+      if (!name || !account || !email || !password) {
+        return res.json({
+          status: 'error',
+          message: 'Required fields must be filled！'
+        })
+      }
       // 確保只有自己能修改自己的資料
       if (helpers.getUser(req).id !== Number(req.params.id)) {
-        return res.json({ status: 'error', message: '無法變更他人資料' })
+        return res.json({ status: 'error', message: 'cannot edit other user data' })
+      }
+      // 確認Email無重複(但可以維持原有email)
+      const user = await User.findOne({
+        where: {
+          email,
+          [Op.not]: { id: helpers.getUser(req).id }
+        }
+      })
+      if (user) {
+        return res.json({
+          status: 'error',
+          message: 'Email has already existed!'
+        })
+      }
+      // 確認Account無重複
+      const accountCheck = await User.findOne({ where: { account } })
+      if (accountCheck) {
+        return res.json({
+          status: 'error',
+          message: 'Account has already existed!'
+        })
       }
       // 如果有上傳圖片 update
       const { files } = req
@@ -176,18 +206,28 @@ let userController = {
             await user.update({
               ...req.body,
               avatar: img1.data.link,
-              cover: img2.data.link
+              cover: img2.data.link,
+              password: bcrypt.hashSync(
+                req.body.password,
+                bcrypt.genSaltSync(10),
+                null
+              ),
             })
           })
         })
         res.json({ status: 'success', message: '使用者資料編輯成功' })
         // 如果沒上傳圖片 update
       } else {
-        const user = await await User.findByPk(req.params.id)
+        const user = await User.findByPk(req.params.id)
         await user.update({
           ...req.body,
-          avatar: null,
-          cover: null
+          avatar: user.avatar || null,
+          cover: user.cover || null,
+          password: bcrypt.hashSync(
+            req.body.password,
+            bcrypt.genSaltSync(10),
+            null
+          ),
         })
         res.json({ status: 'success', message: '使用者資料編輯成功' })
       }
@@ -195,7 +235,7 @@ let userController = {
       console.log(err)
     }
   },
-  
+
   //跟隨者 (followers) 數量排列前 10 的使用者推薦名單
   getTop: async (req, res) => {
     try {
@@ -215,7 +255,10 @@ let userController = {
       })
       // console.log(JSON.stringify(Top, null, 2))
       return res.json(Top)
-
+    } catch (err) {
+      console.log(err)
+    }
+  },
   //找追蹤中的用戶
   getFollowings: async (req, res) => {
     try {
@@ -261,13 +304,16 @@ let userController = {
       where: { UserId: req.params.id },
       include: [
         {
-          model: Tweet, include: [User, Reply, Like,],
+          model: Tweet, include: [User, Reply,],
           attributes: ['id', 'UserId', 'description', 'createdAt', 'updatedAt',
             [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'),
               'likeCount'],
             [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
               'replyCount'
-            ]]
+            ],
+            [sequelize.literal('(SELECT tweetID FROM Likes WHERE Likes.UserID = )'),
+              'replyCount'
+            ]],
         }
       ]
     })
@@ -287,5 +333,6 @@ let userController = {
     return res.json(replies)
   },
 }
+
 
 module.exports = userController
