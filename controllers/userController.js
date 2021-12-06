@@ -107,7 +107,11 @@ const userController = {
             'cover',
             'introduction',
           ],
-          include: { model: Tweet },
+          include: [
+            { model: Tweet },
+            { model: User, as: 'Followings' },
+            { model: User, as: 'Followers' },
+          ],
         })
       ).toJSON()
       let result = {
@@ -120,10 +124,12 @@ const userController = {
         introduction: user.introduction,
         tweetCounts: user.Tweets?.length,
         followship: {
-          followerCounts: helpers.getUser(req).Followers?.length,
-          followingCounts: helpers.getUser(req).Followings?.length,
+          followerCounts: user.Followers?.length,
+          followingCounts: user.Followings?.length,
         },
-        isFollowing: helpers.getUser(req).Followings.some(user => user.id === Number(req.params.id))
+        isFollowing: helpers
+          .getUser(req)
+          .Followings.some((user) => user.id === Number(req.params.id)),
       }
       return res.status(200).json(result)
     } catch (error) {
