@@ -5,7 +5,7 @@ const userController = {
   signUp: async (req, res) => {
     try {
       await userService.signUp(req, res, data => {
-        return res.status(201).json(data)
+        return res.json(data)
       })
     } catch (err) {
       return res.status(400).json({ status: err.name, message: err.message })
