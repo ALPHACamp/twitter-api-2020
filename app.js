@@ -26,7 +26,7 @@ const port = 3000
 //for handlebars
 app.engine('handlebars', handlebars({
   defaultLayout: 'main',
-  // helpers: require('./config/handlebars-helpers')
+  helpers: require('./config/handlebars-helpers')
 })) //{ defaultLayout: 'main' } could be ignored since it has become default in handlebars v3.1.0
 app.set('view engine', 'handlebars')
 
