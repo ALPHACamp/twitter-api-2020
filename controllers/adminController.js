@@ -30,7 +30,7 @@ const adminController = {
   },
   getAdminTweets: (req, res) => {
     Tweet.findAll({
-      include: User,
+      include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
       order: [['createdAt', 'DESC']]
     }).then(tweets => {
       tweets = tweets.map(tweet => ({
@@ -43,17 +43,18 @@ const adminController = {
     })
   },
   deleteTweet: (req, res) => {
-    Tweet.destroy({
-      where: {
-        id: req.params.id
-      }
-    })
-      .then(tweet => {
-        console.log(tweet)
+    const TweetId = req.params.id
+    Promise.all([
+      Tweet.destroy({ where: { id: TweetId }}),
+      Like.destroy({ where: { TweetId }}),
+      Reply.destroy({ where: { TweetId }})
+    ])
+      .then(([ tweet, like, reply ]) => {
+        // console.log([ tweet, like, reply ])
         if (tweet === 1) {  //確實有刪除成功
           return res.json({ status: 'success', message: '刪除成功' })
         } //tweet = 0 表示找不到推文
-        return res.json({ status: 'error', message: '找不到推文' })
+        return res.json({ status: 'error', message: '推文不存在' })
       })
   }
 }
