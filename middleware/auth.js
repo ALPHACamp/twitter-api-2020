@@ -11,5 +11,16 @@ module.exports = {
       req.user = user
       return next()
     })(req, res, next)
+  },
+
+  authenticatedAdmin: (req, res, next) => {
+    if (req.user) {
+      if (req.user.role === 'Admin') {
+        return next()
+      }
+      return res.json({ status: 'error', message: 'permission denied' })
+    } else {
+      return res.json({ status: 'error', message: 'permission denied' })
+    }
   }
 }

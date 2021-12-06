@@ -8,24 +8,9 @@ const userController = require('../controller/apis/userController')
 const replyController = require('../controller/apis/replyController')
 const adminController = require('../controller/apis/adminController')
 const likeController = require('../controller/apis/likeController')
-const passport = require('passport')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
-const { authenticated } = require('../middleware/auth')
-
-//function
-// let authenticated = passport.authenticate('jwt', { session: false })
-
-const authenticatedAdmin = (req, res, next) => {
-  if (req.user) {
-    if (req.user.role === 'Admin') {
-      return next()
-    }
-    return res.json({ status: 'error', message: 'permission denied' })
-  } else {
-    return res.json({ status: 'error', message: 'permission denied' })
-  }
-}
+const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 //tweet
 router.post('/tweets', authenticated, tweetController.postTweet)
@@ -42,6 +27,7 @@ router.delete('/replies/:replyId', authenticated, replyController.deleteReply)
 //JWT
 router.post('/users', userController.signUp)
 
+//user
 router.post('/users/signin', userController.signIn)
 router.put(
   '/users/:id',
@@ -69,7 +55,6 @@ router.get(
   authenticated,
   userController.getUserFollowers
 )
-//user
 router.get('/users', authenticated, userController.getUsers)
 router.get('/users/self', authenticated, userController.getCurrentUser)
 router.get('/users/top', authenticated, userController.getTopUsers)
@@ -80,8 +65,8 @@ router.post('/followships', authenticated, userController.postFollow)
 router.delete('/followships/:id', authenticated, userController.deleteFollow)
 
 //admin
-router.get('/admin/users', authenticated, adminController.getUsers)
-router.get('/admin/tweets', authenticated, adminController.getTweets)
-router.delete('/admin/tweets/:id', authenticated, adminController.deleteTweet)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 module.exports = router
