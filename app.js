@@ -34,11 +34,9 @@ app.use((req, res, next) => {
   res.locals.error_messages = req.flash('error_messages')
   res.locals.user = helpers.getUser(req)
   res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Credentials', true)
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With')
-  if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Methods', 'POST, PUT, PATCH, GET, DELETE')
-    return res.status(200).json({})
-  }
+  res.header('Access-Control-Allow-Methods', 'POST, PUT, PATCH, GET, DELETE')
   next()
 })
 
