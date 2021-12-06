@@ -110,12 +110,12 @@ const userService = {
 
     // 確認當前使用者和欲修改使用者資料是相同的
     if (userId !== Number(req.params.id)) {
-      return callback({ status: 'error', message: '無法變更其他使用者資料' })
+      throw new ReqError('無法變更其他使用者資料')
     }
 
     // 確認name有填寫
     if (!req.body.name) {
-      return callback({ status: 'error', message: 'name為必填欄位' })
+      throw new ReqError('name為必填欄位')
     }
 
     // 如果有上傳圖片，就上傳到imgur中

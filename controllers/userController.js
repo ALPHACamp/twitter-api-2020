@@ -32,10 +32,14 @@ const userController = {
     }
   },
 
-  putUser: (req, res) => {
-    userService.putUser(req, res, data => {
-      return res.json(data)
-    })
+  putUser: async (req, res) => {
+    try {
+      await userService.putUser(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   getCurrentUser: (req, res) => {
