@@ -38,7 +38,7 @@ router.put('/api/users/account', authenticated, userController.putUserAccountSet
 //user取得編輯個人資訊頁面
 router.get('/api/users/edit', authenticated, userController.getUserInfo)
 //user編輯個人資訊頁面
-router.put('/api/users/edit', authenticated, userController.editUserInfo)
+router.put('/api/users', authenticated, userController.editUserInfo)
 //user觀看特定人士已like
 router.get('/api/users/:id/likes', authenticated, userController.getOneLikes)
 //user觀看特定人士已reply
@@ -59,7 +59,7 @@ router.get('/get_current_user', authenticated, userController.getCurrentUser)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
-router.get('/api/admin/tweets',authenticated, authenticatedAdmin, tweetController.getAdminTweets)
+router.get('/api/admin/tweets', authenticated, authenticatedAdmin, tweetController.getAdminTweets)
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, tweetController.deleteTweet)
 
 
