@@ -13,13 +13,13 @@ const adminService = {
     const username = req.body.email
     const password = req.body.password
 
-    return User.findOne({ where: { email: username } }).then(user => {
+    return User.findOne({ where: { email: username } }).then(async user => {
       if (!user) return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       if (!bcrypt.compareSync(password, user.password)) {
         return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       }
       const payload = { id: user.id }
-      const token = jwt.sign(payload, process.env.JWT_SECRET)
+      const token = await jwt.sign(payload, process.env.JWT_SECRET)
       return callback({
         status: 'success',
         message: '登入成功！',

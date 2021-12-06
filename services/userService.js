@@ -41,14 +41,14 @@ const userService = {
     const account = req.body.account
     const password = req.body.password
 
-    User.findOne({ where: { account: account } }).then(user => {
+    User.findOne({ where: { account: account } }).then(async user => {
       if (!user) return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       if (!bcrypt.compareSync(password, user.password)) {
         return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       }
       // 簽發 token
       const payload = { id: user.id }
-      const token = jwt.sign(payload, process.env.JWT_SECRET)
+      const token = await jwt.sign(payload, process.env.JWT_SECRET)
       return callback({
         status: 'success',
         message: '登入成功！',
