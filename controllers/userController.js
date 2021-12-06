@@ -204,21 +204,21 @@ const userController = {
   },
   //取得特定瀏覽人次id
   getOneLikes: (req, res) => {
-    const userId = helpers.getUser(req).id
+    const userId = req.params.id
     return Like.findAll({ where: { userId }, include: [Tweet] })
       .then(tweets => {
         return res.json({ tweets })
       })
   },
   getOneRepliedTweets: (req, res) => {
-    const userId = helpers.getUser(req).id
+    const userId = req.params.id
     return Reply.findAll({ where: { userId }, include: [Tweet] })
       .then(replies => {
         return res.json({ replies })
       })
   },
   getOneTweets: (req, res) => {
-    const userId = helpers.getUser(req).id
+    const userId = req.params.id
     return Tweet.findAll({ where: { userId } })
       .then(tweets => {
         return res.json({ tweets })
