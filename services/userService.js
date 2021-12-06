@@ -4,6 +4,7 @@ const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID;
 const { Op } = require('sequelize')
 const helpers = require("../_helpers");
 const db = require("../models");
+const user = require("../models/user");
 const Tweet = db.Tweet;
 const Reply = db.Reply;
 const User = db.User;
@@ -272,21 +273,21 @@ const userService = {
           TweetId: req.params.id,
           isLike: false,
         }).then(like => {
-          return callback({ status: 'error', message: ''})
-        }) 
-      } 
+          return callback({ status: 'error', message: '' })
+        })
+      }
       if (like.isLike === true) {
         return like.update({ ...like, isLike: !like.isLike }).then(like => {
           return callback({ status: 'success', message: '' })
         })
       }
-      return callback({ status: 'error', message: ''})
+      return callback({ status: 'error', message: '' })
     });
   },
 
   addFollowing: (req, res, callback) => {
     return Followship.create({
-      followerId: helpers.gerUser(req).id,
+      followerId: helpers.getUser(req).id,
       followingId: req.params.userId,
     }).then((followship) => {
       return callback({ status: "success", message: "" });
@@ -295,7 +296,7 @@ const userService = {
   removeFollowing: (req, res, callback) => {
     return Followship.findOne({
       where: {
-        followerId: helpers.gerUser(req).id,
+        followerId: helpers.getUser(req).id,
         followingId: req.params.userId,
       },
     }).then((followship) => {
@@ -305,9 +306,22 @@ const userService = {
     });
   },
   getFollowers: (req, res, callback) => {
-    //撈出這個使用者
-    //include他的followship
-    //呈現他的follower數量、哪些人
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followers' }]
+        .then(user => {
+          const followersCount = user.Followers.length
+          return callback({user: user, followersCount: followersCount})
+        })
+    })
+  },
+  getFollowings: (req, res, callback) => {
+    return User.findByPk(req.params.id, {
+      include: [{ model: User, as: 'Followings' }]
+        .then(user => {
+          const followingsCount = user.Followings.length
+          return callback({ user: user, followingsCount: followingsCount })
+        })
+    })
   },
   getFollowedUsers: (req, res, callback) => {
     //撈出這個使用者

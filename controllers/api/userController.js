@@ -133,6 +133,16 @@ let userController = {
       role: req.user.role
     })
   },
+  getFollowers: (req, res) => {
+    userService.getFollowers(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  getFollowings: (req, res) => {
+    userService.getFollowings(req, res, (data) => {
+      return res.json(data)
+    })
+  }
 };
 
 module.exports = userController
