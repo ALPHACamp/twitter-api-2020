@@ -31,12 +31,6 @@ const userController = {
     })
   },
 
-  putUserSetting: (req, res) => {
-    userService.putUserSetting(req, res, data => {
-      return res.json(data)
-    })
-  },
-
   getTopUser: (req, res) => {
     userService.getTopUser(req, res, data => {
       return res.json(data)
@@ -93,12 +87,6 @@ const userController = {
 
   getUserLikes: (req, res, callback) => {
     userService.getUserLikes(req, res, data => {
-      return res.json(data)
-    })
-  },
-
-  getCurrentUser: (req, res, callback) => {
-    userService.getCurrentUser(req, res, data => {
       return res.json(data)
     })
   }
