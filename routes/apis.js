@@ -42,9 +42,11 @@ router.get('/users/:id/followings', authenticated, userController.getUserFollowi
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id/setting', authenticated, userController.putUserSetting)
 router.put('/users/:id', authenticated, uploadImage, userController.putUser)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 
 router.get('/users', authenticated, userController.getUsers)
 router.get('/tweets', authenticated, tweetController.getTweets)

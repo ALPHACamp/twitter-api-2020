@@ -8,8 +8,14 @@ module.exports = (sequelize, DataTypes) => {
       email: DataTypes.STRING,
       name: DataTypes.STRING,
       password: DataTypes.STRING,
-      avatar: DataTypes.STRING,
-      cover: DataTypes.STRING,
+      avatar: {
+        type: DataTypes.STRING,
+        defaultValue: 'https://i.imgur.com/q6bwDGO.png'
+      },
+      cover: {
+        type: DataTypes.STRING,
+        defaultValue: 'https://i.imgur.com/Qqb0a7S.png'
+      },
       introduction: DataTypes.STRING,
       role: DataTypes.STRING
     },
