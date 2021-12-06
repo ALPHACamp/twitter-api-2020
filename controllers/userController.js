@@ -2,10 +2,14 @@
 const userService = require('../services/userService')
 
 const userController = {
-  signUp: (req, res) => {
-    userService.signUp(req, res, data => {
-      return res.json(data)
-    })
+  signUp: async (req, res) => {
+    try {
+      await userService.signUp(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   signIn: async (req, res) => {
@@ -18,16 +22,24 @@ const userController = {
     }
   },
 
-  putUserSetting: (req, res) => {
-    userService.putUserSetting(req, res, data => {
-      return res.json(data)
-    })
+  putUserSetting: async (req, res) => {
+    try {
+      await userService.putUserSetting(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
-  putUser: (req, res) => {
-    userService.putUser(req, res, data => {
-      return res.json(data)
-    })
+  putUser: async (req, res) => {
+    try {
+      await userService.putUser(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   getCurrentUser: (req, res) => {
@@ -36,10 +48,14 @@ const userController = {
     })
   },
 
-  getUser: (req, res) => {
-    userService.getUser(req, res, data => {
-      return res.json(data)
-    })
+  getUser: async (req, res) => {
+    try {
+      await userService.getUser(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   getUserTweets: (req, res) => {

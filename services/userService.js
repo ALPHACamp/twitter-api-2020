@@ -6,7 +6,7 @@ const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const imgur = require('imgur')
-const ReqError = require('../helps/ReqError')
+const ReqError = require('../helpers/ReqError')
 
 const userService = {
   signUp: async (req, res, callback) => {
@@ -14,21 +14,21 @@ const userService = {
 
     // 確認欄位是否皆有填寫
     if (!account || !name || !email || !password || !checkPassword) {
-      return callback({ status: 'error', message: '所有欄位皆為必填' })
+      throw new ReqError('所有欄位皆為必填')
     }
     // 確認密碼是否一致
     if (password !== checkPassword) {
-      return callback({ status: 'error', message: '兩次密碼不相同' })
+      throw new ReqError('兩次密碼不相同')
     }
 
     // 確認email或account是否重複
     const user = await User.findOne({ where: { [Op.or]: [{ email }, { account }] } })
     if (user) {
       if (user.email === email) {
-        return callback({ status: 'error', message: 'email已重覆註冊！' })
+        throw new ReqError('email已重覆註冊！')
       }
       if (user.account === account) {
-        return callback({ status: 'error', message: 'account已重覆註冊！' })
+        throw new ReqError('account已重覆註冊！')
       }
     } else {
       await User.create({
@@ -74,7 +74,7 @@ const userService = {
 
     // 確認當前使用者和欲修改使用者資料是相同的
     if (userId !== Number(req.params.id)) {
-      return callback({ status: 'error', message: '無法變更其他使用者資料' })
+      throw new ReqError('無法變更其他使用者資料')
     }
 
     // 確認欄位是否皆有填寫
@@ -84,17 +84,17 @@ const userService = {
 
     // 確認密碼是否一致
     if (password !== checkPassword) {
-      return callback({ status: 'error', message: '兩次密碼不相同' })
+      throw new ReqError('兩次密碼不相同')
     }
 
     // 確認email或account是否重複(要排除自己的)
     const check = await User.findOne({ where: { [Op.or]: [{ email }, { account }], [Op.not]: [{ id: userId }] } }) // 利用[Op.not]忽略自己email和account
     if (check) {
       if (check.email === email) {
-        return callback({ status: 'error', message: 'email已重覆註冊！' })
+        throw new ReqError('email已重覆註冊！')
       }
       if (check.account === account) {
-        return callback({ status: 'error', message: 'account已重覆註冊！' })
+        throw new ReqError('account已重覆註冊！')
       }
     } else {
       await User.update({
@@ -110,12 +110,12 @@ const userService = {
 
     // 確認當前使用者和欲修改使用者資料是相同的
     if (userId !== Number(req.params.id)) {
-      return callback({ status: 'error', message: '無法變更其他使用者資料' })
+      throw new ReqError('無法變更其他使用者資料')
     }
 
     // 確認name有填寫
     if (!req.body.name) {
-      return callback({ status: 'error', message: 'name為必填欄位' })
+      throw new ReqError('name為必填欄位')
     }
 
     // 如果有上傳圖片，就上傳到imgur中
@@ -159,13 +159,17 @@ const userService = {
       return callback(user)
     } else {
       // 取得其他使用者資訊(要有isFollowed => 利用SQL原生語法判斷)
-      const user = (await User.findByPk(userId, {
+      let user = await User.findByPk(userId, {
         attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
           [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
           [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed'],
           [sequelize.literal(`(select count(UserId) from Tweets where UserId = User.id)`), 'tweetsCounts']
         ]
-      })).toJSON()
+      })
+      if (!user) {
+        throw new ReqError('該使用者不存在，請重新查詢')
+      }
+      user = user.toJSON()
       return callback(user)
     }
   },
