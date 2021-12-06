@@ -124,36 +124,14 @@ const userService = {
 
   putUser: async (req, res, callback) => {
     try {
-      const { account, email } = req.body
-
-      // 不同人
       if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
         return callback({ status: 'error', message: '沒有編輯權限！' })
-      }
-
-      // account 已重覆
-      if (account && account !== helpers.getUser(req).account) {
-        const existUser = await User.findOne({
-          where: { account },
-          raw: true
-        })
-        if (existUser) return callback({ status: 'error', message: 'account 已重覆註冊！' })
-      }
-
-      // email 已重覆
-      if (email && email !== helpers.getUser(req).email) {
-        const existUser = await User.findOne({
-          where: { email },
-          raw: true
-        })
-        if (existUser) return callback({ status: 'error', message: 'email 已重覆註冊！' })
       }
 
       const user = await User.findByPk(req.params.id)
 
       const { files } = req
 
-      // 如果有圖
       if (files) {
         imgur.setClientID(IMGUR_CLIENT_ID)
         const uploadImg = file => {
@@ -176,6 +154,48 @@ const userService = {
       }
 
       await user.update({ ...req.body })
+      return callback({ status: 'success', message: '使用者資料編輯成功！' })
+    } catch (err) {
+      console.log(err)
+      return callback({ status: 'error', message: '編輯未成功！' })
+    }
+  },
+
+  putUserSetting: async (req, res, callback) => {
+    try {
+      const { name, account, email, password, checkPassword } = req.body
+      if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
+        return callback({ status: 'error', message: '沒有編輯權限！' })
+      }
+
+      if (account !== helpers.getUser(req).account) {
+        const existUser = await User.findOne({
+          where: { account },
+          raw: true
+        })
+        if (existUser) return callback({ status: 'error', message: 'account 已重覆註冊！' })
+      }
+
+      if (email !== helpers.getUser(req).email) {
+        const existUser = await User.findOne({
+          where: { email },
+          raw: true
+        })
+        if (existUser) return callback({ status: 'error', message: 'email 已重覆註冊！' })
+      }
+
+      if (password !== checkPassword) {
+        return callback({ status: 'error', message: '兩次密碼輸入不同！' })
+      }
+
+      const user = await User.findByPk(req.params.id)
+      await user.update({
+        name,
+        account,
+        email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      })
+
       return callback({ status: 'success', message: '使用者資料編輯成功！' })
     } catch (err) {
       console.log(err)
