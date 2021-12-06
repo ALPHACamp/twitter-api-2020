@@ -159,13 +159,17 @@ const userService = {
       return callback(user)
     } else {
       // 取得其他使用者資訊(要有isFollowed => 利用SQL原生語法判斷)
-      const user = (await User.findByPk(userId, {
+      let user = await User.findByPk(userId, {
         attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
           [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
           [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed'],
           [sequelize.literal(`(select count(UserId) from Tweets where UserId = User.id)`), 'tweetsCounts']
         ]
-      })).toJSON()
+      })
+      if (!user) {
+        throw new ReqError('該使用者不存在，請重新查詢')
+      }
+      user = user.toJSON()
       return callback(user)
     }
   },

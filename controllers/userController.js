@@ -48,10 +48,14 @@ const userController = {
     })
   },
 
-  getUser: (req, res) => {
-    userService.getUser(req, res, data => {
-      return res.json(data)
-    })
+  getUser: async (req, res) => {
+    try {
+      await userService.getUser(req, res, data => {
+        return res.json(data)
+      })
+    } catch (err) {
+      return res.status(400).json({ status: err.name, message: err.message })
+    }
   },
 
   getUserTweets: (req, res) => {
