@@ -13,7 +13,6 @@ const adminController = require('../controllers/api/adminController')
 const replyController = require('../controllers/api/replyController')
 const likeController = require('../controllers/api/likeController')
 const followshipController = require('../controllers/api/followshipController')
-const { follow } = require('../controllers/api/followshipController')
 
 /* authenticated */
 const authenticated = (req, res, next) => {
