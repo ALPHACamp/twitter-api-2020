@@ -281,12 +281,13 @@ let userController = {
         include: [
           {
             model: User, as: 'Followings',
-            attributes: [['id', 'followingId'], 'account', [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followerId = User.id)'),
+            attributes: [['id', 'followingId'], 'avatar', 'account', 'name', 'introduction', 'createdAt',
+            [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followerId = User.id)'),
               'isFollowed'
             ]]
           }
         ],
-        order: [[sequelize.literal('Followers.createdAt'), 'DESC']],
+        order: [[sequelize.literal('Followings.createdAt'), 'DESC']],
       })
       return res.json(followings[0].Followings)
     } catch (err) {
@@ -299,15 +300,18 @@ let userController = {
       const followers = await User.findAll({
         where: { id: req.params.id },
         attributes: ['account'],
-        include: [{
-          model: User, as: 'Followers',
-          attributes: [['id', 'followerId'], 'account', [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id)'),
-            'isFollowed'
-          ]]
-        }],
+        include: [
+          {
+            model: User, as: 'Followers',
+            attributes: [['id', 'followerId'], 'avatar', 'account', 'name', 'introduction', 'createdAt',
+            [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id)'),
+              'isFollowed'
+            ]]
+          }
+        ],
         order: [[sequelize.literal('Followers.createdAt'), 'DESC']],
       })
-      return res.json(followers[0].Followers) //followers[0].Followers
+      return res.json(followers[0].Followers)
     } catch (err) {
       console.log(err)
     }
