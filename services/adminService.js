@@ -13,15 +13,23 @@ const Followship = db.Followship;
 const adminService = {
   getUsers: (req, res, callback) => {
     return User.findAll()
-    .then(users => {
-      console.log(users[0])
-      callback({
-        users: users
+      .then(users => {
+        console.log(users[0])
+        callback({
+          users: users
+        })
       })
-    })
+  },
+  getTweets: (req, res, callback) => {
+    return Tweet.findAll({ include: [Reply, Like] })
+      .then(tweets => {
+        callback({
+          tweets: tweets
+        })
+      })
   },
   deleteTweet: (req, res, callback) => {
-    return Tweet.findByPk(req.params.id, {include:[Reply, Like]})
+    return Tweet.findByPk(req.params.id, { include: [Reply, Like] })
       .then((tweet) => {
         console.log('tweet.Replies', tweet.Replies)
         tweet.Replies.map(reply => {
