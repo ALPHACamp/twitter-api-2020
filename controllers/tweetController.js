@@ -2,9 +2,9 @@
 const tweetService = require('../services/tweetService')
 
 const tweetController = {
-  postTweet: (req, res) => {
+  postTweet: async (req, res) => {
     try {
-      tweetService.postTweet(req, res, data => {
+      await tweetService.postTweet(req, res, data => {
         return res.json(data)
       })
     } catch (err) {
