@@ -65,17 +65,23 @@ const adminController = {
   getUsers: (req, res) => {
     User.findAll({
       include: [
+        Tweet,
         Like,
         Reply,
-        { model: User, as: 'Followings' },
-        { model: User, as: 'Followers' }
+        { model: User, as: 'Followings', attributes: { exclude: ['password'] } },
+        { model: User, as: 'Followers', attributes: { exclude: ['password'] } }
       ],
-      order: [['name', 'ASC']]
+      attributes: { exclude: ['password'] }
     })
       .then(users => {
         users = users.filter(user => (
           !user.role.includes('admin')
         ))
+        users = users.map(user => ({
+          ...user.dataValues,
+          tweetCounts: user.dataValues.Tweets.length
+        }))
+        users = users.sort((a, b) => b.tweetCounts - a.tweetCounts)
         return res.json(users)
       })
   },
