@@ -95,6 +95,12 @@ const userController = {
     userService.getUserLikes(req, res, data => {
       return res.json(data)
     })
+  },
+
+  getCurrentUser: (req, res, callback) => {
+    userService.getCurrentUser(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 

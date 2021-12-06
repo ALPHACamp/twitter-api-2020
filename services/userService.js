@@ -372,6 +372,15 @@ const userService = {
         return callback(likes)
       })
     })
+  },
+
+  getCurrentUser: (req, res, callback) => {
+    return User.findByPk(helpers.getUser(req).id).then(user => {
+      if (!user) {
+        return callback({ status: 'error', message: '帳號不存在！' })
+      }
+      return callback(user)
+    })
   }
 }
 
