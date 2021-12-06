@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Like'
+    paranoid: true,
+    timestamps: true
+
   });
   Like.associate = function (models) {
     Like.belongsTo(models.User)
