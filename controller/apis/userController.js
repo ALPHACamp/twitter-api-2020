@@ -23,32 +23,33 @@ const JwtStrategy = passportJWT.Strategy
 const userController = {
   signIn: (req, res) => {
     // 檢查必要資料
-    if (!req.body.email || !req.body.password) {
-      return res.json({
-        status: 'error',
-        message: "required fields didn't exist"
-      })
+    if (!req.body.account || !req.body.password) {
+      return res
+        .status(401)
+        .json({ status: 'error',message: "required fields didn't exist" })
     }
-    User.findOne({ where: { email: req.body.email } }).then(user => {
-      if (!user)
+    User.findOne({ where: { account: req.body.account } }).then(user => {
+      if (!user) { //if user is not exist
         return res
           .status(401)
           .json({ status: 'error', message: 'user is not exist.' })
-      if (!bcrypt.compareSync(req.body.password, user.password)) {
-        return res
+      }
+      if (!bcrypt.compareSync(req.body.password, user.password)) { 
+        return res //if password not match
           .status(401)
           .json({ status: 'error', message: 'email or password incorrect.' })
       }
       // 簽發 token
       var payload = { id: user.id }
       var token = jwt.sign(payload, process.env.JWT_SECRET)
-      return res.json({
+      return res.status(200).json({
         status: 200,
         message: 'pass',
         token: token,
         user: {
           id: user.id,
           name: user.name,
+          account: user.account,
           email: user.email,
           role: user.role,
           avatar: user.avatar
@@ -56,7 +57,6 @@ const userController = {
       })
     })
   },
-
   signUp: async (req, res, cb) => {
     if (req.body.checkPassword !== req.body.password) {
       return res.json({ status: 'error', message: '兩次密碼輸入不相同！' })
@@ -115,7 +115,6 @@ const userController = {
         raw: true,
         nest: true
       })
-      
       const followship = await Followship.findOne({
         where: {
           followerId: helper.getUser(req).id,
@@ -123,7 +122,6 @@ const userController = {
         }
       })
       const isFollowed = followship ? true : false
-
       if (userProfile.role === 'Admin') { //防止使用者搜尋Admin
         return res.status(401).json({ status: 'error', message: 'User is not exist' })
       }
