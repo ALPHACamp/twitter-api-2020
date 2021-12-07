@@ -417,19 +417,19 @@ const userService = {
   getFollowers: (req, res, callback) => {
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followers' }]
-        .then(user => {
-          const followersCount = user.Followers.length
-          return callback({ user: user, followersCount: followersCount })
-        })
     })
+      .then(user => {
+        const followersCount = user.Followers.length
+        return callback({ user: user, followersCount: followersCount })
+      })
   },
   getFollowings: (req, res, callback) => {
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followings' }]
-        .then(user => {
-          const followingsCount = user.Followings.length
-          return callback({ user: user, followingsCount: followingsCount })
-        })
+    })
+    .then(user => {
+      const followingsCount = user.Followings.length
+      return callback({ user: user, followingsCount: followingsCount })
     })
   },
   deleteAllUsers: (req, res, callback) => {
