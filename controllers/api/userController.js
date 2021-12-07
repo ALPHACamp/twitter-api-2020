@@ -393,7 +393,8 @@ let userController = {
               'createdAt',
               [
                 sequelize.literal(
-                  'EXISTS (SELECT * FROM Followships WHERE Followships.followerId = User.id)'
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+                  }  AND Followships.followingId = User.id )`
                 ),
                 'isFollowed'
               ]
@@ -426,7 +427,8 @@ let userController = {
               'createdAt',
               [
                 sequelize.literal(
-                  'EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id)'
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+                  }  AND Followships.followingId = User.id )`
                 ),
                 'isFollowed'
               ]
