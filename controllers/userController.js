@@ -214,8 +214,8 @@ const userController = {
         replyCounts: userTweets.dataValues.Replies.length,
         isLike: helpers.getUser(req).Likes
           ? helpers
-              .getUser(req)
-              .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
+            .getUser(req)
+            .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
           : false
       }))
       return res.status(200).json(results)
@@ -284,6 +284,34 @@ const userController = {
     } catch (error) {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
+    }
+  },
+  getUsersFollowings: async (req, res) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          {
+            model: User, as: 'Followings'
+          },
+        ]
+      })
+
+      const result = user.dataValues.Followings.map((result) => ({
+        followingId: result.dataValues.id,
+        account: result.dataValues.account,
+        name: result.dataValues.name,
+        avatar: result.dataValues.avatar,
+        introduction: result.dataValues.introduction,
+        isFollowing: user
+          .Followings.some((user) => user.dataValues.id === result.dataValues.id)
+      }))
+
+      return res.status(200).json(result)
+    } catch (error) {
+      console.log(error)
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'service error!' })
     }
   }
 }
