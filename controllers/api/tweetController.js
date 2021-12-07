@@ -7,18 +7,37 @@ const { Op } = Sequelize
 const tweetController = {
   getTweets: async (req, res) => {
     try {
-      const data = await Tweet.findAll({
-        include: [User, { model: User, as: 'LikedUsers' }],
-        order: [['createdAt', 'DESC']]
+      let tweets = await Tweet.findAll({
+        attributes: [
+          ['id', 'TweetId'],
+          'createdAt',
+          'description',
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.tweetId = Tweet.id)'
+            ),
+            'LikesCount'
+          ],
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.tweetId = Tweet.id)'
+            ),
+            'RepliesCount'
+          ]
+        ],
+        group: 'TweetId',
+        include: [
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-      const tweets = await data.map((tweet) => ({
-        ...tweet.dataValues,
-        name: tweet.User.name,
-        avatar: tweet.User.avatar,
-        account: tweet.User.account,
-        isLiked: tweet.LikedUsers.map((i) => i.id).includes(
-          helpers.getUser(req).id
-        )
+      tweets = tweets.map((tweet) => ({
+        ...tweet,
+        isLiked: req.user.LikedTweets
+          ? req.user.LikedTweets.map((like) => like.id).includes(tweet.TweetId)
+          : null
       }))
       return res.json(tweets)
     } catch (err) {
@@ -63,14 +82,20 @@ const tweetController = {
           'description',
           'createdAt',
           'updatedAt',
-          [Sequelize.literal('count(distinct Likes.id)'), 'likeCounts'],
-          [Sequelize.literal('count(distinct Replies.id)'), 'replyCounts']
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.tweetId = Tweet.id)'
+            ),
+            'LikesCount'
+          ],
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.tweetId = Tweet.id)'
+            ),
+            'RepliesCount'
+          ]
         ],
-        include: [
-          { model: User, attributes: ['name', 'avatar', 'account'] },
-          { model: Reply, attributes: [] },
-          { model: Like, attributes: [] }
-        ]
+        include: [{ model: User, attributes: ['name', 'avatar', 'account'] }]
       })
 
       if (!tweet) {
