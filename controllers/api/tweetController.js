@@ -7,18 +7,36 @@ const { Op } = Sequelize
 const tweetController = {
   getTweets: async (req, res) => {
     try {
-      const data = await Tweet.findAll({
-        include: [User, { model: User, as: 'LikedUsers' }],
-        order: [['createdAt', 'DESC']]
+      let tweets = await Tweet.findAll({
+        attributes: [
+          'id',
+          'description',
+          'createdAt',
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Tweets inner join Likes on Tweets.id = Likes.TweetId where Tweets.UserId = User.id)'
+            ),
+            'LikesCount'
+          ],
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Tweets inner join Replies on Tweets.id = Replies.TweetId where Tweets.UserId = User.id)'
+            ),
+            'RepliesCount'
+          ]
+        ],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-      const tweets = await data.map((tweet) => ({
-        ...tweet.dataValues,
-        name: tweet.User.name,
-        avatar: tweet.User.avatar,
-        account: tweet.User.account,
-        isLiked: tweet.LikedUsers.map((i) => i.id).includes(
-          helpers.getUser(req).id
-        )
+      tweets = tweets.map((tweet) => ({
+        ...tweet,
+        isLiked: req.user.LikedTweets
+          ? req.user.LikedTweets.map((like) => like.id).includes(tweet.TweetId)
+          : null
       }))
       return res.json(tweets)
     } catch (err) {
