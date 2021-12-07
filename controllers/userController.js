@@ -285,6 +285,26 @@ const userController = {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
     }
+  },
+
+  getUserFollowers: async (req, res) => {
+    try {
+      const followers = (await User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers', attributes: [['id', 'followerId'], 'name', 'account', 'introduction', 'avatar'] }] })).toJSON()
+      const results = followers.Followers.map(data => {
+        const result = {
+          followingId: data.followingId,
+          name: data.name,
+          account: data.account,
+          introduction: data.introduction,
+          avatar: data.avatar,
+          isFollowing: helpers.getUser(req).Followings.some(user => user.id === data.id)
+        }
+        return result
+      })
+      return res.status(200).json(results)
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
