@@ -9,7 +9,7 @@ module.exports = {
       const users = await User.findAll({ where: { role: 'user' } })
       const tweets = await Tweet.findAll()
     await queryInterface.bulkInsert('Replies',
-        Array.from({ length: 30 }).map((d, i) =>
+        Array.from({ length: 150 }).map((d, i) =>
             ({
                 id: i * 10 + 1,
                 TweetId: tweets[parseInt(i / 3)].id,
