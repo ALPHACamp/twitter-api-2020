@@ -8,7 +8,7 @@ const User = db.User
 const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
-const { Op } = require("sequelize");
+const { Op } = require('sequelize')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -27,18 +27,22 @@ const userController = {
     if (!req.body.account || !req.body.password) {
       return res
         .status(400)
-        .json({ status: 'error',message: "required fields didn't exist" })
+        .json({ status: 'error', message: "required fields didn't exist" })
     }
     User.findOne({ where: { account: req.body.account } }).then(user => {
-      if (!user) { //if user is not exist
+      if (!user) {
+        //if user is not exist
         return res
           .status(400)
           .json({ status: 'error', message: 'user is not exist.' })
       }
-      if (!bcrypt.compareSync(req.body.password, user.password)) { 
+      if (!bcrypt.compareSync(req.body.password, user.password)) {
         return res //if password not match
           .status(400)
           .json({ status: 'error', message: 'email or password incorrect.' })
+      }
+      if (user.role === 'admin') {
+        return res.status(400).json({ message: '請使用管理員登錄系統' })
       }
       // 簽發 token
       var payload = { id: user.id }
@@ -59,19 +63,27 @@ const userController = {
     })
   },
   signUp: async (req, res, cb) => {
-    const { account ,name, email, password, checkPassword } = req.body
+    const { account, name, email, password, checkPassword } = req.body
     if (!account || !name || !email || !password || !checkPassword) {
-      return res.status(400).json({ status: 'error', message: '所有欄位都是必填。' })
+      return res
+        .status(400)
+        .json({ status: 'error', message: '所有欄位都是必填。' })
     }
     if (checkPassword !== password) {
-      return res.status(400).json({ status: 'error', message: '兩次密碼輸入不相同！' })
+      return res
+        .status(400)
+        .json({ status: 'error', message: '兩次密碼輸入不相同！' })
     }
     try {
-      const user = await User.findOne({ 
-        where: { [Op.or]: [{email: req.body.email}, {account: req.body.account}] } 
+      const user = await User.findOne({
+        where: {
+          [Op.or]: [{ email: req.body.email }, { account: req.body.account }]
+        }
       })
       if (user) {
-        return res.status(400).json({ status: 'error', message: '信箱或帳號重複！' })
+        return res
+          .status(400)
+          .json({ status: 'error', message: '信箱或帳號重複！' })
       }
     } catch (err) {
       console.log(err)
@@ -128,8 +140,11 @@ const userController = {
         }
       })
       const isFollowed = followship ? true : false
-      if (userProfile.role === 'Admin') { //防止使用者搜尋Admin
-        return res.status(400).json({ status: 'error', message: 'User is not exist' })
+      if (userProfile.role === 'Admin') {
+        //防止使用者搜尋Admin
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'User is not exist' })
       }
       return res.status(200).json({ ...userProfile, isFollowed })
     } catch (err) {
@@ -139,12 +154,12 @@ const userController = {
   },
   getUsers: async (req, res, cb) => {
     try {
-      const users = await User.findAll({ 
+      const users = await User.findAll({
         raw: true,
         nest: true,
         where: { role: null }
       })
-      return res.status(200).json({ status: 200, message: 'success', users})
+      return res.status(200).json({ status: 200, message: 'success', users })
     } catch (err) {
       console.log(err)
       return res.status(400).json({ status: 'error', message: err })
@@ -314,7 +329,8 @@ const userController = {
         raw: true,
         nest: true
       })
-      const followingUsers = await Followship.findAll({ //find currentUser'followings
+      const followingUsers = await Followship.findAll({
+        //find currentUser'followings
         where: { followerId: helper.getUser(req).id },
         attributes: ['followingId'],
         raw: true,
@@ -330,7 +346,9 @@ const userController = {
         isFollowed: followingIds.includes(u.Followings.id) //compare status with currentUser and User
       }))
       if (!user) {
-        return res.status(400).json({ status: 400, message: 'cannot find user' })
+        return res
+          .status(400)
+          .json({ status: 400, message: 'cannot find user' })
       }
       return res.status(200).json(following)
     } catch (err) {
@@ -349,10 +367,12 @@ const userController = {
           }
         ],
         raw: true,
-        nest: true,
+        nest: true
       })
       if (!user) {
-        return res.status(400).json({ status: 400, message: 'cannot find user' })
+        return res
+          .status(400)
+          .json({ status: 400, message: 'cannot find user' })
       }
       const followingUsers = await Followship.findAll({
         where: { followerId: helper.getUser(req).id },

@@ -35,7 +35,8 @@ const tweetController = {
         ],
         raw: true,
         nest: true,
-        group: ['Tweet.id']
+        group: ['Tweet.id'],
+        order: [['createdAt', 'DESC']]
       })
       const likedArray = await Like.findAll({
         where: { UserId: helper.getUser(req).id },
