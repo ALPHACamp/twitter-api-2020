@@ -12,6 +12,12 @@ const adminController = {
     }
   },
 
+  getAdminCurrentUser: (req, res) => {
+    adminService.getAdminCurrentUser(req, res, data => {
+      return res.json(data)
+    })
+  },
+
   getAllTweets: (req, res) => {
     adminService.getAllTweets(req, res, data => {
       return res.json(data)
