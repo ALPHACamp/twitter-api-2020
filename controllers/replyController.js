@@ -9,7 +9,6 @@ const replyController = {
         TweetId: Number(req.params.tweet_id),
         comment: req.body.comment
       })
-      await Reply.findAll({ raw: true, nest: true })
       res.status(200).json({ status: 'success', message: '成功回覆貼文' })
     } catch (error) {
       console.log(error)
@@ -19,7 +18,7 @@ const replyController = {
   getTweetReply: async (req, res) => {
     try {
       const tweetid = Number(req.params.tweet_id)
-      const replies = await Reply.findAll({ raw: true, nest: true, where: { tweetid: tweetid }, include: [{ model: User }] })
+      const replies = await Reply.findAll({ raw: true, nest: true, where: { tweetid: tweetid }, include: [{ model: User }], order: [['createdAt', 'DESC']] })
 
       const results = replies.map(data => ({
         id: data.id,
@@ -32,8 +31,6 @@ const replyController = {
         comment: data.comment,
         createdAt: data.createdAt
       }))
-
-      results.sort((a, z) => z.createdAt - a.createdAt)
 
       return res.status(200).json(results)
     } catch (error) {

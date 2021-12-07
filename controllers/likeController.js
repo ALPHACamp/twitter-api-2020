@@ -9,6 +9,7 @@ const likeController = {
         await Like.destroy({ where: { TweetId: Number(req.params.id) } })
         return res.status(200).json({ status: 'success', message: '成功取消喜歡' })
       } else {
+        // filter out the scenario that trying to alter others following list
         return res.status(401).json({ status: 'error', message: '無法變更其他使用者的Profile' })
       }
     } catch (error) {
