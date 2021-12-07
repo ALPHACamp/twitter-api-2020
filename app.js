@@ -1,11 +1,12 @@
 const express = require('express')
 const helpers = require('./_helpers');
 const routes = require('./routes')
-
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 
 
+router.use(cors())
 if (process.env.NODE_ENV !== "production") {
   require('dotenv').config()
 }
