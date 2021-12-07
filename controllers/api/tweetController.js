@@ -82,14 +82,20 @@ const tweetController = {
           'description',
           'createdAt',
           'updatedAt',
-          [Sequelize.literal('count(distinct Likes.id)'), 'likeCounts'],
-          [Sequelize.literal('count(distinct Replies.id)'), 'replyCounts']
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.tweetId = Tweet.id)'
+            ),
+            'LikesCount'
+          ],
+          [
+            Sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.tweetId = Tweet.id)'
+            ),
+            'RepliesCount'
+          ]
         ],
-        include: [
-          { model: User, attributes: ['name', 'avatar', 'account'] },
-          { model: Reply, attributes: [] },
-          { model: Like, attributes: [] }
-        ]
+        include: [{ model: User, attributes: ['name', 'avatar', 'account'] }]
       })
 
       if (!tweet) {
