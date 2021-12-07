@@ -1,0 +1,67 @@
+<div class="row row-cols-1 row-cols-md-2">
+  <div class="col mb-4">
+    <div class="card">
+      <img src="{{paramsId}}" class="card-img-top" alt="..." style="width: 300px;">
+      <img src="{{paramsId}}" class="card-img-top" alt="..."
+        style="max-width: 80px; max-height: 80px; border-radius: 50%;">
+      <div class="card-body">
+        <h5 class="card-title">使用者帳號 : {{paramsId}} </h5>
+        <p class="card-text">內容:{{paramsId}}</p>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">推文者的 id {{paramsId}}</li>
+        <li class="list-group-item">推文者的名字 {{ paramsId}}</li>
+        <li class="list-group-item d-flex justify-content-around">
+          <div class="left">
+            <span>{{this.Replies.length}} 位跟隨中
+            </span>
+          </div>
+          <div class="right inline-block">
+            <span>{{this.Replies.length}} 位跟隨者
+            </span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <ul class="nav nav-tabs mt-2">
+      <li class="nav-item">
+        <a class="nav-link " href="/users/{{paramsId}}/tweets">推文</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="/users/{{paramsId}}/replies">回覆</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/users/{{paramsId}}/likes">喜歡的推文</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3">
+  {{!-- {{#each tweets}} --}}
+  {{#each tweets}}
+  <div class="card m-3" style="width: 18rem;">
+    <a href="http:/users/{{this.UserId}}">
+      {{!-- <img src="{{this.User.cover}}" class="card-img-top" alt="..."> --}}
+      <img src="{{this.User.avatar}}" class="card-img-top" alt="..."
+        style="max-width: 80px; max-height: 80px; border-radius: 50%;">
+    </a>
+    <div class="card-body">
+      <h5 class="card-title">留言編號:{{this.id}} </h5>
+      <p class="card-text">內容:{{this.comment}}</p>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">推文的時間 {{this.createdAt}}</li>
+      <li class="list-group-item">推文者的帳號 @{{this.User.account}}</li>
+      <li class="list-group-item">推文者的名字 {{ this.User.name}}</li>
+      <li class="list-group-item">回覆給 {{ this.Tweet.User.account}}</li>
+    </ul>
+    <div class="card-body">
+      <a href="/users/{{paramsId}}" class="card-link">profile</a>
+      <a href="/users/{{paramsId}}/edit" class="card-link">edit</a>
+      <a href="/tweets/{{paramsId}}" class="card-link">tweet</a>
+    </div>
+ 
+  </div>
+  {{/each}}
+</div>

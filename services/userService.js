@@ -309,12 +309,12 @@ const userService = {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     return Tweet.findAll({
       where: {
-        UserId: Number(req.params.userId)
+        UserId: Number(req.params.userId),
       },
       order: [["createdAt", "DESC"]],
       include: [User, Reply, Like],
     }).then((tweets) => {
-      console.log(tweets)
+      let paramsId = req.params.userId;
       let newTweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
         isLike = !isLike ? false : isLike.isLike;
@@ -326,9 +326,91 @@ const userService = {
           isLike: isLike,
         };
       });
-      callback({ tweets: newTweets });
+      callback({ tweets: newTweets, paramsId: paramsId });
+    });
+  },
+  getUserReplies: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    let paramsId = req.params.userId;
+    return Reply.findAll({
+      where: {
+        UserId: Number(req.params.userId),
+      },
+      order: [["createdAt", "DESC"]],
+      include: [User, { model: Tweet, include: [User] }],
+    }).then((tweets) => {
+      tweets.map((d) => {
+        d.User = {
+          UserId: d.User.id,
+          avatar: d.User.avatar,
+          name: d.User.name,
+          account: d.User.account,
+          introduction: d.User.introduction,
+          createdAt: d.User.createdAt,
+        };
+        return d;
+      });
+      return callback({ tweets: tweets, paramsId: paramsId });
+    });
+  },
+  getUserLike: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    let paramsId = req.params.userId;
+    return Promise.all([
+      User.findByPk(req.params.userId),
+      Like.findAll({
+        // raw:true,
+        // nest:true,
+        where: {
+          UserId: Number(req.params.userId),
+          isLike: true,
+        },
+        order: [["createdAt", "DESC"]],
+        include: [User, { model: Tweet, include: [User, Reply, Like] }],
+      }),
+    ]).then(([user, tweets]) => {
+      tweets.map((d) => {
+        let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
+          currentUser.id
+        );
+        return Object.assign(d, {
+          tweetReplyCount: d.Tweet.Replies.length,
+          tweetLikeCount: d.Tweet.Likes.length,
+          isLike: isLike,
+        });
+      });
+      return callback({ tweets: tweets, user: user });
     });
   },
 };
 
 module.exports = userService
+
+//  getUserLike: (req, res, callback) => {
+//     const currentUser = req.user ? req.user : helpers.getUser(req);
+//     let paramsId = req.params.userId;
+//     return Like.findAll({
+//       // raw:true,
+//       // nest:true,
+//       where: {
+//         UserId: Number(req.params.userId),
+//         isLike: true,
+//       },
+//       order: [["createdAt", "DESC"]],
+//       include: [User, { model: Tweet, include: [User, Reply, Like] }],
+//     }).then((tweets) => {
+//       tweets.map((d) => {
+//         let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(currentUser.id);
+//         return Object.assign(d, {
+//           tweetReplyCount: d.Tweet.Replies.length,
+//           tweetLikeCount: d.Tweet.Likes.length,
+//           isLike: isLike,
+//         });
+//       });
+//       return callback({ tweets: tweets, paramsId: paramsId });
+//       // return res.render("userLikeTweets", {
+//       //   tweets: tweets,
+//       //   paramsId: paramsId,
+//       // });
+//     });
+//  }

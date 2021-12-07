@@ -38,8 +38,10 @@ router.get("/users/:id", authenticated, userController.getUser);
 router.put("/users/:id", upload.single('cover'), authenticated, userController.putUser);
 //  查詢user的所有推文
 router.get('/users/:userId/tweets', authenticated,upload.single('cover'), userController.getUserTweets)
-//  查詢user的所有留言
-// router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
+//  Add a route for querying all messages of users
+router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
+// 查詢user的所有likes的推文
+router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
 
 // router.put("/users/:id", userController.putUser);
 // router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 

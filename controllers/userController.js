@@ -202,23 +202,16 @@ const userController = {
     });
   },
   getUserReplies: (req, res) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Reply.findAll({
-      where: {
-        UserId: req.params.id
-      },
-      order: [['createdAt', 'DESC']],
-      include: [Tweet]
-    }).then(tweet => {
-      console.log(tweet.length)
-      return res.render("replyTweets", { user: currentUser });
-    })
+    userService.getUserReplies(req, res, (data) => {
+      return res.render("userReplies", data);
+    });
   },
-  // getUserReplies: (req, res) => {
-  //   userService.getUserTweets(req, res, (data) => {
-  //     return res.render("profile", data);
-  //   });
-  // },
+  getUserLikes: (req, res) => {
+    userService.getUserLike(req, res, (data) => {
+      return res.render("userLikeTweets", data);
+    });
+  },
+
   addLike: (req, res) => {
     userService.addLike(req, res, (data) => {
       return res.redirect("back");
@@ -229,16 +222,15 @@ const userController = {
       return res.redirect("back");
     });
   },
-  getUserSetting: (req, res) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    if (currentUser.id !== req.params.userId) {
-      return res.redirect('back')
-    }
-    return findOne({ where: { UserId: currentUser.id} })
-    .then(user => {
-       return res.render('setting', { user: user })
-      })
-  }
+  // getUserSetting: (req, res) => {
+  //   const currentUser = req.user ? req.user : helpers.getUser(req);
+  //   if (currentUser.id !== req.params.userId) {
+  //     return res.redirect("back");
+  //   }
+  //   return findOne({ where: { UserId: currentUser.id } }).then((user) => {
+  //     return res.render("setting", { user: user });
+  //   });
+  // },
 };
 
 module.exports = userController

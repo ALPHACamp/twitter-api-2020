@@ -96,36 +96,46 @@ let userController = {
   },
   putUser: (req, res) => {
     userService.putUser(req, res, (data) => {
-      return res.json(data)
-    }) 
+      return res.json(data);
+    });
   },
   addLike: (req, res) => {
     userService.addLike(req, res, (data) => {
-      return res.json(data)
-    })
+      return res.json(data);
+    });
   },
   removeLike: (req, res) => {
     userService.removeLike(req, res, (data) => {
-      return res.json(data)
-    })
+      return res.json(data);
+    });
   },
   addFollowing: (req, res) => {
     userService.addFollowing(req, res, (data) => {
-      return res.json(data)
-    })
+      return res.json(data);
+    });
   },
   removeFollowing: (req, res) => {
     userService.removeFollowing(req, res, (data) => {
-      return res.json(data)
-    })
+      return res.json(data);
+    });
   },
   getUserTweets: (req, res) => {
-  userService.getUserTweets(req, res, (data) => {
-    return res.json(data)
-  })
+    userService.getUserTweets(req, res, (data) => {
+      return res.json(data);
+    });
+  },
+  getUserReplies: (req, res) => {
+    userService.getUserReplies(req, res, (data) => {
+      return res.json(data);
+    });
+  },
+  getUserLikes: (req, res) => {
+    userService.getUserReplies(req, res, (data) => {
+      return res.json(data);
+    });
   },
   getCurrentUser: (req, res) => {
-    console.log(req.user)
+    console.log(req.user);
     return res.json({
       id: req.user.id,
       name: req.user.name,
@@ -134,8 +144,8 @@ let userController = {
       avatar: req.user.avatar,
       cover: req.user.cover,
       introduction: req.user.introduction,
-      role: req.user.role
-    })
+      role: req.user.role,
+    });
   },
 };
 

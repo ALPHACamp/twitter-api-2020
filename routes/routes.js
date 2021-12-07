@@ -72,6 +72,9 @@ router.put('/users/:id', authenticated, upload.single('cover'), userController.p
 router.get('/users/:userId/tweets', authenticated,upload.single('cover'), userController.getUserTweets)
 //  查詢user的所有留言
 router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
+// 查詢user的所有likes的推文
+router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
+
 // router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
 // <--可以傳一個陣列 FILE
 
