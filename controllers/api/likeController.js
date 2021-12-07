@@ -7,9 +7,20 @@ const helpers = require('../../_helpers')
 const likeController = {
   like: async (req, res) => {
     try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.id
+      const likeStatusCheck = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+      if (likeStatusCheck) {
+        res.json({
+          status: 'error',
+          message: "You've already liked this tweet!"
+        })
+      }
       await Like.create({
-        UserId: helpers.getUser(req).id,
-        TweetId: req.params.id
+        UserId,
+        TweetId
       })
       return res.json({
         status: 'success',
