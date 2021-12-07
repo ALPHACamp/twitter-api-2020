@@ -319,7 +319,6 @@ const userService = {
       include: [User, Reply, Like],
       })
     ]).then(([user, tweets]) => {
-      // let paramsId = req.params.userId;
       let newTweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
         isLike = !isLike ? false : isLike.isLike;
