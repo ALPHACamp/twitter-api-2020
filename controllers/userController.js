@@ -285,6 +285,40 @@ const userController = {
       console.log(error)
       return res.status(500).json({ status: 'error', message: 'Server error' })
     }
+  },
+
+  getUserFollowers: async (req, res) => {
+    try {
+      const followers = (await User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'introduction', 'avatar'] }] })).toJSON()
+
+      const results = followers.Followers.map(data => {
+        const result = {
+          followerId: data.id,
+          name: data.name,
+          account: data.account,
+          introduction: data.introduction,
+          avatar: data.avatar,
+          isFollowing: helpers.getUser(req).Followings.some(user => user.id === data.id)
+        }
+        return result
+      })
+
+      // move isFollowing = true to the top
+      results.sort((a, z) => z.isFollowing - a.isFollowing)
+
+      // move myself to the top
+      const findMyself = results.findIndex(data => data.followerId === helpers.getUser(req).id)
+      if (findMyself !== -1) {
+        const myself = results[findMyself]
+        results.splice(findMyself, 1)
+        results.unshift(myself)
+      }
+
+      return res.status(200).json(results)
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: 'Server error' })
+    }
   }
 }
 
