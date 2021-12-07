@@ -12,7 +12,7 @@ const Followship = db.Followship;
 
 const adminService = {
   getUsers: (req, res, callback) => {
-    return User.findAll()
+    return User.findAll({ include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, Tweet] })
       .then(users => {
         console.log(users[0])
         callback({
@@ -20,8 +20,21 @@ const adminService = {
         })
       })
   },
+  getUser: (req, res, callback) => {
+    return User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, Tweet] })
+      .then(user => {
+        console.log(user[0])
+        const followersCount = user.Followers.length
+        const followingsCount = user.Followings.length
+        const tweetsCount = Tweet.length
+        const likeCount = Like.length
+        callback({
+          user: user, followersCount: followersCount, followingsCount: followingsCount, tweetsCount: tweetsCount, likeCount: likeCount
+        })
+      })
+  },
   getTweets: (req, res, callback) => {
-    return Tweet.findAll({ include: [Reply, Like] })
+    return Tweet.findAll({ include: [Reply, Like, User] })
       .then(tweets => {
         callback({
           tweets: tweets
@@ -41,7 +54,7 @@ const adminService = {
             callback({ status: 'success', message: '' })
           })
       })
-  }
+  },
 }
 
 module.exports = adminService

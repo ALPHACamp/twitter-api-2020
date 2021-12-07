@@ -390,7 +390,7 @@ const userService = {
       include: [{ model: User, as: 'Followers' }]
         .then(user => {
           const followersCount = user.Followers.length
-          return callback({user: user, followersCount: followersCount})
+          return callback({ user: user, followersCount: followersCount })
         })
     })
   },
@@ -403,8 +403,29 @@ const userService = {
         })
     })
   },
-  getFollowedUsers: (req, res, callback) => {
-    //撈出這個使用者
+  deleteAllUsers: (req, res, callback) => {
+    User.destroy({
+      where: {},
+      truncate: true
+    }).then(() => {
+      callback({status:"success", message: "all users killed"})
+    })
+  },
+  deleteAllTweets: (req, res, callback) => {
+    Tweet.destroy({
+      where: {},
+      truncate: true
+    }).then(() => {
+      callback({ status: "success", message: "all tweets killed" })
+    })
+  },
+  deleteAllReplies: (req, res, callback) => {
+    Reply.destroy({
+      where: {},
+      truncate: true
+    }).then(() => {
+      callback({ status: "success", message: "all replies killed" })
+    })
   }
 };
 
