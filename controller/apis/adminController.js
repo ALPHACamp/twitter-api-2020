@@ -3,13 +3,57 @@ const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
 const helper = require('../../_helpers')
+const jwt = require('jsonwebtoken')
 const { sequelize } = require('../../models')
+const bcrypt = require('bcryptjs')
 
 const adminController = {
+  signIn: (req, res) => {
+    // 檢查必要資料
+    if (!req.body.account || !req.body.password) {
+      return res
+        .status(400)
+        .json({ status: 'error', message: "required fields didn't exist" })
+    }
+    User.findOne({ where: { account: req.body.account } }).then(user => {
+      if (!user) {
+        //if user is not exist
+        return res
+          .status(400)
+          .json({ status: 'error', message: 'user is not exist.' })
+      }
+      if (!bcrypt.compareSync(req.body.password, user.password)) {
+        return res //if password not match
+          .status(400)
+          .json({ status: 'error', message: 'email or password incorrect.' })
+      }
+      if (user.role !== 'admin') {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '不允許一般用戶登錄！' })
+      }
+      // 簽發 token
+      var payload = { id: user.id }
+      var token = jwt.sign(payload, process.env.JWT_SECRET)
+      return res.status(200).json({
+        status: 200,
+        message: 'pass',
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          account: user.account,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar
+        }
+      })
+    })
+  },
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        where: { role: null},
+        where: { role: null },
         raw: true,
         nest: true,
         include: [
@@ -21,8 +65,19 @@ const adminController = {
           [sequelize.col('User.name'), 'name'],
           [sequelize.col('User.cover'), 'cover'],
           [sequelize.col('User.avatar'), 'avatar'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('likes.id'))), 'likesCount'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('tweets.id'))), 'tweetsCount'],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'
+            ),
+            'likeCount'
+          ],
+          [
+            sequelize.fn(
+              'COUNT',
+              sequelize.fn('DISTINCT', sequelize.col('tweets.id'))
+            ),
+            'tweetsCount'
+          ],
           [
             sequelize.literal(
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)`
@@ -34,7 +89,7 @@ const adminController = {
               `(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)`
             ),
             `followersCount`
-          ],
+          ]
         ],
         group: ['User.id'],
         order: [
