@@ -124,24 +124,41 @@ let userController = {
   getUser: async (req, res) => {
     try {
       const user = await User.findByPk(req.params.id, {
-        attributes: [['id', 'UserId'], 'avatar', 'account', 'name', 'cover', 'introduction', 'role',
-        [
-          sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'),
-          'TweetCount'
-        ],
-        [
-          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
-          'FollowingsCount'
-        ],
-        [
-          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
-          'FollowersCount'
-        ],
-        [
-          sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id}  AND Followships.followingId = User.id )`),
-          'isFollowed'
+        attributes: [
+          ['id', 'UserId'],
+          'avatar',
+          'account',
+          'name',
+          'cover',
+          'introduction',
+          'role',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'
+            ),
+            'TweetCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
+            ),
+            'FollowingsCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'
+            ),
+            'FollowersCount'
+          ],
+          [
+            sequelize.literal(
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                helpers.getUser(req).id
+              }  AND Followships.followingId = User.id )`
+            ),
+            'isFollowed'
+          ]
         ]
-        ],
       })
       if (!user) {
         return res.json({ status: 'error', message: 'no such user found' })
@@ -264,7 +281,7 @@ let userController = {
       console.log(err)
     }
   },
-    
+
   // 編輯帳號資料
   putUserSetting: async (req, res) => {
     try {
@@ -328,7 +345,7 @@ let userController = {
       console.log(err)
     }
   },
-    
+
   //跟隨者 (followers) 數量排列前 10 的使用者推薦名單
   getTop: async (req, res) => {
     try {
@@ -371,14 +388,25 @@ let userController = {
         attributes: ['account'],
         include: [
           {
-            model: User, as: 'Followings',
-            attributes: [['id', 'followingId'], 'avatar', 'account', 'name', 'introduction', 'createdAt',
-            [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followerId = User.id)'),
-              'isFollowed'
-            ]]
+            model: User,
+            as: 'Followings',
+            attributes: [
+              ['id', 'followingId'],
+              'avatar',
+              'account',
+              'name',
+              'introduction',
+              'createdAt',
+              [
+                sequelize.literal(
+                  'EXISTS (SELECT * FROM Followships WHERE Followships.followerId = User.id)'
+                ),
+                'isFollowed'
+              ]
+            ]
           }
         ],
-        order: [[sequelize.literal('Followings.createdAt'), 'DESC']],
+        order: [[sequelize.literal('Followings.createdAt'), 'DESC']]
       })
       return res.json(followings[0].Followings)
     } catch (err) {
@@ -393,14 +421,25 @@ let userController = {
         attributes: ['account'],
         include: [
           {
-            model: User, as: 'Followers',
-            attributes: [['id', 'followerId'], 'avatar', 'account', 'name', 'introduction', 'createdAt',
-            [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id)'),
-              'isFollowed'
-            ]]
+            model: User,
+            as: 'Followers',
+            attributes: [
+              ['id', 'followerId'],
+              'avatar',
+              'account',
+              'name',
+              'introduction',
+              'createdAt',
+              [
+                sequelize.literal(
+                  'EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id)'
+                ),
+                'isFollowed'
+              ]
+            ]
           }
         ],
-        order: [[sequelize.literal('Followers.createdAt'), 'DESC']],
+        order: [[sequelize.literal('Followers.createdAt'), 'DESC']]
       })
       return res.json(followers[0].Followers)
     } catch (err) {
@@ -412,23 +451,40 @@ let userController = {
   getLikes: async (req, res) => {
     try {
       const like = await Like.findAll({
-        where: { UserId: req.params.id }, attributes: [['id', 'LikeId'], 'TweetId', 'createdAt'],
+        where: { UserId: req.params.id },
+        attributes: [['id', 'LikeId'], 'TweetId', 'createdAt'],
         include: [
           {
             model: Tweet,
-            attributes: ['id', 'description', 'createdAt',
-              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'),
-                'likeCount'],
-              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+            attributes: [
+              'id',
+              'description',
+              'createdAt',
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+                ),
+                'likeCount'
+              ],
+              [
+                sequelize.literal(
+                  '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+                ),
                 'replyCount'
               ],
-              [sequelize.literal(`EXISTS (SELECT * FROM Likes WHERE UserId = ${req.params.id} AND TweetId = Tweet.id)`),
+              [
+                sequelize.literal(
+                  `EXISTS (SELECT * FROM Likes WHERE UserId = ${req.params.id} AND TweetId = Tweet.id)`
+                ),
                 'isLiked'
-              ],
+              ]
+            ],
+            include: [
+              { model: User, attributes: ['id', 'avatar', 'account', 'name'] }
             ]
-            , include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }]
           }
-        ], order: [['createdAt', 'DESC']]
+        ],
+        order: [['createdAt', 'DESC']]
       })
       return res.json(like)
     } catch (err) {
@@ -442,7 +498,11 @@ let userController = {
       attributes: [['id', 'ReplyID'], 'comment', 'createdAt'],
       include: [
         { model: User, attributes: ['id', 'name', 'account'] },
-        { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['id', 'account', 'avatar'] }] }
+        {
+          model: Tweet,
+          attributes: ['id'],
+          include: [{ model: User, attributes: ['id', 'account', 'avatar'] }]
+        }
       ],
       order: [['createdAt', 'DESC']]
     })

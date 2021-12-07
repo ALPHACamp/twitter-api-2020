@@ -104,7 +104,7 @@ router.delete(
   '/admin/tweets/:id',
   authenticated,
   authenticatedAdmin,
-  adminController.getTweet
+  adminController.deleteTweet
 )
 
 module.exports = router
