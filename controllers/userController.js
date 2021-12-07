@@ -226,8 +226,7 @@ const userController = {
     userService.removeLike(req, res, (data) => {
       return res.redirect("back")
     })
-  },
-
+  }
 };
 
 module.exports = userController
