@@ -30,7 +30,6 @@ module.exports = {
       },
       introduction: {
         type: Sequelize.TEXT,
-        defaultValue: ''
       },
       role: {
         type: Sequelize.STRING,
