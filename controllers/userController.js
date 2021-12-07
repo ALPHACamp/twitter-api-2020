@@ -214,8 +214,8 @@ const userController = {
         replyCounts: userTweets.dataValues.Replies.length,
         isLike: helpers.getUser(req).Likes
           ? helpers
-            .getUser(req)
-            .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
+              .getUser(req)
+              .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
           : false
       }))
       return res.status(200).json(results)
@@ -292,7 +292,7 @@ const userController = {
         include: [
           {
             model: User, as: 'Followings'
-          },
+          }
         ]
       })).toJSON()
 
