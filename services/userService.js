@@ -307,14 +307,17 @@ const userService = {
 
   getUserTweets: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Tweet.findAll({
+    return Promise.all([
+      User.findByPk(req.params.userId),
+      Tweet.findAll({
       where: {
         UserId: Number(req.params.userId),
       },
       order: [["createdAt", "DESC"]],
       include: [User, Reply, Like],
-    }).then((tweets) => {
-      let paramsId = req.params.userId;
+      })
+    ]).then(([user, tweets]) => {
+      // let paramsId = req.params.userId;
       let newTweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
         isLike = !isLike ? false : isLike.isLike;
@@ -326,19 +329,20 @@ const userService = {
           isLike: isLike,
         };
       });
-      callback({ tweets: newTweets, paramsId: paramsId });
+      callback({ tweets: newTweets, user: user });
     });
   },
   getUserReplies: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    let paramsId = req.params.userId;
-    return Reply.findAll({
-      where: {
-        UserId: Number(req.params.userId),
-      },
-      order: [["createdAt", "DESC"]],
-      include: [User, { model: Tweet, include: [User] }],
-    }).then((tweets) => {
+    return Promise.all([
+      User.findByPk(req.params.userId),
+      Reply.findAll({
+        where: {
+          UserId: Number(req.params.userId),
+        },
+        order: [["createdAt", "DESC"]],
+        include: [User, { model: Tweet, include: [User] }],
+      }),
+    ]).then(([user, tweets]) => {
       tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
@@ -350,17 +354,14 @@ const userService = {
         };
         return d;
       });
-      return callback({ tweets: tweets, paramsId: paramsId });
+      return callback({ tweets: tweets, user: user});
     });
   },
   getUserLike: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
-    let paramsId = req.params.userId;
     return Promise.all([
       User.findByPk(req.params.userId),
       Like.findAll({
-        // raw:true,
-        // nest:true,
         where: {
           UserId: Number(req.params.userId),
           isLike: true,
@@ -385,32 +386,3 @@ const userService = {
 };
 
 module.exports = userService
-
-//  getUserLike: (req, res, callback) => {
-//     const currentUser = req.user ? req.user : helpers.getUser(req);
-//     let paramsId = req.params.userId;
-//     return Like.findAll({
-//       // raw:true,
-//       // nest:true,
-//       where: {
-//         UserId: Number(req.params.userId),
-//         isLike: true,
-//       },
-//       order: [["createdAt", "DESC"]],
-//       include: [User, { model: Tweet, include: [User, Reply, Like] }],
-//     }).then((tweets) => {
-//       tweets.map((d) => {
-//         let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(currentUser.id);
-//         return Object.assign(d, {
-//           tweetReplyCount: d.Tweet.Replies.length,
-//           tweetLikeCount: d.Tweet.Likes.length,
-//           isLike: isLike,
-//         });
-//       });
-//       return callback({ tweets: tweets, paramsId: paramsId });
-//       // return res.render("userLikeTweets", {
-//       //   tweets: tweets,
-//       //   paramsId: paramsId,
-//       // });
-//     });
-//  }
