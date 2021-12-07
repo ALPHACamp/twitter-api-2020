@@ -52,34 +52,6 @@ const tweetController = {
     })
     return res.json({ status: 'success', message: "" })
   },
-  getAdminTweets: (req, res) => {
-    Tweet.findAll({
-      include: User,
-      order: [['createdAt', 'DESC']]
-    }).then(tweets => {
-      tweets = tweets.map(tweet => ({
-        id: tweet.id,
-        description50: tweet.description.slice(0, 50),
-        createdAt: tweet.createdAt,
-        User: tweet.User
-      }))
-      return res.json(tweets)
-    })
-  },
-  deleteTweet: (req, res) => {
-    Tweet.destroy({
-      where: {
-        id: req.params.id
-      }
-    })
-      .then(tweet => {
-        console.log(tweet)
-        if (tweet === 1) {  //確實有刪除成功
-          return res.json({ status: 'success', message: '刪除成功' })
-        } //tweet = 0 表示找不到推文
-        return res.json({ status: 'error', message: '找不到推文' })
-      })
-  }
 }
 
 module.exports = tweetController
