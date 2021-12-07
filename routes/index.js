@@ -81,6 +81,8 @@ module.exports = (app) => {
     authenticatedUser,
     userController.getUsersFollowings)
 
+  app.get('/api/users/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
+
   // replies
   app.get(
     '/api/tweets/:tweet_id/replies',
