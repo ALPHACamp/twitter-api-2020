@@ -296,15 +296,19 @@ const userController = {
         ]
       })
 
+
       const result = user.dataValues.Followings.map((result) => ({
         followingId: result.dataValues.id,
         account: result.dataValues.account,
         name: result.dataValues.name,
         avatar: result.dataValues.avatar,
         introduction: result.dataValues.introduction,
-        isFollowing: user
-          .Followings.some((user) => user.dataValues.id === result.dataValues.id)
+        isFollowing: helpers.getUser(req)
+          .Followings.some((user) => user.id === result.dataValues.id)
       }))
+      result.sort((a, z) => {
+        return z.isFollowing - a.isFollowing
+      })
 
       return res.status(200).json(result)
     } catch (error) {
