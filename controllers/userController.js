@@ -76,6 +76,7 @@ const userController = {
       })
     })
   },
+  
   getTweets: (req, res) => {
     Tweet.findAll({
       where: { UserId: req.params.id },
