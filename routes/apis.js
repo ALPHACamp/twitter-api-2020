@@ -8,6 +8,7 @@ const tweetController = require('../controllers/api/tweetController')
 const userController = require('../controllers/api/userController')
 const replyController = require('../controllers/api/replyController')
 const helpers = require('../_helpers')
+const adminController = require('../controllers/api/adminController')
 
 //JWT
 const authenticated = passport.authenticate('jwt', { session: false })
@@ -31,6 +32,11 @@ router.post("/users", userController.signUp) //暫時測試用
 //  使用者登入
 router.post('/signIn', userController.signIn)
 //  拿到某位使用者資料
+
+//取得所有追蹤者的資料
+router.get("/users/:id/followers", authenticated, userController.getFollowers)
+//取得正在追蹤的使用者的資料
+router.get("/users/:id/followings", authenticated, userController.getFollowings)
 
 router.get("/users/:id", authenticated, userController.getUser);
 // router.get("/users/:id", userController.getUser);
@@ -66,6 +72,9 @@ router.post('/tweets/:id/unlike', authenticated, userController.removeLike) //�
 router.post('/followships/', authenticated, userController.addFollowing) //新增一位追蹤者
 router.delete('/followships/:id', authenticated, userController.removeFollowing) //新增一位追蹤者
 
+router.get('/admin/users', authenticated, adminController.getUsers) //管理者可以看見站內所有的使用者 //還要補authenticatedAdmin
+router.get('/admin/tweets', authenticated, adminController.getTweets) //管理者可以看見站內所有的使用者 //還要補authenticatedAdmin
+router.delete('/admin/tweets/:id', authenticated, adminController.deleteTweet) //還要補authenticatedAdmin
 
 
 
