@@ -5,7 +5,14 @@ const ReqError = require('../helpers/ReqError')
 
 const replyService = {
   postReply: async (req, res, callback) => {
+    const TweetId = req.params.tweet_id
+    const tweet = await Tweet.findByPk(TweetId)
     const { comment } = req.body
+
+    //確認該推文是否存在
+    if (!tweet) {
+      throw new ReqError('該貼文不存在')
+    }
 
     //確認回覆欄是否有填寫
     if (comment.trim() === '') {
@@ -13,7 +20,7 @@ const replyService = {
     } else {
       await Reply.create({
         comment,
-        TweetId: req.params.tweet_id,
+        TweetId,
         UserId: helpers.getUser(req).id,
       })
     }
