@@ -83,8 +83,6 @@ router.delete('/followships/:id', authenticated, userController.removeFollowing)
 // router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
 // <--可以傳一個陣列 FILE
 
-
-
 // router.get('/admin', authenticatedAdmin, (req, res) => res.redirect('/admin/tweets'))
 // router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
 
