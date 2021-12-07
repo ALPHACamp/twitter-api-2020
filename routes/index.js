@@ -28,10 +28,30 @@ const authenticatedAdmin = (req, res, next) => {
 
 
 //user相關
-router.post('/api/signin', userController.signIn)
-router.post('/api/signup', userController.signUp)
-router.get('/api/user/:id', userController.getUserAccountSetting)
-router.put('/api/user/:id', userController.putUserAccountSetting)
+router.post('/api/users/signin', userController.signIn)
+router.post('/api/users', userController.signUp)
+
+//user取得編輯個人帳號資訊
+router.get('/api/users/account', authenticated, userController.getUserAccountSetting)
+//user編輯個人帳號
+router.put('/api/users/account', authenticated, userController.putUserAccountSetting)
+//router.get('/api/users/:userId', userController.getUser)(待討論)
+//user取得編輯個人資訊頁面
+router.get('/api/users/edit', authenticated, userController.getUserInfo)
+//user編輯個人資訊頁面
+router.put('/api/users', authenticated, userController.editUserInfo)
+//user觀看特定人士已like
+router.get('/api/users/:id/likes', authenticated, userController.getOneLikes)
+//user觀看特定人士已reply
+router.get('/api/users/:id/replied_tweets', authenticated, userController.getOneRepliedTweets)
+//user觀看特定人士tweets
+router.get('/api/users/:id/tweets', authenticated, userController.getOneTweets)
+
+router.get('/api/users/:id/followers', authenticated, userController.getOneFollowers)
+router.get('/api/users/:id/followings', authenticated, userController.getOneFollowings)
+
+//先讓前端使用的get_current)user
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 
 
 

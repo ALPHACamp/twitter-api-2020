@@ -1,23 +1,30 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
+const helpers = require('../_helpers')
 const User = db.User
+const Tweet = db.Tweet
+const Like = db.Like
+const Reply = db.Reply
+const Followship = db.Followship
 
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
+const imgur = require('imgur')
+const tweet = require('../models/tweet')
 
 const userController = {
   signIn: (req, res) => {
     // 檢查必填欄位
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.account || !req.body.password) {
       return res.json({ status: 'error', message: '請輸入必填欄位' })
     }
     // 比對User資料庫、比對密碼
-    let { email, password } = req.body
+    let { account, password } = req.body
     // console.log('get email, password from jwt strategy: ', email, password)  // OK
-    User.findOne({ where: { email } }).then(user => {
+    User.findOne({ where: { account } }).then(user => {
       if (!user) {
         return res.status(401).json({ status: 'error', message: '' })
       }
@@ -106,8 +113,8 @@ const userController = {
     })
   },
   getUserAccountSetting: (req, res) => {
-    const userId = req.params.id
-    return User.findByPk(userId)
+    const userId = helpers.getUser(req).id
+    User.findByPk(userId)
       .then(user => {
         return res.json({
           user: {
@@ -117,6 +124,7 @@ const userController = {
       })
   },
   putUserAccountSetting: (req, res) => {
+    const userId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword } = req.body
 
     // 確認欄位是否皆有填寫
@@ -134,7 +142,10 @@ const userController = {
         $or: [
           { email },
           { account }
-        ]
+        ],
+        $not: [
+          { id: userId }
+        ],
       }
     }).then(user => {
       if (user) {
@@ -145,7 +156,7 @@ const userController = {
           return res.json({ status: 'error', message: 'account已重覆註冊！' })
         }
       } else {
-        return User.findByPk(req.params.id).then(user => {
+        return User.findByPk(userId).then(user => {
           user.update({
             account, email, name,
             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
@@ -154,7 +165,111 @@ const userController = {
         })
       }
     })
-
-  }
+  },
+  getCurrentUser: (req, res) => {
+    return User.findAll({
+      raw: true,
+      nest: true
+    }).then(user => {
+      return res.json(
+        { user }
+      )
+    })
+  },
+  /*getUser: (req, res) => {
+    const UserId = req.params.id
+    return User.findByPk(UserId).then(user => {
+      return res.json({
+        user: user
+      }
+      )
+    }
+    )
+  },*/
+  getUserInfo: (req, res) => {
+    const userId = helpers.getUser(req).id
+    return User.findByPk(userId)
+      .then(user => {
+        return res.json({
+          user: {
+            name: user.name,
+            introduction: user.introduction,
+            avatar: user.avatar,
+            cover: user.cover
+          }
+        })
+      })
+  },
+  editUserInfo: (req, res) => {
+    const userId = helpers.getUser(req).id
+    User.findByPk(userId)
+      .then(user => {
+        const { name, introduction, avatar, cover } = req.body
+        const { files } = req.body
+        imgur.setClientId(process.env.IMGUR_CLIENT_ID)
+        if (!name) {
+          return res.json({ status: 'error', message: 'name為必填欄位' })
+        }
+        if (files) {
+          if (files.cover) {
+            // 如果cover更新, 就上傳
+            const cover = imgur.uploadFile(files.cover[0].path)
+            req.body.cover = cover.link
+          }
+          if (files.avatar) {
+            // 如果avatar更新, 就上傳
+            const avatar = imgur.uploadFile(files.avatar[0].path)
+            req.body.avatar = avatar.link
+          }
+        }
+        else {
+          return User.findByPk(userId).then(user => {
+            user.update({
+              name, introduction, avatar, cover
+            })
+            return res.json({ status: 'success', message: '成功編輯' })
+          })
+        }
+      })
+  },
+  //取得特定瀏覽人次id
+  getOneLikes: (req, res) => {
+    const userId = req.params.id
+    return Like.findAll({ where: { userId }, include: [Tweet] })
+      .then(tweets => {
+        return res.json({ tweets })
+      })
+  },
+  getOneRepliedTweets: (req, res) => {
+    const userId = req.params.id
+    return Reply.findAll({ where: { userId }, include: [Tweet] })
+      .then(replies => {
+        return res.json({ replies })
+      })
+  },
+  getOneTweets: (req, res) => {
+    const userId = req.params.id
+    return Tweet.findAll({ where: { userId } })
+      .then(tweets => {
+        return res.json({ tweets })
+      })
+  },
+  getOneFollowers: (req, res) => {
+    const followerId = req.params.id
+    return Followship.findAll({ where: { followerId } })
+      .then(users => {
+        return res.json({ users })
+      })
+  },
+  getOneFollowings: (req, res) => {
+    const followingId = req.params.id
+    return Followship.findAll({ where: { followingId } })
+      .then(users => {
+        return res.json({ users })
+      })
+  },
 }
+
+
+
 module.exports = userController
