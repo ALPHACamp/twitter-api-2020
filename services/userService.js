@@ -277,9 +277,9 @@ const userService = {
         })
       }
       if (like.isLike === true) {
-        return like.update({ ...like, isLike: !like.isLike }).then(like => {
-          return callback({ status: 'success', message: '' })
-        })
+        return like.update({ ...like, isLike: !like.isLike }).then((like) => {
+          return callback({ status: "success", message: "" });
+        });
       }
       return callback({ status: 'error', message: '' })
     });
@@ -305,6 +305,31 @@ const userService = {
       });
     });
   },
+  getUserTweets: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    return Tweet.findAll({
+      where: {
+        UserId: Number(req.params.userId)
+      },
+      order: [["createdAt", "DESC"]],
+      include: [User, Reply, Like],
+    }).then((tweets) => {
+      console.log(tweets)
+      let newTweets = tweets.map((tweet) => {
+        let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
+        isLike = !isLike ? false : isLike.isLike;
+        let likeCount = tweet.Likes.filter((d) => d.isLike === true).length;
+        return {
+          ...tweet.dataValues,
+          tweetReplyCount: tweet.Replies.length,
+          tweetLikeCount: likeCount,
+          isLike: isLike,
+        };
+      });
+      callback({ tweets: newTweets });
+    });
+  },
+
   getFollowers: (req, res, callback) => {
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followers' }]

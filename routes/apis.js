@@ -42,6 +42,11 @@ router.get("/users/:id", authenticated, userController.getUser);
 // router.get("/users/:id", userController.getUser);
 //  使用者編輯自己所有資訊
 router.put("/users/:id", upload.single('cover'), authenticated, userController.putUser);
+//  查詢user的所有推文
+router.get('/users/:userId/tweets', authenticated,upload.single('cover'), userController.getUserTweets)
+//  查詢user的所有留言
+// router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
+
 // router.put("/users/:id", userController.putUser);
 // router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
 // <--可以傳一個陣列 FILE

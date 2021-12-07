@@ -119,7 +119,11 @@ let userController = {
       return res.json(data)
     })
   },
-
+  getUserTweets: (req, res) => {
+  userService.getUserTweets(req, res, (data) => {
+    return res.json(data)
+  })
+  },
   getCurrentUser: (req, res) => {
     console.log(req.user)
     return res.json({

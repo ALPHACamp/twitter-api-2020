@@ -195,39 +195,50 @@ const userController = {
   //       }
   //     });
   //   },
+
   getUserTweets: (req, res) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    // return User.findOne({ where: { id: currentUser.id }, include: [[Tweet], [Reply]] })
-    // return User.findByPk( currentUser.id, {
-    return Tweet.findAll({
-      where: {
-        id: currentUser.id,
-      },
-      include: [
-        User,
-        // { model: Tweet, include: [Reply] },
-        // { model: Tweet, include: [Like] }
-      ],
-    }).then((Tweet) => {
-      // const tweets = user.Tweets;
-      // console.log(tweets.length);
-      console.log(Tweet);
-      res.render("profile", { Tweet: Tweet });
-      // res.render("profile", { user: user, tweets: tweets });
+    userService.getUserTweets(req, res, (data) => {
+      return res.render("userTweets", data);
     });
   },
-
+  getUserReplies: (req, res) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    return Reply.findAll({
+      where: {
+        UserId: req.params.id
+      },
+      order: [['createdAt', 'DESC']],
+      include: [Tweet]
+    }).then(tweet => {
+      console.log(tweet.length)
+      return res.render("replyTweets", { user: currentUser });
+    })
+  },
+  // getUserReplies: (req, res) => {
+  //   userService.getUserTweets(req, res, (data) => {
+  //     return res.render("profile", data);
+  //   });
+  // },
   addLike: (req, res) => {
     userService.addLike(req, res, (data) => {
-      return res.redirect("back")
-    })
+      return res.redirect("back");
+    });
   },
   removeLike: (req, res) => {
     userService.removeLike(req, res, (data) => {
-      return res.redirect("back")
-    })
+      return res.redirect("back");
+    });
   },
-
+  getUserSetting: (req, res) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    if (currentUser.id !== req.params.userId) {
+      return res.redirect('back')
+    }
+    return findOne({ where: { UserId: currentUser.id} })
+    .then(user => {
+       return res.render('setting', { user: user })
+      })
+  }
 };
 
 module.exports = userController
