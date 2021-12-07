@@ -341,14 +341,19 @@ const userService = {
           isLike: isLike,
         };
       });
-      console.log(user)
-      newTweets = { ...newTweets, tweetCount: tweets.length };
-      callback({ tweets: newTweets, user: user });
+      Object.assign(newTweets, {tweetCount: tweets.length })
+      return callback({ tweets: newTweets, user: user });
     });
   },
   getUserReplies: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
-      User.findByPk(req.params.userId),
+      User.findByPk(req.params.userId, {
+        include: [
+          { model: User, as: 'Followers'},
+          { model: User, as: 'Followings'}
+        ]
+      }),
       Reply.findAll({
         where: {
           UserId: Number(req.params.userId),
@@ -357,7 +362,15 @@ const userService = {
         include: [User, { model: Tweet, include: [User] }],
       }),
     ]).then(([user, tweets]) => {
-      tweets.map((d) => {
+      console.log('tweet.ength',tweets.length)
+      console.log("wtwwt2", tweets[0]);
+       user = {
+         ...user.dataValues,
+         FollowersCount: user.Followers.length,
+         FollowingsCount: user.Followings.length,
+         isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
+       };
+      let newTweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
           avatar: d.User.avatar,
@@ -366,9 +379,12 @@ const userService = {
           introduction: d.User.introduction,
           createdAt: d.User.createdAt,
         };
+        d.Tweet.User = { UserId: d.Tweet.User.id , account: d.Tweet.User.account};
+        console.log(d.Tweet.User);
         return d;
       });
-      return callback({ tweets: tweets, user: user.toJSON()});
+      // Object.assign(newTweets, { tweetCount: tweets.length });
+      return callback({ tweets: newTweets, user: user });
     });
   },
   getUserLike: (req, res, callback) => {

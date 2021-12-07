@@ -1,3 +1,4 @@
+<h1>{{tweets.tweetCount}}  筆推文</h1>
 <div class="row row-cols-1 row-cols-md-2">
   <div class="col mb-4">
     <div class="card">
@@ -8,6 +9,8 @@
        <span>
         {{user.id}} 特定者用
        </span> {{current_user.id }} 當下使用者
+       {{#ifCond current_user.id user.id}}
+       {{else}}
         {{#if user.isFollower}}
         <form action="/followships/{{user.id}}?_method=DELETE" method="post">
           <button type="submit" class="btn btn-outline-info">取消跟隨</button>
@@ -17,8 +20,9 @@
           <button type="submit" class="btn btn-info">跟隨</button>
         </form>
         {{/if}}
+        {{/ifCond}}
       </div>
-    {{!-- <div class="card">
+    <div class="card">
       <img src="{{user.id}}" class="card-img-top" alt="..." style="width: 300px;">
       <img src="{{user.id}}" class="card-img-top" alt="..."
         style="max-width: 80px; max-height: 80px; border-radius: 50%;">
@@ -31,16 +35,16 @@
         <li class="list-group-item">推文者的名字 {{ user.name}}</li>
         <li class="list-group-item d-flex justify-content-around">
           <div class="left">
-            <span>{{this.Replies.length}} 位跟隨中
+            <span>{{user.FollowingsCount}} 位跟隨中
             </span>
           </div>
           <div class="right inline-block">
-            <span>{{this.Replies.length}} 位跟隨者
+            <span>{{user.FollowersCount}} 位跟隨者
             </span>
           </div>
         </li>
       </ul>
-    </div> --}}
+    </div>
     <ul class="nav nav-tabs mt-2">
       <li class="nav-item">
         <a class="nav-link " href="/users/{{user.id}}/tweets">推文</a>
