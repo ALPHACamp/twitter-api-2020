@@ -90,7 +90,6 @@ const adminController = {
           ]
         ],
         order: [[sequelize.literal('TweetsCount'), 'DESC']],
-        where: { role: { [Op.not]: 'admin' } }
       })
       return res.json(users)
     } catch (err) {
