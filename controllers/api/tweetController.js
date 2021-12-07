@@ -9,24 +9,25 @@ const tweetController = {
     try {
       let tweets = await Tweet.findAll({
         attributes: [
-          'id',
-          'description',
+          ['id', 'TweetId'],
           'createdAt',
+          'description',
           [
             Sequelize.literal(
-              '(SELECT COUNT(*) FROM Tweets inner join Likes on Tweets.id = Likes.TweetId where Tweets.UserId = User.id)'
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.tweetId = Tweet.id)'
             ),
             'LikesCount'
           ],
           [
             Sequelize.literal(
-              '(SELECT COUNT(*) FROM Tweets inner join Replies on Tweets.id = Replies.TweetId where Tweets.UserId = User.id)'
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.tweetId = Tweet.id)'
             ),
             'RepliesCount'
           ]
         ],
+        group: 'TweetId',
         include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
         order: [['createdAt', 'DESC']],
         raw: true,
