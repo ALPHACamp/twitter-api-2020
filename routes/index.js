@@ -8,6 +8,7 @@ const replyController = require('../controllers/replyController')
 const likeController = require('../controllers/likeController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
+const cors = require('cors')
 
 // const authenticated = (req, res, next) => {
 //   if (req.isAuthenticated()) {
@@ -15,6 +16,8 @@ const adminController = require('../controllers/adminController')
 //   }
 //   res.redirect('/api/signin')
 // }
+
+router.use(cors())
 const authenticated = passport.authenticate('jwt', { session: false })
 
 const authenticatedAdmin = (req, res, next) => {
