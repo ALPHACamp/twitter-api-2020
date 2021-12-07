@@ -213,7 +213,7 @@ const userController = {
           return res.json({ status: 'error', message: '不能使用此email' })
         }
         if (anotherUserA && anotherUserA.account !== user.account) {
-          return res.json({ status: 'error', message: '不能使用此account' })
+          return res.json({ status: 'error', message: '不能使用此帳號' })
         }
         user.update({
           account,
