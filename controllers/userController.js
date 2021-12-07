@@ -129,10 +129,10 @@ const userController = {
         avatar: user.avatar,
         cover: user.cover,
         introduction: user.introduction,
-        tweetCounts: user.Tweets?.length,
+        tweetCounts: user.Tweets ? user.Tweets.length : 0,
         followship: {
-          followerCounts: user.Followers?.length,
-          followingCounts: user.Followings?.length
+          followerCounts: user.Followers ? user.Followers.length : 0,
+          followingCounts: user.Followings ? user.Followings.length : 0
         },
         isFollowing: helpers
           .getUser(req)
