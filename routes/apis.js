@@ -40,38 +40,32 @@ const authenticatedAdmin = (req, res, next) => {
   }
 }
 
+// * upload image *
+const uploadImage = upload.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'cover', maxCount: 1 }
+])
+
 /* front desk */
 
 // **users**
+router.post('/users/signin', userController.signIn)
 router.get('/users/:id/tweets', authenticated, userController.getTweets)
 router.get('/users/top', authenticated, userController.getTop)
 router.get('/users/:id', authenticated, userController.getUser)
-router.post('/users/signin', userController.signIn)
-router.post('/users', userController.signUp)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id/likes', authenticated, userController.getLikes)
-
-// lookup user replied_tweets
 router.get(
   '/users/:id/replied_tweets',
   authenticated,
   userController.getReplies
 )
-
-// edit personal data
-router.put(
-  '/users/:id',
-  upload.fields([
-    { name: 'avatar', maxCount: 1 },
-    { name: 'cover', maxCount: 1 }
-  ]),
-  authenticated,
-  userController.putUsers
-)
+router.put('/users/:id', authenticated, uploadImage, userController.putUser)
+router.put('/users/:id/setting', authenticated, userController.putUserSetting)
+router.post('/users', userController.signUp)
 
 // **tweet**
-// tweet
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
