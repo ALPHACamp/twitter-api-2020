@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const sequelize = require('sequelize')
 const jwt = require('jsonwebtoken')
 const ReqError = require('../helpers/ReqError')
+const helpers = require('../_helpers')
 
 const adminService = {
   adminLogin: async (req, res, callback) => {
@@ -60,6 +61,11 @@ const adminService = {
       ])
       return callback({ status: 'success', message: '已刪除貼文' })
     }
+  },
+
+  getAdminCurrentUser: async (req, res, callback) => {
+    const user = helpers.getUser(req)
+    return callback(user)
   },
 
   getAllUsers: async (req, res, callback) => {
