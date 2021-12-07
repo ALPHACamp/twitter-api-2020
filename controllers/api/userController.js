@@ -4,11 +4,11 @@ const { User, Tweet, Like, Reply, Followship } = db
 
 /* necessary package */
 const bcrypt = require('bcryptjs')
-const IMGUR_CLIENT_ID = 'e34bbea295f4825'
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const imgur = require('imgur-node-api')
 // sequelize
 const sequelize = require('sequelize')
-const { Op } = require("sequelize")
+const { Op } = require('sequelize')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -26,7 +26,6 @@ let userController = {
       // 檢查必要資料
       const { email, password } = req.body
       if (!email || !password) {
-
         return res.json({
           status: 'error',
           message: 'Please fill both Email & Password fields!'
@@ -97,7 +96,10 @@ let userController = {
         })
       }
       if (account.length > 20 || name.length > 50 || password.length > 20) {
-        return res.json({ status: 'error', message: 'Exceeds the character limit' })
+        return res.json({
+          status: 'error',
+          message: 'Exceeds the character limit'
+        })
       }
       // 建立user
       await User.create({
@@ -114,7 +116,6 @@ let userController = {
       return res
         .status(200)
         .json({ status: 'success', message: 'Successfully register!' })
-
     } catch (err) {
       console.log(err)
     }
@@ -144,15 +145,34 @@ let userController = {
     try {
       const tweet = await Tweet.findAll({
         where: { UserId: req.params.id },
-        attributes: ['description', 'UserId', 'id', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'),
-            'likeCount'],
-          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'replyCount'],
-          [sequelize.literal(`EXISTS (SELECT * FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`),
-            'isLiked'],
+        attributes: [
+          'description',
+          'UserId',
+          'id',
+          'createdAt',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+            ),
+            'likeCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+            ),
+            'replyCount'
+          ],
+          [
+            sequelize.literal(
+              `EXISTS (SELECT * FROM Likes WHERE UserId = ${
+                helpers.getUser(req).id
+              } AND TweetId = Tweet.id)`
+            ),
+            'isLiked'
+          ]
         ],
         include: [{ model: User, attributes: ['id'] }],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC']]
       })
       console.log(JSON.stringify(tweet, null, 2))
       return res.json(tweet)
@@ -160,42 +180,39 @@ let userController = {
       console.log(err)
     }
   },
-  //修改個人資料
-  putUsers: async (req, res) => {
+  //修改使用者帳號資料
+  putUser: async (req, res) => {
     try {
-      // 資料不可為空白
-      const { name, account, email, password } = req.body
-      if (!name || !account || !email || !password) {
+      const { name, introduction } = req.body
+      // 確認Name欄位有輸入
+      if (!name) {
         return res.json({
           status: 'error',
-          message: 'Required fields must be filled！'
+          message: 'Name field must be filled！'
         })
       }
       // 確保只有自己能修改自己的資料
       if (helpers.getUser(req).id !== Number(req.params.id)) {
-        return res.json({ status: 'error', message: 'cannot edit other user data' })
-      }
-      // 確認Email無重複(但可以維持原有email)
-      const user = await User.findOne({
-        where: {
-          email,
-          [Op.not]: { id: helpers.getUser(req).id }
-        }
-      })
-      if (user) {
         return res.json({
           status: 'error',
-          message: 'Email has already existed!'
+          message: "Can NOT edit other user's profile"
         })
       }
-      // 確認Account無重複
-      const accountCheck = await User.findOne({ where: { account } })
-      if (accountCheck) {
+
+      // 確認Name不能超過50字元，Introduction不能超過140字元
+      if (name.length > 50) {
         return res.json({
           status: 'error',
-          message: 'Account has already existed!'
+          message: 'Name should be within 50 characters'
         })
       }
+      if (introduction.length > 140) {
+        return res.json({
+          status: 'error',
+          message: 'Introduction should be within 140 characters'
+        })
+      }
+
       // 如果有上傳圖片 update
       const { files } = req
       if (files) {
@@ -206,31 +223,91 @@ let userController = {
             await user.update({
               ...req.body,
               avatar: img1.data.link,
-              cover: img2.data.link,
-              password: bcrypt.hashSync(
-                req.body.password,
-                bcrypt.genSaltSync(10),
-                null
-              ),
+              cover: img2.data.link
             })
           })
         })
-        res.json({ status: 'success', message: '使用者資料編輯成功' })
+        res.json({
+          status: 'success',
+          message: 'Successfully update user profile'
+        })
         // 如果沒上傳圖片 update
       } else {
         const user = await User.findByPk(req.params.id)
         await user.update({
           ...req.body,
           avatar: user.avatar || null,
-          cover: user.cover || null,
-          password: bcrypt.hashSync(
-            req.body.password,
-            bcrypt.genSaltSync(10),
-            null
-          ),
+          cover: user.cover || null
         })
-        res.json({ status: 'success', message: '使用者資料編輯成功' })
+        res.json({
+          status: 'success',
+          message: 'Successfully update user profile'
+        })
       }
+    } catch (err) {
+      console.log(err)
+    }
+  },
+
+  // 編輯使用者資料
+  putUserSetting: async (req, res) => {
+    try {
+      const { name, account, email, password, checkPassword } = req.body
+      // 資料不可為空白
+      if (!name || !account || !email || !password || !checkPassword) {
+        return res.json({
+          status: 'error',
+          message: 'Required fields must be filled！'
+        })
+      }
+      // 確認checkPassword、password相同
+      if (checkPassword !== password) {
+        return res.json({
+          status: 'error',
+          message: 'Passwords is not matched！'
+        })
+      }
+      // 確保只有自己能修改自己的資料
+      if (helpers.getUser(req).id !== Number(req.params.id)) {
+        return res.json({
+          status: 'error',
+          message: "Can NOT edit other user's setting"
+        })
+      }
+      // 確認Email無重複(但可以維持原有email)
+      const userEmailCheck = await User.findOne({
+        where: {
+          email,
+          [Op.not]: { id: helpers.getUser(req).id }
+        }
+      })
+      if (userEmailCheck) {
+        return res.json({
+          status: 'error',
+          message: 'Email has already existed!'
+        })
+      }
+      // 確認Account無重複
+      const userAccountCheck = await User.findOne({
+        where: { account, [Op.not]: { id: helpers.getUser(req).id } }
+      })
+      if (userAccountCheck) {
+        return res.json({
+          status: 'error',
+          message: 'Account has already existed!'
+        })
+      }
+      const user = await User.findByPk(req.params.id)
+      await user.update({
+        name,
+        account,
+        email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null)
+      })
+      return res.json({
+        status: 'success',
+        message: 'Successfully update user account setting'
+      })
     } catch (err) {
       console.log(err)
     }
@@ -240,13 +317,24 @@ let userController = {
   getTop: async (req, res) => {
     try {
       const Top = await User.findAll({
-        attributes: ['account', 'id', 'name', 'avatar', 'role',
+        attributes: [
+          'account',
+          'id',
+          'name',
+          'avatar',
+          'role',
           [
-            sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'
+            ),
             'FollowingsCount'
           ],
           [
-            sequelize.literal(`EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id}  AND Followships.followingId = User.id )`),
+            sequelize.literal(
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                helpers.getUser(req).id
+              }  AND Followships.followingId = User.id )`
+            ),
             'isFollowed'
           ]
         ],
@@ -267,12 +355,20 @@ let userController = {
         attributes: ['account'],
         include: [
           {
-            model: User, as: 'Followings',
-            attributes: [['id', 'followingId'], 'account', [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followerId = User.id)'),
-              'isFollowed'
-            ]]
+            model: User,
+            as: 'Followings',
+            attributes: [
+              ['id', 'followingId'],
+              'account',
+              [
+                sequelize.literal(
+                  'EXISTS (SELECT * FROM Followships WHERE Followships.followerId = User.id)'
+                ),
+                'isFollowed'
+              ]
+            ]
           }
-        ],
+        ]
       })
       return res.json(followings[0].Followings)
     } catch (err) {
@@ -285,12 +381,22 @@ let userController = {
       const followers = await User.findAll({
         where: { id: req.params.id },
         attributes: ['account'],
-        include: [{
-          model: User, as: 'Followers',
-          attributes: [['id', 'followerId'], 'account', [sequelize.literal('EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id)'),
-            'isFollowed'
-          ]]
-        }],
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: [
+              ['id', 'followerId'],
+              'account',
+              [
+                sequelize.literal(
+                  'EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id)'
+                ),
+                'isFollowed'
+              ]
+            ]
+          }
+        ]
       })
       return res.json(followers[0].Followers) //followers[0].Followers
     } catch (err) {
@@ -304,16 +410,33 @@ let userController = {
       where: { UserId: req.params.id },
       include: [
         {
-          model: Tweet, include: [User, Reply,],
-          attributes: ['id', 'UserId', 'description', 'createdAt', 'updatedAt',
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'),
-              'likeCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+          model: Tweet,
+          include: [User, Reply],
+          attributes: [
+            'id',
+            'UserId',
+            'description',
+            'createdAt',
+            'updatedAt',
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+              ),
+              'likeCount'
+            ],
+            [
+              sequelize.literal(
+                '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+              ),
               'replyCount'
             ],
-            [sequelize.literal('(SELECT tweetID FROM Likes WHERE Likes.UserID = )'),
+            [
+              sequelize.literal(
+                '(SELECT tweetID FROM Likes WHERE Likes.UserID = )'
+              ),
               'replyCount'
-            ]],
+            ]
+          ]
         }
       ]
     })
@@ -326,13 +449,16 @@ let userController = {
       attributes: ['id', 'comment', 'createdAt'],
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Tweet, attributes: ['id'], include: [{ model: User, attributes: ['account'] }] }
+        {
+          model: Tweet,
+          attributes: ['id'],
+          include: [{ model: User, attributes: ['account'] }]
+        }
       ],
-      order: [['createdAt', 'DESC']],
+      order: [['createdAt', 'DESC']]
     })
     return res.json(replies)
-  },
+  }
 }
-
 
 module.exports = userController
