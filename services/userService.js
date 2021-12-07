@@ -227,13 +227,16 @@ const userService = {
           'FollowerCount'
         ]
       ],
-      include: [{ model: User, as: 'Followers', attributes: ['id'] }]
+      include: [{ model: User, as: 'Followers', attributes: ['id', 'account'] }]
     }).then(users => {
       users = users.map(user => ({
         ...user,
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
-      users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
+      users = users
+        .filter((now, index, array) => array.findIndex(target => target.id === now.id) === index)
+        .sort((a, b) => b.FollowerCount - a.FollowerCount)
+        .slice(0, 10)
       return callback({ users })
     })
   },
