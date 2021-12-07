@@ -1,16 +1,16 @@
 <div class="row row-cols-1 row-cols-md-2">
   <div class="col mb-4">
     <div class="card">
-      <img src="{{user.cover}}" class="card-img-top" alt="..." style="width: 300px;">
-      <img src="{{user.avatar}}" class="card-img-top" alt="..."
+      <img src="{{tweets.User.cover}}" class="card-img-top" alt="..." style="width: 300px;">
+      <img src="{{tweets.User.avatar}}" class="card-img-top" alt="..."
         style="max-width: 80px; max-height: 80px; border-radius: 50%;">
       <div class="card-body">
-        <h5 class="card-title">使用者帳號 : {{user.account}} </h5>
-        <p class="card-text">內容:{{user.introduction}}</p>
+        <h5 class="card-title">使用者帳號 : {{tweets.User.account}} </h5>
+        <p class="card-text">內容:{{tweets.User.introduction}}</p>
       </div>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">推文者的 id {{user.id}}</li>
-        <li class="list-group-item">推文者的名字 {{ user.name}}</li>
+        <li class="list-group-item">推文者的 id {{tweets.User.id}}</li>
+        <li class="list-group-item">推文者的名字 {{ tweets.User.name}}</li>
         <li class="list-group-item d-flex justify-content-around">
           <div class="left">
             <span>{{this.Replies.length}} 位跟隨中
@@ -23,8 +23,7 @@
         </li>
       </ul>
     </div>
-    <a href="/users/{{user.id}}/edit" class="card-link">edit</a>
-    {{!-- <ul class="nav nav-tabs mt-2">
+    <ul class="nav nav-tabs mt-2">
       <li class="nav-item">
         <a class="nav-link active" href="/users/{{user.id}}">推文</a>
       </li>
@@ -36,9 +35,9 @@
       </li>
     </ul>
   </div>
-</div> --}}
+</div>
 
-{{!-- <div class="row row-cols-1 row-cols-md-3">
+<div class="row row-cols-1 row-cols-md-3">
   {{!-- {{#each tweets}} --}}
   {{#each tweets}}
   <div class="card m-3" style="width: 18rem;">
@@ -108,9 +107,9 @@
       </li>
     </ul>
     <div class="card-body">
-      <a href="/users/{{this.id}}" class="card-link">profile</a>
-      <a href="/users/{{this.id}}/edit" class="card-link">edit</a>
-      <a href="/tweets/{{this.id}}" class="card-link">tweet</a>
+      <a href="/users/{{this.User.id}}" class="card-link">profile</a>
+      <a href="/users/{{this.User.id}}/edit" class="card-link">edit</a>
+      <a href="/tweets/{{this.User.id}}" class="card-link">tweet</a>
     </div>
     <form action="/tweets/{{this.id}}/replies" method="POST">
       <div class="form-group">
@@ -121,4 +120,4 @@
     </form>
   </div>
   {{/each}}
-</div> 
+</div>
