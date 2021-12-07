@@ -13,15 +13,12 @@ const likeController = {
         where: { UserId, TweetId }
       })
       if (likeStatusCheck) {
-        res.json({
+        return res.json({
           status: 'error',
           message: "You've already liked this tweet!"
         })
       }
-      await Like.create({
-        UserId,
-        TweetId
-      })
+      await Like.create({ UserId, TweetId })
       return res.json({
         status: 'success',
         message: 'Successfully like tweet!'
@@ -32,11 +29,21 @@ const likeController = {
   },
   unlike: async (req, res) => {
     try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.id
+      const likeStatusCheck = await Like.findOne({
+        where: { UserId, TweetId }
+      })
+
+      if (!likeStatusCheck) {
+        return res.json({
+          status: 'error',
+          message: 'You have Not liked this tweet!'
+        })
+      }
+
       const like = await Like.findOne({
-        where: {
-          UserId: helpers.getUser(req).id,
-          TweetId: req.params.id
-        }
+        where: { UserId, TweetId }
       })
       await like.destroy()
       return res.json({
