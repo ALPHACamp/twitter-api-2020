@@ -13,11 +13,7 @@ const tweetService = {
         [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
         [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount']
       ],
-      include: [
-        { model: Reply, attributes: ['id'] },
-        { model: Like, attributes: ['id'] },
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-      ],
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     }).then(tweets => {
       tweets = tweets.map(tweet => ({
@@ -52,15 +48,14 @@ const tweetService = {
       include: [
         {
           model: Reply,
+          attributes: ['id', 'comment', 'UserId', 'createdAt'],
           include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
         },
-        { model: Like },
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
       ]
     }).then(tweet => {
       tweet = tweet.toJSON()
       tweet['isLiked'] = Number(helpers.getUser(req).id) === Number(tweet.UserId)
-
       return callback({ tweet })
     })
   },

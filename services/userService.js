@@ -28,8 +28,9 @@ const userService = {
           })
           .catch(err => console.log(err))
       }
-      if (user.email === req.body.email) return callback({ status: 'error', message: 'email 已重覆註冊！' })
-      if (user.account === req.body.account) return callback({ status: 'error', message: 'account 已重覆註冊！' })
+      user.email === req.body.email
+        ? callback({ status: 'error', message: 'email和account 已重覆註冊！' })
+        : callback({ status: 'error', message: 'account 已重覆註冊！' })
     })
   },
 
@@ -272,7 +273,7 @@ const userService = {
       user = user.toJSON()
       user.Followings.forEach(item => {
         item.followingId = item.id
-        item.isFollowed = Number(helpers.getUser(req).id) === Number(item.Followship.followerId)
+        item.isFollowed = req.user.Followings.map(d => d.id).includes(item.id)
       })
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       return callback(user)
@@ -288,7 +289,7 @@ const userService = {
       user = user.toJSON()
       user.Followers.forEach(item => {
         item.followerId = item.id
-        item.isFollowed = Number(helpers.getUser(req).id) === Number(item.Followship.followerId)
+        item.isFollowed = req.user.Followings.map(d => d.id).includes(item.id)
       })
       user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       return callback(user)
