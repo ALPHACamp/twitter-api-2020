@@ -33,19 +33,16 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id/likes', authenticated, userController.getLikes)
-router.get(
-  '/users/:id/replied_tweets',
-  authenticated,
-  userController.getReplies
-)
+router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
 router.put('/users/:id', authenticated, uploadImage, userController.putUser)
 router.put('/users/:id/setting', authenticated, userController.putUserSetting)
 router.post('/users', userController.signUp)
 
 // **tweet**
 router.get('/tweets', authenticated, tweetController.getTweets)
-router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
+router.post('/tweets', authenticated, tweetController.postTweet)
+
 
 // **reply**
 router.get('/tweets/:id/replies', authenticated, replyController.getReplies)
@@ -61,23 +58,8 @@ router.delete('/followships/:id', authenticated, followshipController.unFollow)
 
 // **admin**
 router.post('/admin/signin', adminController.signIn)
-router.get(
-  '/admin/users',
-  authenticated,
-  authenticatedAdmin,
-  adminController.getAdminUsers
-)
-router.get(
-  '/admin/tweets',
-  authenticated,
-  authenticatedAdmin,
-  adminController.getAdminTweets
-)
-router.delete(
-  '/admin/tweets/:id',
-  authenticated,
-  authenticatedAdmin,
-  adminController.deleteTweet
-)
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getAdminUsers)
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getAdminTweets)
+router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 module.exports = router

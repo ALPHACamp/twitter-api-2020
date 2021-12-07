@@ -14,12 +14,10 @@ module.exports = {
           email: 'root@example.com',
           password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
           name: 'Administrator',
-          avatar: `https://i.pravatar.cc/150?u=${
-            (Math.floor(Math.random() * 10) + 10) * 100
-          }`,
-          cover: `https://loremflickr.com/600/240/landscape/?random=${
-            Math.random() * 100
-          }`,
+          avatar: `https://i.pravatar.cc/150?u=${(Math.floor(Math.random() * 10) + 10) * 100
+            }`,
+          cover: `https://loremflickr.com/600/240/landscape/?random=${Math.random() * 100
+            }`,
           introduction: faker.lorem.sentence().substring(0, 160),
           role: 'admin',
           createdAt: new Date(),
@@ -36,12 +34,10 @@ module.exports = {
         email: `${user}@example.com`,
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
         name: `${userNameList[index]}`,
-        avatar: `https://i.pravatar.cc/150?u=${
-          Math.ceil(Math.random() * 100) * index
-        }`,
-        cover: `https://loremflickr.com/600/240/landscape/?random=${
-          Math.random() * 100
-        }`,
+        avatar: `https://i.pravatar.cc/150?u=${Math.ceil(Math.random() * 100) * index
+          }`,
+        cover: `https://loremflickr.com/600/240/landscape/?random=${Math.random() * 100
+          }`,
         introduction: faker.lorem.sentence().substring(0, 160),
         role: 'user',
         createdAt: new Date(),
