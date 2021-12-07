@@ -51,7 +51,15 @@ router.post('/users', userController.signUp)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id/likes', authenticated, userController.getLikes)
-router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
+
+// lookup user replied_tweets
+router.get(
+  '/users/:id/replied_tweets',
+  authenticated,
+  userController.getReplies
+)
+
+// edit personal data
 router.put(
   '/users/:id',
   upload.fields([
@@ -62,11 +70,10 @@ router.put(
   userController.putUsers
 )
 
-
 // **tweet**
 // tweet
-router.get('/tweets/', authenticated, tweetController.getTweets)
-router.post('/tweets/', authenticated, tweetController.postTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets', authenticated, tweetController.postTweet)
 router.get('/tweets/:id', authenticated, tweetController.getTweet)
 
 // **reply**

@@ -1,7 +1,8 @@
 const { json } = require('body-parser')
 const db = require('../../models')
-const { Tweet, User, Reply, Like, sequelize } = db
+const { Tweet, User, Reply, Like, Sequelize } = db
 const helpers = require('../../_helpers')
+const { Op } = Sequelize
 
 const tweetController = {
   getTweets: async (req, res) => {
@@ -28,9 +29,10 @@ const tweetController = {
     try {
       const { description } = req.body
       if (!description.trim()) {
-        return (
-          res, json({ status: 'error', message: 'Content can NOT be empty!' })
-        )
+        return res.json({
+          status: 'error',
+          message: 'Content can NOT be empty!'
+        })
       }
       if (description.length > 140) {
         return res.json({
