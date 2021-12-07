@@ -43,6 +43,7 @@ const userService = {
 
     User.findOne({ where: { account: account } }).then(async user => {
       if (!user) return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
+      if (user.role === 'admin') return callback({ status: 'error', message: '此帳號無法登入' })
       if (!bcrypt.compareSync(password, user.password)) {
         return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       }
