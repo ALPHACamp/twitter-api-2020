@@ -89,7 +89,7 @@ const adminController = {
             'likesCounts'
           ]
         ],
-        order: [[sequelize.literal('TweetsCount'), 'DESC']],
+        order: [[sequelize.literal('TweetsCount'), 'DESC']]
       })
       return res.json(users)
     } catch (err) {
