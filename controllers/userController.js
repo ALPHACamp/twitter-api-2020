@@ -17,23 +17,23 @@ const tweet = require('../models/tweet')
 
 const userController = {
   signIn: (req, res) => {
-    // 檢查必填欄位
-    if (!req.body.account || !req.body.password) {
-      return res.json({ status: 'error', message: '請輸入必填欄位' })
-    }
     // 比對User資料庫、比對密碼
-    let { account, password } = req.body
-    // console.log('get email, password from jwt strategy: ', email, password)  // OK
+    const { account, password } = req.body
+    // 檢查必填欄位
+    if (!account || !password) {
+      return res.json({ status: 'error', message: '請輸入必填欄位!' })
+    }
+    // console.log('get account, password from jwt strategy: ', account, password)  // OK
     User.findOne({ where: { account } }).then(user => {
       if (!user) {
-        return res.status(401).json({ status: 'error', message: '' })
+        return res.status(401).json({ status: 'error', message: '帳號不存在!' })
       }
       if (!bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ status: 'error', message: '' })
+        return res.status(401).json({ status: 'error', message: '帳號不存在!' })
       }
       // issue token
-      var payload = { id: user.id }
-      var token = jwt.sign(payload, process.env.JWT_SECRET)
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
       // console.log('token = jwt.sign with', process.env.JWT_SECRET) // OK
       return res.json({
         status: 'success',
@@ -80,11 +80,11 @@ const userController = {
 
     // 確認欄位是否皆有填寫
     if (!account || !name || !email || !password || !checkPassword) {
-      return res.json({ status: 'error', message: '須田' })
+      return res.json({ status: 'error', message: '請輸入必填欄位!' })
     }
     // 確認密碼
     if (password !== checkPassword) {
-      return res.json({ status: 'error', message: '' })
+      return res.json({ status: 'error', message: '確認密碼輸入錯誤!' })
     }
 
     // 確認email或account是否重複
@@ -108,7 +108,7 @@ const userController = {
           account, email, name,
           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
         })
-        return res.json({ status: 'success', message: '成功註冊' })
+        return res.json({ status: 'success', message: '成功註冊!' })
       }
     })
   },
@@ -133,7 +133,7 @@ const userController = {
     }
     // 確認密碼
     if (password !== checkPassword) {
-      return res.json({ status: 'error', message: '' })
+      return res.json({ status: 'error', message: '確認密碼輸入錯誤!' })
     }
 
     // 確認email或account是否重複
@@ -167,10 +167,8 @@ const userController = {
     })
   },
   getCurrentUser: (req, res) => {
-    return User.findAll({
-      raw: true,
-      nest: true
-    }).then(user => {
+    const userId = helpers.getUser(req).id
+    return User.findByPk(userId).then(user => {
       return res.json(
         { user }
       )
