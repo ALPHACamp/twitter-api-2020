@@ -14,7 +14,7 @@ module.exports = {
   },
   authenticatedUser: (req, res, next) => {
     if (helper.getUser(req)) {
-      if (helper.getUser(req).role === null) {
+      if (helper.getUser(req).role !== 'admin') {
         return next()
       }
       return res.json({ status: 'error', message: 'permission denied' })

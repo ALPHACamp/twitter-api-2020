@@ -86,7 +86,7 @@ router.post('/users/signin', userController.signIn)
 router.put(
   '/users/account',
   authenticated,
-
+  authenticatedUser,
   userController.accountSetting
 )
 router.put(
@@ -96,56 +96,56 @@ router.put(
     { name: 'cover', maxCount: 1 }
   ]),
   authenticated,
-
+  authenticatedUser,
   userController.putUser
 )
 router.get(
   '/users/:id/tweets',
   authenticated,
-
+  authenticatedUser,
   userController.getUserTweets
 )
 router.get(
   '/users/:id/replied_tweets',
   authenticated,
-
+  authenticatedUser,
   userController.getUserReplies
 )
 router.get(
   '/users/:id/likes',
   authenticated,
-
+  authenticatedUser,
   userController.getUserLike
 )
 router.get(
   '/users/:id/followings',
   authenticated,
-
+  authenticatedUser,
   userController.getUserFollowings
 )
 router.get(
   '/users/:id/followers',
   authenticated,
-
+  authenticatedUser,
   userController.getUserFollowers
 )
-router.get('/users', authenticated, userController.getUsers)
+router.get('/users', authenticated, authenticatedUser, userController.getUsers)
 router.get(
   '/users/self',
   authenticated,
-
+  authenticatedUser,
   userController.getCurrentUser
 )
 router.get(
   '/users/top',
   authenticated,
-
+  authenticatedUser,
   userController.getTopUsers
 )
 router.get(
   '/users/:id',
   authenticated,
-
+  authenticatedUser,
   userController.getUser
 )
 
@@ -153,13 +153,13 @@ router.get(
 router.post(
   '/followships',
   authenticated,
-
+  authenticatedUser,
   userController.postFollow
 )
 router.delete(
   '/followships/:id',
   authenticated,
-
+  authenticatedUser,
   userController.deleteFollow
 )
 
