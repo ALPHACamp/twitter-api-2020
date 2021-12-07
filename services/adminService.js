@@ -27,8 +27,7 @@ const adminService = {
       message: '成功登入',
       token: token,
       user: {
-        id: user.id,
-        role: user.role
+        id: user.id, account: user.account, name: user.name, email: user.email, avatar: user.avatar, cover: user.cover, introduction: user.introduction, role: user.role
       }
     })
   },
