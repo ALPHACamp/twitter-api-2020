@@ -28,8 +28,9 @@ const userService = {
           })
           .catch(err => console.log(err))
       }
-      if (user.email === req.body.email) return callback({ status: 'error', message: 'email 已重覆註冊！' })
-      if (user.account === req.body.account) return callback({ status: 'error', message: 'account 已重覆註冊！' })
+      user.email === req.body.email
+        ? callback({ status: 'error', message: 'email和account 已重覆註冊！' })
+        : callback({ status: 'error', message: 'account 已重覆註冊！' })
     })
   },
 
