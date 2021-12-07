@@ -15,7 +15,6 @@ let replyController = {
     //   return res.json(reply);
     // });
     replyService.postReply(req, res, (data) => {
-      console.log(data)
       return res.json(data)
     })
   },
