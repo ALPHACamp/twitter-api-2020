@@ -263,18 +263,18 @@ const userService = {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     Like.findOne({
       where: {
-        UserId: currentUser.id,
-        TweetId: req.params.id,
+        UserId: Number(currentUser.id),
+        TweetId: Number(req.params.id),
       },
     }).then((like) => {
       if (!like) {
         return Like.create({
-          UserId: currentUser.id,
-          TweetId: req.params.id,
+          UserId: Number(currentUser.id),
+          TweetId: Number(req.params.id),
           isLike: false,
-        }).then(like => {
-          return callback({ status: 'error', message: '' })
-        })
+        }).then((like) => {
+          return callback({ status: "error", message: "" });
+        });
       }
       if (like.isLike === true) {
         return like.update({ ...like, isLike: !like.isLike }).then((like) => {
@@ -362,8 +362,6 @@ const userService = {
         include: [User, { model: Tweet, include: [User] }],
       }),
     ]).then(([user, tweets]) => {
-      console.log('tweet.ength',tweets.length)
-      console.log("wtwwt2", tweets[0]);
        user = {
          ...user.dataValues,
          FollowersCount: user.Followers.length,
@@ -379,38 +377,51 @@ const userService = {
           introduction: d.User.introduction,
           createdAt: d.User.createdAt,
         };
-        d.Tweet.User = { UserId: d.Tweet.User.id , account: d.Tweet.User.account};
-        console.log(d.Tweet.User);
         return d;
       });
-      // Object.assign(newTweets, { tweetCount: tweets.length });
+      Object.assign(newTweets, { tweetCount: tweets.length });
       return callback({ tweets: newTweets, user: user });
     });
   },
   getUserLike: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
-      User.findByPk(req.params.userId),
+      User.findByPk(req.params.userId, {
+        include: [
+          { model: User, as: "Followers" },
+          { model: User, as: "Followings" },
+        ],
+      }),
       Like.findAll({
         where: {
           UserId: Number(req.params.userId),
-          isLike: true,
+          isLike: true
         },
         order: [["createdAt", "DESC"]],
         include: [User, { model: Tweet, include: [User, Reply, Like] }],
       }),
     ]).then(([user, tweets]) => {
-      tweets.map((d) => {
+      user = {
+        ...user.dataValues,
+        FollowersCount: user.Followers.length,
+        FollowingsCount: user.Followings.length,
+        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
+      };
+      let newTweets = tweets.map((d) => {
+        // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
+        //   currentUser.id)
         let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-          currentUser.id
+          Number(req.params.userId)
         );
         return Object.assign(d, {
           tweetReplyCount: d.Tweet.Replies.length,
-          tweetLikeCount: d.Tweet.Likes.length,
+          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
           isLike: isLike,
         });
       });
-      return callback({ tweets: tweets, user: user });
+      newTweets.forEach(d => console.log(d.isLike))
+      Object.assign(newTweets, { tweetCount: tweets.length });
+      return callback({ tweets: newTweets, user: user });
     });
   },
 
