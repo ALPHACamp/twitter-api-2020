@@ -34,6 +34,7 @@ const userController = {
           account,
           name,
           email,
+          introduction:'',
           password: bcrypt.hashSync(req.body.password, 10)
         })
           .then(() => {
