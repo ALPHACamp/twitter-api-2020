@@ -267,7 +267,7 @@ const userService = {
       user = user.toJSON()
       user.Followings.forEach(item => {
         item.followingId = item.id
-        item.isFollowed = Number(helpers.getUser(req).is) === Number(item.Followship.followerId)
+        item.isFollowed = Number(helpers.getUser(req).id) === Number(item.Followship.followerId)
       })
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
       return callback(user)
