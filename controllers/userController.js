@@ -288,23 +288,22 @@ const userController = {
   },
   getUsersFollowings: async (req, res) => {
     try {
-      const user = await User.findByPk(req.params.id, {
+      const user = (await User.findByPk(req.params.id, {
         include: [
           {
             model: User, as: 'Followings'
           },
         ]
-      })
+      })).toJSON()
 
-
-      const result = user.dataValues.Followings.map((result) => ({
-        followingId: result.dataValues.id,
-        account: result.dataValues.account,
-        name: result.dataValues.name,
-        avatar: result.dataValues.avatar,
-        introduction: result.dataValues.introduction,
+      const result = user.Followings.map((result) => ({
+        followingId: result.id,
+        account: result.account,
+        name: result.name,
+        avatar: result.avatar,
+        introduction: result.introduction,
         isFollowing: helpers.getUser(req)
-          .Followings.some((user) => user.id === result.dataValues.id)
+          .Followings.some((user) => user.id === result.id)
       }))
       result.sort((a, z) => {
         return z.isFollowing - a.isFollowing
