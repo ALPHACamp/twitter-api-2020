@@ -28,13 +28,13 @@ const userController = {
     User.findOne({ where: { [Op.or]: [{ email }, { account }] } })
       .then(user => {
         if (user) {
-          return res.json({ status: 'error', message: '信箱或帳戶重複' })
+          return res.json({ status: 'error', message: 'Email或帳號重複' })
         }
         User.create({
           account,
           name,
           email,
-          introduction:'',
+          introduction: '',
           password: bcrypt.hashSync(req.body.password, 10)
         })
           .then(() => {
@@ -77,7 +77,7 @@ const userController = {
       })
     })
   },
-  
+
   getTweets: (req, res) => {
     Tweet.findAll({
       where: { UserId: req.params.id },
