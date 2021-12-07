@@ -82,9 +82,29 @@ router.post('/followships', authenticated, followshipController.follow)
 router.delete('/followships/:id', authenticated, followshipController.unFollow)
 
 // **admin**
-router.post('/admin/signin', adminController.signIn)
-router.get('/admin/users', adminController.getUsers)
-router.get('/admin/tweets', adminController.getTweets)
-router.delete('/admin/tweets/:id', adminController.deleteTweet)
+router.post(
+  '/admin/signin',
+  authenticated,
+  authenticatedAdmin,
+  adminController.signIn
+)
+router.get(
+  '/admin/users',
+  authenticated,
+  authenticatedAdmin,
+  adminController.getUsers
+)
+router.get(
+  '/admin/tweets',
+  authenticated,
+  authenticatedAdmin,
+  adminController.getTweets
+)
+router.delete(
+  '/admin/tweets/:id',
+  authenticated,
+  authenticatedAdmin,
+  adminController.getTweet
+)
 
 module.exports = router
