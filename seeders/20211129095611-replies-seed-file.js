@@ -13,7 +13,7 @@ module.exports = {
             ({
                 id: i * 10 + 1,
                 comment: faker.lorem.text().substring(0, 140),
-                UserId: users[i % 5].id,
+                UserId: i !=1 ? Math.floor(Math.random() * 6) * 10 + 1 : i * 10 + 1,
                 TweetId: tweets[parseInt(i / 3)].id,
                 createdAt: new Date(),
                 updatedAt: new Date(),
