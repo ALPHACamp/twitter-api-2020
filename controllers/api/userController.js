@@ -171,38 +171,42 @@ let userController = {
     }
   },
   //查看使用者推文 (抓followers)
-  getTweets: async (req, res) => {
+  getUserTweets: async (req, res) => {
     try {
-      const tweet = await Tweet.findAll({
+      let tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         attributes: [
-          'description',
           ['id', 'TweetId'],
           'createdAt',
+          'description',
           [
             sequelize.literal(
               '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
             ),
-            'likeCount'
+            'likesCount'
           ],
           [
             sequelize.literal(
               '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
             ),
-            'replyCount'
-          ],
-          [
-            sequelize.literal(
-              `EXISTS (SELECT * FROM Likes WHERE UserId = ${helpers.getUser(req).id
-              } AND TweetId = Tweet.id)`
-            ),
-            'isLiked'
+            'repliesCount'
           ]
         ],
-        include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }],
-        order: [['createdAt', 'DESC']]
+        group: 'TweetId',
+        include: [
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       })
-      return res.json(tweet)
+      tweets = tweets.map((tweet) => ({
+        ...tweet,
+        isLiked: req.user.LikedTweets
+          ? req.user.LikedTweets.map((like) => like.id).includes(tweet.TweetId)
+          : null
+      }))
+      return res.json(tweets)
     } catch (err) {
       console.log(err)
     }
@@ -393,7 +397,8 @@ let userController = {
               'createdAt',
               [
                 sequelize.literal(
-                  'EXISTS (SELECT * FROM Followships WHERE Followships.followerId = User.id)'
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+                  }  AND Followships.followingId = User.id )`
                 ),
                 'isFollowed'
               ]
@@ -426,7 +431,8 @@ let userController = {
               'createdAt',
               [
                 sequelize.literal(
-                  'EXISTS (SELECT * FROM Followships WHERE Followships.followingId = User.id)'
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+                  }  AND Followships.followingId = User.id )`
                 ),
                 'isFollowed'
               ]
