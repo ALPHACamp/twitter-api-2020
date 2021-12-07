@@ -18,8 +18,10 @@ describe('# followship requests', () => {
     describe(' /api/followships', () => {
       before(async () => {
         // 清除 User, Followship table 的測試資料庫資料
-        await db.User.destroy({ where: {}, truncate: true })
-        await db.Followship.destroy({ where: {}, truncate: true })
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Followship.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
@@ -56,8 +58,10 @@ describe('# followship requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({ where: {}, truncate: true })
-        await db.Followship.destroy({ where: {}, truncate: true })
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Followship.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
@@ -69,8 +73,10 @@ describe('# followship requests', () => {
     describe(' /api/followships/:followingId', () => {
       before(async () => {
         // 清除 User table 的測試資料庫資料
-        await db.User.destroy({ where: {}, truncate: true })
-        await db.Followship.destroy({ where: {}, truncate: true })
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Followship.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({ name: 'root' }); this.authenticate = sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
           callback(null, { ...rootUser }, null);
@@ -105,8 +111,10 @@ describe('# followship requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({ where: {}, truncate: true })
-        await db.Followship.destroy({ where: {}, truncate: true })
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Followship.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
