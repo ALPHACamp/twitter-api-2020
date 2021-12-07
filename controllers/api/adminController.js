@@ -1,6 +1,6 @@
 /* DB */
 const db = require('../../models')
-const { User, Tweet, Like, Reply, Sequelize } = db
+const { User, Tweet, Reply, Like, Sequelize } = db
 const { Op } = Sequelize
 
 /* necessary package */
@@ -92,7 +92,7 @@ const adminController = {
         ],
         order: [[sequelize.literal('TweetCount'), 'DESC']]
       })
-      return res.json(users)
+      return res.json([users])
     } catch (err) {
       console.log(err)
     }
@@ -126,6 +126,8 @@ const adminController = {
         })
       }
       await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: tweet.id } })
+      await Like.destroy({ where: { TweetId: tweet.id } })
       return res.json({
         status: 'success',
         message: 'Delete tweet successfully'
