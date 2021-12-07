@@ -15,7 +15,9 @@ describe('# user requests', () => {
     describe('POST /api/users', () => {
       before(async() => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
       // 註冊自己的帳號 POST /users
@@ -38,7 +40,9 @@ describe('# user requests', () => {
 
       after(async () => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
@@ -51,7 +55,9 @@ describe('# user requests', () => {
     describe('GET /users/:id', () => {
       before(async() => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -85,7 +91,9 @@ describe('# user requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
@@ -94,8 +102,10 @@ describe('# user requests', () => {
     describe('GET /users/:id/tweets', () => {
       before(async() => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -130,8 +140,10 @@ describe('# user requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
@@ -139,9 +151,11 @@ describe('# user requests', () => {
     describe('GET /users/:id/replied_tweets', () => {
       before(async() => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Reply.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.Reply.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -177,9 +191,11 @@ describe('# user requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Reply.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.Reply.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
@@ -187,9 +203,11 @@ describe('# user requests', () => {
     describe('GET /users/:id/likes', () => {
       before(async() => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Like.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.Like.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -225,9 +243,11 @@ describe('# user requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Like.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.Like.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
@@ -236,9 +256,11 @@ describe('# user requests', () => {
     describe('GET /users/:id/followings', () => {
       before(async() => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Followship.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.Followship.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -273,9 +295,11 @@ describe('# user requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Followship.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.Followship.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
@@ -283,9 +307,11 @@ describe('# user requests', () => {
     describe('GET /users/:id/followers', () => {
       before(async() => {
         // 清除測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Followship.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.Followship.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -321,9 +347,11 @@ describe('# user requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
-        await db.Tweet.destroy({where: {},truncate: true})
-        await db.Followship.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.Tweet.destroy({where: {},truncate: true, force: true})
+        await db.Followship.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
@@ -337,7 +365,9 @@ describe('# user requests', () => {
     describe('PUT /api/users/:id', () => {
       before(async() => {
         // 清除 User, Tweet table 的測試資料庫資料
-        await db.User.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
         // 模擬登入資料
         const rootUser = await db.User.create({name: 'root'});this.authenticate =  sinon.stub(passport,"authenticate").callsFake((strategy, options, callback) => {            
           callback(null, {...rootUser}, null);
@@ -372,7 +402,9 @@ describe('# user requests', () => {
         // 清除登入及測試資料庫資料
         this.authenticate.restore();
         this.getUser.restore();
-        await db.User.destroy({where: {},truncate: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+        await db.User.destroy({where: {},truncate: true, force: true})
+        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
 
     });
