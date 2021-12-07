@@ -1,23 +1,20 @@
 /* DB */
 const db = require('../../models')
-const { User, Tweet, Like, Reply } = db
+const { User, Tweet, Like, Reply, Sequelize } = db
+const { Op } = Sequelize
 
 /* necessary package */
 const bcrypt = require('bcryptjs')
-// IMGUR
-const imgur = require('imgur-node-api')
-const IMGUR_CLIENT_ID = 'e34bbea295f4825'
+
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
-//helpers
-const helpers = require('../../_helpers')
 
 const sequelize = require('sequelize')
 const adminController = {
-  //登入
+  // 登入
   signIn: async (req, res) => {
     try {
       const { account, password } = req.body
@@ -57,8 +54,8 @@ const adminController = {
       console.log(e)
     }
   },
-  //查看user資訊
-  getUsers: async (req, res) => {
+  // 查看user資訊
+  getAdminUsers: async (req, res) => {
     try {
       const users = await User.findAll({
         attributes: [
@@ -100,21 +97,25 @@ const adminController = {
       console.log(err)
     }
   },
-  getTweets: async (req, res) => {
+  // 查看tweet資訊
+  getAdminTweets: async (req, res) => {
     try {
-      const result = await Tweet.findAndCountAll({ include: [User] })
-      const data = await result.rows.map((tweet) => ({
-        ...tweet.dataValues,
-        description:
-          tweet.dataValues.description.length >= 50
-            ? tweet.dataValues.description.substring(0, 50) + '...'
-            : tweet.dataValues.description
-      }))
-      return res.json(data)
+      const tweets = await Tweet.findAll({
+        attributes: [
+          'id',
+          [Sequelize.literal('substring(description,1,50)'), 'description']
+        ],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      return res.json([tweets])
     } catch (e) {
       console.log(e)
     }
   },
+  // 刪除Tweet
   deleteTweet: async (req, res) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)

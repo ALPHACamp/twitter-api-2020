@@ -65,13 +65,13 @@ router.get(
   '/admin/users',
   authenticated,
   authenticatedAdmin,
-  adminController.getUsers
+  adminController.getAdminUsers
 )
 router.get(
   '/admin/tweets',
   authenticated,
   authenticatedAdmin,
-  adminController.getTweets
+  adminController.getAdminTweets
 )
 router.delete(
   '/admin/tweets/:id',
