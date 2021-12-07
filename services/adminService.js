@@ -21,7 +21,7 @@ const adminService = {
       })
   },
   getTweets: (req, res, callback) => {
-    return Tweet.findAll({ include: [Reply, Like] })
+    return Tweet.findAll({ include: [Reply, Like, User] })
       .then(tweets => {
         callback({
           tweets: tweets

@@ -310,7 +310,7 @@ const userService = {
       include: [{ model: User, as: 'Followers' }]
         .then(user => {
           const followersCount = user.Followers.length
-          return callback({user: user, followersCount: followersCount})
+          return callback({ user: user, followersCount: followersCount })
         })
     })
   },
