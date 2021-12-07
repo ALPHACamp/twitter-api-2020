@@ -22,12 +22,12 @@ const userController = {
       if (!user) {
         return res
           .status(401)
-          .json({ status: 'error', message: 'no such user found' })
+          .json({ status: 'error', message: '帳號或密碼錯誤' })
       }
       if (!bcrypt.compareSync(password, user.password)) {
         return res
           .status(401)
-          .json({ status: 'error', message: 'passwords did not match' })
+          .json({ status: 'error', message: '帳號或密碼錯誤' })
       }
       // 簽發 token
       const payload = { id: user.id }
@@ -56,17 +56,23 @@ const userController = {
       if (req.body.checkPassword !== req.body.password) {
         return res
           .status(401)
-          .json({ status: 'error', message: ' 兩次密碼不相同' })
+          .json({ status: 'error', message: '兩次密碼不相同' })
       } else {
         // confirm unique user
         const email = await User.findOne({ where: { email: req.body.email } })
         const account = await User.findOne({
           where: { account: req.body.account }
         })
-        if (email || account) {
+        if (account) {
           return res.status(401).json({
             status: 'error',
-            message: '此信箱或帳號已註冊過！'
+            message: 'account已重複註冊！'
+          })
+        }
+        if (email) {
+          return res.status(401).json({
+            status: 'error',
+            message: 'email已重複註冊！'
           })
         } else {
           const user = await User.create({
@@ -88,6 +94,9 @@ const userController = {
       }
     } catch (error) {
       console.log(error)
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'service error!' })
     }
   },
 
@@ -139,7 +148,7 @@ const userController = {
   },
 
   putUser: async (req, res) => {
-    const { password } = req.body
+    const { password, account, email } = req.body
     try {
       // 只有自己能編輯自己的資料
       // 防止使用網址修改id切換使用者去修改別人的Profile
@@ -162,6 +171,26 @@ const userController = {
           const cover = await imgur.uploadFile(files.cover[0].path)
           req.body.cover = cover.link
         }
+      }
+      const isAccountExit = await User.findOne({
+        where: { account },
+        raw: true, nest: true,
+      })
+      if (isAccountExit && isAccountExit.id !== helpers.getUser(req).id) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'account已重複註冊！'
+        })
+      }
+      const isEmailExit = await User.findOne({
+        where: { email },
+        raw: true, nest: true,
+      })
+      if (isEmailExit && isEmailExit.id !== helpers.getUser(req).id) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'email已重複註冊！'
+        })
       }
       if (password) {
         await User.update(
@@ -214,8 +243,8 @@ const userController = {
         replyCounts: userTweets.dataValues.Replies.length,
         isLike: helpers.getUser(req).Likes
           ? helpers
-              .getUser(req)
-              .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
+            .getUser(req)
+            .Likes.some((like) => like.TweetId === userTweets.dataValues.id)
           : false
       }))
       return res.status(200).json(results)
@@ -296,20 +325,27 @@ const userController = {
         ]
       })).toJSON()
 
-      const result = user.Followings.map((result) => ({
-        followingId: result.id,
-        account: result.account,
-        name: result.name,
-        avatar: result.avatar,
-        introduction: result.introduction,
+      const results = user.Followings.map((results) => ({
+        followingId: results.id,
+        account: results.account,
+        name: results.name,
+        avatar: results.avatar,
+        introduction: results.introduction,
         isFollowing: helpers.getUser(req)
-          .Followings.some((user) => user.id === result.id)
+          .Followings.some((user) => user.id === results.id)
       }))
-      result.sort((a, z) => {
+      results.sort((a, z) => {
         return z.isFollowing - a.isFollowing
       })
+      // move myself to the top
+      const findMyself = results.findIndex(data => data.followingId === helpers.getUser(req).id)
+      if (findMyself !== -1) {
+        const myself = results[findMyself]
+        results.splice(findMyself, 1)
+        results.unshift(myself)
+      }
 
-      return res.status(200).json(result)
+      return res.status(200).json(results)
     } catch (error) {
       console.log(error)
       return res
