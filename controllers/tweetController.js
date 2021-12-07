@@ -9,27 +9,32 @@ const tweetController = {
   getTweets: (req, res) => {
     Tweet.findAll({
       include: [
-        User,   // Tweet belongsTo User
-        { model: User, as: 'LikedUsers' },    // Tweet belongsToMany User, through Like
-        { model: User, as: 'RepliedUsers' }   // Tweet belongsToMany User, through Reply
+        // User,   // Tweet belongsTo User
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: User, as: 'LikedUsers', attributes: ['id', 'name', 'account', 'avatar'] },    // Tweet belongsToMany User, through Like
+        { model: User, as: 'RepliedUsers', attributes: ['id', 'name', 'account', 'avatar'] }   // Tweet belongsToMany User, through Reply; 包含Reply內容
       ],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         tweets = tweets.map(tweet => ({
-          tweet,
+          ...tweet.dataValues,
           repliedCount: tweet.RepliedUsers.length,
           likedCount: tweet.LikedUsers.length
         }))
+        tweets.forEach(tweet => {
+          delete tweet.RepliedUsers
+          delete tweet.LikedUsers
+        })
         res.json(tweets)
       })
   },
   getTweet: (req, res) => {
     Tweet.findByPk(req.params.id, {
       include: [
-        User,
-        { model: User, as: 'LikedUsers' },
-        { model: User, as: 'RepliedUsers' }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: User, as: 'LikedUsers', attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: User, as: 'RepliedUsers', attributes: ['id', 'name', 'account', 'avatar'] }
       ]
     }).then(tweet => {
       tweet.dataValues.likedCount = tweet.LikedUsers.length
