@@ -13,7 +13,8 @@ const tweetController = {
                 User,
                 Like,
                 { model: Reply, include: [User] }
-            ]
+            ],
+            order: [['createdAt', 'DESC']]
         }).then(tweets => {
             tweets.map(tweet => ({
                 id: tweet.id,
