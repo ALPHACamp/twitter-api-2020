@@ -27,7 +27,7 @@ const uploadImage = upload.fields([
 
 // **users**
 router.post('/users/signin', userController.signIn)
-router.get('/users/:id/tweets', authenticated, userController.getTweets)
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/top', authenticated, userController.getTop)
 router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
