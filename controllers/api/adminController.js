@@ -63,7 +63,6 @@ const adminController = {
           'id',
           'name',
           'avatar',
-          'role',
           'cover',
           [
             sequelize.literal(
@@ -81,18 +80,19 @@ const adminController = {
             sequelize.literal(
               '(SELECT COUNT(*) FROM Tweets WHERE Tweets.id = User.id )'
             ),
-            'TweetCount'
+            'TweetsCount'
           ],
           [
             sequelize.literal(
               '(SELECT COUNT(*) FROM Tweets inner join Likes on Tweets.id = Likes.TweetId where Tweets.UserId = User.id)'
             ),
-            'likeCounts'
+            'likesCounts'
           ]
         ],
-        order: [[sequelize.literal('TweetCount'), 'DESC']]
+        order: [[sequelize.literal('TweetsCount'), 'DESC']],
+        where: { role: { [Op.not]: 'admin' } }
       })
-      return res.json([users])
+      return res.json(users)
     } catch (err) {
       console.log(err)
     }
@@ -110,7 +110,7 @@ const adminController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      return res.json([tweets])
+      return res.json(tweets)
     } catch (e) {
       console.log(e)
     }
