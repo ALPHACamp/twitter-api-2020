@@ -310,7 +310,12 @@ const userService = {
   getUserTweets: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
-      User.findByPk(req.params.userId),
+      User.findByPk(req.params.userId, {
+        include: [
+          { model: User, as: 'Followers'},
+          { model: User, as: 'Followings'}
+        ]
+      }),
       Tweet.findAll({
       where: {
         UserId: Number(req.params.userId),
@@ -319,6 +324,12 @@ const userService = {
       include: [User, Reply, Like],
       })
     ]).then(([user, tweets]) => {
+      user = {
+        ...user.dataValues,
+        FollowersCount: user.Followers.length,
+        FollowingsCount: user.Followings.length,
+        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
+      };
       let newTweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
         isLike = !isLike ? false : isLike.isLike;
@@ -330,6 +341,8 @@ const userService = {
           isLike: isLike,
         };
       });
+      console.log(user)
+      newTweets = { ...newTweets, tweetCount: tweets.length };
       callback({ tweets: newTweets, user: user });
     });
   },
@@ -355,7 +368,7 @@ const userService = {
         };
         return d;
       });
-      return callback({ tweets: tweets, user: user});
+      return callback({ tweets: tweets, user: user.toJSON()});
     });
   },
   getUserLike: (req, res, callback) => {

@@ -1,3 +1,4 @@
+<h1>{{tweets.tweetCount}}  筆推文</h1>
 <div class="row row-cols-1 row-cols-md-2">
   <div class="col mb-4">
     <div class="card">
@@ -5,15 +6,18 @@
       <div class="d-flex justify-content-around">
       <img src="{{user.avatar}}" class="card-img-top" alt="..."
         style="max-width: 80px; max-height: 80px; border-radius: 50%;">
-        {{#ifCond current_user.id user.id}}
-        {{else}}
-        <form action="/followships/{{user.id}}" method="post">
-          <button type="submit" class="btn btn-info">正在跟隨</button>
-        </form>
+       <span>
+        {{user.id}} 特定者用
+       </span> {{current_user.id }} 當下使用者
+        {{#if user.isFollower}}
         <form action="/followships/{{user.id}}?_method=DELETE" method="post">
           <button type="submit" class="btn btn-outline-info">取消跟隨</button>
         </form>
-        {{/ifCond}}
+        {{else}}
+        <form action="/followships/{{user.id}}" method="post">
+          <button type="submit" class="btn btn-info">跟隨</button>
+        </form>
+        {{/if}}
       </div>
       <div class="card-body">
         <h5 class="card-title">使用者帳號 : {{user.account}} </h5>
@@ -24,11 +28,11 @@
         <li class="list-group-item">推文者的名字 {{ user.name}}</li>
         <li class="list-group-item d-flex justify-content-around">
           <div class="left">
-            <span>{{this.Replies.length}} 位跟隨中
+            <span>{{user.FollowingsCount}} 位跟隨中
             </span>
           </div>
           <div class="right inline-block">
-            <span>{{this.Replies.length}} 位跟隨者
+            <span>{{user.FollowersCount}} 位跟隨者
             </span>
           </div>
         </li>
