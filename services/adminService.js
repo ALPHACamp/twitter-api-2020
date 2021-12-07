@@ -41,7 +41,7 @@ const adminService = {
             callback({ status: 'success', message: '' })
           })
       })
-  }
+  },
 }
 
 module.exports = adminService

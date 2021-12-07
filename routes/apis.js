@@ -74,6 +74,9 @@ router.get('/admin/users', authenticated, authenticatedAdmin, adminController.ge
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets) //管理者可以看見站內所有的使用者 //還要補authenticatedAdmin
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet) //還要補authenticatedAdmin
 
-
+//DARK MAGIC FOR DESTROYING DATA
+router.delete('/destroyer/users', userController.deleteAllUsers)
+router.delete('/destroyer/tweets', userController.deleteAllTweets)
+router.delete('/destroyer/replies', userController.deleteAllReplies)
 
 module.exports = router

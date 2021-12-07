@@ -146,6 +146,21 @@ let userController = {
     userService.getFollowings(req, res, (data) => {
       return res.json(data)
     })
+  },
+  deleteAllUsers: (req, res) => {
+    userService.deleteAllUsers(req, res, (data) => {
+      return res.json(data)
+  })
+  },
+  deleteAllTweets: (req, res) => {
+    userService.deleteAllTweets(req, res, (data) => {
+      return res.json(data)
+    })
+  },
+  deleteAllReplies: (req, res) => {
+    userService.deleteAllReplies(req, res, (data) => {
+      return res.json(data)
+    })
   }
 };
 

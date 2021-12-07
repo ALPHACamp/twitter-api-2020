@@ -226,6 +226,7 @@ const userController = {
   },
   removeLike: (req, res) => {
     userService.removeLike(req, res, (data) => {
+
       return res.redirect("back");
     });
   },
