@@ -28,7 +28,7 @@ let userController = {
       if (!account || !password) {
         return res.json({
           status: 'error',
-          message: 'Please fill both Account & Password fields!'
+          message: 'Please fill in both Account & Password fields!'
         })
       }
       const user = await User.findOne({ where: { account } })
@@ -36,21 +36,21 @@ let userController = {
       if (!user)
         return res
           .status(401)
-          .json({ status: 'error', message: 'no such user found' })
+          .json({ status: 'error', message: 'Account did NOT exist' })
       // 是否為admin
       if (user.role === 'admin')
         return res
           .status(401)
-          .json({ status: 'error', message: 'admin can not enter front desk' })
+          .json({ status: 'error', message: 'Admin can NOT enter front desk' })
       // 密碼是否正確
       if (!bcrypt.compareSync(password, user.password)) {
         return res
           .status(401)
-          .json({ status: 'error', message: 'passwords did not match' })
+          .json({ status: 'error', message: 'Passwords is NOT matched' })
       }
       // 簽發 token
       var payload = { id: user.id }
-      var token = jwt.sign(payload, 'alphacamp')
+      var token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
         message: 'Login successfully!',

@@ -82,12 +82,7 @@ router.post('/followships', authenticated, followshipController.follow)
 router.delete('/followships/:id', authenticated, followshipController.unFollow)
 
 // **admin**
-router.post(
-  '/admin/signin',
-  authenticated,
-  authenticatedAdmin,
-  adminController.signIn
-)
+router.post('/admin/signin', adminController.signIn)
 router.get(
   '/admin/users',
   authenticated,

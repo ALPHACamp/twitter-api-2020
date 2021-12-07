@@ -20,24 +20,24 @@ const adminController = {
   //登入
   signIn: async (req, res) => {
     try {
-      const { email, account, password } = req.body
+      const { account, password } = req.body
       // 檢查必要資料
-      if (!email || !password) {
+      if (!account || !password) {
         return res.json({
           status: 'error',
-          message: "required fields didn't exist"
+          message: 'Please fill in both Account & Password fields!'
         })
       }
       // 檢查 user 是否存在與密碼是否正確
-      const user = await User.findOne({ where: { email } })
+      const user = await User.findOne({ where: { account } })
       if (!user)
         return res
           .status(401)
-          .json({ status: 'error', message: 'no such user found' })
+          .json({ status: 'error', message: 'Account did NOT exist' })
       if (!bcrypt.compareSync(password, user.password)) {
         return res
           .status(401)
-          .json({ status: 'error', message: 'passwords did not match' })
+          .json({ status: 'error', message: 'Passwords is NOT matched' })
       }
       if (user.role !== 'admin') {
         return res
@@ -46,7 +46,7 @@ const adminController = {
       }
       // 簽發 token
       var payload = { id: user.id }
-      var token = jwt.sign(payload, 'alphacamp')
+      var token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
         message: 'Admin login successfully',
