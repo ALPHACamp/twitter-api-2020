@@ -43,6 +43,7 @@ const userService = {
 
     User.findOne({ where: { account: account } }).then(async user => {
       if (!user) return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
+      if (user.role === 'admin') return callback({ status: 'error', message: '此帳號無法登入' })
       if (!bcrypt.compareSync(password, user.password)) {
         return callback({ status: 'error', message: '帳號不存在或密碼錯誤！' })
       }
@@ -136,7 +137,15 @@ const userService = {
         user.cover = 'https://i.imgur.com/Qqb0a7S.png'
       }
 
-      if (files.avatar || files.cover) {
+      if (!files) {
+        await user.update({
+          name,
+          introduction,
+          avatar,
+          cover: user.cover
+        })
+        return callback({ status: 'success', message: '使用者資料編輯成功！(沒傳圖）' })
+      } else {
         imgur.setClientID(IMGUR_CLIENT_ID)
         const uploadImg = file => {
           return new Promise((resolve, reject) => {
@@ -156,14 +165,6 @@ const userService = {
           cover: newCover
         })
         return callback({ status: 'success', message: '使用者資料編輯成功！(有傳圖）' })
-      } else {
-        await user.update({
-          name,
-          introduction,
-          avatar,
-          cover: user.cover
-        })
-        return callback({ status: 'success', message: '使用者資料編輯成功！(沒傳圖）' })
       }
     } catch (err) {
       return callback({ status: 'error', message: '編輯未成功！' })

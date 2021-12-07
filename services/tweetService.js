@@ -55,7 +55,7 @@ const tweetService = {
           include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
         },
         { model: Like },
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
       ]
     }).then(tweet => {
       tweet = tweet.toJSON()

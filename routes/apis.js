@@ -52,11 +52,8 @@ router.post('/admin/signin', adminController.signIn)
 // 登入與註冊
 router.post('/signin', userController.signIn)
 router.post('/users', userController.signUp)
-// 取得與編輯user資訊
-router.get('/get_current_user', authenticated, userController.getCurrentUser)
-router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id/setting', authenticated, userController.putUserSetting)
-router.put('/users/:id', authenticated, uploadImage, userController.putUser)
+// TOP10 followers
+router.get('/users/top', authenticated, userController.getTopUser)
 
 // 查看某user的資訊
 // reply
@@ -68,8 +65,12 @@ router.get('/users/:id/likes', authenticated, userController.getUserLikes)
 // followship
 router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
-// TOP10 followers
-router.get('/users/top', authenticated, userController.getTopUser)
+// 取得與編輯user資訊
+router.put('/users/:id/setting', authenticated, userController.putUserSetting)
+router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', authenticated, uploadImage, userController.putUser)
+// 當前登入user
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 
 // 跟followship相關路由
 router.post('/followships', authenticated, userController.addFollowing)
