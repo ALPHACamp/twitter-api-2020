@@ -20,6 +20,7 @@ const tweetService = {
   },
 
   getTweets: async (req, res, callback) => {
+    const currentUserId = helpers.getUser(req).id
     //撈出tweet資料，並取得關聯User的資料
     const tweets = await Tweet.findAll({
       raw: true,
@@ -28,7 +29,8 @@ const tweetService = {
         'id',
         'description',
         [sequelize.literal(`(select count(TweetId) from Likes where TweetId = Tweet.id)`), 'likeCounts'],
-        [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts']
+        [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts'],
+        [sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLiked']
       ],
       include: [{
         model: User, attributes: ['id', 'account', 'name', 'avatar']
@@ -39,6 +41,7 @@ const tweetService = {
   },
 
   getTweet: async (req, res, callback) => {
+    const currentUserId = helpers.getUser(req).id
     //撈出特定:tweet_id的資料，並取得關聯User的資料
     const tweet = await Tweet.findByPk(req.params.tweet_id,
       {
@@ -48,7 +51,8 @@ const tweetService = {
           'id',
           'description',
           [sequelize.literal(`(select count(TweetId) from Likes where TweetId = Tweet.id)`), 'likeCounts'],
-          [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts']
+          [sequelize.literal(`(select count(TweetId) from Replies where TweetId = Tweet.id)`), 'commentCounts'],
+          [sequelize.literal(`exists(select 1 from Likes where UserId = ${currentUserId} and TweetId = Tweet.id)`), 'isLiked']
         ],
         include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }],
       })
