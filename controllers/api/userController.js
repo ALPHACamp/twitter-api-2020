@@ -1,6 +1,6 @@
 /* DB */
 const db = require('../../models')
-const { User, Tweet, Like, Reply, Followship } = db
+const { User, Tweet, Like, Reply } = db
 
 /* necessary package */
 const bcrypt = require('bcryptjs')
@@ -152,8 +152,7 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
-                helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -353,7 +352,7 @@ let userController = {
       const Top = await User.findAll({
         attributes: [
           'account',
-          'id',
+          ['id', 'UserId'],
           'name',
           'avatar',
           'role',
@@ -365,8 +364,7 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
-                helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -375,7 +373,6 @@ let userController = {
         order: [[sequelize.literal('FollowingsCount'), 'DESC']],
         limit: 10
       })
-      // console.log(JSON.stringify(Top, null, 2))
       return res.json(Top)
     } catch (err) {
       console.log(err)
