@@ -1,6 +1,8 @@
 const db = require('../models')
 const User = db.User
 const Tweet = db.Tweet
+const Like = db.Like
+const Reply = db.Reply
 const sequelize = require('sequelize')
 const { Op } = require("sequelize");
 
@@ -12,9 +14,9 @@ const adminController = {
         [sequelize.literal(`(SELECT COUNT(Tweets.UserId) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)`), 'LikedTweetCount'],
       ],
       include: [
-        { model: User, as: 'Followers', attributes: ['id', 'account', 'name'] },  // User belongs to many User, through Followship
+        { model: User, as: 'Followers', attributes: ['id', 'account', 'name'] },
         { model: User, as: 'Followings', attributes: ['id', 'account', 'name'] },
-        Tweet,  // OK ; User has many Tweets
+        Tweet,
       ],
     }).then(users => {
       users = users.map((user) => ({
