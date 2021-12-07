@@ -6,10 +6,24 @@ const helpers = require('../../_helpers')
 const tweetController = {
   getReplies: async (req, res) => {
     try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) {
+        return res.json({
+          status: 'error',
+          message: 'This tweet did Not exist!'
+        })
+      }
+
       const replies = await Reply.findAll({
+        raw: true,
+        nest: true,
         where: { TweetId: req.params.id },
-        include: [User, { model: Tweet, include: User }]
+        include: {
+          model: User,
+          attributes: ['avatar', 'account', 'name']
+        }
       })
+
       return res.json(replies)
     } catch (err) {
       console.log(err)
