@@ -120,6 +120,21 @@ let userController = {
       console.log(err)
     }
   },
+  //取得目前使用者的資料
+  getCurrentUser: (req, res) => {
+    const { id, name, email, account, avatar, cover, introduction, role } =
+      req.user
+    return res.json({
+      id,
+      name,
+      email,
+      account,
+      avatar,
+      cover,
+      introduction,
+      role
+    })
+  },
   //查看使用者資料
   getUser: async (req, res) => {
     try {
@@ -152,7 +167,8 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -364,7 +380,8 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -397,7 +414,8 @@ let userController = {
               'createdAt',
               [
                 sequelize.literal(
-                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                    helpers.getUser(req).id
                   }  AND Followships.followingId = User.id )`
                 ),
                 'isFollowed'
@@ -431,7 +449,8 @@ let userController = {
               'createdAt',
               [
                 sequelize.literal(
-                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                    helpers.getUser(req).id
                   }  AND Followships.followingId = User.id )`
                 ),
                 'isFollowed'
