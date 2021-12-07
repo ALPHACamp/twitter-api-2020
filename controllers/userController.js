@@ -289,10 +289,10 @@ const userController = {
 
   getUserFollowers: async (req, res) => {
     try {
-      const followers = (await User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers', attributes: [['id', 'followerId'], 'name', 'account', 'introduction', 'avatar'] }] })).toJSON()
+      const followers = (await User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'introduction', 'avatar'] }] })).toJSON()
       const results = followers.Followers.map(data => {
         const result = {
-          followingId: data.followingId,
+          followerId: data.id,
           name: data.name,
           account: data.account,
           introduction: data.introduction,
@@ -304,6 +304,7 @@ const userController = {
       return res.status(200).json(results)
     } catch (error) {
       console.log(error)
+      return res.status(500).json({ status: 'error', message: 'Server error' })
     }
   }
 }
