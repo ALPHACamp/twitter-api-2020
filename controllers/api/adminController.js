@@ -60,7 +60,7 @@ const adminController = {
       const users = await User.findAll({
         attributes: [
           'account',
-          'id',
+          ['id', 'UserId'],
           'name',
           'avatar',
           'cover',
@@ -107,7 +107,7 @@ const adminController = {
     try {
       const tweets = await Tweet.findAll({
         attributes: [
-          'id',
+          ['id', 'TweetId'], 'CreatedAt',
           [Sequelize.literal('substring(description,1,50)'), 'description']
         ],
         include: [

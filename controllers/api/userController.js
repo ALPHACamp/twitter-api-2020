@@ -1,6 +1,6 @@
 /* DB */
 const db = require('../../models')
-const { User, Tweet, Like, Reply, Followship } = db
+const { User, Tweet, Like, Reply } = db
 
 /* necessary package */
 const bcrypt = require('bcryptjs')
@@ -152,8 +152,7 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
-                helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -178,8 +177,7 @@ let userController = {
         where: { UserId: req.params.id },
         attributes: [
           'description',
-          'UserId',
-          'id',
+          ['id', 'TweetId'],
           'createdAt',
           [
             sequelize.literal(
@@ -195,17 +193,15 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Likes WHERE UserId = ${
-                helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Likes WHERE UserId = ${helpers.getUser(req).id
               } AND TweetId = Tweet.id)`
             ),
             'isLiked'
           ]
         ],
-        include: [{ model: User, attributes: ['id'] }],
+        include: [{ model: User, attributes: ['id', 'avatar', 'account', 'name'] }],
         order: [['createdAt', 'DESC']]
       })
-      console.log(JSON.stringify(tweet, null, 2))
       return res.json(tweet)
     } catch (err) {
       console.log(err)
@@ -352,7 +348,7 @@ let userController = {
       const Top = await User.findAll({
         attributes: [
           'account',
-          'id',
+          ['id', 'UserId'],
           'name',
           'avatar',
           'role',
@@ -364,8 +360,7 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
-                helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -374,7 +369,6 @@ let userController = {
         order: [[sequelize.literal('FollowingsCount'), 'DESC']],
         limit: 10
       })
-      // console.log(JSON.stringify(Top, null, 2))
       return res.json(Top)
     } catch (err) {
       console.log(err)
