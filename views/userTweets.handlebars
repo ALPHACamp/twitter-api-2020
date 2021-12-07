@@ -2,8 +2,19 @@
   <div class="col mb-4">
     <div class="card">
       <img src="{{user.cover}}" class="card-img-top" alt="..." style="width: 300px;">
+      <div class="d-flex justify-content-around">
       <img src="{{user.avatar}}" class="card-img-top" alt="..."
         style="max-width: 80px; max-height: 80px; border-radius: 50%;">
+        {{#ifCond current_user.id user.id}}
+        {{else}}
+        <form action="/followships/{{user.id}}" method="post">
+          <button type="submit" class="btn btn-info">正在跟隨</button>
+        </form>
+        <form action="/followships/{{user.id}}?_method=DELETE" method="post">
+          <button type="submit" class="btn btn-outline-info">取消跟隨</button>
+        </form>
+        {{/ifCond}}
+      </div>
       <div class="card-body">
         <h5 class="card-title">使用者帳號 : {{user.account}} </h5>
         <p class="card-text">內容:{{user.introduction}}</p>

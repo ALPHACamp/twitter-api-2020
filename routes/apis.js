@@ -69,7 +69,7 @@ router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReplie
 router.post('/tweets/:id/like', authenticated, userController.addLike) //喜歡一則推文
 router.post('/tweets/:id/unlike', authenticated, userController.removeLike) //取消喜歡的貼文
 
-router.post('/followships/', authenticated, userController.addFollowing) //新增一位追蹤者
+router.post('/followships/:id', authenticated, userController.addFollowing) //新增一位追蹤者
 router.delete('/followships/:id', authenticated, userController.removeFollowing) //新增一位追蹤者
 
 router.get('/admin/users', authenticated, adminController.getUsers) //管理者可以看見站內所有的使用者 //還要補authenticatedAdmin

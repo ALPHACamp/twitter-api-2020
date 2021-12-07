@@ -55,7 +55,7 @@ app.use(passport.session())
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
   res.locals.error_messages = req.flash('error_messages')
-  res.locals.user = req.user // 加這行
+  res.locals.current_user = req.user // 加這行
   next()
 })
 //-----------

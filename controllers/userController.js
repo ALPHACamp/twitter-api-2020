@@ -9,6 +9,7 @@ const User = db.User
 const Like = db.Like
 const Tweet = db.Tweet
 const Reply = db.Reply
+const Followship = db.Followship
 
 
 const userService = require("../services/userService");
@@ -221,6 +222,16 @@ const userController = {
     userService.removeLike(req, res, (data) => {
       return res.redirect("back");
     });
+  },
+  addFollowing: (req, res) => {
+    userService.addFollowing(req, res, (data) => {
+      return res.redirect('back')
+    })
+  },
+  removeFollowing: (req, res) => {
+    userService.removeFollowing(req, res, (data) => {
+      return res.redirect('back')
+    })
   },
   // getUserSetting: (req, res) => {
   //   const currentUser = req.user ? req.user : helpers.getUser(req);

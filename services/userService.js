@@ -286,18 +286,20 @@ const userService = {
   },
 
   addFollowing: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req)
     return Followship.create({
-      followerId: helpers.getUser(req).id,
-      followingId: req.params.userId,
+      followerId: currentUser.id,
+      followingId: Number(req.params.id),
     }).then((followship) => {
       return callback({ status: "success", message: "" });
     });
   },
   removeFollowing: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req)
     return Followship.findOne({
       where: {
-        followerId: helpers.getUser(req).id,
-        followingId: req.params.userId,
+        followerId: currentUser.id,
+        followingId: Number(req.params.id),
       },
     }).then((followship) => {
       followship.destroy().then((followship) => {
