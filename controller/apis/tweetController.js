@@ -1,6 +1,5 @@
 const { sequelize } = require('../../models')
 const db = require('../../models')
-const _ = require('lodash')
 const Tweet = db.Tweet
 const Reply = db.Reply
 const User = db.User
@@ -69,7 +68,7 @@ const tweetController = {
                 'COUNT',
                 sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
               ),
-              'like_cont'
+              'like_count'
             ],
             [
               sequelize.fn(

@@ -1,5 +1,6 @@
 const db = require('../../models')
 const Tweet = db.Tweet
+const User = db.User
 const Reply = db.Reply
 const helper = require('../../_helpers')
 
@@ -21,6 +22,9 @@ const replyController = {
     try {
       const replies = await Reply.findAll({
         where: { TweetId: req.params.id },
+        include: [
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
+        ],
         raw: true,
         nest: true
       })
