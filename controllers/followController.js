@@ -44,13 +44,9 @@ const followController = {
       where: { role: { [Op.is]: null } },  // 排除管理者
       include: [{
         model: User, as: 'Followers',
-        attributes: { exclude: ['password'] } // 去除密碼欄位
-        // attributes: [[Sequelize.fn('COUNT', Sequelize.col("followerId")), "followersCount"]] //可運作但沒有新增followerscount欄位
+        attributes: ['id', 'name', 'account', 'avatar'],
       }],
-      attributes:
-      {
-        exclude: ['password'] // 去除密碼欄位
-      },
+      attributes: ['id','name','account','avatar'],
     }).then(users => {
       users = users.map(user => ({
         ...user.dataValues,
@@ -59,6 +55,7 @@ const followController = {
         isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
       }))
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
+      users.forEach(user => {delete user.Followers})
       return res.json(users)
     })
   }
