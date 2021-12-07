@@ -5,8 +5,8 @@ const Reply = db.Reply
 
 const replyController = {
   addReply: (req, res) => {
-    if (req.body.comment.length > 200) {
-      return res.json({ status: 'error', message: '字數最多 200 字' })
+    if (req.body.comment.length > 140) {
+      return res.json({ status: 'error', message: '字數最多 140 字' })
     }
     if (!req.body.comment) {
       return res.json({ status: 'error', message: '內容不可空白' })
