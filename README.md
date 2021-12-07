@@ -57,10 +57,10 @@
 ---
 ## 測試用帳號
 * 前台測試帳號
-  account：user1
-  email：user1@example.com
-  password：12345678
+  * account：user1
+  * email：user1@example.com
+  * password：12345678
 * 後台測試帳號
-  account：root
-  email：root@example.com
-  password：12345678
+  * account：root
+  * email：root@example.com
+  * password：12345678

@@ -13,22 +13,24 @@ const userService = {
   signUp: (req, res, callback) => {
     if (req.body.checkPassword !== req.body.password) {
       return callback({ status: 'error', message: '兩次密碼輸入不同！' })
-    } else {
-      return User.findOne({ where: { email: req.body.email } }).then(user => {
-        if (user) {
-          return callback({ status: 'error', message: 'email 已重覆註冊！' })
-        } else {
-          User.create({
-            account: req.body.account,
-            name: req.body.name,
-            email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
-          }).then(user => {
+    }
+
+    return User.findOne({ where: { account: req.body.account } }).then(user => {
+      if (!user) {
+        return User.create({
+          account: req.body.account,
+          name: req.body.name,
+          email: req.body.email,
+          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+        })
+          .then(user => {
             return callback({ status: 'success', message: '成功註冊帳號！' })
           })
-        }
-      })
-    }
+          .catch(err => console.log(err))
+      }
+      if (user.email === req.body.email) return callback({ status: 'error', message: 'email 已重覆註冊！' })
+      if (user.account === req.body.account) return callback({ status: 'error', message: 'account 已重覆註冊！' })
+    })
   },
 
   signIn: (req, res, callback) => {
