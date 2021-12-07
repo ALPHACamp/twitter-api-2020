@@ -28,6 +28,7 @@ module.exports = {
       })),
       {
         email: 'root@example.com',
+        account: 'root',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
         role: 'admin',
         createdAt: new Date(),

@@ -46,12 +46,12 @@ const userController = {
     })
   },
   adminSignIn: (req, res) => {
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.account || !req.body.password) {
       return res.json({ status: 'error', message: '請輸入必填欄位' })
     }
     // 比對User資料庫、比對密碼
-    let { email, password } = req.body
-    User.findOne({ where: { email } }).then(user => {
+    let { account, password } = req.body
+    User.findOne({ where: { account } }).then(user => {
       if (!user) {
         return res.status(401).json({ status: 'error', message: '' })
       }
