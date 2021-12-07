@@ -7,6 +7,7 @@ const tweetController = require('../controllers/tweetController')
 const replyController = require('../controllers/replyController')
 const likeController = require('../controllers/likeController')
 const followController = require('../controllers/followController')
+const adminController = require('../controllers/adminController')
 
 // const authenticated = (req, res, next) => {
 //   if (req.isAuthenticated()) {
@@ -38,7 +39,7 @@ router.put('/api/users/account', authenticated, userController.putUserAccountSet
 //user取得編輯個人資訊頁面
 router.get('/api/users/edit', authenticated, userController.getUserInfo)
 //user編輯個人資訊頁面
-router.put('/api/users/edit', authenticated, userController.editUserInfo)
+router.put('/api/users', authenticated, userController.editUserInfo)
 //user觀看特定人士已like
 router.get('/api/users/:id/likes', authenticated, userController.getOneLikes)
 //user觀看特定人士已reply
@@ -59,11 +60,11 @@ router.get('/get_current_user', authenticated, userController.getCurrentUser)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/tweets/:id', authenticated, tweetController.getTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
-router.get('/api/admin/tweets',authenticated, authenticatedAdmin, tweetController.getAdminTweets)
+router.get('/api/admin/tweets', authenticated, authenticatedAdmin, tweetController.getAdminTweets)
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, tweetController.deleteTweet)
 
 
-//likes相關   待補authenticated
+//likes相關
 router.post('/api/tweets/:tweetId/like', authenticated, likeController.postLike)
 router.post('/api/tweets/:tweetId/unlike', authenticated, likeController.postUnlike)
 
@@ -72,16 +73,13 @@ router.post('/api/tweets/:tweetId/unlike', authenticated, likeController.postUnl
 router.get('/api/tweets/:tweetId/replies', authenticated, replyController.getReplies)
 router.post('/api/tweets/:tweetId/replies', authenticated, replyController.postReply)
 
+
 //followships相關
 router.post('/api/followships', authenticated, followController.addFollowship)
 router.delete('/api/followships/:followingId', authenticated, followController.deleteFollowship)
+router.get('/api/followers/top', authenticated, followController.getTopFollowers)
 
 
-
-
-
-
-
-//admin相關
-
+//admin相關     待補authenticated, authenticatedAdmin
+router.get('/api/admin/users', adminController.getUsers)
 module.exports = router

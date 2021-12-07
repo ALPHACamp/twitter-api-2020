@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const db = require('../models')
+const helpers = require('../_helpers')
 const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
@@ -17,13 +18,13 @@ const tweet = require('../models/tweet')
 const userController = {
   signIn: (req, res) => {
     // 檢查必填欄位
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.account || !req.body.password) {
       return res.json({ status: 'error', message: '請輸入必填欄位' })
     }
     // 比對User資料庫、比對密碼
-    let { email, password } = req.body
+    let { account, password } = req.body
     // console.log('get email, password from jwt strategy: ', email, password)  // OK
-    User.findOne({ where: { email } }).then(user => {
+    User.findOne({ where: { account } }).then(user => {
       if (!user) {
         return res.status(401).json({ status: 'error', message: '' })
       }
@@ -82,8 +83,8 @@ const userController = {
     })
   },
   getUserAccountSetting: (req, res) => {
-    const userId = req.params.id
-    return User.findByPk(userId)
+    const userId = helpers.getUser(req).id
+    User.findByPk(userId)
       .then(user => {
         return res.json({
           user: {
@@ -93,7 +94,7 @@ const userController = {
       })
   },
   putUserAccountSetting: (req, res) => {
-    const userId = req.params.id
+    const userId = helpers.getUser(req).id
     const { account, name, email, password, checkPassword } = req.body
 
     // 確認欄位是否皆有填寫
@@ -125,7 +126,7 @@ const userController = {
           return res.json({ status: 'error', message: 'account已重覆註冊！' })
         }
       } else {
-        return User.findByPk(req.params.id).then(user => {
+        return User.findByPk(userId).then(user => {
           user.update({
             account, email, name,
             password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
@@ -156,7 +157,7 @@ const userController = {
     )
   },*/
   getUserInfo: (req, res) => {
-    const userId = req.params.id
+    const userId = helpers.getUser(req).id
     return User.findByPk(userId)
       .then(user => {
         return res.json({
@@ -170,7 +171,7 @@ const userController = {
       })
   },
   editUserInfo: (req, res) => {
-    const userId = req.params.id
+    const userId = helpers.getUser(req).id
     User.findByPk(userId)
       .then(user => {
         const { name, introduction, avatar, cover } = req.body
@@ -203,22 +204,22 @@ const userController = {
   },
   //取得特定瀏覽人次id
   getOneLikes: (req, res) => {
-    const UserId = req.params.id
-    return Like.findAll({ where: { UserId }, include: [Tweet] })
+    const userId = req.params.id
+    return Like.findAll({ where: { userId }, include: [Tweet] })
       .then(tweets => {
         return res.json({ tweets })
       })
   },
   getOneRepliedTweets: (req, res) => {
-    const UserId = req.params.id
-    return Reply.findAll({ where: { UserId }, include: [Tweet] })
+    const userId = req.params.id
+    return Reply.findAll({ where: { userId }, include: [Tweet] })
       .then(replies => {
         return res.json({ replies })
       })
   },
   getOneTweets: (req, res) => {
-    const UserId = req.params.id
-    return Tweet.findAll({ where: { UserId } })
+    const userId = req.params.id
+    return Tweet.findAll({ where: { userId } })
       .then(tweets => {
         return res.json({ tweets })
       })
