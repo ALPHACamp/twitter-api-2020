@@ -243,8 +243,7 @@ const userService = {
       include: [
         {
           model: User, as: 'Followings',
-          attributes: ['id', 'name', 'account', 'avatar', 'introduction', [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = Followings.id)`), 'isFollowed']],
-          order: [['createdAt', 'DESC']]
+          attributes: ['id', 'name', 'account', 'avatar', 'introduction', [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = Followings.id)`,), 'isFollowed'], [sequelize.literal(`(select createdAt from Followships where FollowerId = ${req.params.id} and FollowingId = Followings.id)`), 'FollowCreatedAt']],
         }
       ],
     })
@@ -265,8 +264,11 @@ const userService = {
       following.avatar = data.Followings.avatar
       following.introduction = data.Followings.introduction
       following.isFollowed = data.Followings.isFollowed
+      following.createdAt = data.Followings.FollowCreatedAt
       followings.push(following)
     }
+
+    followings.sort((a, b) => b.createdAt - a.createdAt) // 重新排列由新至舊
     return callback(followings)
   },
 
@@ -282,8 +284,7 @@ const userService = {
       include: [
         {
           model: User, as: 'Followers',
-          attributes: ['id', 'name', 'account', 'avatar', 'introduction', [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = Followers.id)`), 'isFollowed']],
-          order: [['createdAt', 'DESC']]
+          attributes: ['id', 'name', 'account', 'avatar', 'introduction', [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = Followers.id)`), 'isFollowed'], [sequelize.literal(`(select createdAt from Followships where FollowingId = ${req.params.id} and FollowerId = Followers.id)`), 'FollowCreatedAt']],
         }
       ],
     })
@@ -304,8 +305,11 @@ const userService = {
       follower.avatar = data.Followers.avatar
       follower.introduction = data.Followers.introduction
       follower.isFollowed = data.Followers.isFollowed
+      follower.createdAt = data.Followers.FollowCreatedAt
       followers.push(follower)
     }
+
+    followers.sort((a, b) => b.createdAt - a.createdAt) // 重新排列由新至舊
     return callback(followers)
   },
 
