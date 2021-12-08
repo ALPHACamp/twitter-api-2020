@@ -15,17 +15,27 @@ const tweetService = {
         description: req.body.description,
         UserId: currentUser.id,
       }).then((tweet) => {
-        callback({ status: "success", message: "tweet was successfully created",
+        callback({
+          status: "success",
+          message: "tweet was successfully created",
         });
       });
     }
   },
 
   getTweets: (req, res, callback) => {
-    return Tweet.findAll({ include: User }).then((result) => {
+    return Tweet.findAll({ 
+      include: User
+     }).then((result) => {
+
       callback({ tweets: result });
     });
   },
+  // getTweets: (req, res, callback) => {
+  //   return Tweet.findAll({ include: User }).then((result) => {
+  //     callback({ tweets: result });
+  //   });
+  // },
   getTweet: (req, res, callback) => {
     return Tweet.findByPk(req.params.id, {
       include: [User, { model: Like }, { model: Reply, include: [User] }],

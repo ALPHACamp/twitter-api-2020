@@ -19,17 +19,12 @@ const userService = {
           { model: User, as: "Followers" },
           { model: User, as: "Followings" },
         ]}).then((user) => {
-          console.log(user)
           user = {
             ...user.dataValues,
             FollowersCount: user.Followers.length,
             FollowingsCount: user.Followings.length,
           };
-          console.log(user)
-      // console.log(req, user, currentUser, helpers.getUser(req));
       return callback({ user: user });
-      // User.findOne({ where: { id: currentUser.id } }).then((user) => {
-      // return res.render("profile", { user: user });
     });
   },
   // getUser: (req, res) => {
@@ -352,8 +347,9 @@ const userService = {
           isLike: isLike,
         };
       });
-      Object.assign(newTweets, {tweetCount: tweets.length })
-      return callback({ tweets: newTweets, user: user });
+   
+      let tweetCount = tweets.length 
+      return callback({ tweets: newTweets, user: user, tweetCount: tweetCount });
     });
   },
   getUserReplies: (req, res, callback) => {
@@ -390,11 +386,11 @@ const userService = {
         };
         return d;
       });
-      Object.assign(newTweets, { tweetCount: tweets.length });
-      return callback({ tweets: newTweets, user: user });
+      let tweetCount = tweets.length;
+      return callback({ tweets: newTweets, user: user, tweetCount: tweetCount });
     });
   },
-  getUserLike: (req, res, callback) => {
+  getUserLikes: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
       User.findByPk(req.params.userId, {
@@ -418,7 +414,7 @@ const userService = {
         FollowingsCount: user.Followings.length,
         isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
       };
-      console.log(current.is, req.params.userId)
+      // console.log(currentUser.id, req.params.userId);
       let newTweets = tweets.map((d) => {
         // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
         //   currentUser.id)
@@ -434,16 +430,18 @@ const userService = {
           Number(req.params.userId))
         }
         
-       console.log(isLike)
-        return Object.assign(d, {
-          tweetReplyCount: d.Tweet.Replies.length,
-          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
-          isLike: isLike,
-        });
+      //  console.log(isLike)
+       return { ...d.dataValues, 
+         tweetReplyCount: d.Tweet.Replies.length,
+          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true
+          ).length,
+          isLike: isLike
+        }
       });
       // newTweets.forEach(d => console.log(d.isLike))
-      Object.assign(newTweets, { tweetCount: tweets.length });
-      return callback({ tweets: newTweets, user: user });
+      let tweetCount = tweets.length;
+      // console.log(newTweets);
+      return callback({ tweets: newTweets, user: user, tweetCount:tweetCount });
     });
   },
 

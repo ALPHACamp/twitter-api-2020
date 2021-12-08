@@ -10,7 +10,6 @@ let replyService = {
       TweetId: req.params.tweet_id,
       UserId: currentUser.id,
     }).then((reply) => {
-      console.log("reply", reply);
       return callback({
         status: "success",
         message: "created new reply successfully",
