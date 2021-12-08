@@ -229,7 +229,8 @@ const userController = {
         where: { UserId: req.params.id },
         raw: true,
         nest: true,
-        group: ['Tweet.id']
+        group: ['Tweet.id'],
+        order: [['createdAt', 'DESC']]
       })
       const likedTweets = await Like.findAll({
         where: { UserId: helper.getUser(req).id },
@@ -254,7 +255,8 @@ const userController = {
         where: { UserId: req.params.id },
         raw: true,
         nest: true,
-        include: [{ model: Tweet, include: [User] }]
+        include: [{ model: Tweet, include: [User] }],
+        order: [['createdAt', 'DESC']]
       })
       return res.status(200).json([...replies])
     } catch (err) {
@@ -326,10 +328,19 @@ const userController = {
   getUserFollowings: async (req, res) => {
     try {
       const user = await User.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.col('Followings->Followship.createdAt'),
+              'following_createdAt'
+            ]
+          ]
+        },
         where: { id: req.params.id },
         include: [{ model: User, as: 'Followings' }],
         raw: true,
-        nest: true
+        nest: true,
+        order: [[sequelize.col('following_createdAt'), 'DESC']]
       })
       const followingUsers = await Followship.findAll({
         //find currentUser'followings
@@ -340,6 +351,7 @@ const userController = {
       })
       const followingIds = followingUsers.map(a => a.followingId)
       const following = user.map(u => ({
+        following_createdAt: u.following_createdAt,
         followingId: u.Followings.id,
         followingName: u.Followings.name,
         followingAccount: u.Followings.account,
@@ -361,6 +373,14 @@ const userController = {
   getUserFollowers: async (req, res) => {
     try {
       const user = await User.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.col('Followers->Followship.createdAt'),
+              'follower_createdAt'
+            ]
+          ]
+        },
         where: { id: req.params.id },
         include: [
           {
@@ -369,7 +389,8 @@ const userController = {
           }
         ],
         raw: true,
-        nest: true
+        nest: true,
+        order: [[sequelize.col('follower_createdAt'), 'DESC']]
       })
       if (!user) {
         return res
@@ -384,6 +405,7 @@ const userController = {
       })
       const followingIds = followingUsers.map(a => a.followingId)
       const follower = user.map(u => ({
+        follower_createdAt: u.follower_createdAt,
         followerId: u.Followers.id,
         followerAccount: u.Followers.account,
         followerName: u.Followers.name,
@@ -399,45 +421,48 @@ const userController = {
     }
   },
   putUser: async (req, res) => {
-    const { files } = req
-    if (files) {
-      imgur.setClientID(IMGUR_CLIENT_ID)
-      if (files.avatar) {
-        await imgur.upload(files.avatar[0].path, (err, avatarImg) => {
-          return User.findByPk(req.params.id).then(user => {
-            user.update({
-              name: req.body.name,
-              introduction: req.body.introduction,
-              avatar: avatarImg.data.link || user.avatar
-            })
+    try {
+      const { files } = req
+      if (files) {
+        imgur.setClientID(IMGUR_CLIENT_ID)
+        if (files.avatar) {
+          await imgur.upload(files.avatar[0].path, async (err, avatarImg) => {
+            await User.update(
+              {
+                name: req.body.name,
+                introduction: req.body.introduction,
+                avatar: avatarImg.data.link
+              },
+              { where: { id: helper.getUser(req).id } }
+            )
           })
-        })
-      }
-      if (files.cover) {
-        await imgur.upload(files.cover[0].path, (err, coverImg) => {
-          return User.findByPk(req.params.id).then(user => {
-            user.update({
-              name: req.body.name,
-              introduction: req.body.introduction,
-              cover: coverImg.data.link || user.cover
-            })
+        }
+        if (files.cover) {
+          await imgur.upload(files.cover[0].path, async (err, coverImg) => {
+            await User.update(
+              {
+                name: req.body.name,
+                introduction: req.body.introduction,
+                cover: coverImg.data.link
+              },
+              { where: { id: helper.getUser(req).id } }
+            )
           })
-        })
-      }
-      return res.status(200).json({ message: 'success' })
-    } else {
-      return User.findByPk(req.params.id).then(user => {
-        user
-          .update({
+        }
+        return res.status(200).json({ message: 'success' })
+      } else {
+        await User.update(
+          {
             name: req.body.name,
-            introduction: req.body.introduction,
-            avatar: user.avatar,
-            cover: user.cover
-          })
-          .then(() => {
-            return res.status(200).json({ status: 200, message: 'success' })
-          })
-      })
+            introduction: req.body.introduction
+          },
+          { where: { id: helper.getUser(req).id } }
+        )
+        return res.status(200).json({ status: 200, message: 'success' })
+      }
+    } catch (err) {
+      console.log(err)
+      return res.status(400).json({ message: err })
     }
   },
   getCurrentUser: async (req, res) => {
