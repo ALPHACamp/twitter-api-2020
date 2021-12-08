@@ -1,14 +1,20 @@
 'use strict';
+const faker = require('faker')
+let likesArray = []
+for (let I = 0; I < 5; I++) {
+  for (let i = 0; i < 5; i ++) {
+    likesArray.push({
+      TweetId: I * 30 + i * 10 + 1, // I=0 [1,11,21,31,41]; I=1 [31,41,51,61,71] I=2 [61,71,81,91,101]
+      UserId: I * 10 + 1,  // [1,11,21,31,41]
+      createdAt: faker.date.recent(10),
+      updatedAt: new Date()
+    })
+  }
+}
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('Likes', 
-      Array.from({ length: 100 }).map((d, i) => ({
-        TweetId: Math.ceil(Math.random()*49) * 10 + 1,  // [1,11,..491]
-        UserId: (i % 5) * 10 + 1,  // [1,11,21,31,41] ; i = 1~50; i % 5 = 0~4
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }))
-    )
+    // 每個user like 5篇
+    return queryInterface.bulkInsert('Likes', likesArray)
   },
 
   down: (queryInterface, Sequelize) => {

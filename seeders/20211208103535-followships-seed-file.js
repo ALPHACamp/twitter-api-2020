@@ -1,5 +1,5 @@
 'use strict';
-
+const faker = require('faker')
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert('Followships',
@@ -7,7 +7,7 @@ module.exports = {
       [1, 1, 1, 11, 11, 21, 21, 31, 31, 41, 41, 41].map((d, i) => ({
         followingId: [41, 31, 11, 31, 21, 31, 1, 11, 21, 21, 11, 31][i],
         followerId: d,
-        createdAt: new Date(),
+        createdAt: faker.date.recent(10),
         updatedAt: new Date()
       }))
     )

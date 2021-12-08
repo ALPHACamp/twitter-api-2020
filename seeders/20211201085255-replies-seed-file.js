@@ -11,7 +11,7 @@ module.exports = {
       TweetId: d,
       UserId: (i % 5) * 10 + 1,  // [1,11,21,31,41] ; i = 1~50; i % 5 = 0~4
       comment: faker.lorem.text().slice(0, 280),
-      createdAt: new Date(),
+      createdAt: faker.date.recent(10),
       updatedAt: new Date()
     })))
   },
