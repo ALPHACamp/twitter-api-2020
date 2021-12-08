@@ -59,7 +59,8 @@ const tweetService = {
         {
           model: Reply,
           attributes: ['id', 'comment', 'UserId', 'createdAt'],
-          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+          order: [['createdAt', 'DESC']]
         },
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
       ]
