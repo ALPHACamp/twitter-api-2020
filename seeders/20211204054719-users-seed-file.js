@@ -12,8 +12,8 @@ module.exports = {
     admin.password = bcrypt.hashSync('12345678', bcrypt.genSaltSync(10))
     admin.account = 'root'
     admin.name = 'root'
-    admin.avatar = 'https://cdn-icons-png.flaticon.com/512/483/483361.png'
-    admin.cover = 'https://images.pexels.com/photos/459225/pexels-photo-459225.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260'
+    admin.avatar = 'https://i.ibb.co/hX5vD63/Rectangle-28.png'
+    admin.cover = 'https://i.ibb.co/yyTyjTV/Cover-Photo.png'
     admin.introduction = 'I am root'
     admin.role = 'admin'
     admin.createdAt = new Date()
