@@ -35,6 +35,8 @@ const userService = {
         account,
         email,
         name,
+        avatar: 'https://i.ibb.co/hX5vD63/Rectangle-28.png',
+        cover: 'https://i.ibb.co/yyTyjTV/Cover-Photo.png',
         password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
         role: 'user'
       })
