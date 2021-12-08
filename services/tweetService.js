@@ -27,21 +27,19 @@ const tweetService = {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     Tweet.findAll({ include: [User, { model: Reply }, { model: Like }] }).then(
       (tweets) => {
-        console.log('tweets',tweets.length)
-        console.log('1111111',tweets[0].Likes[0])
       let newTweets = tweets.map((d) => {
         let tweetLikeCount = d.dataValues.Likes.filter(
           (d) => d.isLike === true
         ).length;
         let tweetReplyCount = d.dataValues.Replies.map((d) => d.id).length;
-        let userIsLike = d.dataValues.Likes.find((d) => d.UserId);
-        // let userIsLike = d.dataValues.Likes.map(d => d.UserId).includes(currentUser.id)
+        let userIsLike = d.dataValues.Likes.find(
+          (d) => d.UserId === currentUser.id
+        );
         if (!userIsLike) {
-          userIsLike = false;
+          userIsLike = false
         } else {
           userIsLike = userIsLike.isLike
         }
-        console.log("~~~~~~",userIsLike);
         d = {
           ...d.dataValues,
           tweetReplyCount,
@@ -50,6 +48,7 @@ const tweetService = {
         };
         return d;
       });
+      newTweets.forEach((d,index) => console.log(index,d.isLike))
       return callback({ tweets: newTweets });
     });
   },
