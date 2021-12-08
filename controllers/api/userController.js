@@ -165,6 +165,7 @@ let userController = {
             ),
             'FollowersCount'
           ],
+          // 存在 followerId = 當前使用者；followingId = 現在看到的人(User.id)
           [
             sequelize.literal(
               `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
@@ -338,7 +339,9 @@ let userController = {
       }
       // 確認Account無重複(但可以維持原有)
       const userAccountCheck = await User.findOne({
-        where: { account, [Op.not]: { id: helpers.getUser(req).id } }
+        where: { 
+          account, 
+          [Op.not]: { id: helpers.getUser(req).id } }
       })
       if (userAccountCheck) {
         return res.json({
@@ -378,6 +381,7 @@ let userController = {
             ),
             'FollowingsCount'
           ],
+          // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followings.id)
           [
             sequelize.literal(
               `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
@@ -399,12 +403,12 @@ let userController = {
   getFollowings: async (req, res) => {
     try {
       const followings = await User.findAll({
-        where: { id: req.params.id },
+        where: { id: req.params.id },   
         attributes: ['account'],
         include: [
           {
             model: User,
-            as: 'Followings',
+            as: 'Followings',  
             attributes: [
               ['id', 'followingId'],
               'avatar',
@@ -412,18 +416,19 @@ let userController = {
               'name',
               'introduction',
               'createdAt',
+              // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followings.id)
               [
                 sequelize.literal(
                   `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
                     helpers.getUser(req).id
-                  }  AND Followships.followingId = User.id )`
+                  }  AND Followships.followingId = Followings.id )`  
                 ),
                 'isFollowed'
-              ]
+              ] 
             ]
           }
         ],
-        order: [[sequelize.literal('Followings.createdAt'), 'DESC']]
+        order: [['Followings.createdAt', 'DESC']]
       })
       return res.json(followings[0].Followings)
     } catch (err) {
@@ -447,11 +452,12 @@ let userController = {
               'name',
               'introduction',
               'createdAt',
+              // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followers.id)
               [
                 sequelize.literal(
                   `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
                     helpers.getUser(req).id
-                  }  AND Followships.followingId = User.id )`
+                  }  AND Followships.followingId = Followers.id )`
                 ),
                 'isFollowed'
               ]
@@ -470,13 +476,13 @@ let userController = {
   getLikes: async (req, res) => {
     try {
       const tweet = await Tweet.findAll({
-        WHERE: { id: { [Op.in]: [sequelize.literal(`SELECT TweetId FROM Likes WHERE UserId =${req.params.id}`)] } },
+        where: { id: { [Op.in]: [sequelize.literal(`SELECT TweetId FROM Likes WHERE Likes.UserId =${req.params.id} `)] } },
         attributes: [['id', 'TweetId'], 'createdAt', 'description',
         [
           sequelize.literal(
             '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
           ),
-          'LikessCount'
+          'LikesCount'
         ],
         [
           sequelize.literal(
