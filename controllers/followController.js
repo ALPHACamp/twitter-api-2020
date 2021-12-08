@@ -4,7 +4,7 @@ const helpers = require('../_helpers')
 const followController = {
   getTopUser: async (req, res) => {
     try {
-      const limit = Number(req.body.limit)
+      const limit = 10
 
       const users = await User.findAll({
         include: [{ model: User, as: 'Followers' }]
