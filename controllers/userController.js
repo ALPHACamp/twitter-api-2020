@@ -273,11 +273,27 @@ const userController = {
         return res.json(replies)
       })
   },
-  getOneTweets: (req, res) => { //TODO
-    const userId = req.params.id
-    return Tweet.findAll({ where: { userId } })
+  getOneTweets: (req, res) => {
+    const UserId = req.params.id
+    return Tweet.findAll({ 
+      where: { UserId },
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: User, as: 'LikedUsers', attributes: ['id'] },
+        { model: User, as: 'RepliedUsers', attributes: ['id'] }]
+    })
       .then(tweets => {
-        return res.json({ tweets })
+        tweets = tweets.map(tweet => ({
+          ...tweet.dataValues,
+          repliedCount: tweet.RepliedUsers.length,
+          likedCount: tweet.LikedUsers.length,
+          isLiked: req.user.LikedTweets.map(d => d.id).includes(tweet.id)
+        }))
+        tweets.forEach(tweet => {
+          delete tweet.RepliedUsers
+          delete tweet.LikedUsers
+        })
+        return res.json(tweets)
       })
   },
   getOneFollowers: (req, res) => {
