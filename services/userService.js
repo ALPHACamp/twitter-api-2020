@@ -233,7 +233,7 @@ const userService = {
     const currentUserId = helpers.getUser(req).id
 
     // 撈出該使用者following的使用者資訊
-    const rawData = await User.findAll({
+    let rawData = await User.findAll({
       where: { id: req.params.id },
       attributes: [], // 因為只想要關聯的資料，因此不回傳任何attributes
       raw: true,
@@ -246,6 +246,12 @@ const userService = {
         }
       ],
     })
+
+    // 若無資料回傳空值
+    if (rawData[0].Followings.id === null) {
+      rawData = ''
+      return callback(rawData)
+    }
 
     // 創造一個新陣列，只放入所需的資料即可
     const followings = []
@@ -266,7 +272,7 @@ const userService = {
     const currentUserId = helpers.getUser(req).id
 
     // 撈出該使用者follower的使用者資訊
-    const rawData = await User.findAll({
+    let rawData = await User.findAll({
       where: { id: req.params.id },
       attributes: [], // 因為只想要關聯的資料，因此不回傳任何attributes
       raw: true,
@@ -279,6 +285,12 @@ const userService = {
         }
       ],
     })
+
+    // 若無資料回傳空值
+    if (rawData[0].Followers.id === null) {
+      rawData = ''
+      return callback(rawData)
+    }
 
     // 創造一個新陣列，只放入所需的資料即可
     const followers = []
