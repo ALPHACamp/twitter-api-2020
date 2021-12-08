@@ -5,21 +5,25 @@ const { Tweet, Reply, Like, User } = require('../models')
 const tweetService = {
   getTweets: (req, res, callback) => {
     return Tweet.findAll({
+      raw: true,
+      nest: true,
       attributes: [
         'id',
         'UserId',
         'description',
         'createdAt',
         [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
-        [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount']
+        [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount'],
+        [
+          sequelize.literal(
+            `exists(SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} and TweetId = Tweet.id)`
+          ),
+          'isLiked'
+        ]
       ],
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       order: [['createdAt', 'DESC']]
     }).then(tweets => {
-      tweets = tweets.map(tweet => ({
-        ...tweet.toJSON(),
-        isLiked: Number(helpers.getUser(req).id) === Number(tweet.UserId)
-      }))
       return callback({ tweets })
     })
   },
@@ -43,7 +47,13 @@ const tweetService = {
         'description',
         'createdAt',
         [sequelize.literal(`(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)`), 'replyCount'],
-        [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount']
+        [sequelize.literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)`), 'likeCount'],
+        [
+          sequelize.literal(
+            `exists(SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} and TweetId = Tweet.id)`
+          ),
+          'isLiked'
+        ]
       ],
       include: [
         {
@@ -55,7 +65,6 @@ const tweetService = {
       ]
     }).then(tweet => {
       tweet = tweet.toJSON()
-      tweet['isLiked'] = Number(helpers.getUser(req).id) === Number(tweet.UserId)
       return callback({ tweet })
     })
   },
