@@ -18,6 +18,14 @@ const tweetController = {
         raw: true,
         nest: true,
         where: { TweetId: req.params.id },
+        attributes: [
+          ['id', 'ReplyId'],
+          'UserId',
+          'TweetId',
+          'comment',
+          'createdAt',
+          'updatedAt'
+        ],
         include: {
           model: User,
           attributes: ['avatar', 'account', 'name']
