@@ -5,7 +5,7 @@ const { User, Tweet, Like, Reply } = db
 /* necessary package */
 const bcrypt = require('bcryptjs')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-const imgur = require('imgur-node-api')
+const imgur = require('imgur')
 // sequelize
 const sequelize = require('sequelize')
 const { Op } = require('sequelize')
@@ -260,40 +260,32 @@ let userController = {
           message: 'Introduction should be within 160 characters'
         })
       }
-
-      // 如果有上傳圖片 update
+      let avatar
+      let cover
       const { files } = req
+      imgur.setClientId(IMGUR_CLIENT_ID)
       if (files) {
-        imgur.setClientID(IMGUR_CLIENT_ID)
-        imgur.upload(files.avatar[0].path, (err, img1) => {
-          imgur.upload(files.cover[0].path, async (err, img2) => {
-            const user = await User.findByPk(req.params.id)
-            await user.update({
-              name,
-              introduction,
-              avatar: img1.data.link,
-              cover: img2.data.link
-            })
-          })
-        })
-        res.json({
-          status: 'success',
-          message: 'Successfully update user profile'
-        })
-        // 如果沒上傳圖片 update
-      } else {
-        const user = await User.findByPk(req.params.id)
-        await user.update({
-          name,
-          introduction,
-          avatar: user.avatar || null,
-          cover: user.cover || null
-        })
-        res.json({
-          status: 'success',
-          message: 'Successfully update user profile'
-        })
+        if (files.avatar) {
+          // 確認是否有avatar
+          avatar = await imgur.uploadFile(files.avatar[0].path)
+        }
+        if (files.cover) {
+          // 確認是否有cover
+          cover = await imgur.uploadFile(files.cover[0].path)
+        }
       }
+
+      const user = await User.findByPk(req.params.id)
+      await user.update({
+        name,
+        introduction,
+        avatar: files.avatar ? avatar.link : user.avatar,
+        cover: files.cover ? cover.link : user.cover
+      })
+      res.json({
+        status: 'success',
+        message: 'Successfully update user profile'
+      })
     } catch (err) {
       console.log(err)
     }

@@ -33,7 +33,11 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.get('/users/:id/followings', authenticated, userController.getFollowings)
 router.get('/users/:id/followers', authenticated, userController.getFollowers)
 router.get('/users/:id/likes', authenticated, userController.getLikes)
-router.get('/users/:id/replied_tweets', authenticated, userController.getReplies)
+router.get(
+  '/users/:id/replied_tweets',
+  authenticated,
+  userController.getReplies
+)
 router.put('/users/:id', authenticated, uploadImage, userController.putUser)
 router.put('/users/:id/setting', authenticated, userController.putUserSetting)
 router.get('/get_current_user', authenticated, userController.getCurrentUser)
