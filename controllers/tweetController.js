@@ -30,9 +30,10 @@ const tweetController = {
 
     getTweet: (req, res) => {
         return Tweet.findByPk(req.params.tweet_id, {
-            include: [User, Like, { model: Reply, include: [User], order: [['createdAt', 'DESC']] }]
+            include: [User, Like, { model: Reply, include: [User]}]
         }).then(tweet => {
             tweet.dataValues.isLiked = tweet.Likes.map(u => u.UserId).includes(req.user.id)
+            tweet.Replies = tweet.Replies.sort((a, b) => b.createdAt - a.createdAt)
             return res.json(tweet)
         })
     },
