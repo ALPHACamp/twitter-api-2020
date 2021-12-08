@@ -2,9 +2,26 @@
 <div class="row row-cols-1 row-cols-md-2">
   <div class="col mb-4">
     <div class="card">
-      {{!-- <img src="{{user.cover}}" class="card-img-top" alt="..." style="width: 300px;"> --}}
+      <img src="{{user.cover}}" class="card-img-top" alt="..." style="width: 300px;">
+       <div class="d-flex justify-content-around">
       <img src="{{user.avatar}}" class="card-img-top" alt="..."
         style="max-width: 80px; max-height: 80px; border-radius: 50%;">
+       <span>
+        {{user.id}} 特定者用
+       </span> {{current_user.id }} 當下使用者
+       {{#ifCond current_user.id user.id}}
+       {{else}}
+        {{#if user.isFollower}}
+        <form action="/followships/{{user.id}}?_method=DELETE" method="post">
+          <button type="submit" class="btn btn-outline-info">取消跟隨</button>
+        </form>
+        {{else}}
+        <form action="/followships/{{user.id}}" method="post">
+          <button type="submit" class="btn btn-info">跟隨</button>
+        </form>
+        {{/if}}
+        {{/ifCond}}
+      </div>
       <div class="card-body">
         <h5 class="card-title">使用者帳號 : {{user.account}} </h5>
         <p class="card-text">內容:{{user.introduction}}</p>
@@ -14,11 +31,11 @@
         <li class="list-group-item">推文者的名字 {{ user.name}}</li>
         <li class="list-group-item d-flex justify-content-around">
           <div class="left">
-            <span>{{this.Replies.length}} 位跟隨中
+            <span>{{user.FollowingsCount}} 位跟隨中
             </span>
           </div>
           <div class="right inline-block">
-            <span>{{this.Replies.length}} 位跟隨者
+            <span>{{user.FollowersCount}} 位跟隨者
             </span>
           </div>
         </li>
@@ -58,30 +75,29 @@
       <li class="list-group-item d-flex justify-content-around">
         <div class="left">
           <i class="far fa-comment"></i>
-          {{!-- <span>{{this.Tweet.Replies.length}} 回覆數</span> --}}
           <span>{{this.tweetReplyCount}} 回覆數</span>
         </div>
         <div class="right inline-block">
 
           {{!-- 推文者{{this.UserId}} 使用者{{../userId}} --}}
-          {{!-- 推文ID {{this.id}} --}}
-          {{!-- {{this.isLike}} --}}
-          {{!-- {{#if this.isLike}} --}}
+          推文ID {{this.Tweet.id}}
+          留言Id {{this.id}}
+          {{this.isLike}}
+          {{!-- {{#ifCond current_user.id user.id}} --}}
+          {{#if this.isLike}}
           {{!-- <form action="/tweets/{{this.id}}/like" method="POST"> --}}
             <form action="/tweets/{{this.Tweet.id}}/unlike" method="POST">
               <button type="submit"><i class="fas fa-heart text-danger"></i></button>
-              <span>{{this.Tweet.Likes.length}} 喜歡數</span>
-              <span>{{this.Likes.length}} 喜歡數</span>
+              <span>{{this.tweetLikeCount}} 喜歡數</span>
             </form>
-            {{!-- {{else}} --}}
+            {{else}}
             {{!-- <form action="/tweets/{{this.id}}/unlike" method="POST"> --}}
               <form action="/tweets/{{this.Tweet.id}}/like" method="POST">
                 <button type="submit"><i class="far fa-heart text-danger"></i></button>
                 <span>{{this.tweetLikeCount}} 喜歡數</span>
-                {{!-- <span>{{this.Likes.length}} 喜歡數</span> --}}
               </form>
-              {{!-- {{/if}} --}}
-
+              {{/if}}
+              {{!-- {{/ifCond}} --}}
               {{!-- {{#ifCond UserId ../userId}}
               <p>不能喜歡</p>
               {{else}}
