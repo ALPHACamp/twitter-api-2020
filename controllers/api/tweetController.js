@@ -97,7 +97,7 @@ const tweetController = {
         include: [
           {
             model: User,
-            attributes: [['id', 'UserId'], 'name', 'avatar', 'account']
+            attributes: ['id', 'name', 'avatar', 'account']
           }
         ]
       })
