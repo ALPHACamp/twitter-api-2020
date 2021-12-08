@@ -56,6 +56,7 @@ const tweetService = {
   },
 
   getTweet: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req)
     return Tweet.findByPk(req.params.id, {
       include: [User, { model: Like }, { model: Reply, include: [User] }],
     }).then((tweet) => {
@@ -63,10 +64,12 @@ const tweetService = {
       const tweetLikeCount = tweet.Likes.filter(
         (d) => d.isLike === true
       ).length;
-
-      let isLike =
-        tweet.Likes.length !== 0 ? tweet.Likes.map((d) => d.isLike) : false;
-      
+      console.log('@@@@@@@',tweet.Likes.length)
+      // let isLike =
+      //   tweet.Likes.length !== 0 ? tweet.Likes.map((d) => d.isLike) : false;
+      let tweetLike = tweet.Likes.filter((d, index) => d.isLike === true)
+      tweetLike = tweetLike.map((d) => d.UserId).includes(currentUser.id)
+        // console.log('isliek',isLike);
         // 測試 ISLIKE
         // let userIsLike = d.dataValues.Likes.find((d) => d.UserId);
         // // userIsLike = {
@@ -94,7 +97,7 @@ const tweetService = {
         tweet: tweet.toJSON(),
         tweetReplyCount: tweetReplyCount,
         tweetLikeCount: tweetLikeCount,
-        isLike: isLike,
+        isLike: tweetLike,
       });
     });
   },
