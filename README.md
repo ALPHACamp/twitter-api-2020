@@ -20,7 +20,7 @@ As a user, you should be able to
 
 As a admin user, you should be able to 
 
-- monitor user activity on the platform including how many followers they have and how many likes they received on their post
+- monitor user activities on the platform including how many followers they have and how many likes they received on their posts
 - view and delete a tweet
 
 
