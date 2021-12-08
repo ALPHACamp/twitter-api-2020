@@ -375,34 +375,35 @@ const userService = {
     User.findByPk(req.params.id).then(user => {
       if (!user || user.role === 'admin') {
         return callback({ status: 'error', message: '帳號不存在！' })
-      }
-    })
-    Like.findAll({
-      raw: true,
-      nest: true,
-      where: { UserId: user.id },
-      attributes: [['id', 'LikeId'], 'TweetId', 'createdAt'],
-      include: [
-        {
-          model: Tweet,
-          attributes: [
-            'description',
-            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
-            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikeCount'],
-            [
-              sequelize.literal(
-                `exists(SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} and TweetId = Tweet.id)`
-              ),
-              'isLiked'
-            ]
+      } else {
+        Like.findAll({
+          raw: true,
+          nest: true,
+          where: { UserId: user.id },
+          attributes: [['id', 'LikeId'], 'TweetId', 'createdAt'],
+          include: [
+            {
+              model: Tweet,
+              attributes: [
+                'description',
+                [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
+                [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikeCount'],
+                [
+                  sequelize.literal(
+                    `exists(SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} and TweetId = Tweet.id)`
+                  ),
+                  'isLiked'
+                ]
+              ],
+              include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+            },
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
           ],
-          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
-        },
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-      ],
-      order: [['createdAt', 'DESC']]
-    }).then(likes => {
-      return callback(likes)
+          order: [['createdAt', 'DESC']]
+        }).then(likes => {
+          return callback(likes)
+        })
+      }
     })
   },
 
