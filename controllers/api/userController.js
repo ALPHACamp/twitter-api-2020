@@ -130,7 +130,7 @@ let userController = {
     });
   },
   getUserLikes: (req, res) => {
-    userService.getUserReplies(req, res, (data) => {
+    userService.getUserLikes(req, res, (data) => {
       return res.json(data);
     });
   },
@@ -149,29 +149,29 @@ let userController = {
   },
   getFollowers: (req, res) => {
     userService.getFollowers(req, res, (data) => {
-      return res.json(data)
-    })
+      return res.json(data);
+    });
   },
   getFollowings: (req, res) => {
     userService.getFollowings(req, res, (data) => {
-      return res.json(data)
-    })
+      return res.json(data);
+    });
   },
   deleteAllUsers: (req, res) => {
     userService.deleteAllUsers(req, res, (data) => {
-      return res.json(data)
-  })
+      return res.json(data);
+    });
   },
   deleteAllTweets: (req, res) => {
     userService.deleteAllTweets(req, res, (data) => {
-      return res.json(data)
-    })
+      return res.json(data);
+    });
   },
   deleteAllReplies: (req, res) => {
     userService.deleteAllReplies(req, res, (data) => {
-      return res.json(data)
-    })
-  }
+      return res.json(data);
+    });
+  },
 };
 
 module.exports = userController

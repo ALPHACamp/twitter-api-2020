@@ -15,17 +15,42 @@ const tweetService = {
         description: req.body.description,
         UserId: currentUser.id,
       }).then((tweet) => {
-        callback({ status: "success", message: "tweet was successfully created",
+        callback({
+          status: "success",
+          message: "tweet was successfully created",
         });
       });
     }
   },
 
   getTweets: (req, res, callback) => {
-    return Tweet.findAll({ include: User }).then((result) => {
-      callback({ tweets: result });
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    Tweet.findAll({ include: [User, { model: Reply }, { model: Like }] }).then(
+      (tweets) => {
+      let newTweets = tweets.map((d) => {
+        let tweetLikeCount = d.dataValues.Likes.filter(
+          (d) => d.isLike === true
+        ).length;
+        let tweetReplyCount = d.dataValues.Replies.map((d) => d.id).length;
+        let userIsLike = d.dataValues.Likes.find((d) => d.UserId);
+        if (!userIsLike) {
+          userIsLike = false;
+        } else {
+          userIsLike = userIsLike.isLike;
+        }
+        console.log(userIsLike);
+        d = {
+          ...d.dataValues,
+          tweetReplyCount,
+          tweetLikeCount,
+          isLike: userIsLike,
+        };
+        return d;
+      });
+      return callback({ tweets: newTweets });
     });
   },
+
   getTweet: (req, res, callback) => {
     return Tweet.findByPk(req.params.id, {
       include: [User, { model: Like }, { model: Reply, include: [User] }],
@@ -34,8 +59,33 @@ const tweetService = {
       const tweetLikeCount = tweet.Likes.filter(
         (d) => d.isLike === true
       ).length;
+
       let isLike =
         tweet.Likes.length !== 0 ? tweet.Likes.map((d) => d.isLike) : false;
+      
+        // 測試 ISLIKE
+        // let userIsLike = d.dataValues.Likes.find((d) => d.UserId);
+        // // userIsLike = {
+        // //   id: userIsLike.id ? userIsLike.id : false,
+        // //   TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
+        // //   UserId: userIsLike.UserId ? userIsLike.UserId : false,
+        // //   isLike: userIsLike.isLike ? userIsLike.isLike : false
+        // // }
+        // // console.log(userIsLike)
+        // if (!userIsLike) {
+        //   userIsLike = false;
+        //   userIsLike = {
+        //     isLike: false
+        //     // id: userIsLike.id ? userIsLike.id : false,
+        //     // TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
+        //     // UserId: userIsLike.UserId ? userIsLike.UserId : false,
+        //     // isLike: userIsLike.isLike ? userIsLike.isLike : false,
+        //   };
+        // } else {
+        //   userIsLike = userIsLike.isLike;
+        // }
+        // console.log(userIsLike);
+
       callback({
         tweet: tweet.toJSON(),
         tweetReplyCount: tweetReplyCount,
@@ -45,5 +95,52 @@ const tweetService = {
     });
   },
 };
-
 module.exports = tweetService
+
+ // getTweets: (req, res) => {
+  //   const currentUser = req.user ? req.user : helpers.getUser(req);
+  //   // Tweet.findAll({ include: [User, Reply, Like] }).then((tweets) => {
+  //   Tweet.findAll({ include: [
+  //     User,
+  //     { model: Reply },
+  //     { model: Like }
+  //     ] }).then((tweets) => {
+  //     let tweetReplyCount;
+  //     console.log("tweet", tweets.length);
+
+  //     let newTweets = tweets.map((d) => {
+  //       let tweetLikeCount = d.dataValues.Likes.filter(d => d.isLike === true).length
+  //       let tweetReplyCount = d.dataValues.Replies.map((d) => d.id).length
+  //       let userIsLike = d.dataValues.Likes.find((d) => d.UserId)
+  //       // userIsLike = {
+  //       //   id: userIsLike.id ? userIsLike.id : false,
+  //       //   TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
+  //       //   UserId: userIsLike.UserId ? userIsLike.UserId : false,
+  //       //   isLike: userIsLike.isLike ? userIsLike.isLike : false
+  //       // }
+  //       // console.log(userIsLike)
+  //       if (!userIsLike) {
+  //         userIsLike = false;
+  //         userIsLike = {
+  //           id: userIsLike.id ? userIsLike.id : false,
+  //           TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
+  //           UserId: userIsLike.UserId ? userIsLike.UserId : false,
+  //           isLike: userIsLike.isLike ? userIsLike.isLike : false
+  //         }
+  //       } else {
+  //         userIsLike = userIsLike.isLike;
+  //       }
+  //       console.log(userIsLike);
+  //       d = {
+  //         ...d.dataValues,
+  //         tweetReplyCount,
+  //         tweetLikeCount,
+  //         isLike: userIsLike,
+  //       };
+  //       return d;
+  //     });
+  //     return res.render("tweets", {
+  //       tweets: newTweets,
+  //     });
+  //   });
+  // },

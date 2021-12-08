@@ -208,7 +208,7 @@ const userController = {
     });
   },
   getUserLikes: (req, res) => {
-    userService.getUserLike(req, res, (data) => {
+    userService.getUserLikes(req, res, (data) => {
       return res.render("userLikeTweets", data);
     });
   },

@@ -8,36 +8,27 @@ const tweetService = require("../services/tweetService");
 
 const tweetController = {
   getTweets: (req, res) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    Tweet.findAll({ include: [User, Reply, Like] }).then((tweets) => {
-      // console.log("]]]]]]]]]", currentUser.id);
-      // console.log(tweets)
-      let likeData = tweets.Replies;
-      //  console.log(likeData)
-      return res.render("tweets", {
-        tweets: tweets,
-        Reply: Reply,
-        userId: currentUser.id,
-      });
-    });
+    tweetService.getTweets(req, res, (data) => {
+      return res.render("tweets", data)
+    })
   },
 
   postTweet: (req, res) => {
     tweetService.postTweet(req, res, (data) => {
-      if (data['status'] === 'error') {
-        req.flash('error_messages', data['message'])
-        return res.redirect('/tweets')
+      if (data["status"] === "error") {
+        req.flash("error_messages", data["message"]);
+        return res.redirect("/tweets");
       } else {
-        req.flash('success_messages', data['message'])
-        return res.redirect('/tweets')
+        req.flash("success_messages", data["message"]);
+        return res.redirect("/tweets");
       }
-    })
+    });
   },
 
   getTweet: (req, res) => {
     tweetService.getTweet(req, res, (data) => {
-      return res.render('tweet', data)
-    })
+      return res.render("tweet", data);
+    });
   },
 };
 
