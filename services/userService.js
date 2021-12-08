@@ -244,14 +244,14 @@ const userService = {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     Like.findOne({
       where: {
-        UserId: currentUser.id,
-        TweetId: req.params.id,
+        UserId: Number(currentUser.id),
+        TweetId: Number(req.params.id),
       },
     }).then((like) => {
       if (!like) {
         return Like.create({
-          UserId: currentUser.id,
-          TweetId: req.params.id,
+          UserId: Number(currentUser.id),
+          TweetId: Number(req.params.id),
           isLike: true,
         }).then((like) => {
           return callback({ status: "error", message: "" });
