@@ -428,7 +428,7 @@ let userController = {
             ]
           }
         ],
-        order: [['Followings.createdAt', 'DESC']]
+        order: [[sequelize.literal('Followings.createdAt'), 'DESC']]
       })
       return res.json(followings[0].Followings)
     } catch (err) {
