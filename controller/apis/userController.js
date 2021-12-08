@@ -229,7 +229,8 @@ const userController = {
         where: { UserId: req.params.id },
         raw: true,
         nest: true,
-        group: ['Tweet.id']
+        group: ['Tweet.id'],
+        order: [['createdAt', 'DESC']]
       })
       const likedTweets = await Like.findAll({
         where: { UserId: helper.getUser(req).id },
@@ -254,7 +255,8 @@ const userController = {
         where: { UserId: req.params.id },
         raw: true,
         nest: true,
-        include: [{ model: Tweet, include: [User] }]
+        include: [{ model: Tweet, include: [User] }],
+        order: [['createdAt', 'DESC']]
       })
       return res.status(200).json([...replies])
     } catch (err) {
@@ -326,10 +328,19 @@ const userController = {
   getUserFollowings: async (req, res) => {
     try {
       const user = await User.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.col('Followings->Followship.createdAt'),
+              'following_createdAt'
+            ]
+          ]
+        },
         where: { id: req.params.id },
         include: [{ model: User, as: 'Followings' }],
         raw: true,
-        nest: true
+        nest: true,
+        order: [[sequelize.col('following_createdAt'), 'DESC']]
       })
       const followingUsers = await Followship.findAll({
         //find currentUser'followings
@@ -340,6 +351,7 @@ const userController = {
       })
       const followingIds = followingUsers.map(a => a.followingId)
       const following = user.map(u => ({
+        following_createdAt: u.following_createdAt,
         followingId: u.Followings.id,
         followingName: u.Followings.name,
         followingAccount: u.Followings.account,
@@ -361,6 +373,14 @@ const userController = {
   getUserFollowers: async (req, res) => {
     try {
       const user = await User.findAll({
+        attributes: {
+          include: [
+            [
+              sequelize.col('Followers->Followship.createdAt'),
+              'follower_createdAt'
+            ]
+          ]
+        },
         where: { id: req.params.id },
         include: [
           {
@@ -369,7 +389,8 @@ const userController = {
           }
         ],
         raw: true,
-        nest: true
+        nest: true,
+        order: [[sequelize.col('follower_createdAt'), 'DESC']]
       })
       if (!user) {
         return res
@@ -384,6 +405,7 @@ const userController = {
       })
       const followingIds = followingUsers.map(a => a.followingId)
       const follower = user.map(u => ({
+        follower_createdAt: u.follower_createdAt,
         followerId: u.Followers.id,
         followerAccount: u.Followers.account,
         followerName: u.Followers.name,
