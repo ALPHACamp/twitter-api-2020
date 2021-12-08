@@ -27,8 +27,8 @@ module.exports = {
       data.password = bcrypt.hashSync('12345678', bcrypt.genSaltSync(10))
       data.account = `user${i + 1}`
       data.name = `user${i + 1}`
-      data.avatar = 'https://cdn-icons-png.flaticon.com/512/483/483361.png'
-      data.cover = 'https://images.pexels.com/photos/459225/pexels-photo-459225.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260'
+      data.avatar = 'https://i.ibb.co/hX5vD63/Rectangle-28.png'
+      data.cover = 'https://i.ibb.co/yyTyjTV/Cover-Photo.png'
       data.introduction = `I am user${i + 1}`
       data.role = 'user'
       data.createdAt = new Date()
