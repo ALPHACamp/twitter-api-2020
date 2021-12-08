@@ -102,7 +102,6 @@ module.exports = (app) => {
   app.get(
     '/api/tweets',
     authenticated,
-    authenticatedUser,
     tweetController.getTweets
   )
   app.get(
