@@ -321,7 +321,11 @@ const userService = {
       where: { UserId: req.params.id },
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: Tweet, attributes: ['id', 'UserId'], include: [{ model: User, attributes: ['id', 'name'] }] }
+        {
+          model: Tweet,
+          attributes: ['id', 'UserId'],
+          include: [{ model: User, attributes: ['id', 'name', 'account'] }]
+        }
       ],
       order: [['createdAt', 'DESC']]
     }).then(replies => {
@@ -362,29 +366,33 @@ const userService = {
       if (!user || user.role === 'admin') {
         return callback({ status: 'error', message: '帳號不存在！' })
       }
-      Like.findAll({
-        raw: true,
-        nest: true,
-        where: { UserId: user.id },
-        attributes: [['id', 'LikeId'], 'TweetId', 'createdAt'],
-        include: [
-          {
-            model: Tweet,
-            attributes: [
-              'description',
-              [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
-              [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikeCount']
+    })
+    Like.findAll({
+      raw: true,
+      nest: true,
+      where: { UserId: user.id },
+      attributes: [['id', 'LikeId'], 'TweetId', 'createdAt'],
+      include: [
+        {
+          model: Tweet,
+          attributes: [
+            'description',
+            [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'), 'ReplyCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'LikeCount'],
+            [
+              sequelize.literal(
+                `exists(SELECT 1 FROM Likes WHERE UserId = ${helpers.getUser(req).id} and TweetId = Tweet.id)`
+              ),
+              'isLiked'
             ]
-          },
-          { model: User, attributes: ['id', 'avatar', 'name', 'account'] }
-        ],
-        order: [['createdAt', 'DESC']]
-      }).then(likes => {
-        likes.forEach(like => {
-          like.Tweet.isLiked = true
-        })
-        return callback(likes)
-      })
+          ],
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
+        },
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    }).then(likes => {
+      return callback(likes)
     })
   },
 
