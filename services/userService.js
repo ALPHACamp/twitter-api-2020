@@ -11,23 +11,33 @@ const replyController = require('../controllers/api/replyController')
 
 const userService = {
   signUp: (req, res, callback) => {
+    // 確認輸入的密碼
     if (req.body.checkPassword !== req.body.password) {
       return callback({ status: 'error', message: '兩次密碼輸入不同！' })
     }
 
     return User.findOne({ where: { account: req.body.account } }).then(user => {
       if (!user) {
-        return User.create({
-          account: req.body.account,
-          name: req.body.name,
-          email: req.body.email,
-          password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+        // account找不到 >> 用Email找
+        return User.findOne({ where: { email: req.body.email } }).then(user => {
+          if (!user) {
+            // account找不到，Email找不到
+            return User.create({
+              account: req.body.account,
+              name: req.body.name,
+              email: req.body.email,
+              password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10), null)
+            })
+              .then(user => {
+                return callback({ status: 'success', message: '成功註冊帳號！' })
+              })
+              .catch(err => console.log(err))
+          }
+          // account找不到，Email找到
+          return callback({ status: 'error', message: 'email 已重覆註冊！' })
         })
-          .then(user => {
-            return callback({ status: 'success', message: '成功註冊帳號！' })
-          })
-          .catch(err => console.log(err))
       }
+      // account找到 >> 確認Email
       user.email === req.body.email
         ? callback({ status: 'error', message: 'email和account 已重覆註冊！' })
         : callback({ status: 'error', message: 'account 已重覆註冊！' })
