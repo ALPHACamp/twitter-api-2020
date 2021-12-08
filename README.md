@@ -1,6 +1,8 @@
 # Alphitter
-# 專案名稱 Alphitter
+
 Alphitter is a platform  for user to share their life with their friends
+
+# 專案名稱 Alphitter
 Alphitter 是一個模擬Twitter的社交媒體平台，使用者可以於平台中，和自己的朋友分享生活。
 
 ## Feature
@@ -49,8 +51,10 @@ As a admin user, you should be able to
 
 ## Getting Started
 
-Clone repository https://github.com/paulchnag0801/twitter-api-2020.git
+Clone API repository https://github.com/paulchnag0801/twitter-api-2020.git
 
+
+Clone Vue repository https://github.com/Beginneraboutlife116/tweet-front-2021.git
     git clone 
 
 Install Dependancies
@@ -94,6 +98,8 @@ Set up seed
 ## User login
 
 we provide both user and admin access. Please use below login to test user and admin feature
+
+## 登入測試
 我們提供已經註冊好的使用者帳號及密碼，及後台管理員的帳號和密碼。
 
 | Role | User account | Password |
@@ -104,6 +110,9 @@ we provide both user and admin access. Please use below login to test user and a
 ## Author
 
 Heidi Chen
+
 Paul Chang
+
 白白
+
 Weikai
