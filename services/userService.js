@@ -66,7 +66,7 @@ const userService = {
         !req.body.email ||
         !req.body.account ||
         !req.body.password ||
-        !req.body.passwordCheck
+        !req.body.checkPassword
       ) {
         callback({
           status: "error",
@@ -75,7 +75,7 @@ const userService = {
         // req.flash( "error_messages", "名字，信箱，帳號，密碼，確認密碼不能為空!");
         // return res.redirect("back");
       }
-      if (req.body.password !== req.body.passwordCheck) {
+      if (req.body.password !== req.body.checkPassword) {
         callback({ status: "error", message: "密碼與確認密碼不一致!" });
         // req.flash("error_messages", "密碼與確認密碼不一致!");
         // return res.redirect("back");
