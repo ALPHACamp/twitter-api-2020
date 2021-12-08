@@ -10,7 +10,7 @@ const tweetController = {
     Tweet.findAll({
       include: [
         // User,   // Tweet belongsTo User
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: User, as: 'User', attributes: ['id', 'name', 'account', 'avatar'] },
         { model: User, as: 'LikedUsers', attributes: ['id', 'name', 'account', 'avatar'] },    // Tweet belongsToMany User, through Like
         { model: User, as: 'RepliedUsers', attributes: ['id', 'name', 'account', 'avatar'] }   // Tweet belongsToMany User, through Reply; 包含Reply內容
       ],
