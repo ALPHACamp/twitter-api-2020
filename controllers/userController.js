@@ -112,7 +112,8 @@ const userController = {
             'email',
             'avatar',
             'cover',
-            'introduction'
+            'introduction',
+            'role'
           ],
           include: [
             { model: Tweet },
@@ -129,6 +130,7 @@ const userController = {
         avatar: user.avatar,
         cover: user.cover,
         introduction: user.introduction,
+        role: user.role,
         tweetCounts: user.Tweets ? user.Tweets.length : 0,
         followship: {
           followerCounts: user.Followers ? user.Followers.length : 0,
