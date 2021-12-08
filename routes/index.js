@@ -52,7 +52,7 @@ router.get('/api/users/:id/followers', authenticated, userController.getOneFollo
 router.get('/api/users/:id/followings', authenticated, userController.getOneFollowings)
 
 //先讓前端使用的get_current)user
-router.get('/get_current_user', authenticated, userController.getCurrentUser)
+router.get('/api/get_current_user', authenticated, userController.getCurrentUser)
 
 
 
