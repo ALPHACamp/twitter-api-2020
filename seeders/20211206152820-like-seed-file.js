@@ -1,6 +1,6 @@
 'use strict'
 
-const { random } = require('faker')
+const { randomDate } = require('../_helpers')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -10,7 +10,12 @@ module.exports = {
         id: index * 10 + 1,
         UserId: Math.ceil((index + 1) / 10) * 10 + 1,
         TweetId: Math.floor(Math.random() * 49) * 10 + 1,
-        createdAt: new Date(),
+        createdAt: randomDate(
+          new Date(2021, 11, 5),
+          new Date(2021, 11, 8),
+          0,
+          24
+        ),
         updatedAt: new Date()
       })),
       {}
