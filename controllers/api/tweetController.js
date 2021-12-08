@@ -77,8 +77,7 @@ const tweetController = {
       const { id } = req.params
       let tweet = await Tweet.findByPk(id, {
         attributes: [
-          'id',
-          'UserId',
+          ['id', 'TweetId'],
           'description',
           'createdAt',
           'updatedAt',
@@ -95,7 +94,12 @@ const tweetController = {
             'RepliesCount'
           ]
         ],
-        include: [{ model: User, attributes: ['name', 'avatar', 'account'] }]
+        include: [
+          {
+            model: User,
+            attributes: [['id', 'UserId'], 'name', 'avatar', 'account']
+          }
+        ]
       })
 
       if (!tweet) {
