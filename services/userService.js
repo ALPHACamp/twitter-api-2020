@@ -312,16 +312,16 @@ const userService = {
     return Promise.all([
       User.findByPk(req.params.userId, {
         include: [
-          { model: User, as: 'Followers'},
-          { model: User, as: 'Followings'}
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
         ]
       }),
       Tweet.findAll({
-      where: {
-        UserId: Number(req.params.userId),
-      },
-      order: [["createdAt", "DESC"]],
-      include: [User, Reply, Like],
+        where: {
+          UserId: Number(req.params.userId),
+        },
+        order: [["createdAt", "DESC"]],
+        include: [User, Reply, Like],
       })
     ]).then(([user, tweets]) => {
       user = {
@@ -341,7 +341,7 @@ const userService = {
           isLike: isLike,
         };
       });
-      Object.assign(newTweets, {tweetCount: tweets.length })
+      Object.assign(newTweets, { tweetCount: tweets.length })
       return callback({ tweets: newTweets, user: user });
     });
   },
@@ -350,8 +350,8 @@ const userService = {
     return Promise.all([
       User.findByPk(req.params.userId, {
         include: [
-          { model: User, as: 'Followers'},
-          { model: User, as: 'Followings'}
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
         ]
       }),
       Reply.findAll({
@@ -362,12 +362,12 @@ const userService = {
         include: [User, { model: Tweet, include: [User] }],
       }),
     ]).then(([user, tweets]) => {
-       user = {
-         ...user.dataValues,
-         FollowersCount: user.Followers.length,
-         FollowingsCount: user.Followings.length,
-         isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-       };
+      user = {
+        ...user.dataValues,
+        FollowersCount: user.Followers.length,
+        FollowingsCount: user.Followings.length,
+        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
+      };
       let newTweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
@@ -424,31 +424,48 @@ const userService = {
       return callback({ tweets: newTweets, user: user });
     });
   },
-
   getFollowers: (req, res, callback) => {
     return User.findByPk(req.params.id, {
-      include: [{ model: User, as: 'Followers' }]
+      include: [{ model: User, as: 'Followers', include: [{ model: User, as: 'Followers' }] }]
     })
-      .then(user => {
-        const followersCount = user.Followers.length
-        return callback({ user: user, followersCount: followersCount })
+      .then(result => {
+        const followersCount = result.Followers.length
+        const thoseWeFollows = [] //those users that follows the user who are followed by the user as well 
+        const ff = result.Followers.map(d => d.Followers)
+        for (i = 0; i < ff.length; i++) {
+          for (j = 0; j < ff[i].length; j++) {
+            if (ff[i][j].id === req.user.id) {
+              thoseWeFollows.push(ff[i][j].Followship.followingId)
+            }
+          }
+        }
+        callback({ result, followersCount, thoseWeFollows })
       })
   },
   getFollowings: (req, res, callback) => {
     return User.findByPk(req.params.id, {
-      include: [{ model: User, as: 'Followings' }]
+      include: [{ model: User, as: 'Followings', include: [{ model: User, as: 'Followers' }] }]
     })
-    .then(user => {
-      const followingsCount = user.Followings.length
-      return callback({ user: user, followingsCount: followingsCount })
-    })
+      .then(result => {
+        const followersCount = result.Followings.length
+        const thoseWeFollows = [] //those who the user and the req.user both follows 
+        const ff = result.Followings.map(d => d.Followers)
+        for (i = 0; i < ff.length; i++) {
+          for (j = 0; j < ff[i].length; j++) {
+            if (ff[i][j].id === req.user.id) {
+              thoseWeFollows.push(ff[i][j].Followship.followingId)
+            }
+          }
+        }
+        callback({ result, followersCount, thoseWeFollows })
+      })
   },
   deleteAllUsers: (req, res, callback) => {
     User.destroy({
       where: {},
       truncate: true
     }).then(() => {
-      callback({status:"success", message: "all users killed"})
+      callback({ status: "success", message: "all users killed" })
     })
   },
   deleteAllTweets: (req, res, callback) => {
