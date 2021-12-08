@@ -1,7 +1,6 @@
 /* DB */
 const db = require('../../models')
 const { User, Tweet, Reply, Like, Sequelize } = db
-const { Op } = Sequelize
 
 /* necessary package */
 const bcrypt = require('bcryptjs')

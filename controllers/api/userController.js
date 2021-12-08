@@ -168,8 +168,7 @@ let userController = {
           // 存在 followerId = 當前使用者；followingId = 現在看到的人(User.id)
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
-                helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -362,6 +361,7 @@ let userController = {
   getTop: async (req, res) => {
     try {
       const Top = await User.findAll({
+        where: { [Op.not]: { role: 'admin' } },
         attributes: [
           'account',
           ['id', 'UserId'],
@@ -377,8 +377,7 @@ let userController = {
           // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followings.id)
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
-                helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -412,8 +411,7 @@ let userController = {
               // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followings.id)
               [
                 sequelize.literal(
-                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
-                    helpers.getUser(req).id
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
                   }  AND Followships.followingId = Followings.id )`
                 ),
                 'isFollowed'
@@ -448,8 +446,7 @@ let userController = {
               // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followers.id)
               [
                 sequelize.literal(
-                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
-                    helpers.getUser(req).id
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
                   }  AND Followships.followingId = Followers.id )`
                 ),
                 'isFollowed'
@@ -496,8 +493,7 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Likes WHERE UserId = ${
-                helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Likes WHERE UserId = ${helpers.getUser(req).id
               } AND TweetId = Tweet.id)`
             ),
             'isLiked'

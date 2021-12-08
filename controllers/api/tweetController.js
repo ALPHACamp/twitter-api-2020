@@ -8,6 +8,7 @@ const tweetController = {
   getTweets: async (req, res) => {
     try {
       let tweets = await Tweet.findAll({
+
         attributes: [
           ['id', 'TweetId'],
           'createdAt',
@@ -27,7 +28,7 @@ const tweetController = {
         ],
         group: 'TweetId',
         include: [
-          { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'], where: { [Op.not]: { role: 'admin' } } }
         ],
         order: [['createdAt', 'DESC']],
         raw: true,
@@ -46,6 +47,12 @@ const tweetController = {
   },
   postTweet: async (req, res) => {
     try {
+      if (helpers.getUser(req).role === 'admin') {
+        return res.json({
+          status: 'error',
+          message: 'Admin can NOT be tweet!'
+        })
+      }
       const { description } = req.body
       if (!description.trim()) {
         return res.json({
@@ -59,6 +66,9 @@ const tweetController = {
           message: 'Content should be within 140 characters!'
         })
       }
+
+
+
       await Tweet.create({
         UserId: helpers.getUser(req).id,
         description

@@ -1,4 +1,3 @@
-const { json } = require('body-parser')
 const db = require('../../models')
 const { Tweet, User, Reply, Like, sequelize } = db
 const helpers = require('../../_helpers')

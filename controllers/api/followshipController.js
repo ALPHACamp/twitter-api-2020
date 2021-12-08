@@ -1,10 +1,18 @@
 const db = require('../../models')
 const { Followship, User } = db
 const helpers = require('../../_helpers')
+const { Op } = require('sequelize')
 
 const followshipController = {
   follow: async (req, res) => {
     try {
+      if (helpers.getUser(req).role === 'admin') {
+        return res.json({
+          status: 'error',
+          message: 'Admin can NOT be follow!'
+        })
+      }
+
       const followingId = Number(req.body.id)
       const followerId = helpers.getUser(req).id
       if (followingId === followerId) {
@@ -13,7 +21,11 @@ const followshipController = {
           message: 'Can NOT follow yourself!'
         })
       }
-      const user = await User.findByPk(followingId)
+      const user = await User.findByPk(
+        followingId, {
+        where: { [Op.not]: { role: 'admin' } }
+      })
+
       if (!user) {
         return res.json({
           status: 'error',
