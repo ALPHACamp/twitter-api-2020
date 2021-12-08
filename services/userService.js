@@ -146,7 +146,8 @@ const userService = {
       const { files } = req
 
       const user = await User.findByPk(req.params.id)
-      if (cover === '') {
+      // 如果user要把cover給刪掉，前端會回傳cover: delete
+      if (cover === 'delete') {
         user.cover = 'https://i.imgur.com/Qqb0a7S.png'
       }
 
