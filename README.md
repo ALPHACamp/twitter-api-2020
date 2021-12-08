@@ -48,7 +48,6 @@
    ```npx sequelize db:migrate```
 7. 載入種子檔
  ``` npx sequelize db:seed:all```
-7. 建立資料夾：*temp*和*upload*
 8. 輸入指令，運行server
  ```npm run dev```
 ##### 注意事項
