@@ -40,6 +40,9 @@ router.post("/users", userController.signUp) //暫時測試用
 router.post('/signIn', userController.signIn)
 //  拿到某位使用者資料
 
+//取得追蹤人數前10的使用者
+router.get('/users/top', authenticated, authenticatedUser, userController.getTopUsers)
+
 //取得所有追蹤者的資料
 router.get("/users/:id/followers", authenticated, authenticatedUser, userController.getFollowers)
 //取得正在追蹤的使用者的資料

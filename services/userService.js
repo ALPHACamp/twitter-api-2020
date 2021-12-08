@@ -425,6 +425,7 @@ const userService = {
     });
   },
   getFollowers: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followers', include: [{ model: User, as: 'Followers' }] }]
     })
@@ -434,7 +435,7 @@ const userService = {
         const ff = result.Followers.map(d => d.Followers)
         for (i = 0; i < ff.length; i++) {
           for (j = 0; j < ff[i].length; j++) {
-            if (ff[i][j].id === req.user.id) {
+            if (ff[i][j].id === currentUser.id) {
               thoseWeFollows.push(ff[i][j].Followship.followingId)
             }
           }
@@ -443,6 +444,7 @@ const userService = {
       })
   },
   getFollowings: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
     return User.findByPk(req.params.id, {
       include: [{ model: User, as: 'Followings', include: [{ model: User, as: 'Followers' }] }]
     })
@@ -452,13 +454,30 @@ const userService = {
         const ff = result.Followings.map(d => d.Followers)
         for (i = 0; i < ff.length; i++) {
           for (j = 0; j < ff[i].length; j++) {
-            if (ff[i][j].id === req.user.id) {
+            if (ff[i][j].id === currentUser.id) {
               thoseWeFollows.push(ff[i][j].Followship.followingId)
             }
           }
         }
         callback({ result, followersCount, thoseWeFollows })
       })
+  },
+  getTopUser: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
+    return User.findAll({
+      include: [
+        { model: User, as: 'Followers' }
+      ]
+    }).then(users => {
+      users = users.map(user => ({
+        ...user.dataValues,
+        FollowerCount: user.Followers.length,
+        isFollowed: currentUser.Followings ? currentUser.Followings.map(d => d.id).includes(user.id) : false
+      }))
+      users = users.sort((a, b) => b.FollowerCount - a.FollowerCount)
+      users = users.slice(1,10)
+      callback({ users: users })
+    })
   },
   deleteAllUsers: (req, res, callback) => {
     User.destroy({
