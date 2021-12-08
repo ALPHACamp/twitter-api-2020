@@ -12,11 +12,13 @@
 
 <div class="row row-cols-1 row-cols-md-3">
   {{#each tweets}}
+
   <div class="card m-3" style="width: 18rem;">
-    <a href="http:/users/{{this.UserId}}">
+    <a href="http:/users/{{this.User.id}}">
       <img src="{{this.User.cover}}" class="card-img-top" alt="...">
     </a>
-    <img src="{{this.User.avatar}}" class="card-img-top" alt="..." style="max-width: 80px; max-height: 80px;border-radius: 50%;">
+    <img src="{{this.User.avatar}}" class="card-img-top" alt="..."
+      style="max-width: 80px; max-height: 80px;border-radius: 50%;">
     <a href="/users/{{this.User.id}}/tweets" class="btn btn-primary mt-2">推文作者所有推文</a>
     <div class="card-body">
       <h5 class="card-title">推文編號:{{this.id}} </h5>
@@ -29,54 +31,29 @@
       <li class="list-group-item d-flex justify-content-around">
         <div class="left">
           <i class="far fa-comment"></i>
-          <span>{{this.Replies.length}} 回覆數</span>
+          <span>{{this.tweetReplyCount}} 回覆數</span>
         </div>
-        <div class="right inline-block">
-
-        推文者{{this.UserId}} 使用者{{../userId}}
-        推文ID {{this.id}}
-        {{this.Likes.UserId}}
-            {{#if this.Likes.isLike}}
-          <form action="/tweets/{{this.id}}/unlike" method="POST">
-            <button type="submit"><i class="fas fa-heart"></i></button>
-            <span>{{this.Likes.length}} 喜歡數</span>
-          </form>
-          {{else}}
-          <form action="/tweets/{{this.id}}/like" method="POST">
-            <button type="submit"><i class="far fa-heart"></i></button>
-            <span>{{this.Likes.length}} 喜歡數</span>
-          </form>
-          {{/if}}
-
-            {{#ifCond UserId ../userId}}
-            <p>不能喜歡</p>
-            {{else}}
-            <p>可以喜歡</p>
-            {{/ifCond}}
-
-
-          <!-- {{#if this.likes.isLike}}
-          <form action="/tweets/{{this.id}}/like" method="POST">
-            <button type="submit"><i class="far fa-heart"></i></button>
-            <span>{{this.Likes.length}} 喜歡數</span>
-          </form>
-          {{else}}
-          <form action="/tweets/{{this.id}}/unlike" method="POST">
-            <button type="submit"><i class="fas fa-heart"></i></button>
-            <span>{{this.Likes.length}} 喜歡數</span>
-          </form>
-          {{/if}} -->
+        <div class="right ">
+          <!-- {{#if this.isLike}} -->
+          {{!-- <form action="/tweets/{{this.id}}/like" method="POST"> --}}
+            <form action="/tweets/{{this.id}}/unlike" method="POST">
+              <button type="submit"><i class="fas fa-heart text-danger"></i></button>
+              <span>{{this.tweetLikeCount}} 喜歡數</span>
+            </form>
+            <!-- {{else}} -->
+            {{!-- <form action="/tweets/{{this.id}}/unlike" method="POST"> --}}
+              <form action="/tweets/{{this.id}}/like" method="POST">
+                <button type="submit"><i class="far fa-heart text-danger"></i></button>
+                <span>{{this.tweetLikeCount}} 喜歡數</span>
+              </form>
+              <!-- {{/if}} -->
         </div>
-        <!-- <div class="right">
-         <i class="far fa-heart"> </i>
-         <span>  喜歡數</span>
-       </div> -->
       </li>
     </ul>
     <div class="card-body">
-      <a href="/users/{{this.id}}" class="card-link">profile</a>
-      <a href="/users/{{this.id}}/edit" class="card-link">edit</a>
-      <a href="/tweets/{{this.id}}" class="card-link">tweet</a>
+      <a href="/users/{{this.User.id}}" class="card-link">profile</a>
+      <a href="/users/{{this.User.id}}/edit" class="card-link">edit</a>
+      <a href="/tweets/{{this.User.id}}" class="card-link">tweet</a>
     </div>
     <form action="/tweets/{{this.id}}/replies" method="POST">
       <div class="form-group">
@@ -88,8 +65,3 @@
   </div>
   {{/each}}
 </div>
-          <!-- {{#ifCond Tweets userId}}
-                    <p>對的</p>
-                    {else}
-                    <p>錯的</p>
-                    {{/ifCond}} -->

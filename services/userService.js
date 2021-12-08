@@ -14,11 +14,17 @@ const Followship = db.Followship;
 const userService = {
   getUser: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
-    User.findOne({ where: { id: req.params.id } }).then((user) => {
-      // console.log(req, user, currentUser, helpers.getUser(req));
+    User.findByPk(req.params.id , {
+       include: [
+          { model: User, as: "Followers" },
+          { model: User, as: "Followings" },
+        ]}).then((user) => {
+          user = {
+            ...user.dataValues,
+            FollowersCount: user.Followers.length,
+            FollowingsCount: user.Followings.length,
+          };
       return callback({ user: user });
-      // User.findOne({ where: { id: currentUser.id } }).then((user) => {
-      // return res.render("profile", { user: user });
     });
   },
   // getUser: (req, res) => {
@@ -60,7 +66,7 @@ const userService = {
         !req.body.email ||
         !req.body.account ||
         !req.body.password ||
-        !req.body.passwordCheck
+        !req.body.checkPassword
       ) {
         callback({
           status: "error",
@@ -69,7 +75,7 @@ const userService = {
         // req.flash( "error_messages", "名字，信箱，帳號，密碼，確認密碼不能為空!");
         // return res.redirect("back");
       }
-      if (req.body.password !== req.body.passwordCheck) {
+      if (req.body.password !== req.body.checkPassword) {
         callback({ status: "error", message: "密碼與確認密碼不一致!" });
         // req.flash("error_messages", "密碼與確認密碼不一致!");
         // return res.redirect("back");
@@ -341,8 +347,9 @@ const userService = {
           isLike: isLike,
         };
       });
-      Object.assign(newTweets, { tweetCount: tweets.length })
-      return callback({ tweets: newTweets, user: user });
+      let tweetCount = tweets.length 
+      return callback({ tweets: newTweets, user: user, tweetCount: tweetCount });
+
     });
   },
   getUserReplies: (req, res, callback) => {
@@ -379,11 +386,11 @@ const userService = {
         };
         return d;
       });
-      Object.assign(newTweets, { tweetCount: tweets.length });
-      return callback({ tweets: newTweets, user: user });
+      let tweetCount = tweets.length;
+      return callback({ tweets: newTweets, user: user, tweetCount: tweetCount });
     });
   },
-  getUserLike: (req, res, callback) => {
+  getUserLikes: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
       User.findByPk(req.params.userId, {
@@ -407,21 +414,34 @@ const userService = {
         FollowingsCount: user.Followings.length,
         isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
       };
+      // console.log(currentUser.id, req.params.userId);
       let newTweets = tweets.map((d) => {
         // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
         //   currentUser.id)
-        let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-          Number(req.params.userId)
-        );
-        return Object.assign(d, {
-          tweetReplyCount: d.Tweet.Replies.length,
-          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
-          isLike: isLike,
-        });
+        // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
+        //   Number(req.params.userId)
+        // );
+        let isLike 
+        if (currentUser.id === user.id) {
+          isLike = true
+        } else {
+          // isLike = false
+          isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
+          Number(req.params.userId))
+        }
+        
+      //  console.log(isLike)
+       return { ...d.dataValues, 
+         tweetReplyCount: d.Tweet.Replies.length,
+          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true
+          ).length,
+          isLike: isLike
+        }
       });
-      newTweets.forEach(d => console.log(d.isLike))
-      Object.assign(newTweets, { tweetCount: tweets.length });
-      return callback({ tweets: newTweets, user: user });
+      // newTweets.forEach(d => console.log(d.isLike))
+      let tweetCount = tweets.length;
+      // console.log(newTweets);
+      return callback({ tweets: newTweets, user: user, tweetCount:tweetCount });
     });
   },
   getFollowers: (req, res, callback) => {
