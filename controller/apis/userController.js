@@ -443,7 +443,8 @@ const userController = {
           },
           { where: { id: helper.getUser(req).id } }
         )
-        return res.status(200).json({ message: 'success' })
+        const user = await User.findByPk(helper.getUser(req).id)
+        return res.status(200).json({ message: 'success', user })
       } else {
         await User.update(
           {
@@ -452,7 +453,8 @@ const userController = {
           },
           { where: { id: helper.getUser(req).id } }
         )
-        return res.status(200).json({ status: 200, message: 'success' })
+        const user = await User.findByPk(helper.getUser(req).id)
+        return res.status(200).json({ status: 200, message: 'success', user })
       }
     } catch (err) {
       console.log(err)
