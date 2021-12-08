@@ -12,7 +12,12 @@ const tweetController = {
         id: tweet.dataValues.id,
         description: tweet.dataValues.description,
         createdAt: tweet.dataValues.createdAt,
-        User: tweet.dataValues.User.toJSON(),
+        User: {
+          id: tweet.dataValues.User.id,
+          account: tweet.dataValues.User.account,
+          name: tweet.dataValues.User.name,
+          avatar: tweet.dataValues.User.avatar
+        },
         likeCounts: tweet.dataValues.Likes.length,
         replyCounts: tweet.dataValues.Replies.length,
         isLike: helpers.getUser(req).Likes ? helpers.getUser(req).Likes.some(like => like.TweetId === tweet.dataValues.id) : false
@@ -36,7 +41,12 @@ const tweetController = {
         id: data.id,
         description: data.description,
         createdAt: data.createdAt,
-        User: data.User,
+        User: {
+          id: tweet.dataValues.User.id,
+          account: tweet.dataValues.User.account,
+          name: tweet.dataValues.User.name,
+          avatar: tweet.dataValues.User.avatar
+        },
         likeCounts: data.Likes.length,
         replyCounts: data.Replies.length,
         isLike: helpers.getUser(req).Likes ? helpers.getUser(req).Likes.some(like => like.TweetId === data.id) : false
