@@ -476,7 +476,7 @@ let userController = {
           sequelize.literal(
             '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
           ),
-          'LikessCount'
+          'LikesCount'
         ],
         [
           sequelize.literal(
