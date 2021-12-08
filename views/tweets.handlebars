@@ -34,19 +34,19 @@
           <span>{{this.tweetReplyCount}} 回覆數</span>
         </div>
         <div class="right ">
-        
+         {{#if isLike}}
           <!-- <form action="/tweets/{{this.id}}/like" method="POST">  -->
             <form action="/tweets/{{this.id}}/unlike" method="POST">
               <button type="submit"><i class="fas fa-heart text-danger"></i></button>
               <span>{{this.tweetLikeCount}} 喜歡數</span>
             </form>
-          
+          {{else}}
              <!-- <form action="/tweets/{{this.id}}/unlike" method="POST">  -->
               <form action="/tweets/{{this.id}}/like" method="POST">
                 <button type="submit"><i class="far fa-heart text-danger"></i></button>
                 <span>{{this.tweetLikeCount}} 喜歡數</span>
               </form>
-             
+             {{/if}}
         </div>
       </li>
     </ul>

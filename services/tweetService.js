@@ -25,7 +25,10 @@ const tweetService = {
 
   getTweets: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
-    Tweet.findAll({ include: [User, { model: Reply }, { model: Like }] }).then(
+    Tweet.findAll({ 
+      include: [User, { model: Reply }, { model: Like }],
+      order: [['createdAt', 'DESC']]
+     }).then(
       (tweets) => {
       let newTweets = tweets.map((d) => {
         let tweetLikeCount = d.dataValues.Likes.filter(
@@ -48,7 +51,6 @@ const tweetService = {
         };
         return d;
       });
-      newTweets.forEach((d,index) => console.log(index,d.isLike))
       return callback({ tweets: newTweets });
     });
   },
