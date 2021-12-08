@@ -65,6 +65,7 @@ const adminController = {
           [sequelize.col('User.name'), 'name'],
           [sequelize.col('User.cover'), 'cover'],
           [sequelize.col('User.avatar'), 'avatar'],
+          [sequelize.col('User.account'), 'account'],
           [
             sequelize.literal(
               '(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'
@@ -115,7 +116,8 @@ const adminController = {
           [sequelize.col('User.id'), 'UserId'],
           [sequelize.col('User.avatar'), 'UserAvatar']
         ]
-      }
+      },
+      order: [['createdAt', 'DESC']]
     })
     return res.status(200).json({ tweets })
   },
