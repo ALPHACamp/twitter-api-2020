@@ -9,6 +9,7 @@ const Reply = db.Reply
 const Like = db.Like
 const Followship = db.Followship
 const { Op } = require('sequelize')
+const uploadImage = require('../../utils/image')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -425,30 +426,23 @@ const userController = {
       const { files } = req
       if (files) {
         imgur.setClientID(IMGUR_CLIENT_ID)
-        if (files.avatar) {
-          await imgur.upload(files.avatar[0].path, async (err, avatarImg) => {
-            await User.update(
-              {
-                name: req.body.name,
-                introduction: req.body.introduction,
-                avatar: avatarImg.data.link
-              },
-              { where: { id: helper.getUser(req).id } }
-            )
-          })
+        let images = {}
+        for (let i in files) {
+          images[i] = await uploadImage(files[i][0].path)
         }
-        if (files.cover) {
-          await imgur.upload(files.cover[0].path, async (err, coverImg) => {
-            await User.update(
-              {
-                name: req.body.name,
-                introduction: req.body.introduction,
-                cover: coverImg.data.link
-              },
-              { where: { id: helper.getUser(req).id } }
-            )
-          })
-        }
+        await User.update(
+          {
+            name: req.body.name,
+            introduction: req.body.introduction,
+            avatar: images.avatar
+              ? images.avatar.data.link
+              : helper.getUser(req).avatar,
+            cover: images.cover
+              ? images.cover.data.link
+              : helper.getUser(req).cover
+          },
+          { where: { id: helper.getUser(req).id } }
+        )
         return res.status(200).json({ message: 'success' })
       } else {
         await User.update(
