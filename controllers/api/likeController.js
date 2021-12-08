@@ -9,6 +9,13 @@ const likeController = {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        return res.json({
+          status: 'error',
+          message: 'This tweet did Not exist!'
+        })
+      }
       const likeStatusCheck = await Like.findOne({
         where: { UserId, TweetId }
       })
@@ -31,6 +38,13 @@ const likeController = {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        return res.json({
+          status: 'error',
+          message: 'This tweet did Not exist!'
+        })
+      }
       const likeStatusCheck = await Like.findOne({
         where: { UserId, TweetId }
       })
