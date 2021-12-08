@@ -200,7 +200,7 @@ let userController = {
             sequelize.literal(
               '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
             ),
-            'likesCount'
+            'LikesCount'
           ],
           [
             sequelize.literal(
@@ -339,9 +339,10 @@ let userController = {
       }
       // 確認Account無重複(但可以維持原有)
       const userAccountCheck = await User.findOne({
-        where: { 
-          account, 
-          [Op.not]: { id: helpers.getUser(req).id } }
+        where: {
+          account,
+          [Op.not]: { id: helpers.getUser(req).id }
+        }
       })
       if (userAccountCheck) {
         return res.json({
@@ -403,12 +404,12 @@ let userController = {
   getFollowings: async (req, res) => {
     try {
       const followings = await User.findAll({
-        where: { id: req.params.id },   
+        where: { id: req.params.id },
         attributes: ['account'],
         include: [
           {
             model: User,
-            as: 'Followings',  
+            as: 'Followings',
             attributes: [
               ['id', 'followingId'],
               'avatar',
@@ -421,10 +422,10 @@ let userController = {
                 sequelize.literal(
                   `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
                     helpers.getUser(req).id
-                  }  AND Followships.followingId = Followings.id )`  
+                  }  AND Followships.followingId = Followings.id )`
                 ),
                 'isFollowed'
-              ] 
+              ]
             ]
           }
         ],
@@ -476,30 +477,45 @@ let userController = {
   getLikes: async (req, res) => {
     try {
       const tweet = await Tweet.findAll({
-        where: { id: { [Op.in]: [sequelize.literal(`SELECT TweetId FROM Likes WHERE Likes.UserId =${req.params.id} `)] } },
-        attributes: [['id', 'TweetId'], 'createdAt', 'description',
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
-          ),
-          'LikesCount'
+        where: {
+          id: {
+            [Op.in]: [
+              sequelize.literal(
+                `SELECT TweetId FROM Likes WHERE Likes.UserId =${req.params.id} `
+              )
+            ]
+          }
+        },
+        attributes: [
+          ['id', 'TweetId'],
+          'createdAt',
+          'description',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+            ),
+            'LikesCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+            ),
+            'RepliesCount'
+          ],
+          [
+            sequelize.literal(
+              `EXISTS (SELECT * FROM Likes WHERE UserId = ${
+                helpers.getUser(req).id
+              } AND TweetId = Tweet.id)`
+            ),
+            'isLiked'
+          ]
         ],
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
-          ),
-          'RepliesCount'
+        include: [
+          { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
+          { model: Like, attributes: ['createdAt'] }
         ],
-        [
-          sequelize.literal(
-            `EXISTS (SELECT * FROM Likes WHERE UserId = ${helpers.getUser(req).id} AND TweetId = Tweet.id)`
-          ),
-          'isLiked'
-        ]
-        ], include:
-          [{ model: User, attributes: ['id', 'name', 'avatar', 'account'] },
-          { model: Like, attributes: ['createdAt'] }]
-        , order: [[sequelize.col('Likes.createdAt'), 'DESC']]
+        order: [[sequelize.col('Likes.createdAt'), 'DESC']]
       })
 
       return res.json(tweet)
