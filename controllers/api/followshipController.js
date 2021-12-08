@@ -1,16 +1,23 @@
 const db = require('../../models')
-const { Followship } = db
+const { Followship, User } = db
 const helpers = require('../../_helpers')
 
 const followshipController = {
   follow: async (req, res) => {
     try {
-      followingId = req.body.id
-      followerId = helpers.getUser(req).id
-      if (Number(followingId) === followerId) {
+      const followingId = Number(req.body.id)
+      const followerId = helpers.getUser(req).id
+      if (followingId === followerId) {
         return res.json({
           status: 'error',
           message: 'Can NOT follow yourself!'
+        })
+      }
+      const user = await User.findByPk(followingId)
+      if (!user) {
+        return res.json({
+          status: 'error',
+          message: 'This user did NOT exist!'
         })
       }
       const followStatusCheck = await Followship.findOne({
@@ -44,6 +51,13 @@ const followshipController = {
       return res.json({
         status: 'error',
         message: 'Can NOT unfollow yourself!'
+      })
+    }
+    const user = await User.findByPk(followingId)
+    if (!user) {
+      return res.json({
+        status: 'error',
+        message: 'This user did NOT exist!'
       })
     }
     const followStatusCheck = await Followship.findOne({
