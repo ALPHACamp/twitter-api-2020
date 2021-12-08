@@ -16,7 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         defaultValue: 'https://i.imgur.com/Qqb0a7S.png'
       },
-      introduction: DataTypes.STRING,
+      introduction: {
+        type: DataTypes.STRING,
+        defaultValue: ''
+      },
       role: DataTypes.STRING
     },
     {}
