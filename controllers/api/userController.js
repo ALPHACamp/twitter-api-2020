@@ -157,10 +157,16 @@ let userController = {
       return res.json(data);
     });
   },
+  getTopUsers: (req, res) => {
+    userService.getTopUser(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   deleteAllUsers: (req, res) => {
     userService.deleteAllUsers(req, res, (data) => {
       return res.json(data);
     });
+
   },
   deleteAllTweets: (req, res) => {
     userService.deleteAllTweets(req, res, (data) => {
