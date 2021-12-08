@@ -26,7 +26,8 @@ const replyController = {
           { model: User, attributes: ['id', 'name', 'avatar', 'account'] }
         ],
         raw: true,
-        nest: true
+        nest: true,
+        order: [['createdAt', 'DESC']]
       })
       return res.status(200).json(replies)
     } catch (err) {

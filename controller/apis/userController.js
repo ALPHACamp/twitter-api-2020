@@ -279,6 +279,7 @@ const userController = {
           ['id', 'TweetId'],
           'description',
           [sequelize.col('User.id'), 'tweet_user_id'],
+          [sequelize.col('Likes.createdAt'), 'like_createdAt'],
           [sequelize.col('User.name'), 'tweet_user_name'],
           [sequelize.col('User.account'), 'tweet_user_account'],
           [sequelize.col('User.avatar'), 'tweet_user_avatar'],
@@ -303,7 +304,8 @@ const userController = {
           { model: Like, attributes: [] },
           { model: User, attributes: [] }
         ],
-        group: ['TweetId']
+        group: ['TweetId', 'Likes.createdAt'],
+        order: [[sequelize.col('like_createdAt'), 'DESC']]
       })
       const likedTweets = await Like.findAll({
         where: { UserId: helper.getUser(req).id },
