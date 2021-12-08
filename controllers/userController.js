@@ -259,11 +259,18 @@ const userController = {
         return res.json(tweets)
       })
   },
-  getOneRepliedTweets: (req, res) => {  //TODO
-    const userId = req.params.id
-    return Reply.findAll({ where: { userId }, include: [Tweet] })
+  getOneRepliedTweets: (req, res) => {
+    const UserId = req.params.id
+    return Reply.findAll({ 
+      where: { UserId },
+      order: [['createdAt', 'DESC']],
+      include: {
+        model: Tweet, attributes: ['id', 'description', 'createdAt'], include: [
+          { model: User, attributes: ['id', 'name', 'account'] }]
+      }
+    })
       .then(replies => {
-        return res.json({ replies })
+        return res.json(replies)
       })
   },
   getOneTweets: (req, res) => { //TODO
