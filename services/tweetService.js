@@ -34,12 +34,10 @@ const tweetService = {
           (d) => d.isLike === true
         ).length;
         let tweetReplyCount = d.dataValues.Replies.map((d) => d.id).length;
-        // let userIsLike = d.dataValues.Likes.find((d) => d.UserId);
         let userIsLike = d.dataValues.Likes.map((d) => d.UserId).includes(currentUser.id)
         let paramsLike
         console.log(userIsLike)
         if (!userIsLike) {
-          // paramsLike = false
           userIsLike = false;
         } else  {
           // userIsLike = {
@@ -49,25 +47,6 @@ const tweetService = {
           // };
           userIsLike = userIsLike
         }
-        //    if (!userIsLike) {
-        //   userIsLike = false;
-        //   paramsLike = {
-        //     // isLike: false,
-        //     id: userIsLike.id ? userIsLike.id : false,
-        //     TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
-        //     UserId: userIsLike.UserId ? userIsLike.UserId : false,
-        //     isLike: userIsLike.isLike ? userIsLike.isLike : false,
-        //   };
-        // } else {
-        //   userIsLike = userIsLike.isLike;
-        //     paramsLike = {
-        //       // isLike: false,
-        //       id: userIsLike.id ? userIsLike.id : false,
-        //       TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
-        //       UserId: userIsLike.UserId ? userIsLike.UserId : false,
-        //       isLike: userIsLike.isLike ? userIsLike.isLike : false,
-        //     };
-        // }
         
         console.log("req.params.userId", req.params.id,'當下使用者',currentUser.id,'userIsLike',userIsLike)
         // console.log('params',paramsLike);
@@ -130,51 +109,3 @@ const tweetService = {
   },
 };
 module.exports = tweetService
-
- // getTweets: (req, res) => {
-  //   const currentUser = req.user ? req.user : helpers.getUser(req);
-  //   // Tweet.findAll({ include: [User, Reply, Like] }).then((tweets) => {
-  //   Tweet.findAll({ include: [
-  //     User,
-  //     { model: Reply },
-  //     { model: Like }
-  //     ] }).then((tweets) => {
-  //     let tweetReplyCount;
-  //     console.log("tweet", tweets.length);
-
-  //     let newTweets = tweets.map((d) => {
-  //       let tweetLikeCount = d.dataValues.Likes.filter(d => d.isLike === true).length
-  //       let tweetReplyCount = d.dataValues.Replies.map((d) => d.id).length
-  //       let userIsLike = d.dataValues.Likes.find((d) => d.UserId)
-  //       // userIsLike = {
-  //       //   id: userIsLike.id ? userIsLike.id : false,
-  //       //   TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
-  //       //   UserId: userIsLike.UserId ? userIsLike.UserId : false,
-  //       //   isLike: userIsLike.isLike ? userIsLike.isLike : false
-  //       // }
-  //       // console.log(userIsLike)
-  //       if (!userIsLike) {
-  //         userIsLike = false;
-  //         userIsLike = {
-  //           id: userIsLike.id ? userIsLike.id : false,
-  //           TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
-  //           UserId: userIsLike.UserId ? userIsLike.UserId : false,
-  //           isLike: userIsLike.isLike ? userIsLike.isLike : false
-  //         }
-  //       } else {
-  //         userIsLike = userIsLike.isLike;
-  //       }
-  //       console.log(userIsLike);
-  //       d = {
-  //         ...d.dataValues,
-  //         tweetReplyCount,
-  //         tweetLikeCount,
-  //         isLike: userIsLike,
-  //       };
-  //       return d;
-  //     });
-  //     return res.render("tweets", {
-  //       tweets: newTweets,
-  //     });
-  //   });
-  // },

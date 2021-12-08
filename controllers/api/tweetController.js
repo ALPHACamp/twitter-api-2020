@@ -1,9 +1,6 @@
 const db = require('../../models')
 const tweetService = require('../../services/tweetService')
 const helpers = require('../../_helpers')
-// const Tweet = db.Tweet
-// const User = db.User
-
 
 const tweetController = {
   postTweet: (req, res) => {
