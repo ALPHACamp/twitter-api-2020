@@ -72,5 +72,9 @@ npm run test
   一般使用者密碼： 12345678
 
 ## 開發人員
+### 後端
 * Emily (email: emily81926@gmail.com)
 * Kerwin (email: tkoleo84119@gmail.com)
+### 前端
+* Chaco (email: chacowang0125@gmail.com)
+* Vince (email: vlee9527@gmail.com)
