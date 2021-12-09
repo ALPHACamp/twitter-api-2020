@@ -7,6 +7,13 @@ const helper = require('../../_helpers')
 const replyController = {
   postReply: async (req, res) => {
     try {
+      if (req.body.comment.trim().length < 1) {
+        return res.status(400).json({ message: '內容不可空白' })
+      }
+      if (req.body.comment.length > 150) {
+        return res.status(400).json({ message: '字數超出上限！' })
+      }
+
       const reply = await Reply.create({
         UserId: helper.getUser(req).id,
         TweetId: req.params.id,

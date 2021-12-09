@@ -10,6 +10,7 @@ const Like = db.Like
 const Followship = db.Followship
 const { Op } = require('sequelize')
 const uploadImage = require('../../utils/image')
+const validator = require('validator')
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -19,6 +20,7 @@ const { sequelize } = require('../../models')
 const { json } = require('body-parser')
 const { image } = require('faker/locale/de')
 const { rearg } = require('lodash')
+const e = require('connect-flash')
 
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
@@ -70,6 +72,21 @@ const userController = {
       return res
         .status(400)
         .json({ status: 'error', message: '所有欄位都是必填。' })
+    }
+    if (account.trim().length < 1) {
+      return res.status(400).json({ message: '帳號不能空白！' })
+    }
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ message: '請使用正確 email 格式！' })
+    }
+    if (name.trim().length < 1) {
+      return res.status(400).json({ message: '名字不能空白！' })
+    }
+    if (name.length > 60) {
+      return res.status(400).json({ message: '名字字數超過上限！' })
+    }
+    if (password.trim().length < 8) {
+      return res.status(400).json({ message: '密碼字數低於下限！' })
     }
     if (checkPassword !== password) {
       return res
@@ -426,6 +443,16 @@ const userController = {
     try {
       const { files } = req
       if (files) {
+        if (req.body.name.trim().length < 1) {
+          return res.status(400).json({ message: '名字不能空白！' })
+        }
+        if (req.body.name.length > 60) {
+          return res.status(400).json({ message: '名字字數超出上限！' })
+        }
+        if (req.body.introduction.length > 170) {
+          return res.status(400).json({ message: '自介字數超出上限！' })
+        }
+
         imgur.setClientID(IMGUR_CLIENT_ID)
         let images = {}
         for (let i in files) {
@@ -462,6 +489,15 @@ const userController = {
         const user = await User.findByPk(helper.getUser(req).id)
         return res.status(200).json({ message: 'success', user })
       } else {
+        if (req.body.name.trim().length < 1) {
+          return res.status(400).json({ message: '名字不能空白！' })
+        }
+        if (req.body.name.length > 60) {
+          return res.status(400).json({ message: '名字字數超出上限！' })
+        }
+        if (req.body.introduction.length > 170) {
+          return res.status(400).json({ message: '自介字數超出上限！' })
+        }
         if (req.body.isCanceled) {
           await User.update(
             {
@@ -534,15 +570,30 @@ const userController = {
   accountSetting: async (req, res) => {
     try {
       const { account, password, checkPassword, name, email } = req.body
-      if (!account || !password || !checkPassword || !name || !email) {
+      if (!account || !name || !email || !password || !checkPassword) {
         return res
           .status(400)
-          .json({ status: 'error', message: '所有欄位必填' })
+          .json({ status: 'error', message: '所有欄位都是必填。' })
       }
-      if (password !== checkPassword) {
+      if (account.trim().length < 1) {
+        return res.status(400).json({ message: '帳號不能空白！' })
+      }
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({ message: '請使用正確 email 格式！' })
+      }
+      if (name.trim().length < 1) {
+        return res.status(400).json({ message: '名字不能空白！' })
+      }
+      if (name.length > 60) {
+        return res.status(400).json({ message: '名字字數超過上限！' })
+      }
+      if (password.trim().length < 8) {
+        return res.status(400).json({ message: '密碼字數低於下限！' })
+      }
+      if (checkPassword !== password) {
         return res
           .status(400)
-          .json({ status: 'error', message: '兩次密碼輸入不一樣' })
+          .json({ status: 'error', message: '兩次密碼輸入不相同！' })
       }
       const accountCheck = await User.findOne({ where: { account } })
       const emailCheck = await User.findOne({ where: { email } })
