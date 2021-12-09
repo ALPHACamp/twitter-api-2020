@@ -35,6 +35,8 @@ const userController = {
           name,
           email,
           introduction: '',
+          avatar: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg',
+          cover: 'https://i.imgur.com/CVo4HhZ.jpg',
           password: bcrypt.hashSync(req.body.password, 10)
         })
           .then(() => {
