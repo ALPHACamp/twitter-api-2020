@@ -166,7 +166,8 @@ const userService = {
       return callback(user)
     } else {
       // 取得其他使用者資訊(要有isFollowed => 利用SQL原生語法判斷)
-      let user = await User.findByPk(userId, {
+      let user = await User.findOne({
+        where: { id: userId, [Op.not]: [{ role: 'admin' }] },
         attributes: ['id', 'account', 'name', 'avatar', 'cover', 'introduction',
           [sequelize.literal(`(select count(followerId) from Followships where followerId = User.id)`), 'followings'], [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers'],
           [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed'],
