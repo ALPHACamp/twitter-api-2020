@@ -1,15 +1,39 @@
 const express = require('express')
-const helpers = require('./_helpers');
-
 const app = express()
-const port = 3000
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+const bodyParser = require('body-parser')
+const methodOverride = require('method-override')
+const cors = require('cors')
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const server = require('http').createServer(app)
+
+app.use(cors())
+
+const buildSocket = require('./server')
+
+const port = process.env.PORT || 3000
+const routes = require('./routes')
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
+const passport = require('./config/passport');
+const { replaceReqUser } = require('./middlewares/mocha')
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+app.use(methodOverride('_method'))
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+// for mocha test's requirement
+app.use(replaceReqUser)
+
+buildSocket(server)
+
+app.use(routes)
+
+server.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
