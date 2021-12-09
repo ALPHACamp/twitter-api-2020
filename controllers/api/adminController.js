@@ -97,7 +97,7 @@ const adminController = {
             }
           }
         },
-        order: [[sequelize.literal('TweetsCount'), 'DESC'], ['createdAt', 'DESC]]
+        order: [[sequelize.literal('TweetsCount'), 'DESC'], ['createdAt', 'DESC']]
       })
       return res.json(users)
     } catch (err) {
@@ -110,7 +110,7 @@ const adminController = {
       const tweets = await Tweet.findAll({
         attributes: [
           ['id', 'TweetId'],
-          'CreatedAt',
+          'createdAt',
           [Sequelize.literal('substring(description,1,50)'), 'description']
         ],
         include: [
