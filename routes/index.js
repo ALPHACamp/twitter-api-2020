@@ -45,7 +45,10 @@ router.put('/api/users/account', authenticated, authenticatedUser, userControlle
 //user取得編輯個人資訊頁面
 router.get('/api/users/edit', authenticated, authenticatedUser, userController.getUserInfo)
 //user編輯個人資訊頁面
+
 router.put('/api/users', authenticated, authenticatedUser, userController.editUserInfo)
+router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUserProfile)
+
 //user觀看特定人士已like
 router.get('/api/users/:id/likes', authenticated, authenticatedUser, userController.getOneLikes)
 //user觀看特定人士已reply
@@ -58,6 +61,7 @@ router.get('/api/users/:id/followings', authenticated, authenticatedUser, userCo
 
 //先讓前端使用的get_current)user
 router.get('/api/get_current_user', authenticated, authenticatedUser, userController.getCurrentUser)
+
 
 
 

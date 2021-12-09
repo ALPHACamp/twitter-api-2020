@@ -20,7 +20,8 @@ const tweetController = {
         tweets = tweets.map(tweet => ({
           ...tweet.dataValues,
           repliedCount: tweet.RepliedUsers.length,
-          likedCount: tweet.LikedUsers.length
+          likedCount: tweet.LikedUsers.length,
+          isLiked: req.user.LikedTweets.map(d => d.id).includes(tweet.id)
         }))
         tweets.forEach(tweet => {
           delete tweet.RepliedUsers
