@@ -105,7 +105,8 @@ const userController = {
         }
       } else {
         User.create({
-          account, email, name,
+          account, email, name, role: null, avatar: "https://imgur.com/a/L3TdYqD",
+          cover: "https://imgur.com/a/L3TdYqD",
           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
         })
         return res.json({ status: 'success', message: '成功註冊!' })

@@ -30,9 +30,9 @@ module.exports = {
         email: `user${i + 1}@example.com`,
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
         name: faker.name.findName(),
-        avatar: 'https://loremflickr.com/320/240/face',
+        avatar: 'https://imgur.com/a/L3TdYqD',
         account: `user${i + 1}`,
-        cover: 'https://loremflickr.com/1200/400/landscape',
+        cover: 'https://imgur.com/a/L3TdYqD',
         introduction: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
