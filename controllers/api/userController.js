@@ -231,6 +231,7 @@ let userController = {
   putUser: async (req, res) => {
     try {
       const { name, introduction } = req.body
+      let { cover } = req.body // "" & "empty"
       // 確認Name欄位有輸入
       if (!name) {
         return res.json({
@@ -253,33 +254,41 @@ let userController = {
           message: 'Name should be within 50 characters'
         })
       }
-      if (!introduction || introduction.length > 160) {
+      if (introduction.length > 160) {
         return res.json({
           status: 'error',
           message: 'Introduction should be within 160 characters'
         })
       }
-      let avatar = null
-      let cover = null
+
       const { files } = req
+      let avatar = null
+      // 確認cover刪("empty") or "" 留上一次的
       imgur.setClientId(IMGUR_CLIENT_ID)
       if (files) {
         if (files.avatar) {
           // 確認是否有avatar
-          avatar = await imgur.uploadFile(files.avatar[0].path)
+          const avatarTemp = await imgur.uploadFile(files.avatar[0].path)
+          avatar = avatarTemp.link
         }
         if (files.cover) {
           // 確認是否有cover
-          cover = await imgur.uploadFile(files.cover[0].path)
+          const coverTemp = await imgur.uploadFile(files.cover[0].path)
+          cover = coverTemp.link
         }
       }
 
       const user = await User.findByPk(req.params.id)
+      if (cover === "empty") {
+        cover = null
+      } else if (cover === "") {
+        cover = user.cover || null
+      }
       await user.update({
         name,
         introduction,
-        avatar: avatar ? avatar.link : user.avatar,
-        cover: cover ? cover.link : user.cover
+        avatar: avatar ? avatar : user.avatar,
+        cover
       })
       res.json({
         status: 'success',
