@@ -1,6 +1,6 @@
 /* DB */
 const db = require('../../models')
-const { User, Tweet, Reply, Like, Sequelize } = db
+const { User, Tweet, Reply, Like } = db
 
 /* necessary package */
 const bcrypt = require('bcryptjs')
@@ -12,6 +12,7 @@ const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 const sequelize = require('sequelize')
+const { Op } = sequelize
 const adminController = {
   // 登入
   signIn: async (req, res) => {
@@ -71,7 +72,7 @@ const adminController = {
           ],
           [
             sequelize.literal(
-              '(SELECT COUNT(*) FROM Tweets WHERE Tweets.id = User.id )'
+              '(SELECT COUNT(*) FROM Tweets WHERE Tweets.Userid = User.id )'
             ),
             'TweetsCount'
           ],
@@ -87,9 +88,17 @@ const adminController = {
             ),
             'RepliesCount'
           ]
-        ]
+        ],
+        where: {
+          role: {
+            [Op.or]: {
+              [Op.ne]: 'admin',
+              [Op.eq]: null //for test
+            }
+          }
+        },
+        order: [[sequelize.literal('TweetsCount'), 'DESC']]
       })
-      users = users.sort((a, b) => b.TweetsCount - a.TweetsCount)
       return res.json(users)
     } catch (err) {
       console.log(err)
