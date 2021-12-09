@@ -83,6 +83,7 @@ router.post('/users', userController.signUp)
 
 //user
 router.post('/users/signin', userController.signIn)
+
 router.put(
   '/users/account',
   authenticated,
@@ -131,12 +132,7 @@ router.get(
   userController.getUserFollowers
 )
 router.get('/users', authenticated, authenticatedUser, userController.getUsers)
-router.get(
-  '/users/self',
-  authenticated,
-  authenticatedUser,
-  userController.getCurrentUser
-)
+router.get('/users/self', authenticated, userController.getCurrentUser)
 router.get(
   '/users/top',
   authenticated,
