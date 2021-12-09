@@ -44,6 +44,7 @@ app.use('/upload', express.static(__dirname + '/upload'))
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(cors());
+
 // put req.flash into res.locals
 // app.use((req, res, next) => {
 //   res.locals.success_messages = req.flash('success_messages')
@@ -57,6 +58,13 @@ app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
   res.locals.error_messages = req.flash('error_messages')
   res.locals.current_user = req.user // 加這行
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Credentials", true);
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin,X-Requested-With,Content-Type,Accept,content-type,application/json"
+  );
   next()
 })
 //-----------
