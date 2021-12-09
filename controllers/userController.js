@@ -6,7 +6,7 @@ const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
 const Followship = db.Followship
-const imgur = require('imgur')
+const imgur = require('imgur-node-api')
 
 
 // JWT
@@ -89,7 +89,7 @@ const userController = {
     }
 
     // 確認email或account是否重複
-    User.findOne({
+    return User.findOne({
       where: {
         $or: [
           { email },
@@ -110,8 +110,9 @@ const userController = {
           avatar: 'https://loremflickr.com/320/240/face',
           cover: 'https://loremflickr.com/1200/400/landscape',
           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
+        }).then(user => {
+          return res.json({ status: 'success', message: '成功註冊!' })
         })
-        return res.json({ status: 'success', message: '成功註冊!' })
       }
     })
   },
@@ -192,7 +193,7 @@ const userController = {
       user = user.toJSON()
       user.FollowerCount = user.Followers.length //跟隨者人數
       user.FollowingCount = user.Followings.length //跟隨中人數
-      user.isFollowed = req.user.Followings.map(d => d.id).includes(user.id)
+      user.isFollowed = helpers.getUser(req).Followings ? helpers.getUser(req).Followings.map(d => d.id).includes(user.id) : null
       user.TweetCount = user.Tweets.length
       delete user.Followers
       delete user.Followings
@@ -215,9 +216,10 @@ const userController = {
         })
       })
   },
-  editUserInfo: async (req, res, callback) => {
+  editUserInfo: async (req, res ) => {
     const userId = helpers.getUser(req).id
-    const { name } = req.body
+    console.log('req.body', req.body) // {}
+    const name  = req.body.name
     // 確認name有填寫
     if (!name) {
       return res.json({
@@ -227,27 +229,27 @@ const userController = {
 
     // 如果有上傳圖片，就上傳到imgur中
     const { files } = req
-    imgur.setClientId(process.env.IMGUR_CLIENT_ID) // 設定imgur的clientId
+    imgur.setClientID(process.env.IMGUR_CLIENT_ID) // 設定imgur的clientId
+    console.log('files', files)
     if (files) {
+      console.log('files', files)
       if (files.avatar) {
         // 確認是否有avatar上傳，有就上傳到imgur
-        const avatar = await imgur.uploadFile(files.avatar[0].path)
+        const avatar = await imgur.upload(files.avatar[0].path)
+        console.log("avatar", avatar)
         req.body.avatar = avatar.link
       }
       if (files.cover) {
         // 確認是否有cover上傳，有就上傳到imgur
-        const cover = await imgur.uploadFile(files.cover[0].path)
+        const cover = await imgur.upload(files.cover[0].path)
         req.body.cover = cover.link
       }
     }
-
-    // 刪除cover
-    if (req.body.noCover === 'yes') {
-      req.body.cover = ''
-    }
-
-    await User.update({ ...req.body }, { where: { id: userId } })
-    return callback({ status: 'success', message: '成功修改使用者Profile' })
+    console.log('req.body', req.body)
+    return User.update({ ...req.body }, { where: { id: userId } })
+      .then((user) => {
+        return res.json({ status: 'success', message: '成功修改使用者Profile' })
+      })
   },
   //取得特定瀏覽人次id
   getOneLikes: (req, res) => {
@@ -269,7 +271,7 @@ const userController = {
           ...tweet.dataValues,
           repliedCount: tweet.Tweet.RepliedUsers.length,
           likedCount: tweet.Tweet.LikedUsers.length,
-          isLiked: req.user.LikedTweets.map(d => d.id).includes(tweet.Tweet.id)
+          isLiked: helpers.getUser(req).LikedTweets ? helper.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
         }))
         tweets.forEach(tweet => {
           delete tweet.Tweet.dataValues.RepliedUsers
@@ -306,7 +308,7 @@ const userController = {
           ...tweet.dataValues,
           repliedCount: tweet.RepliedUsers.length,
           likedCount: tweet.LikedUsers.length,
-          isLiked: req.user.LikedTweets.map(d => d.id).includes(tweet.id)
+          isLiked: helpers.getUser(req).LikedTweets ?helper.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
         }))
         tweets.forEach(tweet => {
           delete tweet.RepliedUsers
@@ -325,7 +327,8 @@ const userController = {
       users = users.Followers
       users = users.map((user) => ({
         ...user.dataValues,
-        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+        isFollowed: helpers.getUser(req).Followings ? helpers.getUser(req).Followings.map(d => d.id).includes(user.id) : null,
+        followerId: user.Followship.followerId
       }))
       return res.json(users)
     })
@@ -340,7 +343,8 @@ const userController = {
       users = users.Followings
       users = users.map((user) => ({
         ...user.dataValues,
-        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+        isFollowed: helpers.getUser(req).Followings ? helpers.getUser(req).Followings.map(d => d.id).includes(user.id) : null,
+        followingId: user.Followship.followingId
       }))
       return res.json(users)
     })

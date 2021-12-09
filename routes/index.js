@@ -57,6 +57,7 @@ router.get('/api/users/edit', authenticated, authenticatedUser, userController.g
 
 router.put('/api/users', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUserInfo)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUserProfile)
+router.put('/api/users/:id', authenticated, authenticatedUser, userController.editUserInfo)
 
 //user觀看特定人士已like
 router.get('/api/users/:id/likes', authenticated, authenticatedUser, userController.getOneLikes)
