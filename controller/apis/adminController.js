@@ -11,21 +11,16 @@ const adminController = {
   signIn: (req, res) => {
     // 檢查必要資料
     if (!req.body.account || !req.body.password) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: "required fields didn't exist" })
+      return res.json({ status: 'error', message: '所有欄位必填！' })
     }
     User.findOne({ where: { account: req.body.account } }).then(user => {
       if (!user) {
         //if user is not exist
-        return res
-          .status(400)
-          .json({ status: 'error', message: 'user is not exist.' })
+        return res.json({ status: 'error', message: '帳號不存在！' })
       }
       if (!bcrypt.compareSync(req.body.password, user.password)) {
         return res //if password not match
-          .status(400)
-          .json({ status: 'error', message: 'email or password incorrect.' })
+          .json({ status: 'error', message: '密碼錯誤！' })
       }
       if (user.role !== 'admin') {
         return res

@@ -25,17 +25,17 @@ const userController = {
     if (!req.body.account || !req.body.password) {
       return res.json({
         status: 'error',
-        message: "required fields didn't exist"
+        message: '所有欄位必填！'
       })
     }
     User.findOne({ where: { account: req.body.account } }).then(user => {
       if (!user) {
         //if user is not exist
-        return res.json({ status: 'error', message: 'user is not exist.' })
+        return res.json({ status: 'error', message: '帳號不存在！' })
       }
       if (!bcrypt.compareSync(req.body.password, user.password)) {
         return res //if password not match
-          .json({ status: 'error', message: 'password incorrect.' })
+          .json({ status: 'error', message: '密碼錯誤！' })
       }
       if (user.role === 'admin') {
         return res.json({ message: '請使用管理員登錄系統' })
