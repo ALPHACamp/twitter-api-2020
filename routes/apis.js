@@ -66,6 +66,8 @@ router.get('/users/:userId/tweets', authenticated, authenticatedUser,  upload.fi
 // router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
 router.get('/users/:userId/likes', authenticated, authenticatedUser, userController.getUserLikes)
 
+router.get('/users/:userId/likesTweets', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikesTweet)
+
 //  查詢user的所有留言
 // router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
 router.get('/users/:userId/replies', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserReplies)
