@@ -22,7 +22,7 @@ const adminController = {
       if (!account || !password) {
         return res.json({
           status: 'error',
-          message: 'Please fill in both Account & Password fields!'
+          message: '帳號及密碼皆不可空白'
         })
       }
       // 檢查 user 是否存在與密碼是否正確
@@ -97,7 +97,7 @@ const adminController = {
             }
           }
         },
-        order: [[sequelize.literal('TweetsCount'), 'DESC']]
+        order: [[sequelize.literal('TweetsCount'), 'DESC'], ['createdAt', 'DESC]]
       })
       return res.json(users)
     } catch (err) {
