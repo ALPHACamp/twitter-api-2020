@@ -85,3 +85,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Upload temp files
+temp/
+upload/
