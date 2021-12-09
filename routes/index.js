@@ -41,6 +41,8 @@ router.put('/api/users/account', authenticated, userController.putUserAccountSet
 router.get('/api/users/edit', authenticated, userController.getUserInfo)
 //user編輯個人資訊頁面
 router.put('/api/users', authenticated, userController.editUserInfo)
+//user瀏覽個人資料
+router.get('/api/users/:id', authenticated, userController.getUserProfile)
 //user觀看特定人士已like
 router.get('/api/users/:id/likes', authenticated, userController.getOneLikes)
 //user觀看特定人士已reply
