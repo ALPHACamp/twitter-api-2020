@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "apidoc": "^0.50.2",
     "bcrypt-nodejs": "0.0.3",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
@@ -38,6 +39,7 @@
     "sinon-chai": "^3.3.0"
   },
   "devDependencies": {
+    "grunt-apidoc": "^0.11.0",
     "sequelize-test-helpers": "^1.0.7",
     "supertest": "^3.3.0"
   }

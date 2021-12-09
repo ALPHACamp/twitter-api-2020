@@ -17,19 +17,19 @@ const tweet = require('../models/tweet')
 
 const userController = {
   signIn: (req, res) => {
-    // 比對User資料庫、比對密碼
     const { account, password } = req.body
-    // 檢查必填欄位
     if (!account || !password) {
       return res.json({ status: 'error', message: '請輸入必填欄位!' })
     }
-    // console.log('get account, password from jwt strategy: ', account, password)  // OK
     User.findOne({ where: { account } }).then(user => {
       if (!user) {
         return res.status(401).json({ status: 'error', message: '帳號不存在!' })
       }
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(401).json({ status: 'error', message: '帳號不存在!' })
+      }
+      if (user.role === "admin") {
+        return res.json({ status: 'error', message: '帳號不存在!' })
       }
       // issue token
       const payload = { id: user.id }
@@ -59,7 +59,7 @@ const userController = {
         return res.status(401).json({ status: 'error', message: '' })
       }
       if (user.role !== "admin") {
-        return res.status(401).json({ status: 'error', message: 'No permission' })
+        return res.status(401).json({ status: 'error', message: '帳號不存在' })
       }
       // issue token
       var payload = { id: user.id }
@@ -105,7 +105,8 @@ const userController = {
         }
       } else {
         User.create({
-          account, email, name,
+          account, email, name, role: null, avatar: "https://imgur.com/a/L3TdYqD",
+          cover: "https://imgur.com/a/L3TdYqD",
           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
         })
         return res.json({ status: 'success', message: '成功註冊!' })
@@ -131,7 +132,7 @@ const userController = {
 
     // 確認欄位是否皆有填寫
     if (!account || !name || !email || !password || !checkPassword) {
-      return res.json({ status: 'error', message: '須田' })
+      return res.json({ status: 'error', message: '請輸入必填欄位！' })
     }
     // 確認密碼
     if (password !== checkPassword) {
@@ -189,7 +190,7 @@ const userController = {
       user = user.toJSON()
       user.FollowerCount = user.Followers.length //跟隨者人數
       user.FollowingCount = user.Followings.length //跟隨中人數
-      user.isFollowed= req.user.Followings.map(d => d.id).includes(user.id)
+      user.isFollowed = req.user.Followings.map(d => d.id).includes(user.id)
       user.TweetCount = user.Tweets.length
       delete user.Followers
       delete user.Followings
@@ -311,18 +312,34 @@ const userController = {
       })
   },
   getOneFollowers: (req, res) => {
-    const followerId = req.params.id
-    return Followship.findAll({ where: { followerId } })
-      .then(users => {
-        return res.json({ users })
-      })
+    const UserId = req.params.id
+    return User.findByPk(UserId, {
+      attributes: ['id'],
+      include: { model: User, as: "Followers", attributes: ['id', 'name', 'account', 'introduction', 'avatar'] },
+      order: [[User.associations.Followers, Followship, 'createdAt', 'DESC']],
+    }).then(users => {
+      users = users.Followers
+      users = users.map((user) => ({
+        ...user.dataValues,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      return res.json(users)
+    })
   },
   getOneFollowings: (req, res) => {
-    const followingId = req.params.id
-    return Followship.findAll({ where: { followingId } })
-      .then(users => {
-        return res.json({ users })
-      })
+    const UserId = req.params.id
+    return User.findByPk(UserId, {
+      attributes: ['id'],
+      include: { model: User, as: "Followings", attributes: ['id', 'name', 'account', 'introduction', 'avatar'] },
+      order: [[User.associations.Followings, Followship, 'createdAt', 'DESC']],
+    }).then(users => {
+      users = users.Followings
+      users = users.map((user) => ({
+        ...user.dataValues,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      return res.json(users)
+    })
   },
 }
 

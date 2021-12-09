@@ -20,14 +20,14 @@ const authenticated = passport.authenticate('jwt', { session: false })
 
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.getUser(req).role === "") {
-    return res.status(401).json({ status: 'error', message: 'permission denied' })
+    return res.status(401).json({ status: 'error', message: '請勿瀏覽前台頁面' })
   }
   return next()
 }
 
 const authenticatedUser = (req, res, next) => {
   if (helpers.getUser(req).role === "admin") {
-    return res.status(401).json({ status: 'error', message: 'permission denied' })
+    return res.status(401).json({ status: 'error', message: '請勿瀏覽後台頁面' })
   }
   return next()
 }
