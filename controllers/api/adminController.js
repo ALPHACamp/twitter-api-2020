@@ -97,7 +97,7 @@ const adminController = {
             }
           }
         },
-        order: [[sequelize.literal('TweetsCount'), 'DESC'], ['createdAt', 'DESC']]
+        order: [[sequelize.literal('TweetsCount'), 'DESC'], ['name']
       })
       return res.json(users)
     } catch (err) {
