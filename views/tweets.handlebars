@@ -1,7 +1,7 @@
 <h1>tweets</h1>
 <form action="/tweets" method="post">
-  <img src="{{user.avatar}}" alt="使用者大頭照" style="width: 20rem">
-  <p>使用者名字 : {{user.name}}</p>
+  <img src="{{current_user.avatar}}" alt="使用者大頭照" style="width: 20rem">
+  <p>使用者名字 : {{current_user.name}}</p>
   <div class="form-group">
     <label for="description">推文</label>
     <textarea class="form-control" id="description" rows="3" name="description" placeholder=" 我是誰"></textarea>
@@ -34,19 +34,19 @@
           <span>{{this.tweetReplyCount}} 回覆數</span>
         </div>
         <div class="right ">
-        
+         {{#if isLike}}
           <!-- <form action="/tweets/{{this.id}}/like" method="POST">  -->
             <form action="/tweets/{{this.id}}/unlike" method="POST">
               <button type="submit"><i class="fas fa-heart text-danger"></i></button>
               <span>{{this.tweetLikeCount}} 喜歡數</span>
             </form>
-          
+          {{else}}
              <!-- <form action="/tweets/{{this.id}}/unlike" method="POST">  -->
               <form action="/tweets/{{this.id}}/like" method="POST">
                 <button type="submit"><i class="far fa-heart text-danger"></i></button>
                 <span>{{this.tweetLikeCount}} 喜歡數</span>
               </form>
-             
+             {{/if}}
         </div>
       </li>
     </ul>
