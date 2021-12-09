@@ -81,7 +81,6 @@ const userService = {
       const { files } = req;
       imgur.setClientID(IMGUR_CLIENT_ID);     
       if (files.cover && !files.avatar) {
-        console.log("只有背景照");
         imgur.upload(files.cover[0].path, (err, coverImg) => {
         if (err) console.log("Error: ", err);
         return User.findByPk(req.params.id).then((user) => {
@@ -345,23 +344,16 @@ const userService = {
         FollowingsCount: user.Followings.length,
         isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
       };
-      // console.log(currentUser.id, req.params.userId);
       let newTweets = tweets.map((d) => {
-        // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-        //   currentUser.id)
-        // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-        //   Number(req.params.userId)
-        // );
-        let isLike 
-        if (currentUser.id === user.id) {
-          isLike = true
+        let isLike
+        let userLike = d.Tweet.Likes.find((l) => {
+          return l.UserId === currentUser.id;
+        });
+        if (!userLike) { 
+          isLike = false
         } else {
-          // isLike = false
-          isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-          Number(req.params.userId))
-        }
-        
-      //  console.log(isLike)
+          isLike = userLike.isLike
+        }        
        return { ...d.dataValues, 
          tweetReplyCount: d.Tweet.Replies.length,
           tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true
@@ -369,9 +361,7 @@ const userService = {
           isLike: isLike
         }
       });
-      // newTweets.forEach(d => console.log(d.isLike))
       let tweetCount = tweets.length;
-      // console.log(newTweets);
       return callback({ tweets: newTweets, user: user, tweetCount:tweetCount });
     });
   },
