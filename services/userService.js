@@ -316,6 +316,7 @@ const userService = {
   getUserTop: async (req, res, callback) => {
     const currentUserId = helpers.getUser(req).id
     const users = await User.findAll({
+      where: { [Op.not]: [{ role: 'admin' }] },
       attributes: ['id', 'name', 'account', 'avatar',
         [sequelize.literal(`exists(select 1 from Followships where followerId = ${currentUserId} and followingId = User.id)`), 'isFollowed'],
         [sequelize.literal(`(select count(followingId) from Followships where followingId = User.id)`), 'followers']
