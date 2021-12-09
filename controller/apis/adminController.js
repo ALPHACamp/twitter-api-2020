@@ -2,6 +2,7 @@ const db = require('../../models')
 const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
+const Reply = db.Reply
 const helper = require('../../_helpers')
 const jwt = require('jsonwebtoken')
 const { sequelize } = require('../../models')
