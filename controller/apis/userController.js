@@ -99,7 +99,6 @@ const userController = {
           null
         )
       })
-      console.log('--------')
       return res.status(200).json({ status: 200, message: '成功註冊帳號！' })
     } catch (err) {
       console.log(err)
@@ -552,10 +551,6 @@ const userController = {
   },
   accountSetting: async (req, res) => {
     try {
-      console.log('---------------')
-      console.log(req.body)
-      console.log(helper.getUser(req).id)
-      console.log('---------------')
       const { account, password, checkPassword, name, email } = req.body
       if (!account || !name || !email || !password || !checkPassword) {
         return res.json({ status: 'error', message: '所有欄位都是必填。' })
@@ -592,7 +587,9 @@ const userController = {
         },
         { where: { id: helper.getUser(req).id } }
       )
-      return res.status(200).json({ message: '成功更新 User 資料！' })
+      return res
+        .status(200)
+        .json({ status: 'success', message: '成功更新 User 資料！' })
     } catch (err) {
       console.log(err)
       return res.json({ status: 'error', message: err })
