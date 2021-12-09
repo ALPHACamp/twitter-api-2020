@@ -56,7 +56,7 @@ const adminController = {
   // 查看user資訊
   getAdminUsers: async (req, res) => {
     try {
-      const users = await User.findAll({
+      let users = await User.findAll({
         attributes: [
           'account',
           ['id', 'UserId'],
