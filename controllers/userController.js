@@ -6,13 +6,14 @@ const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
 const Followship = db.Followship
+const imgur = require('imgur')
+
 
 // JWT
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
-const imgur = require('imgur')
 const tweet = require('../models/tweet')
 
 const userController = {
@@ -214,37 +215,39 @@ const userController = {
         })
       })
   },
-  editUserInfo: (req, res) => {
+  editUserInfo: async (req, res, callback) => {
     const userId = helpers.getUser(req).id
-    User.findByPk(userId)
-      .then(user => {
-        const { name, introduction, avatar, cover } = req.body
-        const { files } = req.body
-        imgur.setClientId(process.env.IMGUR_CLIENT_ID)
-        if (!name) {
-          return res.json({ status: 'error', message: 'name為必填欄位' })
-        }
-        if (files) {
-          if (files.cover) {
-            // 如果cover更新, 就上傳
-            const cover = imgur.uploadFile(files.cover[0].path)
-            req.body.cover = cover.link
-          }
-          if (files.avatar) {
-            // 如果avatar更新, 就上傳
-            const avatar = imgur.uploadFile(files.avatar[0].path)
-            req.body.avatar = avatar.link
-          }
-        }
-        else {
-          return User.findByPk(userId).then(user => {
-            user.update({
-              name, introduction, avatar, cover
-            })
-            return res.json({ status: 'success', message: '成功編輯' })
-          })
-        }
+    const { name } = req.body
+    // 確認name有填寫
+    if (!name) {
+      return res.json({
+        status: 'error', message: '需填入姓名'
       })
+    }
+
+    // 如果有上傳圖片，就上傳到imgur中
+    const { files } = req
+    imgur.setClientId(process.env.IMGUR_CLIENT_ID) // 設定imgur的clientId
+    if (files) {
+      if (files.avatar) {
+        // 確認是否有avatar上傳，有就上傳到imgur
+        const avatar = await imgur.uploadFile(files.avatar[0].path)
+        req.body.avatar = avatar.link
+      }
+      if (files.cover) {
+        // 確認是否有cover上傳，有就上傳到imgur
+        const cover = await imgur.uploadFile(files.cover[0].path)
+        req.body.cover = cover.link
+      }
+    }
+
+    // 刪除cover
+    if (req.body.noCover === 'yes') {
+      req.body.cover = ''
+    }
+
+    await User.update({ ...req.body }, { where: { id: userId } })
+    return callback({ status: 'success', message: '成功修改使用者Profile' })
   },
   //取得特定瀏覽人次id
   getOneLikes: (req, res) => {

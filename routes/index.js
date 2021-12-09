@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
 const helpers = require('../_helpers')
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
@@ -53,7 +55,7 @@ router.put('/api/users/account', authenticated, authenticatedUser, userControlle
 router.get('/api/users/edit', authenticated, authenticatedUser, userController.getUserInfo)
 //user編輯個人資訊頁面
 
-router.put('/api/users', authenticated, authenticatedUser, userController.editUserInfo)
+router.put('/api/users', authenticated, authenticatedUser, upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), userController.editUserInfo)
 router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUserProfile)
 
 //user觀看特定人士已like
