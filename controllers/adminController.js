@@ -9,7 +9,7 @@ const { Op } = require("sequelize");
 const adminController = {
   getUsers: (req, res) => {
     User.findAll({
-      where: { role: { [Op.is]: null } },  // 排除管理者 { [Op.not]: 'admin' }
+      // where: { role: { [Op.is]: null } },  // 測試檔不排除管理者
       attributes: ['id', 'account', 'name', 'cover', 'avatar',
         [sequelize.literal(`(SELECT COUNT(Tweets.UserId) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)`), 'LikedTweetCount'],
       ],
