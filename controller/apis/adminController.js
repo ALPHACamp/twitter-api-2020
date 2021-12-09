@@ -118,7 +118,9 @@ const adminController = {
   },
   deleteTweet: async (req, res) => {
     try {
-      const tweet = await Tweet.destroy({ where: { id: req.params.id } })
+      await Tweet.destroy({ where: { id: req.params.id } })
+      await Reply.destroy({ where: { TweetId: req.params.id } }),
+        await Like.destroy({ where: { TweetId: req.params.id } })
       return res.status(200).json({ message: '刪除成功' })
     } catch (err) {
       console.log(err)
