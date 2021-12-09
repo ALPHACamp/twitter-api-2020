@@ -147,7 +147,6 @@ const userController = {
       ],
       order: [['createdAt', 'DESC']]
     }).then(likes => {
-
       likes = likes.map(like => ({
         ...like.dataValues,
         likeTweetCount: like.Tweet.Likes.length,
