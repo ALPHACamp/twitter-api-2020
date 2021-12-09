@@ -127,7 +127,7 @@ const tweetController = {
       }
       tweet = tweet.toJSON()
       tweet.isLiked = req.user.LikedTweets
-        ? req.user.LikedTweets.map((like) => like.id).includes(tweet.id)
+        ? req.user.LikedTweets.map((like) => like.id).includes(tweet.TweetId)
         : null
       return res.json(tweet)
     } catch (err) {
