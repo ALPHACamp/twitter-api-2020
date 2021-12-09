@@ -182,15 +182,18 @@ const userController = {
       attributes: ['id', 'name', 'account', 'avatar', 'cover', 'introduction'],
       include: [
         { model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar'] }
+        { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Tweet, attributes: ['id'] }
       ]
     }).then(user => {
       user = user.toJSON()
-      user.FollowerCount = user.Followers.length, //跟隨者人數
-      user.FollowingCount = user.Followings.length, //跟隨中人數
+      user.FollowerCount = user.Followers.length //跟隨者人數
+      user.FollowingCount = user.Followings.length //跟隨中人數
       user.isFollowed= req.user.Followings.map(d => d.id).includes(user.id)
+      user.TweetCount = user.Tweets.length
       delete user.Followers
       delete user.Followings
+      delete user.Tweets
       return res.json(user)
     }
     )
