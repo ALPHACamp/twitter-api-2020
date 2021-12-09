@@ -40,6 +40,7 @@ const tweetController = {
     }).then(tweet => {
       tweet.dataValues.likedCount = tweet.LikedUsers.length
       tweet.dataValues.repliedCount = tweet.RepliedUsers.length
+      tweet.dataValues.isLiked = req.user.LikedTweets.map(d => d.id).includes(tweet.id)
       return res.json(tweet)
     })
   },
