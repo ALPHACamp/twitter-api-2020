@@ -16,7 +16,6 @@ const userService = {
        include: [
           { model: User, as: "Followers" },
           { model: User, as: "Followings" },
-          {model: Like, include: Tweet}
         ]}).then((user) => {
           user = {
             ...user.dataValues,

@@ -48,14 +48,14 @@ router.get("/users/:id/followers", authenticated, authenticatedUser, userControl
 //取得正在追蹤的使用者的資料
 router.get("/users/:id/followings", authenticated, authenticatedUser, userController.getFollowings)
 
-router.get("/users/:id", authenticated, userController.getUser);
+router.get("/users/:id", authenticated, authenticatedUser, userController.getUser);
 // router.get("/users/:id", userController.getUser);
 
 
 //  使用者編輯自己所有資訊
 // router.put("/users/:id", upload.single('cover'), authenticated, authenticatedUser, userController.putUser);
 // router.put("/users/:id", upload.array('cover',2), authenticated, authenticatedUser, userController.putUser);
-router.put("/users/:id", authenticated, authenticatedUser, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser) 
+router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser) 
 // <--可以傳一個陣列 FILE
 
 
@@ -64,11 +64,11 @@ router.put("/users/:id", authenticated, authenticatedUser, upload.fields([{ name
 router.get('/users/:userId/tweets', authenticated, authenticatedUser,  upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserTweets)
 // 查詢user的所有likes的推文
 // router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
-router.get('/users/:userId/likes', authenticated, authenticatedUser, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikes)
+router.get('/users/:userId/likes', authenticated, authenticatedUser, userController.getUserLikes)
 
 //  查詢user的所有留言
 // router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
-router.get('/users/:userId/replies', authenticated, authenticatedUser, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserReplies)
+router.get('/users/:userId/replies', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserReplies)
 
 // router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
 
