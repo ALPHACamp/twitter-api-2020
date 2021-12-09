@@ -61,43 +61,44 @@ const userController = {
     })
   },
   signUp: async (req, res, cb) => {
-    const { account, name, email, password, checkPassword } = req.body
-    if (!account || !name || !email || !password || !checkPassword) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: '所有欄位都是必填。' })
-    }
-    if (account.trim().length < 1) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: '帳號不能空白！' })
-    }
-    if (!validator.isEmail(email)) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: '請使用正確 email 格式！' })
-    }
-    if (name.trim().length < 1) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: '名字不能空白！' })
-    }
-    if (name.length > 60) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: '名字字數超過上限！' })
-    }
-    if (password.trim().length < 8) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: '密碼字數低於下限！' })
-    }
-    if (checkPassword !== password) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: '兩次密碼輸入不相同！' })
-    }
     try {
+      const { account, name, email, password, checkPassword } = req.body
+      if (!account || !name || !email || !password || !checkPassword) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '所有欄位都是必填。' })
+      }
+      if (account.trim().length < 1) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '帳號不能空白！' })
+      }
+      if (!validator.isEmail(email)) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '請使用正確 email 格式！' })
+      }
+      if (name.trim().length < 1) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '名字不能空白！' })
+      }
+      if (name.length > 60) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '名字字數超過上限！' })
+      }
+      if (password.trim().length < 8) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '密碼字數低於下限！' })
+      }
+      if (checkPassword !== password) {
+        return res
+          .status(400)
+          .json({ status: 'error', message: '兩次密碼輸入不相同！' })
+      }
+
       const user = await User.findOne({
         where: {
           [Op.or]: [{ email: req.body.email }, { account: req.body.account }]
@@ -108,10 +109,7 @@ const userController = {
           .status(400)
           .json({ status: 'error', message: '信箱或帳號重複！' })
       }
-    } catch (err) {
-      return res.status(400).json({ message: err })
-    }
-    try {
+
       await User.create({
         account: req.body.account,
         name: req.body.name,
