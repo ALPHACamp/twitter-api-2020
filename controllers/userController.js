@@ -247,7 +247,7 @@ const userController = {
             'introduction',
           [
             sequelize.literal(
-              `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helpers.getUser(req).id} AND followingId = Followers.id)`
+              `EXISTS (SELECT 1 FROM Followships WHERE followingId = ${helpers.getUser(req).id} AND followingId = Followers.id)`
             ),
             'isFollowed'
           ]
