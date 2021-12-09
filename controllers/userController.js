@@ -18,7 +18,9 @@ const tweet = require('../models/tweet')
 const userController = {
   signIn: (req, res) => {
     const { account, password } = req.body
-    // console.log('get account, password from jwt strategy: ', account, password)  // OK
+    if (!account || !password) {
+      return res.json({ status: 'error', message: '請輸入必填欄位!' })
+    }
     User.findOne({ where: { account } }).then(user => {
       if (!user) {
         return res.status(401).json({ status: 'error', message: '帳號不存在!' })
