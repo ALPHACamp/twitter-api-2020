@@ -39,7 +39,7 @@ const userService = {
       }
       // account找到 >> 確認Email
       user.email === req.body.email
-        ? callback({ status: 'error', message: 'email和account 已重覆註冊！' })
+        ? callback({ status: 'error', message: 'email 和 account 已重覆註冊！' })
         : callback({ status: 'error', message: 'account 已重覆註冊！' })
     })
   },
