@@ -94,8 +94,8 @@ const adminController = {
             'RepliesCount'
           ]
         ],
-        order: [[sequelize.literal('TweetsCount'), 'DESC']]
       })
+      users = users.sort((a, b) => b.TweetsCount - a.TweetsCount)
       return res.json(users)
     } catch (err) {
       console.log(err)
