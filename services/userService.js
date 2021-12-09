@@ -28,6 +28,7 @@ const userService = {
 
   putUser: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
+    imgur.setClientID(IMGUR_CLIENT_ID); 
     // if (currentUser.id !== Number(req.params.id)) {
     //   // console.log(req, user, currentUser, helpers.getUser(req));
     //   callback({ status: "error", message: "只能編輯自己的資訊." });
@@ -44,10 +45,25 @@ const userService = {
         where: {
           account: { [Op.not]: currentUser.account },
         },
-      }),
-    ]).then(([usersEmail, usersAccount]) => {
+      })
+      // imgur.upload(files.cover[0].path, (err, coverImg) => {
+      //   if (err) console.log("Error: ", err);
+      //   consol.lgo
+      //   return coverImg;
+      // }),
+      // imgur.upload(files.avatar[0].path, (err, avatar) => {
+      //   if (err) console.log("Error: ", err);
+      //   return avatar;
+      // }),
+        ]).then(([usersEmail, usersAccount]) => {
+      console.log("usersEmail", usersEmail, "usersAccount", usersAccount);
+    // ]).then(([usersEmail, usersAccount, cover, avatar]) => {
+    //   console.log("usersEmail", usersEmail, "usersAccount", usersAccount);
+      // console.log("cover", cover, "avatar", avatar);
       let emailCheck = usersEmail.map((d) => d.email).includes(req.body.email);
-      let accountCheck = usersAccount.map((d) => d.account).includes(req.body.account);
+      let accountCheck = usersAccount
+        .map((d) => d.account)
+        .includes(req.body.account);
       // if (
       //   !req.body.name ||
       //   !req.body.email ||
@@ -60,8 +76,8 @@ const userService = {
       //     message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
       //   });
 
-        // req.flash( "error_messages", "名字，信箱，帳號，密碼，確認密碼不能為空!");
-        // return res.redirect("back");
+      // req.flash( "error_messages", "名字，信箱，帳號，密碼，確認密碼不能為空!");
+      // return res.redirect("back");
       // }
 
       // if (req.body.password !== req.body.checkPassword) {
@@ -79,49 +95,53 @@ const userService = {
         });
       }
       const { files } = req;
-      imgur.setClientID(IMGUR_CLIENT_ID);     
+      console.log("files", files);
+      console.log("req.body", req.body);
+      // imgur.setClientID(IMGUR_CLIENT_ID);
       if (files.cover && !files.avatar) {
         imgur.upload(files.cover[0].path, (err, coverImg) => {
-        if (err) console.log("Error: ", err);
-        return User.findByPk(req.params.id).then((user) => {
-          user.update({
-            ...req.body,
-            cover: coverImg.data.link ,
-            password: bcrypt.hashSync(
-              req.body.password,
-              bcrypt.genSaltSync(10),
-              null
-            ),
-          })
-          .then((user) => {
-            callback({
-              status: "success",
-              message: "使用者資料編輯成功。",
-            });
+          if (err) console.log("Error: ", err);
+          return User.findByPk(req.params.id).then((user) => {
+            user
+              .update({
+                ...req.body,
+                cover: coverImg.data.link,
+                password: bcrypt.hashSync(
+                  req.body.password,
+                  bcrypt.genSaltSync(10),
+                  null
+                ),
+              })
+              .then((user) => {
+                callback({
+                  status: "success",
+                  message: "使用者資料編輯成功。",
+                });
+              });
           });
         });
-      })
       } else if (!files.cover && files.avatar) {
         imgur.upload(files.avatar[0].path, (err, avatarImg) => {
           if (err) console.log("Error: ", err);
           return User.findByPk(req.params.id).then((user) => {
-            user.update({
-              ...req.body,                 
-              avatar: avatarImg.data.link,
-              password: bcrypt.hashSync(
-                req.body.password,
-                bcrypt.genSaltSync(10),
-                null
-              ),
-            })
-            .then((user) => {
-              callback({
-                status: "success",
-                message: "使用者資料編輯成功。",
+            user
+              .update({
+                ...req.body,
+                avatar: avatarImg.data.link,
+                password: bcrypt.hashSync(
+                  req.body.password,
+                  bcrypt.genSaltSync(10),
+                  null
+                ),
+              })
+              .then((user) => {
+                callback({
+                  status: "success",
+                  message: "使用者資料編輯成功。",
+                });
               });
-            });
           });
-        })
+        });
       } else if (files.cover && files.avatar) {
         imgur.upload(files.cover[0].path, (err, coverImg) => {
           if (err) console.log("Error: ", err);
@@ -131,8 +151,8 @@ const userService = {
               user
                 .update({
                   ...req.body,
-                  cover: coverImg.data.link ,
-                  avatar: avatarImg.data.link, 
+                  cover: coverImg.data.link,
+                  avatar: avatarImg.data.link,
                   password: bcrypt.hashSync(
                     req.body.password,
                     bcrypt.genSaltSync(10),
@@ -148,8 +168,7 @@ const userService = {
             });
           });
         });
-      }     
-      else {
+      } else {
         return User.findByPk(req.params.id).then((user) => {
           user
             .update({
