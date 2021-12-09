@@ -258,7 +258,7 @@ const userController = {
       }).then(followers => {
         followers.Followers = followers.Followers.map(follower => ({
           ...follower.dataValues,
-          isFollowed: req.user.Followings.map(f => f.id).includes(follower.dataValues.followerId)
+          isFollowed: helpers.getUser(req).Followings.map(f => f.id).includes(follower.dataValues.followerId)
         }))
         return res.json(followers.Followers)
       })
@@ -287,7 +287,7 @@ const userController = {
       }).then(followings => {
         followings.Followings = followings.Followings.map(following => ({
           ...following.dataValues,
-          isFollowed: req.user.Followings.map(f => f.id).includes(following.dataValues.followingId)
+          isFollowed: helpers.getUser(req).Followings.map(f => f.id).includes(following.dataValues.followingId)
         }))
         return res.json(followings.Followings)
       })
