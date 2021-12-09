@@ -189,7 +189,7 @@ const userController = {
       user = user.toJSON()
       user.FollowerCount = user.Followers.length //跟隨者人數
       user.FollowingCount = user.Followings.length //跟隨中人數
-      user.isFollowed= req.user.Followings.map(d => d.id).includes(user.id)
+      user.isFollowed = req.user.Followings.map(d => d.id).includes(user.id)
       user.TweetCount = user.Tweets.length
       delete user.Followers
       delete user.Followings
@@ -324,15 +324,21 @@ const userController = {
       }))
       return res.json(users)
     })
-    // Followship.findAll({  
-      // include: { model: User,..} //SequelizeEagerLoadingError: User is not associated to Followship!
   },
   getOneFollowings: (req, res) => {
-    const followingId = req.params.id
-    return Followship.findAll({ where: { followingId } })
-      .then(users => {
-        return res.json({ users })
-      })
+    const UserId = req.params.id
+    return User.findByPk(UserId, {
+      attributes: ['id'],
+      include: { model: User, as: "Followings", attributes: ['id', 'name', 'account', 'introduction', 'avatar'] },
+      order: [[User.associations.Followings, Followship, 'createdAt', 'DESC']],
+    }).then(users => {
+      users = users.Followings
+      users = users.map((user) => ({
+        ...user.dataValues,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      return res.json(users)
+    })
   },
 }
 
