@@ -344,42 +344,16 @@ const userService = {
         FollowingsCount: user.Followings.length,
         isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
       };
-      console.log(tweets.length);
       let newTweets = tweets.map((d) => {
-        // console.log(d.Likes.length)
-        // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-        //   currentUser.id)
-        // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-        //   Number(req.params.userId)
-        // );
         let isLike
-        let userLike = d.Tweet.Likes.map((l,index) => { 
-          console.log('index',index,l.length)
-          if (!l) { 
-            isLike = false
-            console.log('!!!!!!!',isLike)
-            return isLike }
-          // return (isLike = l.includes(currentUser.id));
-         });
-         console.log(userLike)
-        // let a = d.Tweet.Likes.map((l) => l.UserId).includes(currentUser.id);
-        // // console.log('還在夕面',isLike)
-        // if (!userLike.includes(currentUser.id)) {
-        //   isLike = false;
-        //   console.log("不存的的喜", req.params, currentUser.id,a);
-        //   console.log("不杂在的喜歡", isLike);
-        // } 
-        // // if (isLike)
-        // else {
-        //   console.log('else',isLike)
-        //   isLike = userLike.includes(currentUser.id);
-        //   console.log("存在的的喜", req.params, currentUser.id,a);
-        //   console.log("存在的喜歡", isLike);
-        //   // isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-        //   // Number(req.params.userId))
-        // }
-        
-      //  console.log(isLike)
+        let userLike = d.Tweet.Likes.find((l) => {
+          return l.UserId === currentUser.id;
+        });
+        if (!userLike) { 
+          isLike = false
+        } else {
+          isLike = userLike.isLike
+        }        
        return { ...d.dataValues, 
          tweetReplyCount: d.Tweet.Replies.length,
           tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true
@@ -387,10 +361,7 @@ const userService = {
           isLike: isLike
         }
       });
-      // newTweets.forEach(d => console.log(d.isLike))
       let tweetCount = tweets.length;
-      // console.log(newTweets);
-      //  return callback({ tweets: tweets, user: user, tweetCount: tweetCount });
       return callback({ tweets: newTweets, user: user, tweetCount:tweetCount });
     });
   },
