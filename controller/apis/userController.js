@@ -16,12 +16,6 @@ const validator = require('validator')
 const jwt = require('jsonwebtoken')
 const passportJWT = require('passport-jwt')
 const { sequelize } = require('../../models')
-
-const { json } = require('body-parser')
-const { image } = require('faker/locale/de')
-const { rearg } = require('lodash')
-const e = require('connect-flash')
-
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
