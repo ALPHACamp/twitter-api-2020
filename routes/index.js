@@ -25,7 +25,7 @@ const authenticatedAdmin = (req, res, next) => {
   return next()
 }
 
-const checkNotUser = (req, res, next) => {
+const authenticatedUser = (req, res, next) => {
   if (helpers.getUser(req).role === "admin") {
     return res.status(401).json({ status: 'error', message: 'permission denied' })
   }
@@ -38,50 +38,50 @@ router.post('/api/users/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
 
 //user取得編輯個人帳號資訊
-router.get('/api/users/account', authenticated, checkNotUser, userController.getUserAccountSetting)
+router.get('/api/users/account', authenticated, authenticatedUser, userController.getUserAccountSetting)
 //user編輯個人帳號
-router.put('/api/users/account', authenticated, checkNotUser, userController.putUserAccountSetting)
+router.put('/api/users/account', authenticated, authenticatedUser, userController.putUserAccountSetting)
 //router.get('/api/users/:userId', userController.getUser)(待討論)
 //user取得編輯個人資訊頁面
-router.get('/api/users/edit', authenticated, checkNotUser, userController.getUserInfo)
+router.get('/api/users/edit', authenticated, authenticatedUser, userController.getUserInfo)
 //user編輯個人資訊頁面
-router.put('/api/users', authenticated, checkNotUser, userController.editUserInfo)
+router.put('/api/users', authenticated, authenticatedUser, userController.editUserInfo)
 //user觀看特定人士已like
-router.get('/api/users/:id/likes', authenticated, checkNotUser, userController.getOneLikes)
+router.get('/api/users/:id/likes', authenticated, authenticatedUser, userController.getOneLikes)
 //user觀看特定人士已reply
-router.get('/api/users/:id/replied_tweets', authenticated, checkNotUser, userController.getOneRepliedTweets)
+router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getOneRepliedTweets)
 //user觀看特定人士tweets
-router.get('/api/users/:id/tweets', authenticated, checkNotUser, userController.getOneTweets)
+router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getOneTweets)
 
-router.get('/api/users/:id/followers', authenticated, checkNotUser, userController.getOneFollowers)
-router.get('/api/users/:id/followings', authenticated, checkNotUser, userController.getOneFollowings)
+router.get('/api/users/:id/followers', authenticated, authenticatedUser, userController.getOneFollowers)
+router.get('/api/users/:id/followings', authenticated, authenticatedUser, userController.getOneFollowings)
 
 //先讓前端使用的get_current)user
-router.get('/api/get_current_user', authenticated, checkNotUser, userController.getCurrentUser)
+router.get('/api/get_current_user', authenticated, authenticatedUser, userController.getCurrentUser)
 
 
 
 
 //tweets相關
-router.get('/api/tweets', authenticated, checkNotUser, tweetController.getTweets)
-router.get('/api/tweets/:id', authenticated, checkNotUser, tweetController.getTweet)
-router.post('/api/tweets', authenticated, checkNotUser, tweetController.postTweet)
+router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
+router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 
 //likes相關
-router.post('/api/tweets/:tweetId/like', authenticated, checkNotUser, likeController.postLike)
-router.post('/api/tweets/:tweetId/unlike', authenticated, checkNotUser, likeController.postUnlike)
+router.post('/api/tweets/:tweetId/like', authenticated, authenticatedUser, likeController.postLike)
+router.post('/api/tweets/:tweetId/unlike', authenticated, authenticatedUser, likeController.postUnlike)
 
 
 //replies相關
-router.get('/api/tweets/:tweetId/replies', authenticated, checkNotUser, replyController.getReplies)
-router.post('/api/tweets/:tweetId/replies', authenticated, checkNotUser, replyController.postReply)
+router.get('/api/tweets/:tweetId/replies', authenticated, authenticatedUser, replyController.getReplies)
+router.post('/api/tweets/:tweetId/replies', authenticated, authenticatedUser, replyController.postReply)
 
 
 //followships相關
-router.post('/api/followships', authenticated, checkNotUser, followController.addFollowship)
-router.delete('/api/followships/:followingId', authenticated, checkNotUser, followController.deleteFollowship)
-router.get('/api/followers/top', authenticated, checkNotUser, followController.getTopFollowers)
+router.post('/api/followships', authenticated, authenticatedUser, followController.addFollowship)
+router.delete('/api/followships/:followingId', authenticated, authenticatedUser, followController.deleteFollowship)
+router.get('/api/followers/top', authenticated, authenticatedUser, followController.getTopFollowers)
 
 
 //admin相關
