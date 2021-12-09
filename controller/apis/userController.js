@@ -64,27 +64,27 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
     if (!account || !name || !email || !password || !checkPassword) {
       return res
-        .status(400)
+        .status(200)
         .json({ status: 'error', message: '所有欄位都是必填。' })
     }
     if (account.trim().length < 1) {
-      return res.status(400).json({ message: '帳號不能空白！' })
+      return res.status(200).json({ message: '帳號不能空白！' })
     }
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ message: '請使用正確 email 格式！' })
+      return res.status(200).json({ message: '請使用正確 email 格式！' })
     }
     if (name.trim().length < 1) {
-      return res.status(400).json({ message: '名字不能空白！' })
+      return res.status(200).json({ message: '名字不能空白！' })
     }
     if (name.length > 60) {
-      return res.status(400).json({ message: '名字字數超過上限！' })
+      return res.status(200).json({ message: '名字字數超過上限！' })
     }
     if (password.trim().length < 8) {
-      return res.status(400).json({ message: '密碼字數低於下限！' })
+      return res.status(200).json({ message: '密碼字數低於下限！' })
     }
     if (checkPassword !== password) {
       return res
-        .status(400)
+        .status(200)
         .json({ status: 'error', message: '兩次密碼輸入不相同！' })
     }
     try {
@@ -95,11 +95,11 @@ const userController = {
       })
       if (user) {
         return res
-          .status(400)
+          .status(200)
           .json({ status: 'error', message: '信箱或帳號重複！' })
       }
     } catch (err) {
-      console.log(err)
+      return res.status(200).json({ message: err })
     }
     try {
       await User.create({
@@ -115,7 +115,7 @@ const userController = {
       return res.status(200).json({ status: 200, message: '成功註冊帳號！' })
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.status(200).json({ status: 'error', message: err })
     }
   },
   getUser: async (req, res, cb) => {
