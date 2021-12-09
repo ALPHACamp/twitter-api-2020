@@ -76,9 +76,6 @@ const userController = {
       if (name.length > 60) {
         return res.json({ status: 'error', message: '名字字數超過上限！' })
       }
-      if (password.trim().length < 8) {
-        return res.json({ status: 'error', message: '密碼字數低於下限！' })
-      }
       if (checkPassword !== password) {
         return res.json({ status: 'error', message: '兩次密碼輸入不相同！' })
       }
@@ -92,7 +89,7 @@ const userController = {
         return res.json({ status: 'error', message: '信箱或帳號重複！' })
       }
 
-      await User.create({
+      const abc = await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
@@ -102,6 +99,7 @@ const userController = {
           null
         )
       })
+      console.log('--------')
       return res.status(200).json({ status: 200, message: '成功註冊帳號！' })
     } catch (err) {
       console.log(err)
