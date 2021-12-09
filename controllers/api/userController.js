@@ -246,21 +246,21 @@ let userController = {
         })
       }
 
-      // 確認Name不能超過50字元，Introduction不能超過140字元
+      // 確認Name不能超過50字元，Introduction不能超過160字元
       if (name.length > 50) {
         return res.json({
           status: 'error',
           message: 'Name should be within 50 characters'
         })
       }
-      if (introduction.length > 160) {
+      if (!introduction || introduction.length > 160) {
         return res.json({
           status: 'error',
           message: 'Introduction should be within 160 characters'
         })
       }
-      let avatar
-      let cover
+      let avatar = null
+      let cover = null
       const { files } = req
       imgur.setClientId(IMGUR_CLIENT_ID)
       if (files) {
@@ -278,8 +278,8 @@ let userController = {
       await user.update({
         name,
         introduction,
-        avatar: files.avatar ? avatar.link : user.avatar,
-        cover: files.cover ? cover.link : user.cover
+        avatar: avatar ? avatar.link : user.avatar,
+        cover: cover ? cover.link : user.cover
       })
       res.json({
         status: 'success',
