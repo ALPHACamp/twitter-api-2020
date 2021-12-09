@@ -176,16 +176,25 @@ const userController = {
       )
     })
   },
-  /*getUser: (req, res) => {
+  getUserProfile: (req, res) => {
     const UserId = req.params.id
-    return User.findByPk(UserId).then(user => {
-      return res.json({
-        user: user
-      }
-      )
+    return User.findByPk(UserId, {
+      attributes: ['id', 'name', 'account', 'avatar', 'cover', 'introduction'],
+      include: [
+        { model: User, as: 'Followers', attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: User, as: 'Followings', attributes: ['id', 'name', 'account', 'avatar'] }
+      ]
+    }).then(user => {
+      user = user.toJSON()
+      user.FollowerCount = user.Followers.length, //跟隨者人數
+      user.FollowingCount = user.Followings.length, //跟隨中人數
+      user.isFollowed= req.user.Followings.map(d => d.id).includes(user.id)
+      delete user.Followers
+      delete user.Followings
+      return res.json(user)
     }
     )
-  },*/
+  },
   getUserInfo: (req, res) => {
     const userId = helpers.getUser(req).id
     return User.findByPk(userId)
@@ -235,18 +244,20 @@ const userController = {
   //取得特定瀏覽人次id
   getOneLikes: (req, res) => {
     const UserId = req.params.id
-    return Like.findAll({ 
+    return Like.findAll({
       where: { UserId },
       // attributes: ['id', 'createdAt'] , // 加了結果只剩一筆
       order: [['createdAt', 'DESC']],
-      include: { model: Tweet, attributes: ['id', 'description','createdAt'], include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar']},
-        { model: User, as: 'LikedUsers', attributes: ['id'] },
-        { model: User, as: 'RepliedUsers', attributes: ['id'] }
-      ]}
+      include: {
+        model: Tweet, attributes: ['id', 'description', 'createdAt'], include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: User, as: 'LikedUsers', attributes: ['id'] },
+          { model: User, as: 'RepliedUsers', attributes: ['id'] }
+        ]
+      }
     })
       .then((tweets) => {
-        tweets = tweets.map(tweet =>({
+        tweets = tweets.map(tweet => ({
           ...tweet.dataValues,
           repliedCount: tweet.Tweet.RepliedUsers.length,
           likedCount: tweet.Tweet.LikedUsers.length,
@@ -261,7 +272,7 @@ const userController = {
   },
   getOneRepliedTweets: (req, res) => {
     const UserId = req.params.id
-    return Reply.findAll({ 
+    return Reply.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
       include: {
@@ -275,7 +286,7 @@ const userController = {
   },
   getOneTweets: (req, res) => {
     const UserId = req.params.id
-    return Tweet.findAll({ 
+    return Tweet.findAll({
       where: { UserId },
       order: [['createdAt', 'DESC']],
       include: [
