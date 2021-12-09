@@ -18,6 +18,7 @@ const { sequelize } = require('../../models')
 
 const { json } = require('body-parser')
 const { image } = require('faker/locale/de')
+const { rearg } = require('lodash')
 
 const ExtractJwt = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
@@ -430,6 +431,21 @@ const userController = {
         for (let i in files) {
           images[i] = await uploadImage(files[i][0].path)
         }
+        if (req.body.isCanceled) {
+          await User.update(
+            {
+              name: req.body.name,
+              introduction: req.body.introduction,
+              avatar: images.avatar
+                ? images.avatar.data.link
+                : helper.getUser(req).avatar,
+              cover: null
+            },
+            { where: { id: helper.getUser(req).id } }
+          )
+          const user = await User.findByPk(helper.getUser(req).id)
+          return res.status(200).json({ message: 'success', user })
+        }
         await User.update(
           {
             name: req.body.name,
@@ -446,6 +462,18 @@ const userController = {
         const user = await User.findByPk(helper.getUser(req).id)
         return res.status(200).json({ message: 'success', user })
       } else {
+        if (req.body.isCanceled) {
+          await User.update(
+            {
+              name: req.body.name,
+              introduction: req.body.introduction,
+              cover: null
+            },
+            { where: { id: helper.getUser(req).id } }
+          )
+          const user = await User.findByPk(helper.getUser(req).id)
+          return res.status(200).json({ status: 200, message: 'success', user })
+        }
         await User.update(
           {
             name: req.body.name,
