@@ -136,6 +136,11 @@ const userService = {
       }
     }
 
+    // 刪除cover
+    if (req.body.noCover === 'yes') {
+      req.body.cover = ''
+    }
+
     await User.update({ ...req.body }, { where: { id: userId } })
     return callback({ status: 'success', message: '成功修改使用者Profile' })
   },
