@@ -27,8 +27,8 @@ let userController = {
     // let username = req.body.email;
     let username = req.body.account;
     let password = req.body.password;
-    
-    // User.findOne({ where: { email: username } }).then((user) 
+
+    // User.findOne({ where: { email: username } }).then((user)
     User.findOne({ where: { account: username } }).then((user) => {
       if (!user)
         return res
@@ -201,6 +201,12 @@ let userController = {
   },
   deleteAllReplies: (req, res) => {
     userService.deleteAllReplies(req, res, (data) => {
+      return res.json(data);
+    });
+  },
+
+  getUserLikesTweet: (req, res) => {
+    userService.getUserLikesTweet(req, res, (data) => {
       return res.json(data);
     });
   },

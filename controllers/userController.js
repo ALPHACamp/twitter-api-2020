@@ -113,19 +113,18 @@ const userController = {
   },
   removeLike: (req, res) => {
     userService.removeLike(req, res, (data) => {
-
       return res.redirect("back");
     });
   },
   addFollowing: (req, res) => {
     userService.addFollowing(req, res, (data) => {
-      return res.redirect('back')
-    })
+      return res.redirect("back");
+    });
   },
   removeFollowing: (req, res) => {
     userService.removeFollowing(req, res, (data) => {
-      return res.redirect('back')
-    })
+      return res.redirect("back");
+    });
   },
 };
 
