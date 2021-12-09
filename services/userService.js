@@ -81,7 +81,6 @@ const userService = {
       const { files } = req;
       imgur.setClientID(IMGUR_CLIENT_ID);     
       if (files.cover && !files.avatar) {
-        console.log("只有背景照");
         imgur.upload(files.cover[0].path, (err, coverImg) => {
         if (err) console.log("Error: ", err);
         return User.findByPk(req.params.id).then((user) => {
@@ -345,21 +344,40 @@ const userService = {
         FollowingsCount: user.Followings.length,
         isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
       };
-      // console.log(currentUser.id, req.params.userId);
+      console.log(tweets.length);
       let newTweets = tweets.map((d) => {
+        // console.log(d.Likes.length)
         // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
         //   currentUser.id)
         // let isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
         //   Number(req.params.userId)
         // );
-        let isLike 
-        if (currentUser.id === user.id) {
-          isLike = true
-        } else {
-          // isLike = false
-          isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
-          Number(req.params.userId))
-        }
+        let isLike
+        let userLike = d.Tweet.Likes.map((l,index) => { 
+          console.log('index',index,l.length)
+          if (!l) { 
+            isLike = false
+            console.log('!!!!!!!',isLike)
+            return isLike }
+          // return (isLike = l.includes(currentUser.id));
+         });
+         console.log(userLike)
+        // let a = d.Tweet.Likes.map((l) => l.UserId).includes(currentUser.id);
+        // // console.log('還在夕面',isLike)
+        // if (!userLike.includes(currentUser.id)) {
+        //   isLike = false;
+        //   console.log("不存的的喜", req.params, currentUser.id,a);
+        //   console.log("不杂在的喜歡", isLike);
+        // } 
+        // // if (isLike)
+        // else {
+        //   console.log('else',isLike)
+        //   isLike = userLike.includes(currentUser.id);
+        //   console.log("存在的的喜", req.params, currentUser.id,a);
+        //   console.log("存在的喜歡", isLike);
+        //   // isLike = d.Tweet.Likes.map((l) => l.UserId).includes(
+        //   // Number(req.params.userId))
+        // }
         
       //  console.log(isLike)
        return { ...d.dataValues, 
@@ -372,6 +390,7 @@ const userService = {
       // newTweets.forEach(d => console.log(d.isLike))
       let tweetCount = tweets.length;
       // console.log(newTweets);
+      //  return callback({ tweets: tweets, user: user, tweetCount: tweetCount });
       return callback({ tweets: newTweets, user: user, tweetCount:tweetCount });
     });
   },

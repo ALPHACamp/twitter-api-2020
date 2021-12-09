@@ -54,18 +54,21 @@ router.get("/users/:id", authenticated, authenticatedUser, userController.getUse
 
 //  使用者編輯自己所有資訊
 // router.put("/users/:id", upload.single('cover'), authenticated, authenticatedUser, userController.putUser);
-router.put("/users/:id", upload.array('cover',2), authenticated, authenticatedUser, userController.putUser);
-// router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser) 
+// router.put("/users/:id", upload.array('cover',2), authenticated, authenticatedUser, userController.putUser);
+router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser) 
 // <--可以傳一個陣列 FILE
 
 
 //  查詢user的所有推文
-router.get('/users/:userId/tweets', authenticated, authenticatedUser, upload.single('cover'), userController.getUserTweets)
+// router.get('/users/:userId/tweets', authenticated, authenticatedUser, upload.single('cover'), userController.getUserTweets)
+router.get('/users/:userId/tweets', authenticated, authenticatedUser,  upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserTweets)
 // 查詢user的所有likes的推文
-router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
+// router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
+router.get('/users/:userId/likes', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikes)
 
 //  查詢user的所有留言
-router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
+// router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
+router.get('/users/:userId/replies', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserReplies)
 
 // router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
 

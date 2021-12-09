@@ -22,7 +22,6 @@ const tweetService = {
       });
     }
   },
-
   getTweets: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     Tweet.findAll({ 
@@ -54,7 +53,6 @@ const tweetService = {
       return callback({ tweets: newTweets });
     });
   },
-
   getTweet: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req)
     return Tweet.findByPk(req.params.id, {
@@ -64,35 +62,8 @@ const tweetService = {
       const tweetLikeCount = tweet.Likes.filter(
         (d) => d.isLike === true
       ).length;
-      console.log('@@@@@@@',tweet.Likes.length)
-      // let isLike =
-      //   tweet.Likes.length !== 0 ? tweet.Likes.map((d) => d.isLike) : false;
       let tweetLike = tweet.Likes.filter((d, index) => d.isLike === true)
       tweetLike = tweetLike.map((d) => d.UserId).includes(currentUser.id)
-        // console.log('isliek',isLike);
-        // 測試 ISLIKE
-        // let userIsLike = d.dataValues.Likes.find((d) => d.UserId);
-        // // userIsLike = {
-        // //   id: userIsLike.id ? userIsLike.id : false,
-        // //   TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
-        // //   UserId: userIsLike.UserId ? userIsLike.UserId : false,
-        // //   isLike: userIsLike.isLike ? userIsLike.isLike : false
-        // // }
-        // // console.log(userIsLike)
-        // if (!userIsLike) {
-        //   userIsLike = false;
-        //   userIsLike = {
-        //     isLike: false
-        //     // id: userIsLike.id ? userIsLike.id : false,
-        //     // TweetId: userIsLike.TweetId ? userIsLike.TweetId : false,
-        //     // UserId: userIsLike.UserId ? userIsLike.UserId : false,
-        //     // isLike: userIsLike.isLike ? userIsLike.isLike : false,
-        //   };
-        // } else {
-        //   userIsLike = userIsLike.isLike;
-        // }
-        // console.log(userIsLike);
-
       callback({
         tweet: tweet.toJSON(),
         tweetReplyCount: tweetReplyCount,
