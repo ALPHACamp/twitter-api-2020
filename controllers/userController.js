@@ -245,12 +245,12 @@ const userController = {
             'avatar',
             'cover',
             'introduction',
-          [
-            sequelize.literal(
-              `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helpers.getUser(req).id} AND followingId = Followers.id)`
-            ),
-            'isFollowed'
-          ]
+            // [
+            //   sequelize.literal(
+            //     `EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helpers.getUser(req).id} AND followingId = Followers.id)`
+            //   ),
+            //   'isFollowed'
+            // ]
           ]
         }
         ],
@@ -262,6 +262,10 @@ const userController = {
           'cover'
         ]
       }).then(followers => {
+        followers.Followers = followers.Followers.map(follower => ({
+          ...follower.dataValues,
+          isFollowed: [follower.Followship.followingId].includes(req.user.id)
+        }))
         return res.json(followers.Followers)
       })
   },
@@ -277,12 +281,12 @@ const userController = {
             'avatar',
             'cover',
             'introduction',
-          [
-            sequelize.literal(
-              `EXISTS (SELECT 1 FROM Followships WHERE followingId = ${helpers.getUser(req).id} AND followerId = Followings.id)`
-            ),
-            'isFollowed'
-          ]
+          // [
+          //   sequelize.literal(
+          //     `EXISTS (SELECT 1 FROM Followships WHERE followingId = ${helpers.getUser(req).id} AND followerId = Followings.id)`
+          //   ),
+          //   'isFollowed'
+          // ]
           ]
         }],
         attributes: [
@@ -293,6 +297,10 @@ const userController = {
           'cover'
         ]
       }).then(followings => {
+        followings.Followings = followings.Followings.map(following => ({
+          ...following.dataValues,
+          isFollowed: [following.Followship.followingId].includes(req.user.id)
+        }))
         return res.json(followings.Followings)
       })
   },
