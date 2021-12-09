@@ -99,6 +99,7 @@ router.put(
   authenticatedUser,
   userController.putUser
 )
+
 router.get(
   '/users/:id/tweets',
   authenticated,

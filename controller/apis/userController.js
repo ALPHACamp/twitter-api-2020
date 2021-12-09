@@ -152,7 +152,7 @@ const userController = {
       return res.status(200).json({ ...userProfile, isFollowed })
     } catch (err) {
       console.log(err)
-      return res.status(400).message({ status: 'error', message: err })
+      return res.status(400).json({ status: 'error', message: err })
     }
   },
   getUsers: async (req, res, cb) => {
@@ -180,7 +180,8 @@ const userController = {
           ],
           'id',
           'name',
-          'account'
+          'account',
+          'avatar'
         ],
         limit: 10,
         raw: true,
@@ -553,6 +554,10 @@ const userController = {
   },
   accountSetting: async (req, res) => {
     try {
+      console.log('---------------')
+      console.log(req.body)
+      console.log(helper.getUser(req).id)
+      console.log('---------------')
       const { account, password, checkPassword, name, email } = req.body
       if (!account || !name || !email || !password || !checkPassword) {
         return res.json({ status: 'error', message: '所有欄位都是必填。' })
