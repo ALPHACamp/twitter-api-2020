@@ -48,7 +48,7 @@ router.get("/users/:id/followers", authenticated, authenticatedUser, userControl
 //取得正在追蹤的使用者的資料
 router.get("/users/:id/followings", authenticated, authenticatedUser, userController.getFollowings)
 
-router.get("/users/:id", authenticated, authenticatedUser, userController.getUser);
+router.get("/users/:id", authenticated, userController.getUser);
 // router.get("/users/:id", userController.getUser);
 
 
