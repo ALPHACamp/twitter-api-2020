@@ -1,16 +1,15 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  const Followship = sequelize.define('Followship', {
-    followingId: {
+  const RoomRecord = sequelize.define('RoomRecord', {
+    RoomId: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    followerId: {
+    UserId: {
       type: DataTypes.INTEGER,
       allowNull: false
     }
   }, {})
-  Followship.associate = function (models) {
-  }
-  return Followship
+  RoomRecord.associate = function (models) { }
+  return RoomRecord
 }
