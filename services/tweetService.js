@@ -59,13 +59,13 @@ const tweetService = {
         {
           model: Reply,
           attributes: ['id', 'comment', 'UserId', 'createdAt'],
-          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
-          order: [['createdAt', 'DESC']]
+          include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }]
         },
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
       ]
     }).then(tweet => {
       tweet = tweet.toJSON()
+      tweet.Replies.sort((a, b) => b.createdAt - a.createdAt)
       return callback({ tweet })
     })
   },

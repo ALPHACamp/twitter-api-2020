@@ -72,9 +72,6 @@ const adminService = {
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['name', 'account', 'avatar'] }]
     }).then(tweets => {
-      tweets.forEach(tweet => {
-        tweet.description = tweet.description.substring(0, 50)
-      })
       return callback(tweets)
     })
   },
