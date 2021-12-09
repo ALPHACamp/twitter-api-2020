@@ -53,8 +53,9 @@ const tweetController = {
     Tweet.create({
       description: req.body.description,
       UserId: helpers.getUser(req).id
+    }).then(tweet => {
+      return res.json({ status: 'success', message: "" })
     })
-    return res.json({ status: 'success', message: "" })
   },
 }
 
