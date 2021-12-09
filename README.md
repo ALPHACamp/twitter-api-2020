@@ -3,6 +3,7 @@
 ## 這是什麼？
 這是Alpha Camp的團體專案：Simple Twitter，模擬Twitter的簡化版Twitter。
 是存放作為前端串接資料、進行database操作的路由的repository。
+Simple Twitter連結：https://sh330035.github.io/twitter-frontend/
 
 ---
 ## 有哪些功能？
