@@ -64,3 +64,16 @@ Simple Twitter連結：https://sh330035.github.io/twitter-frontend/
   * account：root
   * email：root@example.com
   * password：12345678
+---
+## 相關連結
+* 前端
+  * github：https://github.com/sh330035/twitter-frontend
+  * 網站入口：https://sh330035.github.io/twitter-frontend/
+* 後端
+  * github：https://github.com/jadokao/twitter-api-2020
+  * Heroku：https://alphitter-api-server.herokuapp.com/api/
+---
+## 團隊成員
+* [Dolly Chen](https://github.com/DollyChen-CYC)
+* [David](https://github.com/sh330035)
+* [WenTing](https://github.com/wentingliuu)
