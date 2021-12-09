@@ -1,4 +1,3 @@
-const { json } = require('body-parser')
 const db = require('../../models')
 const { Tweet, User, Reply, Like, Sequelize } = db
 const helpers = require('../../_helpers')
@@ -28,8 +27,17 @@ const tweetController = {
         ],
         group: 'TweetId',
         include: [
-          { model: User, attributes: ['id', 'name', 'avatar', 'account'], where: { [Op.not]: { role: 'admin' } } }
-        ],
+          {
+            model: User, attributes: ['id', 'name', 'avatar', 'account'],
+            where: {
+              role: {
+                [Op.or]: {
+                  [Op.ne]: 'admin',
+                  [Op.eq]: null    //for test
+                }
+              }
+            }
+          }],
         order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
@@ -81,7 +89,6 @@ const tweetController = {
       console.log(err)
     }
   },
-
   getTweet: async (req, res) => {
     try {
       const { id } = req.params
