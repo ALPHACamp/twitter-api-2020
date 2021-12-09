@@ -1,6 +1,6 @@
-var chai = require('chai');
-var sinon = require('sinon');
-chai.use(require('sinon-chai'));
+const chai = require('chai')
+const sinon = require('sinon')
+chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
 const {
@@ -16,7 +16,7 @@ const TweetModel = require('../../models/tweet')
 describe('# Tweet Model', () => {
   // 使用寫好的 Tweet Model
   const Tweet = TweetModel(sequelize, dataTypes)
-  // 創建 tweet instance 
+  // 創建 tweet instance
   const like = new Tweet()
   // 檢查 Model name
   checkModelName(Tweet)('Tweet')
@@ -27,7 +27,7 @@ describe('# Tweet Model', () => {
     ].forEach(checkPropertyExists(like))
   })
 
-   // 檢查 tweet 的關聯是否正確
+  // 檢查 tweet 的關聯是否正確
   context('associations', () => {
     const Reply = 'Reply'
     const Like = 'Like'
@@ -58,41 +58,39 @@ describe('# Tweet Model', () => {
 
   // 檢查 model 的新增、修改、刪除、更新
   context('action', () => {
-
     let data = null
 
     // 檢查 db.Tweet 是否真的可以新增一筆資料
     it('create', (done) => {
-      db.Tweet.create({UserId: 1, description: 'hi'}).then((tweet) => {   
+      db.Tweet.create({ UserId: 1, description: 'hi' }).then((tweet) => {
         data = tweet
         done()
       })
     })
     // 檢查 db.Tweet 是否真的可以讀取一筆資料
     it('read', (done) => {
-      db.Tweet.findByPk(data.id).then((tweet) => {  
+      db.Tweet.findByPk(data.id).then((tweet) => {
         expect(data.id).to.be.equal(tweet.id)
-          done()
-        })
+        done()
+      })
     })
     // 檢查 db.Tweet 是否真的可以更新一筆資料
     it('update', (done) => {
-      db.Tweet.update({}, { where: { id: data.id }}).then(() => {
-        db.Tweet.findByPk(data.id).then((tweet) => { 
-          expect(data.updatedAt).to.be.not.equal(tweet.updatedAt) 
+      db.Tweet.update({}, { where: { id: data.id } }).then(() => {
+        db.Tweet.findByPk(data.id).then((tweet) => {
+          expect(data.updatedAt).to.be.not.equal(tweet.updatedAt)
           done()
         })
       })
     })
     // 檢查 db.Tweet 是否真的可以刪除一筆資料
     it('delete', (done) => {
-      db.Tweet.destroy({ where: { id: data.id }}).then(() => {
-        db.Tweet.findByPk(data.id).then((tweet) => { 
-          expect(tweet).to.be.equal(null) 
+      db.Tweet.destroy({ where: { id: data.id } }).then(() => {
+        db.Tweet.findByPk(data.id).then((tweet) => {
+          expect(tweet).to.be.equal(null)
           done()
         })
       })
     })
   })
-
 })

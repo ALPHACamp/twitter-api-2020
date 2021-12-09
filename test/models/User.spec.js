@@ -1,5 +1,5 @@
-var chai = require('chai')
-var sinon = require('sinon')
+const chai = require('chai')
+const sinon = require('sinon')
 chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
@@ -16,7 +16,7 @@ const UserModel = require('../../models/user')
 describe('# User Model', () => {
   // 使用寫好的 User Model
   const User = UserModel(sequelize, dataTypes)
-  // 創建 user instance 
+  // 創建 user instance
   const user = new User()
   // 檢查 Model name
   checkModelName(User)('User')
@@ -24,7 +24,7 @@ describe('# User Model', () => {
   // 檢查 user 是否有 name, email, password, account, cover, avatar 屬性
   context('properties', () => {
     ;[
-      'name', 'email', 'password', 'account',  'cover', 'avatar'
+      'name', 'email', 'password', 'account', 'cover', 'avatar'
     ].forEach(checkPropertyExists(user))
   })
 
