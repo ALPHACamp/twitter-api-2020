@@ -144,7 +144,8 @@ const userController = {
             'updatedAt',
           ]
         }
-      ]
+      ],
+      order: [['createdAt', 'DESC']]
     }).then(likes => {
 
       likes = likes.map(like => ({
