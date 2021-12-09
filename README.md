@@ -2,10 +2,14 @@
 本專案為[前端專案](https://github.com/VinceLee9527/twitter-front-end-vue)提供API
 
 ## Live DEMO
-請點此處前往
+請點[此處](https://vincelee9527.github.io/twitter-front-end-vue/#/signin)前往  
+
+![image](https://github.com/Emily81926/twitter-api-2020/blob/e3bb73328ab01ac4d01ab319cf2e02810c0d735b/public/home%20page.png)
 
 ## API文件
-本份API是利用Apiary撰寫而成，請點[此處](https://simpletwitterapi3.docs.apiary.io/#reference)前往
+本份API文件是利用Apiary撰寫而成，請點[此處](https://simpletwitterapi3.docs.apiary.io/#reference)前往  
+
+![image](https://github.com/Emily81926/twitter-api-2020/blob/e3bb73328ab01ac4d01ab319cf2e02810c0d735b/public/API%20document.png)
 
 ## 專案設定(利用終端機)
 1. 下載本專案到本地
