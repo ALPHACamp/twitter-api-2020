@@ -59,6 +59,7 @@ describe('# admin requests', () => {
           .end(function (err, res) {
             if (err) return done(err)
             // 檢查回傳資料是否是陣列類型
+            console.log(res.body)
             expect(res.body).to.be.an('array')
             // 檢查回傳資料是否有 root 這個使用者資料
             res.body[0].name.should.equal('root')
