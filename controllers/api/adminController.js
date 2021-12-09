@@ -27,30 +27,24 @@ const adminController = {
       // 檢查 user 是否存在與密碼是否正確
       const user = await User.findOne({ where: { account } })
       if (!user)
-        return res
-          .status(401)
-          .json({ status: 'error', message: 'Account did NOT exist' })
+        return res.status(401).json({ status: 'error', message: '帳號不存在' })
       if (!bcrypt.compareSync(password, user.password)) {
-        return res
-          .status(401)
-          .json({ status: 'error', message: 'Passwords is NOT matched' })
+        return res.status(401).json({ status: 'error', message: '密碼錯誤' })
       }
       if (user.role !== 'admin') {
-        return res
-          .status(401)
-          .json({ status: 'error', message: 'Permission denied' })
+        return res.status(401).json({ status: 'error', message: '帳號不存在' })
       }
       // 簽發 token
       var payload = { id: user.id }
       var token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
-        message: 'Admin login successfully',
+        message: '管理者登入成功',
         token: token,
         user
       })
-    } catch (e) {
-      console.log(e)
+    } catch (err) {
+      console.log(err)
     }
   },
   // 查看user資訊
@@ -93,7 +87,7 @@ const adminController = {
             ),
             'RepliesCount'
           ]
-        ],
+        ]
       })
       users = users.sort((a, b) => b.TweetsCount - a.TweetsCount)
       return res.json(users)
@@ -106,7 +100,8 @@ const adminController = {
     try {
       const tweets = await Tweet.findAll({
         attributes: [
-          ['id', 'TweetId'], 'CreatedAt',
+          ['id', 'TweetId'],
+          'CreatedAt',
           [Sequelize.literal('substring(description,1,50)'), 'description']
         ],
         include: [
@@ -115,8 +110,8 @@ const adminController = {
         order: [['createdAt', 'DESC']]
       })
       return res.json(tweets)
-    } catch (e) {
-      console.log(e)
+    } catch (err) {
+      console.log(err)
     }
   },
   // 刪除Tweet
@@ -126,7 +121,7 @@ const adminController = {
       if (!tweet) {
         return res.json({
           status: 'error',
-          message: 'This tweet did NOT exist'
+          message: '要刪除的推文不存在'
         })
       }
       await tweet.destroy()
@@ -134,10 +129,10 @@ const adminController = {
       await Like.destroy({ where: { TweetId: tweet.id } })
       return res.json({
         status: 'success',
-        message: 'Delete tweet successfully'
+        message: '成功刪除推文'
       })
-    } catch (e) {
-      console.log(e)
+    } catch (err) {
+      console.log(err)
     }
   }
 }

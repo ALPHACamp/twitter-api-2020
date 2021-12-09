@@ -9,7 +9,7 @@ const tweetController = {
       if (!tweet) {
         return res.json({
           status: 'error',
-          message: 'This tweet did Not exist!'
+          message: '此則貼文不存在!'
         })
       }
 
@@ -28,9 +28,9 @@ const tweetController = {
         include: {
           model: User,
           attributes: ['avatar', 'account', 'name']
-        }
+        },
+        order: [['createdAt', 'DESC']]
       })
-
       return res.json(replies)
     } catch (err) {
       console.log(err)
@@ -44,14 +44,14 @@ const tweetController = {
       if (!tweet) {
         return res.json({
           status: 'error',
-          message: 'This tweet did Not exist!'
+          message: '要回覆的貼文不存在!'
         })
       }
 
       if (!comment.trim()) {
         return res.json({
           status: 'error',
-          message: 'Comment can NOT be empty!'
+          message: '內容不可空白'
         })
       }
 
@@ -62,7 +62,7 @@ const tweetController = {
       })
       return res.json({
         status: 'success',
-        message: 'Comment was successfully posted!'
+        message: '成功回覆推文!'
       })
     } catch (err) {
       console.log(err)

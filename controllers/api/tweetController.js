@@ -7,7 +7,6 @@ const tweetController = {
   getTweets: async (req, res) => {
     try {
       let tweets = await Tweet.findAll({
-
         attributes: [
           ['id', 'TweetId'],
           'createdAt',
@@ -28,16 +27,18 @@ const tweetController = {
         group: 'TweetId',
         include: [
           {
-            model: User, attributes: ['id', 'name', 'avatar', 'account'],
+            model: User,
+            attributes: ['id', 'name', 'avatar', 'account'],
             where: {
               role: {
                 [Op.or]: {
                   [Op.ne]: 'admin',
-                  [Op.eq]: null    //for test
+                  [Op.eq]: null //for test
                 }
               }
             }
-          }],
+          }
+        ],
         order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
@@ -58,24 +59,22 @@ const tweetController = {
       if (helpers.getUser(req).role === 'admin') {
         return res.json({
           status: 'error',
-          message: 'Admin can NOT be tweet!'
+          message: '管理者無法推文!'
         })
       }
       const { description } = req.body
       if (!description.trim()) {
         return res.json({
           status: 'error',
-          message: 'Content can NOT be empty!'
+          message: '內容不可空白'
         })
       }
       if (description.length > 140) {
         return res.json({
           status: 'error',
-          message: 'Content should be within 140 characters!'
+          message: '字數超出上限！'
         })
       }
-
-
 
       await Tweet.create({
         UserId: helpers.getUser(req).id,
@@ -83,7 +82,7 @@ const tweetController = {
       })
       return res.json({
         status: 'success',
-        message: 'Tweet was successfully posted'
+        message: '推文成功'
       })
     } catch (err) {
       console.log(err)

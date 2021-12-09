@@ -28,7 +28,7 @@ let userController = {
       if (!account || !password) {
         return res.json({
           status: 'error',
-          message: 'Please fill in both Account & Password fields!'
+          message: '帳號及密碼不可空白'
         })
       }
       const user = await User.findOne({ where: { account } })
@@ -36,24 +36,20 @@ let userController = {
       if (!user)
         return res
           .status(401)
-          .json({ status: 'error', message: 'Account did NOT exist' })
+          .json({ status: 'error', message: '帳號不存在！' })
       // 是否為admin
       if (user.role === 'admin')
-        return res
-          .status(401)
-          .json({ status: 'error', message: 'Admin can NOT enter front desk' })
+        return res.status(401).json({ status: 'error', message: '帳號不存在' })
       // 密碼是否正確
       if (!bcrypt.compareSync(password, user.password)) {
-        return res
-          .status(401)
-          .json({ status: 'error', message: 'Passwords is NOT matched' })
+        return res.status(401).json({ status: 'error', message: '密碼錯誤' })
       }
       // 簽發 token
       var payload = { id: user.id }
       var token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.json({
         status: 'success',
-        message: 'Login successfully!',
+        message: '登入成功!',
         token,
         user
       })
@@ -69,14 +65,14 @@ let userController = {
       if (!name || !account || !email || !password || !checkPassword) {
         return res.json({
           status: 'error',
-          message: 'Required fields must be filled！'
+          message: '所有欄位皆不可空白！'
         })
       }
       // 確認checkPassword、password相同
       if (checkPassword !== password) {
         return res.json({
           status: 'error',
-          message: 'Passwords is not matched！'
+          message: '密碼確認不符！'
         })
       }
       // 確認Email無重複
@@ -84,7 +80,7 @@ let userController = {
       if (user) {
         return res.json({
           status: 'error',
-          message: 'Email has already existed!'
+          message: 'email 已重覆註冊！'
         })
       }
       // 確認Account無重複
@@ -92,13 +88,13 @@ let userController = {
       if (accountCheck) {
         return res.json({
           status: 'error',
-          message: 'Account has already existed!'
+          message: 'account 已重覆註冊！'
         })
       }
       if (account.length > 20 || name.length > 50 || password.length > 20) {
         return res.json({
           status: 'error',
-          message: 'Exceeds the character limit'
+          message: '字數超出上限！'
         })
       }
       // 建立user
@@ -113,9 +109,7 @@ let userController = {
         ),
         role: 'user'
       })
-      return res
-        .status(200)
-        .json({ status: 'success', message: 'Successfully register!' })
+      return res.status(200).json({ status: 'success', message: '註冊成功!' })
     } catch (err) {
       console.log(err)
     }
@@ -168,7 +162,8 @@ let userController = {
           // 存在 followerId = 當前使用者；followingId = 現在看到的人(User.id)
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -236,14 +231,14 @@ let userController = {
       if (!name) {
         return res.json({
           status: 'error',
-          message: 'Name field must be filled！'
+          message: '暱稱不可空白！'
         })
       }
       // 確保只有自己能修改自己的資料
       if (helpers.getUser(req).id !== Number(req.params.id)) {
         return res.json({
           status: 'error',
-          message: "Can NOT edit other user's profile"
+          message: '不可編輯他人的資訊'
         })
       }
 
@@ -251,13 +246,13 @@ let userController = {
       if (name.length > 50) {
         return res.json({
           status: 'error',
-          message: 'Name should be within 50 characters'
+          message: '字數超出上限！'
         })
       }
       if (introduction.length > 160) {
         return res.json({
           status: 'error',
-          message: 'Introduction should be within 160 characters'
+          message: '字數超出上限！'
         })
       }
 
@@ -279,9 +274,9 @@ let userController = {
       }
 
       const user = await User.findByPk(req.params.id)
-      if (cover === "empty") {
+      if (cover === 'empty') {
         cover = null
-      } else if (cover === "") {
+      } else if (cover === '') {
         cover = user.cover || null
       }
       await user.update({
@@ -292,7 +287,7 @@ let userController = {
       })
       res.json({
         status: 'success',
-        message: 'Successfully update user profile'
+        message: '個人資料編輯成功'
       })
     } catch (err) {
       console.log(err)
@@ -307,21 +302,21 @@ let userController = {
       if (!name || !account || !email || !password || !checkPassword) {
         return res.json({
           status: 'error',
-          message: 'Required fields must be filled！'
+          message: '所有欄位皆不可空白'
         })
       }
       // 確認checkPassword、password相同
       if (checkPassword !== password) {
         return res.json({
           status: 'error',
-          message: 'Passwords is not matched！'
+          message: '密碼確認不符'
         })
       }
       // 確保只有自己能修改自己的資料
       if (helpers.getUser(req).id !== Number(req.params.id)) {
         return res.json({
           status: 'error',
-          message: "Can NOT edit other user's setting"
+          message: '不可編輯他人的帳號資訊'
         })
       }
       // 確認Email無重複(但可以維持原有email)
@@ -334,7 +329,7 @@ let userController = {
       if (userEmailCheck) {
         return res.json({
           status: 'error',
-          message: 'Email has already existed!'
+          message: 'email 已重覆註冊！'
         })
       }
       // 確認Account無重複(但可以維持原有)
@@ -347,7 +342,7 @@ let userController = {
       if (userAccountCheck) {
         return res.json({
           status: 'error',
-          message: 'Account has already existed!'
+          message: 'account 已重覆註冊！'
         })
       }
       const user = await User.findByPk(req.params.id)
@@ -359,7 +354,7 @@ let userController = {
       })
       return res.json({
         status: 'success',
-        message: 'Successfully update user account setting'
+        message: '編輯使用者帳號資訊成功'
       })
     } catch (err) {
       console.log(err)
@@ -386,7 +381,8 @@ let userController = {
           // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followings.id)
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                helpers.getUser(req).id
               }  AND Followships.followingId = User.id )`
             ),
             'isFollowed'
@@ -420,7 +416,8 @@ let userController = {
               // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followings.id)
               [
                 sequelize.literal(
-                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                    helpers.getUser(req).id
                   }  AND Followships.followingId = Followings.id )`
                 ),
                 'isFollowed'
@@ -455,7 +452,8 @@ let userController = {
               // 存在 followerId = 當前使用者；followingId = 現在看到的人(Followers.id)
               [
                 sequelize.literal(
-                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${helpers.getUser(req).id
+                  `EXISTS (SELECT * FROM Followships WHERE Followships.followerId =${
+                    helpers.getUser(req).id
                   }  AND Followships.followingId = Followers.id )`
                 ),
                 'isFollowed'
@@ -502,7 +500,8 @@ let userController = {
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT * FROM Likes WHERE UserId = ${helpers.getUser(req).id
+              `EXISTS (SELECT * FROM Likes WHERE UserId = ${
+                helpers.getUser(req).id
               } AND TweetId = Tweet.id)`
             ),
             'isLiked'
