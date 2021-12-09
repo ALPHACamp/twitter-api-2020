@@ -30,14 +30,9 @@ const followController = {
 
   addFollowing: async (req, res) => {
     try {
-      const following = await Followship.findOne({ where: { followerId: helpers.getUser(req).id, followingId: Number(req.body.id) } })
       // user cannot follow themselves
       if (helpers.getUser(req).id === Number(req.body.id)) {
         return res.status(400).json({ status: 'error', message: '不可以追蹤自己' })
-      }
-      // cannot follow the person who you already following
-      if (following) {
-        return res.status(409).json({ status: 'error', message: 'already following this user' })
       }
       await Followship.create({ followerId: helpers.getUser(req).id, followingId: Number(req.body.id) })
       return res.status(200).json({ status: 'success', message: '成功新增追蹤者' })
@@ -51,7 +46,7 @@ const followController = {
 
   deleteFollowing: async (req, res) => {
     try {
-      await Followship.destroy({ where: { followerId: helpers.getUser(req).id, followingId: Number(req.params.followingId) } })
+      await Followship.destroy({ where: { followerId: Number(helpers.getUser(req).id), followingId: Number(req.params.followingId) } })
       return res.status(200).json({ status: 'success', message: '成功退追蹤' })
     } catch (error) {
       console.log(error)
