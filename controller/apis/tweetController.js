@@ -100,6 +100,13 @@ const tweetController = {
   },
   postTweet: async (req, res) => {
     try {
+      if (req.body.description.length > 150) {
+        return res.status(400).json({ message: '字數超出上限！' })
+      }
+
+      if (req.body.description.trim().length < 1) {
+        return res.status(400).json({ message: '內容不可空白' })
+      }
       await Tweet.create({
         description: req.body.description,
         UserId: helper.getUser(req).id
@@ -117,6 +124,9 @@ const tweetController = {
           status: 'error',
           message: "description didn't exist"
         })
+      }
+      if (req.description.length > 150) {
+        return res.status(400).json({ message: '字數超出上限！' })
       }
       await Tweet.update(
         { description: req.body.description },
