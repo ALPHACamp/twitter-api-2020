@@ -9,25 +9,32 @@ const likeController = require('../controllers/likeController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
 const cors = require('cors')
-// const authenticated = (req, res, next) => {
-//   if (req.isAuthenticated()) {
-//     return next()
-//   }
-//   res.redirect('/api/signin')
-// }
 router.use(cors())
-const authenticated = passport.authenticate('jwt', { session: false })
+
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (err) { return next(err) }
+    if (!user) {
+      return res.status(401).json({ status: 'error', message: '請登入瀏覽網站' })
+    }
+    req.user = user
+    return next()
+  })(req, res, next)
+}
 
 const authenticatedAdmin = (req, res, next) => {
-  if (helpers.getUser(req).role === "") {
-    return res.status(401).json({ status: 'error', message: '請勿瀏覽前台頁面' })
+  if (helpers.ensureAuthenticated(req)) {
+    if (helpers.getUser(req).role === null ) {
+      return res.status(401).json({ status: 'error', message: '請勿瀏覽後台頁面' })
+    }
+    return next()
   }
-  return next()
+  return res.json({ status: 'error', message: '請登入瀏覽網站' })
 }
 
 const authenticatedUser = (req, res, next) => {
   if (helpers.getUser(req).role === "admin") {
-    return res.status(401).json({ status: 'error', message: '請勿瀏覽後台頁面' })
+    return res.status(401).json({ status: 'error', message: '請勿瀏覽前台頁面' })
   }
   return next()
 }
@@ -68,7 +75,7 @@ router.get('/api/get_current_user', authenticated, authenticatedUser, userContro
 
 //tweets相關
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
-router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
+router.get('/api/tweets/:id', authenticated, authenticatedUser,  tweetController.getTweet)
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 
