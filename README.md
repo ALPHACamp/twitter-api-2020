@@ -16,7 +16,7 @@ With Simple Twitter, you can do the followings
 ## Getting Started (adopting mySQL database)
 
 git clone
-  - frontend: https://huangtingyu04.github.io/simple-twitter-front-end/#/signin
+  - frontend: https://github.com/huangtingyu04/simple-twitter-front-end.git
   - backend: https://github.com/cschang07/twitter-api-2020.git
 
 cd forum-express
