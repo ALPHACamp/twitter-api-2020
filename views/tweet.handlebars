@@ -23,17 +23,17 @@
         <i class="far fa-heart"></i></li>
       <li  class="list-group-item">
 
-      {{!-- {{#if isLike}} --}}
+      {{#if isLike}}
       <form action="/tweets/{{tweet.id}}/unlike" method="POST">
         <button type="submit"><i class="fas fa-heart text-danger"></i></button>
         <span>{{tweetLikeCount}} 喜歡數</span>
       </form>
-      {{!-- {{else}} --}}
+      {{else}}
       <form action="/tweets/{{tweet.id}}/like" method="POST">
         <button type="submit"><i class="far fa-heart text-danger"></i></button>
         <span>{{tweetLikeCount}} 喜歡數</span>
       </form>
-      {{!-- {{/if}} --}}
+      {{/if}}
         </li>
 
       <form action="/tweets/{{tweet.id}}/replies" method="POST">
