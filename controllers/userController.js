@@ -311,18 +311,34 @@ const userController = {
       })
   },
   getOneFollowers: (req, res) => {
-    const followerId = req.params.id
-    return Followship.findAll({ where: { followerId } })
-      .then(users => {
-        return res.json({ users })
-      })
+    const UserId = req.params.id
+    return User.findByPk(UserId, {
+      attributes: ['id'],
+      include: { model: User, as: "Followers", attributes: ['id', 'name', 'account', 'introduction', 'avatar'] },
+      order: [[User.associations.Followers, Followship, 'createdAt', 'DESC']],
+    }).then(users => {
+      users = users.Followers
+      users = users.map((user) => ({
+        ...user.dataValues,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      return res.json(users)
+    })
   },
   getOneFollowings: (req, res) => {
-    const followingId = req.params.id
-    return Followship.findAll({ where: { followingId } })
-      .then(users => {
-        return res.json({ users })
-      })
+    const UserId = req.params.id
+    return User.findByPk(UserId, {
+      attributes: ['id'],
+      include: { model: User, as: "Followings", attributes: ['id', 'name', 'account', 'introduction', 'avatar'] },
+      order: [[User.associations.Followings, Followship, 'createdAt', 'DESC']],
+    }).then(users => {
+      users = users.Followings
+      users = users.map((user) => ({
+        ...user.dataValues,
+        isFollowed: req.user.Followings.map(d => d.id).includes(user.id)
+      }))
+      return res.json(users)
+    })
   },
 }
 
