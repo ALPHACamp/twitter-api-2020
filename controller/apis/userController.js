@@ -35,7 +35,7 @@ const userController = {
       }
       if (!bcrypt.compareSync(req.body.password, user.password)) {
         return res //if password not match
-          .json({ status: 'error', message: 'email or password incorrect.' })
+          .json({ status: 'error', message: 'password incorrect.' })
       }
       if (user.role === 'admin') {
         return res.json({ message: '請使用管理員登錄系統' })
