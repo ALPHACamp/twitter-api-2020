@@ -560,19 +560,19 @@ const userController = {
         return res.json({ status: 'error', message: '所有欄位都是必填。' })
       }
       if (account.trim().length < 1) {
-        return res.json({ message: '帳號不能空白！' })
+        return res.json({ status: 'error', message: '帳號不能空白！' })
       }
       if (!validator.isEmail(email)) {
-        return res.json({ message: '請使用正確 email 格式！' })
+        return res.json({ status: 'error', message: '請使用正確 email 格式！' })
       }
       if (name.trim().length < 1) {
-        return res.json({ message: '名字不能空白！' })
+        return res.json({ status: 'error', message: '名字不能空白！' })
       }
       if (name.length > 60) {
-        return res.json({ message: '名字字數超過上限！' })
+        return res.json({ status: 'error', message: '名字字數超過上限！' })
       }
       if (password.trim().length < 8) {
-        return res.json({ message: '密碼字數低於下限！' })
+        return res.json({ status: 'error', message: '密碼字數低於下限！' })
       }
       if (checkPassword !== password) {
         return res.json({ status: 'error', message: '兩次密碼輸入不相同！' })
@@ -580,7 +580,7 @@ const userController = {
       const accountCheck = await User.findOne({ where: { account } })
       const emailCheck = await User.findOne({ where: { email } })
       if (accountCheck || emailCheck) {
-        return res.json({ message: '帳號或信箱已被使用！' })
+        return res.json({ status: 'error', message: '帳號或信箱已被使用！' })
       }
       await User.update(
         {
@@ -594,7 +594,7 @@ const userController = {
       return res.status(200).json({ message: '成功更新 User 資料！' })
     } catch (err) {
       console.log(err)
-      return res.json({ message: err })
+      return res.json({ status: 'error', message: err })
     }
   }
 }
