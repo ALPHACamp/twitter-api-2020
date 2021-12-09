@@ -18,10 +18,15 @@ With Simple Twitter, you can do the followings
 git clone
   - frontend: https://huangtingyu04.github.io/simple-twitter-front-end/#/signin
   - backend: https://github.com/cschang07/twitter-api-2020.git
+
 cd forum-express
+
 npm install
+
 npx sequelize db:migrate
+
 npx sequelize db:seed:all
+
 nodemon app.js
 
 ## User login
