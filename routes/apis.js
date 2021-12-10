@@ -108,4 +108,6 @@ router.delete('/destroyer/users', userController.deleteAllUsers)
 router.delete('/destroyer/tweets', userController.deleteAllTweets)
 router.delete('/destroyer/replies', userController.deleteAllReplies)
 
+router.put("/users/:id/img2", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUserImg) 
+
 module.exports = router
