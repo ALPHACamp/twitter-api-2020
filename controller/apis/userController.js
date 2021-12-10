@@ -140,7 +140,7 @@ const userController = {
         }
       })
       const isFollowed = followship ? true : false
-      if (userProfile.role === 'Admin') {
+      if (userProfile.role === 'admin') {
         //防止使用者搜尋Admin
         return res
           .status(400)
