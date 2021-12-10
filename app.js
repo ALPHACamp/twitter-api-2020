@@ -63,17 +63,17 @@ io.on('connection', socket => {
   // 監聽訊息
   socket.on('getMessage', data => {
     console.log('服務端 接收 訊息: ', data)
-    Message.create({
-      content: data.text,
-      UserId: data.UserId
-    }).then(message => {
-      Message.findByPk(message.id, {
-        include: [User]
-      }).then(message => {
-        //回傳 message 給所有客戶端(包含自己)
-        io.sockets.emit('getMessage', message)
-      })
-    })
+    // Message.create({
+    //   content: data.text,
+    //   UserId: data.UserId
+    // }).then(message => {
+    //   Message.findByPk(message.id, {
+    //     include: [User]
+    //   }).then(message => {
+    //     //回傳 message 給所有客戶端(包含自己)
+    //     io.sockets.emit('getMessage', message)
+    //   })
+    // })
   })
 
   //監聽並提示有人下線了
