@@ -13,14 +13,14 @@ https://thawing-taiga-98720.herokuapp.com/api
 ```
 帳號: user1
 email: user1@example.com
-password: 12345678
+密碼: 12345678
 ```
 ## 後台測試帳號：
 
 ```
 帳號: root
 email: root@example.com
-password: 12345678
+密碼: 12345678
 ```
 ## Installing-本地端專案建置
 1. 請在終端機輸入
