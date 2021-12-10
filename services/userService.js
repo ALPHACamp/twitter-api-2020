@@ -26,10 +26,7 @@ const userService = {
       return callback({ user: user });
     });
   },
-<<<<<<< HEAD
-=======
   
->>>>>>> b02
   addLike: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
     Like.findOne({
