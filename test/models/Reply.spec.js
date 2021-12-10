@@ -21,7 +21,7 @@ describe('# Reply Model', () => {
   // 檢查 Model name
   checkModelName(Reply)('Reply')
 
-   // 檢查 reply 是否有 __ 屬性(由於希望學員可以彈性命名 model 欄位，因此這邊留空)
+  // 檢查 reply 是否有 __ 屬性(由於希望學員可以彈性命名 model 欄位，因此這邊留空)
   context('properties', () => {
     ;[
     ].forEach(checkPropertyExists(like))
@@ -55,32 +55,32 @@ describe('# Reply Model', () => {
     let data = null
     // 檢查 db.Reply 是否真的可以新增一筆資料
     it('create', (done) => {
-      db.Reply.create({}).then((reply) => {   
+      db.Reply.create({}).then((reply) => {
         data = reply
         done()
       })
     })
     // 檢查 db.Reply 是否真的可以讀取一筆資料
     it('read', (done) => {
-      db.Reply.findByPk(data.id).then((reply) => {  
+      db.Reply.findByPk(data.id).then((reply) => {
         expect(data.id).to.be.equal(reply.id)
-          done()
-        })
+        done()
+      })
     })
     // 檢查 db.Reply 是否真的可以更新一筆資料
     it('update', (done) => {
-      db.Reply.update({}, { where: { id: data.id }}).then(() => {
-        db.Reply.findByPk(data.id).then((reply) => { 
-          expect(data.updatedAt).to.be.not.equal(reply.updatedAt) 
+      db.Reply.update({}, { where: { id: data.id } }).then(() => {
+        db.Reply.findByPk(data.id).then((reply) => {
+          expect(data.updatedAt).to.be.not.equal(reply.updatedAt)
           done()
         })
       })
     })
     // 檢查 db.Reply 是否真的可以刪除一筆資料
     it('delete', (done) => {
-      db.Reply.destroy({ where: { id: data.id }}).then(() => {
-        db.Reply.findByPk(data.id).then((reply) => { 
-          expect(reply).to.be.equal(null) 
+      db.Reply.destroy({ where: { id: data.id } }).then(() => {
+        db.Reply.findByPk(data.id).then((reply) => {
+          expect(reply).to.be.equal(null)
           done()
         })
       })
