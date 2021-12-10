@@ -19,18 +19,37 @@
   </p>
 
 
+
 # Simple-twitter
-參考Twitter開發的小型專案，提供前端開發者API。
-(包含瀏覽貼文、創建推文、修改基本資料...，並提供互相追蹤的功能)
+參考Twitter開發的小型專案，提供前端開發者API。(包含瀏覽貼文、創建推文、修改基本資料...，並提供互相追蹤的功能)
+(<a href="https://twitter101.herokuapp.com/">線上API連結</a>)
 
 
 
 # 目錄
-
+- [功能介紹](#功能介紹)
 - [使用方式](#使用方式)
 - [安裝流程](#安裝流程)
 - [種子資料](#種子資料)
+- [相關資料](#相關資料)
 - [共同開發者](#共同開發者)
+
+
+
+# 功能介紹
+  * 提供使用者登入、登出及註冊帳號功能
+    * 網站具備JWT驗證功能 
+    * 使用者無法註冊管理員帳號
+  * 提供瀏覽資訊
+    * 全部推文、使用者追蹤人數、推文的留言及LIKE數量...
+    * 提供使用者裡追蹤人數最高的TOP10
+  * 提供使用者功能
+    * 使用者可以修改個人資料(account、email、password...)
+    * 新增、回覆、LIKE推文
+    * 使用者互相追蹤功能 
+  * 提供後臺管理員功能
+    * 可以瀏覽所有使用者資訊(tweet數量、like數量...)
+    * 可以刪除特定貼文
 
 
 
@@ -38,13 +57,12 @@
 
   請先下載<a href="https://drive.google.com/file/d/1DUylRjruDhiZ_F1q0kbgpphFfZZHBy-z/view?usp=sharing">Postman設定檔</a>，檔案提供所有路由及回傳的資料形式。
 
-
-
 <table>
   <tr>
     <td vlign="center"><img src="https://cdn.discordapp.com/attachments/899218006926831670/918564399332077618/unknown.png"></td>
   </tr>
 </table>
+
 
 
 # 安裝流程
@@ -102,6 +120,15 @@
   role: user
   ```
   
+  
+  
+# 相關資料
+  * `前端Front-end(Vue框架):`
+    <a href="https://github.com/LuciusPook/twitter-vue">GitHub</a> / 
+    <a href="https://jackjackhuo.github.io/twitter-vue/#/main">線上DEMO</a>
+  * `後端Back-end(Express框架):`
+    <a href="https://github.com/rayray1010/twitter-api-2020">GitHub</a> / 
+    <a href="https://twitter101.herokuapp.com/">線上API</a>
   
   
 # 共同開發者
