@@ -39,7 +39,9 @@ npx sequelize db:seed:all
 7. 建立`.env`檔案並設定環境參數(`.env.example`檔案內有實例)
 8. 啟動伺服器
 ```
-npm run dev
+npm run dev  
+
+nodemon app.js // windows使用者使用這行
 ```
 9. 若看到以下字串即代表成功啟動
 `Example app listening on port 3000!`
