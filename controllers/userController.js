@@ -91,6 +91,32 @@ const userController = {
       return res.redirect(`/users/${req.params.id}`);
     });
   },
+  putUser2: (req, res) => {
+    userService.putUser(req, res, (data) => {
+      if (data["status"] === "error") {
+        req.flash("error_messages", data["message"]);
+        return res.redirect("back");
+      }
+      req.flash("success_messages", data["message"]);
+      return res.redirect(`/users/${req.params.id}`);
+    });
+  },
+  settingUser: (req, res) => {
+    userService.settingUser(req, res, (data) => {
+      return res.render("putUser", data);
+    });
+  },
+  reviseUser: (req, res) => {
+    userService.reviseUser(req, res, (data) => {
+      if (data["status"] === "error") {
+        req.flash("error_messages", data["message"]);
+        return res.redirect("back");
+      }
+      req.flash("success_messages", data["message"]);
+      return res.redirect("back");
+    });
+  },
+
   getUserTweets: (req, res) => {
     userService.getUserTweets(req, res, (data) => {
       return res.render("userTweets", data);
@@ -126,7 +152,12 @@ const userController = {
       return res.redirect("back");
     });
   },
-
+  // 測試
+  getUserLikesTweet: (req, res) => {
+    userService.getUserLikesTweet(req, res, (data) => {
+      return res.render("userLikeTweets", data);
+    });
+  },
 };
 
 module.exports = userController
