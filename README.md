@@ -2,6 +2,8 @@
   <img  src="https://i.imgur.com/cZjfegs.png?1" >
 </h1>
 
+<h1 align="center"><a href="https://jackjackhuo.github.io/twitter-vue/#/login">Live Demo</a></h1>
+  
 <p align="center">
   
   <img src="https://img.shields.io/github/v/release/navendu-pottekkat/awesome-readme?include_prereleases" >
@@ -9,7 +11,9 @@
   <img src="https://img.shields.io/github/last-commit/rayray1010/twitter-api-2020" >
 
   <img src="https://img.shields.io/badge/express-4.16.4-green.svg" >
-
+  
+  <img src="https://img.shields.io/badge/Database-MYSQL-yellowgreen.svg">
+  
   <img src="https://img.shields.io/github/issues-pr-closed/rayray1010/twitter-api-2020">
 
   </p>
@@ -55,10 +59,24 @@
     ```
     npm install
     ```
-
-  * 載入model及種子資料
+    
+  * 將環境變數載入
+    ```
+    將資料夾內'.env.example'檔案名稱改為'.env'
+    ```
+    
+  * 請在MySQL Workbench，建立SQL資料庫
+    ```
+    create database ac_twitter_workspace
+    ```
+    
+  * 載入model
     ```
     npx sequelize db:migrate
+    ```
+    
+  * 載入種子資料
+    ```
     npx sequelize db:seed:all
     ```
 
