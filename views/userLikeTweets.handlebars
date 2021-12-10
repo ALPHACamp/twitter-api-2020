@@ -1,0 +1,144 @@
+<h1>{{tweets.tweetCount}}  筆推文</h1>
+<h1>{{tweetCount}}  筆推文</h1>
+<div class="row row-cols-1 row-cols-md-2">
+  <div class="col mb-4">
+    <div class="card">
+      <img src="{{user.cover}}" class="card-img-top" alt="..." style="width: 300px;">
+       <div class="d-flex justify-content-around">
+      <img src="{{user.avatar}}" class="card-img-top" alt="..."
+        style="max-width: 80px; max-height: 80px; border-radius: 50%;">
+       <span>
+        {{user.id}} 特定者用
+       </span> {{current_user.id }} 當下使用者
+       {{#ifCond current_user.id user.id}}
+       {{else}}
+        {{#if user.isFollower}}
+        <form action="/followships/{{user.id}}?_method=DELETE" method="post">
+          <button type="submit" class="btn btn-outline-info">取消跟隨</button>
+        </form>
+        {{else}}
+        <form action="/followships/{{user.id}}" method="post">
+          <button type="submit" class="btn btn-info">跟隨</button>
+        </form>
+        {{/if}}
+        {{/ifCond}}
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">使用者帳號 : {{user.account}} </h5>
+        <p class="card-text">內容:{{user.introduction}}</p>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">推文者的 id {{user.id}}</li>
+        <li class="list-group-item">推文者的名字 {{ user.name}}</li>
+        <li class="list-group-item d-flex justify-content-around">
+          <div class="left">
+            <span>{{user.FollowingsCount}} 位跟隨中
+            </span>
+          </div>
+          <div class="right inline-block">
+            <span>{{user.FollowersCount}} 位跟隨者
+            </span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <ul class="nav nav-tabs mt-2">
+      <li class="nav-item">
+        <a class="nav-link " href="/users/{{user.id}}/tweets">推文</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/users/{{user.id}}/replies">回覆</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="/users/{{user.id}}/likes">喜歡的推文</a>
+      </li>
+       <li class="nav-item">
+        <a class="nav-link " href="/users/{{user.id}}/likesTweet">測試喜歡的推文</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3">
+  {{!-- {{#each tweets}} --}}
+  {{#each tweets}}
+  <div class="card m-3" style="width: 18rem;">
+    <a href="http:/users/{{this.Tweet.User.id}}">
+      {{!-- <img src="{{this.User.cover}}" class="card-img-top" alt="..."> --}}
+      <img src="{{this.Tweet.User.avatar}}" class="card-img-top" alt="..."
+        style="max-width: 80px; max-height: 80px; border-radius: 50%;">
+    </a>
+    <div class="card-body">
+      <h5 class="card-title">推文編號:{{this.Tweet.id}} </h5>
+      <p class="card-text">內容:{{this.Tweet.description}}</p>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">推文的時間 {{this.Tweet.createdAt}}</li>
+      <li class="list-group-item">推文者的帳號 @{{this.Tweet.User.account}}</li>
+      <li class="list-group-item">推文者的名字 {{ this.Tweet.User.name}}</li>
+      <li class="list-group-item d-flex justify-content-around">
+        <div class="left">
+          <i class="far fa-comment"></i>
+          <span>{{this.tweetReplyCount}} 回覆數</span>
+        </div>
+        <div class="right inline-block">
+
+          {{!-- 推文者{{this.UserId}} 使用者{{../userId}} --}}
+          推文ID {{this.Tweet.id}}
+          留言Id {{this.id}}
+          {{this.isLike}}
+          {{!-- {{#ifCond current_user.id user.id}} --}}
+          {{#if this.isLike}}
+          {{!-- <form action="/tweets/{{this.id}}/like" method="POST"> --}}
+            <form action="/tweets/{{this.Tweet.id}}/unlike" method="POST">
+              <button type="submit"><i class="fas fa-heart text-danger"></i></button>
+              <span>{{this.tweetLikeCount}} 喜歡數</span>
+            </form>
+            {{else}}
+            {{!-- <form action="/tweets/{{this.id}}/unlike" method="POST"> --}}
+              <form action="/tweets/{{this.Tweet.id}}/like" method="POST">
+                <button type="submit"><i class="far fa-heart text-danger"></i></button>
+                <span>{{this.tweetLikeCount}} 喜歡數</span>
+              </form>
+              {{/if}}
+              {{!-- {{/ifCond}} --}}
+              {{!-- {{#ifCond UserId ../userId}}
+              <p>不能喜歡</p>
+              {{else}}
+              <p>可以喜歡</p>
+              {{/ifCond}} --}}
+
+
+              <!-- {{#if this.likes.isLike}}
+          <form action="/tweets/{{this.id}}/like" method="POST">
+            <button type="submit"><i class="far fa-heart"></i></button>
+            <span>{{this.Likes.length}} 喜歡數</span>
+          </form>
+          {{else}}
+          <form action="/tweets/{{this.id}}/unlike" method="POST">
+            <button type="submit"><i class="fas fa-heart"></i></button>
+            <span>{{this.Likes.length}} 喜歡數</span>
+          </form>
+          {{/if}} -->
+        </div>
+        <!-- <div class="right">
+         <i class="far fa-heart"> </i>
+         <span>  喜歡數</span>
+       </div> -->
+      </li>
+    </ul>
+    <div class="card-body">
+      <a href="/users/{{this.User.id}}" class="card-link">profile</a>
+      <a href="/users/{{this.User.id}}/edit" class="card-link">edit</a>
+      <a href="/tweets/{{this.User.id}}" class="card-link">tweet</a>
+    </div>
+    <form action="/tweets/{{this.Tweet.id}}/replies" method="POST">
+      <div class="form-group">
+        <label for="reply">回覆</label>
+        <textarea class="form-control" id="reply" rows="3" name="reply" placeholder="請留言"></textarea>
+      </div>
+      <button type="submit" class="btn">留言</button>
+    </form>
+  </div>
+  {{/each}}
+</div>
