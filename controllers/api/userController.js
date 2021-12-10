@@ -89,6 +89,11 @@ let userController = {
       return res.json(data);
     });
   },
+  reviseUser: (req, res) => {
+    userService.reviseUser(req, res, (data) => {
+      return res.json(data);
+    });
+  },
   addLike: (req, res) => {
     userService.addLike(req, res, (data) => {
       return res.json(data);
@@ -170,6 +175,11 @@ let userController = {
 
   getUserLikesTweet: (req, res) => {
     userService.getUserLikesTweet(req, res, (data) => {
+      return res.json(data);
+    });
+  },
+  putUser2: (req, res) => {
+    userService.putUser2(req, res, (data) => {
       return res.json(data);
     });
   },
