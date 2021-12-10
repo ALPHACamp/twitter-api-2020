@@ -39,17 +39,19 @@ Simple Twitter連結：https://sh330035.github.io/twitter-frontend/
 ## 怎麼使用？
 1. 下載repository
     <pre><code>git clone -b master git@github.com:jadokao/twitter-api-2020.git</code></pre>
-2. 進入資料夾，進行套件下載
+2. 進入資料夾
+    <pre><code>cd twitter-api-2020</code></pre>
+4. 進行套件下載
     <pre><code>npm install</code></pre>
-3. 建立檔案：*.env*，並參考檔案：*.env.example*，放入環境變數
-4. 至資料夾*config*裡的*config.json*，修改環境*development*內的*username*與*password*和本機的SQL資訊相符
-5. 到SQL Workbench，輸入指令來建立database
+4. 建立檔案：*.env*，並參考檔案：*.env.example*，放入環境變數
+5. 至資料夾*config*裡的*config.json*，修改環境*development*內的*username*與*password*和本機的SQL資訊相符
+6. 到SQL Workbench，輸入指令來建立database
     <pre><code>create database ac_twitter_workspace;</code></pre>
-6. 建立Model的Table至database
+7. 建立Model的Table至database
     <pre><code>npx sequelize db:migrate</code></pre>
-7. 載入種子檔
+8. 載入種子檔
     <pre><code>npx sequelize db:seed:all</code></pre>
-8. 輸入指令，運行server
+9. 輸入指令，運行server
     <pre><code>npm run dev</code></pre>
 ##### 注意事項
 * 如果是使用windows系統，需要到檔案：*package.json*，找到*scripts*下的*dev*，把內容改成：
