@@ -1,6 +1,6 @@
 const adminController = {
-  getTweets: (req, res) => {
-    return res.render('admin/tweets')
+  getChatroom: (req, res) => {
+    return res.render('chatroom')
   }
 }
 

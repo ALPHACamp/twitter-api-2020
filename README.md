@@ -1,10 +1,10 @@
-# Simple Twitter
+# Alphitter
 
-Simple Twitter is a social media application simulating Twitter
+Alphitter is a social media application simulating Twitter
 
 # Feature
  
-With Simple Twitter, you can do the followings
+With Alphitter, you can do the followings
 
 - set up your personal profile including account, name, avatar, cover photo and an introduction about yourself
 - like/unlike a post
