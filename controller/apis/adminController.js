@@ -12,10 +12,7 @@ const adminController = {
   signIn: (req, res) => {
     // 檢查必要資料
     if (!req.body.account || !req.body.password) {
-      // return res.json({ status: 'error', message: '所有欄位必填！' })
-      return res
-        .status(400)
-        .send({ status: 'error', message: '所有欄位必填！' })
+      return res.json({ status: 'error', message: '所有欄位必填！' })
     }
     User.findOne({ where: { account: req.body.account } }).then(user => {
       if (!user) {
