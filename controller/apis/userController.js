@@ -272,7 +272,7 @@ const userController = {
             //使用SQL原生語法 subQuery出user like的tweetId,在以此條件與主查詢進行查找
             sequelize.literal(`
               SELECT TweetId
-              FROM LIKES
+              FROM Likes
               WHERE UserId = ${req.params.id}`)
           ]
         },
