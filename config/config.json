@@ -4,7 +4,8 @@
     "password": "password",
     "database": "ac_twitter_workspace",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "operatorsAliases": "Sequelize.Op"
   },
   "test": {
     "username": "root",
@@ -12,20 +13,19 @@
     "database": "ac_twitter_workspace_test",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "logging": false
+    "logging": false,
+    "operatorsAliases": "Sequelize.Op"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "use_env_variable": "CLEARDB_DATABASE_URL",
+    "operatorsAliases": "Sequelize.Op"
   },
   "travis": {
     "username": "travis",
     "database": "ac_twitter_workspace_test",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "logging": false
+    "logging": false,
+    "operatorsAliases": "Sequelize.Op"
   }
 }

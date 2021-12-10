@@ -58,9 +58,7 @@ describe('# admin requests', () => {
         await db.User.destroy({where: {},truncate: true, force: true})
         await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
       })
-
     });
-
   });
 
   context('# DELETE ', () => {
