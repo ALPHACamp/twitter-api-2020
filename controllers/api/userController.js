@@ -210,6 +210,11 @@ let userController = {
       return res.json(data);
     });
   },
+  putUser2: (req, res) => {
+    userService.putUser2(req, res, (data) => {
+      return res.json(data);
+    });
+  },
   putUserImg: (req, res) => {
     userService.putUserImg(req, res, (data) => {
       return res.json(data);

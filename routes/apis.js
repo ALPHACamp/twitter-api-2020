@@ -55,7 +55,9 @@ router.get("/users/:id", authenticated, authenticatedUser, userController.getUse
 //  使用者編輯自己所有資訊
 // router.put("/users/:id", upload.single('cover'), authenticated, authenticatedUser, userController.putUser);
 // router.put("/users/:id", upload.array('cover',2), authenticated, authenticatedUser, userController.putUser);
-router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser) 
+router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser)
+// 第二張圖片
+router.put("/users/:id/img2", authenticated,  upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser2)  
 // <--可以傳一個陣列 FILE
 
 
@@ -108,6 +110,6 @@ router.delete('/destroyer/users', userController.deleteAllUsers)
 router.delete('/destroyer/tweets', userController.deleteAllTweets)
 router.delete('/destroyer/replies', userController.deleteAllReplies)
 
-router.put("/users/:id/img2", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUserImg) 
+// router.put("/users/:id/imgtest", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUserImg) 
 
 module.exports = router

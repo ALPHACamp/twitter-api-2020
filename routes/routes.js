@@ -73,7 +73,7 @@ router.get('/users/:id/edit', authenticated, userController.editUser)
 // router.put('/users/:id', authenticated, upload.array('cover',2), userController.putUser)
 router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
 // <--可以傳一個陣列 FILE
-
+router.put("/users/:id/img2", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser)
 
 //  查詢user的所有推文
 router.get('/users/:userId/tweets', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserTweets)
