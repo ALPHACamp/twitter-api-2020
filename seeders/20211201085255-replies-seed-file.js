@@ -9,7 +9,7 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert('Replies', tweetIdArray.map((d, i) => ({
       TweetId: d,
-      UserId: (i % 5) * 10 + 1,  // [1,11,21,31,41] ; i = 1~50; i % 5 = 0~4
+      UserId: (i % 5) * 10 + 11,  // [11,21,31,41,51] ; i = 1~50; i % 5 = 0~4
       comment: faker.lorem.text().slice(0, 280),
       createdAt: faker.date.recent(10),
       updatedAt: new Date()
