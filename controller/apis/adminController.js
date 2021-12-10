@@ -24,9 +24,7 @@ const adminController = {
           .json({ status: 'error', message: '密碼錯誤！' })
       }
       if (user.role !== 'admin') {
-        return res
-          .status(400)
-          .json({ status: 'error', message: '不允許一般用戶登錄！' })
+        return res.json({ status: 'error', message: '不允許一般用戶登錄！' })
       }
       // 簽發 token
       var payload = { id: user.id }
