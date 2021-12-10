@@ -183,6 +183,7 @@ const userController = {
         limit: 10,
         raw: true,
         nest: true,
+        where: { role: null },
         order: [[sequelize.col('follower_count'), 'DESC']]
       })
       const followingUsers = await Followship.findAll({
