@@ -14,7 +14,7 @@
 ## 專案設定(利用終端機)
 1. 下載本專案到本地
 ```
-git colone https://github.com/Emily81926/twitter-api-2020.git
+git clone https://github.com/Emily81926/twitter-api-2020.git
 ```
 2. 進入本專案資料夾
 ```
