@@ -1,5 +1,4 @@
 const db = require('../../models')
-const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
 const helper = require('../../_helpers')
@@ -8,10 +7,12 @@ const replyController = {
   postReply: async (req, res) => {
     try {
       if (req.body.comment.trim().length < 1) {
-        return res.status(400).json({ message: '內容不可空白' })
+        return res.json({ status: 'error', message: '內容不可空白' })
       }
       if (req.body.comment.length > 150) {
-        return res.status(400).json({ message: '字數超出上限！' })
+        return res
+          .status(400)
+          .json({ status: 'error', message: '字數超出上限！' })
       }
 
       const reply = await Reply.create({
@@ -19,10 +20,10 @@ const replyController = {
         TweetId: req.params.id,
         comment: req.body.comment
       })
-      return res.status(200).json(reply)
+      return res.status(200).json({ status: 'success', message: '', reply })
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getReply: async (req, res) => {
@@ -39,20 +40,20 @@ const replyController = {
       return res.status(200).json(replies)
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   deleteReply: async (req, res) => {
     try {
       const reply = await Reply.findByPk(req.params.replyId)
       if (reply.UserId !== helper.getUser(req).id) {
-        return res.status(401).json({ status: 401, message: '無權刪除回覆' })
+        return res.json({ status: 'error', message: '無權刪除回覆' })
       }
       await reply.destroy()
-      return res.json({ status: 200, message: '刪除成功！' })
+      return res.json({ status: 'success', message: '刪除成功！' })
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   }
 }

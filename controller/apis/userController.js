@@ -38,13 +38,13 @@ const userController = {
           .json({ status: 'error', message: '密碼錯誤！' })
       }
       if (user.role === 'admin') {
-        return res.json({ message: '請使用管理員登錄系統' })
+        return res.json({ status: 'error', message: '請使用管理員登錄系統' })
       }
       // 簽發 token
       var payload = { id: user.id }
       var token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.status(200).json({
-        status: 200,
+        status: 'success',
         message: 'pass',
         token: token,
         user: {
@@ -99,7 +99,9 @@ const userController = {
           null
         )
       })
-      return res.status(200).json({ status: 200, message: '成功註冊帳號！' })
+      return res
+        .status(200)
+        .json({ status: 'success', message: '成功註冊帳號！' })
     } catch (err) {
       console.log(err)
       return res.json({ status: 'error', message: err })
@@ -142,14 +144,14 @@ const userController = {
       const isFollowed = followship ? true : false
       if (userProfile.role === 'admin') {
         //防止使用者搜尋Admin
-        return res
-          .status(400)
-          .json({ status: 'error', message: 'User is not exist' })
+        return res.json({ status: 'error', message: 'User is not exist' })
       }
-      return res.status(200).json({ ...userProfile, isFollowed })
+      return res
+        .status(200)
+        .json({ ...userProfile, isFollowed, status: 'success' })
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getUsers: async (req, res, cb) => {
@@ -159,10 +161,12 @@ const userController = {
         nest: true,
         where: { role: null }
       })
-      return res.status(200).json({ status: 200, message: 'success', users })
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'success', users })
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getTopUsers: async (req, res) => {
@@ -199,8 +203,7 @@ const userController = {
       }))
       return res.status(200).json(topUser)
     } catch (err) {
-      console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getUserTweets: async (req, res) => {
@@ -248,7 +251,7 @@ const userController = {
       return res.status(200).json(tweetTable)
     } catch (err) {
       console.log(err)
-      res.status(400).json({ status: 'error', message: err })
+      res.json({ status: 'error', message: err })
     }
   },
   getUserReplies: async (req, res) => {
@@ -262,7 +265,7 @@ const userController = {
       })
       return res.status(200).json([...replies])
     } catch (err) {
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getUserLike: async (req, res) => {
@@ -323,8 +326,7 @@ const userController = {
       }))
       return res.status(200).json(userLikes)
     } catch (err) {
-      console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getUserFollowings: async (req, res) => {
@@ -362,14 +364,12 @@ const userController = {
         isFollowed: followingIds.includes(u.Followings.id) //compare status with currentUser and User
       }))
       if (!user) {
-        return res
-          .status(400)
-          .json({ status: 400, message: 'cannot find user' })
+        return res.json({ status: 'error', message: 'cannot find user' })
       }
       return res.status(200).json(following)
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getUserFollowers: async (req, res) => {
@@ -395,9 +395,7 @@ const userController = {
         order: [[sequelize.col('follower_createdAt'), 'DESC']]
       })
       if (!user) {
-        return res
-          .status(400)
-          .json({ status: 400, message: 'cannot find user' })
+        return res.json({ status: 'error', message: 'cannot find user' })
       }
       const followingUsers = await Followship.findAll({
         where: { followerId: helper.getUser(req).id },
@@ -419,7 +417,7 @@ const userController = {
       return res.status(200).json(follower)
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   putUser: async (req, res) => {
@@ -427,13 +425,13 @@ const userController = {
       const { files } = req
       if (files) {
         if (req.body.name.trim().length < 1) {
-          return res.status(400).json({ message: '名字不能空白！' })
+          return res.json({ status: 'error', message: '名字不能空白！' })
         }
         if (req.body.name.length > 60) {
-          return res.status(400).json({ message: '名字字數超出上限！' })
+          return res.json({ status: 'error', message: '名字字數超出上限！' })
         }
         if (req.body.introduction.length > 170) {
-          return res.status(400).json({ message: '自介字數超出上限！' })
+          return res.json({ status: 'error', message: '自介字數超出上限！' })
         }
 
         imgur.setClientID(IMGUR_CLIENT_ID)
@@ -454,7 +452,9 @@ const userController = {
             { where: { id: helper.getUser(req).id } }
           )
           const user = await User.findByPk(helper.getUser(req).id)
-          return res.status(200).json({ message: 'success', user })
+          return res
+            .status(200)
+            .json({ status: 'success', message: 'success', user })
         }
         await User.update(
           {
@@ -470,16 +470,16 @@ const userController = {
           { where: { id: helper.getUser(req).id } }
         )
         const user = await User.findByPk(helper.getUser(req).id)
-        return res.status(200).json({ message: 'success', user })
+        return res.status(200).json({ status: 'success', message: '', user })
       } else {
         if (req.body.name.trim().length < 1) {
-          return res.status(400).json({ message: '名字不能空白！' })
+          return res.json({ status: 'error', message: '名字不能空白！' })
         }
         if (req.body.name.length > 60) {
-          return res.status(400).json({ message: '名字字數超出上限！' })
+          return res.json({ status: 'error', message: '名字字數超出上限！' })
         }
         if (req.body.introduction.length > 170) {
-          return res.status(400).json({ message: '自介字數超出上限！' })
+          return res.json({ status: 'error', message: '自介字數超出上限！' })
         }
         if (req.body.isCanceled) {
           await User.update(
@@ -491,7 +491,7 @@ const userController = {
             { where: { id: helper.getUser(req).id } }
           )
           const user = await User.findByPk(helper.getUser(req).id)
-          return res.status(200).json({ status: 200, message: 'success', user })
+          return res.status(200).json({ status: 'success', message: '', user })
         }
         await User.update(
           {
@@ -501,11 +501,13 @@ const userController = {
           { where: { id: helper.getUser(req).id } }
         )
         const user = await User.findByPk(helper.getUser(req).id)
-        return res.status(200).json({ status: 200, message: 'success', user })
+        return res
+          .status(200)
+          .json({ status: 'success', message: 'success', user })
       }
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getCurrentUser: async (req, res) => {
@@ -516,8 +518,7 @@ const userController = {
       })
       return res.status(200).json(user)
     } catch (err) {
-      console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   postFollow: async (req, res) => {
@@ -530,10 +531,14 @@ const userController = {
       })
       return res
         .status(200)
-        .json({ message: `成功追蹤 UserId:${req.body.id}`, user })
+        .json({
+          status: 'success',
+          message: `成功追蹤 UserId:${req.body.id}`,
+          user
+        })
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   deleteFollow: async (req, res) => {
@@ -544,10 +549,12 @@ const userController = {
           followingId: req.params.id
         }
       })
-      return res.status(200).json({ message: '成功移除 follow' })
+      return res
+        .status(200)
+        .json({ status: 'success', message: '成功移除 follow' })
     } catch (err) {
       console.log(err)
-      return res.status(400).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   accountSetting: async (req, res) => {

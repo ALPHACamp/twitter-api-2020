@@ -54,7 +54,7 @@ const tweetController = {
       return res.status(200).json([...data])
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   getTweet: async (req, res) => {
@@ -95,26 +95,26 @@ const tweetController = {
       return res.status(200).json({ ...tweet, isLiked })
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   postTweet: async (req, res) => {
     try {
       if (req.body.description.length > 150) {
-        return res.status(400).json({ message: '字數超出上限！' })
+        return res.json({ status: 'error', message: '字數超出上限！' })
       }
 
       if (req.body.description.trim().length < 1) {
-        return res.status(400).json({ message: '內容不可空白' })
+        return res.json({ status: 'error', message: '內容不可空白' })
       }
       await Tweet.create({
         description: req.body.description,
         UserId: helper.getUser(req).id
       })
-      return res.json({ status: 200, message: '' })
+      return res.json({ status: 'success', message: '' })
     } catch (err) {
       console.error(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   putTweet: async (req, res) => {
@@ -126,16 +126,16 @@ const tweetController = {
         })
       }
       if (req.description.length > 150) {
-        return res.status(400).json({ message: '字數超出上限！' })
+        return res.json({ status: 'error', message: '字數超出上限！' })
       }
       await Tweet.update(
         { description: req.body.description },
         { where: { id: req.params.id } }
       )
-      return res.json({ status: 200, message: '' })
+      return res.json({ status: 'success', message: '' })
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   },
   deleteTweet: async (req, res) => {
@@ -143,10 +143,10 @@ const tweetController = {
       await Tweet.destroy({ where: { id: req.params.id } }),
         await Reply.destroy({ where: { TweetId: req.params.id } }),
         await Like.destroy({ where: { TweetId: req.params.id } })
-      return res.json({ status: 200, message: 'delete successfully' })
+      return res.json({ status: 'success', message: 'delete successfully' })
     } catch (err) {
       console.log(err)
-      return res.status(401).json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err })
     }
   }
 }
