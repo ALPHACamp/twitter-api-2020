@@ -19,7 +19,7 @@ git clone
   - frontend: https://github.com/huangtingyu04/simple-twitter-front-end.git
   - backend: https://github.com/cschang07/twitter-api-2020.git
 
-cd forum-express
+cd twitter-api-2020
 
 npm install
 
