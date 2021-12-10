@@ -14,8 +14,9 @@ const likeController = {
         UserId: helper.getUser(req).id,
         TweetId: req.params.id
       })
-      return res.status(200).json({ status: 'success', message: '喜歡成功！' })
+      return res.status(200).json({ message: '喜歡成功！' })
     } catch (err) {
+      console.log(err)
       return res.json({ status: 'error', message: err })
     }
   },
@@ -27,9 +28,11 @@ const likeController = {
           TweetId: req.params.id
         }
       })
-      return res.status(200).json({ status: 'success', message: '成功移除' })
+      return res.status(200).json({ message: '重功移除' })
     } catch (err) {
-      return res.json({ status: 'error', message: err })
+      console.log(err)
+      console.log(err)
+      return res.status(400).json({ message: err })
     }
   }
 }

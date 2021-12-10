@@ -3,6 +3,7 @@ const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
 const Reply = db.Reply
+const helper = require('../../_helpers')
 const jwt = require('jsonwebtoken')
 const { sequelize } = require('../../models')
 const bcrypt = require('bcryptjs')
@@ -31,7 +32,7 @@ const adminController = {
       var payload = { id: user.id }
       var token = jwt.sign(payload, process.env.JWT_SECRET)
       return res.status(200).json({
-        status: 'success',
+        status: 200,
         message: 'pass',
         token: token,
         user: {
@@ -100,35 +101,31 @@ const adminController = {
     }
   },
   getTweets: async (req, res) => {
-    try {
-      const tweets = await Tweet.findAll({
-        raw: true,
-        nest: true,
-        include: [{ model: User, attributes: [] }],
-        attributes: {
-          include: [
-            [sequelize.col('User.name'), 'UserName'],
-            [sequelize.col('User.account'), 'UserAccount'],
-            [sequelize.col('User.id'), 'UserId'],
-            [sequelize.col('User.avatar'), 'UserAvatar']
-          ]
-        },
-        order: [['createdAt', 'DESC']]
-      })
-      return res.status(200).json({ tweets })
-    } catch (err) {
-      return res.json({ status: 'error', message: err })
-    }
+    const tweets = await Tweet.findAll({
+      raw: true,
+      nest: true,
+      include: [{ model: User, attributes: [] }],
+      attributes: {
+        include: [
+          [sequelize.col('User.name'), 'UserName'],
+          [sequelize.col('User.account'), 'UserAccount'],
+          [sequelize.col('User.id'), 'UserId'],
+          [sequelize.col('User.avatar'), 'UserAvatar']
+        ]
+      },
+      order: [['createdAt', 'DESC']]
+    })
+    return res.status(200).json({ tweets })
   },
   deleteTweet: async (req, res) => {
     try {
       await Tweet.destroy({ where: { id: req.params.id } })
       await Reply.destroy({ where: { TweetId: req.params.id } }),
         await Like.destroy({ where: { TweetId: req.params.id } })
-      return res.status(200).json({ status: 'success', message: '刪除成功' })
+      return res.status(200).json({ message: '刪除成功' })
     } catch (err) {
       console.log(err)
-      return res.json({ status: 'err', message: err })
+      return res.status(401).json(err)
     }
   }
 }
