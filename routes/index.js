@@ -70,7 +70,7 @@ router.get('/api/users/:id/followers', authenticated, authenticatedUser, userCon
 router.get('/api/users/:id/followings', authenticated, authenticatedUser, userController.getOneFollowings)
 
 //先讓前端使用的get_current)user
-router.get('/api/get_current_user', authenticated, authenticatedUser, userController.getCurrentUser)
+router.get('/api/get_current_user', authenticated, userController.getCurrentUser)
 
 
 
