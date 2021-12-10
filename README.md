@@ -20,7 +20,7 @@
   },
   User1: {
     "username": "user1",
-    "email": "root@example.com",
+    "email": "user1@example.com",
     "password": "12345678"
   },
 ```
