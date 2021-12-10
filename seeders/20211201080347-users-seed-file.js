@@ -11,7 +11,7 @@ module.exports = {
       [
         {
           id: 1,
-          account: 'admin',
+          account: 'root',
           email: 'root@example.com',
           password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
           name: 'Administrator',
