@@ -34,7 +34,6 @@ router.get('/get_current_user', authenticated, userController.getCurrentUser)
 // 使用者拿到登入路由
 router.get("/signup", userController.signUpPage);
 //  使用者註冊路由
-// router.post("/signup", userController.signUp);
 router.post("/users", userController.signUp)
 //  使用者登入
 router.post('/signIn', userController.signIn)
@@ -47,60 +46,54 @@ router.get('/users/top', authenticated, authenticatedUser, userController.getTop
 router.get("/users/:id/followers", authenticated, authenticatedUser, userController.getFollowers)
 //取得正在追蹤的使用者的資料
 router.get("/users/:id/followings", authenticated, authenticatedUser, userController.getFollowings)
-
+//get a specific user
 router.get("/users/:id", authenticated, authenticatedUser, userController.getUser);
-// router.get("/users/:id", userController.getUser);
+
 
 
 //  使用者編輯自己所有資訊
-// router.put("/users/:id", upload.single('cover'), authenticated, authenticatedUser, userController.putUser);
-// router.put("/users/:id", upload.array('cover',2), authenticated, authenticatedUser, userController.putUser);
 router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser) 
-// <--可以傳一個陣列 FILE
 
 
 //  查詢user的所有推文
-// router.get('/users/:userId/tweets', authenticated, authenticatedUser, upload.single('cover'), userController.getUserTweets)
-router.get('/users/:userId/tweets', authenticated, authenticatedUser,  upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserTweets)
+router.get('/users/:userId/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 // 查詢user的所有likes的推文
-// router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
 router.get('/users/:userId/likes', authenticated, authenticatedUser, userController.getUserLikes)
 
 router.get('/users/:userId/likesTweets', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikesTweet)
 
 //  查詢user的所有留言
-// router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
-router.get('/users/:userId/replies', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserReplies)
+router.get('/users/:userId/replies', authenticated, userController.getUserReplies)
 
-// router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
+//新增一篇堆文
+router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet) 
+//拿到所有推文，包括作者的推文
+router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+//拿到一筆推文與回覆
+router.get('/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet) 
 
+//新增一筆推文的回覆
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply)
+//瀏覽一筆推文的所有回覆
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies) 
 
-// router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
-// <--可以傳一個陣列 FILE
+//喜歡一則推文
+router.post('/tweets/:id/like', authenticated, authenticatedUser, userController.addLike)
+//取消喜歡的貼文
+router.post('/tweets/:id/unlike', authenticated, authenticatedUser, userController.removeLike) 
 
+//新增一位追蹤者
+router.post('/followships/:id', authenticated, authenticatedUser, userController.addFollowing) 
+//新增一位追蹤者
+router.delete('/followships/:id', authenticated, authenticatedUser, userController.removeFollowing) 
 
-// const adminController = require('../controllers/api/adminController.js')
-// const userController = require('../controllers/api/userController.js')
-// 還要宣告其他的controller
-
-//API新增在這裡
-router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet) //新增一篇堆文
-router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets) //拿到所有推文，包括作者的推文
-router.get('/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet) //拿到一筆推文與回覆
-
-router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.postReply) //新增一筆推文的回覆
-router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, replyController.getReplies) //瀏覽一筆推文的所有回覆
-
-
-router.post('/tweets/:id/like', authenticated, authenticatedUser, userController.addLike) //喜歡一則推文
-router.post('/tweets/:id/unlike', authenticated, authenticatedUser, userController.removeLike) //取消喜歡的貼文
-
-router.post('/followships/:id', authenticated, authenticatedUser, userController.addFollowing) //新增一位追蹤者
-router.delete('/followships/:id', authenticated, authenticatedUser, userController.removeFollowing) //新增一位追蹤者
-
-router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers) //管理者可以看見站內所有的使用者
-router.get('/admin/users/:id', authenticated, authenticatedAdmin, adminController.getUser) //管理者可以看見站內所有的使用者
-router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets) //管理者可以看見站內所有的使用者
+//管理者可以看見站內所有的使用者
+router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers) 
+//管理者可以看見站內所有的使用者
+router.get('/admin/users/:id', authenticated, authenticatedAdmin, adminController.getUser) 
+//管理者可以看見站內所有的使用者
+router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets) 
+//管理者可以刪除特定推文
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 
 //DARK MAGIC FOR DESTROYING DATA

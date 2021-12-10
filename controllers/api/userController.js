@@ -18,17 +18,12 @@ let userController = {
   },
 
   signIn: (req, res) => {
-    // if (!req.body.email || !req.body.password) {
-    //   return res.json({ status: "error", message: "請填寫帳號或密碼。" });
-    // }
     if (!req.body.account || !req.body.password) {
       return res.json({ status: "error", message: "請填寫帳號或密碼。" });
     }
-    // let username = req.body.email;
     let username = req.body.account;
     let password = req.body.password;
 
-    // User.findOne({ where: { email: username } }).then((user)
     User.findOne({ where: { account: username } }).then((user) => {
       if (!user)
         return res
@@ -52,38 +47,6 @@ let userController = {
       });
     });
   },
-  // signIn: (req, res) => {
-  //   if (!req.body.email || !req.body.password) {
-  //     return res.json({ status: "error", message: "請填寫帳號或密碼。" });
-  //   }
-
-  //   let username = req.body.email;
-  //   let password = req.body.password;
-
-  //   User.findOne({ where: { email: username } }).then((user) => {
-  //     if (!user)
-  //       return res
-  //         .status(401)
-  //         .json({ status: "error", message: "此帳號不存在。" });
-  //     if (!bcrypt.compareSync(password, user.password)) {
-  //       return res.status(401).json({ status: "error", message: "密碼不正確" });
-  //     }
-  //     var payload = { id: user.id };
-  //     var token = jwt.sign(payload, process.env.JWT_SECRET);
-  //     return res.json({
-  //       status: "success",
-  //       message: "ok",
-  //       token: token,
-  //       user: {
-  //         id: user.id,
-  //         name: user.name,
-  //         email: user.email,
-  //         role: user.role,
-  //       },
-  //     });
-  //   });
-  // },
-
   signUp: (req, res) => {
     // confirm password
     if (req.body.checkPassword !== req.body.password) {
