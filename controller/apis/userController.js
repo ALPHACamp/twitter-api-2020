@@ -38,7 +38,7 @@ const userController = {
           .json({ status: 'error', message: '密碼錯誤！' })
       }
       if (user.role === 'admin') {
-        return res.json({ message: '請使用管理員登錄系統' })
+        return res.json({ message: '帳號不存在！' })
       }
       // 簽發 token
       var payload = { id: user.id }
