@@ -1,8 +1,8 @@
 'use strict';
 const faker = require('faker')
-let userIdArray = []  // [1,1,1..., 11,11,11,...41,41,41]
+let userIdArray = []  // [11,11,11..., 21,21,21,...41,41,41]
 for (let i = 0; i < 5; i++) {
-  let oneUserIdArray = Array(10).fill(10*i+ 1 )  //[1,1,1,1,1,1...] 10個5
+  let oneUserIdArray = Array(10).fill(10*i+ 11 )  //[11,11,11,11,11,11...] 10個5
   userIdArray.push(...oneUserIdArray)
 }
 
