@@ -96,7 +96,7 @@ create database ac_twitter_workspace_test;
 
 ```
 npx sequelize db:migrate
-npm sequelize db:seed:all
+npx sequelize db:seed:all
 ```
 
 8. 啟動伺服器
