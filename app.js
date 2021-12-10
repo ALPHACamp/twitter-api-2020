@@ -18,7 +18,7 @@ const port = process.env.PORT || 3000
 
 //socket.io
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+// const io = require('socket.io')(server);
 
 //for handlebars
 app.engine('handlebars', handlebars({
