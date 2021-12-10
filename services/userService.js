@@ -302,32 +302,36 @@ const userService = {
         include: [User, { model: Tweet, include: [User, Reply, Like] }],
       }),
     ]).then(([user, tweets]) => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-      };
-      let newTweets = tweets.map((d) => {
-        let isLike;
-        let userLike = d.Tweet.Likes.find((l) => l.UserId === currentUser.id);
-        if (!userLike) {
-          isLike = false;
-        } else {
-          isLike = userLike.isLike;
-        }
-        return {
-          ...d.dataValues,
-          tweetReplyCount: d.Tweet.Replies.length,
-          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
-          isLike: isLike,
-        };
-      });
-      let tweetCount = tweets.length;
+      // user = {
+      //   ...user.dataValues,
+      //   FollowersCount: user.Followers.length,
+      //   FollowingsCount: user.Followings.length,
+      //   isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
+      // };
+      // let newTweets = tweets.map((d) => {
+      //   let isLike;
+      //   let userLike = d.Tweet.Likes.find((l) => l.UserId === currentUser.id);
+      //   if (!userLike) {
+      //     isLike = false;
+      //   } else {
+      //     isLike = userLike.isLike;
+      //   }
+      //   return {
+      //     ...d.dataValues,
+      //     tweetReplyCount: d.Tweet.Replies.length,
+      //     tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
+      //     isLike: isLike,
+      //   };
+      // });
+      // let tweetCount = tweets.length;
+      // return callback({
+      //   tweets: newTweets,
+      //   user: user,
+      //   tweetCount: tweetCount,
+      // });
       return callback({
-        tweets: newTweets,
+        tweets: tweets,
         user: user,
-        tweetCount: tweetCount,
       });
     });
   },
