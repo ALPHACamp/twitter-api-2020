@@ -59,6 +59,33 @@ app.use((req, res, next) => {
 //-----------
 
 //socket.io
+// 加入線上人數計數
+let onlineCount = 0;
+
+// 修改 connection 事件
+io.on('connection', (socket) => {
+  // 有連線發生時增加人數
+  onlineCount++;
+  // 發送人數給網頁
+  io.emit("online", onlineCount);
+
+  socket.on("greet", () => {
+    socket.emit("greet", onlineCount);
+  });
+
+  socket.on('disconnect', () => {
+    // 有人離線了，扣人
+    onlineCount = (onlineCount < 0) ? 0 : onlineCount -= 1;
+    io.emit("online", onlineCount);
+  });
+
+  socket.on("send", (msg) => {
+    //for the object should have A NAME and A MSG, the minimum length is 2
+    if (Object.keys(msg).length < 2) return;
+    // 廣播訊息到聊天室
+    io.emit("msg", msg);
+})
+});
 
 
 // app.get('/', (req, res) => res.send('Hello World!'))

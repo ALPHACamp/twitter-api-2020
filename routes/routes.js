@@ -8,6 +8,7 @@ const replyController = require('../controllers/replyController.js')
 const tweetController = require('../controllers/tweetController.js')
 const adminController = require('../controllers/adminController.js')
 const userController = require('../controllers/userController.js')
+const chatroomController = require('../controllers/chatroomController.js')
 const passport = require('../config/passport')
 
 const authenticated = (req, res, next) => {
@@ -94,6 +95,6 @@ router.delete('/followships/:id', authenticated, userController.removeFollowing)
 // router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
 
 //chatroom
-router.get('/chatroom', )
+router.get('/chatroom', chatroomController.getChatroom)
 
 module.exports = router
