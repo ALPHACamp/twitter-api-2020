@@ -1,0 +1,17 @@
+<body>
+  <div id="msg"></div>
+
+  <script>
+    // 當觸發連線建立事件
+    // 發送 greet 事件給伺服器
+    socket.on("connect", function () {
+      socket.emit("greet");
+    });
+
+    // 當收到伺服器回傳到 greet 事件
+    // 將內容轉到 div 中呈現
+    socket.on("greet", function (msg) {
+      document.getElementById("msg").innerText = msg;
+    });
+  </script>
+</body>
