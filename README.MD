@@ -47,16 +47,24 @@ IMGUR_CLIENT_ID=YOUR ID
 create database ac_twitter_workspace;
 ```
 
-4. 在終端機輸入以下指令，進行資料庫遷移、種子資料初始化
+4. 建立資料表
 
 ```
 npx sequelize db:migrate
+```
+
+5. 建立種子資料
+```
 npx sequelize db:seed:all
 ```
 
-5. 在終端機輸入以下指令，啟動後端專案
+6. 啟動後端專案
 ```
 npm run dev
+```
+or
+```
+nodemon app.js 
 ```
 
 ### 開發人員
