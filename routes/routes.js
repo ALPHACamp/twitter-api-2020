@@ -96,4 +96,7 @@ router.delete('/followships/:id', authenticated, userController.removeFollowing)
 // router.get('/admin', authenticatedAdmin, (req, res) => res.redirect('/admin/tweets'))
 // router.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
 
+//chatroom
+router.get('/chatroom', )
+
 module.exports = router

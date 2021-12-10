@@ -14,7 +14,6 @@ const adminService = {
   getUsers: (req, res, callback) => {
     return User.findAll({ include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, Tweet] })
       .then(users => {
-        console.log(users[0])
         callback({
           users: users
         })
