@@ -136,6 +136,12 @@ const userController = {
       return res.redirect("back");
     });
   },
+  // 測試
+  getUserLikesTweet: (req, res) => {
+    userService.getUserLikesTweet(req, res, (data) => {
+      return res.render("userLikeTweets", data);
+    });
+  },
 };
 
 module.exports = userController

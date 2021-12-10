@@ -83,6 +83,7 @@ router.get('/users/:userId/replies', authenticated, upload.fields([{ name: 'cove
 // router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
 // 查詢user的所有likes的推文
 router.get('/users/:userId/likes', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikes)
+router.get('/users/:userId/likesTweet', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikesTweet)
 // router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
 
 //新增一位追蹤者
