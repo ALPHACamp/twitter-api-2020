@@ -11,12 +11,14 @@ https://thawing-taiga-98720.herokuapp.com/api
 
 ## 前台測試帳號：
 ```
+帳號: user1
 email: user1@example.com
 password: 12345678
 ```
 ## 後台測試帳號：
 
 ```
+帳號: root
 email: root@example.com
 password: 12345678
 ```
