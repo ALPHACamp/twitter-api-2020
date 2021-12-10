@@ -11,24 +11,20 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 const passport = require('./config/passport')
-
-//-----------
 const handlebars = require('express-handlebars')
-//-----------
 
 const app = express()
 const port = process.env.PORT || 3000
 
-// use helpers.getUser(req) to replace req.user
-// function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-// };
+//socket.io
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 
 //for handlebars
 app.engine('handlebars', handlebars({
   defaultLayout: 'main',
   helpers: require('./config/handlebars-helpers')
-})) //{ defaultLayout: 'main' } could be ignored since it has become default in handlebars v3.1.0
+}))
 app.set('view engine', 'handlebars')
 
 // setup bodyParser
@@ -62,8 +58,11 @@ app.use((req, res, next) => {
 })
 //-----------
 
+//socket.io
+
+
 // app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+server.listen(port, () => console.log(`Example app listening on port ${port}!`)) //"app" replaced by "server" in order to adapt socket.io
 
 require('./routes')(app)
 
