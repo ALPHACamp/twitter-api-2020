@@ -17,7 +17,7 @@ const tweetController = {
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        const isLiked = helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
+        const isLiked = helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweets.id) : null
         
         tweets = tweets.map(tweet => ({
           ...tweet.dataValues,
