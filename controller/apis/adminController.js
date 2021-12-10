@@ -71,7 +71,7 @@ const adminController = {
           [
             sequelize.fn(
               'COUNT',
-              sequelize.fn('DISTINCT', sequelize.col('tweets.id'))
+              sequelize.fn('DISTINCT', sequelize.col('Tweets.id'))
             ),
             'tweetsCount'
           ],
