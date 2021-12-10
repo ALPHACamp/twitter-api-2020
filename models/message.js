@@ -7,11 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     RoomId: DataTypes.INTEGER
   }, {});
   Message.associate = function (models) {
-    Message.belongsTo(models.Room),
-      Message.belongsTo(models.User, {
-        as: 'Senders',
-        foreignKey: 'senderId'
-      })
+    Message.belongsTo(models.Room)
+    Message.belongsTo(models.User)
   };
   return Message;
 };

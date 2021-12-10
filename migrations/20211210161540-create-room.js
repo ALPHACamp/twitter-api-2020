@@ -8,8 +8,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      roomName: {
-        type: Sequelize.STRING
+      creater: {
+        type: Sequelize.INTEGER
+      },
+      listener: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
