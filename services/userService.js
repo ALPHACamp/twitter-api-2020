@@ -76,7 +76,7 @@ const userService = {
       }
       if (file) {
         // fs.readFile(file.path, (err, data) => {
-        imgur.setClientID(IMGUR_CLIENT_ID);
+        imgur.setClientId(IMGUR_CLIENT_ID);
         imgur.upload(file.path, (err, img) => {
           // if (err) console.log("Error: ", err);
           // fs.writeFile(`upload/${file.originalname}`, data, () => {
