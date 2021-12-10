@@ -1,8 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
-const multer = require('multer')
-const upload = multer({ dest: 'temp/' })
 const helpers = require('../_helpers')
 const userController = require('../controllers/userController')
 const tweetController = require('../controllers/tweetController')
@@ -10,6 +8,8 @@ const replyController = require('../controllers/replyController')
 const likeController = require('../controllers/likeController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
+const multer = require('multer')
+const upload = multer({ dest: 'temp/' })
 const cors = require('cors')
 router.use(cors())
 
@@ -26,7 +26,7 @@ const authenticated = (req, res, next) => {
 
 const authenticatedAdmin = (req, res, next) => {
   if (helpers.ensureAuthenticated(req)) {
-    if (helpers.getUser(req).role === null ) {
+    if (helpers.getUser(req).role === null) {
       return res.status(401).json({ status: 'error', message: '請勿瀏覽後台頁面' })
     }
     return next()
@@ -78,7 +78,7 @@ router.get('/api/get_current_user', authenticated, authenticatedUser, userContro
 
 //tweets相關
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
-router.get('/api/tweets/:id', authenticated, authenticatedUser,  tweetController.getTweet)
+router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 

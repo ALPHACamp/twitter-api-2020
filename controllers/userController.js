@@ -6,7 +6,7 @@ const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
 const Followship = db.Followship
-const imgur = require('imgur-node-api')
+const imgur = require('imgur')
 
 
 // JWT
@@ -106,7 +106,7 @@ const userController = {
         }
       } else {
         User.create({
-          account, email, name, role: null, 
+          account, email, name, role: null,
           avatar: 'https://loremflickr.com/320/240/face',
           cover: 'https://loremflickr.com/1200/400/landscape',
           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
@@ -216,10 +216,9 @@ const userController = {
         })
       })
   },
-  editUserInfo: async (req, res ) => {
-    const userId = helpers.getUser(req).id
-    console.log('req.body', req.body) // {}
-    const name  = req.body.name
+  editUserInfo: async (req, res) => {
+    const userId = helpers.getUser(req).id// {}
+    const name = req.body.name
     // 確認name有填寫
     if (!name) {
       return res.json({
@@ -229,28 +228,25 @@ const userController = {
 
     // 如果有上傳圖片，就上傳到imgur中
     const { files } = req
-    imgur.setClientID(process.env.IMGUR_CLIENT_ID) // 設定imgur的clientId
-    console.log('files', files)
+    imgur.setClientId(process.env.IMGUR_CLIENT_ID) // 設定imgur的clientId
     if (files) {
-      console.log('files', files)
       if (files.avatar) {
         // 確認是否有avatar上傳，有就上傳到imgur
-        const avatar = await imgur.upload(files.avatar[0].path)
-        console.log("avatar", avatar)
+        const avatar = await imgur.uploadFile(files.avatar[0].path)
         req.body.avatar = avatar.link
       }
       if (files.cover) {
         // 確認是否有cover上傳，有就上傳到imgur
-        const cover = await imgur.upload(files.cover[0].path)
+        const cover = await imgur.uploadFile(files.cover[0].path)
         req.body.cover = cover.link
       }
     }
-    console.log('req.body', req.body)
     return User.update({ ...req.body }, { where: { id: userId } })
       .then((user) => {
         return res.json({ status: 'success', message: '成功修改使用者Profile' })
       })
   },
+
   //取得特定瀏覽人次id
   getOneLikes: (req, res) => {
     const UserId = req.params.id
@@ -308,7 +304,7 @@ const userController = {
           ...tweet.dataValues,
           repliedCount: tweet.RepliedUsers.length,
           likedCount: tweet.LikedUsers.length,
-          isLiked: helpers.getUser(req).LikedTweets ?helper.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
+          isLiked: helpers.getUser(req).LikedTweets ? helper.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
         }))
         tweets.forEach(tweet => {
           delete tweet.RepliedUsers
