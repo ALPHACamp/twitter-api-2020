@@ -59,7 +59,7 @@ router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount
 // 第二張圖片
 router.put("/users/:id/img2", authenticated,  upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser2)  
 // <--可以傳一個陣列 FILE
-
+router.put("/users/:id/setting", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
 
 //  查詢user的所有推文
 // router.get('/users/:userId/tweets', authenticated, authenticatedUser, upload.single('cover'), userController.getUserTweets)

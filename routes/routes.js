@@ -66,8 +66,10 @@ router.get('/logout', userController.logout)
 router.get('/users/:id', authenticated, userController.getUser)
 // 使用者到編輯頁
 router.get('/users/:id/edit', authenticated, userController.editUser)
+//  
+router.get("/users/:id/setting", authenticated, userController.settingUser);
 
-
+router.put("/users/:id/setting", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
 // 使用者到編輯個人資訊
 // router.put('/users/:id', authenticated, upload.single('cover'), userController.putUser)
 // router.put('/users/:id', authenticated, upload.array('cover',2), userController.putUser)
@@ -83,7 +85,7 @@ router.get('/users/:userId/replies', authenticated, upload.fields([{ name: 'cove
 // router.get('/users/:userId/replies', authenticated,upload.single('cover'), userController.getUserReplies)
 // 查詢user的所有likes的推文
 router.get('/users/:userId/likes', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikes)
-router.get('/users/:userId/likesTweet', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikesTweet)
+router.get('/users/:userId/likesTweet', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser)
 // router.get('/users/:userId/likes', authenticated,upload.single('cover'), userController.getUserLikes)
 
 //新增一位追蹤者
