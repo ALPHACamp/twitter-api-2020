@@ -703,15 +703,12 @@ const userService = {
       const { files } = req;
       imgur.setClientID(IMGUR_CLIENT_ID);
       if (files) {
-        console.log("cover");
         if (files.cover && !files.avatar) {
           console.log("只有大頭照");
           imgur.upload(files.cover[0].path, async (err, coverImg) => {
             try {
               if (err) console.log("Error: ", err);
-              console.log(coverImg);
               let cover = await coverImg;
-              console.log(cover);
               await user
                 .update({
                   ...req.body,
@@ -732,7 +729,6 @@ const userService = {
           imgur.upload(files.avatar[0].path, async (err, avatarImg) => {
             if (err) console.log("Error: ", err);
             let avatar = await avatarImg;
-            console.log("avatarImg", avatarImg);
             await user
               .update({
                 ...req.body,
@@ -756,7 +752,6 @@ const userService = {
             imgur.upload(files.avatar[0].path, async (err, avatarImg) => {
               try {
                 if (err) console.log("Error: ", err);
-                console.log("有兩張", coverImg, avatarImg);
                 let cover = await coverImg;
                 let avatar = await avatarImg;
                 user
