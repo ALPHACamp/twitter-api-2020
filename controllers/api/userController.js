@@ -181,11 +181,6 @@ let userController = {
       return res.json(data);
     });
   },
-  putUser2: (req, res) => {
-    userService.putUser2(req, res, (data) => {
-      return res.json(data);
-    });
-  },
 };
 
 module.exports = userController

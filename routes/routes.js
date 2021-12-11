@@ -63,15 +63,15 @@ router.post('/signin', passport.authenticate('local', { failureRedirect: '/signi
 router.get('/logout', userController.logout)
 
 //  使用者個人資料頁
+router.get("/users/:id/profile", authenticated, userController.profileUser)
+
+router.put("/users/:id/profile", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
 router.get('/users/:id', authenticated, userController.getUser)
 // 使用者到編輯頁
 router.get('/users/:id/edit', authenticated, userController.editUser)
 //  
-router.get("/users/:id/setting", authenticated, userController.settingUser);
+router.put("/users/:id", authenticated, userController.putUser) 
 
-router.put("/users/:id/setting", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
-
-router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
 
 
 //  查詢user的所有推文
