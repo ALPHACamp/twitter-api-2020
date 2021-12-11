@@ -451,7 +451,7 @@ const userService = {
         message: "帳戶名稱已被其他使用者使用，請更改!",
       });
     }
-    await user.update({
+     user.update({
       ...req.body,
       password: bcrypt.hashSync(
         req.body.password,
@@ -459,7 +459,7 @@ const userService = {
         null
       ),
     });
-    await callback({
+     callback({
       status: "success",
       message: "使用者資料編輯成功。",
     });
