@@ -2,7 +2,7 @@
 const { Message, User, Room } = require('../models')
 const createRoomName = require('../helpers/utils')
 const helpers = require('../_helpers')
-const { Op } = require('sequelize')
+const { Op, Sequelize } = require('sequelize')
 
 const messageService = {
   getPublicMessage: async (req, res, callback) => {
@@ -56,6 +56,29 @@ const messageService = {
       messages.push(message)
     }
     return callback(messages)
+  },
+
+  getLatestMessage: async (req, res, callback) => {
+    const lastestText = []
+    const currentUserId = String(helpers.getUser(req).id)
+    const rawData = await Message.findAll({
+      raw: true,
+      nest: true,
+      where: {
+        roomName: {
+          [Op.or]: [{ [Op.like]: `%R${currentUserId}` }, { [Op.like]: `${currentUserId}R%` }]
+        }
+      },
+      attributes: ['roomName', [Sequelize.fn('max', Sequelize.col('createdAt')), 'createdAt']], group: ['roomName'],
+    })
+    for (let data of rawData) {
+      const text = (await Message.findOne({
+        where: data,
+        attributes: ['text', 'createdAt', 'roomName']
+      })).toJSON()
+      lastestText.push(text)
+    }
+    console.log(lastestText)
   }
 }
 

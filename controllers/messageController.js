@@ -12,6 +12,12 @@ const messageController = {
     messageService.getPrivateMessage(req, res, data => {
       return res.json(data)
     })
+  },
+
+  getLatestMessage: (req, res) => {
+    messageService.getLatestMessage(req, res, data => {
+      return res.json(data)
+    })
   }
 }
 

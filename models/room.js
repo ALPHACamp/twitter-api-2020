@@ -5,7 +5,6 @@ module.exports = (sequelize, DataTypes) => {
     listener: DataTypes.INTEGER
   }, {});
   Room.associate = function (models) {
-    Room.hasMany(models.Message)
   };
   return Room;
 };
