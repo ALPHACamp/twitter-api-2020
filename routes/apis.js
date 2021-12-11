@@ -55,7 +55,7 @@ router.get("/users/:id", authenticated, authenticatedUser, userController.getUse
 
 // router.put("/users/:id", upload.single('cover'), authenticated, authenticatedUser, userController.putUser);
 // router.put("/users/:id", upload.array('cover',2), authenticated, authenticatedUser, userController.putUser);
-router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser)
+router.put("/users/:id", authenticated, authenticatedUser , upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser)
 // 第二張圖片
 router.put("/users/:id/img2", authenticated,  upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUser2)  
 // <--可以傳一個陣列 FILE
@@ -67,7 +67,8 @@ router.get('/users/:userId/tweets', authenticated, authenticatedUser, userContro
 // 查詢user的所有likes的推文
 router.get('/users/:userId/likes', authenticated, authenticatedUser, userController.getUserLikes)
 
-router.get('/users/:userId/likesTweet', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikesTweet)
+// 測試拿到喜歡的推文
+router.get('/users/:userId/likesTweet', authenticated, userController.getUserLikesTweet)
 
 //  查詢user的所有留言
 router.get('/users/:userId/replies', authenticated, userController.getUserReplies)

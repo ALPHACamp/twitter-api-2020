@@ -85,17 +85,7 @@ const userController = {
     userService.putUser(req, res, (data) => {
       if (data["status"] === "error") {
         req.flash("error_messages", data["message"]);
-        return res.redirect("back");
-      }
-      req.flash("success_messages", data["message"]);
-      return res.redirect(`/users/${req.params.id}`);
-    });
-  },
-  putUser2: (req, res) => {
-    userService.putUser(req, res, (data) => {
-      if (data["status"] === "error") {
-        req.flash("error_messages", data["message"]);
-        return res.redirect("back");
+        return res.redirect(`/users/${req.params.id}`);
       }
       req.flash("success_messages", data["message"]);
       return res.redirect(`/users/${req.params.id}`);
@@ -116,7 +106,6 @@ const userController = {
       return res.redirect("back");
     });
   },
-
   getUserTweets: (req, res) => {
     userService.getUserTweets(req, res, (data) => {
       return res.render("userTweets", data);
@@ -150,6 +139,16 @@ const userController = {
   removeFollowing: (req, res) => {
     userService.removeFollowing(req, res, (data) => {
       return res.redirect("back");
+    });
+  },
+  putUser2: (req, res) => {
+    userService.putUser(req, res, (data) => {
+      if (data["status"] === "error") {
+        req.flash("error_messages", data["message"]);
+        return res.redirect("back");
+      }
+      req.flash("success_messages", data["message"]);
+      return res.redirect(`/users/${req.params.id}`);
     });
   },
   // 測試

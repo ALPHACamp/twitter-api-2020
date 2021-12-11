@@ -40,12 +40,16 @@ let userController = {
         token: token,
         user: {
           id: user.id,
+          account: user.account,
           name: user.name,
           email: user.email,
+          introduction: user.introduction,
+          avatar: user.avatar,
+          cover: user.cover,
           role: user.role,
-        },
-      });
-    });
+        }
+      })
+    })
   },
   signUp: (req, res) => {
     // confirm password
@@ -130,7 +134,6 @@ let userController = {
     });
   },
   getCurrentUser: (req, res) => {
-    console.log(req.user);
     return res.json({
       id: req.user.id,
       name: req.user.name,
@@ -180,11 +183,6 @@ let userController = {
   },
   putUser2: (req, res) => {
     userService.putUser2(req, res, (data) => {
-      return res.json(data);
-    });
-  },
-  putUserImg: (req, res) => {
-    userService.putUserImg(req, res, (data) => {
       return res.json(data);
     });
   },

@@ -55,11 +55,12 @@ const tweetService = {
   },
   getTweet: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req)
-    return Tweet.findByPk(req.params.id, {
+    return Tweet.findOne({
+      where: { UserId: Number(req.params.id) },
       include: [User, { model: Like }, { model: Reply, include: [User] }],
     }).then((tweet) => {
-      const tweetReplyCount = tweet.Replies.length;
-      const tweetLikeCount = tweet.Likes.filter(
+      let tweetReplyCount = tweet.Replies.length 
+      let tweetLikeCount = tweet.Likes.filter(
         (d) => d.isLike === true
       ).length;
       let tweetLike = tweet.Likes.filter((d, index) => d.isLike === true)

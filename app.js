@@ -1,3 +1,6 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const express = require('express')
 const helpers = require('./_helpers');
 const bodyParser = require('body-parser')
@@ -7,9 +10,6 @@ const db = require('./models')
 const flash = require('connect-flash')
 const session = require('express-session')
 const cors = require('cors')
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
 const passport = require('./config/passport')
 const handlebars = require('express-handlebars')
 
@@ -18,7 +18,7 @@ const port = process.env.PORT || 3000
 
 //socket.io
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+// const io = require('socket.io')(server);
 
 //for handlebars
 app.engine('handlebars', handlebars({
