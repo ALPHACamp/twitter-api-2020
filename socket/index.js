@@ -5,9 +5,7 @@ const passport = require('passport')
 module.exports = server => {
   const io = require('socket.io')(server, {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
-      transports: ['websocket', 'polling'],
+      origin: 'http://localhost:8080',
       credentials: true
     },
     allowEIO3: true
@@ -41,7 +39,7 @@ module.exports = server => {
         where: { id: user.user.id },
         attributes: ['id', 'account', 'name', 'avatar']
       })
-      publicNamespace.emit('onlineHint', `${profile.name}進入聊天室了！`)
+      socket.broadcast.emit('onlineHint', `${profile.name}進入聊天室了！`)
     })
 
     // 監聽訊息
@@ -49,7 +47,7 @@ module.exports = server => {
       console.log('服務端 接收 訊息: ', message)
       await Member.findOrCreate({ where: { UserId: message.user.id, RoomId: 1 } })
       Message.create({
-        content: message.text,
+        content: message.content,
         UserId: message.user.id,
         roomId: 1,
         isRead: false
@@ -58,6 +56,7 @@ module.exports = server => {
           include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
         }).then(message => {
           //回傳 message 給所有客戶端(包含自己)
+          message['socketId'] = socket.id
           publicNamespace.emit('getMessage', message)
         })
       })
