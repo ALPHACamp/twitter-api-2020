@@ -12,17 +12,25 @@ const Followship = db.Followship;
 
 const adminService = {
   getUsers: (req, res, callback) => {
+    console.log(req.body, req.params)
     return User.findAll({ include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, Tweet] })
       .then(users => {
+        // console.log(users.length)
+        // const getUsers = users.map((d, i) => {
+        //   return i = d
+        // })
+        // console.log('users',typeof users);
+        // console.log("getUser", typeof getUsers);
+        // console.log(getUsers);
         callback({
-          users: users
-        })
+          users: users,
+        });
       })
   },
   getUser: (req, res, callback) => {
     return User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, Tweet] })
       .then(user => {
-        console.log(user[0])
+        // console.log(user[0])
         const followersCount = user.Followers.length
         const followingsCount = user.Followings.length
         const tweetsCount = Tweet.length
