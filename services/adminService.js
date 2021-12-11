@@ -9,23 +9,34 @@ const Reply = db.Reply;
 const User = db.User;
 const Like = db.Like;
 const Followship = db.Followship;
+const sequelize = require('sequelize')
 
 const adminService = {
   getUsers: (req, res, callback) => {
-    console.log(req.body, req.params)
-    return User.findAll({ include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, Tweet] })
-      .then(users => {
-        // console.log(users.length)
-        // const getUsers = users.map((d, i) => {
-        //   return i = d
-        // })
-        // console.log('users',typeof users);
-        // console.log("getUser", typeof getUsers);
-        // console.log(getUsers);
-        callback({
-          users: users,
-        });
-      })
+    return User.findAll({
+      raw: true,
+      nest: true,
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'cover',
+        [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
+        [sequelize.literal('(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)'), 'likeCount'],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'),
+          'followingCount'
+        ],
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'),
+          'followerCount'
+        ]
+      ]
+    }).then(users => {
+      users = users.sort((a, b) => b.tweetCount - a.tweetCount)
+      return callback(users)
+    })
   },
   getUser: (req, res, callback) => {
     return User.findByPk(req.params.id, { include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, Tweet] })
