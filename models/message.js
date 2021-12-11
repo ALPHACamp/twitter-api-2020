@@ -4,8 +4,9 @@ module.exports = (sequelize, DataTypes) => {
     'Message',
     {
       content: DataTypes.TEXT,
-      GiverId: DataTypes.INTEGER,
-      ReceiverId: DataTypes.INTEGER
+      UserId: DataTypes.INTEGER,
+      roomId: DataTypes.INTEGER,
+      isRead: DataTypes.BOOLEAN
     },
     {}
   )
