@@ -41,11 +41,11 @@ With Alphitter, you can do the followings
    ```
    npx sequelize db:seed:all
    ```
+
 10. Then you are good to run the server
    ```
-      npm run dev
+   npm run dev
    ```
-
 ## User login
 
 both user and administrator seed accounts are provided, shown in the table below:
