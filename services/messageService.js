@@ -76,9 +76,12 @@ const messageService = {
         where: data,
         attributes: ['text', 'createdAt', 'roomName']
       })).toJSON()
+      const IdList = text.roomName.split('R')
+      const userId = IdList.filter(id => id !== currentUserId)
+      text.userId = userId[0]
       lastestText.push(text)
     }
-    console.log(lastestText)
+    callback(lastestText)
   }
 }
 
