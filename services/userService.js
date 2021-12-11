@@ -104,26 +104,22 @@ const userService = {
     });
   },
   addFollowing: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return Followship.create({
-      followerId: currentUser.id,
-      followingId: Number(req.params.id),
-    }).then((followship) => {
-      return callback({ status: "success", message: "" });
-    });
+      followerId: helpers.getUser(req).id,
+      followingId: req.body.id
+    }).then(followship => {
+      return callback({ status: 'success', message: '追隨成功' })
+    })
   },
   removeFollowing: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Followship.findOne({
+    return Followship.destroy({
       where: {
-        followerId: currentUser.id,
-        followingId: Number(req.params.id),
-      },
-    }).then((followship) => {
-      followship.destroy().then((followship) => {
-        return callback({ status: "success", message: "" });
-      });
-    });
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
+      }
+    }).then(followship => {
+      return callback({ status: 'success', message: '取消追隨成功' })
+    })
   },
   getUserTweets: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
@@ -427,30 +423,30 @@ const userService = {
     const accountCheck = usersAccount
       .map((d) => d.account)
       .includes(req.body.account);
-    if (
-      !req.body.name ||
-      !req.body.email ||
-      !req.body.account ||
-      !req.body.password ||
-      !req.body.checkPassword
-    ) {
-      await callback({
-        status: "error",
-        message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
-      });
-    }
-    if (req.body.password !== req.body.checkPassword) {
-      await callback({ status: "error", message: "密碼與確認密碼不一致!" });
-    }
-    if (emailCheck) {
-      await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
-    }
-    if (accountCheck) {
-      await callback({
-        status: "error",
-        message: "帳戶名稱已被其他使用者使用，請更改!",
-      });
-    }
+    // if (
+    //   !req.body.name ||
+    //   !req.body.email ||
+    //   !req.body.account ||
+    //   !req.body.password ||
+    //   !req.body.checkPassword
+    // ) {
+    //   await callback({
+    //     status: "error",
+    //     message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
+    //   });
+    // }
+    // if (req.body.password !== req.body.checkPassword) {
+    //   await callback({ status: "error", message: "密碼與確認密碼不一致!" });
+    // }
+    // if (emailCheck) {
+    //   await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+    // }
+    // if (accountCheck) {
+    //   await callback({
+    //     status: "error",
+    //     message: "帳戶名稱已被其他使用者使用，請更改!",
+    //   });
+    // }
     await user.update({
       ...req.body,
       password: bcrypt.hashSync(
