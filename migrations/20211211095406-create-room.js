@@ -9,7 +9,6 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        defaultValue: 'public',
         type: Sequelize.STRING
       },
       createdAt: {
