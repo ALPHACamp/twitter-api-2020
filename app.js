@@ -52,29 +52,27 @@ require('./routes')(app)
 const server = require('http').Server(app).listen(port, () => {
   console.log(`The app is listening on port ${port}`)
 })
-const io = require('socket.io')(server)
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    transports: ['websocket', 'polling'],
+    credentials: true
+  },
+  allowEIO3: true
+})
 
 // 公開聊天室
 const publicNamespace = io.of('/public')
-// publicNamespace.use((socket, next) => {
-//   passport.authenticate('jwt', { session: false }, (err, user, info) => {
-//     if (err) next(err)
-//     if (!user) {
-//       return res.json({
-//         status: 'error',
-//         message: '帳號不存在！'
-//       })
-//     }
-//     req.user = user
-//     return next()
-//   })
-// })
 publicNamespace.on('connection', socket => {
   console.log('連接成功，上線ID: ', socket.id)
+  socket.onAny((event, ...args) => {
+    console.log(event, args)
+  })
 
   //監聽並提示有人上線了
   socket.on('onlineHint', userName => {
-    publicNamespace.broadcast.emit('onlineHint', userName)
+    publicNamespace.emit('onlineHint', userName)
   })
 
   // 監聽訊息
@@ -106,22 +104,13 @@ publicNamespace.on('connection', socket => {
 
 // 私人聊天室
 const privateNamespaces = io.of(/(?:user)\d+/)
-// privateNamespace.use((socket, next) => {
-//   passport.authenticate('jwt', { session: false }, (err, user, info) => {
-//     if (err) next(err)
-//     if (!user) {
-//       return res.json({
-//         status: 'error',
-//         message: '帳號不存在！'
-//       })
-//     }
-//     req.user = user
-//     return next()
-//   })
-// })
 privateNamespaces.on('connection', socket => {
   console.log('連接成功，上線ID: ', socket.id)
-  const privateNamespace = socket.nsp
+  console.log('目前連線數量: ', privateNamespaces.sockets.size)
+  // 可以在伺服器端顯示通道過來的所有事件，以及相關的參數
+  socket.onAny((event, ...args) => {
+    console.log(event, args)
+  })
 
   //監聽並提示有人上線了
   socket.on('onlineHint', userName => {
