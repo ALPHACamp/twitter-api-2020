@@ -15,32 +15,49 @@ With Alphitter, you can do the followings
 
 ## Getting Started (adopting mySQL database)
 
-git clone
-  - frontend: https://github.com/huangtingyu04/simple-twitter-front-end.git
-  - backend: https://github.com/cschang07/twitter-api-2020.git
+1. Clone the repository
+   ```
+   git clone -b master https://github.com/cschang07/twitter-api-2020.git
+   ```
+2. Go to the file on your terminal
+   ```
+   cd twitter-api-2020
+   ```
+3. Install the kits
+   ```
+   npm install
+   ```
+4. Make an .env file according to the content of the .env.example file you will find in the repo
+5. Go to config/config.json and change username and password under 'development' to match your mySQL data
+6. Go to mySQL workbench
+   ```
+   create database ac_twitter_workspace;
+   ```
+7. Set up the data
+   ```
+   npx sequelize db:migrate
+   ```
+8. Set up seed data
+   ```
+   npx sequelize db:seed:all
+   ```
 
-cd forum-express
-
-npm install
-
-npx sequelize db:migrate
-
-npx sequelize db:seed:all
-
-nodemon app.js
-
+10. Then you are good to run the server
+   ```
+   npm run dev
+   ```
 ## User login
 
 both user and administrator seed accounts are provided, shown in the table below:
 
 | Role | User account | Password |
 | ----------- | ----------- | ----------- |
-| Admin | root | 12345678 |
 | User | user1 | 1 |
 | User | user2 | 2 |
 | User | user3 | 3 |
 | User | user4 | 4 |
 | User | user5 | 5 |
+| Admin | root | 12345678 |
 
 *Admin account can login solely to the back stage, where you can view/delete all tweets and monitor/analyze all data(e.g. users' number of followers)
 
