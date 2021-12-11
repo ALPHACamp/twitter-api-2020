@@ -13,23 +13,8 @@ const Followship = db.Followship;
 const adminService = {
   getUsers: (req, res, callback) => {
     return User.findAll({ include: [{ model: User, as: 'Followers' }, { model: User, as: 'Followings' }, Like, Tweet] })
-      .then(users => {
-        // console.log(users.length)
-        const getUsers = users.map((d, index) => {});
-        const a = [];
-        users.forEach((user) => {
-          a.push(user.dataValues);
-        });
-        const b = [...users];
-        console.log(b)
-        console.log('users',typeof b);
-        // console.log(users)
-        // console.log('users',typeof users);
-        // console.log("getUser", typeof a);
-        // console.log(a);
-        callback({
-          users: getUsers,
-        });
+      .then(users => {       
+        callback(users)
       })
   },
   getUser: (req, res, callback) => {
