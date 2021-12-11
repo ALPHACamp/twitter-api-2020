@@ -17,19 +17,42 @@ const userService = {
   
   getUser: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
-    User.findByPk(req.params.id, {
+    console.log(currentUser.id, req.params, helpers.getUser(req));
+    User.findOne({
+      where: {
+        id: req.params.id
+      },
       include: [
         { model: User, as: "Followers" },
         { model: User, as: "Followings" },
       ],
-    }).then((user) => {
+    }).then(user => {
+      console.log('11111111111111111',user)
       user = {
         ...user.dataValues,
         FollowersCount: user.Followers.length,
         FollowingsCount: user.Followings.length,
       };
-      return callback({ user: user})
+      return callback({
+        user: user,
+        status: "success",
+        message: "service success!",
+      });
     }).catch(error => { return callback({ status: "error", message: "service error!" }) })
+    // User.findByPk(req.params.id, {
+    //   include: [
+    //     { model: User, as: "Followers" },
+    //     { model: User, as: "Followings" },
+    //   ],
+    // }).then((user) => {
+    //   console.log('11111111111111111',req.body)
+    //   user = {
+    //     ...user.dataValues,
+    //     FollowersCount: user.Followers.length,
+    //     FollowingsCount: user.Followings.length,
+    //   };
+    //   return callback({ user: user})
+    // }).catch(error => { return callback({ status: "error", message: "service error!" }) })
   },
   
   addLike: (req, res, callback) => {
