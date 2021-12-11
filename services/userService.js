@@ -104,26 +104,22 @@ const userService = {
     });
   },
   addFollowing: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return Followship.create({
-      followerId: currentUser.id,
-      followingId: Number(req.params.id),
-    }).then((followship) => {
-      return callback({ status: "success", message: "" });
-    });
+      followerId: helpers.getUser(req).id,
+      followingId: req.params.id
+    }).then(followship => {
+      return callback({ status: 'success', message: '追隨成功' })
+    })
   },
   removeFollowing: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Followship.findOne({
+    return Followship.destroy({
       where: {
-        followerId: currentUser.id,
-        followingId: Number(req.params.id),
-      },
-    }).then((followship) => {
-      followship.destroy().then((followship) => {
-        return callback({ status: "success", message: "" });
-      });
-    });
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
+      }
+    }).then(followship => {
+      return callback({ status: 'success', message: '取消追隨成功' })
+    })
   },
   getUserTweets: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
