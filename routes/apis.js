@@ -106,27 +106,25 @@ router.get(
 //  使用者編輯自己所有資訊
 
 // router.put("/users/:id", upload.single('cover'), authenticated, authenticatedUser, userController.putUser);
-// router.put("/users/:id", upload.array('cover',2), authenticated, authenticatedUser, userController.putUser);
+
+// router.put(
+//   "/users/:id",
+//   authenticated,
+//   authenticatedUser,
+//   upload.fields([
+//     { name: "cover", maxCount: 1 },
+//     { name: "avatar", maxCount: 1 },
+//   ]),
+//   userController.putUser
+// );
 router.put(
   "/users/:id",
   authenticated,
   authenticatedUser,
-  upload.fields([
-    { name: "cover", maxCount: 1 },
-    { name: "avatar", maxCount: 1 },
-  ]),
   userController.putUser
 );
 // 第二張圖片
-router.put(
-  "/users/:id/img2",
-  authenticated,
-  upload.fields([
-    { name: "cover", maxCount: 1 },
-    { name: "avatar", maxCount: 1 },
-  ]),
-  userController.putUser2
-);
+
 // <--可以傳一個陣列 FILE
 router.put(
   "/users/:id/setting",
