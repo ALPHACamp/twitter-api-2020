@@ -1,8 +1,7 @@
 // 載入所需套件
 const passport = require('../config/passport')
 const helpers = require('../_helpers')
-const passportJwt = require('passport-jwt')
-const JwtStrategy = passportJwt.Strategy
+const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 
 
@@ -33,20 +32,15 @@ module.exports = {
   },
 
   socketAuth: (socket, next) => {
-    const jwtOptions = {
-      jwtFromRequest: socket.handshake.auth.token,
-      secretOrKey: process.env.JWT_SECRET
-    }
+    const token = socket.handshake.auth.token
+    const SECRET = process.env.JWT_SECRET
 
-    // Jwt Strategy setting
-    passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
-      const user = (await User.findByPk(jwt_payload.id, {
+    jwt.verify(token, SECRET, async (err, decoded) => {
+      const user = (await User.findByPk(decoded.id, {
         attributes: ['id', 'account', 'name', 'avatar'],
       })).toJSON()
-      if (!user) {
-        return next(null, false)
-      }
-      return next(null, user, socket)
-    }))
+      socket.user = user
+      return next()
+    })
   }
 }

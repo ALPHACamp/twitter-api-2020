@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     text: DataTypes.STRING,
     isRead: DataTypes.BOOLEAN,
     UserId: DataTypes.INTEGER,
-    RoomId: DataTypes.INTEGER
+    RoomName: DataTypes.STRING
   }, {});
   Message.associate = function (models) {
     Message.belongsTo(models.Room)
