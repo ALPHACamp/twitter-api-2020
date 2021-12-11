@@ -1,3 +1,4 @@
+const { Member, Message, User } = require('../models')
 const session = require('express-session')
 const passport = require('passport')
 
@@ -25,7 +26,7 @@ module.exports = server => {
   })
 
   // 公開聊天室
-  const publicNamespace = io.of('/public')
+  const publicNamespace = io.of('/chat/public')
   publicNamespace.on('connection', socket => {
     console.log('連接成功，上線ID: ', socket.id)
     socket.onAny((event, ...args) => {
@@ -33,29 +34,44 @@ module.exports = server => {
     })
 
     //監聽並提示有人上線了
-    socket.on('onlineHint', userName => {
-      publicNamespace.emit('onlineHint', userName)
+    socket.on('onlineHint', async user => {
+      const profile = await User.findOne({
+        raw: true,
+        nest: true,
+        where: { id: user.user.id },
+        attributes: ['id', 'account', 'name', 'avatar']
+      })
+      publicNamespace.emit('onlineHint', `${profile.name}進入聊天室了！`)
     })
 
     // 監聽訊息
-    socket.on('getMessage', data => {
-      console.log('服務端 接收 訊息: ', data)
-      // Message.create({
-      //   content: data.text,
-      //   UserId: data.UserId
-      // }).then(message => {
-      //   Message.findByPk(message.id, {
-      //     include: [User]
-      //   }).then(message => {
-      //     //回傳 message 給所有客戶端(包含自己)
-      //     publicNamespace.emit('getMessage', message)
-      //   })
-      // })
+    socket.on('getMessage', async message => {
+      console.log('服務端 接收 訊息: ', message)
+      await Member.findOrCreate({ where: { UserId: message.user.id, RoomId: 1 } })
+      Message.create({
+        content: message.text,
+        UserId: message.user.id,
+        roomId: 1,
+        isRead: false
+      }).then(message => {
+        Message.findByPk(message.id, {
+          include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
+        }).then(message => {
+          //回傳 message 給所有客戶端(包含自己)
+          publicNamespace.emit('getMessage', message)
+        })
+      })
     })
 
     //監聽並提示有人下線了
-    socket.on('offlineHint', userName => {
-      publicNamespace.emit('offlineHint', userName)
+    socket.on('offlineHint', async user => {
+      const profile = await User.findOne({
+        raw: true,
+        nest: true,
+        where: { id: user.user.id },
+        attributes: ['id', 'account', 'name', 'avatar']
+      })
+      publicNamespace.emit('offlineHint', `${profile.name}離開聊天室了！`)
     })
 
     // 連接斷開
