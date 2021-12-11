@@ -1,4 +1,5 @@
-const { Member, Message, User } = require('../models')
+const { Member, Message, User, Room } = require('../models')
+const messageService = require('../services/messageService')
 const session = require('express-session')
 const passport = require('passport')
 
@@ -39,6 +40,8 @@ module.exports = server => {
         where: { id: user.user.id },
         attributes: ['id', 'account', 'name', 'avatar']
       })
+      const messages = await messageService.getMessages()
+      publicNamespace.emit(messages)
       socket.broadcast.emit('onlineHint', `${profile.name}進入聊天室了！`)
     })
 
@@ -80,7 +83,7 @@ module.exports = server => {
   })
 
   // 私人聊天室
-  const privateNamespaces = io.of(/(?:user)\d+/)
+  const privateNamespaces = io.of(/(?:\/chat\/user)\d+/)
   privateNamespaces.on('connection', socket => {
     console.log('連接成功，上線ID: ', socket.id)
     console.log('目前連線數量: ', privateNamespaces.sockets.size)
@@ -90,8 +93,14 @@ module.exports = server => {
     })
 
     //監聽並提示有人上線了
-    socket.on('onlineHint', userName => {
-      privateNamespace.emit('onlineHint', userName)
+    socket.on('onlineHint', async user => {
+      const profile = await User.findOne({
+        raw: true,
+        nest: true,
+        where: { id: user.user.id },
+        attributes: ['id', 'account', 'name', 'avatar']
+      })
+      socket.broadcast.emit('onlineHint', `${profile.name}進入聊天室了！`)
     })
 
     // 監聽訊息

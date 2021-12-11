@@ -9,7 +9,6 @@ const adminController = require('../controllers/api/adminControllers')
 const userController = require('../controllers/api/userControllers')
 const tweetController = require('../controllers/api/tweetControllers')
 const replyController = require('../controllers/api/replyController')
-const messageController = require('../controllers/api/messageControllers')
 
 // 驗證user
 function authenticated (req, res, next) {
@@ -96,8 +95,5 @@ router.get('/tweets/:tweet_id/replies', authenticated, replyController.getReply)
 
 // 用來產生模擬users
 router.get('/users', authenticated, userController.getUsers)
-
-// getMessages
-router.get(`/messages`, authenticated, messageController.getMessages)
 
 module.exports = router
