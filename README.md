@@ -43,7 +43,7 @@ With Alphitter, you can do the followings
    ```
 10. Then you are good to run the server
    ```
-   npm run dev
+      npm run dev
    ```
 
 ## User login
