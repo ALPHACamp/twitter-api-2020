@@ -63,24 +63,23 @@ router.post('/signin', passport.authenticate('local', { failureRedirect: '/signi
 router.get('/logout', userController.logout)
 
 //  使用者個人資料頁
+router.get("/users/:id/profile", authenticated, userController.profileUser)
+
+router.put("/users/:id/profile", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
 router.get('/users/:id', authenticated, userController.getUser)
 // 使用者到編輯頁
 router.get('/users/:id/edit', authenticated, userController.editUser)
 //  
-router.get("/users/:id/setting", authenticated, userController.settingUser);
+router.put("/users/:id", authenticated, userController.putUser) 
 
-router.put("/users/:id/setting", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
 
-router.put("/users/:id", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser) 
-// <--可以傳一個陣列 FILE
-router.put("/users/:id/img2", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.putUser2)
 
 //  查詢user的所有推文
 router.get('/users/:userId/tweets', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserTweets)
 //  查詢user的所有留言
 router.get('/users/:userId/replies', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserReplies)
 // 查詢user的所有likes的推文
-router.get('/users/:userId/likes', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserLikes)
+router.get('/users/:userId/likes', authenticated, userController.getUserLikes)
 router.get('/users/:userId/likesTweet', authenticated, userController.getUserLikesTweet)
 
 
