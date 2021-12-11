@@ -27,18 +27,6 @@ app.use(express.json())
 const { Message } = require('./models')
 const userList = []
 
-// 新增訊息到資料庫
-async function postMessage(data, UserId) {
-  const { roomName, text } = data
-  if (data.roomName === 'public') {
-    const message = (await Message.create({ UserId, text, roomName })).toJSON()
-    return message
-  } else {
-    const message = (await Message.create({ UserId, text, roomName })).toJSON()
-    return message
-  }
-}
-
 io.use(socketAuth).on('connection', (socket) => {
   console.log(socket.user)
   // 取得當前使用者資訊
@@ -64,16 +52,6 @@ io.use(socketAuth).on('connection', (socket) => {
       socket.join(roomName)
       console.log(`${currentUser.name} has join ${roomName} Room`)
     }
-    // await Message.update({ isRead: true }, {
-    //   where: {
-    //     [Op.and]: [roomName, { isRead: false }, { [Op.not]: [{ UserId: currentUser.id }] }]
-    //   }
-    // })
-    // const unread = await Message.count({
-    //   where: {
-    //     [Op.and]: [roomName, { isRead: false }, { [Op.not]: [{ UserId: currentUser.id }] }]
-    //   },
-    // })
     // socket.emit('messageNotRead', unread)
   })
 
