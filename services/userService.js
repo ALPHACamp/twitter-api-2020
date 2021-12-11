@@ -405,30 +405,30 @@ const userService = {
     const accountCheck = usersAccount
       .map((d) => d.account)
       .includes(req.body.account);
-    if (
-      !req.body.name ||
-      !req.body.email ||
-      !req.body.account ||
-      !req.body.password ||
-      !req.body.checkPassword
-    ) {
-      await callback({
-        status: "error",
-        message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
-      });
-    }
-    if (req.body.password !== req.body.checkPassword) {
-      await callback({ status: "error", message: "密碼與確認密碼不一致!" });
-    }
-    if (emailCheck) {
-      await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
-    }
-    if (accountCheck) {
-      await callback({
-        status: "error",
-        message: "帳戶名稱已被其他使用者使用，請更改!",
-      });
-    }
+    // if (
+    //   !req.body.name ||
+    //   !req.body.email ||
+    //   !req.body.account ||
+    //   !req.body.password ||
+    //   !req.body.checkPassword
+    // ) {
+    //   await callback({
+    //     status: "error",
+    //     message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
+    //   });
+    // }
+    // if (req.body.password !== req.body.checkPassword) {
+    //   await callback({ status: "error", message: "密碼與確認密碼不一致!" });
+    // }
+    // if (emailCheck) {
+    //   await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+    // }
+    // if (accountCheck) {
+    //   await callback({
+    //     status: "error",
+    //     message: "帳戶名稱已被其他使用者使用，請更改!",
+    //   });
+    // }
     await user.update({
       ...req.body,
       password: bcrypt.hashSync(
