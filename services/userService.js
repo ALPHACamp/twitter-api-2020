@@ -356,7 +356,6 @@ const userService = {
 
   putUser: async (req, res, callback) => {
     console.log('req.body',req.body)
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     if (helpers.getUser(req).id !== Number(req.params.id)) {
       callback({ status: "error", message: "只能編輯自己的資訊." });
     }
