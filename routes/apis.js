@@ -127,7 +127,7 @@ router.put(
 
 // <--可以傳一個陣列 FILE
 router.put(
-  "/users/:id/setting",
+  "/users/:id/revise",
   authenticated,
   upload.fields([
     { name: "cover", maxCount: 1 },

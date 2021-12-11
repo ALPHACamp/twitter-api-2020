@@ -17,7 +17,6 @@ const userService = {
   
   getUser: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
-    console.log(currentUser.id, req.params, helpers.getUser(req));
     User.findOne({
       where: {
         id: req.params.id
@@ -27,7 +26,6 @@ const userService = {
         { model: User, as: "Followings" },
       ],
     }).then(user => {
-      console.log('11111111111111111',user)
       user = {
         ...user.dataValues,
         FollowersCount: user.Followers.length,
@@ -407,6 +405,7 @@ const userService = {
   },
 
   putUser: async (req, res, callback) => {
+    console.log('req.body',req.body)
     const currentUser = req.user ? req.user : helpers.getUser(req);
     if (currentUser.id !== Number(req.params.id)) {
       callback({ status: "error", message: "只能編輯自己的資訊." });
@@ -516,7 +515,7 @@ const userService = {
     });
   },
 
-  settingUser: async (req, res, callback) => {
+  profileUser: async (req, res, callback) => {
     try {
       const currentUser = req.user ? req.user : helpers.getUser(req);
       const [user] = await Promise.all([User.findByPk(currentUser.id)]);

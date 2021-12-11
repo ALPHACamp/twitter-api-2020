@@ -91,8 +91,8 @@ const userController = {
       return res.redirect(`/users/${req.params.id}`);
     });
   },
-  settingUser: (req, res) => {
-    userService.settingUser(req, res, (data) => {
+  profileUser: (req, res) => {
+    userService.profileUser(req, res, (data) => {
       return res.render("putUser", data);
     });
   },
