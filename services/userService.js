@@ -357,18 +357,18 @@ const userService = {
   putUser: async (req, res, callback) => {
     console.log('req.body',req.body)
     const currentUser = req.user ? req.user : helpers.getUser(req);
-    if (currentUser.id !== Number(req.params.id)) {
+    if (helpers.getUser(req).id !== Number(req.params.id)) {
       callback({ status: "error", message: "只能編輯自己的資訊." });
     }
     const [usersEmail, usersAccount, user] = await Promise.all([
       User.findAll({
         where: {
-          email: { [Op.not]: currentUser.email },
+          email: { [Op.not]: helpers.getUser(req).email },
         },
       }),
       User.findAll({
         where: {
-          account: { [Op.not]: currentUser.account },
+          account: { [Op.not]: helpers.getUser(req).account },
         },
       }),
       User.findByPk(req.params.id),
@@ -474,12 +474,11 @@ const userService = {
 
   reviseUser: async (req, res, callback) => {
     try {
-      const currentUser = req.user ? req.user : helpers.getUser(req);
-      if (currentUser.id !== Number(req.params.id)) {
+      if (helpers.getUser(req).id !== Number(req.params.id)) {
         callback({ status: "error", message: "只能編輯自己的資訊." });
       }
 
-      const [user] = await Promise.all([User.findByPk(currentUser.id)]);
+      const [user] = await Promise.all([User.findByPk(helpers.getUser(req).id)]);
       console.log("我在編輯頁面");
       const { files } = req;
       imgur.setClientID(IMGUR_CLIENT_ID);
