@@ -21,7 +21,7 @@ With Alphitter, you can do the followings
    ```
 2. Go to the file on your terminal
    ```
-      cd twitter-api-2020
+   cd twitter-api-2020
    ```
 3. Install the kits
    ```
