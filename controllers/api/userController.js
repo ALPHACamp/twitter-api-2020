@@ -40,12 +40,16 @@ let userController = {
         token: token,
         user: {
           id: user.id,
+          account: user.account,
           name: user.name,
           email: user.email,
+          introduction: user.introduction,
+          avatar: user.avatar,
+          cover: user.cover,
           role: user.role,
-        },
-      });
-    });
+        }
+      })
+    })
   },
   signUp: (req, res) => {
     // confirm password

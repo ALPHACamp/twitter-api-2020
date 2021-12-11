@@ -10,8 +10,13 @@ const User = db.User;
 const Like = db.Like;
 const Followship = db.Followship;
 
+// JWT
+const jwt = require('jsonwebtoken')
+
 const userService = {
+  
   getUser: (req, res, callback) => {
+    const currentUser = req.user ? req.user : helpers.getUser(req);
     User.findByPk(req.params.id, {
       include: [
         { model: User, as: "Followers" },
@@ -23,8 +28,8 @@ const userService = {
         FollowersCount: user.Followers.length,
         FollowingsCount: user.Followings.length,
       };
-      return callback({ user: user });
-    });
+      return res.status(200).json({ user: user })
+    }).catch(error => { return res.status(500).json({ status: "error", message: "service error!" }); })
   },
   
   addLike: (req, res, callback) => {
@@ -696,15 +701,7 @@ const userService = {
       if (currentUser.id !== Number(req.params.id)) {
         callback({ status: "error", message: "只能編輯自己的資訊." });
       }
-      // if (req.name.length > 30) {
-      //    callback({ status: "error", message: "名字最長只能30個字" });
-      // }
-      // if (!req.name) {
-      //   callback({ status: "error", message: "名字不能為空" });
-      // }
-      // if (req.introduction.length > 140) {
-      //   callback({ status: "error", message: "自我介紹最長140個字." });
-      // }
+
       const [user] = await Promise.all([User.findByPk(currentUser.id)]);
       console.log("我在編輯頁面");
       const { files } = req;
