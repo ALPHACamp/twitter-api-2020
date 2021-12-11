@@ -106,7 +106,7 @@ const userService = {
   addFollowing: (req, res, callback) => {
     return Followship.create({
       followerId: helpers.getUser(req).id,
-      followingId: req.params.id
+      followingId: req.body.id
     }).then(followship => {
       return callback({ status: 'success', message: '追隨成功' })
     })
