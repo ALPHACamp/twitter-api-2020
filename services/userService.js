@@ -28,8 +28,8 @@ const userService = {
         FollowersCount: user.Followers.length,
         FollowingsCount: user.Followings.length,
       };
-      return res.status(200).json({ user: user })
-    }).catch(error => { return res.status(500).json({ status: "error", message: "service error!" }); })
+      return callback({ user: user})
+    }).catch(error => { return callback({ status: "error", message: "service error!" }) })
   },
   
   addLike: (req, res, callback) => {
@@ -412,19 +412,19 @@ const userService = {
       !req.body.password ||
       !req.body.checkPassword
     ) {
-      callback({
+      await callback({
         status: "error",
         message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
       });
     }
     if (req.body.password !== req.body.checkPassword) {
-      callback({ status: "error", message: "密碼與確認密碼不一致!" });
+      await callback({ status: "error", message: "密碼與確認密碼不一致!" });
     }
     if (emailCheck) {
-      callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+      await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
     }
     if (accountCheck) {
-      callback({
+      await callback({
         status: "error",
         message: "帳戶名稱已被其他使用者使用，請更改!",
       });

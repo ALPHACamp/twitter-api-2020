@@ -85,7 +85,7 @@ const userController = {
     userService.putUser(req, res, (data) => {
       if (data["status"] === "error") {
         req.flash("error_messages", data["message"]);
-        return res.redirect("back");
+        return res.redirect(`/users/${req.params.id}`);
       }
       req.flash("success_messages", data["message"]);
       return res.redirect(`/users/${req.params.id}`);
