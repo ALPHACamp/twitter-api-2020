@@ -402,8 +402,7 @@ const userService = {
 
   profileUser: async (req, res, callback) => {
     try {
-      const currentUser = req.user ? req.user : helpers.getUser(req);
-      const [user] = await Promise.all([User.findByPk(currentUser.id)]);
+      const [user] = await Promise.all([User.findByPk(helpers.getUser(req).id)]);
       return callback({ user: user });
     } catch (e) {
       console.warn(e);
