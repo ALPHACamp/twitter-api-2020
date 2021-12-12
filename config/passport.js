@@ -2,8 +2,12 @@ const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
-const Tweet = db.Tweet
 const passport = require('passport')
+// // JWT
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
 
 // setup passport strategy
 passport.use(new LocalStrategy(
@@ -41,11 +45,7 @@ passport.deserializeUser((id, cb) => {
   });
 })
 
-// // JWT
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
+
 
 let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()

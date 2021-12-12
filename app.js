@@ -27,6 +27,8 @@ app.engine('handlebars', handlebars({
 }))
 app.set('view engine', 'handlebars')
 
+
+app.use(cors());
 // setup bodyParser
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -39,7 +41,7 @@ app.use('/upload', express.static(__dirname + '/upload'))
 // setup passport
 app.use(passport.initialize())
 app.use(passport.session())
-app.use(cors());
+
 
 // put req.flash into res.locals
 // app.use((req, res, next) => {
@@ -67,7 +69,7 @@ app.use((req, res, next) => {
 
 
 // app.get('/', (req, res) => res.send('Hello World!'))
-server.listen(port, () => console.log(`Example app listening on port ${port}!`)) //"app" replaced by "server" in order to adapt socket.io
+app.listen(port, () => console.log(`Example app listening on port ${port}!`)) //"app" replaced by "server" in order to adapt socket.io
 
 require('./routes')(app)
 
