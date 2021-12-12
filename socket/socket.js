@@ -24,7 +24,6 @@ module.exports = (Server, httpServer) => {
     }
     console.log(userList)
     io.emit('loginStatus', `${currentUser.name}已經登入了`)
-    io.emit('loginUser', userList)
 
     // 未讀私人訊息
     socket.on('messageNotReadInit', async () => {
@@ -38,8 +37,9 @@ module.exports = (Server, httpServer) => {
       if (data.roomName === 'public') {
         console.log(`${currentUser.name} has join public Room`)
         socket.join('public')
+        io.emit('loginUser', userList)
       } else {
-        const userId = Number(data.id.id) // 其他使用者id
+        const userId = Number(data.id) // 其他使用者id
         const roomName = createRoomName(userId, currentUser.id)
         socket.join(roomName)
         console.log(`${currentUser.name} has join ${roomName} Room`)
@@ -58,7 +58,7 @@ module.exports = (Server, httpServer) => {
         console.log(`${currentUser.name} has left public Room`)
         socket.leave('public')
       } else {
-        const userId = Number(data.id.id)
+        const userId = Number(data.id)
         const roomName = createRoomName(userId, currentUser.id)
         console.log(`${currentUser.name} has left ${roomName} Room`)
         socket.join(roomName)
@@ -78,12 +78,16 @@ module.exports = (Server, httpServer) => {
         message.avatar = currentUser.avatar
         io.to(message.roomName).emit('message', message)
       } else {
-        const userId = Number(data.id.id) // 其他使用者id
+        const userId = Number(data.id) // 其他使用者id
+        if (userId === -1) {
+          return
+        }
         const roomName = createRoomName(userId, currentUser.id)
         data.roomName = roomName
         const message = await postMessage(data, currentUser.id)
         message.avatar = currentUser.avatar
         io.to(message.roomName).emit('message', message)
+        socket.broadcast.emit('privateMessage')
       }
     })
 
