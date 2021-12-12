@@ -13,6 +13,19 @@ module.exports = (io, socket) => {
     const messages = await messageService.getMessages()
     socket.emit('getChatHistory', messages)
     socket.broadcast.emit('onlineHint', profile)
+
+    // 將 user 登入狀態寫進 DB
+    const [member, created] = await Member.findOrCreate({ where: { UserId: user.user.id, RoomId: 1 } })
+    await member.update({ online: true })
+    // 再回傳正在聊天室裡的 member array
+    const members = await Member.findAll({
+      raw: true,
+      nest: true,
+      where: { online: true },
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+      order: [['updatedAt', 'ASC']]
+    })
+    io.emit('onlineMember', members)
   })
 
   // 監聽訊息
@@ -44,5 +57,17 @@ module.exports = (io, socket) => {
       attributes: ['id', 'account', 'name', 'avatar']
     })
     io.emit('offlineHint', profile)
+    // 將 user 登入狀態從 DB 移除
+    const member = await Member.findOne({ where: { UserId: user.user.id, RoomId: 1 } })
+    await member.update({ online: false })
+    // 再回傳正在聊天室裡的 member array
+    const members = await Member.findAll({
+      raw: true,
+      nest: true,
+      where: { online: true },
+      include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
+      order: [['updatedAt', 'ASC']]
+    })
+    io.emit('onlineMember', members)
   })
 }
