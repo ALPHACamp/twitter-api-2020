@@ -7,13 +7,12 @@ const helpers = require('../_helpers')
 
 const tweetService = {
   postTweet: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     if (!req.body.description) {
       callback({ status: "error", message: "text didn't exist" });
     } else {
       return Tweet.create({
         description: req.body.description,
-        UserId: currentUser.id,
+        UserId: helpers.getUser(req).id,
       }).then((tweet) => {
         callback({
           status: "success",
@@ -51,14 +50,13 @@ const tweetService = {
            };
            return d
          })
-         console.log(tweets)
+        //  console.log(tweets)
         //  tweets = [...tweets.dataValues]
       // console.log("newTweets", newTweets[0].UserId);
       return callback(tweets);
     });
   },
   getTweet: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req)
     return Tweet.findOne({
       where: { UserId: Number(req.params.id) },
       include: [User, { model: Like }, { model: Reply, include: [User] }],
@@ -68,14 +66,17 @@ const tweetService = {
         (d) => d.isLike === true
       ).length;
       let tweetLike = tweet.Likes.filter((d, index) => d.isLike === true)
-      tweetLike = tweetLike.map((d) => d.UserId).includes(currentUser.id)
-      callback({
-        tweet: tweet.toJSON(),
-        tweetReplyCount: tweetReplyCount,
-        tweetLikeCount: tweetLikeCount,
-        isLike: tweetLike,
-      });
-    });
+      tweetLike = tweetLike.map((d) => d.UserId).includes(helpers.getUser(req).id)
+      tweet = { ...tweet.dataValues, tweetReplyCount, tweetLikeCount,  isLike: tweetLike}
+      console.log(tweet)
+       callback(tweet);
+      // callback({
+      //   tweet: tweet.toJSON(),
+      //   tweetReplyCount: tweetReplyCount,
+      //   tweetLikeCount: tweetLikeCount,
+      //   isLike: tweetLike,
+      // });
+      })
   },
 };
 module.exports = tweetService
