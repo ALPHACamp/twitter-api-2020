@@ -162,7 +162,7 @@ router.get(
 
 //  查詢user的所有留言
 router.get(
-  "/users/:userId/replies",
+  "/users/:userId/replied_tweets",
   authenticated,
   userController.getUserReplies
 );

@@ -85,19 +85,12 @@ const userService = {
           isLike: isLike,
         };
       });
-      return callback({ tweets: tweets });
-      // return callback(tweets);
+      // return callback({ tweets: tweets });
+      return callback(tweets);
     });
   },
   getUserReplies: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
-      User.findByPk(req.params.userId, {
-        include: [
-          { model: User, as: "Followers" },
-          { model: User, as: "Followings" },
-        ],
-      }),
       Reply.findAll({
         where: {
           UserId: Number(req.params.userId),
@@ -105,14 +98,8 @@ const userService = {
         order: [["createdAt", "DESC"]],
         include: [User, { model: Tweet, include: [User] }],
       }),
-    ]).then(([user, tweets]) => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-      };
-      let newTweets = tweets.map((d) => {
+    ]).then(([tweets]) => {
+      tweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
           avatar: d.User.avatar,
@@ -123,12 +110,11 @@ const userService = {
         };
         return d;
       });
-      let tweetCount = tweets.length;
-      return callback({
-        tweets: newTweets,
-        user: user,
-        tweetCount: tweetCount,
-      });
+      // console.log(tweets)
+       return callback(tweets);
+      // return callback({
+      //   tweets: tweets
+      // });
     });
   },
   getUserLikes: (req, res, callback) => {
@@ -142,8 +128,15 @@ const userService = {
       }),
     ]).then(([tweets]) => {
       tweets = tweets.map((d) => {
+        //  d.User = {
+        //    UserId: d.User.id,
+        //    avatar: d.User.avatar,
+        //    name: d.User.name,
+        //    account: d.User.account,
+        //    introduction: d.User.introduction,
+        //    createdAt: d.User.createdAt,
+        //  };
         let isLike = d.Tweet.Likes.some(l => l.UserId === helpers.getUser(req).id)
-        console.log(isLike)
         return {
           ...d.dataValues,
           tweetReplyCount: d.Tweet.Replies.length,
@@ -151,6 +144,7 @@ const userService = {
           isLike: isLike,
         };
       });
+      console.log(tweets)
       return callback(tweets)
     });
   },
