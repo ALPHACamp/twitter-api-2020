@@ -34,7 +34,15 @@ module.exports = (io, socket) => {
       await Member.create({ UserId: user.user2.id, RoomId: newRoom.id })
       socket.join(room)
     }
-
+    const messages = await Message.findAll({
+      raw: true,
+      nest: true,
+      where: { roomId: room },
+      limit: 20,
+      order: [['createdAt']],
+      include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] }]
+    })
+    socket.to(room).emit('getChatHistory', messages)
     socket.to(room).emit('enterRoom', profile)
   })
 
