@@ -221,7 +221,7 @@ router.post(
 
 //新增一位追蹤者
 router.post(
-  "/followships/:id",
+  "/followships",
   authenticated,
   authenticatedUser,
   userController.addFollowing
