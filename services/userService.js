@@ -16,7 +16,6 @@ const jwt = require('jsonwebtoken')
 const userService = {
   
   getUser: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     User.findOne({
       where: {
         id: req.params.id
@@ -30,106 +29,32 @@ const userService = {
         ...user.dataValues,
         FollowersCount: user.Followers.length,
         FollowingsCount: user.Followings.length,
+        isFollower: user.Followers.map((d) => d.id).includes(helpers.getUser(req).id),
       };
-      return callback({
-        user: user,
-        status: "success",
-        message: "service success!",
-      });
-    }).catch(error => { return callback({ status: "error", message: "service error!" }) })
-    // User.findByPk(req.params.id, {
-    //   include: [
-    //     { model: User, as: "Followers" },
-    //     { model: User, as: "Followings" },
-    //   ],
-    // }).then((user) => {
-    //   console.log('11111111111111111',req.body)
-    //   user = {
-    //     ...user.dataValues,
-    //     FollowersCount: user.Followers.length,
-    //     FollowingsCount: user.Followings.length,
-    //   };
-    //   return callback({ user: user})
-    // }).catch(error => { return callback({ status: "error", message: "service error!" }) })
+        return callback(user)
+    })
   },
   
-  addLike: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    Like.findOne({
-      where: {
-        UserId: Number(currentUser.id),
-        TweetId: Number(req.params.id),
-      },
-    }).then((like) => {
-      if (!like) {
-        return Like.create({
-          UserId: Number(currentUser.id),
-          TweetId: Number(req.params.id),
-          isLike: true,
-        }).then((like) => {
-          return callback({ status: "error", message: "" });
-        });
-      }
-      if (like.isLike === false) {
-        return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-          return callback({ status: "success", message: "" });
-        });
-      }
-      return callback({ status: "error", message: "" });
-    });
-  },
-  removeLike: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    Like.findOne({
-      where: {
-        UserId: Number(currentUser.id),
-        TweetId: Number(req.params.id),
-      },
-    }).then((like) => {
-      if (!like) {
-        return Like.create({
-          UserId: Number(currentUser.id),
-          TweetId: Number(req.params.id),
-          isLike: false,
-        }).then((like) => {
-          return callback({ status: "error", message: "" });
-        });
-      }
-      if (like.isLike === true) {
-        return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-          return callback({ status: "success", message: "" });
-        });
-      }
-      return callback({ status: "error", message: "" });
-    });
-  },
   addFollowing: (req, res, callback) => {
     return Followship.create({
       followerId: helpers.getUser(req).id,
-      followingId: req.body.id
-    }).then(followship => {
-      return callback({ status: 'success', message: '追隨成功' })
-    })
+      followingId: req.body.id,
+    }).then((followship) => {
+      return callback({ status: "success", message: "追隨成功" });
+    });
   },
   removeFollowing: (req, res, callback) => {
     return Followship.destroy({
       where: {
         followerId: helpers.getUser(req).id,
         followingId: req.params.followingId
-      }
-    }).then(followship => {
-      return callback({ status: 'success', message: '取消追隨成功' })
-    })
+      },
+    }).then((followship) => {
+      return callback({ status: "success", message: "取消追隨成功" });
+    });
   },
   getUserTweets: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
-      User.findByPk(req.params.userId, {
-        include: [
-          { model: User, as: "Followers" },
-          { model: User, as: "Followings" },
-        ],
-      }),
       Tweet.findAll({
         where: {
           UserId: Number(req.params.userId),
@@ -137,31 +62,22 @@ const userService = {
         order: [["createdAt", "DESC"]],
         include: [User, Reply, Like],
       }),
-    ]).then(([user, tweets]) => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-      };
-      let newTweets = tweets.map((tweet) => {
-        let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
-        isLike = !isLike ? false : isLike.isLike;
-        let likeCount = tweet.Likes.filter((d) => d.isLike === true).length;
-        return {
-          ...tweet.dataValues,
-          tweetReplyCount: tweet.Replies.length,
-          tweetLikeCount: likeCount,
-          isLike: isLike,
-        };
-      });
-      let tweetCount = tweets.length;
-      return callback({
-        tweets: newTweets,
-        user: user,
-        tweetCount: tweetCount,
-      });
-    });
+    ]).then(([tweets]) => {
+        tweets = tweets.map((tweet) => {
+          let isLike = tweet.Likes.find(
+            (d) => d.UserId === helpers.getUser(req).id
+          );
+          isLike = !isLike ? false : isLike.isLike;
+          let likeCount = tweet.Likes.filter((d) => d.isLike === true).length;
+          return {
+            ...tweet.dataValues,
+            tweetReplyCount: tweet.Replies.length,
+            tweetLikeCount: likeCount,
+            isLike: isLike,
+          };
+        });
+      return callback(tweets)
+    })
   },
   getUserReplies: (req, res, callback) => {
     const currentUser = req.user ? req.user : helpers.getUser(req);
@@ -257,27 +173,43 @@ const userService = {
     });
   },
   getFollowers: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
+    const currentUser = req.user ? req.user : helpers.getUser(req)
     return User.findByPk(req.params.id, {
       include: [
         {
-          model: User,
-          as: "Followers",
+          model: User, as: "Followers",
           include: [{ model: User, as: "Followers" }],
         },
       ],
-    }).then((result) => {
+    }).then((followers) => {
+      console.log('reqparams',req.params)
+      // console.log(typeof followers)
+      // console.log(followers.user)
+      // followers.user.forEach(d => console.log(d))
+      // followers.map((d, index) => {
+      //   let isFollower = d.Followers.mpa((d) => d.id).includes(
+      //     helpers.getUser(req)
+      //   );
+      //   console.log(index,sFollower);
+      //   return { ...dataValues, isFollower };
+      // //  return {...d.dataValues}
+      // })
       const followersCount = result.Followers.length;
       const thoseWeFollows = []; //those users that follows the user who are followed by the user as well
       const ff = result.Followers.map((d) => d.Followers);
       for (i = 0; i < ff.length; i++) {
         for (j = 0; j < ff[i].length; j++) {
-          if (ff[i][j].id === currentUser.id) {
+          if (ff[i][j].id === helpers.getUser(req).id) {
             thoseWeFollows.push(ff[i][j].Followship.followingId);
           }
         }
       }
-      callback({ result, followersCount, thoseWeFollows });
+      // console.log(result,'!!!!!!!!!!!!!');
+      // result = { ...result.dataValues, followersCount, thoseWeFollows };
+      // console.log(followers, "@@@@@@@@@@@");
+      callback({ result, followersCount, thoseWeFollows })
+        //  return callback(followers);
+    
     });
   },
   getFollowings: (req, res, callback) => {
@@ -402,19 +334,18 @@ const userService = {
 
   putUser: async (req, res, callback) => {
     console.log('req.body',req.body)
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    if (currentUser.id !== Number(req.params.id)) {
+    if (helpers.getUser(req).id !== Number(req.params.id)) {
       callback({ status: "error", message: "只能編輯自己的資訊." });
     }
     const [usersEmail, usersAccount, user] = await Promise.all([
       User.findAll({
         where: {
-          email: { [Op.not]: currentUser.email },
+          email: { [Op.not]: helpers.getUser(req).email },
         },
       }),
       User.findAll({
         where: {
-          account: { [Op.not]: currentUser.account },
+          account: { [Op.not]: helpers.getUser(req).account },
         },
       }),
       User.findByPk(req.params.id),
@@ -455,59 +386,63 @@ const userService = {
         null
       ),
     });
-    await callback({
+     callback({
       status: "success",
       message: "使用者資料編輯成功。",
     });
   },
   addLike: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     Like.findOne({
       where: {
-        UserId: Number(currentUser.id),
+        UserId: helpers.getUser(req).id,
         TweetId: Number(req.params.id),
       },
     }).then((like) => {
       if (!like) {
         return Like.create({
-          UserId: Number(currentUser.id),
+          UserId: helpers.getUser(req).id,
           TweetId: Number(req.params.id),
           isLike: true,
         }).then((like) => {
-          return callback({ status: "error", message: "" });
+          return callback({ status: "success", message: "喜歡此筆推文。" });
         });
       }
       if (like.isLike === false) {
         return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-          return callback({ status: "success", message: "" });
+          return callback({ status: "success", message: "喜歡此筆推文。" });
         });
       }
-      return callback({ status: "error", message: "" });
+      return callback({ status: "error", message: "錯誤 ! 此筆推文己喜歡。" });
     });
   },
   removeLike: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     Like.findOne({
       where: {
-        UserId: Number(currentUser.id),
+        UserId: helpers.getUser(req).id,
         TweetId: Number(req.params.id),
       },
     }).then((like) => {
       if (!like) {
         return Like.create({
-          UserId: Number(currentUser.id),
+          UserId: helpers.getUser(req).id,
           TweetId: Number(req.params.id),
           isLike: false,
         }).then((like) => {
-          return callback({ status: "error", message: "" });
+          return callback({ status: "success", message: "此筆推文取消喜歡" });
         });
       }
-      if (like.isLike === true) {
-        return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-          return callback({ status: "success", message: "" });
-        });
-      }
-      return callback({ status: "error", message: "" });
+       else if (like.isLike === true) {
+         return like.destroy().then((like) => {
+           return callback({ status: "success", message: "此筆推文取消喜歡" });
+         });
+       } else {
+         return like.destroy().then((like) => {
+           return callback({
+             status: "error",
+             message: "錯誤 ! 此筆推文己取消喜歡。",
+           });
+         });
+       }
     });
   },
 
@@ -523,12 +458,11 @@ const userService = {
 
   reviseUser: async (req, res, callback) => {
     try {
-      const currentUser = req.user ? req.user : helpers.getUser(req);
-      if (currentUser.id !== Number(req.params.id)) {
+      if (helpers.getUser(req).id !== Number(req.params.id)) {
         callback({ status: "error", message: "只能編輯自己的資訊." });
       }
 
-      const [user] = await Promise.all([User.findByPk(currentUser.id)]);
+      const [user] = await Promise.all([User.findByPk(helpers.getUser(req).id)]);
       console.log("我在編輯頁面");
       const { files } = req;
       imgur.setClientID(IMGUR_CLIENT_ID);

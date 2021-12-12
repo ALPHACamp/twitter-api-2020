@@ -65,7 +65,7 @@ router.get('/logout', userController.logout)
 //  使用者個人資料頁
 router.get("/users/:id/profile", authenticated, userController.profileUser)
 
-router.put("/users/:id/profile", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
+router.put("/users/:id/revise", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
 router.get('/users/:id', authenticated, userController.getUser)
 // 使用者到編輯頁
 router.get('/users/:id/edit', authenticated, userController.editUser)
