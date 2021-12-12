@@ -62,9 +62,7 @@ const adminService = {
   deleteTweet: (req, res, callback) => {
     return Tweet.findByPk(req.params.id, { include: [Reply, Like] })
       .then((tweet) => {
-        console.log('tweet.Replies', tweet.Replies)
         tweet.Replies.map(reply => {
-          console.log('reply.id', reply.id)
           reply.destroy()
         })
         tweet.destroy()

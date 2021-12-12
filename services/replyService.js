@@ -4,28 +4,25 @@ const helpers = require('../_helpers')
 
 let replyService = {
   postReply: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req)
     return Reply.create({
-      comment: req.body.reply,
+      comment: req.body.comment,
       TweetId: req.params.tweet_id,
-      UserId: currentUser.id,
+      UserId: helpers.getUser(req).id,
     }).then((reply) => {
       return callback({
         status: "success",
         message: "created new reply successfully",
         TweetId: Number(reply.TweetId),
         replyId: reply.id,
-      })
-    })
+      });
+    });
   },
   getReplies: (req, res, callback) => {
-    const tweetId = req.params.id
+    const tweetId = req.params.tweet_id
     return Reply.findAll({ where: { tweetId: tweetId } })
-      .then(results =>
-        callback({
-          results: results,
-        })
-      )
+      .then(results => {
+        callback(results)
+      })
   }
 }
 

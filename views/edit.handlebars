@@ -1,6 +1,6 @@
 
 <div class="container">
-  <form action="/users/{{ user.id }}?_method=PUT" method="POST" enctype="multipart/form-data">
+  <form action="/users/{{ user.id }}?_method=PUT" method="POST" >
     <div class="form-row">
       <div class="form-group col-md-6">
         <label for="account">帳號</label>
@@ -24,6 +24,7 @@
       <label for="checkPassword">確認密碼</label>
       <input type="password" class="form-control" id="checkPassword" placeholder="請輸入確認密碼" name="checkPassword">
     </div>
+  
     {{!-- <div class="form-group">
       <label for="introduction">自我介紹</label>
       <textarea class="form-control" id="introduction" rows="3" name="introduction">{{user.introduction}}</textarea>
