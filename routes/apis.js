@@ -117,13 +117,6 @@ router.get(
 //   ]),
 //   userController.putUser
 // );
-router.put(
-  "/users/:id",
-  authenticated,
-  authenticatedUser,
-  userController.putUser
-);
-// 第二張圖片
 
 // <--可以傳一個陣列 FILE
 router.put(
@@ -135,6 +128,15 @@ router.put(
   ]),
   userController.reviseUser
 );
+
+router.put(
+  "/users/:id",
+  authenticated,
+  authenticatedUser,
+  userController.putUser
+);
+// 第二張圖片
+
 
 //  查詢user的所有推文
 router.get(
