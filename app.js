@@ -52,7 +52,7 @@ const server = require('http').Server(app).listen(port, () => {
   console.log(`The app is listening on port ${port}`)
 })
 
-const SocketSession = require('./socket/index')
+const SocketSession = require('./socket')
 SocketSession(server)
 
 module.exports = app
