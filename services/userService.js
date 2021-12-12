@@ -332,14 +332,19 @@ const userService = {
     //     message: "帳戶名稱已被其他使用者使用，請更改!",
     //   });
     // }
+    let newPassword = await bcrypt.hash(
+        req.body.password,
+        bcrypt.genSalt(10),
+        null)
     await user.update({
       ...req.body,
-      password: '12345678',
-      // password: bcrypt.hashSync(
-      //   req.body.password,
-      //   bcrypt.genSaltSync(10),
-      //   null
-      // ),
+      // password: newPassword
+        // password: '12345678',
+        password: await bcrypt.hash(
+          req.body.password,
+          bcrypt.genSalt(10),
+          null
+        )
     });
     callback({
       status: "success",
@@ -368,7 +373,7 @@ const userService = {
         });
       }
       return callback({ status: "error", message: "錯誤 ! 此筆推文己喜歡。" });
-    });
+    }).catch((err) => console.log(err))
   },
   removeLike: (req, res, callback) => {
     Like.findOne({
@@ -397,7 +402,7 @@ const userService = {
           });
         });
       }
-    });
+    }).catch((err) => console.log(err))
   },
 
   profileUser: async (req, res, callback) => {
