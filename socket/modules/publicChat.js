@@ -11,7 +11,7 @@ module.exports = (io, socket) => {
       attributes: ['id', 'account', 'name', 'avatar']
     })
     const messages = await messageService.getMessages()
-    io.emit('getChatHistory', messages)
+    socket.emit('getChatHistory', messages)
     socket.broadcast.emit('onlineHint', `${profile.name}進入公開聊天室！`)
   })
 
