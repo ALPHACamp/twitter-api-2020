@@ -11,18 +11,6 @@ module.exports = server => {
     },
     allowEIO3: true
   })
-  const wrap = middleware => (socket, next) => middleware(socket.request, {}, next)
-  io.use(wrap(session({ secret: 'secret', resave: false, saveUninitialized: false })))
-  io.use(wrap(passport.initialize()))
-  io.use(wrap(passport.session()))
-
-  io.use((socket, next) => {
-    if (socket.request.user) {
-      next()
-    } else {
-      next(new Error('unauthorized'))
-    }
-  })
 
   // 公開聊天室
   const publicNamespace = io.of('/chat/public')
@@ -41,7 +29,7 @@ module.exports = server => {
         attributes: ['id', 'account', 'name', 'avatar']
       })
       const messages = await messageService.getMessages()
-      publicNamespace.emit(messages)
+      publicNamespace.emit('onlineHint', messages)
       socket.broadcast.emit('onlineHint', `${profile.name}進入聊天室了！`)
     })
 
@@ -97,10 +85,30 @@ module.exports = server => {
       const profile = await User.findOne({
         raw: true,
         nest: true,
-        where: { id: user.user.id },
+        where: { id: user.user1.id },
         attributes: ['id', 'account', 'name', 'avatar']
       })
-      socket.broadcast.emit('onlineHint', `${profile.name}進入聊天室了！`)
+      const roomsFor1 = await Member.findAll({ raw: true, nest: true, where: { UserId: user.user1.id } })
+      const roomsFor2 = await Member.findAll({ raw: true, nest: true, where: { UserId: user.user2.id } })
+
+      let room = null
+      if (roomsFor1 && roomsFor2) {
+        for (let i = 0; i < roomsFor1.length; i++) {
+          for (let j = 0; j < roomsFor2.length; j++) {
+            roomsFor1[i].RoomId === roomsFor2[j].RoomId ? (room = roomsFor1[i].RoomId) : (room = null)
+          }
+        }
+        socket.join(room)
+      }
+
+      if (!room) {
+        const newRoom = await Room.create({ name: `user${user.user1.id}&user${user.user2.id}的聊天室` })
+        await Member.create({ UserId: user.user1.id, RoomId: newRoom.id })
+        await Member.create({ UserId: user.user2.id, RoomId: newRoom.id })
+        socket.join(newRoom.id)
+      }
+      console.log(socket.adapter)
+      socket.emit('onlineHint', `${profile.name}進入聊天室了！`)
     })
 
     // 監聽訊息
