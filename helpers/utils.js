@@ -1,4 +1,5 @@
 const { Message } = require('../models')
+const { Op } = require('sequelize')
 
 module.exports = {
   createRoomName: (userId, currentId) => {
@@ -24,9 +25,9 @@ module.exports = {
     const notRead = await Message.count({
       where: {
         [Op.and]: [{
-          roomName: { [Op.or]: [{ [Op.like]: `%R${currentUserId}` }, { [Op.like]: `${currentUserId}R%` }] }
+          roomName: { [Op.or]: [{ [Op.like]: `%R${UserId}` }, { [Op.like]: `${UserId}R%` }] }
         },
-        { isRead: false },
+        { isRead: 0 },
         { [Op.not]: [{ UserId }] }]
       },
     })
@@ -34,9 +35,9 @@ module.exports = {
   },
 
   changeToRead: async (roomName, UserId) => {
-    await Message.update({ isRead: true }, {
+    await Message.update({ isRead: 1 }, {
       where: {
-        [Op.and]: [roomName, { isRead: false }, { [Op.not]: [{ UserId }] }]
+        [Op.and]: [{ roomName }, { isRead: 0 }, { [Op.not]: [{ UserId }] }]
       }
     })
   }

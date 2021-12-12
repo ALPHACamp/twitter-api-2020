@@ -1,6 +1,6 @@
 // 載入所需套件
-const { Message, User, Room } = require('../models')
-const createRoomName = require('../helpers/utils')
+const { Message, User } = require('../models')
+const { createRoomName } = require('../helpers/utils')
 const helpers = require('../_helpers')
 const { Op, Sequelize } = require('sequelize')
 
@@ -71,6 +71,7 @@ const messageService = {
       },
       attributes: ['roomName', [Sequelize.fn('max', Sequelize.col('createdAt')), 'createdAt']], group: ['roomName'],
     })
+    rawData.sort((a, b) => b.createdAt - a.createdAt)
     for (let data of rawData) {
       const text = (await Message.findOne({
         where: data,

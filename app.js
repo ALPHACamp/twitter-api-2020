@@ -15,7 +15,7 @@ const PORT = process.env.PORT
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-require('./socket/socket')(Server)
+require('./socket/socket')(Server, httpServer)
 
 app.use(routes)
 
