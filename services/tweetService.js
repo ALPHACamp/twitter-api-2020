@@ -49,10 +49,8 @@ const tweetService = {
         };
         return d;
       });
-      //  console.log(tweets)
-      //  tweets = [...tweets.dataValues]
-      // console.log("newTweets", newTweets[0].UserId);
       return callback(tweets);
+      // return callback({ tweets: tweets });
     });
   },
   getTweet: (req, res, callback) => {
@@ -73,6 +71,7 @@ const tweetService = {
         isLike: tweetLike,
       };
       callback(tweet);
+
       // callback({
       //   tweet: tweet.toJSON(),
       //   tweetReplyCount: tweetReplyCount,

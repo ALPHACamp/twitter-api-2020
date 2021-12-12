@@ -422,15 +422,15 @@ const userService = {
           TweetId: Number(req.params.id),
           isLike: true,
         }).then((like) => {
-          return callback({ status: "error", message: "" });
+          return callback({ status: "success", message: "喜歡此筆推文。" });
         });
       }
       if (like.isLike === false) {
         return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-          return callback({ status: "success", message: "" });
+          return callback({ status: "success", message: "喜歡此筆推文。" });
         });
       }
-      return callback({ status: "error", message: "" });
+      return callback({ status: "error", message: "錯誤 ! 此筆推文己喜歡。" });
     });
   },
   removeLike: (req, res, callback) => {
@@ -446,14 +446,21 @@ const userService = {
           TweetId: Number(req.params.id),
           isLike: false,
         }).then((like) => {
-          return callback({ status: "error", message: "" });
+          return callback({ status: "success", message: "此筆推文取消喜歡" });
         });
       }
-       else  { 
-        return like.destroy().then((like) => {
-          return callback({ status: "success", message: "" });
-        });
-      } 
+       else if (like.isLike === true) {
+         return like.destroy().then((like) => {
+           return callback({ status: "success", message: "此筆推文取消喜歡" });
+         });
+       } else {
+         return like.destroy().then((like) => {
+           return callback({
+             status: "error",
+             message: "錯誤 ! 此筆推文己取消喜歡。",
+           });
+         });
+       }
     });
   },
 
