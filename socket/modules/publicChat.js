@@ -12,7 +12,7 @@ module.exports = (io, socket) => {
     })
     const messages = await messageService.getMessages()
     socket.emit('getChatHistory', messages)
-    socket.broadcast.emit('onlineHint', `${profile.name}進入公開聊天室！`)
+    socket.broadcast.emit('onlineHint', profile)
   })
 
   // 監聽訊息
@@ -43,6 +43,6 @@ module.exports = (io, socket) => {
       where: { id: user.user.id },
       attributes: ['id', 'account', 'name', 'avatar']
     })
-    io.emit('offlineHint', `${profile.name}離開公開聊天室！`)
+    io.emit('offlineHint', profile)
   })
 }
