@@ -5,7 +5,7 @@ const { createRoomName, postMessage, getNotRead, changeToRead } = require('../he
 module.exports = (Server, httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: ["http://localhost:8084", "http://localhost:8080"],
+      origin: '*',
       methods: ["GET", "POST"],
     }
   })
