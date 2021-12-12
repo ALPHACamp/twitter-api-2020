@@ -39,6 +39,7 @@ module.exports = (Server, httpServer) => {
         socket.join('public')
         io.emit('loginUser', userList)
       } else {
+        socket.leaveAll()
         const userId = Number(data.id) // 其他使用者id
         const roomName = createRoomName(userId, currentUser.id)
         socket.join(roomName)
