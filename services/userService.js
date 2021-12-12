@@ -334,11 +334,12 @@ const userService = {
     // }
     await user.update({
       ...req.body,
-      password: bcrypt.hashSync(
-        req.body.password,
-        bcrypt.genSaltSync(10),
-        null
-      ),
+      password: '12345678',
+      // password: bcrypt.hashSync(
+      //   req.body.password,
+      //   bcrypt.genSaltSync(10),
+      //   null
+      // ),
     });
     callback({
       status: "success",
