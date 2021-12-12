@@ -44,26 +44,6 @@ const userService = {
       // return callback(user);
     });
   },
-  // getUser: (req, res, callback) => {
-  //   User.findOne({
-  //     where: {
-  //       id: req.params.id
-  //     },
-  //     include: [
-  //       { model: User, as: "Followers" },
-  //       { model: User, as: "Followings" },
-  //     ],
-  //   }).then(user => {
-  //     user = {
-  //       ...user.dataValues,
-  //       FollowersCount: user.Followers.length,
-  //       FollowingsCount: user.Followings.length,
-  //       isFollower: user.Followers.map((d) => d.id).includes(helpers.getUser(req).id),
-  //     };
-  //       return callback(user)
-  //   })
-  // },
-
   addFollowing: (req, res, callback) => {
     return Followship.create({
       followerId: helpers.getUser(req).id,
@@ -105,7 +85,8 @@ const userService = {
           isLike: isLike,
         };
       });
-      return callback(tweets);
+      return callback({ tweets: tweets });
+      // return callback(tweets);
     });
   },
   getUserReplies: (req, res, callback) => {
@@ -151,37 +132,18 @@ const userService = {
     });
   },
   getUserLikes: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
-      User.findByPk(req.params.userId, {
-        include: [
-          { model: User, as: "Followers" },
-          { model: User, as: "Followings" },
-        ],
-      }),
       Like.findAll({
         where: {
           UserId: Number(req.params.userId),
-          isLike: true,
         },
         order: [["createdAt", "DESC"]],
         include: [User, { model: Tweet, include: [User, Reply, Like] }],
       }),
-    ]).then(([user, tweets]) => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-      };
-      let newTweets = tweets.map((d) => {
-        let isLike;
-        let userLike = d.Tweet.Likes.find((l) => l.UserId === currentUser.id);
-        if (!userLike) {
-          isLike = false;
-        } else {
-          isLike = userLike.isLike;
-        }
+    ]).then(([tweets]) => {
+      tweets = tweets.map((d) => {
+        let isLike = d.Tweet.Likes.some(l => l.UserId === helpers.getUser(req).id)
+        console.log(isLike)
         return {
           ...d.dataValues,
           tweetReplyCount: d.Tweet.Replies.length,
@@ -189,21 +151,11 @@ const userService = {
           isLike: isLike,
         };
       });
-      let tweetCount = tweets.length;
-      return callback({
-        tweets: newTweets,
-        user: user,
-        tweetCount: tweetCount,
-      });
-      // return callback({
-      //   tweets: tweets,
-      //   user: user,
-      // });
+      return callback(tweets)
     });
   },
   getFollowers: (req, res, callback) => {
     return User.findByPk(req.params.id, {
-
       include: [
         {
           model: User,
@@ -403,13 +355,13 @@ const userService = {
     Like.findOne({
       where: {
         UserId: helpers.getUser(req).id,
-        TweetId: Number(req.params.id),
+        TweetId: req.params.id,
       },
     }).then((like) => {
       if (!like) {
         return Like.create({
           UserId: helpers.getUser(req).id,
-          TweetId: Number(req.params.id),
+          TweetId: req.params.id,
           isLike: true,
         }).then((like) => {
           return callback({ status: "success", message: "喜歡此筆推文。" });
@@ -427,13 +379,13 @@ const userService = {
     Like.findOne({
       where: {
         UserId: helpers.getUser(req).id,
-        TweetId: Number(req.params.id),
+        TweetId: req.params.id,
       },
     }).then((like) => {
       if (!like) {
         return Like.create({
           UserId: helpers.getUser(req).id,
-          TweetId: Number(req.params.id),
+          TweetId: req.params.id,
           isLike: false,
         }).then((like) => {
           return callback({ status: "success", message: "此筆推文取消喜歡" });
