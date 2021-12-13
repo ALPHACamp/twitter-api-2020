@@ -54,11 +54,16 @@ const tweetService = {
     });
   },
   getTweet: (req, res, callback) => {
+    console.log("params", req.params, helpers.getUser(req).id);
     return Tweet.findOne({
-      where: { UserId: Number(req.params.id) },
+      where: { id: req.params.id },
       include: [User, { model: Like }, { model: Reply, include: [User] }],
     }).then((tweet) => {
-      let tweetReplyCount = tweet.Replies.length;
+      console.log(tweet)
+      if (!tweet) {
+        return callback({ status: 'error', message: '此推文不存在' })
+      }  
+      let tweetReplyCount = tweet.Replies.length ? tweet.Replies.length : 0
       let tweetLikeCount = tweet.Likes.filter((d) => d.isLike === true).length;
       let tweetLike = tweet.Likes.filter((d, index) => d.isLike === true);
       tweetLike = tweetLike
@@ -71,9 +76,8 @@ const tweetService = {
         isLike: tweetLike,
       };
       return callback(tweet)
-
-      // callback({
-      //   tweet: tweet.toJSON(),
+      // return callback({
+      //   tweet: tweet
       //   tweetReplyCount: tweetReplyCount,
       //   tweetLikeCount: tweetLikeCount,
       //   isLike: tweetLike,
