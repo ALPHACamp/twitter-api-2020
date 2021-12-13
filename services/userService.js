@@ -43,6 +43,7 @@ const userService = {
       return callback({ status: 'success', message: '追隨成功' })
     })
   },
+  
   removeFollowing: (req, res, callback) => {
     return Followship.destroy({
       where: {

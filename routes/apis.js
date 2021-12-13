@@ -228,7 +228,7 @@ router.post(
 );
 //新增一位追蹤者
 router.delete(
-  "/followships/:id",
+  "/followships/:followingId",
   authenticated,
   authenticatedUser,
   userController.removeFollowing
