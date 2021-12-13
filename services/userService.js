@@ -287,64 +287,103 @@ const userService = {
     });
   },
 
-  putUser: async (req, res, callback) => {
-    console.log("req.body", req.body);
-    if (helpers.getUser(req).id !== Number(req.params.id)) {
-      callback({ status: "error", message: "只能編輯自己的資訊." });
-    }
-    const [usersEmail, usersAccount, user] = await Promise.all([
-      User.findAll({
-        where: {
-          email: { [Op.not]: helpers.getUser(req).email },
-        },
-      }),
-      User.findAll({
-        where: {
-          account: { [Op.not]: helpers.getUser(req).account },
-        },
-      }),
+  // putUser: async (req, res, callback) => {
+  //   console.log("req.body", req.body);
+  //   if (helpers.getUser(req).id !== Number(req.params.id)) {
+  //     callback({ status: "error", message: "只能編輯自己的資訊." });
+  //   }
+  //   const [usersEmail, usersAccount, user] = await Promise.all([
+  //     User.findAll({
+  //       where: {
+  //         email: { [Op.not]: helpers.getUser(req).email },
+  //       },
+  //     }),
+  //     User.findAll({
+  //       where: {
+  //         account: { [Op.not]: helpers.getUser(req).account },
+  //       },
+  //     }),
+  //     User.findByPk(req.params.id),
+  //   ]);
+  //   const emailCheck = usersEmail.map((d) => d.email).includes(req.body.email);
+  //   const accountCheck = usersAccount
+  //     .map((d) => d.account)
+  //     .includes(req.body.account);
+  //   // if (
+  //   //   !req.body.name ||
+  //   //   !req.body.email ||
+  //   //   !req.body.account ||
+  //   //   !req.body.password ||
+  //   //   !req.body.checkPassword
+  //   // ) {
+  //   //   await callback({
+  //   //     status: "error",
+  //   //     message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
+  //   //   });
+  //   // }
+  //   // if (req.body.password !== req.body.checkPassword) {
+  //   //   await callback({ status: "error", message: "密碼與確認密碼不一致!" });
+  //   // }
+  //   // if (emailCheck) {
+  //   //   await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+  //   // }
+  //   // if (accountCheck) {
+  //   //   await callback({
+  //   //     status: "error",
+  //   //     message: "帳戶名稱已被其他使用者使用，請更改!",
+  //   //   });
+  //   // }
+  //   await user.update({
+  //     ...req.body,
+  //     password: bcrypt.hashSync(
+  //       req.body.password,
+  //       bcrypt.genSaltSync(10),
+  //       null
+  //     ),
+  //   });
+  //   callback({
+  //     status: "success",
+  //     message: "使用者資料編輯成功。",
+  //   });
+  // },
+  putUser: async (req, res) => {
+    const { account, name, email, password, checkPassword, introduction } = req.body
+    // if (req.params.id !== String(req.user.id)) {
+    //   return res.json({ status: 'error', message: "權限錯誤" })
+    // }
+    // if (!account || !name || !email || !password || !checkPassword) {
+    //   return res.json({ status: 'error', message: '所有欄位都是必填' })
+    // }
+    // if (password !== checkPassword) {
+    //   return res.json({ status: 'error', message: '密碼與確認密碼不相符' })
+    // }
+    // if (account.length > 20 || password.length > 20 || name.length > 50) {
+    //   return res.json({ status: 'error', message: '超過字數上限' })
+    // }
+    return Promise.all([
       User.findByPk(req.params.id),
-    ]);
-    const emailCheck = usersEmail.map((d) => d.email).includes(req.body.email);
-    const accountCheck = usersAccount
-      .map((d) => d.account)
-      .includes(req.body.account);
-    // if (
-    //   !req.body.name ||
-    //   !req.body.email ||
-    //   !req.body.account ||
-    //   !req.body.password ||
-    //   !req.body.checkPassword
-    // ) {
-    //   await callback({
-    //     status: "error",
-    //     message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
-    //   });
-    // }
-    // if (req.body.password !== req.body.checkPassword) {
-    //   await callback({ status: "error", message: "密碼與確認密碼不一致!" });
-    // }
-    // if (emailCheck) {
-    //   await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
-    // }
-    // if (accountCheck) {
-    //   await callback({
-    //     status: "error",
-    //     message: "帳戶名稱已被其他使用者使用，請更改!",
-    //   });
-    // }
-    await user.update({
-      ...req.body,
-      password: bcrypt.hashSync(
-        req.body.password,
-        bcrypt.genSaltSync(10),
-        null
-      ),
-    });
-    callback({
-      status: "success",
-      message: "使用者資料編輯成功。",
-    });
+      User.findOne({ where: { email } }),
+      User.findOne({ where: { account } })
+    ])
+      .then(([user, anotherUserE, anotherUserA]) => {
+        if (anotherUserE && anotherUserE.email !== user.email) {
+          return res.json({ status: 'error', message: '不能使用此email' })
+        }
+        if (anotherUserA && anotherUserA.account !== user.account) {
+          return res.json({ status: 'error', message: '不能使用此帳號' })
+        }
+        user.update({
+          account,
+          name,
+          email,
+          password,
+          introduction
+          // bcrypt.hashSync(password, 10)
+        })
+          .then(() => {
+            return callback({ status: 'success', message: '資料編輯成功' })
+          })
+      })
   },
   addLike: (req, res, callback) => {
     Like.findOne({
