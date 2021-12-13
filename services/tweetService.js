@@ -26,8 +26,6 @@ const tweetService = {
       include: [User, { model: Reply }, { model: Like }],
       order: [["createdAt", "DESC"]],
     }).then((tweets) => {
-      // console.log(tweets,'#################')
-      // let newTweets = tweets.map((d) => {
       tweets = tweets.map((d) => {
         let tweetLikeCount = d.dataValues.Likes.filter(
           (d) => d.isLike === true
@@ -50,16 +48,13 @@ const tweetService = {
         return d;
       });
       return callback(tweets);
-      // return callback({ tweets: tweets });
     });
   },
   getTweet: (req, res, callback) => {
-    console.log("params", req.params, helpers.getUser(req).id);
     return Tweet.findOne({
       where: { id: req.params.id },
       include: [User, { model: Like }, { model: Reply, include: [User] }],
     }).then((tweet) => {
-      console.log(tweet)
       if (!tweet) {
         return callback({ status: 'error', message: '此推文不存在' })
       }  
@@ -76,12 +71,6 @@ const tweetService = {
         isLike: tweetLike,
       };
       return callback(tweet)
-      // return callback({
-      //   tweet: tweet
-      //   tweetReplyCount: tweetReplyCount,
-      //   tweetLikeCount: tweetLikeCount,
-      //   isLike: tweetLike,
-      // });
     });
   },
 };
