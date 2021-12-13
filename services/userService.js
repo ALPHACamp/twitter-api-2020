@@ -386,74 +386,64 @@ const userService = {
     }
   },
 
-    reviseUser: (req, res, callback) => {
-      const { name, email, account, password, checkPassword } = req.body
-      if (helpers.getUser(req).id !== Number(req.params.id)) {
-        callback({ status: "error", message: "只能編輯自己的資訊." });
+  reviseUser: (req, res, callback) => {
+    const { name, email, account, password, checkPassword } = req.body
+    const userId = helpers.getUser(req).id
+    if (userId !== Number(req.params.id)) {
+      callback({ status: "error", message: "只能編輯自己的資訊." });
+    }
+    return Promise.all([
+      User.findAll({
+        where: {
+          email: { [Op.not]: helpers.getUser(req).email },
+        },
+      }),
+      User.findAll({
+        where: {
+          account: { [Op.not]: helpers.getUser(req).account },
+        },
+      }),
+      User.findByPk(userId),
+    ]).then(([usersEmail, usersAccount, user]) => {
+      const emailCheck = usersEmail.map((d) => d.email).includes(email);
+      const accountCheck = usersAccount.map((d) => d.account).includes(account);
+      if (!name || !email || !account || !password || !checkPassword) {
+        callback({
+          status: "error",
+          message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
+        });
       }
-      return Promise.all([
-        User.findAll({
-          where: {
-            email: { [Op.not]: helpers.getUser(req).email },
-          },
-        }),
-        User.findAll({
-          where: {
-            account: { [Op.not]: helpers.getUser(req).account },
-          },
-        }),
-        User.findByPk(helpers.getUser(req).id),
-      ]).then(([usersEmail, usersAccount, user]) => {
-        console.log('$$$$$$$$$$$$$$$後面的',user)
-        console.log('收到的body',req.body)
-        const emailCheck = usersEmail
-          .map((d) => d.email)
-          .includes(req.body.email);
-        const accountCheck = usersAccount
-          .map((d) => d.account)
-          .includes(req.body.account);
-        if (
-          !name ||
-          !email ||
-          !account ||
-          !password ||
-          !checkPassword
-        ) {
-          callback({
-            status: "error",
-            message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
-          });
-        }
-        if (req.body.password !== req.body.checkPassword) {
-          callback({ status: "error", message: "密碼與確認密碼不一致!" });
-        }
-        if (emailCheck) {
-          callback({ status: "error", message: "此信箱己被註冊，請更改!" });
-        }
-        if (accountCheck) {
-          callback({
-            status: "error",
-            message: "帳戶名稱已被其他使用者使用，請更改!",
-          });
-        }
-         user.update({
+      if (password !== checkPassword) {
+        callback({ status: "error", message: "密碼與確認密碼不一致!" });
+      }
+      if (emailCheck) {
+        callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+      }
+      if (accountCheck) {
+        callback({
+          status: "error",
+          message: "帳戶名稱已被其他使用者使用，請更改!",
+        });
+      }
+      user
+        .update({
           name: name,
           email: email,
           account: account,
           password: bcrypt.hashSync(
-            req.body.password,
+            password,
             bcrypt.genSaltSync(10),
             null
-            ),
+          ),
         })
-        .then(user => {
+        .then((user) => {
           return callback({
             status: "success",
             message: "使用者資料編輯成功。",
           });
-        })
-      });
-    }
+        });
+    });
+  }
 };
   
 module.exports = userService
