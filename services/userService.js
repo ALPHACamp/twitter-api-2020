@@ -94,7 +94,7 @@ const userService = {
         },
         order: [["createdAt", "DESC"]],
         include: [User, { model: Tweet, include: [User] }],
-      }).then(([tweets]) => {
+      }).then((tweets) => {
       tweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
@@ -132,7 +132,6 @@ const userService = {
           isLike: isLike,
         };
       });
-      console.log(tweets);
       return callback(tweets);
     });
   },

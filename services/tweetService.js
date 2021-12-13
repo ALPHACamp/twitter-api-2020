@@ -61,9 +61,7 @@ const tweetService = {
       let tweetReplyCount = tweet.Replies.length ? tweet.Replies.length : 0
       let tweetLikeCount = tweet.Likes.filter((d) => d.isLike === true).length;
       let tweetLike = tweet.Likes.filter((d, index) => d.isLike === true);
-      tweetLike = tweetLike
-        .map((d) => d.UserId)
-        .includes(helpers.getUser(req).id);
+      tweetLike = tweetLike.map((d) => d.UserId).includes(helpers.getUser(req).id)
       tweet = {
         ...tweet.dataValues,
         tweetReplyCount,
