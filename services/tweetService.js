@@ -48,11 +48,8 @@ const tweetService = {
           isLike: userIsLike,
         };
         return d;
-      }).then(() => {
-        return callback(tweets);
-      }
-      )
-
+      }).then()
+      return callback(tweets);
       // return callback({ tweets: tweets });
     });
   },
