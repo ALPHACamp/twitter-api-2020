@@ -70,7 +70,7 @@ const tweetService = {
         tweetLikeCount,
         isLike: tweetLike,
       };
-      callback(tweet);
+      callback(tweet)
 
       // callback({
       //   tweet: tweet.toJSON(),

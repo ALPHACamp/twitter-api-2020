@@ -118,7 +118,7 @@ router.get(
 //   userController.putUser
 // );
 
-// <--可以傳一個陣列 FILE
+// 編輯個人名稱，內容，大頭照，背景照路由
 router.put(
   "/users/:id/revise",
   authenticated,
@@ -128,7 +128,7 @@ router.put(
   ]),
   userController.reviseUser
 );
-
+// 帳戶設定路由
 router.put(
   "/users/:id",
   authenticated,

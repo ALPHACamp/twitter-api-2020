@@ -63,15 +63,13 @@ const userService = {
     });
   },
   getUserTweets: (req, res, callback) => {
-    return Promise.all([
-      Tweet.findAll({
+    return Tweet.findAll({
         where: {
           UserId: Number(req.params.userId),
         },
         order: [["createdAt", "DESC"]],
         include: [User, Reply, Like],
-      }),
-    ]).then(([tweets]) => {
+      }).then((tweets) => {
       tweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find(
           (d) => d.UserId === helpers.getUser(req).id
@@ -90,15 +88,13 @@ const userService = {
     });
   },
   getUserReplies: (req, res, callback) => {
-    return Promise.all([
-      Reply.findAll({
+    return Reply.findAll({
         where: {
           UserId: Number(req.params.userId),
         },
         order: [["createdAt", "DESC"]],
         include: [User, { model: Tweet, include: [User] }],
-      }),
-    ]).then(([tweets]) => {
+      }).then(([tweets]) => {
       tweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
@@ -118,15 +114,13 @@ const userService = {
     });
   },
   getUserLikes: (req, res, callback) => {
-    return Promise.all([
-      Like.findAll({
+    return Like.findAll({
         where: {
           UserId: Number(req.params.userId),
         },
         order: [["createdAt", "DESC"]],
         include: [User, { model: Tweet, include: [User, Reply, Like] }],
-      }),
-    ]).then(([tweets]) => {
+      }).then(([tweets]) => {
       tweets = tweets.map((d) => {
         let isLike = d.Tweet.Likes.some(
           (l) => l.UserId === helpers.getUser(req).id
@@ -273,64 +267,127 @@ const userService = {
     });
   },
   putUser: async (req, res, callback) => {
-    console.log("req.body", req.body);
-    if (helpers.getUser(req).id !== Number(req.params.id)) {
-      callback({ status: "error", message: "只能編輯自己的資訊." });
+    try {
+      if (helpers.getUser(req).id !== Number(req.params.id)) {
+        callback({ status: "error", message: "只能編輯自己的資訊." });
+      }
+
+      const [user] = await Promise.all([
+        User.findByPk(helpers.getUser(req).id),
+      ]);
+      console.log("我在編輯頁面");
+      const { files } = req;
+      imgur.setClientID(IMGUR_CLIENT_ID);
+      if (files) {
+        if (files.cover && !files.avatar) {
+          console.log("只有大頭照");
+          imgur.upload(files.cover[0].path, async (err, coverImg) => {
+            try {
+              if (err) console.log("Error: ", err);
+              let cover = await coverImg;
+              await user
+                .update({
+                  ...req.body,
+                  cover: coverImg.data.link,
+                })
+                .then((user) => {
+                  callback({
+                    status: "success",
+                    message: "使用者資料編輯成功。",
+                  });
+                });
+            } catch (e) {
+              console.warn(e);
+            }
+          });
+        } else if (!files.cover && files.avatar) {
+          console.log("只有背景照");
+          imgur.upload(files.avatar[0].path, async (err, avatarImg) => {
+            if (err) console.log("Error: ", err);
+            let avatar = await avatarImg;
+            await user
+              .update({
+                ...req.body,
+                avatar: avatarImg.data.link,
+              })
+              .then((user) => {
+                callback({
+                  status: "success",
+                  message: "使用者資料編輯成功。",
+                });
+              });
+            try {
+            } catch (e) {
+              console.warn(e);
+            }
+          });
+        }
+        // else if (files.cover && files.avatar) {
+        else {
+          console.log("贡張都有");
+          imgur.upload(files.cover[0].path, async (err, coverImg) => {
+            if (err) console.log("Error: ", err);
+            imgur.upload(files.avatar[0].path, async (err, avatarImg) => {
+              try {
+                if (err) console.log("Error: ", err);
+                let cover = await coverImg;
+                let avatar = await avatarImg;
+                user
+                  .update({
+                    ...req.body,
+                    cover: cover.data.link,
+                    avatar: avatar.data.link,
+                  })
+                  .then((user) => {
+                    callback({
+                      status: "success",
+                      message: "使用者資料編輯成功。",
+                    });
+                  });
+              } catch (e) {
+                console.warn(e);
+              }
+            });
+          });
+        } 
+        // else {
+        //   console.log("都沒有照片");
+        //   user
+        //     .update({
+        //       ...req.body,
+        //       cover: user.cover,
+        //       avatar: user.avatar,
+        //     })
+        //     .then(() => {
+        //       callback({
+        //         status: "success",
+        //         message: "使用者資料編輯成功。",
+        //       });
+        //     });
+        // }
+      } 
+      else {
+          console.log("都沒有照片");
+          user
+            .update({
+              ...req.body,
+              cover: user.cover,
+              avatar: user.avatar,
+            })
+            .then(() => {
+              callback({
+                status: "success",
+                message: "使用者資料編輯成功。",
+              });
+            });
+        }
+    } catch (e) {
+      console.warn(e);
+      callback({
+        status: "error",
+        message: "使用者資料編輯失敗。",
+      });
     }
-    return Promise.all([
-      User.findAll({
-        where: {
-          email: { [Op.not]: helpers.getUser(req).email },
-        },
-      }),
-      User.findAll({
-        where: {
-          account: { [Op.not]: helpers.getUser(req).account },
-        },
-      }),
-      User.findByPk(req.params.id),
-    ]).then(([usersEmail, usersAccount, user]) => {
-      const emailCheck = usersEmail.map((d) => d.email).includes(req.body.email);
-      const accountCheck = usersAccount.map((d) => d.account).includes(req.body.account)
-          // if (
-    //   !req.body.name ||
-    //   !req.body.email ||
-    //   !req.body.account ||
-    //   !req.body.password ||
-    //   !req.body.checkPassword
-    // ) {
-    //   await callback({
-    //     status: "error",
-    //     message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
-    //   });
-    // }
-    // if (req.body.password !== req.body.checkPassword) {
-    //   await callback({ status: "error", message: "密碼與確認密碼不一致!" });
-    // }
-    // if (emailCheck) {
-    //   await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
-    // }
-    // if (accountCheck) {
-    //   await callback({
-    //     status: "error",
-    //     message: "帳戶名稱已被其他使用者使用，請更改!",
-    //   });
-    // }
-       user.update({
-         ...req.body,
-         // password: newPassword
-         // password: '12345678',
-         password: await bcrypt.hashSync(
-           req.body.password,
-           bcrypt.genSaltSync(10),
-           null
-         ),
-       });
-       callback({
-         status: "success",
-         message: "使用者資料編輯成功。",
-       });
-    })
   },
   // putUser: async (req, res, callback) => {
   //   console.log("req.body", req.body);
@@ -469,111 +526,97 @@ const userService = {
     }
   },
 
-  reviseUser: async (req, res, callback) => {
-    try {
-      if (helpers.getUser(req).id !== Number(req.params.id)) {
-        callback({ status: "error", message: "只能編輯自己的資訊." });
-      }
-
-      const [user] = await Promise.all([
-        User.findByPk(helpers.getUser(req).id),
-      ]);
-      console.log("我在編輯頁面");
-      const { files } = req;
-      imgur.setClientID(IMGUR_CLIENT_ID);
-      if (files) {
-        if (files.cover && !files.avatar) {
-          console.log("只有大頭照");
-          imgur.upload(files.cover[0].path, async (err, coverImg) => {
-            try {
-              if (err) console.log("Error: ", err);
-              let cover = await coverImg;
-              await user
-                .update({
-                  ...req.body,
-                  cover: coverImg.data.link,
-                })
-                .then((user) => {
-                  callback({
-                    status: "success",
-                    message: "使用者資料編輯成功。",
-                  });
-                });
-            } catch (e) {
-              console.warn(e);
-            }
-          });
-        } else if (!files.cover && files.avatar) {
-          console.log("只有背景照");
-          imgur.upload(files.avatar[0].path, async (err, avatarImg) => {
-            if (err) console.log("Error: ", err);
-            let avatar = await avatarImg;
-            await user
-              .update({
-                ...req.body,
-                avatar: avatarImg.data.link,
-              })
-              .then((user) => {
-                callback({
-                  status: "success",
-                  message: "使用者資料編輯成功。",
-                });
-              });
-            try {
-            } catch (e) {
-              console.warn(e);
-            }
-          });
-        } else if (files.cover && files.avatar) {
-          console.log("贡張都有");
-          imgur.upload(files.cover[0].path, async (err, coverImg) => {
-            if (err) console.log("Error: ", err);
-            imgur.upload(files.avatar[0].path, async (err, avatarImg) => {
-              try {
-                if (err) console.log("Error: ", err);
-                let cover = await coverImg;
-                let avatar = await avatarImg;
-                user
-                  .update({
-                    ...req.body,
-                    cover: cover.data.link,
-                    avatar: avatar.data.link,
-                  })
-                  .then((user) => {
-                    callback({
-                      status: "success",
-                      message: "使用者資料編輯成功。",
-                    });
-                  });
-              } catch (e) {
-                console.warn(e);
-              }
-            });
-          });
-        } else {
-          console.log("都沒有照片");
-          user
-            .update({
-              ...req.body,
-              cover: user.cover,
-              avatar: user.avatar,
-            })
-            .then(() => {
-              callback({
-                status: "success",
-                message: "使用者資料編輯成功。",
-              });
-            });
-        }
-      }
-    } catch (e) {
-      console.warn(e);
-      callback({
-        status: "error",
-        message: "使用者資料編輯失敗。",
-      });
+  reviseUser: (req, res, callback) => {
+    console.log("req.body", req.body, helpers.getUser(req).id);
+    if (helpers.getUser(req).id !== Number(req.params.id)) {
+      callback({ status: "error", message: "只能編輯自己的資訊." });
     }
-  },
+    return Promise.all([
+      User.findAll({
+        where: {
+          email: { [Op.not]: helpers.getUser(req).email },
+        },
+      }),
+      User.findAll({
+        where: {
+          account: { [Op.not]: helpers.getUser(req).account },
+        },
+      }),
+      User.findByPk(helpers.getUser(req).id),
+    ]).then(([usersEmail, usersAccount, user]) => {
+      console.log('$$$$$$$$$$$$$$$後面的',user)
+      console.log('收到的body',req.body)
+      const emailCheck = usersEmail
+        .map((d) => d.email)
+        .includes(req.body.email);
+      const accountCheck = usersAccount
+        .map((d) => d.account)
+        .includes(req.body.account);
+      if (
+        !req.body.name ||
+        !req.body.email ||
+        !req.body.account ||
+        !req.body.password ||
+        !req.body.checkPassword
+      ) {
+        callback({
+          status: "error",
+          message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
+        });
+      }
+      if (req.body.password !== req.body.checkPassword) {
+        callback({ status: "error", message: "密碼與確認密碼不一致!" });
+      }
+      if (emailCheck) {
+        callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+      }
+      if (accountCheck) {
+        callback({
+          status: "error",
+          message: "帳戶名稱已被其他使用者使用，請更改!",
+        });
+      }
+      return bcrypt
+      .genSalt(10)
+      .then(salt => bcrypt.hash(req.body.password, salt))
+      .then(hash => {
+        console.log('hhhhhhhhhhhhhh',req.body)
+        user.update({
+          // ...req.body,
+          name: req.body.name,
+          // account: req.boyd.account,
+          email: req.body.email,
+          password: hash,
+        });
+          return callback({
+            status: "success",
+            message: "使用者資料編輯成功。",
+          });
+      })  
+      // return user.update({
+      //   user.update({
+      //   // name: req.body.name,
+      //   // account: req.boyd.account,
+      //   // email: req.body.email,
+      //   ...req.body,
+      //   // password: '1232456'
+      //   // password: newPassword
+      //   //  password: '12345678',
+      //   password: bcrypt.hashSync(
+      //     req.body.password,
+      //     bcrypt.genSaltSync(10),
+      //     null
+      //   ),
+      // })
+      // .then(user => {
+
+        // return callback({
+        //   status: "success",
+        //   message: "使用者資料編輯成功。",
+        // });
+      // })
+    });
+  }
 };
   
 module.exports = userService
