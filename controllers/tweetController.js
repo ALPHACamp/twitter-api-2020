@@ -27,7 +27,11 @@ const tweetController = {
 
   getTweet: (req, res) => {
     tweetService.getTweet(req, res, (data) => {
-      return res.render("tweet", data);
+      if (data["status"] === "error") {
+        req.flash("error_messages", data["message"]);
+        return res.redirect("/tweets");
+      }
+      return res.render("tweet", data)
     });
   },
 };
