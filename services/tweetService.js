@@ -48,7 +48,7 @@ const tweetService = {
         return d;
       });
       return callback(tweets);
-    });
+      })
   },
   getTweet: (req, res, callback) => {
     return Tweet.findOne({
