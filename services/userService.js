@@ -17,42 +17,41 @@ const userService = {
   getUser: (req, res, callback) => {
     return Promise.all([
       User.findOne({
-      where: {
-        id: req.params.id,
-      },
-      include: [
-        { model: User, as: "Followers" },
-        { model: User, as: "Followings" },
-      ],
-    }),
-    Tweet.findAll({
-      where: {
-        UserId: req.params.id
-      }
-    })
-  ]).then(([user, tweets]) => {
+        where: {
+          id: req.params.id,
+        },
+        include: [
+          { model: User, as: "Followers" },
+          { model: User, as: "Followings" },
+        ],
+      }),
+      Tweet.findAll({
+        where: {
+          UserId: req.params.id,
+        },
+      }),
+    ]).then(([user, tweets]) => {
       user = {
         ...user.dataValues,
         FollowersCount: user.Followers.length,
         FollowingsCount: user.Followings.length,
         isFollower: user.Followers.map((d) => d.id).includes(
           helpers.getUser(req).id
-          ),
-        tweetsCount :tweets.length
+        ),
+        tweetsCount: tweets.length,
       };
-      return callback(user)
+      return callback(user);
       // return callback(user);
     });
   },
   addFollowing: (req, res, callback) => {
     return Followship.create({
       followerId: helpers.getUser(req).id,
-      followingId: Number(req.body.id)
-    }).then(followship => {
-      return callback({ status: 'success', message: '追隨成功' })
-    })
+      followingId: req.body.id,
+    }).then((followship) => {
+      return callback({ status: "success", message: "追隨成功" });
+    });
   },
-  
   removeFollowing: (req, res, callback) => {
     return Followship.destroy({
       where: {
@@ -64,15 +63,13 @@ const userService = {
     });
   },
   getUserTweets: (req, res, callback) => {
-    return Promise.all([
-      Tweet.findAll({
+    return Tweet.findAll({
         where: {
           UserId: Number(req.params.userId),
         },
         order: [["createdAt", "DESC"]],
         include: [User, Reply, Like],
-      }),
-    ]).then(([tweets]) => {
+      }).then((tweets) => {
       tweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find(
           (d) => d.UserId === helpers.getUser(req).id
@@ -91,15 +88,13 @@ const userService = {
     });
   },
   getUserReplies: (req, res, callback) => {
-    return Promise.all([
-      Reply.findAll({
+    return Reply.findAll({
         where: {
           UserId: Number(req.params.userId),
         },
         order: [["createdAt", "DESC"]],
         include: [User, { model: Tweet, include: [User] }],
-      }),
-    ]).then(([tweets]) => {
+      }).then(([tweets]) => {
       tweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
@@ -112,32 +107,24 @@ const userService = {
         return d;
       });
       // console.log(tweets)
-       return callback(tweets);
+      return callback(tweets);
       // return callback({
       //   tweets: tweets
       // });
     });
   },
   getUserLikes: (req, res, callback) => {
-    return Promise.all([
-      Like.findAll({
+    return Like.findAll({
         where: {
           UserId: Number(req.params.userId),
         },
         order: [["createdAt", "DESC"]],
         include: [User, { model: Tweet, include: [User, Reply, Like] }],
-      }),
-    ]).then(([tweets]) => {
+      }).then((tweets) => {
       tweets = tweets.map((d) => {
-        //  d.User = {
-        //    UserId: d.User.id,
-        //    avatar: d.User.avatar,
-        //    name: d.User.name,
-        //    account: d.User.account,
-        //    introduction: d.User.introduction,
-        //    createdAt: d.User.createdAt,
-        //  };
-        let isLike = d.Tweet.Likes.some(l => l.UserId === helpers.getUser(req).id)
+        let isLike = d.Tweet.Likes.some(
+          (l) => l.UserId === helpers.getUser(req).id
+        );
         return {
           ...d.dataValues,
           tweetReplyCount: d.Tweet.Replies.length,
@@ -145,8 +132,8 @@ const userService = {
           isLike: isLike,
         };
       });
-      console.log(tweets)
-      return callback(tweets)
+      console.log(tweets);
+      return callback(tweets);
     });
   },
   getFollowers: (req, res, callback) => {
@@ -162,13 +149,13 @@ const userService = {
       followers = followers.Followers.map((d, index) => {
         let followerId;
         if (!d.Followship.followerId) {
-          followerId = false
+          followerId = false;
         }
-       followerId = d.Followship.followerId; 
+        followerId = d.Followship.followerId;
         return { ...d.dataValues, followerId };
-      })
-       return callback(followers)
-    })
+      });
+      return callback(followers);
+    });
   },
   getFollowings: (req, res, callback) => {
     return User.findByPk(req.params.id, {
@@ -183,11 +170,11 @@ const userService = {
       followings = followings.Followings.map((d, index) => {
         let followingId;
         if (!d.Followship.followingId) {
-          followingId = false
+          followingId = false;
         }
         followingId = d.Followship.followingId;
         return { ...d.dataValues, followingId };
-      })
+      });
       return callback(followings);
     });
   },
@@ -221,7 +208,7 @@ const userService = {
       where: {},
       truncate: true,
     }).then(() => {
-      callback({ status: "success", message: "all tweets killed" });
+      callback({ status: "success", message: "all tweets killed" })
     });
   },
   deleteAllReplies: (req, res, callback) => {
@@ -229,232 +216,14 @@ const userService = {
       where: {},
       truncate: true,
     }).then(() => {
-      callback({ status: "success", message: "all replies killed" });
+      callback({ status: "success", message: "all replies killed" })
     });
   },
-  getUserLikesTweet: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Promise.all([
-      User.findByPk(req.params.userId, {
-        include: [
-          { model: User, as: "Followers" },
-          { model: User, as: "Followings" },
-        ],
-      }),
-      // Like.findAll({
-      //   where: {
-      //     UserId: Number(req.params.userId),
-      //     isLike: true,
-      //   },
-      //   order: [["createdAt", "DESC"]],
-      //   include: [User, { model: Tweet, include: [User, Reply, Like] }],
-      Like.findAll({
-        where: {
-          UserId: Number(req.params.userId),
-          isLike: true,
-        },
-        order: [["createdAt", "DESC"]],
-        include: [User, { model: Tweet, include: [User, Reply, Like] }],
-      }),
-    ]).then(([user, tweets]) => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-      };
-      let newTweets = tweets.map((d) => {
-        let isLike;
-        let userLike = d.Tweet.Likes.find((l) => l.UserId === currentUser.id);
-        if (!userLike) {
-          isLike = false;
-        } else {
-          isLike = userLike.isLike;
-        }
-        return {
-          ...d.dataValues,
-          tweetReplyCount: d.Tweet.Replies.length,
-          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
-          isLike: isLike,
-        };
-      });
-      let tweetCount = tweets.length;
-      return callback({
-        tweets: newTweets,
-        user: user,
-        tweetCount: tweetCount,
-      });
-    });
-  },
-
-  // putUser: async (req, res, callback) => {
-  //   console.log("req.body", req.body);
-  //   if (helpers.getUser(req).id !== Number(req.params.id)) {
-  //     callback({ status: "error", message: "只能編輯自己的資訊." });
-  //   }
-  //   const [usersEmail, usersAccount, user] = await Promise.all([
-  //     User.findAll({
-  //       where: {
-  //         email: { [Op.not]: helpers.getUser(req).email },
-  //       },
-  //     }),
-  //     User.findAll({
-  //       where: {
-  //         account: { [Op.not]: helpers.getUser(req).account },
-  //       },
-  //     }),
-  //     User.findByPk(req.params.id),
-  //   ]);
-  //   const emailCheck = usersEmail.map((d) => d.email).includes(req.body.email);
-  //   const accountCheck = usersAccount
-  //     .map((d) => d.account)
-  //     .includes(req.body.account);
-  //   // if (
-  //   //   !req.body.name ||
-  //   //   !req.body.email ||
-  //   //   !req.body.account ||
-  //   //   !req.body.password ||
-  //   //   !req.body.checkPassword
-  //   // ) {
-  //   //   await callback({
-  //   //     status: "error",
-  //   //     message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
-  //   //   });
-  //   // }
-  //   // if (req.body.password !== req.body.checkPassword) {
-  //   //   await callback({ status: "error", message: "密碼與確認密碼不一致!" });
-  //   // }
-  //   // if (emailCheck) {
-  //   //   await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
-  //   // }
-  //   // if (accountCheck) {
-  //   //   await callback({
-  //   //     status: "error",
-  //   //     message: "帳戶名稱已被其他使用者使用，請更改!",
-  //   //   });
-  //   // }
-  //   await user.update({
-  //     ...req.body,
-  //     password: bcrypt.hashSync(
-  //       req.body.password,
-  //       bcrypt.genSaltSync(10),
-  //       null
-  //     ),
-  //   });
-  //   callback({
-  //     status: "success",
-  //     message: "使用者資料編輯成功。",
-  //   });
-  // },
-  putUser: async (req, res) => {
-    const { account, name, email, password, checkPassword, introduction } = req.body
-    // if (req.params.id !== String(req.user.id)) {
-    //   return res.json({ status: 'error', message: "權限錯誤" })
-    // }
-    // if (!account || !name || !email || !password || !checkPassword) {
-    //   return res.json({ status: 'error', message: '所有欄位都是必填' })
-    // }
-    // if (password !== checkPassword) {
-    //   return res.json({ status: 'error', message: '密碼與確認密碼不相符' })
-    // }
-    // if (account.length > 20 || password.length > 20 || name.length > 50) {
-    //   return res.json({ status: 'error', message: '超過字數上限' })
-    // }
-    return Promise.all([
-      User.findByPk(req.params.id),
-      User.findOne({ where: { email } }),
-      User.findOne({ where: { account } })
-    ])
-      .then(([user, anotherUserE, anotherUserA]) => {
-        if (anotherUserE && anotherUserE.email !== user.email) {
-          return res.json({ status: 'error', message: '不能使用此email' })
-        }
-        if (anotherUserA && anotherUserA.account !== user.account) {
-          return res.json({ status: 'error', message: '不能使用此帳號' })
-        }
-        user.update({
-          account,
-          name,
-          email,
-          password,
-          introduction
-          // bcrypt.hashSync(password, 10)
-        })
-          .then(() => {
-            return callback({ status: 'success', message: '資料編輯成功' })
-          })
-      })
-  },
-  addLike: (req, res, callback) => {
-    Like.findOne({
-      where: {
-        UserId: helpers.getUser(req).id,
-        TweetId: req.params.id,
-      },
-    }).then((like) => {
-      if (!like) {
-        return Like.create({
-          UserId: helpers.getUser(req).id,
-          TweetId: req.params.id,
-          isLike: true,
-        }).then((like) => {
-          return callback({ status: "success", message: "喜歡此筆推文。" });
-        });
-      }
-      if (like.isLike === false) {
-        return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-          return callback({ status: "success", message: "喜歡此筆推文。" });
-        });
-      }
-      return callback({ status: "error", message: "錯誤 ! 此筆推文己喜歡。" });
-    });
-  },
-  removeLike: (req, res, callback) => {
-    Like.findOne({
-      where: {
-        UserId: helpers.getUser(req).id,
-        TweetId: req.params.id,
-      },
-    }).then((like) => {
-      if (!like) {
-        return Like.create({
-          UserId: helpers.getUser(req).id,
-          TweetId: req.params.id,
-          isLike: false,
-        }).then((like) => {
-          return callback({ status: "success", message: "此筆推文取消喜歡" });
-        });
-      } else if (like.isLike === true) {
-        return like.destroy().then((like) => {
-          return callback({ status: "success", message: "此筆推文取消喜歡" });
-        });
-      } else {
-        return like.destroy().then((like) => {
-          return callback({
-            status: "error",
-            message: "錯誤 ! 此筆推文己取消喜歡。",
-          });
-        });
-      }
-    });
-  },
-
-  profileUser: async (req, res, callback) => {
-    try {
-      const currentUser = req.user ? req.user : helpers.getUser(req);
-      const [user] = await Promise.all([User.findByPk(currentUser.id)]);
-      return callback({ user: user });
-    } catch (e) {
-      console.warn(e);
-    }
-  },
-
-  reviseUser: async (req, res, callback) => {
+  putUser: async (req, res, callback) => {
     try {
       if (helpers.getUser(req).id !== Number(req.params.id)) {
         callback({ status: "error", message: "只能編輯自己的資訊." });
       }
-
       const [user] = await Promise.all([
         User.findByPk(helpers.getUser(req).id),
       ]);
@@ -504,7 +273,9 @@ const userService = {
               console.warn(e);
             }
           });
-        } else if (files.cover && files.avatar) {
+        }
+        // else if (files.cover && files.avatar) {
+        else {
           console.log("贡張都有");
           imgur.upload(files.cover[0].path, async (err, coverImg) => {
             if (err) console.log("Error: ", err);
@@ -530,7 +301,24 @@ const userService = {
               }
             });
           });
-        } else {
+        } 
+        // else {
+        //   console.log("都沒有照片");
+        //   user
+        //     .update({
+        //       ...req.body,
+        //       cover: user.cover,
+        //       avatar: user.avatar,
+        //     })
+        //     .then(() => {
+        //       callback({
+        //         status: "success",
+        //         message: "使用者資料編輯成功。",
+        //       });
+        //     });
+        // }
+      } 
+      else {
           console.log("都沒有照片");
           user
             .update({
@@ -545,7 +333,6 @@ const userService = {
               });
             });
         }
-      }
     } catch (e) {
       console.warn(e);
       callback({
@@ -554,6 +341,234 @@ const userService = {
       });
     }
   },
+  // putUser: async (req, res, callback) => {
+  //   console.log("req.body", req.body);
+  //   if (helpers.getUser(req).id !== Number(req.params.id)) {
+  //     callback({ status: "error", message: "只能編輯自己的資訊." });
+  //   }
+  //   const [usersEmail, usersAccount, user] = await Promise.all([
+  //     User.findAll({
+  //       where: {
+  //         email: { [Op.not]: helpers.getUser(req).email },
+  //       },
+  //     }),
+  //     User.findAll({
+  //       where: {
+  //         account: { [Op.not]: helpers.getUser(req).account },
+  //       },
+  //     }),
+  //     User.findByPk(req.params.id),
+  //   ]);
+  //   const emailCheck = usersEmail.map((d) => d.email).includes(req.body.email);
+  //   const accountCheck = usersAccount
+  //     .map((d) => d.account)
+  //     .includes(req.body.account);
+  //   // if (
+  //   //   !req.body.name ||
+  //   //   !req.body.email ||
+  //   //   !req.body.account ||
+  //   //   !req.body.password ||
+  //   //   !req.body.checkPassword
+  //   // ) {
+  //   //   await callback({
+  //   //     status: "error",
+  //   //     message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
+  //   //   });
+  //   // }
+  //   // if (req.body.password !== req.body.checkPassword) {
+  //   //   await callback({ status: "error", message: "密碼與確認密碼不一致!" });
+  //   // }
+  //   // if (emailCheck) {
+  //   //   await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+  //   // }
+  //   // if (accountCheck) {
+  //   //   await callback({
+  //   //     status: "error",
+  //   //     message: "帳戶名稱已被其他使用者使用，請更改!",
+  //   //   });
+  //   // }
+  //   let newPassword = await bcrypt.hash(
+  //       req.body.password,
+  //       bcrypt.genSalt(10),
+  //       null)
+  //   await user.update({
+  //     ...req.body,
+  //     // password: newPassword
+  //       // password: '12345678',
+  //       password: await bcrypt.hash(
+  //         req.body.password,
+  //         bcrypt.genSalt(10),
+  //         null
+  //       )
+  //   });
+  //   callback({
+  //     status: "success",
+  //     message: "使用者資料編輯成功。",
+  //   });
+  // },
+  addLike: (req, res, callback) => {
+    Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id,
+      },
+    })
+      .then((like) => {
+        if (!like) {
+          return Like.create({
+            UserId: helpers.getUser(req).id,
+            TweetId: req.params.id,
+            isLike: true,
+          }).then((like) => {
+            return callback({ status: "success", message: "喜歡此筆推文。" });
+          });
+        }
+        if (like.isLike === false) {
+          return like.update({ ...like, isLike: !like.isLike }).then((like) => {
+            return callback({ status: "success", message: "喜歡此筆推文。" });
+          });
+        }
+        return callback({
+          status: "error",
+          message: "錯誤 ! 此筆推文己喜歡。",
+        });
+      })
+      .catch((err) => console.log(err));
+  },
+  removeLike: (req, res, callback) => {
+    Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id,
+      },
+    })
+      .then((like) => {
+        if (!like) {
+          return Like.create({
+            UserId: helpers.getUser(req).id,
+            TweetId: req.params.id,
+            isLike: false,
+          }).then((like) => {
+            return callback({ status: "success", message: "此筆推文取消喜歡" });
+          });
+        } else if (like.isLike === true) {
+          return like.destroy().then((like) => {
+            return callback({ status: "success", message: "此筆推文取消喜歡" });
+          });
+        } else {
+          return like.destroy().then((like) => {
+            return callback({
+              status: "error",
+              message: "錯誤 ! 此筆推文己取消喜歡。",
+            });
+          });
+        }
+      })
+      .catch((err) => console.log(err));
+  },
+
+  profileUser: async (req, res, callback) => {
+    try {
+      const [user] = await Promise.all([
+        User.findByPk(helpers.getUser(req).id),
+      ]);
+      return callback({ user: user });
+    } catch (e) {
+      console.warn(e);
+    }
+  },
+
+  reviseUser: (req, res, callback) => {
+    console.log("req.body", req.body, helpers.getUser(req).id);
+    if (helpers.getUser(req).id !== Number(req.params.id)) {
+      callback({ status: "error", message: "只能編輯自己的資訊." });
+    }
+    return Promise.all([
+      User.findAll({
+        where: {
+          email: { [Op.not]: helpers.getUser(req).email },
+        },
+      }),
+      User.findAll({
+        where: {
+          account: { [Op.not]: helpers.getUser(req).account },
+        },
+      }),
+      User.findByPk(helpers.getUser(req).id),
+    ]).then(([usersEmail, usersAccount, user]) => {
+      console.log('$$$$$$$$$$$$$$$後面的',user)
+      console.log('收到的body',req.body)
+      const emailCheck = usersEmail
+        .map((d) => d.email)
+        .includes(req.body.email);
+      const accountCheck = usersAccount
+        .map((d) => d.account)
+        .includes(req.body.account);
+      if (
+        !req.body.name ||
+        !req.body.email ||
+        !req.body.account ||
+        !req.body.password ||
+        !req.body.checkPassword
+      ) {
+        callback({
+          status: "error",
+          message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
+        });
+      }
+      if (req.body.password !== req.body.checkPassword) {
+        callback({ status: "error", message: "密碼與確認密碼不一致!" });
+      }
+      if (emailCheck) {
+        callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+      }
+      if (accountCheck) {
+        callback({
+          status: "error",
+          message: "帳戶名稱已被其他使用者使用，請更改!",
+        });
+      }
+      return bcrypt
+      .genSalt(10)
+      .then(salt => bcrypt.hash(req.body.password, salt))
+      .then(hash => {
+        console.log('hhhhhhhhhhhhhh',req.body)
+        user.update({
+          // ...req.body,
+          name: req.body.name,
+          // account: req.boyd.account,
+          email: req.body.email,
+          password: hash,
+        });
+          return callback({
+            status: "success",
+            message: "使用者資料編輯成功。",
+          });
+      })  
+      // return user.update({
+      //   user.update({
+      //   // name: req.body.name,
+      //   // account: req.boyd.account,
+      //   // email: req.body.email,
+      //   ...req.body,
+      //   // password: '1232456'
+      //   // password: newPassword
+      //   //  password: '12345678',
+      //   password: bcrypt.hashSync(
+      //     req.body.password,
+      //     bcrypt.genSaltSync(10),
+      //     null
+      //   ),
+      // })
+      // .then(user => {
+
+        // return callback({
+        //   status: "success",
+        //   message: "使用者資料編輯成功。",
+        // });
+      // })
+    });
+  }
 };
   
 module.exports = userService
