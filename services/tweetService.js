@@ -26,8 +26,6 @@ const tweetService = {
       include: [User, { model: Reply }, { model: Like }],
       order: [["createdAt", "DESC"]],
     }).then((tweets) => {
-      // console.log(tweets,'#################')
-      // let newTweets = tweets.map((d) => {
       tweets = tweets.map((d) => {
         let tweetLikeCount = d.dataValues.Likes.filter(
           (d) => d.isLike === true
@@ -48,10 +46,9 @@ const tweetService = {
           isLike: userIsLike,
         };
         return d;
-      }).then()
+      });
       return callback(tweets);
-      // return callback({ tweets: tweets });
-    });
+    })
   },
   getTweet: (req, res, callback) => {
     return Tweet.findOne({
