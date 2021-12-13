@@ -1,6 +1,9 @@
 .DS_Store
 *.DS_Store
 
+temp/
+upload/
+
 # Logs
 logs
 *.log
@@ -85,3 +88,5 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+bash.exe.stackdump
+ngrok.exe

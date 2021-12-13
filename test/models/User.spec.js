@@ -71,9 +71,9 @@ describe('# User Model', () => {
     // 檢查 db.User 是否真的可以新增一筆資料
     it('create', (done) => {
       db.User.create({}).then((user) => {
-        data = user
-        done()
-      })
+        data = user;
+        done();
+      }).catch(done)
     })
     // 檢查 db.User 是否真的可以讀取一筆資料
     it('read', (done) => {

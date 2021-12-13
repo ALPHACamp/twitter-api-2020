@@ -55,10 +55,12 @@ describe('# Reply Model', () => {
     let data = null
     // 檢查 db.Reply 是否真的可以新增一筆資料
     it('create', (done) => {
-      db.Reply.create({}).then((reply) => {   
-        data = reply
-        done()
-      })
+      db.Reply.create({})
+        .then((reply) => {
+          data = reply;
+          done();
+        })
+        .catch(done);
     })
     // 檢查 db.Reply 是否真的可以讀取一筆資料
     it('read', (done) => {

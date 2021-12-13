@@ -63,10 +63,12 @@ describe('# Tweet Model', () => {
 
     // 檢查 db.Tweet 是否真的可以新增一筆資料
     it('create', (done) => {
-      db.Tweet.create({UserId: 1, description: 'hi'}).then((tweet) => {   
-        data = tweet
-        done()
-      })
+      db.Tweet.create({ UserId: 1, description: "hi" })
+        .then((tweet) => {
+          data = tweet;
+          done();
+        })
+        .catch(done);
     })
     // 檢查 db.Tweet 是否真的可以讀取一筆資料
     it('read', (done) => {
