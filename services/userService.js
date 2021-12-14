@@ -135,7 +135,7 @@ const userService = {
           isLike: isLike,
         };
       });
-      return callback(tweets);
+      return callback({tweets:tweets});
     });
   },
   getFollowers: (req, res, callback) => {

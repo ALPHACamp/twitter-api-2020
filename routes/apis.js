@@ -242,7 +242,7 @@ router.get(
   authenticatedAdmin,
   adminController.getUser
 );
-//管理者可以看見站內所有的使用者
+//管理者可以看見站內所有的推文
 router.get(
   "/admin/tweets",
   authenticated,
