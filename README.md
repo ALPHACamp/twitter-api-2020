@@ -41,6 +41,7 @@ Simple Twitter連結：https://sh330035.github.io/twitter-frontend/
 2. Express.js：基於Node.js來開發Web App的框架
 3. Passport.js：採用JSON Web Token作為登入驗證的middleware套件
 4. MySQL：用來儲存資料的關聯式資料庫
+5. Heroku：部署Web App的雲端平台
 ---
 ## 怎麼使用？
 1. 下載repository
