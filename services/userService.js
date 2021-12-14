@@ -113,65 +113,31 @@ const userService = {
       return callback(tweets);
     });
   },
-  getUserLikes: (req, res) => {
-    const UserId = req.params.id;
+  getUserLikes: (req, res, callback) => {
     return Like.findAll({
-      where: { UserId },
-      // attributes: ['id', 'createdAt'] , // 加了結果只剩一筆
-      order: [["createdAt", "DESC"]],
-      include: {
-        model: Tweet,
-        attributes: ["id", "description", "createdAt"],
-        include: [
-          { model: User, attributes: ["id", "name", "account", "avatar"] },
-          { model: User, as: "LikedUsers", attributes: ["id"] },
-          { model: User, as: "RepliedUsers", attributes: ["id"] },
-        ],
+      where: {
+        UserId: Number(req.params.userId),
       },
+      order: [["createdAt", "DESC"]],
+      include: [User, { model: Tweet, include: [User, Reply, Like] }],
     }).then((tweets) => {
-      tweets = tweets.map((tweet) => ({
-        ...tweet.dataValues,
-        repliedCount: tweet.Tweet.RepliedUsers.length,
-        likedCount: tweet.Tweet.LikedUsers.length,
-        isLiked: helpers.getUser(req).LikedTweets
-          ? helpers
-              .getUser(req)
-              .LikedTweets.map((d) => d.id)
-              .includes(tweet.id)
-          : null,
-      }));
-      tweets.forEach((tweet) => {
-        delete tweet.Tweet.dataValues.RepliedUsers;
-        delete tweet.Tweet.dataValues.LikedUsers;
+      if (!tweets) {
+        return callback({ status: "error", message: "沒有使用者喜歡的推文" });
+      }
+      tweets = tweets.map((d) => {
+        let isLike = d.Tweet.Likes.some(
+          (l) => l.UserId === helpers.getUser(req).id
+        );
+        return {
+          ...d.dataValues,
+          tweetReplyCount: d.Tweet.Replies.length,
+          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
+          isLike: isLike,
+        };
       });
-      return res.json(tweets);
+      return callback(tweets);
     });
   },
-  // getUserLikes: (req, res, callback) => {
-  //   return Like.findAll({
-  //     where: {
-  //       UserId: Number(req.params.userId),
-  //     },
-  //     order: [["createdAt", "DESC"]],
-  //     include: [User, { model: Tweet, include: [User, Reply, Like] }],
-  //   }).then((tweets) => {
-  //     if (!tweets) {
-  //       return callback({ status: "error", message: "沒有使用者喜歡的推文" });
-  //     }
-  //     tweets = tweets.map((d) => {
-  //       let isLike = d.Tweet.Likes.some(
-  //         (l) => l.UserId === helpers.getUser(req).id
-  //       );
-  //       return {
-  //         ...d.dataValues,
-  //         tweetReplyCount: d.Tweet.Replies.length,
-  //         tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
-  //         isLike: isLike,
-  //       };
-  //     });
-  //     return callback(tweets);
-  //   });
-  // },
   getFollowers: (req, res, callback) => {
     return User.findByPk(req.params.id, {
       include: [
