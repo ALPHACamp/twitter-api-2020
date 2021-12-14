@@ -65,19 +65,22 @@ router.get('/logout', userController.logout)
 //  使用者個人資料頁
 router.get("/users/:id/profile", authenticated, userController.profileUser)
 
-router.put("/users/:id/revise", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
+// router.put("/users/:id/revise", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.reviseUser);
+
+router.put("/users/:id/revise", authenticated, userController.reviseUser);
 router.get('/users/:id', authenticated, userController.getUser)
 // 使用者到編輯頁
 router.get('/users/:id/edit', authenticated, userController.editUser)
 //  
-router.put("/users/:id", authenticated, userController.putUser) 
+// router.put("/users/:id", authenticated, userController.putUser) 
+router.put("/users/:id",  upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),authenticated, userController.putUser); 
 
 
 
 //  查詢user的所有推文
 router.get('/users/:userId/tweets', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserTweets)
 //  查詢user的所有留言
-router.get('/users/:userId/replies', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserReplies)
+router.get('/users/:userId/replied_tweets', authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]), userController.getUserReplies)
 // 查詢user的所有likes的推文
 router.get('/users/:userId/likes', authenticated, userController.getUserLikes)
 router.get('/users/:userId/likesTweet', authenticated, userController.getUserLikesTweet)

@@ -108,17 +108,32 @@ const userController = {
   },
   getUserTweets: (req, res) => {
     userService.getUserTweets(req, res, (data) => {
-      return res.render("userTweets", data);
+       if (data["status"] === "error") {
+         req.flash("error_messages", data["message"]);
+         return res.redirect("back");
+       }
+       return res.render("userTweets", data);
+      // return res.render("userTweets", data);
     });
   },
   getUserReplies: (req, res) => {
     userService.getUserReplies(req, res, (data) => {
+      if (data["status"] === "error") {
+        req.flash("error_messages", data["message"]);
+        return res.redirect("back");
+      }
       return res.render("userReplies", data);
+      // return res.render("userReplies", data);
     });
   },
   getUserLikes: (req, res) => {
     userService.getUserLikes(req, res, (data) => {
+      if (data["status"] === "error") {
+        req.flash("error_messages", data["message"]);
+        return res.redirect("back");
+      }
       return res.render("userLikeTweets", data);
+      // return res.render("userLikeTweets", data);
     });
   },
   addLike: (req, res) => {

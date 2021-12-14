@@ -2,8 +2,12 @@ const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const User = db.User
-const Tweet = db.Tweet
 const passport = require('passport')
+// // JWT
+const jwt = require('jsonwebtoken')
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
 
 // setup passport strategy
 passport.use(new LocalStrategy(
@@ -15,7 +19,6 @@ passport.use(new LocalStrategy(
   },
   // authenticate user
   (req, username, password, cb) => {
-    console.log('使用者帳號',username)
   // (req, username, password, cb) => {
     User.findOne({ where: { account: username } }).then(user => {
       if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤'))
@@ -41,11 +44,7 @@ passport.deserializeUser((id, cb) => {
   });
 })
 
-// // JWT
-const jwt = require('jsonwebtoken')
-const passportJWT = require('passport-jwt')
-const ExtractJwt = passportJWT.ExtractJwt
-const JwtStrategy = passportJWT.Strategy
+
 
 let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()

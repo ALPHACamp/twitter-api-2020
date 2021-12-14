@@ -1,3 +1,4 @@
+<h1>{{user.tweetsCount}} 筆推文</h1>
 <div class="row row-cols-1 row-cols-md-2">
   <div class="col mb-4">
     <div class="card">
@@ -21,6 +22,21 @@
             </span>
           </div>
         </li>
+        {{current_user.id}}掌下使用者
+
+        {{user.id}} 別人的
+        {{#ifCond current_user.id user.id}}
+        {{else}}
+            {{#if user.isFollower}}
+        <form action="/followships/{{user.id}}?_method=DELETE" method="post">
+          <button type="submit" class="btn btn-outline-info">取消跟隨</button>
+        </form>
+        {{else}}
+        <form action="/followships/{{user.id}}" method="post">
+          <button type="submit" class="btn btn-info">跟隨</button>
+        </form>
+        {{/if}}
+        {{/ifCond}}
       </ul>
     </div>
     <a href="/users/{{user.id}}/edit" class="card-link">edit</a>

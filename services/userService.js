@@ -14,71 +14,12 @@ const Followship = db.Followship;
 const jwt = require('jsonwebtoken')
 
 const userService = {
-  
   getUser: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    User.findOne({
-      where: {
-        id: req.params.id
-      },
-      include: [
-        { model: User, as: "Followers" },
-        { model: User, as: "Followings" },
-      ],
-    }).then(user => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-      };
-      return callback({
-        user: user,
-        status: "success",
-        message: "service success!",
-      });
-    }).catch(error => { return callback({ status: "error", message: "service error!" }) })
-    // User.findByPk(req.params.id, {
-    //   include: [
-    //     { model: User, as: "Followers" },
-    //     { model: User, as: "Followings" },
-    //   ],
-    // }).then((user) => {
-    //   console.log('11111111111111111',req.body)
-    //   user = {
-    //     ...user.dataValues,
-    //     FollowersCount: user.Followers.length,
-    //     FollowingsCount: user.Followings.length,
-    //   };
-    //   return callback({ user: user})
-    // }).catch(error => { return callback({ status: "error", message: "service error!" }) })
-  },
-  
-  addFollowing: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Followship.create({
-      followerId: currentUser.id,
-      followingId: Number(req.params.id),
-    }).then((followship) => {
-      return callback({ status: "success", message: "" });
-    });
-  },
-  removeFollowing: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Followship.findOne({
-      where: {
-        followerId: currentUser.id,
-        followingId: Number(req.params.id),
-      },
-    }).then((followship) => {
-      followship.destroy().then((followship) => {
-        return callback({ status: "success", message: "" });
-      });
-    });
-  },
-  getUserTweets: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return Promise.all([
-      User.findByPk(req.params.userId, {
+      User.findOne({
+        where: {
+          id: req.params.id,
+        },
         include: [
           { model: User, as: "Followers" },
           { model: User, as: "Followings" },
@@ -86,20 +27,55 @@ const userService = {
       }),
       Tweet.findAll({
         where: {
-          UserId: Number(req.params.userId),
+          UserId: req.params.id,
         },
-        order: [["createdAt", "DESC"]],
-        include: [User, Reply, Like],
       }),
     ]).then(([user, tweets]) => {
       user = {
         ...user.dataValues,
         FollowersCount: user.Followers.length,
         FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
+        isFollower: user.Followers.map((d) => d.id).includes(
+          helpers.getUser(req).id
+        ),
+        tweetsCount: tweets.length,
       };
-      let newTweets = tweets.map((tweet) => {
-        let isLike = tweet.Likes.find((d) => d.UserId === currentUser.id);
+      return callback(user);
+    });
+  },
+  addFollowing: (req, res, callback) => {
+    return Followship.create({
+      followerId: helpers.getUser(req).id,
+      followingId: req.body.id,
+    }).then((followship) => {
+      return callback({ status: "success", message: "追隨成功" });
+    });
+  },
+  removeFollowing: (req, res, callback) => {
+    return Followship.destroy({
+      where: {
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId,
+      },
+    }).then((followship) => {
+      return callback({ status: "success", message: "取消追隨成功" });
+    });
+  },
+  getUserTweets: (req, res, callback) => {
+    return Tweet.findAll({
+      where: {
+        UserId: Number(req.params.userId),
+      },
+      order: [["createdAt", "DESC"]],
+      include: [User, Reply, Like],
+    }).then((tweets) => {
+      if (!tweets) {
+        return callback({ status: "error", message: "目前沒有推文" });
+      }
+      tweets = tweets.map((tweet) => {
+        let isLike = tweet.Likes.find(
+          (d) => d.UserId === helpers.getUser(req).id
+        );
         isLike = !isLike ? false : isLike.isLike;
         let likeCount = tweet.Likes.filter((d) => d.isLike === true).length;
         return {
@@ -109,38 +85,21 @@ const userService = {
           isLike: isLike,
         };
       });
-      let tweetCount = tweets.length;
-      return callback({
-        tweets: newTweets,
-        user: user,
-        tweetCount: tweetCount,
-      });
+      return callback(tweets);
     });
   },
   getUserReplies: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Promise.all([
-      User.findByPk(req.params.userId, {
-        include: [
-          { model: User, as: "Followers" },
-          { model: User, as: "Followings" },
-        ],
-      }),
-      Reply.findAll({
-        where: {
-          UserId: Number(req.params.userId),
-        },
-        order: [["createdAt", "DESC"]],
-        include: [User, { model: Tweet, include: [User] }],
-      }),
-    ]).then(([user, tweets]) => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-      };
-      let newTweets = tweets.map((d) => {
+    return Reply.findAll({
+      where: {
+        UserId: Number(req.params.userId),
+      },
+      order: [["createdAt", "DESC"]],
+      include: [User, { model: Tweet, include: [User] }],
+    }).then((tweets) => {
+      if (!tweets) {
+        return callback({ status: "error", message: "沒有對回覆的推文" });
+      }
+      tweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
           avatar: d.User.avatar,
@@ -151,123 +110,120 @@ const userService = {
         };
         return d;
       });
-      let tweetCount = tweets.length;
-      return callback({
-        tweets: newTweets,
-        user: user,
-        tweetCount: tweetCount,
-      });
+      return callback(tweets);
     });
   },
-  getUserLikes: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Promise.all([
-      User.findByPk(req.params.userId, {
+  getUserLikes: (req, res) => {
+    const UserId = req.params.id;
+    return Like.findAll({
+      where: { UserId },
+      // attributes: ['id', 'createdAt'] , // 加了結果只剩一筆
+      order: [["createdAt", "DESC"]],
+      include: {
+        model: Tweet,
+        attributes: ["id", "description", "createdAt"],
         include: [
-          { model: User, as: "Followers" },
-          { model: User, as: "Followings" },
+          { model: User, attributes: ["id", "name", "account", "avatar"] },
+          { model: User, as: "LikedUsers", attributes: ["id"] },
+          { model: User, as: "RepliedUsers", attributes: ["id"] },
         ],
-      }),
-      Like.findAll({
-        where: {
-          UserId: Number(req.params.userId),
-          isLike: true,
-        },
-        order: [["createdAt", "DESC"]],
-        include: [User, { model: Tweet, include: [User, Reply, Like] }],
-      }),
-    ]).then(([user, tweets]) => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-      };
-      let newTweets = tweets.map((d) => {
-        let isLike;
-        let userLike = d.Tweet.Likes.find((l) => l.UserId === currentUser.id);
-        if (!userLike) {
-          isLike = false;
-        } else {
-          isLike = userLike.isLike;
-        }
-        return {
-          ...d.dataValues,
-          tweetReplyCount: d.Tweet.Replies.length,
-          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
-          isLike: isLike,
-        };
+      },
+    }).then((tweets) => {
+      tweets = tweets.map((tweet) => ({
+        ...tweet.dataValues,
+        repliedCount: tweet.Tweet.RepliedUsers.length,
+        likedCount: tweet.Tweet.LikedUsers.length,
+        isLiked: helpers.getUser(req).LikedTweets
+          ? helpers
+              .getUser(req)
+              .LikedTweets.map((d) => d.id)
+              .includes(tweet.id)
+          : null,
+      }));
+      tweets.forEach((tweet) => {
+        delete tweet.Tweet.dataValues.RepliedUsers;
+        delete tweet.Tweet.dataValues.LikedUsers;
       });
-      let tweetCount = tweets.length;
-      return callback({
-        tweets: newTweets,
-        user: user,
-        tweetCount: tweetCount,
-      });
-      // return callback({
-      //   tweets: tweets,
-      //   user: user,
-      // });
+      return res.json(tweets);
     });
   },
+  // getUserLikes: (req, res, callback) => {
+  //   return Like.findAll({
+  //     where: {
+  //       UserId: Number(req.params.userId),
+  //     },
+  //     order: [["createdAt", "DESC"]],
+  //     include: [User, { model: Tweet, include: [User, Reply, Like] }],
+  //   }).then((tweets) => {
+  //     if (!tweets) {
+  //       return callback({ status: "error", message: "沒有使用者喜歡的推文" });
+  //     }
+  //     tweets = tweets.map((d) => {
+  //       let isLike = d.Tweet.Likes.some(
+  //         (l) => l.UserId === helpers.getUser(req).id
+  //       );
+  //       return {
+  //         ...d.dataValues,
+  //         tweetReplyCount: d.Tweet.Replies.length,
+  //         tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
+  //         isLike: isLike,
+  //       };
+  //     });
+  //     return callback(tweets);
+  //   });
+  // },
   getFollowers: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return User.findByPk(req.params.id, {
       include: [
         {
           model: User,
           as: "Followers",
-          include: [{ model: User, as: "Followers" }],
         },
       ],
-    }).then((result) => {
-      const followersCount = result.Followers.length;
-      const thoseWeFollows = []; //those users that follows the user who are followed by the user as well
-      const ff = result.Followers.map((d) => d.Followers);
-      for (i = 0; i < ff.length; i++) {
-        for (j = 0; j < ff[i].length; j++) {
-          if (ff[i][j].id === currentUser.id) {
-            thoseWeFollows.push(ff[i][j].Followship.followingId);
-          }
+    }).then((followers) => {
+      followers = followers.Followers.map((d, index) => {
+        let followerId;
+        if (!d.Followship.followerId) {
+          followerId = false;
         }
-      }
-      callback({ result, followersCount, thoseWeFollows });
+        followerId = d.Followship.followerId;
+        return { ...d.dataValues, followerId };
+      });
+      return callback(followers);
     });
   },
   getFollowings: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return User.findByPk(req.params.id, {
       include: [
         {
           model: User,
           as: "Followings",
-          include: [{ model: User, as: "Followers" }],
         },
       ],
-    }).then((result) => {
-      const followersCount = result.Followings.length;
-      const thoseWeFollows = []; //those who the user and the req.user both follows
-      const ff = result.Followings.map((d) => d.Followers);
-      for (i = 0; i < ff.length; i++) {
-        for (j = 0; j < ff[i].length; j++) {
-          if (ff[i][j].id === currentUser.id) {
-            thoseWeFollows.push(ff[i][j].Followship.followingId);
-          }
+    }).then((followings) => {
+      followings = followings.Followings.map((d, index) => {
+        let followingId;
+        if (!d.Followship.followingId) {
+          followingId = false;
         }
-      }
-      callback({ result, followersCount, thoseWeFollows });
+        followingId = d.Followship.followingId;
+        return { ...d.dataValues, followingId };
+      });
+      return callback(followings);
     });
   },
   getTopUser: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return User.findAll({
       include: [{ model: User, as: "Followers" }],
     }).then((users) => {
       users = users.map((user) => ({
         ...user.dataValues,
         FollowerCount: user.Followers.length,
-        isFollowed: currentUser.Followings
-          ? currentUser.Followings.map((d) => d.id).includes(user.id)
+        isFollowed: helpers.getUser(req).Followings
+          ? helpers
+              .getUser(req)
+              .Followings.map((d) => d.id)
+              .includes(user.id)
           : false,
       }));
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount);
@@ -299,185 +255,14 @@ const userService = {
       callback({ status: "success", message: "all replies killed" });
     });
   },
-  getUserLikesTweet: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
-    return Promise.all([
-      User.findByPk(req.params.userId, {
-        include: [
-          { model: User, as: "Followers" },
-          { model: User, as: "Followings" },
-        ],
-      }),
-      // Like.findAll({
-      //   where: {
-      //     UserId: Number(req.params.userId),
-      //     isLike: true,
-      //   },
-      //   order: [["createdAt", "DESC"]],
-      //   include: [User, { model: Tweet, include: [User, Reply, Like] }],
-       Like.findAll({
-        where: {
-          UserId: Number(req.params.userId),
-          isLike: true,
-        },
-        order: [["createdAt", "DESC"]],
-        include: [User, { model: Tweet, include: [User, Reply, Like] }],
-      }),
-    ]).then(([user, tweets]) => {
-      user = {
-        ...user.dataValues,
-        FollowersCount: user.Followers.length,
-        FollowingsCount: user.Followings.length,
-        isFollower: user.Followers.map((d) => d.id).includes(currentUser.id),
-      };
-      let newTweets = tweets.map((d) => {
-        let isLike;
-        let userLike = d.Tweet.Likes.find((l) => l.UserId === currentUser.id);
-        if (!userLike) {
-          isLike = false;
-        } else {
-          isLike = userLike.isLike;
-        }
-        return {
-          ...d.dataValues,
-          tweetReplyCount: d.Tweet.Replies.length,
-          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
-          isLike: isLike,
-        };
-      });
-      let tweetCount = tweets.length;
-      return callback({
-        tweets: newTweets,
-        user: user,
-        tweetCount: tweetCount,
-      });
-    });
-  },
-
   putUser: async (req, res, callback) => {
-    console.log('req.body',req.body)
-    if (helpers.getUser(req).id !== Number(req.params.id)) {
-      callback({ status: "error", message: "只能編輯自己的資訊." });
-    }
-    const [usersEmail, usersAccount, user] = await Promise.all([
-      User.findAll({
-        where: {
-          email: { [Op.not]: helpers.getUser(req).email },
-        },
-      }),
-      User.findAll({
-        where: {
-          account: { [Op.not]: helpers.getUser(req).account },
-        },
-      }),
-      User.findByPk(req.params.id),
-    ]);
-    const emailCheck = usersEmail.map((d) => d.email).includes(req.body.email);
-    const accountCheck = usersAccount
-      .map((d) => d.account)
-      .includes(req.body.account);
-    if (
-      !req.body.name ||
-      !req.body.email ||
-      !req.body.account ||
-      !req.body.password ||
-      !req.body.checkPassword
-    ) {
-      await callback({
-        status: "error",
-        message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
-      });
-    }
-    if (req.body.password !== req.body.checkPassword) {
-      await callback({ status: "error", message: "密碼與確認密碼不一致!" });
-    }
-    if (emailCheck) {
-      await callback({ status: "error", message: "此信箱己被註冊，請更改!" });
-    }
-    if (accountCheck) {
-      await callback({
-        status: "error",
-        message: "帳戶名稱已被其他使用者使用，請更改!",
-      });
-    }
-     user.update({
-      ...req.body,
-      password: bcrypt.hashSync(
-        req.body.password,
-        bcrypt.genSaltSync(10),
-        null
-      ),
-    });
-     callback({
-      status: "success",
-      message: "使用者資料編輯成功。",
-    });
-  },
-  addLike: (req, res, callback) => {
-    Like.findOne({
-      where: {
-        UserId: helpers.getUser(req).id,
-        TweetId: Number(req.params.id),
-      },
-    }).then((like) => {
-      if (!like) {
-        return Like.create({
-          UserId: helpers.getUser(req).id,
-          TweetId: Number(req.params.id),
-          isLike: true,
-        }).then((like) => {
-          return callback({ status: "error", message: "" });
-        });
-      }
-      if (like.isLike === false) {
-        return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-          return callback({ status: "success", message: "" });
-        });
-      }
-      return callback({ status: "error", message: "" });
-    });
-  },
-  removeLike: (req, res, callback) => {
-    Like.findOne({
-      where: {
-        UserId: helpers.getUser(req).id,
-        TweetId: Number(req.params.id),
-      },
-    }).then((like) => {
-      if (!like) {
-        return Like.create({
-          UserId: helpers.getUser(req).id,
-          TweetId: Number(req.params.id),
-          isLike: false,
-        }).then((like) => {
-          return callback({ status: "error", message: "" });
-        });
-      }
-       else  { 
-        return like.destroy().then((like) => {
-          return callback({ status: "success", message: "" });
-        });
-      } 
-    });
-  },
-
-  profileUser: async (req, res, callback) => {
-    try {
-      const currentUser = req.user ? req.user : helpers.getUser(req);
-      const [user] = await Promise.all([User.findByPk(currentUser.id)]);
-      return callback({ user: user });
-    } catch (e) {
-      console.warn(e);
-    }
-  },
-
-  reviseUser: async (req, res, callback) => {
     try {
       if (helpers.getUser(req).id !== Number(req.params.id)) {
         callback({ status: "error", message: "只能編輯自己的資訊." });
       }
-
-      const [user] = await Promise.all([User.findByPk(helpers.getUser(req).id)]);
+      const [user] = await Promise.all([
+        User.findByPk(helpers.getUser(req).id),
+      ]);
       console.log("我在編輯頁面");
       const { files } = req;
       imgur.setClientID(IMGUR_CLIENT_ID);
@@ -491,7 +276,7 @@ const userService = {
               await user
                 .update({
                   ...req.body,
-                  cover: coverImg.data.link,
+                  cover: cover.data.link,
                 })
                 .then((user) => {
                   callback({
@@ -511,7 +296,7 @@ const userService = {
             await user
               .update({
                 ...req.body,
-                avatar: avatarImg.data.link,
+                avatar: avatar.data.link,
               })
               .then((user) => {
                 callback({
@@ -540,7 +325,7 @@ const userService = {
                     avatar: avatar.data.link,
                   })
                   .then((user) => {
-                    callback({
+                    return callback({
                       status: "success",
                       message: "使用者資料編輯成功。",
                     });
@@ -552,19 +337,21 @@ const userService = {
           });
         } else {
           console.log("都沒有照片");
-          user
-            .update({
-              ...req.body,
-              cover: user.cover,
-              avatar: user.avatar,
-            })
-            .then(() => {
-              callback({
-                status: "success",
-                message: "使用者資料編輯成功。",
-              });
+          user.update(req.body).then(() => {
+            return callback({
+              status: "success",
+              message: "使用者資料編輯成功。",
             });
+          });
         }
+      } else {
+        console.log("都沒有照片");
+        user.update(req.body).then(() => {
+          return callback({
+            status: "success",
+            message: "使用者資料編輯成功。",
+          });
+        });
       }
     } catch (e) {
       console.warn(e);
@@ -573,6 +360,132 @@ const userService = {
         message: "使用者資料編輯失敗。",
       });
     }
+  },
+  addLike: (req, res, callback) => {
+    Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id,
+      },
+    })
+      .then((like) => {
+        if (!like) {
+          return Like.create({
+            UserId: helpers.getUser(req).id,
+            TweetId: req.params.id,
+            isLike: true,
+          }).then((like) => {
+            return callback({ status: "success", message: "喜歡此筆推文。" });
+          });
+        }
+        if (like.isLike === false) {
+          return like.update({ ...like, isLike: !like.isLike }).then((like) => {
+            return callback({ status: "success", message: "喜歡此筆推文。" });
+          });
+        }
+        return callback({
+          status: "error",
+          message: "錯誤 ! 此筆推文己喜歡。",
+        });
+      })
+      .catch((err) => console.log(err));
+  },
+  removeLike: (req, res, callback) => {
+    Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id,
+      },
+    })
+      .then((like) => {
+        if (!like) {
+          return Like.create({
+            UserId: helpers.getUser(req).id,
+            TweetId: req.params.id,
+            isLike: false,
+          }).then((like) => {
+            return callback({ status: "success", message: "此筆推文取消喜歡" });
+          });
+        } else if (like.isLike === true) {
+          return like.destroy().then((like) => {
+            return callback({ status: "success", message: "此筆推文取消喜歡" });
+          });
+        } else {
+          return like.destroy().then((like) => {
+            return callback({
+              status: "error",
+              message: "錯誤 ! 此筆推文己取消喜歡。",
+            });
+          });
+        }
+      })
+      .catch((err) => console.log(err));
+  },
+
+  profileUser: async (req, res, callback) => {
+    try {
+      const [user] = await Promise.all([
+        User.findByPk(helpers.getUser(req).id),
+      ]);
+      return callback({ user: user });
+    } catch (e) {
+      console.warn(e);
+    }
+  },
+
+  reviseUser: (req, res, callback) => {
+    const { name, email, account, password, checkPassword } = req.body;
+    const userId = helpers.getUser(req).id;
+    if (userId !== Number(req.params.id)) {
+      callback({ status: "error", message: "只能編輯自己的資訊." });
+    }
+    return Promise.all([
+      User.findAll({
+        where: {
+          email: { [Op.not]: helpers.getUser(req).email },
+        },
+      }),
+      User.findAll({
+        where: {
+          account: { [Op.not]: helpers.getUser(req).account },
+        },
+      }),
+      User.findByPk(userId),
+    ]).then(([usersEmail, usersAccount, user]) => {
+      const emailCheck = usersEmail.map((d) => d.email).includes(email);
+      const accountCheck = usersAccount.map((d) => d.account).includes(account);
+      if (!name || !email || !account || !password || !checkPassword) {
+        callback({
+          status: "error",
+          message: "名字，信箱，帳號，密碼，確認密碼不能為空!",
+        });
+      }
+      if (password !== checkPassword) {
+        callback({ status: "error", message: "密碼與確認密碼不一致!" });
+      }
+      if (emailCheck) {
+        callback({ status: "error", message: "此信箱己被註冊，請更改!" });
+      }
+      if (accountCheck) {
+        callback({
+          status: "error",
+          message: "帳戶名稱已被其他使用者使用，請更改!",
+        });
+      }
+      user
+        .update({
+          name: name,
+          email: email,
+          account: account,
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
+        })
+        .then((user) => {
+          return callback({
+            status: "success",
+            message: "使用者資料編輯成功。",
+          });
+        });
+    });
   },
 };
   

@@ -13,16 +13,17 @@ const userController = require("../controllers/api/userController");
 const replyController = require("../controllers/api/replyController");
 const adminController = require("../controllers/api/adminController");
 
-const authenticated = (req, res, next) => {
-    passport.authenticate('jwt', { session: false }, (err, user) => {
+// const authenticated = passport.authenticate("jwt", { session: false });
+  const authenticated = (req, res, next) => {
+    passport.authenticate("jwt", { session: false }, (err, user) => {
       if (!user) {
         return res
           .status(401)
-          .json({ status: 'error', message: "token doesn't exist" })
+          .json({ status: "error", message: "token doesn't exist" });
       }
-      req.user = user
-      return next()
-    })(req, res, next)
+      req.user = user;
+      return next();
+    })(req, res, next);
   }
  const authenticatedUser = (req, res, next) => {
     if (helpers.getUser(req)) {
@@ -117,15 +118,8 @@ router.get(
 //   ]),
 //   userController.putUser
 // );
-router.put(
-  "/users/:id",
-  authenticated,
-  authenticatedUser,
-  userController.putUser
-);
-// 第二張圖片
 
-// <--可以傳一個陣列 FILE
+// 編輯個人名稱，內容，大頭照，背景照路由
 router.put(
   "/users/:id/revise",
   authenticated,
@@ -135,6 +129,15 @@ router.put(
   ]),
   userController.reviseUser
 );
+// 帳戶設定路由
+router.put(
+  "/users/:id",
+  authenticated,
+  authenticatedUser,
+  userController.putUser
+);
+// 第二張圖片
+
 
 //  查詢user的所有推文
 router.get(
@@ -151,16 +154,9 @@ router.get(
   userController.getUserLikes
 );
 
-// 測試拿到喜歡的推文
-router.get(
-  "/users/:userId/likesTweet",
-  authenticated,
-  userController.getUserLikesTweet
-);
-
 //  查詢user的所有留言
 router.get(
-  "/users/:userId/replies",
+  "/users/:userId/replied_tweets",
   authenticated,
   userController.getUserReplies
 );
@@ -219,14 +215,14 @@ router.post(
 
 //新增一位追蹤者
 router.post(
-  "/followships/:id",
+  "/followships",
   authenticated,
   authenticatedUser,
   userController.addFollowing
 );
 //新增一位追蹤者
 router.delete(
-  "/followships/:id",
+  "/followships/:followingId",
   authenticated,
   authenticatedUser,
   userController.removeFollowing
