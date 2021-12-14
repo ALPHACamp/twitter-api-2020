@@ -69,6 +69,9 @@ const userService = {
       order: [["createdAt", "DESC"]],
       include: [User, Reply, Like],
     }).then((tweets) => {
+      if (!tweets) {
+        return callback({ status: "error", message: "目前沒有推文" });
+      } 
       tweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find(
           (d) => d.UserId === helpers.getUser(req).id
@@ -93,6 +96,9 @@ const userService = {
       order: [["createdAt", "DESC"]],
       include: [User, { model: Tweet, include: [User] }],
     }).then((tweets) => {
+      if (!tweets) {
+        return callback({ status: "error", message: "沒有對回覆的推文" });
+      } 
       tweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
@@ -115,6 +121,9 @@ const userService = {
       order: [["createdAt", "DESC"]],
       include: [User, { model: Tweet, include: [User, Reply, Like] }],
     }).then((tweets) => {
+      if (!tweets) {
+        return callback({ status: "error", message: "沒有使用者喜歡的推文" });
+      } 
       tweets = tweets.map((d) => {
         let isLike = d.Tweet.Likes.some(
           (l) => l.UserId === helpers.getUser(req).id
@@ -170,15 +179,14 @@ const userService = {
     });
   },
   getTopUser: (req, res, callback) => {
-    const currentUser = req.user ? req.user : helpers.getUser(req);
     return User.findAll({
       include: [{ model: User, as: "Followers" }],
     }).then((users) => {
       users = users.map((user) => ({
         ...user.dataValues,
         FollowerCount: user.Followers.length,
-        isFollowed: currentUser.Followings
-          ? currentUser.Followings.map((d) => d.id).includes(user.id)
+        isFollowed: helpers.getUser(req).Followings
+          ? helpers.getUser(req).Followings.map((d) => d.id).includes(user.id)
           : false,
       }));
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount);
@@ -231,7 +239,7 @@ const userService = {
               await user
                 .update({
                   ...req.body,
-                  cover: coverImg.data.link,
+                  cover: cover.data.link,
                 })
                 .then((user) => {
                   callback({
@@ -251,7 +259,7 @@ const userService = {
             await user
               .update({
                 ...req.body,
-                avatar: avatarImg.data.link,
+                avatar: avatar.data.link,
               })
               .then((user) => {
                 callback({
@@ -264,7 +272,7 @@ const userService = {
               console.warn(e);
             }
           });
-        } else {
+        } else if (files.cover && files.avatar) {
           console.log("贡張都有");
           imgur.upload(files.cover[0].path, async (err, coverImg) => {
             if (err) console.log("Error: ", err);
@@ -280,7 +288,7 @@ const userService = {
                     avatar: avatar.data.link,
                   })
                   .then((user) => {
-                    callback({
+                    return callback({
                       status: "success",
                       message: "使用者資料編輯成功。",
                     });
@@ -290,21 +298,23 @@ const userService = {
               }
             });
           });
-        }
-      } else {
-        console.log("都沒有照片");
-        user
-          .update({
-            ...req.body,
-            cover: user.cover,
-            avatar: user.avatar,
-          })
-          .then(() => {
-            callback({
+        } else {
+          console.log("都沒有照片");
+          user.update(req.body).then(() => {
+            return callback({
               status: "success",
               message: "使用者資料編輯成功。",
             });
           });
+        }
+      } else {
+        console.log("都沒有照片");
+        user.update(req.body).then(() => {
+          return callback({
+            status: "success",
+            message: "使用者資料編輯成功。",
+          });
+        });
       }
     } catch (e) {
       console.warn(e);
