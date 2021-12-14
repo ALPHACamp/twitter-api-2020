@@ -36,6 +36,12 @@ Simple Twitter連結：https://sh330035.github.io/twitter-frontend/
   * package.json：本repository所使用的套件和執行設定
 
 ---
+## 使用技術
+1. Node.js：讓JavaScript在伺服器端運行的執行環境
+2. Express.js：基於Node.js來開發Web App的框架
+3. Passport.js：採用JSON Web Token作為登入驗證的middleware套件
+4. MySQL：用來儲存資料的關聯式資料庫
+---
 ## 怎麼使用？
 1. 下載repository
     <pre><code>git clone -b master git@github.com:jadokao/twitter-api-2020.git</code></pre>
@@ -79,3 +85,4 @@ Simple Twitter連結：https://sh330035.github.io/twitter-frontend/
 * [Dolly Chen](https://github.com/DollyChen-CYC)
 * [David](https://github.com/sh330035)
 * [WenTing](https://github.com/wentingliuu)
+* [Ming](https://github.com/jadokao)
