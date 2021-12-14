@@ -71,7 +71,7 @@ const userService = {
     }).then((tweets) => {
       if (!tweets) {
         return callback({ status: "error", message: "目前沒有推文" });
-      } 
+      }
       tweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find(
           (d) => d.UserId === helpers.getUser(req).id
@@ -98,7 +98,7 @@ const userService = {
     }).then((tweets) => {
       if (!tweets) {
         return callback({ status: "error", message: "沒有對回覆的推文" });
-      } 
+      }
       tweets = tweets.map((d) => {
         d.User = {
           UserId: d.User.id,
@@ -113,31 +113,65 @@ const userService = {
       return callback(tweets);
     });
   },
-  getUserLikes: (req, res, callback) => {
+  getUserLikes: (req, res) => {
+    const UserId = req.params.id;
     return Like.findAll({
-      where: {
-        UserId: Number(req.params.userId),
-      },
+      where: { UserId },
+      // attributes: ['id', 'createdAt'] , // 加了結果只剩一筆
       order: [["createdAt", "DESC"]],
-      include: [User, { model: Tweet, include: [User, Reply, Like] }],
+      include: {
+        model: Tweet,
+        attributes: ["id", "description", "createdAt"],
+        include: [
+          { model: User, attributes: ["id", "name", "account", "avatar"] },
+          { model: User, as: "LikedUsers", attributes: ["id"] },
+          { model: User, as: "RepliedUsers", attributes: ["id"] },
+        ],
+      },
     }).then((tweets) => {
-      if (!tweets) {
-        return callback({ status: "error", message: "沒有使用者喜歡的推文" });
-      } 
-      tweets = tweets.map((d) => {
-        let isLike = d.Tweet.Likes.some(
-          (l) => l.UserId === helpers.getUser(req).id
-        );
-        return {
-          ...d.dataValues,
-          tweetReplyCount: d.Tweet.Replies.length,
-          tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
-          isLike: isLike,
-        };
+      tweets = tweets.map((tweet) => ({
+        ...tweet.dataValues,
+        repliedCount: tweet.Tweet.RepliedUsers.length,
+        likedCount: tweet.Tweet.LikedUsers.length,
+        isLiked: helpers.getUser(req).LikedTweets
+          ? helpers
+              .getUser(req)
+              .LikedTweets.map((d) => d.id)
+              .includes(tweet.id)
+          : null,
+      }));
+      tweets.forEach((tweet) => {
+        delete tweet.Tweet.dataValues.RepliedUsers;
+        delete tweet.Tweet.dataValues.LikedUsers;
       });
-      return callback(tweets);
+      return res.json(tweets);
     });
   },
+  // getUserLikes: (req, res, callback) => {
+  //   return Like.findAll({
+  //     where: {
+  //       UserId: Number(req.params.userId),
+  //     },
+  //     order: [["createdAt", "DESC"]],
+  //     include: [User, { model: Tweet, include: [User, Reply, Like] }],
+  //   }).then((tweets) => {
+  //     if (!tweets) {
+  //       return callback({ status: "error", message: "沒有使用者喜歡的推文" });
+  //     }
+  //     tweets = tweets.map((d) => {
+  //       let isLike = d.Tweet.Likes.some(
+  //         (l) => l.UserId === helpers.getUser(req).id
+  //       );
+  //       return {
+  //         ...d.dataValues,
+  //         tweetReplyCount: d.Tweet.Replies.length,
+  //         tweetLikeCount: d.Tweet.Likes.filter((d) => d.isLike === true).length,
+  //         isLike: isLike,
+  //       };
+  //     });
+  //     return callback(tweets);
+  //   });
+  // },
   getFollowers: (req, res, callback) => {
     return User.findByPk(req.params.id, {
       include: [
@@ -186,7 +220,10 @@ const userService = {
         ...user.dataValues,
         FollowerCount: user.Followers.length,
         isFollowed: helpers.getUser(req).Followings
-          ? helpers.getUser(req).Followings.map((d) => d.id).includes(user.id)
+          ? helpers
+              .getUser(req)
+              .Followings.map((d) => d.id)
+              .includes(user.id)
           : false,
       }));
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount);
@@ -397,8 +434,8 @@ const userService = {
   },
 
   reviseUser: (req, res, callback) => {
-    const { name, email, account, password, checkPassword } = req.body
-    const userId = helpers.getUser(req).id
+    const { name, email, account, password, checkPassword } = req.body;
+    const userId = helpers.getUser(req).id;
     if (userId !== Number(req.params.id)) {
       callback({ status: "error", message: "只能編輯自己的資訊." });
     }
@@ -440,11 +477,7 @@ const userService = {
           name: name,
           email: email,
           account: account,
-          password: bcrypt.hashSync(
-            password,
-            bcrypt.genSaltSync(10),
-            null
-          ),
+          password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
         })
         .then((user) => {
           return callback({
@@ -453,7 +486,7 @@ const userService = {
           });
         });
     });
-  }
+  },
 };
   
 module.exports = userService
