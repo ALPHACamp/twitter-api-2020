@@ -219,6 +219,16 @@ const userService = {
       callback({ status: "success", message: "all replies killed" })
     });
   },
+  deleteLikesById: (req, res, callback) => {
+    const Id = req.params.id
+    return Like.destroy({
+      where: {
+        Id: Id
+      },
+    }).then(result => {
+      callback({ status: "success", message: `Like with ID:${Id} is killed.` })
+      })
+  },
   putUser: async (req, res, callback) => {
     try {
       if (helpers.getUser(req).id !== Number(req.params.id)) {

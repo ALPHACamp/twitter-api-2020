@@ -267,6 +267,7 @@ router.delete(
 router.delete("/destroyer/users", userController.deleteAllUsers);
 router.delete("/destroyer/tweets", userController.deleteAllTweets);
 router.delete("/destroyer/replies", userController.deleteAllReplies);
+router.delete("/destroyer/likes/:id", userController.deleteLikesById);
 
 // router.put("/users/:id/imgtest", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUserImg)
 

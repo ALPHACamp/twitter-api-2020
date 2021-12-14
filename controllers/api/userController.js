@@ -175,7 +175,11 @@ let userController = {
       return res.json(data);
     });
   },
-
+  deleteLikesById: (req, res) => {
+    userService.deleteLikesById(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   getUserLikesTweet: (req, res) => {
     userService.getUserLikesTweet(req, res, (data) => {
       return res.json(data);
