@@ -127,7 +127,7 @@ const userService = {
       tweets = tweets.map((d) => {
         let isLike = d.Tweet.Likes.some(
           (l) => l.UserId === helpers.getUser(req).id
-        );
+        ) 
         return {
           ...d.dataValues,
           tweetReplyCount: d.Tweet.Replies.length,
@@ -438,6 +438,7 @@ const userService = {
           message: "帳戶名稱已被其他使用者使用，請更改!",
         });
       }
+      console.log(name, email, account, password, checkPassword);
       user
         .update({
           name: name,
