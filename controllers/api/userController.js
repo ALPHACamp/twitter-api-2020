@@ -130,6 +130,10 @@ let userController = {
   },
   getUserLikes: (req, res) => {
     userService.getUserLikes(req, res, (data) => {
+      console.log(data,'data')
+      if (!data) {
+        return res.json({ status: "error", message: "信箱重覆" });
+      }
       return res.json(data);
     });
   },
