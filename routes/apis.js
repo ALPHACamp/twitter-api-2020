@@ -104,11 +104,6 @@ router.get(
   userController.getUser
 );
 
-//  使用者編輯自己所有資訊
-
-// router.put("/users/:id", upload.single('cover'), authenticated, authenticatedUser, userController.putUser);
-
-
 // 編輯個人名稱，內容，大頭照，背景照路由
 router.put(
   "/users/:id",
@@ -118,29 +113,12 @@ router.put(
     { name: "cover", maxCount: 1 },
     { name: "avatar", maxCount: 1 },
   ]), userController.putUser);
-  // router.put(
-    //   "/users/:id/revise",
-    //   authenticated,
-    //   upload.fields([
-      //     { name: "cover", maxCount: 1 },
-      //     { name: "avatar", maxCount: 1 },
-      //   ]),
-      //   userController.reviseUser
-      // );
-      // 帳戶設定路由
+ // 帳戶設定路由
   router.put(
     "/users/:id/revise",
     authenticated,
     userController.reviseUser
     );
-      // router.put(
-//   "/users/:id",
-//   authenticated,
-//   authenticatedUser,
-//   userController.putUser
-// );
-// 第二張圖片
-
 
 //  查詢user的所有推文
 router.get(
@@ -263,8 +241,6 @@ router.delete(
 //DARK MAGIC FOR DESTROYING DATA
 router.delete("/destroyer/users", userController.deleteAllUsers);
 router.delete("/destroyer/tweets", userController.deleteAllTweets);
-router.delete("/destroyer/replies", userController.deleteAllReplies);
+router.delete("/destroyer/replies", userController.deleteAllReplies)
 
-// router.put("/users/:id/imgtest", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUserImg)
-
-module.exports = router;
+module.exports = router
