@@ -13,16 +13,17 @@ const userController = require("../controllers/api/userController");
 const replyController = require("../controllers/api/replyController");
 const adminController = require("../controllers/api/adminController");
 
-const authenticated = (req, res, next) => {
-    passport.authenticate('jwt', { session: false }, (err, user) => {
+// const authenticated = passport.authenticate("jwt", { session: false });
+  const authenticated = (req, res, next) => {
+    passport.authenticate("jwt", { session: false }, (err, user) => {
       if (!user) {
         return res
           .status(401)
-          .json({ status: 'error', message: "token doesn't exist" })
+          .json({ status: "error", message: "token doesn't exist" });
       }
-      req.user = user
-      return next()
-    })(req, res, next)
+      req.user = user;
+      return next();
+    })(req, res, next);
   }
  const authenticatedUser = (req, res, next) => {
     if (helpers.getUser(req)) {
@@ -103,40 +104,21 @@ router.get(
   userController.getUser
 );
 
-//  使用者編輯自己所有資訊
-
-// router.put("/users/:id", upload.single('cover'), authenticated, authenticatedUser, userController.putUser);
-
-// router.put(
-//   "/users/:id",
-//   authenticated,
-//   authenticatedUser,
-//   upload.fields([
-//     { name: "cover", maxCount: 1 },
-//     { name: "avatar", maxCount: 1 },
-//   ]),
-//   userController.putUser
-// );
-
 // 編輯個人名稱，內容，大頭照，背景照路由
-router.put(
-  "/users/:id/revise",
-  authenticated,
-  upload.fields([
-    { name: "cover", maxCount: 1 },
-    { name: "avatar", maxCount: 1 },
-  ]),
-  userController.reviseUser
-);
-// 帳戶設定路由
 router.put(
   "/users/:id",
   authenticated,
   authenticatedUser,
-  userController.putUser
-);
-// 第二張圖片
-
+  upload.fields([
+    { name: "cover", maxCount: 1 },
+    { name: "avatar", maxCount: 1 },
+  ]), userController.putUser);
+ // 帳戶設定路由
+  router.put(
+    "/users/:id/revise",
+    authenticated,
+    userController.reviseUser
+    );
 
 //  查詢user的所有推文
 router.get(
@@ -151,13 +133,6 @@ router.get(
   authenticated,
   authenticatedUser,
   userController.getUserLikes
-);
-
-// 測試拿到喜歡的推文
-router.get(
-  "/users/:userId/likesTweet",
-  authenticated,
-  userController.getUserLikesTweet
 );
 
 //  查詢user的所有留言
@@ -248,7 +223,7 @@ router.get(
   authenticatedAdmin,
   adminController.getUser
 );
-//管理者可以看見站內所有的使用者
+//管理者可以看見站內所有的推文
 router.get(
   "/admin/tweets",
   authenticated,
@@ -266,9 +241,6 @@ router.delete(
 //DARK MAGIC FOR DESTROYING DATA
 router.delete("/destroyer/users", userController.deleteAllUsers);
 router.delete("/destroyer/tweets", userController.deleteAllTweets);
-router.delete("/destroyer/replies", userController.deleteAllReplies);
-router.delete("/destroyer/likes/:id", userController.deleteLikesById);
+router.delete("/destroyer/replies", userController.deleteAllReplies)
 
-// router.put("/users/:id/imgtest", authenticated, upload.fields([{ name: 'cover', maxCount: 1 }, { name:'avatar', maxCount: 1 }]),  userController.putUserImg)
-
-module.exports = router;
+module.exports = router
