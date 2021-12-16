@@ -71,6 +71,7 @@ let userController = {
             name: req.body.name,
             email: req.body.email,
             account: req.body.account,
+            role: 'user',
             password: bcrypt.hashSync(
               req.body.password,
               bcrypt.genSaltSync(10),
@@ -175,7 +176,11 @@ let userController = {
       return res.json(data);
     });
   },
-
+  deleteLikesById: (req, res) => {
+    userService.deleteLikesById(req, res, (data) => {
+      return res.json(data)
+    })
+  },
   getUserLikesTweet: (req, res) => {
     userService.getUserLikesTweet(req, res, (data) => {
       return res.json(data);
