@@ -1,0 +1,73 @@
+<div class="row row-cols-1 row-cols-md-3" style="min-width: 800px;">
+  <!-- {{!-- {{#each tweets}} --}} -->
+  <div class="card m-3" style="width: 20rem;">
+    <div class="d-flex justify-content-between">
+      <img src="{{tweet.User.avatar}}" class="card-img-top" alt="我是大頭照">
+      <div>
+        <li class="list-group-item">推文者的帳號 @{{tweet.User.account}}</li>
+        <li class="list-group-item">推文者的名字 {{ tweet.User.name}}</li>
+      </div>
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">推文編號:{{tweet.id}} </h5>
+      <p class="card-text">內容:{{tweet.description}}</p>
+      <p class="card-text">時間:{{tweet.createdAt}}</p>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item d-flex justify-content-between">
+        <p>{{tweetReplyCount}} 則回覆</p>
+        <p>{{tweetLikeCount}} 次喜歡次數</p>
+      </li>
+      <li class="list-group-item d-flex justify-content-around">
+        <i class="far fa-comment"></i>
+        <i class="far fa-heart"></i></li>
+      <li  class="list-group-item">
+
+      {{!-- {{#if isLike}} --}}
+      <form action="/tweets/{{tweet.id}}/unlike" method="POST">
+        <button type="submit"><i class="fas fa-heart text-danger"></i></button>
+        <span>{{tweetLikeCount}} 喜歡數</span>
+      </form>
+      {{!-- {{else}} --}}
+      <form action="/tweets/{{tweet.id}}/like" method="POST">
+        <button type="submit"><i class="far fa-heart text-danger"></i></button>
+        <span>{{tweetLikeCount}} 喜歡數</span>
+      </form>
+      {{!-- {{/if}} --}}
+        </li>
+
+      <form action="/tweets/{{tweet.id}}/replied_tweets" method="POST">
+        <div class="form-group">
+          <label for="reply">回覆</label>
+          <textarea class="form-control" id="reply" rows="3" name="reply" placeholder="請留言"></textarea>
+        </div>
+        <button type="submit" class="btn">留言</button>
+      </form>
+
+
+    </ul>
+
+    <ul class="list-group list-group-flush ">
+      {{#each tweet.Replies}}
+      <li class="list-group-item d-flex justify-content-between">
+        <div class="card">
+          <div class="left d-flex justify-content-between">
+            <img src="{{this.User.avatar}}" class="card-img-top" alt="我是大頭照" style="width: 5rem;">
+            <div>
+              <p class="list-group-item">推文者的帳號 @{{this.User.account}}</p>
+              <p class="list-group-item">推文者的名字 {{this.User.name}}</p>
+              <p class="list-group-item">留言時間 {{this.User.createdAt}}</p>
+            </div>
+          </div>
+          <div>
+            <p class="list-group-item">回覆給 @{{../tweet.User.name}}</p>
+            <p class="list-group-item">回覆內容 {{ this.comment}}</p>
+          </div>
+        </div>
+      </li>
+      {{/each}}
+    </ul>
+
+  </div>
+  <!-- {{!-- {{/each}} --}} -->
+</div>
