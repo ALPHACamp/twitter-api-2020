@@ -27,12 +27,11 @@ const adminController = require("../controllers/api/adminController");
   }
  const authenticatedUser = (req, res, next) => {
     if (helpers.getUser(req)) {
-      if (helpers.getUser(req).role !== 'admin') {
+      if (helpers.getUser(req).role !== 'user') {
+        return res.json({ status: 'error', message: 'permission denied' })
+      } else {
         return next()
       }
-      return res.json({ status: 'error', message: 'permission denied' })
-    } else {
-      return res.json({ status: 'error', message: 'permission denied' })
     }
   }
 
