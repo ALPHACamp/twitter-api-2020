@@ -18,7 +18,7 @@ let chatroomService = {
   }).then((reply) => {
     return callback({
       status: "success",
-      message: "created new reply successfully",
+      message: "Reply successfully.",
       TweetId: Number(reply.TweetId),
       replyId: reply.id,
     })

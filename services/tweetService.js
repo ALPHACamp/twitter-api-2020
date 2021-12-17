@@ -8,7 +8,7 @@ const helpers = require("../_helpers");
 const tweetService = {
   postTweet: (req, res, callback) => {
     if (!req.body.description) {
-      callback({ status: "error", message: "text didn't exist" });
+      callback({ status: "error", message: "Text didn't exist." });
     } else {
       return Tweet.create({
         description: req.body.description,
@@ -16,7 +16,7 @@ const tweetService = {
       }).then((tweet) => {
         callback({
           status: "success",
-          message: "tweet was successfully created",
+          message: "Tweet successfully created.",
         });
       });
     }
@@ -56,7 +56,7 @@ const tweetService = {
       include: [User, { model: Like }, { model: Reply, include: [User] }],
     }).then((tweet) => {
       if (!tweet) {
-        return callback({ status: 'error', message: '此推文不存在' })
+        return callback({ status: 'error', message: 'Tweet not found.' })
       }  
       let tweetReplyCount = tweet.Replies.length ? tweet.Replies.length : 0
       let tweetLikeCount = tweet.Likes.filter((d) => d.isLike === true).length;
