@@ -52,7 +52,10 @@ const adminService = {
       })
   },
   getTweets: (req, res, callback) => {
-    return Tweet.findAll({ include: [Reply, Like, User] })
+    return Tweet.findAll({
+      order: [["createdAt", "DESC"]],
+      include: [Reply, Like, User]
+    })
       .then(tweets => {
         callback({
           tweets: tweets

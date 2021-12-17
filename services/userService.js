@@ -48,7 +48,7 @@ const userService = {
       followerId: helpers.getUser(req).id,
       followingId: req.body.id,
     }).then((followship) => {
-      return callback({ status: "success", message: "追隨成功" });
+      return callback({ status: "success", message: "following User!" });
     });
   },
   removeFollowing: (req, res, callback) => {
@@ -58,7 +58,7 @@ const userService = {
         followingId: req.params.followingId,
       },
     }).then((followship) => {
-      return callback({ status: "success", message: "取消追隨成功" });
+      return callback({ status: "success", message: "User unfollowed." });
     });
   },
   getUserTweets: (req, res, callback) => {
@@ -70,7 +70,7 @@ const userService = {
       include: [User, Reply, Like],
     }).then((tweets) => {
       if (!tweets) {
-        return callback({ status: "error", message: "目前沒有推文" });
+        return callback({ status: "error", message: "No tweet found." });
       }
       tweets = tweets.map((tweet) => {
         let isLike = tweet.Likes.find(
@@ -119,7 +119,7 @@ const userService = {
       include: [User, { model: Tweet, include: [User, Reply, Like] }],
     }).then((tweets) => {
       if (!tweets) {
-        return callback({ status: "error", message: "沒有使用者喜歡的推文" });
+        return callback({ status: "error", message: "No liked tweet found." });
       }
       tweets = tweets.map((d) => {
         let isLike = d.Tweet.Likes.some(
@@ -199,7 +199,7 @@ const userService = {
       where: {},
       truncate: true,
     }).then(() => {
-      callback({ status: "success", message: "all users killed" });
+      callback({ status: "success", message: "All users killed." });
     });
   },
   deleteAllTweets: (req, res, callback) => {
@@ -207,7 +207,7 @@ const userService = {
       where: {},
       truncate: true,
     }).then(() => {
-      callback({ status: "success", message: "all tweets killed" });
+      callback({ status: "success", message: "All tweets killed." });
     });
   },
   deleteAllReplies: (req, res, callback) => {
@@ -215,7 +215,7 @@ const userService = {
       where: {},
       truncate: true,
     }).then(() => {
-      callback({ status: "success", message: "all replies killed" });
+      callback({ status: "success", message: "All replies killed." });
     });
   },
   addLike: (req, res, callback) => {
@@ -232,17 +232,17 @@ const userService = {
             TweetId: req.params.id,
             isLike: true,
           }).then((like) => {
-            return callback({ status: "success", message: "喜歡此筆推文。" });
+            return callback({ status: "success", message: "Tweet liked." });
           });
         }
         if (like.isLike === false) {
           return like.update({ ...like, isLike: !like.isLike }).then((like) => {
-            return callback({ status: "success", message: "喜歡此筆推文。" });
+            return callback({ status: "success", message: "Tweet liked." });
           });
         }
         return callback({
           status: "error",
-          message: "錯誤 ! 此筆推文己喜歡。",
+          message: "This tweet is already liked.",
         });
       })
       .catch((err) => console.log(err));
@@ -261,17 +261,17 @@ const userService = {
             TweetId: req.params.id,
             isLike: false,
           }).then((like) => {
-            return callback({ status: "success", message: "此筆推文取消喜歡" });
+            return callback({ status: "success", message: "Tweet unliked." });
           });
         } else if (like.isLike === true) {
           return like.destroy().then((like) => {
-            return callback({ status: "success", message: "此筆推文取消喜歡" });
+            return callback({ status: "success", message: "Tweet unliked." });
           });
         } else {
           return like.destroy().then((like) => {
             return callback({
               status: "error",
-              message: "錯誤 ! 此筆推文己取消喜歡。",
+              message: "You have already unliked this tweet.",
             });
           });
         }
@@ -460,7 +460,7 @@ const userService = {
   putUser: async (req, res, callback) => {
     try {
       if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
-        return callback({ status: "error", message: "沒有編輯權限！" });
+        return callback({ status: "error", message: "Unauthorized." });
       }
 
       const { name, introduction, avatar, cover } = req.body;
@@ -481,7 +481,7 @@ const userService = {
         });
         return callback({
           status: "success",
-          message: "使用者資料編輯成功！(沒傳圖）",
+          message: "Edit successful. No image uploaded",
         });
       } else {
         imgur.setClientID(IMGUR_CLIENT_ID);
@@ -508,11 +508,11 @@ const userService = {
         });
         return callback({
           status: "success",
-          message: "使用者資料編輯成功！(有傳圖）",
+          message: "Edit successful. Image uploaded.",
         });
       }
     } catch (err) {
-      return callback({ status: "error", message: "編輯未成功！" });
+      return callback({ status: "error", message: "Edit failed." });
     }
   },
 
@@ -520,7 +520,7 @@ const userService = {
     try {
       const { name, account, email, password, checkPassword } = req.body;
       if (Number(req.params.id) !== Number(helpers.getUser(req).id)) {
-        return callback({ status: "error", message: "沒有編輯權限！" });
+        return callback({ status: "error", message: "Unauthorized" });
       }
 
       if (account !== helpers.getUser(req).account) {
@@ -529,7 +529,7 @@ const userService = {
           raw: true,
         });
         if (existUser)
-          return callback({ status: "error", message: "account 已重覆註冊！" });
+          return callback({ status: "error", message: "This account already exists." });
       }
 
       if (email !== helpers.getUser(req).email) {
@@ -538,11 +538,11 @@ const userService = {
           raw: true,
         });
         if (existUser)
-          return callback({ status: "error", message: "email 已重覆註冊！" });
+          return callback({ status: "error", message: "This email already exists." });
       }
 
       if (password !== checkPassword) {
-        return callback({ status: "error", message: "兩次密碼輸入不同！" });
+        return callback({ status: "error", message: "Password inconsistent with check password." });
       }
 
       const user = await User.findByPk(req.params.id);
@@ -553,10 +553,10 @@ const userService = {
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10), null),
       });
 
-      return callback({ status: "success", message: "使用者資料編輯成功！" });
+      return callback({ status: "success", message: "Edit successful." });
     } catch (err) {
       console.log(err);
-      return callback({ status: "error", message: "編輯未成功！" });
+      return callback({ status: "error", message: "Edit failed." });
     }
   },
 };

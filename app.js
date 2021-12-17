@@ -43,12 +43,6 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 
-// put req.flash into res.locals
-// app.use((req, res, next) => {
-//   res.locals.success_messages = req.flash('success_messages')
-//   res.locals.error_messages = req.flash('error_messages')
-//   next()
-// })
 
 //-----------
 //pending
@@ -65,9 +59,6 @@ app.use((req, res, next) => {
   next()
 })
 //-----------
-
-//socket.io
-
 
 // app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`)) //"app" replaced by "server" in order to adapt socket.io
