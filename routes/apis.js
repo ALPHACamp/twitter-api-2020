@@ -45,7 +45,6 @@ const adminController = require("../controllers/api/adminController");
     }
   }
 
-
 // 拿到當下使用者資料
 router.get("/get_current_user", authenticated, userController.getCurrentUser);
 // 使用者拿到登入路由
@@ -54,8 +53,6 @@ router.get("/signup", userController.signUpPage);
 router.post("/users", userController.signUp);
 //  使用者登入
 router.post("/signIn", userController.signIn);
-//  拿到某位使用者資料
-
 //取得追蹤人數前10的使用者
 router.get(
   "/users/top",
@@ -63,7 +60,6 @@ router.get(
   authenticatedUser,
   userController.getTopUsers
 );
-
 //取得所有追蹤者的資料
 router.get(
   "/users/:id/followers",
@@ -78,14 +74,13 @@ router.get(
   authenticatedUser,
   userController.getFollowings
 );
-//get a specific user
+//  拿到某位使用者資料
 router.get(
   "/users/:id",
   authenticated,
   authenticatedUser,
   userController.getUser
 );
-
 // 編輯個人名稱，內容，大頭照，背景照路由
 router.put(
   "/users/:id",
@@ -99,6 +94,7 @@ router.put(
   router.put(
     "/users/:id/revise",
     authenticated,
+    authenticatedUser,
     userController.reviseUser
     );
 
@@ -121,9 +117,9 @@ router.get(
 router.get(
   "/users/:userId/replied_tweets",
   authenticated,
+  authenticatedUser,
   userController.getUserReplies
 );
-
 //新增一篇堆文
 router.post(
   "/tweets",
@@ -145,7 +141,6 @@ router.get(
   authenticatedUser,
   tweetController.getTweet
 );
-
 //新增一筆推文的回覆
 router.post(
   "/tweets/:tweet_id/replies",
@@ -175,7 +170,6 @@ router.post(
   authenticatedUser,
   userController.removeLike
 );
-
 //新增一位追蹤者
 router.post(
   "/followships",
@@ -190,7 +184,6 @@ router.delete(
   authenticatedUser,
   userController.removeFollowing
 );
-
 //管理者可以看見站內所有的使用者
 router.get(
   "/admin/users",
