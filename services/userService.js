@@ -132,7 +132,7 @@ const userService = {
           isLike: isLike,
         };
       });
-      return callback({ tweets: tweets });
+      return callback(tweets);
     });
   },
   getFollowers: (req, res, callback) => {
