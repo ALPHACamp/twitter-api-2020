@@ -1,0 +1,40 @@
+
+<div class="container">
+   <img src="{{current_user.cover}}" class="card-img-top" alt="..." style="width: 300px;">
+      <img src="{{current_user.avatar}}" class="card-img-top" alt="..."
+        style="max-width: 80px; max-height: 80px; border-radius: 50%;">
+  <form action="/users/{{ current_user.id }}?_method=PUT" method="POST" enctype="multipart/form-data">
+    {{!-- <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="account">帳號</label>
+        <input type="text" class="form-control" id="account" value="{{current_user.account}}" placeholder="請輸入帳號"
+          name="account">
+      </div> --}}
+      <div class="form-group col-md-6">
+        <label for="name">名稱</label>
+        <input type="text" class="form-control" id="name" value="{{current_user.name}}" placeholder="請輸入名稱" name="name">
+      </div>
+    </div>
+    {{!-- <div class="form-group">
+      <label for="email">信箱</label>
+      <input type="email" class="form-control" id="email" placeholder="請輸入信箱" value="{{current_user.email}}" name="email">
+    </div> --}}
+    <div class="form-group">
+      <label for="introduction">自我介紹</label>
+      <textarea class="form-control" id="introduction" rows="3" name="introduction">{{current_user.introduction}}</textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="cover">背景照</label>
+        <input type="file" class="form-control-file" id="cover" name="cover">
+      </div>
+      <div class="form-group">
+        <label for="avatar">大頭照</label>
+        <input type="file" class="form-control-file" id="avatar" name="avatar">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Sign in</button>
+  </form>
+
+
+</div>
