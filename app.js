@@ -44,8 +44,15 @@ app.use((req, res, next) => {
 })
 
 app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 require('./routes')(app)
+
+// 加入 socket.io 監聽
+const server = require('http').Server(app).listen(port, () => {
+  console.log(`The app is listening on port ${port}`)
+})
+
+const SocketSession = require('./socket')
+SocketSession(server)
 
 module.exports = app

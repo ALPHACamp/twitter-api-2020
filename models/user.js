@@ -48,6 +48,13 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Tweet)
     User.hasMany(models.Reply)
     User.hasMany(models.Like)
+    User.hasMany(models.Message)
+    User.hasMany(models.Member)
+    User.belongsToMany(models.Room, {
+      through: models.Member,
+      foreignKey: 'UserId',
+      as: 'RoomsOfUser'
+    })
   }
   return User
 }
