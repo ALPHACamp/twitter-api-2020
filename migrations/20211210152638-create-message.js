@@ -1,23 +1,24 @@
 'use strict'
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Replies', {
+    return queryInterface.createTable('Messages', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      content: {
+        type: Sequelize.TEXT
+      },
       UserId: {
         type: Sequelize.INTEGER
       },
-      TweetId: {
+      roomId: {
         type: Sequelize.INTEGER
       },
-      comment: {
-        type: Sequelize.TEXT,
-        len: [1, 140]
+      isRead: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
@@ -30,6 +31,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Replies')
+    return queryInterface.dropTable('Messages')
   }
 }
