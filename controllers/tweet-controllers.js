@@ -2,7 +2,7 @@ const { User, Tweet } = require('../models')
 const helper = require('../_helpers')
 
 const tweetController = {
-  // Get all tweet data include user data, return in an Array
+  // Get all tweet data include user data and latest shows at front, return in an Array
   getTweets: async (req, res, next) => {
     try {
     } catch (error) {
