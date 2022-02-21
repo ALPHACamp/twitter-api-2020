@@ -8,13 +8,14 @@ module.exports = {
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
 
-    await queryInterface.bulkInsert('Tweets', 
+    await queryInterface.bulkInsert('Replies',
       Array.from({ length: 10 }, () => ({
       UserId: users[Math.floor(Math.random() * users.length)].id,
-      description: faker.lorem.text(),
+      TweetId: users[Math.floor(Math.random() * users.length)].id,
+      comment: faker.lorem.text().substring(0, 20),
       createdAt: new Date(),
       updatedAt: new Date()
-      }))
+    }))
     )
   },
 
