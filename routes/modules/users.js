@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { authenticated, authenticatedAdmin } = require('../../helpers/auth')
+const { authenticated } = require('../../helpers/auth')
 
 const userController = require('../../controllers/user-controllers')
 
