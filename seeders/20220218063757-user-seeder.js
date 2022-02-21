@@ -23,6 +23,7 @@ module.exports = {
           name: 'user1',
           account: 'user1',
           password: bcrypt.hashSync('12345678', 10),
+          role: 'user',
           createdAt: new Date(),
           updatedAt: new Date()
         },
@@ -33,6 +34,7 @@ module.exports = {
           name: 'nixon',
           account: 'nixon',
           password: bcrypt.hashSync('12345678', 10),
+          role: 'user',
           createdAt: new Date(),
           updatedAt: new Date()
         },
@@ -41,6 +43,7 @@ module.exports = {
           name: 'ethon',
           account: 'ethon',
           password: bcrypt.hashSync('12345678', 10),
+          role: 'user',
           createdAt: new Date(),
           updatedAt: new Date()
         },
@@ -49,6 +52,7 @@ module.exports = {
           name: 'louis',
           account: 'louis',
           password: bcrypt.hashSync('12345678', 10),
+          role: 'user',
           createdAt: new Date(),
           updatedAt: new Date()
         },
@@ -57,6 +61,7 @@ module.exports = {
           name: 'richard',
           account: 'richard',
           password: bcrypt.hashSync('12345678', 10),
+          role: 'user',
           createdAt: new Date(),
           updatedAt: new Date()
         }

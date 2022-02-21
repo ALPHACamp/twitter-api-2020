@@ -2,9 +2,12 @@ const express = require('express')
 const router = express.Router()
 const passport = require('../config/passport')
 const { generalErrorHandler } = require('../helpers/error-handler')
-const { authenticated, authenticatedAdmin } = require('../helpers/auth')
+const { authenticated, checkRoleInverse } = require('../helpers/auth')
 
 const users = require('./modules/users')
+const admin = require('./modules/admin')
+
+router.use('/admin', authenticated, checkRoleInverse('user'), admin)
 
 router.use('/users', users)
 
