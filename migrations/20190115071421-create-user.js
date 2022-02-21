@@ -8,8 +8,13 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      account: {
+        type: Sequelize.STRING,
+        unique: true // 避免同時註冊發生重複
+      },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true // 避免同時註冊發生重複
       },
       password: {
         type: Sequelize.STRING
@@ -24,6 +29,10 @@ module.exports = {
         type: Sequelize.TEXT
       },
       role: {
+        type: Sequelize.STRING
+      },
+      cover: {
+        allowNull: true,
         type: Sequelize.STRING
       },
       createdAt: {
