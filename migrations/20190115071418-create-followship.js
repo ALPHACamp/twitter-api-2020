@@ -8,19 +8,17 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      follower_id: {
-        allowNull: false,
+      followerId: {
         type: Sequelize.INTEGER
       },
-      following_id: {
-        allowNull: false,
+      followingId: {
         type: Sequelize.INTEGER
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }

@@ -18,7 +18,9 @@ module.exports = (sequelize, DataTypes) => {
     totalTweets: DataTypes.INTEGER,
     totalFollowings: DataTypes.INTEGER,
     totalFollowers: DataTypes.INTEGER,
-    totalLiked: DataTypes.INTEGER
+    totalLiked: DataTypes.INTEGER,
+    createdAt: DataTypes.DATE,
+    updatedAt: DataTypes.DATE
   }, {
     tableName: 'Users'
   });
