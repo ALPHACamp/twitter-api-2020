@@ -9,18 +9,21 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       email: {
-        allowNull: false,
+        type: Sequelize.STRING
+      },
+      account: {
         type: Sequelize.STRING
       },
       password: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       name: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       avatar: {
+        type: Sequelize.STRING
+      },
+      cover: {
         type: Sequelize.STRING
       },
       introduction: {
@@ -31,31 +34,31 @@ module.exports = {
         defaultValue: 'user',
         type: Sequelize.STRING
       },
-      total_tweets: {
+      totalTweets: {
         allowNull: false,
         defaultValue: 0,
         type: Sequelize.INTEGER
       },
-      total_followings: {
+      totalFollowings: {
         allowNull: false,
         defaultValue: 0,
         type: Sequelize.INTEGER
       },
-      total_followers: {
+      totalFollowers: {
         allowNull: false,
         defaultValue: 0,
         type: Sequelize.INTEGER
       },
-      total_liked: {
+      totalLiked: {
         allowNull: false,
         defaultValue: 0,
         type: Sequelize.INTEGER
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
