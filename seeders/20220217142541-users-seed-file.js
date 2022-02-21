@@ -4,23 +4,37 @@ const bcrypt = require('bcrypt-nodejs')
 
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert(
-      'Users',
-      Array.from({ length: 6 }).map((user, i) => ({
-        id: i == 1 ? i : (i * 10 + 1),
-        account: i == 1 ? 'root' : 'user' + (i - 1),
-        email: i == 1 ? 'root@example.com' : `user${i - 1}@example.com`,
+  up: (queryInterface, Sequelize) => {
+    return Promise.all([
+      queryInterface.bulkInsert('Users', [{
+        id: 1,
+        email: 'root@example.com',
+        account: 'root',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
-        name: faker.name.findName(),
-        avatar: `https://loremflickr.com/320/240/selfie?lock=${i}`,
-        introduction: faker.lorem.text().substring(0, 160),
-        role: i == 1 ? 'admin' : 'user',
-        cover: `https://loremflickr.com/400/300/landscape?lock=${i}`,
+        name: 'root',
+        avatar: `https://loremflickr.com/320/320/model/?lock=${Math.random() * 100}`,
+        cover: `https://loremflickr.com/600/200/nature/?lock=${Math.random() * 100}`,
+        introduction: faker.lorem.sentence().substring(0, 160),
+        role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
-      }))
-    )
+      }]),
+      queryInterface.bulkInsert('Users',
+        Array.from({ length: 5 }).map((_, i) => ({
+          id: i * 10 + 11,
+          email: `user${i + 1}@example.com`,
+          account: `user${i + 1}`,
+          password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
+          name: faker.name.findName(),
+          avatar: `https://loremflickr.com/320/320/model/?lock=${Math.random() * 100}`,
+          cover: `https://loremflickr.com/600/200/nature/?lock=${Math.random() * 100}`,
+          introduction: faker.lorem.sentence().substring(0, 160),
+          role: 'user',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }))
+      )
+    ])
   },
 
   down: async (queryInterface, Sequelize) => {
