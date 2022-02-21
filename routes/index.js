@@ -9,7 +9,7 @@ const admin = require('./modules/admin')
 
 router.use('/admin', authenticated, checkRoleInverse('user'), admin)
 router.use('/users', users)
-router.use('/tweets', authenticated, tweets)
+router.use('/tweets', authenticated, checkRoleInverse('admin'), tweets)
 
 // fallback route for 404 not found (temporary)
 router.get('/', (req, res) => res.send('Hello World!'))
