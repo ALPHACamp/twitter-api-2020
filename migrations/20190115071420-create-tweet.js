@@ -8,28 +8,28 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_id: {
+      UserId: {
         allowNull: false,
         type: Sequelize.INTEGER
       },
       description: {
         type: Sequelize.TEXT
       },
-      total_likes: {
+      totalLikes: {
         allowNull: false,
         defaultValue: 0,
         type: Sequelize.INTEGER
       },
-      total_replies: {
+      totalReplies: {
         allowNull: false,
         defaultValue: 0,
         type: Sequelize.INTEGER
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
