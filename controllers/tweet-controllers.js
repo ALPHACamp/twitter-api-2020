@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const helper = require('../_helpers')
 
 const tweetController = {
@@ -44,6 +44,23 @@ const tweetController = {
         message: 'New tweet posted.',
         tweet
       })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  // Get specific tweet include user and replies data
+  getTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.tweet_id
+      const tweet = await Tweet.findByPk(tweetId, {
+        include: [
+          { model: User, attributes: ['name', 'account', 'avatar'] },
+          { model: Reply, include: [User] }
+        ]
+      })
+
+      return res.status(200).json(tweet)
     } catch (error) {
       next(error)
     }
