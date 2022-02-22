@@ -14,11 +14,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 app.use(express.json())
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next) {
-  // passport.authenticate('jwt', { ses...
-}
-
 app.use(passport.initialize())
 
 app.use('/api', router)
