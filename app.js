@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 } //放在最前面好安心
 const express = require('express')
+const bodyParser = require('body-parser')
 const handlebars = require('express-handlebars')
 const flash = require('connect-flash')
 //登入認證
