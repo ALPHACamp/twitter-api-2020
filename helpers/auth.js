@@ -14,7 +14,7 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 
-const checkRoleInverse = (role) => {
+const blockRole = (role) => {
   return (req, res, next) => {
     
     if (helpers.getUser(req).role !== role) return next()
@@ -27,5 +27,5 @@ const checkRoleInverse = (role) => {
 
 module.exports = {
   authenticated,
-  checkRoleInverse
+  blockRole
 }

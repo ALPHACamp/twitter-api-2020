@@ -11,7 +11,7 @@ const adminServices = {
     return Tweet.findByPk(tweetId)
       .then(tweet => {
         if (!tweet) {
-          throw new RequestError('Tweet does not exist')
+          throw new Error('Tweet does not exist')
         }
 
         return Promise.all([
