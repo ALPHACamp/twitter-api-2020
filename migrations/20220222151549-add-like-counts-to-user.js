@@ -3,7 +3,7 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addColumn('Users', 'like_counts', {
-      type: Sequelize.STRING
+      type: Sequelize.INTEGER
     })
   },
   down: async (queryInterface, Sequelize) => {
