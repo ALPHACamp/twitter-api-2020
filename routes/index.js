@@ -8,8 +8,8 @@ const tweets = require('./modules/tweets')
 const admin = require('./modules/admin')
 const followships = require('./modules/followships')
 
-router.use('/admin', authenticated, blockRole('user'), admin)
 
+router.use('/admin', authenticated, blockRole('user'), admin)
 router.use('/users', users)
 router.use('/tweets', authenticated, blockRole('admin'), tweets)
 

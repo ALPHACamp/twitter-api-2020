@@ -57,7 +57,12 @@ const tweetController = {
       const tweet = await Tweet.findByPk(tweetId, {
         include: [
           { model: User, attributes: ['name', 'account', 'avatar'] },
-          { model: Reply, include: [User] }
+          {
+            model: Reply,
+            include: [
+              { model: User, attributes: ['name', 'account', 'avatar'] }
+            ]
+          }
         ]
       })
 
