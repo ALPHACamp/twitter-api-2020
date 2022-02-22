@@ -13,6 +13,12 @@ module.exports = {
         isBetaMember: false
       }], {});
     */
+
+    const RANDOM_DEFAULT_NUMBER = 0
+    const DEFAULT_REPLIES_NUMBER = 3
+
+    // retrieve all user data from database except for admin
+    // also retrieve all tweet data from database
     return Promise.all([
       queryInterface.sequelize.query(
         `SELECT * FROM Users WHERE role='user'`,
@@ -24,14 +30,20 @@ module.exports = {
       )
     ])
       .then(([users, tweets]) => {
+        // prepare an array of all reply data
         const repliesArray = tweets.flatMap(tweet => {
           const userSet = new Set()
 
-          return Array.from({ length: 3 }, () => {
-            let UserId = 0
+          return Array.from({ length: DEFAULT_REPLIES_NUMBER }, () => {
+            // assign random number to UserId
+            let UserId = RANDOM_DEFAULT_NUMBER
 
             do {
+              // generate random UserId
               UserId = users[Math.floor(Math.random() * users.length)].id
+
+              // check if generated UserId matches tweet.UserId
+              // or that userId already had one reply in the same tweet
             } while (UserId === tweet.UserId || userSet.has(UserId))
 
             userSet.add(UserId)
@@ -46,6 +58,8 @@ module.exports = {
           })
         })
 
+        // prepare an array of all tweet data
+        // and update totalReplies and updatedAt fields
         const tweetsArray = tweets.map(tweet => {
           const { id, UserId, description, createdAt } = tweet
 
@@ -53,12 +67,13 @@ module.exports = {
             id,
             UserId,
             description,
-            totalReplies: 3,
+            totalReplies: DEFAULT_REPLIES_NUMBER,
             createdAt,
             updatedAt: new Date()
           }
         })
 
+        // execute two database commands at the same time
         return Promise.all([
           queryInterface.bulkInsert('Replies', repliesArray, {}),
           queryInterface.bulkInsert('Tweets', tweetsArray, {
@@ -76,6 +91,7 @@ module.exports = {
       Example:
       return queryInterface.bulkDelete('People', null, {});
     */
+
     return queryInterface.bulkDelete('Replies', null, {})
   }
 };

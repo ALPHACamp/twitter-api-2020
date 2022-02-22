@@ -13,45 +13,53 @@ module.exports = {
         isBetaMember: false
       }], {});
     */
-   return queryInterface.sequelize.query(
-     `SELECT * FROM Users WHERE role='user'`,
-     { type: queryInterface.sequelize.QueryTypes.SELECT }
-   )
-    .then(users => {
-      const tweetsArray = users.flatMap(user => {
-        return Array.from({ length: 10 }, () => ({
-          UserId: user.id,
-          description: faker.lorem.paragraph(),
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }))
-      })
 
-      const usersArray = users.map(user => {
-        const { 
-          id, email, name, account, password, role, createdAt 
-        } = user
+    const DEFAULT_TWEETS_NUMBER = 10
 
-        return {
-          id,
-          email,
-          name,
-          account,
-          password,
-          role,
-          totalTweets: 10,
-          createdAt,
-          updatedAt: new Date()
-        }
-      })
-
-      return Promise.all([
-        queryInterface.bulkInsert('Tweets', tweetsArray, {}),
-        queryInterface.bulkInsert('Users', usersArray, {
-          updateOnDuplicate: ['totalTweets', 'updatedAt']
+    // retrieve all user data from database except for admin
+    return queryInterface.sequelize.query(
+      `SELECT * FROM Users WHERE role='user'`,
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+      .then(users => {
+        // prepare an array of all tweet data
+        const tweetsArray = users.flatMap(user => {
+          return Array.from({ length: DEFAULT_TWEETS_NUMBER }, () => ({
+            UserId: user.id,
+            description: faker.lorem.paragraph(),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }))
         })
-      ])
-    })
+
+        // prepare an array of all user data
+        // and update totalTweets and updatedAt fields
+        const usersArray = users.map(user => {
+          const { 
+            id, email, name, account, password, role, createdAt 
+          } = user
+
+          return {
+            id,
+            email,
+            name,
+            account,
+            password,
+            role,
+            totalTweets: DEFAULT_TWEETS_NUMBER,
+            createdAt,
+            updatedAt: new Date()
+          }
+        })
+
+        // execute two database commands at the same time
+        return Promise.all([
+          queryInterface.bulkInsert('Tweets', tweetsArray, {}),
+          queryInterface.bulkInsert('Users', usersArray, {
+            updateOnDuplicate: ['totalTweets', 'updatedAt']
+          })
+        ])
+      })
   },
 
   down: (queryInterface, Sequelize) => {
@@ -62,6 +70,7 @@ module.exports = {
       Example:
       return queryInterface.bulkDelete('People', null, {});
     */
-   return queryInterface.bulkDelete('Tweets', null, {})
+
+    return queryInterface.bulkDelete('Tweets', null, {})
   }
 };
