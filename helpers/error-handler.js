@@ -5,7 +5,9 @@ module.exports = {
         status: 'error',
         message: `${err.message}`
       })
-    } else {
+    }
+
+    if (err) {
       return res.status(500).json({
         status: 'error',
         message: `${err}`
