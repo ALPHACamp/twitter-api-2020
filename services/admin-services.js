@@ -40,7 +40,7 @@ const adminServices = {
       })
       const result = tweets.map(tweet => ({
         ...tweet,
-        description: tweet.description.substring(0, 100)
+        description: tweet.description.substring(0, 50)
       }))
       return cb(null, result)
     } catch (err) {
