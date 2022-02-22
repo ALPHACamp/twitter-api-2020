@@ -32,6 +32,20 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = function (models) {
     User.hasMany(models.Tweet, { foreignKey: 'UserId' })
     User.hasMany(models.Reply, { ForeignKey: 'UserId' })
+    User.hasMany(models.Like, { ForeignKey: 'UserId' })
+
+    // 自己與跟隨自己的使用者之間關係
+    User.belongsToMany(models.User, {
+      through: 'Followships',
+      foreignKey: 'followingId',
+      as: 'Followers'
+    })
+    // 自己與自己跟隨的使用者之間關係
+    User.belongsToMany(models.User, {
+      through: 'Followships',
+      foreignKey: 'followerId',
+      as: 'Followings'
+    })
   };
   return User;
 };
