@@ -8,18 +8,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
     },
     UserId: {
-      type: DataTypes.INTEGER,
-      reference: {
-        model: 'Users',
-        key: 'id'
-      }
+      type: DataTypes.INTEGER
     },
     TweetId: {
       type: DataTypes.INTEGER,
-      reference: {
-        model: 'Tweets',
-        key: 'id'
-      }
     },
     createdAt: {
       allowNull: false,
@@ -29,7 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.DATE
     }
-  }, {});
+  }, {
+    modelName: 'Like',
+    tableName: 'Likes',
+    underscored: true
+  });
   Like.associate = function (models) {
     Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
     Like.belongsTo(models.User, { foreignKey: 'UserId' })
