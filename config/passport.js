@@ -3,8 +3,7 @@ const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 const bcrypt = require('bcrypt-nodejs')
 const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
+const { User, Tweet } = require('../models')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
@@ -31,12 +30,11 @@ passport.use(
   )
 )
 
-
 let jwtOptions = {}
-jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
-jwtOptions.secretOrKey = process.env.TOKEN_SECRET || test
+jwtOptions.jwtFromRequest = ExtractJWT.fromAuthHeaderAsBearerToken()
+jwtOptions.secretOrKey = process.env.JWT_SECRET // || test
 
-passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
     const user = await User.findByPk(jwt_payload.id)
     if (!user) {
