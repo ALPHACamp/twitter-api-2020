@@ -11,16 +11,17 @@ module.exports = {
     const userData = await User.findAll({
       raw: true,
       nest: true,
-      where: { role: 'user' }
+      where: { role: 'user' },
+      attributes: ['id']
     })
-      .then(user => user.map(i => i.id))
+
       await queryInterface.bulkInsert('Tweets', Array.from({ length: 50 }).map((d, i) => {
         let a = 0
         for (let b = i; b / 10 >= 1; b = b - 10) {
           a++
         }
         const tweet = {
-          userId: userData[a],
+          userId: userData[a].id,
           description: faker.lorem.text(),
           createdAt: new Date(),
           updatedAt: new Date()
