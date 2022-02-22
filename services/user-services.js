@@ -19,7 +19,6 @@ const userServices = {
         password: hash
       }))
       .then((createdUser) => {
-        console.log(createdUser)
         createdUser = createdUser.toJSON()
         delete createdUser.password
         return cb(null, { user: createdUser })
