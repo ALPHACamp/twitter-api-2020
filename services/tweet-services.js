@@ -49,7 +49,20 @@ const tweetServices = {
     } catch (err) {
       cb(err)
     }
-
+  },
+  postTweet: async (req, cb) => {
+    try {
+      const userId = helper.getUser(req).id
+      const { description } = req.body
+      if (!description) throw new Error('推文不能為空白')
+      const tweet = await Tweet.create({
+        userId,
+        description
+      })
+      return cb(null, tweet)
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 module.exports = tweetServices
