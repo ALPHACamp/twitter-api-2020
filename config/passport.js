@@ -1,6 +1,9 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
+const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
+const JWTStrategy = passportJWT.Strategy
+const ExtractJWT = passportJWT.ExtractJwt
 const { User } = require('../models')
 
 
@@ -22,6 +25,25 @@ passport.use(new LocalStrategy({
     return cb(null, user)
 
   } catch (err) { return cb(err, false) }
+}))
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET
+}
+
+passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
+  try {
+    const user = await User.findByPk(jwtPayload.id, {
+      include: [
+        { model: User, as: 'Followings' },
+        { model: User, as: 'Followers' }
+      ]
+    })
+
+    return cb(null, user)
+    
+  } catch (err) { cb(err, false) }
 }))
 
 
