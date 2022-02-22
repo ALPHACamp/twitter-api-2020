@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { Tweet, User } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -30,5 +30,23 @@ const adminServices = {
       return cb(err)
     }
   },
+  getTweets: async (req, cb) => {
+    try {
+      const tweets = await Tweet.findAll({
+        include: { model: User },
+        raw: true,
+        nest: true,
+        order: [['createdAt', 'DESC']]
+      })
+      const result = tweets.map(tweet => ({
+        ...tweet,
+        description: tweet.description.substring(0, 100)
+      }))
+      return cb(null, result)
+    } catch (err) {
+      cb(err)
+    }
+
+  }
 }
 module.exports = adminServices
