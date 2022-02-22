@@ -3,14 +3,13 @@ const helpers = require('../_helpers')
 
 
 // 前台的登入驗證
+// const authenticated = passport.authenticate('jwt', { session: false })
+
 const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
-    if (user) {
-      console.log(user.dataValues)
-      helpers.getUser(req) = user.dataValues
-      return next()
-    }
-    return res.status(401).json({ message: '請先登入' })
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err || !user) return res.status(401).json({ status: 'error', message: '請先登入' })
+    req.user = user
+    next()
   })(req, res, next)
 }
 

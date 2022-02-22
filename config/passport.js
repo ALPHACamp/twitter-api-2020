@@ -36,7 +36,7 @@ jwtOptions.secretOrKey = process.env.JWT_SECRET // || test
 
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
-    const user = await User.findByPk(jwt_payload.id)
+    const user = await User.findByPk(jwtPayload.id)
     if (!user) {
       return done(null, false)
     }

@@ -2,7 +2,6 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 } //放在最前面好安心
 const express = require('express')
-const bodyParser = require('body-parser')
 const handlebars = require('express-handlebars')
 const flash = require('connect-flash')
 //登入認證
@@ -28,6 +27,7 @@ app.use(flash())
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
   res.locals.error_messages = req.flash('error_messages')
+  res.locals.user = helpers.getUser(req)
   next()
 })
 app.use(passport.initialize())
