@@ -33,18 +33,21 @@ const userServices = {
         throw new Error('All fields are required!')
       }
       const user = await User.findOne({ where: { account } })
+      console.log(user);
       if (!user) {
         throw new Error('User not found!')
       } else if (!bcrypt.compareSync(password, user.password)) {
         throw new Error('Incorrect Account or Password!')
+      } else if (user.role !== 'user') {
+        throw new Error('請使用一般帳戶登入!')
       } else {
         result = user.toJSON()
       }
-      if(result){
+      if (result) {
         const payload = { id: user.id }
         const token = jwt.sign(payload, process.env.JWT_SECRET)
         delete result.password
-        return cb(null, { token , user:result })
+        return cb(null, { token, user: result })
       }
     } catch (err) {
       return cb(err)

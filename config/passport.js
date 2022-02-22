@@ -32,7 +32,7 @@ passport.use(
 
 let jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJWT.fromAuthHeaderAsBearerToken()
-jwtOptions.secretOrKey = process.env.JWT_SECRET // || test
+jwtOptions.secretOrKey = process.env.JWT_SECRET
 
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
