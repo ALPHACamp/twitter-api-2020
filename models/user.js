@@ -3,28 +3,35 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     id: {
       allowNull: false,
-      type: Sequelize.INTEGER
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER
     },
     email: {
-      type: Sequelize.STRING
+      type: DataTypes.STRING
     },
     password: {
-      type: Sequelize.STRING
+      type: DataTypes.STRING
     },
     name: {
-      type: Sequelize.STRING
+      type: DataTypes.STRING
     },
     avatar: {
-      type: Sequelize.STRING
+      type: DataTypes.STRING
     },
     introduction: {
-      type: Sequelize.TEXT
+      type: DataTypes.TEXT
     },
     role: {
-      type: Sequelize.STRING
+      type: DataTypes.STRING
     }
-  }, {});
+  }, {
+    modelName: 'User',
+    tableName: 'Users'
+  });
   User.associate = function (models) {
+    User.hasMany(models.Tweet, { foreignKey: 'UserId' })
+    User.hasMany(models.Reply, { ForeignKey: 'UserId' })
   };
   return User;
 };
