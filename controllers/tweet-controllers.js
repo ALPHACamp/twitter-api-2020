@@ -1,5 +1,6 @@
 const { User, Tweet, Reply } = require('../models')
 const helper = require('../_helpers')
+const tweetServices = require('../services/tweet-service')
 
 const tweetController = {
   // Get all tweet data include user data and latest shows at front, return in an Array
@@ -63,6 +64,19 @@ const tweetController = {
       return res.status(200).json(tweet)
     } catch (error) {
       next(error)
+    }
+  },
+
+  likeTweet: async (req, res, next) => {
+    const tweetId = req.params.id
+    const userId = req.user.id
+
+    try {
+      const like = await tweetServices.likeTweet(tweetId, userId)
+
+      return res.status(200).json(like)
+    } catch (err) {
+      next(err)
     }
   }
 }
