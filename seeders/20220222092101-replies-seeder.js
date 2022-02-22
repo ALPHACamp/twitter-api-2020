@@ -27,7 +27,30 @@ module.exports = {
       replies.push(...randomReplies)
     })
 
-    await queryInterface.bulkInsert('Replies', replies, {})
+    // Update users' repliedCount
+    const data = await queryInterface.sequelize.query(
+      `
+      SELECT 
+        COUNT(replies.id) AS repliedCount,
+        tweets.UserId
+      FROM replies
+      JOIN tweets ON replies.TweetId = tweets.id
+      GROUP BY tweets.UserId;
+      `,
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+
+    for (const user of data) {
+      console.log(user)
+      await queryInterface.sequelize.query(
+        `
+        Update Users
+        SET repliedCount = ${user.repliedCount}
+        WHERE id = ${user.UserId}
+        `,
+        { type: queryInterface.sequelize.QueryTypes.UPDATE }
+      )
+    }
   },
 
   down: async (queryInterface, Sequelize) => {
