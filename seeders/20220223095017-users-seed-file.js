@@ -17,7 +17,7 @@ module.exports = {
         updatedAt: new Date()
       },
       Array.from({ length: 5 }, (_, i) => ({
-        name: `user${ i + 1 }`,
+        name: faker.name.findName(),
         email: `user${ i + 1 }@example.com`,
         password: bcrypjs.hashSync('12345678', bcrypjs.genSaltSync(10), null),
         account: `user${ i + 1 }`,

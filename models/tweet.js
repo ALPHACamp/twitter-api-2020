@@ -1,14 +1,18 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Tweet = sequelize.define('Tweet', {
-    userId: DataTypes.STRING,
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER,
+    },
+    UserId: DataTypes.STRING,
     description: {
       type: DataTypes.STRING,
       allowNull: false
     },
   }, {
-    sequelize,
-    modelName: 'Tweet',
     tableName: 'Tweets'
   })
   Tweet.associate = function(models) {

@@ -1,12 +1,16 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Like = sequelize.define('Like', {
-    userId: DataTypes.STRING,
-    tweetId: DataTypes.STRING
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER,
+    },
+    UserId: DataTypes.STRING,
+    TweetId: DataTypes.STRING
   }, {
-    sequelize,
-    modelName: 'Like',
-    tableName: 'Likes',
+    tableName: 'Likes'
   })
   Like.associate = function(models) {
     Like.belongsTo(models.User, { foreignKey: 'UserId' })
