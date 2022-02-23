@@ -22,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
     avatar: {
       type: DataTypes.STRING
     },
+    cover: {
+      type: DataTypes.STRING
+    },
     introduction: {
       type: DataTypes.TEXT
     },

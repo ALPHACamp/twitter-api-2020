@@ -7,13 +7,13 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    follower_id: {
+    followerId: {
       type: DataTypes.INTEGER,
     },
-    following_id: {
+    followingId: {
       type: DataTypes.INTEGER,
     },
-    created_at: {
+    createdAt: {
       allowNull: false,
       type: DataTypes.DATE
     }
