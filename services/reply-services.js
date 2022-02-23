@@ -22,5 +22,21 @@ const replyServices = {
       cb(err)
     }
   },
+  postReply: async (req, cb) => {
+    try {
+      const userId = helper.getUser(req).id
+      const tweetId = req.params.id
+      const { comment } = req.body
+      if (!comment) throw new Error('內容不可空白')
+      const reply = await Reply.create({
+        userId,
+        tweetId,
+        comment
+      })
+      return cb(null, reply)
+    } catch (err) {
+      cb(err)
+    }
+  }
 }
 module.exports = replyServices
