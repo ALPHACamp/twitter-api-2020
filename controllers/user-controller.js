@@ -9,7 +9,16 @@ const userController = {
     userServices.postUser(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', message: '操作成功' }))
   },
   signIn: (req, res, next) => {
-    userServices.userLogin(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
+    userServices.userLogin(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getUserProfile: (req, res, next) => {
+    userServices.getUserProfile(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getUserTweet: (req, res, next) => {
+    userServices.getUserTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getUserReply: (req, res, next) => {
+    userServices.getUserReply(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 
