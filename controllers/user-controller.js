@@ -11,10 +11,10 @@ module.exports = {
 
       switch (true) {
         case (req.originalUrl === '/api/signin' && userData.role !== 'user'):
-          throw new Error('使用者不存在')
+          throw new Error('使用者不存在!')
         
         case (req.originalUrl === '/api/admin/signin' && userData.role !== 'admin'):
-          throw new Error('使用者不存在')
+          throw new Error('使用者不存在!')
 
         default:
           delete userData.password
@@ -40,15 +40,15 @@ module.exports = {
       const checkPassword = req.body?.checkPassword?.trim() || null
 
       if (!account || !name || !email || !password || !checkPassword) {
-        throw new Error('每個欄位都屬必填')
+        throw new Error('每個欄位都屬必填!')
       }
 
       if (name.length > 50) {
-        throw new Error('名稱欄位不得超過50字')
+        throw new Error('name 不得超過50字!')
       }
 
       if (password !== checkPassword) {
-        throw new Error('密碼欄位必須相符')
+        throw new Error('密碼欄位必須一致!')
       }
 
       // in order to handle two exceptions,
