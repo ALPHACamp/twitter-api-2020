@@ -1,4 +1,4 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -46,7 +46,24 @@ const adminServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  deleteTweet: async (req, cb) => {
+    try {
+      const tweetId = await req.params.id
+      const like = await Like.destroy({ where: { tweetId } })
+      const reply = await Reply.destroy({ where: { tweetId } })
+      const tweet = await Tweet.destroy({ where: { id: tweetId } })
+      return cb(null, { like, reply, tweet })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUsers: async (req, cb) => {
+    try {
 
-  }
+    } catch (err) {
+      cb(err)
+    }
+  },
 }
 module.exports = adminServices
