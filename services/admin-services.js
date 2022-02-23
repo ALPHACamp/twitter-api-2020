@@ -72,15 +72,15 @@ const adminServices = {
             'avatar',
             'cover',
             'role',
-            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"),'tweetNum'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeNum'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingNum'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerNum']
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"),'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'isLiked'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'following'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'isfollowed']
           ]
         },
         group: ['User.id'],
         order: [
-          [sequelize.literal('tweetNum'), 'DESC'],
+          [sequelize.literal('tweetCount'), 'DESC'],
           ['id', 'ASC']
         ]
       })
