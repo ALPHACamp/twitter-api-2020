@@ -65,6 +65,10 @@ const adminServices = {
         raw: true,
         nest: true,
         attributes: {
+          exclude: [
+            'email',
+            'password',
+          ],
           include: [
             'id',
             'name',
