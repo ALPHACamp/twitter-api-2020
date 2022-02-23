@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
+
+const helpers = require('../_helpers')
 
 const userController = {
   login: async (req, res, next) => {
@@ -80,11 +82,20 @@ const userController = {
     }
   },
 
-  // To-do: it's just for auth test !!!!!!!!
+  // Get basic user info
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, { raw: true })
-      // return ONLY user object to satisfy the test... :(
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          Tweet,
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
+        ]
+      })
+
+      // Protect sensitive user info
+      user.password = undefined
+
       return res.json(user)
     } catch (error) {
       next(error)
