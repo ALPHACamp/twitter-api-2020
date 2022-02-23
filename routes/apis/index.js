@@ -1,13 +1,15 @@
 const express = require('express')
 const router = express.Router()
-const { apiErrorHandler } = require('../../middleware/error-handler')
+const passport = require('../../config/passport')
 const admin = require('./modules/admin')
+const userController = require('../../controllers/apis/user-controller')
+const { apiErrorHandler } = require('../../middleware/error-handler')
+const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 
-/* TODO: authenticated和authenticatedAdmin部分完成後，增加middleware */
 router.use('/admin', admin)
+router.post('/users', userController.signUp)
+router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
-
-/* TODO: 測試/api路由可運作使用，完成後須把(req, res) => res.send('Hello api')部分刪除 */
-router.use('/', apiErrorHandler, (req, res) => res.send('Hello api'))
+router.use('/', apiErrorHandler)
 
 module.exports = router
