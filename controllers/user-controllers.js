@@ -37,7 +37,7 @@ const userController = {
                 return res.json({ status: 'error', message: "User didn't exist!" })
             }
             const { account, name, email, introduction, avatar, cover } = targetUser
-            const isFollowing = req.user.Followings.some(f => f.id === targetUser.id)
+            const isFollowing = targetUser.Followers.some(f => f.id === req.user.id)
             return res.json({ 
                 account,
                 name,
@@ -67,7 +67,31 @@ const userController = {
         } catch (err) {
             next(err)
         }
+    },
+    getTopUsers: async (req, res, next) => { 
+        try {
+            const users = await User.findAll({
+                include: { 
+                    model: User, as: 'Followers' ,
+                }
+            })
+            const result = users
+                .map(user => ({
+                    id: user.id,
+                    name: user.name,
+                    avatar: user.avatar,
+                    followerCount: user.Followers.length,
+                    isFollowing: req.user.Followings.some(f => f.id === user.id)
+                }))
+                .sort((a, b) => b.followerCount - a.followerCount)
+                // .slice(0, 10)
+            
+            return res.json(result)
+        } catch (err) {
+            next(err)
+        }
     }
+
 }
 
 module.exports = userController
