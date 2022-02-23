@@ -45,6 +45,22 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        raw: true,
+        nest: true
+      })
+      return res.status(200).json({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        email: user.email
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
