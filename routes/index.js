@@ -11,6 +11,7 @@ const { authenticated, authenticatedUser, authenticatedAdmin } = require('../mid
 router.get('/', (req, res) => {
   res.send('Hello World!')
 })
+router.post('/api/tweets/:id/replies', authenticated, replyController.postReply)
 router.get('/api/tweets/:id/replies', authenticated, replyController.getReplies)
 router.get('/api/tweets/:tweetId', authenticated, tweetController.getTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
