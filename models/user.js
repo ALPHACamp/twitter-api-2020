@@ -8,12 +8,11 @@ module.exports = (sequelize, DataTypes) => {
     role: DataTypes.STRING,
     avatar: DataTypes.STRING,
     introduction: DataTypes.TEXT,
-    background: DataTypes.STRING,
+    cover: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'User',
     tableName: 'Users',
-    underscored: true  
   });
   User.associate = function(models) {
     User.hasMany(models.Reply, { foreignKey: 'userId' })

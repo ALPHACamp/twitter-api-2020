@@ -11,25 +11,22 @@ module.exports = {
       account: {
         type: Sequelize.STRING,
         unique: true,
-        allowNull: false
       },
       email: {
         type: Sequelize.STRING,
         unique: true,
-        allowNull: false
       },
       password: {
         type: Sequelize.STRING
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false,
       },
       avatar: {
         type: Sequelize.STRING,
         defaultValue: null
       },
-      background: {
+      cover: {
         type: Sequelize.STRING,
         defaultValue: null
       },
@@ -39,13 +36,12 @@ module.exports = {
       role: {
         type: Sequelize.STRING,
         defaultValue: 'user',
-        allowNull: false,
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
