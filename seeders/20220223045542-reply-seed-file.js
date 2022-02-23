@@ -12,19 +12,44 @@ module.exports = {
         'SELECT id FROM Tweets;',
         { type: queryInterface.sequelize.QueryTypes.SELECT }
       )
-    const replyPerTweet = 3
-    const replyCount = replyPerTweet * tweets.length
 
-    for ( let i = 0; i < replyCount; i++) {
-      await queryInterface.bulkInsert('Replies', [{
+
+    for (const tweet of tweets) {
+      await queryInterface.bulkInsert('Replies', 
+        Array.from({ length: 3 }, () => ({
         comment: faker.lorem.text(140),
-        UserId: users[Math.floor(i % users.length)].id,
-        TweetId: tweets[Math.floor(i / tweets.length)].id,
+        UserId: users[Math.floor(Math.random() * users.length)].id,
+        TweetId: tweet.id,
         createdAt: new Date(),
         updatedAt: new Date()
-      }])
-     }  
-    },
+        }))
+      )
+    }
+
+    // const replyPerTweet = 3
+    // const replyCount = replyPerTweet * tweets.length
+
+    // for (const user of users) {
+    //   await queryInterface.bulkInsert('Replies', [{
+    //     comment: faker.lorem.text(140),
+    //     UserId: user.id,
+    //     TweetId: tweets[Math.floor(Math.random() * tweets.length)].id,
+    //     createdAt: new Date(),
+    //     updatedAt: new Date()
+    //   }])
+    // }
+
+    // for ( let i = 0; i < replyCount - users.length; i++) {
+    //   await queryInterface.bulkInsert('Replies', [{
+    //     comment: faker.lorem.text(140),
+    //     UserId: users[Math.floor(i % users.length)].id,
+    //     TweetId: tweets[Math.floor(i % tweets.length)].id,
+    //     createdAt: new Date(),
+    //     updatedAt: new Date()
+    //   }])
+    //  }
+
+  },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Replies', null, {})
  }
