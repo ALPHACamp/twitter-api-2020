@@ -1,5 +1,7 @@
-const { User } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const bcrypt = require('bcryptjs')
+const sequelize = require('sequelize')
+const helper = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
@@ -53,5 +55,56 @@ const userServices = {
       return cb(err)
     }
   },
+  getUserTweets: async (req, cb) => {
+    try {
+      // 找出目標使用者的所有推文及喜歡 回覆數
+      const userTweets = await Tweet.findAll({
+        where: { userId: req.params.id },
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] },
+          { model: User, attributes: ['account', 'name', 'avatar'] }
+        ],
+        attributes: {
+          include: [
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
+              ),
+              'likeCount'
+            ],
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
+              ),
+              'replyCount'
+            ]
+          ]
+        },
+        group: ['Tweet.id'],
+        order: [['createdAt', 'DESC']]
+      })
+      // 找出目前使用者喜歡的推文
+      const likedTweets = await Like.findAll({
+        where: { userId: helper.getUser(req).id },
+        attributes: ['tweetId'],
+        raw: true
+      })
+      const likedData = likedTweets.map(data =>
+        data.tweetId
+      )
+      // 目標使用者若無推文
+      if (userTweets.length === 0) throw new Error("使用者尚無任何推文")
+      const result = userTweets.map(tweet => ({
+        ...tweet.toJSON(),
+        isLiked: likedData.includes(tweet.id)
+      }))
+      return cb(null, result)
+    } catch (err) {
+      cb(err)
+    }
+  }
 }
 module.exports = userServices
