@@ -56,6 +56,19 @@ const userService = {
         return cb(null, user)
       })
       .catch(err => cb(err))
+  },
+  getUser: (req, cb) => {
+    const userId = Number(req.params.id)
+    User.findByPk(userId, {
+      raw: true
+    })
+      .then(user => {
+        if (!user) throw new Error('User not exits!')
+        if (user.role === 'admin') throw new Error('User not exits!')
+        delete user.password
+        return cb(null, user)
+      })
+      .catch(err => cb(err))
   }
 }
 
