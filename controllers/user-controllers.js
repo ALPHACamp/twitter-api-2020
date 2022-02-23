@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 const userController = {
     signUp: async (req, res, next) => {
@@ -30,14 +30,14 @@ const userController = {
         try {
             const targetUser = await User.findByPk(req.params.id, {
                 include: [
-                    { model: User, as: 'Followings' },
+                    { model: User, as: 'Followers' },
                 ]
             })
             if (!targetUser) {
                 return res.json({ status: 'error', message: "User didn't exist!" })
             }
             const { account, name, email, introduction, avatar, cover } = targetUser
-            const isFollowed = targetUser.Followings.some(f => f.id === req.user.id)
+            const isFollowing = req.user.Followings.some(f => f.id === targetUser.id)
             return res.json({ 
                 account,
                 name,
@@ -45,9 +45,25 @@ const userController = {
                 introduction,
                 avatar,
                 cover,
-                isFollowed
+                isFollowing
             })
 
+        } catch (err) {
+            next(err)
+        }
+    },
+    getUserTweets: async (req, res, next) => { 
+        try {
+            const user = await User.findByPk(req.params.id)
+            if (!user) {
+                return res.json({ status: 'error', message: "User didn't exist!" })
+            }
+            const tweets = await Tweet.findAll({
+                where: { UserId: req.params.id},
+                nest: true,
+                raw: true
+            })
+            return res.json(tweets)
         } catch (err) {
             next(err)
         }
