@@ -1,8 +1,8 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Like = sequelize.define('Like', {
-    userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Like',

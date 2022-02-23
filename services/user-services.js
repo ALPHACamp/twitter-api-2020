@@ -55,6 +55,25 @@ const userServices = {
       return cb(err)
     }
   },
+  getUser: async (req, cb) => {
+    try {
+      const userData = await User.findByPk(req.params.id, {
+        attributes: {
+          include: [
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followerCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followingCount']
+          ]
+        },
+      })
+      const user = userData.toJSON()
+      delete user.password
+      return cb(null, user)
+    } catch (err) {
+      cb(err)
+    }
+  },
   getUserTweets: async (req, cb) => {
     try {
       // 找出目標使用者的所有推文及喜歡 回覆數
