@@ -105,6 +105,27 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUserReplies: async (req, cb) => {
+    try {
+      // 找出目標使用者的所有回覆
+      const userReplies = await Reply.findAll({
+        where: { userId: req.params.id },
+        include: [
+          // 將回覆的使用者資訊in進來
+          { model: User, attributes: ['account', 'name', 'avatar'] },
+          // 將原推文及推文者資訊in進來 
+          { model: Tweet, include: { model: User, attributes: ['account', 'name'] } },
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true
+      })
+      // 目標使用者若無回覆
+      if (userReplies.length === 0) throw new Error("使用者尚無任何回覆")
+      return cb(null, userReplies)
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 module.exports = userServices
