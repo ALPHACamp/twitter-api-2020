@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
+    account: {
+      type: DataTypes.STRING
+    },
     email: {
       type: DataTypes.STRING
     },
@@ -27,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     modelName: 'User',
-    tableName: 'Users'
+    tableName: 'Users',
+    underscored: true
   });
   User.associate = function (models) {
     User.hasMany(models.Tweet, { foreignKey: 'UserId' })
@@ -36,13 +40,13 @@ module.exports = (sequelize, DataTypes) => {
 
     // 自己與跟隨自己的使用者之間關係
     User.belongsToMany(models.User, {
-      through: 'Followships',
+      through: models.Followship,
       foreignKey: 'followingId',
       as: 'Followers'
     })
     // 自己與自己跟隨的使用者之間關係
     User.belongsToMany(models.User, {
-      through: 'Followships',
+      through: models.Followship,
       foreignKey: 'followerId',
       as: 'Followings'
     })

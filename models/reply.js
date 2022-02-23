@@ -9,17 +9,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     UserId: {
       type: DataTypes.INTEGER,
-      references: {
-        model: 'Users',
-        key: 'id'
-      }
     },
     TweetId: {
       type: DataTypes.INTEGER,
-      references: {
-        model: 'Tweets',
-        key: 'id'
-      }
     },
     comment: {
       type: DataTypes.TEXT
