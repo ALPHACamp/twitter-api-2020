@@ -63,8 +63,8 @@ const adminServices = {
     try {
       const users = await User.findAll({
         raw: true,
-        nest: true,   
-        attributes:{
+        nest: true,
+        attributes: {
           include: [
             'id',
             'name',
@@ -72,10 +72,10 @@ const adminServices = {
             'avatar',
             'cover',
             'role',
-            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"),'tweetCount'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'isLiked'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'following'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'isfollowed']
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followerCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followingCount']
           ]
         },
         group: ['User.id'],
@@ -84,7 +84,7 @@ const adminServices = {
           ['id', 'ASC']
         ]
       })
-      const result = users.map(user => ({...user}))
+      const result = users.map(user => ({ ...user }))
       return cb(null, result)
     } catch (err) {
       cb(err)

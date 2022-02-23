@@ -55,6 +55,25 @@ const userServices = {
       return cb(err)
     }
   },
+  getUser: async (req, cb) => {
+    try {
+      const userData = await User.findByPk(req.params.id, {
+        attributes: {
+          include: [
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followerCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followingCount']
+          ]
+        },
+      })
+      const user = userData.toJSON()
+      delete user.password
+      return cb(null, user)
+    } catch (err) {
+      cb(err)
+    }
+  },
   getUserTweets: async (req, cb) => {
     try {
       // 找出目標使用者的所有推文及喜歡 回覆數
@@ -102,6 +121,27 @@ const userServices = {
         isLiked: likedData.includes(tweet.id)
       }))
       return cb(null, result)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUserReplies: async (req, cb) => {
+    try {
+      // 找出目標使用者的所有回覆
+      const userReplies = await Reply.findAll({
+        where: { userId: req.params.id },
+        include: [
+          // 將回覆的使用者資訊in進來
+          { model: User, attributes: ['account', 'name', 'avatar'] },
+          // 將原推文及推文者資訊in進來 
+          { model: Tweet, include: { model: User, attributes: ['account', 'name'] } },
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true
+      })
+      // 目標使用者若無回覆
+      if (userReplies.length === 0) throw new Error("使用者尚無任何回覆")
+      return cb(null, userReplies)
     } catch (err) {
       cb(err)
     }
