@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const helpers = require('../_helpers')
 
@@ -97,6 +97,76 @@ const userController = {
       user.password = undefined
 
       return res.json(user)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  putUser: async (req, res, next) => {
+    try {
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  // Get all tweets from specific user
+  getUserTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id }
+      })
+
+      return res.status(200).json(tweets)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  // Get all replied tweets by specific user
+  getUserRepliedTweet: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [Tweet]
+      })
+
+      return res.status(200).json(replies)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getUserLikes: async (req, res, next) => {
+    try {
+      const likes = await Like.findAll({
+        where: { UserId: req.params.id }
+      })
+
+      return res.status(200).json(likes)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const followings = await Followship.findAll({
+        where: { followerId: req.params.id }
+      })
+
+      return res.status(200).json(followings)
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const followers = await Followship.findAll({
+        where: { followingId: req.params.id }
+      })
+
+      return res.status(200).json(followers)
     } catch (error) {
       next(error)
     }
