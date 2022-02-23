@@ -19,6 +19,9 @@ passport.use(
         ]
       })
 
+      // Protect sensitive info
+      user.password = undefined
+
       return done(null, user)
     } catch (error) {
       done(error)
