@@ -14,7 +14,7 @@ const userController = {
       throw error
     }
 
-    User.findOne({ where: { account } })
+    return User.findOne({ where: { account } })
       .then(user => {
         if (!user || user.role === 'admin') {
           error.code = 403
