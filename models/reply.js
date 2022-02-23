@@ -2,8 +2,8 @@
 module.exports = (sequelize, DataTypes) => {
   const Reply = sequelize.define('Reply', {
     comment: DataTypes.TEXT,
-    userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Reply',
