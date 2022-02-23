@@ -2,8 +2,8 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
 
-const { User } = require('../models')
-
+const { User, Followship } = require('../models')
+const { getUser } = require('../_helpers')
 const userServices = {
   postUser: (req, cb) => {
     return User.findOne({
@@ -39,13 +39,47 @@ const userServices = {
       .catch(err => cb(err))
   },
   userLogin: (req, cb) => {
-    const userData = req.user.toJSON()
+    const userData = getUser(req).toJSON()
     try {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       return cb(null, { token })
     } catch (err) {
       cb(err)
     }
+  },
+  getUserProfile: (req, cb) => {
+    const { id } = req.params
+    return Promise.all([
+      User.findByPk(id, {
+        raw: true,
+        nest: true
+      }),
+      Followship.findAll({
+        where: { followerId: id },
+        raw: true,
+        nest: true
+      }),
+      Followship.findAll({
+        where: { followingId: id },
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, follower, following]) => {
+        if (!user) throw new Error('資料庫內沒有相關資料')
+        const data = {
+          id: user.id,
+          account: user.account,
+          name: user.name,
+          cover: user.cover,
+          avatar: user.avatar,
+          introduction: user.introduction,
+          follower: follower.length,
+          following: following.length
+        }
+        return cb(null, data)
+      })
+      .catch(err => cb(err))
   }
 }
 

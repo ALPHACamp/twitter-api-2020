@@ -10,6 +10,11 @@ const userController = {
   },
   signIn: (req, res, next) => {
     userServices.userLogin(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
+  },
+  getUserProfile: (req, res, next) => {
+    if (typeof Number(req.params.id) !== 'number') throw new ReferenceError('請輸入數字id 當 parameters')
+
+    userServices.getUserProfile(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
   }
 }
 
