@@ -23,6 +23,14 @@ const tweetController = {
         status: 'success',
         message: data
       }))
+  },
+  unlikeTweet: (req, res, next) => {
+    tweetServices.unlikeTweet(req, (err, data) => err
+      ? next(err)
+      : res.status(200).json({
+        status: 'success',
+        message: data
+      }))
   }
 }
 
