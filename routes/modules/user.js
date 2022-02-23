@@ -8,5 +8,7 @@ const router = express.Router()
 router.post('/login', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/', userController.signUp)
 
+router.get('/:id/tweets', authenticated, userController.getUserTweet)
 router.get('/:id', authenticated, userController.getUserProfile)
+
 module.exports = router

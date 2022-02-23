@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
 
-const { User, Followship } = require('../models')
+const { User, Followship, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../_helpers')
 const userServices = {
   postUser: (req, cb) => {
@@ -77,6 +77,25 @@ const userServices = {
           follower: follower.length,
           following: following.length
         }
+        return cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
+  getUserTweet: (req, cb) => {
+    return Tweet.findAll({
+      where: { userId: req.params.id },
+      include: [Reply, Like],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweet => {
+        if (!tweet) throw new Error('資料庫內沒有相關資料')
+        const data = tweet.map(t => ({
+          id: t.dataValues.id,
+          description: t.dataValues.description,
+          replyAmount: t.Replies.length,
+          likeAmount: t.Likes.length,
+          createdAt: t.dataValues.createdAt
+        }))
         return cb(null, data)
       })
       .catch(err => cb(err))
