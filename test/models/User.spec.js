@@ -24,7 +24,7 @@ describe('# User Model', () => {
   // 檢查 user 是否有 name, email, password, account, cover, avatar 屬性
   context('properties', () => {
     ;[
-      'name', 'email', 'password', 'account',  'cover', 'avatar'
+      'name', 'email', 'password', 'account', 'cover', 'avatar'
     ].forEach(checkPropertyExists(user))
   })
 
