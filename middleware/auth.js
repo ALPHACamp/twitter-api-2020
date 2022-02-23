@@ -12,6 +12,11 @@ module.exports = {
         })
       }
 
+      // user object is automatically added up in unit test,
+      // but in other scenarios,
+      // we still need to retrieve user data from JWT auth,
+      if (user.avatar) { req.user = user.toJSON() }
+
       return next()
     })(req, res, next)
   },
