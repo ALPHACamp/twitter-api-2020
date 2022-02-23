@@ -6,17 +6,21 @@
  * @param {object} res 
  * @param {function} next 
  */
-function apiErrorHandler (error, req, res, next) {
-  if (error instanceof Error) {
-    res.status(500).json({
-      status: 500,
-      message: `${error.name}: ${error.message}`
-    })
-  } else {
-    res.status(500).json({
-      status: 500,
-      message: `${error}`
-    })
+function apiErrorHandler(error, req, res, next) {
+  // 這裡系統會統一將error視為物件
+
+  const DEFAULT_STATUS = 'error'
+  const errorCode = error.code
+
+  switch (error.code) {
+    case 400:
+    case 403:
+    case 500:
+      res.status(errorCode).json({
+        status: DEFAULT_STATUS,
+        message: error.message
+      })
+      break
   }
 
   next(error)
