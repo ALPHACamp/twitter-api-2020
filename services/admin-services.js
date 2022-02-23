@@ -1,6 +1,7 @@
-const { Tweet, User, Like, Reply } = require('../models')
+const { Tweet, User, Like, Reply, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const sequelize = require('sequelize')
 
 const adminServices = {
   signIn: async (req, cb) => {
@@ -22,7 +23,7 @@ const adminServices = {
       }
       if (result) {
         const payload = { id: user.id }
-        const token = jwt.sign(payload, process.env.JWT_SECRET)
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' })
         delete result.password
         return cb(null, { token, user: result })
       }
@@ -60,7 +61,31 @@ const adminServices = {
   },
   getUsers: async (req, cb) => {
     try {
-
+      const users = await User.findAll({
+        raw: true,
+        nest: true,   
+        attributes:{
+          include: [
+            'id',
+            'name',
+            'account',
+            'avatar',
+            'cover',
+            'role',
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"),'tweetNum'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeNum'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingNum'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerNum']
+          ]
+        },
+        group: ['User.id'],
+        order: [
+          [sequelize.literal('tweetNum'), 'DESC'],
+          ['id', 'ASC']
+        ]
+      })
+      const result = users.map(user => ({...user}))
+      return cb(null, result)
     } catch (err) {
       cb(err)
     }

@@ -45,7 +45,7 @@ const userServices = {
       }
       if (result) {
         const payload = { id: user.id }
-        const token = jwt.sign(payload, process.env.JWT_SECRET)
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' })
         delete result.password
         return cb(null, { token, user: result })
       }

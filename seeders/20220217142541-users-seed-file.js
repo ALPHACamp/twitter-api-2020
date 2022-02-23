@@ -1,7 +1,6 @@
 'use strict';
 const faker = require('faker')
-const bcrypt = require('bcrypt-nodejs')
-
+const bcrypt = require('bcryptjs')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

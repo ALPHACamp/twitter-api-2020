@@ -15,9 +15,9 @@ router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.post('/api/users', userController.signUp)
 router.post('/api/signin', userController.signIn)
 router.post('/api/admin/signin', adminController.signIn)
-router.get('/api/admin/tweets', authenticatedAdmin, adminController.getTweets)
-router.delete('/api/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
-router.get('/api/admin/users', authenticatedAdmin, adminController.getUsers)
+router.get('/api/admin/tweets', authenticated, adminController.getTweets)
+router.delete('/api/admin/tweets/:id', authenticated, adminController.deleteTweet)
+router.get('/api/admin/users', authenticated, adminController.getUsers)
 router.use('/', apiErrorHandler) //放最後一關檢查
 
 module.exports = router
