@@ -35,7 +35,6 @@ const userServices = {
         throw new Error('All fields are required!')
       }
       const user = await User.findOne({ where: { account } })
-      console.log(user);
       if (!user) {
         throw new Error('User not found!')
       } else if (!bcrypt.compareSync(password, user.password)) {
