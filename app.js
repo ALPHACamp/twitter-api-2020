@@ -18,9 +18,8 @@ app.use((req, res, next) => {
   next()
 })
 
-// use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
+  passport.authenticate('jwt', { session: false })
 };
 app.use('/api', apis)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
