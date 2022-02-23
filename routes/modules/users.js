@@ -1,11 +1,22 @@
 const express = require('express')
 const router = express.Router()
-const { authenticated, blockRole } = require('../../helpers/auth')
+const upload = require('../../helpers/multer')
 
 const userController = require('../../controllers/user-controllers')
 
-router.post('/login', userController.login)
-router.get('/:id', authenticated, blockRole('admin'), userController.getUser)
-router.post('/', userController.register)
+router.get('/:id', userController.getUser)
+router.put(
+  '/:id',
+  upload.fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'cover', maxCount: 1 }
+  ]),
+  userController.putUser
+)
+router.get('/:id/tweets', userController.getUserTweets)
+router.get('/:id/replied_tweets', userController.getUserRepliedTweet)
+router.get('/:id/likes', userController.getUserLikes)
+router.get('/:id/followings', userController.getUserFollowings)
+router.get('/:id/followers', userController.getUserFollowers)
 
 module.exports = router
