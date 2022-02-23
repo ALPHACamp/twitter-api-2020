@@ -18,6 +18,8 @@ function authenticated(req, res, next) {
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
+
+
 app.use('/api', apis)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
