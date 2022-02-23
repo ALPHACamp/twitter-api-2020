@@ -9,19 +9,15 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       email: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       password: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       name: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       account: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       avatar: {
@@ -36,11 +32,11 @@ module.exports = {
       role: {
         type: Sequelize.STRING
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
