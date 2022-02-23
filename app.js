@@ -1,8 +1,13 @@
 const express = require('express')
+const passport = require('./config/passport')
 const helpers = require('./_helpers');
 
 const app = express()
 const port = 3000
+
+
+// 初始化passport
+app.use(passport.initialize())
 
 // use helpers.getUser(req) to replace req.user
 function authenticated(req, res, next){
