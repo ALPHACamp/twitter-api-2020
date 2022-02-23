@@ -52,7 +52,7 @@ module.exports = {
       type: queryInterface.sequelize.QueryTypes.SELECT
     })).map(item => item.id)
 
-    // 更新資料庫上使用者所擁有的推文數
+    // 重置使用者的推文數
     seedUsers.forEach(async userId => {
       const queryStatement = `
           UPDATE Users SET tweet_count = 0
@@ -62,6 +62,7 @@ module.exports = {
       await queryInterface.sequelize.query(queryStatement)
     })
 
+    // 刪除Tweets所有紀錄
     await queryInterface.bulkDelete('Tweets', null)
 
   }
