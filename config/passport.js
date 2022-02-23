@@ -14,7 +14,6 @@ passport.use(new LocalStrategy(
   },
   async (account, password, cb) => {
     try {
-      console.log(account)
       const user = await User.find({ where: { account } })
       if (!user) throw new Error('Account or Password is wrong!')
       const res = await bcrypt.compare(password, user.password)
