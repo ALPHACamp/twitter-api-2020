@@ -8,6 +8,7 @@ const tweetServices = {
   getTweets: (req, cb) => {
     // 顯示使用者是否將該貼文加入最愛的並未完成，暫時用userLiked: true代替
     Tweet.findAll({
+      order: [['createdAt', 'DESC']],
       include: [User, Like, Reply]
     })
       .then(tweet => {
@@ -29,6 +30,14 @@ const tweetServices = {
           }))
         return cb(null, tweetData)
       })
+      .catch(err => cb(err, null))
+  },
+  postTweets: (req, cb) => {
+    Tweet.create({
+      description: req.body.description,
+      userId: req.user.dataValues.id
+    })
+      .then(() => cb(null, '成功建立推文'))
       .catch(err => cb(err, null))
   }
 }
