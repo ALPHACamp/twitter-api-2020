@@ -6,7 +6,7 @@ const userController = require('../../controllers/user-controller')
 
 router.post(
   '/signin',
-  passport.authenticate('local', { session: false, failWithError: true }),
+  passport.authenticate('local', { session: false }),
   userController.signin
 )
 
