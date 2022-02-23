@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     introduction: DataTypes.STRING,
     avatar: DataTypes.STRING,
     cover: DataTypes.STRING,
-    isAdmin: DataTypes.BOOLEAN
+    isAdmin: DataTypes.BOOLEAN,
+    role: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',
