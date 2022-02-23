@@ -57,6 +57,10 @@ const userController = {
       const user = await User.findOne({ where: { email } })
       if (user) throw new Error('Email already exists!')
 
+      // Check if account is used
+      const accountIsUsed = await User.findOne({ where: { account } })
+      if (accountIsUsed) throw new Error('Account is used.')
+
       // Create new user
       const hash = bcrypt.hashSync(password, 10)
       const newUser = await User.create({
@@ -70,12 +74,7 @@ const userController = {
       // Protect sensitive user info
       newUser.password = undefined
 
-      return res.json({
-        status: 'success',
-        data: {
-          newUser
-        }
-      })
+      return res.json({ newUser })
     } catch (error) {
       next(error)
     }
