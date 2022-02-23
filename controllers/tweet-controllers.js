@@ -83,6 +83,19 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  unlikeTweet: async(req, res, next) => {
+    const tweetId = req.params.id
+    const userId = req.user.id
+
+    try {
+      const unlike = await tweetServices.unlikeTweet(tweetId, userId)
+
+      return res.status(200).json(unlike)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 

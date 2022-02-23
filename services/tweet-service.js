@@ -24,6 +24,29 @@ const tweetServices = {
       status: 'success',
       message: "Add Tweet's like successfully"
     }
+  },
+
+  unlikeTweet: async (tweetId, userId) => {
+    const unlike = await Like.findOne({
+      where: { TweetId: tweetId, UserId: userId }
+    })
+    if (!unlike) throw new Error("You haven't like this tweet!")
+
+    await unlike.destroy()
+
+    Promise.all([
+      User.findByPk(userId),
+      Tweet.findByPk(tweetId)
+    ]).then(([user, tweet]) => {
+      user.decrement('likedCount')
+      tweet.decrement('likedCount')
+    })
+
+    return {
+      unlike,
+      status: 'success',
+      message: "Remove Tweet's like successfully"
+    }
   }
 }
 
