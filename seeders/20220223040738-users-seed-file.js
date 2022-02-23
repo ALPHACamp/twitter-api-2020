@@ -17,7 +17,6 @@ module.exports = {
         account: 'root',
         email: 'root@example.com',
         password: await bcrypt.hash('12345678', 10),
-        // password: '12345',
         name: 'root',
         role: 'admin',
         createdAt: new Date(),
@@ -27,9 +26,9 @@ module.exports = {
       const users = await Promise.all(Array.from({length: 5}).map(async (_, i) => ({
         account: `user${i+1}`,
         email: `user${i+1}@example.com`,
-         password: await bcrypt.hash('12345678', 10),
-        //password: '12345',
+        password: await bcrypt.hash('12345678', 10),
         name: `user${i+1}`,
+        role: 'user',
         createdAt: new Date(),
         updatedAt: new Date()
       }))
