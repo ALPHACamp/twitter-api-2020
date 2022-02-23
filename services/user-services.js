@@ -69,6 +69,7 @@ const userServices = {
         if (!user) throw new Error('資料庫內沒有相關資料')
         const data = {
           id: user.id,
+          email: user.email,
           account: user.account,
           name: user.name,
           cover: user.cover,
