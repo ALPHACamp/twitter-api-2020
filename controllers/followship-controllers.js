@@ -3,7 +3,7 @@ const followshipServices = require('../services/followship-service')
 const followshipController = {
   addFollowing: async (req, res, next) => {
     const followerId = Number(req.user.id)
-    const followingId = Number(req.body.id)
+    const followingId = Number(req.body.followingId)
 
     try {
       const data = await followshipServices.addFollowing(followerId, followingId)

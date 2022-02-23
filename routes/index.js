@@ -17,6 +17,7 @@ router.post('/users/', userController.register)
 router.use('/admin', authenticated, blockRole('user'), admin)
 router.use('/users', authenticated, blockRole('admin'), users)
 router.use('/tweets', authenticated, blockRole('admin'), tweets)
+
 router.use('/followships', authenticated, blockRole('admin'), followships)
 
 // fallback route for 404 not found (temporary)
