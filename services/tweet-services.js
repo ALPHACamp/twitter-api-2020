@@ -63,6 +63,33 @@ const tweetServices = {
     } catch (err) {
       cb(err)
     }
-  }
+  },
+  getTweet: async (req, cb) => {
+    try {
+      const userId = helper.getUser(req).id
+      // 找出單一tweet 包含其發文者 喜歡及回覆資訊 回覆依照新到舊排序
+      const tweetData = await Tweet.findByPk(req.params.tweetId, {
+        include: [
+          { model: Like, attributes: ['id', 'UserId', 'createdAt'] },
+          { model: Reply, include: { model: User, attributes: ['account', 'name', 'avatar'] } },
+          { model: User, attributes: ['account', 'name', 'avatar'] }
+        ],
+        order: [[Reply, 'createdAt', 'DESC']]
+      })
+      // 列出此tweet所有likes的userId
+      const likedUsersId = tweetData.toJSON().Likes.map(data =>
+        data.UserId
+      )
+      const tweet = {
+        ...tweetData.toJSON(),
+        likeCount: tweetData.Likes.length,
+        replyCount: tweetData.Likes.length,
+        isLiked: likedUsersId.includes(userId)
+      }
+      return cb(null, tweet)
+    } catch (err) {
+      cb(err)
+    }
+  },
 }
 module.exports = tweetServices
