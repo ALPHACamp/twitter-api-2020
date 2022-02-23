@@ -90,6 +90,6 @@ const tweetServices = {
     } catch (err) {
       cb(err)
     }
-  },
+  }
 }
 module.exports = tweetServices
