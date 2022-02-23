@@ -10,6 +10,7 @@ const { authenticated, authenticatedUser } = require('../middleware/api-auth')
 router.get('/', (req, res) => {
   res.send('Hello World!')
 })
+router.get('/api/tweets/:tweetId', authenticated, tweetController.getTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.post('/api/users', userController.signUp)
