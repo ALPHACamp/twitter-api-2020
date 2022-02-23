@@ -145,6 +145,34 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUserLikes: async (req, cb) => {
+    try {
+      const data = await Like.findAll({
+        where: { userId: req.params.id },
+        include: [
+          {
+            model: Tweet, include: [
+              { model: User, attributes: ['account', 'name', 'avatar'] },
+              { model: Reply, attributes: [] },
+              { model: Like, attributes: [] }
+            ]
+          },
+          { model: User, attributes: [] }
+        ],
+        attributes: [
+          ['id', 'likeId'],
+          [sequelize.col('User.id'), 'userId'],
+          'createdAt'
+        ],
+        order: [['createdAt', 'DESC']],
+        row: true,
+        nest: true
+      })
+      return cb(null, data)
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 module.exports = userServices
