@@ -85,6 +85,47 @@ const tweetServices = {
         like.destroy().then(() => cb(null, '成功將推文從最愛中移除'))
       })
       .catch(err => cb(err, null))
+  },
+  addReply: (req, cb) => {
+    Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (tweet === null) throw new Error('輸入錯誤的tweetId，沒有此推文')
+        Reply.create({
+          userId: req.user.dataValues.id,
+          tweetId: req.params.id,
+          comment: req.body.comment
+        })
+          .then(() => cb(null, '新增留言成功'))
+          .catch(err => cb(err, null))
+      })
+      .catch(err => cb(err, null))
+  },
+  getReplies: (req, cb) => {
+    Reply.findAll({
+      where: { tweetId: req.params.id },
+      order: [['createdAt', 'DESC']],
+      include: [User, { model: Tweet, include: [User] }]
+    })
+      .then(reply => {
+        if (reply.length === 0) throw new Error('此推文沒有任何回覆')
+        const replyData = reply.map(i => i.get({ plain: true }))
+          .map(i => ({
+            id: i.id,
+            comment: i.comment,
+            replyerData: {
+              id: i.User.id,
+              account: i.User.account,
+              name: i.User.name,
+              avatar: i.User.avatar
+            },
+            TweetId: i.TweetId,
+            tweetOwerId: i.Tweet.User.id,
+            tweetOwerAccount: i.Tweet.User.account,
+            createAt: i.createAt
+          }))
+        return cb(null, replyData)
+      })
+      .catch(err => cb(err, null))
   }
 }
 
