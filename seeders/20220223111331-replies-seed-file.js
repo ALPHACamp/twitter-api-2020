@@ -17,7 +17,7 @@ module.exports = {
       return Array.from({ length: REPLY_AMOUNT }, () => ({
         UserId: users[Math.floor(Math.random() * users.length)].id,
         TweetId: tweet.id,
-        comment: faker.lorem.text(),
+        comment: faker.lorem.text().slice(0, 130),
         createdAt: new Date(),
         updatedAt: new Date()
       }))

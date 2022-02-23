@@ -1,6 +1,9 @@
 'use strict'
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
+const PASSWORD = '12345678'
+const AVATAR = 'https://i.imgur.com/zYddUs8.png'
+const COVER = 'https://i.imgur.com/dfpDjBN.jpg'
 const USER_AMOUNT = 5
 
 module.exports = {
@@ -9,10 +12,10 @@ module.exports = {
       account: 'root',
       name: 'root',
       email: 'root@example.com',
-      password: await bcrypt.hash('12345678', 10),
-      introduction: faker.lorem.text(),
-      avatar: 'https://i.imgur.com/zYddUs8.png',
-      cover: 'https://i.imgur.com/dfpDjBN.jpg',
+      password: await bcrypt.hash(PASSWORD, 10),
+      introduction: faker.lorem.text().slice(0, 150),
+      avatar: AVATAR,
+      cover: COVER,
       role: 'admin',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -21,10 +24,10 @@ module.exports = {
       account: `user${i + 1}`,
       name: `user${i + 1}`,
       email: `user${i + 1}@example.com`,
-      password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10)),
-      introduction: faker.lorem.text(),
-      avatar: 'https://i.imgur.com/zYddUs8.png',
-      cover: 'https://i.imgur.com/dfpDjBN.jpg',
+      password: bcrypt.hashSync(PASSWORD, 10),
+      introduction: faker.lorem.text().slice(0, 150),
+      avatar: AVATAR,
+      cover: COVER,
       role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()

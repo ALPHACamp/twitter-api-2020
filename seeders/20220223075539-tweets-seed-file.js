@@ -13,7 +13,7 @@ module.exports = {
       users.flatMap(user => {
         return Array.from({ length: TWEET_AMOUNT }, () => ({
           UserId: user.id,
-          description: faker.lorem.text(),
+          description: faker.lorem.text().slice(0, 130),
           createdAt: new Date(),
           updatedAt: new Date()
         }))
