@@ -7,6 +7,7 @@ const userController = {
   signUp: async (req, res, next) => {
     const { account, name, email, password, confirmPassword } = req.body
     try {
+      if (!account || !email || !password || !confirmPassword) throw new Error('account, email, password, confirmPassword is require!')
       if (password !== confirmPassword) throw new Error('Password do not match!')
       const userAccountExisted = await User.findOne({ where: { account } })
       if (userAccountExisted) throw new Error('Account already exists!')
