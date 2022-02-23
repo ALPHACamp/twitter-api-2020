@@ -3,8 +3,13 @@ const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
 // 驗證目前登入者是否合法
-const authenticated = passport.authenticate('jwt', { session: false })
+const authenticated = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
 
+    next()
+  })(req, res, next)
+}
 // 驗證目前登入者是否為管理員
 /**
  * 
