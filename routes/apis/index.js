@@ -4,6 +4,6 @@ const router = express.Router()
 const admin = require('./modules/admin')
 
 router.use('/admin', admin)
-router.use('/')
+// router.use('/')
 
 module.exports = router
