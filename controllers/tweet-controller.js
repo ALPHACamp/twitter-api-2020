@@ -37,5 +37,21 @@ module.exports = {
       return res.status(200).json([...responseData])
 
     } catch (err) { next(err) }
+  },
+
+  postTweet: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const description = req.body.description?.trim() || null
+
+      if (!description) throw new Error('推文不能為空!')
+
+      // create tweet, and then find full tweet data from database
+      let tweet = await Tweet.create({ description, UserId: userId })
+      tweet = await Tweet.findByPk(tweet.id, { raw: true })
+
+      return res.status(200).json({ ...tweet })
+
+    } catch (err) { next(err) }
   }
 }
