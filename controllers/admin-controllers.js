@@ -32,7 +32,7 @@ const adminController = {
       nest: true,
     })
       .then((users) => {
-        return res.json({ status: "success", users });
+        return res.json(users);
       })
       .catch((err) => next(err));
   },
