@@ -16,10 +16,6 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
-    },
-    updatedAt: {
-      allowNull: false,
-      type: DataTypes.DATE
     }
   }, {
     modelName: 'Like',
