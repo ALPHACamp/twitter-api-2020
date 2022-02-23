@@ -14,11 +14,11 @@ passport.use(new LocalStrategy({
   try {
     const user = await User.findOne({ where: { account } })
     // if user is not found, then return false
-    if (!user) return cb(null, false)
+    if (!user) throw new Error('帳號不存在！')
 
     const isMatched = await bcrypt.compare(password, user.password)
     // if password is not matched, then return false
-    if (!isMatched) return cb(null, false)
+    if (!isMatched) throw new Error('帳號不存在！')
 
     // if both account and password checks all passed
     // then return user

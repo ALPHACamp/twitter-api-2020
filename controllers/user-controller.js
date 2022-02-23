@@ -11,10 +11,10 @@ module.exports = {
 
       switch (true) {
         case (req.originalUrl === '/api/signin' && userData.role !== 'user'):
-          throw new Error('使用者不存在!')
+          throw new Error('帳號不存在！')
         
         case (req.originalUrl === '/api/admin/signin' && userData.role !== 'admin'):
-          throw new Error('使用者不存在!')
+          throw new Error('帳號不存在！')
 
         default:
           delete userData.password

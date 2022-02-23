@@ -11,7 +11,7 @@ router.use('/api/admin', admin)
 router.use('/api/users', user)
 router.post(
   '/api/signin', 
-  passport.authenticate('local', { session: false, failWithError: true }),
+  passport.authenticate('local', { session: false }),
   userController.signin
 )
 
