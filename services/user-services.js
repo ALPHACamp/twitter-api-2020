@@ -82,15 +82,28 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUserTweet: (req, cb) => {
-    return Tweet.findAll({
-      where: { userId: req.params.id },
-      include: [Reply, Like],
-      order: [['createdAt', 'DESC']]
-    })
-      .then(tweets => {
+    const { id } = req.params
+    return Promise.all([
+      Tweet.findAll({
+        where: { userId: id },
+        include: [Reply, Like],
+        order: [['createdAt', 'DESC']]
+      }),
+      User.findByPk(id, {
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([tweets, user]) => {
         if (!tweets) throw new Error('資料庫內沒有相關資料')
         const data = tweets.map(t => ({
           id: t.dataValues.id,
+          userData: {
+            id: user.id,
+            account: user.account,
+            name: user.name,
+            avatar: user.avatar
+          },
           description: t.dataValues.description,
           replyAmount: t.Replies.length,
           likeAmount: t.Likes.length,
