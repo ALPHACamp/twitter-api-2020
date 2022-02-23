@@ -16,6 +16,9 @@ const userController = {
   },
   getUserTweet: (req, res, next) => {
     userServices.getUserTweet(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getUserReply: (req, res, next) => {
+    userServices.getUserReply(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 

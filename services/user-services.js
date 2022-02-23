@@ -87,14 +87,45 @@ const userServices = {
       include: [Reply, Like],
       order: [['createdAt', 'DESC']]
     })
-      .then(tweet => {
-        if (!tweet) throw new Error('資料庫內沒有相關資料')
-        const data = tweet.map(t => ({
+      .then(tweets => {
+        if (!tweets) throw new Error('資料庫內沒有相關資料')
+        const data = tweets.map(t => ({
           id: t.dataValues.id,
           description: t.dataValues.description,
           replyAmount: t.Replies.length,
           likeAmount: t.Likes.length,
           createdAt: t.dataValues.createdAt
+        }))
+        return cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
+  getUserReply: (req, cb) => {
+    return Reply.findAll({
+      where: { userId: req.params.id },
+      include: [
+        { model: User },
+        { model: Tweet, include: User }
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(replies => {
+        if (!replies.length) throw new Error('資料庫內沒有相關資料')
+        const data = replies.map(r => ({
+          id: r.id,
+          comment: r.comment,
+          replierData: {
+            id: r.User.id,
+            account: r.User.account,
+            name: r.User.name,
+            avatar: r.User.avatar
+          },
+          tweetId: r.tweetId,
+          tweetOwnerId: r.Tweet.userId,
+          tweetOwnerAccount: r.Tweet.User.account,
+          createdAt: r.createdAt
         }))
         return cb(null, data)
       })
