@@ -5,10 +5,10 @@ const TOKEN_EXPIRES = process.env.TOKEN_EXPIRES || '30m'
 
 const userController = {
   signUp: async (req, res, next) => {
-    const { account, name, email, password, confirmPassword } = req.body
+    const { account, name, email, password, checkPassword } = req.body
     try {
-      if (!account || !email || !password || !confirmPassword) throw new Error('account, email, password, confirmPassword is require!')
-      if (password !== confirmPassword) throw new Error('Password do not match!')
+      if (!account || !email || !password || !checkPassword) throw new Error('account, email, password, checkPassword is require!')
+      if (password !== checkPassword) throw new Error('Password do not match!')
       const userAccountExisted = await User.findOne({ where: { account } })
       if (userAccountExisted) throw new Error('Account already exists!')
       const userEmailExisted = await User.findOne({ where: { email } })
@@ -29,23 +29,26 @@ const userController = {
         }
       })
     } catch (err) {
-      console.log(err)
       next(err)
     }
   },
-  signIn: (req, res) => {
+  signIn: (req, res, next) => {
     const userData = req.user.toJSON()
-    // 管理者身分不能登入前台
-    if (userData.role === 'admin') throw new Error('Account or Password is wrong!')
-    delete userData.password
-    const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: TOKEN_EXPIRES })
-    res.json({
-      status: 'success',
-      data: {
-        token,
-        user: userData
-      }
-    })
+    try {
+      // 非使用者不能登入前台
+      if (userData.role !== 'user') throw new Error('Account or Password is wrong!')
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: TOKEN_EXPIRES })
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
