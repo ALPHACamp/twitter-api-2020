@@ -11,18 +11,46 @@ const userController = {
             if (email) return res.json({ status: 'error', message: 'email already existed' })
             if (account) return res.json({ status: 'error', message: 'account already existed' })
             return bcrypt.hash(req.body.password, 10)
-                .then(hash => 
+                .then(hash =>
                     User.create({
-                    name: req.body.name,
-                    account: req.body.account,
-                    email: req.body.email,
-                    password: hash,
-                    isAdmin: false
-                }))
-                .then(() => {{
-                    res.json({ status: 'success'})
-                }})
+                        name: req.body.name,
+                        account: req.body.account,
+                        email: req.body.email,
+                        password: hash,
+                        isAdmin: false
+                    }))
+                .then(() => {
+                    {
+                        res.json({ status: 'success' })
+                    }
+                })
         } catch (err) { next(err) }
+    },
+    getUser: async (req, res, next) => {
+        try {
+            const targetUser = await User.findByPk(req.params.id, {
+                include: [
+                    { model: User, as: 'Followings' },
+                ]
+            })
+            if (!targetUser) {
+                return res.json({ status: 'error', message: "User didn't exist!" })
+            }
+            const { account, name, email, introduction, avatar, cover } = targetUser
+            const isFollowed = targetUser.Followings.some(f => f.id === req.user.id)
+            return res.json({ 
+                account,
+                name,
+                email,
+                introduction,
+                avatar,
+                cover,
+                isFollowed
+            })
+
+        } catch (err) {
+            next(err)
+        }
     }
 }
 
