@@ -4,7 +4,9 @@ const tweetController = {
     getTweets: async (req, cb) => {
         try{
             const tweets = await Tweet.findAll({
-                include: User
+                include: User,
+                raw: true,
+                nest: true
             })
             return cb(null, tweets)
         }catch(err){
