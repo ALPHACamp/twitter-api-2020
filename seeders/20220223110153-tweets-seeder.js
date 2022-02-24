@@ -35,7 +35,7 @@ module.exports = {
     seedUsers.forEach(async userId => {
       const seederArray = Array.from({ length: DEFAULT_TWEET_NUMBER }, () => {
         return {
-          userId: userId,
+          UserId: userId,
           description: faker.lorem.text().substring(0, 140),
           createdAt: new Date(),
           updatedAt: new Date()

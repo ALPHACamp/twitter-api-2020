@@ -46,8 +46,8 @@ module.exports = {
 
       result.forEach(userId => {
         seederArray.push({
-          tweetId: tweetId,
-          userId: userId,
+          TweetId: tweetId,
+          UserId: userId,
           comment: faker.lorem.text().substring(0, 140),
           createdAt: new Date(),
           updatedAt: new Date()
