@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     role: {
       type: DataTypes.STRING
     },
-    like_count: {
+    likeCount: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     },
