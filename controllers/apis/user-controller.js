@@ -8,6 +8,9 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     userServices.getUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getTweets: async (req, res, next) => {
+    userServices.getTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = userController

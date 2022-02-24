@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userController = {
@@ -61,9 +61,29 @@ const userController = {
         account: user.account,
         email: user.email
       }
-      return cb(null, userData )
+      return cb(null, userData)
     } catch (err) {
       cb(err)
+    }
+  },
+  getTweets: async (req, cb) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        raw: true,
+        nest: true,
+        include: [
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const tweets = await Tweet.findAll({
+        where: { UserId: user.id },
+        attributes: ['id', 'UserId', 'description', 'createdAt', 'updatedAt'],
+        raw: true,
+        nest: true
+      })
+      return cb(null, tweets)
+    } catch (err) {
+      return cb(err)
     }
   }
 }

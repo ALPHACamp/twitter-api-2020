@@ -6,5 +6,6 @@ const userController = require('../../../controllers/apis/user-controller')
 
 router.post('/', userController.signUp)
 router.get('/:id', authenticated, userController.getUser)
+router.get('/:id/tweets', authenticated, userController.getTweets)
 
 module.exports = router
