@@ -101,6 +101,10 @@ const userController = {
   },
   userFollowings: async (req, res, next) => {
     try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.json({ status: 'error', message: "User didn't exist!" })
+      }
       const targetUser = await User.findByPk(req.params.id,
         {
           include: [{ model: User, as: 'Followings' }]
@@ -132,6 +136,9 @@ const userController = {
         {
           include: [{ model: User, as: 'Followers' }]
         })
+      if (!user) {
+        return res.json({ status: 'error', message: "User didn't exist!" })
+      }
       const userFollowers = user.Followers.map(follower => {
         return {
           followerId: follower.id,
@@ -154,6 +161,10 @@ const userController = {
   },
   getReliedTweets: async (req, res, next) => {
     try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.json({ status: 'error', message: "User didn't exist!" })
+      }
       const replies = await Reply.findAll({
         where: { UserId: req.params.id },
         order: [['createdAt', 'DESC']],
@@ -173,6 +184,40 @@ const userController = {
           tweetUserName: repliedTweet.name,
           avatar: repliedTweet.avatar,
           liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === repliedTweet.id) : false
+        }
+      })
+      return res.json(result)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getLikes: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res.json({ status: 'error', message: "User didn't exist!" })
+      }
+      const likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        order: [['createdAt', 'DESC']],
+        include: [{ model: Tweet, include: [User, Like, Reply] }]
+      })
+      if (likes.length === 0) {
+        return res.json({ status: 'error', message: 'No liked tweets!' })
+      }
+
+      const result = likes.map(like => {
+        const tweet = like.Tweet
+        return {
+          TweetId: tweet.id,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          tweetUserId: tweet.id,
+          tweetUserName: tweet.name,
+          avatar: tweet.avatar,
+          repliedCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === like.Tweet.id) : false
         }
       })
       return res.json(result)
