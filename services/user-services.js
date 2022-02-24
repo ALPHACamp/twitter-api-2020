@@ -144,6 +144,54 @@ const userServices = {
     } catch (err) {
       cb(err)
     }
+  },
+  getUserLikes: async (req, cb) => {
+    try {
+      // 找出目標使用者的所有like 包含tweet及相關資訊並依喜歡由新到舊排序
+      const likeData = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          {
+            model: Tweet, include: [
+              { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+              { model: Reply, attributes: ['id'] },
+              { model: Like, attributes: ['id', 'UserId'] }
+            ]
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+        row: true,
+        nest: true
+      })
+      const results = likeData.map((like) => {
+        const userId = helper.getUser(req).id
+        // 列出此tweet所有likes的userId
+        const likedUsersId = like.Tweet.Likes.map(data =>
+          data.UserId
+        )
+        // tweet層的資訊
+        const tweet = {
+          id: like.Tweet.id,
+          description: like.Tweet.description,
+          createdAt: like.Tweet.createdAt,
+          replyCount: like.Tweet.Replies.length,
+          likeCount: like.Tweet.Likes.length,
+          User: like.Tweet.User,
+          isLiked: likedUsersId.includes(userId)
+        }
+        //外層資訊
+        const result = {
+          id: like.id,
+          createdAt: like.createdAt,
+          TweetId: like.Tweet.id, // 應測試需求
+          tweet
+        }
+        return result
+      })
+      return cb(null, results)
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 module.exports = userServices

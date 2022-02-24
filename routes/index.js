@@ -20,6 +20,7 @@ router.post('/api/tweets/:tweetId/unlike', authenticated, likeController.unlikeT
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
 router.get('/api/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/api/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/api/users/:id', authenticated, userController.getUser)
 router.post('/api/users', userController.signUp)
