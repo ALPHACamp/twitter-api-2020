@@ -92,9 +92,62 @@ const userController = {
                     isFollowing: req.user.Followings.some(f => f.id === user.id)
                 }))
                 .sort((a, b) => b.followerCount - a.followerCount)
-                // .slice(0, 10)
+                .slice(0, 10)
             
             return res.json(result)
+        } catch (err) {
+            next(err)
+        }
+    },
+    userFollowings: async (req, res, next) => {
+        try {
+            const targetUser = await User.findByPk(req.params.id,
+                {
+                    include: [{ model: User, as: 'Followings' }]
+                })
+            
+            const userFollowings = targetUser.Followings.map(following => {
+                return {
+                    followingId: following.id,
+                    account: following.name,
+                    description: following.description,
+                    avatar: following.avatar,
+                    createdAt: following.createdAt,
+                    isFollowing: req.user.Followings.some(f => f.id === following.id)
+                }
+            })
+                .sort((a, b) => b.createdAt - a.createdAt)
+            
+            if (userFollowings.length === 0) {
+                return res.json({ status: 'error', message: "No followings!" })
+            }
+            return res.json(userFollowings)
+        } catch (err) {
+            next(err)
+        }
+    },
+    userFollowers: async (req, res, next) => {
+        try {
+            const user = await User.findByPk(req.params.id,
+                {
+                    include: [{ model: User, as: 'Followers' }]
+                })
+            const userFollowers = user.Followers.map(follower => {
+                return {
+                    followerId: follower.id,
+                    account: follower.name,
+                    description: follower.description,
+                    avatar: follower.avatar,
+                    createdAt: follower.createdAt,
+                    isFollowing: req.user.Followings.some(f => f.id === follower.id)
+                }
+            })
+                .sort((a, b) => b.createdAt - a.createdAt)
+            
+            if (userFollowers.length === 0) {
+                return res.json({ status: 'error', message: "No followers!" })
+            }
+            return res.json(userFollowers)
         } catch (err) {
             next(err)
         }

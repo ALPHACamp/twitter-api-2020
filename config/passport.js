@@ -43,7 +43,7 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
     ]
   })
     .then(user => {
-      cb(null, user)
+      cb(null, user.toJSON())
     })
     .catch(err => cb(err))
 }))

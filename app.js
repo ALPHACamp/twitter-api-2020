@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const passport = require('./config/passport')
 const session = require('express-session')
+const helpers = require('./_helpers')
 
 const { apis } = require('./routes')
 const cors = require('cors')
@@ -19,10 +20,9 @@ app.use(cors())
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
-app.use(passport.session())
 
 app.use((req, res, next) => {
-  res.locals.user = getUser(req)
+  req.user = helpers.getUser(req)
   next()
 })
 

@@ -16,6 +16,8 @@ router.post('/users/signin',passport.authenticate('local', { session: false }), 
 router.post('/admin/login',passport.authenticate('local', { session: false }), adminController.login)
 
 router.get('/users/top', authenticated, userController.getTopUsers)
+router.get('/users/:id/followings', authenticated, userController.userFollowings)
+router.get('/users/:id/followers', authenticated, userController.userFollowers)
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
