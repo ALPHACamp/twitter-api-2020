@@ -17,5 +17,6 @@ const userController = require('../../controllers/user-controller')
 router.post('/login', userController.login)
 router.post('/users', userController.postUsers)
 router.use('/followships', authenticated, followshipRouter)
+
 router.use(apiErrorHandler)
 module.exports = router
