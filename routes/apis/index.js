@@ -5,7 +5,6 @@ const admin = require('./modules/admin')
 const user = require('./modules/user')
 const userController = require('../../controllers/apis/user-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
-const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 
 router.use('/admin', admin)
 router.use('/users', user)

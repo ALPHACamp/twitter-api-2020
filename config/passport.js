@@ -13,10 +13,10 @@ passport.use(new LocalStrategy(
     passReqToCallback: true
   },
   (req, account, password, cb) => {
-    User.findOne({ where: { account } })
+    return User.findOne({ where: { account } })
       .then(user => {
         if (!user) return cb(null, false)
-        bcrypt.compare(password, user.password).then(res => {
+        return bcrypt.compare(password, user.password).then(res => {
           if (!res) return cb(null, false)
           return cb(null, user)
         })
@@ -30,14 +30,18 @@ const jwtOptions = {
 }
 
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
+  return User.findByPk(jwtPayload.id, {
     include: [
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
   })
-    .then(user => cb(null, user))
-    .catch(err => cb(err))
+    .then(user => {
+      return cb(null, user)
+    })
+    .catch(err => {
+      return cb(err)
+    })
 }))
 
 module.exports = passport

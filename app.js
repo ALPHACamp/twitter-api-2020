@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const passport = require('./config/passport')
-const helpers = require('./_helpers');
+const helpers = require('./_helpers')
 const { apis } = require('./routes')
 
 const app = express()
@@ -18,9 +18,6 @@ app.use((req, res, next) => {
   next()
 })
 
-function authenticated(req, res, next){
-  passport.authenticate('jwt', { session: false })
-};
 app.use('/api', apis)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
