@@ -29,10 +29,10 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
-      const liked = await Like.findOne({ where: { UserId, TweetId } })
+      const unliked = await Like.findOne({ where: { UserId, TweetId } })
 
       if (!tweet) throw new Error("Tweet didn't exist!")
-      if (!liked) throw new Error("You haven't Liked this tweet")
+      if (!unliked) throw new Error("You haven't Liked this tweet")
 
       await liked.destroy()
       return res.json({
