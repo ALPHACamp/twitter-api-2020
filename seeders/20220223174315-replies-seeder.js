@@ -46,11 +46,11 @@ module.exports = {
 
       result.forEach(userId => {
         seederArray.push({
-          tweet_id: tweetId,
-          user_id: userId,
+          tweetId: tweetId,
+          userId: userId,
           comment: faker.lorem.text().substring(0, 140),
-          created_at: new Date(),
-          updated_at: new Date()
+          createdAt: new Date(),
+          updatedAt: new Date()
         })
       })
 
@@ -59,7 +59,7 @@ module.exports = {
     // 更新資料庫上推文所擁有的留言數
     await Promise.all(seedTweets.map(tweetId => queryInterface.sequelize.query(
       `
-          UPDATE Tweets SET reply_count = 3
+          UPDATE Tweets SET replyCount = 3
           WHERE id = ${tweetId}
       `
     )))
@@ -84,7 +84,7 @@ module.exports = {
     // 重設每個推文的留言數為0
     seedTweets.forEach(async tweetId => {
       const queryStatement = `
-          UPDATE Tweets SET reply_count = 0
+          UPDATE Tweets SET replyCount = 0
           WHERE id = ${tweetId}
       `
 

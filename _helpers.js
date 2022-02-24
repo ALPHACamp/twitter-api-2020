@@ -9,9 +9,6 @@ function getUser(req) {
   return req.user
 }
 
-function we(){
-  
-}
 
 /**
  * 
@@ -20,9 +17,10 @@ function we(){
  */
 
 function getUserId(req) {
-  return getUser(req).id
+  return getUser(req)?.id
 }
 
 module.exports = {
   getUser,
+  getUserId
 };

@@ -15,7 +15,7 @@ module.exports = {
     // 更新資料庫上使用者所擁有的推文數
     await Promise.all(seedUsers.map(userId => queryInterface.sequelize.query(
       `
-          UPDATE Users SET tweet_count = 10
+          UPDATE Users SET tweetCount = 10
           WHERE id = ${userId}
       `
     )))
@@ -25,10 +25,10 @@ module.exports = {
     seedUsers.forEach(async userId => {
       const seederArray = Array.from({ length: DEFAULT_TWEET_NUMBER }, () => {
         return {
-          user_id: userId,
+          userId: userId,
           description: faker.lorem.text().substring(0, 140),
-          created_at: new Date(),
-          updated_at: new Date()
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       })
       await queryInterface.bulkInsert('Tweets', seederArray)
@@ -55,7 +55,7 @@ module.exports = {
     // 重置使用者的推文數
     seedUsers.forEach(async userId => {
       const queryStatement = `
-          UPDATE Users SET tweet_count = 0
+          UPDATE Users SET tweetCount = 0
           WHERE id = ${userId}
       `
 

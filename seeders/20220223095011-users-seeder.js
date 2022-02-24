@@ -30,12 +30,12 @@ module.exports = {
       cover: `https://loremflickr.com/720/240?lock=${(Math.random() * 100) + 1}`,
       role: "admin",
       introduction: faker.lorem.text().substring(0, 160),
-      tweet_count: 0,
-      like_count: 0,
-      follower_count: 0,
-      following_count: 0,
-      created_at: new Date(),
-      updated_at: new Date()
+      tweetCount: 0,
+      likeCount: 0,
+      followerCount: 0,
+      followingCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
     })
 
     // add a set of users
@@ -50,12 +50,12 @@ module.exports = {
         cover: `https://loremflickr.com/720/240?lock=${(Math.random() * 100) + 1}`,
         role: "user",
         introduction: faker.lorem.text().substring(0, 160),
-        tweet_count: 0,
-        like_count: 0,
-        follower_count: 0,
-        following_count: 0,
-        created_at: new Date(),
-        updated_at: new Date()
+        tweetCount: 0,
+        likeCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     })
 

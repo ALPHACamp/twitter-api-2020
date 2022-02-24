@@ -30,7 +30,24 @@ module.exports = (sequelize, DataTypes) => {
     },
     role: {
       type: DataTypes.STRING
+    },
+    like_count: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    tweetCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    followingCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    followerCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
+
   }, {
     modelName: 'User',
     tableName: 'Users',
