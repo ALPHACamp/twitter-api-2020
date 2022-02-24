@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../_helpers')
+const sequelize = require('sequelize')
 
 const userService = {
   signIn: (req, cb) => {
@@ -130,6 +131,42 @@ const userService = {
         })
       })
       .then(user => cb(null, user))
+      .catch(err => cb(err))
+  },
+  getUserTweets: (req, cb) => {
+    const getUserId = Number(req.params.id)
+    return Tweet.findAll({
+      where: { UserId: getUserId },
+      attributes: [
+        [ 'id', 'tweetId' ],
+        'createdAt',
+        'description',
+        'image',
+        [
+        sequelize.literal(
+          '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+        ),
+        'LikesCount'
+        ],
+        [
+          sequelize.literal(
+            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+          ),
+          'RepliesCount'
+        ]
+      ],
+      include: [
+        { model: User, attributes: [ 'id', 'name', 'account', 'avatar' ]}
+      ],
+      order: [['createdAt', 'DESC']],
+      group: 'tweetId',
+      nest: true,
+      raw: true
+    })
+      .then(tweets => {
+        if (!tweets) throw new Error('User not exits!')
+        return cb(null, tweets)
+      })
       .catch(err => cb(err))
   }
 }
