@@ -4,5 +4,9 @@ const followshipController = {
     followshipServices.postFollowships(req, (err, data) =>
       err ? next(err) : res.status(200).json({ status: 'success', data }))
   },
+  deleteFollowships: (req, res, next) => {
+    followshipServices.deleteFollowships(req, (err, data) =>
+      err ? next(err) : res.status(200).json({ status: 'success', data }))
+  }
 }
 module.exports = followshipController

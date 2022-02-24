@@ -25,5 +25,24 @@ const followServices = {
       cb(err)
     }
   },
+  deleteFollowships: async (req, cb) => {
+    try {
+      const userId = helper.getUser(req).id
+      const deletedFollowship = await Followship.findOne({
+        where: {
+          followerId: userId,
+          followingId: req.params.id
+        },
+        include: [
+          { model: User, as: 'Followers', attributes: ['account', 'name'] },
+        ],
+      })
+      if (!deletedFollowship) throw new Error(`尚未追蹤此用戶`)
+      await deletedFollowship.destroy()
+      return cb(null, deletedFollowship)
+    } catch (err) {
+      cb(err)
+    }
+  },
 }
 module.exports = followServices
