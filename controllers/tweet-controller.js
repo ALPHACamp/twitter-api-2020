@@ -15,7 +15,9 @@ module.exports = {
         nest: true
       })
 
-      // reassemble tweet array
+      if (!tweets.length) throw new Error('沒有任何推文!')
+
+      // reassemble tweets array
       const responseData = tweets.map(tweet => {
         tweet = tweet.toJSON()
 
@@ -34,7 +36,7 @@ module.exports = {
         }
       })
 
-      return res.status(200).json([...responseData])
+      return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
   },
@@ -54,7 +56,6 @@ module.exports = {
 
       if (!tweet) throw new Error('沒有這則推文!')
 
-      // reassemble tweet array
       tweet = tweet.toJSON()
 
       // assign following two objects to temp constants
@@ -65,13 +66,14 @@ module.exports = {
       delete tweet.User
       delete tweet.UsersFromLikedTweets
 
+      // reassemble tweet object
       const responseData = {
         ...tweet,
         isLiked: usersFromLikedTweets.some(u => u.id === userId),
         tweetedUser
       }
 
-      return res.status(200).json({ ...responseData })
+      return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
   },
@@ -84,10 +86,10 @@ module.exports = {
       if (!description) throw new Error('推文不能為空!')
 
       // create tweet, and then find full tweet data from database
-      let tweet = await Tweet.create({ description, UserId: userId })
-      tweet = await Tweet.findByPk(tweet.id, { raw: true })
+      const tweet = await Tweet.create({ description, UserId: userId })
+      const responseData = await Tweet.findByPk(tweet.id, { raw: true })
 
-      return res.status(200).json({ ...tweet })
+      return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
   }
