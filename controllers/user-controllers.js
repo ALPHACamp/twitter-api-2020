@@ -4,6 +4,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const validator = require('validator')
 const uploadFile = require('../helpers/file')
 const helpers = require('../_helpers')
+const { getFollowshipId } = require('../helpers/user')
 
 const userController = {
   login: async (req, res, next) => {
@@ -96,7 +97,6 @@ const userController = {
           exclude: ['password']
         }
       })
-      console.log(helpers.getUser(req))
 
       return res.json(user)
     } catch (error) {
@@ -161,14 +161,23 @@ const userController = {
   // Get top 10 users
   getTopUsers: async (req, res, next) => {
     try {
-      const topUsers = await User.findAll({
+      let topUsers = await User.findAll({
         where: { role: 'user' },
         attributes: {
           exclude: ['password']
         },
         order: [['followerCount', 'DESC']],
-        limit: 10
+        limit: 10,
+        raw: true
       })
+
+      const followingIds = getFollowshipId(req, 'Followings')
+
+      // Clean data
+      topUsers = topUsers.map(user => ({
+        ...user,
+        isFollowed: followingIds.includes(user.id)
+      }))
 
       return res.status(200).json(topUsers)
     } catch (error) {
