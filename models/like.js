@@ -19,8 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     modelName: 'Like',
-    tableName: 'Likes',
-    underscored: true
+    tableName: 'Likes'
   });
   Like.associate = function (models) {
     Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
