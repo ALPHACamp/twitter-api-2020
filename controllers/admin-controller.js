@@ -5,26 +5,28 @@ const jwt = require('jsonwebtoken')
 const adminController = {
   login: async (req, res, next) => {
     try {
+      const error = new Error()
       const { account, password } = req.body
 
       if (!account || !password) {
-        return res.json({
-          status: '400',
-          message: '有欄位沒填寫到'
-        })
+        error.code = 400
+        error.message = '有欄位沒填寫到'
+        throw error
       }
 
       const user = await User.findOne({ where: { account } }) 
 
-      if (!user) return res.status(403).json({
-        status: '403',
-        message: '帳號不存在'
-      })
+      if (!user || user.role === 'user') {
+        error.code = 403
+        error.message = '帳號不存在'
+        throw error
+      }
 
-      if (!bcrypt.compareSync(password, user.password)) return res.status(403).json({
-        status: '403',
-        message: '帳號或密碼錯誤'
-      })
+      if (!bcrypt.compareSync(password, user.password)) {
+        error.code = 403
+        error.message = '帳號或密碼錯誤'
+        throw error
+      }
 
       const userData = user.toJSON()
       delete userData.password
@@ -37,8 +39,8 @@ const adminController = {
       return res.json({
         status: 'success',
         token,
-        data: userData
-
+        data: userData,
+        message: '登入成功'
       })
     } catch (err) {
       next(err)
