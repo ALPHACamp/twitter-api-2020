@@ -7,7 +7,7 @@ const tweetController = {
             if (err) {
                 return next(err)
             } 
-            return res.json(data)
+            return res.status(200).json(data)
         })
     },
     getTweet: (req, res, next) => {
@@ -15,7 +15,7 @@ const tweetController = {
             if (err) {
                 return next(err)
             } 
-            return res.json(data)
+            return res.status(200).json(data)
         })
     }
 }

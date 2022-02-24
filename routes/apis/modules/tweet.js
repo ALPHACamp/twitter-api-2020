@@ -1,8 +1,9 @@
 const express = require('express')
 const router = express.Router()
+const { authenticated, authenticatedAdmin } = require('../../../middleware/api-auth')
 const tweetController = require('../../../controllers/apis/tweet-controllers')
 
-router.get('/:tweet_id', tweetController.getTweet)
-router.get('/', tweetController.getTweets)
+router.get('/:tweet_id', authenticated, tweetController.getTweet)
+router.get('/', authenticated, tweetController.getTweets)
 
 module.exports = router
