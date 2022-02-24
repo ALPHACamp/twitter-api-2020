@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('validator')
 const { User } = require('../models')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
   signUp: async (req, res, next) => {
@@ -78,7 +80,7 @@ const userController = {
         message: 'login success!',
         data: {
           token,
-          user: req.user
+          user: userData
         }
       })
     } catch (err) { next(err) }
