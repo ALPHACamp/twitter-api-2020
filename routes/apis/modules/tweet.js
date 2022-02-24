@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { authenticated, authenticatedAdmin } = require('../../../middleware/api-auth')
+const { authenticated } = require('../../../middleware/api-auth')
 const tweetController = require('../../../controllers/apis/tweet-controllers')
 
 router.get('/:tweet_id', authenticated, tweetController.getTweet)

@@ -5,7 +5,10 @@ const authenticated = (req, res, next) => passport.authenticate('jwt', { session
   }
   if (err) {
     console.log(err)
+    return res.status(403).json({ status: 'error', message: 'permission denied' })
   }
+  const userData = { ...user.dataValues }
+  req.user = userData
   return next()
 })(req, res, next)
 const authenticatedAdmin = (req, res, next) => {
