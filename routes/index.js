@@ -18,6 +18,7 @@ router.use('/followship', followship)
 router.post('/signup', userController.signUp)
 router.post('/signin', userController.signIn)
 
+
 router.use('/', apiErrorHandler)
 
 module.exports = router
