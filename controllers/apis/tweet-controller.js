@@ -101,11 +101,14 @@ const tweetController = {
     }
   },
   postReply: async (req, res, next) => {
-    const { comment } = req.body
-    const TweetId = req.params.id
-    const UserId = helpers.getUser(req).id
     try {
+      const { comment } = req.body
+      const TweetId = req.params.id
+      const UserId = helpers.getUser(req).id
+      if (!comment) throw new Error('Comment text is required!')
       if (comment.length > 140) throw new Error('回應字數不可大於140字！')
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('Tweet is not exist!')
       const reply = await Reply.create({
         TweetId,
         UserId,
@@ -123,8 +126,8 @@ const tweetController = {
     }
   },
   getReplies: async (req, res, next) => {
-    const TweetId = req.params.id
     try {
+      const TweetId = req.params.id
       const replies = await Reply.findAll({
         where: { TweetId },
         raw: true,
