@@ -12,6 +12,7 @@ module.exports = {
           { model: User },
           { model: User, as: 'UsersFromLikedTweets' }
         ],
+        order: [['createdAt', 'DESC']],
         nest: true
       })
 
