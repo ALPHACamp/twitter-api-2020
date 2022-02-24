@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const faker = require('faker')
 
 module.exports = {
@@ -8,19 +8,18 @@ module.exports = {
         type: queryInterface.sequelize.QueryTypes.SELECT
       }
     )
-    const insertedTweets = users.map((user) => {
+    const insertedTweets = users.map(user => {
       return Array.from({ length: 10 }, () => ({
         userId: user.id,
         description: `${user.name} said: ${faker.lorem.text().substring(1, 50)}`,
-        createdAt: new Date(+(new Date()) - Math.floor(Math.random()*10000000000)),  // minus 10^10 milisecond from current date
+        createdAt: new Date(+(new Date()) - Math.floor(Math.random() * 10000000000)), // minus 10^10 milisecond from current date
         updatedAt: new Date()
       }))
     }).flat()
     await queryInterface.bulkInsert('Tweets', insertedTweets)
-    
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Tweets', null, {})
   }
-};
+}
