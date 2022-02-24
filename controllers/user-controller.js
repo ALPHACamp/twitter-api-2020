@@ -10,19 +10,27 @@ const userController = {
   },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) =>
-      err ? next(err) : res.status(200).json(data)) // 應測試要求要第一層就能找到name只好拿掉 status
+        err ? next(err) : res.status(200).json(data)) // 應測試要求要第一層就能找到name只好拿掉 status
   },
   getUserTweets: (req, res, next) => {
     userServices.getUserTweets(req, (err, data) =>
-      err ? next(err) : res.status(200).json(data))  // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
+        err ? next(err) : res.status(200).json(data)) // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
   },
   getUserReplies: (req, res, next) => {
     userServices.getUserReplies(req, (err, data) =>
-      err ? next(err) : res.status(200).json(data))  // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
+        err ? next(err) : res.status(200).json(data)) // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
   },
   getUserLikes: (req, res, next) => {
     userServices.getUserLikes(req, (err, data) =>
-      err ? next(err) : res.status(200).json(data))  // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
+        err ? next(err) : res.status(200).json(data)) // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
+  },
+  getUserFollowings: (req, res, next) => {
+    userServices.getUserFollowings(req, (err, data) =>
+        err ? next(err) : res.status(200).json(data)) // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
+  },
+  getUserFollowers: (req, res, next) => {
+    userServices.getUserFollowers(req, (err, data) =>
+        err ? next(err) : res.status(200).json(data)) // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
   },
 }
 module.exports = userController

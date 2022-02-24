@@ -8,7 +8,17 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'Followship',
     tableName: 'Followships'
   });
-  Followship.associate = function (models) {
+  Followship.associate = function(models) {
+    Followship.belongsTo(models.User, {
+      through: models.Followship,
+      foreignKey: 'followingId',
+      as: 'Followers'
+    })
+    Followship.belongsTo(models.User, {
+      through: models.Followship,
+      foreignKey: 'followerId',
+      as: 'Followings'
+    })
   };
   return Followship;
 };
