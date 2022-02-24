@@ -6,9 +6,6 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     // Each user have two random follows exclude user self
 
-    // "followerId": 2,
-    // "followingId": 5,
-
     // Select users
     const users = await queryInterface.sequelize.query(
       "SELECT id FROM Users WHERE role = 'user'",

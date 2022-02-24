@@ -221,10 +221,17 @@ const userController = {
   // Get all tweets from specific user
   getUserTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
-        where: { UserId: req.params.id }
-      })
+      const user = helpers.getUser(req)
+      let [tweets, userLikes] = await Promise.all([
+        Tweet.findAll({
+          where: { UserId: req.params.id }
+        }),
+        Like.findAll({
+          where: { UserId: user.id }
+        })
+      ])
 
+      
       // add isLiked
 
       return res.status(200).json(tweets)
