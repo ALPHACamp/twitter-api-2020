@@ -27,7 +27,11 @@ module.exports = (sequelize, DataTypes) => {
     role: DataTypes.STRING,
     avatar: DataTypes.STRING,
     introduction: DataTypes.STRING,
-    cover: DataTypes.STRING
+    cover: DataTypes.STRING,
+    tweetCount: DataTypes.INTEGER,
+    followingCount: DataTypes.INTEGER,
+    followerCount: DataTypes.INTEGER,
+    likedCount: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'User',

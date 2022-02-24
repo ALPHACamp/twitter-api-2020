@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER,
     },
-    userId: DataTypes.STRING,
-    tweetId: DataTypes.STRING,
+    UserId: DataTypes.STRING,
+    TweetId: DataTypes.STRING,
     comment: {
       type: DataTypes.TEXT,
       allowNull: false
