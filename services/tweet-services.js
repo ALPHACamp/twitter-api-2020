@@ -24,13 +24,12 @@ const tweetController = {
         nest: true
       })
       if (!tweet) {
-        return cb('tweet_id does not exists.')
+        return cb(null, 'tweet_id does not exists.')
       }
       return cb(null, tweet)
     } catch (err) {
       return cb(err)
     }
   }
-
 }
 module.exports = tweetController
