@@ -3,10 +3,13 @@ const authenticated = (req, res, next) => passport.authenticate('jwt', { session
   if (!user) {
     return res.status(403).json({ status: 'error', message: 'permission denied' })
   }
+  if (err) {
+    console.log(err)
+  }
   return next()
-}) (req, res, next)
+})(req, res, next)
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.idAdmin) return next()
+  if (req.user && req.user.isAdmin) return next()
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 
