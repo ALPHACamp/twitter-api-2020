@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken')
+const { getUser } = require('../../_helpers')
 const TOKEN_EXPIRES = process.env.TOKEN_EXPIRES || '30m'
 
 const adminController = {
   signIn: (req, res, next) => {
-    const userData = req.user.toJSON()
+    const userData = getUser(req).toJSON()
     try {
       // 非管理者不能登入後台
       if (userData.role !== 'admin') throw new Error('Account or Password is wrong!')
