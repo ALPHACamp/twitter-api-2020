@@ -1,15 +1,20 @@
-const { getUser } = require('../../_helpers')
+const helpers = require('../../_helpers')
 const { Tweet } = require('../../models')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
     const { description } = req.body
+    console.log(req.body)
+    console.log(helpers.getUser(req))
     try {
       if (description.length > 140) throw new Error('推文字數不可大於140字！')
       const tweet = await Tweet.create({
-        UserId: getUser(req).id,
+        UserId: helpers.getUser(req).id,
         description
       })
+      if (process.env.NODE_ENV === 'test') {
+        res.json({ tweet: tweet.toJSON() })
+      }
       res.json({
         status: 'success',
         data: { tweet: tweet.toJSON() }
