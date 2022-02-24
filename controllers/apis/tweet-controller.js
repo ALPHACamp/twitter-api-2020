@@ -1,5 +1,5 @@
 const helpers = require('../../_helpers')
-const { Tweet, Like } = require('../../models')
+const { Tweet, Like, Reply } = require('../../models')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
@@ -95,6 +95,47 @@ const tweetController = {
           ...tweet.toJSON(),
           isLiked: false
         }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  postReply: async (req, res, next) => {
+    const { comment } = req.body
+    const TweetId = req.params.id
+    const UserId = helpers.getUser(req).id
+    try {
+      if (comment.length > 140) throw new Error('回應字數不可大於140字！')
+      const reply = await Reply.create({
+        TweetId,
+        UserId,
+        comment
+      })
+      if (process.env.NODE_ENV === 'test') {
+        res.json({ reply: reply.toJSON() })
+      }
+      res.json({
+        status: 'success',
+        data: { reply: reply.toJSON() }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    const TweetId = req.params.id
+    try {
+      const replies = await Reply.findAll({
+        where: { TweetId },
+        raw: true,
+        nest: true
+      })
+      if (process.env.NODE_ENV === 'test') {
+        res.json(replies)
+      }
+      res.json({
+        status: 'success',
+        data: { replies }
       })
     } catch (err) {
       next(err)
