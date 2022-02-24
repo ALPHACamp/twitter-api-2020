@@ -103,6 +103,7 @@ const userController = {
     }
   },
 
+  // Edit user profile
   putUser: async (req, res, next) => {
     try {
       const userId = helpers.getUser(req).id
@@ -151,6 +152,24 @@ const userController = {
         status: 'success',
         message: 'User profile successfully edited.'
       })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  // Get top 10 users
+  getTopUsers: async (req, res, next) => {
+    try {
+      const topUsers = await User.findAll({
+        where: { role: 'user' },
+        attributes: {
+          exclude: ['password']
+        },
+        order: [['followerCount', 'DESC']],
+        limit: 10
+      })
+
+      return res.status(200).json(topUsers)
     } catch (error) {
       next(error)
     }
