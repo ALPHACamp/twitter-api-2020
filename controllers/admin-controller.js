@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Reply, Like, Tweet } = require('../models')
 const jwt = require('jsonwebtoken')
+// const tweet = require('../models/tweet')
 
 const adminController = {
   login: async (req, res, next) => {
@@ -41,6 +42,29 @@ const adminController = {
         token,
         data: userData,
         message: '登入成功'
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const error = new Error()
+      const tweet = await Tweet.findByPk(req.params.id)
+      console.log(tweet.id)
+
+      if (!tweet) {
+        error.code = 404
+        error.message = '對應推文不存在'
+        throw error
+      }
+
+      await Reply.destroy({ where: { TweetId: tweet.id } })
+      await Like.destroy({ where: { TweetId: tweet.id } })
+      await tweet.destroy()
+      return res.json({
+        status: 'success',
+        message: '成功刪除貼文'
       })
     } catch (err) {
       next(err)

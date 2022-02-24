@@ -25,7 +25,7 @@ const authenticated = (req, res, next) => {
  * @returns 
  */
 function authenticatedAdmin(req, res, next) {
-  const user = helpers.getUser()
+  const user = helpers.getUser(req)
 
   if (user && user.role === 'admin') return next()
 
