@@ -7,9 +7,8 @@ const bcrypt = require('bcryptjs')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
-// set up Passport strategy
+// 本地登入認證
 passport.use(new LocalStrategy(
-  // customize user field
   {
     usernameField: 'account',
     passwordField: 'password',
@@ -20,13 +19,13 @@ passport.use(new LocalStrategy(
     // 查詢是否資料有輸入的email資料
     User.findOne({ where: { account } })
       .then(user => {
-        // 若沒有使用者資料，回傳錯誤
+        // 沒有使用者資料，回傳錯誤
         if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤!'))
 
-        // 若有使用者資料，使用bcrypt比對是否與資料庫密碼一致
+        // 比對密碼
         bcrypt.compare(password, user.password)
           .then(res => {
-            // 若不一致，回傳錯誤
+            // 不一致，回傳錯誤
             if (!res) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤!'))
 
             // 回傳user
@@ -36,7 +35,7 @@ passport.use(new LocalStrategy(
   }
 ))
 
-// 宣告物件，有token的authorization header 裡的 bearer 資訊，與所設定的金鑰
+// 宣告物件，token的 bearer 資訊，與所設定的金鑰
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
@@ -44,7 +43,6 @@ const jwtOptions = {
 }
 
 // 設定jwt的登入策略
-// 帶入jwtOptions，解開 token並回傳jwt裡的payload資料
 passport.use(new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
   // 使用payload的id資料尋找user資料，並關連其他model
   User.findByPk(jwtPayload.id, {
@@ -62,7 +60,6 @@ passport.use(new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
     }) // 回傳user資料
     .catch(err => cb(err))
 }))
-
 
 
 module.exports = passport
