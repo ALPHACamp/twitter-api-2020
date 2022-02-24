@@ -319,6 +319,24 @@ const userController = {
     } catch (error) {
       next(error)
     }
+  },
+
+  // Get current user info
+  getCurrentUser: async (req, res, next) => {
+    let user = helpers.getUser(req)
+
+    // Clean user
+    user = {
+      name: user.name,
+      account: user.account,
+      avatar: user.avatar,
+      cover: user.cover,
+      role: user.role,
+      email: user.email,
+      introduction: user.introduction
+    }
+
+    return res.status(200).json(user)
   }
 }
 

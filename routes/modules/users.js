@@ -4,6 +4,7 @@ const upload = require('../../helpers/multer')
 
 const userController = require('../../controllers/user-controllers')
 
+router.get('/get-current-user', userController.getCurrentUser)
 router.get('/top', userController.getTopUsers)
 router.get('/:id', userController.getUser)
 router.put(
