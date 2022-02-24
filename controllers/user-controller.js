@@ -19,11 +19,11 @@ module.exports = {
         default:
           delete userData.password
           const token = jwt.sign(
-            userData,
-            process.env.JWT_SECRET,
-            { expiresIn: '30d' }
+            userData, process.env.JWT_SECRET, { expiresIn: '30d' }
           )
-          return res.json({ token, user: userData })
+          
+          const responseData = { token, user: userData }
+          return res.json(responseData)
       }
 
     } catch (err) { next(err) }
@@ -65,15 +65,15 @@ module.exports = {
       const hash = await bcrypt.hash(password, salt)
 
       // create user in database
-      let user = await User.create({
+      const user = await User.create({
         account, name, email, password: hash
       })
 
       // retrieve complete user data from database
-      user = await User.findByPk(user.toJSON().id, { raw: true })
-      delete user.password
+      const responseData = await User.findByPk(user.toJSON().id, { raw: true })
+      delete responseData.password
 
-      return res.status(200).json({ ...user })
+      return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
   }
