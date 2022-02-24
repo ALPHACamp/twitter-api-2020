@@ -5,7 +5,8 @@ const router = express.Router()
 // const admin = require('./modules/admin')
 
 // const userController = require('../../controllers/apis/user-controller')
-// const { authenticate } = require('../../middleware/api-auth')
+const { authenticated } = require('../../middleware/api-auth')
+const followshipRouter = require('./modules/followship')
 const { apiErrorHandler } = require('../../middleware/api-error-handler')
 
 const userController = require('../../controllers/user-controller')
@@ -15,8 +16,6 @@ const userController = require('../../controllers/user-controller')
 
 router.post('/login', userController.login)
 router.post('/users', userController.postUsers)
-// router.use('/')
-
-
+router.use('/followships', authenticated, followshipRouter)
 router.use(apiErrorHandler)
 module.exports = router

@@ -11,9 +11,10 @@ function apiErrorHandler(error, req, res, next) {
 
   const DEFAULT_STATUS = 'error'
   const errorCode = error.code
-
+  console.log('inside error')
   switch (error.code) {
     case 400:
+    case 401:
     case 403:
     case 500:
       res.status(errorCode).json({
