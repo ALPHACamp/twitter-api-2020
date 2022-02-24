@@ -128,6 +128,8 @@ const tweetController = {
   getReplies: async (req, res, next) => {
     try {
       const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('Tweet is not exist!')
       const replies = await Reply.findAll({
         where: { TweetId },
         raw: true,
