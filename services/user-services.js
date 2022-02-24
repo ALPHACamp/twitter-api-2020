@@ -56,14 +56,12 @@ const userController = {
       })
       const userData = {
         status: 'success',
-        data: {
-          id: user.id,
-          name: user.name,
-          account: user.account,
-          email: user.email
-        }
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        email: user.email
       }
-      return cb(null, { userData })
+      return cb(null, userData )
     } catch (err) {
       cb(err)
     }
