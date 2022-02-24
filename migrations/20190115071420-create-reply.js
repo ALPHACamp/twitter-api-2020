@@ -8,14 +8,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_id: {
+      userId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
           key: 'id'
         }
       },
-      tweet_id: {
+      tweetId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Tweets',
@@ -25,11 +25,11 @@ module.exports = {
       comment: {
         type: Sequelize.TEXT
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }

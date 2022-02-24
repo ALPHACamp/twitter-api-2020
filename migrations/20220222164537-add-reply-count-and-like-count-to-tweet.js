@@ -9,11 +9,11 @@ module.exports = {
       Example:
       return queryInterface.createTable('users', { id: Sequelize.INTEGER });
     */
-    await queryInterface.addColumn('Tweets', 'reply_count', {
+    await queryInterface.addColumn('Tweets', 'replyCount', {
       type: Sequelize.INTEGER,
       defaultValue: 0
     })
-    await queryInterface.addColumn('Tweets', 'like_count', {
+    await queryInterface.addColumn('Tweets', 'likeCount', {
       type: Sequelize.INTEGER,
       defaultValue: 0
     })
@@ -27,7 +27,7 @@ module.exports = {
       Example:
       return queryInterface.dropTable('users');
     */
-    await queryInterface.removeColumn('Tweets', 'reply_count')
-    await queryInterface.removeColumn('Tweets', 'like_count')
+    await queryInterface.removeColumn('Tweets', 'replyCount')
+    await queryInterface.removeColumn('Tweets', 'likeCount')
   }
 };

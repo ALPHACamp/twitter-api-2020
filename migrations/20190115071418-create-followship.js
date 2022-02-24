@@ -8,21 +8,21 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      follower_id: {
+      followerId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
           key: 'id'
         }
       },
-      following_id: {
+      followingId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
           key: 'id'
         }
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       }

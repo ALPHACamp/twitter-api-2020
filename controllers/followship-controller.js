@@ -25,19 +25,21 @@ const followshipController = {
         error.message = '追蹤對象不存在'
         return next(error)
       }
-      // await targetUser.increment('followerCount', { by: 1 })
-      // await loginUser.increment('followingCount', { by: 1 })
 
-      // const result = await Followship.create({
-      //   followerId: loginUserId,
-      //   followingId: targetUserId
-      // })
+      await targetUser.increment('follower_count', { by: 1 })
+      await loginUser.increment('following_count', { by: 1 })
 
-      // return res.json({
-      //   status: 'success',
-      //   message: '成功追蹤對方',
-      //   data: result
-      // })
+      const result = await Followship.create({
+        followerId: loginUserId,
+        followingId: targetUserId,
+        createdAt: new Date()
+      })
+
+      return res.json({
+        status: 'success',
+        message: '成功追蹤對方',
+        data: result
+      })
 
     } catch (error) {
       error.code = 500
