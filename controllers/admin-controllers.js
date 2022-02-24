@@ -10,6 +10,15 @@ const adminController = {
       next(err)
     }
   },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await adminServices.getTweets()
+    
+      return res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
   deleteTweet: async (req, res, next) => {
     const tweetId = req.params.id
     try {

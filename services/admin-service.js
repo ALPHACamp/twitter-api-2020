@@ -1,11 +1,42 @@
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Sequelize } = require('../models')
 
 const adminServices = {
   getUsers: () => {
     return User.findAll({
-      where: { role: 'user' }
+      where: { role: 'user' },
+      include: [{ model: Tweet }],
+      attributes: [
+        'id', 'email', 'account', 'name', 'avatar', 'cover', 'avatar', 'introduction', 'role', 'likedCount', 'repliedCount', 'followerCount', 'followingCount',
+        [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount']
+      ],
+      order: [[Sequelize.literal('tweetCount'), 'DESC']]
     })
       .then(users => { return users })
+  },
+  getTweets: async () => {
+    const rawTweets = await Tweet.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }
+      ],
+      attributes: ['id', 'description', 'createdAt'],
+      order: [['createdAt', 'DESC']]
+    })
+
+    const tweets = rawTweets.map(r => ({
+      id: r.id,
+      description: r.description.substring(0, 50),
+      createdAt: r.createdAt,
+      User: r.User
+    }))
+
+    return {
+      tweets,
+      status: 'success',
+      message: 'Get all tweets successfully'
+    }
   },
   deleteTweet: (tweetId) => {
     return Tweet.findByPk(tweetId)
