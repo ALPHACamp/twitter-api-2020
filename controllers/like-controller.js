@@ -2,6 +2,7 @@ const { User, Tweet, Like } = require('../models')
 const authHelpers = require('../_helpers')
 
 const likeController = {
+  // 以目前使用者來對某個推文表示喜歡
   postTweetLike: async (req, res, next) => {
     // params => tweetid
     // id => getUser
@@ -10,8 +11,8 @@ const likeController = {
       const tweetId = req.params.id
       const userId = authHelpers.getUser(req).id
 
-      const targetTweet = await Tweet.findByPK(tweetId)
-      const targetUser = await User.findByPK(userId)
+      const targetTweet = await Tweet.findByPk(tweetId)
+      const targetUser = await User.findByPk(userId)
       // 找不到推文可以按喜歡
       if (!targetTweet) {
         error.code = 404
