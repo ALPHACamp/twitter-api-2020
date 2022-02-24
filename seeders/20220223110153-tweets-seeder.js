@@ -1,10 +1,20 @@
 'use strict'
 
+const bcrypt = require('bcryptjs')
 const faker = require('faker')
-const { User } = require('../models')
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    /*
+      Add altering commands here.
+      Return a promise to correctly handle asynchronicity.
 
+      Example:
+      return queryInterface.bulkInsert('People', [{
+        name: 'John Doe',
+        isBetaMember: false
+      }], {});
+    */
     const DEFAULT_TWEET_NUMBER = 10
     // 獲取現存資料庫使用者(不含管理員)
     const seedUsers = (await queryInterface.sequelize.query(
@@ -35,7 +45,6 @@ module.exports = {
     })
 
 
-
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -46,7 +55,6 @@ module.exports = {
       Example:
       return queryInterface.bulkDelete('People', null, {});
     */
-
     const seedUsers = (await queryInterface.sequelize.query(
       'SELECT `id` FROM `Users` WHERE role="user"', {
       type: queryInterface.sequelize.QueryTypes.SELECT
