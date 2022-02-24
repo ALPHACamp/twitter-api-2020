@@ -1,8 +1,8 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Reply = sequelize.define('Reply', {
-    userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER,
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER,
     comment: DataTypes.TEXT,
   }, {
     sequelize,
@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Replies'
   });
   Reply.associate = function(models) {
-    Reply.belongsTo(models.User, { foreignkey: 'userId' })
-    Reply.belongsTo(models.Tweet, { foreignkey: 'tweetId' })
+    Reply.belongsTo(models.User, { foreignkey: 'UserId' })
+    Reply.belongsTo(models.Tweet, { foreignkey: 'TweetId' })
   };
   return Reply;
 };
