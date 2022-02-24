@@ -6,6 +6,7 @@ const adminController = require('../../controllers/admin-controller')
 const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 
 
+router.get('/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.get('/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.post(
   '/signin',

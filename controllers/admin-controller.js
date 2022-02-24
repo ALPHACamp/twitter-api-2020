@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 module.exports = {
   getUsers: async (req, res, next) => {
@@ -11,6 +11,19 @@ module.exports = {
       })
 
       return res.status(200).json(users)
+
+    } catch (err) { next(err) }
+  },
+
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+
+      return res.status(200).json(tweets)
 
     } catch (err) { next(err) }
   }
