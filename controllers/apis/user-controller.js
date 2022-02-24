@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const helpers = require('../../_helpers')
 const { User } = require('../../models')
 const TOKEN_EXPIRES = process.env.TOKEN_EXPIRES || '30m'
 
@@ -33,7 +34,7 @@ const userController = {
     }
   },
   signIn: (req, res, next) => {
-    const userData = req.user.toJSON()
+    const userData = helpers.getUser(req).toJSON()
     try {
       // 非使用者不能登入前台
       if (userData.role !== 'user') throw new Error('Account or Password is wrong!')
