@@ -87,16 +87,49 @@ const userController = {
   // Get basic user info
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, {
+      let user = await User.findByPk(req.params.id, {
         include: [
           Tweet,
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'name', 'account', 'avatar']
+          }
         ],
         attributes: {
           exclude: ['password']
         }
       })
+
+      const userFollowingIds = getFollowshipId(req, 'Followings')
+
+      // Clean data
+      const followers = user.Followers.map(user => ({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar,
+        isFollowed: userFollowingIds.includes(user.id)
+      }))
+
+      const followings = user.Followings.map(user => ({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar,
+        isFollowed: userFollowingIds.includes(user.id)
+      }))
+
+      user = {
+        ...user.dataValues,
+        followings,
+        followers
+      }
 
       return res.json(user)
     } catch (error) {
@@ -228,6 +261,7 @@ const userController = {
     }
   },
 
+  // Just for test, data included in GET api/users/:id
   getUserFollowings: async (req, res, next) => {
     try {
       const followings = await Followship.findAll({
@@ -240,6 +274,7 @@ const userController = {
     }
   },
 
+  // Just for test, data included in GET api/users/:id
   getUserFollowers: async (req, res, next) => {
     try {
       const followers = await Followship.findAll({
