@@ -16,13 +16,13 @@ const userController = {
         password: hash
       })
       const userData = {
-        status: "suceess",
+        status: 'suceess',
         data: {
           user: {
             id: newUser.id,
             account: newUser.account,
             name: newUser.name,
-            email: newUser.email,
+            email: newUser.email
           }
         }
       }
