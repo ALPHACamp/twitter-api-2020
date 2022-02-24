@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
       switch (true) {
         case (req.originalUrl === '/api/signin' && userData.role !== 'user'):
           throw new Error('帳號不存在！')
-        
+
         case (req.originalUrl === '/api/admin/signin' && userData.role !== 'admin'):
           throw new Error('帳號不存在！')
 
@@ -21,7 +21,7 @@ module.exports = {
           const token = jwt.sign(
             userData, process.env.JWT_SECRET, { expiresIn: '30d' }
           )
-          
+
           const responseData = { token, user: userData }
           return res.json(responseData)
       }
@@ -76,5 +76,33 @@ module.exports = {
       return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const { UserId } = req.params
+
+      const responseData = await User.findByPk(UserId, { raw: true })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweetsOfUser: async (req, res, next) => {
+    try {
+      const { UserId } = req.params
+
+      const responseData = await Tweet.findAll({
+        where: { UserId }, raw: true
+      })
+
+      if (!responseData.length) throw new Error('沒有任何推文!')
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
   }
 }
