@@ -32,7 +32,8 @@ const userServices = {
         name: req.body.name,
         account: req.body.account,
         email: req.body.email,
-        password: hash
+        password: hash,
+        role: 'user'
       }))
       .then(user => {
         delete user.dataValues.password
