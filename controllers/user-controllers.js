@@ -224,15 +224,27 @@ const userController = {
       const user = helpers.getUser(req)
       let [tweets, userLikes] = await Promise.all([
         Tweet.findAll({
-          where: { UserId: req.params.id }
+          where: { UserId: req.params.id },
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ],
+          raw: true,
+          nest: true
         }),
         Like.findAll({
-          where: { UserId: user.id }
+          where: { UserId: user.id },
+          raw: true
         })
       ])
 
-      
-      // add isLiked
+      // Clean like data
+      userLikes = userLikes.map(like => like.TweetId)
+
+      // Clean like data
+      tweets = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: userLikes.includes(tweet.id)
+      }))
 
       return res.status(200).json(tweets)
     } catch (error) {
@@ -243,12 +255,27 @@ const userController = {
   // Get all replied tweets by specific user
   getUserRepliedTweet: async (req, res, next) => {
     try {
-      const replies = await Reply.findAll({
-        where: { UserId: req.params.id },
-        include: [Tweet]
-      })
+      const user = helpers.getUser(req)
+      let [replies, userLikes] = await Promise.all([
+        Reply.findAll({
+          where: { UserId: req.params.id },
+          include: [Tweet],
+          raw: true,
+          nest: true
+        }),
+        Like.findAll({
+          where: { UserId: user.id },
+          raw: true
+        })
+      ])
 
-      // add isLiked
+      // Clean like data
+      userLikes = userLikes.map(like => like.TweetId)
+
+      replies = replies.map(reply => ({
+        ...reply,
+        likedTweet: userLikes.includes(reply.Tweet.id)
+      }))
 
       return res.status(200).json(replies)
     } catch (error) {
