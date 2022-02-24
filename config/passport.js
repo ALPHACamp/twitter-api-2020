@@ -3,7 +3,7 @@ const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
 
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
@@ -19,10 +19,10 @@ passport.use(new LocalStrategy(
   (req, account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null,{data: { status: 'error', message: "account didn't exist" }})
+        if (!user) return cb(null, { data: { status: 'error', message: "account didn't exist" } })
 
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, {data: { status: 'error', message: 'password incorrect' }})
+          if (!res) return cb(null, { data: { status: 'error', message: 'password incorrect' } })
 
           return cb(null, user)
         })
@@ -37,15 +37,20 @@ const jwtOptions = {
 
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
-    include:[
+    include: [
       { model: User, as: 'Followings' },
-      { model: User, as: 'Followers' }
+      { model: User, as: 'Followers' },
+      { model: Tweet, as: 'LikedTweets' }
     ]
   })
     .then(user => {
       cb(null, user.toJSON())
+      return null
     })
-    .catch(err => cb(err))
+    .catch(err => {
+      cb(err)
+      return null
+    })
 }))
 
 module.exports = passport
