@@ -9,6 +9,14 @@ const tweetController = {
             } 
             return res.json(data)
         })
+    },
+    getTweet: (req, res, next) => {
+        tweetServices.getTweet(req, (err, data) => {
+            if (err) {
+                return next(err)
+            } 
+            return res.json(data)
+        })
     }
 }
 

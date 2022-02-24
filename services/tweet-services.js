@@ -12,6 +12,25 @@ const tweetController = {
         }catch(err){
             return cb(err)
         }
+    },
+    getTweet: async (req, cb) => {
+        try{
+            const tweet = await Tweet.findByPk(req.params.tweet_id, {
+                include: [
+                    Reply,
+                    User
+                ],
+                raw: true,
+                nest: true
+            })
+            if (!tweet){
+                return cb('tweet_id does not exists.')
+            }
+            return cb(null, tweet)
+        }catch(err){
+            return cb(err)
+        }
+
     }
 
 }
