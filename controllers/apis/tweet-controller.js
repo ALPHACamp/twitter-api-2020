@@ -66,7 +66,7 @@ const tweetController = {
       if (!tweet) throw new Error("Tweet didn't exist!")
       if (like) throw new Error('You have liked this tweet!')
 
-      const liked = await Like.create({ UserId, TweetId })
+      await Like.create({ UserId, TweetId })
       return res.json({
         status: 'success',
         data: {
