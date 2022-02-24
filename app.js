@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
+const cors = require('cors')
 const helpers = require('./_helpers')
 const passport = require('./config/passport')
 const routes = require('./routes')
@@ -15,6 +16,7 @@ const PORT = process.env.PORT || 3000
 //   passport.authenticate('jwt', { ses...
 // }
 
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(passport.initialize())
