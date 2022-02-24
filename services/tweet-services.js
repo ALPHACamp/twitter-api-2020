@@ -30,6 +30,29 @@ const tweetController = {
     } catch (err) {
       return cb(err)
     }
+  },
+  postTweet: async (req, cb) => {
+    try {
+      const { description } = req.body
+      const UserId = req.user?.id || null
+      console.log(req.user)
+      if (!description) {
+        return cb('Description is required.')
+      }
+      const newTweet = await Tweet.create({
+        description,
+        UserId
+      })
+      const tweetData = {
+        status: 'suceess',
+        data: {
+          tweet: newTweet
+        }
+      }
+      return cb(null, tweetData)
+    } catch (err) {
+      return cb(err)
+    }
   }
 }
 module.exports = tweetController
