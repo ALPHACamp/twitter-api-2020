@@ -70,6 +70,7 @@ const userController = {
   },
   signIn: async (req, res, next) => {
     try {
+      console.log(req.user)
       const userData = req.user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
