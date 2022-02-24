@@ -11,27 +11,27 @@ const ExtractJWT = passportJWT.ExtractJwt
 passport.use(new LocalStrategy(
   {
     usernameField: 'account',
-    passwordField: 'password',
-    passReqToCallback: true
+    passwordField: 'password'
   },
 
-  (req, account, password, cb) => {
+  (account, password, cb) => {
     // 查詢是否資料有輸入的email資料
     User.findOne({ where: { account } })
       .then(user => {
         // 沒有使用者資料，回傳錯誤
-        if (!user) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤!'))
+        if (!user) throw new Error('帳號或密碼輸入錯誤!')
 
         // 比對密碼
         bcrypt.compare(password, user.password)
           .then(res => {
             // 不一致，回傳錯誤
-            if (!res) return cb(null, false, req.flash('error_messages', '帳號或密碼輸入錯誤!'))
+            if (!res) throw new Error ('帳號或密碼輸入錯誤!')
 
             // 回傳user
             return cb(null, user)
           })
       })
+      .catch(err => cb(err))
   }
 ))
 
