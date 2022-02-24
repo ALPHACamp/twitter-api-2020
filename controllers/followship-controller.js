@@ -93,7 +93,7 @@ const followshipController = {
           })
       }
 
-      // 找不到對象追蹤
+      // 找不到對象可以取消追蹤
       if (!targetUser) {
         error.code = 404
         error.message = '取消追蹤對象不存在'
