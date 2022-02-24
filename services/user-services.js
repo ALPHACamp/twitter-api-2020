@@ -6,9 +6,9 @@ const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
     return Promise.all([
-        User.findOne({ where: { email: req.body.email } }),
-        User.findOne({ where: { account: req.body.account } })
-      ])
+      User.findOne({ where: { email: req.body.email } }),
+      User.findOne({ where: { account: req.body.account } })
+    ])
       .then(([email, account]) => {
         if (email) throw new Error('Email already exists!')
         if (account) throw new Error('Account already exists!')
@@ -27,7 +27,7 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
-  signIn: async(req, cb) => {
+  signIn: async (req, cb) => {
     try {
       let result = {}
       const { account, password } = req.body
@@ -54,7 +54,7 @@ const userServices = {
       return cb(err)
     }
   },
-  getUser: async(req, cb) => {
+  getUser: async (req, cb) => {
     try {
       const userData = await User.findByPk(req.params.id, {
         attributes: {
@@ -73,49 +73,49 @@ const userServices = {
       cb(err)
     }
   },
-  getUserTweets: async(req, cb) => {
+  getUserTweets: async (req, cb) => {
     try {
       // 找出目標使用者的所有推文及喜歡 回覆數
       const userTweets = await Tweet.findAll({
-          where: { userId: req.params.id },
+        where: { userId: req.params.id },
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] },
+          { model: User, attributes: ['account', 'name', 'avatar'] }
+        ],
+        attributes: {
           include: [
-            { model: Like, attributes: [] },
-            { model: Reply, attributes: [] },
-            { model: User, attributes: ['account', 'name', 'avatar'] }
-          ],
-          attributes: {
-            include: [
-              [
-                sequelize.fn(
-                  'COUNT',
-                  sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
-                ),
-                'likeCount'
-              ],
-              [
-                sequelize.fn(
-                  'COUNT',
-                  sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
-                ),
-                'replyCount'
-              ]
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Likes.id'))
+              ),
+              'likeCount'
+            ],
+            [
+              sequelize.fn(
+                'COUNT',
+                sequelize.fn('DISTINCT', sequelize.col('Replies.id'))
+              ),
+              'replyCount'
             ]
-          },
-          group: ['Tweet.id'],
-          order: [
-            ['createdAt', 'DESC']
           ]
-        })
-        // 找出目前使用者喜歡的推文
+        },
+        group: ['Tweet.id'],
+        order: [
+          ['createdAt', 'DESC']
+        ]
+      })
+      // 找出目前使用者喜歡的推文
       const likedTweets = await Like.findAll({
         where: { userId: helper.getUser(req).id },
         attributes: ['tweetId'],
         raw: true
       })
       const likedData = likedTweets.map(data =>
-          data.tweetId
-        )
-        // 目標使用者若無推文
+        data.tweetId
+      )
+      // 目標使用者若無推文
       if (userTweets.length === 0) throw new Error("使用者尚無任何推文")
       const result = userTweets.map(tweet => ({
         ...tweet.toJSON(),
@@ -126,30 +126,30 @@ const userServices = {
       cb(err)
     }
   },
-  getUserReplies: async(req, cb) => {
+  getUserReplies: async (req, cb) => {
     try {
       // 找出目標使用者的所有回覆
       const userReplies = await Reply.findAll({
-          where: { userId: req.params.id },
-          include: [
-            // 將回覆的使用者資訊in進來
-            { model: User, attributes: ['account', 'name', 'avatar'] },
-            // 將原推文及推文者資訊in進來 
-            { model: Tweet, include: { model: User, attributes: ['account', 'name'] } },
-          ],
-          order: [
-            ['createdAt', 'DESC']
-          ],
-          raw: true
-        })
-        // 目標使用者若無回覆
+        where: { userId: req.params.id },
+        include: [
+          // 將回覆的使用者資訊in進來
+          { model: User, attributes: ['account', 'name', 'avatar'] },
+          // 將原推文及推文者資訊in進來 
+          { model: Tweet, include: { model: User, attributes: ['account', 'name'] } },
+        ],
+        order: [
+          ['createdAt', 'DESC']
+        ],
+        raw: true
+      })
+      // 目標使用者若無回覆
       if (userReplies.length === 0) throw new Error("使用者尚無任何回覆")
       return cb(null, userReplies)
     } catch (err) {
       cb(err)
     }
   },
-  getUserLikes: async(req, cb) => {
+  getUserLikes: async (req, cb) => {
     try {
       // 找出目標使用者的所有like 包含tweet及相關資訊並依喜歡由新到舊排序
       const likeData = await Like.findAll({
@@ -161,7 +161,7 @@ const userServices = {
             { model: Reply, attributes: ['id'] },
             { model: Like, attributes: ['id', 'UserId'] }
           ]
-        }, ],
+        },],
         order: [
           ['createdAt', 'DESC']
         ],
@@ -170,21 +170,21 @@ const userServices = {
       })
       const results = likeData.map((like) => {
         const userId = helper.getUser(req).id
-          // 列出此tweet所有likes的userId
+        // 列出此tweet所有likes的userId
         const likedUsersId = like.Tweet.Likes.map(data =>
-            data.UserId
-          )
-          // tweet層的資訊
+          data.UserId
+        )
+        // tweet層的資訊
         const tweet = {
-            id: like.Tweet.id,
-            description: like.Tweet.description,
-            createdAt: like.Tweet.createdAt,
-            replyCount: like.Tweet.Replies.length,
-            likeCount: like.Tweet.Likes.length,
-            User: like.Tweet.User,
-            isLiked: likedUsersId.includes(userId)
-          }
-          //外層資訊
+          id: like.Tweet.id,
+          description: like.Tweet.description,
+          createdAt: like.Tweet.createdAt,
+          replyCount: like.Tweet.Replies.length,
+          likeCount: like.Tweet.Likes.length,
+          User: like.Tweet.User,
+          isLiked: likedUsersId.includes(userId)
+        }
+        //外層資訊
         const result = {
           id: like.id,
           createdAt: like.createdAt,
@@ -198,7 +198,7 @@ const userServices = {
       cb(err)
     }
   },
-  getUserFollowings: async(req, cb) => {
+  getUserFollowings: async (req, cb) => {
     try {
       // 取得使用者的追蹤名單
       let followings = await Followship.findAll({
@@ -239,7 +239,7 @@ const userServices = {
       return cb(err)
     }
   },
-  getUserFollowers: async(req, cb) => {
+  getUserFollowers: async (req, cb) => {
     try {
       let followers = await Followship.findAll({
         where: { followingId: req.params.id },
@@ -276,6 +276,42 @@ const userServices = {
       }))
       return cb(null, followers)
     } catch (err) {
+      return cb(err)
+    }
+  },
+  getTopUsers: async (req, cb) => {
+    try {
+      let users = await User.findAll({
+        raw: true,
+        nest: true,
+        limit: 10,
+        where: {
+          role: 'user'
+        },
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'account',
+          //看自己有沒有追隨
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = User.id)`), 'isFollowings'],
+          //看追隨的人數
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
+            'FollowerCount'],
+        ],
+        order: [[sequelize.col('FollowerCount'), 'DESC']],
+        // Op.gt == 大於
+        having: { FollowerCount: { [sequelize.Op.gt]: 0 } },
+      })
+      console.log(users);
+      console.log(typeof users);
+      let result = users.map(user => ({
+        ...user
+      }))
+      console.log(result);
+      return cb(null, result)
+    } catch (err) {
+      console.log(err);
       return cb(err)
     }
   },
