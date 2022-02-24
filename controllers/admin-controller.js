@@ -26,5 +26,18 @@ module.exports = {
       return res.status(200).json(tweets)
 
     } catch (err) { next(err) }
+  },
+
+  deleteTweet: async (req, res, next) => {
+    try {
+      const { TweetId } = req.params
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('這則推文已不存在!')
+
+      const responseData = await tweet.destroy()
+      return res.status(200).json(responseData)
+
+    } catch (err) { next(err) }
   }
 }
