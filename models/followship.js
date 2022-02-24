@@ -19,8 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     modelName: 'Followship',
-    tableName: 'Followships',
-    underscored: true
+    tableName: 'Followships'
   });
   Followship.associate = function (models) {
   };

@@ -46,12 +46,20 @@ module.exports = (sequelize, DataTypes) => {
     followerCount: {
       type: DataTypes.INTEGER,
       defaultValue: 0
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     }
 
   }, {
     modelName: 'User',
-    tableName: 'Users',
-    underscored: true
+    tableName: 'Users'
+
   });
   User.associate = function (models) {
     User.hasMany(models.Tweet, { foreignKey: 'UserId' })
