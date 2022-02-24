@@ -12,6 +12,7 @@ const userController = require('../controllers/user-controller')
 // users
 router.post('/api/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
+router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getReplies)
 router.get('/api/users/:id/tweets', authenticated, authenticatedUser, userController.getUserTweets)
 router.put('/api/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
 router.put('/api/users/:id', authenticated, authenticatedUser, uploadImage, userController.putUser)

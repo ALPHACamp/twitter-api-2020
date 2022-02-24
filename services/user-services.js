@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../_helpers')
 const sequelize = require('sequelize')
@@ -166,6 +166,27 @@ const userService = {
       .then(tweets => {
         if (!tweets) throw new Error('User not exits!')
         return cb(null, tweets)
+      })
+      .catch(err => cb(err))
+  },
+  getReplies: (req, cb) => {
+    const getUserId = Number(req.params.id)
+    return Reply.findAll({
+      where: { UserId: getUserId },
+      attributes: [
+        [ 'id', 'replyId'],
+        'comment',
+        'createdAt'
+      ],
+      include: [
+        { model: Tweet, attributes: [ ['id', 'tweetId'], 'description', 'image' ]},
+        { model: User, attributes: [ 'id', 'name', 'account', 'avatar' ]}
+      ],
+      order: [[ 'createdAt', 'DESC' ]]
+    })
+      .then(replies => {
+        if (!replies) throw new Error('No replies')
+        return cb(null, replies)
       })
       .catch(err => cb(err))
   }
