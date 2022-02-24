@@ -68,7 +68,10 @@ const tweetServices = {
             tweetId: req.params.id
           }
         })
-          .then(() => cb(null, '成功將推文加入最愛'))
+          .then(like => {
+            if (!like[1]) throw new Error('該貼文已經加入最愛了')
+            return cb(null, '成功將推文加入最愛')
+          })
           .catch(err => cb(err, null))
       })
       .catch(err => cb(err, null))
