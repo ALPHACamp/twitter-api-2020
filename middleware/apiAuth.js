@@ -2,16 +2,18 @@ const passport = require('../config/passport')
 const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (err || !user) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'permission denied!'
-      })
-    }
-
-    return next()
-  })(req, res, next)
+  if (process.env.NODE_ENV === 'test') {
+    passport.authenticate('jwt', { session: false }, (err, user) => {
+      if (err || !user) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'permission denied!'
+        })
+      }
+      return next()
+    })(req, res, next)
+  }
+  return passport.authenticate('jwt', { session: false })(req, res, next)
 }
 const authenticatedAdmin = (req, res, next) => {
   if (process.env.NODE_ENV === 'test') return next()
