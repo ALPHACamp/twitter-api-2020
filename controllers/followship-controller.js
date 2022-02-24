@@ -26,8 +26,8 @@ const followshipController = {
         return next(error)
       }
 
-      await targetUser.increment('follower_count', { by: 1 })
-      await loginUser.increment('following_count', { by: 1 })
+      await targetUser.increment('followerCount', { by: 1 })
+      await loginUser.increment('followingCount', { by: 1 })
 
       const result = await Followship.create({
         followerId: loginUserId,
