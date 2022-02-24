@@ -34,7 +34,7 @@ const tweetController = {
       if (!tweet) throw new Error("Tweet didn't exist!")
       if (!unliked) throw new Error("You haven't Liked this tweet")
 
-      await liked.destroy()
+      await unliked.destroy()
       return res.json({
         status: 'success',
         data: {
