@@ -91,11 +91,12 @@ const userController = {
           Tweet,
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
-        ]
+        ],
+        attributes: {
+          exclude: ['password']
+        }
       })
-
-      // Protect sensitive user info
-      user.password = undefined
+      console.log(helpers.getUser(req))
 
       return res.json(user)
     } catch (error) {

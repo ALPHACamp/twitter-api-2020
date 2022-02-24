@@ -16,11 +16,11 @@ passport.use(
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
-        ]
+        ],
+        attributes: {
+          exclude: ['password']
+        }
       })
-
-      // Protect sensitive info
-      user.password = undefined
 
       return done(null, user)
     } catch (error) {
