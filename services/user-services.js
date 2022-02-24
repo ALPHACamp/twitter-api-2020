@@ -60,12 +60,16 @@ const userService = {
   getUser: (req, cb) => {
     const userId = Number(req.params.id)
     User.findByPk(userId, {
-      raw: true
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: User, as: 'Followers', attributes: { exclude: ['password'] }},
+        { model: User, as: 'Followings', attributes: { exclude: ['password'] } }
+      ]
     })
       .then(user => {
         if (!user) throw new Error('User not exits!')
         if (user.role === 'admin') throw new Error('User not exits!')
-        delete user.password
+        user.dataValues.isFollowed = (user.Followers.some(u => u.id === req.user.id))
         return cb(null, user)
       })
       .catch(err => cb(err))

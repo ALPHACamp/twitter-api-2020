@@ -8,10 +8,10 @@ const { authenticated, authenticatedUser, authenticatedAdmin } = require('../mid
 const userController = require('../controllers/user-controller')
 
 // users
-router.post('/signin', userController.signIn)
-router.post('/users', userController.signUp)
-router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
+router.post('/api/signin', userController.signIn)
+router.post('/api/users', userController.signUp)
+router.get('/api/users/:id', authenticated, authenticatedUser, userController.getUser)
 
-router.use('/', apiErrorHandler)
+router.use('/api', apiErrorHandler)
 
 module.exports = router

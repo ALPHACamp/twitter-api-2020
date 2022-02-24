@@ -16,7 +16,7 @@ app.use(express.json())
 app.use(passport.initialize())
 app.use(methodOverride('_method'))
 
-app.use('/api', routes)
+app.use(routes)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
