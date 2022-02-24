@@ -9,6 +9,12 @@ const userController = {
   },
   getUser: (req, res, next) => {
     userService.getUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  putUserSetting: (req, res, next) => {
+    userService.putUserSetting(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  putUser: (req, res, next) => {
+    userService.putUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 
