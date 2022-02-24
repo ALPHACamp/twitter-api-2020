@@ -1,9 +1,15 @@
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Sequelize } = require('../models')
 
 const adminServices = {
   getUsers: () => {
     return User.findAll({
-      where: { role: 'user' }
+      where: { role: 'user' },
+      include: [{ model: Tweet }],
+      attributes: [
+        'id', 'email', 'account', 'name', 'avatar', 'cover', 'avatar', 'introduction', 'role', 'likedCount', 'repliedCount', 'followerCount', 'followingCount', 
+        [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount']
+      ],
+      order: [[Sequelize.literal('tweetCount'), 'DESC']]
     })
       .then(users => { return users })
   },
