@@ -1,8 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply } = require('../models')
-const { getUser } = require('../_helpers')
-const { imgurFileHandler } = require('../_helpers')
+const helpers = require('../_helpers')
 const sequelize = require('sequelize')
 
 const userController = {
@@ -80,7 +79,7 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
     if (password !== checkPassword) throw new Error('Passwords do not match!')
     if (!account || !name || !email) throw new Error('Account, name and email are required!')
-    if (getUser(req).id !== Number(req.params.id)) throw new Error('permission denied')
+    if (helpers.getUser(req).id !== Number(req.params.id)) throw new Error('permission denied')
     return Promise.all([
       User.findAll({
         where: {
@@ -112,20 +111,13 @@ const userController = {
     const getUserId = Number(req.params.id)
     const { name, introduction } = req.body
     if (!name) throw new Error('name is required!')
-    if (getUser(req).id !== getUserId) throw new Error('permission denied')
-    const { files } = req
-    return Promise.all([
-      User.findByPk(getUserId),
-      imgurFileHandler(files.avatar),
-      imgurFileHandler(files.cover)
-    ])
-      .then(([user, avatarPath, coverPath]) => {
+    if (helpers.getUser(req).id !== getUserId) throw new Error('permission denied')
+    return User.findByPk(getUserId)
+      .then(user => {
         if (!user) throw new Error('user not exist!')
         return user.update({
           name,
-          introduction,
-          avatar: avatarPath || user.avatar,
-          cover: coverPath || user.cover
+          introduction
         })
       })
       .then(updatedUser => res.status(200).json({ user: updatedUser }))
