@@ -4,6 +4,8 @@ const { Op } = require('sequelize')
 
 const { User, Followship, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../_helpers')
+const { imgurFileHandler } = require('../file-helper')
+
 const userServices = {
   postUser: (req, cb) => {
     return User.findOne({
@@ -66,7 +68,7 @@ const userServices = {
       })
     ])
       .then(([user, follower, following]) => {
-        if (!user) throw new Error('資料庫內沒有相關資料')
+        if (!user) throw new Error('資料庫內找不到使用者資料')
         const data = {
           id: user.id,
           email: user.email,
@@ -96,7 +98,7 @@ const userServices = {
       })
     ])
       .then(([tweets, user]) => {
-        if (!tweets) throw new Error('資料庫內沒有相關資料')
+        if (!tweets) throw new Error('資料庫內找不到使用者資料')
         const data = tweets.map(t => ({
           id: t.dataValues.id,
           userData: {
@@ -126,7 +128,7 @@ const userServices = {
       nest: true
     })
       .then(replies => {
-        if (!replies.length) throw new Error('資料庫內沒有相關資料')
+        if (!replies.length) throw new Error('資料庫內找不到使用者資料')
         const data = replies.map(r => ({
           id: r.id,
           comment: r.comment,
@@ -143,6 +145,35 @@ const userServices = {
         }))
         return cb(null, data)
       })
+      .catch(err => cb(err))
+  },
+  putUserProfile: (req, cb) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error('資料庫內找不到使用者資料')
+        const { files } = req
+        // 有上傳封面或頭像
+        if (JSON.stringify(files) !== '{}' && files !== undefined) {
+          return Promise.all([
+            imgurFileHandler(files.cover),
+            imgurFileHandler(files.avatar)
+          ])
+            .then(([coverFilePath, avatarFilePath]) => {
+              return user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                cover: coverFilePath || user.toJSON().cover,
+                avatar: avatarFilePath || user.toJSON().avatar
+              })
+            })
+        } else {
+          return user.update({
+            name: req.body.name,
+            introduction: req.body.introduction
+          })
+        }
+      })
+      .then(updatedUser => cb(null, updatedUser))
       .catch(err => cb(err))
   }
 }
