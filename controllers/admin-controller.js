@@ -6,9 +6,9 @@ module.exports = {
       const users = await User.findAll({
         where: { role: 'user' },
         order: [['totalTweets', 'DESC']],
-        raw: true,
-        nest: true
+        raw: true
       })
+      if (!users.length) throw new Error('沒有任何使用者!')
 
       return res.status(200).json(users)
 
@@ -19,9 +19,9 @@ module.exports = {
     try {
       const tweets = await Tweet.findAll({
         order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
+        raw: true
       })
+      if (!tweets.length) throw new Error('沒有任何推文!')
 
       return res.status(200).json(tweets)
 
