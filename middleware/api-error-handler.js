@@ -16,6 +16,7 @@ function apiErrorHandler(error, req, res, next) {
     case 400:
     case 401:
     case 403:
+    case 404:
     case 500:
       res.status(errorCode).json({
         status: DEFAULT_STATUS,

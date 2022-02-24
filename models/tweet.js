@@ -13,6 +13,14 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.TEXT
     },
+    likeCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    replyCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
