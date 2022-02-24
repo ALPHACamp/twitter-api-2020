@@ -17,7 +17,17 @@ const tweetController = {
             } 
             return res.status(200).json(data)
         })
+    },
+    postTweet: (req, res, next) => {
+        console.log(req.user)
+        tweetServices.postTweet(req, (err, data) => {
+            if (err) {
+                return next(err)
+            } 
+            return res.status(200).json(data)
+        })
     }
+
 }
 
 module.exports = tweetController
