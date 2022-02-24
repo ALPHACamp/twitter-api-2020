@@ -39,6 +39,43 @@ module.exports = {
     } catch (err) { next(err) }
   },
 
+  getTweet: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const { TweetId } = req.params
+
+      let tweet = await Tweet.findByPk(TweetId, {
+        include: [
+          { model: User },
+          { model: User, as: 'UsersFromLikedTweets' }
+        ],
+        nest: true
+      })
+
+      if (!tweet) throw new Error('沒有這則推文!')
+
+      // reassemble tweet array
+      tweet = tweet.toJSON()
+
+      // assign following two objects to temp constants
+      const tweetedUser = tweet.User
+      const usersFromLikedTweets = tweet.UsersFromLikedTweets
+
+      // delete original properties from tweet
+      delete tweet.User
+      delete tweet.UsersFromLikedTweets
+
+      const responseData = {
+        ...tweet,
+        isLiked: usersFromLikedTweets.some(u => u.id === userId),
+        tweetedUser
+      }
+
+      return res.status(200).json({ ...responseData })
+
+    } catch (err) { next(err) }
+  },
+
   postTweet: async (req, res, next) => {
     try {
       const userId = helpers.getUser(req).id
