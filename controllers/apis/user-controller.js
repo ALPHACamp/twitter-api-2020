@@ -11,6 +11,9 @@ const userController = {
   },
   getTweets: async (req, res, next) => {
     userServices.getTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
-  }
+  },
+  getRepliedTweets: async (req, res, next) => {
+    userServices.getRepliedTweets(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
 }
 module.exports = userController
