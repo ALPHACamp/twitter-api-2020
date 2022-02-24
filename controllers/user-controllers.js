@@ -192,6 +192,8 @@ const userController = {
         where: { UserId: req.params.id }
       })
 
+      // add isLiked
+
       return res.status(200).json(tweets)
     } catch (error) {
       next(error)
@@ -205,6 +207,8 @@ const userController = {
         where: { UserId: req.params.id },
         include: [Tweet]
       })
+
+      // add isLiked
 
       return res.status(200).json(replies)
     } catch (error) {
