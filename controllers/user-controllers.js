@@ -4,6 +4,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const validator = require('validator')
 const uploadFile = require('../helpers/file')
 const helpers = require('../_helpers')
+const { getFollowshipId } = require('../helpers/user')
 
 const userController = {
   login: async (req, res, next) => {
@@ -86,16 +87,49 @@ const userController = {
   // Get basic user info
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, {
+      let user = await User.findByPk(req.params.id, {
         include: [
           Tweet,
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ]
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'name', 'account', 'avatar']
+          }
+        ],
+        attributes: {
+          exclude: ['password']
+        }
       })
 
-      // Protect sensitive user info
-      user.password = undefined
+      const userFollowingIds = getFollowshipId(req, 'Followings')
+
+      // Clean data
+      const followers = user.Followers.map(user => ({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar,
+        isFollowed: userFollowingIds.includes(user.id)
+      }))
+
+      const followings = user.Followings.map(user => ({
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar,
+        isFollowed: userFollowingIds.includes(user.id)
+      }))
+
+      user = {
+        ...user.dataValues,
+        followings,
+        followers
+      }
 
       return res.json(user)
     } catch (error) {
@@ -103,6 +137,7 @@ const userController = {
     }
   },
 
+  // Edit user profile
   putUser: async (req, res, next) => {
     try {
       const userId = helpers.getUser(req).id
@@ -156,12 +191,60 @@ const userController = {
     }
   },
 
+  // Get top 10 users
+  getTopUsers: async (req, res, next) => {
+    try {
+      let topUsers = await User.findAll({
+        where: { role: 'user' },
+        attributes: {
+          exclude: ['password']
+        },
+        order: [['followerCount', 'DESC']],
+        limit: 10,
+        raw: true
+      })
+
+      const followingIds = getFollowshipId(req, 'Followings')
+
+      // Clean data
+      topUsers = topUsers.map(user => ({
+        ...user,
+        isFollowed: followingIds.includes(user.id)
+      }))
+
+      return res.status(200).json(topUsers)
+    } catch (error) {
+      next(error)
+    }
+  },
+
   // Get all tweets from specific user
   getUserTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
-        where: { UserId: req.params.id }
-      })
+      const user = helpers.getUser(req)
+      let [tweets, userLikes] = await Promise.all([
+        Tweet.findAll({
+          where: { UserId: req.params.id },
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ],
+          raw: true,
+          nest: true
+        }),
+        Like.findAll({
+          where: { UserId: user.id },
+          raw: true
+        })
+      ])
+
+      // Clean like data
+      userLikes = userLikes.map(like => like.TweetId)
+
+      // Clean like data
+      tweets = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: userLikes.includes(tweet.id)
+      }))
 
       return res.status(200).json(tweets)
     } catch (error) {
@@ -172,10 +255,27 @@ const userController = {
   // Get all replied tweets by specific user
   getUserRepliedTweet: async (req, res, next) => {
     try {
-      const replies = await Reply.findAll({
-        where: { UserId: req.params.id },
-        include: [Tweet]
-      })
+      const user = helpers.getUser(req)
+      let [replies, userLikes] = await Promise.all([
+        Reply.findAll({
+          where: { UserId: req.params.id },
+          include: [Tweet],
+          raw: true,
+          nest: true
+        }),
+        Like.findAll({
+          where: { UserId: user.id },
+          raw: true
+        })
+      ])
+
+      // Clean like data
+      userLikes = userLikes.map(like => like.TweetId)
+
+      replies = replies.map(reply => ({
+        ...reply,
+        likedTweet: userLikes.includes(reply.Tweet.id)
+      }))
 
       return res.status(200).json(replies)
     } catch (error) {
@@ -195,6 +295,7 @@ const userController = {
     }
   },
 
+  // Just for test, data included in GET api/users/:id
   getUserFollowings: async (req, res, next) => {
     try {
       const followings = await Followship.findAll({
@@ -207,6 +308,7 @@ const userController = {
     }
   },
 
+  // Just for test, data included in GET api/users/:id
   getUserFollowers: async (req, res, next) => {
     try {
       const followers = await Followship.findAll({
@@ -217,6 +319,24 @@ const userController = {
     } catch (error) {
       next(error)
     }
+  },
+
+  // Get current user info
+  getCurrentUser: async (req, res, next) => {
+    let user = helpers.getUser(req)
+
+    // Clean user
+    user = {
+      name: user.name,
+      account: user.account,
+      avatar: user.avatar,
+      cover: user.cover,
+      role: user.role,
+      email: user.email,
+      introduction: user.introduction
+    }
+
+    return res.status(200).json(user)
   }
 }
 
