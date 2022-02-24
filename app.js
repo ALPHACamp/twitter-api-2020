@@ -7,14 +7,15 @@ const passport = require('./config/passport')
 const session = require('express-session')
 const helpers = require('./_helpers')
 
-const { getUser } = require('./helpers/auth-helpers')
 const { apis } = require('./routes')
+const cors = require('cors')
 
 const app = express()
 const port = 3000
 
 const SESSION_SECRET = 'secret'
 
+app.use(cors())
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())

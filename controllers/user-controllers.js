@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet } = require('../models')
 
 const userController = {
     signUp: async (req, res, next) => {
@@ -30,14 +30,14 @@ const userController = {
         try {
             const targetUser = await User.findByPk(req.params.id, {
                 include: [
-                    { model: User, as: 'Followings' },
+                    { model: User, as: 'Followers' },
                 ]
             })
             if (!targetUser) {
                 return res.json({ status: 'error', message: "User didn't exist!" })
             }
             const { account, name, email, introduction, avatar, cover } = targetUser
-            const isFollowed = targetUser.Followings.some(f => f.id === req.user.id)
+            const isFollowing = targetUser.Followers.some(f => f.id === req.user.id)
             return res.json({ 
                 account,
                 name,
@@ -45,13 +45,53 @@ const userController = {
                 introduction,
                 avatar,
                 cover,
-                isFollowed
+                isFollowing
             })
 
         } catch (err) {
             next(err)
         }
+    },
+    getUserTweets: async (req, res, next) => { 
+        try {
+            const user = await User.findByPk(req.params.id)
+            if (!user) {
+                return res.json({ status: 'error', message: "User didn't exist!" })
+            }
+            const tweets = await Tweet.findAll({
+                where: { UserId: req.params.id},
+                nest: true,
+                raw: true
+            })
+            return res.json(tweets)
+        } catch (err) {
+            next(err)
+        }
+    },
+    getTopUsers: async (req, res, next) => { 
+        try {
+            const users = await User.findAll({
+                include: { 
+                    model: User, as: 'Followers' ,
+                }
+            })
+            const result = users
+                .map(user => ({
+                    id: user.id,
+                    name: user.name,
+                    avatar: user.avatar,
+                    followerCount: user.Followers.length,
+                    isFollowing: req.user.Followings.some(f => f.id === user.id)
+                }))
+                .sort((a, b) => b.followerCount - a.followerCount)
+                // .slice(0, 10)
+            
+            return res.json(result)
+        } catch (err) {
+            next(err)
+        }
     }
+
 }
 
 module.exports = userController
