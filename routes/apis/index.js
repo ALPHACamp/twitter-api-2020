@@ -14,6 +14,7 @@ const userController = require('../../controllers/user-controller')
 // router.use('/admin', admin)
 
 router.post('/login', userController.login)
+router.post('/users', userController.postUsers)
 // router.use('/')
 
 
