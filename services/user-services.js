@@ -52,7 +52,7 @@ const userServices = {
     }
   },
   getUserProfile: (req, cb) => {
-    const { id } = req.params
+    const id = req.params.id || getUser(req).dataValues.id
     return Promise.all([
       User.findByPk(id, {
         raw: true,
@@ -71,6 +71,8 @@ const userServices = {
     ])
       .then(([user, follower, following]) => {
         if (!user) throw new Error('資料庫內找不到使用者資料')
+        // 瀏覽特定使用者資料時，特定使用者不包含後台管理員
+        if (req.params.id && user.role === 'admin') throw new Error('帳號不存在')
         const data = {
           id: user.id,
           email: user.email,
@@ -79,6 +81,7 @@ const userServices = {
           cover: user.cover,
           avatar: user.avatar,
           introduction: user.introduction,
+          role: user.role,
           follower: follower.length,
           following: following.length
         }

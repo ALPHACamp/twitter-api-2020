@@ -15,6 +15,9 @@ const userController = {
 
     userServices.userLogin(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
+  getCurrentUser: (req, res, next) => {
+    userServices.getUserProfile(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
   getUserProfile: (req, res, next) => {
     userServices.getUserProfile(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },

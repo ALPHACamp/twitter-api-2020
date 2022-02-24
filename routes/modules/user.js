@@ -11,6 +11,7 @@ const router = express.Router()
 router.post('/login', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/', userController.signUp)
 
+router.get('/current_user', authenticated, userController.getCurrentUser)
 router.get('/:id/replied_tweets', authenticated, paramsChecker, userController.getUserReply)
 router.get('/:id/tweets', authenticated, paramsChecker, userController.getUserTweet)
 router.get('/:id', authenticated, paramsChecker, userController.getUserProfile)
