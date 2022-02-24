@@ -15,7 +15,7 @@ module.exports = {
       // user object is automatically added up in unit test,
       // but in other scenarios,
       // we still need to retrieve user data from JWT auth,
-      if (user.avatar) { req.user = user.toJSON() }
+      if (user.role) { req.user = user.toJSON() }
 
       return next()
     })(req, res, next)
@@ -23,7 +23,7 @@ module.exports = {
 
   authenticatedAdmin: (req, res, next) => {
     const user = helpers.getUser(req)
-    if (user && user.role === 'admin') next()
+    if (user && user.role === 'admin') return next()
 
     return res.status(403).json({
       status: 'error',
