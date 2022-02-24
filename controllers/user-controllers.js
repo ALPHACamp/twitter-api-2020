@@ -3,19 +3,26 @@ const { User } = require('../models')
 
 const userController = {
     signUp: async (req, res, next) => {
-        if (req.body.password !== req.body.checkPassword) return res.json({ status: 'error', message: 'Passwords do not match!' })
-        if (!req.body.email || !req.body.account || !req.body.name) return res.json({ status: 'error', message: 'All fields are required' })
+        const account = req.body?.account?.trim() || null
+        const password = req.body?.password?.trim() || null
+        const checkPassword = req.body?.checkPassword?.trim() || null
+        const name = req.body?.name?.trim() || null
+        const email = req.body?.email?.trim() || null
+        if (!account || !password || !checkPassword || !name || !email) return res.json({ status: 'error', message: 'All fields are required' })
+        if (name.length > 50) return res.json({ status: 'error', message: "Name is too long " })
+        if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match!' })
+
         try {
-            const email = await User.findOne({ where: { email: req.body.email } })
-            const account = await User.findOne({ where: { account: req.body.account } })
-            if (email) return res.json({ status: 'error', message: 'email already existed' })
-            if (account) return res.json({ status: 'error', message: 'account already existed' })
+            const userEmail = await User.findOne({ where: { email } })
+            const userAccount = await User.findOne({ where: { account } })
+            if (userEmail) return res.json({ status: 'error', message: 'email already existed' })
+            if (userAccount) return res.json({ status: 'error', message: 'account already existed' })
             return bcrypt.hash(req.body.password, 10)
                 .then(hash =>
                     User.create({
-                        name: req.body.name,
-                        account: req.body.account,
-                        email: req.body.email,
+                        name,
+                        account,
+                        email,
                         password: hash,
                         isAdmin: false
                     }))
@@ -26,6 +33,7 @@ const userController = {
                 })
         } catch (err) { next(err) }
     },
+
     getUser: async (req, res, next) => {
         try {
             const targetUser = await User.findByPk(req.params.id, {

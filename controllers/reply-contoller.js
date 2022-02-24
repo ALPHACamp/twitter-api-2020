@@ -1,11 +1,12 @@
 const { User, Tweet, Reply } = require('../models')
 
+const helpers = require('../_helpers')
+
 const replyController = {
     postReply: (req, res, next) => {
         const { tweet_id } = req.params
         const { comment } = req.body
-        const userId = req.user.id
-        console.log(`tweet_id=${tweet_id}，comment=${comment}，userId=${userId}`)
+        const userId = helpers.getUser(req).id
         return Promise.all([
             User.findByPk(userId),
             Tweet.findByPk(tweet_id)
@@ -15,12 +16,13 @@ const replyController = {
             if (!tweet) return res.json({ status: 'error', message: "Tweet didn't exist!'" })
             return Reply.create({
                 comment,
-                tweetId: tweet_id,
-                userId
+                TweetId: tweet_id,
+                UserId: userId
             })
             .then(() => {
                return res.json({ status: 'success'})
             })
+            .catch(err => next(err))
         })
     }
 }

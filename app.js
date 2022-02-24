@@ -5,7 +5,6 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const passport = require('./config/passport')
 const session = require('express-session')
-const helpers = require('./_helpers')
 
 const { getUser } = require('./helpers/auth-helpers')
 const { apis } = require('./routes')
@@ -15,6 +14,7 @@ const port = 3000
 
 const SESSION_SECRET = 'secret'
 
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
