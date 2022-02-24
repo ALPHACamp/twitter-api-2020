@@ -1,0 +1,700 @@
+
+> test@1.0.0 test /Users/eklipsorz/Develop/githubRepo/twitter-api-2020
+> mocha test --exit --recursive --timeout 5000
+
+
+
+Example app listening on port 3000!
+  # Followship Model
+    ✓ is named 'Followship'
+    properties
+      ✓ has property followerId
+      ✓ has property followingId
+
+  # Like Model
+    ✓ is named 'Like'
+    associations
+      ✓ should belong to user
+      ✓ should belong to tweet
+    action
+Executing (default): INSERT INTO `Likes` (`id`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'2022-02-24 13:52:45','2022-02-24 13:52:45');
+      ✓ create (44ms)
+Executing (default): SELECT `id`, `UserId`, `TweetId`, `createdAt`, `updatedAt` FROM `Likes` AS `Like` WHERE `Like`.`id` = 2;
+      ✓ read
+Executing (default): UPDATE `Likes` SET `updatedAt`='2022-02-24 13:52:45' WHERE `id` = 2
+Executing (default): SELECT `id`, `UserId`, `TweetId`, `createdAt`, `updatedAt` FROM `Likes` AS `Like` WHERE `Like`.`id` = 2;
+      ✓ update
+Executing (default): DELETE FROM `Likes` WHERE `id` = 2
+Executing (default): SELECT `id`, `UserId`, `TweetId`, `createdAt`, `updatedAt` FROM `Likes` AS `Like` WHERE `Like`.`id` = 2;
+      ✓ delete
+
+  # Reply Model
+    ✓ is named 'Reply'
+    associations
+      ✓ should belong to user
+      ✓ should belong to tweet
+    action
+Executing (default): INSERT INTO `Relies` (`id`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'2022-02-24 13:52:45','2022-02-24 13:52:45');
+      1) create
+      2) read
+      3) update
+      4) delete
+
+  # Tweet Model
+    ✓ is named 'Tweet'
+    associations
+      ✓ should have many replies
+      ✓ should have many likes
+      ✓ should belong to user
+    action
+Executing (default): INSERT INTO `Tweets` (`id`,`UserId`,`description`,`likeCount`,`replyCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,1,'hi',0,0,'2022-02-24 13:52:50','2022-02-24 13:52:50');
+      5) create
+      6) read
+      7) update
+      8) delete
+
+  # User Model
+    ✓ is named 'User'
+    properties
+      ✓ has property name
+      ✓ has property email
+      ✓ has property password
+      ✓ has property account
+      ✓ has property cover
+      ✓ has property avatar
+    associations
+      ✓ should have many replies
+      ✓ should have many tweets
+      ✓ should have many likes
+      ✓ should have many followships
+    action
+Executing (default): INSERT INTO `Users` (`id`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+      ✓ create
+Executing (default): SELECT `id`, `account`, `email`, `password`, `name`, `avatar`, `cover`, `introduction`, `role`, `likeCount`, `tweetCount`, `followingCount`, `followerCount`, `createdAt`, `updatedAt` FROM `Users` AS `User` WHERE `User`.`id` = 1;
+      ✓ read
+Executing (default): UPDATE `Users` SET `updatedAt`='2022-02-24 13:52:55' WHERE `id` = 1
+Executing (default): SELECT `id`, `account`, `email`, `password`, `name`, `avatar`, `cover`, `introduction`, `role`, `likeCount`, `tweetCount`, `followingCount`, `followerCount`, `createdAt`, `updatedAt` FROM `Users` AS `User` WHERE `User`.`id` = 1;
+      ✓ update
+Executing (default): DELETE FROM `Users` WHERE `id` = 1
+Executing (default): SELECT `id`, `account`, `email`, `password`, `name`, `avatar`, `cover`, `introduction`, `role`, `likeCount`, `tweetCount`, `followingCount`, `followerCount`, `createdAt`, `updatedAt` FROM `Users` AS `User` WHERE `User`.`id` = 1;
+      ✓ delete
+
+  # admin requests
+    # GET 
+       /api/admin/users
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): INSERT INTO `Users` (`id`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'root',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`role`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User1','User1','User1','User1','admin',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User2','User2','User2','User2',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+        9)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+    # DELETE 
+       /api/admin/tweets/:id
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): INSERT INTO `Users` (`id`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'root',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`role`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User1','User1','User1','User1','admin',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User2','User2','User2','User2',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Tweets` (`id`,`UserId`,`description`,`likeCount`,`replyCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,1,'User1 的 description',0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+        10)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+
+  # followship requests
+    # POST 
+       /api/followships
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Followships`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): INSERT INTO `Users` (`id`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'root',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User1','User1','User1','User1',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User2','User2','User2','User2',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+inside error
+        11)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Followships`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+    # DELETE 
+       /api/followships/:followingId
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Followships`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): INSERT INTO `Users` (`id`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'root',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User1','User1','User1','User1',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User2','User2','User2','User2',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Followships` (`id`,`followerId`,`followingId`,`createdAt`,`updatedAt`) VALUES (DEFAULT,1,2,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+        12)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Followships`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+
+  # like requests
+    # POST 
+       /api/tweets/:id/like
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): TRUNCATE `Likes`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): INSERT INTO `Users` (`id`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'root',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User1','User1','User1','User1',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User2','User2','User2','User2',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Tweets` (`id`,`UserId`,`description`,`likeCount`,`replyCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,2,'User2 的 Tweet1',0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+        13)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): TRUNCATE `Likes`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+       /api/tweets/:id/unlike
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): TRUNCATE `Likes`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): INSERT INTO `Users` (`id`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'root',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User1','User1','User1','User1',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User2','User2','User2','User2',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Tweets` (`id`,`UserId`,`description`,`likeCount`,`replyCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,2,'User2 的 Tweet1',0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Likes` (`id`,`UserId`,`TweetId`,`createdAt`,`updatedAt`) VALUES (DEFAULT,1,1,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+        14)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): TRUNCATE `Likes`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+
+  # reply requests
+    # POST 
+       /api/tweets/:tweet_id/replies
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): TRUNCATE `Relies`
+        15) "before all" hook for " - successfully"
+        16) "after all" hook for " - successfully"
+    # GET 
+      GET /api/tweets/:tweet_id/replies
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): TRUNCATE `Relies`
+        17) "before all" hook for " - successfully"
+        18) "after all" hook for " - successfully"
+
+  # tweet requests
+    # POST 
+      POST /api/tweets
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): INSERT INTO `Users` (`id`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'root',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User1','User1','User1','User1',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+        19)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+    # GET 
+      GET /api/tweets
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): INSERT INTO `Users` (`id`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'root',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Users` (`id`,`account`,`email`,`password`,`name`,`likeCount`,`tweetCount`,`followingCount`,`followerCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,'User1','User1','User1','User1',0,0,0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+Executing (default): INSERT INTO `Tweets` (`id`,`UserId`,`description`,`likeCount`,`replyCount`,`createdAt`,`updatedAt`) VALUES (DEFAULT,1,'User1 的 Tweet1',0,0,'2022-02-24 13:52:55','2022-02-24 13:52:55');
+        20)  - successfully
+        21)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): TRUNCATE `Tweets`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+
+  # user requests
+    # POST 
+      POST /api/users
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+Executing (default): SET FOREIGN_KEY_CHECKS = 1
+Executing (default): SELECT `id`, `account`, `email`, `password`, `name`, `avatar`, `cover`, `introduction`, `role`, `likeCount`, `tweetCount`, `followingCount`, `followerCount`, `createdAt`, `updatedAt` FROM `Users` AS `User` WHERE `User`.`account` = 'User1' LIMIT 1;
+Executing (default): SELECT `id`, `account`, `email`, `password`, `name`, `avatar`, `cover`, `introduction`, `role`, `likeCount`, `tweetCount`, `followingCount`, `followerCount`, `createdAt`, `updatedAt` FROM `Users` AS `User` WHERE `User`.`email` = 'User1@example.com' LIMIT 1;
+        22)  - successfully
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+        23) "after all" hook for " - successfully"
+    # GET 
+      GET /users/:id
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+        24) "before all" hook for " - successfully"
+        25) "after all" hook for " - successfully"
+      GET /users/:id/tweets
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+        26) "before all" hook for " - self successfully"
+        27) "after all" hook for " - self successfully"
+      GET /users/:id/replied_tweets
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+        28) "before all" hook for " - successfully"
+        29) "after all" hook for " - successfully"
+      GET /users/:id/likes
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+        30) "before all" hook for " - successfully"
+        31) "after all" hook for " - successfully"
+      GET /users/:id/followings
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+        32) "before all" hook for " - successfully"
+        33) "after all" hook for " - successfully"
+      GET /users/:id/followers
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+        34) "before all" hook for " - successfully"
+        35) "after all" hook for " - successfully"
+    # PUT 
+      PUT /api/users/:id
+Executing (default): SET FOREIGN_KEY_CHECKS = 0
+Executing (default): TRUNCATE `Users`
+        36) "before all" hook for " - successfully"
+        37) "after all" hook for " - successfully"
+
+
+  32 passing (11s)
+  37 failing
+
+  1) # Reply Model
+       action
+         create:
+     Error: Timeout of 5000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/Users/eklipsorz/Develop/githubRepo/twitter-api-2020/test/models/Reply.spec.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  2) # Reply Model
+       action
+         read:
+     TypeError: Cannot read property 'id' of null
+      at Context.<anonymous> (test/models/Reply.spec.js:65:30)
+      at processImmediate (internal/timers.js:461:21)
+
+  3) # Reply Model
+       action
+         update:
+     TypeError: Cannot read property 'id' of null
+      at Context.<anonymous> (test/models/Reply.spec.js:72:47)
+      at processImmediate (internal/timers.js:461:21)
+
+  4) # Reply Model
+       action
+         delete:
+     TypeError: Cannot read property 'id' of null
+      at Context.<anonymous> (test/models/Reply.spec.js:81:44)
+      at processImmediate (internal/timers.js:461:21)
+
+  5) # Tweet Model
+       action
+         create:
+     Error: Timeout of 5000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/Users/eklipsorz/Develop/githubRepo/twitter-api-2020/test/models/Tweet.spec.js)
+      at listOnTimeout (internal/timers.js:554:17)
+      at processTimers (internal/timers.js:497:7)
+
+  6) # Tweet Model
+       action
+         read:
+     TypeError: Cannot read property 'id' of null
+      at Context.<anonymous> (test/models/Tweet.spec.js:73:30)
+      at processImmediate (internal/timers.js:461:21)
+
+  7) # Tweet Model
+       action
+         update:
+     TypeError: Cannot read property 'id' of null
+      at Context.<anonymous> (test/models/Tweet.spec.js:80:47)
+      at processImmediate (internal/timers.js:461:21)
+
+  8) # Tweet Model
+       action
+         delete:
+     TypeError: Cannot read property 'id' of null
+      at Context.<anonymous> (test/models/Tweet.spec.js:89:44)
+      at processImmediate (internal/timers.js:461:21)
+
+  9) # admin requests
+       # GET 
+          /api/admin/users
+            - successfully:
+     Error: expected 200 "OK", got 404 "Not Found"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  10) # admin requests
+       # DELETE 
+          /api/admin/tweets/:id
+            - successfully:
+     Error: expected 200 "OK", got 404 "Not Found"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  11) # followship requests
+       # POST 
+          /api/followships
+            - successfully:
+     Error: expected 200 "OK", got 403 "Forbidden"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  12) # followship requests
+       # DELETE 
+          /api/followships/:followingId
+            - successfully:
+     Error: expected 200 "OK", got 404 "Not Found"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  13) # like requests
+       # POST 
+          /api/tweets/:id/like
+            - successfully:
+     Error: expected 200 "OK", got 404 "Not Found"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  14) # like requests
+       # POST 
+          /api/tweets/:id/unlike
+            - successfully:
+     Error: expected 200 "OK", got 404 "Not Found"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  15) # reply requests
+       # POST 
+          /api/tweets/:tweet_id/replies
+           "before all" hook for " - successfully":
+     SequelizeDatabaseError: Table 'ac_twitter_workspace.relies' doesn't exist
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  16) # reply requests
+       # POST 
+          /api/tweets/:tweet_id/replies
+           "after all" hook for " - successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/reply.spec.js:58:27)
+      at processImmediate (internal/timers.js:461:21)
+
+  17) # reply requests
+       # GET 
+         GET /api/tweets/:tweet_id/replies
+           "before all" hook for " - successfully":
+     SequelizeDatabaseError: Table 'ac_twitter_workspace.relies' doesn't exist
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  18) # reply requests
+       # GET 
+         GET /api/tweets/:tweet_id/replies
+           "after all" hook for " - successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/reply.spec.js:112:27)
+      at processImmediate (internal/timers.js:461:21)
+
+  19) # tweet requests
+       # POST 
+         POST /api/tweets
+            - successfully:
+     Error: expected 200 "OK", got 404 "Not Found"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  20) # tweet requests
+       # GET 
+         GET /api/tweets
+            - successfully:
+     Error: expected 200 "OK", got 404 "Not Found"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  21) # tweet requests
+       # GET 
+         GET /api/tweets
+            - successfully:
+     Error: expected 200 "OK", got 404 "Not Found"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  22) # user requests
+       # POST 
+         POST /api/users
+            - successfully:
+     Error: expected 200 "OK", got 400 "Bad Request"
+      at Test._assertStatus (node_modules/supertest/lib/test.js:268:12)
+      at Test._assertFunction (node_modules/supertest/lib/test.js:283:11)
+      at Test.assert (node_modules/supertest/lib/test.js:173:18)
+      at Server.localAssert (node_modules/supertest/lib/test.js:131:12)
+      at emitCloseNT (net.js:1659:8)
+      at processTicksAndRejections (internal/process/task_queues.js:79:21)
+
+  23) # user requests
+       # POST 
+         POST /api/users
+           "after all" hook for " - successfully":
+     SequelizeDatabaseError: Cannot truncate a table referenced in a foreign key constraint (`ac_twitter_workspace`.`Followships`, CONSTRAINT `followships_ibfk_1`)
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  24) # user requests
+       # GET 
+         GET /users/:id
+           "before all" hook for " - successfully":
+     SequelizeDatabaseError: Cannot truncate a table referenced in a foreign key constraint (`ac_twitter_workspace`.`Followships`, CONSTRAINT `followships_ibfk_1`)
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  25) # user requests
+       # GET 
+         GET /users/:id
+           "after all" hook for " - successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/user.spec.js:92:27)
+      at processImmediate (internal/timers.js:461:21)
+
+  26) # user requests
+       # GET 
+         GET /users/:id/tweets
+           "before all" hook for " - self successfully":
+     SequelizeDatabaseError: Cannot truncate a table referenced in a foreign key constraint (`ac_twitter_workspace`.`Followships`, CONSTRAINT `followships_ibfk_1`)
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  27) # user requests
+       # GET 
+         GET /users/:id/tweets
+           "after all" hook for " - self successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/user.spec.js:141:27)
+      at processImmediate (internal/timers.js:461:21)
+
+  28) # user requests
+       # GET 
+         GET /users/:id/replied_tweets
+           "before all" hook for " - successfully":
+     SequelizeDatabaseError: Cannot truncate a table referenced in a foreign key constraint (`ac_twitter_workspace`.`Followships`, CONSTRAINT `followships_ibfk_1`)
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  29) # user requests
+       # GET 
+         GET /users/:id/replied_tweets
+           "after all" hook for " - successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/user.spec.js:192:27)
+      at processImmediate (internal/timers.js:461:21)
+
+  30) # user requests
+       # GET 
+         GET /users/:id/likes
+           "before all" hook for " - successfully":
+     SequelizeDatabaseError: Cannot truncate a table referenced in a foreign key constraint (`ac_twitter_workspace`.`Followships`, CONSTRAINT `followships_ibfk_1`)
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  31) # user requests
+       # GET 
+         GET /users/:id/likes
+           "after all" hook for " - successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/user.spec.js:244:27)
+      at processImmediate (internal/timers.js:461:21)
+
+  32) # user requests
+       # GET 
+         GET /users/:id/followings
+           "before all" hook for " - successfully":
+     SequelizeDatabaseError: Cannot truncate a table referenced in a foreign key constraint (`ac_twitter_workspace`.`Followships`, CONSTRAINT `followships_ibfk_1`)
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  33) # user requests
+       # GET 
+         GET /users/:id/followings
+           "after all" hook for " - successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/user.spec.js:296:27)
+      at processImmediate (internal/timers.js:461:21)
+
+  34) # user requests
+       # GET 
+         GET /users/:id/followers
+           "before all" hook for " - successfully":
+     SequelizeDatabaseError: Cannot truncate a table referenced in a foreign key constraint (`ac_twitter_workspace`.`Followships`, CONSTRAINT `followships_ibfk_1`)
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  35) # user requests
+       # GET 
+         GET /users/:id/followers
+           "after all" hook for " - successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/user.spec.js:348:27)
+      at processImmediate (internal/timers.js:461:21)
+
+  36) # user requests
+       # PUT 
+         PUT /api/users/:id
+           "before all" hook for " - successfully":
+     SequelizeDatabaseError: Cannot truncate a table referenced in a foreign key constraint (`ac_twitter_workspace`.`Followships`, CONSTRAINT `followships_ibfk_1`)
+      at Query.formatError (node_modules/sequelize/lib/dialects/mysql/query.js:247:16)
+      at Query.handler [as onResult] (node_modules/sequelize/lib/dialects/mysql/query.js:68:23)
+      at Query.execute (node_modules/mysql2/lib/commands/command.js:30:14)
+      at Connection.handlePacket (node_modules/mysql2/lib/connection.js:455:32)
+      at PacketParser.onPacket (node_modules/mysql2/lib/connection.js:73:18)
+      at PacketParser.executeStart (node_modules/mysql2/lib/packet_parser.js:75:16)
+      at Socket.<anonymous> (node_modules/mysql2/lib/connection.js:80:31)
+      at addChunk (internal/streams/readable.js:309:12)
+      at readableAddChunk (internal/streams/readable.js:284:9)
+      at Socket.Readable.push (internal/streams/readable.js:223:10)
+      at TCP.onStreamRead (internal/stream_base_commons.js:188:23)
+
+  37) # user requests
+       # PUT 
+         PUT /api/users/:id
+           "after all" hook for " - successfully":
+     TypeError: Cannot read property 'restore' of undefined
+      at Context.<anonymous> (test/requests/user.spec.js:403:27)
+      at processImmediate (internal/timers.js:461:21)
+
+
+
