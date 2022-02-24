@@ -16,6 +16,7 @@ router.get('/:id/replied_tweets', authenticated, paramsChecker, userController.g
 router.get('/:id/tweets', authenticated, paramsChecker, userController.getUserTweet)
 router.get('/:id', authenticated, paramsChecker, userController.getUserProfile)
 
+router.put('/:id/account', authenticated, paramsChecker, userController.putUserAccount)
 router.put('/:id', authenticated, paramsChecker, cpUpload, userController.putUserProfile)
 
 module.exports = router

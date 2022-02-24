@@ -180,6 +180,21 @@ const userServices = {
       })
       .then(updatedUser => cb(null, updatedUser))
       .catch(err => cb(err))
+  },
+  putUserAccount: (req, cb) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error('資料庫內找不到使用者資料')
+
+        return user.update({
+          name: req.body.name,
+          account: req.body.account,
+          email: req.body.email,
+          password: bcrypt.hashSync(req.body.password, 10)
+        })
+      })
+      .then(updatedUser => cb(null, updatedUser))
+      .catch(err => cb(err))
   }
 }
 

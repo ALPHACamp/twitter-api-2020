@@ -29,10 +29,22 @@ const userController = {
   },
   putUserProfile: (req, res, next) => {
     if (Number(req.params.id) !== getUser(req).dataValues.id) throw new Error('只能編輯自己的資料')
-
+    console.log(req.body.account)
     if (req.body.name.trim().length > 50) throw new RangeError('暱稱字數超過上限')
     if (req.body.introduction.trim().length > 160) throw new RangeError('自我介紹字數超過上限')
     userServices.putUserProfile(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  putUserAccount: (req, res, next) => {
+    if (Number(req.params.id) !== getUser(req).dataValues.id) throw new Error('只能編輯自己的資料')
+
+    if (req.body.account === undefined || req.body.account.trim() === '') throw new Error('帳號為必填項目')
+    if (req.body.account.trim().length > 20) throw new RangeError('帳號字數超過上限')
+    if (req.body.email === undefined || req.body.email.trim() === '') throw new Error('信箱為必填項目')
+    if (req.body.password === undefined || req.body.password.trim() === '') throw new Error('密碼為必填項目')
+    if (req.body.password.length < 5 || req.body.password.length > 20) throw new RangeError('密碼字數不符合規定')
+    if (req.body.name && req.body.name.trim().length > 50) throw new RangeError('暱稱字數超過上限')
+
+    userServices.putUserAccount(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 
