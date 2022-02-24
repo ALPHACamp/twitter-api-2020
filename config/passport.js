@@ -14,7 +14,9 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
     include: [
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
-    ]
+    ],
+    raw: true,
+    nest: true
   })
     .then(user => cb(null, user))
     .catch(err => cb(err))
