@@ -1,4 +1,6 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const helpers = require('../_helpers')
 const validator = require('validator')
 const { User } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -9,7 +11,7 @@ const userController = {
       if (!name || !account || !email || !password || !checkPassword) {
         return res.status(400).json({
           status: 'error',
-          message: '資料未全部填完' 
+          message: '欄位必須全部填完'
         })
       }
       if (email && !validator.isEmail(email)) {
@@ -42,15 +44,45 @@ const userController = {
           message: '帳號長度不能超過 50 個字'
         })
       }
-      const user = await User.findOne({ where: account, role: 'user' })
-      
-
+      const checkedUser = await User.findOne({
+        where: {
+          [Op.or]: [{ account }, { email }]
+        },
+        raw: true
+      })
+      if (checkedUser) return res.status(400).json({
+        status: 'error',
+        message: 'account 或 email 已註冊!'
+      })
+      console.log(checkedUser)
+      const user = await User.create({
+        name,
+        account,
+        email,
+        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+      })
+      console.log(user)
+      return res.status(200).json({
+        status: 'success',
+        message: 'Account success created!'
+      })
     } catch (err) { next(err) }
   },
   signIn: async (req, res, next) => {
-    res.redirect('/tweets')
+    try {
+      const userData = req.user.toJSON()
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      res.json({
+        status: 'success',
+        message: 'login success!',
+        data: {
+          token,
+          user: req.user
+        }
+      })
+    } catch (err) { next(err) }
   }
-  
 }
 
 module.exports = userController
