@@ -152,6 +152,31 @@ const userServices = {
       })
       .catch(err => cb(err))
   },
+  getUserFollowing: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followings' }
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true
+      })
+    ])
+      .then(([user, following]) => {
+        const currentUserFollowing = following.map(f => f.followingId)
+        const data = user.Followings.map(f => ({
+          followingId: f.id,
+          account: f.account,
+          email: f.email,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          followed: currentUserFollowing?.some(id => id === f.id)
+        }))
+        return cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
   putUserProfile: (req, cb) => {
     return User.findByPk(req.params.id)
       .then(user => {

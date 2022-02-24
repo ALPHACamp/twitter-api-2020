@@ -27,6 +27,9 @@ const userController = {
   getUserReply: (req, res, next) => {
     userServices.getUserReply(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
+  getUserFollowing: (req, res, next) => {
+    userServices.getUserFollowing(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
   putUserProfile: (req, res, next) => {
     if (Number(req.params.id) !== getUser(req).dataValues.id) throw new Error('只能編輯自己的資料')
 
