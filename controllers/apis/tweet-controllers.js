@@ -19,7 +19,7 @@ const tweetController = {
     })
   },
   postTweet: (req, res, next) => {
-    console.log(req.user)
+    console.log(req.user?.id)
     tweetServices.postTweet(req, (err, data) => {
       if (err) {
         return next(err)

@@ -31,14 +31,14 @@ const tweetController = {
   postTweet: async (req, cb) => {
     try {
       const { description } = req.body
-      const userId = req.user
-      console.log(req)
+      const UserId = req.user?.id || null
+      console.log(req.user)
       if (!description) {
         return cb('Description is required.')
       }
       const newTweet = await Tweet.create({
         description,
-        userId
+        UserId
       })
       const tweetData = {
         status: 'suceess',
