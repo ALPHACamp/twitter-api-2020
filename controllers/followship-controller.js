@@ -36,21 +36,16 @@ const followshipController = {
         return next(error)
       }
 
-      const targetUser = await User.findByPk(targetUserId)
-      const loginUser = await User.findByPk(loginUserId)
-
       // 找不到對象追蹤
-      if (!targetUser) {
+      if (!(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '追蹤對象不存在'
         return next(error)
       }
 
       // 可以追蹤的狀態
-
-      await targetUser.increment('followerCount', { by: 1 })
-      await loginUser.increment('followingCount', { by: 1 })
-
+      await User.increment('followerCount', { where: { id: targetUserId }, by: 1 })
+      await User.increment('followingCount', { where: { id: loginUserId }, by: 1 })
 
       const result = await Followship.create({
         followerId: loginUserId,
@@ -80,8 +75,6 @@ const followshipController = {
       // 測試檔必檢查-請勿更動獲取方式
       const loginUserId = authHelpers.getUser(req).id
       const targetUserId = Number(req.params.id)
-      const targetUser = await User.findByPk(targetUserId)
-      const loginUser = await User.findByPk(loginUserId)
 
       // 不允許取消追蹤自己
       if (loginUserId === targetUserId) {
@@ -94,7 +87,7 @@ const followshipController = {
       }
 
       // 找不到對象可以取消追蹤
-      if (!targetUser) {
+      if (!(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '取消追蹤對象不存在'
         return next(error)
@@ -116,10 +109,8 @@ const followshipController = {
 
 
       // 可以取消追蹤的狀態
-
-      await targetUser.decrement('followerCount', { by: 1 })
-      await loginUser.decrement('followingCount', { by: 1 })
-
+      await User.decrement('followerCount', { where: { id: targetUserId }, id: 1 })
+      await User.decrement('followingCount', { where: { id: loginUserId }, id: 1 })
 
       const result = await Followship.findOne({
         where: {
