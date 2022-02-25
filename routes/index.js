@@ -31,8 +31,8 @@ router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 //replies
-router.get('/api/tweets/:id/replies', authenticated, replyController.getReplies)
-router.post('/api/tweets/:id/replies', authenticated, replyController.postReply)
+router.get('/api/tweets/:id/replies', authenticated, authenticatedUser, replyController.getReplies)
+router.post('/api/tweets/:id/replies', authenticated, authenticatedUser, replyController.postReply)
 
 //admin
 router.post('/api/admin/signin', adminController.signIn)
