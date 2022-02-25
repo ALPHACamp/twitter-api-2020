@@ -23,6 +23,9 @@ const userController = {
   },
   getFollowings: async (req, res, next) => {
     userServices.getFollowings(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getLikes: async (req, res, next) => {
+    userServices.getLikes(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = userController
