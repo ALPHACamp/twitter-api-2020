@@ -1,4 +1,4 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 
@@ -90,6 +90,37 @@ module.exports = {
       // create tweet, and then find full tweet data from database
       const tweet = await Tweet.create({ description, UserId: userId })
       const responseData = await Tweet.findByPk(tweet.id, { raw: true })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) { next(err) }
+  },
+
+  getReplies: async (req, res, next) => {
+    try {
+      const { TweetId } = req.params
+
+      const replies = await Reply.findAll({
+        include: User,
+        where: { TweetId },
+        nest: true
+      })
+
+      if (!replies.length) throw new Error('這則推文沒有任何回覆!')
+
+      // reassemble replies array
+      const responseData = replies.map(reply => {
+        reply = reply.toJSON()
+
+        // assign following object to temp constant
+        const repliedUser = reply.User
+
+        // delete following object or property from reply
+        delete reply.User
+        delete repliedUser.password
+
+        return { ...reply, repliedUser }
+      })
 
       return res.status(200).json(responseData)
 
