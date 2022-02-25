@@ -162,15 +162,19 @@ module.exports = {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.TweetId)
 
-      const [tweet, user, like] = await Promise.all([
-        Tweet.findByPk(TweetId),
-        User.findByPk(UserId),
+      const [tweet, like] = await Promise.all([
+        Tweet.findOne({
+          include: User,
+          where: { id: TweetId }
+        }),
         Like.findOne({
           where: { UserId, TweetId }
         })
       ])
 
       if (!tweet) throw new Error('因為沒有這則推文，所以點讚動作失敗!')
+
+      const user = await User.findByPk(tweet.User.id)
       if (!user) throw new Error('因為沒有推文作者，所以點讚動作失敗!')
       if (like) throw new Error('不能對同一則推文重複點讚!')
 
@@ -192,15 +196,19 @@ module.exports = {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.TweetId)
 
-      const [tweet, user, like] = await Promise.all([
-        Tweet.findByPk(TweetId),
-        User.findByPk(UserId),
+      const [tweet, like] = await Promise.all([
+        Tweet.findOne({
+          include: User,
+          where: { id: TweetId }
+        }),
         Like.findOne({
           where: { UserId, TweetId }
         })
       ])
 
       if (!tweet) throw new Error('因為沒有這則推文，所以收回讚的動作失敗!')
+
+      const user = await User.findByPk(tweet.User.id)
       if (!user) throw new Error('因為沒有推文作者，所以收回讚的動作失敗!')
       if (!like) throw new Error('不能對尚未按讚的推文收回讚!')
 
