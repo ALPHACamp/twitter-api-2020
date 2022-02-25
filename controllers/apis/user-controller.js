@@ -2,8 +2,9 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../../_helpers')
 const { Op } = require('sequelize')
-const { User } = require('../../models')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
+const { User, Tweet, Like, Reply } = require('../../models')
+const appFunc = require('../../services/appFunctions')
 const TOKEN_EXPIRES = process.env.TOKEN_EXPIRES || '30m'
 
 const userController = {
@@ -123,6 +124,100 @@ const userController = {
         data: {
           editedUser
         }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+    getTweets: async (req, res, next) => {
+    try {
+      const userId = Number(helpers.getUser(req).id)
+      const id = Number(req.params.id)
+      const user = await User.findByPk(id)
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      const tweets = await Tweet.findAll({
+        where: { UserId: id },
+        raw: true,
+        nest: true,
+        order: [['createdAt', 'DESC']],
+        include: {
+          model: User,
+          attributes: ['name', 'account', 'avatar']
+        }
+      })
+      if (process.env.NODE_ENV === 'test') {
+        res.json(tweets)
+      }
+      const resTweets = await Promise.all(tweets.map(async tweet => {
+        return await appFunc.resTweetHandler(userId, tweet)
+      }))
+      res.json({
+        status: 'success',
+        data: { tweets: resTweets }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getReplies: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      const user = await User.findByPk(id)
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      const replies = await Reply.findAll({
+        where: { UserId: id },
+        raw: true,
+        nest: true,
+        order: [['createdAt', 'DESC']],
+        include: {
+          model: User,
+          attributes: ['name', 'account', 'avatar']
+        }
+      })
+      if (process.env.NODE_ENV === 'test') {
+        res.json(replies)
+      }
+      res.json({
+        status: 'success',
+        data: { replies }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getLikes: async (req, res, next) => {
+    try {
+      const userId = Number(helpers.getUser(req).id)
+      const id = Number(req.params.id)
+      const user = await User.findByPk(id)
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      const likes = await Like.findAll({
+        where: { UserId: id },
+        raw: true,
+        nest: true,
+        include: {
+          model: Tweet,
+          order: [['createdAt', 'DESC']],
+          include: {
+            model: User,
+            attributes: ['name', 'account', 'avatar']
+          }
+        }
+      })
+      const tweets = likes.map(like => like.Tweet)
+      if (process.env.NODE_ENV === 'test') {
+        tweets.map(tweet => {
+          tweet.TweetId = tweet.id
+          return tweet
+        })
+        res.json(tweets)
+      }
+      const resTweets = await Promise.all(tweets.map(async tweet => {
+        return await appFunc.resTweetHandler(userId, tweet)
+      }))
+      res.json({
+        status: 'success',
+        data: { tweets: resTweets }
       })
     } catch (err) {
       next(err)
