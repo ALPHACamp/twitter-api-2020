@@ -125,5 +125,27 @@ module.exports = {
       return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
+  },
+
+  postReply: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const { TweetId } = req.params
+      const comment = req.body.comment?.trim() || null
+
+      if (!comment) throw new Error('回覆不能為空!')
+      if (comment.length > 140) throw new Error('回覆字數不能超過140字!')
+
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) throw new Error('沒有這則推文!')
+
+      // create reply, and then return full reply data from database
+      const responseData = await Reply.create({ 
+        comment, TweetId, UserId: userId 
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) { next(err) }
   }
 }
