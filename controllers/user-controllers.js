@@ -334,6 +334,7 @@ const userController = {
 
     // Clean user
     user = {
+      id: user.id,
       name: user.name,
       account: user.account,
       avatar: user.avatar,
