@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
-const { User, Followship } = require('../models')
+const { User, Followship, Tweet } = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -82,24 +82,41 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const { userId } = req.params
-      // const [user, followship] = await Promise.all([
-      //   User.findByPk(UserId)
-      // ])
-      const data = await User.findByPk(userId, { 
-        raw: true
+      const { userId: id } = req.params
+      const userData = await User.findByPk(id, { 
+        raw: true,
+        include: [
+          Tweet
+        ]
       })
-      if (!data) return res.status(400).json({
+      if (!userData) return res.status(400).json({
         status: 'error',
         message: 'User not found!'
       }) 
       res.json({
         status: 'success',
         message: 'getUser success!',
-        data
+        data: userData
       })
     } catch (err) { next(err) }
   },
+  getTweets: async (req, res, next) => {
+    try {
+      const { userId: id } = req.params
+      const tweetsData = await Tweet.findByPk(id, {
+        raw: true
+      })
+      if (!tweetsData) return res.status(400).json({
+        status: 'error',
+        message: 'Tweet not found!'
+      })
+      res.json({
+        status: 'success',
+        message: 'getTweets success!',
+        data: tweetsData
+      })
+    } catch (err) { next(err) }
+  }
 
 }
 
