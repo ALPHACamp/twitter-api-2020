@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const { Op } = require("sequelize");
 
 
@@ -154,6 +154,23 @@ module.exports = {
       const user = users.find(user => user.id = UserId)
       const updatedUser = await user.update(req.body)
       const responseData = updatedUser.toJSON()
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
+  getLikedTweets: async (req, res, next) => {
+    try {
+      const { UserId } = req.params
+
+      const responseData = await Like.findAll({
+        where: { UserId },
+        include: [{ model: Tweet }],
+        order: [['createdAt', 'DESC']],
+        nest: true
+      })
 
       return res.status(200).json(responseData)
 
