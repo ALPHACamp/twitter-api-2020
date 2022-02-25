@@ -110,7 +110,7 @@ const userServices = {
       })
     ])
       .then(([tweets, user]) => {
-        if (!tweets) throw new Error('資料庫內找不到使用者資料')
+        if (!tweets.length) throw new Error('資料庫內找不到使用者資料')
         const data = tweets.map(t => ({
           id: t.dataValues.id,
           userData: {
@@ -239,6 +239,7 @@ const userServices = {
       nest: true
     })
       .then(likes => {
+        if (!likes.length) throw new Error('資料庫內沒有相關資料')
         const data = likes.map(l => ({
           TweetId: l.Tweet.id,
           userData: {
