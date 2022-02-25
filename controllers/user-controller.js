@@ -179,6 +179,37 @@ const userController = {
         return res.status(200).json(replies)
       })
       .catch(err => next(err))
+  },
+  getFollowings: (req, res, next) => {
+    const getUserId = Number(req.params.id)
+    return User.findByPk(getUserId, {
+      include: [{
+        model: User, as: 'Followings',
+        attributes: [
+          ['id', 'followingId'],
+          'name', 
+          'account',
+          'avatar',
+          'cover',
+          'introduction'
+        ]
+      }],
+      attributes: [
+        'id',
+        'name',
+        'account',
+        'avatar',
+        'cover',
+      ]
+    })
+      .then(followings => {
+        const result = followings.Followings
+          .map(following => ({
+            ...following.toJSON(),
+          }))
+        return res.json(result)
+      })
+      .catch(err => next(err))
   }
 }
 
