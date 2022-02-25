@@ -104,6 +104,38 @@ const userController = {
     } catch (err) {
       return cb(err)
     }
+  },
+  putUser: async (req, cb) => {
+    try {
+      const { account, name, email, password, introduction, avatar, cover } = req.body
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const updatedUser = await user.update({
+        account,
+        name,
+        email,
+        password,
+        introduction,
+        avatar,
+        cover
+      })
+      const updatedData = { ...updatedUser.dataValues }
+      delete updatedData.password
+      const userData = {
+        status: 'success',
+        data: {
+          user: {
+            ...updatedData
+          }
+        }
+      }
+      return cb(null, userData)
+    } catch (err) {
+      return cb(err)
+    }
   }
 }
 module.exports = userController

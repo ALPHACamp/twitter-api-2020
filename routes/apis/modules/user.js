@@ -7,4 +7,5 @@ router.post('/', userController.signUp)
 router.get('/:id', authenticated, userController.getUser)
 router.get('/:id/tweets', authenticated, userController.getTweets)
 router.get('/:id/replied_tweets', userController.getRepliedTweets)
+router.put('/:id', userController.putUser)
 module.exports = router
