@@ -81,7 +81,6 @@ const adminController = {
   // 獲取所有使用者
   getUsers: async (req, res, next) => {
     try {
-      const error = new Error()
       const users = await User.findAll({
         attributes: [
           'id',

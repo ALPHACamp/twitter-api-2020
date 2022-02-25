@@ -1,6 +1,7 @@
 
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Followship, sequelize } = require('../models')
+const helper = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const formDataCheckHelpers = require('../helpers/formdata-check-helper')
 const BCRYPT_COMPLEXITY = 10
@@ -84,6 +85,42 @@ const userController = {
     } catch (error) {
       error.code = 500
       return next(error)
+    }
+  },
+  getUser: (req, res, next) => {
+
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      const user = await User.findAll({
+        where: { role: 'user' },
+        include: [{ model: User, as: 'Followers' }],
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'account',
+          'followerCount'
+        ],
+        order: [[sequelize.literal('followerCount'), 'DESC']],
+        limit: 10,
+      })
+
+      const userId = helper.getUser(req).id
+      const followedUsers = await Followship.findAll({
+        where: { followerId: userId }
+      })
+      
+      const results = user.map(u => {
+        return { 
+          ...u.toJSON(),
+          isFollowed: followedUsers.some(f => f.followingId === u.id)
+        }
+      })
+
+      return res.json(results)
+    } catch (err) {
+      next(err)
     }
 
   }
