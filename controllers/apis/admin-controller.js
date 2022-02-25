@@ -57,7 +57,9 @@ const adminController = {
       const usersSorted = users.sort((a, b) => b.tweetNum - a.tweetNum)
       return res.json({
         status: 'success',
-        data: { usersSorted }
+        data: {
+          users: usersSorted
+        }
       })
     } catch (err) {
       next(err)
@@ -81,7 +83,9 @@ const adminController = {
 
       return res.json({
         status: 'success',
-        data: { tweetsSubstr }
+        data: {
+          tweets: tweetsSubstr
+        }
       })
     } catch (err) {
       next(err)
@@ -97,7 +101,7 @@ const adminController = {
 
       return res.json({
         status: 'success',
-        data: { deletedTweet: deletedTweet.toJSON() }
+        data: { tweet: deletedTweet.toJSON() }
       })
     } catch (err) {
       next(err)
