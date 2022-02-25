@@ -87,9 +87,20 @@ module.exports = {
       if (!description) throw new Error('推文不能為空!')
       if (description.length > 140) throw new Error('推文字數不能超過140字!')
 
-      // create tweet, and then find full tweet data from database
-      const tweet = await Tweet.create({ description, UserId })
-      const responseData = await Tweet.findByPk(tweet.id, { raw: true })
+      // find user and create tweet at the same time
+      const [user, tweet] = await Promise.all([
+        User.findByPk(UserId),
+        Tweet.create({ description, UserId })
+      ])
+
+      if (!user) throw new Error('這位使用者不存在，發佈推文動作失敗!')
+
+      // plus both totalTweets number by 1,
+      // and then get full tweet data from database
+      const [_, responseData] = await Promise.all([
+        user.increment('totalTweets', { by: 1 }),
+        Tweet.findByPk(tweet.id, { raw: true })
+      ])
 
       return res.status(200).json(responseData)
 
