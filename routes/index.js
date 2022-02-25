@@ -8,6 +8,7 @@ const likeController = require('../controllers/like-controller')
 const followshipController = require('../controllers/followship-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/api-auth')
+const upload = require('../middleware/multer')
 
 
 router.get('/', (req, res) => {
@@ -27,6 +28,10 @@ router.get('/api/users/:id/followings', authenticated, userController.getUserFol
 router.get('/api/users/:id/followers', authenticated, userController.getUserFollowers)
 router.delete('/api/followships/:id', authenticated, followshipController.deleteFollowships)
 router.post('/api/followships', authenticated, followshipController.postFollowships)
+router.put('/api/users/:id', authenticated, upload.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'cover', maxCount: 1 }
+]), userController.putUser)
 router.get('/api/users/:id', authenticated, userController.getUser)
 router.post('/api/users', userController.signUp)
 router.post('/api/signin', userController.signIn)

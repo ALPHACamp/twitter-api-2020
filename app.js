@@ -7,6 +7,7 @@ const flash = require('connect-flash')
 //登入認證
 const session = require('express-session')
 const methodOverride = require('method-override')
+const path = require('path')
 const helpers = require('./_helpers')
 const passport = require('./config/passport')
 const app = express()
@@ -14,9 +15,11 @@ const port = process.env.PORT || 3000
 const route = require('./routes')
 const SESSION_SECRET = 'ThisIsMySecret'
 
+
 // body-parser
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json()) // POST json格式
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
