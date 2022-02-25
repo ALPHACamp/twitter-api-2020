@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userController = {
@@ -101,6 +101,97 @@ const userController = {
         raw: true
       })
       return cb(null, replies)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  putUser: async (req, cb) => {
+    try {
+      const { account, name, email, password, introduction, avatar, cover } = req.body
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const updatedUser = await user.update({
+        account,
+        name,
+        email,
+        password,
+        introduction,
+        avatar,
+        cover
+      })
+      const updatedData = { ...updatedUser.dataValues }
+      delete updatedData.password
+      const userData = {
+        status: 'success',
+        data: {
+          user: {
+            ...updatedData
+          }
+        }
+      }
+      return cb(null, userData)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getFollowers: async (req, cb) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followers' }
+        ]
+      })
+      const followers = user.Followers.map(e => e.dataValues)
+      followers.forEach(e => {
+        delete e.Followship
+        e.followerId = e.id
+      })
+      return cb(null, followers)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getFollowings: async (req, cb) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const followings = user.Followings.map(e => e.dataValues)
+      followings.forEach(e => {
+        delete e.Followship
+        e.followingId = e.id
+      })
+      return cb(null, followings)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getLikes: async (req, cb) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const likedTweets = await Like.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: user.id },
+        include: [{
+          model: Tweet
+        }]
+      })
+      likedTweets.forEach(e => {
+        delete e.tweetId
+        delete e.userId
+        delete e.Tweet.userId
+      })
+      return cb(null, likedTweets)
     } catch (err) {
       return cb(err)
     }
