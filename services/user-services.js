@@ -1,9 +1,11 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
-
+const sequelize = require('sequelize')
 const { User, Followship, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../_helpers')
+const { imgurFileHandler } = require('../file-helper')
+
 const userServices = {
   postUser: (req, cb) => {
     return User.findOne({
@@ -30,7 +32,8 @@ const userServices = {
         name: req.body.name,
         account: req.body.account,
         email: req.body.email,
-        password: hash
+        password: hash,
+        role: 'user'
       }))
       .then(user => {
         delete user.dataValues.password
@@ -40,19 +43,26 @@ const userServices = {
   },
   userLogin: (req, cb) => {
     const userData = getUser(req).toJSON()
+    delete userData.password
     try {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      return cb(null, { token })
+      return cb(null, { token, userData })
     } catch (err) {
       cb(err)
     }
   },
   getUserProfile: (req, cb) => {
-    const { id } = req.params
+    const id = req.params.id || getUser(req).dataValues.id
     return Promise.all([
       User.findByPk(id, {
         raw: true,
-        nest: true
+        nest: true,
+        include: { model: Tweet, attributes: [] },
+        attributes: {
+          include: [
+            [sequelize.fn('COUNT', sequelize.col('tweets.id')), 'tweetAmount']
+          ]
+        }
       }),
       Followship.findAll({
         where: { followerId: id },
@@ -66,17 +76,23 @@ const userServices = {
       })
     ])
       .then(([user, follower, following]) => {
-        if (!user) throw new Error('資料庫內沒有相關資料')
+        if (!user) throw new Error('資料庫內找不到使用者資料')
+        // 瀏覽特定使用者資料時，特定使用者不包含後台管理員
+        if (req.params.id && user.role === 'admin') throw new Error('帳號不存在')
         const data = {
           id: user.id,
+          email: user.email,
           account: user.account,
           name: user.name,
           cover: user.cover,
           avatar: user.avatar,
           introduction: user.introduction,
+          role: user.role,
           follower: follower.length,
-          following: following.length
+          following: following.length,
+          tweetAmount: user.tweetAmount
         }
+        if (req.params.id) data.followed = following?.some(f => f.followerId === getUser(req).dataValues.id)
         return cb(null, data)
       })
       .catch(err => cb(err))
@@ -95,7 +111,7 @@ const userServices = {
       })
     ])
       .then(([tweets, user]) => {
-        if (!tweets) throw new Error('資料庫內沒有相關資料')
+        if (!tweets.length) throw new Error('資料庫內找不到使用者資料')
         const data = tweets.map(t => ({
           id: t.dataValues.id,
           userData: {
@@ -125,7 +141,7 @@ const userServices = {
       nest: true
     })
       .then(replies => {
-        if (!replies.length) throw new Error('資料庫內沒有相關資料')
+        if (!replies.length) throw new Error('資料庫內找不到使用者資料')
         const data = replies.map(r => ({
           id: r.id,
           comment: r.comment,
@@ -142,6 +158,167 @@ const userServices = {
         }))
         return cb(null, data)
       })
+      .catch(err => cb(err))
+  },
+  getUserFollowing: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followings' }
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true
+      })
+    ])
+      .then(([user, following]) => {
+        if (!user) throw new Error('資料庫內找不到使用者資料')
+        if (user.dataValues.role === 'admin') throw new Error('帳號不存在')
+        if (!user.Followings.length) throw new Error('該使用者沒有追蹤者(following)')
+
+        const currentUserFollowing = following.map(f => f.followingId)
+        const data = user.Followings.map(f => ({
+          followingId: f.id,
+          account: f.account,
+          email: f.email,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          followed: currentUserFollowing?.some(id => id === f.id)
+        }))
+        return cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
+  getUserFollower: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        include: { model: User, as: 'Followers' }
+      }),
+      Followship.findAll({
+        where: { followerId: getUser(req).dataValues.id },
+        raw: true
+      })
+    ])
+      .then(([user, following]) => {
+        if (!user) throw new Error('資料庫內找不到該使用者資料')
+        if (user.dataValues.role === 'admin') throw new Error('帳號不存在')
+        if (!user.Followers.length) throw new Error('該使用者沒有追隨者(follower)')
+
+        const currentUserFollowing = following.map(f => f.followingId)
+        const data = user.Followers.map(f => ({
+          followerId: f.id,
+          account: f.account,
+          email: f.email,
+          name: f.name,
+          avatar: f.avatar,
+          introduction: f.introduction,
+          followed: currentUserFollowing?.some(id => id === f.id)
+        }))
+        return cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
+  getUserLike: (req, cb) => {
+    const { id } = req.params
+    return Like.findAll({
+      where: { userId: id },
+      include: {
+        model: Tweet,
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] },
+          { model: User }
+        ],
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+            'replyAmount'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
+        ]
+      },
+      group: ['like.id'],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(likes => {
+        if (!likes.length) throw new Error('資料庫內沒有相關資料')
+        const data = likes.map(l => ({
+          TweetId: l.Tweet.id,
+          userData: {
+            id: l.Tweet.User.id,
+            account: l.Tweet.User.account,
+            name: l.Tweet.User.name,
+            avatar: l.Tweet.User.avatar
+          },
+          description: l.Tweet.description,
+          replyAmount: l.Tweet.replyAmount,
+          likeAmount: l.Tweet.likeAmount,
+          userLiked: Boolean(l.Tweet.userLiked),
+          createdAt: l.createdAt
+        }))
+        return cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
+  putUserProfile: (req, cb) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error('資料庫內找不到使用者資料')
+        const { files } = req
+        // 有上傳封面或頭像
+        if (JSON.stringify(files) !== '{}' && files !== undefined) {
+          return Promise.all([
+            imgurFileHandler(files.cover),
+            imgurFileHandler(files.avatar)
+          ])
+            .then(([coverFilePath, avatarFilePath]) => {
+              return user.update({
+                name: req.body.name,
+                introduction: req.body.introduction,
+                cover: coverFilePath || user.toJSON().cover,
+                avatar: avatarFilePath || user.toJSON().avatar
+              })
+            })
+        } else {
+          return user.update({
+            name: req.body.name,
+            introduction: req.body.introduction
+          })
+        }
+      })
+      .then(updatedUser => cb(null, updatedUser))
+      .catch(err => cb(err))
+  },
+  putUserAccount: (req, cb) => {
+    return User.findAll({
+      where: {
+        [Op.or]: [
+          { email: req.body.email },
+          { account: req.body.account }
+        ]
+      },
+      attributes: ['account', 'email', 'id'],
+      raw: true,
+      nest: true
+    })
+      .then(user => {
+        // 檢查信箱是否已被用過，如果被用過但 id 等於 getUser 的 id 就代表那是自己
+        if (user.some(u => u.email === req.body.email && u.id !== getUser(req).dataValues.id)) throw new Error('信箱已被註冊過')
+        if (user.some(u => u.account === req.body.account && u.id !== getUser(req).dataValues.id)) throw new Error('帳號已被註冊過')
+        return User.findByPk(req.params.id)
+      })
+      .then(user => {
+        if (!user) throw new Error('資料庫內找不到使用者資料')
+
+        return user.update({
+          name: req.body.name,
+          account: req.body.account,
+          email: req.body.email,
+          password: bcrypt.hashSync(req.body.password, 10)
+        })
+      })
+      .then(updatedUser => cb(null, updatedUser))
       .catch(err => cb(err))
   }
 }

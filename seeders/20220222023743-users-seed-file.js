@@ -10,7 +10,7 @@ module.exports = {
         email: 'root@example.com',
         password: await bcrypt.hash('12345678', 10),
         account: 'root',
-        role: 'administrator',
+        role: 'admin',
         avatar: `https://loremflickr.com/320/240/man/?random=${Math.random() * 100}`,
         cover: `https://loremflickr.com/1440/480/city/?random=${Math.random() * 100}`,
         introduction: faker.lorem.text().substring(0, 160),
