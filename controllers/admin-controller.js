@@ -52,7 +52,6 @@ const adminController = {
     try {
       const error = new Error()
       const tweet = await Tweet.findByPk(req.params.id)
-      console.log(tweet.id)
 
       if (!tweet) {
         error.code = 404
