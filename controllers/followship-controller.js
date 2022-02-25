@@ -44,13 +44,13 @@ const followshipController = {
       }
 
       // 可以追蹤的狀態
-      await User.increment('followerCount', { where: { id: targetUserId }, by: 1 })
-      await User.increment('followingCount', { where: { id: loginUserId }, by: 1 })
-
       const result = await Followship.create({
         followerId: loginUserId,
         followingId: targetUserId,
       })
+      await User.increment('followerCount', { where: { id: targetUserId }, by: 1 })
+      await User.increment('followingCount', { where: { id: loginUserId }, by: 1 })
+
 
       return res
         .status(200)
@@ -109,9 +109,6 @@ const followshipController = {
 
 
       // 可以取消追蹤的狀態
-      await User.decrement('followerCount', { where: { id: targetUserId }, id: 1 })
-      await User.decrement('followingCount', { where: { id: loginUserId }, id: 1 })
-
       const result = await Followship.findOne({
         where: {
           followerId: loginUserId,
@@ -119,6 +116,10 @@ const followshipController = {
         }
       })
         .then(followship => followship.destroy())
+
+      await User.decrement('followerCount', { where: { id: targetUserId }, id: 1 })
+      await User.decrement('followingCount', { where: { id: loginUserId }, id: 1 })
+
 
       return res
         .status(200)
