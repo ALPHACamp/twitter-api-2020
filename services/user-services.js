@@ -85,7 +85,7 @@ const userServices = {
       })
     ])
       .then(([user, follower, following]) => {
-        if (!user) throw new Error('資料庫內找不到使用者資料')
+        if (user.id === null) throw new Error('資料庫內找不到使用者資料')
         // 瀏覽特定使用者資料時，特定使用者不包含後台管理員
         if (req.params.id && user.role === 'admin') throw new Error('帳號不存在')
         const data = {
@@ -326,7 +326,7 @@ const userServices = {
         if (!user) throw new Error('資料庫內找不到使用者資料')
 
         return user.update({
-          name: req.body.name,
+          name: req.body.name || user.name,
           account: req.body.account,
           email: req.body.email,
           password: bcrypt.hashSync(req.body.password, 10)
