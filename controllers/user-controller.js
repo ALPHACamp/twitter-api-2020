@@ -11,7 +11,7 @@ const userController = {
       if (!name || !account || !email || !password || !checkPassword) {
         return res.status(400).json({
           status: 'error',
-          message: '欄位必須全部填完'
+          message: '欄位必須全部填完' 
         })
       }
       if (email && !validator.isEmail(email)) {
