@@ -1,11 +1,11 @@
-const { Tweet, User, Reply } = require('../models')
+const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 
 
 module.exports = {
   getTweets: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id 
+      const UserId = helpers.getUser(req).id 
 
       const tweets = await Tweet.findAll({
         include: [
@@ -32,7 +32,7 @@ module.exports = {
 
         return {
           ...tweet,
-          isLiked: usersFromLikedTweets.some(u => u.id === userId),
+          isLiked: usersFromLikedTweets.some(u => u.id === UserId),
           tweetedUser
         }
       })
@@ -44,8 +44,8 @@ module.exports = {
 
   getTweet: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
-      const { TweetId } = req.params
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.TweetId)
 
       let tweet = await Tweet.findByPk(TweetId, {
         include: [
@@ -70,7 +70,7 @@ module.exports = {
       // reassemble tweet object
       const responseData = {
         ...tweet,
-        isLiked: usersFromLikedTweets.some(u => u.id === userId),
+        isLiked: usersFromLikedTweets.some(u => u.id === UserId),
         tweetedUser
       }
 
@@ -81,14 +81,14 @@ module.exports = {
 
   postTweet: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
+      const UserId = helpers.getUser(req).id
       const description = req.body.description?.trim() || null
 
       if (!description) throw new Error('推文不能為空!')
       if (description.length > 140) throw new Error('推文字數不能超過140字!')
 
       // create tweet, and then find full tweet data from database
-      const tweet = await Tweet.create({ description, UserId: userId })
+      const tweet = await Tweet.create({ description, UserId })
       const responseData = await Tweet.findByPk(tweet.id, { raw: true })
 
       return res.status(200).json(responseData)
@@ -98,7 +98,7 @@ module.exports = {
 
   getReplies: async (req, res, next) => {
     try {
-      const { TweetId } = req.params
+      const TweetId = Number(req.params.TweetId)
 
       const [tweet, replies] = await Promise.all([
         Tweet.findByPk(TweetId),
@@ -133,8 +133,8 @@ module.exports = {
 
   postReply: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
-      const { TweetId } = req.params
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.TweetId)
       const comment = req.body.comment?.trim() || null
 
       if (!comment) throw new Error('回覆不能為空!')
@@ -145,9 +145,55 @@ module.exports = {
 
       // create reply, and then return full reply data from database
       const responseData = await Reply.create({ 
-        comment, TweetId, UserId: userId 
+        comment, TweetId, UserId
       })
 
+      return res.status(200).json(responseData)
+
+    } catch (err) { next(err) }
+  },
+
+  postLike: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.TweetId)
+
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Like.findOne({
+          where: { UserId, TweetId }
+        })
+      ])
+
+      if (!tweet) throw new Error('因為沒有這則推文，所以無法對它點讚!')
+      if (like) throw new Error('不能對同一則推文重複點讚!')
+
+      // create like, and then return full like data from database
+      const responseData = await Like.create({
+        UserId, TweetId
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) { next(err) }
+  },
+
+  postUnlike: async (req, res, next) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = Number(req.params.TweetId)
+
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Like.findOne({
+          where: { UserId, TweetId }
+        })
+      ])
+
+      if (!tweet) throw new Error('因為沒有這則推文，所以無法對它收回讚!')
+      if (!like) throw new Error('不能對尚未按讚的推文收回讚!')
+
+      const responseData = await like.destroy()
       return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
