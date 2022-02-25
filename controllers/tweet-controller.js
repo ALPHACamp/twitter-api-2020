@@ -29,6 +29,7 @@ module.exports = {
         // delete original properties from tweet
         delete tweet.User
         delete tweet.UsersFromLikedTweets
+        delete tweetedUser.password
 
         return {
           ...tweet,
@@ -63,9 +64,10 @@ module.exports = {
       const tweetedUser = tweet.User
       const usersFromLikedTweets = tweet.UsersFromLikedTweets
 
-      // delete original properties from tweet
+      // remove unnecessary key properties
       delete tweet.User
       delete tweet.UsersFromLikedTweets
+      delete tweetedUser.password
 
       // reassemble tweet object
       const responseData = {
@@ -87,9 +89,20 @@ module.exports = {
       if (!description) throw new Error('推文不能為空!')
       if (description.length > 140) throw new Error('推文字數不能超過140字!')
 
-      // create tweet, and then find full tweet data from database
-      const tweet = await Tweet.create({ description, UserId })
-      const responseData = await Tweet.findByPk(tweet.id, { raw: true })
+      // find user and create tweet at the same time
+      const [user, tweet] = await Promise.all([
+        User.findByPk(UserId),
+        Tweet.create({ description, UserId })
+      ])
+
+      if (!user) throw new Error('這位使用者不存在，發佈推文動作失敗!')
+
+      // plus totalTweets number by 1,
+      // and then get full tweet data from database
+      const [_, responseData] = await Promise.all([
+        user.increment('totalTweets', { by: 1 }),
+        Tweet.findByPk(tweet.id, { raw: true })
+      ])
 
       return res.status(200).json(responseData)
 
@@ -119,7 +132,7 @@ module.exports = {
         // assign following object to temp constant
         const repliedUser = reply.User
 
-        // delete following object or property from reply
+        // remove unnecessary key properties
         delete reply.User
         delete repliedUser.password
 
@@ -143,10 +156,14 @@ module.exports = {
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error('因為沒有這則推文，無法在其底下新增回覆!')
 
+      // plus both totalReplies number by 1, and
       // create reply, and then return full reply data from database
-      const responseData = await Reply.create({ 
-        comment, TweetId, UserId
-      })
+      const [_, responseData] = await Promise.all([
+        tweet.increment('totalReplies', { by: 1 }),
+        Reply.create({
+          comment, TweetId, UserId
+        })
+      ])
 
       return res.status(200).json(responseData)
 
@@ -159,19 +176,28 @@ module.exports = {
       const TweetId = Number(req.params.TweetId)
 
       const [tweet, like] = await Promise.all([
-        Tweet.findByPk(TweetId),
+        Tweet.findOne({
+          include: User,
+          where: { id: TweetId }
+        }),
         Like.findOne({
           where: { UserId, TweetId }
         })
       ])
 
-      if (!tweet) throw new Error('因為沒有這則推文，所以無法對它點讚!')
+      if (!tweet) throw new Error('因為沒有這則推文，所以點讚動作失敗!')
+
+      const user = await User.findByPk(tweet.User.id)
+      if (!user) throw new Error('因為沒有推文作者，所以點讚動作失敗!')
       if (like) throw new Error('不能對同一則推文重複點讚!')
 
-      // create like, and then return full like data from database
-      const responseData = await Like.create({
-        UserId, TweetId
-      })
+      // plus both totalLikes and totalLiked numbers each by 1,
+      // and create like, and then return full like data from database
+      const [_t, _u, responseData] = await Promise.all([
+        tweet.increment('totalLikes', { by: 1 }),
+        user.increment('totalLiked', { by: 1 }),
+        Like.create({ UserId, TweetId }),
+      ])
 
       return res.status(200).json(responseData)
 
@@ -184,16 +210,29 @@ module.exports = {
       const TweetId = Number(req.params.TweetId)
 
       const [tweet, like] = await Promise.all([
-        Tweet.findByPk(TweetId),
+        Tweet.findOne({
+          include: User,
+          where: { id: TweetId }
+        }),
         Like.findOne({
           where: { UserId, TweetId }
         })
       ])
 
-      if (!tweet) throw new Error('因為沒有這則推文，所以無法對它收回讚!')
+      if (!tweet) throw new Error('因為沒有這則推文，所以收回讚的動作失敗!')
+
+      const user = await User.findByPk(tweet.User.id)
+      if (!user) throw new Error('因為沒有推文作者，所以收回讚的動作失敗!')
       if (!like) throw new Error('不能對尚未按讚的推文收回讚!')
 
-      const responseData = await like.destroy()
+      // minus both totalLikes and totalLiked numbers each by 1,
+      // and destroy like, and then return full like data from database
+      const [_t, _u, responseData] = await Promise.all([
+        tweet.decrement('totalLikes', { by: 1 }),
+        user.decrement('totalLiked', { by: 1 }),
+        like.destroy(),
+      ])
+
       return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
