@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('validator')
-const { User } = require('../models')
+const { User, Like, Tweet } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
   signUp: async (req, res, next) => {
@@ -82,6 +82,86 @@ const userController = {
         }
       })
     } catch (err) { next(err) }
+  },
+  postLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '推文不存在'
+          })
+      }
+      const like = await Like.findOne({
+        where: {
+          UserId: req.user.id,
+          TweetId
+        }
+      })
+      if (like) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: '已經按過喜歡囉'
+          })
+      }
+      await Like.create({
+        UserId: req.user.id,
+        TweetId
+      })
+      return res.status(200).json({
+        status: 'success',
+        message: '已加入喜歡的貼文!'
+      })
+    } catch (error) {res.status(500).json({
+      status: 'error',
+      message: error
+    })}
+  },
+  postUnlike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '推文不存在'
+          })
+      }
+      const like = await Like.findOne({
+        where: {
+          UserId: req.user.id,
+          TweetId
+        }
+      })
+      if (like) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: '已經按過喜歡囉'
+          })
+      }
+      await Like.create({
+        UserId: req.user.id,
+        TweetId
+      })
+      return res.status(200).json({
+        status: 'success',
+        message: '已加入喜歡的貼文!'
+      })
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error
+      })
+    }
   }
 }
 

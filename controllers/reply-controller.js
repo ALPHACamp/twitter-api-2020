@@ -1,7 +1,7 @@
 const { Reply, Tweet, User } = require('../models')
 const replyController = {
   getReplies: (req, res) => {
-    return Reply.findOne({
+    return Reply.findAll({
       where: {
         TweetId: req.params.id,
         UserId: req.user.id

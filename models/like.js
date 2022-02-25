@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER,
     },
-    UserId: DataTypes.STRING,
-    TweetId: DataTypes.STRING
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER
   }, {
     tableName: 'Likes'
   })
