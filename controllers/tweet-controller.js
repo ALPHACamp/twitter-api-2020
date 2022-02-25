@@ -95,7 +95,7 @@ module.exports = {
 
       if (!user) throw new Error('這位使用者不存在，發佈推文動作失敗!')
 
-      // plus both totalTweets number by 1,
+      // plus totalTweets number by 1,
       // and then get full tweet data from database
       const [_, responseData] = await Promise.all([
         user.increment('totalTweets', { by: 1 }),
