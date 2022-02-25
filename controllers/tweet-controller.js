@@ -176,5 +176,26 @@ module.exports = {
       return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
+  },
+
+  postUnlike: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const TweetId = Number(req.params.TweetId)
+
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Like.findOne({
+          where: { UserId: userId, TweetId }
+        })
+      ])
+
+      if (!tweet) throw new Error('因為沒有這則推文，所以無法對它收回讚!')
+      if (!like) throw new Error('不能對尚未按讚的推文收回讚!')
+
+      const responseData = await like.destroy()
+      return res.status(200).json(responseData)
+
+    } catch (err) { next(err) }
   }
 }
