@@ -82,7 +82,9 @@ module.exports = {
     try {
       const { UserId } = req.params
 
-      const responseData = await User.findByPk(UserId, { raw: true })
+      const responseData = await User.findByPk(UserId, {
+        attributes: { exclude: ['password'] }, raw: true
+      })
 
       return res.status(200).json(responseData)
 
@@ -124,13 +126,14 @@ module.exports = {
       // find user and count with account & email
       const users = await User.findAll({
         where: { [Op.or]: [{ id: UserId }, { account }, { email }] },
+        attributes: { exclude: ['password'] },
         limit: 4
       })
 
       // check repeat if edit account or email
       if (account && email && password) {
         // match password 
-        if (password != checkPassword) throw new Error('密碼與確認密碼不同！')
+        if (password != checkPassword) throw new Error('密碼欄位必須一致!')
 
         // check repeat
         const repeatCount = users.reduce((counter, user) => {
