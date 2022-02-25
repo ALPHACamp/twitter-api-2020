@@ -33,7 +33,22 @@ const followshipServices = {
       .catch(err => cb(err, null))
   },
   followshipTop10: (req, cb) => {
-    // Followship.findAll()
+    User.findAll({
+      attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
+      include: [{ model: User, as: 'Followers' }]
+    })
+      .then(user => {
+        if (user.length === 0) throw new Error('資料庫內沒有任何使用者資料')
+        const userData = user.map(i => i.get({ plain: true }))
+          .map(i => ({
+            ...i,
+            followed: i.Followers.some(i => i.Followship.followerId === req.user.dataValues.id),
+            Followers: i.Followers.length
+          }))
+          .sort((a, b) => a.Followers > b.Followers)
+        return cb(null, userData)
+      })
+      .catch(err => cb(err, null))
   }
 }
 
