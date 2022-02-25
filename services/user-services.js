@@ -164,6 +164,7 @@ const userServices = {
     ])
       .then(([user, following]) => {
         if (!user) throw new Error('資料庫內找不到使用者資料')
+        if (!user.Followings.length) throw new Error('該使用者沒有追蹤者(following)')
 
         const currentUserFollowing = following.map(f => f.followingId)
         const data = user.Followings.map(f => ({
@@ -190,7 +191,8 @@ const userServices = {
       })
     ])
       .then(([user, following]) => {
-        if (!user) throw new Error('資料庫內找不到使用者資料')
+        if (!user) throw new Error('資料庫內找不到該使用者資料')
+        if (!user.Followers.length) throw new Error('該使用者沒有追隨者(follower)')
 
         const currentUserFollowing = following.map(f => f.followingId)
         const data = user.Followers.map(f => ({
