@@ -100,12 +100,16 @@ module.exports = {
     try {
       const { TweetId } = req.params
 
-      const replies = await Reply.findAll({
-        include: User,
-        where: { TweetId },
-        nest: true
-      })
+      const [tweet, replies] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Reply.findAll({
+          include: User,
+          where: { TweetId },
+          nest: true
+        })
+      ])
 
+      if (!tweet) throw new Error('因為沒有這則推文，無法查詢底下的回覆!')
       if (!replies.length) throw new Error('這則推文沒有任何回覆!')
 
       // reassemble replies array
@@ -137,7 +141,7 @@ module.exports = {
       if (comment.length > 140) throw new Error('回覆字數不能超過140字!')
 
       const tweet = await Tweet.findByPk(TweetId)
-      if (!tweet) throw new Error('沒有這則推文!')
+      if (!tweet) throw new Error('因為沒有這則推文，無法在其底下新增回覆!')
 
       // create reply, and then return full reply data from database
       const responseData = await Reply.create({ 
