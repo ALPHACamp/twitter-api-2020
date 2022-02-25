@@ -3,7 +3,7 @@ const { Like } = require('../models')
 module.exports = {
   resTweetHandler: async function (userId, tweet) {
     const resTweet = await this.getTweetIsLiked(userId, tweet)
-    resTweet.likeCount = await this.getTweetsLikedCount(tweet)
+    resTweet.likeCount = await this.getTweetLikedCount(tweet)
     return resTweet
   },
   getTweetIsLiked: async function (userId, tweet) {
@@ -14,7 +14,7 @@ module.exports = {
     tweet.isLiked = Boolean(userLiked)
     return tweet
   },
-  getTweetsLikedCount: async function (tweet) {
+  getTweetLikedCount: async function (tweet) {
     const likes = await Like.findAndCountAll({
       where: { TweetId: tweet.id },
       raw: true,
