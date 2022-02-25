@@ -27,10 +27,6 @@ const adminController = {
     try {
       const users = await User.findAll({
         nest: true,
-        include: [
-          { model: Like, attributes: [] },
-          { model: Tweet, attributes: [] }
-        ],
         attributes: [
           'id',
           'name',
@@ -41,11 +37,11 @@ const adminController = {
           // all tweets num
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetNum'],
 
-          // all following num
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followingNum'],
-
           // all follower num
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followerNum'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerNum'],
+
+          // all following num
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingNum'],
 
           // all likes get from tweets
           [sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'), 'likeNum']
