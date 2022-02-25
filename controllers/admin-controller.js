@@ -48,29 +48,35 @@ const adminController = {
       return next(err)
     }
   },
+  // 刪除指定推文
   deleteTweet: async (req, res, next) => {
     try {
       const error = new Error()
       const tweet = await Tweet.findByPk(req.params.id)
 
+      // 找不到推文
       if (!tweet) {
         error.code = 404
         error.message = '對應推文不存在'
         throw error
       }
 
+      // 可以找到推文刪除
       await Reply.destroy({ where: { TweetId: tweet.id } })
       await Like.destroy({ where: { TweetId: tweet.id } })
-      await tweet.destroy()
+      // 成功刪除
       return res.json({
         status: 'success',
-        message: '成功刪除貼文'
+        message: '成功刪除貼文',
+        data: await tweet.destroy()
       })
     } catch (err) {
+      // 系統出錯
       err.code = 500
       return next(err)
     }
   },
+  // 獲取所有使用者
   getUsers: async (req, res, next) => {
     try {
       const error = new Error()
@@ -91,10 +97,12 @@ const adminController = {
       })
       return res.status(200).json(...[users])
     } catch (err) {
+      // 系統出錯
       err.code = 500
       return next(err)
     }
   },
+  // 獲取所有推文
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
@@ -120,8 +128,10 @@ const adminController = {
         result.description = result.description.substring(0, 50)
         return result
       })
+      // 獲取成功
       return res.status(200).json(results)
     } catch (err) {
+      // 系統出錯
       err.code = 500
       return next(err)
     }

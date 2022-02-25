@@ -29,10 +29,10 @@ function authenticatedAdmin(req, res, next) {
 
   if (user && user.role === 'admin') return next()
 
-  return res.status(403).json({
-    status: 403,
-    message: 'permission denied'
-  })
+  const error = new Error()
+  error.code = 403
+  error.message = '存取被拒'
+  return next(error)
 
 }
 
