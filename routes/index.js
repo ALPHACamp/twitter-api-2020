@@ -9,6 +9,7 @@ const uploadImage = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cov
 
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
+const followshipController = require('../controllers/followship-controller')
 
 // users
 router.post('/api/signin', userController.signIn)
@@ -28,6 +29,10 @@ router.post('/api/admin/signin', adminController.signIn)
 router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getAdminUsers)
 router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getAdminTweets)
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteAdminTweet)
+
+//followship
+router.delete('/api/followships/:id', authenticated, authenticatedUser, followshipController.removeFollowing)
+router.post('/api/followships', authenticated, authenticatedUser, followshipController.addFollowing)
 
 router.use('/api', apiErrorHandler)
 
