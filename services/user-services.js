@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs')
 const sequelize = require('sequelize')
 const { Op } = require('sequelize');
 const helper = require('../_helpers')
-const imgur = require('imgur')
-const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
-const { localFileHandler } = require('../helpers/file-helpers')
+// const imgur = require('imgur')
+// const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const { localFileHandler, imgurFileHandler } = require('../helpers/file-helpers')
 const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
@@ -88,20 +88,20 @@ const userServices = {
       const { files } = req
       if (files) {
         console.log(files)
-        imgur.setClientId(IMGUR_CLIENT_ID)
-        console.log(imgur.getClientId())
-        console.log(imgur.getAPIUrl())
+        // imgur.setClientId(IMGUR_CLIENT_ID)
+        // console.log(imgur.getClientId())
+        // console.log(imgur.getAPIUrl())
         if (files.avatar) {
-          avatar = await localFileHandler(files.avatar[0])
+          let avatar1 = await localFileHandler(files.avatar[0]) // 神聖的存在
+          // req.body.avatar = avatar
+          avatar = await imgurFileHandler(files.avatar[0])
           req.body.avatar = avatar
-          // avatar = await imgur.uploadFile(files.avatar[0].path)
-          // req.body.avatar = avatar.link
         }
         if (files.cover) {
-          cover = await localFileHandler(files.cover[0])
+          let cover1 = await localFileHandler(files.cover[0]) // 神聖的存在
+          // req.body.cover = cover
+          cover = await imgurFileHandler(files.cover[0])
           req.body.cover = cover
-          // cover = await imgur.uploadFile(files.cover[0].path)
-          // req.body.cover = cover.link
         }
       }
       const user = await User.findByPk(userId)
