@@ -17,6 +17,7 @@ router.post('/admin/login',passport.authenticate('local', { session: false }), a
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
+router.get('/users/get_current_user', authenticated, userController.getCurrentUser)
 router.get('/users/top', authenticated, userController.getTopUsers)
 router.get('/users/:id/followings', authenticated, userController.userFollowings)
 router.get('/users/:id/followers', authenticated, userController.userFollowers)
