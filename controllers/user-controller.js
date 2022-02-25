@@ -54,14 +54,12 @@ const userController = {
         status: 'error',
         message: 'account 或 email 已註冊!'
       })
-      console.log(checkedUser)
       const user = await User.create({
         name,
         account,
         email,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
       })
-      console.log(user)
       return res.status(200).json({
         status: 'success',
         message: 'Account success created!'
