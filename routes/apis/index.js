@@ -16,7 +16,8 @@ router.post('/users', userController.signUp)
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
 router.post('/tweets/:id/like', tweetController.addLike)
 router.post('/tweets/:id/unlike', tweetController.removeLike)
-router.delete('/followships/:followingId', followController.removeFollowing)
+
+router.delete('/followships/:followingId', followController.deleteFollowing)
 router.post('/followships', followController.postFollowing)
 router.use('/', apiErrorHandler)
 

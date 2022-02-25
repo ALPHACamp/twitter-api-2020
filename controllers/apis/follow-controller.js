@@ -28,7 +28,7 @@ const followController = {
       return res.json({
         status: 'success',
         data: {
-          followship,
+          followship: followship.toJSON(),
           following: {
             ...following,
             isFollowed: true
@@ -42,29 +42,29 @@ const followController = {
       next(err)
     }
   },
-  removeFollowing: async (req, res, next) => {
+  deleteFollowing: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
-      const id = req.params.followingId
+      const followerId = helpers.getUser(req).id
+      const { followingId } = req.params
 
-      const following = await User.findByPk(id, { raw: true })
-      const follower = await User.findByPk(userId, { raw: true })
+      const following = await User.findByPk(followingId, { raw: true })
+      const follower = await User.findByPk(followerId, { raw: true })
 
       const deleteFollowship = await Followship.findOne({
         where: {
-          followerId: userId,
-          followingId: id
+          followerId,
+          followingId
         }
       })
 
       if (!following) throw new Error("User didn't exist!")
       if (!deleteFollowship) throw new Error("You haven't followed this user!")
 
-      await deleteFollowship.destroy
+      await deleteFollowship.destroy()
       return res.json({
         status: 'success',
         data: {
-          deleteFollowship,
+          deleteFollowship: deleteFollowship.toJSON(),
           following: {
             ...following,
             isFollowed: false
