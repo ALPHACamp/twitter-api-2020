@@ -30,7 +30,7 @@ module.exports = {
 
         // assign following one object to temp constants
         const tweetedUser = tweet.User
-        // delete original properties from tweet
+        // remove unnecessary key properties
         delete tweet.User
         delete tweetedUser.password
 

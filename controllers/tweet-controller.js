@@ -29,6 +29,7 @@ module.exports = {
         // delete original properties from tweet
         delete tweet.User
         delete tweet.UsersFromLikedTweets
+        delete tweetedUser.password
 
         return {
           ...tweet,
@@ -63,9 +64,10 @@ module.exports = {
       const tweetedUser = tweet.User
       const usersFromLikedTweets = tweet.UsersFromLikedTweets
 
-      // delete original properties from tweet
+      // remove unnecessary key properties
       delete tweet.User
       delete tweet.UsersFromLikedTweets
+      delete tweetedUser.password
 
       // reassemble tweet object
       const responseData = {
@@ -130,7 +132,7 @@ module.exports = {
         // assign following object to temp constant
         const repliedUser = reply.User
 
-        // delete following object or property from reply
+        // remove unnecessary key properties
         delete reply.User
         delete repliedUser.password
 
