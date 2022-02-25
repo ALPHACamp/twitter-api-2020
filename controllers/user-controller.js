@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { User, Tweet } = require('../models')
+const { Op } = require("sequelize");
 
 
 module.exports = {
@@ -98,6 +99,58 @@ module.exports = {
       })
 
       if (!responseData.length) throw new Error('沒有任何推文!')
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUser: async (req, res, next) => {
+    // account edit : account name email password checkPassword 
+    // profile edit : name introduction cover avatar
+    try {
+      const selfUserId = helpers.getUser(req).id
+      const UserId = Number(req.params.UserId)
+
+      const { account, name, email, password, checkPassword, introduction } = req.body
+
+      // check UserId and word length
+      if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
+      if (introduction?.length > 160 || name?.length > 50) {
+        throw new Error('字數超出上限！')
+      }
+
+      // find user and count with account & email
+      const users = await User.findAll({
+        where: { [Op.or]: [{ id: UserId }, { account }, { email }] },
+        limit: 4
+      })
+
+      // check repeat if edit account or email
+      if (account && email && password) {
+        // match password 
+        if (password != checkPassword) throw new Error('password ')
+
+        // check repeat
+        const repeatCount = users.reduce((counter, user) => {
+          if (user.account === account) counter.account++
+          if (user.email === email) counter.email++
+          return counter
+        }, { account: 0, email: 0 })
+
+        // throw email or account error
+        if (repeatCount.account > 1 && repeatCount.email > 1) {
+          throw new Error('account 和 email 已重覆！')
+        }
+        if (repeatCount.account > 1) throw new Error('account 已重覆！')
+        if (repeatCount.email > 1) throw new Error('email 已重覆！')
+      }
+
+      // find self user and update
+      const user = users.find(user => user.id = UserId)
+      const updatedUser = await user.update(req.body)
+      const responseData = updatedUser.toJSON()
 
       return res.status(200).json(responseData)
 
