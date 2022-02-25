@@ -15,12 +15,6 @@ const authenticatedAdmin = (req, res, next) => {
   return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
 
-const authenticatedUser = (req, res, next) => {
-  const user = helper.getUser(req)
-  if (user?.role === 'user') return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
-}
-
 module.exports = {
   authenticated,
   authenticatedAdmin

@@ -1,9 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
-const { User, Followship, Tweet } = require('../models')
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
+const { User, Like, Tweet, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
   signUp: async (req, res, next) => {
@@ -39,7 +37,6 @@ const userController = {
           message: '名字長度不能超過 50 個字'
         })
       }
-
       const checkedUser = await User.findOne({
         where: {
           [Op.or]: [{ account }, { email }]
@@ -50,7 +47,6 @@ const userController = {
         status: 'error',
         message: 'account 或 email 已註冊!'
       })
-      console.log(checkedUser)
       const user = await User.create({
         name,
         account,
@@ -58,7 +54,6 @@ const userController = {
         role: 'user',
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
       })
-      console.log(user)
       return res.status(200).json({
         status: 'success',
         message: 'Account success created!'
@@ -79,6 +74,89 @@ const userController = {
         }
       })
     } catch (err) { next(err) }
+  },
+  postLike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (!tweet) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '推文不存在'
+          })
+      }
+      const like = await Like.findOne({
+        where: {
+          UserId: req.user.id,
+          TweetId
+        }
+      })
+      if (like) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: '已經按過喜歡囉'
+          })
+      }
+      await Like.create({
+        UserId: req.user.id,
+        TweetId,
+        isDeleted: false
+      })
+      return res.status(200).json({
+        status: 'success',
+        message: '已加入喜歡的貼文!'
+      })
+    } catch (error) {res.status(500).json({
+      status: 'error',
+      message: error
+    })}
+  },
+  postUnlike: async (req, res, next) => {
+    try {
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      const like = await Like.findOne({
+        where: {
+          UserId: req.user.id,
+          TweetId,
+          isDeleted: false
+        }
+      })
+      if (!tweet) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '推文不存在'
+          })
+      }
+      if (!like) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: '已經Unlike過囉'
+          })
+      }
+      const toggleLike = await like.update({
+        isDeleted: !like.isDeleted
+      })
+      if (toggleLike) {
+        return res.status(200).json({
+          status: 'success',
+          message: 'Unlike成功!'
+        })
+      }
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error
+      })
+    }
   },
   getUser: async (req, res, next) => {
     try {
@@ -119,7 +197,6 @@ const userController = {
       })
     } catch (err) { next(err) }
   }
-
 }
 
 module.exports = userController
