@@ -42,6 +42,35 @@ const tweetController = {
       return like.destroy()
       .then(() => res.json({ status: 'success'}))
     } catch(err) { next(err) }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        order: [['createdAt', 'DESC']],
+        include: [{ model: User },
+          { model: Reply },
+          { model: Like }]
+      })
+      if (!tweets) {
+        return res.json({ status: 'error', message: 'No tweets.' })
+      }
+      const result = tweets.map(tweet => {
+        return {
+          TweetId: tweet.id,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          tweetUserId: tweet.User.id,
+          tweetUserName: tweet.User.name,
+          avatar: tweet.User.avatar,
+          repliedCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+        }
+      })
+      return res.json(result)
+    } catch (err) {
+      next(err)
+    }
   }
 };
 
