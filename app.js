@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
@@ -10,6 +11,7 @@ const app = express()
 const PORT = process.env.PORT
 
 // http
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 app.use(express.json())
