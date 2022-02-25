@@ -16,7 +16,8 @@ const replyController = {
         error.message = '對應推文不存在'
         return next(error)
       }
-      //TODO: 刪除密碼
+      
+      // 獲取回覆
       const replies = await Reply.findAll({
         where: { TweetId: targetTweetId },
         include: [
@@ -29,6 +30,7 @@ const replyController = {
         nest: true
       })
 
+      // 清除敏感性資料
       const results = replies.map(item => {
         const result = item.toJSON()
         delete result.ReplyAuthor.password
