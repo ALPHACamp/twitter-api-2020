@@ -113,7 +113,7 @@ const userController = {
       const userFollowingIds = getFollowshipId(req, 'Followings')
 
       // Clean data
-      const followers = user.Followers.map(user => ({
+      const Followers = user.Followers.map(user => ({
         id: user.id,
         name: user.name,
         account: user.account,
@@ -121,7 +121,7 @@ const userController = {
         isFollowed: userFollowingIds.includes(user.id)
       }))
 
-      const followings = user.Followings.map(user => ({
+      const Followings = user.Followings.map(user => ({
         id: user.id,
         name: user.name,
         account: user.account,
@@ -131,8 +131,10 @@ const userController = {
 
       user = {
         ...user.dataValues,
-        followings,
-        followers
+        introduction: '',
+        isFollowed: userFollowingIds.includes(user.id),
+        Followers,
+        Followings
       }
 
       return res.json(user)
