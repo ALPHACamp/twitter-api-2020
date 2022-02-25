@@ -109,6 +109,9 @@ const tweetController = {
       return next(error)
     }
 
+  },
+  postTweets: (req, res, next) => {
+    console.log('postTweets')
   }
 }
 
