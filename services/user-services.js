@@ -56,7 +56,13 @@ const userServices = {
     return Promise.all([
       User.findByPk(id, {
         raw: true,
-        nest: true
+        nest: true,
+        include: { model: Tweet, attributes: [] },
+        attributes: {
+          include: [
+            [sequelize.fn('COUNT', sequelize.col('tweets.id')), 'tweetAmount']
+          ]
+        }
       }),
       Followship.findAll({
         where: { followerId: id },
@@ -83,7 +89,8 @@ const userServices = {
           introduction: user.introduction,
           role: user.role,
           follower: follower.length,
-          following: following.length
+          following: following.length,
+          tweetAmount: user.tweetAmount
         }
         return cb(null, data)
       })
