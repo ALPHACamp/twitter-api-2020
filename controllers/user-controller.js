@@ -16,6 +16,10 @@ const userController = {
     userServices.putUser(req, (err, data) =>
       err ? next(err) : res.json({ status: 'success', data }))
   },
+  putSetting: (req, res, next) => {
+    userServices.putSetting(req, (err, data) =>
+      err ? next(err) : res.json({ status: 'success', data }))
+  },
   getUserTweets: (req, res, next) => {
     userServices.getUserTweets(req, (err, data) =>
       err ? next(err) : res.status(200).json(data)) // 應測試要求要array 且第一筆要是資料一 只好拿掉 status
