@@ -1,4 +1,4 @@
-const { Tweet, User, Reply } = require('../models')
+const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 
 
@@ -146,6 +146,31 @@ module.exports = {
       // create reply, and then return full reply data from database
       const responseData = await Reply.create({ 
         comment, TweetId, UserId: userId 
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) { next(err) }
+  },
+
+  postLike: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const TweetId = Number(req.params.TweetId)
+
+      const [tweet, like] = await Promise.all([
+        Tweet.findByPk(TweetId),
+        Like.findOne({
+          where: { UserId: userId, TweetId }
+        })
+      ])
+
+      if (!tweet) throw new Error('因為沒有這則推文，所以無法對它點讚!')
+      if (like) throw new Error('不能對同一則推文重複點讚!')
+
+      // create like, and then return full like data from database
+      const responseData = await Like.create({
+        UserId: userId, TweetId
       })
 
       return res.status(200).json(responseData)
