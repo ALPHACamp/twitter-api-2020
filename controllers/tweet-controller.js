@@ -143,10 +143,14 @@ module.exports = {
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error('因為沒有這則推文，無法在其底下新增回覆!')
 
+      // plus both totalReplies number by 1, and
       // create reply, and then return full reply data from database
-      const responseData = await Reply.create({ 
-        comment, TweetId, UserId
-      })
+      const [_, responseData] = await Promise.all([
+        tweet.increment('totalReplies', { by: 1 }),
+        Reply.create({
+          comment, TweetId, UserId
+        })
+      ])
 
       return res.status(200).json(responseData)
 
