@@ -26,7 +26,7 @@ const tweetController = {
 
       // 獲取一個目前使用者所回覆過的推文之清單
       const replyTweets = await Reply.findAll({
-        attributes: ['TweetId'],
+        attributes: ['UserId'],
         where: { UserId: loginUserId },
         raw: true
       })
@@ -49,6 +49,66 @@ const tweetController = {
       error.code = 500
       return next(error)
     }
+  },
+  getTweet: async (req, res, next) => {
+
+    try {
+      const error = new Error()
+      const targetTweetId = req.params.id
+      const loginUserId = authHelpers.getUser(req).id
+
+      // 獲取一個推文(含推文下的所有回覆、推文作者)
+      const tweet = await Tweet.findByPk(targetTweetId, {
+        include: [
+          {
+            model: User,
+            as: 'TweetAuthor',
+            attributes: { exclude: ['password'] }
+          },
+          {
+            model: Reply, include: [
+              {
+                model: User,
+                as: 'ReplyAuthor',
+                attributes: { exclude: ['password'] }
+              }
+            ]
+          }
+        ]
+      })
+
+      // 找不到推文
+      if (!tweet) {
+        error.code = 404
+        error.message = '對應推文不存在'
+        return next(error)
+      }
+      // 獲取一個目前使用者所喜歡的推文之清單
+      const likeTweets = await Like.findAll({
+        attributes: ['TweetId'],
+        where: { UserId: loginUserId },
+        raw: true
+      })
+
+      // 獲取一個目前使用者所回覆過的推文之清單
+      const replyTweets = await Reply.findAll({
+        attributes: ['TweetId'],
+        where: { UserId: loginUserId },
+        raw: true
+      })
+
+      tweet.dataValues.isLiked = likeTweets.some(lt => lt.TweetId === tweet.id)
+      tweet.dataValues.isReplied = replyTweets.some(rt => rt.TweetId === tweet.id)
+
+      return res
+        .status(200)
+        .json(tweet)
+    } catch (error) {
+      // 系統出錯
+      error.code = 500
+      return next(error)
+    }
+
   }
 }
 
