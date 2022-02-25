@@ -94,7 +94,7 @@ const userController = {
     try {
       const user = await User.findAll({
         where: { role: 'user' },
-        include: [{ model: User, as: 'Followers' }],
+        include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
         attributes: [
           'id',
           'name',
