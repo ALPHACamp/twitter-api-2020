@@ -158,20 +158,25 @@ module.exports = {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.TweetId)
 
-      const [tweet, like] = await Promise.all([
+      const [tweet, user, like] = await Promise.all([
         Tweet.findByPk(TweetId),
+        User.findByPk(UserId),
         Like.findOne({
           where: { UserId, TweetId }
         })
       ])
 
-      if (!tweet) throw new Error('因為沒有這則推文，所以無法對它點讚!')
+      if (!tweet) throw new Error('因為沒有這則推文，所以點讚動作失敗!')
+      if (!user) throw new Error('因為沒有推文作者，所以點讚動作失敗!')
       if (like) throw new Error('不能對同一則推文重複點讚!')
 
-      // create like, and then return full like data from database
-      const responseData = await Like.create({
-        UserId, TweetId
-      })
+      // plus both totalLikes and totalLiked numbers each by 1,
+      // and create like, and then return full like data from database
+      const [_t, _u, responseData] = await Promise.all([
+        tweet.increment('totalLikes', { by: 1 }),
+        user.increment('totalLiked', { by: 1 }),
+        Like.create({ UserId, TweetId }),
+      ])
 
       return res.status(200).json(responseData)
 
@@ -183,17 +188,26 @@ module.exports = {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.TweetId)
 
-      const [tweet, like] = await Promise.all([
+      const [tweet, user, like] = await Promise.all([
         Tweet.findByPk(TweetId),
+        User.findByPk(UserId),
         Like.findOne({
           where: { UserId, TweetId }
         })
       ])
 
-      if (!tweet) throw new Error('因為沒有這則推文，所以無法對它收回讚!')
+      if (!tweet) throw new Error('因為沒有這則推文，所以收回讚的動作失敗!')
+      if (!user) throw new Error('因為沒有推文作者，所以收回讚的動作失敗!')
       if (!like) throw new Error('不能對尚未按讚的推文收回讚!')
 
-      const responseData = await like.destroy()
+      // minus both totalLikes and totalLiked numbers each by 1,
+      // and destroy like, and then return full like data from database
+      const [_t, _u, responseData] = await Promise.all([
+        tweet.decrement('totalLikes', { by: 1 }),
+        user.decrement('totalLiked', { by: 1 }),
+        like.destroy(),
+      ])
+
       return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
