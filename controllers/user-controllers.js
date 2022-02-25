@@ -1,5 +1,7 @@
+const helpers = require('../_helpers')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { reporters } = require('mocha')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userController = {
   signUp: async (req, res, next) => {
@@ -59,6 +61,7 @@ const userController = {
       next(err)
     }
   },
+
   getUserTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -76,6 +79,7 @@ const userController = {
       next(err)
     }
   },
+
   getTopUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
@@ -99,6 +103,7 @@ const userController = {
       next(err)
     }
   },
+
   userFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -130,6 +135,7 @@ const userController = {
       next(err)
     }
   },
+
   userFollowers: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id,
@@ -159,6 +165,7 @@ const userController = {
       next(err)
     }
   },
+
   getReliedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -191,6 +198,7 @@ const userController = {
       next(err)
     }
   },
+
   getLikes: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -224,6 +232,37 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  addFollow: async (req, res, next) => {
+    const followerId = helpers.getUser(req).id
+    const followingId = req.body.id
+    console.log(followerId)
+    console.log(followingId)
+    try {
+      const user = await User.findByPk(followingId)
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!"})
+  
+      const followship = await Followship.findOne({ where: { followerId, followingId }})
+      if (followship) return res.json({ status: 'error', message: 'You are already following this user!'})
+
+      if (followerId == followingId) return res.json({ status: 'error', message: "You can't follow yourself"})
+  
+      return Followship.create({ followerId, followingId })
+      .then(() => res.json({ status: 'success'}))
+    } catch (err) { next(err) }
+  },
+
+  removeFollow: async (req, res, next) =>{
+    const followingId = req.params.followingId
+    const followerId = helpers.getUser(req).id
+    try {
+      const followship = await Followship.findOne({ where: { followerId, followingId }})
+      if (!followship) return res.json({ status: 'error', message: "You haven't followed this user!"})
+
+      return followship.destroy()
+      .then(() => res.json({ status: 'success'}))
+    } catch (err) { next(err) }
   }
 }
 
