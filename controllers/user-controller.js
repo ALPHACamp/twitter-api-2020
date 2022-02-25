@@ -30,6 +30,9 @@ const userController = {
   getUserFollowing: (req, res, next) => {
     userServices.getUserFollowing(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
+  getUserFollower: (req, res, next) => {
+    userServices.getUserFollower(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
   putUserProfile: (req, res, next) => {
     if (Number(req.params.id) !== getUser(req).dataValues.id) throw new Error('只能編輯自己的資料')
 

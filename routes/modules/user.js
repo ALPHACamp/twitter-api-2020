@@ -13,6 +13,7 @@ router.post('/', userController.signUp)
 
 router.get('/current_user', authenticated, userController.getCurrentUser)
 router.get('/:id/followings', authenticated, paramsChecker, userController.getUserFollowing)
+router.get('/:id/followers', authenticated, paramsChecker, userController.getUserFollower)
 router.get('/:id/replied_tweets', authenticated, paramsChecker, userController.getUserReply)
 router.get('/:id/tweets', authenticated, paramsChecker, userController.getUserTweet)
 router.get('/:id', authenticated, paramsChecker, userController.getUserProfile)
