@@ -18,7 +18,10 @@ const tweetController = {
       const tweet = await Tweet.findByPk(req.params.tweet_id, {
         include: [
           Reply,
-          User
+          {
+            model: User,
+            attributes: { exclude: ['password'] }
+          }
         ],
         raw: true,
         nest: true
@@ -35,7 +38,6 @@ const tweetController = {
     try {
       const { description } = req.body
       const UserId = req.user?.id || null
-      console.log(req.user)
       if (!description) {
         return cb(new Error('Description is required.'))
       }
