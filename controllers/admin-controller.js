@@ -44,7 +44,8 @@ const adminController = {
         message: '登入成功'
       })
     } catch (err) {
-      next(err)
+      err.code = 500
+      return next(err)
     }
   },
   deleteTweet: async (req, res, next) => {
@@ -67,7 +68,8 @@ const adminController = {
         message: '成功刪除貼文'
       })
     } catch (err) {
-      next(err)
+      err.code = 500
+      return next(err)
     }
   },
   getUsers: async (req, res, next) => {
@@ -85,12 +87,44 @@ const adminController = {
           'followingCount',
           'likeCount',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)'), 'replyCount']
-         ],
+        ],
         order: [['TweetCount', 'DESC']]
       })
       return res.status(200).json(...[users])
     } catch (err) {
-      next(err)
+      err.code = 500
+      return next(err)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        attributes: [
+          'id',
+          'updatedAt',
+          'description'
+        ],
+        include: [
+          {
+            model: User,
+            attributes: [
+              'name',
+              'account',
+              'avatar'
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      const results = tweets.map(item => {
+        const result = item.toJSON()
+        result.description = result.description.substring(0, 50)
+        return result
+      })
+      return res.status(200).json(results)
+    } catch (err) {
+      err.code = 500
+      return next(err)
     }
   }
 }
