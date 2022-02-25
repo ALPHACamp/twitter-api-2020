@@ -92,6 +92,7 @@ const userServices = {
           following: following.length,
           tweetAmount: user.tweetAmount
         }
+        if (req.params.id) data.followed = following?.some(f => f.followerId === getUser(req).dataValues.id)
         return cb(null, data)
       })
       .catch(err => cb(err))
