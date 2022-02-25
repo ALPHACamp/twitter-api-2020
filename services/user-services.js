@@ -171,6 +171,7 @@ const userServices = {
     ])
       .then(([user, following]) => {
         if (!user) throw new Error('資料庫內找不到使用者資料')
+        if (user.dataValues.role === 'admin') throw new Error('帳號不存在')
         if (!user.Followings.length) throw new Error('該使用者沒有追蹤者(following)')
 
         const currentUserFollowing = following.map(f => f.followingId)
@@ -199,6 +200,7 @@ const userServices = {
     ])
       .then(([user, following]) => {
         if (!user) throw new Error('資料庫內找不到該使用者資料')
+        if (user.dataValues.role === 'admin') throw new Error('帳號不存在')
         if (!user.Followers.length) throw new Error('該使用者沒有追隨者(follower)')
 
         const currentUserFollowing = following.map(f => f.followingId)
@@ -288,7 +290,23 @@ const userServices = {
       .catch(err => cb(err))
   },
   putUserAccount: (req, cb) => {
-    return User.findByPk(req.params.id)
+    return User.findAll({
+      where: {
+        [Op.or]: [
+          { email: req.body.email },
+          { account: req.body.account }
+        ]
+      },
+      attributes: ['account', 'email', 'id'],
+      raw: true,
+      nest: true
+    })
+      .then(user => {
+        // 檢查信箱是否已被用過，如果被用過但 id 等於 getUser 的 id 就代表那是自己
+        if (user.some(u => u.email === req.body.email && u.id !== getUser(req).dataValues.id)) throw new Error('信箱已被註冊過')
+        if (user.some(u => u.account === req.body.account && u.id !== getUser(req).dataValues.id)) throw new Error('帳號已被註冊過')
+        return User.findByPk(req.params.id)
+      })
       .then(user => {
         if (!user) throw new Error('資料庫內找不到使用者資料')
 
