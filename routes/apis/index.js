@@ -5,6 +5,7 @@ const { apiErrorHandler } = require('../../middleware/error-handlers')
 const userController = require('../../controllers/apis/user-controller')
 const adminController = require('../../controllers/apis/admin-controller')
 const tweetController = require('../../controllers/apis/tweet-controller')
+const followController = require('../../controllers/apis/follow-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../../middleware/apiAuth')
 
 router.post('/tweets', tweetController.postTweet)
@@ -15,6 +16,8 @@ router.post('/users', userController.signUp)
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
 router.post('/tweets/:id/like', tweetController.addLike)
 router.post('/tweets/:id/unlike', tweetController.removeLike)
+router.delete('/followships/:followingId', followController.removeFollowing)
+router.post('/followships', followController.postFollowing)
 router.use('/', apiErrorHandler)
 
 module.exports = router
