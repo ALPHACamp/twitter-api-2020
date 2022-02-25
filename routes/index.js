@@ -10,6 +10,7 @@ const uploadImage = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cov
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const tweetController = require('../controllers/tweet-controller')
+const replyController = require('../controllers/reply-controller')
 
 // users
 router.post('/api/signin', userController.signIn)
@@ -28,6 +29,10 @@ router.get('/api/users/:id', authenticated, authenticatedUser, userController.ge
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
 router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
+
+//replies
+router.get('/api/tweets/:id/replies', authenticated, replyController.getReplies)
+// router.post('/api/tweets/:id/replies', authenticated, replyController.postReply)
 
 //admin
 router.post('/api/admin/signin', adminController.signIn)
