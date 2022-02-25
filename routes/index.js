@@ -26,8 +26,8 @@ router.get('/api/users/:id', authenticated, authenticatedUser, userController.ge
 //admin
 router.post('/api/admin/signin', adminController.signIn)
 router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getAdminUsers)
-// router.get('/api/admin/users', authenticated, authenticatedAdmin, adminController.getAdminTweets)
-// router.delete('/api/admin/users', authenticated, authenticatedAdmin, adminController.deleteAdminTweet)
+router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getAdminTweets)
+router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteAdminTweet)
 
 router.use('/api', apiErrorHandler)
 

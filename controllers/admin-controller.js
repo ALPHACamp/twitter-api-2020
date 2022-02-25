@@ -32,6 +32,24 @@ const adminController = {
         res.status(200).json(users)
       })
       .catch(err => next(err))
+  },
+  getAdminTweets: (req, res, next) => {
+    return Tweet.findAll()
+      .then(tweets => {
+        res.status(200).json(tweets)
+      })
+      .catch(err => next(err))
+  },
+  deleteAdminTweet: (req, res, next) => {
+    const getTweetId = Number(req.params.id)
+    return Tweet.destroy({
+      where: { id: getTweetId }
+    })
+      .then(deletedTweet => {
+        if (!deletedTweet) throw new Error('Tweet not exist!')
+        return res.status(200).json({ message: 'Tweet deleted!'})
+      })
+      .catch(err => next(err))
   }
 }
 
