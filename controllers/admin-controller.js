@@ -73,7 +73,6 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const error = new Error()
       const users = await User.findAll({
         attributes: [
           'id',
