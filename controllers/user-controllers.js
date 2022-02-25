@@ -57,13 +57,17 @@ const userController = {
       if (password !== checkPassword)
         throw new Error('Please check your password again!')
 
-      // Check if user exists
+      // Check if email is used
       const user = await User.findOne({ where: { email } })
-      if (user) throw new Error('Email already exists!')
+      if (user) throw new Error('Email is already used!')
 
       // Check if account is used
       const accountIsUsed = await User.findOne({ where: { account } })
       if (accountIsUsed) throw new Error('Account is used.')
+
+      // Check if name exceeds 50 words
+      if (!validator.isByteLength(name, { min: 0, max: 50 }))
+        throw new Error('Name must not exceed 50 words.')
 
       // Create new user
       const hash = bcrypt.hashSync(password, 10)
