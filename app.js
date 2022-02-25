@@ -8,6 +8,7 @@ const session = require('express-session')
 const helpers = require('./_helpers')
 
 const { apis } = require('./routes')
+const helpers = require('./_helpers')
 const cors = require('cors')
 
 const app = express()
@@ -22,7 +23,7 @@ app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: fals
 app.use(passport.initialize())
 
 app.use((req, res, next) => {
-  req.user = helpers.getUser(req)
+  res.user = helpers.getUser(req)
   next()
 })
 
