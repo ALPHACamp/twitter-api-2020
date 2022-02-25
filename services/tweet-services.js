@@ -24,7 +24,7 @@ const tweetController = {
         nest: true
       })
       if (!tweet) {
-        return cb(new Error('tweet_id does not exists.'))
+        return cb(new Error('tweet_id does not exist.'))
       }
       return cb(null, tweet)
     } catch (err) {
