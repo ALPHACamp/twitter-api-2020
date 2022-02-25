@@ -19,12 +19,25 @@ module.exports = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
+        include: User,
         order: [['createdAt', 'DESC']],
-        raw: true
+        nest: true
       })
       if (!tweets.length) throw new Error('沒有任何推文!')
 
-      return res.status(200).json(tweets)
+      const responseData = tweets.map(tweet => {
+        tweet = tweet.toJSON()
+
+        // assign following one object to temp constants
+        const tweetedUser = tweet.User
+        // delete original properties from tweet
+        delete tweet.User
+        delete tweetedUser.password
+
+        return { ...tweet, tweetedUser }
+      })
+
+      return res.status(200).json(responseData)
 
     } catch (err) { next(err) }
   },
