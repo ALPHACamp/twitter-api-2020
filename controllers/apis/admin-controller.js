@@ -78,10 +78,14 @@ const adminController = {
         order: [['createdAt', 'DESC']],
         raw: true
       })
+      const tweetsSubstr = tweets.map(tweet => ({
+        ...tweet,
+        description: tweet.description.substring(0, 50)
+      }))
 
       return res.json({
         status: 'success',
-        data: { tweets }
+        data: { tweetsSubstr }
       })
     } catch (err) {
       next(err)
