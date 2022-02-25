@@ -24,7 +24,7 @@ const tweetController = {
         nest: true
       })
       if (!tweet) {
-        return cb(null, 'tweet_id does not exists.')
+        return cb(new Error('tweet_id does not exists.'))
       }
       return cb(null, tweet)
     } catch (err) {
@@ -37,7 +37,7 @@ const tweetController = {
       const UserId = req.user?.id || null
       console.log(req.user)
       if (!description) {
-        return cb('Description is required.')
+        return cb(new Error('Description is required.'))
       }
       const newTweet = await Tweet.create({
         description,
