@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize')
-
+const sequelize = require('sequelize')
 const { User, Followship, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../_helpers')
 const { imgurFileHandler } = require('../file-helper')
@@ -203,6 +203,48 @@ const userServices = {
           avatar: f.avatar,
           introduction: f.introduction,
           followed: currentUserFollowing?.some(id => id === f.id)
+        }))
+        return cb(null, data)
+      })
+      .catch(err => cb(err))
+  },
+  getUserLike: (req, cb) => {
+    const { id } = req.params
+    return Like.findAll({
+      where: { userId: id },
+      include: {
+        model: Tweet,
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] },
+          { model: User }
+        ],
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+            'replyAmount'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
+        ]
+      },
+      group: ['like.id'],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(likes => {
+        const data = likes.map(l => ({
+          TweetId: l.Tweet.id,
+          userData: {
+            id: l.Tweet.User.id,
+            account: l.Tweet.User.account,
+            name: l.Tweet.User.name,
+            avatar: l.Tweet.User.avatar
+          },
+          description: l.Tweet.description,
+          replyAmount: l.Tweet.replyAmount,
+          likeAmount: l.Tweet.likeAmount,
+          userLiked: Boolean(l.Tweet.userLiked),
+          createdAt: l.createdAt
         }))
         return cb(null, data)
       })
