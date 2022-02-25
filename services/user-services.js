@@ -5,6 +5,7 @@ const { Op } = require('sequelize');
 const helper = require('../_helpers')
 const imgur = require('imgur')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+const { localFileHandler } = require('../helpers/file-helpers')
 const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
@@ -81,29 +82,35 @@ const userServices = {
       const { name, introduction } = req.body
       const userId = helper.getUser(req).id
       if (Number(req.params.id) !== userId) throw new Error('只有本人可以這樣做')
-      // if (!name) throw new Error('name is required!')
+      if (!name) throw new Error('name is required!')
       if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
       if (introduction && introduction.length > 160) throw new Error('自我介紹字數超出上限！')
       const { files } = req
       if (files) {
         console.log(files)
         imgur.setClientId(IMGUR_CLIENT_ID)
+        console.log(imgur.getClientId())
+        console.log(imgur.getAPIUrl())
         if (files.avatar) {
-          const avatar = await imgur.uploadFile(files.avatar[0].path)
-          req.body.avatar = avatar.link
+          avatar = await localFileHandler(files.avatar[0])
+          req.body.avatar = avatar
+          // avatar = await imgur.uploadFile(files.avatar[0].path)
+          // req.body.avatar = avatar.link
         }
         if (files.cover) {
-          const cover = await imgur.uploadFile(files.cover[0].path)
-          req.body.cover = cover.link
+          cover = await localFileHandler(files.cover[0])
+          req.body.cover = cover
+          // cover = await imgur.uploadFile(files.cover[0].path)
+          // req.body.cover = cover.link
         }
       }
       const user = await User.findByPk(userId)
       if (!user) throw new Error("User didn't exist!")
       await user.update({
-        name,
-        introduction,
-        avatar: avatar,
-        cover: cover
+        name: name || user.name,
+        introduction: introduction || user.introduction,
+        avatar: req.body.avatar || user.avatar,
+        cover: req.body.cover || user.cover
       })
       return cb(null, user.toJSON())
     } catch (err) {
