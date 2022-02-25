@@ -54,9 +54,8 @@ const adminController = {
       })
 
       // test data
-      const usersSortedforTest = users.sort((a, b) => b.tweetNum - a.tweetNum)
       if (process.env.NODE_ENV === 'test') {
-        return res.status(200).json(usersSortedforTest)
+        return res.status(200).json(users)
       }
 
       const usersSorted = users.sort((a, b) => b.tweetNum - a.tweetNum)
