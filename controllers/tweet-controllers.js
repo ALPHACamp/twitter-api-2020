@@ -71,6 +71,42 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id, {
+        order: [['createdAt', 'DESC']],
+        include: [{ model: User },
+          { model: Reply, include: User },
+          { model: Like }]
+      })
+      if (!tweet) {
+        return res.json({ status: 'error', message: "This tweet didn't exist!" })
+      }
+      const reply = tweet.Replies
+      const tweetResult = {
+        TweetId: tweet.id,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        tweetUserName: tweet.User.name,
+        avatar: tweet.User.avatar,
+        repliedCount: reply.length,
+        likeCount: tweet.Likes.length,
+        liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false,
+      }
+      const replyResult = reply.map(r => ({
+        repliedComment: r.comment,
+        createdAt: r.createdAt,
+        repliedUser: r.User.id,
+        repliedUserName: r.User.name,
+        repliedUserAvatar: r.User.avatar
+      }))
+      return res.json({ tweetResult,
+        replyResult
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 };
 
