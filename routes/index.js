@@ -32,7 +32,7 @@ router.post('/api/tweets', authenticated, authenticatedUser, tweetController.pos
 
 //replies
 router.get('/api/tweets/:id/replies', authenticated, replyController.getReplies)
-// router.post('/api/tweets/:id/replies', authenticated, replyController.postReply)
+router.post('/api/tweets/:id/replies', authenticated, replyController.postReply)
 
 //admin
 router.post('/api/admin/signin', adminController.signIn)

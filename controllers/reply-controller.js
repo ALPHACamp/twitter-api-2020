@@ -1,4 +1,5 @@
 const { Reply, Tweet } = require('../models')
+const helpers = require('../_helpers')
 
 const replyController = {
   getReplies: (req, res, next) => {
@@ -12,9 +13,25 @@ const replyController = {
       })
       .catch(err => next(err))
   },
-  // postReply: (req, res, next) => {
-
-  // }
+  postReply: (req, res, next) => {
+    const getTweetId = Number(req.params.id)
+    const UserId = helpers.getUser(req).id
+    const { comment } = req.body
+    if (!comment) throw new Error('Comment is required!')
+    return Tweet.findByPk(getTweetId)
+      .then(tweet => {
+        if (!tweet) throw new Error('Tweet not exist!')
+        return Reply.create({
+          comment,
+          TweetId: getTweetId,
+          UserId
+        })
+      })
+      .then(newReply => {
+        res.status(200).json(newReply)
+      })
+      .catch(err => next(err))
+  }
 }
 
 module.exports = replyController
