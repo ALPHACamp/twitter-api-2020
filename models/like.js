@@ -8,6 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Likes'
   })
   Like.associate = function (models) {
+    Like.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+    Like.belongsTo(models.User, { foreignKey: 'UserId' })
   }
   return Like
 }
