@@ -14,6 +14,7 @@ const userController = {
     })
       .then(user => {
         if (!user) throw new Error('User not exist!')
+        if (user.role === 'admin') throw new Error('User not exist!')
         if (!bcrypt.compareSync(password, user.password)) throw new Error('password incorrect!')
         const userData = user.toJSON()
         delete userData.password
