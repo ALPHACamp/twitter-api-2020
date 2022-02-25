@@ -82,17 +82,18 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const { userId: id } = req.params
-      const userData = await User.findByPk(id, { 
-        raw: true,
-        include: [
-          Tweet
-        ]
+      const { uid: id } = req.params
+      const userData = await User.findByPk(id, {
+        raw: true
       })
       if (!userData) return res.status(400).json({
         status: 'error',
         message: 'User not found!'
-      }) 
+      })
+      const followData = await Followship.findAll({
+        where: {},
+        raw: true
+      })
       res.json({
         status: 'success',
         message: 'getUser success!',
@@ -100,13 +101,14 @@ const userController = {
       })
     } catch (err) { next(err) }
   },
-  getTweets: async (req, res, next) => {
+  getUserTweets: async (req, res, next) => {
     try {
-      const { userId: id } = req.params
-      const tweetsData = await Tweet.findByPk(id, {
+      const { uid: id } = req.params
+      const tweetsData = await Tweet.findAll({
+        where: { UserId: id },
         raw: true
       })
-      if (!tweetsData) return res.status(400).json({
+      if (tweetsData.length === 0) return res.status(400).json({
         status: 'error',
         message: 'Tweet not found!'
       })

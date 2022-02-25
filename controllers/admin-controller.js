@@ -18,6 +18,12 @@ const adminController = {
         }
       })
     } catch (err) { next(err) }
+  },
+  getUsers: async (req, res, next) => {
+    try {
+      const user = User.findAll({ raw: true })
+      console.log(user)
+    } catch (err) { next(err) }
   }
 }
 
