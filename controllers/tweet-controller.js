@@ -110,8 +110,48 @@ const tweetController = {
     }
 
   },
-  postTweets: (req, res, next) => {
-    console.log('postTweets')
+  postTweets: async (req, res, next) => {
+    try {
+      const error = new Error()
+      const { description } = req.body
+
+      // 推文內容為空
+      if (!description) {
+        error.code = 400
+        error.message = '推文內容不能為空白'
+        return next(error)
+      }
+
+      // 推文內容超過140字
+      if (description.length > 140) {
+        error.code = 400
+        error.message = '推文字數限制在 140 字以內'
+        return next(error)
+      }
+
+      // 正常新增
+      const loginUserId = authHelpers.getUser(req).id
+
+      const results = await Tweet.create({
+        UserId: loginUserId,
+        description
+      })
+
+      await User.increment('tweetCount', { where: { id: loginUserId }, by: 1 })
+
+      return res
+        .status(200)
+        .json({
+          status: 'success',
+          message: '已新增推文內容',
+          data: results
+        })
+
+    } catch (error) {
+      // 系統出錯
+      error.code = 500
+      return next(error)
+    }
   }
 }
 
