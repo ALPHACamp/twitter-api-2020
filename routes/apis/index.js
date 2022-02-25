@@ -8,6 +8,10 @@ const tweetController = require('../../controllers/apis/tweet-controller')
 const followController = require('../../controllers/apis/follow-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../../middleware/apiAuth')
 
+router.get('/admin/users', adminController.getUsers)
+router.get('/admin/tweets', adminController.getTweets)
+router.delete('/admin/tweets/:id', adminController.deleteTweet)
+
 router.post('/tweets', tweetController.postTweet)
 router.get('/tweets', tweetController.getTweets)
 router.get('/tweets/:id', tweetController.getTweet)
