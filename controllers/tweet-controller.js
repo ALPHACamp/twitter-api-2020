@@ -85,6 +85,7 @@ module.exports = {
       const description = req.body.description?.trim() || null
 
       if (!description) throw new Error('推文不能為空!')
+      if (description.length > 140) throw new Error('推文字數不能超過140字!')
 
       // create tweet, and then find full tweet data from database
       const tweet = await Tweet.create({ description, UserId: userId })
