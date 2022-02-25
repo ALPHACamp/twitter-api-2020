@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 const sequelize = require('sequelize')
 
@@ -223,6 +223,27 @@ const userController = {
         const result = followers.Followers
           .map(followers => ({
             ...followers.toJSON(),
+          }))
+        return res.json(result)
+      })
+      .catch(err => next(err))
+  },
+  getLikes: (req, res, next) => {
+    const getUserId = Number(req.params.id)
+    return User.findByPk(getUserId, {
+      include: [{
+        model: Like,
+        include: { model: Tweet, attributes: [
+          [ 'id', 'tweetId'],
+          'description',
+          'image'
+        ]}
+      }]
+    })
+      .then(likedTweet => {
+        const result = likedTweet.Likes
+          .map(t => ({
+            ...t.toJSON()
           }))
         return res.json(result)
       })
