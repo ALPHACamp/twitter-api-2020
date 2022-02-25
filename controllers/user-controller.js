@@ -1,8 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const helpers = require('../_helpers')
 const validator = require('validator')
-const { User } = require('../models')
+const { User, Followship } = require('../models')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -40,12 +39,7 @@ const userController = {
           message: '名字長度不能超過 50 個字'
         })
       }
-      if (account && !validator.isByteLength(account, { min: 0, max: 50 })) {
-        return res.status(400).json({
-          status: 'error',
-          message: '帳號長度不能超過 50 個字'
-        })
-      }
+
       const checkedUser = await User.findOne({
         where: {
           [Op.or]: [{ account }, { email }]
@@ -61,6 +55,7 @@ const userController = {
         name,
         account,
         email,
+        role: 'user',
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
       })
       console.log(user)
@@ -84,7 +79,28 @@ const userController = {
         }
       })
     } catch (err) { next(err) }
-  }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const { userId } = req.params
+      // const [user, followship] = await Promise.all([
+      //   User.findByPk(UserId)
+      // ])
+      const data = await User.findByPk(userId, { 
+        raw: true
+      })
+      if (!data) return res.status(400).json({
+        status: 'error',
+        message: 'User not found!'
+      }) 
+      res.json({
+        status: 'success',
+        message: 'getUser success!',
+        data
+      })
+    } catch (err) { next(err) }
+  },
+
 }
 
 module.exports = userController
