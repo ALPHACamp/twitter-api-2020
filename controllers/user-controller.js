@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
 const sequelize = require('sequelize')
 
@@ -177,6 +177,75 @@ const userController = {
       .then(replies => {
         if (!replies) throw new Error('No replies')
         return res.status(200).json(replies)
+      })
+      .catch(err => next(err))
+  },
+  getFollowings: (req, res, next) => {
+    const getUserId = Number(req.params.id)
+    return User.findByPk(getUserId, {
+      include: [{
+        model: User, as: 'Followings',
+        attributes: [
+          ['id', 'followingId'],
+          'name', 
+          'account',
+          'avatar',
+          'cover',
+          'introduction'
+        ]
+      }]
+    })
+      .then(followings => {
+        const result = followings.Followings
+          .map(following => ({
+            ...following.toJSON(),
+          }))
+        return res.json(result)
+      })
+      .catch(err => next(err))
+  },
+  getFollowers: (req, res, next) => {
+    const getUserId = Number(req.params.id)
+    return User.findByPk(getUserId, {
+      include: [{
+        model: User, as: 'Followers',
+        attributes: [
+          ['id', 'followerId'],
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          'introduction'
+        ]
+      }]
+    })
+      .then(followers => {
+        const result = followers.Followers
+          .map(followers => ({
+            ...followers.toJSON(),
+          }))
+        return res.json(result)
+      })
+      .catch(err => next(err))
+  },
+  getLikes: (req, res, next) => {
+    const getUserId = Number(req.params.id)
+    return User.findByPk(getUserId, {
+      include: [{
+        model: Like,
+        include: { model: Tweet, attributes: [
+          [ 'id', 'tweetId'],
+          'description',
+          'image'
+        ]}
+      }]
+    })
+      .then(likedTweet => {
+        const result = likedTweet.Likes
+          .map(t => ({
+            ...t.toJSON()
+          }))
+        return res.json(result)
       })
       .catch(err => next(err))
   }
