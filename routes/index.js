@@ -27,7 +27,7 @@ router.get('/api/users/:id', authenticated, authenticatedUser, userController.ge
 //tweets
 router.get('/api/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.get('/api/tweets/:id', authenticated, authenticatedUser, tweetController.getTweet)
-// router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
+router.post('/api/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 //admin
 router.post('/api/admin/signin', adminController.signIn)

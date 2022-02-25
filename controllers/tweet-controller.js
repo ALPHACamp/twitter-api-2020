@@ -17,13 +17,24 @@ const tweetController = {
       include: { model: Reply }
     })
       .then(tweet => {
+        if (!tweet) throw new Error('Tweet not exist!')
         res.status(200).json(tweet)
       })
       .catch(err => next(err))
   },
-  // postTweet: (req, res, next) => {
-
-  // }
+  postTweet: (req, res, next) => {
+    const { description } = req.body
+    const UserId = helpers.getUser(req).id
+    if (!description) throw new Error('description is required!')
+    return Tweet.create({
+      UserId,
+      description
+    })
+      .then(addTweet => {
+        res.status(200).json(addTweet)
+      })
+      .catch(err => next(err))
+  }
 }
 
 module.exports = tweetController
