@@ -30,7 +30,7 @@ module.exports = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const { TweetId } = req.params
+      const TweetId = Number(req.params.TweetId)
 
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error('這則推文已不存在!')
