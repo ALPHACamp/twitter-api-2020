@@ -7,7 +7,7 @@ const methodOverride = require('method-override')
 const router = require('./routes')
 
 const app = express()
-const port = 3000
+const PORT = process.env.PORT
 
 // http
 app.use(express.urlencoded({ extended: true }))
@@ -17,8 +17,8 @@ app.use(express.json())
 app.use(passport.initialize())
 
 app.use('/api', router)
-app.listen(port, () =>
-  console.log(`Alphitter api server listening on port ${port}!`)
+app.listen(PORT, () =>
+  console.log(`Alphitter api server listening on port ${PORT}!`)
 )
 
 module.exports = app
