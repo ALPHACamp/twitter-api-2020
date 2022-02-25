@@ -17,9 +17,11 @@ module.exports = {
       let randFollowerId = users[Math.floor(Math.random() * users.length)].id
       let randFollowingId = users[Math.floor(Math.random() * users.length)].id
 
+      // no duplicate
       if (!followshipArray.some(follow => follow.followerId === randFollowerId && follow.followingId === randFollowingId)) {
 
-        if (randFollowerId !== randFollowingId && !adminId.some(a => a.id === randFollowerId && a.id === randFollowingId)) {
+        // no follow myself and no admin
+        if (randFollowerId !== randFollowingId && !adminId.some(a => a.id === randFollowerId || a.id === randFollowingId)) {
           followshipArray.push({
             followerId: randFollowerId,
             followingId: randFollowingId,
