@@ -10,17 +10,25 @@
 5. 完成建立資料庫，並完成資料庫遷移
 `在 Terminal 輸入 npx sequelize db:create`
 `接著輸入 npx sequelize db:migrate`
-6. 設定環境變數
+6. 在資料庫裡面建立種子資料
+`npx sequelize db:seed:all`
+7. 設定環境變數
 `將根目錄的.env.example改成.env，並填入環境變數`
-7. 建立種子資料
-`npm run seed`
 8. 啟動伺服器，執行 app.js 檔案
 `在 Terminal 輸入 npm run dev 指令`
-9. 當 terminal 出現以下字樣，表示伺服器與資料庫已啟動並成功連結
+8. 當 terminal 出現以下字樣，表示伺服器與資料庫已啟動並成功連結
 `Express is listening on http://localhost:3000`
-10. 輸入 SEED_USER 帳號密碼即可登入
+9. 輸入下列帳號密碼即可登入
+管理者帳號：
 ```
     account: 'root'
+    email: 'root@example.com'
+    password: '12345678'
+
+```
+使用者帳號：
+```
+    account: ’'
     email: 'root@example.com'
     password: '12345678'
 
