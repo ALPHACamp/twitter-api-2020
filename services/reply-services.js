@@ -25,6 +25,34 @@ const replyController = {
     } catch (err) {
       return cb(err)
     }
+  },
+  postReply: async (req, cb) => {
+    try {
+      const UserId = req.user?.id || null
+      const { comment } = req.body
+      if (!comment) {
+        return cb(new Error('Comment is required.'))
+      }
+      const tweet = await Tweet.findByPk(req.params.tweet_id)
+      if (tweet === null) {
+        return cb(new Error('tweet_id does not exist.'))
+      }
+      const newReply = await Reply.create({
+        TweetId: req.params.tweet_id,
+        comment,
+        UserId
+      })
+      const replyData = {
+        status: 'suceess',
+        data: {
+          reply: newReply
+        }
+      }
+      return cb(null, replyData)
+    } catch (err) {
+      return cb(err)
+    }
   }
+
 }
 module.exports = replyController
