@@ -1,7 +1,34 @@
+const helpers = require('../_helpers');
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like } = require('../models')
 
 const userController = {
+  getCurrentUser: async (req, res, next) => {
+    const DEFAULT_COUNT = 0
+    const currentUser = helpers.getUser(req)
+    const count ={}
+    try {
+      const user = await User.findByPk(currentUser.id, {
+        include: [
+          { model: User, as: 'Followers'},
+          { model: User, as: 'Followings'},
+          { model: Like },
+          { model: Tweet },
+          { model: Reply }
+        ]
+      })
+
+      count.tweetCount = user.Tweet?.length || DEFAULT_COUNT
+      count.likedCount = user.Like?.length || DEFAULT_COUNT
+      count.repliedCount = user.Reply?.length || DEFAULT_COUNT
+      count.followerCount = user.Followers?.length || DEFAULT_COUNT
+      count.followingCount = user.Followings?.length || DEFAULT_COUNT
+
+      return res.json({ status: 'success', count })
+      .then(() => res.json({ status: 'success'}))
+    } catch (err) { next(err) }
+  },
+
   signUp: async (req, res, next) => {
     const account = req.body?.account?.trim() || null
     const password = req.body?.password?.trim() || null
