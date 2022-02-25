@@ -106,19 +106,14 @@ const userController = {
         limit: 10,
       })
 
-      const userId = helper.getUser(req).id
-      const followedUsers = await Followship.findAll({
-        where: { followerId: userId }
-      })
-      
-      const results = user.map(u => {
-        return { 
-          ...u.toJSON(),
-          isFollowed: followedUsers.some(f => f.followingId === u.id)
-        }
-      })
+      const followedUsers = helper.getUser(req).Followings
 
-      return res.json(results)
+      const results = user.map(u => ({
+        ...u.toJSON(),
+        isFollowed: followedUsers.some(fu => fu.id === u.id)
+      }))
+
+      return res.json({ status: 'success', message: '成功獲取', data: results })
     } catch (err) {
       next(err)
     }
