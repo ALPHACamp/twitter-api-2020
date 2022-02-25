@@ -37,7 +37,11 @@ const userServices = {
       }))
       .then(user => {
         delete user.dataValues.password
-        return cb(null, { user })
+        return cb(null, {
+          status: 'success',
+          message: '註冊成功',
+          user
+        })
       })
       .catch(err => cb(err))
   },
@@ -46,7 +50,12 @@ const userServices = {
     delete userData.password
     try {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      return cb(null, { token, userData })
+      return cb(null, {
+        status: 'success',
+        message: '成功登入',
+        token,
+        userData
+      })
     } catch (err) {
       cb(err)
     }
@@ -288,7 +297,11 @@ const userServices = {
           })
         }
       })
-      .then(updatedUser => cb(null, updatedUser))
+      .then(updatedUser => cb(null, {
+        status: 'success',
+        message: '操作成功',
+        updatedUser
+      }))
       .catch(err => cb(err))
   },
   putUserAccount: (req, cb) => {
@@ -319,7 +332,11 @@ const userServices = {
           password: bcrypt.hashSync(req.body.password, 10)
         })
       })
-      .then(updatedUser => cb(null, updatedUser))
+      .then(updatedUser => cb(null, {
+        status: 'success',
+        message: '操作成功',
+        updatedUser
+      }))
       .catch(err => cb(err))
   }
 }
