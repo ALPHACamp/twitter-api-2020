@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Reply, Like, Tweet } = require('../models')
+const { User, Reply, Like, Tweet, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 // const tweet = require('../models/tweet')
 
@@ -15,7 +15,7 @@ const adminController = {
         throw error
       }
 
-      const user = await User.findOne({ where: { account } }) 
+      const user = await User.findOne({ where: { account } })
 
       if (!user || user.role === 'user') {
         error.code = 403
@@ -69,7 +69,30 @@ const adminController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUsers: async (req, res, next) => {
+    try {
+      const error = new Error()
+      const users = await User.findAll({
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          'cover',
+          'introduction',
+          'followerCount',
+          'followingCount',
+          'likeCount',
+          [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)'), 'replyCount']
+         ],
+        order: [['TweetCount', 'DESC']]
+      })
+      return res.status(200).json(...[users])
+    } catch (err) {
+      next(err)
+    }
   }
 }
-  
+
 module.exports = adminController
