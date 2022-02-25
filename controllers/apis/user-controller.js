@@ -1,15 +1,17 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../../_helpers')
+const { Op } = require('sequelize')
+const { imgurFileHandler } = require('../../helpers/file-helpers')
 const { User, Tweet, Like, Reply } = require('../../models')
 const appFunc = require('../../services/appFunctions')
 const TOKEN_EXPIRES = process.env.TOKEN_EXPIRES || '30m'
 
 const userController = {
   signUp: async (req, res, next) => {
-    const { account, name, email, password, checkPassword } = req.body
     try {
-      if (!account || !email || !password || !checkPassword) throw new Error('account, email, password, checkPassword is require!')
+      const { account, name, email, password, checkPassword } = req.body
+      if (!account || !name || !email || !password || !checkPassword) throw new Error('account, name, email, password, checkPassword is require!')
       if (password !== checkPassword) throw new Error('Password do not match!')
       const userAccountExisted = await User.findOne({ where: { account } })
       if (userAccountExisted) throw new Error('Account already exists!')
@@ -52,7 +54,82 @@ const userController = {
       next(err)
     }
   },
-  getTweets: async (req, res, next) => {
+  putUser: async (req, res, next) => {
+    try {
+      const { name, introduction } = req.body
+      if (!name) throw new Error('name is require!')
+      const userId = Number(helpers.getUser(req).id)
+      const editId = Number(req.params.id)
+      const user = await User.findByPk(editId)
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      if (userId !== editId) throw new Error('Only allow edit your own account')
+      if (name.length > 50) throw new Error('暱稱不能超過50個字！')
+      if (introduction.length > 160) throw new Error('自我介紹不能超過160個字！')
+      const { files } = req
+      const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
+      const cover = files?.cover ? await imgurFileHandler(files.cover[0]) : user.cover
+
+      const editedUser = await user.update({
+        name,
+        introduction,
+        avatar,
+        cover
+      })
+      delete editedUser.password
+      res.json({
+        status: 'success',
+        data: {
+          user: editedUser
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUserAccount: async (req, res, next) => {
+    try {
+      const { account, name, email, password, checkPassword } = req.body
+      if (!account || !name || !email || !password || !checkPassword) throw new Error('account, name, email, password, checkPassword is require!')
+      const userId = Number(helpers.getUser(req).id)
+      const editId = Number(req.params.id)
+      const user = await User.findByPk(editId)
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      if (userId !== editId) throw new Error('只能修改自己的資料！')
+      if (password !== checkPassword) throw new Error('Password do not match!')
+      const userAccountExisted = await User.findOne({
+        where: {
+          account,
+          id: { [Op.ne]: editId }
+        }
+      })
+      if (userAccountExisted) throw new Error('Account already exists!')
+      const userEmailExisted = await User.findOne({
+        where: {
+          email,
+          id: { [Op.ne]: editId }
+        }
+      })
+      if (userEmailExisted) throw new Error('Email already exists!')
+      const hash = await bcrypt.hash(password, await bcrypt.genSalt(10))
+      const editedUser = await user.update({
+        account,
+        name,
+        email,
+        password: hash,
+        role: 'user'
+      })
+      delete editedUser.password
+      res.json({
+        status: 'success',
+        data: {
+          editedUser
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+    getTweets: async (req, res, next) => {
     try {
       const userId = Number(helpers.getUser(req).id)
       const id = Number(req.params.id)
