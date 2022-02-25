@@ -130,7 +130,7 @@ module.exports = {
       // check repeat if edit account or email
       if (account && email && password) {
         // match password 
-        if (password != checkPassword) throw new Error('password ')
+        if (password != checkPassword) throw new Error('密碼與確認密碼不同！')
 
         // check repeat
         const repeatCount = users.reduce((counter, user) => {
