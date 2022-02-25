@@ -193,19 +193,36 @@ const userController = {
           'cover',
           'introduction'
         ]
-      }],
-      attributes: [
-        'id',
-        'name',
-        'account',
-        'avatar',
-        'cover',
-      ]
+      }]
     })
       .then(followings => {
         const result = followings.Followings
           .map(following => ({
             ...following.toJSON(),
+          }))
+        return res.json(result)
+      })
+      .catch(err => next(err))
+  },
+  getFollowers: (req, res, next) => {
+    const getUserId = Number(req.params.id)
+    return User.findByPk(getUserId, {
+      include: [{
+        model: User, as: 'Followers',
+        attributes: [
+          ['id', 'followerId'],
+          'name',
+          'account',
+          'avatar',
+          'cover',
+          'introduction'
+        ]
+      }]
+    })
+      .then(followers => {
+        const result = followers.Followers
+          .map(followers => ({
+            ...followers.toJSON(),
           }))
         return res.json(result)
       })
