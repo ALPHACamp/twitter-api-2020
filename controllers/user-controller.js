@@ -111,7 +111,8 @@ const userController = {
       }
       await Like.create({
         UserId: req.user.id,
-        TweetId
+        TweetId,
+        isDeleted: false
       })
       return res.status(200).json({
         status: 'success',
@@ -126,6 +127,13 @@ const userController = {
     try {
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
+      const like = await Like.findOne({
+        where: {
+          UserId: req.user.id,
+          TweetId,
+          isDeleted: false
+        }
+      })
       if (!tweet) {
         return res
           .status(404)
@@ -134,28 +142,23 @@ const userController = {
             message: '推文不存在'
           })
       }
-      const like = await Like.findOne({
-        where: {
-          UserId: req.user.id,
-          TweetId
-        }
-      })
-      if (like) {
+      if (!like) {
         return res
           .status(400)
           .json({
             status: 'error',
-            message: '已經按過喜歡囉'
+            message: '已經Unlike過囉'
           })
       }
-      await Like.create({
-        UserId: req.user.id,
-        TweetId
+      const toggleLike = await like.update({
+        isDeleted: !like.isDeleted
       })
-      return res.status(200).json({
-        status: 'success',
-        message: '已加入喜歡的貼文!'
-      })
+      if (toggleLike) {
+        return res.status(200).json({
+          status: 'success',
+          message: 'Unlike成功!'
+        })
+      }
     } catch (error) {
       res.status(500).json({
         status: 'error',
