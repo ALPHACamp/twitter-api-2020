@@ -259,7 +259,14 @@ const userController = {
       let [replies, userLikes] = await Promise.all([
         Reply.findAll({
           where: { UserId: req.params.id },
-          include: [Tweet],
+          include: [
+            {
+              model: Tweet,
+              include: [
+                { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+              ]
+            }
+          ],
           raw: true,
           nest: true
         }),
