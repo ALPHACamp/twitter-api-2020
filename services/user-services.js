@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Followship } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userController = {
@@ -144,10 +144,27 @@ const userController = {
           { model: User, as: 'Followers' }
         ]
       })
-      const followings = user.Followers.map(e => e.dataValues)
-      followings.forEach(e => {
+      const followers = user.Followers.map(e => e.dataValues)
+      followers.forEach(e => {
         delete e.Followship
         e.followerId = e.id
+      })
+      return cb(null, followers)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getFollowings: async (req, cb) => {
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: User, as: 'Followings' }
+        ]
+      })
+      const followings = user.Followings.map(e => e.dataValues)
+      followings.forEach(e => {
+        delete e.Followship
+        e.followingId = e.id
       })
       return cb(null, followings)
     } catch (err) {
