@@ -128,6 +128,7 @@ const userController = {
   },
   getUserTweets: (req, res, next) => {
     const getUserId = Number(req.params.id)
+    const reqUserId = helpers.getUser(req).id
     return Tweet.findAll({
       where: { UserId: getUserId },
       attributes: [
@@ -149,16 +150,24 @@ const userController = {
         ]
       ],
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        { model: Like, attributes: ['userId'] }
       ],
-      order: [['createdAt', 'DESC']],
-      group: 'tweetId',
-      nest: true,
-      raw: true
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         if (!tweets) throw new Error('User not exits!')
-        return res.status(200).json(tweets)
+
+        const result = tweets
+          .map(t => ({
+            ...t.toJSON()
+          }))
+
+        result.forEach(tweet => {
+          tweet.isLiked = tweet.Likes.some(l => l.userId === reqUserId)
+          delete tweet.Likes
+        })
+        return res.status(200).json(result)
       })
       .catch(err => next(err))
   },
