@@ -12,7 +12,7 @@ const tweetController = {
         UserId: helpers.getUser(req).id,
         description
       })
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json({ tweet: tweet.toJSON() })
       }
       res.json({
@@ -42,7 +42,7 @@ const tweetController = {
           [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
         ]
       })
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
       }
       await Promise.all(tweets.map(async tweet => {
@@ -76,7 +76,7 @@ const tweetController = {
           [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
         ]
       })
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweet)
       }
       await appFunc.resTweetHandler(userId, tweet)
@@ -146,7 +146,7 @@ const tweetController = {
         UserId,
         comment
       })
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json({ reply: reply.toJSON() })
       }
       res.json({
