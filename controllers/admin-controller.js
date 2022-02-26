@@ -19,7 +19,7 @@ module.exports = {
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
-        include: User,
+        include: { model: User, attributes: { exclude: ['password'] } },
         order: [['createdAt', 'DESC']],
         nest: true
       })
@@ -32,7 +32,6 @@ module.exports = {
         const tweetedUser = tweet.User
         // remove unnecessary key properties
         delete tweet.User
-        delete tweetedUser.password
 
         return { ...tweet, tweetedUser }
       })
