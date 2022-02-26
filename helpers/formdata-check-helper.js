@@ -47,9 +47,28 @@ async function postUsersFormDataCheck(req) {
   }
 }
 
+async function putUserCheck(req) {
+  const errorMessage = []
+  const { name, introduction } = req.body
+
+  // 檢查所有欄位都有填寫
+  if (!name) {
+    errorMessage.push('名字要填寫')
+  }
+
+  if (name && !validator.isLength(name, { min: 0, max: 50 })) {
+    errorMessage.push('名字上限 50 字')
+  }
+
+  if (introduction && !validator.isLength(introduction, { min: 0, max: 160 })) {
+    errorMessage.push('自我介紹上限 160 字')
+  }
+}
+
 
 exports = module.exports = {
 
-  postUsersFormDataCheck
+  postUsersFormDataCheck,
+  putUserCheck
 
 }

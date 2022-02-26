@@ -1,5 +1,6 @@
 
 const bcrypt = require('bcryptjs')
+const { imgurFileHandler } = require('../helpers/file-helper')
 const { User, Followship, Tweet, sequelize } = require('../models')
 const jwtHelpers = require('../helpers/bearer-token-helper')
 const helper = require('../_helpers')
@@ -221,9 +222,66 @@ const userController = {
       return next(error)
     }
 
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      const currentId = helper.getUser(req).id
+
+      if (id !== currentId) {
+        return res.json({
+          status: '400',
+          message: '只能修改自己的資料'
+        })
+      }
+
+      const { name, introduction } = req.body
+      const message = await formDataCheckHelpers.putUserCheck(req)
+      if (message) {
+        return res
+          .status(400)
+          .json({ status: 'error', message, data: req.body })
+      }
+
+
+      const avatar = req?.files?.avatar
+      const cover = req?.files?.cover
+      
+
+      const user = await User.findByPk(id, {attributes: { exclude: ['password'] }})
+      if (!avatar && !cover) {
+        await user.update({
+          name,
+          introduction
+        })
+      } else if (!avatar && cover) {
+        await user.update({
+          name,
+          introduction,
+          cover: await imgurFileHandler(cover[0])
+        })
+      } else if (avatar && !cover) {
+        await user.update({
+          name,
+          introduction,
+          avatar: await imgurFileHandler(avatar[0])
+        })
+      } else if (avatar && cover) {
+        await user.update({
+          name,
+          introduction,
+          avatar: await imgurFileHandler(avatar[0]),
+          cover: await imgurFileHandler(cover[0])
+        })
+      }
+      return res
+        .status(200)
+        .json({ status: 'success', message: '修改成功', data: user.toJSON() })
+    } catch (error) {
+      error.code = 500
+      return next(error)
+    }
   }
-
-
 }
 
 module.exports = userController
