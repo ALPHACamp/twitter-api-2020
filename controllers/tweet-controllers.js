@@ -113,12 +113,13 @@ const tweetController = {
   
   postTweet: async (req, res, next) => {
     const { description } = req.body
+    const UserId = helpers.getUser(req).id
     if (!description) return res.json({ status: 'error', message: 'Description is required' })
     if (description.length > 140) return res.json({ status: 'error', message: 'Tweet text must be less than 140 characters.' })
     try {
       await Tweet.create({
         description,
-        UserId: req.user.dataValues.id
+        UserId
       })
       return res.json({ status: 'success' })
     } catch (err) {
