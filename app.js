@@ -6,7 +6,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const path = require('path')
 const passport = require('./config/passport')
-const helpers = require('./_helpers');
+const router = require('./routes')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -20,7 +20,9 @@ app.use(express.json())
 // 設定讓外部傳入的 request 可以取得 /upload 路徑
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.use('/api', router)
+
+// app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app
