@@ -345,21 +345,26 @@ const userController = {
 
   // Get current user info
   getCurrentUser: async (req, res, next) => {
-    let user = helpers.getUser(req)
+    try {
+      let user = helpers.getUser(req)
+      console.log(user)
 
-    // Clean user
-    user = {
-      id: user.id,
-      name: user.name,
-      account: user.account,
-      avatar: user.avatar,
-      cover: user.cover,
-      role: user.role,
-      email: user.email,
-      introduction: user.introduction
+      // Clean user
+      user = {
+        id: user.id,
+        name: user.name,
+        account: user.account,
+        avatar: user.avatar,
+        cover: user.cover,
+        role: user.role,
+        email: user.email,
+        introduction: user.introduction
+      }
+
+      return res.status(200).json(user)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(user)
   }
 }
 
