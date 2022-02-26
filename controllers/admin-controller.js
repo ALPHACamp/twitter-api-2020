@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet } = require('../models')
-const { imgurFileHandler } = require('../helpers/file-helpers')
 const adminController = {
   signIn: async (req, res, next) => {
     try {
@@ -53,6 +52,23 @@ const adminController = {
         status: 'success',
         message: 'Admin getTweets success',
         data
+      })
+    } catch (err) { next(err) }
+  },
+  deleteTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+
+      if (!tweet) return res.status(400).json({
+        status: 'error',
+        message: 'tweet does not exist'
+      })
+
+      tweet.destroy()
+
+      res.json({
+        status: 'success',
+        message: 'delete tweet success'
       })
     } catch (err) { next(err) }
   }
