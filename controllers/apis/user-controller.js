@@ -26,11 +26,12 @@ const userController = {
         password: hash,
         role: 'user'
       })
-      delete user.password
+      const resUser = user.toJSON()
+      delete resUser.password
       res.json({
         status: 'success',
         data: {
-          user
+          user: resUser
         }
       })
     } catch (err) {
@@ -62,7 +63,7 @@ const userController = {
       const user = await User.findByPk(id, {
         raw: true,
         nest: true,
-        attributes: { exclud: ['password'] }
+        attributes: { exclude: ['password'] }
       })
       if (!user || user.role === 'admin') throw new Error("User didn't exist!")
       const following = await Followship.findAndCountAll({ where: { followerId: id }, raw: true, nest: true })
@@ -141,11 +142,12 @@ const userController = {
         avatar,
         cover
       })
-      delete editedUser.password
+      const resUser = editedUser.toJSON()
+      delete resUser.password
       res.json({
         status: 'success',
         data: {
-          user: editedUser
+          user: resUser
         }
       })
     } catch (err) {
@@ -184,11 +186,12 @@ const userController = {
         password: hash,
         role: 'user'
       })
-      delete editedUser.password
+      const resUser = editedUser.toJSON()
+      delete resUser.password
       res.json({
         status: 'success',
         data: {
-          editedUser
+          user: resUser
         }
       })
     } catch (err) {
@@ -209,7 +212,14 @@ const userController = {
         include: {
           model: User,
           attributes: ['name', 'account', 'avatar']
-        }
+        },
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
+        ]
       })
       if (process.env.NODE_ENV === 'test') {
         res.json(tweets)
@@ -235,17 +245,23 @@ const userController = {
         raw: true,
         nest: true,
         order: [['createdAt', 'DESC']],
-        include: {
+        include: [{
+          model: Tweet,
+          attributes: ['id'],
+          include: [{ model: User, attributes: ['account'] }]
+        },
+        {
           model: User,
           attributes: ['name', 'account', 'avatar']
-        }
+        }]
       })
       if (process.env.NODE_ENV === 'test') {
         res.json(replies)
       }
+      const resReplies = appFunc.resRepliesHandler(replies)
       res.json({
         status: 'success',
-        data: { replies }
+        data: { replies: resReplies }
       })
     } catch (err) {
       next(err)
@@ -264,6 +280,13 @@ const userController = {
         include: {
           model: Tweet,
           order: [['createdAt', 'DESC']],
+          attributes: [
+            'id',
+            'UserId',
+            'description',
+            'createdAt',
+            [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
+          ],
           include: {
             model: User,
             attributes: ['name', 'account', 'avatar']
@@ -291,7 +314,7 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      const UserId = req.params.id
+      const UserId = Number(req.params.id)
       let user = await User.findByPk(UserId, {
         include: [
           {
@@ -310,15 +333,17 @@ const userController = {
       const followingsId = helpers.getUser(req).Followings.map(following => following.id) || []
 
       user = user.toJSON()
-      user.Followings.forEach(following => {
-        following.followingId = following.id
-        following.isFollowed = followingsId.includes(following.id)
-      })
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
 
       if (process.env.NODE_ENV === 'test') {
+        user.forEach(following => {
+          following.followingId = following.id
+        })
         res.json(user)
       }
+      user.forEach(following => {
+        following.isFollowed = followingsId.includes(following.id)
+      })
       return res.json({
         status: 'success',
         data: {
@@ -331,7 +356,7 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-      const UserId = req.params.id
+      const UserId = Number(req.params.id)
       let user = await User.findByPk(UserId, {
         include: [
           {
@@ -350,16 +375,17 @@ const userController = {
       const followingsId = helpers.getUser(req).Followings.map(following => following.id) || []
 
       user = user.toJSON()
-      user.Followers.forEach(follower => {
-        follower.followerId = follower.id
-        follower.isFollowed = followingsId.includes(follower.id)
-      })
       user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
 
       if (process.env.NODE_ENV === 'test') {
+        user.forEach(follower => {
+          follower.followerId = follower.id
+        })
         res.json(user)
       }
-
+      user.forEach(follower => {
+        follower.isFollowed = followingsId.includes(follower.id)
+      })
       return res.json({
         status: 'success',
         data: {
