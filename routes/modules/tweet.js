@@ -6,7 +6,7 @@ const likeController = require('../../controllers/like-controller')
 
 // tweet相關路由
 router.post('/:id/like', likeController.likeTweet)
-router.post('/:id/like', likeController.unlikeTweet)
+router.post('/:id/unlike', likeController.unlikeTweet)
 router.get('/:tweet_id', tweetController.getTweet)
 router.post('/', tweetController.postTweet)
 router.get('/', tweetController.getTweets)
