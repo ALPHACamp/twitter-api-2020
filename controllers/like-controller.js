@@ -109,7 +109,6 @@ const likeController = {
     } catch (error) {
       // 系統出錯
       error.code = 500
-      console.log('hiii', error)
       return next(error)
     }
   }
