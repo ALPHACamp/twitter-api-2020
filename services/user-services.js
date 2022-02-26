@@ -65,11 +65,13 @@ const userServices = {
           include: [
             [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
             [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followerCount'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followingCount']
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerCount']
           ]
         },
       })
+      // 禁止搜尋admin
+      if (userData.role === 'admin') throw new Error('使用者不存在')
       const user = userData.toJSON()
       delete user.password
       return cb(null, user)
