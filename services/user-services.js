@@ -3,6 +3,7 @@ const Op = sequelize.Op
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
+const { imgurFileHandler } = require('../helpers/file-helper')
 
 const userController = {
   signUp: async (req, cb) => {
@@ -124,11 +125,24 @@ const userController = {
     }
   },
   putUser: async (req, cb) => {
+    const { account, name, email, password, checkPassword, introduction, avatar, cover } = req.body
+    const where = {}
+    const { files } = req
+
+    async function uploadFiles (files) {
+      const filesArr = []
+      for (const file in files) {
+        filesArr.push(files[file][0])
+      }
+      for (const file of filesArr) {
+        const imgurUrl = await imgurFileHandler(file)
+        where[file.fieldname] = imgurUrl
+      }
+    }
     try {
-      const { account, name, email, password, checkPassword, introduction, avatar, cover } = req.body
       if (password !== checkPassword) throw new Error('Passwords do not match!')
-      if ((introduction && introduction.length) > 160) throw new Error('Introduction exceeds the word limit!')
-      if (name && name.length > 50) throw new Error('Name exceeds the word limit!')
+      if (introduction && (introduction.length > 160)) throw new Error('Introduction exceeds the word limit!')
+      if (name && (name.length > 50)) throw new Error('Name exceeds the word limit!')
       const registereduser = await User.findOne({
         raw: true,
         where: {
@@ -137,17 +151,18 @@ const userController = {
         }
       })
       if (registereduser) throw new Error('Acount or Email repeated!')
-
       const user = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followings' }]
       })
+
+      // pass, update user
       const reqBodyArr = { account, name, email, password, introduction, avatar, cover }
-      const where = {}
       for (const attribute in reqBodyArr) {
         if (reqBodyArr[attribute]) {
           where[attribute] = reqBodyArr[attribute]
         }
       }
+      await uploadFiles(files)
       const updatedUser = await user.update(where)
       const updatedData = { ...updatedUser.dataValues }
       delete updatedData.password
