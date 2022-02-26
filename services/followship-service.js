@@ -19,26 +19,53 @@ const followshipController = {
         return cb(new Error('The user does not exist.'))
       }
 
-      const checkedFollowships = await Followship.findAll({
+      const checkedFollowships = await Followship.findOne({
         where: {
           followerId,
           followingId
         }
       })
 
-      if (checkedFollowships.length > 0) {
+      if (checkedFollowships) {
         return cb(new Error('The followship already exist.'))
       }
       const newFollowship = await Followship.create({
         followerId,
         followingId
       })
+      console.log(newFollowship)
       const followshipData = {
         status: 'success',
         data: {
-          Followship: newFollowship
+          Followship: newFollowship.dataValues
         }
       }
+      return cb(null, followshipData)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  removeFollowing: async (req, cb) => {
+    try {
+      const followerId = req.user?.id
+      const followingId = req.params.followingId
+      const checkedFollowships = await Followship.findOne({
+        where: {
+          followerId,
+          followingId
+        }
+      })
+      if (!checkedFollowships) {
+        return cb(new Error('The followship does not exsit.'))
+      }
+      const deletedFollowship = await checkedFollowships.destroy()
+      const followshipData = {
+        status: 'success',
+        data: {
+          Followship: deletedFollowship.dataValues
+        }
+      }
+
       return cb(null, followshipData)
     } catch (err) {
       return cb(err)
