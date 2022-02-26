@@ -1,3 +1,5 @@
+const sequelize = require('sequelize')
+const Op = sequelize.Op
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
@@ -5,14 +7,22 @@ const bcrypt = require('bcryptjs')
 const userController = {
   signUp: async (req, cb) => {
     try {
-      if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
-      const user = await User.findOne({ where: { email: req.body.email } })
-      if (user) throw new Error('Email already exists!')
+      const { account, name, email, password, checkPassword } = req.body
+      if (password !== checkPassword) throw new Error('Passwords do not match!')
+      if (name.length > 50) {
+        throw new Error('String must not exceed 50 characters!')
+      }
+      const user = await User.findOne({
+        where: {
+          [Op.or]: [{ email }, { account }]
+        }
+      })
+      if (user) throw new Error('Email or Account already exists!')
       const hash = await bcrypt.hash(req.body.password, 10)
       const newUser = await User.create({
-        account: req.body.account,
-        name: req.body.name,
-        email: req.body.email,
+        account,
+        name,
+        email,
         password: hash
       })
       const userData = {
