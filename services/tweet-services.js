@@ -45,6 +45,8 @@ const tweetController = {
       const UserId = req.user?.id || null
       if (!description) {
         return cb(new Error('Description is required.'))
+      } else if (description.length > 140) {
+        return cb(new Error('Description is longer than 140 words.'))
       }
       const newTweet = await Tweet.create({
         description,
@@ -66,7 +68,7 @@ const tweetController = {
       const UserId = req.user?.id
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
-      if (tweet === null) {
+      if (!tweet) {
         return cb(new Error('tweet_id does not exist.'))
       }
 
@@ -102,7 +104,7 @@ const tweetController = {
       const UserId = req.user?.id
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
-      if (tweet === null) {
+      if (!tweet) {
         return cb(new Error('tweet_id does not exist.'))
       }
 
