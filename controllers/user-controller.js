@@ -270,7 +270,8 @@ const userController = {
         include: { model: User, as: 'Followings' },
       }),
       User.findAll({
-        include: { model: User, as: 'Followers' }
+        include: { model: User, as: 'Followers' },
+        attributes: ['id', 'name', 'account', 'createdAt']
       })
     ])
       .then(([user, users]) => {
@@ -283,7 +284,7 @@ const userController = {
             followedCount: u.Followers.length,
             isFollowing: reqUserFollowing.some(f => f.id === u.id)
           }))
-          .sort((a, b) => b.followedCount - a.followedCount)
+          .sort((a, b) => b.followedCount - a.followedCount || b.createdAt - a.createdAt)
           .slice(0, 10)
 
         result.forEach(r => {
