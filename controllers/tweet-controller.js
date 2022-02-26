@@ -12,5 +12,9 @@ const tweetController = {
     tweetServices.getTweet(req, (err, data) =>
       err ? next(err) : res.status(200).json(data)) // 應測試要求要第一層就能找到description只好拿掉 status
   },
+  putTweet: (req, res, next) => {
+    tweetServices.putTweet(req, (err, data) =>
+      err ? next(err) : res.status(200).json({ status: 'success', data }))
+  },
 }
 module.exports = tweetController
