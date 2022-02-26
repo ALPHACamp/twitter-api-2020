@@ -15,7 +15,7 @@ const userServices = {
         if (email) throw new Error('Email already exists!')
         if (account) throw new Error('Account already exists!')
         if (req.body.name.length > 50) throw new Error('暱稱字數超出上限！')
-        if (req.body.password.length < 8) throw new Error('密碼至少要有八個字')
+        if (req.body.password.length < 4) throw new Error('密碼至少要有八個字')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
@@ -89,12 +89,12 @@ const userServices = {
       const { files } = req
       if (files) {
         if (files.avatar) {
-          let localAvatar = await localFileHandler(files.avatar[0])
+          // let localAvatar = await localFileHandler(files.avatar[0])
           const avatar = await imgurFileHandler(files.avatar[0])
           req.body.avatar = avatar
         }
         if (files.cover) {
-          let localCover = await localFileHandler(files.cover[0])
+          // let localCover = await localFileHandler(files.cover[0])
           const cover = await imgurFileHandler(files.cover[0])
           req.body.cover = cover
         }
@@ -125,7 +125,7 @@ const userServices = {
       if (!account) throw new Error('account is required!')
       if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
       if (!email) throw new Error('email is required!')
-      if (password && password.length < 8) throw new Error('密碼至少要有八個字')
+      if (password && password.length < 4) throw new Error('密碼至少要有八個字')
       // 確認account是否重複
       const existAccount = await User.findOne({
         where: {
