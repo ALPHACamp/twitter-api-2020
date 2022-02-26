@@ -14,6 +14,8 @@ const userServices = {
       .then(([email, account]) => {
         if (email) throw new Error('Email already exists!')
         if (account) throw new Error('Account already exists!')
+        if (req.body.name.length > 50) throw new Error('暱稱字數超出上限！')
+        if (req.body.password.length < 8) throw new Error('密碼至少要有八個字')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
