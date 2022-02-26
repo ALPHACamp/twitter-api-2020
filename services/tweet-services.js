@@ -79,14 +79,14 @@ const tweetController = {
         return cb(new Error('tweet_id does not exist.'))
       }
 
-      const findLike = await Like.findAll({
+      const findLike = await Like.findOne({
         where: {
           UserId,
           TweetId
         }
       })
 
-      if (findLike.length > 0) {
+      if (findLike) {
         return cb(new Error('This tweet is already liked.'))
       }
 
@@ -115,14 +115,14 @@ const tweetController = {
         return cb(new Error('tweet_id does not exist.'))
       }
 
-      const findLike = await Like.findAll({
+      const findLike = await Like.findOne({
         raw: true,
         where: {
           UserId,
           TweetId
         }
       })
-      if (findLike.length === 0) {
+      if (!findLike) {
         return cb(new Error('This tweet is not liked.'))
       }
       await Like.destroy({
@@ -135,7 +135,7 @@ const tweetController = {
       const likeData = {
         status: 'success',
         data: {
-          Like: findLike[0]
+          Like: findLike
         }
       }
       return cb(null, likeData)
