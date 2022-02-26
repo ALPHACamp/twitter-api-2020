@@ -2,9 +2,9 @@ const { Like, User, Tweet } = require('../models')
 const likeController = {
   getUserLikes: async(req, res, next) => {
   try {
-    const UserId = req.params.id
-    const like = await Like.findByPk(UserId)
-    if (!UserId) {
+    const user = await User.findByPk(req.params.id)
+    const like = await Like.findByPk(req.params.id)
+    if (!user) {
       return res
         .status(404)
         .json({
@@ -25,6 +25,7 @@ const likeController = {
         UserId: req.params.id,
         isDeleted: false
       },
+      order: [['createdAt', 'desc']],
       include: [Tweet]
     })
     if (likes.length ==0) {

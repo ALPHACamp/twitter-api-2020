@@ -81,6 +81,15 @@ const userController = {
       })
     } catch (err) { next(err) }
   },
+  getUser: (req, res) => {
+    const UserId = req.params.id
+    User.findByPk(UserId)
+      .then(user => { return res.status(200).json(user) })
+      .catch((error) => res.status(500).json({
+        status: 'error',
+        message: error
+      }))
+  },
   postLike: async (req, res, next) => {
     try {
       const TweetId = req.params.id
@@ -99,12 +108,22 @@ const userController = {
           TweetId
         }
       })
-      if (like) {
+      if (like.isDeleted) {
+        const toggleLike = await like.update({
+          isDeleted: !like.isDeleted
+        })
+        if (toggleLike) {
+          return res.status(200).json({
+            status: 'success',
+            message: 'Like成功!'
+          })
+        }
+      } else {
         return res
           .status(400)
           .json({
             status: 'error',
-            message: '已經按過喜歡囉'
+            message: '已經按過Like囉'
           })
       }
       await Like.create({
@@ -114,7 +133,7 @@ const userController = {
       })
       return res.status(200).json({
         status: 'success',
-        message: '已加入喜歡的貼文!'
+        message: '成功加入喜歡的貼文!'
       })
     } catch (error) {res.status(500).json({
       status: 'error',
@@ -128,8 +147,7 @@ const userController = {
       const like = await Like.findOne({
         where: {
           UserId: req.user.id,
-          TweetId,
-          isDeleted: false
+          TweetId
         }
       })
       if (!tweet) {
@@ -140,22 +158,23 @@ const userController = {
             message: '推文不存在'
           })
       }
-      if (!like) {
+      if (like.isDeleted) {
         return res
           .status(400)
           .json({
             status: 'error',
-            message: '已經Unlike過囉'
+            message: '已經按過Unlike囉'
           })
-      }
-      const toggleLike = await like.update({
-        isDeleted: !like.isDeleted
-      })
-      if (toggleLike) {
-        return res.status(200).json({
-          status: 'success',
-          message: 'Unlike成功!'
+      } else {
+        const toggleLike = await like.update({
+          isDeleted: !like.isDeleted
         })
+        if (toggleLike) {
+          return res.status(200).json({
+            status: 'success',
+            message: 'Unlike成功!'
+          })
+        }
       }
     } catch (error) {
       res.status(500).json({

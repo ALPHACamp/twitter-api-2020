@@ -2,9 +2,9 @@ const { Reply, Tweet, User } = require('../models')
 const replyController = {
   getUserReplies: async (req, res, next) => {
     try {
-      const UserId = req.params.id
-      const reply = await Reply.findByPk(UserId)
-      if (!UserId) {
+      const user = await User.findByPk(req.params.id)
+      const reply = await Reply.findByPk(req.params.id)
+      if (!user) {
         return res
           .status(404)
           .json({
@@ -24,6 +24,7 @@ const replyController = {
         where: {
           UserId: req.params.id
         },
+        order: [['createdAt', 'desc']],
         include: [Tweet]
       })
       if (replies.length == 0) {
@@ -45,17 +46,23 @@ const replyController = {
   getReplies: (req, res) => {
     return Reply.findAll({
       where: {
-        TweetId: req.params.id,
-        // UserId: req.user.id
-      }
+        TweetId: req.params.id
+      },
+      order: [['createdAt', 'desc']],
     })
       .then(replies => {
-        console.log(req.params.id,'',replies)
-        return res.status(200).json({
-          status: '200',
-          message: '成功找到回覆',
-          Reply: replies
-        })
+        if (replies.length ===0) {
+          return res.status(404).json({
+            status: 'error',
+            message: '推文不存在',
+          })
+        } else {
+          return res.status(200).json({
+            status: 'success',
+            message: '成功找到回覆',
+            Reply: replies
+          })
+        }
       })
       .catch((error) => res.status(500).json({
         status: 'error',

@@ -22,7 +22,7 @@ module.exports = {
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
         account: `user${i + 1}`,
         introduction: faker.lorem.text().substring(0, 160),
-        avatar: 'https://loremflickr.com/320/240/people',
+        avatar: 'https://loremflickr.com/320/320/people',
         cover: 'https://loremflickr.com/800/600/paris',
         role: 'user',
         createdAt: new Date(),
