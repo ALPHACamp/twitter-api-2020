@@ -1,5 +1,5 @@
-const sequelize = require('sequelize')
-const Op = sequelize.Op
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
@@ -96,10 +96,28 @@ const userController = {
       })
       const tweets = await Tweet.findAll({
         where: { UserId: user.id },
-        attributes: ['id', 'UserId', 'description', 'createdAt', 'updatedAt'],
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt'
+        ],
         raw: true,
         nest: true
       })
+      for (const tweet of tweets) {
+        const [repliesResult, likesResult] = await Promise.all([
+          Reply.count({
+            where: { TweetId: tweet.id }
+          }),
+          Like.count({
+            where: { TweetId: tweet.id }
+          })
+        ])
+        tweet.repliesCount = repliesResult
+        tweet.likesCount = likesResult
+      }
       return cb(null, tweets)
     } catch (err) {
       return cb(err)
