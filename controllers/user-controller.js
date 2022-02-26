@@ -103,10 +103,6 @@ const userController = {
       })
       const followedUsers = helper.getUser(req).Followings
       user.dataValues.isFollowed = followedUsers.some(fu => fu.id === user.id)
-      // const results = user.map(u => ({
-      //   ...u.toJSON(),
-      //   isFollowed: followedUsers.some(fu => fu.id === u.id)
-      // }))
 
       return res.json(user)
     } catch(err) {
