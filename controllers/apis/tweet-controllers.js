@@ -25,6 +25,22 @@ const tweetController = {
       }
       return res.status(200).json(data)
     })
+  },
+  postLike: (req, res, next) => {
+    tweetServices.postLike(req, (err, data) => {
+      if (err) {
+        return next(err)
+      }
+      return res.status(200).json(data)
+    })
+  },
+  postUnlike: (req, res, next) => {
+    tweetServices.postUnlike(req, (err, data) => {
+      if (err) {
+        return next(err)
+      }
+      return res.status(200).json(data)
+    })
   }
 
 }
