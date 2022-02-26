@@ -11,6 +11,7 @@ const { apiErrorHandler } = require('../../middleware/api-error-handler')
 
 const userController = require('../../controllers/user-controller')
 
+router.get('/current_user', authenticated, userController.getCurrentUser)
 router.use('/admin', admin)
 router.use('/users', users)
 router.post('/login', userController.login)
