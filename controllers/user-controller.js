@@ -279,7 +279,7 @@ const userController = {
 
     return User.findAll({
       include: { model: User, as: 'Followers' },
-      attributes: ['id', 'name', 'account', 'createdAt'],
+      attributes: ['id', 'name', 'account', 'avatar', 'createdAt'],
       where: { role: { $not: 'admin' } }
     })
       .then(users => {
