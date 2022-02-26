@@ -10,7 +10,7 @@ module.exports = {
     const users = (await User.findAll({ where: { role: 'user' } })).map(user => user.id)
     const tweets = (await Tweet.findAll()).map(tweet => tweet.id)
 
-    // 建立3則Reply，每個留言者皆不同
+    // 建立3則Reply，隨機留言者 - 可重複
     await Promise.all(tweets.map(tweetId => {
       const replySeeder = Array.from({ length: DEFAULT_REPLY_COUNT }, (_, i) => {
         return {
@@ -21,13 +21,10 @@ module.exports = {
           updatedAt: new Date()
         }
       })
-      return queryInterface.bulkInsert('Replies', replySeeder)
-    }))
-
-    // 更新 DB 推文的留言數
-    await Promise.all(tweets.map(tweetId => {
+      // 更新 DB 推文的留言數
       const SQL = `UPDATE Tweets SET replyCount = 3 WHERE id = ${tweetId}`
-      return queryInterface.sequelize.query(SQL)
+      queryInterface.sequelize.query(SQL)
+      return queryInterface.bulkInsert('Replies', replySeeder)
     }))
   },
 
