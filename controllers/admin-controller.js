@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -26,10 +26,34 @@ const adminController = {
   },
   getAdminUsers: (req, res, next) => {
     return User.findAll({
-      attributes: { exclude: ['password'] }
+      // where: { role: { $not: 'admin' } },  test file requires admin role also included
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: Tweet, attributes: ['id'], include: { model: Like, attributes: ['id'] } },
+        { model: Reply, attributes: ['id'] },
+        { model: User, as: 'Followings', attributes: ['id'] },
+        { model: User, as: 'Followers', attributes: ['id'] }
+      ]
     })
       .then(users => {
-        res.status(200).json(users)
+        const result = users
+          .map(u => ({
+            ...u.toJSON()
+          }))
+
+        result.forEach(r => {
+          r.TweetsCount = r.Tweets.length
+          r.FollowingsCount = r.Followings.length
+          r.FollowersCount = r.Followers.length
+          r.RepliesCount = r.Replies.length
+          r.TweetsLikedCount = r.Tweets.reduce((acc, tweet) => acc + tweet.Likes.length, 0)
+          delete r.Tweets
+          delete r.Replies
+          delete r.Followings
+          delete r.Followers
+        })
+
+        res.status(200).json(result)
       })
       .catch(err => next(err))
   },
