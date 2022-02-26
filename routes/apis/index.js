@@ -31,6 +31,9 @@ router.get('/tweets/:tweet_id/replies', authenticated, tweetController.getReplie
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 router.post('/tweets/:tweet_id/like', authenticated, tweetController.addLike)
 router.post('/tweets/:tweet_id/unlike', authenticated, tweetController.removeLike)
+router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets', authenticated, tweetController.postTweet)
 
 
 module.exports = router
