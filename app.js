@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
-
+const path = require('path')
 const express = require('express')
 const passport = require('./config/passport')
 const session = require('express-session')
@@ -16,11 +16,12 @@ const port = 3000
 
 const SESSION_SECRET = 'secret'
 
-app.use(express.urlencoded({ extended: true }))
 app.use(cors())
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize())
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use((req, res, next) => {
   res.user = helpers.getUser(req)
