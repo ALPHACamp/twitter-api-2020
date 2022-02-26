@@ -2,7 +2,7 @@ const followshipServices = require('../services/followship-service')
 
 const followshipController = {
   addFollowship: (req, res, next) => {
-    if (!req.body.id.trim()) throw new ReferenceError('請輸入數字 id 當 parameters')
+    if (req.body.id === undefined) throw new ReferenceError('請輸入要追蹤使用者的ID')
     if (isNaN(Number(req.body.id))) throw new ReferenceError('請輸入數字 id 當 parameters')
     if (Number(req.body.id) === req.user.dataValues.id) throw new Error('使用者不可以自己追蹤自己')
     followshipServices.addFollowship(req, (err, data) => err

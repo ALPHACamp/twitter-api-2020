@@ -3,20 +3,19 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const helpers = require('./_helpers')
+const { CORSHeader } = require('./middleware/CORS-header')
 const passport = require('./config/passport')
 const router = require('./routes')
 
 const app = express()
-const port = 3000
+const PORT = process.env.PORT || 3000
 
 app.use(passport.initialize())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-// use helpers.getUser(req) to replace req.user
-app.use('/api', router)
+app.use('/api', CORSHeader, router)
 
 app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
 
 module.exports = app
