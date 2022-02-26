@@ -37,12 +37,42 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     const getTweetId = Number(req.params.id)
+    const reqUserId = helpers.getUser(req).id
     return Tweet.findByPk(getTweetId, {
-      include: { model: Reply }
+      include: [
+        { model: Reply, include: { model: User } },
+        { model: Like },
+        { model: User }
+      ],
     })
       .then(tweet => {
         if (!tweet) throw new Error('Tweet not exist!')
-        res.status(200).json(tweet)
+
+        const result = tweet.toJSON()
+
+        result.Replies
+          .forEach(reply => {
+            reply.replyId = reply.id
+            reply.name = reply.User.name
+            reply.account = reply.User.account
+            delete reply.id
+            delete reply.TweetId
+            delete reply.userId
+            delete reply.User
+          })
+
+        result.tweetId = result.id
+        result.name = result.User.name
+        result.account = result.User.account
+        result.isLiked = result.Likes.some(like => like.UserId === reqUserId)
+        result.likesCount = result.Likes.length
+        result.repliesCount = result.Replies.length
+        delete result.id
+        delete result.userId
+        delete result.Likes
+        delete result.User
+
+        res.status(200).json(result)
       })
       .catch(err => next(err))
   },
