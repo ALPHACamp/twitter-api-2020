@@ -1,4 +1,4 @@
-const { Tweet, User, Reply, Like } = require('../models')
+const { Tweet, User, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 
@@ -9,7 +9,7 @@ module.exports = {
 
       const tweets = await Tweet.findAll({
         include: [
-          { model: User },
+          { model: User, attributes: { exclude: ['password'] } },
           { model: User, as: 'UsersFromLikedTweets' }
         ],
         order: [['createdAt', 'DESC']],
@@ -29,7 +29,6 @@ module.exports = {
         // delete original properties from tweet
         delete tweet.User
         delete tweet.UsersFromLikedTweets
-        delete tweetedUser.password
 
         return {
           ...tweet,
@@ -50,7 +49,7 @@ module.exports = {
 
       let tweet = await Tweet.findByPk(TweetId, {
         include: [
-          { model: User },
+          { model: User, attributes: { exclude: ['password'] }  },
           { model: User, as: 'UsersFromLikedTweets' }
         ],
         nest: true
@@ -67,7 +66,6 @@ module.exports = {
       // remove unnecessary key properties
       delete tweet.User
       delete tweet.UsersFromLikedTweets
-      delete tweetedUser.password
 
       // reassemble tweet object
       const responseData = {
@@ -89,20 +87,24 @@ module.exports = {
       if (!description) throw new Error('推文不能為空!')
       if (description.length > 140) throw new Error('推文字數不能超過140字!')
 
-      // find user and create tweet at the same time
-      const [user, tweet] = await Promise.all([
-        User.findByPk(UserId),
-        Tweet.create({ description, UserId })
-      ])
+      const responseData = await sequelize.transaction(async (t) => {
+        // find user and create tweet at the same time
+        const [user, tweet] = await Promise.all([
+          User.findByPk(UserId, { transaction: t }),
+          Tweet.create({ description, UserId }, { transaction: t })
+        ])
 
-      if (!user) throw new Error('這位使用者不存在，發佈推文動作失敗!')
+        if (!user) throw new Error('這位使用者不存在，發佈推文動作失敗!')
 
-      // plus totalTweets number by 1,
-      // and then get full tweet data from database
-      const [_, responseData] = await Promise.all([
-        user.increment('totalTweets', { by: 1 }),
-        Tweet.findByPk(tweet.id, { raw: true })
-      ])
+        // plus totalTweets number by 1,
+        // and then get full tweet data from database
+        const [postedTweet] = await Promise.all([
+          Tweet.findByPk(tweet.id, { raw: true, transaction: t }),
+          user.increment('totalTweets', { by: 1, transaction: t })
+        ])
+
+        return postedTweet
+      })
 
       return res.status(200).json(responseData)
 
@@ -116,7 +118,7 @@ module.exports = {
       const [tweet, replies] = await Promise.all([
         Tweet.findByPk(TweetId),
         Reply.findAll({
-          include: User,
+          include: { model: User, attributes: { exclude: ['password'] } },
           where: { TweetId },
           nest: true
         })
@@ -131,10 +133,8 @@ module.exports = {
 
         // assign following object to temp constant
         const repliedUser = reply.User
-
         // remove unnecessary key properties
         delete reply.User
-        delete repliedUser.password
 
         return { ...reply, repliedUser }
       })
@@ -156,14 +156,15 @@ module.exports = {
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) throw new Error('因為沒有這則推文，無法在其底下新增回覆!')
 
-      // plus both totalReplies number by 1, and
-      // create reply, and then return full reply data from database
-      const [_, responseData] = await Promise.all([
-        tweet.increment('totalReplies', { by: 1 }),
-        Reply.create({
-          comment, TweetId, UserId
-        })
-      ])
+      const responseData = await sequelize.transaction(async (t) => {
+        // plus both totalReplies number by 1, and
+        // create reply, and then return full reply data from database
+        const [postedReply] = await Promise.all([
+          Reply.create({ comment, TweetId, UserId }, { transaction: t }),
+          tweet.increment('totalReplies', { by: 1, transaction: t })
+        ])
+        return postedReply
+      })
 
       return res.status(200).json(responseData)
 
@@ -191,13 +192,16 @@ module.exports = {
       if (!user) throw new Error('因為沒有推文作者，所以點讚動作失敗!')
       if (like) throw new Error('不能對同一則推文重複點讚!')
 
-      // plus both totalLikes and totalLiked numbers each by 1,
-      // and create like, and then return full like data from database
-      const [_t, _u, responseData] = await Promise.all([
-        tweet.increment('totalLikes', { by: 1 }),
-        user.increment('totalLiked', { by: 1 }),
-        Like.create({ UserId, TweetId }),
-      ])
+      const responseData = await sequelize.transaction(async (t) => {
+        // plus both totalLikes and totalLiked numbers each by 1,
+        // and create like, and then return full like data from database
+        const [postedLike] = await Promise.all([
+          Like.create({ UserId, TweetId }, { transaction: t }),
+          tweet.increment('totalLikes', { by: 1, transaction: t }),
+          user.increment('totalLiked', { by: 1, transaction: t })
+        ])
+        return postedLike
+      })
 
       return res.status(200).json(responseData)
 
@@ -225,13 +229,16 @@ module.exports = {
       if (!user) throw new Error('因為沒有推文作者，所以收回讚的動作失敗!')
       if (!like) throw new Error('不能對尚未按讚的推文收回讚!')
 
-      // minus both totalLikes and totalLiked numbers each by 1,
-      // and destroy like, and then return full like data from database
-      const [_t, _u, responseData] = await Promise.all([
-        tweet.decrement('totalLikes', { by: 1 }),
-        user.decrement('totalLiked', { by: 1 }),
-        like.destroy(),
-      ])
+      const responseData = await sequelize.transaction(async (t) => {
+        // minus both totalLikes and totalLiked numbers each by 1,
+        // and destroy like, and then return full like data from database
+        const [removedLike] = await Promise.all([
+          like.destroy({ transaction: t }),
+          tweet.decrement('totalLikes', { by: 1, transaction: t }),
+          user.decrement('totalLiked', { by: 1, transaction: t })
+        ])
+        return removedLike
+      })
 
       return res.status(200).json(responseData)
 
