@@ -181,14 +181,27 @@ const userController = {
         'createdAt'
       ],
       include: [
-        { model: Tweet, attributes: [['id', 'tweetId'], 'description', 'image'] },
+        { model: Tweet, attributes: [['id', 'tweetId'], 'description', 'image'], include: { model: User, attributes: ['id', 'name', 'account'] } },
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
       ],
       order: [['createdAt', 'DESC']]
     })
       .then(replies => {
         if (!replies) throw new Error('No replies')
-        return res.status(200).json(replies)
+
+        const result = replies
+          .map(r => ({
+            ...r.toJSON()
+          }))
+
+        result.forEach(r => {
+          r.Tweet.TweetUserId = r.Tweet.User.id
+          r.Tweet.TweetUserName = r.Tweet.User.name
+          r.Tweet.TweetUserAccount = r.Tweet.User.account
+          delete r.Tweet.User
+        })
+
+        return res.status(200).json(result)
       })
       .catch(err => next(err))
   },
