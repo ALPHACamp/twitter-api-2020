@@ -8,8 +8,7 @@ const tweetController = {
     // 找到所有推文，並關連User
     Tweet.findAll({
       include: User,
-      raw: true,
-      nest: true
+      order: [['createdAt', 'DESC']],
     })
       .then(tweets => {
         // 回傳陣列-物件json
@@ -23,12 +22,11 @@ const tweetController = {
     // 以tweet_id取得Tweet推文，並關連Reply-User
     Tweet.findByPk(req.params.tweet_id, {
       include: [{ model: Reply, include: User }],
-      raw: true,
-      nest: true
+      order: [['Replies', 'createdAt', 'DESC']]
     })
       .then(tweet => {
         // 回傳物件json
-        return res.json(tweet)
+        return res.json(tweet.toJSON())
       })
       .catch(err => next(err))
   },
