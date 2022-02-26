@@ -1,5 +1,7 @@
 const helpers = require('../../_helpers')
-const { Tweet, Like, Reply } = require('../../models')
+const sequelize = require('sequelize')
+const { User, Tweet, Like, Reply } = require('../../models')
+const appFunc = require('../../services/appFunctions')
 
 const tweetController = {
   postTweet: async (req, res, next) => {
@@ -23,13 +25,29 @@ const tweetController = {
   },
   getTweets: async (req, res, next) => {
     try {
+      const userId = Number(helpers.getUser(req).id)
       const tweets = await Tweet.findAll({
         raw: true,
-        nest: true
+        nest: true,
+        order: [['createdAt', 'DESC']],
+        include: {
+          model: User,
+          attributes: ['name', 'account', 'avatar']
+        },
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
+        ]
       })
       if (process.env.NODE_ENV === 'test') {
         res.json(tweets)
       }
+      await Promise.all(tweets.map(async tweet => {
+        return await appFunc.resTweetHandler(userId, tweet)
+      }))
       res.json({
         status: 'success',
         data: { tweets }
@@ -40,14 +58,28 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
+      const userId = Number(helpers.getUser(req).id)
       const tweet = await Tweet.findOne({
         where: { id: req.params.id },
         raw: true,
-        nest: true
+        nest: true,
+        order: [['createdAt', 'DESC']],
+        include: {
+          model: User,
+          attributes: ['name', 'account', 'avatar']
+        },
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
+        ]
       })
       if (process.env.NODE_ENV === 'test') {
         res.json(tweet)
       }
+      await appFunc.resTweetHandler(userId, tweet)
       res.json({
         status: 'success',
         data: { tweet }
@@ -133,7 +165,11 @@ const tweetController = {
       const replies = await Reply.findAll({
         where: { TweetId },
         raw: true,
-        nest: true
+        nest: true,
+        include: {
+          model: User,
+          attributes: ['name', 'account', 'avatar']
+        }
       })
       if (process.env.NODE_ENV === 'test') {
         res.json(replies)

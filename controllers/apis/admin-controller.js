@@ -16,7 +16,7 @@ const adminController = {
         status: 'success',
         data: {
           token,
-          user: userData
+          admin: userData
         }
       })
     } catch (err) {
