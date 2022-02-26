@@ -23,7 +23,9 @@ const followshipController = {
           followerId
         })
       })
-      .then(() => res.status(200).json('Successfully followed this user.'))
+      .then((getFollowing) => {
+        res.status(200).json('Successfully followed this user.')
+      })
       .catch(err => next(err))
   },
   unFollowUser: (req, res, next) => {
