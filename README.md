@@ -21,7 +21,7 @@ create database ac_twitter_workspace;
 ```
 7. 在資料庫內建立資料表
 ```
-npx sequelize db:seed:all
+npx sequelize db:migrate
 ```
 8. 產生種子資料給資料庫
 ```
@@ -46,10 +46,7 @@ npm run start
 ctrl + c ( mac : command + .)
 ```
 ## 路由列表
-參照下列網址有詳細說明路由清單與各路由的必要參數與回傳格式
-```
-https://app.swaggerhub.com/apis-docs/HUANG-SIH-MAN/twitter-API/1.0.0#/
-```
+參照[文字說明](https://app.swaggerhub.com/apis-docs/HUANG-SIH-MAN/twitter-API/1.0.0#/)有詳細說明路由清單與各路由的必要參數與回傳格式
 ## 開發工具
 - Node.js 14.16.0
 - Express 4.16.4
