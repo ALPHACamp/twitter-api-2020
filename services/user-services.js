@@ -1,18 +1,29 @@
+const sequelize = require('sequelize')
+const Op = sequelize.Op
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
+const { imgurFileHandler } = require('../helpers/file-helper')
 
 const userController = {
   signUp: async (req, cb) => {
     try {
-      if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
-      const user = await User.findOne({ where: { email: req.body.email } })
-      if (user) throw new Error('Email already exists!')
+      const { account, name, email, password, checkPassword } = req.body
+      if (password !== checkPassword) throw new Error('Passwords do not match!')
+      if (name.length > 50) {
+        throw new Error('String must not exceed 50 characters!')
+      }
+      const user = await User.findOne({
+        where: {
+          [Op.or]: [{ email }, { account }]
+        }
+      })
+      if (user) throw new Error('Email or Account already exists!')
       const hash = await bcrypt.hash(req.body.password, 10)
       const newUser = await User.create({
-        account: req.body.account,
-        name: req.body.name,
-        email: req.body.email,
+        account,
+        name,
+        email,
         password: hash
       })
       const userData = {
@@ -54,13 +65,21 @@ const userController = {
         raw: true,
         nest: true
       })
+      const followers = await Followship.findAndCountAll({
+        raw: true,
+        where: { FollowingId: req.params.id }
+      })
+      const followings = await Followship.findAndCountAll({
+        raw: true,
+        where: { FollowerId: req.params.id }
+      })
       const userData = {
         status: 'success',
-        id: user.id,
-        name: user.name,
-        account: user.account,
-        email: user.email
+        ...user,
+        followersCount: followers.count,
+        followingsCount: followings.count
       }
+      delete userData.password
       return cb(null, userData)
     } catch (err) {
       cb(err)
@@ -106,22 +125,45 @@ const userController = {
     }
   },
   putUser: async (req, cb) => {
+    const { account, name, email, password, checkPassword, introduction, avatar, cover } = req.body
+    const where = {}
+    const { files } = req
+
+    async function uploadFiles (files) {
+      const filesArr = []
+      for (const file in files) {
+        filesArr.push(files[file][0])
+      }
+      for (const file of filesArr) {
+        const imgurUrl = await imgurFileHandler(file)
+        where[file.fieldname] = imgurUrl
+      }
+    }
     try {
-      const { account, name, email, password, introduction, avatar, cover } = req.body
+      if (password !== checkPassword) throw new Error('Passwords do not match!')
+      if (introduction && (introduction.length > 160)) throw new Error('Introduction exceeds the word limit!')
+      if (name && (name.length > 50)) throw new Error('Name exceeds the word limit!')
+      const registereduser = await User.findOne({
+        raw: true,
+        where: {
+          [Op.or]: [{ email }, { account }],
+          [Op.not]: [{ id: req.params.id }]
+        }
+      })
+      if (registereduser) throw new Error('Acount or Email repeated!')
       const user = await User.findByPk(req.params.id, {
-        include: [
-          { model: User, as: 'Followings' }
-        ]
+        include: [{ model: User, as: 'Followings' }]
       })
-      const updatedUser = await user.update({
-        account,
-        name,
-        email,
-        password,
-        introduction,
-        avatar,
-        cover
-      })
+
+      // pass, update user
+      const reqBodyArr = { account, name, email, password, introduction, avatar, cover }
+      for (const attribute in reqBodyArr) {
+        if (reqBodyArr[attribute]) {
+          where[attribute] = reqBodyArr[attribute]
+        }
+      }
+      await uploadFiles(files)
+      const updatedUser = await user.update(where)
       const updatedData = { ...updatedUser.dataValues }
       delete updatedData.password
       const userData = {
