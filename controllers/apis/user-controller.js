@@ -245,17 +245,23 @@ const userController = {
         raw: true,
         nest: true,
         order: [['createdAt', 'DESC']],
-        include: {
+        include: [{
+          model: Tweet,
+          attributes: ['id'],
+          include: [{ model: User, attributes: ['account'] }]
+        },
+        {
           model: User,
           attributes: ['name', 'account', 'avatar']
-        }
+        }]
       })
       if (process.env.NODE_ENV === 'test') {
         res.json(replies)
       }
+      const resReplies = appFunc.resRepliesHandler(replies)
       res.json({
         status: 'success',
-        data: { replies }
+        data: { replies: resReplies }
       })
     } catch (err) {
       next(err)

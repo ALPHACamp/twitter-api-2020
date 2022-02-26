@@ -30,5 +30,13 @@ module.exports = {
       }
     })
     return Boolean(followship)
+  },
+  resRepliesHandler: replies => {
+    replies.map(reply => {
+      reply.replyTo = reply.Tweet.User.account
+      delete reply.Tweet
+      return reply
+    })
+    return replies
   }
 }
