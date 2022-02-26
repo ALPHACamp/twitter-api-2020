@@ -4,7 +4,7 @@ const { Op } = require('sequelize')
 const sequelize = require('sequelize')
 const { User, Followship, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../_helpers')
-const { imgurFileHandler } = require('../file-helper')
+const { imgurFileHandler, localFileHandler } = require('../file-helper')
 
 const userServices = {
   postUser: (req, cb) => {
@@ -285,14 +285,16 @@ const userServices = {
       .catch(err => cb(err))
   },
   putUserProfile: (req, cb) => {
+    const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
+    console.log(fileHandler)
     return User.findByPk(req.params.id)
       .then(user => {
         const { files } = req
         // 有上傳封面或頭像
         if (JSON.stringify(files) !== '{}' && files !== undefined) {
           return Promise.all([
-            imgurFileHandler(files.cover),
-            imgurFileHandler(files.avatar)
+            fileHandler(files.cover),
+            fileHandler(files.avatar)
           ])
             .then(([coverFilePath, avatarFilePath]) => {
               return user.update({
