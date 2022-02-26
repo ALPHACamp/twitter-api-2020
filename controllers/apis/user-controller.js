@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../../_helpers')
-const { Op } = require('sequelize')
+const sequelize = require('sequelize')
+const { Op } = sequelize
 const { imgurFileHandler } = require('../../helpers/file-helpers')
 const { User, Tweet, Like, Reply, Followship } = require('../../models')
 const appFunc = require('../../services/appFunctions')
@@ -48,6 +49,39 @@ const userController = {
         data: {
           token,
           user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const userId = Number(helpers.getUser(req).id)
+      const id = Number(req.params.id)
+      const user = await User.findByPk(id, {
+        raw: true,
+        nest: true,
+        attributes: { exclud: ['password'] }
+      })
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      const following = await Followship.findAndCountAll({ where: { followerId: id }, raw: true, nest: true })
+      const followers = await Followship.findAndCountAll({ where: { followingId: id }, raw: true, nest: true })
+      const isFollowing = await appFunc.getUserIsFollowing(userId, id)
+      const isUser = Boolean(userId === id)
+      if (process.env.NODE_ENV === 'test') {
+        res.json(user)
+      }
+      res.json({
+        status: 'success',
+        data: {
+          user: {
+            ...user,
+            isFollowing,
+            following: following.count,
+            followers: followers.count,
+            isUser
+          }
         }
       })
     } catch (err) {

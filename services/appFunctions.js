@@ -1,4 +1,4 @@
-const { Like } = require('../models')
+const { Like, Followship } = require('../models')
 
 module.exports = {
   resTweetHandler: async function (userId, tweet) {
@@ -21,5 +21,14 @@ module.exports = {
       nest: true
     })
     return likes.count
+  },
+  getUserIsFollowing: async function (userId, targetId) {
+    const followship = await Followship.findOne({
+      where: {
+        followingId: targetId,
+        followerId: userId
+      }
+    })
+    return Boolean(followship)
   }
 }
