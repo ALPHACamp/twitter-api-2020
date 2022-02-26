@@ -43,7 +43,7 @@ const replyController = {
       })
     }
   },
-  getReplies: (req, res) => {
+  getTweetReplies: (req, res) => {
     return Reply.findAll({
       where: {
         TweetId: req.params.id
@@ -54,7 +54,7 @@ const replyController = {
         if (replies.length ===0) {
           return res.status(404).json({
             status: 'error',
-            message: '推文不存在',
+            message: '這篇推文沒有回覆哦',
           })
         } else {
           return res.status(200).json({
@@ -69,7 +69,7 @@ const replyController = {
         message: error
       }))
   },
-  postReplies: (req, res) => {
+  postTweetReplies: (req, res) => {
     const { TweetId, comment } = req.body
     const UserId = req.user.id
     if (!comment) {
