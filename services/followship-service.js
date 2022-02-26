@@ -27,6 +27,8 @@ const followshipServices = {
       }
     })
       .then(followship => {
+        console.log(req.user.dataValues.id, req.params.id)
+        console.log(followship)
         if (followship === null) throw new Error('輸入錯誤的followingId，當前使用者並未追隨該使用者')
         followship.destroy().then(() => cb(null, '成功移追蹤'))
       })
