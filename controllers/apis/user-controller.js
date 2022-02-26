@@ -88,6 +88,41 @@ const userController = {
       next(err)
     }
   },
+  getPopularUsers: async (req, res, next) => {
+    try {
+      const userId = Number(helpers.getUser(req).id)
+      const limit = Number(req.query.amount) || 10
+      const followList = await User.findAll({
+        where: { role: { [Op.ne]: 'admin' } },
+        raw: true,
+        nest: true,
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followers']
+        ],
+        limit
+      })
+      console.log(followList)
+      const reUsers = await Promise.all(followList.map(async user => {
+        user.isFollowing = await appFunc.getUserIsFollowing(userId, user.id)
+        return user
+      }))
+      console.log(reUsers)
+      reUsers.sort((a, b) => b.followers - a.followers)
+      console.log(reUsers)
+      res.json({
+        status: 'success',
+        data: {
+          users: reUsers
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
   putUser: async (req, res, next) => {
     try {
       const { name, introduction } = req.body
