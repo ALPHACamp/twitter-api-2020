@@ -104,7 +104,9 @@ const userController = {
           'updatedAt'
         ],
         raw: true,
-        nest: true
+        nest: true,
+        order: [['createdAt', 'DESC']],
+        include: [User]
       })
       for (const tweet of tweets) {
         const [repliesResult, likesResult] = await Promise.all([
@@ -117,6 +119,7 @@ const userController = {
         ])
         tweet.repliesCount = repliesResult
         tweet.likesCount = likesResult
+        delete tweet.User.password
       }
       return cb(null, tweets)
     } catch (err) {
