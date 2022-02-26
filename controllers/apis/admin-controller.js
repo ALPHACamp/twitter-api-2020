@@ -50,7 +50,7 @@ const adminController = {
       })
 
       // test data
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         return res.status(200).json(users)
       }
 

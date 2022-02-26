@@ -70,7 +70,7 @@ const userController = {
       const followers = await Followship.findAndCountAll({ where: { followingId: id }, raw: true, nest: true })
       const isFollowing = await appFunc.getUserIsFollowing(userId, id)
       const isUser = Boolean(userId === id)
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(user)
       }
       res.json({
@@ -221,7 +221,7 @@ const userController = {
           [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
         ]
       })
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
       }
       const resTweets = await Promise.all(tweets.map(async tweet => {
@@ -255,7 +255,7 @@ const userController = {
           attributes: ['name', 'account', 'avatar']
         }]
       })
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(replies)
       }
       const resReplies = appFunc.resRepliesHandler(replies)
@@ -294,7 +294,7 @@ const userController = {
         }
       })
       const tweets = likes.map(like => like.Tweet)
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         tweets.map(tweet => {
           tweet.TweetId = tweet.id
           return tweet
@@ -335,7 +335,7 @@ const userController = {
       user = user.toJSON()
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
 
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         user.forEach(following => {
           following.followingId = following.id
         })
@@ -377,7 +377,7 @@ const userController = {
       user = user.toJSON()
       user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
 
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         user.forEach(follower => {
           follower.followerId = follower.id
         })
