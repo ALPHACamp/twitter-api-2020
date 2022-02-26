@@ -1,3 +1,4 @@
 JWT_SECRET=
 ADMIN_ACCOUNT=root
 IMGUR_CLIENT_ID=
+front_end_web_url=

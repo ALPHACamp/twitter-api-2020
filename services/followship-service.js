@@ -29,7 +29,7 @@ const followshipServices = {
     })
       .then(followship => {
         if (followship === null) throw new Error('輸入錯誤的followingId，當前使用者並未追隨該使用者')
-        followship.destroy().then(() => cb(null, '成功移追蹤'))
+        followship.destroy().then(() => cb(null, '成功移除追蹤'))
       })
       .catch(err => cb(err, null))
   },
