@@ -53,7 +53,6 @@ const tempController = {
 
       result.forEach(fu => {
         fu.isFollowed = Boolean(fu.isFollowed)
-        delete fu.Followship
       })
 
       return res
