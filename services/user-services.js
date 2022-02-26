@@ -112,8 +112,15 @@ const userServices = {
     return Promise.all([
       Tweet.findAll({
         where: { userId: id },
-        include: [Reply, Like],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+            'replyAmount'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
+        ],
+        raw: true,
+        nest: true
       }),
       User.findByPk(id, {
         raw: true,
@@ -121,19 +128,21 @@ const userServices = {
       })
     ])
       .then(([tweets, user]) => {
-        if (!tweets.length) throw new Error('資料庫內找不到使用者資料')
+        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
+        if (!tweets.length) throw new Error('資料庫內沒有相關資料')
         const data = tweets.map(t => ({
-          id: t.dataValues.id,
+          id: t.id,
           userData: {
             id: user.id,
             account: user.account,
             name: user.name,
             avatar: user.avatar
           },
-          description: t.dataValues.description,
-          replyAmount: t.Replies.length,
-          likeAmount: t.Likes.length,
-          createdAt: t.dataValues.createdAt
+          description: t.description,
+          replyAmount: t.replyAmount,
+          likeAmount: t.likeAmount,
+          userLiked: Boolean(t.userLiked),
+          createdAt: t.createdAt
         }))
         return cb(null, data)
       })
