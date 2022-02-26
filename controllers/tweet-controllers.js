@@ -42,7 +42,86 @@ const tweetController = {
       return like.destroy()
       .then(() => res.json({ status: 'success'}))
     } catch(err) { next(err) }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        order: [['createdAt', 'DESC']],
+        include: [{ model: User },
+          { model: Reply },
+          { model: Like }]
+      })
+      if (!tweets) {
+        return res.json({ status: 'error', message: 'No tweets.' })
+      }
+      const result = tweets.map(tweet => {
+        return {
+          TweetId: tweet.id,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          tweetUserId: tweet.User.id,
+          tweetUserName: tweet.User.name,
+          avatar: tweet.User.avatar,
+          repliedCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+        }
+      })
+      return res.json(result)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.tweet_id, {
+        order: [['createdAt', 'DESC']],
+        include: [{ model: User },
+          { model: Reply, include: User },
+          { model: Like }]
+        })
+      if (!tweet) {
+        return res.json({ status: 'error', message: "This tweet didn't exist!" })
+      }
+      const reply = tweet.Replies
+      const replyResult = reply.map(r => ({
+        repliedComment: r.comment,
+        createdAt: r.createdAt,
+        repliedUser: r.User.id,
+        repliedUserName: r.User.name,
+        repliedUserAvatar: r.User.avatar
+      }))
+      const result = {
+        TweetId: tweet.id,
+        description: tweet.description,
+        createdAt: tweet.createdAt,
+        tweetUserName: tweet.User.name,
+        avatar: tweet.User.avatar,
+        repliedCount: reply.length,
+        likeCount: tweet.Likes.length,
+        liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false,
+        replyResult
+      }
+      
+      return res.json(result)
+    } catch (err) {
+      next(err)
+    }
+  },
+  postTweet: async (req, res, next) => {
+    const { description } = req.body
+    if (!description) return res.json({ status: 'error', message: 'Description is required' })
+    if (description.length > 140) return res.json({ status: 'error', message: 'Tweet text must be less than 140 characters.' })
+    try {
+      await Tweet.create({
+        description,
+        UserId: req.user.dataValues.id
+      })
+      return res.json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
   }
-};
+}
 
-module.exports = tweetController;
+module.exports = tweetController

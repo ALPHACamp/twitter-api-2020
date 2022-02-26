@@ -17,6 +17,7 @@ router.post('/admin/login',passport.authenticate('local', { session: false }), a
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
+router.get('/users/get_current_user', authenticated, userController.getCurrentUser)
 router.get('/users/top', authenticated, userController.getTopUsers)
 router.get('/users/:id/followings', authenticated, userController.userFollowings)
 router.get('/users/:id/followers', authenticated, userController.userFollowers)
@@ -30,6 +31,9 @@ router.get('/tweets/:tweet_id/replies', authenticated, tweetController.getReplie
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
 router.post('/tweets/:tweet_id/like', authenticated, tweetController.addLike)
 router.post('/tweets/:tweet_id/unlike', authenticated, tweetController.removeLike)
+router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
+router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.post('/followships', authenticated, userController.addFollow)
 router.delete('/followships/:followingId', authenticated, userController.removeFollow)
