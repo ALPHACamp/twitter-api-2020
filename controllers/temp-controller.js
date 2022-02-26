@@ -1,5 +1,5 @@
 
-const { User, Followship, Tweet, Like } = require('../models')
+const { User, Followship, Tweet, Like, Reply } = require('../models')
 const { sequelize } = require('../models')
 const authHelpers = require('../_helpers')
 
@@ -144,7 +144,7 @@ const tempController = {
 
       // 目前使用者調閱另一個使用者X的喜歡推文清單
       // (含暱稱/名稱、帳號、頭像、封面、它所喜歡的推文是否也被目前使用者喜歡和回覆)
-      // (時間、推文內容、)
+      // (時間、推文內容等)
       // 按喜歡紀錄排序，由新至舊
       const findOption = {
         where: {
@@ -198,6 +198,92 @@ const tempController = {
       })
 
       return res.json(results)
+    } catch (error) {
+      // 系統出錯
+      error.code = 500
+      return next(error)
+    }
+  },
+  // 獲取對應使用者所回覆的推文之清單(含回覆內容)
+  getReplies: async (req, res, next) => {
+    try {
+      const error = new Error()
+      const loginUserId = authHelpers.getUser(req).id
+      const targetUserId = req.params.id
+
+      // 找不到使用者可以調閱他/她的回覆推文清單
+      if (!(await User.findByPk(targetUserId))) {
+        error.code = 404
+        error.message = '對應使用者不存在'
+        return next(error)
+      }
+      // 目前使用者調閱另一個使用者X的回覆推文清單
+      // (含暱稱/名稱、帳號、頭像、封面、它所回覆的推文是否也被目前使用者喜歡和回覆)
+      // (時間、推文內容等)
+      // 按回覆紀錄排序，由新至舊
+      const findOption = {
+        where: {
+          UserId: targetUserId
+        },
+        include: [
+          {
+            model: User,
+            as: 'ReplyAuthor',
+            attributes: [
+              'id', 'account', 'name',
+              'cover', 'avatar'
+            ]
+          },
+          {
+            model: Tweet,
+            as: 'TargetTweet',
+            include: [
+              {
+                model: User,
+                as: 'TweetAuthor',
+                attributes: ['id', 'name', 'account', 'avatar', 'cover']
+              }
+            ]
+          }
+        ],
+        attributes: [
+          'id', 'UserId', 'TweetId',
+          'comment', 'createdAt', 'updatedAt',
+          [
+            sequelize.literal(`
+                  EXISTS (
+                      SELECT 1 FROM Likes
+                      WHERE UserId = ${loginUserId} 
+                      AND TweetId = TargetTweet.id
+                    )
+            `),
+            'isLikedTweet'
+          ],
+          [
+            sequelize.literal(`
+                  EXISTS (
+                      SELECT 1 FROM Replies
+                      WHERE UserId = ${loginUserId} 
+                      AND TweetId = TargetTweet.id
+                    )
+            `),
+            'isRepliedTweet'
+          ]
+        ],
+        order: [['createdAt', 'DESC']]
+      }
+      const replies = await Reply.findAll(findOption)
+
+      const results = replies.map(r => {
+        r = r.toJSON()
+        r.isLikedTweet = Boolean(r.isLikedTweet)
+        r.isRepliedTweet = Boolean(r.isRepliedTweet)
+        return r
+      })
+
+      return res
+        .status(200)
+        .json(results)
     } catch (error) {
       // 系統出錯
       error.code = 500
