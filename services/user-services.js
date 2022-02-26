@@ -82,12 +82,10 @@ const userServices = {
       const { name, introduction } = req.body
       const userId = helper.getUser(req).id
       if (Number(req.params.id) !== userId) throw new Error('只有本人可以這樣做')
-      if (!name) throw new Error('name is required!')
       if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
       if (introduction && introduction.length > 160) throw new Error('自我介紹字數超出上限！')
       const { files } = req
       if (files) {
-        console.log(files)
         if (files.avatar) {
           let localAvatar = await localFileHandler(files.avatar[0])
           const avatar = await imgurFileHandler(files.avatar[0])
@@ -99,7 +97,13 @@ const userServices = {
           req.body.cover = cover
         }
       }
-      const user = await User.findByPk(userId)
+      const user = await User.findByPk(userId, {
+        attributes: {
+          exclude: [
+            'password',
+          ],
+        }
+      })
       if (!user) throw new Error("User didn't exist!")
       await user.update({
         name: name || user.name,
