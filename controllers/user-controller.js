@@ -1,9 +1,12 @@
 
 const bcrypt = require('bcryptjs')
 const { User, Followship, sequelize } = require('../models')
+const jwtHelpers = require('../helpers/bearer-token-helper')
 const helper = require('../_helpers')
 const jwt = require('jsonwebtoken')
 const formDataCheckHelpers = require('../helpers/formdata-check-helper')
+
+
 const BCRYPT_COMPLEXITY = 10
 
 const userController = {
@@ -136,6 +139,7 @@ const userController = {
           'tweetCount'
         ]
       })
+      currentUser.dataValues.isExpiredToken = jwtHelpers.identifyJWT(req)
       return res.json({ status: 'success', message: '成功獲取', data: currentUser })
     } catch (err) {
       next(err)
