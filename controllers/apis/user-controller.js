@@ -105,14 +105,11 @@ const userController = {
         ],
         limit
       })
-      console.log(followList)
       const reUsers = await Promise.all(followList.map(async user => {
         user.isFollowing = await appFunc.getUserIsFollowing(userId, user.id)
         return user
       }))
-      console.log(reUsers)
       reUsers.sort((a, b) => b.followers - a.followers)
-      console.log(reUsers)
       res.json({
         status: 'success',
         data: {
