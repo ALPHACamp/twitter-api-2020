@@ -160,7 +160,7 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const { uid: id } = req.params
+      const { id } = req.params
       const userData = await User.findByPk(id, {
         raw: true
       })
@@ -172,6 +172,8 @@ const userController = {
         where: {},
         raw: true
       })
+      delete userData.password
+      
       res.json({
         status: 'success',
         message: 'getUser success!',
@@ -181,7 +183,7 @@ const userController = {
   },
   getUserTweets: async (req, res, next) => {
     try {
-      const { uid: id } = req.params
+      const { id } = req.params
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
         raw: true
@@ -196,6 +198,11 @@ const userController = {
         data: tweetsData
       })
     } catch (err) { next(err) }
+  },
+  putUser: async (req, res, next) => {
+    const { account, name, email, password, checkPassword } = req.body
+    const user = await User.findByPk(req.params.id)
+    
   }
 }
 
