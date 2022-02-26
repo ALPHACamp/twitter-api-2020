@@ -10,11 +10,11 @@ module.exports = {
       },
       account: {
         type: Sequelize.STRING,
-        unique: true // 避免同時註冊發生重複
+        // unique: true // 避免同時註冊發生重複
       },
       email: {
         type: Sequelize.STRING,
-        unique: true // 避免同時註冊發生重複
+        // unique: true // 避免同時註冊發生重複
       },
       password: {
         type: Sequelize.STRING
