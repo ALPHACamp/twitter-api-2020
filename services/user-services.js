@@ -228,11 +228,6 @@ const userController = {
           model: Tweet
         }]
       })
-      likedTweets.forEach(e => {
-        delete e.tweetId
-        delete e.userId
-        delete e.Tweet.userId
-      })
       return cb(null, likedTweets)
     } catch (err) {
       return cb(err)
