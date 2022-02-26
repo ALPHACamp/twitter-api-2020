@@ -53,7 +53,7 @@ git pull
 ```
 
 ## 共用帳號
-請一律設定下面 2 組帳號以利驗收：
+下面 2 組帳號為測試帳號：
 * 第一組帳號有 admin 權限：
   * email: root@example.com
   * password: 12345678
