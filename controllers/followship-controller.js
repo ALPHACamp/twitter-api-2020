@@ -1,4 +1,4 @@
-const { Followship, User } = require('../models')
+const { Followship, User, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 
@@ -21,12 +21,15 @@ module.exports = {
       if (!following) throw new Error('追隨者並不存在，跟隨動作失敗!')
       if (followship) throw new Error('不能對同一位使用者重複跟隨!')
 
-      // only retrieve first array item, which is created followship
-      const [responseData] = await Promise.all([
-        Followship.create({ followerId, followingId }),
-        follower.increment('totalFollowings', { by: 1 }),
-        following.increment('totalFollowers', { by: 1 })
-      ])
+      const responseData = await sequelize.transaction(async (t) => {
+        // only retrieve first array item, which is created followship
+        const [createdFollowship] = await Promise.all([
+          Followship.create({ followerId, followingId }, { transaction: t }),
+          follower.increment('totalFollowings', { by: 1, transaction: t }),
+          following.increment('totalFollowers', { by: 1, transaction: t })
+        ])
+        return createdFollowship
+      })
 
       return res.status(200).json(responseData)
 
@@ -51,12 +54,15 @@ module.exports = {
       if (!following) throw new Error('追隨者並不存在，跟隨動作失敗!')
       if (!followship) throw new Error('不能對尚未跟隨的使用者收回跟隨!')
 
-      // only retrieve first array item, which is created followship
-      const [responseData] = await Promise.all([
-        followship.destroy(),
-        follower.decrement('totalFollowings', { by: 1 }),
-        following.decrement('totalFollowers', { by: 1 })
-      ])
+      const responseData = await sequelize.transaction(async (t) => {
+        // only retrieve first array item, which is created followship
+        const [removedFollowship] = await Promise.all([
+          followship.destroy({ transaction: t }),
+          follower.decrement('totalFollowings', { by: 1, transaction: t }),
+          following.decrement('totalFollowers', { by: 1, transaction: t })
+        ])
+        return removedFollowship
+      })
 
       return res.status(200).json(responseData)
 
