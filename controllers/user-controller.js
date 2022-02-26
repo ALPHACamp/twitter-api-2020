@@ -93,7 +93,6 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const id = req.params.id
-      // console.log('userID is', req.params)
       const user = await User.findByPk(id, {
         include: [
           { model: User, as: 'Followers' },
@@ -198,10 +197,9 @@ const userController = {
         })
       }
 
-      const { name, account, email, password, passwordConfirm } = req.body
+      const { name, account, email, password } = req.body
       const message = await formDataCheckHelpers.postUsersFormDataCheck(req)
-      
-      console.log('message is,', message)
+
       if (message) {
         return res
           .status(400)
@@ -222,7 +220,7 @@ const userController = {
       error.code = 500
       return next(error)
     }
-    
+
   }
 
 
