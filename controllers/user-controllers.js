@@ -287,6 +287,7 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
+      if (req.user.id !== req.params.id) return res.json({ status: 'error', message: "You con't do this" })
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ status: 'error', message: "User didn't exist." })
       const { name, introduction } = req.body
@@ -320,8 +321,8 @@ const userController = {
   },
 
   editAccount: async (req, res, next) => {
-  
     try {
+      if (req.user.id !== req.params.id) return res.json({ status: 'error', message: "You con't do this" })
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const account = req.body?.account?.trim() || null
@@ -354,7 +355,7 @@ const userController = {
     } catch (err) {
       next(err)
     }
-
+  },
 
   addFollow: async (req, res, next) => {
     const followerId = helpers.getUser(req).id
