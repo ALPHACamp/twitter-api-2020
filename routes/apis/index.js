@@ -25,6 +25,10 @@ router.post('/followships', followController.postFollowing)
 router.get('/users/:id/tweets', userController.getTweets)
 router.get('/users/:id/replied_tweets', userController.getReplies)
 router.get('/users/:id/likes', userController.getLikes)
+
+router.get('/users/:id/followings', userController.getUserFollowings)
+router.get('/users/:id/followers', userController.getUserFollowers)
+
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.put('/users/:id/account', userController.putUserAccount)
 router.put('/users/:id', upload.fields(uploadFields), userController.putUser)
