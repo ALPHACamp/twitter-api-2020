@@ -38,5 +38,22 @@ module.exports = {
       return reply
     })
     return replies
+  },
+  resAdminUsersHandler: users => {
+    users.forEach(user => {
+      user.tweetCount = cutNumber(user.tweetCount, 1000, 'k', 1)
+      user.likeCount = cutNumber(user.tweetCount, 1000, 'k', 1)
+      user.following = cutNumber(user.following, 10000, '萬', 1)
+      user.followers = cutNumber(user.following, 10000, '萬', 1)
+      return user
+    })
+    return users
+    function cutNumber (num, unitAmount, unit, decimal) {
+      if (num > unitAmount) {
+        const newNum = Math.round(num / (unitAmount / Math.pow(10, decimal)))
+        return `${newNum}${unit}`
+      }
+      return num
+    }
   }
 }
