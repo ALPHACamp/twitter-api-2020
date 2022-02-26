@@ -1,4 +1,5 @@
 const { Followship, User } = require('../models')
+const sequelize = require('sequelize')
 
 const followshipServices = {
   addFollowship: (req, cb) => {
@@ -35,18 +36,31 @@ const followshipServices = {
   },
   followshipTop10: (req, cb) => {
     User.findAll({
-      attributes: ['id', 'account', 'name', 'avatar', 'introduction'],
-      include: [{ model: User, as: 'Followers' }]
+      group: 'User.id',
+      attributes: [
+        'id', 'account', 'name', 'avatar', 'introduction',
+        [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
+          'totalFollowers'],
+        [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followingId = User.id AND followerId = ${req.user.dataValues.id})`), 'followed']
+      ],
+      include: [{
+        model: User,
+        as: 'Followers',
+        attributes: [],
+        through: { attributes: [] }
+      }],
+      order: [[sequelize.col('totalFollowers'), 'DESC']],
+      subQuery: false, // 避免因查詢多張表造成limit失常
+      having: { totalFollowers: { [sequelize.Op.gt]: 0 } }, // 只要粉絲大於0的人
+      limit: 10
     })
       .then(user => {
         if (user.length === 0) throw new Error('資料庫內沒有任何使用者資料')
         const userData = user.map(i => i.get({ plain: true }))
           .map(i => ({
             ...i,
-            followed: i.Followers.some(i => i.Followship.followerId === req.user.dataValues.id),
-            Followers: i.Followers.length
+            followed: Boolean(i.followed)
           }))
-          .sort((a, b) => a.Followers > b.Followers)
         return cb(null, userData)
       })
       .catch(err => cb(err, null))
