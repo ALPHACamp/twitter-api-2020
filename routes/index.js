@@ -17,6 +17,7 @@ router.get('/', (req, res) => {
 router.post('/api/tweets/:id/replies', authenticated, replyController.postReply)
 router.get('/api/tweets/:id/replies', authenticated, replyController.getReplies)
 router.get('/api/tweets/:tweetId', authenticated, tweetController.getTweet)
+router.put('/api/tweets/:tweetId', authenticated, tweetController.putTweet)
 router.post('/api/tweets/:tweetId/like', authenticated, likeController.likeTweet)
 router.post('/api/tweets/:tweetId/unlike', authenticated, likeController.unlikeTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
