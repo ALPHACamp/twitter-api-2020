@@ -127,6 +127,8 @@ const userController = {
     try {
       const { account, name, email, password, checkPassword, introduction, avatar, cover } = req.body
       if (password !== checkPassword) throw new Error('Passwords do not match!')
+      if ((introduction && introduction.length) > 160) throw new Error('Introduction exceeds the word limit!')
+      if (name && name.length > 50) throw new Error('Name exceeds the word limit!')
       const registereduser = await User.findOne({
         raw: true,
         where: {
