@@ -149,18 +149,25 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUserReply: (req, cb) => {
-    return Reply.findAll({
-      where: { userId: req.params.id },
-      include: [
-        { model: User },
-        { model: Tweet, include: User }
-      ],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(replies => {
-        if (!replies.length) throw new Error('資料庫內找不到使用者資料')
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        raw: true,
+        nest: true
+      }),
+      Reply.findAll({
+        where: { userId: req.params.id },
+        include: [
+          { model: User },
+          { model: Tweet, include: User }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
+        if (!replies.length) throw new Error('資料庫內沒有相關資料')
         const data = replies.map(r => ({
           id: r.id,
           comment: r.comment,
