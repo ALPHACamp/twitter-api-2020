@@ -37,7 +37,11 @@ const userServices = {
       }))
       .then(user => {
         delete user.dataValues.password
-        return cb(null, { user })
+        return cb(null, {
+          status: 'success',
+          message: '註冊成功',
+          user
+        })
       })
       .catch(err => cb(err))
   },
@@ -46,7 +50,12 @@ const userServices = {
     delete userData.password
     try {
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      return cb(null, { token, userData })
+      return cb(null, {
+        status: 'success',
+        message: '成功登入',
+        token,
+        userData
+      })
     } catch (err) {
       cb(err)
     }
@@ -76,7 +85,7 @@ const userServices = {
       })
     ])
       .then(([user, follower, following]) => {
-        if (!user) throw new Error('資料庫內找不到使用者資料')
+        if (user.id === null) throw new Error('資料庫內找不到使用者資料')
         // 瀏覽特定使用者資料時，特定使用者不包含後台管理員
         if (req.params.id && user.role === 'admin') throw new Error('帳號不存在')
         const data = {
@@ -92,6 +101,7 @@ const userServices = {
           following: following.length,
           tweetAmount: user.tweetAmount
         }
+        // 如果是從get users/:id 路由進來，需要多回傳當前使用者是否有追蹤特定使用者
         if (req.params.id) data.followed = following?.some(f => f.followerId === getUser(req).dataValues.id)
         return cb(null, data)
       })
@@ -287,7 +297,11 @@ const userServices = {
           })
         }
       })
-      .then(updatedUser => cb(null, updatedUser))
+      .then(updatedUser => cb(null, {
+        status: 'success',
+        message: '操作成功',
+        updatedUser
+      }))
       .catch(err => cb(err))
   },
   putUserAccount: (req, cb) => {
@@ -312,13 +326,17 @@ const userServices = {
         if (!user) throw new Error('資料庫內找不到使用者資料')
 
         return user.update({
-          name: req.body.name,
+          name: req.body.name || user.name,
           account: req.body.account,
           email: req.body.email,
           password: bcrypt.hashSync(req.body.password, 10)
         })
       })
-      .then(updatedUser => cb(null, updatedUser))
+      .then(updatedUser => cb(null, {
+        status: 'success',
+        message: '操作成功',
+        updatedUser
+      }))
       .catch(err => cb(err))
   }
 }

@@ -18,9 +18,9 @@ passport.use(new LocalStrategy(
   (account, password, cb) => {
     User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false, { message: '查無此帳號' })
+        if (!user) return cb(Error('查無此帳號!'), false)
         bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, false, { message: '密碼輸入錯誤！' })
+          if (!res) return cb(Error('密碼輸入錯誤！'), false)
           return cb(null, user)
         })
       })
