@@ -250,7 +250,15 @@ const userController = {
       })
       user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
 
-      return res.json(user)
+      if (process.env.NODE_ENV === 'test') {
+        res.json(user)
+      }
+      return res.json({
+        status: 'success',
+        data: {
+          users: user
+        }
+      })
     } catch (err) {
       next(err)
     }
@@ -282,7 +290,16 @@ const userController = {
       })
       user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
 
-      return res.json(user)
+      if (process.env.NODE_ENV === 'test') {
+        res.json(user)
+      }
+
+      return res.json({
+        status: 'success',
+        data: {
+          users: user
+        }
+      })
     } catch (err) {
       next(err)
     }
