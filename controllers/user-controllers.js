@@ -1,9 +1,38 @@
 const helpers = require('../_helpers');
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const jwt = require("jsonwebtoken");
+const { reporters } = require('mocha')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
+
 
 const userController = {
+  login: (req, res, next) => {
+    const errData = req.user.data;
+    try {
+      if (!errData) {
+        const userData = req.user.toJSON();
+        if (userData.role === 'user') {
+          delete userData.password;
+          const token = jwt.sign(userData, process.env.JWT_SECRET, {
+            expiresIn: "30d",
+          }); // 簽發 JWT，效期為 30 天
+          res.json({
+            status: "success",
+            data: {
+              token,
+              user: userData,
+            }
+          });
+        } else { res.json({ status: "error", message: "You are admin!"}) }
+      } else {
+        res.json(errData);
+      }
+    } catch (err) {
+      next(err);
+    }
+  },
+
   getCurrentUser: async (req, res, next) => {
     const DEFAULT_COUNT = 0
     const currentUser = helpers.getUser(req)
@@ -25,8 +54,9 @@ const userController = {
       count.followerCount = user.Followers?.length || DEFAULT_COUNT
       count.followingCount = user.Followings?.length || DEFAULT_COUNT
 
-      return res.json({ status: 'success', count })
-        .then(() => res.json({ status: 'success' }))
+
+      return res.json({ status: 'success', user, count })
+      .then(() => res.json({ status: 'success'}))
     } catch (err) { next(err) }
   },
 
@@ -37,14 +67,14 @@ const userController = {
     const name = req.body?.name?.trim() || null
     const email = req.body?.email?.trim() || null
     if (!account || !password || !checkPassword || !name || !email) return res.json({ status: 'error', message: 'All fields are required' })
-    if (name.length > 50) return res.json({ status: 'error', message: 'Name is too long ' })
+    if (name.length > 50) return res.json({ status: 'error', message: 'Name is too long!' })
     if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match!' })
 
     try {
       const userEmail = await User.findOne({ where: { email } })
       const userAccount = await User.findOne({ where: { account } })
-      if (userEmail) return res.json({ status: 'error', message: 'email already existed' })
-      if (userAccount) return res.json({ status: 'error', message: 'account already existed' })
+      if (userEmail) return res.json({ status: 'error', message: 'Email already existed!' })
+      if (userAccount) return res.json({ status: 'error', message: 'Account already existed!' })
       return bcrypt.hash(req.body.password, 10)
         .then(hash =>
           User.create({
@@ -85,6 +115,7 @@ const userController = {
       next(err)
     }
   },
+
   getUserTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -100,6 +131,7 @@ const userController = {
       next(err)
     }
   },
+
   getTopUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
@@ -124,6 +156,7 @@ const userController = {
       next(err)
     }
   },
+
   userFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -147,13 +180,14 @@ const userController = {
         .sort((a, b) => b.createdAt - a.createdAt)
 
       if (userFollowings.length === 0) {
-        return res.json({ status: 'error', message: 'No followings!' })
+        return res.json({ status: 'success', data: [] })
       }
       return res.json(userFollowings)
     } catch (err) {
       next(err)
     }
   },
+
   userFollowers: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id,
@@ -177,13 +211,14 @@ const userController = {
         .sort((a, b) => b.createdAt - a.createdAt)
 
       if (userFollowers.length === 0) {
-        return res.json({ status: 'error', message: 'No followers!' })
+        return res.json({  status: 'success', data: [] })
       }
       return res.json(userFollowers)
     } catch (err) {
       next(err)
     }
   },
+
   getReliedTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -216,6 +251,7 @@ const userController = {
       next(err)
     }
   },
+
   getLikes: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -248,6 +284,7 @@ const userController = {
       next(err)
     }
   },
+
   putUser: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
@@ -317,6 +354,38 @@ const userController = {
     } catch (err) {
       next(err)
     }
+
+
+  addFollow: async (req, res, next) => {
+    const followerId = helpers.getUser(req).id
+    const followingId = req.body.id
+    console.log(followerId)
+    console.log(followingId)
+    try {
+      const user = await User.findByPk(followingId)
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!"})
+  
+      const followship = await Followship.findOne({ where: { followerId, followingId }})
+      if (followship) return res.json({ status: 'error', message: 'You are already following this user!'})
+
+      if (followerId == followingId) return res.json({ status: 'error', message: "You can't follow yourself"})
+  
+      return Followship.create({ followerId, followingId })
+      .then(() => res.json({ status: 'success'}))
+    } catch (err) { next(err) }
+  },
+
+  removeFollow: async (req, res, next) =>{
+    const followingId = req.params.followingId
+    const followerId = helpers.getUser(req).id
+    try {
+      const followship = await Followship.findOne({ where: { followerId, followingId }})
+      if (!followship) return res.json({ status: 'error', message: "You haven't followed this user!"})
+
+      return followship.destroy()
+      .then(() => res.json({ status: 'success'}))
+    } catch (err) { next(err) }
+
   }
 }
 

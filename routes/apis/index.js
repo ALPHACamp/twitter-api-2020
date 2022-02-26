@@ -10,11 +10,14 @@ const userController = require('../../controllers/user-controllers')
 const tweetController = require('../../controllers/tweet-controllers')
 const replyController = require('../../controllers/reply-contoller')
 
-const { authenticated, authenticatedAdmin, authenticatedNoAdmin } = require('../../middleware/api-auth')
+const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 const upload = require('../../middleware/multer')
 
 router.post('/users/signin', passport.authenticate('local', { session: false }), adminController.login)
 router.post('/admin/login', passport.authenticate('local', { session: false }), adminController.login)
+
+router.post('/users/signin',passport.authenticate('local', { session: false }), userController.login)
+router.post('/admin/login',passport.authenticate('local', { session: false }), adminController.login)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
@@ -37,5 +40,8 @@ router.post('/tweets/:tweet_id/unlike', authenticated, tweetController.removeLik
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
+
+router.post('/followships', authenticated, userController.addFollow)
+router.delete('/followships/:followingId', authenticated, userController.removeFollow)
 
 module.exports = router
