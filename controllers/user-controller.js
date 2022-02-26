@@ -117,8 +117,31 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const userId = helper.getUser(req).id
 
+      const currentUser = await User.findByPk(userId, {
+        attributes: [
+          'id',
+          'account',
+          'email',
+          'name',
+          'avatar',
+          'role',
+          'cover',
+          'followerCount',
+          'followingCount',
+          'tweetCount'
+        ]
+      })
+      return res.json({ status: 'success', message: '成功獲取', data: currentUser })
+    } catch (err) {
+      next(err)
+    }
   }
+
 }
 
 module.exports = userController
