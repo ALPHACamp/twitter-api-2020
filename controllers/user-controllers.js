@@ -280,6 +280,35 @@ const userController = {
       next(err)
       return res.json({ status: 'error', message: err })
     }
+  },
+  editAccount: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
+      const account = req.body?.account?.trim() || null
+      const name = req.body?.name?.trim() || null
+      const email = req.body?.email?.trim() || null
+      const password = req.body?.password?.trim() || null
+      const checkPassword = req.body?.checkPassword?.trim() || null
+
+      if (!account || !name || !email || !password || !checkPassword) return res.json({ status: 'error', message: 'All fields are required' })
+      if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters.' })
+      if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match.' })
+
+      let sameUser = await User.findOne({ where: { email } })
+      if (sameUser) return res.json({ status: 'error', message: 'Email already existed.' })
+      sameUser = await User.findOne({ where: { account } })
+      if (sameUser) return res.json({ status: 'error', message: 'Account already existed.' })
+      await User.update({
+        name: name,
+        account: account,
+        email: email,
+        password: bcrypt.hash(password, 10)
+      })
+      return res.json({ status: 'success' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
