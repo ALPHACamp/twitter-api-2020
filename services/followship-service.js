@@ -4,7 +4,8 @@ const followshipServices = {
   addFollowship: (req, cb) => {
     User.findByPk(req.body.id)
       .then(user => {
-        if (user === null) throw new Error('輸入錯誤的userId，該使用者不存在')
+        if (!user) throw new Error('輸入錯誤的userId，該使用者不存在')
+        if (user.dataValues.role === 'admin') throw new Error('不可追蹤管理者')
         Followship.findOrCreate({
           where: {
             followerId: req.user.dataValues.id,
@@ -27,8 +28,6 @@ const followshipServices = {
       }
     })
       .then(followship => {
-        console.log(req.user.dataValues.id, req.params.id)
-        console.log(followship)
         if (followship === null) throw new Error('輸入錯誤的followingId，當前使用者並未追隨該使用者')
         followship.destroy().then(() => cb(null, '成功移追蹤'))
       })

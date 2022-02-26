@@ -104,6 +104,12 @@ const tweetServices = {
       .catch(err => cb(err, null))
   },
   getReplies: (req, cb) => {
+    Tweet.findByPk(req.params.id)
+      .then(tweet => {
+        if (!tweet) throw new Error('查詢的推文不存在')
+      })
+      .catch(err => cb(err, null))
+
     Reply.findAll({
       where: { tweetId: req.params.id },
       order: [['createdAt', 'DESC']],
@@ -124,7 +130,7 @@ const tweetServices = {
             TweetId: i.TweetId,
             tweetOwerId: i.Tweet.User.id,
             tweetOwerAccount: i.Tweet.User.account,
-            createAt: i.createAt
+            createdAt: i.createdAt
           }))
         return cb(null, replyData)
       })
