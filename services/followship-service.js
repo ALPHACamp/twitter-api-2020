@@ -33,7 +33,7 @@ const followshipController = {
         followerId,
         followingId
       })
-      console.log(newFollowship)
+
       const followshipData = {
         status: 'success',
         data: {

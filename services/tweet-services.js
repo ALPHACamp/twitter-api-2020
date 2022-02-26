@@ -62,7 +62,7 @@ const tweetController = {
       const tweetData = {
         status: 'success',
         data: {
-          Tweet: newTweet
+          Tweet: newTweet.dataValues
         }
       }
       return cb(null, tweetData)
@@ -98,7 +98,7 @@ const tweetController = {
       const likeData = {
         status: 'success',
         data: {
-          Like: newLike
+          Like: newLike.dataValues
         }
       }
       return cb(null, likeData)
@@ -116,7 +116,6 @@ const tweetController = {
       }
 
       const findLike = await Like.findOne({
-        raw: true,
         where: {
           UserId,
           TweetId
@@ -125,17 +124,12 @@ const tweetController = {
       if (!findLike) {
         return cb(new Error('This tweet is not liked.'))
       }
-      await Like.destroy({
-        where: {
-          UserId,
-          TweetId
-        }
-      })
+      const deletedLike = await findLike.destroy()
 
       const likeData = {
         status: 'success',
         data: {
-          Like: findLike
+          Like: deletedLike.dataValues
         }
       }
       return cb(null, likeData)
