@@ -229,7 +229,7 @@ const userServices = {
         ],
         raw: true
       })
-      // 目標使用者若無回覆
+      // 目標使用者若無推文
       if (userReplies.length === 0) throw new Error("使用者尚無任何回覆")
       return cb(null, userReplies)
     } catch (err) {
@@ -255,6 +255,8 @@ const userServices = {
         row: true,
         nest: true
       })
+      // 目標使用者若無推文
+      if (likeData.length === 0) throw new Error("使用者尚無任何喜歡的推文")
       const results = likeData.map((like) => {
         const userId = helper.getUser(req).id
         // 列出此tweet所有likes的userId
@@ -317,7 +319,7 @@ const userServices = {
           ['createdAt', 'DESC']
         ]
       })
-      if (followings === null) { throw new Error("沒有這個使用者") }
+      if (followings.length === 0) throw new Error("使用者尚未追蹤任何人")
       followings = followings.map(following => ({
         ...following.toJSON()
       }))
@@ -357,7 +359,7 @@ const userServices = {
           ['createdAt', 'DESC']
         ]
       })
-      if (followers === null) { throw new Error("沒有這個使用者") }
+      if (followers.length === 0) throw new Error("使用者尚未有人追蹤")
       followers = followers.map(follower => ({
         ...follower.toJSON()
       }))
