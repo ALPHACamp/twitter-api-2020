@@ -133,8 +133,8 @@ const userController = {
       if (name.length > 50) throw new Error('暱稱不能超過50個字！')
       if (introduction.length > 160) throw new Error('自我介紹不能超過160個字！')
       const { files } = req
-      const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
-      const cover = files?.cover ? await imgurFileHandler(files.cover[0]) : user.cover
+      const avatar = files && files.avatar ? await imgurFileHandler(files.avatar[0]) : user.avatar
+      const cover = files && files.cover ? await imgurFileHandler(files.cover[0]) : user.cover
 
       const editedUser = await user.update({
         name,
