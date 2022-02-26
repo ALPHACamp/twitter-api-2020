@@ -90,8 +90,24 @@ const userController = {
       return next(error)
     }
   },
-  getUser: (req, res, next) => {
+  getUser: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      // console.log('userID is', req.params)
+      const user = await User.findByPk(id, {
+        include: [
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' },
+        ],
+        attributes: { exclude: ['password'] }
+      })
+      const followedUsers = helper.getUser(req).Followings
+      user.dataValues.isFollowed = followedUsers.some(fu => fu.id === user.id)
 
+      return res.json(user)
+    } catch(err) {
+      next(err)
+    }
   },
   getTopUsers: async (req, res, next) => {
     try {
