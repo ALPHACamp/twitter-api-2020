@@ -7,6 +7,7 @@ const tempController = require('../../../controllers/temp-controller')
 
 
 router.get('/:id', authenticated, userController.getUser)
+router.put('/:id/setting', authenticated, userController.putUserSetting)
 router.get('/:id/followers', tempController.getFollowers)
 router.get('/:id/followings', tempController.getFollowings)
 router.get('/:id/tweets', authenticated, userController.getTweets)
