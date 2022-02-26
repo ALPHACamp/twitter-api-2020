@@ -1,17 +1,26 @@
 const { User, Tweet, Reply } = require('../models')
 const helper = require('../_helpers')
 const tweetServices = require('../services/tweet-service')
+const { getLikedTweetsIds } = require('../helpers/user')
 
 const tweetController = {
   // Get all tweet data include user data and latest shows at front, return in an Array
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
+      let tweets = await Tweet.findAll({
         order: [['createdAt', 'DESC']],
         include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
         raw: true,
         nest: true
       })
+
+      // Clean data with isLiked
+      const userLikes = await getLikedTweetsIds(req)
+
+      tweets = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: userLikes.includes(tweet.id)
+      }))
 
       return res.status(200).json(tweets)
     } catch (error) {
@@ -85,7 +94,7 @@ const tweetController = {
     }
   },
 
-  unlikeTweet: async(req, res, next) => {
+  unlikeTweet: async (req, res, next) => {
     const tweetId = req.params.id
     const userId = req.user.id
 
