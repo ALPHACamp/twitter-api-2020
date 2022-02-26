@@ -23,8 +23,8 @@ const tweetController = {
             tweet.name = tweet.User.name
             tweet.account = tweet.User.account
             tweet.isLiked = tweet.Likes.some(like => like.UserId === reqUserId)
-            tweet.likesCount = tweet.Likes.length
-            tweet.repliesCount = tweet.Replies.length
+            tweet.LikesCount = tweet.Likes.length
+            tweet.RepliesCount = tweet.Replies.length
             delete tweet.userId
             delete tweet.Likes
             delete tweet.Replies
@@ -65,8 +65,8 @@ const tweetController = {
         result.name = result.User.name
         result.account = result.User.account
         result.isLiked = result.Likes.some(like => like.UserId === reqUserId)
-        result.likesCount = result.Likes.length
-        result.repliesCount = result.Replies.length
+        result.LikesCount = result.Likes.length
+        result.RepliesCount = result.Replies.length
         delete result.id
         delete result.userId
         delete result.Likes
