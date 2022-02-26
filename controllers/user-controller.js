@@ -265,20 +265,15 @@ const userController = {
       .catch(err => next(err))
   },
   topFollowed: (req, res, next) => {
-    const userId = helpers.getUser(req).id
+    const reqUser = helpers.getUser(req)
 
-    return Promise.all([
-      User.findByPk(userId, {
-        include: { model: User, as: 'Followings' },
-      }),
-      User.findAll({
-        include: { model: User, as: 'Followers' },
-        attributes: ['id', 'name', 'account', 'createdAt']
-      })
-    ])
-      .then(([user, users]) => {
-        const reqUser = user.toJSON()
-        const reqUserFollowing = reqUser.Followings
+    return User.findAll({
+      include: { model: User, as: 'Followers' },
+      attributes: ['id', 'name', 'account', 'createdAt'],
+      where: { role: { $not: 'admin' } }
+    })
+      .then(users => {
+        const reqUserFollowing = reqUser.Followings.length > 1 ? reqUser.Followings : [reqUser.Followings]
 
         const result = users
           .map(u => ({
