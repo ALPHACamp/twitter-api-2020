@@ -185,6 +185,44 @@ const userController = {
       next(err)
     }
 
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+      const currentId = helper.getUser(req).id
+
+      if (id !== currentId) {
+        return res.json({
+          status: '400',
+          message: '只能修改自己的資料'
+        })
+      }
+
+      const { name, account, email, password, passwordConfirm } = req.body
+      const message = await formDataCheckHelpers.postUsersFormDataCheck(req)
+      
+      console.log('message is,', message)
+      if (message) {
+        return res
+          .status(400)
+          .json({ status: 'error', message, data: req.body })
+      }
+
+      const user = await User.findByPk(id)
+      await user.update({
+        name,
+        account,
+        email,
+        password: bcrypt.hashSync(password, BCRYPT_COMPLEXITY)
+      })
+      return res
+        .status(200)
+        .json({ status: 'success', message: '修改成功', data: user.toJSON() })
+    } catch (error) {
+      error.code = 500
+      return next(error)
+    }
+    
   }
 
 
