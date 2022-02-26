@@ -22,7 +22,6 @@ const tweetController = {
     try {
       const tweet = await Tweet.findByPk(req.params.tweet_id, {
         include: [
-          Reply,
           {
             model: User,
             attributes: { exclude: ['password'] }
@@ -34,6 +33,14 @@ const tweetController = {
       if (!tweet) {
         return cb(new Error('tweet_id does not exist.'))
       }
+      const Replies = await Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { TweetId: req.params.tweet_id }
+      })
+
+      tweet.reply = Replies
+
       return cb(null, tweet)
     } catch (err) {
       return cb(err)
