@@ -3,8 +3,6 @@ const bcrypt = require('bcryptjs')
 const sequelize = require('sequelize')
 const { Op } = require('sequelize');
 const helper = require('../_helpers')
-// const imgur = require('imgur')
-// const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 const { localFileHandler, imgurFileHandler } = require('../helpers/file-helpers')
 const jwt = require('jsonwebtoken')
 const userServices = {
@@ -88,19 +86,14 @@ const userServices = {
       const { files } = req
       if (files) {
         console.log(files)
-        // imgur.setClientId(IMGUR_CLIENT_ID)
-        // console.log(imgur.getClientId())
-        // console.log(imgur.getAPIUrl())
         if (files.avatar) {
-          let avatar1 = await localFileHandler(files.avatar[0]) // 神聖的存在
-          // req.body.avatar = avatar
-          avatar = await imgurFileHandler(files.avatar[0])
+          let localAvatar = await localFileHandler(files.avatar[0])
+          const avatar = await imgurFileHandler(files.avatar[0])
           req.body.avatar = avatar
         }
         if (files.cover) {
-          let cover1 = await localFileHandler(files.cover[0]) // 神聖的存在
-          // req.body.cover = cover
-          cover = await imgurFileHandler(files.cover[0])
+          let localCover = await localFileHandler(files.cover[0])
+          const cover = await imgurFileHandler(files.cover[0])
           req.body.cover = cover
         }
       }

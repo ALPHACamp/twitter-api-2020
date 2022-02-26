@@ -19,12 +19,13 @@ const SESSION_SECRET = 'ThisIsMySecret'
 // body-parser
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json()) // POST json格式
-app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false
 }))
+app.use(methodOverride('_method'))
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(flash())
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages')
@@ -42,7 +43,6 @@ function authenticated(req, res, next) {
 
 
 
-app.use(methodOverride('_method'))
 app.use(route)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
