@@ -223,14 +223,15 @@ const userController = {
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
+      } else {
+        const resTweets = await Promise.all(tweets.map(async tweet => {
+          return await appFunc.resTweetHandler(userId, tweet)
+        }))
+        res.json({
+          status: 'success',
+          data: { tweets: resTweets }
+        })
       }
-      const resTweets = await Promise.all(tweets.map(async tweet => {
-        return await appFunc.resTweetHandler(userId, tweet)
-      }))
-      res.json({
-        status: 'success',
-        data: { tweets: resTweets }
-      })
     } catch (err) {
       next(err)
     }
@@ -257,12 +258,13 @@ const userController = {
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(replies)
+      } else {
+        const resReplies = appFunc.resRepliesHandler(replies)
+        res.json({
+          status: 'success',
+          data: { replies: resReplies }
+        })
       }
-      const resReplies = appFunc.resRepliesHandler(replies)
-      res.json({
-        status: 'success',
-        data: { replies: resReplies }
-      })
     } catch (err) {
       next(err)
     }
@@ -300,14 +302,15 @@ const userController = {
           return tweet
         })
         res.json(tweets)
+      } else {
+        const resTweets = await Promise.all(tweets.map(async tweet => {
+          return await appFunc.resTweetHandler(userId, tweet)
+        }))
+        res.json({
+          status: 'success',
+          data: { tweets: resTweets }
+        })
       }
-      const resTweets = await Promise.all(tweets.map(async tweet => {
-        return await appFunc.resTweetHandler(userId, tweet)
-      }))
-      res.json({
-        status: 'success',
-        data: { tweets: resTweets }
-      })
     } catch (err) {
       next(err)
     }
@@ -340,16 +343,17 @@ const userController = {
           following.followingId = following.id
         })
         res.json(user)
+      } else {
+        user.forEach(following => {
+          following.isFollowed = followingsId.includes(following.id)
+        })
+        return res.json({
+          status: 'success',
+          data: {
+            users: user
+          }
+        })
       }
-      user.forEach(following => {
-        following.isFollowed = followingsId.includes(following.id)
-      })
-      return res.json({
-        status: 'success',
-        data: {
-          users: user
-        }
-      })
     } catch (err) {
       next(err)
     }
@@ -382,16 +386,17 @@ const userController = {
           follower.followerId = follower.id
         })
         res.json(user)
+      } else {
+        user.forEach(follower => {
+          follower.isFollowed = followingsId.includes(follower.id)
+        })
+        return res.json({
+          status: 'success',
+          data: {
+            users: user
+          }
+        })
       }
-      user.forEach(follower => {
-        follower.isFollowed = followingsId.includes(follower.id)
-      })
-      return res.json({
-        status: 'success',
-        data: {
-          users: user
-        }
-      })
     } catch (err) {
       next(err)
     }
