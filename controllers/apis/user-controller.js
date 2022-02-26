@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../../_helpers')
 const { Op } = require('sequelize')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
-const { User, Tweet, Like, Reply } = require('../../models')
+const { User, Tweet, Like, Reply, Followship } = require('../../models')
 const appFunc = require('../../services/appFunctions')
 const TOKEN_EXPIRES = process.env.TOKEN_EXPIRES || '30m'
 
@@ -129,7 +129,7 @@ const userController = {
       next(err)
     }
   },
-    getTweets: async (req, res, next) => {
+  getTweets: async (req, res, next) => {
     try {
       const userId = Number(helpers.getUser(req).id)
       const id = Number(req.params.id)
@@ -218,6 +218,87 @@ const userController = {
       res.json({
         status: 'success',
         data: { tweets: resTweets }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      let user = await User.findByPk(UserId, {
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
+          }
+        ],
+        attributes: {
+          exclude: [
+            'password'
+          ]
+        }
+      })
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      const followingsId = helpers.getUser(req).Followings.map(following => following.id) || []
+
+      user = user.toJSON()
+      user.Followings.forEach(following => {
+        following.followingId = following.id
+        following.isFollowed = followingsId.includes(following.id)
+      })
+      user = user.Followings.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+
+      if (process.env.NODE_ENV === 'test') {
+        res.json(user)
+      }
+      return res.json({
+        status: 'success',
+        data: {
+          users: user
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const UserId = req.params.id
+      let user = await User.findByPk(UserId, {
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: ['id', 'account', 'name', 'avatar', 'introduction']
+          }
+        ],
+        attributes: {
+          exclude: [
+            'password'
+          ]
+        }
+      })
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      const followingsId = helpers.getUser(req).Followings.map(following => following.id) || []
+
+      user = user.toJSON()
+      user.Followers.forEach(follower => {
+        follower.followerId = follower.id
+        follower.isFollowed = followingsId.includes(follower.id)
+      })
+      user = user.Followers.sort((a, b) => b.Followship.createdAt - a.Followship.createdAt)
+
+      if (process.env.NODE_ENV === 'test') {
+        res.json(user)
+      }
+
+      return res.json({
+        status: 'success',
+        data: {
+          users: user
+        }
       })
     } catch (err) {
       next(err)

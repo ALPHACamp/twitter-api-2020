@@ -33,7 +33,10 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
   try {
     // 提取當前 user 資料
     const user = await User.findByPk(jwtPayload.id, {
-      include: []
+      include: [
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
     })
     cb(null, user)
   } catch (err) {
