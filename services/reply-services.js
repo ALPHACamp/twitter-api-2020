@@ -16,7 +16,7 @@ const replyServices = {
         order: [['createdAt', 'DESC']],
         raw: true
       })
-
+      if (replies.length === 0) throw new Error('目前沒有任何回覆')
       return cb(null, replies)
     } catch (err) {
       cb(err)
