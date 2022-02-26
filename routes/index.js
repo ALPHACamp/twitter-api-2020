@@ -17,6 +17,7 @@ const likeController = require('../controllers/like-controller')
 router.post('/api/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
 
+router.get('/api/users/top', authenticated, authenticatedUser, userController.topFollowed)
 router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getReplies)
 router.get('/api/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
 router.get('/api/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)

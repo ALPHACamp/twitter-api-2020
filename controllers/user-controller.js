@@ -261,6 +261,38 @@ const userController = {
         return res.json(likesArray)
       })
       .catch(err => next(err))
+  },
+  topFollowed: (req, res, next) => {
+    const userId = helpers.getUser(req).id
+
+    return Promise.all([
+      User.findByPk(userId, {
+        include: { model: User, as: 'Followings' },
+      }),
+      User.findAll({
+        include: { model: User, as: 'Followers' }
+      })
+    ])
+      .then(([user, users]) => {
+        const reqUser = user.toJSON()
+        const reqUserFollowing = reqUser.Followings
+
+        const result = users
+          .map(u => ({
+            ...u.toJSON(),
+            followedCount: u.Followers.length,
+            isFollowing: reqUserFollowing.some(f => f.id === u.id)
+          }))
+          .sort((a, b) => b.followedCount - a.followedCount)
+          .slice(0, 10)
+
+        result.forEach(r => {
+          delete r.Followers
+        })
+
+        res.status(200).json(result)
+      })
+      .catch(err => next(err))
   }
 }
 
