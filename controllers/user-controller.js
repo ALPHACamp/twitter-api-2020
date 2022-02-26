@@ -254,11 +254,46 @@ const userController = {
 
         likesArray
           .forEach(like => {
-            like.Tweet.Likes = like.Tweet.Likes.length
-            like.Tweet.Replies = like.Tweet.Replies.length
+            like.Tweet.likesCount = like.Tweet.Likes.length
+            like.Tweet.repliesCount = like.Tweet.Replies.length
+            delete like.Tweet.Likes
+            delete like.Tweet.Replies
           })
 
         return res.json(likesArray)
+      })
+      .catch(err => next(err))
+  },
+  topFollowed: (req, res, next) => {
+    const userId = helpers.getUser(req).id
+
+    return Promise.all([
+      User.findByPk(userId, {
+        include: { model: User, as: 'Followings' },
+      }),
+      User.findAll({
+        include: { model: User, as: 'Followers' },
+        attributes: ['id', 'name', 'account', 'createdAt']
+      })
+    ])
+      .then(([user, users]) => {
+        const reqUser = user.toJSON()
+        const reqUserFollowing = reqUser.Followings
+
+        const result = users
+          .map(u => ({
+            ...u.toJSON(),
+            followedCount: u.Followers.length,
+            isFollowing: reqUserFollowing.some(f => f.id === u.id)
+          }))
+          .sort((a, b) => b.followedCount - a.followedCount || b.createdAt - a.createdAt)
+          .slice(0, 10)
+
+        result.forEach(r => {
+          delete r.Followers
+        })
+
+        res.status(200).json(result)
       })
       .catch(err => next(err))
   }
