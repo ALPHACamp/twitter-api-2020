@@ -27,7 +27,7 @@ const userController = {
         password: hash
       })
       const userData = {
-        status: 'suceess',
+        status: 'success',
         data: {
           user: {
             id: newUser.id,

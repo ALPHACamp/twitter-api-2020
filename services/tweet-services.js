@@ -1,10 +1,15 @@
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 
 const tweetController = {
   getTweets: async (req, cb) => {
     try {
       const tweets = await Tweet.findAll({
-        include: User,
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ['password'] }
+          }
+        ],
         raw: true,
         nest: true
       })
@@ -46,12 +51,85 @@ const tweetController = {
         UserId
       })
       const tweetData = {
-        status: 'suceess',
+        status: 'success',
         data: {
           tweet: newTweet
         }
       }
       return cb(null, tweetData)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  postLike: async (req, cb) => {
+    try {
+      const UserId = req.user?.id
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (tweet === null) {
+        return cb(new Error('tweet_id does not exist.'))
+      }
+
+      const findLike = await Like.findAll({
+        where: {
+          UserId,
+          TweetId
+        }
+      })
+
+      if (findLike.length > 0) {
+        return cb(new Error('This tweet is already liked.'))
+      }
+
+      const newLike = await Like.create({
+        UserId,
+        TweetId
+      })
+
+      const likeData = {
+        status: 'success',
+        data: {
+          like: newLike
+        }
+      }
+      return cb(null, likeData)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  postUnlike: async (req, cb) => {
+    try {
+      const UserId = req.user?.id
+      const TweetId = req.params.id
+      const tweet = await Tweet.findByPk(TweetId)
+      if (tweet === null) {
+        return cb(new Error('tweet_id does not exist.'))
+      }
+
+      const findLike = await Like.findAll({
+        raw: true,
+        where: {
+          UserId,
+          TweetId
+        }
+      })
+      if (findLike.length === 0) {
+        return cb(new Error('This tweet is not liked.'))
+      }
+      await Like.destroy({
+        where: {
+          UserId,
+          TweetId
+        }
+      })
+
+      const likeData = {
+        status: 'success',
+        data: {
+          like: findLike[0]
+        }
+      }
+      return cb(null, likeData)
     } catch (err) {
       return cb(err)
     }

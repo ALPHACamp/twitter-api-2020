@@ -28,7 +28,7 @@
 ```
 使用者帳號：
 ```
-    account: 'User1'
+    account: 'user1'
     email: 'user1@example.com'
     password: '12345678'
 
