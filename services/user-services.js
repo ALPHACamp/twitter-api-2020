@@ -117,21 +117,28 @@ const userController = {
   },
   putUser: async (req, cb) => {
     try {
-      const { account, name, email, password, introduction, avatar, cover } = req.body
+      const { account, name, email, password, checkPassword, introduction, avatar, cover } = req.body
+      if (password !== checkPassword) throw new Error('Passwords do not match!')
+      const registereduser = await User.findOne({
+        raw: true,
+        where: {
+          [Op.or]: [{ email }, { account }],
+          [Op.not]: [{ id: req.params.id }]
+        }
+      })
+      if (registereduser) throw new Error('Acount or Email repeated!')
+
       const user = await User.findByPk(req.params.id, {
-        include: [
-          { model: User, as: 'Followings' }
-        ]
+        include: [{ model: User, as: 'Followings' }]
       })
-      const updatedUser = await user.update({
-        account,
-        name,
-        email,
-        password,
-        introduction,
-        avatar,
-        cover
-      })
+      const reqBodyArr = { account, name, email, password, introduction, avatar, cover }
+      const where = {}
+      for (const attribute in reqBodyArr) {
+        if (reqBodyArr[attribute]) {
+          where[attribute] = reqBodyArr[attribute]
+        }
+      }
+      const updatedUser = await user.update(where)
       const updatedData = { ...updatedUser.dataValues }
       delete updatedData.password
       const userData = {
