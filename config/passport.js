@@ -39,11 +39,10 @@ passport.use(new LocalStrategy(
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
-  passReqToCallback: true
 }
 
 // 設定jwt的登入策略
-passport.use(new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
+passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   // 使用payload的id資料尋找user資料，並關連其他model
   User.findByPk(jwtPayload.id, {
     include: [
@@ -55,7 +54,6 @@ passport.use(new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
     ]
   })
     .then(user => {
-      req.currentUser = user
       cb(null, user)
     }) // 回傳user資料
     .catch(err => cb(err))
