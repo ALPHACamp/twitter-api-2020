@@ -52,15 +52,15 @@ const adminController = {
       // test data
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         return res.status(200).json(users)
+      } else {
+        const usersSorted = users.sort((a, b) => b.tweetNum - a.tweetNum)
+        return res.json({
+          status: 'success',
+          data: {
+            users: usersSorted
+          }
+        })
       }
-
-      const usersSorted = users.sort((a, b) => b.tweetNum - a.tweetNum)
-      return res.json({
-        status: 'success',
-        data: {
-          users: usersSorted
-        }
-      })
     } catch (err) {
       next(err)
     }
