@@ -14,6 +14,8 @@ const userServices = {
       .then(([email, account]) => {
         if (email) throw new Error('Email already exists!')
         if (account) throw new Error('Account already exists!')
+        if (req.body.name.length > 50) throw new Error('暱稱字數超出上限！')
+        if (req.body.password.length < 4) throw new Error('密碼至少要有八個字')
         return bcrypt.hash(req.body.password, 10)
       })
       .then(hash => User.create({
@@ -63,11 +65,13 @@ const userServices = {
           include: [
             [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
             [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followerCount'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followingCount']
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerCount']
           ]
         },
       })
+      // 禁止搜尋admin
+      if (userData.role === 'admin') throw new Error('使用者不存在')
       const user = userData.toJSON()
       delete user.password
       return cb(null, user)
@@ -80,24 +84,28 @@ const userServices = {
       const { name, introduction } = req.body
       const userId = helper.getUser(req).id
       if (Number(req.params.id) !== userId) throw new Error('只有本人可以這樣做')
-      if (!name) throw new Error('name is required!')
       if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
       if (introduction && introduction.length > 160) throw new Error('自我介紹字數超出上限！')
       const { files } = req
       if (files) {
-        console.log(files)
         if (files.avatar) {
-          let localAvatar = await localFileHandler(files.avatar[0])
+          // let localAvatar = await localFileHandler(files.avatar[0])
           const avatar = await imgurFileHandler(files.avatar[0])
           req.body.avatar = avatar
         }
         if (files.cover) {
-          let localCover = await localFileHandler(files.cover[0])
+          // let localCover = await localFileHandler(files.cover[0])
           const cover = await imgurFileHandler(files.cover[0])
           req.body.cover = cover
         }
       }
-      const user = await User.findByPk(userId)
+      const user = await User.findByPk(userId, {
+        attributes: {
+          exclude: [
+            'password',
+          ],
+        }
+      })
       if (!user) throw new Error("User didn't exist!")
       await user.update({
         name: name || user.name,
@@ -117,6 +125,7 @@ const userServices = {
       if (!account) throw new Error('account is required!')
       if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
       if (!email) throw new Error('email is required!')
+      if (password && password.length < 4) throw new Error('密碼至少要有八個字')
       // 確認account是否重複
       const existAccount = await User.findOne({
         where: {
@@ -221,7 +230,7 @@ const userServices = {
         ],
         raw: true
       })
-      // 目標使用者若無回覆
+      // 目標使用者若無推文
       if (userReplies.length === 0) throw new Error("使用者尚無任何回覆")
       return cb(null, userReplies)
     } catch (err) {
@@ -247,6 +256,8 @@ const userServices = {
         row: true,
         nest: true
       })
+      // 目標使用者若無推文
+      if (likeData.length === 0) throw new Error("使用者尚無任何喜歡的推文")
       const results = likeData.map((like) => {
         const userId = helper.getUser(req).id
         // 列出此tweet所有likes的userId
@@ -309,7 +320,7 @@ const userServices = {
           ['createdAt', 'DESC']
         ]
       })
-      if (followings === null) { throw new Error("沒有這個使用者") }
+      if (followings.length === 0) throw new Error("使用者尚未追蹤任何人")
       followings = followings.map(following => ({
         ...following.toJSON()
       }))
@@ -349,7 +360,7 @@ const userServices = {
           ['createdAt', 'DESC']
         ]
       })
-      if (followers === null) { throw new Error("沒有這個使用者") }
+      if (followers.length === 0) throw new Error("使用者尚未有人追蹤")
       followers = followers.map(follower => ({
         ...follower.toJSON()
       }))
@@ -392,6 +403,29 @@ const userServices = {
     } catch (err) {
       console.log(err);
       return cb(err)
+    }
+  },
+  getSelfUser: async (req, cb) => {
+    try {
+      const UserId = helper.getUser(req).id
+      const userData = await User.findByPk(UserId, {
+        attributes: {
+          exclude: [
+            'password'
+          ],
+          include: [
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerCount']
+          ]
+        },
+      })
+      const user = userData.toJSON()
+      delete user.password
+      return cb(null, user)
+    } catch (err) {
+      cb(err)
     }
   },
 }

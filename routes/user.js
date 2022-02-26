@@ -9,6 +9,7 @@ router.post('/', userController.signUp)
 router.use(authenticated, authenticatedUser)
 
 router.put('/account/setting', userController.putSetting)
+router.get('/account', userController.getSelfUser)
 router.get('/:id/replied_tweets', userController.getUserReplies)
 router.get('/:id/likes', userController.getUserLikes)
 router.get('/:id/tweets', userController.getUserTweets)
