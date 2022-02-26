@@ -125,6 +125,7 @@ const userServices = {
       if (!account) throw new Error('account is required!')
       if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
       if (!email) throw new Error('email is required!')
+      if (password && password.length < 8) throw new Error('密碼至少要有八個字')
       // 確認account是否重複
       const existAccount = await User.findOne({
         where: {
