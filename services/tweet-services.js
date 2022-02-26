@@ -80,6 +80,7 @@ const tweetServices = {
           [Reply, 'createdAt', 'DESC']
         ]
       })
+      if (!tweetData) throw new Error('您尋找的推文已不存在')
       // 列出此tweet所有likes的userId
       const likedUsersId = tweetData.toJSON().Likes.map(data =>
         data.UserId
