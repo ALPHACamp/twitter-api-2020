@@ -52,7 +52,7 @@ const userController = {
       count.followerCount = user.Followers?.length || DEFAULT_COUNT
       count.followingCount = user.Followings?.length || DEFAULT_COUNT
 
-      return res.json({ status: 'success', count })
+      return res.json({ status: 'success', user, count })
       .then(() => res.json({ status: 'success'}))
     } catch (err) { next(err) }
   },
