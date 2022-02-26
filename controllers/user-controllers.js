@@ -1,17 +1,18 @@
 const helpers = require('../_helpers');
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply, Like } = require('../models')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   getCurrentUser: async (req, res, next) => {
     const DEFAULT_COUNT = 0
     const currentUser = helpers.getUser(req)
-    const count ={}
+    const count = {}
     try {
       const user = await User.findByPk(currentUser.id, {
         include: [
-          { model: User, as: 'Followers'},
-          { model: User, as: 'Followings'},
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' },
           { model: Like },
           { model: Tweet },
           { model: Reply }
@@ -25,7 +26,7 @@ const userController = {
       count.followingCount = user.Followings?.length || DEFAULT_COUNT
 
       return res.json({ status: 'success', count })
-      .then(() => res.json({ status: 'success'}))
+        .then(() => res.json({ status: 'success' }))
     } catch (err) { next(err) }
   },
 
@@ -68,9 +69,7 @@ const userController = {
           { model: User, as: 'Followers' }
         ]
       })
-      if (!targetUser) {
-        return res.json({ status: 'error', message: "User didn't exist!" })
-      }
+      if (!targetUser) return res.json({ status: 'error', message: "User didn't exist!" })
       const { account, name, email, introduction, avatar, cover } = targetUser
       const isFollowing = targetUser.Followers.some(f => f.id === req.user.id)
       return res.json({
@@ -89,9 +88,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      if (!user) {
-        return res.json({ status: 'error', message: "User didn't exist!" })
-      }
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         order: [['createdAt', 'DESC']],
@@ -114,6 +111,7 @@ const userController = {
         .map(user => ({
           id: user.id,
           name: user.name,
+          account: user.account,
           avatar: user.avatar,
           followerCount: user.Followers.length,
           isFollowing: req.user.Followings.some(f => f.id === user.id)
@@ -129,9 +127,7 @@ const userController = {
   userFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      if (!user) {
-        return res.json({ status: 'error', message: "User didn't exist!" })
-      }
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const targetUser = await User.findByPk(req.params.id,
         {
           include: [{ model: User, as: 'Followings' }]
@@ -140,8 +136,9 @@ const userController = {
       const userFollowings = targetUser.Followings.map(following => {
         return {
           followingId: following.id,
-          account: following.name,
-          description: following.description,
+          name: following.name,
+          account: following.account,
+          introduction: following.introduction,
           avatar: following.avatar,
           createdAt: following.createdAt,
           isFollowing: req.user?.Followings ? req.user.Followings.some(f => f.id === following.id) : false
@@ -169,8 +166,9 @@ const userController = {
       const userFollowers = user.Followers.map(follower => {
         return {
           followerId: follower.id,
-          account: follower.name,
-          description: follower.description,
+          name: follower.name,
+          account: follower.account,
+          introduction: follower.introduction,
           avatar: follower.avatar,
           createdAt: follower.createdAt,
           isFollowing: req.user?.Followings ? req.user.Followings.some(f => f.id === follower.id) : false
@@ -221,9 +219,7 @@ const userController = {
   getLikes: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      if (!user) {
-        return res.json({ status: 'error', message: "User didn't exist!" })
-      }
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const likes = await Like.findAll({
         where: { UserId: req.params.id },
         order: [['createdAt', 'DESC']],
@@ -250,6 +246,39 @@ const userController = {
       return res.json(result)
     } catch (err) {
       next(err)
+    }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) return res.json({ status: 'error', message: "User didn't exist." })
+      const { name, introduction } = req.body
+      if (!name) return res.json({ status: 'error', message: 'Name is required.' })
+      if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters.' })
+      if (introduction.length > 160) return res.json({ status: 'error', message: 'introduction must be less than 160 characters.' })
+      const { files } = req
+      if (files) {
+        const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
+        const cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
+        await user.update({
+          name,
+          introduction,
+          avatar: avatar || user.avatar,
+          cover: cover || user.cover
+        })
+        return res.json({ status: 'success' })
+      } else {
+        await user.update({
+          name,
+          introduction,
+          avatar: user.avatar,
+          cover: user.cover
+        })
+        return res.json({ status: 'success' })
+      }
+    } catch (err) {
+      next(err)
+      return res.json({ status: 'error', message: err })
     }
   }
 }

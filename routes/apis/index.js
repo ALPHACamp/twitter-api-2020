@@ -11,9 +11,10 @@ const tweetController = require('../../controllers/tweet-controllers')
 const replyController = require('../../controllers/reply-contoller')
 
 const { authenticated, authenticatedAdmin, authenticatedNoAdmin } = require('../../middleware/api-auth')
+const upload = require('../../middleware/multer')
 
-router.post('/users/signin',passport.authenticate('local', { session: false }), adminController.login)
-router.post('/admin/login',passport.authenticate('local', { session: false }), adminController.login)
+router.post('/users/signin', passport.authenticate('local', { session: false }), adminController.login)
+router.post('/admin/login', passport.authenticate('local', { session: false }), adminController.login)
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
@@ -25,6 +26,7 @@ router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getReliedTweets)
 router.get('/users/:id/likes', authenticated, userController.getLikes)
 router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'cover', maxCount: 1 }]), authenticated, userController.putUser)
 router.post('/users', userController.signUp)
 
 router.get('/tweets/:tweet_id/replies', authenticated, tweetController.getReplies)
@@ -34,6 +36,5 @@ router.post('/tweets/:tweet_id/unlike', authenticated, tweetController.removeLik
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
-
 
 module.exports = router
