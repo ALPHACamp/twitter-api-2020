@@ -188,7 +188,7 @@ const userController = {
         model: User, as: 'Followings',
         attributes: [
           ['id', 'followingId'],
-          'name', 
+          'name',
           'account',
           'avatar',
           'cover',
@@ -230,23 +230,35 @@ const userController = {
       .catch(err => next(err))
   },
   getLikes: (req, res, next) => {
+    // 我們還需要 user name、user account、這個tweet的留言數 以及 這個tweet的按讚數
     const getUserId = Number(req.params.id)
-    return User.findByPk(getUserId, {
-      include: [{
-        model: Like,
-        include: { model: Tweet, attributes: [
-          [ 'id', 'tweetId'],
-          'description',
-          'image'
-        ]}
-      }]
-    })
-      .then(likedTweet => {
-        const result = likedTweet.Likes
-          .map(t => ({
-            ...t.toJSON()
+    return Like.findAll({
+      where: {
+        UserId: getUserId
+      },
+      include: {
+        model: Tweet,
+        include: [
+          { model: User, attributes: ['id', 'name', 'account'] },
+          { model: Like },
+          { model: Reply }
+        ]
+      }
+    },
+    )
+      .then(likes => {
+        const likesArray = likes
+          .map(like => ({
+            ...like.toJSON()
           }))
-        return res.json(result)
+
+        likesArray
+          .forEach(like => {
+            like.Tweet.Likes = like.Tweet.Likes.length
+            like.Tweet.Replies = like.Tweet.Replies.length
+          })
+
+        return res.json(likesArray)
       })
       .catch(err => next(err))
   }
