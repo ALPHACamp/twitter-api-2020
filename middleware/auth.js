@@ -13,9 +13,18 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 
+// 驗証是否是使用者
+const authenticatedUser = (req, res, next) => {
+  // 若有req.user且 該user.role為user， 進行下一步驟
+  if (req.user && req.user.role === 'user') return next()
+
+  // 若為否，回傳狀態碼403，且回傳錯誤json資料
+  return res.status(403).json({ status: 'error', message: 'permission denied' })
+}
+
 // 驗証是否是管理者
 const authenticatedAdmin = (req, res, next) => {
-  // 若有req.user且 該user.isAdmin為true， 進行下一步驟
+  // 若有req.user且 該user.user為admin， 進行下一步驟
   if (req.user && req.user.role === 'admin') return next()
 
   // 若為否，回傳狀態碼403，且回傳錯誤json資料
@@ -25,5 +34,6 @@ const authenticatedAdmin = (req, res, next) => {
 // 匯出模組
 module.exports = {
   authenticated,
+  authenticatedUser,
   authenticatedAdmin
 }
