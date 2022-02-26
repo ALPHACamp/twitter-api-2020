@@ -11,7 +11,6 @@ module.exports = {
         description: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        // UserId: users[Math.floor(Math.random() * users.length)].id
         UserId: users[Math.floor(i/10)].id
       }))
     )

@@ -8,6 +8,7 @@ const authenticated = (req, res, next) => {
     next()
   })(req, res, next)
 }
+
 const authenticatedAdmin = (req, res, next) => {
   const user = helper.getUser(req)
   if (user?.role === 'admin') return next()

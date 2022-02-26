@@ -13,6 +13,15 @@ const tweetController = {
         message: error
       }))
   },
+  getTweet: (req, res) => {
+    const TweetId = req.params.id
+    Tweet.findByPk(TweetId)
+      .then(tweet => { return res.status(200).json(tweet) })
+      .catch((error) => res.status(500).json({
+        status: 'error',
+        message: error
+      }))
+  },
   postTweet: (req, res) => {
     const { UserId, description } = req.body
     if (!description) {

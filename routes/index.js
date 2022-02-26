@@ -10,7 +10,7 @@ const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 router.use('/admin', admin)
-router.use('/users', users)
+router.use('/user', users)
 router.use('/tweets', tweets)
 router.use('/followship', followship)
 
