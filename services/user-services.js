@@ -307,16 +307,16 @@ const userServices = {
           ])
             .then(([coverFilePath, avatarFilePath]) => {
               return user.update({
-                name: req.body.name,
-                introduction: req.body.introduction,
+                name: req.body.name || user.toJSON().name,
+                introduction: req.body.introduction || user.toJSON().introduction,
                 cover: coverFilePath || user.toJSON().cover,
                 avatar: avatarFilePath || user.toJSON().avatar
               })
             })
         } else {
           return user.update({
-            name: req.body.name,
-            introduction: req.body.introduction
+            name: req.body.name || user.toJSON().name,
+            introduction: req.body.introduction || user.toJSON().introduction
           })
         }
       })
