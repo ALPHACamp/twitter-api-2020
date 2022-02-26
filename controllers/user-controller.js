@@ -105,7 +105,7 @@ const userController = {
       user.dataValues.isFollowed = followedUsers.some(fu => fu.id === user.id)
 
       return res.json(user)
-    } catch(err) {
+    } catch (err) {
       next(err)
     }
   },
@@ -180,10 +180,11 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
-      return res.json([ ...tweets ])
+      return res.json([...tweets])
     } catch (err) {
       next(err)
     }
+
   },
   putUserSetting: async (req, res, next) => {
     try {
