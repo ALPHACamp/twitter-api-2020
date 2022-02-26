@@ -405,5 +405,28 @@ const userServices = {
       return cb(err)
     }
   },
+  getSelfUser: async (req, cb) => {
+    try {
+      const UserId = helper.getUser(req).id
+      const userData = await User.findByPk(UserId, {
+        attributes: {
+          exclude: [
+            'password'
+          ],
+          include: [
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerCount']
+          ]
+        },
+      })
+      const user = userData.toJSON()
+      delete user.password
+      return cb(null, user)
+    } catch (err) {
+      cb(err)
+    }
+  },
 }
 module.exports = userServices

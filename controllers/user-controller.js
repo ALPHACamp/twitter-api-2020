@@ -2,11 +2,11 @@ const userServices = require('../services/user-services')
 const userController = {
   signUp: (req, res, next) => {
     userServices.signUp(req, (err, data) =>
-      err ? next(err) : res.json({ status: 'success', data }))
+      err ? next(err) : res.status(200).json({ status: 'success', data }))
   },
   signIn: (req, res, next) => {
     userServices.signIn(req, (err, data) =>
-      err ? next(err) : res.json({ status: 'success', data }))
+      err ? next(err) : res.status(200).json({ status: 'success', data }))
   },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, data) =>
@@ -14,11 +14,11 @@ const userController = {
   },
   putUser: (req, res, next) => {
     userServices.putUser(req, (err, data) =>
-      err ? next(err) : res.json({ status: 'success', data }))
+      err ? next(err) : res.status(200).json({ status: 'success', data }))
   },
   putSetting: (req, res, next) => {
     userServices.putSetting(req, (err, data) =>
-      err ? next(err) : res.json({ status: 'success', data }))
+      err ? next(err) : res.status(200).json({ status: 'success', data }))
   },
   getUserTweets: (req, res, next) => {
     userServices.getUserTweets(req, (err, data) =>
@@ -43,6 +43,10 @@ const userController = {
   getTopUsers: (req, res, next) => {
     userServices.getTopUsers(req, (err, data) =>
       err ? next(err) : res.status(200).json(data))
+  },
+  getSelfUser: (req, res, next) => {
+    userServices.getSelfUser(req, (err, data) =>
+      err ? next(err) : res.status(200).json({ status: 'success', data }))
   },
 }
 module.exports = userController
