@@ -13,8 +13,8 @@ const userController = {
       where: { account }
     })
       .then(user => {
-        if (!user) throw new Error('User not exist!')
-        if (user.role === 'admin') throw new Error('User not exist!')
+        if (!user) throw new Error('帳號不存在！')
+        if (user.role === 'admin') throw new Error('帳號不存在！')
         if (!bcrypt.compareSync(password, user.password)) throw new Error('password incorrect!')
         const userData = user.toJSON()
         delete userData.password
@@ -33,14 +33,13 @@ const userController = {
     return User.findAll({
       $or: [
         { where: { account } },
-        { where: { email } },
-        { where: { name } }
+        { where: { email } }
       ]
     })
       .then(users => {
-        if (users.some(u => u.email === email)) throw new Error('Email already exists!')
-        if (users.some(u => u.account === account)) throw new Error('Account already exists!')
-        if (users.some(u => u.name === name)) throw new Error('Name already exists!')
+        if (users.some(u => u.email === email)) throw new Error('email 已重複註冊！')
+        if (users.some(u => u.account === account)) throw new Error('account 已重複註冊！')
+        if (name.length > 50) throw new Error('字數超出上限！')
 
         return bcrypt.hash(password, 10)
       })
@@ -70,8 +69,8 @@ const userController = {
       ]
     })
       .then(user => {
-        if (!user) throw new Error('User not exits!')
-        if (user.role === 'admin') throw new Error('User not exits!')
+        if (!user) throw new Error('帳號不存在！')
+        if (user.role === 'admin') throw new Error('帳號不存在！')
         return res.status(200).json(user)
       })
       .catch(err => next(err))
@@ -79,6 +78,7 @@ const userController = {
   putUserSetting: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     if (password !== checkPassword) throw new Error('Passwords do not match!')
+    if (name.length > 50) throw new Error('字數超出上限！')
     if (!account || !name || !email) throw new Error('Account, name and email are required!')
     if (helpers.getUser(req).id !== Number(req.params.id)) throw new Error('permission denied')
     return Promise.all([
@@ -96,8 +96,8 @@ const userController = {
       bcrypt.hash(password, 10)
     ])
       .then(([checkUsers, user, hash]) => {
-        if (checkUsers.some(u => u.email === email)) throw new Error('email is registered')
-        if (checkUsers.some(u => u.account === account)) throw new Error('account is registered')
+        if (checkUsers.some(u => u.email === email)) throw new Error('email 已重複註冊！')
+        if (checkUsers.some(u => u.account === account)) throw new Error('account 已重複註冊！')
         return user.update({
           account,
           name,
@@ -112,10 +112,12 @@ const userController = {
     const getUserId = Number(req.params.id)
     const { name, introduction } = req.body
     if (!name) throw new Error('name is required!')
+    if (name.length > 50) throw new Error('字數超出上限！')
+    if (introduction.length > 160) throw new Error('字數超出上限！')
     if (helpers.getUser(req).id !== getUserId) throw new Error('permission denied')
     return User.findByPk(getUserId)
       .then(user => {
-        if (!user) throw new Error('user not exist!')
+        if (!user) throw new Error('帳號不存在！')
         return user.update({
           name,
           introduction
@@ -230,7 +232,6 @@ const userController = {
       .catch(err => next(err))
   },
   getLikes: (req, res, next) => {
-    // 我們還需要 user name、user account、這個tweet的留言數 以及 這個tweet的按讚數
     const getUserId = Number(req.params.id)
     return Like.findAll({
       where: {
