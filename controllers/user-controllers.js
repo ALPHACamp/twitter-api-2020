@@ -321,8 +321,6 @@ const userController = {
   },
 
   editAccount: async (req, res, next) => {
-  console.log(req.user.id)
-  console.log(req.params.id)
     try {
       if (req.user.id !== req.params.id) return res.json({ status: 'error', message: "You con't do this" })
       const user = await User.findByPk(req.params.id)
@@ -357,7 +355,7 @@ const userController = {
     } catch (err) {
       next(err)
     }
-
+  },
 
   addFollow: async (req, res, next) => {
     const followerId = helpers.getUser(req).id
