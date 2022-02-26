@@ -10,14 +10,16 @@ const tweetRouter = require('./modules/tweet')
 const { apiErrorHandler } = require('../../middleware/api-error-handler')
 
 const userController = require('../../controllers/user-controller')
-
 router.get('/current_user', authenticated, userController.getCurrentUser)
-router.use('/admin', admin)
-router.use('/users', users)
+
+// 登入
 router.post('/login', userController.login)
+// 註冊
 router.post('/users', userController.postUsers)
 router.use('/followships', authenticated, followshipRouter)
 router.use('/tweets', authenticated, tweetRouter)
+router.use('/admin', admin)
+router.use('/users', authenticated, users)
 
 router.use(apiErrorHandler)
 module.exports = router
