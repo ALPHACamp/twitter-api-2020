@@ -246,28 +246,35 @@ const userServices = {
   },
   getUserLike: (req, cb) => {
     const { id } = req.params
-    return Like.findAll({
-      where: { userId: id },
-      include: {
-        model: Tweet,
-        include: [
-          { model: Like, attributes: [] },
-          { model: Reply, attributes: [] },
-          { model: User }
-        ],
-        attributes: ['id', 'description', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
-          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
-            'replyAmount'],
-          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
-        ]
-      },
-      group: ['like.id'],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(likes => {
+    return Promise.all([
+      User.findByPk(id, {
+        raw: true,
+        nest: true
+      }),
+      Like.findAll({
+        where: { userId: id },
+        include: {
+          model: Tweet,
+          include: [
+            { model: Like, attributes: [] },
+            { model: Reply, attributes: [] },
+            { model: User }
+          ],
+          attributes: ['id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
+            [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+              'replyAmount'],
+            [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
+          ]
+        },
+        group: ['like.id'],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
         if (!likes.length) throw new Error('資料庫內沒有相關資料')
         const data = likes.map(l => ({
           TweetId: l.Tweet.id,
