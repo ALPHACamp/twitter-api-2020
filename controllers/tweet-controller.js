@@ -79,7 +79,7 @@ const tweetController = {
   postTweet: (req, res, next) => {
     const { description } = req.body
     const UserId = helpers.getUser(req).id
-    if (!description) throw new Error('description is required!')
+    if (!description) throw new Error('內容不可空白')
     return Tweet.create({
       UserId,
       description

@@ -17,7 +17,7 @@ const replyController = {
     const getTweetId = Number(req.params.id)
     const UserId = helpers.getUser(req).id
     const { comment } = req.body
-    if (!comment) throw new Error('Comment is required!')
+    if (!comment) throw new Error('內容不可空白')
     return Tweet.findByPk(getTweetId)
       .then(tweet => {
         if (!tweet) throw new Error('Tweet not exist!')
