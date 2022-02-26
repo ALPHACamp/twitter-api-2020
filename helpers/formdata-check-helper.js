@@ -7,10 +7,10 @@ const { User } = require('../models')
 
 async function postUsersFormDataCheck(req) {
   const errorMessage = []
-  const { name, account, email, password, passwordConfirm } = req.body
+  const { name, account, email, password, checkPassword } = req.body
 
   // 檢查所有欄位都有填寫
-  if (!name || !account || !email || !password || !passwordConfirm) {
+  if (!name || !account || !email || !password || !checkPassword) {
     errorMessage.push('所有欄位都要填寫')
   }
 
@@ -20,7 +20,7 @@ async function postUsersFormDataCheck(req) {
   }
 
   // 檢查密碼和確認密碼是否一致
-  if (password !== passwordConfirm) {
+  if (password !== checkPassword) {
     errorMessage.push('密碼和確認密碼必須一致')
   }
 

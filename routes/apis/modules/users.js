@@ -12,6 +12,7 @@ router.put('/:id/setting', authenticated, userController.putUserSetting)
 router.get('/:id/followers', authenticated, tempController.getFollowers)
 router.get('/:id/followings', authenticated, tempController.getFollowings)
 router.get('/:id/likes', tempController.getLikes)
+router.get('/:id/replied_tweets', tempController.getReplies)
 router.get('/:id', authenticated, userController.getUser)
 router.put('/:id', authenticated, upload.fields([{ name: 'avatar', maxCount: 1 },{ name: 'cover', maxCount: 1 }]), userController.putUser)
 
