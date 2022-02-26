@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('validator')
-const { User, Like, Tweet } = require('../models')
+const { User, Like, Tweet, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
   signUp: async (req, res, next) => {
@@ -11,7 +11,7 @@ const userController = {
       if (!name || !account || !email || !password || !checkPassword) {
         return res.status(400).json({
           status: 'error',
-          message: '欄位必須全部填完'
+          message: '欄位必須全部填完' 
         })
       }
       if (email && !validator.isEmail(email)) {
@@ -38,12 +38,6 @@ const userController = {
           message: '名字長度不能超過 50 個字'
         })
       }
-      if (account && !validator.isByteLength(account, { min: 0, max: 50 })) {
-        return res.status(400).json({
-          status: 'error',
-          message: '帳號長度不能超過 50 個字'
-        })
-      }
       const checkedUser = await User.findOne({
         where: {
           [Op.or]: [{ account }, { email }]
@@ -58,6 +52,7 @@ const userController = {
         name,
         account,
         email,
+        role: 'user',
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
       })
       return res.status(200).json({
@@ -80,15 +75,6 @@ const userController = {
         }
       })
     } catch (err) { next(err) }
-  },
-  getUser: (req, res) => {
-    const UserId = req.params.id
-    User.findByPk(UserId)
-      .then(user => { return res.status(200).json(user) })
-      .catch((error) => res.status(500).json({
-        status: 'error',
-        message: error
-      }))
   },
   postLike: async (req, res, next) => {
     try {
@@ -182,6 +168,51 @@ const userController = {
         message: error
       })
     }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const userData = await User.findByPk(id, {
+        raw: true
+      })
+      if (!userData) return res.status(400).json({
+        status: 'error',
+        message: 'User not found!'
+      })
+      const followData = await Followship.findAll({
+        where: {},
+        raw: true
+      })
+      delete userData.password
+      
+      res.json({
+        status: 'success',
+        message: 'getUser success!',
+        data: userData
+      })
+    } catch (err) { next(err) }
+  },
+  getUserTweets: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const tweetsData = await Tweet.findAll({
+        where: { UserId: id },
+        raw: true
+      })
+      if (tweetsData.length === 0) return res.status(400).json({
+        status: 'error',
+        message: 'Tweet not found!'
+      })
+      res.json({
+        status: 'success',
+        message: 'getTweets success!',
+        data: tweetsData
+      })
+    } catch (err) { next(err) }
+  },
+  putUser: async (req, res, next) => {
+    const { account, name, email, password, checkPassword } = req.body
+    const user = await User.findByPk(req.params.id)
   }
 }
 
