@@ -1,5 +1,7 @@
 # twitter-api-2020 README
 
+## 初始化
+
 ### 將專案複製到本機
 ```
 git clone https://github.com/dandywhy/twitter-api-2020.git
@@ -43,6 +45,11 @@ npx sequelize db:seed:undo:all
 ### 啟動本機端伺服器
 ```
 npm run dev
+```
+
+## 遠端若有更新，要拉到本地端時
+```
+git pull
 ```
 
 ## 共用帳號
