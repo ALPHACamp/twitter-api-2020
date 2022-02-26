@@ -53,6 +53,8 @@ const adminController = {
           delete r.Followers
         })
 
+        result.sort((a, b) => b.TweetsCount - a.TweetsCount)
+
         res.status(200).json(result)
       })
       .catch(err => next(err))
