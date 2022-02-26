@@ -84,7 +84,7 @@ const userServices = {
         nest: true
       })
     ])
-      .then(([user, follower, following]) => {
+      .then(([user, iFollowed, followMe]) => {
         if (user.id === null) throw new Error('資料庫內找不到使用者資料')
         // 瀏覽特定使用者資料時，特定使用者不包含後台管理員
         if (req.params.id && user.role === 'admin') throw new Error('帳號不存在')
@@ -97,12 +97,12 @@ const userServices = {
           avatar: user.avatar,
           introduction: user.introduction,
           role: user.role,
-          follower: follower.length,
-          following: following.length,
+          follower: followMe.length,
+          following: iFollowed.length,
           tweetAmount: user.tweetAmount
         }
         // 如果是從get users/:id 路由進來，需要多回傳當前使用者是否有追蹤特定使用者
-        if (req.params.id) data.followed = following?.some(f => f.followerId === getUser(req).dataValues.id)
+        if (req.params.id) data.followed = followMe?.some(f => f.followerId === getUser(req).dataValues.id)
         return cb(null, data)
       })
       .catch(err => cb(err))
@@ -112,8 +112,15 @@ const userServices = {
     return Promise.all([
       Tweet.findAll({
         where: { userId: id },
-        include: [Reply, Like],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+            'replyAmount'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
+        ],
+        raw: true,
+        nest: true
       }),
       User.findByPk(id, {
         raw: true,
@@ -121,37 +128,46 @@ const userServices = {
       })
     ])
       .then(([tweets, user]) => {
-        if (!tweets.length) throw new Error('資料庫內找不到使用者資料')
+        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
+        if (!tweets.length) throw new Error('資料庫內沒有相關資料')
         const data = tweets.map(t => ({
-          id: t.dataValues.id,
+          id: t.id,
           userData: {
             id: user.id,
             account: user.account,
             name: user.name,
             avatar: user.avatar
           },
-          description: t.dataValues.description,
-          replyAmount: t.Replies.length,
-          likeAmount: t.Likes.length,
-          createdAt: t.dataValues.createdAt
+          description: t.description,
+          replyAmount: t.replyAmount,
+          likeAmount: t.likeAmount,
+          userLiked: Boolean(t.userLiked),
+          createdAt: t.createdAt
         }))
         return cb(null, data)
       })
       .catch(err => cb(err))
   },
   getUserReply: (req, cb) => {
-    return Reply.findAll({
-      where: { userId: req.params.id },
-      include: [
-        { model: User },
-        { model: Tweet, include: User }
-      ],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(replies => {
-        if (!replies.length) throw new Error('資料庫內找不到使用者資料')
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        raw: true,
+        nest: true
+      }),
+      Reply.findAll({
+        where: { userId: req.params.id },
+        include: [
+          { model: User },
+          { model: Tweet, include: User }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
+        if (!replies.length) throw new Error('資料庫內沒有相關資料')
         const data = replies.map(r => ({
           id: r.id,
           comment: r.comment,
@@ -230,28 +246,35 @@ const userServices = {
   },
   getUserLike: (req, cb) => {
     const { id } = req.params
-    return Like.findAll({
-      where: { userId: id },
-      include: {
-        model: Tweet,
-        include: [
-          { model: Like, attributes: [] },
-          { model: Reply, attributes: [] },
-          { model: User }
-        ],
-        attributes: ['id', 'description', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
-          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
-            'replyAmount'],
-          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
-        ]
-      },
-      group: ['like.id'],
-      order: [['createdAt', 'DESC']],
-      raw: true,
-      nest: true
-    })
-      .then(likes => {
+    return Promise.all([
+      User.findByPk(id, {
+        raw: true,
+        nest: true
+      }),
+      Like.findAll({
+        where: { userId: id },
+        include: {
+          model: Tweet,
+          include: [
+            { model: Like, attributes: [] },
+            { model: Reply, attributes: [] },
+            { model: User }
+          ],
+          attributes: ['id', 'description', 'createdAt',
+            [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
+            [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+              'replyAmount'],
+            [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
+          ]
+        },
+        group: ['like.id'],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
         if (!likes.length) throw new Error('資料庫內沒有相關資料')
         const data = likes.map(l => ({
           TweetId: l.Tweet.id,
@@ -284,16 +307,16 @@ const userServices = {
           ])
             .then(([coverFilePath, avatarFilePath]) => {
               return user.update({
-                name: req.body.name,
-                introduction: req.body.introduction,
+                name: req.body.name || user.toJSON().name,
+                introduction: req.body.introduction || user.toJSON().introduction,
                 cover: coverFilePath || user.toJSON().cover,
                 avatar: avatarFilePath || user.toJSON().avatar
               })
             })
         } else {
           return user.update({
-            name: req.body.name,
-            introduction: req.body.introduction
+            name: req.body.name || user.toJSON().name,
+            introduction: req.body.introduction || user.toJSON().introduction
           })
         }
       })
