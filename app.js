@@ -43,7 +43,7 @@ function authenticated(req, res, next) {
 
 
 
-app.use(route)
+require('./routes')(app)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 
