@@ -125,7 +125,7 @@ const replyController = {
       })
       .then(reply => {
         return res.status(200).json({
-          status: '200',
+          status: 'success',
           message: '成功新增回覆',
           Reply: reply
         })})
