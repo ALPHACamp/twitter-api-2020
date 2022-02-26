@@ -254,8 +254,10 @@ const userController = {
 
         likesArray
           .forEach(like => {
-            like.Tweet.Likes = like.Tweet.Likes.length
-            like.Tweet.Replies = like.Tweet.Replies.length
+            like.Tweet.likesCount = like.Tweet.Likes.length
+            like.Tweet.repliesCount = like.Tweet.Replies.length
+            delete like.Tweet.Likes
+            delete like.Tweet.Replies
           })
 
         return res.json(likesArray)
