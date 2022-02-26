@@ -1,7 +1,7 @@
 const sequelize = require('sequelize')
 const Op = sequelize.Op
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userController = {
@@ -64,13 +64,21 @@ const userController = {
         raw: true,
         nest: true
       })
+      const followers = await Followship.findAndCountAll({
+        raw: true,
+        where: { FollowingId: req.params.id }
+      })
+      const followings = await Followship.findAndCountAll({
+        raw: true,
+        where: { FollowerId: req.params.id }
+      })
       const userData = {
         status: 'success',
-        id: user.id,
-        name: user.name,
-        account: user.account,
-        email: user.email
+        ...user,
+        followersCount: followers.count,
+        followingsCount: followings.count
       }
+      delete userData.password
       return cb(null, userData)
     } catch (err) {
       cb(err)
