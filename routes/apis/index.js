@@ -22,17 +22,19 @@ router.post('/tweets', authenticated, authenticatedUser, tweetController.postTwe
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.delete('/followships/:followingId', authenticated, authenticatedUser, followController.deleteFollowing)
 router.post('/followships', authenticated, authenticatedUser, followController.postFollowing)
+
+router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.get('/users/popular', authenticated, authenticatedUser, userController.getPopularUsers)
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getReplies)
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getLikes)
-
 router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getUserFollowings)
 router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getUserFollowers)
-
-router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.put('/users/:id/account', authenticated, authenticatedUser, userController.putUserAccount)
 router.put('/users/:id', authenticated, authenticatedUser, upload.fields(uploadFields), userController.putUser)
+router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 router.post('/users', userController.signUp)
+
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)

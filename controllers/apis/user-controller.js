@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../../_helpers')
-const { Op } = require('sequelize')
+const sequelize = require('sequelize')
+const { Op } = sequelize
 const { imgurFileHandler } = require('../../helpers/file-helpers')
 const { User, Tweet, Like, Reply, Followship } = require('../../models')
 const appFunc = require('../../services/appFunctions')
@@ -48,6 +49,71 @@ const userController = {
         data: {
           token,
           user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getUser: async (req, res, next) => {
+    try {
+      const userId = Number(helpers.getUser(req).id)
+      const id = Number(req.params.id)
+      const user = await User.findByPk(id, {
+        raw: true,
+        nest: true,
+        attributes: { exclud: ['password'] }
+      })
+      if (!user || user.role === 'admin') throw new Error("User didn't exist!")
+      const following = await Followship.findAndCountAll({ where: { followerId: id }, raw: true, nest: true })
+      const followers = await Followship.findAndCountAll({ where: { followingId: id }, raw: true, nest: true })
+      const isFollowing = await appFunc.getUserIsFollowing(userId, id)
+      const isUser = Boolean(userId === id)
+      if (process.env.NODE_ENV === 'test') {
+        res.json(user)
+      }
+      res.json({
+        status: 'success',
+        data: {
+          user: {
+            ...user,
+            isFollowing,
+            following: following.count,
+            followers: followers.count,
+            isUser
+          }
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getPopularUsers: async (req, res, next) => {
+    try {
+      const userId = Number(helpers.getUser(req).id)
+      const limit = Number(req.query.amount) || 10
+      const followList = await User.findAll({
+        where: { role: { [Op.ne]: 'admin' } },
+        raw: true,
+        nest: true,
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar',
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followers']
+        ],
+        limit
+      })
+      const reUsers = await Promise.all(followList.map(async user => {
+        user.isFollowing = await appFunc.getUserIsFollowing(userId, user.id)
+        return user
+      }))
+      reUsers.sort((a, b) => b.followers - a.followers)
+      res.json({
+        status: 'success',
+        data: {
+          users: reUsers
         }
       })
     } catch (err) {
