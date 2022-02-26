@@ -9,13 +9,14 @@ module.exports = {
     )
 
     await queryInterface.bulkInsert('Tweets', 
-      Array.from({ length: 10 }, () => ({
-      UserId: users[Math.floor(Math.random() * users.length)].id,
-      description: faker.lorem.text(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-      }))
-    )
+    Array.from({ length: users.length * 10 }).map((_, i) =>
+          ({
+            UserId: users[Math.floor(i/10)].id,
+            description: faker.lorem.text(),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+        ), {})
   },
 
   down: async (queryInterface, Sequelize) => {
