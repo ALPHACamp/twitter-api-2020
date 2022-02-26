@@ -80,6 +80,7 @@ const tweetController = {
     const { description } = req.body
     const UserId = helpers.getUser(req).id
     if (!description) throw new Error('內容不可空白')
+    if (description.length > 140) throw new Error('字數超出上限！')
     return Tweet.create({
       UserId,
       description
