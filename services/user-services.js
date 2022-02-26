@@ -1,7 +1,9 @@
 const { User, Tweet, Like, Reply, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const sequelize = require('sequelize')
+const { Op } = require('sequelize');
 const helper = require('../_helpers')
+const { localFileHandler, imgurFileHandler } = require('../helpers/file-helpers')
 const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
@@ -69,6 +71,83 @@ const userServices = {
       const user = userData.toJSON()
       delete user.password
       return cb(null, user)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  putUser: async (req, cb) => {
+    try {
+      const { name, introduction } = req.body
+      const userId = helper.getUser(req).id
+      if (Number(req.params.id) !== userId) throw new Error('只有本人可以這樣做')
+      if (!name) throw new Error('name is required!')
+      if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
+      if (introduction && introduction.length > 160) throw new Error('自我介紹字數超出上限！')
+      const { files } = req
+      if (files) {
+        console.log(files)
+        if (files.avatar) {
+          let localAvatar = await localFileHandler(files.avatar[0])
+          const avatar = await imgurFileHandler(files.avatar[0])
+          req.body.avatar = avatar
+        }
+        if (files.cover) {
+          let localCover = await localFileHandler(files.cover[0])
+          const cover = await imgurFileHandler(files.cover[0])
+          req.body.cover = cover
+        }
+      }
+      const user = await User.findByPk(userId)
+      if (!user) throw new Error("User didn't exist!")
+      await user.update({
+        name: name || user.name,
+        introduction: introduction || user.introduction,
+        avatar: req.body.avatar || user.avatar,
+        cover: req.body.cover || user.cover
+      })
+      return cb(null, user.toJSON())
+    } catch (err) {
+      cb(err)
+    }
+  },
+  putSetting: async (req, cb) => {
+    try {
+      const { account, name, email, password } = req.body
+      const userId = helper.getUser(req).id
+      if (!account) throw new Error('account is required!')
+      if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
+      if (!email) throw new Error('email is required!')
+      // 確認account是否重複
+      const existAccount = await User.findOne({
+        where: {
+          account,
+          [Op.not]: [
+            { id: [userId] } // 排除跟自己原資料重複
+          ],
+        }
+      })
+      if (existAccount) throw new Error('Account已經有人使用')
+      // 確認email是否重複
+      const existEmail = await User.findOne({
+        where: {
+          email,
+          [Op.not]: [
+            { id: [userId] } // 排除跟自己原資料重複
+          ],
+        }
+      })
+      if (existEmail) throw new Error('Email已經有人使用')
+      const user = await User.findByPk(userId)
+      if (!user) throw new Error("User didn't exist!")
+      const putUser = await user.update({
+        account: account || user.account,
+        name: name || user.name,
+        email: email || user.email,
+        password: password ? await bcrypt.hash(password, 10) : user.password
+      })
+      const result = putUser.toJSON()
+      delete result.password
+      return cb(null, result)
     } catch (err) {
       cb(err)
     }

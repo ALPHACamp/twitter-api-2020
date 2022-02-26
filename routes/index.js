@@ -8,6 +8,7 @@ const likeController = require('../controllers/like-controller')
 const followshipController = require('../controllers/followship-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/api-auth')
+const upload = require('../middleware/multer')
 
 
 router.get('/', (req, res) => {
@@ -20,6 +21,7 @@ router.post('/api/tweets/:tweetId/like', authenticated, likeController.likeTweet
 router.post('/api/tweets/:tweetId/unlike', authenticated, likeController.unlikeTweet)
 router.post('/api/tweets', authenticated, tweetController.postTweet)
 router.get('/api/tweets', authenticated, tweetController.getTweets)
+router.put('/api/users/account/setting', authenticated, userController.putSetting)
 router.get('/api/users/:id/replied_tweets', authenticated, userController.getUserReplies)
 router.get('/api/users/:id/likes', authenticated, userController.getUserLikes)
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweets)
@@ -28,6 +30,10 @@ router.get('/api/users/:id/followers', authenticated, userController.getUserFoll
 router.get('/api/users/top', authenticated, userController.getTopUsers)
 router.delete('/api/followships/:id', authenticated, followshipController.deleteFollowships)
 router.post('/api/followships', authenticated, followshipController.postFollowships)
+router.put('/api/users/:id', authenticated, upload.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'cover', maxCount: 1 }
+]), userController.putUser)
 router.get('/api/users/:id', authenticated, userController.getUser)
 router.post('/api/users', userController.signUp)
 router.post('/api/signin', userController.signIn)
