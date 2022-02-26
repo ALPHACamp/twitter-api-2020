@@ -5,8 +5,10 @@ const tweetController = require('../../controllers/tweet-controller')
 const replyController = require('../../controllers/reply-controller')
 const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 
-router.get('/', authenticated, tweetController.getTweets)
+router.get('/:id', authenticated, tweetController.getTweet)
 router.post('/', authenticated, tweetController.postTweet)
+router.get('/', authenticated, tweetController.getTweets)
+
 
 router.get('/:id/replies', authenticated, replyController.getReplies)
 router.post('/:id/replies', authenticated, replyController.postReplies)

@@ -4,14 +4,15 @@ const replyController = {
     return Reply.findAll({
       where: {
         TweetId: req.params.id,
-        UserId: req.user.id
+        // UserId: req.user.id
       }
     })
-      .then(reply => {
+      .then(replies => {
+        console.log(req.params.id,'',replies)
         return res.status(200).json({
           status: '200',
           message: '成功找到回覆',
-          Reply: reply
+          Reply: replies
         })
       })
       .catch((error) => res.status(500).json({
