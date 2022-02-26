@@ -8,6 +8,7 @@ const authenticated = (req, res, next) => {
     // 錯誤或user沒資料，回傳錯誤訊息
     if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
 
+    req.user = user
     next()
   })(req, res, next)
 }
