@@ -13,6 +13,8 @@ const authenticated = (req, res, next) => {
       req.user = user
       return next()
     })(req, res, next)
+  } else {
+    return passport.authenticate('jwt', { session: false })(req, res, next)
   }
 }
 const authenticatedAdmin = (req, res, next) => {
