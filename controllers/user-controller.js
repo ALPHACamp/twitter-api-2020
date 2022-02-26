@@ -1,6 +1,6 @@
 
 const bcrypt = require('bcryptjs')
-const { User, Followship, sequelize } = require('../models')
+const { User, Followship, Tweet, sequelize } = require('../models')
 const jwtHelpers = require('../helpers/bearer-token-helper')
 const helper = require('../_helpers')
 const jwt = require('jsonwebtoken')
@@ -144,7 +144,33 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt',
+          'likeCount',
+          'replyCount'
+        ],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'], as: 'TweetAuthor' }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
+      return res.json([ ...tweets ])
+    } catch (err) {
+      next(err)
+    }
+    
   }
+
 
 }
 
