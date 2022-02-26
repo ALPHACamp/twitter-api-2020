@@ -84,7 +84,7 @@ const userServices = {
         nest: true
       })
     ])
-      .then(([user, follower, following]) => {
+      .then(([user, iFollowed, followMe]) => {
         if (user.id === null) throw new Error('資料庫內找不到使用者資料')
         // 瀏覽特定使用者資料時，特定使用者不包含後台管理員
         if (req.params.id && user.role === 'admin') throw new Error('帳號不存在')
@@ -97,12 +97,12 @@ const userServices = {
           avatar: user.avatar,
           introduction: user.introduction,
           role: user.role,
-          follower: follower.length,
-          following: following.length,
+          follower: followMe.length,
+          following: iFollowed.length,
           tweetAmount: user.tweetAmount
         }
         // 如果是從get users/:id 路由進來，需要多回傳當前使用者是否有追蹤特定使用者
-        if (req.params.id) data.followed = following?.some(f => f.followerId === getUser(req).dataValues.id)
+        if (req.params.id) data.followed = followMe?.some(f => f.followerId === getUser(req).dataValues.id)
         return cb(null, data)
       })
       .catch(err => cb(err))
