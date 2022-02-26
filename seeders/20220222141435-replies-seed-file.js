@@ -1,5 +1,3 @@
-/* eslint-disable indent */
-/* eslint-disable padded-blocks */
 'use strict'
 const faker = require('faker')
 const db = require('../models')
