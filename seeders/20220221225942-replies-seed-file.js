@@ -18,7 +18,7 @@ module.exports = {
           ({
             UserId: users[Math.floor(Math.random() * users.length)].id,
             TweetId: tweets[Math.floor(i/3)].id,
-            comment: faker.lorem.text().substring(0, 20),
+      comment: faker.lorem.text().substring(0, 20).substring(0, 140),
             createdAt: new Date(),
             updatedAt: new Date()
           })

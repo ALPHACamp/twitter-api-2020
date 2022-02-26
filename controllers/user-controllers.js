@@ -24,7 +24,7 @@ const userController = {
               user: userData,
             }
           });
-        } else { res.json({ status: "error", message: "You are admin!"}) }
+        } else { res.json({ status: "error", message: "You are admin!" }) }
       } else {
         res.json(errData);
       }
@@ -56,7 +56,7 @@ const userController = {
 
 
       return res.json({ status: 'success', user, count })
-      .then(() => res.json({ status: 'success'}))
+        .then(() => res.json({ status: 'success' }))
     } catch (err) { next(err) }
   },
 
@@ -211,7 +211,7 @@ const userController = {
         .sort((a, b) => b.createdAt - a.createdAt)
 
       if (userFollowers.length === 0) {
-        return res.json({  status: 'success', data: [] })
+        return res.json({ status: 'success', data: [] })
       }
       return res.json(userFollowers)
     } catch (err) {
@@ -287,7 +287,7 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
-      if (req.user.id !== req.params.id) return res.json({ status: 'error', message: "You con't do this" })
+      if (helpers.getUser(req).id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this." })
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ status: 'error', message: "User didn't exist." })
       const { name, introduction } = req.body
@@ -316,7 +316,7 @@ const userController = {
       }
     } catch (err) {
       next(err)
-      return res.json({ status: 'error', message: err })
+      return res.json({ status: 'error', message: err.message })
     }
   },
 
@@ -330,7 +330,6 @@ const userController = {
       const email = req.body?.email?.trim() || null
       const password = req.body?.password?.trim() || null
       const checkPassword = req.body?.checkPassword?.trim() || null
-      console.log(password)
       if (!account || !name || !email || !password || !checkPassword) return res.json({ status: 'error', message: 'All fields are required' })
       if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters.' })
       if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match.' })
@@ -341,17 +340,17 @@ const userController = {
       if (sameUser) return res.json({ status: 'error', message: 'Account already existed.' })
 
       return bcrypt.hash(req.body.password, 10)
-      .then(hash => {
-         user.update({
-          name: name,
-          account: account,
-          email: email,
-          password: hash
+        .then(hash => {
+          user.update({
+            name: name,
+            account: account,
+            email: email,
+            password: hash
+          })
         })
-      })
- 
-      .then(() => {  res.json({ status: 'success' })})
-      
+
+        .then(() => { res.json({ status: 'success' }) })
+
     } catch (err) {
       next(err)
     }
@@ -360,31 +359,29 @@ const userController = {
   addFollow: async (req, res, next) => {
     const followerId = helpers.getUser(req).id
     const followingId = req.body.id
-    console.log(followerId)
-    console.log(followingId)
     try {
       const user = await User.findByPk(followingId)
-      if (!user) return res.json({ status: 'error', message: "User didn't exist!"})
-  
-      const followship = await Followship.findOne({ where: { followerId, followingId }})
-      if (followship) return res.json({ status: 'error', message: 'You are already following this user!'})
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
 
-      if (followerId == followingId) return res.json({ status: 'error', message: "You can't follow yourself"})
-  
+      const followship = await Followship.findOne({ where: { followerId, followingId } })
+      if (followship) return res.json({ status: 'error', message: 'You are already following this user!' })
+
+      if (followerId == followingId) return res.json({ status: 'error', message: "You can't follow yourself" })
+
       return Followship.create({ followerId, followingId })
-      .then(() => res.json({ status: 'success'}))
+        .then(() => res.json({ status: 'success' }))
     } catch (err) { next(err) }
   },
 
-  removeFollow: async (req, res, next) =>{
+  removeFollow: async (req, res, next) => {
     const followingId = req.params.followingId
     const followerId = helpers.getUser(req).id
     try {
-      const followship = await Followship.findOne({ where: { followerId, followingId }})
-      if (!followship) return res.json({ status: 'error', message: "You haven't followed this user!"})
+      const followship = await Followship.findOne({ where: { followerId, followingId } })
+      if (!followship) return res.json({ status: 'error', message: "You haven't followed this user!" })
 
       return followship.destroy()
-      .then(() => res.json({ status: 'success'}))
+        .then(() => res.json({ status: 'success' }))
     } catch (err) { next(err) }
 
   }
