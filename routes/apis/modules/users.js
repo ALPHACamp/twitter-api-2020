@@ -6,7 +6,7 @@ const userController = require('../../../controllers/user-controller')
 
 // router.post('/login', userController.login)
 // router.post('/users', userController.postUsers)
-
+router.get('/:id/tweets', authenticated, userController.getTweets)
 router.get('/top', authenticated, userController.getTopUsers)
 
 exports = module.exports = router
