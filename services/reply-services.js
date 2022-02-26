@@ -43,7 +43,7 @@ const replyController = {
         UserId
       })
       const replyData = {
-        status: 'suceess',
+        status: 'success',
         data: {
           reply: newReply
         }

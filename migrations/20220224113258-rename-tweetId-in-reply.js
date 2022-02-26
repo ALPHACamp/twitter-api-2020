@@ -6,6 +6,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.renameColumn('Tweets', 'TweetId', 'tweetId')
+    return queryInterface.renameColumn('Replies', 'TweetId', 'tweetId')
   }
 }
