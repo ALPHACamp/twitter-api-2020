@@ -72,19 +72,20 @@ const userController = {
       const isUser = Boolean(userId === id)
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(user)
-      }
-      res.json({
-        status: 'success',
-        data: {
-          user: {
-            ...user,
-            isFollowing,
-            following: following.count,
-            followers: followers.count,
-            isUser
+      } else {
+        res.json({
+          status: 'success',
+          data: {
+            user: {
+              ...user,
+              isFollowing,
+              following: following.count,
+              followers: followers.count,
+              isUser
+            }
           }
-        }
-      })
+        })
+      }
     } catch (err) {
       next(err)
     }
