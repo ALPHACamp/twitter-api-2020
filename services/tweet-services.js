@@ -39,7 +39,7 @@ const tweetController = {
         where: { TweetId: req.params.tweet_id }
       })
 
-      tweet.reply = Replies
+      tweet.Reply = Replies
 
       return cb(null, tweet)
     } catch (err) {
