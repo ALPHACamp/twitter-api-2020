@@ -87,7 +87,7 @@ const tweetServices = {
       const tweet = {
         ...tweetData.toJSON(),
         likeCount: tweetData.Likes.length,
-        replyCount: tweetData.Likes.length,
+        replyCount: tweetData.Replies.length,
         isLiked: likedUsersId.includes(userId)
       }
       return cb(null, tweet)
