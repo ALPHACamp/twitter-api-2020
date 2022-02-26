@@ -85,9 +85,6 @@ const userServices = {
       })
     ])
       .then(([user, iFollowed, followMe]) => {
-        if (user.id === null) throw new Error('資料庫內找不到使用者資料')
-        // 瀏覽特定使用者資料時，特定使用者不包含後台管理員
-        if (req.params.id && user.role === 'admin') throw new Error('帳號不存在')
         const data = {
           id: user.id,
           email: user.email,
@@ -128,7 +125,6 @@ const userServices = {
       })
     ])
       .then(([tweets, user]) => {
-        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
         if (!tweets.length) throw new Error('資料庫內沒有相關資料')
         const data = tweets.map(t => ({
           id: t.id,
@@ -166,7 +162,6 @@ const userServices = {
       })
     ])
       .then(([user, replies]) => {
-        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
         if (!replies.length) throw new Error('資料庫內沒有相關資料')
         const data = replies.map(r => ({
           id: r.id,
@@ -197,8 +192,6 @@ const userServices = {
       })
     ])
       .then(([user, following]) => {
-        if (!user) throw new Error('資料庫內找不到使用者資料')
-        if (user.dataValues.role === 'admin') throw new Error('帳號不存在')
         if (!user.Followings.length) throw new Error('該使用者沒有追蹤者(following)')
 
         const currentUserFollowing = following.map(f => f.followingId)
@@ -226,8 +219,6 @@ const userServices = {
       })
     ])
       .then(([user, following]) => {
-        if (!user) throw new Error('資料庫內找不到該使用者資料')
-        if (user.dataValues.role === 'admin') throw new Error('帳號不存在')
         if (!user.Followers.length) throw new Error('該使用者沒有追隨者(follower)')
 
         const currentUserFollowing = following.map(f => f.followingId)
@@ -274,7 +265,6 @@ const userServices = {
       })
     ])
       .then(([user, likes]) => {
-        if (!user || user.role === 'admin') throw new Error('資料庫內找不到使用者資料')
         if (!likes.length) throw new Error('資料庫內沒有相關資料')
         const data = likes.map(l => ({
           TweetId: l.Tweet.id,
@@ -297,7 +287,6 @@ const userServices = {
   putUserProfile: (req, cb) => {
     return User.findByPk(req.params.id)
       .then(user => {
-        if (!user) throw new Error('資料庫內找不到使用者資料')
         const { files } = req
         // 有上傳封面或頭像
         if (JSON.stringify(files) !== '{}' && files !== undefined) {
@@ -346,8 +335,6 @@ const userServices = {
         return User.findByPk(req.params.id)
       })
       .then(user => {
-        if (!user) throw new Error('資料庫內找不到使用者資料')
-
         return user.update({
           name: req.body.name || user.name,
           account: req.body.account,
