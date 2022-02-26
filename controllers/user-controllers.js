@@ -1,9 +1,36 @@
 const helpers = require('../_helpers');
 const bcrypt = require('bcryptjs')
+const jwt = require("jsonwebtoken");
 const { reporters } = require('mocha')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 
 const userController = {
+  login: (req, res, next) => {
+    const errData = req.user.data;
+    try {
+      if (!errData) {
+        const userData = req.user.toJSON();
+        if (userData.role === 'user') {
+          delete userData.password;
+          const token = jwt.sign(userData, process.env.JWT_SECRET, {
+            expiresIn: "30d",
+          }); // 簽發 JWT，效期為 30 天
+          res.json({
+            status: "success",
+            data: {
+              token,
+              user: userData,
+            }
+          });
+        } else { res.json({ status: "error", message: "You are admin!"}) }
+      } else {
+        res.json(errData);
+      }
+    } catch (err) {
+      next(err);
+    }
+  },
+
   getCurrentUser: async (req, res, next) => {
     const DEFAULT_COUNT = 0
     const currentUser = helpers.getUser(req)
@@ -37,14 +64,14 @@ const userController = {
     const name = req.body?.name?.trim() || null
     const email = req.body?.email?.trim() || null
     if (!account || !password || !checkPassword || !name || !email) return res.json({ status: 'error', message: 'All fields are required' })
-    if (name.length > 50) return res.json({ status: 'error', message: 'Name is too long ' })
+    if (name.length > 50) return res.json({ status: 'error', message: 'Name is too long!' })
     if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match!' })
 
     try {
       const userEmail = await User.findOne({ where: { email } })
       const userAccount = await User.findOne({ where: { account } })
-      if (userEmail) return res.json({ status: 'error', message: 'email already existed' })
-      if (userAccount) return res.json({ status: 'error', message: 'account already existed' })
+      if (userEmail) return res.json({ status: 'error', message: 'Email already existed!' })
+      if (userAccount) return res.json({ status: 'error', message: 'Account already existed!' })
       return bcrypt.hash(req.body.password, 10)
         .then(hash =>
           User.create({
@@ -154,7 +181,7 @@ const userController = {
         .sort((a, b) => b.createdAt - a.createdAt)
 
       if (userFollowings.length === 0) {
-        return res.json({ status: 'error', message: 'No followings!' })
+        return res.json({ status: 'success', data: [] })
       }
       return res.json(userFollowings)
     } catch (err) {

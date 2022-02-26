@@ -43,6 +43,7 @@ const tweetController = {
       .then(() => res.json({ status: 'success'}))
     } catch(err) { next(err) }
   },
+
   getTweets: async (req, res, next) => {
     try {
       const tweets = await Tweet.findAll({
@@ -72,6 +73,7 @@ const tweetController = {
       next(err)
     }
   },
+
   getTweet: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.tweet_id, {
@@ -108,6 +110,7 @@ const tweetController = {
       next(err)
     }
   },
+  
   postTweet: async (req, res, next) => {
     const { description } = req.body
     if (!description) return res.json({ status: 'error', message: 'Description is required' })

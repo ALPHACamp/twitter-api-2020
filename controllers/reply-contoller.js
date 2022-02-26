@@ -14,6 +14,8 @@ const replyController = {
         .then(([ user, tweet ]) => {
             if (!user) return res.json({ status: 'error', message: "User didn't exist!'" })
             if (!tweet) return res.json({ status: 'error', message: "Tweet didn't exist!'" })
+            if (!comment) return res.json({ status: 'error', message: "Fields are required!'" })
+            if (comment.length > 140) return res.json({ status: 'error', message: "Comment is too long!'" })
             return Reply.create({
                 comment,
                 TweetId: tweet_id,
