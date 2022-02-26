@@ -358,5 +358,41 @@ const userServices = {
       return cb(err)
     }
   },
+  getTopUsers: async (req, cb) => {
+    try {
+      let users = await User.findAll({
+        raw: true,
+        nest: true,
+        limit: 10,
+        where: {
+          role: 'user'
+        },
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'account',
+          //看自己有沒有追隨
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = User.id)`), 'isFollowings'],
+          //看追隨的人數
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
+            'FollowerCount'],
+        ],
+        order: [[sequelize.col('FollowerCount'), 'DESC']],
+        // Op.gt == 大於
+        having: { FollowerCount: { [sequelize.Op.gt]: 0 } },
+      })
+      console.log(users);
+      console.log(typeof users);
+      let result = users.map(user => ({
+        ...user
+      }))
+      console.log(result);
+      return cb(null, result)
+    } catch (err) {
+      console.log(err);
+      return cb(err)
+    }
+  },
 }
 module.exports = userServices
