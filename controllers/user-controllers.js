@@ -290,9 +290,26 @@ const userController = {
 
   getUserLikes: async (req, res, next) => {
     try {
-      const likes = await Like.findAll({
-        where: { UserId: req.params.id }
+      let likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            ]
+          }
+        ],
+        raw: true,
+        nest: true
       })
+
+      // Clean data
+      likes = likes.map(like => ({
+        ...like,
+        likedTweet: true
+      }))
 
       return res.status(200).json(likes)
     } catch (error) {
