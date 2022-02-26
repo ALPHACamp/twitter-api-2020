@@ -48,7 +48,7 @@ const replyController = {
       const replyData = {
         status: 'success',
         data: {
-          reply: newReply
+          Reply: newReply
         }
       }
       return cb(null, replyData)

@@ -62,7 +62,7 @@ const tweetController = {
       const tweetData = {
         status: 'success',
         data: {
-          tweet: newTweet
+          Tweet: newTweet
         }
       }
       return cb(null, tweetData)
@@ -98,7 +98,7 @@ const tweetController = {
       const likeData = {
         status: 'success',
         data: {
-          like: newLike
+          Like: newLike
         }
       }
       return cb(null, likeData)
@@ -135,7 +135,7 @@ const tweetController = {
       const likeData = {
         status: 'success',
         data: {
-          like: findLike[0]
+          Like: findLike[0]
         }
       }
       return cb(null, likeData)
