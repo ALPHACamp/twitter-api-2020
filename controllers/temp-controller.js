@@ -26,8 +26,9 @@ const tempController = {
             model: User,
             as: 'Followings',
             attributes: [
-              'id', 'name', 'account',
-              'introduction', 'cover', 'avatar',
+              ['id', 'followingId'],
+              'name', 'account', 'introduction',
+              'cover', 'avatar',
               [
                 sequelize.literal(`
                   EXISTS (
@@ -41,16 +42,16 @@ const tempController = {
             ]
           }
         ],
-        attributes: ['id', 'name', 'account', 'avatar', 'cover'],
+        attributes: [],
         order: [
           [sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']
         ]
       }
       const followingUsers = await User.findByPk(targetUserId, findOption)
 
-      const result = followingUsers.toJSON()
+      const result = followingUsers.toJSON().Followings
 
-      result.Followings.forEach(fu => {
+      result.forEach(fu => {
         fu.isFollowed = Boolean(fu.isFollowed)
         delete fu.Followship
       })
