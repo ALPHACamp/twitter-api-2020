@@ -211,7 +211,7 @@ const userController = {
         .sort((a, b) => b.createdAt - a.createdAt)
 
       if (userFollowers.length === 0) {
-        return res.json({ status: 'error', message: 'No followers!' })
+        return res.json({  status: 'success', data: [] })
       }
       return res.json(userFollowers)
     } catch (err) {
