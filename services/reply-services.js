@@ -5,7 +5,7 @@ const replyController = {
     try {
       const TweetId = req.params.tweet_id
       const tweet = await Tweet.findByPk(TweetId)
-      if (tweet === null) {
+      if (!tweet) {
         return cb(new Error('tweet_id does not exist.'))
       }
       const replies = await Reply.findAll({
@@ -32,9 +32,12 @@ const replyController = {
       const { comment } = req.body
       if (!comment) {
         return cb(new Error('Comment is required.'))
+      } else if (comment.length > 140) {
+        return cb(new Error('Comment is longer than 140 words.'))
       }
+
       const tweet = await Tweet.findByPk(req.params.tweet_id)
-      if (tweet === null) {
+      if (!tweet) {
         return cb(new Error('tweet_id does not exist.'))
       }
       const newReply = await Reply.create({
@@ -45,7 +48,7 @@ const replyController = {
       const replyData = {
         status: 'success',
         data: {
-          reply: newReply
+          Reply: newReply
         }
       }
       return cb(null, replyData)
