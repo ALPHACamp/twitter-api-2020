@@ -1,6 +1,25 @@
 const { User, Tweet, Like } = require('../models')
+const { getLikedTweetsIds } = require('../helpers/user')
 
 const tweetServices = {
+  getTweets: async (req, res, next) => {
+    let tweets = await Tweet.findAll({
+      order: [['createdAt', 'DESC']],
+      include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+      raw: true,
+      nest: true
+    })
+
+    // Clean data with isLiked
+    const userLikes = await getLikedTweetsIds(req)
+
+    tweets = tweets.map(tweet => ({
+      ...tweet,
+      isLiked: userLikes.includes(tweet.id)
+    }))
+
+    return tweets
+  },
   likeTweet: async (tweetId, userId) => {
     const tweet = await Tweet.findByPk(tweetId)
     if (!tweet) throw new Error("This Tweet didn't exist!")

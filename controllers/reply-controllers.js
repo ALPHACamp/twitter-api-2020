@@ -1,4 +1,3 @@
-const { User, Tweet, Reply } = require('../models')
 const replyServices = require('../services/reply-service')
 const helper = require('../_helpers')
 

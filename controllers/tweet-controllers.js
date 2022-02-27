@@ -7,20 +7,7 @@ const tweetController = {
   // Get all tweet data include user data and latest shows at front, return in an Array
   getTweets: async (req, res, next) => {
     try {
-      let tweets = await Tweet.findAll({
-        order: [['createdAt', 'DESC']],
-        include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
-        raw: true,
-        nest: true
-      })
-
-      // Clean data with isLiked
-      const userLikes = await getLikedTweetsIds(req)
-
-      tweets = tweets.map(tweet => ({
-        ...tweet,
-        isLiked: userLikes.includes(tweet.id)
-      }))
+      const tweets = await tweetServices.getTweets(req)
 
       return res.status(200).json(tweets)
     } catch (error) {
