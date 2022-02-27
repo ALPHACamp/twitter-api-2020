@@ -20,7 +20,7 @@ module.exports = {
       userRandomChooser.refresh()
       const likeTimes = Math.floor(Math.random() * userIds.length) + 1
       return Array.from({ length: likeTimes }, () => {
-        const newDate = new Date(+(tweet.createdAt) + Math.floor(Math.random() * 100000000)) // minus 10^10 milisecond from current date
+        const newDate = new Date(+(tweet.createdAt) + Math.floor(Math.random() * 1000000000)) // add 10^9 milisecond from tweet createdAt date
         return {
           TweetId: tweet.id,
           UserId: userRandomChooser.choose(),

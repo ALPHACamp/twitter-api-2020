@@ -29,7 +29,7 @@ module.exports = {
       password: await bcrypt.hash('12345678', 10),
       name: `user${i + 1}`,
       role: 'user',
-      createdAt: new Date(),
+      createdAt: new Date(+(new Date()) - Math.floor(Math.random() * 10000000000)), // minus 10^10 milisecond from current date
       updatedAt: new Date()
     }))
     )

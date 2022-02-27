@@ -23,7 +23,7 @@ module.exports = {
       // })
       // )
       return Array.from({ length: followTimes }, () => {
-        const newDate = new Date(+(user.createdAt) + Math.floor(Math.random() * 100000000)) // minus 10^10 milisecond from current date
+        const newDate = new Date(+(user.createdAt) + Math.floor(Math.random() * 1000000000)) // add 10^9 milisecond from user createdAt date
         return {
           followingId: followingRandomChooser.choose(),
           followerId: user.id,

@@ -16,7 +16,7 @@ module.exports = {
     )
     const insertedReplies = tweets.map(tweet => {
       return Array.from({ length: 3 }, () => {
-        const newDate = new Date(+(tweet.createdAt) + Math.floor(Math.random() * 100000000)) // minus 10^10 milisecond from current date
+        const newDate = new Date(+(tweet.createdAt) + Math.floor(Math.random() * 1000000000)) // add 10^9 milisecond from tweet createdAt date
         return {
           UserId: users[Math.floor(Math.random() * users.length)].id,
           comment: faker.lorem.text().substring(1, 40),
