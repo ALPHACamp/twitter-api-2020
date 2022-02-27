@@ -303,6 +303,38 @@ const userController = {
         res.json({ status: 'success', message: '資料編輯成功', user })
       })
       .catch(err => next(err))
+  },
+
+  //取得熱門使用者
+  getTopUsers: (req, res, next) => {
+    // 預設取得10位使用者， 並判斷是否有查詢變數來改變取得長度
+    const DEFAULT_LIMIT = 10
+    const limit = req.query.limit ? req.query.limit : DEFAULT_LIMIT
+
+    // 取得所有使用者資料，用多對多關連，取得使用者追蹤資料
+    return User.findAll({
+      include: [{ model: User, as: 'Followers', attributes: ['id', 'name'] }],
+      attributes: ['id', 'name', 'avatar']
+    })
+      .then(users => {
+        // 重新編排資料，並計算追隨者數量、登入者是否有追蹤
+        const data = users.map(user => {
+          user = user.toJSON()
+          return {
+            id: user.id,
+            name: user.name,
+            avatar: user.avatar,
+            followerCount: user.Followers.length,
+            isFollowed: helpers.getUser(req).Followings.some(f => f.id === user.id)
+          }
+
+        })
+          .sort((a, b) => b.followerCount - a.followerCount) // 依followerCount降冪排列
+          .slice(0, limit) // 取得所設定數量
+
+        res.json(data)
+      })
+      .catch(err => next(err))
   }
 
 
