@@ -3,6 +3,11 @@ const { getUser } = require('../_helpers')
 
 const userController = {
   signUp: (req, res, next) => {
+    // 帳號、密碼、信箱為註冊必填項目
+    if (req.body.account === undefined || req.body.account.trim() === '') throw new Error('帳號為必填項目')
+    if (req.body.email === undefined || req.body.email.trim() === '') throw new Error('信箱為必填項目')
+    if (req.body.password === undefined || req.body.password.trim() === '') throw new Error('密碼為必填項目')
+    // 密碼、帳號、暱稱各有其規範
     if (req.body.password.length < 5 || req.body.password.length > 20) throw new RangeError('密碼字數不符合規定')
     if (req.body.account.trim().length > 20) throw new RangeError('帳號字數超過上限')
     if (req.body.name && req.body.name.trim().length > 50) throw new RangeError('暱稱字數超過上限')
@@ -10,6 +15,9 @@ const userController = {
     userServices.postUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
   signIn: (req, res, next) => {
+    // 帳號、密碼為登入必填項目
+    if (req.body.account === undefined || req.body.account.trim() === '') throw new Error('帳號為必填項目')
+    if (req.body.password === undefined || req.body.password.trim() === '') throw new Error('密碼為必填項目')
     // 在前台登入輸入管理員帳號(root)，則給錯誤：帳號不存在
     if (req.body.account === process.env.ADMIN_ACCOUNT) throw new Error('帳號不存在')
 
