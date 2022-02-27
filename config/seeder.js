@@ -17,10 +17,16 @@ const DEFAULT_TWEET_NUMBER = 10
 // 設定每篇推文要有的回覆數，每一篇回覆皆代表不同的使用者
 const DEFAULT_REPLIER_NUMBER = 3
 
+
+/* Like Seeder  */
+// 設定每篇推文要有的喜歡數，每一個喜歡皆代表不同的使用者
+const DEFAULT_LIKER_NUMBER = 3
+
 exports = module.exports = {
   DEFAULT_PASSWORD,
   BCRYPT_COMPLEXITY,
   DEFAULT_USER_NUMBER,
+  DEFAULT_LIKER_NUMBER,
   DEFAULT_TWEET_NUMBER,
-  DEFAULT_REPLIER_NUMBER
+  DEFAULT_REPLIER_NUMBER,
 }
