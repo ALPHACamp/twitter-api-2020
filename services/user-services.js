@@ -202,7 +202,7 @@ const userServices = {
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
-          followed: currentUserFollowing?.some(id => id === f.id)
+          followed: currentUserFollowing.some(id => id === f.id)
         }))
         return cb(null, data)
       })
@@ -229,7 +229,7 @@ const userServices = {
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
-          followed: currentUserFollowing?.some(id => id === f.id)
+          followed: currentUserFollowing.some(id => id === f.id)
         }))
         return cb(null, data)
       })
