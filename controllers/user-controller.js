@@ -248,10 +248,12 @@ const userController = {
 
       if (otherUser) return res.status(400).json({
         status: 'error',
-        message: 'account or email 已重覆'
+        message: 'account or email 已被使用'
       })
 
       delete req.body.checkPassword
+    
+      req.body.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
       const user = await User.findByPk(id)
       const updatedUser = await user.update(req.body)
 
