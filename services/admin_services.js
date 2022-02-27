@@ -67,6 +67,21 @@ const adminServices = {
         return cb(null, data)
       })
       .catch(err => cb(err))
+  },
+  deleteTweet: (req, cb) => {
+    return Tweet.destroy({
+      where: { id: req.params.tweetId },
+      raw: true,
+      nest: true
+    })
+      .then(tweet => {
+        if (!tweet) throw new Error(' Parameters 的資料錯誤，無法執行該操作')
+        return cb(null, {
+          status: 'success',
+          message: '操作成功'
+        })
+      })
+      .catch(err => cb(err))
   }
 }
 module.exports = adminServices
