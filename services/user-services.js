@@ -1,5 +1,5 @@
-const sequelize = require('sequelize')
-const Op = sequelize.Op
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
@@ -29,7 +29,7 @@ const userController = {
       const userData = {
         status: 'success',
         data: {
-          user: {
+          User: {
             id: newUser.id,
             account: newUser.account,
             name: newUser.name,
@@ -51,7 +51,7 @@ const userController = {
         status: 'success',
         data: {
           token,
-          user: userData
+          User: userData
         }
       }
       return cb(null, { tokenData })
@@ -65,19 +65,17 @@ const userController = {
         raw: true,
         nest: true
       })
-      const followers = await Followship.findAndCountAll({
-        raw: true,
+      const followers = await Followship.count({
         where: { FollowingId: req.params.id }
       })
-      const followings = await Followship.findAndCountAll({
-        raw: true,
+      const followings = await Followship.count({
         where: { FollowerId: req.params.id }
       })
       const userData = {
         status: 'success',
         ...user,
-        followersCount: followers.count,
-        followingsCount: followings.count
+        followersCount: followers,
+        followingsCount: followings
       }
       delete userData.password
       return cb(null, userData)
@@ -96,10 +94,31 @@ const userController = {
       })
       const tweets = await Tweet.findAll({
         where: { UserId: user.id },
-        attributes: ['id', 'UserId', 'description', 'createdAt', 'updatedAt'],
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt'
+        ],
         raw: true,
-        nest: true
+        nest: true,
+        order: [['createdAt', 'DESC']],
+        include: [User]
       })
+      for (const tweet of tweets) {
+        const [repliesResult, likesResult] = await Promise.all([
+          Reply.count({
+            where: { TweetId: tweet.id }
+          }),
+          Like.count({
+            where: { TweetId: tweet.id }
+          })
+        ])
+        tweet.repliesCount = repliesResult
+        tweet.likesCount = likesResult
+        delete tweet.User.password
+      }
       return cb(null, tweets)
     } catch (err) {
       return cb(err)
@@ -117,7 +136,13 @@ const userController = {
       const replies = await Reply.findAll({
         where: { UserId: user.id },
         attributes: ['id', 'UserId', 'TweetId', 'comment', 'createdAt', 'updatedAt'],
-        raw: true
+        include: [{ model: Tweet, include: [User] }],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      })
+      replies.forEach(e => {
+        delete e.Tweet.User.password
       })
       return cb(null, replies)
     } catch (err) {
@@ -169,7 +194,7 @@ const userController = {
       const userData = {
         status: 'success',
         data: {
-          user: {
+          User: {
             ...updatedData
           }
         }
@@ -183,12 +208,20 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [
-          { model: User, as: 'Followers' }
+          { model: User, as: 'Followers' },
+          { model: User, as: 'Followings' }
         ]
       })
       const followers = user.Followers.map(e => e.dataValues)
+      const followingsArr = user.Followings.map(e => e.dataValues.id)
       followers.forEach(e => {
+        if (followingsArr.includes(e.id)) {
+          e.isFollowing = true
+        } else {
+          e.isFollowing = false
+        }
         delete e.Followship
+        delete e.password
         e.followerId = e.id
       })
       return cb(null, followers)
@@ -200,11 +233,18 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [
-          { model: User, as: 'Followings' }
+          { model: User, as: 'Followings' },
+          { model: User, as: 'Followers' }
         ]
       })
       const followings = user.Followings.map(e => e.dataValues)
+      const followersArr = user.Followers.map(e => e.dataValues.id)
       followings.forEach(e => {
+        if (followersArr.includes(e.id)) {
+          e.isFollowed = true
+        } else {
+          e.isFollowed = false
+        }
         delete e.Followship
         e.followingId = e.id
       })
@@ -224,10 +264,24 @@ const userController = {
         raw: true,
         nest: true,
         where: { UserId: user.id },
-        include: [{
-          model: Tweet
-        }]
+        include: [
+          { model: Tweet },
+          { model: User }
+        ]
       })
+      for (const likedTweet of likedTweets) {
+        const TweetId = likedTweet.Tweet.id
+        const [repliesCount, likesCount] = await Promise.all([
+          Reply.count({ where: { TweetId } }),
+          Like.count({ where: { TweetId } })
+        ])
+        likedTweet.Tweet.repliesCount = repliesCount
+        likedTweet.Tweet.likesCount = likesCount
+        delete likedTweet.tweetId
+        delete likedTweet.userId
+        delete likedTweet.Tweet.userId
+        delete likedTweet.User.password
+      }
       return cb(null, likedTweets)
     } catch (err) {
       return cb(err)
