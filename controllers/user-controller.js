@@ -5,7 +5,11 @@ const { User, Followship, Tweet, sequelize } = require('../models')
 const jwtHelpers = require('../helpers/bearer-token-helper')
 const helper = require('../_helpers')
 const jwt = require('jsonwebtoken')
-const formDataCheckHelpers = require('../helpers/formdata-check-helper')
+const {
+  putUserCheck,
+  putUserSettingCheck,
+  postUsersFormDataCheck
+} = require('../helpers/formdata-check-helper')
 
 
 const BCRYPT_COMPLEXITY = 10
@@ -65,7 +69,7 @@ const userController = {
 
     try {
       const { name, account, email, password } = req.body
-      const message = await formDataCheckHelpers.postUsersFormDataCheck(req)
+      const message = await postUsersFormDataCheck(req)
 
       if (message) {
         return res
@@ -82,6 +86,8 @@ const userController = {
         avatar: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1644154630/github/defaultAvatar_uapauy.png",
         cover: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1645696452/github/defaultCover_uhyyds.jpg"
       })
+      const result = user.toJSON()
+      delete result.password
 
       return res
         .status(200)
@@ -188,18 +194,25 @@ const userController = {
   },
   putUserSetting: async (req, res, next) => {
     try {
+      const error = new Error()
       const id = Number(req.params.id)
       const currentId = helper.getUser(req).id
 
       if (id !== currentId) {
-        return res.json({
-          status: '400',
-          message: '只能修改自己的資料'
-        })
+        error.code = 400
+        error.message = '只能修改自己的資料'
+        return next(error)
+      }
+
+
+      if (!(await User.findByPk(id))) {
+        error.code = 404
+        error.message = '對應使用者找不到'
+        return next(error)
       }
 
       const { name, account, email, password } = req.body
-      const message = await formDataCheckHelpers.postUsersFormDataCheck(req)
+      const message = await putUserSettingCheck(req)
 
       if (message) {
         return res
@@ -207,16 +220,19 @@ const userController = {
           .json({ status: 'error', message, data: req.body })
       }
 
-      const user = await User.findByPk(id, {attributes: { exclude: ['password'] }})
-      await user.update({
+
+      await User.update({
         name,
         account,
         email,
         password: bcrypt.hashSync(password, BCRYPT_COMPLEXITY)
-      })
+      }, { where: { id } })
+
+      const result = { name, account, email }
+
       return res
         .status(200)
-        .json({ status: 'success', message: '修改成功', data: user.toJSON() })
+        .json({ status: 'success', message: '修改成功', data: result })
     } catch (error) {
       error.code = 500
       return next(error)
@@ -235,25 +251,21 @@ const userController = {
         error.message = '只能修改自己的資料'
         return next(error)
       }
-
-      const user = await User.findByPk(id, { attributes: { exclude: ['password'] } })
+      const user = await User.findByPk(id)
       if (!user) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
       }
-
+      const { files } = req
       const { name, introduction } = req.body
-      const message = await formDataCheckHelpers.putUserCheck(req)
+      const message = await putUserCheck(req)
       if (message) {
         return res
           .status(400)
           .json({ status: 'error', message, data: req.body })
       }
 
-
-
-      const { files } = req
       const avatar = files && files.avatar ?
         await imgurFileHandler(files.avatar[0]) :
         user.avatar
@@ -268,10 +280,17 @@ const userController = {
         avatar,
         cover
       })
+      const results = {
+        account: user.account,
+        name,
+        introduction,
+        avatar,
+        cover
+      }
 
       return res
         .status(200)
-        .json({ status: 'success', message: '修改成功', data: user.toJSON() })
+        .json({ status: 'success', message: '修改成功', data: results })
     } catch (error) {
       error.code = 500
       return next(error)
