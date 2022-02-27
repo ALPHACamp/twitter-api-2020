@@ -28,18 +28,15 @@ const likeController = {
           status: 'success',
           message: '成功加入喜歡的貼文!'
         })
-      }
-      if (like.isDeleted) {
-        const toggleLike = await like.update({
+      } else if (like.isDeleted) {
+        await like.update({
           isDeleted: !like.isDeleted
         })
-        if (toggleLike) {
-          return res.status(200).json({
-            status: 'success',
-            message: 'Like成功!'
-          })
-        }
-      } else {
+        return res.status(200).json({
+          status: 'success',
+          message: 'Like成功!'
+        })
+      } else if (!like.isDeleted) {
         return res
           .status(400)
           .json({
