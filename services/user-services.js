@@ -28,7 +28,8 @@ const userServices = {
       })
 
       .catch(err => cb(err))
-  }
+  },
+  getUser: (req, cb) => {}
 
 }
 
