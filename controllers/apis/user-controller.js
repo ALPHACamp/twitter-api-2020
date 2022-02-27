@@ -29,6 +29,9 @@ const userController = {
   },
   topFollowedUsers: async (req, res, next) => {
     userServices.topFollowedUsers(req, (err, data) => err ? next(err) : res.status(200).json(data))
+  },
+  getCurrentUser: async (req, res, next) => {
+    userServices.getCurrentUser(req, (err, data) => err ? next(err) : res.status(200).json(data))
   }
 }
 module.exports = userController

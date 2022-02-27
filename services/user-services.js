@@ -246,6 +246,7 @@ const userController = {
           e.isFollowed = false
         }
         delete e.Followship
+        delete e.password
         e.followingId = e.id
       })
       return cb(null, followings)
@@ -317,6 +318,24 @@ const userController = {
         delete user.password
       }
       return cb(null, users)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getCurrentUser: async (req, cb) => {
+    try {
+      console.log(req.user)
+      const currentUser = req.user
+      const currentUserData = {
+        status: 'success',
+        data: {
+          User: {
+            ...currentUser
+          }
+        }
+      }
+      delete currentUserData.data.User.password
+      return cb(null, currentUserData)
     } catch (err) {
       return cb(err)
     }
