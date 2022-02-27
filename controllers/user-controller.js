@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { User, Tweet, Like, Reply } = require('../models')
-const { Op } = require("sequelize");
+const Sequelize = require('sequelize')
+const { Op } = Sequelize;
 
 
 module.exports = {
@@ -203,6 +204,89 @@ module.exports = {
         delete reply.repliedTweet.User
 
         return reply
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const { UserId } = req.params
+
+      const user = await User.findByPk(UserId, {
+        include: [{
+          model: User, as: 'Followings',
+          attributes: {
+            include: [['id', 'followingId']],
+            exclude: ['password']
+          },
+          order: [['createdAt', 'DESC']]
+        }],
+        nest: true
+      })
+
+      if (!user) throw new Error('使用者不存在！')
+
+      // reassemble followers array
+      const responseData = user.Followings.map(following => {
+        following = following.toJSON()
+
+        delete following.Followship
+
+        return {
+          ...following,
+          isFollowed: true
+        }
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const { UserId } = req.params
+
+      const user = await User.findByPk(UserId, {
+        include: [{
+          // find my follower
+          model: User, as: 'Followers',
+          // I follow my follower
+          include: [{
+            model: User, as: 'Followers', where: { id: UserId },
+            // If not, don't delete all data
+            required: false,
+          }],
+          attributes: {
+            include: [['id', 'followerId']],
+            exclude: ['password']
+          },
+          order: [['createdAt', 'DESC']]
+        }],
+        nest: true
+      })
+
+      if (!user) throw new Error('使用者不存在！')
+
+      // reassemble followers array
+      const responseData = user.Followers.map(follower => {
+        follower = follower.toJSON()
+
+        // If length > 0 , I follow my follower
+        const isFollowed = Boolean(follower.Followers.length)
+
+        delete follower.Followers
+        delete follower.Followship
+
+        return {
+          ...follower,
+          isFollowed
+        }
       })
 
       return res.status(200).json(responseData)
