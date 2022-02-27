@@ -9,7 +9,7 @@ const userController = require('../../controllers/apis/user-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 
-router.use('/admin', authenticated, authenticatedAdmin, admin)
+router.use('/admin', admin)
 router.use('/users', user)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.use('/tweets', tweet)
