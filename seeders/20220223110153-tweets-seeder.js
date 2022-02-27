@@ -1,7 +1,7 @@
 'use strict'
 
-const bcrypt = require('bcryptjs')
 const faker = require('faker')
+const { DEFAULT_TWEET_NUMBER } = require('../config/seeder')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -15,7 +15,7 @@ module.exports = {
         isBetaMember: false
       }], {});
     */
-    const DEFAULT_TWEET_NUMBER = 10
+
     // 獲取現存資料庫使用者(不含管理員)
     const seedUsers = (await queryInterface.sequelize.query(
       'SELECT `id` FROM `Users` WHERE role = "user"', {
