@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Followships'
   });
   Followship.associate = function(models) {
+    
   };
   return Followship;
 };
