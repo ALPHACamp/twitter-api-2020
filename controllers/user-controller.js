@@ -2,7 +2,9 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { User, Tweet, Like, Reply } = require('../models')
-const { Op } = require("sequelize");
+const Sequelize = require('sequelize')
+const { DATE } = require('sequelize')
+const { Op } = Sequelize;
 
 
 module.exports = {
@@ -241,6 +243,111 @@ module.exports = {
         delete reply.repliedTweet.User
 
         return reply
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const selfUserId = helpers.getUser(req).id
+      const { UserId } = req.params
+
+      const user = await User.findByPk(UserId, {
+        include: [{
+          // find this following
+          model: User, as: 'Followings',
+          // I follow this follower
+          include: [{
+            model: User, as: 'Followers', where: { id: selfUserId },
+            // If not, don't delete all data
+            required: false,
+          }],
+          attributes: {
+            include: [['id', 'followingId']],
+            exclude: ['password']
+          }
+        }],
+        nest: true
+      })
+
+      if (!user) throw new Error('使用者不存在！')
+
+      // newer on the top 
+      let sortedFollowings = user.Followings.sort((a, b) => {
+        return b.Followship.createdAt - a.Followship.createdAt
+      })
+
+      // reassemble followers array
+      const responseData = sortedFollowings.map(following => {
+        following = following.toJSON()
+
+        // If length > 0 , I follow this follower
+        const isFollowed = Boolean(following.Followers.length)
+
+        delete following.Followers
+        delete following.Followship
+
+        return {
+          ...following,
+          isFollowed
+        }
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const selfUserId = helpers.getUser(req).id
+      const { UserId } = req.params
+
+      const user = await User.findByPk(UserId, {
+        include: [{
+          // find this follower
+          model: User, as: 'Followers',
+          // I follow this follower
+          include: [{
+            model: User, as: 'Followers', where: { id: selfUserId },
+            // If not, don't delete all data
+            required: false,
+          }],
+          attributes: {
+            include: [['id', 'followerId']],
+            exclude: ['password']
+          }
+        }],
+        nest: true
+      })
+
+      if (!user) throw new Error('使用者不存在！')
+
+
+      // newer on the top 
+      let sortedFollowers = user.Followers.sort((a, b) => {
+        return b.Followship.createdAt - a.Followship.createdAt
+      })
+
+      // reassemble followers array
+      let responseData = sortedFollowers.map(follower => {
+        follower = follower.toJSON()
+
+        // If length > 0 , I follow this follower
+        const isFollowed = Boolean(follower.Followers.length)
+
+        delete follower.Followers
+        delete follower.Followship
+
+        return {
+          ...follower,
+          isFollowed
+        }
       })
 
       return res.status(200).json(responseData)
