@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../../_helpers')
 const sequelize = require('sequelize')
 const { User, Like, Tweet, Reply } = require('../../models')
+const appFunc = require('../../services/appFunctions')
 const TOKEN_EXPIRES = process.env.TOKEN_EXPIRES || '30m'
 
 const adminController = {
@@ -35,16 +36,17 @@ const adminController = {
           'avatar',
           'cover',
           // all tweets num
-          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetNum'],
-
-          // all follower num
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followerNum'],
-
-          // all following num
-          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'followingNum'],
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
 
           // all likes get from tweets
-          [sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'), 'likeNum']
+          [sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'), 'likeCount'],
+
+          // all following num
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)'), 'following'],
+
+          // all follower num
+          [sequelize.literal('(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)'), 'followers']
+
         ],
         raw: true
       })
@@ -54,10 +56,11 @@ const adminController = {
         return res.status(200).json(users)
       } else {
         const usersSorted = users.sort((a, b) => b.tweetNum - a.tweetNum)
+        const resUsers = appFunc.numToUnitHandler(usersSorted)
         return res.json({
           status: 'success',
           data: {
-            users: usersSorted
+            users: resUsers
           }
         })
       }

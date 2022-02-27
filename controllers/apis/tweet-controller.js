@@ -7,6 +7,7 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     const { description } = req.body
     try {
+      if (!description) throw new Error('推文不可為空白！')
       if (description.length > 140) throw new Error('推文字數不可大於140字！')
       const tweet = await Tweet.create({
         UserId: helpers.getUser(req).id,

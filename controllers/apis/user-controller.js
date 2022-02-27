@@ -73,16 +73,17 @@ const userController = {
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(user)
       } else {
+        const resUser = appFunc.numToUnitHandler({
+          ...user,
+          isFollowing,
+          following: following.count,
+          followers: followers.count,
+          isUser
+        })
         res.json({
           status: 'success',
           data: {
-            user: {
-              ...user,
-              isFollowing,
-              following: following.count,
-              followers: followers.count,
-              isUser
-            }
+            user: resUser
           }
         })
       }
@@ -107,11 +108,11 @@ const userController = {
         ],
         limit
       })
+      followList.sort((a, b) => b.followers - a.followers)
       const reUsers = await Promise.all(followList.map(async user => {
         user.isFollowing = await appFunc.getUserIsFollowing(userId, user.id)
-        return user
+        return appFunc.numToUnitHandler(user)
       }))
-      reUsers.sort((a, b) => b.followers - a.followers)
       res.json({
         status: 'success',
         data: {
