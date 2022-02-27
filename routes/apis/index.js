@@ -35,6 +35,8 @@ router.post('/users', userController.signUp)
 
 router.get('/tweets/:tweet_id/replies', authenticated, tweetController.getReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, replyController.postReply)
+router.put('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.putReply)
+router.delete('/tweets/:tweet_id/replies/:reply_id', authenticated, replyController.deleteReply)
 router.post('/tweets/:tweet_id/like', authenticated, tweetController.addLike)
 router.post('/tweets/:tweet_id/unlike', authenticated, tweetController.removeLike)
 router.get('/tweets/:tweet_id', authenticated, tweetController.getTweet)
