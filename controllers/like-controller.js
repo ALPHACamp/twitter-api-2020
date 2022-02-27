@@ -3,7 +3,9 @@ const likeController = {
   getUserLikes: async(req, res, next) => {
   try {
     const user = await User.findByPk(req.params.id)
-    const like = await Like.findByPk(req.params.id)
+    const like = await Like.findAll({
+      where: { UserId: req.params.id }
+    })
     if (!user) {
       return res
         .status(404)
@@ -26,7 +28,18 @@ const likeController = {
         isDeleted: false
       },
       order: [['createdAt', 'desc']],
-      include: [Tweet, User]
+      include: [
+        {
+          model: Tweet,
+          attributes: ['description'],
+          include: [
+            {
+              model: User,
+              attributes: ['name','account']
+            }
+          ]
+        }
+      ]
     })
     if (likes.length ==0) {
       return res
