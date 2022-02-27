@@ -277,12 +277,35 @@ const userController = {
         ])
         likedTweet.Tweet.repliesCount = repliesCount
         likedTweet.Tweet.likesCount = likesCount
-        delete likedTweet.tweetId
-        delete likedTweet.userId
-        delete likedTweet.Tweet.userId
         delete likedTweet.User.password
       }
       return cb(null, likedTweets)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  topFollowedUsers: async (req, cb) => {
+    try {
+      const users = await User.findAll({
+        raw: true,
+        nest: true,
+        include: [{ model: User, as: 'Followers', duplicating: false }],
+        attributes: {
+          include: [
+            [Sequelize.fn('COUNT', Sequelize.col('Followers.id')), 'followedCount']
+          ]
+        },
+        group: ['User.id'],
+        order: [
+          [Sequelize.fn('COUNT', Sequelize.col('Followers.id')), 'DESC']
+        ],
+        limit: 10
+      })
+      for (const user of users) {
+        delete user.Followers
+        delete user.password
+      }
+      return cb(null, users)
     } catch (err) {
       return cb(err)
     }
