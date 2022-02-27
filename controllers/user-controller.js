@@ -207,7 +207,7 @@ const userController = {
           .json({ status: 'error', message, data: req.body })
       }
 
-      const user = await User.findByPk(id)
+      const user = await User.findByPk(id, {attributes: { exclude: ['password'] }})
       await user.update({
         name,
         account,
