@@ -12,7 +12,7 @@ module.exports = {
     Array.from({ length: users.length * 10 }).map((_, i) =>
           ({
             UserId: users[Math.floor(i/10)].id,
-            description: faker.lorem.text(),
+      description: faker.lorem.text().substring(0, 140),
             createdAt: new Date(),
             updatedAt: new Date()
           })
