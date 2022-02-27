@@ -246,6 +246,7 @@ const userController = {
           e.isFollowed = false
         }
         delete e.Followship
+        delete e.password
         e.followingId = e.id
       })
       return cb(null, followings)
@@ -289,7 +290,11 @@ const userController = {
       const users = await User.findAll({
         raw: true,
         nest: true,
-        include: [{ model: User, as: 'Followers', duplicating: false }],
+        include: [
+          { model: User, as: 'Followers', duplicating: false },
+          { model: User, as: 'Followings', duplicating: false }
+        ],
+        where: { [Op.not]: { id: req.user.id } },
         attributes: {
           include: [
             [Sequelize.fn('COUNT', Sequelize.col('Followers.id')), 'followedCount']
@@ -301,11 +306,36 @@ const userController = {
         ],
         limit: 10
       })
+      const followingsArr = req.user.Followings.map(e => e.dataValues.id)
       for (const user of users) {
+        if (followingsArr.includes(user.id)) {
+          user.isFollowing = true
+        } else {
+          user.isFollowing = false
+        }
         delete user.Followers
+        delete user.Followings
         delete user.password
       }
       return cb(null, users)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getCurrentUser: async (req, cb) => {
+    try {
+      console.log(req.user)
+      const currentUser = req.user
+      const currentUserData = {
+        status: 'success',
+        data: {
+          User: {
+            ...currentUser
+          }
+        }
+      }
+      delete currentUserData.data.User.password
+      return cb(null, currentUserData)
     } catch (err) {
       return cb(err)
     }
