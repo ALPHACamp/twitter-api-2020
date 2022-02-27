@@ -286,7 +286,6 @@ const userServices = {
   },
   putUserProfile: (req, cb) => {
     const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
-    console.log(fileHandler)
     return User.findByPk(req.params.id)
       .then(user => {
         const { files } = req

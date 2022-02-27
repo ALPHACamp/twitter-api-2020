@@ -69,7 +69,7 @@ const adminServices = {
   },
   deleteTweet: (req, cb) => {
     return Tweet.destroy({
-      where: { id: req.params.tweetId },
+      where: { id: req.params.id },
       raw: true,
       nest: true
     })
