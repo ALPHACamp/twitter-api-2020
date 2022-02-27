@@ -166,7 +166,7 @@ const userServices = {
         const data = replies.map(r => ({
           id: r.id,
           comment: r.comment,
-          replierData: {
+          replyerData: {
             id: r.User.id,
             account: r.User.account,
             name: r.User.name,
@@ -286,7 +286,6 @@ const userServices = {
   },
   putUserProfile: (req, cb) => {
     const fileHandler = process.env.NODE_ENV !== 'production' ? localFileHandler : imgurFileHandler
-    console.log(fileHandler)
     return User.findByPk(req.params.id)
       .then(user => {
         const { files } = req
