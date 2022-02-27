@@ -25,7 +25,7 @@ const replyController = {
           UserId: req.params.id
         },
         order: [['createdAt', 'desc']],
-        include: [Tweet]
+        include: [Tweet, User]
       })
       if (replies.length == 0) {
         return res
@@ -43,32 +43,40 @@ const replyController = {
       })
     }
   },
-  getTweetReplies: (req, res) => {
-    return Reply.findAll({
-      where: {
-        TweetId: req.params.id
-      },
-      order: [['createdAt', 'desc']],
-    })
-      .then(replies => {
-        if (replies.length ===0) {
-          return res.status(404).json({
-            status: 'error',
-            message: '這篇推文沒有回覆哦',
-          })
-        } else {
-          return res.status(200).json({
-            status: 'success',
-            message: '成功找到回覆',
-            Reply: replies
-          })
-        }
+  getTweetReplies: async (req, res) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) {
+        return res.status(404).json({
+          status: 'error',
+          message: '這篇推文不存在',
+        })
+      }
+      const replies =  await Reply.findAll({
+        where: {
+          TweetId: req.params.id
+        },
+        order: [['createdAt', 'desc']],
       })
-      .catch((error) => res.status(500).json({
+      if (!replies) {
+        return res.status(404).json({
+        status: 'error',
+        message: '這篇推文沒有回覆',
+        })
+      } else {
+        return res.status(200).json({
+          status: 'success',
+          message: '成功找到回覆',
+          Reply: replies
+        })
+      }
+    } catch (error) {
+      res.status(500).json({
         status: 'error',
         message: error
-      }))
-  },
+      })
+    }
+},
   postTweetReplies: (req, res) => {
     const { TweetId, comment } = req.body
     const UserId = req.user.id
@@ -117,7 +125,7 @@ const replyController = {
       })
       .then(reply => {
         return res.status(200).json({
-          status: '200',
+          status: 'success',
           message: '成功新增回覆',
           Reply: reply
         })})
