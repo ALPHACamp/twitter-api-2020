@@ -225,14 +225,22 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
+      const error = new Error()
       const id = Number(req.params.id)
       const currentId = helper.getUser(req).id
 
+
       if (id !== currentId) {
-        return res.json({
-          status: '400',
-          message: '只能修改自己的資料'
-        })
+        error.code = 400
+        error.message = '只能修改自己的資料'
+        return next(error)
+      }
+
+      const user = await User.findByPk(id, { attributes: { exclude: ['password'] } })
+      if (!user) {
+        error.code = 404
+        error.message = '對應使用者不存在'
+        return next(error)
       }
 
       const { name, introduction } = req.body
@@ -244,36 +252,47 @@ const userController = {
       }
 
 
-      const avatar = req?.files?.avatar
-      const cover = req?.files?.cover
-      
+      const { files } = req
+      const avatar = files && files.avatar ?
+        await imgurFileHand(files.avatar[0]) :
+        user.avatar
 
-      const user = await User.findByPk(id, {attributes: { exclude: ['password'] }})
-      if (!avatar && !cover) {
-        await user.update({
-          name,
-          introduction
-        })
-      } else if (!avatar && cover) {
-        await user.update({
-          name,
-          introduction,
-          cover: await imgurFileHandler(cover[0])
-        })
-      } else if (avatar && !cover) {
-        await user.update({
-          name,
-          introduction,
-          avatar: await imgurFileHandler(avatar[0])
-        })
-      } else if (avatar && cover) {
-        await user.update({
-          name,
-          introduction,
-          avatar: await imgurFileHandler(avatar[0]),
-          cover: await imgurFileHandler(cover[0])
-        })
-      }
+      const cover = files && files.cover ?
+        await imgurFileHand(files.cover[0]) :
+        user.cover
+
+      await user.update({
+        name,
+        introduction,
+        avatar,
+        cover
+      })
+
+      // if (!avatar && !cover) {
+      //   await user.update({
+      //     name,
+      //     introduction
+      //   })
+      // } else if (!avatar && cover) {
+      //   await user.update({
+      //     name,
+      //     introduction,
+      //     cover: await imgurFileHandler(cover[0])
+      //   })
+      // } else if (avatar && !cover) {
+      //   await user.update({
+      //     name,
+      //     introduction,
+      //     avatar: await imgurFileHandler(avatar[0])
+      //   })
+      // } else if (avatar && cover) {
+      //   await user.update({
+      //     name,
+      //     introduction,
+      //     avatar: await imgurFileHandler(avatar[0]),
+      //     cover: await imgurFileHandler(cover[0])
+      //   })
+      // }
       return res
         .status(200)
         .json({ status: 'success', message: '修改成功', data: user.toJSON() })
