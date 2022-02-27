@@ -11,6 +11,7 @@ const tweetController = {
         { model: Like },
         { model: User }
       ],
+      attributes: [ ['id', 'tweetId'], 'UserId', 'description', 'image' ]
     })
       .then(tweets => {
         const tweetsArray = tweets
@@ -20,6 +21,7 @@ const tweetController = {
 
         tweetsArray
           .forEach(tweet => {
+            tweetId = tweet.id
             tweet.name = tweet.User.name
             tweet.account = tweet.User.account
             tweet.isLiked = tweet.Likes.some(like => like.UserId === reqUserId)
@@ -43,18 +45,18 @@ const tweetController = {
         { model: Reply, include: { model: User } },
         { model: Like },
         { model: User }
-      ],
+      ]
     })
       .then(tweet => {
         if (!tweet) throw new Error('Tweet not exist!')
 
         const result = tweet.toJSON()
-
         result.Replies
           .forEach(reply => {
             reply.replyId = reply.id
             reply.name = reply.User.name
             reply.account = reply.User.account
+            reply.avatar = reply.User.avatar
             delete reply.id
             delete reply.TweetId
             delete reply.userId
@@ -64,6 +66,7 @@ const tweetController = {
         result.tweetId = result.id
         result.name = result.User.name
         result.account = result.User.account
+        result.avatar = result.User.avatar
         result.isLiked = result.Likes.some(like => like.UserId === reqUserId)
         result.LikesCount = result.Likes.length
         result.RepliesCount = result.Replies.length
