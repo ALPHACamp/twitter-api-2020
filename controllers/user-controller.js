@@ -227,9 +227,37 @@ const userController = {
   },
   getUserFollowings: async (req, res, next) => {
     try {
-      
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '使用者不存在'
+          })
+      }
+      const followings = await Followship.findAll({
+        where: {
+          followerId: req.params.id
+        },
+        //attributes:['followingId']
+      })
+      if (!followings) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: '此使用者沒有追蹤任何人'
+          })
+      } else {
+        console.log(followings.followingId)
+        return res.status(200).json(followings)
+      }
     } catch (error) {
-      
+      res.status(500).json({
+        status: 'error',
+        message: error
+      })
     }
   },
   getUserFollowers: async (req, res, next) => {
