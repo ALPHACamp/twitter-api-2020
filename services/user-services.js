@@ -69,7 +69,7 @@ const userServices = {
         include: { model: Tweet, attributes: [] },
         attributes: {
           include: [
-            [sequelize.fn('COUNT', sequelize.col('tweets.id')), 'tweetAmount']
+            [sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetAmount']
           ]
         }
       }),
@@ -258,7 +258,7 @@ const userServices = {
             [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
           ]
         },
-        group: ['like.id'],
+        group: ['id'],
         order: [['createdAt', 'DESC']],
         raw: true,
         nest: true
