@@ -26,7 +26,7 @@ const likeController = {
         isDeleted: false
       },
       order: [['createdAt', 'desc']],
-      include: [Tweet]
+      include: [Tweet, User]
     })
     if (likes.length ==0) {
       return res
