@@ -197,7 +197,8 @@ const userController = {
       const { id } = req.params
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
-        raw: true
+        raw: true,
+        include: [User]
       })
       if (tweetsData.length === 0) return res.status(400).json({
         status: 'error',
