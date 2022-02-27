@@ -2,6 +2,11 @@
 
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
+const {
+  DEFAULT_PASSWORD,
+  BCRYPT_COMPLEXITY,
+  DEFAULT_USER_NUMBER
+} = require('../config/seeder')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -15,8 +20,7 @@ module.exports = {
         isBetaMember: false
       }], {});
     */
-    const DEFAULT_PASSWORD = '12345678'
-    const BCRYPT_COMPLEXITY = 10
+
 
     const seederArray = []
 
@@ -40,7 +44,7 @@ module.exports = {
 
     // add a set of users
 
-    const userArray = Array.from({ length: 5 }, (_, index) => {
+    const userArray = Array.from({ length: DEFAULT_USER_NUMBER }, (_, index) => {
       return {
         name: `user${index + 1}`,
         account: `user${index + 1}`,
