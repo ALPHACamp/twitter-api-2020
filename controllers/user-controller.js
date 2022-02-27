@@ -177,11 +177,6 @@ const userController = {
   getUserReplies: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      // const replies = await Reply.findAll({
-      //   where: {
-      //     UserId: req.params.id
-      //   }
-      // })
       if (!user) {
         return res
           .status(404)
@@ -190,14 +185,6 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      // if (!replies) {
-      //   return res
-      //     .status(400)
-      //     .json({
-      //       status: 'error',
-      //       message: '使用者沒有回覆過的推文'
-      //     })
-      // }
       const replies = await Reply.findAll({
         where: {
           UserId: req.params.id
