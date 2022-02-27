@@ -255,11 +255,11 @@ const userController = {
 
       const { files } = req
       const avatar = files && files.avatar ?
-        await imgurFileHand(files.avatar[0]) :
+        await imgurFileHandler(files.avatar[0]) :
         user.avatar
 
       const cover = files && files.cover ?
-        await imgurFileHand(files.cover[0]) :
+        await imgurFileHandler(files.cover[0]) :
         user.cover
 
       await user.update({
