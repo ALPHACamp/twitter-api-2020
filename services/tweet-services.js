@@ -128,7 +128,7 @@ const tweetServices = {
               name: i.User.name,
               avatar: i.User.avatar
             },
-            TweetId: i.TweetId,
+            tweetId: i.TweetId,
             tweetOwerId: i.Tweet.User.id,
             tweetOwerAccount: i.Tweet.User.account,
             createdAt: i.createdAt
