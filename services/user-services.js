@@ -202,7 +202,7 @@ const userServices = {
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
-          followed: currentUserFollowing?.some(id => id === f.id)
+          followed: currentUserFollowing.some(id => id === f.id)
         }))
         return cb(null, data)
       })
@@ -229,7 +229,7 @@ const userServices = {
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
-          followed: currentUserFollowing?.some(id => id === f.id)
+          followed: currentUserFollowing.some(id => id === f.id)
         }))
         return cb(null, data)
       })
@@ -310,11 +310,14 @@ const userServices = {
           })
         }
       })
-      .then(updatedUser => cb(null, {
-        status: 'success',
-        message: '操作成功',
-        updatedUser
-      }))
+      .then(updatedUser => {
+        delete updatedUser.dataValues.password
+        cb(null, {
+          status: 'success',
+          message: '操作成功',
+          updatedUser
+        })
+      })
       .catch(err => cb(err))
   },
   putUserAccount: (req, cb) => {
@@ -343,11 +346,14 @@ const userServices = {
           password: bcrypt.hashSync(req.body.password, 10)
         })
       })
-      .then(updatedUser => cb(null, {
-        status: 'success',
-        message: '操作成功',
-        updatedUser
-      }))
+      .then(updatedUser => {
+        delete updatedUser.dataValues.password
+        cb(null, {
+          status: 'success',
+          message: '操作成功',
+          updatedUser
+        })
+      })
       .catch(err => cb(err))
   }
 }
