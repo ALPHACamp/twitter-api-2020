@@ -20,6 +20,29 @@ const tweetServices = {
 
     return tweets
   },
+  postTweet: async (user, description) => {
+    // user need to be extract from helper in order to meet the test,
+    // otherwise it will show timeout exceed 2000 ms.
+    if (!description) throw new Error('Tweet description is required.')
+
+    // Block description which is empty string
+    if (description.trim() === '') throw new Error('Tweet cannot be empty.')
+
+    // Block description which't exceed 140 words.
+    if (description.length > 140)
+      throw new Error('Tweet content must not exceed 140 words.')
+
+    const tweet = await Tweet.create({
+      UserId: user.id,
+      description
+    })
+
+    return {
+      status: 'success',
+      message: 'New tweet posted.',
+      tweet
+    }
+  },
   likeTweet: async (tweetId, userId) => {
     const tweet = await Tweet.findByPk(tweetId)
     if (!tweet) throw new Error("This Tweet didn't exist!")
