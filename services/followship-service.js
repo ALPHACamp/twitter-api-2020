@@ -1,4 +1,5 @@
 const { Followship, User } = require('../models')
+const { getUser } = require('../_helpers')
 const sequelize = require('sequelize')
 
 const followshipServices = {
@@ -9,7 +10,7 @@ const followshipServices = {
         if (user.dataValues.role === 'admin') throw new Error('不可追蹤管理者')
         Followship.findOrCreate({
           where: {
-            followerId: req.user.dataValues.id,
+            followerId: getUser(req).dataValues.id,
             followingId: req.body.id
           }
         })
@@ -24,7 +25,7 @@ const followshipServices = {
   deleteFollowship: (req, cb) => {
     Followship.findOne({
       where: {
-        followerId: req.user.dataValues.id,
+        followerId: getUser(req).dataValues.id,
         followingId: req.params.id
       }
     })
@@ -51,7 +52,6 @@ const followshipServices = {
       }],
       order: [[sequelize.col('totalFollowers'), 'DESC']],
       subQuery: false, // 避免因查詢多張表造成limit失常
-      having: { totalFollowers: { [sequelize.Op.gt]: 0 } }, // 只要粉絲大於0的人
       limit: 10
     })
       .then(user => {
