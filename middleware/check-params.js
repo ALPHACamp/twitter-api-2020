@@ -5,7 +5,8 @@ const paramsChecker = (req, res, next) => {
   return next()
 }
 const adminChecker = (req, res, next) => {
-  return User.findByPk(req.params.id, {
+  const currentUserId = req.params.id || req.user.dataValues.id
+  return User.findByPk(currentUserId, {
     raw: true,
     nest: true
   })
