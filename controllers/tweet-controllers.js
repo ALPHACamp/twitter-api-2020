@@ -30,27 +30,9 @@ const tweetController = {
 
   // Get specific tweet include user and replies data
   getTweet: async (req, res, next) => {
+    const tweetId = req.params.tweet_id
     try {
-      const tweetId = req.params.tweet_id
-      let tweet = await Tweet.findByPk(tweetId, {
-        include: [
-          { model: User, attributes: ['name', 'account', 'avatar'] },
-          {
-            model: Reply,
-            include: [
-              { model: User, attributes: ['name', 'account', 'avatar'] }
-            ]
-          }
-        ]
-      })
-
-      // Clean data
-      const userLikes = await getLikedTweetsIds(req)
-
-      tweet = {
-        ...tweet.dataValues,
-        isLiked: userLikes.includes(tweet.id)
-      }
+      const tweet = await tweetServices.getTweet(tweetId, req)
 
       return res.status(200).json(tweet)
     } catch (error) {

@@ -1,4 +1,4 @@
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const { getLikedTweetsIds } = require('../helpers/user')
 
 const tweetServices = {
@@ -42,6 +42,29 @@ const tweetServices = {
       message: 'New tweet posted.',
       tweet
     }
+  },
+  getTweet: async (tweetId, req) => {
+    let tweet = await Tweet.findByPk(tweetId, {
+      include: [
+        { model: User, attributes: ['name', 'account', 'avatar'] },
+        {
+          model: Reply,
+          include: [
+            { model: User, attributes: ['name', 'account', 'avatar'] }
+          ]
+        }
+      ]
+    })
+
+    // Clean data
+    const userLikes = await getLikedTweetsIds(req)
+
+    tweet = {
+      ...tweet.dataValues,
+      isLiked: userLikes.includes(tweet.id)
+    }
+
+    return tweet
   },
   likeTweet: async (tweetId, userId) => {
     const tweet = await Tweet.findByPk(tweetId)
