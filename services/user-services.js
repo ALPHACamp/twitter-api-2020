@@ -99,7 +99,7 @@ const userServices = {
           tweetAmount: user.tweetAmount
         }
         // 如果是從get users/:id 路由進來，需要多回傳當前使用者是否有追蹤特定使用者
-        if (req.params.id) data.followed = followMe?.some(f => f.followerId === getUser(req).dataValues.id)
+        if (req.params.id) data.followed = followMe.some(f => f.followerId === getUser(req).dataValues.id)
         return cb(null, data)
       })
       .catch(err => cb(err))
