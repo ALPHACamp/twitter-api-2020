@@ -210,6 +210,9 @@ const userController = {
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
+        ],
+        order: [
+          ['Followers', Followship, 'createdAt', 'DESC']
         ]
       })
       const followers = user.Followers.map(e => e.dataValues)
@@ -235,6 +238,9 @@ const userController = {
         include: [
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
+        ],
+        order: [
+          ['Followings', Followship, 'createdAt', 'DESC']
         ]
       })
       const followings = user.Followings.map(e => e.dataValues)
