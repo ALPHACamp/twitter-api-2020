@@ -24,6 +24,7 @@ router.delete('/followships/:followingId', authenticated, authenticatedUser, fol
 router.post('/followships', authenticated, authenticatedUser, followController.postFollowing)
 
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.get('/users/current', authenticated, authenticatedUser, userController.getCurrentUser)
 router.get('/users/popular', authenticated, authenticatedUser, userController.getPopularUsers)
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getTweets)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getReplies)

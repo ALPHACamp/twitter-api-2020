@@ -402,6 +402,23 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const userId = Number(helpers.getUser(req).id)
+      const user = await User.findById(userId, {
+        raw: true,
+        attributes: ['id', 'name', 'account', 'avatar']
+      })
+      res.json({
+        status: 'success',
+        data: {
+          user
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
