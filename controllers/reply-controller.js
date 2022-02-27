@@ -1,6 +1,6 @@
 const { Reply, Tweet, User } = require('../models')
 const replyController = {
-  getTweetReplies: async (req, res) => {
+  getReplies: async (req, res) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
       if (!tweet) {
@@ -34,7 +34,7 @@ const replyController = {
       })
     }
 },
-  postTweetReplies: (req, res) => {
+  postReplies: (req, res) => {
     const { TweetId, comment } = req.body
     const UserId = req.user.id
     if (!comment) {

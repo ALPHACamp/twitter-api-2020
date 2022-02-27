@@ -152,7 +152,7 @@ const userController = {
             include: [
               {
                 model: User,
-                attributes: ['name', 'account']
+                attributes: ['name', 'account','avatar']
               }
             ]
           }
@@ -223,6 +223,20 @@ const userController = {
         status: 'error',
         message: error
       })
+    }
+  },
+  getUserFollowings: async (req, res, next) => {
+    try {
+      
+    } catch (error) {
+      
+    }
+  },
+  getUserFollowers: async (req, res, next) => {
+    try {
+
+    } catch (error) {
+
     }
   },
   putUser: async (req, res, next) => {

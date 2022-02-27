@@ -8,6 +8,8 @@ const replyController = require('../../controllers/reply-controller')
 router.get('/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/:id/likes', authenticated, userController.getUserLikes)
 router.get('/:id/replies', authenticated, userController.getUserReplies)
+router.get('/:id/followings', authenticated, userController.getUserFollowings)
+router.get('/:id/followers', authenticated, userController.getUserFollowers)
 router.get('/:id', authenticated, userController.getUser)
 router.post('/:id', authenticated, userController.putUser)
 

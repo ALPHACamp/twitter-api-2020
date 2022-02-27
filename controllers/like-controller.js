@@ -1,6 +1,6 @@
 const { Like, User, Tweet } = require('../models')
 const likeController = {
-  postTweetLike: async (req, res, next) => {
+  postLike: async (req, res, next) => {
     try {
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
@@ -51,7 +51,7 @@ const likeController = {
       })
     }
   },
-  postTweetUnlike: async (req, res, next) => {
+  postUnlike: async (req, res, next) => {
     try {
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
