@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const { Op } = require("sequelize");
 
 
@@ -170,6 +170,39 @@ module.exports = {
         include: [{ model: Tweet }],
         order: [['createdAt', 'DESC']],
         nest: true
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const { UserId } = req.params
+      const replies = await Reply.findAll({
+        where: { UserId },
+        include: [{
+          model: Tweet,
+          include: [{ model: User, attributes: { exclude: ['password'] } }]
+        }],
+        order: [['createdAt', 'DESC']],
+        nest: true
+      })
+
+      const responseData = replies.map(reply => {
+        reply = reply.toJSON()
+
+        // assign following two objects to reply
+        reply.repliedTweet = reply.Tweet
+        reply.repliedTweet.tweetedUser = reply.Tweet.User
+
+        // remove unnecessary key properties
+        delete reply.Tweet
+        delete reply.repliedTweet.User
+
+        return reply
       })
 
       return res.status(200).json(responseData)
