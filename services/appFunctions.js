@@ -4,7 +4,7 @@ module.exports = {
   resTweetHandler: async function (userId, tweet) {
     const resTweet = await this.getTweetIsLiked(userId, tweet)
     resTweet.likeCount = await this.getTweetLikedCount(tweet)
-    return resTweet
+    return this.numToUnitHandler(resTweet)
   },
   getTweetIsLiked: async function (userId, tweet) {
     const userLiked = await Like.findOne({
@@ -38,5 +38,31 @@ module.exports = {
       return reply
     })
     return replies
+  },
+  numToUnitHandler: function (items) {
+    const checkList = ['tweetCount', 'likeCount', 'replyCount', 'following', 'followers']
+    if (Array.isArray(items)) {
+      items.forEach(item => {
+        numToUnit(item, checkList)
+      })
+    } else {
+      numToUnit(items, checkList)
+    }
+    return items
+    function numToUnit (item, checkList) {
+      checkList.forEach(key => {
+        if (item[key]) {
+          item[key] = cutNumber(item[key], 1000, 'k', 1)
+        }
+      })
+      return item
+    }
+    function cutNumber (num, unitAmount, unit, decimal) {
+      if (num > unitAmount) {
+        const newNum = Math.round(num / (unitAmount / Math.pow(10, decimal))) / Math.pow(10, decimal)
+        return `${newNum}${unit}`
+      }
+      return num
+    }
   }
 }

@@ -7,6 +7,7 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     const { description } = req.body
     try {
+      if (!description) throw new Error('推文不可為空白！')
       if (description.length > 140) throw new Error('推文字數不可大於140字！')
       const tweet = await Tweet.create({
         UserId: helpers.getUser(req).id,
@@ -14,11 +15,12 @@ const tweetController = {
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json({ tweet: tweet.toJSON() })
+      } else {
+        res.json({
+          status: 'success',
+          data: { tweet: tweet.toJSON() }
+        })
       }
-      res.json({
-        status: 'success',
-        data: { tweet: tweet.toJSON() }
-      })
     } catch (err) {
       next(err)
     }
@@ -44,14 +46,15 @@ const tweetController = {
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
+      } else {
+        await Promise.all(tweets.map(async tweet => {
+          return await appFunc.resTweetHandler(userId, tweet)
+        }))
+        res.json({
+          status: 'success',
+          data: { tweets }
+        })
       }
-      await Promise.all(tweets.map(async tweet => {
-        return await appFunc.resTweetHandler(userId, tweet)
-      }))
-      res.json({
-        status: 'success',
-        data: { tweets }
-      })
     } catch (err) {
       next(err)
     }
@@ -78,12 +81,13 @@ const tweetController = {
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweet)
+      } else {
+        await appFunc.resTweetHandler(userId, tweet)
+        res.json({
+          status: 'success',
+          data: { tweet }
+        })
       }
-      await appFunc.resTweetHandler(userId, tweet)
-      res.json({
-        status: 'success',
-        data: { tweet }
-      })
     } catch (err) {
       next(err)
     }
@@ -148,11 +152,12 @@ const tweetController = {
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json({ reply: reply.toJSON() })
+      } else {
+        res.json({
+          status: 'success',
+          data: { reply: reply.toJSON() }
+        })
       }
-      res.json({
-        status: 'success',
-        data: { reply: reply.toJSON() }
-      })
     } catch (err) {
       next(err)
     }
@@ -176,14 +181,15 @@ const tweetController = {
           attributes: ['name', 'account', 'avatar']
         }]
       })
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(replies)
+      } else {
+        const resReplies = appFunc.resRepliesHandler(replies)
+        res.json({
+          status: 'success',
+          data: { replies: resReplies }
+        })
       }
-      const resReplies = appFunc.resRepliesHandler(replies)
-      res.json({
-        status: 'success',
-        data: { replies: resReplies }
-      })
     } catch (err) {
       next(err)
     }
