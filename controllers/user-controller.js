@@ -195,6 +195,7 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const { id } = req.params
+      console.log(id)
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
         raw: true
