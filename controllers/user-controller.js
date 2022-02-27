@@ -282,7 +282,8 @@ const userController = {
       })
       res.json({ user })
     } catch (err) { next(err) }
-  }
+  },
+  
 }
 
 module.exports = userController
