@@ -14,6 +14,7 @@ router.use('/users', users)
 router.use('/tweets', tweets)
 router.use('/followship', followship)
 
+router.get('/currentuser', authenticated, userController.getCurrentUser)
 router.post('/signup', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
