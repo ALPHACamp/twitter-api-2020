@@ -22,7 +22,7 @@ const userController = {
               user: userData,
             }
           });
-        } else { res.json({ status: "error", message: "You are admin!"}) }
+        } else { res.json({ status: "error", message: "You are user!"}) }
       } else {
         res.json(errData);
       }
@@ -79,7 +79,8 @@ const userController = {
             account,
             email,
             password: hash,
-            isAdmin: false
+            isAdmin: false,
+            role: 'user'
           }))
         .then(() => {
           {
