@@ -1,5 +1,6 @@
 'use strict'
 const faker = require('faker')
+const { DEFAULT_REPLIER_NUMBER } = require('../config/seeder')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     /*
@@ -14,9 +15,7 @@ module.exports = {
     */
     // 在同篇推文上，每個留言者皆不是同一個人
     // 在同篇推文上，每個留言者只會有一則留言
-    // 在同篇推文上，有三名留言者
-    const DEFAULT_REPLIER_NUMBER = 3
-
+    // 在同篇推文上，有三名留言者 (DEFAULT_REPLIER_NUMBER = 3)
     const seedUsers = (await queryInterface.sequelize.query(
       'SELECT `id` FROM `Users` WHERE role = "user"', {
       type: queryInterface.sequelize.QueryTypes.SELECT
