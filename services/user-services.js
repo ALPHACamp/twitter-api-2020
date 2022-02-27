@@ -20,11 +20,9 @@ const userServices = {
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password: hash,
-        role: 'user'
+        password: hash
       }))
       .then(user => {
-        user.toJSON()
         delete user.password
         return cb(null, user)
       })

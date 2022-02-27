@@ -2,24 +2,29 @@ const jwt = require('jsonwebtoken')
 const userServices = require('../services/user-services')
 
 const userController = {
-  signIn: (req, res, next) => {
-    try {
-      const userData = req.user.toJSON()
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, {
-        expiresIn: '1d'
-      })
-      res.json({
-        token,
-        user: userData
-      })
-    } catch (err) {
-      next(err)
-    }
-  },
+  // signIn: (req, res, next) => {
+  //   try {
+  //     const userData = req.user.toJSON()
+  //     delete userData.password
+  //     const token = jwt.sign(userData, process.env.JWT_SECRET, {
+  //       expiresIn: '1d'
+  //     })
+  //     res.json({
+  //       token,
+  //       user: userData
+  //     })
+  //   } catch (err) {
+  //     next(err)
+  //   }
+  // },
   signUp: (req, res, next) => {
     userServices.signUp(req, (err, data) =>
-      err ? next(err) : res.status(200).json(data))
+      err
+        ? next(err)
+        : res.json({
+          status: 'success',
+          data
+        }))
   }
 }
 
