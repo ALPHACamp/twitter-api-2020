@@ -96,6 +96,7 @@ const userController = {
       bcrypt.hash(password, 10)
     ])
       .then(([checkUsers, user, hash]) => {
+        if (!user) throw new Error('帳號不存在！')
         if (checkUsers.some(u => u.email === email)) throw new Error('email 已重複註冊！')
         if (checkUsers.some(u => u.account === account)) throw new Error('account 已重複註冊！')
         return user.update({
@@ -130,33 +131,33 @@ const userController = {
     const getUserId = Number(req.params.id)
     const reqUserId = helpers.getUser(req).id
     return Tweet.findAll({
-      where: { UserId: getUserId },
-      attributes: [
-        ['id', 'tweetId'],
-        'createdAt',
-        'description',
-        'image',
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
-          ),
-          'LikesCount'
+        where: { UserId: getUserId },
+        attributes: [
+          ['id', 'tweetId'],
+          'createdAt',
+          'description',
+          'image',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Likes WHERE Likes.TweetId = Tweet.id)'
+            ),
+            'LikesCount'
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
+            ),
+            'RepliesCount'
+          ]
         ],
-        [
-          sequelize.literal(
-            '(SELECT COUNT(*) FROM Replies WHERE Replies.TweetId = Tweet.id)'
-          ),
-          'RepliesCount'
-        ]
-      ],
-      include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: Like, attributes: ['userId'] }
-      ],
-      order: [['createdAt', 'DESC']]
-    })
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          { model: Like, attributes: ['userId'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      })
       .then(tweets => {
-        if (!tweets) throw new Error('User not exits!')
+        if (tweets.length === 0) throw new Error('User has no tweets')
 
         const result = tweets
           .map(t => ({
@@ -187,7 +188,7 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(replies => {
-        if (!replies) throw new Error('No replies')
+        if (replies.length === 0) throw new Error('No replies')
 
         const result = replies
           .map(r => ({
@@ -218,13 +219,24 @@ const userController = {
           'cover',
           'introduction'
         ]
-      }]
+      }],
+      attributes: [
+        ['id', 'userId'],
+        'name',
+        'account',
+        'avatar',
+        'cover'
+      ]
     })
       .then(followings => {
+        if (followings.Followings.length === 0) throw new Error('User has no followings')
+        const followingId = helpers.getUser(req).Followings.map(user => user.id)
         const result = followings.Followings
-          .map(following => ({
-            ...following.toJSON(),
+          .map(f => ({
+            ...f.toJSON(),
+            isFollowed: followingId?.includes(f.followingId) || false
           }))
+        result.forEach(i => delete i.Followship)
         return res.json(result)
       })
       .catch(err => next(err))
