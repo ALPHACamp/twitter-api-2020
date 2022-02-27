@@ -56,7 +56,7 @@ module.exports = {
       }
 
       const result = Object.keys(followingList).map(index => seedUsers[index])
-      console.log('data: ', userId, result)
+
       result.forEach(followingId => {
 
         userFollowerCounts[followingId] = userFollowerCounts[followingId] ?
