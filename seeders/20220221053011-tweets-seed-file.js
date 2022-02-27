@@ -16,7 +16,7 @@ module.exports = {
           ({
 
             UserId: users[Math.floor(i/DEFAULT_COUNT)].id,
-            description: faker.lorem.text(),
+        description: faker.lorem.text().substring(0, 50),
             createdAt: new Date(),
             updatedAt: new Date()
           })

@@ -1,5 +1,7 @@
 'use strict'
 
+const DEFAULT_COUNT = 2
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
@@ -8,8 +10,9 @@ module.exports = {
     )
     const checkArray = Array.from({ length: users.length }).map((_, i) => [])
     await queryInterface.bulkInsert('Followships',
-      Array.from({ length: users.length * 2 }).map((_, i) => {
-        const followerId = Math.floor(Math.random() * users.length)
+      Array.from({ length: users.length * DEFAULT_COUNT }).map((_, i) => {
+        // const followerId = Math.floor(Math.random() * users.length)
+        const followerId = Math.floor(i / DEFAULT_COUNT)
         let followingId = Math.floor(Math.random() * users.length)
         while (followerId === followingId || checkArray[followerId].includes(followingId)) {
           followingId = Math.floor(Math.random() * users.length)
