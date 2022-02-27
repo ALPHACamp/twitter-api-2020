@@ -294,17 +294,19 @@ const userController = {
     },
     )
       .then(likes => {
+        const getUserId = helpers.getUser(req).id
         const likesArray = likes
           .map(like => ({
-            ...like.toJSON()
+            ...like.toJSON(),
+            isLiked: like.Tweet.Likes.map(u => u.UserId).includes(getUserId)
           }))
-
         likesArray
           .forEach(like => {
             like.Tweet.likesCount = like.Tweet.Likes.length
             like.Tweet.repliesCount = like.Tweet.Replies.length
             delete like.Tweet.Likes
             delete like.Tweet.Replies
+            delete like.Tweet.UserId
             delete like.tweetId
           })
 
