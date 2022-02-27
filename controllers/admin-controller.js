@@ -30,7 +30,6 @@ const adminController = {
       attributes: { exclude: ['password'] },
       include: [
         { model: Tweet, attributes: ['id'], include: { model: Like, attributes: ['id'] } },
-        { model: Reply, attributes: ['id'] },
         { model: User, as: 'Followings', attributes: ['id'] },
         { model: User, as: 'Followers', attributes: ['id'] }
       ]
@@ -45,10 +44,8 @@ const adminController = {
           r.TweetsCount = r.Tweets.length
           r.FollowingsCount = r.Followings.length
           r.FollowersCount = r.Followers.length
-          r.RepliesCount = r.Replies.length
           r.TweetsLikedCount = r.Tweets.reduce((acc, tweet) => acc + tweet.Likes.length, 0)
           delete r.Tweets
-          delete r.Replies
           delete r.Followings
           delete r.Followers
         })
@@ -73,7 +70,7 @@ const adminController = {
 
         result.forEach(r => {
           r.tweetId = r.id
-          r.description = r.description.toString(0, 50)
+          r.description = r.description.substring(0, 50)
           r.User.userId = r.User.id
           delete r.id
           delete r.User.id
