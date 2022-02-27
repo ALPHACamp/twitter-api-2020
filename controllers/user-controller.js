@@ -78,6 +78,44 @@ module.exports = {
 
     } catch (err) { next(err) }
   },
+
+  getTopUsers: async (req, res, next) => {
+    try {
+      const DEFAULT_LIMIT_NUMBER = 10
+      const DEFAULT_OFFSET_NUMBER = 0
+
+      // retrieve all query strings from HTTP request, and 
+      // use their values or fallback default values
+      const fieldArray = Object.keys(helpers.getUser(req))
+
+      const field = req.query.field?.trim() || 'totalFollowers'
+      if (!fieldArray.includes(field)) {
+        throw new Error('提供的欄位並不存在，動作執行失敗!')
+      }
+
+      const order = req.query.order?.trim() || 'DESC'
+      if (!['ASC', 'DESC'].includes(order)) {
+        throw new Error('提供的排序並不存在，動作執行失敗!')
+      }
+
+      const limit = Number(req.query.limit) || DEFAULT_LIMIT_NUMBER
+      const offset = Number(req.query.offset) || DEFAULT_OFFSET_NUMBER
+
+      // using previous option values to do database query
+      const responseData = await User.findAll({
+        where: { role: 'user' },
+        order: [[field, order]],
+        limit,
+        offset,
+        attributes: { exclude: ['password'] },
+        raw: true
+      })
+
+      return res.status(200).json(responseData)
+
+    } catch (err) { next(err) }
+  },
+
   getUser: async (req, res, next) => {
     try {
       const { UserId } = req.params

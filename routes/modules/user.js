@@ -4,6 +4,7 @@ const userController = require('../../controllers/user-controller')
 const { authenticated } = require('../../middleware/auth')
 
 
+router.get('/top', authenticated, userController.getTopUsers)
 router.post('/', userController.signup)
 router.get('/:UserId', authenticated, userController.getUser)
 router.put('/:UserId', authenticated, userController.putUser)
