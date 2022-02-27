@@ -198,6 +198,7 @@ const userController = {
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
         raw: true,
+        nest: true,
         include: [User]
       })
       if (tweetsData.length === 0) return res.status(400).json({

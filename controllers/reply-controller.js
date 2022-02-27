@@ -25,7 +25,20 @@ const replyController = {
           UserId: req.params.id
         },
         order: [['createdAt', 'desc']],
-        include: [Tweet, User]
+        attributes: ['comment'],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['UserId'],
+            include: [
+              { model:User,
+                attributes:['account']
+              }
+            ]
+          },
+          { model: User,
+            attributes:['name','account'] }
+        ]
       })
       if (replies.length == 0) {
         return res
