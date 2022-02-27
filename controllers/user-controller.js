@@ -196,7 +196,7 @@ module.exports = {
 
         // assign following two objects to reply
         reply.repliedTweet = reply.Tweet
-        reply.repliedTweet.TweetedUser = reply.Tweet.User
+        reply.repliedTweet.tweetedUser = reply.Tweet.User
 
         // remove unnecessary key properties
         delete reply.Tweet
