@@ -4,7 +4,7 @@ const { errorHandler } = require('../middleware/error-handler')
 const user = require('./modules/user')
 const admin = require('./modules/admin')
 const tweet = require('./modules/tweet')
-const { authenticated, authenticatedAdmin } = require('../middleware/auth')
+const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
 const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
 
