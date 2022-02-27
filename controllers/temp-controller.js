@@ -182,7 +182,10 @@ const tempController = {
               {
                 model: User,
                 as: 'TweetAuthor',
-                attributes: { exclude: ['password'] }
+                attributes: [
+                  'id', 'account', 'name', 'email',
+                  'avatar', 'cover'
+                ]
               }
             ]
           }
