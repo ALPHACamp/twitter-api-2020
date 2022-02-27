@@ -10,7 +10,7 @@ const authenticated = (req, res, next) => {
   })(req, res, next)
 }
 const authenticatedUser = (req, res, next) => {
-  if (helpers.getUser(req).role === 'user') return next()
+  if (helpers.getUser(req).role !== 'admin') return next()
   return res.status(403).json({ status: 'error', message: '管理者不能使用前台API功能' })
 }
 const authenticatedAdmin = (req, res, next) => {
