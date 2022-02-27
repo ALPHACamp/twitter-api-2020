@@ -1,5 +1,5 @@
 // 引入模組
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -21,12 +21,32 @@ const tweetController = {
   getTweet: (req, res, next) => {
     // 以tweet_id取得Tweet推文，並關連Reply-User
     Tweet.findByPk(req.params.tweet_id, {
-      include: [{ model: Reply, include: User }],
-      order: [['Replies', 'createdAt', 'DESC']]
+      include: [
+        User,
+        Like,
+      ]
     })
       .then(tweet => {
+        // 檢查推文是否存在
+        if (!tweet) return res.json({ status: 'error', message: '推文不存在' })
+
+        // 將tweet轉換json物件
+        tweet = tweet.toJSON()
+        // 調整需回傳的欄位，並加入likedCount、isLiked欄位
+        const data = {
+          id: tweet.id,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          User: {
+            id: tweet.User.id,
+            name: tweet.User.name,
+            avatar: tweet.User.avatar
+          },
+          likeCount: tweet.Likes ? tweet.Likes.length : 0,
+          isLiked: helpers.getUser(req).Likes ? helpers.getUser(req).Likes.some(u => u.TweetId === tweet.id) : false
+        }
         // 回傳物件json
-        return res.json(tweet.toJSON())
+        return res.json(data)
       })
       .catch(err => next(err))
   },
