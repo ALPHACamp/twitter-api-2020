@@ -177,6 +177,7 @@ const userController = {
             avatar: following.avatar,
             cover: following.cover,
             introduction: following.introduction,
+            isFollowed: helpers.getUser(req).Followings.some(u => u.id === following.id),
             followerUser: {
               followerId: user.id,
               name: user.name
@@ -201,6 +202,7 @@ const userController = {
         user = user.toJSON()
         const followers = user.Followers
         // 將followings迭代，並將id重新命名為followingId，並回傳成陣列
+        
         const data = followers.map(follower => {
           return {
             followerId: follower.id,
@@ -209,6 +211,7 @@ const userController = {
             avatar: follower.avatar,
             cover: follower.cover,
             introduction: follower.introduction,
+            isFollowed: helpers.getUser(req).Followings.some(u => u.id === follower.id),
             followingUser: {
               followingId: user.id,
               name: user.name,
