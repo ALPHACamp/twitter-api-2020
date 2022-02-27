@@ -1,4 +1,5 @@
 const passport = require('../config/passport')
+const helpers = require('../_helpers')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -8,12 +9,16 @@ const authenticated = (req, res, next) => {
     next()
   })(req, res, next)
 }
-
+const authenticatedUser = (req, res, next) => {
+  if (helpers.getUser(req).role !== 'admin') return next()
+  return res.status(403).json({ status: 'error', message: '管理者不能使用前台API功能' })
+}
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.isAdmin) return next()
-  return res.status(403).json({ status: 'error', message: '權限不足，沒有提供正確的authencation token' })
+  if (helpers.getUser(req).role === 'admin') return next()
+  return res.status(403).json({ status: 'error', message: '權限不足，沒有提供後台管理員的 authencation token' })
 }
 module.exports = {
   authenticated,
-  authenticatedAdmin
+  authenticatedAdmin,
+  authenticatedUser
 }
