@@ -252,6 +252,7 @@ const userController = {
       }
 
 
+
       const { files } = req
       const avatar = files && files.avatar ?
         await imgurFileHand(files.avatar[0]) :
@@ -268,31 +269,6 @@ const userController = {
         cover
       })
 
-      // if (!avatar && !cover) {
-      //   await user.update({
-      //     name,
-      //     introduction
-      //   })
-      // } else if (!avatar && cover) {
-      //   await user.update({
-      //     name,
-      //     introduction,
-      //     cover: await imgurFileHandler(cover[0])
-      //   })
-      // } else if (avatar && !cover) {
-      //   await user.update({
-      //     name,
-      //     introduction,
-      //     avatar: await imgurFileHandler(avatar[0])
-      //   })
-      // } else if (avatar && cover) {
-      //   await user.update({
-      //     name,
-      //     introduction,
-      //     avatar: await imgurFileHandler(avatar[0]),
-      //     cover: await imgurFileHandler(cover[0])
-      //   })
-      // }
       return res
         .status(200)
         .json({ status: 'success', message: '修改成功', data: user.toJSON() })
