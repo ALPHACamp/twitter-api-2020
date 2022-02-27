@@ -9,18 +9,6 @@ function getUser(req) {
   return req.user
 }
 
-
-/**
- * 
- * @param {object} req 
- * @returns {number} id
- */
-
-function getUserId(req) {
-  return getUser(req)?.id
-}
-
 module.exports = {
-  getUser,
-  getUserId
+  getUser
 };
