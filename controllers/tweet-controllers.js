@@ -75,6 +75,9 @@ const tweetController = {
         ]
       })
 
+      // Clean data
+      
+
       return res.status(200).json(tweet)
     } catch (error) {
       next(error)

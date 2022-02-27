@@ -347,19 +347,9 @@ const userController = {
   getCurrentUser: async (req, res, next) => {
     try {
       let user = helpers.getUser(req)
-      console.log(user)
-
-      // Clean user
-      user = {
-        id: user.id,
-        name: user.name,
-        account: user.account,
-        avatar: user.avatar,
-        cover: user.cover,
-        role: user.role,
-        email: user.email,
-        introduction: user.introduction
-      }
+      user = await User.findById(user.id, {
+        raw: true
+      })
 
       return res.status(200).json(user)
     } catch (error) {
