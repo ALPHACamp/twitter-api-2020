@@ -187,6 +187,7 @@ module.exports = {
       ])
 
       if (!tweet) throw new Error('因為沒有這則推文，所以點讚動作失敗!')
+      if (tweet.UserId === UserId) throw new Error('不能對自己的貼文點讚!')
 
       const user = await User.findByPk(tweet.User.id)
       if (!user) throw new Error('因為沒有推文作者，所以點讚動作失敗!')
@@ -224,6 +225,7 @@ module.exports = {
       ])
 
       if (!tweet) throw new Error('因為沒有這則推文，所以收回讚的動作失敗!')
+      if (tweet.UserId === UserId) throw new Error('不能對自己的貼文收回讚!')
 
       const user = await User.findByPk(tweet.User.id)
       if (!user) throw new Error('因為沒有推文作者，所以收回讚的動作失敗!')
