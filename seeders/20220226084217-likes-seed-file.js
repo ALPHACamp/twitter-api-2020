@@ -24,7 +24,7 @@ module.exports = {
         return {
           TweetId: tweet.id,
           UserId: userRandomChooser.choose(),
-          createdAt: newDate, 
+          createdAt: newDate,
           updatedAt: newDate
         }
       })
