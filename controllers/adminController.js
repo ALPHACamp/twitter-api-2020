@@ -27,10 +27,8 @@ const adminController = {
             // 傳給用戶端
             return res.json({
               status: 'success',
-              data: {
-                token,
-                user
-              }
+              token,
+              user
             })
           })
           .catch(err => next(err))
