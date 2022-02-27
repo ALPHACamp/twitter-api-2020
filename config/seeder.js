@@ -22,11 +22,29 @@ const DEFAULT_REPLIER_NUMBER = 3
 // 設定每篇推文要有的喜歡數，每一個喜歡皆代表不同的使用者
 const DEFAULT_LIKER_NUMBER = 3
 
+
+/* Followship Seeder  */
+// 設定每一位使用者能跟隨的使用者，從ID為 START - END 的使用者挑選並跟隨
+const FOLLOWING_CANDIDATE_RANGE = {
+  START: 0,
+  END: 10
+}
+
+// 設定每個人可跟隨的人數
+const DEFAULT_FOLLOWING_NUMBER = 5
+
 exports = module.exports = {
+  // User
   DEFAULT_PASSWORD,
   BCRYPT_COMPLEXITY,
   DEFAULT_USER_NUMBER,
-  DEFAULT_LIKER_NUMBER,
+  // Tweet
   DEFAULT_TWEET_NUMBER,
+  // Like
+  DEFAULT_LIKER_NUMBER,
+  // Reply
   DEFAULT_REPLIER_NUMBER,
+  // Followship
+  DEFAULT_FOLLOWING_NUMBER,
+  FOLLOWING_CANDIDATE_RANGE,
 }
