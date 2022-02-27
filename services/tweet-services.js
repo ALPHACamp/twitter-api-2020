@@ -8,12 +8,21 @@ const tweetController = {
           {
             model: User,
             attributes: { exclude: ['password'] }
+          }, {
+            model: Reply
+          }, {
+            model: Like
           }
-        ],
-        raw: true,
-        nest: true
+        ]
       })
-      return cb(null, tweets)
+      const returnTweets = tweets.map(tweet => {
+        const returnTweet = tweet.toJSON()
+        returnTweet.repliesCount = returnTweet.Replies.length
+        returnTweet.likesCount = returnTweet.Likes.length
+        return returnTweet
+      })
+
+      return cb(null, returnTweets)
     } catch (err) {
       return cb(err)
     }
@@ -25,23 +34,22 @@ const tweetController = {
           {
             model: User,
             attributes: { exclude: ['password'] }
+          }, {
+            model: Reply
+          }, {
+            model: Like
           }
-        ],
-        raw: true,
-        nest: true
+
+        ]
       })
       if (!tweet) {
         return cb(new Error('tweet_id does not exist.'))
       }
-      const Replies = await Reply.findAll({
-        raw: true,
-        nest: true,
-        where: { TweetId: req.params.tweet_id }
-      })
+      const returnTweet = tweet.toJSON()
+      returnTweet.repliesCount = returnTweet.Replies.length
+      returnTweet.likesCount = returnTweet.Likes.length
 
-      tweet.Reply = Replies
-
-      return cb(null, tweet)
+      return cb(null, returnTweet)
     } catch (err) {
       return cb(err)
     }
