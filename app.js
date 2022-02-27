@@ -6,6 +6,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const path = require('path')
 const methodOverride = require('method-override')
+const cors = require('cors')
 const passport = require('./config/passport')
 const router = require('./routes')
 
@@ -15,7 +16,7 @@ const port = process.env.PORT || 3000
 
 // 初始化passport
 app.use(passport.initialize())
-
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 app.use(express.json())
