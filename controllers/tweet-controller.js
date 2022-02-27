@@ -9,7 +9,7 @@ module.exports = {
 
       const tweets = await Tweet.findAll({
         include: [
-          { model: User },
+          { model: User, attributes: { exclude: ['password'] } },
           { model: User, as: 'UsersFromLikedTweets' }
         ],
         order: [['createdAt', 'DESC']],
@@ -29,7 +29,6 @@ module.exports = {
         // delete original properties from tweet
         delete tweet.User
         delete tweet.UsersFromLikedTweets
-        delete tweetedUser.password
 
         return {
           ...tweet,
@@ -50,7 +49,7 @@ module.exports = {
 
       let tweet = await Tweet.findByPk(TweetId, {
         include: [
-          { model: User },
+          { model: User, attributes: { exclude: ['password'] }  },
           { model: User, as: 'UsersFromLikedTweets' }
         ],
         nest: true
@@ -67,7 +66,6 @@ module.exports = {
       // remove unnecessary key properties
       delete tweet.User
       delete tweet.UsersFromLikedTweets
-      delete tweetedUser.password
 
       // reassemble tweet object
       const responseData = {
@@ -99,9 +97,9 @@ module.exports = {
 
       // plus totalTweets number by 1,
       // and then get full tweet data from database
-      const [_, responseData] = await Promise.all([
-        user.increment('totalTweets', { by: 1 }),
-        Tweet.findByPk(tweet.id, { raw: true })
+      const [responseData] = await Promise.all([
+        Tweet.findByPk(tweet.id, { raw: true }),
+        user.increment('totalTweets', { by: 1 })
       ])
 
       return res.status(200).json(responseData)
@@ -116,7 +114,7 @@ module.exports = {
       const [tweet, replies] = await Promise.all([
         Tweet.findByPk(TweetId),
         Reply.findAll({
-          include: User,
+          include: { model: User, attributes: { exclude: ['password'] } },
           where: { TweetId },
           nest: true
         })
@@ -131,10 +129,8 @@ module.exports = {
 
         // assign following object to temp constant
         const repliedUser = reply.User
-
         // remove unnecessary key properties
         delete reply.User
-        delete repliedUser.password
 
         return { ...reply, repliedUser }
       })
@@ -158,11 +154,11 @@ module.exports = {
 
       // plus both totalReplies number by 1, and
       // create reply, and then return full reply data from database
-      const [_, responseData] = await Promise.all([
-        tweet.increment('totalReplies', { by: 1 }),
+      const [responseData] = await Promise.all([
         Reply.create({
           comment, TweetId, UserId
-        })
+        }),
+        tweet.increment('totalReplies', { by: 1 })
       ])
 
       return res.status(200).json(responseData)
@@ -193,10 +189,10 @@ module.exports = {
 
       // plus both totalLikes and totalLiked numbers each by 1,
       // and create like, and then return full like data from database
-      const [_t, _u, responseData] = await Promise.all([
-        tweet.increment('totalLikes', { by: 1 }),
-        user.increment('totalLiked', { by: 1 }),
+      const [responseData] = await Promise.all([
         Like.create({ UserId, TweetId }),
+        tweet.increment('totalLikes', { by: 1 }),
+        user.increment('totalLiked', { by: 1 })
       ])
 
       return res.status(200).json(responseData)
@@ -227,10 +223,10 @@ module.exports = {
 
       // minus both totalLikes and totalLiked numbers each by 1,
       // and destroy like, and then return full like data from database
-      const [_t, _u, responseData] = await Promise.all([
-        tweet.decrement('totalLikes', { by: 1 }),
-        user.decrement('totalLiked', { by: 1 }),
+      const [responseData] = await Promise.all([
         like.destroy(),
+        tweet.decrement('totalLikes', { by: 1 }),
+        user.decrement('totalLiked', { by: 1 })
       ])
 
       return res.status(200).json(responseData)
