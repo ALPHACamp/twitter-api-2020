@@ -86,6 +86,8 @@ const userController = {
         avatar: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1644154630/github/defaultAvatar_uapauy.png",
         cover: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1645696452/github/defaultCover_uhyyds.jpg"
       })
+      const result = user.toJSON()
+      delete result.password
 
       return res
         .status(200)
@@ -201,9 +203,9 @@ const userController = {
         error.message = '只能修改自己的資料'
         return next(error)
       }
-      const user = await User.findByPk(id, { attributes: { exclude: ['password'] } })
 
-      if (!user) {
+
+      if (!(await User.findByPk(id))) {
         error.code = 404
         error.message = '對應使用者找不到'
         return next(error)
@@ -219,15 +221,18 @@ const userController = {
       }
 
 
-      await user.update({
+      await User.update({
         name,
         account,
         email,
         password: bcrypt.hashSync(password, BCRYPT_COMPLEXITY)
-      })
+      }, { where: { id } })
+
+      const result = { name, account, email }
+
       return res
         .status(200)
-        .json({ status: 'success', message: '修改成功', data: user.toJSON() })
+        .json({ status: 'success', message: '修改成功', data: result })
     } catch (error) {
       error.code = 500
       return next(error)
@@ -246,14 +251,13 @@ const userController = {
         error.message = '只能修改自己的資料'
         return next(error)
       }
-
-      const user = await User.findByPk(id, { attributes: { exclude: ['password'] } })
+      const user = await User.findByPk(id)
       if (!user) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
       }
-
+      const { files } = req
       const { name, introduction } = req.body
       const message = await putUserCheck(req)
       if (message) {
@@ -262,9 +266,6 @@ const userController = {
           .json({ status: 'error', message, data: req.body })
       }
 
-
-
-      const { files } = req
       const avatar = files && files.avatar ?
         await imgurFileHandler(files.avatar[0]) :
         user.avatar
@@ -279,10 +280,17 @@ const userController = {
         avatar,
         cover
       })
+      const results = {
+        account: user.account,
+        name,
+        introduction,
+        avatar,
+        cover
+      }
 
       return res
         .status(200)
-        .json({ status: 'success', message: '修改成功', data: user.toJSON() })
+        .json({ status: 'success', message: '修改成功', data: results })
     } catch (error) {
       error.code = 500
       return next(error)

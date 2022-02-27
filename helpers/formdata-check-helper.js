@@ -21,15 +21,18 @@ async function postUsersFormDataCheck(req) {
     errorMessage.push('名字上限 50 字')
   }
 
+  // 檢查電子郵件是否為正確格式
+  if (email && !validator.isEmail(email)) {
+    errorMessage.push('電子郵件不是正確格式')
+  }
+
+
   // 檢查密碼和確認密碼是否一致
   if (password !== checkPassword) {
     errorMessage.push('密碼和確認密碼必須一致')
   }
 
-  // 檢查電子郵件是否為正確格式
-  if (email && !validator.isEmail(email)) {
-    errorMessage.push('電子郵件不是正確格式')
-  }
+
 
   // 檢查是否為已註冊的帳號或者電子郵件
   const [isExistAccount, isExistEmail] = await Promise.all([
