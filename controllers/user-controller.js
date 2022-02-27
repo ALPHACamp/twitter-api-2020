@@ -265,11 +265,11 @@ const userController = {
     })
       .then(followers => {
         if (followers.Followers.length === 0) throw new Error('User has no followers')
-        const followerId = helpers.getUser(req).Followers.map(user => user.id)
+        const followingId = helpers.getUser(req).Followings.map(user => user.id)
         const result = followers.Followers
           .map(f => ({
             ...f.toJSON(),
-            isFollowingId: followerId?.includes(f.toJSON().followerId) || false
+            isFollowed: followingId?.includes(f.toJSON().followerId) || false
           }))
         result.forEach(i => delete i.Followship)
         return res.json(result)
@@ -289,7 +289,8 @@ const userController = {
           { model: Like },
           { model: Reply }
         ]
-      }
+      },
+      attributes: { exclude: ['id', 'UserId', 'createdAt', 'updatedAt'] }
     },
     )
       .then(likes => {
@@ -304,6 +305,7 @@ const userController = {
             like.Tweet.repliesCount = like.Tweet.Replies.length
             delete like.Tweet.Likes
             delete like.Tweet.Replies
+            delete like.tweetId
           })
 
         return res.json(likesArray)
