@@ -2,12 +2,14 @@
 const faker = require('faker')
 const bcrypt = require('bcryptjs')
 
+const DEFAULT_PASSWORD = '12345678'
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Users', [{
       email: 'root@example.com',
       account: 'root',
-      password: await bcrypt.hash('12345678', 10),
+      password: await bcrypt.hash(DEFAULT_PASSWORD, 10),
       isAdmin: true,
       role: 'admin',
       name: 'root',
@@ -19,7 +21,7 @@ module.exports = {
     },{
       email: 'user1@example.com',
       account: 'user1',
-      password: await bcrypt.hash('12345678', 10),
+      password: await bcrypt.hash(DEFAULT_PASSWORD, 10),
       isAdmin: false,
       role: 'user',
       name: 'user1',
@@ -31,7 +33,7 @@ module.exports = {
     },{
       email: 'user2@example.com',
       account: 'user2',
-      password: await bcrypt.hash('12345678', 10),
+      password: await bcrypt.hash(DEFAULT_PASSWORD, 10),
       isAdmin: false,
       role: 'user',
       name: 'user2',
@@ -43,7 +45,7 @@ module.exports = {
     },{
       email: 'user3@example.com',
       account: 'user3',
-      password: await bcrypt.hash('123', 10),
+      password: await bcrypt.hash(DEFAULT_PASSWORD, 10),
       isAdmin: false,
       role: 'user',
       name: 'user3',
@@ -55,7 +57,7 @@ module.exports = {
     },{
       email: 'user4@example.com',
       account: 'user4',
-      password: await bcrypt.hash('123', 10),
+      password: await bcrypt.hash(DEFAULT_PASSWORD, 10),
       isAdmin: false,
       role: 'user',
       name: 'user4',
@@ -67,7 +69,7 @@ module.exports = {
     },{
       email: 'user5@example.com',
       account: 'user5',
-      password: await bcrypt.hash('123', 10),
+      password: await bcrypt.hash(DEFAULT_PASSWORD, 10),
       isAdmin: false,
       role: 'user',
       name: 'user5',

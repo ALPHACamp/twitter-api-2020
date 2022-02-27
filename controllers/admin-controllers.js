@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 const jwt = require("jsonwebtoken");
 
 const adminController = {
@@ -28,15 +28,36 @@ const adminController = {
     }
   },
 
-  getUsers: (req, res, next) => {
+  getUsers: async (req, res, next) => {
     return User.findAll({
-      raw: true,
-      nest: true,
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: Tweet, attributes: ['id'], include: { model: Like, attributes: ['id'] } },
+        { model: User, as: 'Followings', attributes: ['id'] },
+        { model: User, as: 'Followers', attributes: ['id'] }
+      ]
     })
-      .then((users) => {
-        return res.json(users);
+      .then(users => {
+        const result = users
+          .map(u => ({
+            ...u.toJSON()
+          }))
+
+        result.forEach(r => {
+          r.TweetsCount = r.Tweets.length
+          r.FollowingsCount = r.Followings.length
+          r.FollowersCount = r.Followers.length
+          r.TweetsLikedCount = r.Tweets.reduce((acc, tweet) => acc + tweet.Likes.length, 0)
+          delete r.Tweets
+          delete r.Followings
+          delete r.Followers
+        })
+
+        result.sort((a, b) => b.TweetsCount - a.TweetsCount)
+
+        return res.json(result)
       })
-      .catch((err) => next(err));
+      .catch(err => next(err))
   },
 
   deleteTweet: (req, res, next) => {
