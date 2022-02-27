@@ -234,7 +234,7 @@ const userController = {
         const result = followings.Followings
           .map(f => ({
             ...f.toJSON(),
-            isFollowed: followingId?.includes(f.followingId) || false
+            isFollowed: followingId?.includes(f.toJSON().followingId) || false
           }))
         result.forEach(i => delete i.Followship)
         return res.json(result)
@@ -254,13 +254,24 @@ const userController = {
           'cover',
           'introduction'
         ]
-      }]
+      }],
+      attributes: [
+        ['id', 'userId'],
+        'name',
+        'account',
+        'avatar',
+        'cover'
+      ]
     })
       .then(followers => {
+        if (followers.Followers.length === 0) throw new Error('User has no followers')
+        const followerId = helpers.getUser(req).Followers.map(user => user.id)
         const result = followers.Followers
-          .map(followers => ({
-            ...followers.toJSON(),
+          .map(f => ({
+            ...f.toJSON(),
+            isFollowingId: followerId?.includes(f.toJSON().followerId) || false
           }))
+        result.forEach(i => delete i.Followship)
         return res.json(result)
       })
       .catch(err => next(err))
