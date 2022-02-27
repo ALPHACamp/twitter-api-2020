@@ -71,7 +71,7 @@ const userController = {
         })
       })
       .then(user => {
-        res.json({ status: 'success', message: '註冊成功'})
+        res.json({ status: 'success', message: '註冊成功' })
       })
   },
   // 使用者頁面
@@ -202,7 +202,7 @@ const userController = {
         user = user.toJSON()
         const followers = user.Followers
         // 將followings迭代，並將id重新命名為followingId，並回傳成陣列
-        
+
         const data = followers.map(follower => {
           return {
             followerId: follower.id,
@@ -311,9 +311,11 @@ const userController = {
     // 預設取得10位使用者， 並判斷是否有查詢變數來改變取得長度
     const DEFAULT_LIMIT = 10
     const limit = req.query.limit ? req.query.limit : DEFAULT_LIMIT
+    const currentUserName = helpers.getUser(req).account
 
     // 取得所有使用者資料，用多對多關連，取得使用者追蹤資料
     return User.findAll({
+      where: { account: { $not: ['root', currentUserName] } },
       include: [{ model: User, as: 'Followers', attributes: ['id', 'name'] }],
       attributes: ['id', 'name', 'avatar']
     })
