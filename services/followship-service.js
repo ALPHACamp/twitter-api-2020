@@ -27,7 +27,11 @@ const followshipController = {
       })
 
       if (checkedFollowships) {
-        return cb(new Error('The followship already exist.'))
+        return cb(null, {
+          status: 'success',
+          isFollowing: true,
+          message: 'The followship already exist.'
+        })
       }
       const newFollowship = await Followship.create({
         followerId,
@@ -36,6 +40,7 @@ const followshipController = {
 
       const followshipData = {
         status: 'success',
+        isFollowing: true,
         data: {
           Followship: newFollowship.dataValues
         }
@@ -56,11 +61,16 @@ const followshipController = {
         }
       })
       if (!checkedFollowships) {
-        return cb(new Error('The followship does not exsit.'))
+        return cb(null, {
+          status: 'success',
+          isFollowing: false,
+          message: 'The followship does not exist.'
+        })
       }
       const deletedFollowship = await checkedFollowships.destroy()
       const followshipData = {
         status: 'success',
+        isFollowing: false,
         data: {
           Followship: deletedFollowship.dataValues
         }
