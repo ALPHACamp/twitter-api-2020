@@ -30,7 +30,7 @@ const adminServices = {
           'following'],
         [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.UserId = User.id)'), 'likeAmount']
       ],
-      order: [[sequelize.col('tweetAmount'), 'DESC']],
+      order: [[sequelize.col('tweetAmount'), 'DESC'], ['createdAt']],
       raw: true,
       nest: true
     })
