@@ -6,7 +6,7 @@ const tweets = require('./modules/tweets')
 const followship = require('./modules/followship')
 const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
-const { authenticated, authenticatedAdmin } = require('../middleware/auth')
+const { authenticated } = require('../middleware/auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 router.use('/admin', admin)
