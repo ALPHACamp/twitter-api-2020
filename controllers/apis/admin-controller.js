@@ -56,7 +56,7 @@ const adminController = {
         return res.status(200).json(users)
       } else {
         const usersSorted = users.sort((a, b) => b.tweetNum - a.tweetNum)
-        const resUsers = appFunc.resAdminUsersHandler(usersSorted)
+        const resUsers = appFunc.numToUnitHandler(usersSorted)
         return res.json({
           status: 'success',
           data: {
