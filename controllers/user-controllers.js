@@ -4,7 +4,7 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const validator = require('validator')
 const uploadFile = require('../helpers/file')
 const helpers = require('../_helpers')
-const { getFollowshipId } = require('../helpers/user')
+const { getFollowshipId, getLikedTweetsIds } = require('../helpers/user')
 
 const userController = {
   login: async (req, res, next) => {
@@ -261,29 +261,21 @@ const userController = {
   // Get all replied tweets by specific user
   getUserRepliedTweet: async (req, res, next) => {
     try {
-      const user = helpers.getUser(req)
-      let [replies, userLikes] = await Promise.all([
-        Reply.findAll({
-          where: { UserId: req.params.id },
-          include: [
-            {
-              model: Tweet,
-              include: [
-                { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-              ]
-            }
-          ],
-          raw: true,
-          nest: true
-        }),
-        Like.findAll({
-          where: { UserId: user.id },
-          raw: true
-        })
-      ])
+      let replies = await Reply.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            ]
+          }
+        ],
+        raw: true,
+        nest: true
+      })
 
-      // Clean like data
-      userLikes = userLikes.map(like => like.TweetId)
+      const userLikes = await getLikedTweetsIds(req)
 
       replies = replies.map(reply => ({
         ...reply,
@@ -298,9 +290,26 @@ const userController = {
 
   getUserLikes: async (req, res, next) => {
     try {
-      const likes = await Like.findAll({
-        where: { UserId: req.params.id }
+      let likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            include: [
+              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+            ]
+          }
+        ],
+        raw: true,
+        nest: true
       })
+
+      // Clean data
+      likes = likes.map(like => ({
+        ...like,
+        likedTweet: true
+      }))
 
       return res.status(200).json(likes)
     } catch (error) {
@@ -336,21 +345,16 @@ const userController = {
 
   // Get current user info
   getCurrentUser: async (req, res, next) => {
-    let user = helpers.getUser(req)
+    try {
+      let user = helpers.getUser(req)
+      user = await User.findById(user.id, {
+        raw: true
+      })
 
-    // Clean user
-    user = {
-      id: user.id,
-      name: user.name,
-      account: user.account,
-      avatar: user.avatar,
-      cover: user.cover,
-      role: user.role,
-      email: user.email,
-      introduction: user.introduction
+      return res.status(200).json(user)
+    } catch (error) {
+      next(error)
     }
-
-    return res.status(200).json(user)
   }
 }
 

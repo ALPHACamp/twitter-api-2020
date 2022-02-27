@@ -10,7 +10,7 @@ const tweets = require('./modules/tweets')
 const admin = require('./modules/admin')
 const followships = require('./modules/followships')
 
-// Login and Registration
+// Login & Registration & Current user
 router.post('/users/login', userController.login)
 router.post('/users/', userController.register)
 
