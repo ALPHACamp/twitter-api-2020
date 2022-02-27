@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 } //放在最前面好安心
 const express = require('express')
+const cors = require('cors')
 const handlebars = require('express-handlebars')
 const flash = require('connect-flash')
 //登入認證
@@ -17,6 +18,7 @@ const SESSION_SECRET = 'ThisIsMySecret'
 
 
 // body-parser
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json()) // POST json格式
 // app.use(session({
