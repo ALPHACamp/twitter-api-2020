@@ -39,7 +39,6 @@ const userController = {
       .then(users => {
         if (users.some(u => u.email === email)) throw new Error('email 已重複註冊！')
         if (users.some(u => u.account === account)) throw new Error('account 已重複註冊！')
-        if (name.length > 50) throw new Error('字數超出上限！')
 
         return bcrypt.hash(password, 10)
       })
@@ -78,7 +77,6 @@ const userController = {
   putUserSetting: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     if (password !== checkPassword) throw new Error('Passwords do not match!')
-    if (name.length > 50) throw new Error('字數超出上限！')
     if (!account || !name || !email) throw new Error('Account, name and email are required!')
     if (helpers.getUser(req).id !== Number(req.params.id)) throw new Error('permission denied')
     return Promise.all([
@@ -111,17 +109,17 @@ const userController = {
   },
   putUser: (req, res, next) => {
     const getUserId = Number(req.params.id)
-    const { name, introduction } = req.body
+    const { name, introduction, avatar, cover } = req.body
     if (!name) throw new Error('name is required!')
-    if (name.length > 50) throw new Error('字數超出上限！')
-    if (introduction.length > 160) throw new Error('字數超出上限！')
     if (helpers.getUser(req).id !== getUserId) throw new Error('permission denied')
     return User.findByPk(getUserId)
       .then(user => {
         if (!user) throw new Error('帳號不存在！')
         return user.update({
           name,
-          introduction
+          introduction,
+          avatar: avatar ? avatar : user.avatar,
+          cover: cover ? cover : user.cover
         })
       })
       .then(updatedUser => res.status(200).json({ user: updatedUser }))
@@ -236,6 +234,7 @@ const userController = {
             ...f.toJSON(),
             isFollowed: followingId?.includes(f.toJSON().followingId) || false
           }))
+          .sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
         result.forEach(i => delete i.Followship)
         return res.json(result)
       })
@@ -271,6 +270,7 @@ const userController = {
             ...f.toJSON(),
             isFollowed: followingId?.includes(f.toJSON().followerId) || false
           }))
+          .sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
         result.forEach(i => delete i.Followship)
         return res.json(result)
       })
@@ -286,11 +286,12 @@ const userController = {
         model: Tweet,
         include: [
           { model: User, attributes: ['id', 'name', 'account'] },
-          { model: Like },
+          { model: Like, },
           { model: Reply }
         ]
       },
-      attributes: { exclude: ['id', 'UserId', 'createdAt', 'updatedAt'] }
+      attributes: { exclude: ['id', 'UserId', 'createdAt', 'updatedAt'] },
+      order: [['createdAt', 'DESC']] 
     },
     )
       .then(likes => {
