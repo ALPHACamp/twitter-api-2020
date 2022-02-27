@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('validator')
+const { Op } = require('sequelize')
 const { User, Like, Tweet, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
@@ -48,7 +49,7 @@ const userController = {
         status: 'error',
         message: 'account 或 email 已註冊!'
       })
-      const user = await User.create({
+      await User.create({
         name,
         account,
         email,
@@ -184,12 +185,8 @@ const userController = {
         raw: true
       })
       delete userData.password
-      
-      res.json({
-        status: 'success',
-        message: 'getUser success!',
-        data: userData
-      })
+
+      res.json({ userData })
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
@@ -199,7 +196,8 @@ const userController = {
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
         raw: true,
-        include: [User]
+        include: User,
+        nest: true
       })
       if (tweetsData.length === 0) return res.status(400).json({
         status: 'error',
@@ -213,8 +211,91 @@ const userController = {
     } catch (err) { next(err) }
   },
   putUser: async (req, res, next) => {
-    const { account, name, email, password, checkPassword } = req.body
-    const user = await User.findByPk(req.params.id)
+    try {
+      const id = +req.params.id
+      const userId = req.user.id
+      const { account, name, email, password, checkPassword } = req.body
+
+      if (!name || !account || !email || !password || !checkPassword) {
+        return res.status(400).json({
+          status: 'error',
+          message: '欄位必須全部填完' 
+        })
+      }
+      if (userId !== id) return res.status(400).json({
+        status: 'error',
+        message: 'No permission'
+      })
+
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({
+          status: 'error',
+          message: '請輸入正確信箱格式'
+        })
+      }
+      if (!validator.isByteLength(password, { min: 4 })) {
+        return res.status(400).json({
+          status: 'error',
+          message: '密碼請輸入至少 4 個!'
+        })
+      }
+      if (password !== checkPassword) {
+        return res.status(400).json({
+          status: 'error',
+          message: '兩次密碼不相符'
+        })
+      }
+      if (!validator.isByteLength(name, { min: 0, max: 50 })) {
+        return res.status(400).json({
+          status: 'error',
+          message: '名字長度不能超過 50 個字'
+        })
+      }
+      // 列出全部有相同 account or email 的 user
+      const checkedUser = await User.findAll({
+        where: { [Op.or]: [{ account }, { email }]},
+        attributes: ['id', 'name', 'account', 'email', 'avatar', 'role'],
+        raw: true
+      })
+
+      const otherUser = checkedUser.find(user => user.id !== userId)
+
+      if (otherUser) return res.status(400).json({
+        status: 'error',
+        message: 'account or email 已被使用'
+      })
+
+      delete req.body.checkPassword
+    
+      req.body.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+      const user = await User.findByPk(id)
+      const updatedUser = await user.update(req.body)
+
+      res.json({
+        status: 'success',
+        message: 'putUser success',
+        updateduser: updatedUser.toJSON()
+      })
+    } catch (err) { next(err) }
+  },
+  getCurrentUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.user.id, {
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'email',
+          'avatar',
+          'role'
+        ]
+      })
+      if (!user) return res.status(400).json({
+        status: 'error',
+        message: 'user not found'
+      })
+      res.json({ user })
+    } catch (err) { next(err) }
   }
 }
 

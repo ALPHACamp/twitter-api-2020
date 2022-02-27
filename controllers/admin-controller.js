@@ -45,13 +45,14 @@ const adminController = {
       const data = tweets.map(tweet => {
         tweet.username = tweet.User.name
         tweet.account = tweet.User.account
+        tweet.avatar = tweet.User.avatar
         delete tweet.User
         return { ...tweet }
       })
       res.json({
         status: 'success',
         message: 'Admin getTweets success',
-        data
+        tweets: data
       })
     } catch (err) { next(err) }
   },
