@@ -27,6 +27,7 @@ module.exports = {
 
     // 先建立一串預備要更新至Likes表格的留言紀錄，每個喜歡推文的人皆為不一樣
     const seederArray = []
+    // 紀錄使用者喜歡數
     const userLikeCounts = {}
     seedTweets.forEach(tweetId => {
 
@@ -41,13 +42,12 @@ module.exports = {
       }
 
       const result = Object.keys(userList).map(index => seedUsers[index])
-      console.log(result)
       result.forEach(userId => {
-        console.log()
-        userLikeCounts[`${userId}`] = userLikeCounts[`${userId}`] ?
-          userLikeCounts[`${userId}`]++ :
+
+        userLikeCounts[userId] = userLikeCounts[userId] ?
+          ++userLikeCounts[userId] :
           1
-        
+
         seederArray.push({
           TweetId: tweetId,
           UserId: userId,
@@ -57,18 +57,28 @@ module.exports = {
       })
 
     })
-    console.log(userLikeCounts)
 
-    // // 更新資料庫上推文所擁有的留言數
-    // await Promise.all(seedTweets.map(tweetId => queryInterface.sequelize.query(
-    //   `
-    //       UPDATE Tweets SET likeCount = 3
-    //       WHERE id = ${tweetId}
-    //   `
-    // )))
+    // 更新使用者的喜歡數
+    await Promise.all(
+      Object.entries(userLikeCounts).map(([key, value]) => {
+        const queryStatement = `
+          UPDATE Users SET likeCount = ${value}
+          WHERE id = ${key}
+        `
+        return queryInterface.sequelize.query(queryStatement)
+      })
+    )
 
-    // // 實際更新使用者對於推文的留言
-    // await queryInterface.bulkInsert('Likes', seederArray)
+    // 更新資料庫上推文所擁有的喜歡數
+    await Promise.all(seedTweets.map(tweetId => queryInterface.sequelize.query(
+      `
+          UPDATE Tweets SET likeCount = 3
+          WHERE id = ${tweetId}
+      `
+    )))
+
+    // 實際更新使用者對於推文的留言
+    await queryInterface.bulkInsert('Likes', seederArray)
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -80,6 +90,11 @@ module.exports = {
       return queryInterface.bulkDelete('People', null, {});
     */
 
+    const seedUsers = (await queryInterface.sequelize.query(
+      'SELECT `id` FROM `Users` WHERE role = "user"', {
+      type: queryInterface.sequelize.QueryTypes.SELECT
+    })).map(item => item.id)
+
     const seedTweets = (await queryInterface.sequelize.query(
       'SELECT `id` FROM `Tweets`', {
       type: queryInterface.sequelize.QueryTypes.SELECT
@@ -90,6 +105,15 @@ module.exports = {
       const queryStatement = `
           UPDATE Tweets SET likeCount = 0
           WHERE id = ${tweetId}
+      `
+      await queryInterface.sequelize.query(queryStatement)
+    })
+
+    // 重設每個使用者的喜歡數為0
+    seedUsers.forEach(async userId => {
+      const queryStatement = `
+          UPDATE Users SET likeCount = 0
+          WHERE id = ${userId}
       `
 
       await queryInterface.sequelize.query(queryStatement)
