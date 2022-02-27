@@ -245,7 +245,7 @@ const userController = {
 
 
       const avatar = req.files?.avatar
-      const cover = req.files?.avatar
+      const cover = req.files?.cover
       
 
       const user = await User.findByPk(id, {attributes: { exclude: ['password'] }})
