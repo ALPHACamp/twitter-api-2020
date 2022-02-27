@@ -46,18 +46,23 @@ module.exports = {
       const followerId = helpers.getUser(req).id
       const followingId = Number(req.params.followingId)
 
-      if (!followingId) throw new Error('沒有追隨者ID，取消跟隨動作失敗!')
+      if (!followingId) throw new Error('沒有追隨者ID，取消追隨動作失敗!')
+      if (followerId === followingId) {
+        throw new Error('不能對自己取消追隨的動作!')
+      }
 
       const [follower, following, followship] = await Promise.all([
         User.findByPk(followerId),
-        User.findByPk(Number(followingId)),
+        User.findOne({
+          where: { id: Number(followingId), role: 'user' }
+        }),
         Followship.findOne({
           where: { followerId, followingId }
         })
       ])
 
-      if (!following) throw new Error('追隨者並不存在，跟隨動作失敗!')
-      if (!followship) throw new Error('不能對尚未跟隨的使用者收回跟隨!')
+      if (!following) throw new Error('追隨者並不存在，取消追隨動作失敗!')
+      if (!followship) throw new Error('不能對尚未追隨的使用者取消追隨!')
 
       const responseData = await sequelize.transaction(async (t) => {
         // only retrieve first array item, which is created followship
