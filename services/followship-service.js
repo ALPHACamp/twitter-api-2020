@@ -51,7 +51,6 @@ const followshipServices = {
       }],
       order: [[sequelize.col('totalFollowers'), 'DESC']],
       subQuery: false, // 避免因查詢多張表造成limit失常
-      having: { totalFollowers: { [sequelize.Op.gt]: 0 } }, // 只要粉絲大於0的人
       limit: 10
     })
       .then(user => {
