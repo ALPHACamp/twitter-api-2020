@@ -96,21 +96,24 @@ const userController = {
 
   getUser: async (req, res, next) => {
     try {
-      const targetUser = await User.findByPk(req.params.id, {
+      const user = await User.findByPk(req.params.id, {
         include: [
+          { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
         ]
       })
-      if (!targetUser) return res.json({ status: 'error', message: "User didn't exist!" })
-      const { account, name, email, introduction, avatar, cover } = targetUser
-      const isFollowing = targetUser.Followers.some(f => f.id === req.user.id)
-      return res.json({
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
+      const { account, name, email, introduction, avatar, cover } = user
+      const isFollowing = user.Followers.some(f => f.id === req.user.id)
+      return res.json({ 
         account,
         name,
         email,
         introduction,
         avatar,
         cover,
+        followingCount: user.Followings.length,
+        followerCount: user.Followers.length,
         isFollowing
       })
     } catch (err) {
@@ -120,15 +123,27 @@ const userController = {
 
   getUserTweets: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id)
-      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
-      const tweets = await Tweet.findAll({
-        where: { UserId: req.params.id },
-        order: [['createdAt', 'DESC']],
-        nest: true,
-        raw: true
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          { model: Tweet, include: [Reply, Like] }
+        ]
       })
-      return res.json(tweets)
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
+      const result = user.Tweets.map(tweet => {
+        return {
+          tweetUserId: user.id,
+          tweetUserAccount: user.account,
+          tweetUserName: user.name,
+          TweetId: tweet.id,
+          description: tweet.description,
+          createdAt: tweet.createdAt,
+          repliedCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+        }
+      })
+        .sort((a, b) => b.createdAt - a.createdAt)
+      return res.json(result)
     } catch (err) {
       next(err)
     }
@@ -182,7 +197,7 @@ const userController = {
         .sort((a, b) => b.createdAt - a.createdAt)
 
       if (userFollowings.length === 0) {
-        return res.json({ status: 'success', data: [] })
+        return res.json(userFollowings)
       }
       return res.json(userFollowings)
     } catch (err) {
@@ -213,7 +228,7 @@ const userController = {
         .sort((a, b) => b.createdAt - a.createdAt)
 
       if (userFollowers.length === 0) {
-        return res.json({ status: 'success', data: [] })
+        return res.json(userFollowers)
       }
       return res.json(userFollowers)
     } catch (err) {
@@ -273,9 +288,9 @@ const userController = {
           TweetId: tweet.id,
           description: tweet.description,
           createdAt: tweet.createdAt,
-          tweetUserId: tweet.id,
-          tweetUserName: tweet.name,
-          avatar: tweet.avatar,
+          tweetUserId: tweet.User.id,
+          tweetUserName: tweet.User.name,
+          avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
           liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === like.Tweet.id) : false
