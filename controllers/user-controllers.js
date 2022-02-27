@@ -5,44 +5,16 @@ const validator = require('validator')
 const uploadFile = require('../helpers/file')
 const helpers = require('../_helpers')
 const { getFollowshipId, getLikedTweetsIds } = require('../helpers/user')
+const userServices = require('../services/user-service')
 
 const userController = {
   login: async (req, res, next) => {
     const { email, password } = req.body
-    if (!email || !password) {
-      return res.status(422).json({
-        status: 'error',
-        message: 'Missing email or password!'
-      })
-    }
+
     try {
-      let user = await User.findOne({ where: { email } })
+      const { status, data } = await userServices.login(email, password)
 
-      // User not found
-      if (!user) {
-        return res.status(401).json({
-          status: 'error',
-          message: "This account doesn't exist."
-        })
-      }
-
-      // Password incorrect
-      if (!bcrypt.compareSync(password, user.password))
-        return res.status(401).json({
-          status: 'error',
-          message: 'Incorrect password.'
-        })
-
-      user = user.toJSON()
-      // Issue a token to user
-      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '7d' })
-      return res.json({
-        status: 'success',
-        data: {
-          token,
-          user
-        }
-      })
+      return res.json({ status, data })
     } catch (error) {
       next(error)
     }
