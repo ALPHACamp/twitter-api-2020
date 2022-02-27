@@ -35,14 +35,10 @@ const likeController = {
           include: [
             {
               model: User,
-              attributes: ['id','name','account']
+              attributes: ['name','account']
             }
           ]
         }
-        // {
-        //   model: User,
-        //   attributes: ['name', 'account']
-        // }
       ]
     })
     if (likes.length ==0) {
