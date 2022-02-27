@@ -181,16 +181,29 @@ module.exports = {
   getRepliedTweets: async (req, res, next) => {
     try {
       const { UserId } = req.params
-      const repliedTweets = await Reply.findAll({
+      const replies = await Reply.findAll({
         where: { UserId },
         include: [{
-          model: Tweet, as: 'repliedTweet',
-          include: [{ model: User, as: 'tweetedUser', attributes: { exclude: ['password'] } }]
+          model: Tweet,
+          include: [{ model: User, attributes: { exclude: ['password'] } }]
         }],
+        order: [['createdAt', 'DESC']],
         nest: true
       })
 
-      const responseData = repliedTweets
+      const responseData = replies.map(reply => {
+        reply = reply.toJSON()
+
+        // assign following two objects to reply
+        reply.repliedTweet = reply.Tweet
+        reply.repliedTweet.tweetedUser = reply.Tweet.User
+
+        // remove unnecessary key properties
+        delete reply.Tweet
+        delete reply.repliedTweet.User
+
+        return reply
+      })
 
       return res.status(200).json(responseData)
 
