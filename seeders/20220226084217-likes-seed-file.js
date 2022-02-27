@@ -19,12 +19,15 @@ module.exports = {
     const insertedLikes = tweets.map(tweet => {
       userRandomChooser.refresh()
       const likeTimes = Math.floor(Math.random() * userIds.length) + 1
-      return Array.from({ length: likeTimes }, () => ({
-        TweetId: tweet.id,
-        UserId: userRandomChooser.choose(),
-        createdAt: new Date(+(tweet.createdAt) + Math.floor(Math.random() * 100000000)), // minus 10^10 milisecond from current date
-        updatedAt: new Date(+(tweet.createdAt) + Math.floor(Math.random() * 100000000))
-      }))
+      return Array.from({ length: likeTimes }, () => {
+        const newDate = new Date(+(tweet.createdAt) + Math.floor(Math.random() * 100000000)) // minus 10^10 milisecond from current date
+        return {
+          TweetId: tweet.id,
+          UserId: userRandomChooser.choose(),
+          createdAt: newDate, 
+          updatedAt: newDate
+        }
+      })
     }).flat()
 
     await queryInterface.bulkInsert('Likes', insertedLikes, {})
