@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const helpers = require('../_helpers')
 const validator = require('validator')
 const { Op } = require('sequelize')
-const { User, Like, Tweet, Followship } = require('../models')
+const { User, Like, Tweet, Followship, Reply } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const userController = {
   signUp: async (req, res, next) => {
@@ -116,6 +116,127 @@ const userController = {
         data: tweetsData
       })
     } catch (err) { next(err) }
+  },
+  getUserLikes: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      const like = await Like.findAll({
+        where: { UserId: req.params.id }
+      })
+      if (!user) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '使用者不存在'
+          })
+      }
+      if (!like) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: '使用者沒有like過的推文'
+          })
+      }
+      const likes = await Like.findAll({
+        where: {
+          UserId: req.params.id,
+          isDeleted: false
+        },
+        order: [['createdAt', 'desc']],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['description'],
+            include: [
+              {
+                model: User,
+                attributes: ['name', 'account']
+              }
+            ]
+          }
+        ]
+      })
+      if (likes.length == 0) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '推文不存在'
+          })
+      }
+      return res.status(200).json(likes)
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error
+      })
+    }
+  },
+  getUserReplies: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      // const replies = await Reply.findAll({
+      //   where: {
+      //     UserId: req.params.id
+      //   }
+      // })
+      if (!user) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '使用者不存在'
+          })
+      }
+      // if (!replies) {
+      //   return res
+      //     .status(400)
+      //     .json({
+      //       status: 'error',
+      //       message: '使用者沒有回覆過的推文'
+      //     })
+      // }
+      const replies = await Reply.findAll({
+        where: {
+          UserId: req.params.id
+        },
+        order: [['createdAt', 'desc']],
+        attributes: ['comment', 'createdAt', 'updatedAt'],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['id'],
+            include: [
+              {
+                model: User,
+                attributes: ['account']
+              }
+            ]
+          },
+          {
+            model: User,
+            attributes: ['id', 'name', 'account','avatar']
+          }
+        ]
+      })
+      if (replies.length === 0) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '使用者沒有回覆過的貼文'
+          })
+      } else {
+        return res.status(200).json(replies)
+      }
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error
+      })
+    }
   },
   putUser: async (req, res, next) => {
     try {
