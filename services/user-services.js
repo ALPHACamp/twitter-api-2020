@@ -166,7 +166,7 @@ const userServices = {
         const data = replies.map(r => ({
           id: r.id,
           comment: r.comment,
-          replierData: {
+          replyerData: {
             id: r.User.id,
             account: r.User.account,
             name: r.User.name,
