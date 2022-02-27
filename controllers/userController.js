@@ -71,7 +71,7 @@ const userController = {
         })
       })
       .then(user => {
-        res.json({ status: 'success', message: '註冊成功', user })
+        res.json({ status: 'success', message: '註冊成功'})
       })
   },
   // 使用者頁面
