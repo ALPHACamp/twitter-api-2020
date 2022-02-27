@@ -21,7 +21,6 @@ const adminServices = {
   },
   getUsers: (req, cb) => {
     return User.findAll({
-      where: { role: 'user' },
       attributes: ['id', 'account', 'name', 'cover', 'avatar',
         [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Tweets WHERE Tweets.UserId = User.id)'),
           'tweetAmount'],
@@ -46,7 +45,7 @@ const adminServices = {
           'replyAmount']
       ],
       include: { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-      order: [['createdAt', 'DESC']],
+      order: [['createdAt', 'DESC'], ['id', 'DESC']],
       raw: true,
       nest: true
     })
