@@ -1,4 +1,5 @@
 const { Tweet, User, Like, Reply } = require('../models')
+const { getUser } = require('../_helpers')
 
 const tweetServices = {
   getTweets: (req, cb) => {
@@ -20,7 +21,7 @@ const tweetServices = {
             description: i.description,
             replyAmount: i.Replies.length,
             likeAmount: i.Likes.length,
-            userLiked: i.Likes.some(i => i.UserId === req.user.dataValues.id),
+            userLiked: i.Likes.some(i => i.UserId === getUser(req).dataValues.id),
             createdAt: i.createdAt
           }))
         return cb(null, tweetData)
@@ -30,7 +31,7 @@ const tweetServices = {
   postTweets: (req, cb) => {
     Tweet.create({
       description: req.body.description,
-      userId: req.user.dataValues.id
+      userId: getUser(req).dataValues.id
     })
       .then(() => cb(null, '成功建立推文'))
       .catch(err => cb(err, null))
@@ -51,7 +52,7 @@ const tweetServices = {
           description: Data.description,
           replyAmount: Data.Replies.length,
           likeAmount: Data.Likes.length,
-          userLiked: Data.Likes.some(i => i.UserId === req.user.dataValues.id),
+          userLiked: Data.Likes.some(i => i.UserId === getUser(req).dataValues.id),
           createdAt: Data.createdAt
         }
         return cb(null, tweetData)
@@ -64,7 +65,7 @@ const tweetServices = {
         if (tweet === null) throw new Error('輸入錯誤的tweetId，沒有此推文')
         Like.findOrCreate({
           where: {
-            userId: req.user.dataValues.id,
+            userId: getUser(req).dataValues.id,
             tweetId: req.params.id
           }
         })
@@ -79,7 +80,7 @@ const tweetServices = {
   unlikeTweet: (req, cb) => {
     Like.findOne({
       where: {
-        userId: req.user.dataValues.id,
+        userId: getUser(req).dataValues.id,
         tweetId: req.params.id
       }
     })
@@ -94,7 +95,7 @@ const tweetServices = {
       .then(tweet => {
         if (tweet === null) throw new Error('輸入錯誤的tweetId，沒有此推文')
         Reply.create({
-          userId: req.user.dataValues.id,
+          userId: getUser(req).dataValues.id,
           tweetId: req.params.id,
           comment: req.body.comment
         })
