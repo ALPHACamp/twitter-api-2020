@@ -19,7 +19,7 @@ const replyController = {
       return res.json({ status: 'error', message: '內容不可空白!'})
     }
     if (comment.length > 140) {
-      return res.json({ status: 'error', message: '內容不可空白!'})
+      return res.json({ status: 'error', message: '超過字數上限!'})
     }
     return Reply.create({
       UserId: helpers.getUser(req).id,
