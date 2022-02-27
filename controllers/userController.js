@@ -174,14 +174,11 @@ const userController = {
             followingId: following.id,
             account: following.account,
             email: following.email,
+            name: following.name,
             avatar: following.avatar,
             cover: following.cover,
             introduction: following.introduction,
-            isFollowed: helpers.getUser(req).Followings.some(u => u.id === following.id),
-            followerUser: {
-              followerId: user.id,
-              name: user.name
-            }
+            isFollowed: helpers.getUser(req).Followings.some(u => u.id === following.id)
           }
         })
 
@@ -192,7 +189,7 @@ const userController = {
   getFollowers: (req, res, next) => {
     return User.findByPk(req.params.id, {
       include: [{
-        model: User, as: 'Followers'
+        model: User, as: 'Followers', include: Tweet
       }]
     })
       .then(user => {
@@ -201,21 +198,18 @@ const userController = {
         // 將usee.Followers從物件拿出
         user = user.toJSON()
         const followers = user.Followers
-        // 將followings迭代，並將id重新命名為followingId，並回傳成陣列
 
+        // 將followings迭代，並將id重新命名為followingId，並回傳成陣列
         const data = followers.map(follower => {
           return {
             followerId: follower.id,
             account: follower.account,
             email: follower.email,
+            name: follower.name,
             avatar: follower.avatar,
             cover: follower.cover,
             introduction: follower.introduction,
-            isFollowed: helpers.getUser(req).Followings.some(u => u.id === follower.id),
-            followingUser: {
-              followingId: user.id,
-              name: user.name,
-            }
+            isFollowed: helpers.getUser(req).Followings.some(u => u.id === follower.id)
           }
         })
         res.json(data)
