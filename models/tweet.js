@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   });
   Tweet.associate = function (models) {
     Tweet.hasMany(models.Reply, { foreignKey: 'TweetId' })
-    Tweet.belongsTo(models.User, { foreignKey: 'UserId', as: 'tweetedUser' })
+    Tweet.belongsTo(models.User, { foreignKey: 'UserId' })
     Tweet.hasMany(models.Like, { foreignKey: 'TweetId' })
     Tweet.belongsToMany(models.User, {
       through: models.Like,
