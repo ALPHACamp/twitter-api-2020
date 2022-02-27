@@ -268,7 +268,8 @@ const userController = {
         include: [
           { model: Tweet },
           { model: User }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
       for (const likedTweet of likedTweets) {
         const TweetId = likedTweet.Tweet.id
