@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const sequelize = require('sequelize')
 const { Op } = require('sequelize');
 const helper = require('../_helpers')
-const { localFileHandler, imgurFileHandler } = require('../helpers/file-helpers')
+const uploadFile = require('../helpers/file-helpers')
 const jwt = require('jsonwebtoken')
 const userServices = {
   signUp: (req, cb) => {
@@ -87,18 +87,6 @@ const userServices = {
       if (name && name.length > 50) throw new Error('暱稱字數超出上限！')
       if (introduction && introduction.length > 160) throw new Error('自我介紹字數超出上限！')
       const { files } = req
-      if (files) {
-        if (files.avatar) {
-          // let localAvatar = await localFileHandler(files.avatar[0])
-          const avatar = await imgurFileHandler(files.avatar[0])
-          req.body.avatar = avatar
-        }
-        if (files.cover) {
-          // let localCover = await localFileHandler(files.cover[0])
-          const cover = await imgurFileHandler(files.cover[0])
-          req.body.cover = cover
-        }
-      }
       const user = await User.findByPk(userId, {
         attributes: {
           exclude: [
@@ -107,17 +95,28 @@ const userServices = {
         }
       })
       if (!user) throw new Error("User didn't exist!")
+      const images = {}
+      if (files) {
+        for (const key in files) {
+          images[key] = await uploadFile(files[key][0])
+        }
+        await user.update({
+          name: name || user.name,
+          introduction: introduction || user.introduction,
+          cover: images.cover ? images.cover : user.cover,
+          avatar: images.avatar ? images.avatar : user.avatar
+        })
+      }
       await user.update({
         name: name || user.name,
-        introduction: introduction || user.introduction,
-        avatar: req.body.avatar || user.avatar,
-        cover: req.body.cover || user.cover
+        introduction: introduction || user.introduction
       })
       return cb(null, user.toJSON())
     } catch (err) {
       cb(err)
     }
   },
+
   putSetting: async (req, cb) => {
     try {
       const { account, name, email, password } = req.body
