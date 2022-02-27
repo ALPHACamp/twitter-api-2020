@@ -74,7 +74,7 @@ const adminServices = {
       nest: true
     })
       .then(tweet => {
-        if (!tweet) throw new Error(' Parameters 的資料錯誤，無法執行該操作')
+        if (!tweet) throw new Error('此貼文不存在，可能是 Parameters 的資料錯誤或已經被刪除')
         return cb(null, {
           status: 'success',
           message: '操作成功'
