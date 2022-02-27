@@ -25,11 +25,11 @@ const replyController = {
           UserId: req.params.id
         },
         order: [['createdAt', 'desc']],
-        attributes: ['comment'],
+        attributes: ['comment', 'createdAt', 'updatedAt'],
         include: [
           {
             model: Tweet,
-            attributes: ['UserId'],
+            attributes: ['id'],
             include: [
               { model:User,
                 attributes:['account']
@@ -37,7 +37,7 @@ const replyController = {
             ]
           },
           { model: User,
-            attributes:['name','account'] }
+            attributes:['id','name','account'] }
         ]
       })
       if (replies.length == 0) {
