@@ -1,8 +1,9 @@
 const CORSHeader = (req, res, next) => {
   res.header('Access-Control-Allow-Origin', process.env.front_end_web_url)
-  res.header('Access-Control-Allow-Headers', 'content-type')
-  res.header('Access-Control-Allow-Methods', 'PUT', 'DELETE', 'OPTIONS')
-  res.header('Access-Control-Max-Age', 600)
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS')
+  }
   next()
 }
 
