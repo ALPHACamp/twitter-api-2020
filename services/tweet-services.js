@@ -13,12 +13,15 @@ const tweetController = {
           }, {
             model: Like
           }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
+      const userId = req.user.id
       const returnTweets = tweets.map(tweet => {
         const returnTweet = tweet.toJSON()
         returnTweet.repliesCount = returnTweet.Replies.length
         returnTweet.likesCount = returnTweet.Likes.length
+        returnTweet.isLiked = returnTweet.Likes.some(Like => Like.UserId === userId)
         return returnTweet
       })
 
@@ -45,10 +48,11 @@ const tweetController = {
       if (!tweet) {
         return cb(new Error('tweet_id does not exist.'))
       }
+      const userId = req.user.id
       const returnTweet = tweet.toJSON()
       returnTweet.repliesCount = returnTweet.Replies.length
       returnTweet.likesCount = returnTweet.Likes.length
-
+      returnTweet.isLiked = returnTweet.Likes.some(Like => Like.UserId === userId)
       return cb(null, returnTweet)
     } catch (err) {
       return cb(err)
@@ -95,7 +99,11 @@ const tweetController = {
       })
 
       if (findLike) {
-        return cb(new Error('This tweet is already liked.'))
+        return cb(null, {
+          status: 'success',
+          isLiked: true,
+          message: 'This tweet is already liked.'
+        })
       }
 
       const newLike = await Like.create({
@@ -105,6 +113,7 @@ const tweetController = {
 
       const likeData = {
         status: 'success',
+        isLiked: true,
         data: {
           Like: newLike.dataValues
         }
@@ -130,12 +139,17 @@ const tweetController = {
         }
       })
       if (!findLike) {
-        return cb(new Error('This tweet is not liked.'))
+        return cb(null, {
+          status: 'success',
+          isLiked: false,
+          message: 'This tweet is not liked.'
+        })
       }
       const deletedLike = await findLike.destroy()
 
       const likeData = {
         status: 'success',
+        isLiked: false,
         data: {
           Like: deletedLike.dataValues
         }
