@@ -4,7 +4,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const path = require('path')
 const methodOverride = require('method-override')
 const cors = require('cors')
 const passport = require('./config/passport')
@@ -20,8 +19,6 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 app.use(express.json())
-// 設定讓外部傳入的 request 可以取得 /upload 路徑
-app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', router)
 
