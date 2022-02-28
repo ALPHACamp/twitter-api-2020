@@ -87,9 +87,9 @@ const userController = {
     })
       .then(user => {
         if (!user) throw new Error("User didn't exist!")
-        user.dataValues.followingCount = user.Followings?.length
-        user.dataValues.follwerCount = user.Followers?.length
-        user.dataValues.isFollowed = user.Followers?.some(id => id === currentUser.id)
+        user.dataValues.followingCount = user.Followings ? user.Followings.length : 0
+        user.dataValues.follwerCount = user.Followers ? user.Followers.length : 0
+        user.dataValues.isFollowed = user.Followers ? user.Followers.some(id => id === currentUser.id) : false
         res.json(user)
       })
       .catch(err => next(err))
