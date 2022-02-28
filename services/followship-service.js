@@ -38,6 +38,7 @@ const followshipServices = {
   followshipTop10: (req, cb) => {
     User.findAll({
       group: 'User.id',
+      where: { role: 'user' },
       attributes: [
         'id', 'account', 'name', 'avatar', 'introduction',
         [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
@@ -55,7 +56,7 @@ const followshipServices = {
       limit: 10
     })
       .then(user => {
-        if (user.length === 0) throw new Error('資料庫內沒有任何使用者資料')
+        if (user.length === 0) return cb(null, [])
         const userData = user.map(i => i.get({ plain: true }))
           .map(i => ({
             ...i,

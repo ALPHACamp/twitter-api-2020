@@ -8,7 +8,7 @@ const tweetServices = {
       include: [User, Like, Reply]
     })
       .then(tweet => {
-        if (tweet.length === 0) throw new Error('資料庫內沒有推文資料')
+        if (tweet.length === 0) return cb(null, [])
         const tweetData = tweet.map(i => i.get({ plain: true }))
           .map(i => ({
             id: i.id,
@@ -117,7 +117,7 @@ const tweetServices = {
       include: [User, { model: Tweet, include: [User] }]
     })
       .then(reply => {
-        if (reply.length === 0) throw new Error('此推文沒有任何回覆')
+        if (reply.length === 0) return cb(null, [])
         const replyData = reply.map(i => i.get({ plain: true }))
           .map(i => ({
             id: i.id,
