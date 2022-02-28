@@ -227,9 +227,6 @@ const userController = {
       })
         .sort((a, b) => b.createdAt - a.createdAt)
 
-      if (userFollowers.length === 0) {
-        return res.json(userFollowers)
-      }
       return res.json(userFollowers)
     } catch (err) {
       next(err)
@@ -245,23 +242,30 @@ const userController = {
       const replies = await Reply.findAll({
         where: { UserId: req.params.id },
         order: [['createdAt', 'DESC']],
-        include: [{ model: Tweet, include: User }]
+        include: [
+          { model: Tweet, include: User }
+        ]
       })
-      if (replies.length === 0) {
-        return res.json({ status: 'error', message: 'No reliedTweets!' })
-      }
       const result = replies.map(reply => {
         const repliedTweet = reply.Tweet
+
         return {
           comment: reply.comment,
           tweetId: repliedTweet.id,
           description: repliedTweet.description,
           createdAt: repliedTweet.createdAt,
-          tweetUserId: repliedTweet.id,
-          tweetUserName: repliedTweet.name,
-          avatar: repliedTweet.avatar,
-          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === repliedTweet.id) : false
+          tweetUserId: repliedTweet.User.id,
+          tweetUserName: repliedTweet.User.name,
+          tweetUserAccount: repliedTweet.User.account,
+          tweetUserAvatar: repliedTweet.User.avatar,
+          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === repliedTweet.id) : false,
+          replyUserId: user.id,
+          replyUserAccount: user.account,
+          replyUserName: user.name,
+          replyUserAvatar: user.avatar,
+          replyTime: reply.createdAt
         }
+        
       })
       return res.json(result)
     } catch (err) {
@@ -278,9 +282,6 @@ const userController = {
         order: [['createdAt', 'DESC']],
         include: [{ model: Tweet, include: [User, Like, Reply] }]
       })
-      if (likes.length === 0) {
-        return res.json({ status: 'error', message: 'No liked tweets!' })
-      }
 
       const result = likes.map(like => {
         const tweet = like.Tweet
@@ -290,6 +291,7 @@ const userController = {
           createdAt: tweet.createdAt,
           tweetUserId: tweet.User.id,
           tweetUserName: tweet.User.name,
+          account: tweet.User.account,
           avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
