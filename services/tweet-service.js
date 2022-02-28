@@ -20,6 +20,7 @@ const tweetServices = {
 
     return tweets
   },
+
   postTweet: async (user, description) => {
     // user need to be extract from helper in order to meet the test,
     // otherwise it will show timeout exceed 2000 ms.
@@ -43,6 +44,7 @@ const tweetServices = {
       tweet
     }
   },
+
   getTweet: async (tweetId, req) => {
     let tweet = await Tweet.findByPk(tweetId, {
       include: [
@@ -55,6 +57,7 @@ const tweetServices = {
         }
       ]
     })
+    if (!tweet) throw new Error("This tweet doesn't exist!")
 
     // Clean data
     const userLikes = await getLikedTweetsIds(req)
@@ -66,6 +69,7 @@ const tweetServices = {
 
     return tweet
   },
+  
   likeTweet: async (tweetId, userId) => {
     const tweet = await Tweet.findByPk(tweetId)
     if (!tweet) throw new Error("This Tweet didn't exist!")
