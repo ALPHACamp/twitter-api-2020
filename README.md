@@ -18,9 +18,11 @@ cp .env.example .env
 ```
 
 ```
-touch .env
+vi .env
 ```
 設定JWT_SECRET=alphacamp
+
+shift + :wq 存檔離開
 
 ### 建立資料庫
 ```

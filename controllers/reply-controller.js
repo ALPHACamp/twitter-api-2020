@@ -1,49 +1,6 @@
 const { Reply, Tweet, User } = require('../models')
 const replyController = {
-  getUserReplies: async (req, res, next) => {
-    try {
-      const user = await User.findByPk(req.params.id)
-      const reply = await Reply.findByPk(req.params.id)
-      if (!user) {
-        return res
-          .status(404)
-          .json({
-            status: 'error',
-            message: '使用者不存在'
-          })
-      }
-      if (!reply) {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: '使用者沒有回覆過的推文'
-          })
-      }
-      const replies = await Reply.findAll({
-        where: {
-          UserId: req.params.id
-        },
-        order: [['createdAt', 'desc']],
-        include: [Tweet, User]
-      })
-      if (replies.length == 0) {
-        return res
-          .status(404)
-          .json({
-            status: 'error',
-            message: '回覆不存在'
-          })
-      }
-      return res.status(200).json(replies)
-    } catch (error) {
-      res.status(500).json({
-        status: 'error',
-        message: error
-      })
-    }
-  },
-  getTweetReplies: async (req, res) => {
+  getReplies: async (req, res) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
       if (!tweet) {
@@ -57,6 +14,12 @@ const replyController = {
           TweetId: req.params.id
         },
         order: [['createdAt', 'desc']],
+        include: [
+          { 
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          }
+        ]
       })
       if (!replies) {
         return res.status(404).json({
@@ -64,11 +27,12 @@ const replyController = {
         message: '這篇推文沒有回覆',
         })
       } else {
-        return res.status(200).json({
-          status: 'success',
-          message: '成功找到回覆',
-          Reply: replies
-        })
+        // return res.status(200).json({
+        //   status: 'success',
+        //   message: '成功找到回覆',
+        //   Reply: replies
+        // })
+        return res.status(200).json(replies)
       }
     } catch (error) {
       res.status(500).json({
@@ -77,8 +41,9 @@ const replyController = {
       })
     }
 },
-  postTweetReplies: (req, res) => {
-    const { TweetId, comment } = req.body
+  postReplies: (req, res) => {
+    const { comment } = req.body
+    const TweetId = req.params.id 
     const UserId = req.user.id
     if (!comment) {
       return res
