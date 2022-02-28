@@ -29,7 +29,6 @@ const replyController = {
     },
 
     putReply: async (req, res, next) => {
-        const tweetId = req.params.tweet_id
         const replyId = req.params.reply_id
         const comment = req.body?.comment?.trim() || null
 
@@ -38,31 +37,23 @@ const replyController = {
             if (!comment) return res.json({ status: 'error', message: "Comment is required!'" })
             if (comment.length > 140) return res.json({ status: 'error', message: "Comment is too long!'" })
 
-            const tweet = await Tweet.findByPk(tweetId)
-            if (!tweet) return res.json({ status: 'error', message: "Tweet didn't exist!"})
-
             const reply = await Reply.findByPk(replyId)
-            if (!reply || (Number(reply.TweetId) !== Number(tweet.id))) return res.json({ status: 'error', message: "Reply didn't exist!"})
+            if (!reply) return res.json({ status: 'error', message: "Reply didn't exist!"})
             if (helpers.getUser(req).id !== Number(reply.UserId)) return res.json({ status: 'error', message: "You can't do this." })
    
-
             return reply.update({ comment })
             .then(() => res.json({ status: 'success' }))
         } catch (err) { next(err) }
     },
 
     deleteReply: async (req, res, next) => {
-        const tweetId = req.params.tweet_id
         const replyId = req.params.reply_id
 
         try {
-            const tweet = await Tweet.findByPk(tweetId)
-            if (!tweet) return res.json({ status: 'error', message: "Tweet didn't exist!"})
-
             const reply = await Reply.findByPk(replyId)
             console.log(reply.TweetId)
             console.log(tweet.id)
-            if (!reply || (Number(reply.TweetId) !== Number(tweet.id))) return res.json({ status: 'error', message: "Reply didn't exist!"})
+            if (!reply) return res.json({ status: 'error', message: "Reply didn't exist!"})
             if (helpers.getUser(req).id !== Number(reply.UserId)) return res.json({ status: 'error', message: "You can't do this." })
 
 
