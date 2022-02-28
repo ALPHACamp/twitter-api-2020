@@ -18,7 +18,8 @@ module.exports = {
 
     const RANDOM_USER_API_URL = 'https://randomuser.me/api'
     const DEFAULT_PASSWORD = '12345678'
-    const DEFAULT_USERS_NUMBER = 5
+    // default DEFAULT_USERS_NUMBER is 5
+    const DEFAULT_USERS_NUMBER = 15
 
     // using axios to get some avatar pictures from Random User API
     return axios.get(`${RANDOM_USER_API_URL}?results=${DEFAULT_USERS_NUMBER}`)

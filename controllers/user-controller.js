@@ -85,13 +85,13 @@ module.exports = {
     try {
       const DEFAULT_LIMIT_NUMBER = 10
       const DEFAULT_OFFSET_NUMBER = 0
+      const fieldsArray = Object.keys(helpers.getUser(req))
+      const followingIdArray = helpers.getUser(req).Followings.map(f => f.id)
 
       // retrieve all query strings from HTTP request, and 
       // use their values or fallback default values
-      const fieldArray = Object.keys(helpers.getUser(req))
-
       const field = req.query.field?.trim() || 'totalFollowers'
-      if (!fieldArray.includes(field)) {
+      if (!fieldsArray.includes(field)) {
         throw new Error('提供的欄位並不存在，動作執行失敗!')
       }
 
@@ -104,7 +104,7 @@ module.exports = {
       const offset = Number(req.query.offset) || DEFAULT_OFFSET_NUMBER
 
       // using previous option values to do database query
-      const responseData = await User.findAll({
+      const users = await User.findAll({
         where: { role: 'user' },
         order: [[field, order]],
         limit,
@@ -112,6 +112,11 @@ module.exports = {
         attributes: { exclude: ['password'] },
         raw: true
       })
+
+      const responseData = users.map(user => ({
+        ...user,
+        isFollowed: followingIdArray.some(f => f === user.id)
+      }))
 
       return res.status(200).json(responseData)
 
