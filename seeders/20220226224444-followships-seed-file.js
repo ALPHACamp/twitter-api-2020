@@ -15,23 +15,19 @@ module.exports = {
       const followingIds = userIds.filter(x => x !== user.id)
       const followingRandomChooser = new RandomChooser(followingIds)
 
-      // return Array.from({ length: followTimes }, () => ({
-      //   followingId: followingRandomChooser.choose(),
-      //   followerId: user.id,
-      //   createdAt: newDate,
-      //   updatedAt: newDate
-      // })
-      // )
       return Array.from({ length: followTimes }, () => {
-        const newDate = new Date(+(user.createdAt) + Math.floor(Math.random() * 1000000000)) // add 10^9 milisecond from user createdAt date
+        const followingId = followingRandomChooser.choose()
+        const followingUserCreatedAt = users.filter(user => user.id === followingId)[0].createdAt
+        const newDate = new Date(+(Math.max(followingUserCreatedAt, user.createdAt)) + Math.floor(Math.random() * 1000000000)) // add 10^9 milisecond from latest user createdAt date
         return {
-          followingId: followingRandomChooser.choose(),
+          followingId: followingId,
           followerId: user.id,
           createdAt: newDate,
           updatedAt: newDate
         }
       })
     }).flat()
+
     await queryInterface.bulkInsert('followships', insertedFollowships, {})
   },
 
