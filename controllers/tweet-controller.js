@@ -16,8 +16,6 @@ module.exports = {
         nest: true
       })
 
-      if (!tweets.length) throw new Error('沒有任何推文!')
-
       // reassemble tweets array
       const responseData = tweets.map(tweet => {
         tweet = tweet.toJSON()
@@ -125,7 +123,6 @@ module.exports = {
       ])
 
       if (!tweet) throw new Error('因為沒有這則推文，無法查詢底下的回覆!')
-      if (!replies.length) throw new Error('這則推文沒有任何回覆!')
 
       // reassemble replies array
       const responseData = replies.map(reply => {
