@@ -25,7 +25,7 @@ const userController = {
             }
           });
 
-        } else { res.json({ status: "error", message: "You are user!"}) }
+        } else { res.json({ status: "error", message: "You are not user!"}) }
       } else {
         res.json(errData);
       }
