@@ -7,7 +7,7 @@ const ExtractJWT = passportJWT.ExtractJwt
 // 宣告物件，token的 bearer 資訊，與所設定的金鑰
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: process.env.JWT_SECRET || 'test',
 }
 
 // 設定jwt的登入策略
