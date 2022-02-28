@@ -104,8 +104,42 @@ const userController = {
         })
       })
       .catch(error => next(error))
+  },
+  getUser: (req, res, next) => {
+    const userId = Number(req.params.id)
+    User.findByPk(userId)
+      .then(user => {
+        if (!user) throw new Error('帳號不存在')
+        // if (user.role === 'admin') throw new Error('帳號不存在！')
+        return res.status(200).json(user)
+      })
+      .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    const getUserId = Number(req.params.id)
+    const {
+      name,
+      introduction,
+      avatar,
+      cover
+    } = req.body
+    if (!name) throw new Error('name is required!')
+    if (helpers.getUser(req).id !== getUserId) throw new Error('permission denied')
+    return User.findByPk(getUserId)
+      .then(user => {
+        if (!user) throw new Error('帳號不存在！')
+        return user.update({
+          name,
+          introduction,
+          avatar,
+          cover
+        })
+      })
+      .then(updatedUser => res.status(200).json({
+        user: updatedUser
+      }))
+      .catch(err => next(err))
   }
 }
-
 
 module.exports = userController

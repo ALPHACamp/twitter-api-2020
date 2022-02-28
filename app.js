@@ -4,6 +4,7 @@ if (process.env.NODE_NEV !== 'production') {
 const express = require('express')
 const helpers = require('./_helpers')
 const passport = require('./config/passport')
+const methodOverride = require('method-override')
 
 const app = express()
 const port = 3000
@@ -21,6 +22,7 @@ app.use(express.urlencoded({
 }))
 app.use(express.json())
 app.use(passport.initialize())
+// app.use(methodOverride('_method'))
 
 // app.get('/', (req, res) => res.send('Hello World!'))
 app.use('/api', apis)
