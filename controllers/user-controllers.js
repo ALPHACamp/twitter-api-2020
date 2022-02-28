@@ -343,6 +343,7 @@ const userController = {
 
   editAccount: async (req, res, next) => {
     try {
+      console.log('req.user.id', req.user.id, 'req.params.id', req.params.id)
       if (req.user.id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this" })
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
@@ -354,12 +355,15 @@ const userController = {
       if (!account || !name || !email || !password || !checkPassword) return res.json({ status: 'error', message: 'All fields are required' })
       if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters.' })
       if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match.' })
-
       let sameUser = await User.findOne({ where: { email } })
-      if (sameUser) return res.json({ status: 'error', message: 'Email already existed.' })
+      if (sameUser) {
+        console.log('sameUser', sameUser.id, 'req.user.id', req.user.id)
+        if (sameUser.id !== req.user.id) return res.json({ status: 'error', message: 'Email already existed.' })
+      }
       sameUser = await User.findOne({ where: { account } })
-      if (sameUser) return res.json({ status: 'error', message: 'Account already existed.' })
-
+      if (sameUser) {
+        if (sameUser.id !== req.user.id) return res.json({ status: 'error', message: 'Account already existed.' })
+      }
       return bcrypt.hash(req.body.password, 10)
         .then(hash => {
           user.update({
