@@ -62,6 +62,8 @@ const userController = {
         if (emailUser) {
           return res.json({ status: 'error', message: 'email 已重複註冊!' })
         }
+
+        // 新增User資料，並回傳成功訊息
         return User.create({
           account,
           name,
@@ -69,10 +71,9 @@ const userController = {
           password: bcrypt.hashSync(password, 10),
           role: 'user'
         })
+          .then(() => res.json({ status: 'success', message: '註冊成功' }))
       })
-      .then(user => {
-        res.json({ status: 'success', message: '註冊成功' })
-      })
+      .catch(err => next(err))
   },
   // 使用者頁面
   getUser: (req, res, next) => {
