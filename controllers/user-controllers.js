@@ -1,6 +1,4 @@
-const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
-const { getFollowshipId, getLikedTweetsIds } = require('../helpers/user')
 const userServices = require('../services/user-service')
 
 const userController = {
