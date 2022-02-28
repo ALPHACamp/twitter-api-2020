@@ -42,7 +42,9 @@ const tweetController = {
           }, {
             model: Like
           }
-
+        ],
+        order: [
+          [Reply, 'createdAt', 'DESC']
         ]
       })
       if (!tweet) {

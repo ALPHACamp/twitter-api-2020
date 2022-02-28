@@ -19,7 +19,8 @@ const replyController = {
           TweetId
         },
         raw: true,
-        nest: true
+        nest: true,
+        order: [['createdAt', 'DESC']]
       })
       return cb(null, replies)
     } catch (err) {
