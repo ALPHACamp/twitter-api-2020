@@ -13,7 +13,7 @@ const replyController = require('../../controllers/reply-contoller')
 const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 const upload = require('../../middleware/multer')
 
-router.post('/users/signin', passport.authenticate('local', { session: false }), adminController.login)
+router.post('/users/signin', passport.authenticate('local', { session: false }), userController.login)
 router.post('/admin/login', passport.authenticate('local', { session: false }), adminController.login)
 
 router.post('/users/signin',passport.authenticate('local', { session: false }), userController.login)
