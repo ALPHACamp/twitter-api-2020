@@ -28,7 +28,8 @@ const tweetController = {
               avatar: tweet.User.avatar
             },
             replyCount: tweet.Replies ? tweet.Replies.length : 0,
-            likeCount: tweet.Likes ? tweet.Likes.length : 0
+            likeCount: tweet.Likes ? tweet.Likes.length : 0,
+            isLiked: helpers.getUser(req).Likes ? helpers.getUser(req).Likes.some(u => u.TweetId === tweet.id) : false
           }
         })
         // 回傳陣列-物件json
