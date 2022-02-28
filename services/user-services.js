@@ -44,6 +44,7 @@ const userController = {
   },
   signIn: (req, cb) => {
     try {
+      if (req.user.role === 'admin') return cb(new Error('you are admin user, permission denied'))
       const userData = req.user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -331,7 +332,6 @@ const userController = {
   },
   getCurrentUser: async (req, cb) => {
     try {
-      console.log(req.user)
       const currentUser = req.user
       const currentUserData = {
         status: 'success',
