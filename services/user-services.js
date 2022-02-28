@@ -324,7 +324,6 @@ const userController = {
   },
   getCurrentUser: async (req, cb) => {
     try {
-      console.log(req.user)
       const currentUser = req.user
       const currentUserData = {
         status: 'success',

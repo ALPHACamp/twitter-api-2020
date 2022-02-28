@@ -7,7 +7,6 @@ const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 const userController = require('../../controllers/apis/user-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
-const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 
 router.use('/admin', admin)
 router.use('/users', user)
