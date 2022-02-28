@@ -18,21 +18,29 @@ const tweetController = {
   },
   getTweet: (req, res) => {
     const TweetId = req.params.id
-    console.log(TweetId)
     Tweet.findByPk(TweetId, {
       include: [{
         model: User,
         attributes: ['id','name','account','avatar']
       }]
     })
-      .then(tweet => { return res.status(200).json(tweet) })
+      .then(tweet => {
+        if (!tweet) {
+          return res.status(404).json({
+            status: 'error',
+            message: '推文不存在'
+          })
+        } 
+        return res.status(200).json(tweet)
+      })
       .catch((error) => res.status(500).json({
         status: 'error',
         message: error
       }))
   },
   postTweet: (req, res) => {
-    const { UserId, description } = req.body
+    const { description } = req.body
+    const UserId = req.user.id
     if (!description) {
       return res
         .status(400)
