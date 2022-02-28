@@ -254,6 +254,13 @@ const userServices = {
     })
 
     return followings
+  },
+  getUserFollowers: async (req) => {
+    const followers = await Followship.findAll({
+      where: { followingId: req.params.id }
+    })
+
+    return followers
   }
 }
 

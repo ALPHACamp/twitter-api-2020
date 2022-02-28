@@ -119,9 +119,7 @@ const userController = {
   // Just for test, data included in GET api/users/:id
   getUserFollowers: async (req, res, next) => {
     try {
-      const followers = await Followship.findAll({
-        where: { followingId: req.params.id }
-      })
+      const followers = await userServices.getUserFollowers(req)
 
       return res.status(200).json(followers)
     } catch (error) {
