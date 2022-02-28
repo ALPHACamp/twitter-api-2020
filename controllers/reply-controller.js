@@ -42,7 +42,8 @@ const replyController = {
     }
 },
   postReplies: (req, res) => {
-    const { TweetId, comment } = req.body
+    const { comment } = req.body
+    const TweetId = req.params.id 
     const UserId = req.user.id
     if (!comment) {
       return res

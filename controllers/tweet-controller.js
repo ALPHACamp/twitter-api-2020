@@ -5,7 +5,10 @@ const tweetController = {
       raw: true,
       nest: true,
       order: [['createdAt', 'desc']],
-      include: [User]
+      include: [{
+        model: User,
+        attributes: ['id','name','account','avatar']
+      }]
     })
       .then(tweets => { return res.status(200).json(tweets) })
       .catch((error) => res.status(500).json({
