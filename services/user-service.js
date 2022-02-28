@@ -172,6 +172,33 @@ const userServices = {
     }))
 
     return topUsers
+  },
+  getUserTweets: async (req, user) => {
+    let [tweets, userLikes] = await Promise.all([
+      Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        raw: true,
+        nest: true
+      }),
+      Like.findAll({
+        where: { UserId: user.id },
+        raw: true
+      })
+    ])
+
+    // Clean like data
+    userLikes = userLikes.map(like => like.TweetId)
+
+    // Clean like data
+    tweets = tweets.map(tweet => ({
+      ...tweet,
+      isLiked: userLikes.includes(tweet.id)
+    }))
+
+    return tweets
   }
 }
 

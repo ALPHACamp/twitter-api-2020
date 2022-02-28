@@ -74,32 +74,10 @@ const userController = {
 
   // Get all tweets from specific user
   getUserTweets: async (req, res, next) => {
+    const user = helpers.getUser(req)
     try {
-      const user = helpers.getUser(req)
-      let [tweets, userLikes] = await Promise.all([
-        Tweet.findAll({
-          where: { UserId: req.params.id },
-          include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-          ],
-          raw: true,
-          nest: true
-        }),
-        Like.findAll({
-          where: { UserId: user.id },
-          raw: true
-        })
-      ])
-
-      // Clean like data
-      userLikes = userLikes.map(like => like.TweetId)
-
-      // Clean like data
-      tweets = tweets.map(tweet => ({
-        ...tweet,
-        isLiked: userLikes.includes(tweet.id)
-      }))
-
+      const tweets = await userServices.getUserTweets(req, user)
+      
       return res.status(200).json(tweets)
     } catch (error) {
       next(error)
