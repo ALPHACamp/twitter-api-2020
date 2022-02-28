@@ -144,7 +144,7 @@ const userController = {
         ...u.toJSON(),
         isFollowed: followedUsers.some(fu => fu.id === u.id)
       }))
-      console.log('長度', results.length)
+
       return res.json({ status: 'success', message: '成功獲取', data: results })
     } catch (err) {
       next(err)
