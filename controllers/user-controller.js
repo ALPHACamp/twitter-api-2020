@@ -99,11 +99,13 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const { id } = req.params
-      console.log(id)
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
         raw: true,
-        include: User,
+        include: {
+          model : User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        },
         nest: true
       })
       if (tweetsData.length === 0) return res.status(400).json({
@@ -262,7 +264,12 @@ const userController = {
             message: '此使用者沒有追蹤任何人'
           })
       } else {
-        return res.status(200).json(followship)
+        const userFollowings = followship
+        .map(userFollowing => ({
+          ...userFollowing.toJSON(),
+          isFollowed: true
+        }))
+        return res.status(200).json(userFollowings)
       }
     } catch (error) {
       res.status(500).json({
@@ -308,7 +315,12 @@ const userController = {
             message: '此使用者沒有跟隨者'
           })
       } else {
-        return res.status(200).json(followship)
+        const userFollowers = followship
+          .map(userFollower => ({
+            ...userFollower.toJSON(),
+            isFollowed: req.user.Followers.some(f => f.id === userFollower.id)
+          }))
+        return res.status(200).json(userFollowers)
       }
     } catch (error) {
       res.status(500).json({
