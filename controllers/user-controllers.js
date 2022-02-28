@@ -5,44 +5,16 @@ const validator = require('validator')
 const uploadFile = require('../helpers/file')
 const helpers = require('../_helpers')
 const { getFollowshipId, getLikedTweetsIds } = require('../helpers/user')
+const userServices = require('../services/user-service')
 
 const userController = {
   login: async (req, res, next) => {
     const { email, password } = req.body
-    if (!email || !password) {
-      return res.status(422).json({
-        status: 'error',
-        message: 'Missing email or password!'
-      })
-    }
+
     try {
-      let user = await User.findOne({ where: { email } })
+      const { status, data } = await userServices.login(email, password)
 
-      // User not found
-      if (!user) {
-        return res.status(401).json({
-          status: 'error',
-          message: "This account doesn't exist."
-        })
-      }
-
-      // Password incorrect
-      if (!bcrypt.compareSync(password, user.password))
-        return res.status(401).json({
-          status: 'error',
-          message: 'Incorrect password.'
-        })
-
-      user = user.toJSON()
-      // Issue a token to user
-      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '7d' })
-      return res.json({
-        status: 'success',
-        data: {
-          token,
-          user
-        }
-      })
+      return res.json({ status, data })
     } catch (error) {
       next(error)
     }
@@ -50,37 +22,9 @@ const userController = {
 
   // User sign up for new account
   register: async (req, res, next) => {
+    const { account, name, email, password, checkPassword } = req.body
     try {
-      const { account, name, email, password, checkPassword } = req.body
-
-      // Double check password
-      if (password !== checkPassword)
-        throw new Error('Please check your password again!')
-
-      // Check if email is used
-      const user = await User.findOne({ where: { email } })
-      if (user) throw new Error('Email is already used!')
-
-      // Check if account is used
-      const accountIsUsed = await User.findOne({ where: { account } })
-      if (accountIsUsed) throw new Error('Account is used.')
-
-      // Check if name exceeds 50 words
-      if (!validator.isByteLength(name, { min: 0, max: 50 }))
-        throw new Error('Name must not exceed 50 words.')
-
-      // Create new user
-      const hash = bcrypt.hashSync(password, 10)
-      const newUser = await User.create({
-        account,
-        name,
-        email,
-        password: hash,
-        role: 'user'
-      })
-
-      // Protect sensitive user info
-      newUser.password = undefined
+      const newUser = await userServices.register(account, name, email, password, checkPassword)
 
       return res.json({ newUser })
     } catch (error) {
@@ -91,51 +35,7 @@ const userController = {
   // Get basic user info
   getUser: async (req, res, next) => {
     try {
-      let user = await User.findByPk(req.params.id, {
-        include: [
-          Tweet,
-          {
-            model: User,
-            as: 'Followers',
-            attributes: ['id', 'name', 'account', 'avatar']
-          },
-          {
-            model: User,
-            as: 'Followings',
-            attributes: ['id', 'name', 'account', 'avatar']
-          }
-        ],
-        attributes: {
-          exclude: ['password']
-        }
-      })
-
-      const userFollowingIds = getFollowshipId(req, 'Followings')
-
-      // Clean data
-      const Followers = user.Followers.map(user => ({
-        id: user.id,
-        name: user.name,
-        account: user.account,
-        avatar: user.avatar,
-        isFollowed: userFollowingIds.includes(user.id)
-      }))
-
-      const Followings = user.Followings.map(user => ({
-        id: user.id,
-        name: user.name,
-        account: user.account,
-        avatar: user.avatar,
-        isFollowed: userFollowingIds.includes(user.id)
-      }))
-
-      user = {
-        ...user.dataValues,
-        introduction: '',
-        isFollowed: userFollowingIds.includes(user.id),
-        Followers,
-        Followings
-      }
+      const user = await userServices.getUser(req)
 
       return res.json(user)
     } catch (error) {
@@ -145,52 +45,16 @@ const userController = {
 
   // Edit user profile
   putUser: async (req, res, next) => {
+    const userId = helpers.getUser(req).id
+    const id = req.params.id
+    const { files } = req
+    const { email, password, name, account, introduction } = req.body
     try {
-      const userId = helpers.getUser(req).id
-      const id = req.params.id
-      const { files } = req
-      const { email, password, name, account, introduction } = req.body
-
-      if (userId !== Number(id))
-        throw new Error("You cannot edit other's profile.")
-
-      const [usedEmail, usedAccount] = await Promise.all([
-        User.findOne({ where: { email } }),
-        User.findOne({ where: { account } })
-      ])
-
-      if (usedEmail || usedAccount)
-        throw new Error('Email and account should be unique.')
-
-      if (!validator.isByteLength(introduction, { min: 0, max: 160 }))
-        throw new Error('Introduction must not exceed 160 words.')
-
-      // Get user instance in db
-      const user = await User.findByPk(id)
-
-      await user.update({
-        email,
-        password: password ? bcrypt.hashSync(password, 10) : user.password,
-        name,
-        account,
-        introduction
-      })
-
-      // If user uploads images
-      const images = {}
-      if (files) {
-        for (const key in files) {
-          images[key] = await uploadFile(files[key][0])
-        }
-        await user.update({
-          cover: images ? images.cover : user.cover,
-          avatar: images ? images.avatar : user.avatar
-        })
-      }
+      const { status, message } = await userServices.putUser(userId, id, files, email, password, name, account, introduction)
 
       return res.status(200).json({
-        status: 'success',
-        message: 'User profile successfully edited.'
+        status,
+        message
       })
     } catch (error) {
       next(error)

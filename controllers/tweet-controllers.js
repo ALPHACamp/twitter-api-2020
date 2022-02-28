@@ -7,20 +7,7 @@ const tweetController = {
   // Get all tweet data include user data and latest shows at front, return in an Array
   getTweets: async (req, res, next) => {
     try {
-      let tweets = await Tweet.findAll({
-        order: [['createdAt', 'DESC']],
-        include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
-        raw: true,
-        nest: true
-      })
-
-      // Clean data with isLiked
-      const userLikes = await getLikedTweetsIds(req)
-
-      tweets = tweets.map(tweet => ({
-        ...tweet,
-        isLiked: userLikes.includes(tweet.id)
-      }))
+      const tweets = await tweetServices.getTweets(req)
 
       return res.status(200).json(tweets)
     } catch (error) {
@@ -30,30 +17,12 @@ const tweetController = {
 
   // Create a new tweet
   postTweet: async (req, res, next) => {
+    const user = helper.getUser(req)
+    const { description } = req.body
     try {
-      // user need to be extract from helper in order to meet the test,
-      // otherwise it will show timeout exceed 2000 ms.
-      const user = helper.getUser(req)
-      const { description } = req.body
-      if (!description) throw new Error('Tweet description is required.')
+      const tweet = await tweetServices.postTweet(user, description)
 
-      // Block description which is empty string
-      if (description.trim() === '') throw new Error('Tweet cannot be empty.')
-
-      // Block description which't exceed 140 words.
-      if (description.length > 140)
-        throw new Error('Tweet content must not exceed 140 words.')
-
-      const tweet = await Tweet.create({
-        UserId: user.id,
-        description
-      })
-
-      return res.status(200).json({
-        status: 'success',
-        message: 'New tweet posted.',
-        tweet
-      })
+      return res.status(200).json(tweet)
     } catch (error) {
       next(error)
     }
@@ -61,27 +30,9 @@ const tweetController = {
 
   // Get specific tweet include user and replies data
   getTweet: async (req, res, next) => {
+    const tweetId = req.params.tweet_id
     try {
-      const tweetId = req.params.tweet_id
-      let tweet = await Tweet.findByPk(tweetId, {
-        include: [
-          { model: User, attributes: ['name', 'account', 'avatar'] },
-          {
-            model: Reply,
-            include: [
-              { model: User, attributes: ['name', 'account', 'avatar'] }
-            ]
-          }
-        ]
-      })
-
-      // Clean data
-      const userLikes = await getLikedTweetsIds(req)
-
-      tweet = {
-        ...tweet.dataValues,
-        isLiked: userLikes.includes(tweet.id)
-      }
+      const tweet = await tweetServices.getTweet(tweetId, req)
 
       return res.status(200).json(tweet)
     } catch (error) {

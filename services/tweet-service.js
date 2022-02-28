@@ -1,6 +1,71 @@
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
+const { getLikedTweetsIds } = require('../helpers/user')
 
 const tweetServices = {
+  getTweets: async (req, res, next) => {
+    let tweets = await Tweet.findAll({
+      order: [['createdAt', 'DESC']],
+      include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+      raw: true,
+      nest: true
+    })
+
+    // Clean data with isLiked
+    const userLikes = await getLikedTweetsIds(req)
+
+    tweets = tweets.map(tweet => ({
+      ...tweet,
+      isLiked: userLikes.includes(tweet.id)
+    }))
+
+    return tweets
+  },
+  postTweet: async (user, description) => {
+    // user need to be extract from helper in order to meet the test,
+    // otherwise it will show timeout exceed 2000 ms.
+    if (!description) throw new Error('Tweet description is required.')
+
+    // Block description which is empty string
+    if (description.trim() === '') throw new Error('Tweet cannot be empty.')
+
+    // Block description which't exceed 140 words.
+    if (description.length > 140)
+      throw new Error('Tweet content must not exceed 140 words.')
+
+    const tweet = await Tweet.create({
+      UserId: user.id,
+      description
+    })
+
+    return {
+      status: 'success',
+      message: 'New tweet posted.',
+      tweet
+    }
+  },
+  getTweet: async (tweetId, req) => {
+    let tweet = await Tweet.findByPk(tweetId, {
+      include: [
+        { model: User, attributes: ['name', 'account', 'avatar'] },
+        {
+          model: Reply,
+          include: [
+            { model: User, attributes: ['name', 'account', 'avatar'] }
+          ]
+        }
+      ]
+    })
+
+    // Clean data
+    const userLikes = await getLikedTweetsIds(req)
+
+    tweet = {
+      ...tweet.dataValues,
+      isLiked: userLikes.includes(tweet.id)
+    }
+
+    return tweet
+  },
   likeTweet: async (tweetId, userId) => {
     const tweet = await Tweet.findByPk(tweetId)
     if (!tweet) throw new Error("This Tweet didn't exist!")
