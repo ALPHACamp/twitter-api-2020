@@ -18,7 +18,7 @@ cp .env.example .env
 ```
 
 ```
-touch .env
+vi .env
 ```
 設定JWT_SECRET=alphacamp
 
