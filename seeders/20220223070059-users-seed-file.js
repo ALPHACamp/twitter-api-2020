@@ -4,7 +4,7 @@ const faker = require('faker')
 const PASSWORD = '12345678'
 const AVATAR = 'https://i.imgur.com/zYddUs8.png'
 const COVER = 'https://i.imgur.com/dfpDjBN.jpg'
-const USER_AMOUNT = 15
+const USER_AMOUNT = 5
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
