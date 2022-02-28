@@ -1,33 +1,60 @@
+const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const userServices = require('../services/user-services')
+const {
+  User,
+  Tweet,
+  Reply,
+  Like
+} = require('../models')
+const helpers = require('../_helpers')
+const sequelize = require('sequelize')
 
 const userController = {
-  // signIn: (req, res, next) => {
-  //   try {
-  //     const userData = req.user.toJSON()
-  //     delete userData.password
-  //     const token = jwt.sign(userData, process.env.JWT_SECRET, {
-  //       expiresIn: '1d'
-  //     })
-  //     res.json({
-  //       token,
-  //       user: userData
-  //     })
-  //   } catch (err) {
-  //     next(err)
-  //   }
-  // },
+
   signUp: (req, res, next) => {
-    userServices.signUp(req, (err, data) =>
-      err
-        ? next(err)
-        : res.json({
-          status: 'success',
-          data
-        }))
-  },
-  getUser: (req, res, next) => {
-    userServices.getUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    const {
+      account,
+      name,
+      email,
+      password,
+      checkPassword
+    } = req.body
+    if (password !== checkPassword) throw new Error('Passwords do not match!')
+
+    return User.findAll({
+        $or: [{
+            where: {
+              account
+            }
+          },
+          {
+            where: {
+              email
+            }
+          }
+        ]
+      })
+      .then(users => {
+        if (users.some(u => u.email === email)) throw new Error('email 已重複註冊！')
+        if (users.some(u => u.account === account)) throw new Error('account 已重複註冊！')
+
+        return bcrypt.hash(password, 10)
+      })
+      .then(hash => {
+        return User.create({
+          account,
+          password: hash,
+          name,
+          email,
+          role: ''
+        })
+      })
+      .then(newUser => {
+        const user = newUser.toJSON()
+        delete user.password
+        return res.status(200).json(user)
+      })
+      .catch(err => next(err))
   }
 }
 
