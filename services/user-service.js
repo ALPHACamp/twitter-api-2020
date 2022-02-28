@@ -16,19 +16,21 @@ const userServices = {
     if (!user) throw new Error("This account doesn't exist.")
 
     // Password incorrect
-    if (!bcrypt.compareSync(password, user.password)) throw new Error('Incorrect password.')
+    if (!bcrypt.compareSync(password, user.password))
+      throw new Error('Incorrect password.')
 
     user = user.toJSON()
     // Issue a token to user
     const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '7d' })
-    return ({
+    return {
       status: 'success',
       data: {
         token,
         user
       }
-    })
+    }
   },
+
   register: async (account, name, email, password, checkPassword) => {
     // Double check password
     if (password !== checkPassword)
@@ -60,7 +62,8 @@ const userServices = {
     newUser.password = undefined
     return newUser
   },
-  getUser: async (req) => {
+
+  getUser: async req => {
     let user = await User.findByPk(req.params.id, {
       include: [
         Tweet,
@@ -109,17 +112,30 @@ const userServices = {
 
     return user
   },
-  putUser: async (userId, id, files, email, password, name, account, introduction) => {
-    if (userId !== Number(id))
+
+  putUser: async (
+    currentUser,
+    id,
+    files,
+    email,
+    password,
+    name,
+    account,
+    introduction
+  ) => {
+    if (currentUser.id !== Number(id))
       throw new Error("You cannot edit other's profile.")
 
-    const [usedEmail, usedAccount] = await Promise.all([
-      User.findOne({ where: { email } }),
-      User.findOne({ where: { account } })
-    ])
+    // Check if user is using the same email or account
+    if (currentUser.email !== email) {
+      const usedEmail = await User.findOne({ where: { email } })
+      if (usedEmail) throw new Error('Email should be unique.')
+    }
 
-    if (usedEmail || usedAccount)
-      throw new Error('Email and account should be unique.')
+    if (currentUser.account !== account) {
+      const usedAccount = await User.findOne({ where: { account } })
+      if (usedAccount) throw new Error('Account should be unique.')
+    }
 
     if (!validator.isByteLength(introduction, { min: 0, max: 160 }))
       throw new Error('Introduction must not exceed 160 words.')
@@ -127,7 +143,7 @@ const userServices = {
     // Get user instance in db
     const user = await User.findByPk(id)
 
-    await user.update({
+    const userProfile = await user.update({
       email,
       password: password ? bcrypt.hashSync(password, 10) : user.password,
       name,
@@ -149,7 +165,8 @@ const userServices = {
 
     return {
       status: 'success',
-      message: 'User profile successfully edited.'
+      message: 'User profile successfully edited.',
+      userProfile
     }
   }
 }
