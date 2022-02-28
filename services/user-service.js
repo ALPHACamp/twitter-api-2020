@@ -168,6 +168,124 @@ const userServices = {
       message: 'User profile successfully edited.',
       userProfile
     }
+  },
+  getTopUsers: async (req) => {
+    let topUsers = await User.findAll({
+      where: { role: 'user' },
+      attributes: {
+        exclude: ['password']
+      },
+      order: [['followerCount', 'DESC']],
+      limit: 10,
+      raw: true
+    })
+
+    const followingIds = getFollowshipId(req, 'Followings')
+
+    // Clean data
+    topUsers = topUsers.map(user => ({
+      ...user,
+      isFollowed: followingIds.includes(user.id)
+    }))
+
+    return topUsers
+  },
+  getUserTweets: async (req, user) => {
+    let [tweets, userLikes] = await Promise.all([
+      Tweet.findAll({
+        where: { UserId: req.params.id },
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        raw: true,
+        nest: true
+      }),
+      Like.findAll({
+        where: { UserId: user.id },
+        raw: true
+      })
+    ])
+
+    // Clean like data
+    userLikes = userLikes.map(like => like.TweetId)
+
+    // Clean like data
+    tweets = tweets.map(tweet => ({
+      ...tweet,
+      isLiked: userLikes.includes(tweet.id)
+    }))
+
+    return tweets
+  },
+  getUserRepliedTweet: async (req) => {
+    let replies = await Reply.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        {
+          model: Tweet,
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ]
+        }
+      ],
+      raw: true,
+      nest: true
+    })
+
+    const userLikes = await getLikedTweetsIds(req)
+
+    replies = replies.map(reply => ({
+      ...reply,
+      likedTweet: userLikes.includes(reply.Tweet.id)
+    }))
+
+    return replies
+  },
+  getUserLikes: async (req) => {
+    let likes = await Like.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
+        {
+          model: Tweet,
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ]
+        }
+      ],
+      raw: true,
+      nest: true
+    })
+
+    // Clean data
+    likes = likes.map(like => ({
+      ...like,
+      likedTweet: true
+    }))
+
+    return likes
+  },
+  getUserFollowings: async (req) => {
+    const followings = await Followship.findAll({
+      where: { followerId: req.params.id }
+    })
+
+    return followings
+  },
+  getUserFollowers: async (req) => {
+    const followers = await Followship.findAll({
+      where: { followingId: req.params.id }
+    })
+
+    return followers
+  },
+  getCurrentUser: async (req) => {
+    let user = helpers.getUser(req)
+    user = await User.findById(user.id, {
+      raw: true
+    })
+
+    return user
   }
 }
 

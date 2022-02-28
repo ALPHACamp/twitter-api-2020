@@ -1,6 +1,4 @@
-const { User, Tweet, Reply, Like, Followship } = require('../models')
 const helpers = require('../_helpers')
-const { getFollowshipId, getLikedTweetsIds } = require('../helpers/user')
 const userServices = require('../services/user-service')
 
 const userController = {
@@ -76,23 +74,7 @@ const userController = {
   // Get top 10 users
   getTopUsers: async (req, res, next) => {
     try {
-      let topUsers = await User.findAll({
-        where: { role: 'user' },
-        attributes: {
-          exclude: ['password']
-        },
-        order: [['followerCount', 'DESC']],
-        limit: 10,
-        raw: true
-      })
-
-      const followingIds = getFollowshipId(req, 'Followings')
-
-      // Clean data
-      topUsers = topUsers.map(user => ({
-        ...user,
-        isFollowed: followingIds.includes(user.id)
-      }))
+      const topUsers = await userServices.getTopUsers(req)
 
       return res.status(200).json(topUsers)
     } catch (error) {
@@ -102,32 +84,10 @@ const userController = {
 
   // Get all tweets from specific user
   getUserTweets: async (req, res, next) => {
+    const user = helpers.getUser(req)
     try {
-      const user = helpers.getUser(req)
-      let [tweets, userLikes] = await Promise.all([
-        Tweet.findAll({
-          where: { UserId: req.params.id },
-          include: [
-            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-          ],
-          raw: true,
-          nest: true
-        }),
-        Like.findAll({
-          where: { UserId: user.id },
-          raw: true
-        })
-      ])
-
-      // Clean like data
-      userLikes = userLikes.map(like => like.TweetId)
-
-      // Clean like data
-      tweets = tweets.map(tweet => ({
-        ...tweet,
-        isLiked: userLikes.includes(tweet.id)
-      }))
-
+      const tweets = await userServices.getUserTweets(req, user)
+      
       return res.status(200).json(tweets)
     } catch (error) {
       next(error)
@@ -137,26 +97,7 @@ const userController = {
   // Get all replied tweets by specific user
   getUserRepliedTweet: async (req, res, next) => {
     try {
-      let replies = await Reply.findAll({
-        where: { UserId: req.params.id },
-        include: [
-          {
-            model: Tweet,
-            include: [
-              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-            ]
-          }
-        ],
-        raw: true,
-        nest: true
-      })
-
-      const userLikes = await getLikedTweetsIds(req)
-
-      replies = replies.map(reply => ({
-        ...reply,
-        likedTweet: userLikes.includes(reply.Tweet.id)
-      }))
+      const replies = await userServices.getUserRepliedTweet(req)
 
       return res.status(200).json(replies)
     } catch (error) {
@@ -166,27 +107,8 @@ const userController = {
 
   getUserLikes: async (req, res, next) => {
     try {
-      let likes = await Like.findAll({
-        where: { UserId: req.params.id },
-        include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
-          {
-            model: Tweet,
-            include: [
-              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-            ]
-          }
-        ],
-        raw: true,
-        nest: true
-      })
-
-      // Clean data
-      likes = likes.map(like => ({
-        ...like,
-        likedTweet: true
-      }))
-
+      const likes = await userServices.getUserLikes(req)
+      
       return res.status(200).json(likes)
     } catch (error) {
       next(error)
@@ -196,9 +118,7 @@ const userController = {
   // Just for test, data included in GET api/users/:id
   getUserFollowings: async (req, res, next) => {
     try {
-      const followings = await Followship.findAll({
-        where: { followerId: req.params.id }
-      })
+      const followings = await userServices.getUserFollowings(req)
 
       return res.status(200).json(followings)
     } catch (error) {
@@ -209,9 +129,7 @@ const userController = {
   // Just for test, data included in GET api/users/:id
   getUserFollowers: async (req, res, next) => {
     try {
-      const followers = await Followship.findAll({
-        where: { followingId: req.params.id }
-      })
+      const followers = await userServices.getUserFollowers(req)
 
       return res.status(200).json(followers)
     } catch (error) {
@@ -222,10 +140,7 @@ const userController = {
   // Get current user info
   getCurrentUser: async (req, res, next) => {
     try {
-      let user = helpers.getUser(req)
-      user = await User.findById(user.id, {
-        raw: true
-      })
+      const user = await userServices.getCurrentUser(req)
 
       return res.status(200).json(user)
     } catch (error) {
