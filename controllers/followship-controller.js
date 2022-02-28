@@ -21,11 +21,6 @@ const followshipController = {
           where: {
             followerId: currentUser.id,
             followingId: id
-          },
-          defaults: {
-            id: 1,
-            createdAt: new Date(),
-            updatedAt: new Date()
           }
         })
       })
