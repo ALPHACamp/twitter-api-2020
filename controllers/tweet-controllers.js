@@ -1,7 +1,5 @@
-const { User, Tweet, Reply } = require('../models')
 const helper = require('../_helpers')
 const tweetServices = require('../services/tweet-service')
-const { getLikedTweetsIds } = require('../helpers/user')
 
 const tweetController = {
   // Get all tweet data include user data and latest shows at front, return in an Array
