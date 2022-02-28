@@ -334,6 +334,7 @@ const userController = {
           isFollowed: req.user.Followings.some(f => f.id === user.id)
         }))
         .sort((a, b) => b.followerCount - a.followerCount)
+        .slice(0, 10)
       return res.status(200).json(usersTop)
     } catch (error) {
       res.status(500).json({
