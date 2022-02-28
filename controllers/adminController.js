@@ -70,10 +70,24 @@ const adminController = {
         return res.json(tweet)
       })
   },
-  deleteTweet: (req, res, next) => {
-    Tweet.destroy({ where: { id: req.params.id } })
-      .then(res.json({ status: 'success', message: '成功刪除' }))
-      .catch(err => next(err))
+  // 刪除推文
+  deleteTweet: async (req, res, next) => {
+    try {
+      // 依動態路由查詢Tweet資料
+      const tweet = await Tweet.findByPk(req.params.id)
+
+      // 檢查是否存在推文
+      if (!tweet) return res.json({ status: 'error', message: '推文不存在' })
+
+      // 刪除 該推文id的 Tweet、Reply、like相關資料
+      await tweet.destroy()
+      await Reply.destroy({ where: { TweetId: req.params.id } })
+      await Like.destroy({ where: { TweetId: req.params.id } })
+
+      return res.json({ status: 'success', message: '成功刪除推文' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
