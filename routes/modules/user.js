@@ -5,10 +5,11 @@ const userController = require('../../controllers/user-controller')
 const { authenticatedUser, authenticated } = require('../../middleware/auth')
 const { paramsChecker, adminChecker } = require('../../middleware/check-params')
 const upload = require('../../middleware/multer')
+const { userLogin } = require('../../middleware/login-check')
 const cpUpload = upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }])
 const router = express.Router()
 
-router.post('/login', passport.authenticate('local', { session: false }), userController.signIn)
+router.post('/login', userLogin, passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/', userController.signUp)
 
 router.get('/current_user', authenticated, userController.getCurrentUser)
