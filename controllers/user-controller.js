@@ -85,8 +85,10 @@ module.exports = {
     try {
       const DEFAULT_LIMIT_NUMBER = 10
       const DEFAULT_OFFSET_NUMBER = 0
-      const fieldsArray = Object.keys(helpers.getUser(req))
-      const followingIdArray = helpers.getUser(req).Followings.map(f => f.id)
+      const selfUser = helpers.getUser(req)
+      const selfUserId = selfUser.id
+      const fieldsArray = Object.keys(selfUser)
+      const followingIdArray = selfUser.Followings.map(f => f.id)
 
       // retrieve all query strings from HTTP request, and 
       // use their values or fallback default values
@@ -105,7 +107,7 @@ module.exports = {
 
       // using previous option values to do database query
       const users = await User.findAll({
-        where: { role: 'user' },
+        where: { id: { [Op.ne]: selfUserId }, role: 'user' },
         order: [[field, order]],
         limit,
         offset,
