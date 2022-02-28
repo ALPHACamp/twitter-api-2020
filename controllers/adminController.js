@@ -58,7 +58,6 @@ const adminController = {
           likedCount: user.dataValues.likedCount,
           followingCount: user.dataValues.Followings.length,
           followersCount: user.dataValues.Followers.length,
-          // likedCount,
           tweetCount: user.dataValues.Tweets.length
         }))
         users.sort((a, b) => b.tweetCount - a.tweetCount)
