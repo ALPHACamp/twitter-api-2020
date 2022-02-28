@@ -13,7 +13,10 @@ const route = require('./routes')
 // function authenticated (req, res, next) {
 //   // passport.authenticate('jwt', { ses...
 // };
-
+app.use(express.urlencoded({
+  extended: true
+}))
+app.use(express.json())
 app.use(passport.initialize())
 
 // app.get('/', (req, res) => res.send('Hello World!'))
