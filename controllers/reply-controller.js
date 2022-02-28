@@ -14,6 +14,12 @@ const replyController = {
           TweetId: req.params.id
         },
         order: [['createdAt', 'desc']],
+        include: [
+          { 
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          }
+        ]
       })
       if (!replies) {
         return res.status(404).json({
@@ -21,11 +27,12 @@ const replyController = {
         message: '這篇推文沒有回覆',
         })
       } else {
-        return res.status(200).json({
-          status: 'success',
-          message: '成功找到回覆',
-          Reply: replies
-        })
+        // return res.status(200).json({
+        //   status: 'success',
+        //   message: '成功找到回覆',
+        //   Reply: replies
+        // })
+        return res.status(200).json(replies)
       }
     } catch (error) {
       res.status(500).json({
