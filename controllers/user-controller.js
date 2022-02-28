@@ -1,7 +1,7 @@
 
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helper')
-const { User, Followship, Tweet, sequelize } = require('../models')
+const { User, Followship, Tweet, Like, Reply, sequelize } = require('../models')
 const jwtHelpers = require('../helpers/bearer-token-helper')
 const helper = require('../_helpers')
 const jwt = require('jsonwebtoken')
@@ -163,7 +163,7 @@ const userController = {
   },
   getTweets: async (req, res, next) => {
     try {
-
+      const currentId = helper.getUser(req).id
       const tweets = await Tweet.findAll({
         where: { UserId: req.params.id },
         attributes: [
@@ -173,14 +173,26 @@ const userController = {
           'createdAt',
           'updatedAt',
           'likeCount',
-          'replyCount'
+          'replyCount',
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${currentId} AND TweetId = Tweet.id)`
+            ),
+            'isLiked',
+          ]
         ],
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'], as: 'TweetAuthor' }
         ],
         order: [['createdAt', 'DESC']]
       })
-      return res.json([...tweets])
+      const results = tweets.map(t => {
+        t = t.toJSON()
+        t.isLiked = Boolean(t.isLiked)
+        return t
+      })
+
+      return res.json([...results])
     } catch (err) {
       next(err)
     }
