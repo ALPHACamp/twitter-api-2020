@@ -83,8 +83,8 @@ const userController = {
         email,
         password: bcrypt.hashSync(password, BCRYPT_COMPLEXITY),
         role: "user",
-        avatar: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1644154630/github/defaultAvatar_uapauy.png",
-        cover: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1645696452/github/defaultCover_uhyyds.jpg"
+        avatar: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1646039874/twitter/project/defaultAvatar_a0hkxw.png",
+        cover: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1646039858/twitter/project/defaultCover_rx9g6m.jpg"
       })
       const result = user.toJSON()
       delete result.password
@@ -263,6 +263,7 @@ const userController = {
       const error = new Error()
       const id = Number(req.params.id)
       const currentId = helper.getUser(req).id
+      const DEL_OPERATION_CODE = '-1'
 
 
       if (id !== currentId) {
@@ -276,8 +277,9 @@ const userController = {
         error.message = '對應使用者不存在'
         return next(error)
       }
+      const { name, introduction, cover, avatar } = req.body
       const { files } = req
-      const { name, introduction } = req.body
+
       const message = await putUserCheck(req)
       if (message) {
         return res
@@ -285,26 +287,37 @@ const userController = {
           .json({ status: 'error', message, data: req.body })
       }
 
-      const avatar = files && files.avatar ?
-        await imgurFileHandler(files.avatar[0]) :
-        user.avatar
+      let uploadAvatar = ''
+      let uploadCover = ''
 
-      const cover = files && files.cover ?
-        await imgurFileHandler(files.cover[0]) :
-        user.cover
+      if (cover === DEL_OPERATION_CODE) {
+        uploadCover = 'https://res.cloudinary.com/dqfxgtyoi/image/upload/v1646039858/twitter/project/defaultCover_rx9g6m.jpg'
+      } else {
+        uploadCover = files && files.cover ?
+          await imgurFileHandler(files.cover[0]) :
+          user.cover
+      }
+
+      if (avatar === DEL_OPERATION_CODE) {
+        uploadAvatar = 'https://res.cloudinary.com/dqfxgtyoi/image/upload/v1646039874/twitter/project/defaultAvatar_a0hkxw.png'
+      } else {
+        uploadAvatar = files && files.avatar ?
+          await imgurFileHandler(files.avatar[0]) :
+          user.avatar
+      }
 
       await user.update({
         name,
         introduction,
-        avatar,
-        cover
+        avatar: uploadAvatar,
+        cover: uploadCover
       })
       const results = {
         account: user.account,
         name,
         introduction,
-        avatar,
-        cover
+        avatar: uploadAvatar,
+        cover: uploadCover
       }
 
       return res
