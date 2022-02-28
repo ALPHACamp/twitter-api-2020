@@ -290,6 +290,7 @@ const userController = {
           createdAt: tweet.createdAt,
           tweetUserId: tweet.User.id,
           tweetUserName: tweet.User.name,
+          account: tweet.User.account,
           avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
