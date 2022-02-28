@@ -11,7 +11,7 @@ const tweetController = {
         { model: Like },
         { model: User }
       ],
-      attributes: [ ['id', 'tweetId'], 'UserId', 'description', 'image' ]
+      attributes: [ ['id', 'tweetId'], 'UserId', 'description', 'image', 'createdAt', 'updatedAt' ]
     })
       .then(tweets => {
         const tweetsArray = tweets
