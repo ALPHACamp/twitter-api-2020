@@ -80,13 +80,13 @@ const tweetController = {
       .catch(err => next(err))
   },
   postTweet: (req, res, next) => {
-    const { description } = req.body
+    const { description, image } = req.body
     const UserId = helpers.getUser(req).id
     if (!description) throw new Error('內容不可空白')
-    if (description.length > 140) throw new Error('字數超出上限！')
     return Tweet.create({
       UserId,
-      description
+      description,
+      image: image || null
     })
       .then(addTweet => {
         res.status(200).json(addTweet)
