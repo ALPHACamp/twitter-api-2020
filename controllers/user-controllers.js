@@ -1,8 +1,4 @@
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
-const validator = require('validator')
-const uploadFile = require('../helpers/file')
 const helpers = require('../_helpers')
 const { getFollowshipId, getLikedTweetsIds } = require('../helpers/user')
 const userServices = require('../services/user-service')
@@ -24,7 +20,13 @@ const userController = {
   register: async (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     try {
-      const newUser = await userServices.register(account, name, email, password, checkPassword)
+      const newUser = await userServices.register(
+        account,
+        name,
+        email,
+        password,
+        checkPassword
+      )
 
       return res.json({ newUser })
     } catch (error) {
@@ -45,16 +47,26 @@ const userController = {
 
   // Edit user profile
   putUser: async (req, res, next) => {
-    const userId = helpers.getUser(req).id
+    const currentUser = helpers.getUser(req)
     const id = req.params.id
     const { files } = req
     const { email, password, name, account, introduction } = req.body
     try {
-      const { status, message } = await userServices.putUser(userId, id, files, email, password, name, account, introduction)
+      const { status, message, userProfile } = await userServices.putUser(
+        currentUser,
+        id,
+        files,
+        email,
+        password,
+        name,
+        account,
+        introduction
+      )
 
       return res.status(200).json({
         status,
-        message
+        message,
+        userProfile
       })
     } catch (error) {
       next(error)
