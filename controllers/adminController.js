@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 const bcrypt = require('bcryptjs')
+const sequelize = require('sequelize')
 
 const adminController = {
   signIn: (req, res, next) => {
@@ -42,14 +43,21 @@ const adminController = {
         { model: User, as: "Followings" },
         { model: User, as: "Followers" },
       ],
-      attributes: ['id', 'name', 'avatar', 'cover']
+      attributes: ['id', 'name', 'account', 'avatar', 'cover',
+      // 使用sequelize 運算將 Tweets JOIN Likes 
+      [sequelize.literal(`(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)`), 'likedCount']
+    ]
     })
       .then(users => {
         users = users.map(user => ({
-          ...user.dataValues,
+          id: user.dataValues.id,
+          name: user.dataValues.name,
+          account: user.dataValues.account,
+          avatar: user.dataValues.avatar,
+          cover: user.dataValues.cover,
+          likedCount: user.dataValues.likedCount,
           followingCount: user.dataValues.Followings.length,
           followersCount: user.dataValues.Followers.length,
-          // likedCount: ,
           tweetCount: user.dataValues.Tweets.length
         }))
         users.sort((a, b) => b.tweetCount - a.tweetCount)
