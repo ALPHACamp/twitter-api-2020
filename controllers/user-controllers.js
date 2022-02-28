@@ -64,23 +64,7 @@ const userController = {
   // Get top 10 users
   getTopUsers: async (req, res, next) => {
     try {
-      let topUsers = await User.findAll({
-        where: { role: 'user' },
-        attributes: {
-          exclude: ['password']
-        },
-        order: [['followerCount', 'DESC']],
-        limit: 10,
-        raw: true
-      })
-
-      const followingIds = getFollowshipId(req, 'Followings')
-
-      // Clean data
-      topUsers = topUsers.map(user => ({
-        ...user,
-        isFollowed: followingIds.includes(user.id)
-      }))
+      const topUsers = await userServices.getTopUsers(req)
 
       return res.status(200).json(topUsers)
     } catch (error) {

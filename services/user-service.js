@@ -151,6 +151,27 @@ const userServices = {
       status: 'success',
       message: 'User profile successfully edited.'
     }
+  },
+  getTopUsers: async (req) => {
+    let topUsers = await User.findAll({
+      where: { role: 'user' },
+      attributes: {
+        exclude: ['password']
+      },
+      order: [['followerCount', 'DESC']],
+      limit: 10,
+      raw: true
+    })
+
+    const followingIds = getFollowshipId(req, 'Followings')
+
+    // Clean data
+    topUsers = topUsers.map(user => ({
+      ...user,
+      isFollowed: followingIds.includes(user.id)
+    }))
+
+    return topUsers
   }
 }
 
