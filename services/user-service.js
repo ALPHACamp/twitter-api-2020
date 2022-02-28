@@ -261,6 +261,14 @@ const userServices = {
     })
 
     return followers
+  },
+  getCurrentUser: async (req) => {
+    let user = helpers.getUser(req)
+    user = await User.findById(user.id, {
+      raw: true
+    })
+
+    return user
   }
 }
 

@@ -130,10 +130,7 @@ const userController = {
   // Get current user info
   getCurrentUser: async (req, res, next) => {
     try {
-      let user = helpers.getUser(req)
-      user = await User.findById(user.id, {
-        raw: true
-      })
+      const user = await userServices.getCurrentUser(req)
 
       return res.status(200).json(user)
     } catch (error) {
