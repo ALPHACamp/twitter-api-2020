@@ -16,7 +16,7 @@ const adminController = {
           User: userData
         }
       }
-      return cb(null, { tokenData })
+      return cb(null, tokenData)
     } catch (err) {
       return cb(err)
     }
@@ -85,9 +85,11 @@ const adminController = {
       const deletedTweet = await tweet.destroy()
       const TweetData = {
         status: 'success',
-        ...deletedTweet.dataValues
+        data: {
+          ...deletedTweet.dataValues
+        }
       }
-      return cb(null, { TweetData })
+      return cb(null, TweetData)
     } catch (err) {
       return cb(err)
     }
