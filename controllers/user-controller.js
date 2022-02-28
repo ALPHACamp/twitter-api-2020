@@ -222,11 +222,23 @@ module.exports = {
     try {
       const { UserId } = req.params
 
-      const responseData = await Like.findAll({
+      const likes = await Like.findAll({
         where: { UserId },
         include: [{ model: Tweet }],
         order: [['createdAt', 'DESC']],
         nest: true
+      })
+
+      const responseData = likes.map(like => {
+        like = like.toJSON()
+        const likedTweet = like.Tweet
+
+        delete like.Tweet
+
+        return {
+          ...like,
+          likedTweet
+        }
       })
 
       return res.status(200).json(responseData)
