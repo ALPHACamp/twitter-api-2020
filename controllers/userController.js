@@ -233,9 +233,16 @@ const userController = {
     }
 
     const { files } = req
-    const avatarfile = files ? files.avatar[0] : null
-    const coverfile = files ? files.cover[0] : null
-
+    let avatarfile = ''
+    let coverfile = ''
+    if (files) {
+      if (files.avatar) {
+        avatarfile = files.avatar[0]
+      }
+      if (files.cover) {
+        coverfile = files.cover[0]
+      }
+    }
     return Promise.all([
       User.findByPk(currentUser.id),
       imgurFileHandler(avatarfile),
