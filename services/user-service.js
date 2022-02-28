@@ -82,7 +82,7 @@ const userServices = {
         exclude: ['password']
       }
     })
-    if(!user) throw new Error("This user don't exist!")
+    if (!user) throw new Error("This user don't exist!")
 
     const userFollowingIds = getFollowshipId(req, 'Followings')
 
@@ -114,26 +114,20 @@ const userServices = {
     return user
   },
 
-  putUser: async (
-    currentUser,
-    id,
-    files,
-    email,
-    password,
-    name,
-    account,
-    introduction
-  ) => {
-    if (currentUser.id !== Number(id))
+  putUser: async (id, files, email, password, name, account, introduction) => {
+    // Get user instance in db
+    const user = await User.findByPk(id)
+
+    if (user.id !== Number(id))
       throw new Error("You cannot edit other's profile.")
 
     // Check if user is using the same email or account
-    if (currentUser.email !== email) {
+    if (user.email !== email) {
       const usedEmail = await User.findOne({ where: { email } })
       if (usedEmail) throw new Error('Email should be unique.')
     }
 
-    if (currentUser.account !== account) {
+    if (user.account !== account) {
       const usedAccount = await User.findOne({ where: { account } })
       if (usedAccount) throw new Error('Account should be unique.')
     }
@@ -141,8 +135,10 @@ const userServices = {
     if (!validator.isByteLength(introduction, { min: 0, max: 160 }))
       throw new Error('Introduction must not exceed 160 words.')
 
-    // Get user instance in db
-    const user = await User.findByPk(id)
+    // User didn't change password
+    if (password === user.password) {
+      password = null
+    }
 
     const userProfile = await user.update({
       email,
@@ -171,7 +167,7 @@ const userServices = {
     }
   },
 
-  getTopUsers: async (req) => {
+  getTopUsers: async req => {
     let topUsers = await User.findAll({
       where: { role: 'user' },
       attributes: {
@@ -208,7 +204,7 @@ const userServices = {
         raw: true
       })
     ])
-    if(!tweets) throw new Error("This user doesn't publish any tweets")
+    if (!tweets) throw new Error("This user doesn't publish any tweets")
 
     // Clean like data
     userLikes = userLikes.map(like => like.TweetId)
@@ -222,7 +218,7 @@ const userServices = {
     return tweets
   },
 
-  getUserRepliedTweet: async (req) => {
+  getUserRepliedTweet: async req => {
     let replies = await Reply.findAll({
       where: { UserId: req.params.id },
       include: [
@@ -236,7 +232,7 @@ const userServices = {
       raw: true,
       nest: true
     })
-    if(!replies) throw new Error("This user doesn't reply any tweets")
+    if (!replies) throw new Error("This user doesn't reply any tweets")
 
     const userLikes = await getLikedTweetsIds(req)
 
@@ -248,7 +244,7 @@ const userServices = {
     return replies
   },
 
-  getUserLikes: async (req) => {
+  getUserLikes: async req => {
     let likes = await Like.findAll({
       where: { UserId: req.params.id },
       include: [
@@ -263,7 +259,7 @@ const userServices = {
       raw: true,
       nest: true
     })
-    if(!likes) throw new Error("This user doesn't like any tweets")
+    if (!likes) throw new Error("This user doesn't like any tweets")
 
     // Clean data
     likes = likes.map(like => ({
@@ -274,16 +270,16 @@ const userServices = {
     return likes
   },
 
-  getUserFollowings: async (req) => {
+  getUserFollowings: async req => {
     const followings = await Followship.findAll({
       where: { followerId: req.params.id }
     })
-    if(!followings) throw new Error("This user doesn't following anyone")
+    if (!followings) throw new Error("This user doesn't following anyone")
 
     return followings
   },
 
-  getUserFollowers: async (req) => {
+  getUserFollowers: async req => {
     const followers = await Followship.findAll({
       where: { followingId: req.params.id }
     })
@@ -292,7 +288,7 @@ const userServices = {
     return followers
   },
 
-  getCurrentUser: async (req) => {
+  getCurrentUser: async req => {
     let user = helpers.getUser(req)
     user = await User.findById(user.id, {
       raw: true
