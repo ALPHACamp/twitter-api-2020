@@ -5,7 +5,7 @@ const tweetController = {
   getReplies: (req, res, next) => {
     const { tweet_id } = req.params;
     return Tweet.findByPk(tweet_id, {
-      include: [Reply],
+      include: [{ model: Reply, other: ['createAt', 'DESC']}],
     })
       .then((tweet) => {
         if (!tweet)
