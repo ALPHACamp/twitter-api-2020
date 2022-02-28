@@ -45,52 +45,16 @@ const userController = {
 
   // Edit user profile
   putUser: async (req, res, next) => {
+    const userId = helpers.getUser(req).id
+    const id = req.params.id
+    const { files } = req
+    const { email, password, name, account, introduction } = req.body
     try {
-      const userId = helpers.getUser(req).id
-      const id = req.params.id
-      const { files } = req
-      const { email, password, name, account, introduction } = req.body
-
-      if (userId !== Number(id))
-        throw new Error("You cannot edit other's profile.")
-
-      const [usedEmail, usedAccount] = await Promise.all([
-        User.findOne({ where: { email } }),
-        User.findOne({ where: { account } })
-      ])
-
-      if (usedEmail || usedAccount)
-        throw new Error('Email and account should be unique.')
-
-      if (!validator.isByteLength(introduction, { min: 0, max: 160 }))
-        throw new Error('Introduction must not exceed 160 words.')
-
-      // Get user instance in db
-      const user = await User.findByPk(id)
-
-      await user.update({
-        email,
-        password: password ? bcrypt.hashSync(password, 10) : user.password,
-        name,
-        account,
-        introduction
-      })
-
-      // If user uploads images
-      const images = {}
-      if (files) {
-        for (const key in files) {
-          images[key] = await uploadFile(files[key][0])
-        }
-        await user.update({
-          cover: images ? images.cover : user.cover,
-          avatar: images ? images.avatar : user.avatar
-        })
-      }
+      const { status, message } = await userServices.putUser(userId, id, files, email, password, name, account, introduction)
 
       return res.status(200).json({
-        status: 'success',
-        message: 'User profile successfully edited.'
+        status,
+        message
       })
     } catch (error) {
       next(error)

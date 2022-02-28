@@ -108,6 +108,49 @@ const userServices = {
     }
 
     return user
+  },
+  putUser: async (userId, id, files, email, password, name, account, introduction) => {
+    if (userId !== Number(id))
+      throw new Error("You cannot edit other's profile.")
+
+    const [usedEmail, usedAccount] = await Promise.all([
+      User.findOne({ where: { email } }),
+      User.findOne({ where: { account } })
+    ])
+
+    if (usedEmail || usedAccount)
+      throw new Error('Email and account should be unique.')
+
+    if (!validator.isByteLength(introduction, { min: 0, max: 160 }))
+      throw new Error('Introduction must not exceed 160 words.')
+
+    // Get user instance in db
+    const user = await User.findByPk(id)
+
+    await user.update({
+      email,
+      password: password ? bcrypt.hashSync(password, 10) : user.password,
+      name,
+      account,
+      introduction
+    })
+
+    // If user uploads images
+    const images = {}
+    if (files) {
+      for (const key in files) {
+        images[key] = await uploadFile(files[key][0])
+      }
+      await user.update({
+        cover: images ? images.cover : user.cover,
+        avatar: images ? images.avatar : user.avatar
+      })
+    }
+
+    return {
+      status: 'success',
+      message: 'User profile successfully edited.'
+    }
   }
 }
 
