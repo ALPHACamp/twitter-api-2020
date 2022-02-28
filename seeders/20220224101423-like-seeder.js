@@ -28,6 +28,65 @@ module.exports = {
     })
 
     await queryInterface.bulkInsert('Likes', likes, {})
+
+    // Update users' and tweets' liked data
+    const likedTweetData = await queryInterface.sequelize.query(
+      `
+        SELECT
+            count(id) as likedCount,
+            TweetId
+        FROM (
+          SELECT 
+            likes.id,
+            likes.UserId,
+            likes.TweetId,
+            tweets.UserId AS TweetUserId
+          FROM likes
+          JOIN tweets ON TweetId = tweets.id
+        ) AS likes
+        GROUP BY TweetId;
+      `,
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+
+    const likedUserData = await queryInterface.sequelize.query(
+      `
+        SELECT
+            count(id) as likedCount,
+            TweetUserId
+        FROM (
+          SELECT 
+            likes.id,
+            likes.UserId,
+            likes.TweetId,
+            tweets.UserId AS TweetUserId
+          FROM likes
+          JOIN tweets ON TweetId = tweets.id
+        ) AS likes
+        GROUP BY TweetUserId;
+      `,
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+
+    for (const data of likedTweetData) {
+      await queryInterface.sequelize.query(
+        `
+          UPDATE Tweets
+          SET likedCount = ${data.likedCount}
+          WHERE id = ${data.TweetId}
+        `
+      )
+    }
+
+    for (const data of likedUserData) {
+      await queryInterface.sequelize.query(
+        `
+          UPDATE Users
+          SET likedCount = ${data.likedCount}
+          WHERE id = ${data.TweetUserId}
+        `
+      )
+    }
   },
 
   down: async (queryInterface, Sequelize) => {

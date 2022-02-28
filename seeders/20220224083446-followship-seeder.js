@@ -27,6 +27,44 @@ module.exports = {
       users.push(temp)
     }
     await queryInterface.bulkInsert('Followships', followships, {})
+
+    // Update users' data (followingCount, followerCount)
+    const followingData = await queryInterface.sequelize.query(
+      `
+      SELECT 
+        count(id) as followingCount,
+        followerId as userId
+      FROM followships
+      GROUP BY followerId
+      ORDER BY userId;
+      `,
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+
+    const followerData = await queryInterface.sequelize.query(
+      `
+      SELECT 
+        count(id) as followerCount,
+        followingId as userId
+      FROM followships
+      GROUP BY followingId
+      ORDER BY userId;
+      `,
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+
+    for (const [i, data] of followingData.entries()) {
+      await queryInterface.sequelize.query(
+        `
+        Update Users
+        SET
+        followingCount = ${data.followingCount},
+        followerCount = ${followerData[i].followerCount}
+        WHERE id = ${data.userId}
+        `,
+        { type: queryInterface.sequelize.QueryTypes.UPDATE }
+      )
+    }
   },
 
   down: async (queryInterface, Sequelize) => {
