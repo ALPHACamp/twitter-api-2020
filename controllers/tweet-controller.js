@@ -1,5 +1,5 @@
 // 引入模組
-const { User, Tweet, Like } = require('../models')
+const { User, Tweet, Like, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -7,12 +7,32 @@ const tweetController = {
   getTweets: (req, res, next) => {
     // 找到所有推文，並關連User
     Tweet.findAll({
-      include: User,
+      include: [
+        User,
+        Reply,
+        Like
+      ],
       order: [['createdAt', 'DESC']],
     })
       .then(tweets => {
+        const data = tweets.map(tweet => {
+          tweet = tweet.toJSON()
+          return {
+            id: tweet.id,
+            description: tweet.description,
+            createdAt: tweet.createdAt,
+            User: {
+              id: tweet.User.id,
+              account: tweet.User.account,
+              name: tweet.User.name,
+              avatar: tweet.User.avatar
+            },
+            replyCount: tweet.Replies ? tweet.Replies.length : 0,
+            likeCount: tweet.Likes ? tweet.Likes.length : 0
+          }
+        })
         // 回傳陣列-物件json
-        return res.json([...tweets])
+        return res.json(data)
       })
       .catch(err => next(err))
   },
@@ -39,6 +59,7 @@ const tweetController = {
           createdAt: tweet.createdAt,
           User: {
             id: tweet.User.id,
+            account: tweet.User.account,
             name: tweet.User.name,
             avatar: tweet.User.avatar
           },
