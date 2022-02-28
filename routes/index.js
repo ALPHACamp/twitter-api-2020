@@ -4,7 +4,7 @@ const { errorHandler } = require('../middleware/error-handler')
 const user = require('./modules/user')
 const admin = require('./modules/admin')
 const tweet = require('./modules/tweet')
-const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 const userController = require('../controllers/userController')
 const adminController = require('../controllers/adminController')
 
@@ -17,7 +17,7 @@ router.post('/admin/signin', adminController.signIn)
 // router.use('/followships', authenticated, followships)
 router.use('/tweets', authenticated, tweet)
 router.use('/users', authenticated, user)
-router.use('/admin', authenticated, admin)
+router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/', errorHandler)
 
 module.exports = router
