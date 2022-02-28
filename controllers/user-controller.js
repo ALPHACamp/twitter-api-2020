@@ -74,8 +74,8 @@ const userController = {
 
       if (message) {
         return res
-          .status(400)
-          .json({ status: 'error', message, data: req.body })
+          .status(200)
+          .json({ code: 400, status: 'error', message, data: req.body })
       }
 
       const user = await User.create({
@@ -125,7 +125,7 @@ const userController = {
             [Op.ne]: user.id
           },
           role: 'user'
-         },
+        },
         include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
         attributes: [
           'id',
@@ -242,8 +242,8 @@ const userController = {
 
       if (message) {
         return res
-          .status(400)
-          .json({ status: 'error', message, data: req.body })
+          .status(200)
+          .json({ code: 400, status: 'error', message, data: req.body })
       }
 
 
@@ -290,8 +290,8 @@ const userController = {
       const message = await putUserCheck(req)
       if (message) {
         return res
-          .status(400)
-          .json({ status: 'error', message, data: req.body })
+          .status(200)
+          .json({ code: 400, status: 'error', message, data: req.body })
       }
 
       let uploadAvatar = ''

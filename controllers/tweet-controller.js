@@ -6,16 +6,44 @@ const tweetController = {
   getTweets: async (req, res, next) => {
     try {
       const loginUserId = authHelpers.getUser(req).id
-      // 推文要包含作者
-      const tweets = await Tweet.findAll({
-        include: [
-          { model: User, as: 'TweetAuthor', attributes: { exclude: ['password'] } }
-        ],
-        order: [
-          ['createdAt', 'DESC']
-        ],
-        nest: true
-      })
+      let findOption = {}
+
+      if (req.query && req.query.page) {
+        let offset = 0
+        const limit = Number(req.query.limit) || 20
+        if (req.query.page) {
+          offset = (Number(req.query.page - 1)) * limit
+        }
+
+        // 推文要包含作者
+        findOption = {
+          include: [
+            { model: User, as: 'TweetAuthor', attributes: { exclude: ['password'] } }
+          ],
+          order: [
+            ['createdAt', 'DESC']
+          ],
+          offset,
+          limit,
+          nest: true
+        }
+
+
+      } else {
+        // 推文要包含作者
+        findOption = {
+          include: [
+            { model: User, as: 'TweetAuthor', attributes: { exclude: ['password'] } }
+          ],
+          order: [
+            ['createdAt', 'DESC']
+          ],
+          nest: true
+        }
+      }
+
+
+      const tweets = await Tweet.findAll(findOption)
 
       // 獲取一個目前使用者所喜歡的推文之清單
       const likeTweets = await Like.findAll({
