@@ -185,6 +185,12 @@ const userController = {
               `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${currentId} AND TweetId = Tweet.id)`
             ),
             'isLiked',
+          ],
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Replies WHERE UserId = ${currentId} AND TweetId = Tweet.id)`
+            ),
+            'isReplied'
           ]
         ],
         include: [
@@ -195,6 +201,7 @@ const userController = {
       const results = tweets.map(t => {
         t = t.toJSON()
         t.isLiked = Boolean(t.isLiked)
+        t.isReplied = Boolean(t.isReplied)
         return t
       })
 
