@@ -228,6 +228,24 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
+      const followship = await Followship.findAll({
+        where: {
+          followerId: req.params.id
+        },
+        include: {
+          model: User,
+          as: 'following',
+          attributes: [
+            'id',
+            'account',
+            'name',
+            'avatar',
+            'introduction'
+          ],
+        },
+        attributes: ['id', 'followingId', 'followerId', 'createdAt'],
+        order: [['createdAt', 'desc']]
+      })
       if (!user) {
         return res
           .status(404)
@@ -236,13 +254,7 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      const followings = await Followship.findAll({
-        where: {
-          followerId: req.params.id
-        },
-        //attributes:['followingId']
-      })
-      if (!followings) {
+      if (followship.length === 0) {
         return res
           .status(400)
           .json({
@@ -250,8 +262,7 @@ const userController = {
             message: '此使用者沒有追蹤任何人'
           })
       } else {
-        console.log(followings.followingId)
-        return res.status(200).json(followings)
+        return res.status(200).json(followship)
       }
     } catch (error) {
       res.status(500).json({
@@ -262,9 +273,48 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
-
+      const user = await User.findByPk(req.params.id)
+      const followship = await Followship.findAll({
+        where: {
+          followingId: req.params.id
+        },
+        include: {
+          model: User,
+          as: 'follower',
+          attributes: [
+            'id',
+            'account',
+            'name',
+            'avatar',
+            'introduction'
+          ],
+        },
+        attributes: ['id', 'followingId', 'followerId', 'createdAt'],
+        order: [['createdAt', 'desc']]
+      })
+      if (!user) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '使用者不存在'
+          })
+      }
+      if (followship.length === 0) {
+        return res
+          .status(400)
+          .json({
+            status: 'error',
+            message: '此使用者沒有跟隨者'
+          })
+      } else {
+        return res.status(200).json(followship)
+      }
     } catch (error) {
-
+      res.status(500).json({
+        status: 'error',
+        message: error
+      })
     }
   },
   putUser: async (req, res, next) => {
