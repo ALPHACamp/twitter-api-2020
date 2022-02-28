@@ -68,6 +68,7 @@ const userController = {
       if (!user || user.role === 'admin') throw new Error("User didn't exist!")
       const following = await Followship.findAndCountAll({ where: { followerId: id }, raw: true, nest: true })
       const followers = await Followship.findAndCountAll({ where: { followingId: id }, raw: true, nest: true })
+      const tweets = await Tweet.findAndCountAll({ where: { UserId: id }, raw: true, nest: true })
       const isFollowing = await appFunc.getUserIsFollowing(userId, id)
       const isUser = Boolean(userId === id)
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
@@ -76,6 +77,7 @@ const userController = {
         const resUser = appFunc.numToUnitHandler({
           ...user,
           isFollowing,
+          tweetCount: tweets.count,
           following: following.count,
           followers: followers.count,
           isUser
