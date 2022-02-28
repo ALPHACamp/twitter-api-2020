@@ -22,6 +22,8 @@ vi .env
 ```
 設定JWT_SECRET=alphacamp
 
+shift + :wq 存檔離開
+
 ### 建立資料庫
 ```
 npx sequelize db:migrate
