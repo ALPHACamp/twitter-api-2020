@@ -46,61 +46,55 @@ const userServices = {
       .catch(err => cb(err))
   },
   userLogin: (req, cb) => {
-    const userData = getUser(req).toJSON()
-    delete userData.password
-    try {
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      return cb(null, {
-        status: 'success',
-        message: '成功登入',
-        token,
-        userData
+    return User.findByPk(getUser(req).toJSON().id, {
+      raw: true,
+      nest: true,
+      attributes: {
+        include: [
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.followingId = User.id)'), 'follower'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.followerId = User.id)'), 'following'],
+          [sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetAmount']
+        ],
+        exclude: ['password', 'createdAt', 'updatedAt']
+      }
+    })
+      .then(userData => {
+        const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+        return cb(null, {
+          status: 'success',
+          message: '成功登入',
+          token,
+          userData
+        })
       })
-    } catch (err) {
-      cb(err)
-    }
+      .catch(err => cb(err))
   },
   getUserProfile: (req, cb) => {
+    // 查看特定使用者與查看當前登入的使用者都是用這隻程式碼，查看特定使用者會在路由處帶 id
     const id = req.params.id || getUser(req).dataValues.id
     return Promise.all([
       User.findByPk(id, {
         raw: true,
         nest: true,
-        include: { model: Tweet, attributes: [] },
         attributes: {
           include: [
+            [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.followingId = User.id)'), 'follower'],
+            [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.followerId = User.id)'), 'following'],
             [sequelize.literal('(SELECT COUNT(id) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetAmount']
-          ]
+          ],
+          exclude: ['password', 'createdAt', 'updatedAt']
         }
       }),
       Followship.findAll({
-        where: { followerId: id },
-        raw: true,
-        nest: true
-      }),
-      Followship.findAll({
-        where: { followingId: id },
+        where: { followerId: getUser(req).dataValues.id },
         raw: true,
         nest: true
       })
     ])
-      .then(([user, iFollowed, followMe]) => {
-        const data = {
-          id: user.id,
-          email: user.email,
-          account: user.account,
-          name: user.name,
-          cover: user.cover,
-          avatar: user.avatar,
-          introduction: user.introduction,
-          role: user.role,
-          follower: followMe.length,
-          following: iFollowed.length,
-          tweetAmount: user.tweetAmount
-        }
+      .then(([user, currentUserFollowing]) => {
         // 如果是從get users/:id 路由進來，需要多回傳當前使用者是否有追蹤特定使用者
-        if (req.params.id) data.followed = followMe.some(f => f.followerId === getUser(req).dataValues.id)
-        return cb(null, data)
+        if (req.params.id) user.followed = currentUserFollowing.some(f => f.followingId === user.id)
+        return cb(null, user)
       })
       .catch(err => cb(err))
   },
@@ -198,7 +192,6 @@ const userServices = {
         const data = user.Followings.map(f => ({
           followingId: f.id,
           account: f.account,
-          email: f.email,
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
@@ -225,7 +218,6 @@ const userServices = {
         const data = user.Followers.map(f => ({
           followerId: f.id,
           account: f.account,
-          email: f.email,
           name: f.name,
           avatar: f.avatar,
           introduction: f.introduction,
