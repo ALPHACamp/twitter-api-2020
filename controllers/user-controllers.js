@@ -49,9 +49,9 @@ const userController = {
         ]
       })
 
-      count.tweetCount = user.Tweet?.length || DEFAULT_COUNT
-      count.likedCount = user.Like?.length || DEFAULT_COUNT
-      count.repliedCount = user.Reply?.length || DEFAULT_COUNT
+      count.tweetCount = user.Tweets?.length || DEFAULT_COUNT
+      count.likedCount = user.Likes?.length || DEFAULT_COUNT
+      count.repliedCount = user.Replies?.length || DEFAULT_COUNT
       count.followerCount = user.Followers?.length || DEFAULT_COUNT
       count.followingCount = user.Followings?.length || DEFAULT_COUNT
 
