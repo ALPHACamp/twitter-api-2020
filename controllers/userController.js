@@ -332,6 +332,19 @@ const userController = {
         res.json(data)
       })
       .catch(err => next(err))
+  },
+  getCurrentUser: (req, res, next) => {
+    const { id, account, email, name, avatar, cover, introduction, role } = helpers.getUser(req).dataValues
+    return res.json({
+      id,
+      account,
+      email,
+      name,
+      avatar,
+      cover,
+      introduction,
+      role
+    })
   }
 
 
