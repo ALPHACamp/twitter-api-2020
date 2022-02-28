@@ -64,15 +64,21 @@ const userController = {
   },
   signIn: async (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const user = helpers.getUser(req).toJSON()
+
+      if (user.role !== 'user') return res.status(400).json({
+        status: 'error',
+        message: 'Not found user'
+      })
+
+      delete user.password
+      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
         status: 'success',
         message: 'login success!',
         data: {
           token,
-          user: userData
+          user
         }
       })
     } catch (err) { next(err) }
@@ -196,9 +202,9 @@ const userController = {
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
         raw: true,
-        include: User,
         nest: true
       })
+      
       if (tweetsData.length === 0) return res.status(400).json({
         status: 'error',
         message: 'Tweet not found!'
@@ -266,15 +272,16 @@ const userController = {
       })
 
       delete req.body.checkPassword
-    
       req.body.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
       const user = await User.findByPk(id)
       const updatedUser = await user.update(req.body)
+      const data = updatedUser.toJSON()
+      delete data.password
 
       res.json({
         status: 'success',
         message: 'putUser success',
-        updateduser: updatedUser.toJSON()
+        updateduser: data
       })
     } catch (err) { next(err) }
   },
@@ -287,6 +294,7 @@ const userController = {
           'name',
           'email',
           'avatar',
+          'cover',
           'role'
         ]
       })
@@ -295,6 +303,39 @@ const userController = {
         message: 'user not found'
       })
       res.json({ user })
+    } catch (err) { next(err) }
+  },
+  getTopFollwer: async (req, res, next) => {
+    try {
+      
+    } catch (error) {
+      next(error)
+    }
+  },
+  getFollowing: async (req, res, next) => {
+    try {
+      const { id } = req.params
+      const following = await Followship.findAll({
+        where: { followingId: id },
+        order: [['createdAt', 'desc']],
+        include: [
+          {
+            model: User,
+            as: 'Following',
+          }
+        ],
+        raw: true,
+        nest: true
+      })
+      if (!following.length) return res.status(400).json({
+        status: 'error',
+        message: 'Following not found'
+      })
+      res.json({
+        status: 'success',
+        message: 'getFollowing success',
+        following
+      })
     } catch (err) { next(err) }
   }
 }

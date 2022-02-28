@@ -1,17 +1,18 @@
 const jwt = require('jsonwebtoken')
 const { User, Tweet } = require('../models')
+const helpers = require('../_helpers')
 const adminController = {
   signIn: async (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
-      delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const user = helpers.getUser(req).toJSON()
+      delete user.password
+      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
         status: 'success',
         message: 'login success!',
         data: {
           token,
-          user: userData
+          user
         }
       })
     } catch (err) { next(err) }
