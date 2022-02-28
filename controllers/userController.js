@@ -327,6 +327,7 @@ const userController = {
           user = user.toJSON()
           return {
             id: user.id,
+            account: user.account,
             name: user.name,
             avatar: user.avatar,
             followerCount: user.Followers.length,
