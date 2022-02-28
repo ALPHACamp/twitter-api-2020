@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs')
 const helpers = require('../_helpers')
 const { User, Tweet, Like, Reply } = require('../models')
 const Sequelize = require('sequelize')
-const { DATE } = require('sequelize')
 const { Op } = Sequelize;
 
 
@@ -124,7 +123,20 @@ module.exports = {
 
     } catch (err) { next(err) }
   },
+  getSelfUser: async (req, res, next) => {
+    try {
+      const userData = helpers.getUser(req)
 
+      delete userData.password
+      delete userData.Followings
+      delete userData.Followers
+
+      return res.json(userData)
+
+    } catch (err) {
+      next(err)
+    }
+  },
   getUser: async (req, res, next) => {
     try {
       const { UserId } = req.params
@@ -146,8 +158,6 @@ module.exports = {
       const responseData = await Tweet.findAll({
         where: { UserId }, raw: true
       })
-
-      if (!responseData.length) throw new Error('沒有任何推文!')
 
       return res.status(200).json(responseData)
 
