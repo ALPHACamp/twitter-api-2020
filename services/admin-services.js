@@ -5,7 +5,7 @@ const { User, Tweet, Like, Reply } = require('../models')
 const adminController = {
   signIn: async (req, cb) => {
     try {
-      if (req.user.role !== 'admin') return cb(new Error('permission denied'))
+      if (req.user.role !== 'admin') return cb(new Error('you are not admin user, permission denied'))
       const userData = req.user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -26,7 +26,7 @@ const adminController = {
       const users = await User.findAll({
         attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt',
           [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'RepliesCount'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'LikesCount'],
+          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'LikesCount']
         ],
         include: [
           Like,
