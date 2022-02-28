@@ -60,6 +60,7 @@ const userController = {
   },
   getUser: (req, res, next) => {
     const userId = Number(req.params.id)
+    const reqUserId = helpers.getUser(req).id
     User.findByPk(userId, {
       attributes: { exclude: ['password'] },
       include: [
@@ -70,6 +71,7 @@ const userController = {
       .then(user => {
         if (!user) throw new Error('帳號不存在！')
         if (user.role === 'admin') throw new Error('帳號不存在！')
+        user.dataValues.isFollowed = user.Followers.map(u => u.id).includes(reqUserId)
         return res.status(200).json(user)
       })
       .catch(err => next(err))
