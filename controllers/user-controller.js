@@ -152,7 +152,7 @@ const userController = {
             include: [
               {
                 model: User,
-                attributes: ['name', 'account','avatar']
+                attributes: ['id','name', 'account','avatar']
               }
             ]
           }
@@ -310,6 +310,31 @@ const userController = {
       } else {
         return res.status(200).json(followship)
       }
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error
+      })
+    }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      const users = await User.findAll({
+        include: [{ 
+          model: User, 
+          as: 'Followers', 
+          attributes:['id','name','account']
+        }],
+        attributes: ['id', 'name', 'account', 'avatar']
+      })
+      const usersTop = users
+        .map(user => ({
+          ...user.toJSON(),
+          followerCount: user.Followers.length,
+          isFollowed: req.user.Followings.some(f => f.id === user.id)
+        }))
+        .sort((a, b) => b.followerCount - a.followerCount)
+      return res.status(200).json(usersTop)
     } catch (error) {
       res.status(500).json({
         status: 'error',
