@@ -54,7 +54,58 @@ const userController = {
         return res.status(200).json(user)
       })
       .catch(err => next(err))
+  },
+  signIn: (req, res, next) => {
+    const error = new Error()
+
+    const {
+      account,
+      password
+    } = req.body
+
+    if (!account || !password) {
+      throw new Error('所有欄位都要填寫')
+    }
+
+    return User.findOne({
+        where: {
+          account
+        }
+      })
+      .then(user => {
+        if (!user || user.role === 'admin') {
+          throw new Error('帳號不存在')
+        }
+
+        return Promise.all([
+          bcrypt.compare(password, user.password),
+          user
+        ])
+      })
+      .then(([isMatched, user]) => {
+        if (!isMatched) {
+          throw new Error('密碼錯誤')
+        }
+
+        const userData = user.toJSON()
+        delete userData.password
+        const token = jwt
+          .sign(
+            userData,
+            process.env.JWT_SECRET, {
+              expiresIn: '30d'
+            }
+          )
+        return res.json({
+          status: 'success',
+          token,
+          data: userData
+
+        })
+      })
+      .catch(error => next(error))
   }
 }
+
 
 module.exports = userController

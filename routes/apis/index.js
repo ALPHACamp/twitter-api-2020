@@ -8,6 +8,7 @@ const {
 
 // router.use('/users', users)
 router.post('/users', userController.signUp)
+router.post('/signIn', userController.signIn)
 
 router.use('/', apiErrorHandler)
 
