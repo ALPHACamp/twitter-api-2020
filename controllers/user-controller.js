@@ -1,5 +1,6 @@
 
 const bcrypt = require('bcryptjs')
+const Op = require('../models').Sequelize.Op
 const { imgurFileHandler } = require('../helpers/file-helper')
 const { User, Followship, Tweet, Like, Reply, sequelize } = require('../models')
 const jwtHelpers = require('../helpers/bearer-token-helper')
@@ -117,8 +118,14 @@ const userController = {
   },
   getTopUsers: async (req, res, next) => {
     try {
-      const user = await User.findAll({
-        where: { role: 'user' },
+      const user = helper.getUser(req)
+      const users = await User.findAll({
+        where: {
+          id: {
+            [Op.ne]: user.id
+          },
+          role: 'user'
+         },
         include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }],
         attributes: [
           'id',
@@ -128,16 +135,16 @@ const userController = {
           'followerCount'
         ],
         order: [[sequelize.literal('followerCount'), 'DESC']],
-        limit: 10,
+        limit: 10
       })
 
       const followedUsers = helper.getUser(req).Followings
 
-      const results = user.map(u => ({
+      const results = users.map(u => ({
         ...u.toJSON(),
         isFollowed: followedUsers.some(fu => fu.id === u.id)
       }))
-
+      console.log('長度', results.length)
       return res.json({ status: 'success', message: '成功獲取', data: results })
     } catch (err) {
       next(err)
