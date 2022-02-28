@@ -25,7 +25,7 @@ const userController = {
             }
           });
 
-        } else { res.json({ status: "error", message: "You are user!"}) }
+        } else { res.json({ status: 'error', message: 'This is for normal user.' }) }
       } else {
         res.json(errData);
       }
@@ -134,6 +134,7 @@ const userController = {
           tweetUserId: user.id,
           tweetUserAccount: user.account,
           tweetUserName: user.name,
+          avatar: user.avatar,
           TweetId: tweet.id,
           description: tweet.description,
           createdAt: tweet.createdAt,
@@ -286,12 +287,13 @@ const userController = {
       const result = likes.map(like => {
         const tweet = like.Tweet
         return {
+          likeCreatedAt: like.createdAt,
           TweetId: tweet.id,
           description: tweet.description,
           createdAt: tweet.createdAt,
           tweetUserId: tweet.User.id,
           tweetUserName: tweet.User.name,
-          account: tweet.User.account,
+          tweetUserAccount: tweet.User.account,
           avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
@@ -341,7 +343,7 @@ const userController = {
 
   editAccount: async (req, res, next) => {
     try {
-      if (req.user.id !== req.params.id) return res.json({ status: 'error', message: "You con't do this" })
+      if (req.user.id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this" })
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const account = req.body?.account?.trim() || null
