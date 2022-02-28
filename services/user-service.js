@@ -247,6 +247,13 @@ const userServices = {
     }))
 
     return likes
+  },
+  getUserFollowings: async (req) => {
+    const followings = await Followship.findAll({
+      where: { followerId: req.params.id }
+    })
+
+    return followings
   }
 }
 
