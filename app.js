@@ -8,6 +8,9 @@ const passport = require('./config/passport')
 const app = express()
 const port = 3000
 const route = require('./routes')
+const {
+  apis
+} = require('./routes')
 
 // // use helpers.getUser(req) to replace req.user
 // function authenticated (req, res, next) {
@@ -17,7 +20,7 @@ const route = require('./routes')
 app.use(passport.initialize())
 
 // app.get('/', (req, res) => res.send('Hello World!'))
-app.use(route)
+app.use('/api', apis)
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 module.exports = app

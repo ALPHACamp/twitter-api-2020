@@ -6,11 +6,11 @@ const bcrypt = require('bcryptjs')
 const userServices = {
   signUp: (req, cb) => {
     User.findOne({
-      where: {
-        email: req.body.email,
-        account: req.body.account
-      }
-    })
+        where: {
+          email: req.body.email,
+          account: req.body.account
+        }
+      })
       .then(([email, account]) => {
         if (email) throw new Error('Email already exists!')
         if (account) throw new Error('Email already exists!')
@@ -29,7 +29,35 @@ const userServices = {
 
       .catch(err => cb(err))
   },
-  getUser: (req, cb) => {}
+  getUser: (req, res, next) => {
+    const userId = Number(req.params.id)
+    User.findByPk(userId, {
+        attributes: {
+          exclude: ['password']
+        },
+        include: [{
+            model: User,
+            as: 'Followers',
+            attributes: {
+              exclude: ['password']
+            }
+          },
+          {
+            model: User,
+            as: 'Followings',
+            attributes: {
+              exclude: ['password']
+            }
+          }
+        ]
+      })
+      .then(user => {
+        if (!user) throw new Error('帳號不存在！')
+        if (user.role === 'admin') throw new Error('帳號不存在！')
+        return res.status(200).json(user)
+      })
+      .catch(err => next(err))
+  }
 
 }
 
