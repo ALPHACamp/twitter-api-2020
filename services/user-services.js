@@ -60,19 +60,28 @@ const userServices = {
   },
   getUser: async (req, cb) => {
     try {
+      const userId = helper.getUser(req).id
       const userData = await User.findByPk(req.params.id, {
         attributes: {
           include: [
             [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
             [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
             [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingCount'],
-            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerCount']
-          ]
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerCount'],
+            [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = User.id)`), 'isFollowed']
+          ],
+
         },
       })
       // 禁止搜尋admin
+      if (!userData) throw new Error('使用者不存在')
       if (userData.role === 'admin') throw new Error('使用者不存在')
-      const user = userData.toJSON()
+      const isSelf = (userData.id === userId)
+      const user = {
+        ...userData.toJSON(),
+        isSelf: isSelf,
+        isFollowed: userData.dataValues.isFollowed ? true : false
+      }
       delete user.password
       return cb(null, user)
     } catch (err) {
@@ -317,11 +326,14 @@ const userServices = {
         //以追隨日期排序
         order: [
           ['createdAt', 'DESC']
-        ]
+        ],
+        raw: true,
+        nest: true
       })
       if (followings.length === 0) throw new Error("使用者尚未追蹤任何人")
       followings = followings.map(following => ({
-        ...following.toJSON()
+        ...following,
+        isFollowed: following.Followers.isFollowed ? true : false
       }))
       return cb(null, followings)
     } catch (err) {
@@ -357,11 +369,14 @@ const userServices = {
         //以追隨日期排序
         order: [
           ['createdAt', 'DESC']
-        ]
+        ],
+        raw: true,
+        nest: true
       })
       if (followers.length === 0) throw new Error("使用者尚未有人追蹤")
       followers = followers.map(follower => ({
-        ...follower.toJSON()
+        ...follower,
+        isFollowed: follower.Followings.isFollowed ? true : false
       }))
       return cb(null, followers)
     } catch (err) {
@@ -383,7 +398,7 @@ const userServices = {
           'avatar',
           'account',
           //看自己有沒有追隨
-          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = User.id)`), 'isFollowings'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = User.id)`), 'isFollowed'],
           //看追隨的人數
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
             'FollowerCount'],
@@ -395,7 +410,8 @@ const userServices = {
       console.log(users);
       console.log(typeof users);
       let result = users.map(user => ({
-        ...user
+        ...user,
+        isFollowed: user.isFollowed ? true : false
       }))
       console.log(result);
       return cb(null, result)
