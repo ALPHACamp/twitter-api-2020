@@ -59,6 +59,55 @@ const userServices = {
     // Protect sensitive user info
     newUser.password = undefined
     return newUser
+  },
+  getUser: async (req) => {
+    let user = await User.findByPk(req.params.id, {
+      include: [
+        Tweet,
+        {
+          model: User,
+          as: 'Followers',
+          attributes: ['id', 'name', 'account', 'avatar']
+        },
+        {
+          model: User,
+          as: 'Followings',
+          attributes: ['id', 'name', 'account', 'avatar']
+        }
+      ],
+      attributes: {
+        exclude: ['password']
+      }
+    })
+
+    const userFollowingIds = getFollowshipId(req, 'Followings')
+
+    // Clean data
+    const Followers = user.Followers.map(user => ({
+      id: user.id,
+      name: user.name,
+      account: user.account,
+      avatar: user.avatar,
+      isFollowed: userFollowingIds.includes(user.id)
+    }))
+
+    const Followings = user.Followings.map(user => ({
+      id: user.id,
+      name: user.name,
+      account: user.account,
+      avatar: user.avatar,
+      isFollowed: userFollowingIds.includes(user.id)
+    }))
+
+    user = {
+      ...user.dataValues,
+      introduction: '',
+      isFollowed: userFollowingIds.includes(user.id),
+      Followers,
+      Followings
+    }
+
+    return user
   }
 }
 
