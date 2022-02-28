@@ -199,6 +199,30 @@ const userServices = {
     }))
 
     return tweets
+  },
+  getUserRepliedTweet: async (req) => {
+    let replies = await Reply.findAll({
+      where: { UserId: req.params.id },
+      include: [
+        {
+          model: Tweet,
+          include: [
+            { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          ]
+        }
+      ],
+      raw: true,
+      nest: true
+    })
+
+    const userLikes = await getLikedTweetsIds(req)
+
+    replies = replies.map(reply => ({
+      ...reply,
+      likedTweet: userLikes.includes(reply.Tweet.id)
+    }))
+
+    return replies
   }
 }
 

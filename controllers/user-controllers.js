@@ -87,26 +87,7 @@ const userController = {
   // Get all replied tweets by specific user
   getUserRepliedTweet: async (req, res, next) => {
     try {
-      let replies = await Reply.findAll({
-        where: { UserId: req.params.id },
-        include: [
-          {
-            model: Tweet,
-            include: [
-              { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-            ]
-          }
-        ],
-        raw: true,
-        nest: true
-      })
-
-      const userLikes = await getLikedTweetsIds(req)
-
-      replies = replies.map(reply => ({
-        ...reply,
-        likedTweet: userLikes.includes(reply.Tweet.id)
-      }))
+      const replies = await userServices.getUserRepliedTweet(req)
 
       return res.status(200).json(replies)
     } catch (error) {
