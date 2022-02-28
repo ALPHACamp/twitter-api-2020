@@ -15,9 +15,9 @@
 6. 設定環境變數
 將根目錄的`.env.example`改成`.env`，並填入相對應的環境變數
 7. 啟動伺服器，執行 app.js 檔案
-`在 Terminal 輸入 npm run dev 指令`
+在 Terminal 輸入 `npm run dev` 指令
 8. 當 terminal 出現以下字樣，表示伺服器與資料庫已啟動並成功連結
-`Example app listening on 3000`
+`Example app listening on 3000!`
 9. 輸入下列帳號密碼即可登入  
 ##### 後台管理者帳號：
 ```
