@@ -12,7 +12,7 @@ const tempController = {
       const targetUserId = req.params.id
 
       // 找不到使用者可以調閱他/她追隨的使用者清單
-      if (!(await User.findByPk(targetUserId))) {
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
@@ -73,7 +73,7 @@ const tempController = {
       const targetUserId = req.params.id
 
       // 找不到使用者可以調閱他/她的被跟隨之使用者清單
-      if (!(await User.findByPk(targetUserId))) {
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
@@ -136,7 +136,7 @@ const tempController = {
       const targetUserId = req.params.id
 
       // 找不到使用者可以調閱他/她的喜歡推文清單
-      if (!(await User.findByPk(targetUserId))) {
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
@@ -215,7 +215,7 @@ const tempController = {
       const targetUserId = req.params.id
 
       // 找不到使用者可以調閱他/她的回覆推文清單
-      if (!(await User.findByPk(targetUserId))) {
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
