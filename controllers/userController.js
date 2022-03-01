@@ -330,7 +330,7 @@ const userController = {
     return User.findAll({
       where: { account: { $not: ['root', currentUserName] } },
       include: [{ model: User, as: 'Followers', attributes: ['id', 'name'] }],
-      attributes: ['id', 'name', 'avatar']
+      attributes: ['id', 'name', 'avatar', 'account']
     })
       .then(users => {
         // 重新編排資料，並計算追隨者數量、登入者是否有追蹤
