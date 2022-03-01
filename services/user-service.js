@@ -108,7 +108,7 @@ const userServices = {
 
     user = {
       ...user.dataValues,
-      introduction: '',
+      introduction: user.introduction || '',
       isFollowed: userFollowingIds.includes(user.id),
       Followers,
       Followings
