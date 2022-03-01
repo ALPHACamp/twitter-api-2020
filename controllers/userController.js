@@ -97,15 +97,19 @@ const userController = {
   },
   // 回覆過的推文
   getRepliedTweets: (req, res, next) => {
-    return Reply.findAll({
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Reply.findAll({
       where: { UserId: req.params.id },
       include: [User, { model: Tweet, include: [{ model: User, attributes: ['name', 'account'] }] }
       ]
-    })
-      .then(replies => {
-        res.json(replies)
       })
-      .catch(err => next(err))
+    ])
+    .then(([user, replies]) => {
+      if (!user) throw new Error("User didn't exist!")
+      res.json(replies)
+    })
+    .catch(err => next(err))
   },
   // 使用者推文
   getUserTweets: (req, res, next) => {
