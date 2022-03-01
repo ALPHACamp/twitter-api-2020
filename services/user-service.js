@@ -196,6 +196,7 @@ const userServices = {
     let [tweets, userLikes] = await Promise.all([
       Tweet.findAll({
         where: { UserId: req.params.id },
+        order: [['createdAt', 'DESC']],
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         ],
