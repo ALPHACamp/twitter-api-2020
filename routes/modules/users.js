@@ -7,10 +7,10 @@ const upload = require('../../middleware/multer')
 
 // router.use('/users', users)
 // router.post('/signIn', userController.signIn)
-router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
-router.put('/users/:id', authenticated, authenticatedUser,
+router.get('/:id', authenticated, authenticatedUser, userController.getUser)
+router.put('/:id', authenticated, authenticatedUser,
   upload.fields([{ name: 'avatar' }, { name: 'cover' }]), userController.putUser)
-router.post('/users', userController.signUp)
+router.post('/', userController.signUp)
 
 // router.use('/', apiErrorHandler)
 
