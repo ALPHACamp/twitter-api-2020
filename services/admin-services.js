@@ -17,7 +17,7 @@ const adminServices = {
       } else if (!bcrypt.compareSync(password, user.password)) {
         throw new Error('Incorrect Account or Password!')
       } else if (user.role !== 'admin') {
-        throw new Error('請使用管理者帳戶登入!')
+        throw new Error('帳號不存在')
       } else {
         result = user.toJSON()
       }
