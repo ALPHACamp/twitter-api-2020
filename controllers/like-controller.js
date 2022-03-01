@@ -24,6 +24,7 @@ const likeController = {
           TweetId,
           isDeleted: false
         })
+        tweet.increment('likeCount')
         return res.status(200).json({
           status: 'success',
           message: '成功加入喜歡的貼文!'
@@ -32,6 +33,7 @@ const likeController = {
         await like.update({
           isDeleted: !like.isDeleted
         })
+        tweet.increment('likeCount')
         return res.status(200).json({
           status: 'success',
           message: 'Like成功!'
@@ -81,6 +83,7 @@ const likeController = {
           isDeleted: !like.isDeleted
         })
         if (toggleLike) {
+          tweet.decrement('likeCount')
           return res.status(200).json({
             status: 'success',
             message: 'Unlike成功!'
