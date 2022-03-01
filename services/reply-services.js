@@ -14,7 +14,8 @@ const replyServices = {
           { model: Tweet, include: { model: User, attributes: ['account', 'name'] } },
         ],
         order: [['createdAt', 'DESC']],
-        raw: true
+        raw: true,
+        nest: true
       })
       if (replies.length === 0) throw new Error('目前沒有任何回覆')
       return cb(null, replies)

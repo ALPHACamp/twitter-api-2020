@@ -237,7 +237,6 @@ const userServices = {
         order: [
           ['createdAt', 'DESC']
         ],
-        row: true,
         nest: true
       })
       // 目標使用者若無推文
@@ -263,7 +262,6 @@ const userServices = {
         order: [
           ['createdAt', 'DESC']
         ],
-        row: true,
         nest: true
       })
       // 目標使用者若無推文
