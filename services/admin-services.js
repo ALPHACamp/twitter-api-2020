@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 const { User, Tweet, Like, Reply } = require('../models')
 let dbConfig
 if (process.env.NODE_ENV !== 'production') {
@@ -36,6 +37,7 @@ const adminController = {
   getUsers: async (req, cb) => {
     try {
       const users = await User.findAll({
+        where: { [Op.not]: [{ role: 'admin' }] },
         attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt',
           [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Tweets.id'))), 'tweetsCount'],
           [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Replies.id'))), 'repliesCount'],
