@@ -1,5 +1,8 @@
 const authHelpers = require('../_helpers')
-const { Tweet, User, Like, Reply } = require('../models')
+const {
+  Tweet, User, Like,
+  Reply, sequelize
+} = require('../models')
 
 const tweetController = {
   // 回傳所有推文(包含當前使用者回覆以及喜歡的推文)
@@ -158,23 +161,32 @@ const tweetController = {
         error.message = '推文字數限制在 140 字以內'
         return next(error)
       }
-
-      // 正常新增
       const loginUserId = authHelpers.getUser(req).id
 
-      const results = await Tweet.create({
-        UserId: loginUserId,
-        description
+      // 正常新增
+      const data = await sequelize.transaction(async t => {
+
+        const [result] = await Promise.all([
+          // 新增推文
+          Tweet.create({
+            UserId: loginUserId, description
+          }, { transaction: t }),
+          // 增加使用者推文數
+          User.increment('tweetCount', {
+            where: { id: loginUserId }, by: 1,
+            transaction: t
+          })
+        ])
+
+        return result
       })
-
-      await User.increment('tweetCount', { where: { id: loginUserId }, by: 1 })
-
+      
       return res
         .status(200)
         .json({
           status: 'success',
           message: '已新增推文內容',
-          data: results
+          data
         })
 
     } catch (error) {

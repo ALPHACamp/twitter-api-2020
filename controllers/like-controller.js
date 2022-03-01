@@ -1,5 +1,8 @@
-const { User, Tweet, Like } = require('../models')
 const authHelpers = require('../_helpers')
+const {
+  User, Tweet,
+  Like, sequelize
+} = require('../models')
 
 const likeController = {
   // 以目前使用者來對某個推文表示喜歡 API
@@ -18,36 +21,44 @@ const likeController = {
         return next(error)
       }
 
-      // 不允許重複按喜歡 (即為不能用這API重複對同一篇推文表示喜歡)
-      const isExistLike = await Like.findOne({
-        where: {
-          UserId: loginUserId,
-          TweetId: targetTweetId
+      const data = await sequelize.transaction(async t => {
+        // 不允許重複按喜歡 (即為不能用這API重複對同一篇推文表示喜歡)
+
+        const isExistLike = await Like.findOne({
+          where: { UserId: loginUserId, TweetId: targetTweetId },
+          transaction: t
+        })
+
+        if (isExistLike) {
+          error.code = 403
+          error.message = '不可重複對同一篇推文表示喜歡'
+          return next(error)
         }
+
+        // 可以按喜歡
+        const [result] = await Promise.all([
+          Like.create({ UserId: loginUserId, TweetId: targetTweetId }, { transaction: t }),
+          Tweet.increment('likeCount', {
+            where: { id: targetTweetId },
+            by: 1, transaction: t
+          }),
+          User.increment('likeCount', {
+            where: { id: loginUserId },
+            by: 1, transaction: t
+          })
+        ])
+
+        return result
+
       })
-
-      if (isExistLike) {
-        error.code = 403
-        error.message = '不可重複對同一篇推文表示喜歡'
-        return next(error)
-      }
-
-      // 可以按喜歡
-      const result = await Like.create({
-        UserId: loginUserId,
-        TweetId: targetTweetId
-      })
-
-      await Tweet.increment('likeCount', { where: { id: targetTweetId }, by: 1 })
-      await User.increment('likeCount', { where: { id: loginUserId }, by: 1 })
-
       return res
         .status(200)
         .json({
           status: 'success',
           message: '成功喜歡推文',
-          data: result
+          data
         })
+
 
     } catch (error) {
       // 系統出錯
@@ -71,38 +82,52 @@ const likeController = {
         error.message = '對應推文不存在'
         return next(error)
       }
-      // 不可取消從未喜歡過的推文
-      const isExistLike = await Like.findOne({
-        where: {
-          UserId: loginUserId,
-          TweetId: targetTweetId
+
+
+      const data = await sequelize.transaction(async t => {
+        // 不可取消從未喜歡過的推文
+        const isExistLike = await Like.findOne({
+          where: { UserId: loginUserId, TweetId: targetTweetId },
+          transaction: t
+        })
+
+        if (!isExistLike) {
+          error.code = 403
+          error.message = '該推文從未被喜歡，不可取消喜歡'
+          return next(error)
         }
+
+        const targetLike = await Like.findOne({
+          where: { UserId: loginUserId, TweetId: targetTweetId },
+          transaction: t
+        })
+        // 可以取消喜歡
+        await Promise.all([
+          // 刪除喜歡的推文
+          targetLike.destroy({ transaction: t }),
+          // 計算推文的喜歡數
+          Tweet.decrement('likeCount', {
+            where: { id: targetTweetId }, by: 1,
+            transaction: t
+          }),
+          // 計算使用者的喜歡數
+          User.decrement('likeCount', {
+            where: { id: loginUserId }, by: 1,
+            transaction: t
+          })
+
+        ])
+
+        return targetLike.toJSON()
+
       })
-
-      if (!isExistLike) {
-        error.code = 403
-        error.message = '該推文從未被喜歡，不可取消喜歡'
-        return next(error)
-      }
-
-      // 可以取消喜歡
-      const result = await Like.findOne({
-        where: {
-          UserId: loginUserId,
-          TweetId: targetTweetId
-        }
-      })
-        .then(like => like.destroy())
-
-      await Tweet.decrement('likeCount', { where: { id: targetTweetId }, by: 1 })
-      await User.decrement('likeCount', { where: { id: loginUserId }, by: 1 })
 
       return res
         .status(200)
         .json({
           status: 'success',
           message: '成功取消喜歡推文',
-          data: result
+          data
         })
 
 

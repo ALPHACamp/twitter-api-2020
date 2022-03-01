@@ -1,5 +1,9 @@
 
-const { User, Followship } = require('../models')
+const {
+  User,
+  Followship,
+  sequelize
+} = require('../models')
 const authHelpers = require('../_helpers')
 
 const followshipController = {
@@ -32,45 +36,53 @@ const followshipController = {
           })
       }
 
-      // 不可重複追蹤
-      const isExistFollowship = await Followship.findOne({
-        where: {
-          followerId: loginUserId,
-          followingId: targetUserId
+      const data = await sequelize.transaction(async t => {
+
+        // 不可重複追蹤
+        const isExistFollowship = await Followship.findOne({
+          where: { followerId: loginUserId, followingId: targetUserId }
+        }, { transaction: t })
+
+        if (isExistFollowship) {
+          error.code = 403
+          error.message = '該對象已被追蹤，不可重複追蹤'
+          return next(error)
         }
+
+        // 可以追蹤的狀態
+        const [result] = await Promise.all([
+          // 建立追蹤關係
+          Followship.create({
+            followerId: loginUserId, followingId: targetUserId,
+          }, { transaction: t }),
+          // 增加使用者追隨他人的數量
+          User.increment('followerCount', {
+            where: { id: targetUserId }, by: 1,
+            transaction: t
+          }),
+          // 增加使用者的跟隨者數量
+          User.increment('followingCount', {
+            where: { id: loginUserId }, by: 1,
+            transaction: t
+          })
+        ])
+        return result
       })
-
-      if (isExistFollowship) {
-        error.code = 403
-        error.message = '該對象已被追蹤，不可重複追蹤'
-        return next(error)
-      }
-
-
-
-      // 可以追蹤的狀態
-      const result = await Followship.create({
-        followerId: loginUserId,
-        followingId: targetUserId,
-      })
-      await User.increment('followerCount', { where: { id: targetUserId }, by: 1 })
-      await User.increment('followingCount', { where: { id: loginUserId }, by: 1 })
-
 
       return res
         .status(200)
         .json({
           status: 'success',
           message: '成功追蹤對方',
-          data: result
+          data
         })
 
     } catch (error) {
       // 系統出錯
       error.code = 500
       return next(error)
-
     }
+
   },
   // 取消追蹤他人API
   deleteFollowships: async (req, res, next) => {
@@ -100,34 +112,44 @@ const followshipController = {
           })
       }
 
+      const data = await sequelize.transaction(async t => {
+
+        // 不可取消從未追蹤過的對象
+        const isExistFollowship = await Followship.findOne({
+          where: { followerId: loginUserId, followingId: targetUserId }
+        }, { transaction: t })
 
 
-      // 不可取消從未追蹤過的對象
-      const isExistFollowship = await Followship.findOne({
-        where: {
-          followerId: loginUserId,
-          followingId: targetUserId
+        if (!isExistFollowship) {
+          error.code = 403
+          error.message = '該對象從未被追蹤，不可取消追蹤'
+          return next(error)
         }
+
+        const targetFollowShip = await Followship.findOne({
+          where: { followerId: loginUserId, followingId: targetUserId },
+          transaction: t
+        })
+
+        // 可以取消追蹤的狀態
+        await Promise.all([
+          // 取消追蹤關係
+          targetFollowShip.destroy({ transaction: t }),
+          // 減少使用者的追蹤者人數
+          User.decrement('followerCount', {
+            where: { id: targetUserId }, id: 1,
+            transaction: t
+          }),
+          // 減少使用者所追蹤的人的數量
+          User.decrement('followingCount', {
+            where: { id: loginUserId }, id: 1,
+            transaction: t
+          })
+        ])
+
+        return targetFollowShip.toJSON()
+
       })
-
-      if (!isExistFollowship) {
-        error.code = 403
-        error.message = '該對象從未被追蹤，不可取消追蹤'
-        return next(error)
-      }
-
-
-      // 可以取消追蹤的狀態
-      const result = await Followship.findOne({
-        where: {
-          followerId: loginUserId,
-          followingId: targetUserId,
-        }
-      })
-        .then(followship => followship.destroy())
-
-      await User.decrement('followerCount', { where: { id: targetUserId }, id: 1 })
-      await User.decrement('followingCount', { where: { id: loginUserId }, id: 1 })
 
 
       return res
@@ -135,7 +157,7 @@ const followshipController = {
         .json({
           status: 'success',
           message: '成功取消追蹤對方',
-          data: result
+          data
         })
 
     } catch (error) {
