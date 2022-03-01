@@ -116,7 +116,7 @@ const userController = {
         raw: true,
         include: {
           model : User,
-          attributes: ['id', 'name', 'account', 'avatar','tweetCount']
+          attributes: ['id', 'name', 'account', 'avatar']
         },
         nest: true
       })
@@ -134,9 +134,9 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      const like = await Like.findAll({
-        where: { UserId: req.params.id }
-      })
+      // const like = await Like.findAll({
+      //   where: { UserId: req.params.id }
+      // })
       if (!user) {
         return res
           .status(404)
@@ -145,14 +145,14 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      if (!like) {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: '使用者沒有like過的推文'
-          })
-      }
+      // if (!like) {
+      //   return res
+      //     .status(400)
+      //     .json({
+      //       status: 'error',
+      //       message: '使用者沒有like過的推文'
+      //     })
+      // }
       const likes = await Like.findAll({
         where: {
           UserId: req.params.id,
@@ -162,7 +162,7 @@ const userController = {
         include: [
           {
             model: Tweet,
-            attributes: ['description'],
+            attributes: ['id','description','replyCount','likeCount'],
             include: [
               {
                 model: User,
@@ -177,7 +177,7 @@ const userController = {
           .status(404)
           .json({
             status: 'error',
-            message: '推文不存在'
+            message: '使用者沒有喜歡過的推文'
           })
       }
       return res.status(200).json(likes)
@@ -460,13 +460,6 @@ const userController = {
       })
       res.json({ user })
     } catch (err) { next(err) }
-  },
-  getTopFollwer: async (req, res, next) => {
-    try {
-      
-    } catch (error) {
-      next(error)
-    }
   }
 }
 
