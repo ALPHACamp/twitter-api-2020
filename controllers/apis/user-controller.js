@@ -69,17 +69,18 @@ const userController = {
       const following = await Followship.findAndCountAll({ where: { followerId: id }, raw: true, nest: true })
       const followers = await Followship.findAndCountAll({ where: { followingId: id }, raw: true, nest: true })
       const tweets = await Tweet.findAndCountAll({ where: { UserId: id }, raw: true, nest: true })
-      const isFollowing = await appFunc.getUserIsFollowing(userId, id)
+      const followingsId = following.rows.map(following => following.id) || []
+      const isFollowing = followingsId.includes(user.id)
       const isUser = Boolean(userId === id)
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(user)
       } else {
         const resUser = appFunc.numToUnitHandler({
           ...user,
-          isFollowing,
           tweetCount: tweets.count,
           following: following.count,
           followers: followers.count,
+          isFollowing,
           isUser
         })
         res.json({
@@ -97,7 +98,7 @@ const userController = {
     try {
       const userId = Number(helpers.getUser(req).id)
       const limit = Number(req.query.amount) || 10
-      const followList = await User.findAll({
+      const popUsersList = await User.findAll({
         where: { role: { [Op.ne]: 'admin' } },
         raw: true,
         nest: true,
@@ -110,15 +111,13 @@ const userController = {
         ],
         limit
       })
-      followList.sort((a, b) => b.followers - a.followers)
-      const reUsers = await Promise.all(followList.map(async user => {
-        user.isFollowing = await appFunc.getUserIsFollowing(userId, user.id)
-        return appFunc.numToUnitHandler(user)
-      }))
+      popUsersList.sort((a, b) => b.followers - a.followers)
+      await appFunc.getUsersIsFollowing(userId, popUsersList)
+      const users = appFunc.numToUnitHandler(popUsersList)
       res.json({
         status: 'success',
         data: {
-          users: reUsers
+          users
         }
       })
     } catch (err) {
@@ -222,18 +221,17 @@ const userController = {
           'UserId',
           'description',
           'createdAt',
+          [sequelize.literal('(select count(TweetId) from Likes where TweetId = Tweet.id)'), 'likeCount'],
           [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
         ]
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
       } else {
-        const resTweets = await Promise.all(tweets.map(async tweet => {
-          return await appFunc.resTweetHandler(userId, tweet)
-        }))
+        await appFunc.resTweetHandler(userId, tweets)
         res.json({
           status: 'success',
-          data: { tweets: resTweets }
+          data: { tweets }
         })
       }
     } catch (err) {
@@ -291,6 +289,7 @@ const userController = {
             'UserId',
             'description',
             'createdAt',
+            [sequelize.literal('(select count(TweetId) from Likes where TweetId = Tweet.id)'), 'likeCount'],
             [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
           ],
           include: {
@@ -307,12 +306,10 @@ const userController = {
         })
         res.json(tweets)
       } else {
-        const resTweets = await Promise.all(tweets.map(async tweet => {
-          return await appFunc.resTweetHandler(userId, tweet)
-        }))
+        await appFunc.resTweetHandler(userId, tweets)
         res.json({
           status: 'success',
-          data: { tweets: resTweets }
+          data: { tweets }
         })
       }
     } catch (err) {
