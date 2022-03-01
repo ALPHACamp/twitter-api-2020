@@ -251,6 +251,7 @@ const userServices = {
   getUserLikes: async req => {
     let likes = await Like.findAll({
       where: { UserId: req.params.id },
+      order: [['createdAt', 'DESC']],
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
         {
