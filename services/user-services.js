@@ -44,6 +44,7 @@ const userController = {
   },
   signIn: (req, cb) => {
     try {
+      if (req.user.role === 'admin') return cb(new Error('you are admin user, permission denied'))
       const userData = req.user.toJSON()
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -210,6 +211,9 @@ const userController = {
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
+        ],
+        order: [
+          ['Followers', Followship, 'createdAt', 'DESC']
         ]
       })
       const followers = user.Followers.map(e => e.dataValues)
@@ -235,17 +239,15 @@ const userController = {
         include: [
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
+        ],
+        order: [
+          ['Followings', Followship, 'createdAt', 'DESC']
         ]
       })
       const followings = user.Followings.map(e => e.dataValues)
-      const followersArr = user.Followers.map(e => e.dataValues.id)
       followings.forEach(e => {
-        if (followersArr.includes(e.id)) {
-          e.isFollowed = true
-        } else {
-          e.isFollowed = false
-        }
         delete e.Followship
+        delete e.password
         e.followingId = e.id
       })
       return cb(null, followings)
@@ -265,9 +267,16 @@ const userController = {
         nest: true,
         where: { UserId: user.id },
         include: [
-          { model: Tweet },
+          {
+            model: Tweet,
+            include: [{
+              model: User,
+              attributes: { exclude: ['password'] }
+            }]
+          },
           { model: User }
-        ]
+        ],
+        order: [['createdAt', 'DESC']]
       })
       for (const likedTweet of likedTweets) {
         const TweetId = likedTweet.Tweet.id
@@ -317,6 +326,23 @@ const userController = {
         delete user.password
       }
       return cb(null, users)
+    } catch (err) {
+      return cb(err)
+    }
+  },
+  getCurrentUser: async (req, cb) => {
+    try {
+      const currentUser = req.user
+      const currentUserData = {
+        status: 'success',
+        data: {
+          User: {
+            ...currentUser
+          }
+        }
+      }
+      delete currentUserData.data.User.password
+      return cb(null, currentUserData)
     } catch (err) {
       return cb(err)
     }

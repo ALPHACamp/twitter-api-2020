@@ -15,9 +15,13 @@ passport.use(new LocalStrategy(
   (req, account, password, cb) => {
     return User.findOne({ where: { account } })
       .then(user => {
-        if (!user) return cb(null, false)
+        if (!user) {
+          return cb(new Error('acount does not exist.'))
+        }
         return bcrypt.compare(password, user.password).then(res => {
-          if (!res) return cb(null, false)
+          if (!res) {
+            return cb(new Error('password does not match.'))
+          }
           return cb(null, user)
         })
       })
