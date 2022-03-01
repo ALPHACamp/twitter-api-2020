@@ -6,7 +6,6 @@ const users = require('./modules/users')
 
 const {
   authenticated,
-  authenticatedUser,
   authenticatedAdmin
 } = require('../../middleware/api-auth')
 const followshipRouter = require('./modules/followship')
@@ -31,9 +30,9 @@ router.get('/current_user', authenticated, userController.getCurrentUser)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 // 前台使用者相關路由
-router.use('/followships', authenticated, authenticatedUser, followshipRouter)
-router.use('/tweets', authenticated, authenticatedUser, tweetRouter)
-router.use('/users', authenticated, authenticatedUser, users)
+router.use('/followships', authenticated, followshipRouter)
+router.use('/tweets', authenticated, tweetRouter)
+router.use('/users', authenticated, users)
 
 
 

@@ -27,13 +27,14 @@ const authenticated = (req, res, next) => {
 
 // 驗證目前登入者是否為管理員，並只一般前台登入者能進入路由
 function authenticatedUser(req, res, next) {
-  const user = helpers.getUser(req)
+  // const user = helpers.getUser(req)
   
-  if (user && user.role === 'user') return next()
-  const error = new Error()
-  error.code = 403
-  error.message = '存取被拒'
-  return next(error)
+  // if (user && user.role === 'user') return next()
+  // const error = new Error()
+  // error.code = 200
+  // error.message = '存取被拒'
+  // return next(error)
+  return next()
 }
 
 
