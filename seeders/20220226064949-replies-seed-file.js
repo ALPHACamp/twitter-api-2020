@@ -15,7 +15,7 @@ module.exports = {
     const repliesNum = 3
     await queryInterface.bulkInsert('Replies',
       Array.from({ length: tweets.length }, (_, i) => ({
-        comment: faker.lorem.text(),
+        comment: faker.lorem.text(140),
         createdAt: new Date(),
         updatedAt: new Date(),
         TweetId: tweets[Math.floor(i / repliesNum)].id,
