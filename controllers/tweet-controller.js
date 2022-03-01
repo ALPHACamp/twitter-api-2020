@@ -61,7 +61,17 @@ const tweetController = {
         description,
         UserId
       })
-      .then(tweets => {return res.status(200).json(tweets)})
+      .then(tweet => {
+        User.findByPk(UserId)
+          .then(user => user.increment('tweetCount'))
+          .then(() =>
+            res.status(200).json({
+              status: '200',
+              message: 'Successfully post tweet.',
+              Tweet: tweet
+            })
+          )
+      })
       .catch((error) => res.status(500).json({
         status: 'error',
         message: error

@@ -363,26 +363,20 @@ const userController = {
     try {
       const id = +req.params.id
       const userId = req.user.id
-      const { account, name, email, password, checkPassword } = req.body
+      const { account, name, email, password, checkPassword, introduction } = req.body
+      const { files } = req
 
-      if (!name || !account || !email || !password || !checkPassword) {
-        return res.status(400).json({
-          status: 'error',
-          message: '欄位必須全部填完' 
-        })
-      }
       if (userId !== id) return res.status(400).json({
         status: 'error',
         message: 'No permission'
       })
-
-      if (!validator.isEmail(email)) {
+      if (email && !validator.isEmail(email)) {
         return res.status(400).json({
           status: 'error',
           message: '請輸入正確信箱格式'
         })
       }
-      if (!validator.isByteLength(password, { min: 4 })) {
+      if (password && !validator.isByteLength(password, { min: 4 })) {
         return res.status(400).json({
           status: 'error',
           message: '密碼請輸入至少 4 個!'
@@ -394,16 +388,22 @@ const userController = {
           message: '兩次密碼不相符'
         })
       }
-      if (!validator.isByteLength(name, { min: 0, max: 50 })) {
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
         return res.status(400).json({
           status: 'error',
           message: '名字長度不能超過 50 個字'
         })
       }
+      if (introduction && !introduction.isByteLength(introduction, { min: 0, max: 160 })) {
+        return res.status(400).json({
+          status: 'error',
+          message: '自我介少不能超過 160 個字'
+        })
+      }
       // 列出全部有相同 account or email 的 user
       const checkedUser = await User.findAll({
         where: { [Op.or]: [{ account }, { email }]},
-        attributes: ['id', 'name', 'account', 'email', 'avatar', 'role'],
+        attributes: ['id', 'name', 'account', 'email', 'avatar', 'introduction', 'role'],
         raw: true
       })
 
@@ -416,7 +416,12 @@ const userController = {
 
       delete req.body.checkPassword
       req.body.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-      const user = await User.findByPk(id)
+      // const [user, filePath] = await Promise.all([
+      //   User.findByPk(id),
+      //   imgurFileHandler(files)
+      // ])
+      // console.log(user.toJSON(), filePath)
+
       const updatedUser = await user.update(req.body)
       const data = updatedUser.toJSON()
       delete data.password
