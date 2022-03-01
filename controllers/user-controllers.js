@@ -24,8 +24,7 @@ const userController = {
               user: userData,
             }
           });
-
-        } else { res.json({ status: "error", message: "You are not user!"}) }
+        } else { res.json({ status: 'error', message: 'This is for normal user.' }) }
       } else {
         res.json(errData);
       }
@@ -49,9 +48,9 @@ const userController = {
         ]
       })
 
-      count.tweetCount = user.Tweet?.length || DEFAULT_COUNT
-      count.likedCount = user.Like?.length || DEFAULT_COUNT
-      count.repliedCount = user.Reply?.length || DEFAULT_COUNT
+      count.tweetCount = user.Tweets?.length || DEFAULT_COUNT
+      count.likedCount = user.Likes?.length || DEFAULT_COUNT
+      count.repliedCount = user.Replies?.length || DEFAULT_COUNT
       count.followerCount = user.Followers?.length || DEFAULT_COUNT
       count.followingCount = user.Followings?.length || DEFAULT_COUNT
 
@@ -134,6 +133,7 @@ const userController = {
           tweetUserId: user.id,
           tweetUserAccount: user.account,
           tweetUserName: user.name,
+          avatar: user.avatar,
           TweetId: tweet.id,
           description: tweet.description,
           createdAt: tweet.createdAt,
@@ -286,12 +286,13 @@ const userController = {
       const result = likes.map(like => {
         const tweet = like.Tweet
         return {
+          likeCreatedAt: like.createdAt,
           TweetId: tweet.id,
           description: tweet.description,
           createdAt: tweet.createdAt,
           tweetUserId: tweet.User.id,
           tweetUserName: tweet.User.name,
-          account: tweet.User.account,
+          tweetUserAccount: tweet.User.account,
           avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
@@ -341,7 +342,7 @@ const userController = {
 
   editAccount: async (req, res, next) => {
     try {
-      if (req.user.id !== req.params.id) return res.json({ status: 'error', message: "You con't do this" })
+      if (req.user.id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this" })
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const account = req.body?.account?.trim() || null
@@ -349,15 +350,20 @@ const userController = {
       const email = req.body?.email?.trim() || null
       const password = req.body?.password?.trim() || null
       const checkPassword = req.body?.checkPassword?.trim() || null
+
       if (!account || !name || !email || !password || !checkPassword) return res.json({ status: 'error', message: 'All fields are required' })
       if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters.' })
       if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match.' })
 
       let sameUser = await User.findOne({ where: { email } })
-      if (sameUser) return res.json({ status: 'error', message: 'Email already existed.' })
-      sameUser = await User.findOne({ where: { account } })
-      if (sameUser) return res.json({ status: 'error', message: 'Account already existed.' })
 
+      if (sameUser) {
+        if (sameUser.id !== req.user.id) return res.json({ status: 'error', message: 'Email already existed.' })
+      }
+      sameUser = await User.findOne({ where: { account } })
+      if (sameUser) {
+        if (sameUser.id !== req.user.id) return res.json({ status: 'error', message: 'Account already existed.' })
+      }
       return bcrypt.hash(req.body.password, 10)
         .then(hash => {
           user.update({

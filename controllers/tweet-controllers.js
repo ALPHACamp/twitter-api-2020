@@ -11,12 +11,21 @@ const tweetController = {
           { model: User }
         ],
       })
-          if (!tweet) return res.json({ status: "error", message: "Tweet didn't exist!" });
-          
-          return res.json(tweet);
+      if (!tweet) return res.json({ status: "error", message: "Tweet didn't exist!" });
+      const result = tweet.Replies.map(reply => {
+        return {
+          TweetId: reply.TweetId,
+          tweetUserId: tweet.User.id,
+          tweetUserAccount: tweet.User.account,
+          commentId: reply.id,
+          comment: reply.comment,
+          createdAt: reply.createdAt,
+          commentUser: reply.User
+        }
+      })
+      return res.json(result);
     } catch (err) { next(err) }
   },
-
   addLike: async (req, res, next) => {
     const UserId = helpers.getUser(req).id;
     const TweetId = req.params.tweet_id
