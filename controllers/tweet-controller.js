@@ -54,7 +54,7 @@ const tweetController = {
 
       // 獲取一個目前使用者所回覆過的推文之清單
       const replyTweets = await Reply.findAll({
-        attributes: ['UserId'],
+        attributes: ['TweetId'],
         where: { UserId: loginUserId },
         raw: true
       })
