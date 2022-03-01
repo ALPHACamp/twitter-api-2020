@@ -149,8 +149,12 @@ const userController = {
       }],
     })
       .then(likes => {
+        if (!likes) return res.json({ status: 'error', message: '無喜歡推文' })
         likes = likes.map(like => ({
           ...like.dataValues,
+          likedCount: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.length : 0,
+          repliedCount: like.dataValues.Tweet.Replies ? like.dataValues.Tweet.Replies.length : 0,
+          isLiked: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.map(user => user.UserId).includes(helpers.getUser(req).id) : 0
         }))
         res.json(likes)
       })
