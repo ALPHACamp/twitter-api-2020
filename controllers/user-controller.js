@@ -190,16 +190,10 @@ module.exports = {
           : selfUser.avatar
       ])
 
-      // get cover & avatar link , if not error
+      // get cover & avatar , if resImage is number , it's error
       let [cover, avatar] = resImages.map(resImage => {
-        if (typeof (resImage) === 'string') {
-          if (resImage.includes('too fast')) {
-            const minutes = resImage.replace(/[^0-9]/ig, "");
-            throw new Error(`圖片上傳次數過多，請稍候 ${minutes} 分鐘`)
-          }
-          return resImage
-        }
-        return resImage.link
+        if (resImage instanceof Error) throw resImage
+        return resImage
       })
 
       // check UserId and word length
