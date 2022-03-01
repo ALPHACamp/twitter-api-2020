@@ -164,17 +164,17 @@ const tweetController = {
       const loginUserId = authHelpers.getUser(req).id
 
       // 正常新增
-      const data = await sequelize.transaction(async t => {
+      const data = await sequelize.transaction(async transaction => {
 
         const [result] = await Promise.all([
           // 新增推文
           Tweet.create({
             UserId: loginUserId, description
-          }, { transaction: t }),
+          }, { transaction }),
           // 增加使用者推文數
           User.increment('tweetCount', {
             where: { id: loginUserId }, by: 1,
-            transaction: t
+            transaction
           })
         ])
 

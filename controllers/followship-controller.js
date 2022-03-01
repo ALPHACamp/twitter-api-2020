@@ -36,12 +36,12 @@ const followshipController = {
           })
       }
 
-      const data = await sequelize.transaction(async t => {
+      const data = await sequelize.transaction(async transaction => {
 
         // 不可重複追蹤
         const isExistFollowship = await Followship.findOne({
           where: { followerId: loginUserId, followingId: targetUserId }
-        }, { transaction: t })
+        }, { transaction })
 
         if (isExistFollowship) {
           error.code = 403
@@ -54,16 +54,16 @@ const followshipController = {
           // 建立追蹤關係
           Followship.create({
             followerId: loginUserId, followingId: targetUserId,
-          }, { transaction: t }),
+          }, { transaction }),
           // 增加使用者追隨他人的數量
           User.increment('followerCount', {
             where: { id: targetUserId }, by: 1,
-            transaction: t
+            transaction
           }),
           // 增加使用者的跟隨者數量
           User.increment('followingCount', {
             where: { id: loginUserId }, by: 1,
-            transaction: t
+            transaction
           })
         ])
         return result
@@ -112,12 +112,12 @@ const followshipController = {
           })
       }
 
-      const data = await sequelize.transaction(async t => {
+      const data = await sequelize.transaction(async transaction => {
 
         // 不可取消從未追蹤過的對象
         const isExistFollowship = await Followship.findOne({
           where: { followerId: loginUserId, followingId: targetUserId }
-        }, { transaction: t })
+        }, { transaction })
 
 
         if (!isExistFollowship) {
@@ -128,22 +128,22 @@ const followshipController = {
 
         const targetFollowShip = await Followship.findOne({
           where: { followerId: loginUserId, followingId: targetUserId },
-          transaction: t
+          transaction
         })
 
         // 可以取消追蹤的狀態
         await Promise.all([
           // 取消追蹤關係
-          targetFollowShip.destroy({ transaction: t }),
+          targetFollowShip.destroy({ transaction }),
           // 減少使用者的追蹤者人數
           User.decrement('followerCount', {
             where: { id: targetUserId }, id: 1,
-            transaction: t
+            transaction
           }),
           // 減少使用者所追蹤的人的數量
           User.decrement('followingCount', {
             where: { id: loginUserId }, id: 1,
-            transaction: t
+            transaction
           })
         ])
 

@@ -74,7 +74,7 @@ const replyController = {
       }
 
       // 增加回覆
-      const data = await sequelize.transaction(async t => {
+      const data = await sequelize.transaction(async transaction => {
 
         const [result] = await Promise.all([
           // 新增推文的回覆
@@ -82,11 +82,11 @@ const replyController = {
             UserId: loginUserId,
             TweetId: targetTweetId,
             comment
-          }, { transaction: t }),
+          }, { transaction }),
           // 替當前推文增加回覆數
           Tweet.increment('replyCount', {
             where: { id: targetTweetId },
-            transaction: t
+            transaction
           })
         ])
         return result

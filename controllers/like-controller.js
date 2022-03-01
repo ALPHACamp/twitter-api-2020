@@ -21,12 +21,12 @@ const likeController = {
         return next(error)
       }
 
-      const data = await sequelize.transaction(async t => {
+      const data = await sequelize.transaction(async transaction => {
         // 不允許重複按喜歡 (即為不能用這API重複對同一篇推文表示喜歡)
 
         const isExistLike = await Like.findOne({
           where: { UserId: loginUserId, TweetId: targetTweetId },
-          transaction: t
+          transaction
         })
 
         if (isExistLike) {
@@ -37,14 +37,14 @@ const likeController = {
 
         // 可以按喜歡
         const [result] = await Promise.all([
-          Like.create({ UserId: loginUserId, TweetId: targetTweetId }, { transaction: t }),
+          Like.create({ UserId: loginUserId, TweetId: targetTweetId }, { transaction }),
           Tweet.increment('likeCount', {
             where: { id: targetTweetId },
-            by: 1, transaction: t
+            by: 1, transaction
           }),
           User.increment('likeCount', {
             where: { id: loginUserId },
-            by: 1, transaction: t
+            by: 1, transaction
           })
         ])
 
@@ -84,11 +84,11 @@ const likeController = {
       }
 
 
-      const data = await sequelize.transaction(async t => {
+      const data = await sequelize.transaction(async transaction => {
         // 不可取消從未喜歡過的推文
         const isExistLike = await Like.findOne({
           where: { UserId: loginUserId, TweetId: targetTweetId },
-          transaction: t
+          transaction
         })
 
         if (!isExistLike) {
@@ -99,21 +99,21 @@ const likeController = {
 
         const targetLike = await Like.findOne({
           where: { UserId: loginUserId, TweetId: targetTweetId },
-          transaction: t
+          transaction
         })
         // 可以取消喜歡
         await Promise.all([
           // 刪除喜歡的推文
-          targetLike.destroy({ transaction: t }),
+          targetLike.destroy({ transaction }),
           // 計算推文的喜歡數
           Tweet.decrement('likeCount', {
             where: { id: targetTweetId }, by: 1,
-            transaction: t
+            transaction
           }),
           // 計算使用者的喜歡數
           User.decrement('likeCount', {
             where: { id: loginUserId }, by: 1,
-            transaction: t
+            transaction
           })
 
         ])
