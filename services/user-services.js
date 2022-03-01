@@ -66,6 +66,7 @@ const userServices = {
           include: [
             [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
             [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)"), 'replyCount'],
             [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingCount'],
             [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerCount'],
             [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = User.id)`), 'isFollowed']
@@ -236,7 +237,6 @@ const userServices = {
         order: [
           ['createdAt', 'DESC']
         ],
-        raw: true,
         nest: true
       })
       // 目標使用者若無推文
@@ -262,7 +262,6 @@ const userServices = {
         order: [
           ['createdAt', 'DESC']
         ],
-        row: true,
         nest: true
       })
       // 目標使用者若無推文
@@ -299,91 +298,134 @@ const userServices = {
   },
   getUserFollowings: async (req, cb) => {
     try {
-      // 取得使用者的追蹤名單
-      let followings = await Followship.findAll({
-        where: { followerId: req.params.id },
+      const userId = helper.getUser(req).id
+      const followshipData = await User.findAll({
+        where: { id: req.params.id, role: 'user' },
+        attributes: [
+          [
+            sequelize.col('Followings->Followship.id'),
+            'id'
+          ],
+          [
+            sequelize.col('Followings->Followship.followerId'),
+            'followerId'
+          ],
+          [
+            sequelize.col('Followings->Followship.followingId'),
+            'followingId'
+          ],
+          [
+            sequelize.col('Followings->Followship.createdAt'),
+            'createdAt'
+          ],
+          [
+            sequelize.col('Followings->Followship.updatedAt'),
+            'updatedAt'
+          ]
+        ],
         include: [{
-          model: User,
-          as: 'Followers',
-          attributes: [
+          model: User, as: 'Followings', attributes: [
+            'id',
             'name',
             'account',
             'avatar',
-            'createdAt',
-            'introduction',
-            // 比對id，看登入使用者是否也有在追蹤這些人
-            //TODO 辨別Followers是不是使用者本身
-            [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = Followers.id)`), 'isFollowed']
-          ],
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = Followings.id)"), 'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = Followings.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = Followings.id)"), 'replyCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = Followings.id)"), 'followingCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = Followings.id)"), 'followerCount'],
+            [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${userId} AND followingId = Followings.id)`), 'isFollowed']
+          ]
         }],
-        attributes: {
-          exclude: [
-            'email',
-            'password',
-            'introduction',
-            'cover'
-          ],
-        },
-        //以追隨日期排序
-        order: [
-          ['createdAt', 'DESC']
-        ],
         raw: true,
-        nest: true
+        nest: true,
+        order: [[sequelize.col('createdAt'), 'DESC']]
       })
-      if (followings.length === 0) throw new Error("使用者尚未追蹤任何人")
-      followings = followings.map(following => ({
-        ...following,
-        isFollowed: following.Followers.isFollowed ? true : false
+      if (followshipData.length === 0) throw new Error("使用者不存在")
+      if (!followshipData[0].Followings.id) throw new Error("沒有任何的追蹤")
+      const result = followshipData.map(data => ({
+        ...data,
+        Followings: {
+          'id': data.Followings.id,
+          'name': data.Followings.name,
+          'account': data.Followings.account,
+          'avatar': data.Followings.avatar,
+          'isFollowed': data.Followings.isFollowed ? true : false,
+          'isSelf': data.Followings.id === userId,
+          'Followship': data.Followings.Followship,
+        }
       }))
-      return cb(null, followings)
+      return cb(null, result)
     } catch (err) {
       return cb(err)
     }
   },
+
   getUserFollowers: async (req, cb) => {
     try {
-      let followers = await Followship.findAll({
-        where: { followingId: req.params.id },
+      const userId = helper.getUser(req).id
+      const followshipData = await User.findAll({
+        where: { id: req.params.id, role: 'user' },
+        attributes: [
+          [
+            sequelize.col('Followers->Followship.id'),
+            'id'
+          ],
+          [
+            sequelize.col('Followers->Followship.followerId'),
+            'followerId'
+          ],
+          [
+            sequelize.col('Followers->Followship.followingId'),
+            'followingId'
+          ],
+          [
+            sequelize.col('Followers->Followship.createdAt'),
+            'createdAt'
+          ],
+          [
+            sequelize.col('Followers->Followship.updatedAt'),
+            'updatedAt'
+          ]
+        ],
         include: [{
-          model: User,
-          as: 'Followings',
-          attributes: [
+          model: User, as: 'Followers', attributes: [
+            'id',
             'name',
             'account',
             'avatar',
-            'createdAt',
-            'introduction',
-            // 比對id，看登入使用者是否也有在追蹤這些人
-            //TODO 辨別Followings是不是使用者本身
-            [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = Followings.id)`), 'isFollowed']
-          ],
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = Followers.id)"), 'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = Followers.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = Followers.id)"), 'replyCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = Followers.id)"), 'followingCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = Followers.id)"), 'followerCount'],
+            [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${userId} AND followingId = Followers.id)`), 'isFollowed']
+          ]
         }],
-        attributes: {
-          exclude: [
-            'email',
-            'password',
-            'introduction',
-            'cover'
-          ],
-        },
-        //以追隨日期排序
-        order: [
-          ['createdAt', 'DESC']
-        ],
         raw: true,
-        nest: true
+        nest: true,
+        order: [[sequelize.col('createdAt'), 'DESC']]
       })
-      if (followers.length === 0) throw new Error("使用者尚未有人追蹤")
-      followers = followers.map(follower => ({
-        ...follower,
-        isFollowed: follower.Followings.isFollowed ? true : false
+      if (followshipData.length === 0) throw new Error("使用者不存在")
+      if (!followshipData[0].Followers.id) throw new Error("沒有任何追蹤者")
+      const result = followshipData.map(data => ({
+        ...data,
+        Followers: {
+          'id': data.Followers.id,
+          'name': data.Followers.name,
+          'account': data.Followers.account,
+          'avatar': data.Followers.avatar,
+          'isFollowed': data.Followers.isFollowed ? true : false,
+          'isSelf': data.Followers.id === userId,
+          'Followship': data.Followers.Followship,
+        }
       }))
-      return cb(null, followers)
+      return cb(null, result)
     } catch (err) {
       return cb(err)
     }
   },
+
   getTopUsers: async (req, cb) => {
     try {
       let users = await User.findAll({

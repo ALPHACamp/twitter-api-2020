@@ -10,7 +10,7 @@ module.exports = {
         id: i * 10 + 1,
         userId: Math.ceil(Math.random() * 5) * 10 + 1,
         tweetId: Math.floor(i / 3) * 10 + 1,
-        comment: faker.lorem.sentence(2),
+        comment: faker.lorem.text().substring(0, 140),
         createdAt: new Date(),
         updatedAt: new Date()
       }))
