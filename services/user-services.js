@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurFileHandler } = require('../helpers/file-helper')
+const helpers = require('../_helpers')
 
 const userController = {
   signUp: async (req, cb) => {
@@ -168,7 +169,7 @@ const userController = {
       if (password !== checkPassword) throw new Error('Passwords do not match!')
       if (introduction && (introduction.length > 160)) throw new Error('Introduction exceeds the word limit!')
       if (name && (name.length > 50)) throw new Error('Name exceeds the word limit!')
-      if (req.params.id !== req.user.id) throw new Error('You are not the user, permisson denied!')
+      if (Number(req.params.id) !== helpers.getUser(req).id) throw new Error('You are not the user, permisson denied!')
       const registereduser = await User.findOne({
         raw: true,
         where: {
@@ -180,7 +181,6 @@ const userController = {
       const user = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followings' }]
       })
-      console.log(req.user.id)
       // pass, update user
       const reqBodyArr = { account, name, email, password, introduction, avatar, cover }
       for (const attribute in reqBodyArr) {
