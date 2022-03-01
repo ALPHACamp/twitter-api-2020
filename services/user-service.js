@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
+const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
 const validator = require('validator')
 const uploadFile = require('../helpers/file')
 const helpers = require('../_helpers')
@@ -67,18 +67,37 @@ const userServices = {
   },
 
   getUser: async req => {
-    let user = await User.findByPk(req.params.id, {
+    const id = req.params.id
+    let user = await User.findByPk(id, {
       include: [
         Tweet,
         {
           model: User,
           as: 'Followers',
-          attributes: ['id', 'name', 'account', 'avatar']
+          attributes: [
+            'id',
+            'name',
+            'account',
+            'avatar',
+            [
+              sequelize.literal('`Followers->Followship`.`createdAt`'),
+              'createdAt'
+            ]
+          ]
         },
         {
           model: User,
           as: 'Followings',
-          attributes: ['id', 'name', 'account', 'avatar']
+          attributes: [
+            'id',
+            'name',
+            'account',
+            'avatar',
+            [
+              sequelize.literal('`Followings->Followship`.`createdAt`'),
+              'createdAt'
+            ]
+          ]
         }
       ],
       attributes: {
@@ -88,6 +107,10 @@ const userServices = {
     if (!user) throw new Error("This user don't exist!")
 
     const userFollowingIds = getFollowshipId(req, 'Followings')
+
+    // sort by created date
+    user.Followers.sort((a, b) => b.createdAt - a.createdAt)
+    user.Followings.sort((a, b) => b.createdAt - a.createdAt)
 
     // Clean data
     const Followers = user.Followers.map(user => ({
@@ -108,7 +131,7 @@ const userServices = {
 
     user = {
       ...user.dataValues,
-      introduction: '',
+      introduction: user.introduction || '',
       isFollowed: userFollowingIds.includes(user.id),
       Followers,
       Followings
@@ -196,6 +219,7 @@ const userServices = {
     let [tweets, userLikes] = await Promise.all([
       Tweet.findAll({
         where: { UserId: req.params.id },
+        order: [['createdAt', 'DESC']],
         include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
         ],
@@ -250,6 +274,7 @@ const userServices = {
   getUserLikes: async req => {
     let likes = await Like.findAll({
       where: { UserId: req.params.id },
+      order: [['createdAt', 'DESC']],
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
         {
