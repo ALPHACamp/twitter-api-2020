@@ -248,6 +248,7 @@ const userController = {
       followings.forEach(e => {
         delete e.Followship
         delete e.password
+        e.followingId = e.id
       })
       return cb(null, followings)
     } catch (err) {
