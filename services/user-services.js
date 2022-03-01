@@ -119,7 +119,7 @@ const userServices = {
       })
     ])
       .then(([tweets, user]) => {
-        if (!tweets.length) throw new Error('資料庫內沒有相關資料')
+        if (!tweets.length) return cb(null, [])
         const data = tweets.map(t => ({
           id: t.id,
           userData: {
@@ -156,7 +156,7 @@ const userServices = {
       nest: true
     })
       .then(replies => {
-        if (!replies.length) throw new Error('資料庫內沒有相關資料')
+        if (!replies.length) return cb(null, [])
         const data = replies.map(r => ({
           id: r.id,
           comment: r.comment,
@@ -186,7 +186,7 @@ const userServices = {
       })
     ])
       .then(([user, following]) => {
-        if (!user.Followings.length) throw new Error('該使用者沒有追蹤者(following)')
+        if (!user.Followings.length) return cb(null, [])
 
         const currentUserFollowing = following.map(f => f.followingId)
         const data = user.Followings.map(f => ({
@@ -212,7 +212,7 @@ const userServices = {
       })
     ])
       .then(([user, following]) => {
-        if (!user.Followers.length) throw new Error('該使用者沒有追隨者(follower)')
+        if (!user.Followers.length) return cb(null, [])
 
         const currentUserFollowing = following.map(f => f.followingId)
         const data = user.Followers.map(f => ({
@@ -251,7 +251,7 @@ const userServices = {
       nest: true
     })
       .then(likes => {
-        if (!likes.length) throw new Error('資料庫內沒有相關資料')
+        if (!likes.length) return cb(null, [])
         const data = likes.map(l => ({
           TweetId: l.Tweet.id,
           userData: {
