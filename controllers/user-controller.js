@@ -244,14 +244,8 @@ const userController = {
     try {
       const error = new Error()
       const loginUserId = helper.getUser(req).id
-      const targetUserId = Number(req.params.id)
+      let targetUserId = req.params.id
 
-
-      if (loginUserId !== targetUserId) {
-        error.code = 400
-        error.message = '只能修改自己的資料'
-        return next(error)
-      }
 
       if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
@@ -259,6 +253,13 @@ const userController = {
         return next(error)
       }
 
+      targetUserId = Number(targetUserId)
+
+      if (targetUserId !== loginUserId) {
+        error.code = 400
+        error.message = '只能修改自己的資料'
+        return next(error)
+      }
 
 
       const { name, account, email, password } = req.body
@@ -292,22 +293,26 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       const error = new Error()
-      const id = Number(req.params.id)
-      const currentId = helper.getUser(req).id
+      let targetUserId = req.params.id
+      const loginUserId = helper.getUser(req).id
       const DEL_OPERATION_CODE = '-1'
 
 
-      if (id !== currentId) {
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
+        error.code = 404
+        error.message = '對應使用者找不到'
+        return next(error)
+      }
+
+      targetUserId = Number(targetUserId)
+
+      if (targetUserId !== loginUserId) {
         error.code = 400
         error.message = '只能修改自己的資料'
         return next(error)
       }
-      const user = await User.findByPk(id)
-      if (!user) {
-        error.code = 404
-        error.message = '對應使用者不存在'
-        return next(error)
-      }
+
+
       const { name, introduction, cover, avatar } = req.body
       const { files } = req
 
@@ -337,12 +342,13 @@ const userController = {
           user.avatar
       }
 
-      await user.update({
+      const user = await User.update({
         name,
         introduction,
         avatar: uploadAvatar,
         cover: uploadCover
-      })
+      }, { where: { id: targetUserId } })
+
       const results = {
         account: user.account,
         name,
