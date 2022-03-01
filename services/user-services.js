@@ -139,23 +139,23 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUserReply: (req, cb) => {
-    return Promise.all([
-      User.findByPk(req.params.id, {
-        raw: true,
-        nest: true
-      }),
-      Reply.findAll({
-        where: { userId: req.params.id },
+    return Reply.findAll({
+      where: { userId: req.params.id },
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Tweet, attributes: [] }
+      ],
+      attributes: {
         include: [
-          { model: User },
-          { model: Tweet, include: User }
-        ],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      })
-    ])
-      .then(([user, replies]) => {
+          [sequelize.literal('(SELECT id FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerId'],
+          [sequelize.literal('(SELECT account FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerAccount']
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(replies => {
         if (!replies.length) throw new Error('資料庫內沒有相關資料')
         const data = replies.map(r => ({
           id: r.id,
@@ -167,8 +167,8 @@ const userServices = {
             avatar: r.User.avatar
           },
           tweetId: r.tweetId,
-          tweetOwnerId: r.Tweet.userId,
-          tweetOwnerAccount: r.Tweet.User.account,
+          tweetOwnerId: r.tweetOwnerId,
+          tweetOwnerAccount: r.tweetOwnerAccount,
           createdAt: r.createdAt
         }))
         return cb(null, data)
