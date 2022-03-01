@@ -18,7 +18,7 @@ const userController = {
   register: async (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     try {
-      const newUser = await userServices.register(
+      const { status, message } = await userServices.register(
         account,
         name,
         email,
@@ -26,7 +26,7 @@ const userController = {
         checkPassword
       )
 
-      return res.json({ newUser })
+      return res.json({ status, message })
     } catch (error) {
       next(error)
     }
