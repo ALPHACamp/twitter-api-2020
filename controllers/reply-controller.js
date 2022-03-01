@@ -1,5 +1,8 @@
 
-const { User, Tweet, Reply } = require('../models')
+const {
+  User, Tweet,
+  Reply, sequelize
+} = require('../models')
 const authHelpers = require('../_helpers')
 
 const replyController = {
@@ -71,21 +74,30 @@ const replyController = {
       }
 
       // 增加回覆
-      const result = await Reply.create({
-        UserId: loginUserId,
-        TweetId: targetTweetId,
-        comment
-      })
+      const data = await sequelize.transaction(async transaction => {
 
-      // 替當前推文增加回覆數
-      await Tweet.increment('replyCount', { where: { id: targetTweetId } })
+        const [result] = await Promise.all([
+          // 新增推文的回覆
+          Reply.create({
+            UserId: loginUserId,
+            TweetId: targetTweetId,
+            comment
+          }, { transaction }),
+          // 替當前推文增加回覆數
+          Tweet.increment('replyCount', {
+            where: { id: targetTweetId },
+            transaction
+          })
+        ])
+        return result
+      })
 
       return res
         .status(200)
         .json({
           status: 'success',
-          message: '成功發表推文',
-          data: result
+          message: '成功發表回覆',
+          data
         })
     } catch (error) {
       error.code = 500
