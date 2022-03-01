@@ -14,7 +14,11 @@ module.exports = {
         cover: 'https://loremflickr.com/800/600/paris',
         role: 'admin',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        tweetCount: 0,
+        followingCount: 0,
+        followerCount: 0,
+        likedCount: 0
       },
       ...Array.from({ length: 10 }, (_, i) => ({
         name: faker.name.findName(),
@@ -26,7 +30,11 @@ module.exports = {
         cover: 'https://loremflickr.com/800/600/paris',
         role: 'user',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        tweetCount: 0,
+        followingCount: 0,
+        followerCount: 0,
+        likedCount: 0
       }))
     ])
   },
