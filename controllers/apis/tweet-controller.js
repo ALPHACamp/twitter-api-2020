@@ -41,15 +41,14 @@ const tweetController = {
           'UserId',
           'description',
           'createdAt',
+          [sequelize.literal('(select count(TweetId) from Likes where TweetId = Tweet.id)'), 'likeCount'],
           [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
         ]
       })
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         res.json(tweets)
       } else {
-        await Promise.all(tweets.map(async tweet => {
-          return await appFunc.resTweetHandler(userId, tweet)
-        }))
+        await appFunc.resTweetHandler(userId, tweets)
         res.json({
           status: 'success',
           data: { tweets }
@@ -76,6 +75,7 @@ const tweetController = {
           'UserId',
           'description',
           'createdAt',
+          [sequelize.literal('(select count(TweetId) from Likes where TweetId = Tweet.id)'), 'likeCount'],
           [sequelize.literal('(select count(TweetId) from Replies where TweetId = Tweet.id)'), 'replyCount']
         ]
       })

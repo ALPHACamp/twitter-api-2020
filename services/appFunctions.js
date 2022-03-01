@@ -1,35 +1,41 @@
 const { Like, Followship } = require('../models')
 
 module.exports = {
-  resTweetHandler: async function (userId, tweet) {
-    const resTweet = await this.getTweetIsLiked(userId, tweet)
-    resTweet.likeCount = await this.getTweetLikedCount(tweet)
-    return this.numToUnitHandler(resTweet)
+  resTweetHandler: async function (userId, tweets) {
+    const resTweets = await this.getTweetsIsLiked(userId, tweets)
+    return this.numToUnitHandler(resTweets)
   },
-  getTweetIsLiked: async function (userId, tweet) {
-    const userLiked = await Like.findOne({
-      where: { UserId: userId, TweetId: tweet.id },
+  getTweetsIsLiked: async function (userId, tweets) {
+    const userLikes = await Like.findAll({
+      where: { UserId: userId },
       raw: true
     })
-    tweet.isLiked = Boolean(userLiked)
-    return tweet
+    const userLikeTweetsId = userLikes.map(like => like.TweetId)
+    if (Array.isArray(tweets)) {
+      tweets.forEach(tweet => {
+        tweet.isLiked = userLikeTweetsId.includes(tweet.id)
+      })
+    } else {
+      tweets.isLiked = userLikeTweetsId.includes(tweets.id)
+    }
+    return tweets
   },
-  getTweetLikedCount: async function (tweet) {
-    const likes = await Like.findAndCountAll({
-      where: { TweetId: tweet.id },
-      raw: true,
-      nest: true
+  getUsersIsFollowing: async function (userId, users) {
+    const userFollowings = await Followship.findAll({
+      where: { followerId: userId },
+      raw: true
     })
-    return likes.count
-  },
-  getUserIsFollowing: async function (userId, targetId) {
-    const followship = await Followship.findOne({
-      where: {
-        followingId: targetId,
-        followerId: userId
-      }
-    })
-    return Boolean(followship)
+    const userFollowingUsersId = userFollowings.map(followship => followship.followingId)
+    if (Array.isArray(users)) {
+      users.forEach(user => {
+        user.isFollowing = userFollowingUsersId.includes(user.id)
+        user.isUser = Boolean(user.id === userId)
+      })
+    } else {
+      users.isFollowing = userFollowingUsersId.includes(users.id)
+      users.isUser = Boolean(users.id === userId)
+    }
+    return users
   },
   resRepliesHandler: replies => {
     replies.map(reply => {
