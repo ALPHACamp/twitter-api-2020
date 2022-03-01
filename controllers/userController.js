@@ -142,7 +142,9 @@ const userController = {
   },
   // 喜歡的推文
   getLikedTweet: (req, res, next) => {
-    return Like.findAll({
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Like.findAll({
       where: { UserId: req.params.id },
       include: [{
         model: Tweet,
@@ -151,9 +153,10 @@ const userController = {
           Like
         ]
       }],
-    })
-      .then(likes => {
-        if (!likes) return res.json({ status: 'error', message: '無喜歡推文' })
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user) throw new Error("User didn't exist!")
         likes = likes.map(like => ({
           ...like.dataValues,
           likedCount: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.length : 0,
