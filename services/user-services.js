@@ -154,7 +154,6 @@ const userController = {
     const { account, name, email, password, checkPassword, introduction, avatar, cover } = req.body
     const where = {}
     const { files } = req
-
     async function uploadFiles (files) {
       const filesArr = []
       for (const file in files) {
@@ -169,6 +168,7 @@ const userController = {
       if (password !== checkPassword) throw new Error('Passwords do not match!')
       if (introduction && (introduction.length > 160)) throw new Error('Introduction exceeds the word limit!')
       if (name && (name.length > 50)) throw new Error('Name exceeds the word limit!')
+      if (req.params.id !== req.user.id) throw new Error('You are not the user, permisson denied!')
       const registereduser = await User.findOne({
         raw: true,
         where: {
@@ -180,7 +180,7 @@ const userController = {
       const user = await User.findByPk(req.params.id, {
         include: [{ model: User, as: 'Followings' }]
       })
-
+      console.log(req.user.id)
       // pass, update user
       const reqBodyArr = { account, name, email, password, introduction, avatar, cover }
       for (const attribute in reqBodyArr) {
