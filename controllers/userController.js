@@ -324,11 +324,11 @@ const userController = {
     // 預設取得10位使用者， 並判斷是否有查詢變數來改變取得長度
     const DEFAULT_LIMIT = 10
     const limit = req.query.limit ? req.query.limit : DEFAULT_LIMIT
-    const currentUserName = helpers.getUser(req).account
+    const currentUserAccount = helpers.getUser(req).account
 
     // 取得所有使用者資料，用多對多關連，取得使用者追蹤資料
     return User.findAll({
-      where: { account: { $not: ['root', currentUserName] } },
+      where: { account: { $not: ['root', currentUserAccount] } },
       include: [{ model: User, as: 'Followers', attributes: ['id', 'name'] }],
       attributes: ['id', 'name', 'avatar', 'account']
     })
