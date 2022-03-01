@@ -297,8 +297,10 @@ const userController = {
       const loginUserId = helper.getUser(req).id
       const DEL_OPERATION_CODE = '-1'
 
+      // 測試檔要求
+      const user = !isNaN(targetUserId) && await User.findByPk(targetUserId)
 
-      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
+      if (!user) {
         error.code = 404
         error.message = '對應使用者找不到'
         return next(error)
@@ -342,12 +344,12 @@ const userController = {
           user.avatar
       }
 
-      const user = await User.update({
+      await user.update({
         name,
         introduction,
         avatar: uploadAvatar,
         cover: uploadCover
-      }, { where: { id: targetUserId } })
+      })
 
       const results = {
         account: user.account,
@@ -357,6 +359,7 @@ const userController = {
         cover: uploadCover
       }
 
+
       return res
         .status(200)
         .json({ status: 'success', message: '修改成功', data: results })
@@ -365,6 +368,7 @@ const userController = {
       return next(error)
     }
   }
+
 }
 
 module.exports = userController
