@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const Sequelize = require('sequelize')
 const Op = Sequelize.Op
 const { User, Tweet, Like, Reply } = require('../models')
-let dbConfig
+let dbConfig = {}
 if (process.env.NODE_ENV !== 'production') {
   const { development } = require('../config/config.json')
   dbConfig = development
