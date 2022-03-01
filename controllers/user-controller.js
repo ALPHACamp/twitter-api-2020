@@ -102,16 +102,24 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const { id } = req.params
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '使用者不存在'
+          })
+      }
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
         raw: true,
         include: {
           model : User,
-          attributes: ['id', 'name', 'account', 'avatar']
+          attributes: ['id', 'name', 'account', 'avatar','tweetCount']
         },
         nest: true
       })
-      
       if (tweetsData.length === 0) return res.status(400).json({
         status: 'error',
         message: 'Tweet not found!'
