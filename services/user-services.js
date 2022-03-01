@@ -251,7 +251,6 @@ const userServices = {
       nest: true
     })
       .then(likes => {
-        console.log(likes)
         if (!likes.length) throw new Error('資料庫內沒有相關資料')
         const data = likes.map(l => ({
           TweetId: l.Tweet.id,
