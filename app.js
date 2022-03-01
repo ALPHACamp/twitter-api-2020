@@ -8,10 +8,8 @@ const methodOverride = require('method-override')
 
 const app = express()
 const port = 3000
-// const route = require('./routes')
-const {
-  apis
-} = require('./routes')
+const routes = require('./routes')
+
 
 // // use helpers.getUser(req) to replace req.user
 // function authenticated (req, res, next) {
@@ -25,7 +23,7 @@ app.use(passport.initialize())
 // app.use(methodOverride('_method'))
 
 // app.get('/', (req, res) => res.send('Hello World!'))
-app.use('/api', apis)
+app.use(routes)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
