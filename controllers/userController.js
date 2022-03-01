@@ -132,8 +132,8 @@ const userController = {
         // 將tweet迭代，並回傳所以資料陣列
         const tweets = tweet.map(tweet => ({
           ...tweet.dataValues,
-          likedCount: tweet.Likes.length,
-          repliedCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          replydCount: tweet.Replies.length,
           isLiked: tweet.Likes.map(user => user.UserId).includes(currentUser.id)
         }))
         res.json(tweets)
@@ -159,8 +159,8 @@ const userController = {
         if (!user) throw new Error("User didn't exist!")
         likes = likes.map(like => ({
           ...like.dataValues,
-          likedCount: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.length : 0,
-          repliedCount: like.dataValues.Tweet.Replies ? like.dataValues.Tweet.Replies.length : 0,
+          likeCount: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.length : 0,
+          replyCount: like.dataValues.Tweet.Replies ? like.dataValues.Tweet.Replies.length : 0,
           isLiked: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.map(user => user.UserId).includes(helpers.getUser(req).id) : 0
         }))
         res.json(likes)
