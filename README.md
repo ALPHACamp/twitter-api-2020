@@ -1,125 +1,170 @@
 # 簡易推特 API
 
-一個後端 API 伺服器，提供類似 Twitter 的社群媒體服務功能，例如發佈推文、點讚、或是追隨等動作，主要使用技術包含 Node.js + Express + passport + bcryptjs + Sequelize。
+[![Framework](https://img.shields.io/badge/Framework-Express-aliceblue.svg)](https://www.npmjs.com/package/express)
+[![ORM](https://img.shields.io/badge/ORM-Sequelize-steelblue.svg)](https://www.npmjs.com/package/mysql)
+[![Database](https://img.shields.io/badge/Database-MySQL-lightblue.svg)](https://www.npmjs.com/package/mysql)
 
 
-## 功能描述
+### 一個後端 API 伺服器，提供類似 Twitter 的社群媒體服務功能，例如發佈推文、點讚、或是追隨等動作，主要使用技術包含 Node.js + Express + passport + bcryptjs + Sequelize。
 
-登入註冊
+<br>
+<br>
 
-- 一般使用者註冊
-- 一般使用者登入
-- 管理者登入
+## <strong>功能描述</strong>
 
-推文功能
+> ### 登入註冊
+>> - 一般使用者註冊
+>> - 一般使用者登入
+>> - 管理者登入
 
-- 新增推文、或是回覆推文資訊
-- 查詢推文、以及推文回覆資訊
-- 可對推文點讚、收回點讚動作
+> ### 推文功能
+>> - 新增推文、或是回覆推文資訊
+>> - 查詢推文、以及推文回覆資訊
+>> - 可對推文點讚、收回點讚動作
 
-使用者功能
+> ### 使用者功能
+>> - 可修改自己的帳號密碼、或大頭貼、封面和簡介
+>> - 查詢使用者的詳細資料
+>> - 查詢使用者的推文歷史
+>> - 查詢使用者的按讚歷史
+>> - 查詢使用者的追蹤與被追隨名單
 
-- 可修改自己的帳號密碼、或大頭貼、封面和簡介
-- 查詢使用者的詳細資料
-- 查詢使用者的推文歷史
-- 查詢使用者的按讚歷史
-- 查詢使用者的追蹤與被追隨名單
+> ### 追隨功能
+>> - 可對其他使用者進行追隨
+>> - 可對其他使用者取消追隨
 
-追隨功能
+> ### 後台功能
+>> - 顯示所有使用者清單
+>> - 顯示所有推文清單
+>> - 刪除推文資訊
 
-- 可對其他使用者進行追隨
-- 可對其他使用者取消追隨
+<br>
+<br>
 
-後台功能
+## <strong>環境建置需求</strong>
+- ### Git - [下載連結](https://git-scm.com/downloads) 
+- ### Node.js 14.16.0 - [下載連結](https://nodejs.org/dist/v14.16.0/)
+- ### 終端機工具 Terminal、CMD、Git Bash - [Git Bash下載連結](https://gitforwindows.org/)
+- ### MySQL Community Server 8.0.15 - [下載連結](https://downloads.mysql.com/archives/installer/)
+- ### MySQL Workbench 8.0.15 (`安裝 MySQL 時選擇同時安裝 Workbench`)
 
-- 顯示所有使用者清單
-- 顯示所有推文清單
-- 刪除推文資訊
+<br>
+<br>
 
+## <strong>安裝步驟</strong>
+<br>
 
-## 環境建置需求
+> ### 1. 請先確認本機<strong style="color: red">已經安裝環境建置需求</strong>裡面的所有軟體項目。
 
-- [Node.js 14.16.0](https://nodejs.org/en/)
-- Terminal | CMD | [Git Bash](https://gitforwindows.org/)
-- [MySQL Community Server 8.0.15](https://downloads.mysql.com/archives/installer/)
-- MySQL Workbench 8.0.15
+<br>
 
-
-## 安裝步驟
-
-1. 打開終端機或是Git Bash，移動到指定路徑 ( 以 windows 桌面 為例 )
-
-```text
-cd C:\Users\'使用者名稱'\Desktop
-```
-
-2. 下載 twitter-api-2020 專案到本地電腦上
-
+> ### 2. 打開終端機或是 Git Bash，下載Github的專案到本地主機。
 ```text
 git clone https://github.com/Richie-Yang/twitter-api-2020.git
 ```
 
-3. 進入 twitter-api-2020 資料夾
+<br>
 
+> ### 3. 進入本地專案資料夾。
 ```text
 cd twitter-api-2020
 ```
 
-4. 位於 twitter-api-2020 資料夾裡面，執行以下指令安裝必須套件
+<br>
 
-```text
+> ### 4. 位於本地專案資料夾裡面，執行以下指令安裝必須套件。
+```
 npm install
 ```
 
-5. 位於 twitter-api-2020 資料夾裡面，建立 .env 檔案，內容可以參考 .env.example 檔案
+<br>
 
+> ### 5. 位於本地專案資料夾裡面，建立 .env 檔案，以下提供兩種方式進行 .env  檔案設定:
+>> <ol>5-1. 方法一，本地測試可以直接使用 .env.example 內容進行 .env 檔案設定。</ol>
+>> <ol>5-1. 方法二，或是參考下方檔案內容的環境變數說明，進行 .env 檔案的客製化。</ol>
 ```text
-PORT=3000
-SESSION_SECRET="輸入隨機字串"
+PORT=<輸入指定伺服器通訊埠>
+SESSION_SECRET=<輸入自訂的加密使用私鑰>
 ```
 
-6. 執行資料庫的遷徙檔案 ( `須先確定 MySQL 已啟動` )
+<br>
 
+> ### 6. 核對專案質料夾裡面的 config 資料夾，該資料夾裡面的 config.json 檔案，裡面有寫下本專案需要連接資料庫時的必要資訊，請核對以下資訊:
+>> <ol>6-1. 連線的 MySQL 資料庫 password 是否為 `"password"`，如果不是，請在以下的 password 欄位修改密碼。</ol>
+>> <ol>6-2. 連線的 MySQL 資料庫 IP address 是否為 `"127.0.0.1"`，如果不是，請在以下的 host 欄位修改 IP address。</ol>
+```json
+{
+  "development": {
+    "username": "root",
+    "password": "password",
+    "database": "ac_twitter_workspace",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+  ...
+}
+```
+
+<br>
+
+> ### 7. 在 MySQL Workbench 裡面先行建立資料庫。
+>> <ol>7-1. 須先確定 MySQL 服務已經啟動，並且透過 MySQL Workbench 成功登入資料庫。</ol>
+>> <ol>7-2. 輸入以下 SQL 指令，並且點擊閃電圖示直接執行 SQL 指令。</ol>
+```sql
+CREATE DATABASE ac_twitter_workspace;
+```
+
+<br>
+
+> ### 8. 執行資料庫的遷徙檔案。
 ```text
 npx sequelize db:migrate
 ```
 
-7. 執行資料庫的種子檔案 ( `須先確定 MySQL 已啟動` )，請勿重複執行
+<br>
 
+> ### 9. 執行資料庫的種子檔案。
 ```text
 npx sequelize db:seed:all
 ```
 
+<br>
+<br>
 
-## 執行步驟
 
-1. 執行專案 ( 伺服器啟動後會顯示 `Example app listening on port 3000!` )
+## <strong>執行步驟</strong>
 
+> ### 1. 執行專案 ( 伺服器啟動後會顯示 `Example app listening on port ...` )
 ```text
 npm run start
 ```
 
-2. 開啟瀏覽器輸入網址 <http://localhost:3000> 或是 <http://127.0.0.1:3000>
+> ### 2. 接著來到前台頁面，使用以下種子帳號進行登入
 
-3. 使用測試帳號登入
+<br>
+<br>
 
-root (這個帳號只能使用於後台)
-
+## <strong>種子資料</strong>
+> ### 1. root (這個帳號只能使用於後台)
 ```text
 account : root
 password : 12345678
 ```
 
-user1 (這個帳號只能使用於前台)
-
+> ### 2. user1 (這個帳號只能使用於前台)
 ```text
 account : user1
 password : 12345678
 ```
 
-## 參與專案協作者
-- [靜易](https://github.com/z88243310)
-- [Richie](https://github.com/Richie-Yang)
+<br>
+<br>
 
+## <strong>參與專案協作者</strong>
+- ### 靜易 - [個人 Github 連結](https://github.com/z88243310)
+- ### Richie - [個人 Github 連結](https://github.com/Richie-Yang)
 
-更新時間 : 2021.02.28
+<br>
+<br>
+
+<p style="text-align: right; font-size: 1.2em">更新時間 : 2021.03.01</p>
