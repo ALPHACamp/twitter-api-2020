@@ -12,7 +12,7 @@ const likeController = {
       const loginUserId = authHelpers.getUser(req).id
 
       // 找不到推文可以按喜歡
-      if (!(await Tweet.findByPk(targetTweetId))) {
+      if (isNaN(targetTweetId) || !(await Tweet.findByPk(targetTweetId))) {
         error.code = 404
         error.message = '對應推文不存在'
         return next(error)
@@ -66,7 +66,7 @@ const likeController = {
       const loginUserId = authHelpers.getUser(req).id
 
       // 找不到推文可以取消喜歡
-      if (!(await Tweet.findByPk(targetTweetId))) {
+      if (isNaN(targetTweetId) || !(await Tweet.findByPk(targetTweetId))) {
         error.code = 404
         error.message = '對應推文不存在'
         return next(error)
