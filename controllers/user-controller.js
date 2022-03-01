@@ -6,6 +6,8 @@ const Sequelize = require('sequelize')
 const { Op } = Sequelize;
 
 
+
+
 module.exports = {
   signin: (req, res, next) => {
     try {
@@ -169,10 +171,22 @@ module.exports = {
     // account edit : account name email password checkPassword 
     // profile edit : name introduction cover avatar
     try {
-      const selfUserId = helpers.getUser(req).id
+      const selfUser = helpers.getUser(req)
+      const selfUserId = selfUser.id
       const UserId = Number(req.params.UserId)
 
       const { account, name, email, password, checkPassword, introduction } = req.body
+
+      // getImageFiles : cover , avatar
+      const { files } = req
+
+      // upload to imgur if file exists
+      const cover = files?.cover
+        ? await helpers.imgurFileHandler(files.cover[0])
+        : selfUser.cover
+      const avatar = files?.avatar
+        ? await helpers.imgurFileHandler(files.avatar[0])
+        : selfUser.avatar
 
       // check UserId and word length
       if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
@@ -208,8 +222,8 @@ module.exports = {
       }
 
       // find self user and update
-      const user = users.find(user => user.id = UserId)
-      const updatedUser = await user.update(req.body)
+      const user = users.find(user => user.id === UserId)
+      const updatedUser = await user.update({ ...req.body, cover, avatar })
       const responseData = updatedUser.toJSON()
 
       return res.status(200).json(responseData)
