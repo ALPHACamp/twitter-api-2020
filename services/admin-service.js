@@ -6,8 +6,12 @@ const adminServices = {
       where: { role: 'user' },
       include: [{ model: Tweet }],
       attributes: [
-        'id', 'email', 'account', 'name', 'avatar', 'cover', 'avatar', 'introduction', 'role', 'likedCount', 'repliedCount', 'followerCount', 'followingCount',
-        [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount']
+        'id', 'email', 'account', 'name', 'avatar', 'cover', 'avatar', 'introduction', 'role', 'repliedCount', 'followerCount', 'followingCount',
+        [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
+        [
+          Sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'),
+          'likedCount',
+        ],
       ],
       order: [[Sequelize.literal('tweetCount'), 'DESC']]
     })
