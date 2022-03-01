@@ -1,4 +1,5 @@
 const { Tweet, User, Like, Reply } = require('../models')
+const { getUser } = require('../_helpers')
 
 const tweetServices = {
   getTweets: (req, cb) => {
@@ -7,7 +8,7 @@ const tweetServices = {
       include: [User, Like, Reply]
     })
       .then(tweet => {
-        if (tweet.length === 0) throw new Error('資料庫內沒有推文資料')
+        if (tweet.length === 0) return cb(null, [])
         const tweetData = tweet.map(i => i.get({ plain: true }))
           .map(i => ({
             id: i.id,
@@ -20,7 +21,7 @@ const tweetServices = {
             description: i.description,
             replyAmount: i.Replies.length,
             likeAmount: i.Likes.length,
-            userLiked: i.Likes.some(i => i.UserId === req.user.dataValues.id),
+            userLiked: i.Likes.some(i => i.UserId === getUser(req).dataValues.id),
             createdAt: i.createdAt
           }))
         return cb(null, tweetData)
@@ -30,9 +31,9 @@ const tweetServices = {
   postTweets: (req, cb) => {
     Tweet.create({
       description: req.body.description,
-      userId: req.user.dataValues.id
+      userId: getUser(req).dataValues.id
     })
-      .then(() => cb(null, '成功建立推文'))
+      .then(tweet => cb(null, tweet))
       .catch(err => cb(err, null))
   },
   getTweet: (req, cb) => {
@@ -51,7 +52,7 @@ const tweetServices = {
           description: Data.description,
           replyAmount: Data.Replies.length,
           likeAmount: Data.Likes.length,
-          userLiked: Data.Likes.some(i => i.UserId === req.user.dataValues.id),
+          userLiked: Data.Likes.some(i => i.UserId === getUser(req).dataValues.id),
           createdAt: Data.createdAt
         }
         return cb(null, tweetData)
@@ -64,7 +65,7 @@ const tweetServices = {
         if (tweet === null) throw new Error('輸入錯誤的tweetId，沒有此推文')
         Like.findOrCreate({
           where: {
-            userId: req.user.dataValues.id,
+            userId: getUser(req).dataValues.id,
             tweetId: req.params.id
           }
         })
@@ -79,7 +80,7 @@ const tweetServices = {
   unlikeTweet: (req, cb) => {
     Like.findOne({
       where: {
-        userId: req.user.dataValues.id,
+        userId: getUser(req).dataValues.id,
         tweetId: req.params.id
       }
     })
@@ -94,7 +95,7 @@ const tweetServices = {
       .then(tweet => {
         if (tweet === null) throw new Error('輸入錯誤的tweetId，沒有此推文')
         Reply.create({
-          userId: req.user.dataValues.id,
+          userId: getUser(req).dataValues.id,
           tweetId: req.params.id,
           comment: req.body.comment
         })
@@ -116,7 +117,7 @@ const tweetServices = {
       include: [User, { model: Tweet, include: [User] }]
     })
       .then(reply => {
-        if (reply.length === 0) throw new Error('此推文沒有任何回覆')
+        if (reply.length === 0) return cb(null, [])
         const replyData = reply.map(i => i.get({ plain: true }))
           .map(i => ({
             id: i.id,
@@ -127,7 +128,7 @@ const tweetServices = {
               name: i.User.name,
               avatar: i.User.avatar
             },
-            TweetId: i.TweetId,
+            tweetId: i.TweetId,
             tweetOwerId: i.Tweet.User.id,
             tweetOwerAccount: i.Tweet.User.account,
             createdAt: i.createdAt
