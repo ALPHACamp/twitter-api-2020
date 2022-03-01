@@ -14,8 +14,7 @@ const { generalErrorHandler } = require('../middleware/error-handler')
 // router.use('/api/followships', authenticated, followships)
 router.use('/api/users', users)
 // router.post('/api/users', userController.signUp)
-router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
-
+router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn) 
 
 // router.use('/', generalErrorHandler)
 
