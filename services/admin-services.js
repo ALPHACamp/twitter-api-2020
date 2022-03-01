@@ -7,6 +7,10 @@ if (process.env.NODE_ENV !== 'production') {
   const { development } = require('../config/config.json')
   dbConfig = development
 }
+if (process.env.NODE_ENV === 'travis') {
+  const { travis } = require('../config/config.json')
+  dbConfig = travis
+}
 const databaseConfig = {
   dialect: dbConfig.dialect || process.env.DB_DIALECT,
   host: dbConfig.host || process.env.DB_HOST,
