@@ -103,9 +103,9 @@ const userController = {
     try {
 
       const error = new Error()
-      const targetUserId = req.params.id
-    
-      if (!(await User.findByPk(targetUserId))) {
+      const targetUserId = (req.params.id)
+
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
@@ -191,7 +191,7 @@ const userController = {
       const targetUserId = req.params.id
       const loginUserId = helper.getUser(req).id
 
-      if (!(await User.findByPk(targetUserId))) {
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
@@ -243,21 +243,23 @@ const userController = {
   putUserSetting: async (req, res, next) => {
     try {
       const error = new Error()
-      const id = Number(req.params.id)
-      const currentId = helper.getUser(req).id
+      const loginUserId = helper.getUser(req).id
+      const targetUserId = Number(req.params.id)
 
-      if (id !== currentId) {
+
+      if (loginUserId !== targetUserId) {
         error.code = 400
         error.message = '只能修改自己的資料'
         return next(error)
       }
 
-
-      if (!(await User.findByPk(id))) {
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者找不到'
         return next(error)
       }
+
+
 
       const { name, account, email, password } = req.body
       const message = await putUserSettingCheck(req)
@@ -274,7 +276,7 @@ const userController = {
         account,
         email,
         password: bcrypt.hashSync(password, BCRYPT_COMPLEXITY)
-      }, { where: { id } })
+      }, { where: { id: targetUserId } })
 
       const result = { name, account, email }
 
