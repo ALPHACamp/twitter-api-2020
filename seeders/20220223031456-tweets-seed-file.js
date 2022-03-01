@@ -12,7 +12,7 @@ module.exports = {
     for ( const user of users) {
       // 更改推文種子數
       await queryInterface.bulkInsert('Tweets', 
-        Array.from({ length: 1 }, () => ({
+        Array.from({ length: 10 }, () => ({
         description: faker.lorem.text(140),
         UserId: user.id,
         createdAt: new Date(),
