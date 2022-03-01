@@ -94,6 +94,7 @@ const adminController = {
           'followerCount',
           'followingCount',
           'likeCount',
+          'tweetCount',
           [sequelize.literal('(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)'), 'replyCount']
         ],
         order: [['TweetCount', 'DESC']]
