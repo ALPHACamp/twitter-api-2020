@@ -93,10 +93,7 @@ const userController = {
         status: 'error',
         message: 'User not found!'
       })
-      const followData = await Followship.findAll({
-        where: {},
-        raw: true
-      })
+
       delete userData.password
 
       res.json({ userData })
@@ -457,32 +454,6 @@ const userController = {
     } catch (error) {
       next(error)
     }
-  },
-  getFollowing: async (req, res, next) => {
-    try {
-      const { id } = req.params
-      const following = await Followship.findAll({
-        where: { followingId: id },
-        order: [['createdAt', 'desc']],
-        include: [
-          {
-            model: User,
-            as: 'Following',
-          }
-        ],
-        raw: true,
-        nest: true
-      })
-      if (!following.length) return res.status(400).json({
-        status: 'error',
-        message: 'Following not found'
-      })
-      res.json({
-        status: 'success',
-        message: 'getFollowing success',
-        following
-      })
-    } catch (err) { next(err) }
   }
 }
 
