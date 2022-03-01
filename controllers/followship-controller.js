@@ -37,7 +37,6 @@ const followshipController = {
         followingId: req.params.id
       })
       if (followship) {
-        console.log(user.id)
         user.increment('followerCount')
         return res.status(200).json({
         status: 'success',
@@ -85,6 +84,7 @@ const followshipController = {
       } else {
         followingUser.destroy()
       }
+      user.decrement('followerCount')
       return res.status(200).json({
         status: 'success',
         message: '成功取消追蹤此使用者!'
