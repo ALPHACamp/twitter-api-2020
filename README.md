@@ -117,5 +117,5 @@ npx mocha test/{{ Model or Request }}/{{Model or Request}}.spec.js --exit
 - [MySQL Workbench](https://dev.mysql.com/downloads/mysql/)
 
 ## 開發人員
-[Eklipsorz](https://github.com/Eklipsorz)
+[Eklipsorz](https://github.com/Eklipsorz)  
 [Yung-Che](https://github.com/Yung-Che)
