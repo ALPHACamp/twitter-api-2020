@@ -181,7 +181,7 @@ module.exports = {
       const { files } = req
 
       // upload to imgur if file exists
-      const [cover, avatar] = await Promise.all([
+      let resImages = await Promise.all([
         files?.cover
           ? helpers.imgurFileHandler(files.cover[0])
           : selfUser.cover,
@@ -189,6 +189,18 @@ module.exports = {
           ? helpers.imgurFileHandler(files.avatar[0])
           : selfUser.avatar
       ])
+
+      // get cover & avatar link , if not error
+      let [cover, avatar] = resImages.map(resImage => {
+        if (typeof (resImage) === 'string') {
+          if (resImage.includes('too fast')) {
+            const minutes = resImage.replace(/[^0-9]/ig, "");
+            throw new Error(`圖片上傳次數過多，請稍候 ${minutes} 分鐘`)
+          }
+          return resImage
+        }
+        return resImage.link
+      })
 
       // check UserId and word length
       if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')

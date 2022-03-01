@@ -10,7 +10,7 @@ const imgurFileHandler = async file => {
     image: fs.createReadStream(file.path),
     type: 'stream'
   })
-  return response.data.link
+  return response.data
 }
 
 function getUser(req) {
