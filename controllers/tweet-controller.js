@@ -11,7 +11,8 @@ const tweetController = {
       ? next(err)
       : res.status(200).json({
         status: 'success',
-        message: data
+        message: '新增推文成功',
+        tweetData: data
       }))
   },
   getTweet: (req, res, next) => {
