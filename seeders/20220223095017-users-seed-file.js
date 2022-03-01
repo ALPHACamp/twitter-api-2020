@@ -15,7 +15,7 @@ module.exports = {
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date(),
-        tweetCount: 0,
+        tweetCount: 10,
         followingCount: 0,
         followerCount: 0,
         likedCount: 0

@@ -12,13 +12,13 @@ module.exports = {
       'SELECT id FROM Tweets;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    //每篇推文都有使用者按喜歡
+    //每篇推文都有1個使用者按喜歡
     await queryInterface.bulkInsert('Likes',
       Array.from({ length: tweets.length }, (_, i) => ({
         createdAt: new Date(),
         updatedAt: new Date(),
         TweetId: tweets[Math.floor(Math.random() * tweets.length)].id,
-        UserId: users[Math.floor(i/ (tweets.length/users.length))].id,
+        UserId: users[Math.floor(Math.random() * users.length)].id,
         isDeleted: false
       }))
     )

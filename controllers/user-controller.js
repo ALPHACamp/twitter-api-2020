@@ -397,7 +397,7 @@ const userController = {
       if (introduction && !introduction.isByteLength(introduction, { min: 0, max: 160 })) {
         return res.status(400).json({
           status: 'error',
-          message: '自我介少不能超過 160 個字'
+          message: '自我介紹不能超過 160 個字'
         })
       }
       // 列出全部有相同 account or email 的 user

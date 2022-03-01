@@ -18,6 +18,14 @@ const replyController = {
           { 
             model: User,
             attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: Tweet,
+            attributes: ['id','UserId'],
+            include: {
+              model: User,
+              attributes: ['id','name','account']
+            }
           }
         ]
       })

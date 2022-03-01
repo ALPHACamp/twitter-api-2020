@@ -6,9 +6,11 @@ module.exports = {
       'SELECT id FROM Users;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
+    //每個User都有1個追蹤者
     await queryInterface.bulkInsert('Followships',
-      Array.from({ length: 20 }, (_, i) => ({
-        followerId: users[Math.floor(Math.random() * users.length)].id,
+      Array.from({ length: users.length }, (_, i) => ({
+        // followerId: users[Math.floor(Math.random() * users.length)].id,
+        followerId: users[i].id,
         followingId: users[Math.floor(Math.random() * users.length)].id,
         createdAt: new Date(),
         updatedAt: new Date()
