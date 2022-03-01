@@ -25,6 +25,7 @@ const userController = {
             }
           });
         } else { res.json({ status: 'error', message: 'This is for normal user.' }) }
+
       } else {
         res.json(errData);
       }
@@ -97,6 +98,7 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [
+          { model: Tweet },
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
         ]
@@ -111,6 +113,7 @@ const userController = {
         introduction,
         avatar,
         cover,
+        tweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
         followerCount: user.Followers.length,
         isFollowing
@@ -250,6 +253,7 @@ const userController = {
         const repliedTweet = reply.Tweet
 
         return {
+          commentId: reply.id,
           comment: reply.comment,
           tweetId: repliedTweet.id,
           description: repliedTweet.description,
