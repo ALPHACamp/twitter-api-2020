@@ -1,6 +1,18 @@
 const jwt = require('jsonwebtoken')
-const sequelize = require('sequelize')
+const Sequelize = require('sequelize')
 const { User, Tweet, Like, Reply } = require('../models')
+let dbConfig
+if (process.env.NODE_ENV !== 'production') {
+  const { development } = require('../config/config.json')
+  dbConfig = development
+}
+const databaseConfig = {
+  dialect: dbConfig.dialect || process.env.DB_DIALECT,
+  host: dbConfig.host || process.env.DB_HOST,
+  username: dbConfig.username || process.env.DB_USERNAME,
+  password: dbConfig.password || process.env.DB_PASSWORD,
+  database: dbConfig.database || process.env.DB_DATABASE
+}
 
 const adminController = {
   signIn: async (req, cb) => {
@@ -25,8 +37,8 @@ const adminController = {
     try {
       const users = await User.findAll({
         attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt',
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Replies.id'))), 'RepliesCount'],
-          [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('Likes.id'))), 'LikesCount']
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Replies.id'))), 'RepliesCount'],
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Likes.id'))), 'LikesCount']
         ],
         include: [
           Like,
@@ -82,11 +94,18 @@ const adminController = {
     try {
       const tweet = await Tweet.findOne({ where: { id: req.params.id } })
       if (!tweet) throw new Error("Tweet doestn't exit!")
-      const deletedTweet = await tweet.destroy()
+      const squelizeConnection = new Sequelize(databaseConfig)
+
+      const result = await squelizeConnection.transaction(async t => {
+        const deletedTweet = await tweet.destroy({ transaction: t })
+        await Reply.destroy({ where: { TweetId: tweet.dataValues.id } }, { transaction: t })
+        await Like.destroy({ where: { TweetId: tweet.dataValues.id } }, { transaction: t })
+        return deletedTweet
+      })
       const TweetData = {
         status: 'success',
         data: {
-          ...deletedTweet.dataValues
+          ...result.dataValues
         }
       }
       return cb(null, TweetData)
