@@ -6,6 +6,7 @@ const users = require('./modules/users')
 
 const {
   authenticated,
+  authenticatedUser,
   authenticatedAdmin
 } = require('../../middleware/api-auth')
 const followshipRouter = require('./modules/followship')

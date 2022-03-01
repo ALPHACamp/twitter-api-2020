@@ -25,16 +25,20 @@ const authenticated = (req, res, next) => {
  * @param {function} next 
  */
 
+/* 未來開發功能 - 能夠避免管理員使用前台功能的API */
 // 驗證目前登入者是否為管理員，並只一般前台登入者能進入路由
+// 舉例來說，假如不允許後台管理員使用前台使用者相關的API，那麼就是可以這樣放置
+// authenticated 為驗證登入，登入成功才能進一步驗證是否為前台使用者，若不是就報錯並不允許使用
+// 若是前台使用者的話，就導向userRouter指定的路由/API
+// router.use('/users', authenticated, authenticatedUser, userRouter)
 function authenticatedUser(req, res, next) {
-  // const user = helpers.getUser(req)
-  
-  // if (user && user.role === 'user') return next()
-  // const error = new Error()
-  // error.code = 200
-  // error.message = '存取被拒'
-  // return next(error)
-  return next()
+  const user = helpers.getUser(req)
+
+  if (user && user.role === 'user') return next()
+  const error = new Error()
+  error.code = 403
+  error.message = '存取被拒'
+  return next(error)
 }
 
 
@@ -48,7 +52,7 @@ function authenticatedUser(req, res, next) {
  */
 function authenticatedAdmin(req, res, next) {
   const user = helpers.getUser(req)
-
+  
   if (user && user.role === 'admin') return next()
 
   const error = new Error()
