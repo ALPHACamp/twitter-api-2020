@@ -38,7 +38,10 @@ const followshipServices = {
   followshipTop10: (req, cb) => {
     User.findAll({
       group: 'User.id',
-      where: { role: 'user' },
+      where: {
+        role: 'user',
+        id: { [sequelize.Op.not]: getUser(req).dataValues.id }
+      },
       attributes: [
         'id', 'account', 'name', 'avatar', 'introduction',
         [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE followingId = User.id)'),
