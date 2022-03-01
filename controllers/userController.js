@@ -133,7 +133,7 @@ const userController = {
         const tweets = tweet.map(tweet => ({
           ...tweet.dataValues,
           likeCount: tweet.Likes.length,
-          replydCount: tweet.Replies.length,
+          replyCount: tweet.Replies.length,
           isLiked: tweet.Likes.map(user => user.UserId).includes(currentUser.id)
         }))
         res.json(tweets)
