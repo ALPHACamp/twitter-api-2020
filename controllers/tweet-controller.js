@@ -15,8 +15,11 @@ const tweetController = {
       order: [['createdAt', 'DESC']],
     })
       .then(tweets => {
+        console.log('findAll')
         const data = tweets.map(tweet => {
+          console.log('map')
           tweet = tweet.toJSON()
+          console.log(tweet)
           return {
             id: tweet.id,
             description: tweet.description,
@@ -33,6 +36,7 @@ const tweetController = {
           }
         })
         // 回傳陣列-物件json
+        console.log(data)
         return res.json(data)
       })
       .catch(err => next(err))
