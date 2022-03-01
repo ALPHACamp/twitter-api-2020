@@ -246,21 +246,26 @@ module.exports = {
 
       const likes = await Like.findAll({
         where: { UserId },
-        include: [{ model: Tweet }],
+        include: [{
+          model: Tweet,
+          include: [{ model: User, attributes: { exclude: ['password'] } }]
+        }],
         order: [['createdAt', 'DESC']],
         nest: true
       })
 
       const responseData = likes.map(like => {
         like = like.toJSON()
-        const likedTweet = like.Tweet
 
+        // assign following two objects to reply
+        like.likedTweet = like.Tweet
+        like.likedTweet.tweetedUser = like.Tweet.User
+
+        // remove unnecessary key properties
         delete like.Tweet
+        delete like.likedTweet.User
 
-        return {
-          ...like,
-          likedTweet
-        }
+        return like
       })
 
       return res.status(200).json(responseData)
