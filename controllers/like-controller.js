@@ -4,7 +4,6 @@ const likeController = {
     try {
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
-      const user = await User.findByPk(req.user.id)
       if (!tweet) {
         return res
           .status(404)
@@ -62,7 +61,6 @@ const likeController = {
     try {
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
-      const user = await User.findByPk(req.user.id)
       const like = await Like.findOne({
         where: {
           UserId: req.user.id,
