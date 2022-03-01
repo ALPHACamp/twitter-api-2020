@@ -1,12 +1,10 @@
 const express = require('express')
 const router = express.Router()
 
-const { authenticated, authenticatedAdmin } = require('../../../middleware/api-auth')
 const adminController = require('../../../controllers/admin-controller')
 
-router.post('/login', adminController.login)
-router.get('/users', authenticated, authenticatedAdmin, adminController.getUsers)
-router.get('/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
-router.delete('/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+router.get('/users', adminController.getUsers)
+router.get('/tweets', adminController.getTweets)
+router.delete('/tweets/:id', adminController.deleteTweet)
 
 module.exports = router
