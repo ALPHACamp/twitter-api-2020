@@ -5,19 +5,25 @@ const followServices = {
   postFollowships: async (req, cb) => {
     try {
       const userId = helper.getUser(req).id
-      // 判斷使用者是否可以追蹤
-      const allowUser = await User.findByPk(req.body.id)
-      if (!allowUser || allowUser.role === 'admin') throw new Error(`使用者不存在`)
-      // 判斷是否已追蹤
-      const isFollowed = await Followship.findOne({
-        where: {
-          followerId: userId,
-          followingId: req.body.id
-        }
-      })
-      if (isFollowed) throw new Error(`已經追蹤過了`)
       // 判斷是否按到自己
       if (userId === Number(req.body.id)) throw new Error('不可以追蹤自己')
+      // 判斷使用者是否可以追蹤
+      const allowUser = await User.findByPk(req.body.id, {
+        include: [{
+          model: User,
+          as: 'Followers',
+          attributes: [
+            'id'
+          ],
+        }]
+      })
+      if (!allowUser || allowUser.role === 'admin') throw new Error(`使用者不存在`)
+      console.log(allowUser.Followers)
+      const followersData = allowUser.Followers.map(data =>
+        data.id
+      )
+      // 判斷是否已追蹤
+      if (followersData.includes(userId)) throw new Error(`已經追蹤過了`)
       // create
       const followship = await Followship.create({
         followerId: userId,
