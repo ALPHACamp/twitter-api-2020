@@ -3,10 +3,10 @@ const userServices = require('../services/user-service')
 
 const userController = {
   login: async (req, res, next) => {
-    const { email, password } = req.body
+    const { account, password } = req.body
 
     try {
-      const { status, data } = await userServices.login(email, password)
+      const { status, data } = await userServices.login(account, password)
 
       return res.json({ status, data })
     } catch (error) {

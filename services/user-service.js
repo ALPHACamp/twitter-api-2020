@@ -7,10 +7,10 @@ const helpers = require('../_helpers')
 const { getFollowshipId, getLikedTweetsIds } = require('../helpers/user')
 
 const userServices = {
-  login: async (email, password) => {
-    if (!email || !password) throw new Error('Missing email or password!')
+  login: async (account, password) => {
+    if (!account || !password) throw new Error('Missing account or password!')
 
-    let user = await User.findOne({ where: { email } })
+    let user = await User.findOne({ where: { account } })
 
     // User not found
     if (!user) throw new Error("This account doesn't exist.")
