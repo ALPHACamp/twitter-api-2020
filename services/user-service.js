@@ -145,21 +145,35 @@ const userServices = {
     const user = await User.findByPk(id)
 
     if (user.id !== Number(id))
-      throw new Error("You cannot edit other's profile.")
+      return {
+        status: 'error',
+        message: "You cannot edit other's profile."
+      }
 
     // Check if user is using the same email or account
     if (user.email !== email) {
       const usedEmail = await User.findOne({ where: { email } })
-      if (usedEmail) throw new Error('Email should be unique.')
+      if (usedEmail)
+        return {
+          status: 'error',
+          message: 'Email should be unique.'
+        }
     }
 
     if (user.account !== account) {
       const usedAccount = await User.findOne({ where: { account } })
-      if (usedAccount) throw new Error('Account should be unique.')
+      if (usedAccount)
+        return {
+          status: 'error',
+          message: 'Account should be unique.'
+        }
     }
 
     if (!validator.isByteLength(introduction, { min: 0, max: 160 }))
-      throw new Error('Introduction must not exceed 160 words.')
+      return {
+        status: 'error',
+        message: 'Introduction must not exceed 160 words.'
+      }
 
     // User didn't change password
     if (password === user.password) {
