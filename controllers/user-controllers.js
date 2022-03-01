@@ -45,13 +45,11 @@ const userController = {
 
   // Edit user profile
   putUser: async (req, res, next) => {
-    const currentUser = helpers.getUser(req)
     const id = req.params.id
     const { files } = req
     const { email, password, name, account, introduction } = req.body
     try {
       const { status, message, userProfile } = await userServices.putUser(
-        currentUser,
         id,
         files,
         email,
@@ -87,7 +85,7 @@ const userController = {
     const user = helpers.getUser(req)
     try {
       const tweets = await userServices.getUserTweets(req, user)
-      
+
       return res.status(200).json(tweets)
     } catch (error) {
       next(error)
@@ -108,7 +106,7 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const likes = await userServices.getUserLikes(req)
-      
+
       return res.status(200).json(likes)
     } catch (error) {
       next(error)
