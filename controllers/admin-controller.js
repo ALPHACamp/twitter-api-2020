@@ -9,7 +9,6 @@ module.exports = {
         order: [['totalTweets', 'DESC']],
         raw: true
       })
-      if (!users.length) throw new Error('沒有任何使用者!')
 
       return res.status(200).json(users)
 
@@ -23,7 +22,6 @@ module.exports = {
         order: [['createdAt', 'DESC']],
         nest: true
       })
-      if (!tweets.length) throw new Error('沒有任何推文!')
 
       const responseData = tweets.map(tweet => {
         tweet = tweet.toJSON()
