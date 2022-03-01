@@ -25,7 +25,7 @@ const userController = {
             }
           });
 
-        } else { res.json({ status: "error", message: "You are not user!"}) }
+        } else { res.json({ status: "error", message: 'This is for normal user.'}) }
       } else {
         res.json(errData);
       }
@@ -250,6 +250,7 @@ const userController = {
         const repliedTweet = reply.Tweet
 
         return {
+          commentId: reply.id,
           comment: reply.comment,
           tweetId: repliedTweet.id,
           description: repliedTweet.description,
