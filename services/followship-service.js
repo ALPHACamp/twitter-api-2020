@@ -3,7 +3,7 @@ const { User, Followship } = require('../models')
 const followshipController = {
   addFollowing: async (req, cb) => {
     try {
-      const followerId = req.user?.id
+      const followerId = req.user.id
       const followingId = req.body.id
 
       if (followerId === followingId) {
@@ -52,7 +52,7 @@ const followshipController = {
   },
   removeFollowing: async (req, cb) => {
     try {
-      const followerId = req.user?.id
+      const followerId = req.user.id
       const followingId = req.params.followingId
       const checkedFollowships = await Followship.findOne({
         where: {

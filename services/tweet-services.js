@@ -63,7 +63,7 @@ const tweetController = {
   postTweet: async (req, cb) => {
     try {
       const { description } = req.body
-      const UserId = req.user?.id || null
+      const UserId = req.user.id
       if (!description) {
         return cb(new Error('Description is required.'))
       } else if (description.length > 140) {
@@ -86,7 +86,7 @@ const tweetController = {
   },
   postLike: async (req, cb) => {
     try {
-      const UserId = req.user?.id
+      const UserId = req.user.id
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) {
@@ -127,7 +127,7 @@ const tweetController = {
   },
   postUnlike: async (req, cb) => {
     try {
-      const UserId = req.user?.id
+      const UserId = req.user.id
       const TweetId = req.params.id
       const tweet = await Tweet.findByPk(TweetId)
       if (!tweet) {
