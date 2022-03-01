@@ -35,6 +35,7 @@ touch .env
 ```
 JWT_SECRET=alphacamp
 ADMIN_ACCOUNT=root
+front_end_web_url = *
 ```
 10. 快速啟動（如果要進入開發者模式，請輸入：npm run dev，請先確保有安裝nodemon)
 ```

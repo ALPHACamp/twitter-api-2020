@@ -4,7 +4,7 @@ const CORSHeader = (req, res, next) => {
   if (req.method === 'OPTIONS') {
     res.header('Access-Control-Allow-Methods', 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS')
   }
-  next()
+  return next()
 }
 
 module.exports = {
