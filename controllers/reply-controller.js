@@ -11,12 +11,12 @@ const replyController = {
       const targetTweetId = req.params.id
 
       // 找不到推文
-      if (!(await Tweet.findByPk(targetTweetId))) {
+      if (isNaN(targetTweetId) || !(await Tweet.findByPk(targetTweetId))) {
         error.code = 404
         error.message = '對應推文不存在'
         return next(error)
       }
-      
+
       // 獲取回覆
       const replies = await Reply.findAll({
         where: { TweetId: targetTweetId },
@@ -57,7 +57,7 @@ const replyController = {
 
 
       // 找不到推文
-      if (!(await Tweet.findByPk(targetTweetId))) {
+      if (isNaN(targetTweetId) || !(await Tweet.findByPk(targetTweetId))) {
         error.code = 404
         error.message = '對應推文不存在'
         return next(error)

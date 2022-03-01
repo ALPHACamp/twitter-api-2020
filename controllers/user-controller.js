@@ -103,9 +103,9 @@ const userController = {
     try {
 
       const error = new Error()
-      const targetUserId = req.params.id
-    
-      if (!(await User.findByPk(targetUserId))) {
+      const targetUserId = (req.params.id)
+
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
@@ -191,7 +191,7 @@ const userController = {
       const targetUserId = req.params.id
       const loginUserId = helper.getUser(req).id
 
-      if (!(await User.findByPk(targetUserId))) {
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
         error.code = 404
         error.message = '對應使用者不存在'
         return next(error)
@@ -243,21 +243,24 @@ const userController = {
   putUserSetting: async (req, res, next) => {
     try {
       const error = new Error()
-      const id = Number(req.params.id)
-      const currentId = helper.getUser(req).id
+      const loginUserId = helper.getUser(req).id
+      let targetUserId = req.params.id
 
-      if (id !== currentId) {
+
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
+        error.code = 404
+        error.message = '對應使用者找不到'
+        return next(error)
+      }
+
+      targetUserId = Number(targetUserId)
+
+      if (targetUserId !== loginUserId) {
         error.code = 400
         error.message = '只能修改自己的資料'
         return next(error)
       }
 
-
-      if (!(await User.findByPk(id))) {
-        error.code = 404
-        error.message = '對應使用者找不到'
-        return next(error)
-      }
 
       const { name, account, email, password } = req.body
       const message = await putUserSettingCheck(req)
@@ -274,7 +277,7 @@ const userController = {
         account,
         email,
         password: bcrypt.hashSync(password, BCRYPT_COMPLEXITY)
-      }, { where: { id } })
+      }, { where: { id: targetUserId } })
 
       const result = { name, account, email }
 
@@ -290,22 +293,28 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       const error = new Error()
-      const id = Number(req.params.id)
-      const currentId = helper.getUser(req).id
+      let targetUserId = req.params.id
+      const loginUserId = helper.getUser(req).id
       const DEL_OPERATION_CODE = '-1'
 
+      // 測試檔要求
+      const user = !isNaN(targetUserId) && await User.findByPk(targetUserId)
 
-      if (id !== currentId) {
+      if (!user) {
+        error.code = 404
+        error.message = '對應使用者找不到'
+        return next(error)
+      }
+
+      targetUserId = Number(targetUserId)
+
+      if (targetUserId !== loginUserId) {
         error.code = 400
         error.message = '只能修改自己的資料'
         return next(error)
       }
-      const user = await User.findByPk(id)
-      if (!user) {
-        error.code = 404
-        error.message = '對應使用者不存在'
-        return next(error)
-      }
+
+
       const { name, introduction, cover, avatar } = req.body
       const { files } = req
 
@@ -341,6 +350,7 @@ const userController = {
         avatar: uploadAvatar,
         cover: uploadCover
       })
+
       const results = {
         account: user.account,
         name,
@@ -348,6 +358,7 @@ const userController = {
         avatar: uploadAvatar,
         cover: uploadCover
       }
+
 
       return res
         .status(200)
@@ -357,6 +368,7 @@ const userController = {
       return next(error)
     }
   }
+
 }
 
 module.exports = userController

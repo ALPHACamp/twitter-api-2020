@@ -85,6 +85,13 @@ const tweetController = {
       const targetTweetId = req.params.id
       const loginUserId = authHelpers.getUser(req).id
 
+      // 找不到推文
+      if (isNaN(targetTweetId) || !(await Tweet.findByPk(targetTweetId))) {
+        error.code = 404
+        error.message = '對應推文不存在'
+        return next(error)
+      }
+
       // 獲取一個推文(含推文下的所有回覆、推文作者)
       const tweet = await Tweet.findByPk(targetTweetId, {
         include: [
@@ -105,12 +112,7 @@ const tweetController = {
         ]
       })
 
-      // 找不到推文
-      if (!tweet) {
-        error.code = 404
-        error.message = '對應推文不存在'
-        return next(error)
-      }
+
       // 獲取一個目前使用者所喜歡的推文之清單
       const likeTweets = await Like.findAll({
         attributes: ['TweetId'],
