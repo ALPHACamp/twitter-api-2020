@@ -237,7 +237,8 @@ const userServices = {
         order: [
           ['createdAt', 'DESC']
         ],
-        raw: true
+        row: true,
+        nest: true
       })
       // 目標使用者若無推文
       if (userReplies.length === 0) throw new Error("使用者尚無任何回覆")
@@ -343,47 +344,89 @@ const userServices = {
   },
   getUserFollowers: async (req, cb) => {
     try {
-      let followers = await Followship.findAll({
-        where: { followingId: req.params.id },
-        include: [{
-          model: User,
-          as: 'Followings',
-          attributes: [
-            'name',
-            'account',
-            'avatar',
-            'createdAt',
-            'introduction',
-            // 比對id，看登入使用者是否也有在追蹤這些人
-            //TODO 辨別Followings是不是使用者本身
-            [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = Followings.id)`), 'isFollowed']
-          ],
-        }],
+      const userId = helper.getUser(req).id
+      const user = await User.findAll({
         attributes: {
-          exclude: [
-            'email',
-            'password',
-            'introduction',
-            'cover'
-          ],
+          include: [
+            [
+              sequelize.col('Followings->Followship.createdAt'),
+              'following_createdAt'
+            ]
+          ]
         },
-        //以追隨日期排序
-        order: [
-          ['createdAt', 'DESC']
-        ],
+        where: { id: req.params.id },
+        include: [{ model: User, as: 'Followers' }],
         raw: true,
-        nest: true
+        nest: true,
+        order: [[sequelize.col('following_createdAt'), 'DESC']]
       })
-      if (followers.length === 0) throw new Error("使用者尚未有人追蹤")
-      followers = followers.map(follower => ({
-        ...follower,
-        isFollowed: follower.Followings.isFollowed ? true : false
-      }))
-      return cb(null, followers)
+      // attributes: {
+      //   exclude: [
+      //     'email',
+      //     'password',
+      //     'introduction',
+      //     'cover'
+      //   ],
+      // },
+      //以追隨日期排序
+      // order: [
+      //   ['createdAt', 'DESC']
+      // ],
+      // raw: true,
+      // nest: true
+
+      // if (followers.length === 0) throw new Error("使用者尚未有人追蹤")
+      // followers = followers.map(follower => ({
+      //   ...follower,
+      //   isFollowed: follower.Followings.isFollowed ? true : false
+      // }))
+      return cb(null, user)
     } catch (err) {
       return cb(err)
     }
   },
+  //   try {
+  //     let followers = await Followship.findAll({
+  //       where: { followingId: req.params.id },
+  //       include: [{
+  //         model: User,
+  //         as: 'Followings',
+  //         attributes: [
+  //           'name',
+  //           'account',
+  //           'avatar',
+  //           'createdAt',
+  //           'introduction',
+  //           // 比對id，看登入使用者是否也有在追蹤這些人
+  //           //TODO 辨別Followings是不是使用者本身
+  //           [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = Followings.id)`), 'isFollowed']
+  //         ],
+  //       }],
+  //       attributes: {
+  //         exclude: [
+  //           'email',
+  //           'password',
+  //           'introduction',
+  //           'cover'
+  //         ],
+  //       },
+  //       //以追隨日期排序
+  //       order: [
+  //         ['createdAt', 'DESC']
+  //       ],
+  //       raw: true,
+  //       nest: true
+  //     })
+  //     if (followers.length === 0) throw new Error("使用者尚未有人追蹤")
+  //     followers = followers.map(follower => ({
+  //       ...follower,
+  //       isFollowed: follower.Followings.isFollowed ? true : false
+  //     }))
+  //     return cb(null, followers)
+  //   } catch (err) {
+  //     return cb(err)
+  //   }
+  // },
   getTopUsers: async (req, cb) => {
     try {
       let users = await User.findAll({
