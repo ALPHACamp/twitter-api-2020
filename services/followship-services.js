@@ -71,13 +71,33 @@ const followServices = {
           followerId: userId,
           followingId: req.params.id
         },
-        include: [
-          { model: User, as: 'Followers', attributes: ['account', 'name'] },
-        ],
       })
       if (!deletedFollowship) throw new Error(`尚未追蹤此用戶`)
       await deletedFollowship.destroy()
-      return cb(null, deletedFollowship)
+      const followingUserData = await User.findByPk(req.params.id, {
+        attributes: {
+          include: [
+            [sequelize.literal("(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)"), 'tweetCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Likes WHERE Likes.UserId = User.id)"), 'likeCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Replies WHERE Replies.UserId = User.id)"), 'replyCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followerId = User.id)"), 'followingCount'],
+            [sequelize.literal("(SELECT COUNT(*) FROM Followships WHERE Followships.followingId = User.id)"), 'followerCount'],
+            [sequelize.literal(`EXISTS (SELECT 1 FROM Followships WHERE followerId = ${helper.getUser(req).id} AND followingId = User.id)`), 'isFollowed']
+          ],
+          exclude: [
+            'password'
+          ],
+        },
+      })
+      const following = {
+        ...followingUserData.toJSON(),
+        isFollowed: followingUserData.dataValues.isFollowed ? true : false
+      }
+      const result = {
+        ...deletedFollowship.toJSON(),
+        following
+      }
+      return cb(null, result)
     } catch (err) {
       cb(err)
     }
