@@ -177,6 +177,12 @@ module.exports = {
 
       const { account, name, email, password, checkPassword, introduction } = req.body
 
+      // check UserId and word length
+      if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
+      if (introduction?.length > 160 || name?.length > 50) {
+        throw new Error('字數超出上限！')
+      }
+
       // getImageFiles : cover , avatar
       const { files } = req
 
@@ -195,12 +201,6 @@ module.exports = {
         if (resImage instanceof Error) throw resImage
         return resImage
       })
-
-      // check UserId and word length
-      if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
-      if (introduction?.length > 160 || name?.length > 50) {
-        throw new Error('字數超出上限！')
-      }
 
       // find user and count with account & email
       const users = await User.findAll({
