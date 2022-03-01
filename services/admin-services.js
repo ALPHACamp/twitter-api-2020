@@ -37,22 +37,26 @@ const adminController = {
     try {
       const users = await User.findAll({
         attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt',
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Tweets.id'))), 'tweetsCount'],
           [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Replies.id'))), 'repliesCount'],
           [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Likes.id'))), 'likesCount'],
           [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followers.id'))), 'followersCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followings.id'))), 'followingsCount'],
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followings.id'))), 'followingsCount']
         ],
         include: [
           Like,
           Reply,
+          Tweet,
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' }
         ],
         group: ['User.id'],
         raw: true,
-        nest: true
+        nest: true,
+        order: Sequelize.literal('max(Tweets.id) DESC')
       })
       for (const user of users) {
+        delete user.Tweets
         delete user.Likes
         delete user.Replies
         delete user.Followers
