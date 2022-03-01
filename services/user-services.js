@@ -236,7 +236,8 @@ const userServices = {
         order: [
           ['createdAt', 'DESC']
         ],
-        raw: true
+        raw: true,
+        nest: true
       })
       // 目標使用者若無推文
       if (userReplies.length === 0) throw new Error("使用者尚無任何回覆")
