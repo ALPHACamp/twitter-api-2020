@@ -98,6 +98,7 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         include: [
+          { model: Tweet, where: { UserId: req.params.id } },
           { model: User, as: 'Followings' },
           { model: User, as: 'Followers' }
         ]
@@ -105,6 +106,7 @@ const userController = {
       if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const { account, name, email, introduction, avatar, cover } = user
       const isFollowing = user.Followers.some(f => f.id === req.user.id)
+      console.log(user.Tweets)
       return res.json({ 
         account,
         name,
@@ -112,6 +114,7 @@ const userController = {
         introduction,
         avatar,
         cover,
+        tweetCount: user.Tweets.length,
         followingCount: user.Followings.length,
         followerCount: user.Followers.length,
         isFollowing
