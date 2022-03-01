@@ -10,7 +10,17 @@ const followshipController = {
       const error = new Error()
       // 測試檔必檢查-請勿更動獲取方式
       const loginUserId = authHelpers.getUser(req).id
-      const targetUserId = Number(req.body.id)
+      let targetUserId = req.body.id
+
+
+      // 找不到對象追蹤
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
+        error.code = 404
+        error.message = '追蹤對象不存在'
+        return next(error)
+      }
+
+      targetUserId = Number(targetUserId)
 
       // 不允許追蹤自己
       if (loginUserId === targetUserId) {
@@ -36,12 +46,7 @@ const followshipController = {
         return next(error)
       }
 
-      // 找不到對象追蹤
-      if (!(await User.findByPk(targetUserId))) {
-        error.code = 404
-        error.message = '追蹤對象不存在'
-        return next(error)
-      }
+
 
       // 可以追蹤的狀態
       const result = await Followship.create({
@@ -74,7 +79,16 @@ const followshipController = {
       const error = new Error()
       // 測試檔必檢查-請勿更動獲取方式
       const loginUserId = authHelpers.getUser(req).id
-      const targetUserId = Number(req.params.id)
+      let targetUserId = req.params.id
+
+      // 找不到對象可以取消追蹤
+      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
+        error.code = 404
+        error.message = '取消追蹤對象不存在'
+        return next(error)
+      }
+
+      targetUserId = Number(targetUserId)
 
       // 不允許取消追蹤自己
       if (loginUserId === targetUserId) {
@@ -86,12 +100,7 @@ const followshipController = {
           })
       }
 
-      // 找不到對象可以取消追蹤
-      if (!(await User.findByPk(targetUserId))) {
-        error.code = 404
-        error.message = '取消追蹤對象不存在'
-        return next(error)
-      }
+
 
       // 不可取消從未追蹤過的對象
       const isExistFollowship = await Followship.findOne({

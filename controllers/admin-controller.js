@@ -54,14 +54,16 @@ const adminController = {
   deleteTweet: async (req, res, next) => {
     try {
       const error = new Error()
-      const tweet = await Tweet.findByPk(req.params.id)
+      const targetTweetId = req.params.id
 
       // 找不到推文
-      if (!tweet) {
+      if (isNaN(targetTweetId) || !(await Tweet.findByPk(req.params.id))) {
         error.code = 404
         error.message = '對應推文不存在'
         return next(error)
       }
+
+      const tweet = await Tweet.findByPk(targetTweetId)
 
       // 可以找到推文刪除
       await Reply.destroy({ where: { TweetId: tweet.id } })
