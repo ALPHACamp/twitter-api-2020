@@ -245,13 +245,7 @@ const userController = {
         ]
       })
       const followings = user.Followings.map(e => e.dataValues)
-      const followersArr = user.Followers.map(e => e.dataValues.id)
       followings.forEach(e => {
-        if (followersArr.includes(e.id)) {
-          e.isFollowed = true
-        } else {
-          e.isFollowed = false
-        }
         delete e.Followship
         delete e.password
         e.followingId = e.id
