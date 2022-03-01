@@ -181,12 +181,14 @@ module.exports = {
       const { files } = req
 
       // upload to imgur if file exists
-      const cover = files?.cover
-        ? await helpers.imgurFileHandler(files.cover[0])
-        : selfUser.cover
-      const avatar = files?.avatar
-        ? await helpers.imgurFileHandler(files.avatar[0])
-        : selfUser.avatar
+      const [cover, avatar] = await Promise.all([
+        files?.cover
+          ? helpers.imgurFileHandler(files.cover[0])
+          : selfUser.cover,
+        files?.avatar
+          ? helpers.imgurFileHandler(files.avatar[0])
+          : selfUser.avatar
+      ])
 
       // check UserId and word length
       if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
