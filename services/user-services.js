@@ -139,23 +139,23 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUserReply: (req, cb) => {
-    return Promise.all([
-      User.findByPk(req.params.id, {
-        raw: true,
-        nest: true
-      }),
-      Reply.findAll({
-        where: { userId: req.params.id },
+    return Reply.findAll({
+      where: { userId: req.params.id },
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Tweet, attributes: [] }
+      ],
+      attributes: {
         include: [
-          { model: User },
-          { model: Tweet, include: User }
-        ],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      })
-    ])
-      .then(([user, replies]) => {
+          [sequelize.literal('(SELECT id FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerId'],
+          [sequelize.literal('(SELECT account FROM Users WHERE Users.id = Tweet.UserId)'), 'tweetOwnerAccount']
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(replies => {
         if (!replies.length) return cb(null, [])
         const data = replies.map(r => ({
           id: r.id,
@@ -167,8 +167,8 @@ const userServices = {
             avatar: r.User.avatar
           },
           tweetId: r.tweetId,
-          tweetOwnerId: r.Tweet.userId,
-          tweetOwnerAccount: r.Tweet.User.account,
+          tweetOwnerId: r.tweetOwnerId,
+          tweetOwnerAccount: r.tweetOwnerAccount,
           createdAt: r.createdAt
         }))
         return cb(null, data)
@@ -229,34 +229,28 @@ const userServices = {
   },
   getUserLike: (req, cb) => {
     const { id } = req.params
-    return Promise.all([
-      User.findByPk(id, {
-        raw: true,
-        nest: true
-      }),
-      Like.findAll({
-        where: { userId: id },
-        include: {
-          model: Tweet,
-          include: [
-            { model: Like, attributes: [] },
-            { model: Reply, attributes: [] },
-            { model: User }
-          ],
-          attributes: ['id', 'description', 'createdAt',
-            [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
-            [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
-              'replyAmount'],
-            [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
-          ]
-        },
-        group: ['id'],
-        order: [['createdAt', 'DESC']],
-        raw: true,
-        nest: true
-      })
-    ])
-      .then(([user, likes]) => {
+    return Like.findAll({
+      where: { userId: id },
+      include: {
+        model: Tweet,
+        include: [
+          { model: Like, attributes: [] },
+          { model: Reply, attributes: [] },
+          { model: User }
+        ],
+        attributes: ['id', 'description', 'createdAt',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.TweetId = Tweet.id)'), 'likeAmount'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.TweetId = Tweet.id)'),
+            'replyAmount'],
+          [sequelize.literal(`EXISTS (SELECT 1 FROM Likes WHERE userId = ${getUser(req).dataValues.id} AND TweetId = Tweet.id)`), 'userLiked']
+        ]
+      },
+      group: ['id'],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(likes => {
         if (!likes.length) return cb(null, [])
         const data = likes.map(l => ({
           TweetId: l.Tweet.id,
@@ -270,7 +264,8 @@ const userServices = {
           replyAmount: l.Tweet.replyAmount,
           likeAmount: l.Tweet.likeAmount,
           userLiked: Boolean(l.Tweet.userLiked),
-          createdAt: l.createdAt
+          createdAt: l.Tweet.createdAt,
+          relationshipCreatedAt: l.createdAt
         }))
         return cb(null, data)
       })
