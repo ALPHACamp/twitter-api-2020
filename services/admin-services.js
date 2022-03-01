@@ -72,27 +72,16 @@ const adminController = {
   getTweets: async (req, cb) => {
     try {
       const tweets = await Tweet.findAll({
-        include: [
-          {
-            model: User,
-            attributes: { exclude: ['password'] }
-          }, {
-            model: Reply
-          }, {
-            model: Like
-          }
-        ],
+        include: [{
+          model: User,
+          attributes: { exclude: ['password'] }
+        }],
         order: [['createdAt', 'DESC']]
       })
-      const userId = req.user.id
       const returnTweets = tweets.map(tweet => {
         const returnTweet = tweet.toJSON()
-        returnTweet.repliesCount = returnTweet.Replies.length
-        returnTweet.likesCount = returnTweet.Likes.length
-        returnTweet.isLiked = returnTweet.Likes.some(Like => Like.UserId === userId)
         return returnTweet
       })
-
       return cb(null, returnTweets)
     } catch (err) {
       return cb(err)
