@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
 const Sequelize = require('sequelize')
-const Op = Sequelize.Op
 const { User, Tweet, Like, Reply } = require('../models')
 let dbConfig = {}
 if (process.env.NODE_ENV !== 'production') {
@@ -41,33 +40,18 @@ const adminController = {
   getUsers: async (req, cb) => {
     try {
       const users = await User.findAll({
-        where: { [Op.not]: [{ role: 'admin' }] },
+        // where: { [Op.not]: [{ role: 'admin' }] },
         attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt',
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Tweets.id'))), 'tweetsCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Replies.id'))), 'repliesCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Likes.id'))), 'likesCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followers.id'))), 'followersCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followings.id'))), 'followingsCount']
+          [Sequelize.literal(`(SELECT COUNT(Tweets.UserId) FROM Tweets WHERE Tweets.UserId = User.id)`), 'TweetsCount'],
+          [Sequelize.literal(`(SELECT COUNT(Replies.UserId) FROM Replies WHERE Replies.UserId = User.id)`), 'repliedCount'],
+          [Sequelize.literal(`(SELECT COUNT(Likes.UserId) FROM Likes WHERE Likes.UserId = User.id)`), 'likedCount'],
+          [Sequelize.literal(`(SELECT COUNT(Followships.followerId) FROM Followships WHERE Followships.followerId = User.id)`), 'followingCount'],
+          [Sequelize.literal(`(SELECT COUNT(Followships.followingId) FROM Followships WHERE Followships.followingId = User.id)`), 'followedCount']
         ],
-        include: [
-          Like,
-          Reply,
-          Tweet,
-          { model: User, as: 'Followers' },
-          { model: User, as: 'Followings' }
-        ],
-        group: ['User.id'],
+        order: Sequelize.literal('TweetsCount DESC'),
         raw: true,
-        nest: true,
-        order: Sequelize.literal('max(Tweets.id) DESC')
+        nest: true
       })
-      for (const user of users) {
-        delete user.Tweets
-        delete user.Likes
-        delete user.Replies
-        delete user.Followers
-        delete user.Followings
-      }
       return cb(null, users)
     } catch (err) {
       return cb(err)
