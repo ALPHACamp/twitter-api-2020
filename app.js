@@ -17,7 +17,7 @@ app.use((req, res, next) => {
   res.locals.user = helpers.getUser(req)
   next()
 })
-// app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => res.send('Hello World!'))
 app.use(routes)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
