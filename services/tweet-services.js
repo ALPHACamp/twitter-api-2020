@@ -33,7 +33,7 @@ const tweetServices = {
       description: req.body.description,
       userId: getUser(req).dataValues.id
     })
-      .then(() => cb(null, '成功建立推文'))
+      .then(tweet => cb(null, tweet))
       .catch(err => cb(err, null))
   },
   getTweet: (req, cb) => {
