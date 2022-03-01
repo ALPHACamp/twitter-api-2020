@@ -26,8 +26,8 @@ const replyController = {
       TweetId: req.params.tweet_id,
       comment: comment
     })
-    .then(() => {
-      res.json({ status: 'success', message: '成功回覆!'})
+    .then(reply => {
+      res.json({ status: 'success', message: '成功回覆!', reply })
     })
     .catch(err => next(err))
   }

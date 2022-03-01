@@ -97,15 +97,19 @@ const userController = {
   },
   // 回覆過的推文
   getRepliedTweets: (req, res, next) => {
-    return Reply.findAll({
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Reply.findAll({
       where: { UserId: req.params.id },
       include: [User, { model: Tweet, include: [{ model: User, attributes: ['name', 'account'] }] }
       ]
-    })
-      .then(replies => {
-        res.json(replies)
       })
-      .catch(err => next(err))
+    ])
+    .then(([user, replies]) => {
+      if (!user) throw new Error("User didn't exist!")
+      res.json(replies)
+    })
+    .catch(err => next(err))
   },
   // 使用者推文
   getUserTweets: (req, res, next) => {
@@ -128,8 +132,8 @@ const userController = {
         // 將tweet迭代，並回傳所以資料陣列
         const tweets = tweet.map(tweet => ({
           ...tweet.dataValues,
-          likedCount: tweet.Likes.length,
-          repliedCount: tweet.Replies.length,
+          likeCount: tweet.Likes.length,
+          replydCount: tweet.Replies.length,
           isLiked: tweet.Likes.map(user => user.UserId).includes(currentUser.id)
         }))
         res.json(tweets)
@@ -138,7 +142,9 @@ const userController = {
   },
   // 喜歡的推文
   getLikedTweet: (req, res, next) => {
-    return Like.findAll({
+    return Promise.all([
+      User.findByPk(req.params.id),
+      Like.findAll({
       where: { UserId: req.params.id },
       include: [{
         model: Tweet,
@@ -147,10 +153,15 @@ const userController = {
           Like
         ]
       }],
-    })
-      .then(likes => {
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user) throw new Error("User didn't exist!")
         likes = likes.map(like => ({
           ...like.dataValues,
+          likeCount: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.length : 0,
+          replyCount: like.dataValues.Tweet.Replies ? like.dataValues.Tweet.Replies.length : 0,
+          isLiked: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.map(user => user.UserId).includes(helpers.getUser(req).id) : 0
         }))
         res.json(likes)
       })
@@ -319,7 +330,7 @@ const userController = {
     return User.findAll({
       where: { account: { $not: ['root', currentUserName] } },
       include: [{ model: User, as: 'Followers', attributes: ['id', 'name'] }],
-      attributes: ['id', 'name', 'avatar']
+      attributes: ['id', 'name', 'avatar', 'account']
     })
       .then(users => {
         // 重新編排資料，並計算追隨者數量、登入者是否有追蹤
