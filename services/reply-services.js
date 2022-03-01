@@ -29,7 +29,7 @@ const replyController = {
   },
   postReply: async (req, cb) => {
     try {
-      const UserId = req.user?.id || null
+      const UserId = req.user.id
       const { comment } = req.body
       if (!comment) {
         return cb(new Error('Comment is required.'))
