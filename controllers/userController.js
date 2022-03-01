@@ -87,7 +87,7 @@ const userController = {
       ]
     })
       .then(user => {
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
         user.dataValues.followingCount = user.Followings ? user.Followings.length : 0
         user.dataValues.follwerCount = user.Followers ? user.Followers.length : 0
         user.dataValues.isFollowed = user.Followers ? user.Followers.some(u => u.id === currentUser.id) : false
@@ -106,7 +106,7 @@ const userController = {
       })
     ])
     .then(([user, replies]) => {
-      if (!user) throw new Error("User didn't exist!")
+      if (!user) throw new Error('使用者不存在!')
       res.json(replies)
     })
     .catch(err => next(err))
@@ -127,7 +127,7 @@ const userController = {
     ])
       .then(([user, tweet]) => {
         // 判斷是否有該查詢使用者
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error("使用者不存在!")
 
         // 將tweet迭代，並回傳所以資料陣列
         const tweets = tweet.map(tweet => ({
@@ -156,7 +156,7 @@ const userController = {
       })
     ])
       .then(([user, likes]) => {
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
         likes = likes.map(like => ({
           ...like.dataValues,
           likeCount: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.length : 0,
@@ -176,7 +176,7 @@ const userController = {
     })
       .then(user => {
         // 判斷是否有使用者
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
         user = user.toJSON()
         // 將usee.following從物件拿出
         const Followings = user.Followings
@@ -206,7 +206,7 @@ const userController = {
     })
       .then(user => {
         // 判斷是否有使用者
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
         // 將usee.Followers從物件拿出
         user = user.toJSON()
         const followers = user.Followers

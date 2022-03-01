@@ -7,7 +7,7 @@ const helps = require('../_helpers')
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
     // 錯誤或user沒資料，回傳錯誤訊息
-    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
+    if (err || !user) return res.status(401).json({ status: 'error', message: '帳號不存在!' })
 
     req.user = user
     next()
@@ -23,7 +23,7 @@ const authenticatedUser = (req, res, next) => {
   if (currentUser && currentUser.role === 'user') return next()
 
   // 若為否，回傳狀態碼403，且回傳錯誤json資料
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  return res.status(403).json({ status: 'error', message: '帳號不存在' })
 }
 
 // 驗証是否是管理者
@@ -35,7 +35,7 @@ const authenticatedAdmin = (req, res, next) => {
   if (currentUser && currentUser.role === 'admin') return next()
 
   // 若為否，回傳狀態碼403，且回傳錯誤json資料
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  return res.status(403).json({ status: 'error', message: '帳號不存在!' })
 }
 
 // 匯出模組

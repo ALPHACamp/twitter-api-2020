@@ -14,7 +14,7 @@ const followshipController = {
     return User.findByPk(id)
       .then(user => {
         // 檢查followingId使用者是否存在
-        if (!user) throw new Error("User didn't exist!")
+        if (!user) throw new Error('使用者不存在!')
 
         // 查詢條件資料是否存在，沒有在新增資料
         return Followship.findOrCreate({
