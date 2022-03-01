@@ -37,8 +37,10 @@ const adminController = {
     try {
       const users = await User.findAll({
         attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt',
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Replies.id'))), 'RepliesCount'],
-          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Likes.id'))), 'LikesCount']
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Replies.id'))), 'repliesCount'],
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Likes.id'))), 'likesCount'],
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followers.id'))), 'followersCount'],
+          [Sequelize.fn('COUNT', Sequelize.fn('DISTINCT', Sequelize.col('Followings.id'))), 'followingsCount'],
         ],
         include: [
           Like,
