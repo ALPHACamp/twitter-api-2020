@@ -23,7 +23,7 @@ const userController = {
     if (!account || !password) {
       error.code = 400
       error.message = '所有欄位都要填寫'
-      throw error
+      return next(error)
     }
 
     return User.findOne({ where: { account } })
@@ -31,7 +31,7 @@ const userController = {
         if (!user || user.role === 'admin') {
           error.code = 403
           error.message = '帳號不存在'
-          throw error
+          return next(error)
         }
 
         return Promise.all([
@@ -43,7 +43,7 @@ const userController = {
         if (!isMatched) {
           error.code = 403
           error.message = '帳號或密碼錯誤'
-          throw error
+          return next(error)
         }
 
         const userData = user.toJSON()
@@ -63,7 +63,7 @@ const userController = {
       })
       .catch(error => {
         error.code = 500
-        next(error)
+        return next(error)
       })
   },
   postUsers: async (req, res, next) => {
@@ -85,7 +85,8 @@ const userController = {
         password: bcrypt.hashSync(password, BCRYPT_COMPLEXITY),
         role: "user",
         avatar: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1646039874/twitter/project/defaultAvatar_a0hkxw.png",
-        cover: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1646039858/twitter/project/defaultCover_rx9g6m.jpg"
+        cover: "https://res.cloudinary.com/dqfxgtyoi/image/upload/v1646039858/twitter/project/defaultCover_rx9g6m.jpg",
+        introduction: ""
       })
       const result = user.toJSON()
       delete result.password
@@ -100,8 +101,17 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const id = req.params.id
-      const user = await User.findByPk(id, {
+
+      const error = new Error()
+      const targetUserId = req.params.id
+    
+      if (!(await User.findByPk(targetUserId))) {
+        error.code = 404
+        error.message = '對應使用者不存在'
+        return next(error)
+      }
+
+      const user = await User.findByPk(targetUserId, {
         include: [
           { model: User, as: 'Followers' },
           { model: User, as: 'Followings' },
@@ -176,9 +186,19 @@ const userController = {
   },
   getTweets: async (req, res, next) => {
     try {
-      const currentId = helper.getUser(req).id
+
+      const error = new Error()
+      const targetUserId = req.params.id
+      const loginUserId = helper.getUser(req).id
+
+      if (!(await User.findByPk(targetUserId))) {
+        error.code = 404
+        error.message = '對應使用者不存在'
+        return next(error)
+      }
+
       const tweets = await Tweet.findAll({
-        where: { UserId: req.params.id },
+        where: { UserId: targetUserId },
         attributes: [
           'id',
           'UserId',
@@ -189,13 +209,13 @@ const userController = {
           'replyCount',
           [
             sequelize.literal(
-              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${currentId} AND TweetId = Tweet.id)`
+              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${loginUserId} AND TweetId = Tweet.id)`
             ),
             'isLiked',
           ],
           [
             sequelize.literal(
-              `EXISTS (SELECT 1 FROM Replies WHERE UserId = ${currentId} AND TweetId = Tweet.id)`
+              `EXISTS (SELECT 1 FROM Replies WHERE UserId = ${loginUserId} AND TweetId = Tweet.id)`
             ),
             'isReplied'
           ]
@@ -205,6 +225,8 @@ const userController = {
         ],
         order: [['createdAt', 'DESC']]
       })
+
+
       const results = tweets.map(t => {
         t = t.toJSON()
         t.isLiked = Boolean(t.isLiked)
