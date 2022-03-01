@@ -34,33 +34,36 @@ const userServices = {
   register: async (account, name, email, password, checkPassword) => {
     // Double check password
     if (password !== checkPassword)
-      throw new Error('Please check your password again!')
+      return { status: 'error', message: 'Please check your password again!' }
 
     // Check if email is used
     const user = await User.findOne({ where: { email } })
-    if (user) throw new Error('Email is already used!')
+    if (user) return { status: 'error', message: 'Email is already used!' }
 
     // Check if account is used
     const accountIsUsed = await User.findOne({ where: { account } })
-    if (accountIsUsed) throw new Error('Account is used.')
+    if (accountIsUsed) return { status: 'error', message: 'Account is used.' }
 
     // Check if name exceeds 50 words
     if (!validator.isByteLength(name, { min: 0, max: 50 }))
-      throw new Error('Name must not exceed 50 words.')
+      return { status: 'error', message: 'Name must not exceed 50 words.' }
+
+    // Check if account exceeds 50 words
+    if (!validator.isByteLength(account, { min: 0, max: 50 }))
+      return { status: 'error', message: 'Account must not exceed 50 words.' }
 
     // Create new user
-    const hash = bcrypt.hashSync(password, 10)
     const newUser = await User.create({
       account,
       name,
       email,
-      password: hash,
+      password: bcrypt.hashSync(password, 10),
       role: 'user'
     })
 
     // Protect sensitive user info
     newUser.password = undefined
-    return newUser
+    return { status: 'success', message: 'New user created.' }
   },
 
   getUser: async req => {
