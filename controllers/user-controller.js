@@ -244,9 +244,12 @@ module.exports = {
       })
 
       // check repeat if edit account or email
-      if (account && email && password) {
-        // match password 
-        if (password != checkPassword) throw new Error('密碼欄位必須一致!')
+      if (account || email || password || checkPassword) {
+        // match password & hash password
+        if (password !== checkPassword) throw new Error('密碼欄位必須一致!')
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(password, salt)
+        req.body.password = hash
 
         // check repeat
         const repeatCount = users.reduce((counter, user) => {
