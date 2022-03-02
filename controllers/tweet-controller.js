@@ -1,4 +1,5 @@
 const { Tweet, User, Like } = require('../models')
+const user = require('../models/user')
 const tweetController = {
   getTweets: (req, res) => {
     Tweet.findAll({
@@ -11,11 +12,11 @@ const tweetController = {
       }]
     })
       .then(tweets => {
-        const tweetLiked = tweets.map(tweet => ({
+        const tweetsLiked = tweets.map(tweet => ({
           ...tweet,
           isLiked: req.user.LikedTweets.some(f => f.id === tweet.id)
         }))
-        return res.status(200).json(tweetLiked)
+        return res.status(200).json(tweetsLiked)
       })
       .catch((error) => res.status(500).json({
         status: 'error',
@@ -25,19 +26,41 @@ const tweetController = {
   getTweet: (req, res) => {
     const TweetId = req.params.id
     Tweet.findByPk(TweetId, {
-      include: [{
-        model: User,
-        attributes: ['id','name','account','avatar']
-      }]
+        include: [{
+          model: User,
+          as: 'TweetAuthor',
+          attributes: ['id','name','account','avatar']
+        },
+        {
+          model: User,
+          as: 'LikedUsers',
+          attributes: ['id'],
+          through: {
+            attributes: []
+          }
+        }
+      ]
     })
-      .then(tweet => {
+      .then((tweet) => {
         if (!tweet) {
           return res.status(404).json({
             status: 'error',
             message: '推文不存在'
           })
-        } 
-        return res.status(200).json(tweet)
+        } else {
+          tweet_toJSON = tweet.toJSON()
+          const { id, description, createdAt, updatedAt, likeCount, replyCount, TweetAuthor } = tweet_toJSON
+          return res.status(200).json({
+            id,
+            description,
+            createdAt,
+            updatedAt,
+            likeCount,
+            replyCount,
+            TweetAuthor,
+            isLiked: tweet.LikedUsers.some((user) => user.id === req.user.id)
+          })
+        }
       })
       .catch((error) => res.status(500).json({
         status: 'error',

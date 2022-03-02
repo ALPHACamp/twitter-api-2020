@@ -76,6 +76,7 @@ const followshipController = {
       const followingUser = await Followship.findOne({
         where: {
           followingId: req.params.id,
+          followerId: req.user.id
         }
       })
       if (!followingUser) {
