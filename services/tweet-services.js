@@ -56,7 +56,7 @@ const tweetServices = {
     try {
       const userId = helper.getUser(req).id
       const { description } = req.body
-      if (!description) throw new Error('推文不能為空白')
+      if (!description.trim()) throw new Error('推文不能為空白')
       const tweet = await Tweet.create({
         userId,
         description
