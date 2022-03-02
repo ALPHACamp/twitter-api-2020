@@ -4,16 +4,14 @@ const adminServices = {
   getUsers: () => {
     return User.findAll({
       where: { role: 'user' },
-      include: [{ model: Tweet }],
+      include: [{ model: Tweet, attributes: [] }],
       attributes: [
         'id', 'email', 'account', 'name', 'avatar', 'cover', 'avatar', 'introduction', 'role', 'repliedCount', 'followerCount', 'followingCount',
-        [Sequelize.literal('(SELECT COUNT(*) FROM Tweets WHERE Tweets.UserId = User.id)'), 'tweetCount'],
-        [
-          Sequelize.literal('(SELECT COUNT(*) FROM Tweets INNER JOIN Likes ON Tweets.id = Likes.TweetId WHERE Tweets.UserId = User.id)'),
-          'likedCount',
-        ],
+        [Sequelize.fn('COUNT', Sequelize.col('Tweets.UserId')), 'tweetCount'],
+        [Sequelize.fn('SUM', Sequelize.col('Tweets.likedCount')), 'likedCount']
       ],
-      order: [[Sequelize.literal('tweetCount'), 'DESC']]
+      order: [[Sequelize.literal('tweetCount'), 'DESC']],
+      group: 'id'
     })
       .then(users => { return users })
   },
