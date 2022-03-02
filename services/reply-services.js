@@ -30,7 +30,7 @@ const replyServices = {
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) throw new Error('此推文已不存在')
       const { comment } = req.body
-      if (!comment) throw new Error('內容不可空白')
+      if (!comment.trim()) throw new Error('內容不可空白')
       const reply = await Reply.create({
         userId,
         tweetId,
