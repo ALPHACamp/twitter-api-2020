@@ -9,46 +9,25 @@ const userController = {
   signUp: async (req, res, next) => {
     try {
       const { name, account, email, password, checkPassword } = req.body
-      if (!name || !account || !email || !password || !checkPassword) {
-        return res.status(400).json({
-          status: 'error',
-          message: '欄位必須全部填完' 
-        })
-      }
-      if (email && !validator.isEmail(email)) {
-        return res.status(400).json({
-          status: 'error',
-          message: '請輸入正確信箱格式'
-        })
-      }
-      if (password && !validator.isByteLength(password, { min: 4 })) {
-        return res.status(400).json({
-          status: 'error',
-          message: '密碼請輸入至少 4 個!'
-        })
-      }
-      if (password !== checkPassword) {
-        return res.status(400).json({
-          status: 'error',
-          message: '兩次密碼不相符'
-        })
-      }
-      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-        return res.status(400).json({
-          status: 'error',
-          message: '名字長度不能超過 50 個字'
-        })
-      }
+
+      if (!name || !account || !email || !password || !checkPassword) throw new Error('欄位必須全部填完')
+
+      if (email && !validator.isEmail(email)) throw new Error('請輸入正確信箱格式')
+      
+      if (password && !validator.isByteLength(password, { min: 4 })) throw new Error('密碼請輸入至少 4 個!')
+
+      if (password !== checkPassword) throw new Error('兩次密碼不相符')
+
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
+      
       const checkedUser = await User.findOne({
         where: {
           [Op.or]: [{ account }, { email }]
         },
         raw: true
       })
-      if (checkedUser) return res.status(400).json({
-        status: 'error',
-        message: 'account 或 email 已註冊!'
-      })
+      
+      if (checkedUser) throw new Error('account 或 email 已註冊!')
       await User.create({
         name,
         account,
@@ -66,11 +45,8 @@ const userController = {
     try {
       const user = helpers.getUser(req).toJSON()
 
-      if (user.role !== 'user') return res.status(400).json({
-        status: 'error',
-        message: 'Not found user'
-      })
-
+      if (user.role !== 'user') throw new Error('Not found user')
+      
       delete user.password
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
@@ -89,10 +65,7 @@ const userController = {
       const userData = await User.findByPk(id, {
         raw: true
       })
-      if (!userData) return res.status(400).json({
-        status: 'error',
-        message: 'User not found!'
-      })
+      if (!userData) throw new Error('User not found!')
 
       delete userData.password
 
@@ -108,7 +81,7 @@ const userController = {
           .status(404)
           .json({
             status: 'error',
-            message: '使用者不存在'
+            message: ''
           })
       }
       const tweetsData = await Tweet.findAll({
@@ -368,36 +341,15 @@ const userController = {
         status: 'error',
         message: 'No permission'
       })
-      if (email && !validator.isEmail(email)) {
-        return res.status(400).json({
-          status: 'error',
-          message: '請輸入正確信箱格式'
-        })
-      }
-      if (password && !validator.isByteLength(password, { min: 4 })) {
-        return res.status(400).json({
-          status: 'error',
-          message: '密碼請輸入至少 4 個!'
-        })
-      }
-      if (password !== checkPassword) {
-        return res.status(400).json({
-          status: 'error',
-          message: '兩次密碼不相符'
-        })
-      }
-      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) {
-        return res.status(400).json({
-          status: 'error',
-          message: '名字長度不能超過 50 個字'
-        })
-      }
-      if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
-        return res.status(400).json({
-          status: 'error',
-          message: '自我介紹不能超過 160 個字'
-        })
-      }
+      if (email && !validator.isEmail(email)) throw new Error('請輸入正確信箱格式')
+
+      if (password && !validator.isByteLength(password, { min: 4 })) throw new Error('密碼請輸入至少 4 個!')
+
+      if (password !== checkPassword) throw new Error('兩次密碼不相符')
+
+      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
+
+      if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) throw new Error('自我介紹不能超過 160 個字')
       // 列出全部有相同 account or email 的 user
       const checkedUser = await User.findAll({
         where: { [Op.or]: [{ account }, { email }]},
@@ -407,10 +359,7 @@ const userController = {
       
       const otherUser = checkedUser.find(user => user.id !== userId)
       
-      if (otherUser) return res.status(400).json({
-        status: 'error',
-        message: 'account or email 已被使用'
-      })
+      if (otherUser) throw new Error('account or email 已被使用')
       
       delete req.body.checkPassword
 
@@ -450,10 +399,7 @@ const userController = {
           'role'
         ]
       })
-      if (!user) return res.status(400).json({
-        status: 'error',
-        message: 'user not found'
-      })
+      if (!user) throw new Error('user not found')
       res.json({ user })
     } catch (err) { next(err) }
   }

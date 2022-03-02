@@ -23,10 +23,7 @@ const adminController = {
         raw: true,
         order: [['tweetCount', 'desc']]
       })
-      if (!user) return res.status(400).json({
-        status: 'error',
-        message: 'Users not found!'
-      })
+      if (!user) throw new Error('Users not found!')
       res.json({
         status: 'success',
         message: 'Admin getUser success!',
@@ -42,10 +39,8 @@ const adminController = {
         order: [['createdAt', 'desc']],
         include: User
       })
-      if (tweets.length === 0) return res.status(400).json({
-        status: 'error',
-        message: 'Tweets not found'
-      })
+
+      if (tweets.length === 0) throw new Error('Tweets not found')
       const data = tweets.map(tweet => {
         tweet.shortd_escription = tweet.description.substring(0, 50)
         tweet.username = tweet.User.name
@@ -65,11 +60,7 @@ const adminController = {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
 
-      if (!tweet) return res.status(400).json({
-        status: 'error',
-        message: 'tweet does not exist'
-      })
-
+      if (!tweet) throw new Error('tweet does not exist')
       tweet.destroy()
 
       res.json({
