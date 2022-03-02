@@ -64,6 +64,7 @@ const adminController = {
         tweetCount: 1,
         likedCount: likeCount,
       })
+
       await tweet.destroy()
       return res.json({
         status: 'success',

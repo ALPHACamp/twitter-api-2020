@@ -18,7 +18,7 @@ const likeController = {
         }
       })
       if (!like) {
-        await Like.create({
+        const likeData = await Like.create({
           UserId: req.user.id,
           TweetId: req.params.id,
           isDeleted: false
@@ -26,11 +26,8 @@ const likeController = {
         await tweet.increment('likeCount')
         const tweetFind = await Tweet.findByPk(tweet.id)
         const user = await User.findByPk(tweetFind.UserId)
-        user.increment('likedCount')
-        return res.status(200).json({
-          status: 'success',
-          message: '成功加入喜歡的貼文!'
-        })
+        await user.increment('likedCount')
+        res.status(200).json(likeData)
       } else if (like && like.isDeleted === true) {
         await like.update({
           isDeleted: !like.isDeleted
@@ -38,11 +35,8 @@ const likeController = {
         await tweet.increment('likeCount')
         const tweetFind = await Tweet.findByPk(tweet.id)
         const user = await User.findByPk(tweetFind.UserId)
-        user.increment('likedCount')
-        return res.status(200).json({
-          status: 'success',
-          message: 'Like成功!'
-        })
+        await user.increment('likedCount')
+        return res.status(200).json()
       } else if (like && like.isDeleted === false) {
         return res
           .status(400)
