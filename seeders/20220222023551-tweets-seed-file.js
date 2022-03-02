@@ -27,7 +27,7 @@ module.exports = {
           return Array.from({ length: DEFAULT_TWEETS_NUMBER }, () => ({
             UserId: user.id,
             description: faker.lorem.sentence(),
-            createdAt: new Date(),
+            createdAt: faker.date.past(),
             updatedAt: new Date()
           }))
         })
