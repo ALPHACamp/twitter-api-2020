@@ -173,12 +173,13 @@ module.exports = {
       const UserId = Number(req.params.UserId)
 
       const { account, email, password, checkPassword } = req.body
-      const name = req.body.name ? req.body.name.trim() : null
-      const introduction = req.body.introduction ? req.body.introduction.trim() : null
+      const name = req.body.name ? req.body.name.trim() : selfUser.name
+      const introduction = req.body.introduction ? req.body.introduction.trim() : selfUser.introduction
 
       // check UserId and word length
       if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
-      if (introduction.length > 160 || name.length > 50) {
+      if ((introduction && introduction.length > 160) ||
+        (name && name.length > 50)) {
         throw new Error('字數超出上限！')
       }
 
