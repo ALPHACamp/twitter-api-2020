@@ -49,7 +49,7 @@ module.exports = {
           TweetId: tweetId,
           UserId: userId,
           comment: faker.lorem.text().substring(0, 140),
-          createdAt: randomTime(),
+          createdAt: new Date(),
           updatedAt: new Date()
         })
       })

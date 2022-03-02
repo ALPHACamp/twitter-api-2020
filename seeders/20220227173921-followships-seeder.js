@@ -67,7 +67,7 @@ module.exports = {
         seederArray.push({
           followerId: userId,
           followingId,
-          createdAt: randomTime(),
+          createdAt: new Date(),
           updatedAt: new Date()
         })
       })

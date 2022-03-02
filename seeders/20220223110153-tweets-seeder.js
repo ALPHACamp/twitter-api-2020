@@ -38,7 +38,7 @@ module.exports = {
         return {
           UserId: userId,
           description: faker.lorem.text().substring(0, 140),
-          createdAt: randomTime(),
+          createdAt: new Date(),
           updatedAt: new Date()
         }
       })
