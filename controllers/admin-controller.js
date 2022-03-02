@@ -109,7 +109,8 @@ const adminController = {
   // 獲取所有推文
   getTweets: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
+
+      const findOption = {
         attributes: [
           'id',
           'updatedAt',
@@ -127,7 +128,21 @@ const adminController = {
           }
         ],
         order: [['createdAt', 'DESC']]
-      })
+      }
+
+
+      if (req.query && req.query.page) {
+        let offset = 0
+        const limit = Number(req.query.limit) || 20
+        if (req.query.page) {
+          offset = (Number(req.query.page - 1)) * limit
+        }
+        findOption.offset = offset
+        findOption.limit = limit
+      }
+
+      const tweets = await Tweet.findAll(findOption)
+
       const results = tweets.map(item => {
         const result = item.toJSON()
         result.description = result.description.substring(0, 50)
