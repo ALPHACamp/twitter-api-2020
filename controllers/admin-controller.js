@@ -61,6 +61,13 @@ const adminController = {
       const tweet = await Tweet.findByPk(req.params.id)
 
       if (!tweet) throw new Error('tweet does not exist')
+
+      const { id, likeCount } = tweet.toJSON()
+      const user = await User.findByPk(id)
+      await user.decrement({
+        tweetCount: 1,
+        likedCount: likeCount,
+      })
       tweet.destroy()
 
       res.json({
