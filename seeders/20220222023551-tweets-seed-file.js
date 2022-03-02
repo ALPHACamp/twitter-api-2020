@@ -26,7 +26,7 @@ module.exports = {
         const tweetsArray = users.flatMap(user => {
           return Array.from({ length: DEFAULT_TWEETS_NUMBER }, () => ({
             UserId: user.id,
-            description: faker.lorem.paragraph(),
+            description: faker.lorem.sentence(),
             createdAt: new Date(),
             updatedAt: new Date()
           }))
