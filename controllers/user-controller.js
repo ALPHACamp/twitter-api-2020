@@ -361,7 +361,7 @@ const userController = {
     try {
       const id = +req.params.id
       const userId = req.user.id
-      const { account, name, email, password, checkPassword, introduction } = req.body
+      const { account, name, email, password, checkPassword, introduction, cover, avatar } = req.body
       const { files } = req
 
       if (userId !== id) return res.status(400).json({
@@ -392,7 +392,7 @@ const userController = {
           message: '名字長度不能超過 50 個字'
         })
       }
-      if (introduction && !introduction.isByteLength(introduction, { min: 0, max: 160 })) {
+      if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
         return res.status(400).json({
           status: 'error',
           message: '自我介紹不能超過 160 個字'
@@ -404,22 +404,28 @@ const userController = {
         attributes: ['id', 'name', 'account', 'email', 'avatar', 'introduction', 'role'],
         raw: true
       })
-
+      
       const otherUser = checkedUser.find(user => user.id !== userId)
-
+      
       if (otherUser) return res.status(400).json({
         status: 'error',
         message: 'account or email 已被使用'
       })
-
+      
       delete req.body.checkPassword
-      req.body.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-      // const [user, filePath] = await Promise.all([
-      //   User.findByPk(id),
-      //   imgurFileHandler(files)
-      // ])
-      // console.log(user.toJSON(), filePath)
 
+      if (password) {
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(password, salt)
+        req.body.password = hash
+      }
+      
+      const imgurUploadAvatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
+      const imgurUploadCover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
+      if (imgurUploadAvatar) req.body.avatar = imgurUploadAvatar.toString()
+      if (imgurUploadCover) req.body.cover = imgurUploadCover.toString()
+      
+      const user = await User.findByPk(id)
       const updatedUser = await user.update(req.body)
       const data = updatedUser.toJSON()
       delete data.password
