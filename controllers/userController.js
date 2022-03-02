@@ -52,8 +52,8 @@ const userController = {
     }
     // account email 已經被使用
     return Promise.all([
-      User.findOne({ where: { account } }),
-      User.findOne({ where: { email } })
+      User.findOne({ where: { account }, attributes: ['id'] }),
+      User.findOne({ where: { email }, attributes: ['id'] })
     ])
       .then(([accountUser, emailUser]) => {
         if (accountUser) {
@@ -79,37 +79,58 @@ const userController = {
   getUser: (req, res, next) => {
     const currentUser = helpers.getUser(req)
     return User.findByPk(req.params.id, {
-      // raw: true,
-      // nest: true,
       include: [
-        { model: User, as: "Followings" },
-        { model: User, as: "Followers" }
-      ]
+        { model: Tweet, attributes: ['id'] },
+        { model: User, as: "Followings", attributes: ['id'] },
+        { model: User, as: "Followers", attributes: ['id'] }
+      ],
+      attributes: { exclude: ['password', 'role', 'createdAt', 'updatedAt'] }
+
     })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
-        user.dataValues.followingCount = user.Followings ? user.Followings.length : 0
-        user.dataValues.follwerCount = user.Followers ? user.Followers.length : 0
-        user.dataValues.isFollowed = user.Followers ? user.Followers.some(u => u.id === currentUser.id) : false
-        res.json(user)
+        user = user.toJSON()
+        const data = {
+          id: user.id,
+          account: user.account,
+          email: user.email,
+          name: user.name,
+          avatar: user.avatar,
+          cover: user.cover,
+          introduction: user.introduction,
+          tweetCount: user.Tweets ? user.Tweets.length : 0,
+          followingCount: user.Followings ? user.Followings.length : 0,
+          follwerCount: user.Followers ? user.Followers.length : 0,
+          isFollowed: user.Followers ? user.Followers.some(u => u.id === currentUser.id) : false
+
+        }
+
+        res.json(data)
       })
       .catch(err => next(err))
   },
   // 回覆過的推文
   getRepliedTweets: (req, res, next) => {
     return Promise.all([
-      User.findByPk(req.params.id),
+      User.findByPk(req.params.id, { attributes: ['id'] }),
       Reply.findAll({
-      where: { UserId: req.params.id },
-      include: [User, { model: Tweet, include: [{ model: User, attributes: ['name', 'account'] }] }
-      ]
+        where: { UserId: req.params.id },
+        include: [{ model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        {
+          model: Tweet, attributes: ['id'],
+          include: [{ model: User, attributes: ['id', 'name', 'account'] }]
+        }
+        ],
+        attributes: ['id', 'comment', 'createdAt'],
+        order: [['createdAt', 'DESC']]
       })
     ])
-    .then(([user, replies]) => {
-      if (!user) throw new Error('使用者不存在!')
-      res.json(replies)
-    })
-    .catch(err => next(err))
+      .then(([user, replies]) => {
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
+
+        return res.json(replies)
+      })
+      .catch(err => next(err))
   },
   // 使用者推文
   getUserTweets: (req, res, next) => {
@@ -118,25 +139,36 @@ const userController = {
 
     // 取出user與tweet資料
     return Promise.all([
-      User.findByPk(req.params.id),
+      User.findByPk(req.params.id, { attributes: ['id'] }),
       Tweet.findAll({
         where: { UserId: req.params.id },
-        include: [User, Reply, Like],
+        include: [
+          { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+          { model: Reply, attributes: ['id'] },
+          { model: Like, attributes: ['id', 'UserId'] }
+        ],
+        attributes: ['id', 'description', 'createdAt'],
         order: [['createdAt', 'DESC']]
       })
     ])
-      .then(([user, tweet]) => {
+      .then(([user, tweets]) => {
         // 判斷是否有該查詢使用者
-        if (!user) throw new Error("使用者不存在!")
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
 
         // 將tweet迭代，並回傳所以資料陣列
-        const tweets = tweet.map(tweet => ({
-          ...tweet.dataValues,
-          likeCount: tweet.Likes.length,
-          replyCount: tweet.Replies.length,
-          isLiked: tweet.Likes.map(user => user.UserId).includes(currentUser.id)
-        }))
-        res.json(tweets)
+        const data = tweets.map(tweet => {
+          tweet = tweet.toJSON()
+          return {
+            id: tweet.id,
+            description: tweet.description,
+            createdAt: tweet.createdAt,
+            likeCount: tweet.Likes.length,
+            replyCount: tweet.Replies.length,
+            isLiked: tweet.Likes.map(user => user.UserId).includes(currentUser.id)
+          }
+
+        })
+        return res.json(data)
       })
       .catch(err => next(err))
   },
@@ -145,15 +177,15 @@ const userController = {
     return Promise.all([
       User.findByPk(req.params.id),
       Like.findAll({
-      where: { UserId: req.params.id },
-      include: [{
-        model: Tweet,
-        include: [{ model: User },
-          Reply,
-          Like
-        ]
-      }],
-      order: [['createdAt', 'DESC']]
+        where: { UserId: req.params.id },
+        include: [{
+          model: Tweet,
+          include: [{ model: User },
+            Reply,
+            Like
+          ]
+        }],
+        order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, likes]) => {
@@ -177,7 +209,7 @@ const userController = {
     })
       .then(user => {
         // 判斷是否有使用者
-        if (!user) throw new Error('使用者不存在!')
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
         user = user.toJSON()
         // 將usee.following從物件拿出
         const Followings = user.Followings
@@ -195,7 +227,7 @@ const userController = {
             isFollowed: helpers.getUser(req).Followings ? helpers.getUser(req).Followings.some(u => u.id === following.id) : 0
           }
         })
-        .sort((a, b) => b.createdAt - a.createdAt) 
+          .sort((a, b) => b.createdAt - a.createdAt)
         res.json(data)
       })
       .catch(err => next(err))
@@ -208,7 +240,7 @@ const userController = {
     })
       .then(user => {
         // 判斷是否有使用者
-        if (!user) throw new Error('使用者不存在!')
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
         // 將usee.Followers從物件拿出
         user = user.toJSON()
         const followers = user.Followers
@@ -227,7 +259,7 @@ const userController = {
             isFollowed: helpers.getUser(req).Followings ? helpers.getUser(req).Followings.some(u => u.id === follower.id) : 0
           }
         })
-        .sort((a, b) => b.createdAt - a.createdAt) 
+          .sort((a, b) => b.createdAt - a.createdAt)
         res.json(data)
       })
       .catch(err => next(err))
@@ -260,11 +292,12 @@ const userController = {
       }
     }
     return Promise.all([
-      User.findByPk(currentUser.id),
+      User.findByPk(currentUser.id, { attributes: ['id'] }),
       imgurFileHandler(avatarfile),
       imgurFileHandler(coverfile),
     ])
       .then(([user, avatarPath, coverPath]) => {
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
         return user.update({
           name,
           introduction,
@@ -273,7 +306,9 @@ const userController = {
         })
       })
       .then(user => {
-        res.json({ status: 'success', user })
+        res.json({
+          status: 'success', user
+        })
       })
       .catch(err => next(err))
   },
@@ -299,11 +334,12 @@ const userController = {
     }
     // account email 已經被使用
     return Promise.all([
-      User.findByPk(req.params.id),
-      User.findOne({ where: { account } }),
-      User.findOne({ where: { email } })
+      User.findByPk(req.params.id, { attributes: ['id', 'account', 'email'] }),
+      User.findOne({ where: { account }, attributes: ['id', 'account'] }),
+      User.findOne({ where: { email }, attributes: ['id', 'email'] })
     ])
       .then(([user, accountUser, emailUser]) => {
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
         if (accountUser && accountUser.account !== user.account) {
           return res.json({ status: 'error', message: 'account 已重複註冊!' })
         }
@@ -318,7 +354,14 @@ const userController = {
         })
       })
       .then(user => {
-        res.json({ status: 'success', message: '資料編輯成功', user })
+        res.json({
+          status: 'success', message: '資料編輯成功', user: {
+            id: user.id,
+            account: user.account,
+            name: user.name,
+            updatedAt: user.updatedAt
+          }
+        })
       })
       .catch(err => next(err))
   },
