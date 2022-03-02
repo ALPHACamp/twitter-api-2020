@@ -4,8 +4,13 @@
 [![ORM](https://img.shields.io/badge/ORM-Sequelize-steelblue.svg)](https://www.npmjs.com/package/mysql)
 [![Database](https://img.shields.io/badge/Database-MySQL-lightblue.svg)](https://www.npmjs.com/package/mysql)
 
-
 一個後端 API 伺服器，提供類似 Twitter 的社群媒體服務功能，例如發佈推文、點讚、或是追隨等動作，主要使用技術包含 Node.js + Express + passport + bcryptjs + Sequelize。
+
+<br>
+
+- 前後端協作資訊:
+  - [ERD 資訊連結](https://app.quickdatabasediagrams.com/#/d/BdkVRy)
+  - [API 文件連結](https://app.swaggerhub.com/apis-docs/Richie-Yang/simpleTwitter/1.0.0-oas3)
 
 <br>
 <br>
