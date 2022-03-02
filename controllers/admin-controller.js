@@ -47,6 +47,7 @@ const adminController = {
         message: 'Tweets not found'
       })
       const data = tweets.map(tweet => {
+        tweet.shortd_escription = tweet.description.substring(0, 50)
         tweet.username = tweet.User.name
         tweet.account = tweet.User.account
         tweet.avatar = tweet.User.avatar
