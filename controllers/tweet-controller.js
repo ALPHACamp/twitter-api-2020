@@ -67,7 +67,7 @@ const tweetController = {
         message: error
       }))
   },
-  postTweet: (req, res) => {
+  postTweet: async (req, res) => {
     const { description } = req.body
     const UserId = req.user.id
     if (!description) {
@@ -91,17 +91,11 @@ const tweetController = {
         UserId
       })
       .then(tweet => {
-        User.findByPk(UserId)
+        return User.findByPk(UserId)
           .then(user => user.increment('tweetCount'))
-          .then(() =>
-            res.status(200).json({
-              status: '200',
-              message: 'Successfully post tweet.',
-              Tweet: tweet
-            })
-          )
+          .then(() => res.status(200).json(tweet))
       })
-      .catch((error) => res.status(500).json({
+      .catch(error => res.status(500).json({
         status: 'error',
         message: error
       }))
