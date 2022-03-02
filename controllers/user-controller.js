@@ -204,7 +204,8 @@ module.exports = {
       const selfUserId = selfUser.id
       const UserId = Number(req.params.UserId)
 
-      const { account, email, password, checkPassword } = req.body
+      let { account, email, password, checkPassword } = req.body
+      const bodyKeys = Object.keys(req.body)
       const name = req.body.name ? req.body.name.trim() : selfUser.name
       const introduction = req.body.introduction ? req.body.introduction.trim() : selfUser.introduction
 
@@ -243,10 +244,25 @@ module.exports = {
         limit: 4
       })
 
-      // check repeat if edit account or email
-      if (account && email && password) {
-        // match password 
-        if (password != checkPassword) throw new Error('密碼欄位必須一致!')
+      // check if edit account setting
+      const checkBody = bodyKeys.some(bodyKey =>
+        bodyKey === 'account' || bodyKey === 'email' ||
+        bodyKey === 'password' || bodyKey === 'checkPassword'
+      )
+      if (checkBody) {
+        // match password & hash password
+        password = password ? password.trim() : null
+        checkPassword = checkPassword ? checkPassword.trim() : null
+        account = account ? account.trim() : null
+
+        if (!password || !checkPassword) throw new Error('密碼欄位不能空白!')
+        if (!account) throw new Error('帳戶欄位不能空白!')
+        if (password !== checkPassword) throw new Error('密碼欄位必須一致!')
+
+        // get a hash password
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(password, salt)
+        password = hash
 
         // check repeat
         const repeatCount = users.reduce((counter, user) => {
@@ -265,7 +281,9 @@ module.exports = {
 
       // find self user and update
       const user = users.find(user => user.id === UserId)
-      const updatedUser = await user.update({ ...req.body, cover, avatar })
+      const updatedUser = await user.update({
+        name, account, password, introduction, cover, avatar
+      })
       const responseData = updatedUser.toJSON()
 
       return res.status(200).json(responseData)
