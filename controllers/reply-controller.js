@@ -54,7 +54,7 @@ const replyController = {
   postReplies: async (req, res, next) => {
     try {
       const error = new Error()
-      const { comment } = req.body
+      const comment = (req.body && req.body.comment) ? req.body.comment.trim() : ''
       const loginUserId = authHelpers.getUser(req).id
       const targetTweetId = req.params.id
 

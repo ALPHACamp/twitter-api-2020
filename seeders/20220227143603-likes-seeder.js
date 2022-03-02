@@ -52,7 +52,7 @@ module.exports = {
         seederArray.push({
           TweetId: tweetId,
           UserId: userId,
-          createdAt: randomTime(),
+          createdAt: new Date(),
           updatedAt: new Date()
         })
       })

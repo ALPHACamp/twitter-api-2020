@@ -146,7 +146,9 @@ const tweetController = {
   postTweets: async (req, res, next) => {
     try {
       const error = new Error()
-      const { description } = req.body
+      const description = (req.body && req.body.description) ?
+        req.body.description.trim() :
+        ''
 
       // 推文內容為空
       if (!description) {
@@ -180,7 +182,7 @@ const tweetController = {
 
         return result
       })
-      
+
       return res
         .status(200)
         .json({

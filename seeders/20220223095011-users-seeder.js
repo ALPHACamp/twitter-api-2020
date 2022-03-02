@@ -39,7 +39,7 @@ module.exports = {
       likeCount: 0,
       followerCount: 0,
       followingCount: 0,
-      createdAt: randomTime(),
+      createdAt: new Date(),
       updatedAt: new Date()
     })
 
@@ -59,7 +59,7 @@ module.exports = {
         likeCount: 0,
         followerCount: 0,
         followingCount: 0,
-        createdAt: randomTime(),
+        createdAt: new Date(),
         updatedAt: new Date()
       }
     })
