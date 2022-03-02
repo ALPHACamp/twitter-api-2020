@@ -29,9 +29,9 @@ module.exports = {
       const responseData = await sequelize.transaction(async (t) => {
         // only retrieve first array item, which is created followship
         const [createdFollowship] = await Promise.all([
-          Followship.create({ followerId, followingId }, { transaction: t }),
-          follower.increment('totalFollowings', { by: 1, transaction: t }),
-          following.increment('totalFollowers', { by: 1, transaction: t })
+          Followship.create({ followerId, followingId }, { transaction: t, lock: true }),
+          follower.increment('totalFollowings', { by: 1, transaction: t, lock: true }),
+          following.increment('totalFollowers', { by: 1, transaction: t, lock: true })
         ])
         return createdFollowship
       })
@@ -67,9 +67,9 @@ module.exports = {
       const responseData = await sequelize.transaction(async (t) => {
         // only retrieve first array item, which is created followship
         const [removedFollowship] = await Promise.all([
-          followship.destroy({ transaction: t }),
-          follower.decrement('totalFollowings', { by: 1, transaction: t }),
-          following.decrement('totalFollowers', { by: 1, transaction: t })
+          followship.destroy({ transaction: t, lock: true }),
+          follower.decrement('totalFollowings', { by: 1, transaction: t, lock: true }),
+          following.decrement('totalFollowers', { by: 1, transaction: t, lock: true })
         ])
         return removedFollowship
       })

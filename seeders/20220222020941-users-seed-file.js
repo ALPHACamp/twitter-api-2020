@@ -42,7 +42,7 @@ module.exports = {
             email: `user${i + 1}@example.com`,
             name: `user${i + 1}`,
             avatar: data.results[i].picture.large,
-            introduction: faker.lorem.text(10),
+            introduction: faker.lorem.text(2),
             account: `user${i + 1}`,
             password: bcrypt.hashSync(DEFAULT_PASSWORD, bcrypt.genSaltSync(10)),
             role: 'user',
