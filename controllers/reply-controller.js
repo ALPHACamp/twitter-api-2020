@@ -73,6 +73,12 @@ const replyController = {
         return next(error)
       }
 
+      // 回覆字數限制在 140 字以內
+      if (comment.length > 140) {
+        error.code = 400
+        error.message = '回覆字數限制在 140 字以內'
+        return next(error)
+      }
       // 增加回覆
       const data = await sequelize.transaction(async transaction => {
 
