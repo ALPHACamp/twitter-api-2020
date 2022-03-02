@@ -36,7 +36,8 @@ const likeController = {
           isDeleted: !like.isDeleted
         })
         await tweet.increment('likeCount')
-        const user = await User.findByPk(tweet.UserId)
+        const tweetFind = await Tweet.findByPk(tweet.id)
+        const user = await User.findByPk(tweetFind.UserId)
         user.increment('likedCount')
         return res.status(200).json({
           status: 'success',
@@ -87,7 +88,8 @@ const likeController = {
         })
         if (toggleLike) {
           await tweet.decrement('likeCount')
-          const user = await User.findByPk(tweet.UserId)
+          const tweetFind = await Tweet.findByPk(tweet.id)
+          const user = await User.findByPk(tweetFind.UserId)
           user.decrement('likedCount')
           return res.status(200).json({
             status: 'success',
