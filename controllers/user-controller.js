@@ -392,7 +392,7 @@ const userController = {
           message: '名字長度不能超過 50 個字'
         })
       }
-      if (introduction && !introduction.isByteLength(introduction, { min: 0, max: 160 })) {
+      if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) {
         return res.status(400).json({
           status: 'error',
           message: '自我介紹不能超過 160 個字'
