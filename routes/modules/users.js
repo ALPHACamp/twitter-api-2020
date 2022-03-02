@@ -8,6 +8,7 @@ const options = [
 const { authenticated } = require('../../middleware/auth')
 const userController = require('../../controllers/user-controller')
 
+router.post('/', userController.signUp)
 router.use(authenticated)
 router.get('/top', userController.getTopUsers) 
 router.get('/:id/tweets', userController.getUserTweets)

@@ -24,11 +24,7 @@ const adminController = {
         order: [['tweetCount', 'desc']]
       })
       if (!user) throw new Error('Users not found!')
-      res.json({
-        status: 'success',
-        message: 'Admin getUser success!',
-        data: user
-      })
+      res.json(user)
     } catch (err) { next(err) }
   },
   getTweets: async (req, res, next) => {
@@ -68,11 +64,10 @@ const adminController = {
         tweetCount: 1,
         likedCount: likeCount,
       })
-      tweet.destroy()
-
-      res.json({
+      await tweet.destroy()
+      return res.json({
         status: 'success',
-        message: 'delete tweet success'
+        message: 'deleteTweet success'
       })
     } catch (err) { next(err) }
   }

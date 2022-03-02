@@ -9,10 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     UserId: DataTypes.INTEGER,
     TweetId: DataTypes.INTEGER,
-    comment: {
-      type: DataTypes.TEXT,
-      allowNull: false
-    }
+    comment: DataTypes.TEXT
   }, {
     tableName: 'Replies'
   })
