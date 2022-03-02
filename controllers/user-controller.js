@@ -157,7 +157,7 @@ const userController = {
         order: [['createdAt', 'DESC']]
       })
       .then(tweets => {
-        if (tweets.length === 0) return res.status(200).json({ isEmpity: true })
+        if (tweets.length === 0) return res.status(200).json({ isEmpty: true })
 
         const result = tweets
           .map(t => ({
@@ -188,7 +188,7 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(replies => {
-        if (replies.length === 0) return res.status(200).json({ isEmpity: true })
+        if (replies.length === 0) return res.status(200).json({ isEmpty: true })
 
         const result = replies
           .map(r => ({
@@ -229,7 +229,7 @@ const userController = {
       ]
     })
       .then(followings => {
-        if (followings.Followings.length === 0) return res.status(200).json({ isEmpity: true })
+        if (followings.Followings.length === 0) return res.status(200).json({ isEmpty: true })
         const followingId = helpers.getUser(req).Followings.map(user => user.id)
         const result = followings.Followings
           .map(f => ({
@@ -265,7 +265,7 @@ const userController = {
       ]
     })
       .then(followers => {
-        if (followers.Followers.length === 0) return res.status(200).json({ isEmpity: true })
+        if (followers.Followers.length === 0) return res.status(200).json({ isEmpty: true })
         const followingId = helpers.getUser(req).Followings.map(user => user.id)
         const result = followers.Followers
           .map(f => ({
@@ -297,7 +297,7 @@ const userController = {
     },
     )
       .then(likes => {
-        if (likes.length === 0) return res.status(200).json({ isEmpity: true })
+        if (likes.length === 0) return res.status(200).json({ isEmpty: true })
         const getUserId = helpers.getUser(req).id
         const likesArray = likes
           .map(like => ({
