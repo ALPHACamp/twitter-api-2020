@@ -8,12 +8,6 @@ const adminController = {
       const { account, password } = req.body
       console.log(account, password)
       const user = await User.findOne({ where: { account } })
-      if (!account || !password) {
-        return res.status(400).json({
-          status: 'error',
-          message: '所有欄位都要填寫'
-        })
-      }
       if (!user || user.role !== 'admin') {
         return res.status(403).json({
           status: 'error',

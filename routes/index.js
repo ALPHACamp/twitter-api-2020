@@ -8,6 +8,7 @@ const adminController = require('../controllers/admin-controller')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
+// 後台登入
 router.post('/api/admin/signin', adminController.signIn)
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 // router.use('/api/tweets', authenticated, tweets)
