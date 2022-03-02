@@ -56,7 +56,7 @@ const userController = {
         role: 'user',
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
       })
-      return res.status(200).json({
+      res.status(200).json({
         status: 'success',
         message: 'Account success created!'
       })
