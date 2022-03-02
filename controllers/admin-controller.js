@@ -14,7 +14,7 @@ const adminController = {
           message: '所有欄位都要填寫'
         })
       }
-      if (user.role !== 'admin') {
+      if (!user || user.role !== 'admin') {
         return res.status(403).json({
           status: 'error',
           message: '帳號不存在'
@@ -23,7 +23,7 @@ const adminController = {
       if (!bcrypt.compareSync(password, user.password)) {
         return res.status(403).json({
           status: 'error',
-          message: '帳號或密碼錯誤'
+          message: '密碼錯誤'
         })
       }
       const userData = user.toJSON()
