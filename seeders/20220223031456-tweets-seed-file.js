@@ -15,7 +15,7 @@ module.exports = {
         Array.from({ length: 10 }, () => ({
         description: faker.lorem.text(140),
         UserId: user.id,
-        createdAt: new Date(),
+        createdAt: faker.date.recent(30),
         updatedAt: new Date()
         }))
       )  
