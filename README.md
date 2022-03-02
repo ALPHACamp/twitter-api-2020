@@ -29,7 +29,7 @@
 
 <!-- ABOUT THE PROJECT -->
 
-### 建置環境 Built With
+## 建置環境 Built With
 
 - [Node.js](https://nodejs.org/) (v14.17.0)
 - [Express](https://expressjs.com/)
@@ -87,7 +87,6 @@
    IMGUR_CLIENT_ID=SKIP
    CALLBACK = http://localhost:3000/auth/facebook/callback
    ```
-
 <details style="margin-left:2em;">
   <summary>沒有 IMGUR_CLIENT_ID ?</summary>
   <ol>
@@ -98,7 +97,6 @@
   </ol>
   <p style="margin-left:2em; color: yellow;">※ 一旦關閉便無法再次檢視資訊，請務必紀錄後再關閉頁面</p>
 </details>
-<br />
 
 5. 建立種子資料（需先連線 MySQL Server）
 
@@ -119,6 +117,7 @@
    ```
 
 7. 所有 API 皆為 `http://localhost:3000/api/` 開頭
+
    細節可參考 [API文件](https://hackmd.io/@Boochu/r1Qn2AWl5/%2Fj2ROblOoSXyQ6IRTeX1luQ)
 
 8. 可使用測試帳號登入
@@ -136,6 +135,7 @@
    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
 <!-- ACKNOWLEDGMENTS -->
 ## 致謝 Acknowledgments
 
