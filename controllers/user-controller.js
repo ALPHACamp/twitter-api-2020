@@ -37,11 +37,11 @@ module.exports = {
     try {
       // if no any following property within req.body,
       // then just return null instead
-      const account = req.body?.account?.trim() || null
-      const name = req.body.name?.trim() || null
-      const email = req.body.email?.trim() || null
-      const password = req.body.password?.trim() || null
-      const checkPassword = req.body?.checkPassword?.trim() || null
+      const account = req.body.account ? req.body.account.trim() : null
+      const name = req.body.name ? req.body.name.trim() : null
+      const email = req.body.email ? req.body.email.trim() : null
+      const password = req.body.password ? req.body.password.trim() : null
+      const checkPassword = req.body.checkPassword ? req.body.checkPassword.trim() : null
 
       if (!account || !name || !email || !password || !checkPassword) {
         throw new Error('每個欄位都屬必填!')
@@ -93,12 +93,12 @@ module.exports = {
 
       // retrieve all query strings from HTTP request, and 
       // use their values or fallback default values
-      const field = req.query.field?.trim() || 'totalFollowers'
+      const field = req.query.field ? req.query.field.trim() : 'totalFollowers'
       if (!fieldsArray.includes(field)) {
         throw new Error('提供的欄位並不存在，動作執行失敗!')
       }
 
-      const order = req.query.order?.trim() || 'DESC'
+      const order = req.query.order ? req.query.order.trim() : 'DESC'
       if (!['ASC', 'DESC'].includes(order)) {
         throw new Error('提供的排序並不存在，動作執行失敗!')
       }
@@ -175,23 +175,27 @@ module.exports = {
       const selfUserId = selfUser.id
       const UserId = Number(req.params.UserId)
 
-      const { account, name, email, password, checkPassword, introduction } = req.body
+      const { account, email, password, checkPassword } = req.body
+      const name = req.body.name ? req.body.name.trim() : null
+      const introduction = req.body.introduction ? req.body.introduction.trim() : null
 
       // check UserId and word length
       if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
-      if (introduction?.length > 160 || name?.length > 50) {
+      if (introduction.length > 160 || name.length > 50) {
         throw new Error('字數超出上限！')
       }
 
       // getImageFiles : cover , avatar
       const { files } = req
+      const filesCover = files ? files.cover : null
+      const filesAvatar = files ? files.avatar : null
 
       // upload to imgur if file exists
       let resImages = await Promise.all([
-        files?.cover
+        filesCover
           ? helpers.imgurFileHandler(files.cover[0])
           : selfUser.cover,
-        files?.avatar
+        filesAvatar
           ? helpers.imgurFileHandler(files.avatar[0])
           : selfUser.avatar
       ])
