@@ -262,6 +262,7 @@ const userServices = {
   getUserRepliedTweet: async req => {
     let replies = await Reply.findAll({
       where: { UserId: req.params.id },
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: Tweet,
