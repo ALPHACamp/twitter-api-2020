@@ -10,7 +10,16 @@ const imgurFileHandler = async file => {
     image: fs.createReadStream(file.path),
     type: 'stream'
   })
-  return response.data
+  const data = response.data
+
+  // if data is string , it's error with uploading too many times
+  // return minutes number
+  if (typeof (data) === 'string' && data.includes('too fast')) {
+    const minutes = data.replace(/[^0-9]/ig, "")
+    return new Error(`圖片上傳次數過多，請稍候 ${minutes} 分鐘`)
+  }
+
+  return data.link
 }
 
 function getUser(req) {

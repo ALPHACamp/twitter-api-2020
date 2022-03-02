@@ -177,6 +177,12 @@ module.exports = {
 
       const { account, name, email, password, checkPassword, introduction } = req.body
 
+      // check UserId and word length
+      if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
+      if (introduction?.length > 160 || name?.length > 50) {
+        throw new Error('字數超出上限！')
+      }
+
       // getImageFiles : cover , avatar
       const { files } = req
 
@@ -190,23 +196,11 @@ module.exports = {
           : selfUser.avatar
       ])
 
-      // get cover & avatar link , if not error
+      // get cover & avatar , if resImage is number , it's error
       let [cover, avatar] = resImages.map(resImage => {
-        if (typeof (resImage) === 'string') {
-          if (resImage.includes('too fast')) {
-            const minutes = resImage.replace(/[^0-9]/ig, "");
-            throw new Error(`圖片上傳次數過多，請稍候 ${minutes} 分鐘`)
-          }
-          return resImage
-        }
-        return resImage.link
+        if (resImage instanceof Error) throw resImage
+        return resImage
       })
-
-      // check UserId and word length
-      if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
-      if (introduction?.length > 160 || name?.length > 50) {
-        throw new Error('字數超出上限！')
-      }
 
       // find user and count with account & email
       const users = await User.findAll({
