@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { imgurFileHandler } = require('../helpers/file-helper')
-const { User, Tweet, Like, Reply } = require('../models')
+const { User, Tweet, Like, Reply, Followships } = require('../models')
 const helpers = require('../_helpers')
 const bcrypt = require('bcryptjs')
 
@@ -153,6 +153,7 @@ const userController = {
           Like
         ]
       }],
+      order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, likes]) => {
@@ -171,7 +172,7 @@ const userController = {
     // 依req的id從User抓資料
     return User.findByPk(req.params.id, {
       include: [{
-        model: User, as: 'Followings'
+        model: User, as: 'Followings', include: Followships
       }]
     })
       .then(user => {
@@ -189,11 +190,12 @@ const userController = {
             name: following.name,
             avatar: following.avatar,
             cover: following.cover,
+            createdAt: following.Followship.createdAt,
             introduction: following.introduction,
-            isFollowed: helpers.getUser(req).Followings.some(u => u.id === following.id)
+            isFollowed: helpers.getUser(req).Followings ? helpers.getUser(req).Followings.some(u => u.id === following.id) : 0
           }
         })
-
+        .sort((a, b) => b.createdAt - a.createdAt) 
         res.json(data)
       })
       .catch(err => next(err))
@@ -201,7 +203,7 @@ const userController = {
   getFollowers: (req, res, next) => {
     return User.findByPk(req.params.id, {
       include: [{
-        model: User, as: 'Followers', include: Tweet
+        model: User, as: 'Followers', include: Followships
       }]
     })
       .then(user => {
@@ -220,10 +222,12 @@ const userController = {
             name: follower.name,
             avatar: follower.avatar,
             cover: follower.cover,
+            createdAt: follower.Followship.createdAt,
             introduction: follower.introduction,
-            isFollowed: helpers.getUser(req).Followings.some(u => u.id === follower.id)
+            isFollowed: helpers.getUser(req).Followings ? helpers.getUser(req).Followings.some(u => u.id === follower.id) : 0
           }
         })
+        .sort((a, b) => b.createdAt - a.createdAt) 
         res.json(data)
       })
       .catch(err => next(err))
