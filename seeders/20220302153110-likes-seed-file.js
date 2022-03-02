@@ -31,9 +31,11 @@ module.exports = {
       .then(([users, tweets]) => {
         // prepare an array of all like data
         const likesArray = users.flatMap(user => {
+
+          // pre fill tweetSet with specific TweetId
           const tweetSet = new Set()
           tweets.forEach(t => {
-            if (t.UserId === user.id) tweetSet.add(t.UserId)
+            if (t.UserId === user.id) tweetSet.add(t.TweetId)
           })
 
           return Array.from({ length: DEFAULT_LIKES_NUMBER }, () => {
