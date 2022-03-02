@@ -111,20 +111,32 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      const tweetsData = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
         where: { UserId: id },
         raw: true,
-        include: {
-          model : User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        },
+        include: [
+          {
+            model : User,
+            as: 'TweetAuthor',
+            attributes: ['id', 'name', 'account', 'avatar']
+          }, 
+          {
+            model: User,
+            as: 'LikedUsers',
+            attributes: ['id']
+          }
+        ],
         nest: true,
         order: [['createdAt', 'desc']]
       })
-      if (tweetsData.length === 0) return res.status(400).json({
+      if (tweets.length === 0) return res.status(400).json({
         status: 'error',
         message: 'Tweet not found!'
       })
+      tweetsData = tweets.map(tweet => ({
+        ...tweet,
+        isLiked: tweet.LikedUsers.id !== null
+      }))
       res.json({
         status: 'success',
         message: 'getTweets success!',
