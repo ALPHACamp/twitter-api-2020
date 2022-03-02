@@ -7,12 +7,11 @@ const { authenticated } = require('../../middleware/auth')
 
 router.use(authenticated)
 router.get('/:id', tweetController.getTweet)
-router.post('/', tweetController.postTweet)
-router.get('/', tweetController.getTweets)
-
 router.get('/:id/replies', replyController.getReplies)
 router.post('/:id/replies', replyController.postReplies)
 router.post('/:id/like', likeController.postLike)
 router.post('/:id/unlike', likeController.postUnlike)
 
+router.post('/', tweetController.postTweet)
+router.get('/', tweetController.getTweets)
 module.exports = router
