@@ -192,7 +192,7 @@ const userController = {
             cover: following.cover,
             createdAt: following.Followship.createdAt,
             introduction: following.introduction,
-            isFollowed: helpers.getUser(req).Followings.some(u => u.id === following.id)
+            isFollowed: helpers.getUser(req).Followings ? helpers.getUser(req).Followings.some(u => u.id === following.id) : 0
           }
         })
         .sort((a, b) => b.createdAt - a.createdAt) 
@@ -224,7 +224,7 @@ const userController = {
             cover: follower.cover,
             createdAt: follower.Followship.createdAt,
             introduction: follower.introduction,
-            isFollowed: helpers.getUser(req).Followings.some(u => u.id === follower.id)
+            isFollowed: helpers.getUser(req).Followings ? helpers.getUser(req).Followings.some(u => u.id === follower.id) : 0
           }
         })
         .sort((a, b) => b.createdAt - a.createdAt) 
