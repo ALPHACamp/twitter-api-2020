@@ -28,12 +28,14 @@ const userController = {
       })
       
       if (checkedUser) throw new Error('account 或 email 已註冊!')
+      const salt = bcrypt.genSalt(10)
+      const hash = bcrypt.hash(password, salt)
       await User.create({
         name,
         account,
         email,
         role: 'user',
-        password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+        password: hash,
       })
       res.status(200).json({
         status: 'success',
