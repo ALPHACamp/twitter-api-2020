@@ -5,9 +5,6 @@ const { User, Tweet, Like, Reply } = require('../models')
 const Sequelize = require('sequelize')
 const { Op } = Sequelize;
 
-
-
-
 module.exports = {
   signin: (req, res, next) => {
     try {
@@ -142,12 +139,25 @@ module.exports = {
   getUser: async (req, res, next) => {
     try {
       const { UserId } = req.params
+      const selfUserId = helpers.getUser(req).id
 
-      const responseData = await User.findByPk(UserId, {
-        attributes: { exclude: ['password'] }, raw: true
+      let user = await User.findByPk(UserId, {
+        attributes: { exclude: ['password'] },
+        include: [{
+          model: User, as: 'Followers',
+          where: { id: selfUserId }, required: false
+        }],
+        nest: true
       })
 
-      return res.status(200).json(responseData)
+      user = user.toJSON()
+
+      // add isFollowed
+      user.isFollowed = Boolean(user.Followers.length)
+
+      delete user.Followers
+
+      return res.status(200).json(user)
 
     } catch (err) {
       next(err)
@@ -156,9 +166,28 @@ module.exports = {
   getTweetsOfUser: async (req, res, next) => {
     try {
       const { UserId } = req.params
+      const selfUserId = helpers.getUser(req).id
 
-      const responseData = await Tweet.findAll({
-        where: { UserId }, raw: true
+      const tweets = await Tweet.findAll({
+        where: { UserId },
+        include: [
+          {
+            model: User, as: 'UsersFromLikedTweets',
+            where: { id: selfUserId }, required: false
+          }
+        ],
+        nest: true,
+      })
+
+      const responseData = tweets.map(tweet => {
+        tweet = tweet.toJSON()
+
+        // add isLiked to tweet
+        tweet.isLiked = Boolean(tweet.UsersFromLikedTweets.length)
+
+        delete tweet.UsersFromLikedTweets
+
+        return tweet
       })
 
       return res.status(200).json(responseData)
@@ -176,12 +205,13 @@ module.exports = {
       const UserId = Number(req.params.UserId)
 
       const { account, email, password, checkPassword } = req.body
-      const name = req.body.name ? req.body.name.trim() : null
-      const introduction = req.body.introduction ? req.body.introduction.trim() : null
+      const name = req.body.name ? req.body.name.trim() : selfUser.name
+      const introduction = req.body.introduction ? req.body.introduction.trim() : selfUser.introduction
 
       // check UserId and word length
       if (selfUserId !== UserId) throw new Error('無法編輯其他使用者資料')
-      if (introduction.length > 160 || name.length > 50) {
+      if ((introduction && introduction.length > 160) ||
+        (name && name.length > 50)) {
         throw new Error('字數超出上限！')
       }
 
@@ -247,12 +277,16 @@ module.exports = {
   getLikedTweets: async (req, res, next) => {
     try {
       const { UserId } = req.params
+      const selfUserId = helpers.getUser(req).id
 
       const likes = await Like.findAll({
         where: { UserId },
         include: [{
           model: Tweet,
-          include: [{ model: User, attributes: { exclude: ['password'] } }]
+          include: [
+            { model: User, attributes: { exclude: ['password'] } },
+            { model: User, as: 'UsersFromLikedTweets', where: { id: selfUserId }, required: false }
+          ]
         }],
         order: [['createdAt', 'DESC']],
         nest: true
@@ -261,13 +295,15 @@ module.exports = {
       const responseData = likes.map(like => {
         like = like.toJSON()
 
-        // assign following two objects to reply
+        // assign following two objects to like
         like.likedTweet = like.Tweet
         like.likedTweet.tweetedUser = like.Tweet.User
+        like.likedTweet.isLiked = Boolean(like.Tweet.UsersFromLikedTweets.length)
 
         // remove unnecessary key properties
         delete like.Tweet
         delete like.likedTweet.User
+        delete like.likedTweet.UsersFromLikedTweets
 
         return like
       })
