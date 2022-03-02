@@ -153,6 +153,7 @@ const userController = {
           Like
         ]
       }],
+      order: [['createdAt', 'DESC']]
       })
     ])
       .then(([user, likes]) => {
