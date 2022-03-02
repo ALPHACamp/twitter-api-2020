@@ -4,7 +4,7 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      "SELECT id, name, createdAt FROM users where role = 'user';", {
+      "SELECT id, name, createdAt FROM Users where role = 'user';", {
         type: queryInterface.sequelize.QueryTypes.SELECT
       }
     )

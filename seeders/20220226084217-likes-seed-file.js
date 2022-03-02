@@ -4,12 +4,12 @@ const { RandomChooser } = require('../helpers/seed-helpers')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const users = await queryInterface.sequelize.query(
-      "SELECT id, name FROM users where role = 'user';", {
+      "SELECT id, name FROM Users where role = 'user';", {
         type: queryInterface.sequelize.QueryTypes.SELECT
       }
     )
     const tweets = await queryInterface.sequelize.query(
-      'SELECT * FROM tweets;', {
+      'SELECT * FROM Tweets;', {
         type: queryInterface.sequelize.QueryTypes.SELECT
       }
     )
