@@ -97,8 +97,8 @@ const userController = {
     ])
       .then(([checkUsers, user, hash]) => {
         if (!user) throw new Error('帳號不存在！')
-        if (checkUsers.some(u => u.email === email)) throw new Error('email 已重複註冊！')
-        if (checkUsers.some(u => u.account === account)) throw new Error('account 已重複註冊！')
+        if (checkUsers.some(u => u.email === email && u.id !== helpers.getUser(req).id)) throw new Error('email 已重複註冊！')
+        if (checkUsers.some(u => u.account === account && u.id !== helpers.getUser(req).id)) throw new Error('account 已重複註冊！')
         return user.update({
           account,
           name,
