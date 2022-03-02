@@ -35,7 +35,6 @@ const userController = {
         name,
         account,
         email,
-        role: 'user',
         password: hash,
       })
       res.status(200).json({
@@ -72,7 +71,7 @@ const userController = {
 
       delete userData.password
 
-      res.json({ userData })
+      res.json(userData)
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
@@ -84,7 +83,7 @@ const userController = {
           .status(404)
           .json({
             status: 'error',
-            message: ''
+            message: 'Not found user'
           })
       }
       const tweets = await Tweet.findAll({
@@ -113,11 +112,7 @@ const userController = {
         ...tweet,
         isLiked: tweet.LikedUsers.id !== null
       }))
-      res.json({
-        status: 'success',
-        message: 'getTweets success!',
-        data: tweetsData
-      })
+      res.json(tweetsData)
     } catch (err) { next(err) }
   },
   getUserLikes: async (req, res, next) => {
