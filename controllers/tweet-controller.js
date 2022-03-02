@@ -97,8 +97,8 @@ module.exports = {
         // plus totalTweets number by 1,
         // and then get full tweet data from database
         const [postedTweet] = await Promise.all([
-          Tweet.findByPk(tweet.id, { raw: true, transaction: t }),
-          user.increment('totalTweets', { by: 1, transaction: t })
+          Tweet.findByPk(tweet.id, { raw: true, transaction: t, lock: true }),
+          user.increment('totalTweets', { by: 1, transaction: t, lock: true })
         ])
 
         return postedTweet
@@ -157,8 +157,8 @@ module.exports = {
         // plus both totalReplies number by 1, and
         // create reply, and then return full reply data from database
         const [postedReply] = await Promise.all([
-          Reply.create({ comment, TweetId, UserId }, { transaction: t }),
-          tweet.increment('totalReplies', { by: 1, transaction: t })
+          Reply.create({ comment, TweetId, UserId }, { transaction: t, lock: true }),
+          tweet.increment('totalReplies', { by: 1, transaction: t, lock: true })
         ])
         return postedReply
       })
@@ -194,9 +194,9 @@ module.exports = {
         // plus both totalLikes and totalLiked numbers each by 1,
         // and create like, and then return full like data from database
         const [postedLike] = await Promise.all([
-          Like.create({ UserId, TweetId }, { transaction: t }),
-          tweet.increment('totalLikes', { by: 1, transaction: t }),
-          user.increment('totalLiked', { by: 1, transaction: t })
+          Like.create({ UserId, TweetId }, { transaction: t, lock: true }),
+          tweet.increment('totalLikes', { by: 1, transaction: t, lock: true }),
+          user.increment('totalLiked', { by: 1, transaction: t, lock: true })
         ])
         return postedLike
       })
@@ -232,9 +232,9 @@ module.exports = {
         // minus both totalLikes and totalLiked numbers each by 1,
         // and destroy like, and then return full like data from database
         const [removedLike] = await Promise.all([
-          like.destroy({ transaction: t }),
-          tweet.decrement('totalLikes', { by: 1, transaction: t }),
-          user.decrement('totalLiked', { by: 1, transaction: t })
+          like.destroy({ transaction: t, lock: true }),
+          tweet.decrement('totalLikes', { by: 1, transaction: t, lock: true }),
+          user.decrement('totalLiked', { by: 1, transaction: t, lock: true })
         ])
         return removedLike
       })

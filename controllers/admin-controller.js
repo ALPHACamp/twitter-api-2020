@@ -55,16 +55,26 @@ module.exports = {
         // minus both totalTweets and totalLiked numbers,
         // and then also remove both tweet, replies, and likes
         const [removedTweet] = await Promise.all([
-          tweet.destroy({ transaction: t }),
-          user.decrement('totalTweets', { by: 1, transaction: t }),
-          user.decrement('totalLiked', { by: tweet.totalLikes, transaction: t }),
+          tweet.destroy({ transaction: t, lock: true }),
+          user.decrement('totalTweets', {
+            by: 1,
+            transaction: t,
+            lock: true
+          }),
+          user.decrement('totalLiked', { 
+            by: tweet.totalLikes,
+            transaction: t,
+            lock: true 
+          }),
           Reply.destroy({
             where: { id: { [Op.in]: tweet.Replies.map(r => r.id) } },
-            transaction: t
+            transaction: t,
+            lock: true
           }),
           Like.destroy({
             where: { id: { [Op.in]: tweet.Likes.map(l => l.id) } },
-            transaction: t
+            transaction: t,
+            lock: true
           })
         ])
         return removedTweet
