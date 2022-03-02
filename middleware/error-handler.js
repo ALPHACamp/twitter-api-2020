@@ -1,16 +1,18 @@
 module.exports = {
-  apiErrorHandler(err, req, res, next) {
+  generalErrorHandler: (err, req, res, next) => {
     if (err instanceof Error) {
+      const { name, message } = err
       res.status(500).json({
         status: 'error',
-        message: `${err.name}:${err.message}`
+        message: `${name}: ${message}`
       })
     } else {
       res.status(500).json({
         status: 'error',
-        message: `${err}`
+        message: err
       })
     }
+
     next(err)
   }
 }
