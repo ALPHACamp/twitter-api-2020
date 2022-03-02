@@ -166,9 +166,28 @@ module.exports = {
   getTweetsOfUser: async (req, res, next) => {
     try {
       const { UserId } = req.params
+      const selfUserId = helpers.getUser(req).id
 
-      const responseData = await Tweet.findAll({
-        where: { UserId }, raw: true
+      const tweets = await Tweet.findAll({
+        where: { UserId },
+        include: [
+          {
+            model: User, as: 'UsersFromLikedTweets',
+            where: { id: selfUserId }, required: false
+          }
+        ],
+        nest: true,
+      })
+
+      const responseData = tweets.map(tweet => {
+        tweet = tweet.toJSON()
+
+        // add isLiked to tweet
+        tweet.isLiked = Boolean(tweet.UsersFromLikedTweets.length)
+
+        delete tweet.UsersFromLikedTweets
+
+        return tweet
       })
 
       return res.status(200).json(responseData)
