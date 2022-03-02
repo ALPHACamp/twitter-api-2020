@@ -1,21 +1,27 @@
 const { User, Tweet, Reply, Like } = require('../models')
-const helpers = require('../_helpers')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
 
 const adminController = {
   signIn: async (req, res, next) => {
-    const userData = helpers.getUser(req).toJSON()
     try {
-      // Admin only
-      if (userData.role !== 'admin') throw new Error('Account or Password is wrong!')
+      const { account, password } = req.body
+      console.log(account, password)
+      const user = await User.findOne({ where: { account } })
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({
+          status: 'error',
+          message: '帳號不存在'
+        })
+      }
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(403).json({
+          status: 'error',
+          message: '密碼錯誤'
+        })
+      }
+      const userData = user.toJSON()
       delete userData.password
-      delete userData.introduction
-      delete userData.avatar
-      delete userData.cover
-      delete userData.tweetCount
-      delete userData.followerCount
-      delete userData.followingCount
-      delete userData.likeCount
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.json({
         status: 'success',

@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const passport = require('../../config/passport')
+// const passport = require('../../config/passport')
 const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 const adminController = require('../../controllers/admin-controller')
 
-router.post('/signin', passport.authenticate('local', { session: false }), adminController.signIn)
+// router.post('/signin', adminController.signIn)
 router.get('/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.get('/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.delete('/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
