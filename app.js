@@ -10,6 +10,8 @@ const router = require('./routes')
 const app = express()
 const PORT = process.env.PORT
 
+const server = require('http').createServer(app)
+
 // http
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
@@ -18,8 +20,10 @@ app.use(express.json())
 
 app.use(passport.initialize())
 
+require('./socket/server')(server)
+
 app.use('/api', router)
-app.listen(PORT, () =>
+server.listen(PORT, () =>
   console.log(`Alphitter api server listening on port ${PORT}!`)
 )
 
