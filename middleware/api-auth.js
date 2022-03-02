@@ -34,11 +34,15 @@ const authenticated = (req, res, next) => {
 function authenticatedUser(req, res, next) {
   const user = helpers.getUser(req)
 
-  if (user && user.role === 'user') return next()
-  const error = new Error()
-  error.code = 403
-  error.message = '存取被拒'
-  return next(error)
+  if (user && user.role === 'admin') {
+    const error = new Error()
+    error.code = 403
+    error.message = '存取被拒'
+    return next(error)
+  }
+
+  return next()
+
 }
 
 
@@ -52,7 +56,7 @@ function authenticatedUser(req, res, next) {
  */
 function authenticatedAdmin(req, res, next) {
   const user = helpers.getUser(req)
-  
+
   if (user && user.role === 'admin') return next()
 
   const error = new Error()
