@@ -58,6 +58,14 @@ const userController = {
       })
       .catch(err => next(err))
   },
+  getCurrentUser:(req, res, next) => {
+    const reqUser = helpers.getUser(req)
+    const result = reqUser.toJSON()
+    delete result.password
+    delete result.Followers
+    delete result.Followings
+    return res.status(200).json(result)
+  },
   getUser: (req, res, next) => {
     const userId = Number(req.params.id)
     const reqUserId = helpers.getUser(req).id

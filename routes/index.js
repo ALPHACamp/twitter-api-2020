@@ -17,6 +17,7 @@ const followshipController = require('../controllers/followship-controller.js')
 // users
 router.post('/api/signin', userController.signIn)
 router.post('/api/users', userController.signUp)
+router.get('/api/user',authenticated, authenticatedUser, userController.getCurrentUser)
 
 router.get('/api/users/top', authenticated, authenticatedUser, userController.topFollowed)
 router.get('/api/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getReplies)
