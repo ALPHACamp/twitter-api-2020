@@ -5,9 +5,6 @@ const { User, Tweet, Like, Reply } = require('../models')
 const Sequelize = require('sequelize')
 const { Op } = Sequelize;
 
-
-
-
 module.exports = {
   signin: (req, res, next) => {
     try {
@@ -243,12 +240,16 @@ module.exports = {
   getLikedTweets: async (req, res, next) => {
     try {
       const { UserId } = req.params
+      const selfUserId = helpers.getUser(req).id
 
       const likes = await Like.findAll({
         where: { UserId },
         include: [{
           model: Tweet,
-          include: [{ model: User, attributes: { exclude: ['password'] } }]
+          include: [
+            { model: User, attributes: { exclude: ['password'] } },
+            { model: User, as: 'UsersFromLikedTweets', where: { id: selfUserId }, required: false }
+          ]
         }],
         order: [['createdAt', 'DESC']],
         nest: true
@@ -257,13 +258,15 @@ module.exports = {
       const responseData = likes.map(like => {
         like = like.toJSON()
 
-        // assign following two objects to reply
+        // assign following two objects to like
         like.likedTweet = like.Tweet
         like.likedTweet.tweetedUser = like.Tweet.User
+        like.likedTweet.isLiked = Boolean(like.Tweet.UsersFromLikedTweets.length)
 
         // remove unnecessary key properties
         delete like.Tweet
         delete like.likedTweet.User
+        delete like.likedTweet.UsersFromLikedTweets
 
         return like
       })
