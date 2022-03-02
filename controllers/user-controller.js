@@ -254,9 +254,11 @@ module.exports = {
         password = password ? password.trim() : null
         checkPassword = checkPassword ? checkPassword.trim() : null
         account = account ? account.trim() : null
+        email = email ? email.trim() : null
 
         if (!password || !checkPassword) throw new Error('密碼欄位不能空白!')
         if (!account) throw new Error('帳戶欄位不能空白!')
+        if (!email) throw new Error('email欄位不能空白!')
         if (password !== checkPassword) throw new Error('密碼欄位必須一致!')
 
         // get a hash password
@@ -282,7 +284,7 @@ module.exports = {
       // find self user and update
       const user = users.find(user => user.id === UserId)
       const updatedUser = await user.update({
-        name, account, password, introduction, cover, avatar
+        name, account, email, password, introduction, cover, avatar
       })
       const responseData = updatedUser.toJSON()
 
