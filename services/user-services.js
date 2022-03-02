@@ -284,16 +284,16 @@ const userServices = {
           ])
             .then(([coverFilePath, avatarFilePath]) => {
               return user.update({
-                name: req.body.name || user.toJSON().name,
-                introduction: req.body.introduction || user.toJSON().introduction,
+                name: req.body.name !== undefined ? req.body.name : user.toJSON().name,
+                introduction: req.body.introduction !== undefined ? req.body.introduction : user.toJSON().introduction,
                 cover: coverFilePath || user.toJSON().cover,
                 avatar: avatarFilePath || user.toJSON().avatar
               })
             })
         } else {
           return user.update({
-            name: req.body.name || user.toJSON().name,
-            introduction: req.body.introduction || user.toJSON().introduction
+            name: req.body.name !== undefined ? req.body.name : user.toJSON().name,
+            introduction: req.body.introduction !== undefined ? req.body.introduction : user.toJSON().introduction
           })
         }
       })
@@ -327,7 +327,7 @@ const userServices = {
       })
       .then(user => {
         return user.update({
-          name: req.body.name || user.name,
+          name: req.body.name !== undefined ? req.body.name : user.name,
           account: req.body.account,
           email: req.body.email,
           password: bcrypt.hashSync(req.body.password, 10)
