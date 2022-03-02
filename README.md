@@ -49,8 +49,7 @@
 ## <strong>環境建置需求</strong>
 - Git
   - [下載連結](https://git-scm.com/downloads) 
-- Node.js 10.24.1
-  - <span style="color: red">注意:</span> `內部測試可以支援 14.16.0，但是建議使用 10.24.1`
+- Node.js 14.16.X
   - [下載連結](https://nodejs.org/dist/v14.16.0/)
 - 終端機工具 Terminal、CMD、Git Bash
   - <span style="color: red">注意:</span> `只需要上述的終端機工具項目其中一個即可`
