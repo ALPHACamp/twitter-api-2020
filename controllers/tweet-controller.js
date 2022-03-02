@@ -1,4 +1,5 @@
 const { Tweet, User, Like } = require('../models')
+const user = require('../models/user')
 const tweetController = {
   getTweets: (req, res) => {
     Tweet.findAll({
@@ -25,10 +26,20 @@ const tweetController = {
   getTweet: (req, res) => {
     const TweetId = req.params.id
     Tweet.findByPk(TweetId, {
-      include: [{
-        model: User,
-        attributes: ['id','name','account','avatar']
-      }]
+        include: [{
+          model: User,
+          as: 'TweetAuthor',
+          attributes: ['id','name','account','avatar']
+        },
+        {
+          model: User,
+          as: 'LikedUsers',
+          attributes: ['id'],
+          through: {
+            attributes: []
+          }
+        }
+      ]
     })
       .then((tweet) => {
         if (!tweet) {
@@ -36,19 +47,18 @@ const tweetController = {
             status: 'error',
             message: '推文不存在'
           })
-        }
-        if (tweet) {
-          tweet = tweet.toJSON()
-          // const { id, description, likeCount, replyCount, createdAt, updatedAt } = tweet
-        // return res.status(200).json(tweet)
+        } else {
+          tweet_toJSON = tweet.toJSON()
+          const { id, description, createdAt, updatedAt, likeCount, replyCount, TweetAuthor } = tweet_toJSON
           return res.status(200).json({
-            id: tweet.id,
-            isLiked: tweet.LikedTweets.some((user) => user.id === req.user.id),
-            description: tweet.description
-            // likeCount,
-            // replyCount,
-            // createdAt,
-            // updatedAt
+            id,
+            description,
+            createdAt,
+            updatedAt,
+            likeCount,
+            replyCount,
+            TweetAuthor,
+            isLiked: tweet.LikedUsers.some((user) => user.id === req.user.id)
           })
         }
       })
