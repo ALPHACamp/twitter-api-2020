@@ -1,5 +1,6 @@
 'use strict'
 const { DEFAULT_LIKER_NUMBER } = require('../config/seeder')
+const { randomTime } = require('../helpers/random-time-generator')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     /*
@@ -51,7 +52,7 @@ module.exports = {
         seederArray.push({
           TweetId: tweetId,
           UserId: userId,
-          createdAt: new Date(),
+          createdAt: randomTime(),
           updatedAt: new Date()
         })
       })

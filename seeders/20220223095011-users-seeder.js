@@ -2,6 +2,7 @@
 
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
+const { randomTime } = require('../helpers/random-time-generator')
 const {
   DEFAULT_PASSWORD,
   BCRYPT_COMPLEXITY,
@@ -38,7 +39,7 @@ module.exports = {
       likeCount: 0,
       followerCount: 0,
       followingCount: 0,
-      createdAt: new Date(),
+      createdAt: randomTime(),
       updatedAt: new Date()
     })
 
@@ -58,7 +59,7 @@ module.exports = {
         likeCount: 0,
         followerCount: 0,
         followingCount: 0,
-        createdAt: new Date(),
+        createdAt: randomTime(),
         updatedAt: new Date()
       }
     })
