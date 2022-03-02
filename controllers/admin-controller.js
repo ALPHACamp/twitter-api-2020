@@ -60,8 +60,9 @@ const adminController = {
         raw: true
       })
       const tweetsSubstr = tweets.map(tweet => ({
-        ...tweet,
-        description: tweet.description.substring(0, 50)
+        ...tweet
+        // 前端會自己縮減
+        // description: tweet.description.substring(0, 50)
       }))
 
       return res.json({
