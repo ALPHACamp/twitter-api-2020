@@ -117,7 +117,7 @@ const userController = {
         include: [
           {
             model : User,
-            as: 'TweetAuthor',
+            // as: 'TweetAuthor',
             attributes: ['id', 'name', 'account', 'avatar']
           }, 
           {
@@ -137,11 +137,7 @@ const userController = {
         ...tweet,
         isLiked: tweet.LikedUsers.id !== null
       }))
-      res.json({
-        status: 'success',
-        message: 'getTweets success!',
-        data: tweetsData
-      })
+      return res.json(tweetsData)
     } catch (err) { next(err) }
   },
   getUserLikes: async (req, res, next) => {
@@ -164,7 +160,8 @@ const userController = {
         include: [
           {
             model: Tweet,
-            attributes: ['id','description','replyCount','likeCount'],
+            as: "LikedTweet",
+            attributes: ['id','UserId','description','replyCount','likeCount'],
             include: [
               {
                 model: User,
@@ -182,7 +179,12 @@ const userController = {
             message: '使用者沒有喜歡過的推文'
           })
       }
-      return res.status(200).json(likes)
+      const userLikes = likes
+        .map(like => ({
+          ...like.toJSON(),
+          isLiked: true
+        }))
+      return res.status(200).json(userLikes)
     } catch (error) {
       res.status(500).json({
         status: 'error',

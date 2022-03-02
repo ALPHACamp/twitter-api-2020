@@ -2,8 +2,7 @@ const { Like, Tweet } = require('../models')
 const likeController = {
   postLike: async (req, res, next) => {
     try {
-      const TweetId = req.params.id
-      const tweet = await Tweet.findByPk(TweetId)
+      const tweet = await Tweet.findByPk(req.params.id)
       if (!tweet) {
         return res
           .status(404)
@@ -15,18 +14,21 @@ const likeController = {
       const like = await Like.findOne({
         where: {
           UserId: req.user.id,
-          TweetId
+          TweetId: req.params.id
         }
       })
       if (!like) {
         await Like.create({
           UserId: req.user.id,
-          TweetId,
+          TweetId: req.params.id,
           isDeleted: false
         })
         await tweet.increment('likeCount')
-        const user = await User.findByPk(tweet.UserId)
-        user.increment('likedCount')
+        const tweet2 = await Tweet.findByPk(tweet.id)
+        console.log(tweet2)
+        await User.findByPk(tweet2.UserId).increment('likedCount')
+        // const user = await User.findByPk(tweet.UserId).increment('likedCount')
+        // user.increment('likedCount')
         return res.status(200).json({
           status: 'success',
           message: '成功加入喜歡的貼文!'
