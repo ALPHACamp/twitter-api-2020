@@ -118,7 +118,8 @@ const userController = {
           model : User,
           attributes: ['id', 'name', 'account', 'avatar']
         },
-        nest: true
+        nest: true,
+        order: [['createdAt', 'desc']]
       })
       if (tweetsData.length === 0) return res.status(400).json({
         status: 'error',
@@ -134,9 +135,6 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      // const like = await Like.findAll({
-      //   where: { UserId: req.params.id }
-      // })
       if (!user) {
         return res
           .status(404)
@@ -145,14 +143,6 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      // if (!like) {
-      //   return res
-      //     .status(400)
-      //     .json({
-      //       status: 'error',
-      //       message: '使用者沒有like過的推文'
-      //     })
-      // }
       const likes = await Like.findAll({
         where: {
           UserId: req.params.id,
