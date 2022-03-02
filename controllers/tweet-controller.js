@@ -11,11 +11,11 @@ const tweetController = {
       }]
     })
       .then(tweets => {
-        const tweetLiked = tweets.map(tweet => ({
+        const tweetsLiked = tweets.map(tweet => ({
           ...tweet,
           isLiked: req.user.LikedTweets.some(f => f.id === tweet.id)
         }))
-        return res.status(200).json(tweetLiked)
+        return res.status(200).json(tweetsLiked)
       })
       .catch((error) => res.status(500).json({
         status: 'error',
@@ -30,14 +30,27 @@ const tweetController = {
         attributes: ['id','name','account','avatar']
       }]
     })
-      .then(tweet => {
+      .then((tweet) => {
         if (!tweet) {
           return res.status(404).json({
             status: 'error',
             message: '推文不存在'
           })
-        } 
-        return res.status(200).json(tweet)
+        }
+        if (tweet) {
+          tweet = tweet.toJSON()
+          // const { id, description, likeCount, replyCount, createdAt, updatedAt } = tweet
+        // return res.status(200).json(tweet)
+          return res.status(200).json({
+            id: tweet.id,
+            isLiked: tweet.LikedTweets.some((user) => user.id === req.user.id),
+            description: tweet.description
+            // likeCount,
+            // replyCount,
+            // createdAt,
+            // updatedAt
+          })
+        }
       })
       .catch((error) => res.status(500).json({
         status: 'error',
