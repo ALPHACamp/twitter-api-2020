@@ -268,17 +268,18 @@ module.exports = {
 
         // check repeat
         const repeatCount = users.reduce((counter, user) => {
+          if (user.id === UserId) return counter
           if (user.account === account) counter.account++
           if (user.email === email) counter.email++
           return counter
         }, { account: 0, email: 0 })
 
         // throw email or account error
-        if (repeatCount.account > 1 && repeatCount.email > 1) {
+        if (repeatCount.account > 0 && repeatCount.email > 0) {
           throw new Error('account 和 email 已重覆！')
         }
-        if (repeatCount.account > 1) throw new Error('account 已重覆！')
-        if (repeatCount.email > 1) throw new Error('email 已重覆！')
+        if (repeatCount.account > 0) throw new Error('account 已重覆！')
+        if (repeatCount.email > 0) throw new Error('email 已重覆！')
       }
 
       // find self user and update
