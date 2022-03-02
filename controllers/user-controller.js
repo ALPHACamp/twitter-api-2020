@@ -363,7 +363,7 @@ const userController = {
     try {
       const id = +req.params.id
       const userId = req.user.id
-      const { account, name, email, password, checkPassword, introduction } = req.body
+      const { account, name, email, password, checkPassword, introduction, cover, avatar } = req.body
       const { files } = req
 
       if (userId !== id) return res.status(400).json({
@@ -406,23 +406,28 @@ const userController = {
         attributes: ['id', 'name', 'account', 'email', 'avatar', 'introduction', 'role'],
         raw: true
       })
-
+      
       const otherUser = checkedUser.find(user => user.id !== userId)
-
+      // console.log(otherUser)
       if (otherUser) return res.status(400).json({
         status: 'error',
         message: 'account or email 已被使用'
       })
 
-      delete req.body.checkPassword
-      req.body.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-      // const [user, filePath] = await Promise.all([
-      //   User.findByPk(id),
-      //   imgurFileHandler(files)
+      // delete req.body.checkPassword
+      // const salt = await bcrypt.genSalt(10)
+      // const hash = await bcrypt.hash(password, salt)
+      const imgurUploadInfo = await imgurFileHandler(files.cover[0])
+      // const imgurUploadInfo = await Promise.all([
+      //   files?.avatar ? imgurFileHandler(files.avatar[0]) : req.user.avatar,
+      //   files?.cover ? imgurFileHandler(files.cover[0]) : req.user.cover
       // ])
-      // console.log(user.toJSON(), filePath)
-
-      const updatedUser = await user.update(req.body)
+      console.log(imgurUploadInfo)
+      const user = await User.findByPk(id)
+      const updatedUser = await user.update({
+        ...req.body,
+        // password: hash
+      })
       const data = updatedUser.toJSON()
       delete data.password
 
