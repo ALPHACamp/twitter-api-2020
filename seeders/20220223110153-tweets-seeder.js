@@ -1,6 +1,7 @@
 'use strict'
 
 const faker = require('faker')
+const { randomTime } = require('../helpers/random-time-generator')
 const { DEFAULT_TWEET_NUMBER } = require('../config/seeder')
 
 module.exports = {
@@ -37,7 +38,7 @@ module.exports = {
         return {
           UserId: userId,
           description: faker.lorem.text().substring(0, 140),
-          createdAt: new Date(),
+          createdAt: randomTime(),
           updatedAt: new Date()
         }
       })

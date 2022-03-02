@@ -1,5 +1,6 @@
 'use strict'
 const faker = require('faker')
+const { randomTime } = require('../helpers/random-time-generator')
 const { DEFAULT_REPLIER_NUMBER } = require('../config/seeder')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -48,7 +49,7 @@ module.exports = {
           TweetId: tweetId,
           UserId: userId,
           comment: faker.lorem.text().substring(0, 140),
-          createdAt: new Date(),
+          createdAt: randomTime(),
           updatedAt: new Date()
         })
       })

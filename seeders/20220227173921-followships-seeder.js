@@ -6,6 +6,7 @@
 2. 每一個人只能選前面十位使用者
 3. 若自己就選到自己，那麼即可跳過直到改選到非自己以外的使用者，且能跟隨範圍還是前面十位
 */
+const { randomTime } = require('../helpers/random-time-generator')
 const {
   FOLLOWING_CANDIDATE_RANGE,
   DEFAULT_FOLLOWING_NUMBER
@@ -66,7 +67,7 @@ module.exports = {
         seederArray.push({
           followerId: userId,
           followingId,
-          createdAt: new Date(),
+          createdAt: randomTime(),
           updatedAt: new Date()
         })
       })
