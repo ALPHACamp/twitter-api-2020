@@ -1,4 +1,4 @@
-const { Tweet, User } = require('../models')
+const { Tweet, User, Like } = require('../models')
 const tweetController = {
   getTweets: (req, res) => {
     Tweet.findAll({
@@ -10,7 +10,13 @@ const tweetController = {
         attributes: ['id','name','account','avatar']
       }]
     })
-      .then(tweets => { return res.status(200).json(tweets) })
+      .then(tweets => {
+        const tweetLiked = tweets.map(tweet => ({
+          ...tweet,
+          isLiked: req.user.LikedTweets.some(f => f.id === tweet.id)
+        }))
+        return res.status(200).json(tweetLiked)
+      })
       .catch((error) => res.status(500).json({
         status: 'error',
         message: error
