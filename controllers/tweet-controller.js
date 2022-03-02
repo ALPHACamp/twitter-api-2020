@@ -80,7 +80,7 @@ module.exports = {
   postTweet: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req).id
-      const description = req.body.description?.trim() || null
+      const description = req.body.description ? req.body.description.trim() : null
 
       if (!description) throw new Error('推文不能為空!')
       if (description.length > 140) throw new Error('推文字數不能超過140字!')
@@ -145,7 +145,7 @@ module.exports = {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = Number(req.params.TweetId)
-      const comment = req.body.comment?.trim() || null
+      const comment = req.body.comment ? req.body.comment.trim() : null
 
       if (!comment) throw new Error('回覆不能為空!')
       if (comment.length > 140) throw new Error('回覆字數不能超過140字!')
