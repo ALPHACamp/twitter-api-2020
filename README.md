@@ -41,13 +41,28 @@ front_end_web_url = *
 ```
 npm run start
 ``` 
-11. 在瀏覽器網址列輸入 `http://localhost:3000/+欲使用的 API 路由` 使用特定功能
-12. 若欲暫停使用
+11. 在終端機看到以下字串代表伺服器建立成功：
+Example app listening on port 3000!
+12. 在瀏覽器網址列輸入 `http://localhost:3000/+欲使用的 API 路由` 使用特定功能
+13. 若欲暫停使用
 ```
 ctrl + c ( mac : command + .)
 ```
 ## 路由列表
 參照[文字說明](https://app.swaggerhub.com/apis-docs/HUANG-SIH-MAN/twitter-API/1.0.0#/)有詳細說明路由清單與各路由的必要參數與回傳格式
+## 測試帳號
+前台帳號：
+```
+user1
+```
+後台帳號：
+```
+root
+```
+密碼都是：
+```
+12345678
+```
 ## 開發工具
 - Node.js 14.16.0
 - Express 4.16.4
