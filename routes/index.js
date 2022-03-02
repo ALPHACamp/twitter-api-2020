@@ -10,8 +10,9 @@ const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 // 後台登入
 router.post('/api/admin/signin', adminController.signIn)
+
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
-// router.use('/api/tweets', authenticated, tweets)
+router.use('/api/tweets', authenticated, tweets)
 // router.use('/api/followships', authenticated, followships)
 // router.use('/api/users', users)
 // router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn) // 注意是 Post
