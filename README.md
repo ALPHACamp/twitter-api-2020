@@ -3,13 +3,12 @@
 模擬Twitter開發的專案，提供前端開發者API。
 
 
-[![Build Status](https://app.travis-ci.com/ALPHACamp/twitter-api-2020.svg?branch=master)](https://app.travis-ci.com/github/ALPHACamp/twitter-api-2020/jobs/561357334/config)
 [![Framework](https://img.shields.io/badge/express-4.16.4-yellow.svg)](https://www.npmjs.com/package/express)
 [![Database](https://img.shields.io/badge/Database-MYSQL-yellow.svg)](https://www.npmjs.com/package/mysql)
 
 (<a href="https://dzbr-alphatwitter.herokuapp.com">API連結</a>)
 (<a href="https://basalt-nerve-0ff.notion.site/API-44c1f841134341c59846c42eab049329">API文件</a>)
-(<a href="https://basalt-nerve-0ff.notion.site/API-44c1f841134341c59846c42eab049329">POSTMAN JSON檔案</a>)
+(<a href="https://basalt-nerve-0ff.notion.site/postman-export-9ebbca32f21b4bfb84f833cba5a5dfcd">POSTMAN JSON檔案</a>)
 
 ## 功能介紹
   * 提供使用者登入、登出及註冊帳號功能
@@ -69,7 +68,7 @@ npx sequelize db:migrate   // 載入模組
 npx sequelize db:seed:all  // 載入種子資料 
 ```
 
-3.開啟程式
+4.開啟程式
 
 ```
 npm run dev
