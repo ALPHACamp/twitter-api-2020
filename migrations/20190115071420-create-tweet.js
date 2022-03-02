@@ -17,12 +17,12 @@ module.exports = {
       totalLikes: {
         allowNull: false,
         defaultValue: 0,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER.UNSIGNED
       },
       totalReplies: {
         allowNull: false,
         defaultValue: 0,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER.UNSIGNED
       },
       createdAt: {
         allowNull: false,
