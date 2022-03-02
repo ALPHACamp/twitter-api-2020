@@ -129,8 +129,8 @@ const tweetServices = {
               avatar: i.User.avatar
             },
             tweetId: i.TweetId,
-            tweetOwerId: i.Tweet.User.id,
-            tweetOwerAccount: i.Tweet.User.account,
+            tweetOwnerId: i.Tweet.User.id,
+            tweetOwnerAccount: i.Tweet.User.account,
             createdAt: i.createdAt
           }))
         return cb(null, replyData)
