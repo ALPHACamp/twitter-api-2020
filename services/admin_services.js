@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const sequelize = require('sequelize')
 const { getUser } = require('../_helpers')
-const { User, Tweet } = require('../models')
+const { User, Tweet, Like } = require('../models')
 
 const adminServices = {
   userLogin: (req, cb) => {
@@ -68,11 +68,18 @@ const adminServices = {
       .catch(err => cb(err))
   },
   deleteTweet: (req, cb) => {
-    return Tweet.destroy({
-      where: { id: req.params.id },
-      raw: true,
-      nest: true
-    })
+    return Promise.all([
+      Tweet.destroy({
+        where: { id: req.params.id },
+        raw: true,
+        nest: true
+      }),
+      Like.destroy({
+        where: { TweetId: req.params.id },
+        raw: true,
+        nest: true
+      })
+    ])
       .then(tweet => {
         if (!tweet) throw new Error('此貼文不存在，可能是 Parameters 的資料錯誤或已經被刪除')
         return cb(null, {
