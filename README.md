@@ -49,8 +49,7 @@
 ## <strong>環境建置需求</strong>
 - Git
   - [下載連結](https://git-scm.com/downloads) 
-- Node.js 10.24.1
-  - <span style="color: red">注意:</span> `內部測試可以支援 14.16.0，但是建議使用 10.24.1`
+- Node.js 14.16.X
   - [下載連結](https://nodejs.org/dist/v14.16.0/)
 - 終端機工具 Terminal、CMD、Git Bash
   - <span style="color: red">注意:</span> `只需要上述的終端機工具項目其中一個即可`
@@ -95,11 +94,11 @@ npm install
 <br>
 
 > 5. 位於本地專案資料夾裡面，建立 .env 檔案，以下提供兩種方式進行 .env  檔案設定:
->> <ol>5-1. 方法一，本地測試可以直接使用 .env.example 內容進行 .env 檔案設定，但是IMGUR_CLIENT_ID 還是要自行補上資料</ol>
+>> <ol>5-1. 方法一，本地測試可以直接使用 .env.example 內容進行 .env 檔案設定，但是IMGUR_CLIENT_ID 還是要自行補上資料。</ol>
 >> <ol>5-1. 方法二，或是參考下方檔案內容的環境變數說明，進行 .env 檔案的客製化。</ol>
 ```text
 PORT=<輸入指定伺服器通訊埠>
-SESSION_SECRET=<輸入自訂的加密使用私鑰>
+JWT_SECRET=<輸入自訂的加密使用私鑰>
 IMGUR_CLIENT_ID=<輸入 Imgur 第三方圖片服務的 Client ID>
 ```
 
