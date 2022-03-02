@@ -24,6 +24,9 @@ const likeController = {
           TweetId,
           isDeleted: false
         })
+        await tweet.increment('likeCount')
+        const user = await User.findByPk(tweet.UserId)
+        user.increment('likedCount')
         return res.status(200).json({
           status: 'success',
           message: '成功加入喜歡的貼文!'
@@ -32,6 +35,9 @@ const likeController = {
         await like.update({
           isDeleted: !like.isDeleted
         })
+        await tweet.increment('likeCount')
+        const user = await User.findByPk(tweet.UserId)
+        user.increment('likedCount')
         return res.status(200).json({
           status: 'success',
           message: 'Like成功!'
@@ -81,6 +87,9 @@ const likeController = {
           isDeleted: !like.isDeleted
         })
         if (toggleLike) {
+          await tweet.decrement('likeCount')
+          const user = await User.findByPk(tweet.UserId)
+          user.decrement('likedCount')
           return res.status(200).json({
             status: 'success',
             message: 'Unlike成功!'

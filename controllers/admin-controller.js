@@ -19,7 +19,10 @@ const adminController = {
   },
   getUsers: async (req, res, next) => {
     try {
-      const user = await User.findAll({ raw: true })
+      const user = await User.findAll({
+        raw: true,
+        order: [['tweetCount', 'desc']]
+      })
       if (!user) return res.status(400).json({
         status: 'error',
         message: 'Users not found!'

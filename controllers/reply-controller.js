@@ -18,6 +18,14 @@ const replyController = {
           { 
             model: User,
             attributes: ['id', 'name', 'account', 'avatar']
+          },
+          {
+            model: Tweet,
+            attributes: ['id','UserId'],
+            include: {
+              model: User,
+              attributes: ['id','name','account']
+            }
           }
         ]
       })
@@ -89,11 +97,16 @@ const replyController = {
         })
       })
       .then(reply => {
-        return res.status(200).json({
-          status: 'success',
-          message: '成功新增回覆',
-          Reply: reply
-        })})
+        Tweet.findByPk(TweetId)
+          .then(tweet => tweet.increment('replyCount'))
+          .then(() =>
+            res.status(200).json({
+              status: 'success',
+              message: '成功新增回覆',
+              Reply: reply
+            })
+          )
+      })
       .catch((error) => res.status(500).json({
         status: 'error',
         message: error

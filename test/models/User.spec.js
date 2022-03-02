@@ -72,15 +72,15 @@ describe('# User Model', () => {
     it('create', (done) => {
       db.User.create({}).then((user) => {
         data = user
-        done()
-      })
+        done() 
+      }).catch(done);
     })
     // 檢查 db.User 是否真的可以讀取一筆資料
     it('read', (done) => {
       db.User.findByPk(data.id).then((user) => {
         expect(data.id).to.be.equal(user.id)
         done()
-      })
+      }).catch(done);
     })
     // 檢查 db.User 是否真的可以更新一筆資料
     it('update', (done) => {

@@ -2,8 +2,9 @@ const { Followship, User } = require('../models')
 const followshipController = {
   addFollowing: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id)
-      if (!user) {
+      const userFollowing = await User.findByPk(req.params.id)
+      const userFollower = await User.findByPk(req.user.id)
+      if (!userFollowing) {
         return res
           .status(404)
           .json({
@@ -37,6 +38,8 @@ const followshipController = {
         followingId: req.params.id
       })
       if (followship) {
+        userFollowing.increment('followerCount')
+        userFollower.increment('followingCount')
         return res.status(200).json({
         status: 'success',
         message: '成功追蹤此使用者!'
@@ -51,8 +54,9 @@ const followshipController = {
   },
   removeFollowing: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id)
-      if (!user) {
+      const userFollowing = await User.findByPk(req.params.id)
+      const userFollower = await User.findByPk(req.user.id)
+      if (!userFollowing) {
         return res
           .status(404)
           .json({
@@ -83,6 +87,8 @@ const followshipController = {
       } else {
         followingUser.destroy()
       }
+      await userFollowing.decrement('followerCount')
+      await userFollower.decrement('followingCount')
       return res.status(200).json({
         status: 'success',
         message: '成功取消追蹤此使用者!'

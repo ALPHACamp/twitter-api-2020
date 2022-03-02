@@ -74,12 +74,12 @@ https://zigzag-cress-7d0.notion.site/Simple-Twitter-API-fc3f66287dc1428dbb83d17a
 ## 共用帳號
 下面 2 組帳號為測試帳號：
 * 第一組帳號有 admin 權限：
-  * email: root@example.com
+  * account: root
   * password: 12345678
 * 第二組帳號沒有 admin 權限：
-  * email: user1@example.com
+  * account: user1
   * password: 12345678
 
 ## 作者
 Wendy (wendyog@gmail.com)  
-Dandy
+Dandy (lavenderflyyaya@gmail.com)

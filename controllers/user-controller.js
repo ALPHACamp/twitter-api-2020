@@ -102,6 +102,15 @@ const userController = {
   getUserTweets: async (req, res, next) => {
     try {
       const { id } = req.params
+      const user = await User.findByPk(req.params.id)
+      if (!user) {
+        return res
+          .status(404)
+          .json({
+            status: 'error',
+            message: '使用者不存在'
+          })
+      }
       const tweetsData = await Tweet.findAll({
         where: { UserId: id },
         raw: true,
@@ -109,9 +118,9 @@ const userController = {
           model : User,
           attributes: ['id', 'name', 'account', 'avatar']
         },
-        nest: true
+        nest: true,
+        order: [['createdAt', 'desc']]
       })
-      
       if (tweetsData.length === 0) return res.status(400).json({
         status: 'error',
         message: 'Tweet not found!'
@@ -126,23 +135,12 @@ const userController = {
   getUserLikes: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      const like = await Like.findAll({
-        where: { UserId: req.params.id }
-      })
       if (!user) {
         return res
           .status(404)
           .json({
             status: 'error',
             message: '使用者不存在'
-          })
-      }
-      if (!like) {
-        return res
-          .status(400)
-          .json({
-            status: 'error',
-            message: '使用者沒有like過的推文'
           })
       }
       const likes = await Like.findAll({
@@ -154,7 +152,7 @@ const userController = {
         include: [
           {
             model: Tweet,
-            attributes: ['description'],
+            attributes: ['id','description','replyCount','likeCount'],
             include: [
               {
                 model: User,
@@ -169,7 +167,7 @@ const userController = {
           .status(404)
           .json({
             status: 'error',
-            message: '推文不存在'
+            message: '使用者沒有喜歡過的推文'
           })
       }
       return res.status(200).json(likes)
@@ -397,7 +395,7 @@ const userController = {
       if (introduction && !introduction.isByteLength(introduction, { min: 0, max: 160 })) {
         return res.status(400).json({
           status: 'error',
-          message: '自我介少不能超過 160 個字'
+          message: '自我介紹不能超過 160 個字'
         })
       }
       // 列出全部有相同 account or email 的 user
@@ -457,13 +455,6 @@ const userController = {
       })
       res.json({ user })
     } catch (err) { next(err) }
-  },
-  getTopFollwer: async (req, res, next) => {
-    try {
-      
-    } catch (error) {
-      next(error)
-    }
   }
 }
 
