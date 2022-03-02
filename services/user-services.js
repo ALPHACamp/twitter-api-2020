@@ -14,6 +14,8 @@ const userServices = {
       .then(([email, account]) => {
         if (email) throw new Error('email 已重複註冊！')
         if (account) throw new Error('account 已重複註冊！')
+        if (!req.body.account.trim()) throw new Error('account為必填欄位')
+        if (!req.body.email.trim()) throw new Error('email為必填欄位')
         if (req.body.name.length > 50) throw new Error('字數超出上限！')
         if (req.body.password.length < 4) throw new Error('密碼至少要有四個字')
         return bcrypt.hash(req.body.password, 10)
