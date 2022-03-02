@@ -139,12 +139,25 @@ module.exports = {
   getUser: async (req, res, next) => {
     try {
       const { UserId } = req.params
+      const selfUserId = helpers.getUser(req).id
 
-      const responseData = await User.findByPk(UserId, {
-        attributes: { exclude: ['password'] }, raw: true
+      let user = await User.findByPk(UserId, {
+        attributes: { exclude: ['password'] },
+        include: [{
+          model: User, as: 'Followers',
+          where: { id: selfUserId }, required: false
+        }],
+        nest: true
       })
 
-      return res.status(200).json(responseData)
+      user = user.toJSON()
+
+      // add isFollowed
+      user.isFollowed = Boolean(user.Followers.length)
+
+      delete user.Followers
+
+      return res.status(200).json(user)
 
     } catch (err) {
       next(err)
