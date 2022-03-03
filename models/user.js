@@ -16,7 +16,10 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: AVATAR_DEFAULT
     },
     role: DataTypes.STRING,
-    introduction: DataTypes.TEXT
+    introduction: {
+      type: DataTypes.TEXT,
+      defaultValue: ''
+    }
   }, {
     modelName: 'User',
     tableName: 'Users'
