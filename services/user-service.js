@@ -175,8 +175,13 @@ const userServices = {
         message: 'Introduction must not exceed 160 words.'
       }
 
-    // User didn't change password
+    // Check if it's initial intro
+    if (!introduction) {
+      introduction === user.introduction
+    }
+
     if (password === user.password) {
+      // User didn't change password
       password = null
     }
 
@@ -304,10 +309,11 @@ const userServices = {
     })
     if (!likes) throw new Error("This user doesn't like any tweets")
 
+    const userLikes = await getLikedTweetsIds(req)
     // Clean data
     likes = likes.map(like => ({
       ...like,
-      likedTweet: true
+      likedTweet: userLikes.includes(like.TweetId)
     }))
 
     return likes
@@ -336,6 +342,10 @@ const userServices = {
     user = await User.findById(user.id, {
       raw: true
     })
+
+    if (!user.introduction) {
+      user.introduction = ''
+    }
 
     return user
   }
