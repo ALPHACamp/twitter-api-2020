@@ -179,7 +179,7 @@ const userServices = {
     if (!introduction) {
       introduction === user.introduction
     }
-    
+
     if (password === user.password) {
       // User didn't change password
       password = null
@@ -342,6 +342,10 @@ const userServices = {
     user = await User.findById(user.id, {
       raw: true
     })
+
+    if (!introduction) {
+      user.introduction = ''
+    }
 
     return user
   }
