@@ -24,6 +24,7 @@ const tweetController = {
             tweetId = tweet.id
             tweet.name = tweet.User.name
             tweet.account = tweet.User.account
+            tweet.userAvatar = tweet.User.avatar
             tweet.isLiked = tweet.Likes.some(like => like.UserId === reqUserId)
             tweet.LikesCount = tweet.Likes.length
             tweet.RepliesCount = tweet.Replies.length
