@@ -49,11 +49,11 @@ const userController = {
         ]
       })
 
-      count.tweetCount = user.Tweets?.length || DEFAULT_COUNT
-      count.likedCount = user.Likes?.length || DEFAULT_COUNT
-      count.repliedCount = user.Replies?.length || DEFAULT_COUNT
-      count.followerCount = user.Followers?.length || DEFAULT_COUNT
-      count.followingCount = user.Followings?.length || DEFAULT_COUNT
+      count.tweetCount = user.Tweets.length || DEFAULT_COUNT
+      count.likedCount = user.Likes.length || DEFAULT_COUNT
+      count.repliedCount = user.Replies.length || DEFAULT_COUNT
+      count.followerCount = user.Followers.length || DEFAULT_COUNT
+      count.followingCount = user.Followings.length || DEFAULT_COUNT
 
 
       return res.json({ status: 'success', user, count })
@@ -62,11 +62,11 @@ const userController = {
   },
 
   signUp: async (req, res, next) => {
-    const account = req.body?.account?.trim() || null
-    const password = req.body?.password?.trim() || null
-    const checkPassword = req.body?.checkPassword?.trim() || null
-    const name = req.body?.name?.trim() || null
-    const email = req.body?.email?.trim() || null
+    const account = req.body.account.trim() || null
+    const password = req.body.password.trim() || null
+    const checkPassword = req.body.checkPassword.trim() || null
+    const name = req.body.name.trim() || null
+    const email = req.body.email.trim() || null
     if (!account || !password || !checkPassword || !name || !email) return res.json({ status: 'error', message: 'All fields are required' })
     if (name.length > 50) return res.json({ status: 'error', message: 'Name is too long!' })
     if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match!' })
@@ -142,7 +142,7 @@ const userController = {
           createdAt: tweet.createdAt,
           repliedCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
-          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
         }
       })
         .sort((a, b) => b.createdAt - a.createdAt)
@@ -194,7 +194,7 @@ const userController = {
           introduction: following.introduction,
           avatar: following.avatar,
           createdAt: following.createdAt,
-          isFollowing: req.user?.Followings ? req.user.Followings.some(f => f.id === following.id) : false
+          isFollowing: req.user.Followings ? req.user.Followings.some(f => f.id === following.id) : false
         }
       })
         .sort((a, b) => b.createdAt - a.createdAt)
@@ -225,7 +225,7 @@ const userController = {
           introduction: follower.introduction,
           avatar: follower.avatar,
           createdAt: follower.createdAt,
-          isFollowing: req.user?.Followings ? req.user.Followings.some(f => f.id === follower.id) : false
+          isFollowing: req.user.Followings ? req.user.Followings.some(f => f.id === follower.id) : false
         }
       })
         .sort((a, b) => b.createdAt - a.createdAt)
@@ -262,7 +262,7 @@ const userController = {
           tweetUserName: repliedTweet.User.name,
           tweetUserAccount: repliedTweet.User.account,
           tweetUserAvatar: repliedTweet.User.avatar,
-          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === repliedTweet.id) : false,
+          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === repliedTweet.id) : false,
           replyUserId: user.id,
           replyUserAccount: user.account,
           replyUserName: user.name,
@@ -300,7 +300,7 @@ const userController = {
           avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
-          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === like.Tweet.id) : false
+          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === like.Tweet.id) : false
         }
       })
       return res.json(result)
@@ -320,8 +320,8 @@ const userController = {
       if (introduction.length > 160) return res.json({ status: 'error', message: 'introduction must be less than 160 characters.' })
       const { files } = req
       if (files) {
-        const avatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
-        const cover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
+        const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+        const cover = files.cover ? await imgurFileHandler(files.cover[0]) : null
         await user.update({
           name,
           introduction,
@@ -349,11 +349,11 @@ const userController = {
       if (req.user.id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this" })
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
-      const account = req.body?.account?.trim() || null
-      const name = req.body?.name?.trim() || null
-      const email = req.body?.email?.trim() || null
-      const password = req.body?.password?.trim() || null
-      const checkPassword = req.body?.checkPassword?.trim() || null
+      const account = req.body.account.trim() || null
+      const name = req.body.name.trim() || null
+      const email = req.body.email.trim() || null
+      const password = req.body.password.trim() || null
+      const checkPassword = req.body.checkPassword.trim() || null
 
       if (!account || !name || !email || !password || !checkPassword) return res.json({ status: 'error', message: 'All fields are required' })
       if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters.' })

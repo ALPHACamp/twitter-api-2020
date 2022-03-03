@@ -5,7 +5,7 @@ const helpers = require('../_helpers')
 const replyController = {
     postReply: (req, res, next) => {
         const { tweet_id } = req.params
-        const comment = req.body?.comment?.trim() || null
+        const comment = req.body.comment.trim() || null
         const userId = helpers.getUser(req).id
         return Promise.all([
             User.findByPk(userId),
@@ -30,7 +30,7 @@ const replyController = {
 
     putReply: async (req, res, next) => {
         const replyId = req.params.reply_id
-        const comment = req.body?.comment?.trim() || null
+        const comment = req.body.comment.trim() || null
 
         try {
  
@@ -51,8 +51,6 @@ const replyController = {
 
         try {
             const reply = await Reply.findByPk(replyId)
-            console.log(reply.TweetId)
-            console.log(tweet.id)
             if (!reply) return res.json({ status: 'error', message: "Reply didn't exist!"})
             if (helpers.getUser(req).id !== Number(reply.UserId)) return res.json({ status: 'error', message: "You can't do this." })
 

@@ -77,7 +77,7 @@ const tweetController = {
           avatar: tweet.User.avatar,
           repliedCount: tweet.Replies.length,
           likeCount: tweet.Likes.length,
-          liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
+          liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false
         }
       })
       return res.json(result)
@@ -115,7 +115,7 @@ const tweetController = {
         avatar: tweet.User.avatar,
         repliedCount: reply.length,
         likeCount: tweet.Likes.length,
-        liked: req.user?.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false,
+        liked: req.user.LikedTweets ? req.user.LikedTweets.some(l => l.id === tweet.id) : false,
         replyResult
       }
       
