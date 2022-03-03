@@ -149,25 +149,50 @@ const userController = {
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
-    const userId = Number(req.params.id)
-    return Promise.all([
-      User.findByPk(userId),
-      Tweet.findAll({
-        where: { userId: userId },
-        include: [{
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
-        }],
+    try {
+      const targetUserId = req.params.id
+      const currentUserId = helpers.getUser(req).id
+
+      const tweets = await Tweet.findAll({
+        where: { UserId: targetUserId },
+        attributes: [
+          'id',
+          'UserId',
+          'description',
+          'createdAt',
+          'updatedAt',
+          'likeCount',
+          'replyCount',
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${currentUserId} AND TweetId = Tweet.id)`
+            ),
+            'isLike'
+          ],
+          [
+            sequelize.literal(
+              `EXISTS (SELECT 1 FROM Replies WHERE UserId = ${currentUserId} AND TweetId = Tweet.id)`
+            ),
+            'isReply'
+          ]
+        ],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
         order: [['createdAt', 'DESC']]
       })
-    ])
-      .then(([user, tweets]) => {
-        if (!user) throw new Error('帳號不存在！')
-        if (!tweets) throw new Error('使用者沒有任何推文!')
-        return res.status(200).json(tweets)
+
+      const results = tweets.map(t => {
+        t = t.toJSON()
+        t.isLike = Boolean(t.isLike)
+        t.isReply = Boolean(t.isReply)
+        return t
       })
 
-      .catch(err => next(err))
+      return res.status(200).json([...results])
+    } catch (err) {
+      next(err)
+    }
   },
   getRepliedTweets: (req, res, next) => {
     const userId = Number(req.params.id)

@@ -1,3 +1,10 @@
+<p align="center">
+    <img src="https://img.shields.io/badge/Javascript-yellow" />
+    <img src="https://img.shields.io/badge/express-orange" />
+    <img src="https://img.shields.io/badge/Sequelize-blue"  />
+    <img src="https://img.shields.io/badge/mySQL-blue"  />
+</p>
+
 # Simple-Twitter API
 
 這是一個簡易版的推特(Twitter)專案，主要功能分別提供：
@@ -14,36 +21,68 @@
 
 ## 使用流程
 #### 複製專案到本機
+```
 git clone https://github.com/lcy101u/twitter-api-2020 
+```
 #### 進入專案資料夾
+```
 cd twitter-api-2020 
+```
 #### 安裝相關套件
+```
 npm install
+```
 #### 環境設定
 依照 .env.example 中資訊範例設立 .env
+```
+JWT_SECRET=
+IMGUR_CLIENT_ID=
+PORT=3000
+```
+<details style="margin-left:2em;">
+  <summary>如何取得 IMGUR_CLIENT_ID </summary>
+  <ol>
+    <li>前往 <a href="https://api.imgur.com/oauth2/addclient">imgur - Register an Application</a> 填寫資訊</li>
+    <li>於 <code>Authorization type:</code> 請選擇 <code>OAuth 2 authorization without a callback URL</code></li>
+    <li>點選 <code>submit</code> 便可取得 <code>Client ID</code> 與 <code>Client Secret</code>
+    </li>
+  </ol>
+  <p style="margin-left:2em; color: yellow;">※ 一旦關閉便無法再次檢視資訊，請務必紀錄後再關閉頁面</p>
+</details>
+
 #### 資料庫
+
+1. 設定 MySQL 連線資訊: 
 create database ac_twitter_workspace
 create database ac_twitter_workspace_test
 npx sequelize db:migrate
 npx sequelize db:seed:all
 
 #### 啟動本地端伺服器
+需先安裝 [nodemon](https://www.npmjs.com/package/nodemon)
+```
 npm run dev
-
+```
 #### 測試帳號
+```
 * 後台 admin 
 account: root
 password: 12345678
+```
+
+```
 * 一般使用者
 account: user1
 password: 12345678
+```
 
 ## 環境建置
-* Node.js(v16.14.0)
-* Express
-* MySQL
-* sequelize
-* sequelize-cli
+* [Node.js](https://nodejs.org/)(v16.14.0)
+* [Express](https://expressjs.com/)
+* [MySQL](https://downloads.mysql.com/archives/installer/)
+* [MySQL Workbench](https://dev.mysql.com/downloads/workbench/) (v8.0.27)
+* [sequelize](https://sequelize.org/)
+* [sequelize-cli](https://github.com/sequelize/cli)
 * .env
 
 ## 相關資訊
