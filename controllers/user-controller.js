@@ -350,8 +350,8 @@ const userController = {
             createdAt,
             updatedAt,
             follower,
-            // isFollowed: followship.followingId === helpers.getUser(req).id
-            isFollowed: follower.Followers.id ? follower.Followers.some(f => f.id === userId) : false
+            isFollowed: followship.followingId === helpers.getUser(req).id
+            // isFollowed: follower.Followers.id ? follower.Followers.some(f => f.id === userId) : false
           }
         })
         delete followshipsData.follower
