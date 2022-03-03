@@ -41,8 +41,14 @@ const userController = {
   putUserProfile: (req, res, next) => {
     if (Number(req.params.id) !== getUser(req).dataValues.id) throw new Error('只能編輯自己的資料')
 
+    // 為了讓前後端再計算跳行字數會一致
+    let introduction = ''
+    if (req.body.introduction !== undefined) {
+      introduction = req.body.introduction.replace(/\r\n|\n/g, ' ')
+    }
+
     if (req.body.name && req.body.name.trim().length > 50) throw new RangeError('暱稱字數超過上限')
-    if (req.body.introduction && req.body.introduction.trim().length > 160) throw new RangeError('自我介紹字數超過上限')
+    if (req.body.introduction && introduction.length > 160) throw new RangeError('自我介紹字數超過上限')
 
     userServices.putUserProfile(req, (err, data) => err ? next(err) : res.status(200).json(data))
   },
