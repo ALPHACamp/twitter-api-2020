@@ -23,13 +23,14 @@ module.exports = {
     )
       .then(users => {
         // prepare an array of all tweet data
-        const tweetsArray = users.flatMap(user => {
-          return Array.from({ length: DEFAULT_TWEETS_NUMBER }, () => ({
+        const tweetsArray = []
+        users.forEach(user => {
+          tweetsArray.push(...Array.from({ length: DEFAULT_TWEETS_NUMBER }, () => ({
             UserId: user.id,
             description: faker.lorem.sentence(),
             createdAt: faker.date.past(),
             updatedAt: new Date()
-          }))
+          })))
         })
 
         // prepare an array of all user data

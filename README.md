@@ -52,7 +52,8 @@
 ## <strong>環境建置需求</strong>
 - Git
   - [下載連結](https://git-scm.com/downloads) 
-- Node.js 14.16.X
+- Node.js 10.24.1 或是 14.16.0
+  - <span style="color: red">注意:</span> 強烈建議使用 14.16.0 版本，只是內部測試有做 10.24.1 的 backward compatibility test。
   - [下載連結](https://nodejs.org/dist/v14.16.0/)
 - 終端機工具 Terminal、CMD、Git Bash
   - <span style="color: red">注意:</span> `只需要上述的終端機工具項目其中一個即可，但是如果您是使用 Windows 作業系統，我們非常建議使用 Git Bash。`
