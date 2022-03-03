@@ -85,6 +85,7 @@ const userController = {
       const { name, account, email, password, checkPassword } = req.body
       const currentUserId = helpers.getUser(req).id
       const targetUserId = Number(req.params.id)
+      const errorMsg = []
       if (currentUserId !== targetUserId) {
         return res.status(400).json({
           status: 'error',
@@ -97,9 +98,15 @@ const userController = {
         User.findOne({ attributes: ['id', 'account'], where: { account } }),
         User.findOne({ attributes: ['id', 'email'], where: { email } })
       ])
-      if (isExistAccount) throw new Error('此 account 已被註冊')
-      if (isExistEmail) throw new Error('此 email 已被註冊')
-      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符！')
+      if (isExistAccount) errorMsg.push('此 account 已被註冊')
+      if (isExistEmail) errorMsg.push('此 email 已被註冊')
+      if (password !== checkPassword) errorMsg.push('密碼與確認密碼不相符！')
+      if (errorMsg.length !== 0) {
+        return res.status(400).json({
+          status: 'error',
+          message: errorMsg[0]
+        })
+      }
       await User.update({
         name,
         account,
@@ -159,21 +166,26 @@ const userController = {
   },
   getLikes: (req, res, next) => {
     const userId = Number(req.params.id)
-    return Like.findAll({
-      where: { userId: userId },
-      attributes: ['id', 'createdAt', 'TweetId'],
-      order: [['createdAt', 'DESC']],
-      include: [{
-        model: Tweet,
-        attributes: ['id', 'description', 'createdAt', 'replyCount', 'likeCount'],
+    return Promise.all([
+      User.findByPk(userId),
+      Like.findAll({
+        where: { UserId: userId },
+        attributes: ['id', 'createdAt', 'TweetId'],
+        order: [['createdAt', 'DESC']],
         include: [{
-          model: User,
-          attributes: ['id', 'name', 'account', 'avatar']
+          model: Tweet,
+          attributes: ['id', 'description', 'createdAt', 'replyCount', 'likeCount'],
+          include: [{
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar']
+          }]
         }]
-      }]
-    })
-      .then(userLikes => {
-        if (!userLikes) throw new Error('使用者並未喜歡任何推文!')
+      })
+    ])
+      .then(([user, likes]) => {
+        if (!user) throw new Error('帳號不存在!')
+        if (likes.length === 0) throw new Error('使用者並未喜歡任何推文!')
+        const userLikes = likes.map(like => ({ ...like.toJSON(), isLiked: true }))
         return res.status(200).json(userLikes)
       })
       .catch(err => next(err))
