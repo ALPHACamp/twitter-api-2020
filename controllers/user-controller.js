@@ -98,8 +98,8 @@ const userController = {
         User.findOne({ attributes: ['id', 'account'], where: { account } }),
         User.findOne({ attributes: ['id', 'email'], where: { email } })
       ])
-      if (isExistAccount) errorMsg.push('此 account 已被註冊')
-      if (isExistEmail) errorMsg.push('此 email 已被註冊')
+      if (isExistAccount && isExistAccount.id !== currentUserId) errorMsg.push('此 account 已被註冊')
+      if (isExistEmail && isExistEmail.id !== currentUserId) errorMsg.push('此 email 已被註冊')
       if (password !== checkPassword) errorMsg.push('密碼與確認密碼不相符！')
       if (errorMsg.length !== 0) {
         return res.status(400).json({
