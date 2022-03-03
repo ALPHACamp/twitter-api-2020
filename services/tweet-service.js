@@ -51,12 +51,14 @@ const tweetServices = {
         { model: User, attributes: ['name', 'account', 'avatar'] },
         {
           model: Reply,
-          include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
-          order: [['createdAt', 'DESC']]
+          include: [{ model: User, attributes: ['name', 'account', 'avatar'] }]
         }
       ]
     })
     if (!tweet) throw new Error("This tweet doesn't exist!")
+
+    // Sort replies
+    tweet.Replies.sort((a, b) => b.createdAt - a.createdAt)
 
     // Clean data
     const userLikes = await getLikedTweetsIds(req)
