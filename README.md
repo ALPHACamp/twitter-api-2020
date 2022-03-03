@@ -1,17 +1,37 @@
-# twitter-api-2022
+<h1 aling="center">Twitter-API-2020</h1>
 
 <div id="top"></div>
-<p>
+<p align="center">
   <a href="https://github.com/Prysline/S2A1_restaurant" target="_blank">
   <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
   </a>
   <a href="https://github.com/Prysline/S2A1_restaurant/blob/main/LICENSE" target="_blank">
     <img alt="License: MIT" src="https://img.shields.io/github/license/Prysline/S2A1_restaurant.svg" />
   </a>
+  <img src="https://img.shields.io/github/languages/top/xnubber/twitter-api-2020" />
+  <img src="https://img.shields.io/github/issues/xnubber/twitter-api-2020" />
+  <img src="https://img.shields.io/github/last-commit/xnubber/twitter-api-2020" />
 </p>
+<p align="center">
+    <img src="https://img.shields.io/badge/Javascript-yellow" />
+    <img src="https://img.shields.io/badge/express-orange" />
+    <img src="https://img.shields.io/badge/Sequelize-blue"  />
+    <img src="https://img.shields.io/badge/mySQL-blue"  />
+    <img src="https://img.shields.io/badge/dotenv-green" />
+</p>
+
 </div>
 
 <!-- TABLE OF CONTENTS -->
+## 介紹 Introduction
+
+This is an API ( Application Programming Interface ) built for a twitter-like project, using MySQL2, NodeJs, Express and Sequelize.
+
+Just like real twitter, user can sign-up, sign-in, tweet, reply, like a tweet and follow other users, but notice that, before doing above actions, please make sure you have already conneted to database, and executing seed files to insert some fake data into database.
+
+
+## 目錄 Table of Contents
+
 <details>
   <summary>目錄 Table of Contents</summary>
   <ol>
