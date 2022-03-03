@@ -147,7 +147,7 @@ const userController = {
       })
       if (likes.length == 0) {
         return res
-          .status(404)
+          .status(400)
           .json({
             status: 'error',
             message: '使用者沒有喜歡過的推文'
@@ -202,7 +202,7 @@ const userController = {
       })
       if (replies.length === 0) {
         return res
-          .status(404)
+          .status(400)
           .json({
             status: 'error',
             message: '使用者沒有回覆過的貼文'

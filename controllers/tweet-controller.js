@@ -19,11 +19,28 @@ const tweetController = {
         }
       ]
     })
+      // .then((tweets) => {
+      //   tweets = tweets.map((tweet) => {
+      //     const { id, description, likeCount, replyCount, createdAt, updatedAt, Author } = tweet
+      //     console.log(tweet.LikedUsers)
+      //     return {
+      //       id,
+      //       isLike: tweet.LikedUsers.some((user) => user.id === helpers.getUser(req).id),
+      //       description,
+      //       likeCount,
+      //       replyCount,
+      //       createdAt,
+      //       updatedAt,
+      //       Author
+      //     }
+      //   })
+      //   return res.status(200).json(tweets)
+      // })
       .then((tweets) => {
         console.log(helpers.getUser(req).LikedTweets)
         const tweetsLiked = tweets.map(tweet => ({
           ...tweet,
-          isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id)
+          // isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id)
           // && tweet.LikedUsers.Like.isDeleted !== 1
         }))
         return res.status(200).json(tweetsLiked) 
