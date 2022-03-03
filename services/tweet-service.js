@@ -51,9 +51,8 @@ const tweetServices = {
         { model: User, attributes: ['name', 'account', 'avatar'] },
         {
           model: Reply,
-          include: [
-            { model: User, attributes: ['name', 'account', 'avatar'] }
-          ]
+          include: [{ model: User, attributes: ['name', 'account', 'avatar'] }],
+          order: [['createdAt', 'DESC']]
         }
       ]
     })
@@ -69,7 +68,7 @@ const tweetServices = {
 
     return tweet
   },
-  
+
   likeTweet: async (tweetId, userId) => {
     const tweet = await Tweet.findByPk(tweetId)
     if (!tweet) throw new Error("This Tweet didn't exist!")
@@ -78,15 +77,14 @@ const tweetServices = {
       where: { TweetId: tweetId, UserId: userId }
     })
 
-    if (!created) throw new Error("You have already like this tweet!")
+    if (!created) throw new Error('You have already like this tweet!')
 
-    Promise.all([
-      User.findByPk(userId),
-      Tweet.findByPk(tweetId)
-    ]).then(([user, tweet]) => {
-      user.increment('likedCount')
-      tweet.increment('likedCount')
-    })
+    Promise.all([User.findByPk(userId), Tweet.findByPk(tweetId)]).then(
+      ([user, tweet]) => {
+        user.increment('likedCount')
+        tweet.increment('likedCount')
+      }
+    )
 
     return {
       isLiked,
@@ -103,13 +101,12 @@ const tweetServices = {
 
     await unlike.destroy()
 
-    Promise.all([
-      User.findByPk(userId),
-      Tweet.findByPk(tweetId)
-    ]).then(([user, tweet]) => {
-      user.decrement('likedCount')
-      tweet.decrement('likedCount')
-    })
+    Promise.all([User.findByPk(userId), Tweet.findByPk(tweetId)]).then(
+      ([user, tweet]) => {
+        user.decrement('likedCount')
+        tweet.decrement('likedCount')
+      }
+    )
 
     return {
       unlike,
