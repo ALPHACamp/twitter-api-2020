@@ -63,13 +63,14 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req).id
       const { id } = req.params
       const userData = await User.findByPk(id, {
         raw: true
       })
       const followship = await Followship.findOne({
         where: {
-          followerId: req.user.id,
+          followerId: userId,
           followingId: id
         }
       })
@@ -82,6 +83,7 @@ const userController = {
           userData.isFollowed = false
         }
         delete userData.password
+        console.log(userData)
         res.json(userData)
       }
     } catch (err) { next(err) }
@@ -338,7 +340,6 @@ const userController = {
             message: '此使用者沒有跟隨者'
           })
       } else {
-        // console.log(followships)
         followshipsData = followships.map((followship) => {
           const { id, followerId, followingId, createdAt, updatedAt, follower} = followship
           return {
@@ -353,8 +354,6 @@ const userController = {
           }
         })
         delete followshipsData.follower
-        // console.log('=======================')
-        // console.log(followshipsData)
         return res.status(200).json(followshipsData)
       }
     } catch (error) {
