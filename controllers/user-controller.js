@@ -338,6 +338,7 @@ const userController = {
             message: '此使用者沒有跟隨者'
           })
       } else {
+        // console.log(followships)
         followshipsData = followships.map((followship) => {
           const { id, followerId, followingId, createdAt, updatedAt, follower} = followship
           return {
@@ -347,9 +348,13 @@ const userController = {
             createdAt,
             updatedAt,
             follower,
-            isFollowed: follower.Followers.id ? follower.Followers.some(f => f.id === id) : false
+            isFollowed: followship.followingId === helpers.getUser(req).id
+            // isFollowed: follower.Followers.id ? follower.Followers.some(f => f.id === id) : false
           }
         })
+        delete followshipsData.follower
+        // console.log('=======================')
+        // console.log(followshipsData)
         return res.status(200).json(followshipsData)
       }
     } catch (error) {
