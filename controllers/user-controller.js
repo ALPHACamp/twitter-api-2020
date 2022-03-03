@@ -242,7 +242,7 @@ const userController = {
         const result = followings.Followings
           .map(f => ({
             ...f.toJSON(),
-            isFollowed: followingId?.includes(f.toJSON().followingId) || false
+            isFollowed: followingId.includes(f.toJSON().followingId) || false
           }))
           .sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
         result.forEach(i => delete i.Followship)
@@ -278,7 +278,7 @@ const userController = {
         const result = followers.Followers
           .map(f => ({
             ...f.toJSON(),
-            isFollowed: followingId?.includes(f.toJSON().followerId) || false
+            isFollowed: followingId.includes(f.toJSON().followerId) || false
           }))
           .sort((a, b) => b.Followship.createdAt.getTime() - a.Followship.createdAt.getTime())
         result.forEach(i => delete i.Followship)
