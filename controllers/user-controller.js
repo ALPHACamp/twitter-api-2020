@@ -63,7 +63,6 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const userId = helpers.getUser(req).id
       const { id } = req.params
       const userData = await User.findByPk(id, {
         raw: true
@@ -302,6 +301,8 @@ const userController = {
           followingId: req.params.id
         },
         order: [['createdAt', 'desc']],
+        raw: true,
+        nest: true,
         include: {
           model: User,
           as: 'follower',
@@ -311,10 +312,15 @@ const userController = {
             'name',
             'avatar',
             'introduction'
+          ],
+          include: [
+            {
+              model: User,
+              as: 'Followers',
+              attributes: ['id']
+            }
           ]
-        },
-        raw: true,
-        nest: true
+        }
       })
       if (!user) {
         return res
@@ -341,7 +347,7 @@ const userController = {
             createdAt,
             updatedAt,
             follower,
-            isFollowed: followship.followingId === helpers.getUser(req).id
+            isFollowed: follower.Followers.id ? follower.Followers.some(f => f.id === id) : false
           }
         })
         return res.status(200).json(followshipsData)
