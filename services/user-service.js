@@ -184,9 +184,14 @@ const userServices = {
       email,
       password: password ? bcrypt.hashSync(password, 10) : user.password,
       name,
-      account,
-      introduction: introduction || ''
+      account
     })
+
+    if (introduction) {
+      await user.update({
+        introduction
+      })
+    }
 
     // If user uploads images
     const images = {}
