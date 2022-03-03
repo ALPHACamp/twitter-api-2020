@@ -184,8 +184,13 @@ const userController = {
       // pass, update user
       const reqBodyArr = { account, name, email, password, introduction, avatar, cover }
       for (const attribute in reqBodyArr) {
-        if (reqBodyArr[attribute]) {
-          where[attribute] = reqBodyArr[attribute]
+        if (reqBodyArr[attribute]) { 
+          if (attribute === 'password') {
+            const hash = await bcrypt.hash(req.body.password, 10)
+            where[attribute] = hash
+          } else {
+            where[attribute] = reqBodyArr[attribute]
+          }
         }
       }
       await uploadFiles(files)
