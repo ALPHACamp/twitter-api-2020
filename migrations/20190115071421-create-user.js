@@ -10,8 +10,8 @@ module.exports = {
       },
       account: {
         type: Sequelize.STRING,
-        unique: true,
-        allowNull: false
+        unique: true
+        // allowNull: false
       },
       email: {
         type: Sequelize.STRING
