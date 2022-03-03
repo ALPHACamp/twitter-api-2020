@@ -1,7 +1,7 @@
 # Simple Twitter API
-An API server for [Simple Twitter](https://zheanzheng.github.io/) built on Node.js with Exress.js and MySQL database.
+An API server for [Simple Twitter](https://zheanzheng.github.io/vue_twitter/) built on Node.js with Exress.js and MySQL database.
 ## Try It Out ✨
-Simple Twitter API is running on [Heroku](heroku.com). You can experience its full feature with [this link](https://zheanzheng.github.io/), and enter the following existing **account** and **password** to login through admin/user login page respectively.
+Simple Twitter API is running on [Heroku](heroku.com). You can experience its full feature with [this link](https://zheanzheng.github.io/vue_twitter/), and enter the following existing **account** and **password** to login through admin/user login page respectively.
 | Role | Account | Password |
 | ------ | ------ | ------ |
 | Admin | root | 12345678 |
