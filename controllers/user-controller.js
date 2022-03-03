@@ -14,11 +14,11 @@ const userController = {
 
       if (email && !validator.isEmail(email)) throw new Error('請輸入正確信箱格式')
       
-      if (password && !validator.isByteLength(password, { min: 4 })) throw new Error('密碼請輸入至少 4 個!')
+      if (password && !validator.isLength(password, { min: 4 })) throw new Error('密碼請輸入至少 4 個!')
 
       if (password !== checkPassword) throw new Error('兩次密碼不相符')
 
-      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
+      if (name && !validator.isLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
       
       const checkedUser = await User.findOne({
         where: {
