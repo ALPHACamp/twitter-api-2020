@@ -5,19 +5,19 @@ module.exports = {
         return res.status(200).json({
           status: 'error',
           statusCode: '404',
-          message: `${err.name}: ${err.message}`
+          message: `${err.message}`
         })
       }
       res.status(200).json({
         status: 'error',
         statusCode: '400',
-        message: `${err.name}: ${err.message}`
+        message: `${err.message}`
       })
     } else if (err instanceof RangeError) {
       res.status(200).json({
         status: 'error',
         statusCode: '400',
-        message: `${err.name}: ${err.message}`
+        message: `${err.message}`
       })
     } else {
       res.status(200).json({
