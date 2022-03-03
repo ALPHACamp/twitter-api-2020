@@ -11,7 +11,7 @@ git clone https://github.com/dandywhy/twitter-api-2020.git
 
 ### 安裝相關套件
 ```
-cd twitter-api-2020.git
+cd twitter-api-2020
 npm install
 ```
 
