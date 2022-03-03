@@ -63,6 +63,7 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req).id
       const { id } = req.params
       const userData = await User.findByPk(id, {
         raw: true
@@ -331,7 +332,6 @@ const userController = {
             message: '此使用者沒有跟隨者'
           })
       } else {
-        console.log(followships)
         followshipsData = followships.map((followship) => {
           const { id, followerId, followingId, createdAt, updatedAt, follower} = followship
           return {
@@ -341,10 +341,9 @@ const userController = {
             createdAt,
             updatedAt,
             follower,
-            isFollowed: followship.followerId === helpers.getUser(req).id
+            isFollowed: followship.followingId === helpers.getUser(req).id
           }
         })
-        console.log(followships)
         return res.status(200).json(followshipsData)
       }
     } catch (error) {
