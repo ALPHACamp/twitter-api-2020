@@ -30,8 +30,8 @@ const replyController = {
           }
         ]
       })
-      if (!replies || replies.length ===0) {
-        return res.status(404).json({
+      if (!replies || replies.length === 0) {
+        return res.status(400).json({
         status: 'error',
         message: '這篇推文沒有回覆',
         })
@@ -55,7 +55,7 @@ const replyController = {
     const TweetId = req.params.id 
     const { id } = helpers.getUser(req)
 
-    if (!comment) {
+    if (!comment || comment.trim().length ===0) {
       return res
         .status(400)
         .json({

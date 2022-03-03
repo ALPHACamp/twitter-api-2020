@@ -10,7 +10,8 @@ const tweetController = {
       include: [
         {
           model: User,
-          attributes: ['id', 'account', 'name', 'avatar'],
+          as: 'User',
+          attributes: ['id', 'account', 'name', 'avatar']
         },
         {
           model: User,
@@ -20,12 +21,21 @@ const tweetController = {
       ]
     })
       .then((tweets) => {
-        const tweetsLiked = tweets.map(tweet => ({
-          ...tweet,
-          isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id)
-          && tweet.LikedUsers.Like.isDeleted !== 1 
-        }))
-        return res.status(200).json(tweetsLiked) 
+        tweets = tweets.map((tweet) => {
+          const { id, UserId, description, likeCount, replyCount, createdAt, updatedAt, User } = tweet
+          return {
+            id,
+            UserId,
+            description,
+            likeCount,
+            replyCount,
+            createdAt,
+            updatedAt,
+            User,
+            isLiked: tweet.LikedUsers.Like.UserId === helpers.getUser(req).id
+          }
+        })
+        return res.status(200).json(tweets)
       })
       .catch((error) => res.status(500).json({
         status: 'error',
@@ -63,12 +73,19 @@ const tweetController = {
             message: '推文不存在'
           })
         } else {
-          const tweetsLiked = {
-            ...tweet.toJSON(),
-            isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id) 
-            && like.isDeleted !== true
-          }
-          return res.status(200).json(tweetsLiked)
+          tweet = tweet.toJSON()
+          const { id, UserId, description, likeCount, replyCount, createdAt, updatedAt, User } = tweet
+          return res.status(200).json({
+            id,
+            UserId,
+            description,
+            likeCount,
+            replyCount,
+            createdAt,
+            updatedAt,
+            User,
+            isLike: tweet.LikedUsers.some((user) => user.id === helpers.getUser(req).id),
+          })
         }
       })
       .catch((error) => res.status(500).json({
