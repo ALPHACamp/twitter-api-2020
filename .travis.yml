@@ -8,6 +8,9 @@ services:
 # 設定參數(Travis CI 會按照參數分別執行)
 env:
   - NODE_ENV=travis
+  - JWT_SECRET=Alphitter
+  - IMGUR_CLIENT_ID=Alphitter
+  - PORT=3000
 
 # 在 install 前執行的指令
 before_install:
