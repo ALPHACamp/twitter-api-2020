@@ -343,7 +343,7 @@ const userServices = {
       raw: true
     })
 
-    if (!introduction) {
+    if (!user.introduction) {
       user.introduction = ''
     }
 
