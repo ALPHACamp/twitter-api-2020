@@ -184,8 +184,13 @@ const userController = {
       // pass, update user
       const reqBodyArr = { account, name, email, password, introduction, avatar, cover }
       for (const attribute in reqBodyArr) {
-        if (reqBodyArr[attribute]) {
-          where[attribute] = reqBodyArr[attribute]
+        if (reqBodyArr[attribute]) { 
+          if (attribute === 'password') {
+            const hash = await bcrypt.hash(req.body.password, 10)
+            where[attribute] = hash
+          } else {
+            where[attribute] = reqBodyArr[attribute]
+          }
         }
       }
       await uploadFiles(files)
@@ -207,6 +212,7 @@ const userController = {
   },
   getFollowers: async (req, cb) => {
     try {
+      const currentUserId = Number(req.user.id)
       const user = await User.findByPk(req.params.id, {
         include: [
           { model: User, as: 'Followers' },
@@ -217,9 +223,8 @@ const userController = {
         ]
       })
       const followers = user.Followers.map(e => e.dataValues)
-      const followingsArr = user.Followings.map(e => e.dataValues.id)
       followers.forEach(e => {
-        if (followingsArr.includes(e.id)) {
+        if (e.Followship.followerId === currentUserId) {
           e.isFollowing = true
         } else {
           e.isFollowing = false
@@ -235,6 +240,7 @@ const userController = {
   },
   getFollowings: async (req, cb) => {
     try {
+      const currentUserId = req.user.id
       const user = await User.findByPk(req.params.id, {
         include: [
           { model: User, as: 'Followings' },
@@ -244,8 +250,20 @@ const userController = {
           ['Followings', Followship, 'createdAt', 'DESC']
         ]
       })
+      // find the followingIds of current(login) user
+      const currentUserFollowingIds = await Followship.findAll({
+        attribute: ['followingId'],
+        where: { followerId: currentUserId }
+      }).map(f => f.followingId)
+
       const followings = user.Followings.map(e => e.dataValues)
       followings.forEach(e => {
+        if (currentUserFollowingIds.some(fid => fid === e.id)) {
+          e.isFollowing = true
+        } else {
+          e.isFollowing = false
+        }
+
         delete e.Followship
         delete e.password
         e.followingId = e.id
@@ -295,6 +313,7 @@ const userController = {
   },
   topFollowedUsers: async (req, cb) => {
     try {
+      const currentUserId = req.user.id
       const users = await User.findAll({
         raw: true,
         nest: true,
@@ -302,7 +321,7 @@ const userController = {
           { model: User, as: 'Followers', duplicating: false },
           { model: User, as: 'Followings', duplicating: false }
         ],
-        where: { [Op.not]: { id: req.user.id } },
+        // where: { [Op.not]: { id: req.user.id } },  /*uncomment it if self user can show in popular*/
         attributes: {
           include: [
             [Sequelize.fn('COUNT', Sequelize.col('Followers.id')), 'followedCount']
@@ -314,13 +333,14 @@ const userController = {
         ],
         limit: 10
       })
-      const followingsArr = req.user.Followings.map(e => e.dataValues.id)
+
+      const currentUserFollowingIds = await Followship.findAll({
+        attribute: ['followingId'],
+        where: { followerId: currentUserId }
+      }).map(f => f.followingId)
+
       for (const user of users) {
-        if (followingsArr.includes(user.id)) {
-          user.isFollowing = true
-        } else {
-          user.isFollowing = false
-        }
+        user.isFollowing = currentUserFollowingIds.some(fid => user.id === fid)
         delete user.Followers
         delete user.Followings
         delete user.password
