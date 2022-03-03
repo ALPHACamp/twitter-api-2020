@@ -40,6 +40,7 @@ $ npm install
 #### Add .env file
 Please reference `.env.example` to create a `.env` file for app functionality.
 For IMGUR_CLIENT_ID, you must first register an application on [IMGUR](https://api.imgur.com/oauth2/addclient).
+(You may enter "localhost" in the "Authorization callback URL" block when registering a new application.)
 ```
 JWT_SECRET=<your_jwt_secret>
 IMGUR_CLIENT_ID=<your_imgur_client_id>
