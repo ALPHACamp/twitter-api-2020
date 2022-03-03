@@ -162,6 +162,12 @@ const userController = {
             id: tweet.id,
             description: tweet.description,
             createdAt: tweet.createdAt,
+            User: {
+              id: tweet.User.id,
+              account: tweet.User.account,
+              name: tweet.User.name,
+              avatar: tweet.User.avatar
+            },
             likeCount: tweet.Likes.length,
             replyCount: tweet.Replies.length,
             isLiked: tweet.Likes.map(user => user.UserId).includes(currentUser.id)
