@@ -23,10 +23,11 @@ module.exports = {
     )
       .then(users => {
         // prepare an array of all followship data
-        const followshipsArray = users.flatMap(user => {
+        const followshipsArray = []
+        users.forEach(user => {
           const userSet = new Set()
 
-          return Array.from({ length: DEFAULT_FOLLOWSHIPS_NUMBER }, () => {
+          followshipsArray.push(...Array.from({ length: DEFAULT_FOLLOWSHIPS_NUMBER }, () => {
             // assign random number to followingId
             let followingId = RANDOM_DEFAULT_NUMBER
 
@@ -46,7 +47,7 @@ module.exports = {
               createdAt: new Date(),
               updatedAt: new Date()
             }
-          })
+          }))
         })
 
         // prepare an array of all user data

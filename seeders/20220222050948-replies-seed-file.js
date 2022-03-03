@@ -31,10 +31,11 @@ module.exports = {
     ])
       .then(([users, tweets]) => {
         // prepare an array of all reply data
-        const repliesArray = tweets.flatMap(tweet => {
+        const repliesArray = []
+        tweets.forEach(tweet => {
           const userSet = new Set()
 
-          return Array.from({ length: DEFAULT_REPLIES_NUMBER }, () => {
+          repliesArray.push(...Array.from({ length: DEFAULT_REPLIES_NUMBER }, () => {
             // assign random number to UserId
             let UserId = RANDOM_DEFAULT_NUMBER
 
@@ -55,7 +56,7 @@ module.exports = {
               createdAt: new Date(),
               updatedAt: new Date()
             }
-          })
+          }))
         })
 
         // prepare an array of all tweet data

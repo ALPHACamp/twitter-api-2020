@@ -30,7 +30,8 @@ module.exports = {
     ])
       .then(([users, tweets]) => {
         // prepare an array of all like data
-        const likesArray = users.flatMap(user => {
+        const likesArray = []
+        users.forEach(user => {
 
           // pre fill tweetSet with specific TweetId
           const tweetSet = new Set()
@@ -38,7 +39,7 @@ module.exports = {
             if (t.UserId === user.id) tweetSet.add(t.id)
           })
 
-          return Array.from({ length: DEFAULT_LIKES_NUMBER }, () => {
+          likesArray.push(...Array.from({ length: DEFAULT_LIKES_NUMBER }, () => {
             // assign random number to TweetId
             let TweetId = RANDOM_DEFAULT_NUMBER
 
@@ -57,7 +58,7 @@ module.exports = {
               createdAt: new Date(),
               updatedAt: new Date()
             }
-          })
+          }))
         })
 
         // prepare an array of all tweet data
