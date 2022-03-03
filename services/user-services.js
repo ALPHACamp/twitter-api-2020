@@ -224,7 +224,7 @@ const userController = {
         } else {
           e.isFollowing = false
         }
-        // delete f.Followship // for debug
+        delete e.Followship
         delete e.password
         e.followerId = e.id
       })
