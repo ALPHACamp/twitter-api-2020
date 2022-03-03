@@ -80,8 +80,8 @@ describe('# tweet requests', () => {
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
         // 在測試資料庫中，新增 mock 資料
-        await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
-        await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
+        await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
+        await db.Tweet.create({ UserId: 1, description: 'User1 的 Tweet1' })
       })
 
       // GET /tweets - 所有推文，包括推文作者
@@ -114,14 +114,14 @@ describe('# tweet requests', () => {
           })
       });
 
-      after(async () => {
-        this.authenticate.restore();
-        this.getUser.restore();
-        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
-        await db.User.destroy({where: {},truncate: true, force: true})
-        await db.Tweet.destroy({where: {},truncate: true, force: true})
-        await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
-      })
+      // after(async () => {
+      //   this.authenticate.restore();
+      //   this.getUser.restore();
+      //   await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null, { raw: true });
+      //   await db.User.destroy({where: {},truncate: true, force: true})
+      //   await db.Tweet.destroy({where: {},truncate: true, force: true})
+      //   await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', null, { raw: true });
+      // })
 
     });
 
