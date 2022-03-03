@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const Op = require('../models').Sequelize.Op
+const { imgurFileHandler } = require('../helpers/file-helper')
 
 const userController = {
 
@@ -63,22 +64,49 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  putUser: (req, res, next) => {
-    const getUserId = Number(req.params.id)
-    const { name, introduction, avatar, cover } = req.body
-    if (!name) throw new Error('name is required!')
-    // if (helpers.getUser(req).id !== getUserId) throw new Error('帳號驗證不通過')
-    return User.findByPk(getUserId)
-      .then(user => {
-        if (!user) throw new Error('帳號不存在！')
-        return user.update({ name, introduction, avatar, cover })
+  putUser: async (req, res, next) => {
+    try {
+      const targetUserId = Number(req.params.id)
+      const currentUserId = helpers.getUser(req).id
+      const user = await User.findByPk(targetUserId)
+      const { name, introduction } = req.body
+      const { files } = req
+
+      if (targetUserId !== currentUserId) {
+        return res.status(400).json({
+          status: 'error',
+          message: '使用者只能修改自己的資料'
+        })
+      }
+
+      const uploadAvatar = files && files.cover
+        ? await imgurFileHandler(files.cover[0])
+        : user.cover
+      const uploadCover = files && files.cover
+        ? await imgurFileHandler(files.cover[0])
+        : user.cover
+
+      await user.update({
+        name,
+        introduction,
+        avatar: uploadAvatar,
+        cover: uploadCover
       })
-      .then(user => res.status(200).json({
+
+      const results = {
+        account: user.account,
+        name,
+        introduction,
+        avatar: uploadAvatar,
+        cover: uploadCover
+      }
+
+      return res.status(200).json({
         status: 'success',
-        message: '成功更新資料',
-        data: user
-      }))
-      .catch(err => next(err))
+        data: results,
+        message: '修改成功'
+      })
+    } catch (err) { next(err) }
   },
   putUserSettings: async (req, res, next) => {
     try {
