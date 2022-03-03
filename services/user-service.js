@@ -308,7 +308,7 @@ const userServices = {
     // Clean data
     likes = likes.map(like => ({
       ...like,
-      likedTweet: userLikes.includes(likes.TweetId)
+      likedTweet: userLikes.includes(like.TweetId)
     }))
 
     return likes
