@@ -14,11 +14,11 @@ const userController = {
 
       if (email && !validator.isEmail(email)) throw new Error('請輸入正確信箱格式')
       
-      if (password && !validator.isByteLength(password, { min: 4 })) throw new Error('密碼請輸入至少 4 個!')
+      if (password && !validator.isLength(password, { min: 4 })) throw new Error('密碼請輸入至少 4 個!')
 
       if (password !== checkPassword) throw new Error('兩次密碼不相符')
 
-      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
+      if (name && !validator.isLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
       
       const checkedUser = await User.findOne({
         where: {
@@ -311,7 +311,9 @@ const userController = {
             'avatar',
             'introduction'
           ]
-        }
+        },
+        raw: true,
+        nest: true
       })
       if (!user) {
         return res
@@ -329,6 +331,7 @@ const userController = {
             message: '此使用者沒有跟隨者'
           })
       } else {
+        console.log(followships)
         followshipsData = followships.map((followship) => {
           const { id, followerId, followingId, createdAt, updatedAt, follower} = followship
           return {
@@ -341,6 +344,7 @@ const userController = {
             isFollowed: followship.followingId === helpers.getUser(req).id
           }
         })
+        console.log(followships)
         return res.status(200).json(followshipsData)
       }
     } catch (error) {
@@ -393,9 +397,9 @@ const userController = {
 
       if (password !== checkPassword) throw new Error('兩次密碼不相符')
 
-      if (name && !validator.isByteLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
+      if (name && !validator.isLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
 
-      if (introduction && !validator.isByteLength(introduction, { min: 0, max: 160 })) throw new Error('自我介紹不能超過 160 個字')
+      if (introduction && !validator.isLength(introduction, { min: 0, max: 160 })) throw new Error('自我介紹不能超過 160 個字')
       // 列出全部有相同 account or email 的 user
       const checkedUser = await User.findAll({
         where: { [Op.or]: [{ account }, { email }]},
