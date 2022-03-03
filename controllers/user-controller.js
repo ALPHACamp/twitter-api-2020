@@ -430,8 +430,8 @@ const userController = {
         req.body.password = hash
       }
       
-      const imgurUploadAvatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
-      const imgurUploadCover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
+      const imgurUploadAvatar = files && files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+      const imgurUploadCover = files && files.cover ? await imgurFileHandler(files.cover[0]) : null
       if (imgurUploadAvatar) req.body.avatar = imgurUploadAvatar.toString()
       if (imgurUploadCover) req.body.cover = imgurUploadCover.toString()
       
