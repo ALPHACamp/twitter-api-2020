@@ -15,7 +15,7 @@ router.post('/api/admin/signin', adminController.signIn)
 // 前台登入
 router.post('/api/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
-router.use('/api/users', authenticated, users)
+router.use('/api/users', users)
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.use('/api/tweets', authenticated, tweets)
 router.use('/api/followships', authenticated, followships)
