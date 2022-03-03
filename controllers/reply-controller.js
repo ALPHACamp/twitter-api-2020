@@ -15,7 +15,7 @@ const replyController = {
   },
   addReply: (req, res, next) => {
     const { comment } = req.body
-    if (!comment) {
+    if (!comment.trim()) {
       return res.json({ status: 'error', message: '內容不可空白!'})
     }
     if (comment.length > 140) {
