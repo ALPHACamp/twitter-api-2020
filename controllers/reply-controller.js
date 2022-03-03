@@ -29,7 +29,7 @@ const replyController = {
           }
         ]
       })
-      if (!replies) {
+      if (!replies || replies.length ===0) {
         return res.status(404).json({
         status: 'error',
         message: '這篇推文沒有回覆',
