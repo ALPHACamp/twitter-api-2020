@@ -64,7 +64,7 @@ const tweetController = {
           { model: Like }]
       })
       if (!tweets) {
-        return res.json({ status: 'error', message: 'No tweets.' })
+        return res.json({ status: 'error', message: 'No tweets!' })
       }
       const result = tweets.map(tweet => {
         return {
@@ -128,8 +128,8 @@ const tweetController = {
   postTweet: async (req, res, next) => {
     const description = req.body.description.trim() || null
     const UserId = helpers.getUser(req).id
-    if (!description) return res.json({ status: 'error', message: 'Description is required' })
-    if (description.length > 140) return res.json({ status: 'error', message: 'Tweet text must be less than 140 characters.' })
+    if (!description) return res.json({ status: 'error', message: 'Description is required!' })
+    if (description.length > 140) return res.json({ status: 'error', message: 'Tweet text must be less than 140 characters!' })
     try {
       await Tweet.create({
         description,

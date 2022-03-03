@@ -39,7 +39,7 @@ const replyController = {
 
             const reply = await Reply.findByPk(replyId)
             if (!reply) return res.json({ status: 'error', message: "Reply didn't exist!"})
-            if (helpers.getUser(req).id !== Number(reply.UserId)) return res.json({ status: 'error', message: "You can't do this." })
+            if (helpers.getUser(req).id !== Number(reply.UserId)) return res.json({ status: 'error', message: "You can't do this!" })
    
             return reply.update({ comment })
             .then(() => res.json({ status: 'success' }))
@@ -52,7 +52,7 @@ const replyController = {
         try {
             const reply = await Reply.findByPk(replyId)
             if (!reply) return res.json({ status: 'error', message: "Reply didn't exist!"})
-            if (helpers.getUser(req).id !== Number(reply.UserId)) return res.json({ status: 'error', message: "You can't do this." })
+            if (helpers.getUser(req).id !== Number(reply.UserId)) return res.json({ status: 'error', message: "You can't do this!" })
 
 
             return reply.destroy()

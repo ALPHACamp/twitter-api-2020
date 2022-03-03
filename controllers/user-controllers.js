@@ -24,7 +24,7 @@ const userController = {
               user: userData,
             }
           });
-        } else { res.json({ status: 'error', message: 'This is for normal user.' }) }
+        } else { res.json({ status: 'error', message: 'This is for normal user!' }) }
 
       } else {
         res.json(errData);
@@ -67,7 +67,7 @@ const userController = {
     const checkPassword = req.body.checkPassword.trim() || null
     const name = req.body.name.trim() || null
     const email = req.body.email.trim() || null
-    if (!account || !password || !checkPassword || !name || !email) return res.json({ status: 'error', message: 'All fields are required' })
+    if (!account || !password || !checkPassword || !name || !email) return res.json({ status: 'error', message: 'All fields are required!' })
     if (name.length > 50) return res.json({ status: 'error', message: 'Name is too long!' })
     if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match!' })
 
@@ -311,13 +311,13 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
-      if (helpers.getUser(req).id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this." })
+      if (helpers.getUser(req).id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this!" })
       const user = await User.findByPk(req.params.id)
-      if (!user) return res.json({ status: 'error', message: "User didn't exist." })
+      if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const { name, introduction } = req.body
-      if (!name) return res.json({ status: 'error', message: 'Name is required.' })
-      if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters.' })
-      if (introduction.length > 160) return res.json({ status: 'error', message: 'introduction must be less than 160 characters.' })
+      if (!name) return res.json({ status: 'error', message: 'Name is required!' })
+      if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters!' })
+      if (introduction.length > 160) return res.json({ status: 'error', message: 'introduction must be less than 160 characters!' })
       const { files } = req
       if (files) {
         const avatar = files.avatar ? await imgurFileHandler(files.avatar[0]) : null
@@ -346,7 +346,7 @@ const userController = {
 
   editAccount: async (req, res, next) => {
     try {
-      if (req.user.id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this" })
+      if (req.user.id !== Number(req.params.id)) return res.json({ status: 'error', message: "You can't do this!" })
       const user = await User.findByPk(req.params.id)
       if (!user) return res.json({ status: 'error', message: "User didn't exist!" })
       const account = req.body.account.trim() || null
@@ -355,18 +355,18 @@ const userController = {
       const password = req.body.password.trim() || null
       const checkPassword = req.body.checkPassword.trim() || null
 
-      if (!account || !name || !email || !password || !checkPassword) return res.json({ status: 'error', message: 'All fields are required' })
-      if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters.' })
-      if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match.' })
+      if (!account || !name || !email || !password || !checkPassword) return res.json({ status: 'error', message: 'All fields are required!' })
+      if (name.length > 50) return res.json({ status: 'error', message: 'Name must be less than 50 characters!' })
+      if (password !== checkPassword) return res.json({ status: 'error', message: 'Passwords do not match!' })
 
       let sameUser = await User.findOne({ where: { email } })
 
       if (sameUser) {
-        if (sameUser.id !== req.user.id) return res.json({ status: 'error', message: 'Email already existed.' })
+        if (sameUser.id !== req.user.id) return res.json({ status: 'error', message: 'Email already existed!' })
       }
       sameUser = await User.findOne({ where: { account } })
       if (sameUser) {
-        if (sameUser.id !== req.user.id) return res.json({ status: 'error', message: 'Account already existed.' })
+        if (sameUser.id !== req.user.id) return res.json({ status: 'error', message: 'Account already existed!' })
       }
       return bcrypt.hash(req.body.password, 10)
         .then(hash => {
@@ -395,7 +395,7 @@ const userController = {
       const followship = await Followship.findOne({ where: { followerId, followingId } })
       if (followship) return res.json({ status: 'error', message: 'You are already following this user!' })
 
-      if (followerId == followingId) return res.json({ status: 'error', message: "You can't follow yourself" })
+      if (followerId == followingId) return res.json({ status: 'error', message: "You can't follow yourself!" })
 
       return Followship.create({ followerId, followingId })
         .then(() => res.json({ status: 'success' }))
