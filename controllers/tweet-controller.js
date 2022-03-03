@@ -10,6 +10,7 @@ const tweetController = {
       include: [
         {
           model: User,
+          as: 'User',
           attributes: ['id', 'account', 'name', 'avatar']
         },
         {
@@ -21,25 +22,29 @@ const tweetController = {
     })
       .then((tweets) => {
         tweets = tweets.map((tweet) => {
-          const { id, description, likeCount, replyCount, createdAt, updatedAt, Author } = tweet
-          console.log(tweet.LikedUsers.Like)
+          const { id, UserId, description, likeCount, replyCount, createdAt, updatedAt, User } = tweet
+          // console.log(tweet.LikedUsers)
           return {
             id,
-            isLiked: tweet.LikedUsers.Like.some((f) => f.UserId === helpers.getUser(req).id),
+            UserId,
             description,
             likeCount,
             replyCount,
             createdAt,
             updatedAt,
-            Author
+            User,
+            isLiked: tweet.LikedUsers.Like.UserId === helpers.getUser(req).id,
           }
         })
         return res.status(200).json(tweets)
       })
       // .then((tweets) => {
+      //   console.log(tweet.LikedUsers[0])
       //   const tweetsLiked = tweets.map(tweet => ({
       //     ...tweet,
-      //     // isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id)
+      //     isLiked: tweet.LikedUsers.length !== 0 &&
+      //       tweet.LikedUsers[0].id === helpers.getUser(req).id
+      //     //isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id)
       //     // && tweet.LikedUsers.Like.isDeleted !== 1
       //   }))
       //   return res.status(200).json(tweetsLiked) 
@@ -80,13 +85,31 @@ const tweetController = {
             message: '推文不存在'
           })
         } else {
-          const tweetsLiked = {
-            ...tweet.toJSON(),
-            isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id) 
-            && like.isDeleted !== true
-          }
-          return res.status(200).json(tweetsLiked)
+          tweet = tweet.toJSON()
+          const { id, UserId, description, likeCount, replyCount, createdAt, updatedAt, User } = tweet
+          return res.status(200).json({
+            id,
+            UserId,
+            description,
+            likeCount,
+            replyCount,
+            createdAt,
+            updatedAt,
+            User,
+            isLike: tweet.LikedUsers.some((user) => user.id === helpers.getUser(req).id),
+          })
         }
+          // console.log(tweet.LikedUsers[0].id)
+          // console.log(helpers.getUser(req).id)
+          // const tweetsLiked = {
+          //   ...tweet.toJSON(),
+          //   isLiked: tweet.LikedUsers.length !==0 &&
+          //     tweet.LikedUsers[0].id === helpers.getUser(req).id
+          //   // isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id) 
+          //   // && like.isDeleted !== true
+          // }
+          // return res.status(200).json(tweetsLiked)
+        // }
       })
       .catch((error) => res.status(500).json({
         status: 'error',
