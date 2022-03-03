@@ -87,7 +87,7 @@ const likeController = {
           //   isLiked: !isDeleted
           // })
           const user = await User.findByPk(tweetFind.UserId)
-          user.decrement('likedCount')
+          await user.decrement('likedCount')
           return res.status(200).json({
             status: 'success',
             message: 'Unlike成功!'
