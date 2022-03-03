@@ -23,8 +23,8 @@ module.exports = {
         type: Sequelize.STRING
       },
       avatar: {
-        type: Sequelize.STRING
-        // defaultValue: 'https://i.imgur.com/q6bwDGO.png'
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/q6bwDGO.png'
       },
       introduction: {
         type: Sequelize.TEXT
@@ -34,8 +34,8 @@ module.exports = {
         defaultValue: 'user'
       },
       cover: {
-        type: Sequelize.STRING
-        // defaultValue: 'https://i.imgur.com/1jDf2Me.png'
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/1jDf2Me.png'
       },
       tweetCount: {
         type: Sequelize.INTEGER,
