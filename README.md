@@ -202,7 +202,7 @@ password: 12345678
 <br>
 
 ## <strong>停止伺服器步驟</strong>
-> 1. 如果要終止 API server 運作，可以位於鍵盤上面同時按壓 Ctrl + c 連續兩下。
+> 1. 位於鍵盤上使用兩下 Ctrl + c，即可直接終止 API server 運作。
 
 <br>
 <br>
