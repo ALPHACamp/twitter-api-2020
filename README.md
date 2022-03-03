@@ -1,12 +1,9 @@
-<h1 aling="center">Twitter-API-2020</h1>
+<h1 align="center">Twitter-API-2022</h1>
 
 <div id="top"></div>
 <p align="center">
-  <a href="https://github.com/Prysline/S2A1_restaurant" target="_blank">
+  <a href="https://github.com/xnubber/twitter-api-2020" target="_blank">
   <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
-  </a>
-  <a href="https://github.com/Prysline/S2A1_restaurant/blob/main/LICENSE" target="_blank">
-    <img alt="License: MIT" src="https://img.shields.io/github/license/Prysline/S2A1_restaurant.svg" />
   </a>
   <img src="https://img.shields.io/github/languages/top/xnubber/twitter-api-2020" />
   <img src="https://img.shields.io/github/issues/xnubber/twitter-api-2020" />
