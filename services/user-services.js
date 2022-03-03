@@ -14,12 +14,10 @@ const userController = {
       if (name.length > 50) {
         throw new Error('String must not exceed 50 characters!')
       }
-      const user = await User.findOne({
-        where: {
-          [Op.or]: [{ email }, { account }]
-        }
-      })
-      if (user) throw new Error('Email or Account already exists!')
+      const sameEmailUser = await User.findOne({ where: { email } })
+      if (sameEmailUser) throw new Error('Email already exists!')
+      const sameAccountUser = await User.findOne({ where: { account } })
+      if (sameAccountUser) throw new Error('account already exists!')
       const hash = await bcrypt.hash(req.body.password, 10)
       const newUser = await User.create({
         account,
@@ -184,7 +182,7 @@ const userController = {
       // pass, update user
       const reqBodyArr = { account, name, email, password, introduction, avatar, cover }
       for (const attribute in reqBodyArr) {
-        if (reqBodyArr[attribute]) { 
+        if (reqBodyArr[attribute]) {
           if (attribute === 'password') {
             const hash = await bcrypt.hash(req.body.password, 10)
             where[attribute] = hash
