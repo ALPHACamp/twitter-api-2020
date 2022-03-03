@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const { User, Tweet, Reply, Like, sequelize } = require('../models')
 const helpers = require('../_helpers')
 const Op = require('../models').Sequelize.Op
 
@@ -140,8 +140,56 @@ const userController = {
       })
       .catch(err => next(err))
   },
-  getUserFollowings: (req, res, next) => {
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const targetUserId = req.params.id
+      const role = (await User.findByPk(targetUserId)).dataValues.role
+      if (!targetUserId || role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      const findOption = {
+        include: [
+          {
+            model: User,
+            as: 'Followings',
+            attributes: [
+              ['id', 'followingId'],
+              'name', 'account', 'introduction',
+              'cover', 'avatar',
+              [
+                sequelize.literal(`
+                  EXISTS (
+                      SELECT 1 FROM Followships
+                      WHERE followerId = ${currentUserId} 
+                      AND followingId = Followings.id
+                    )
+                `),
+                'isFollowed'
+              ]
+            ]
+          }
+        ],
+        attributes: [],
+        order: [
+          [sequelize.literal('`Followings->Followship`.`createdAt`'), 'DESC']
+        ]
+      }
+      const followerUsers = await User.findByPk(targetUserId, findOption)
 
+      const result = followerUsers.toJSON().Followings
+
+      result.forEach(fu => {
+        fu.isFollowed = Boolean(fu.isFollowed)
+      })
+
+      return res
+        .status(200)
+        .json(result)
+    } catch (err) { next(err) }
   },
   getUserFollowers: async (req, res, next) => {
     try {
