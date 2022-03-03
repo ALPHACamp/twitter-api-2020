@@ -1,4 +1,5 @@
 const { Reply, Tweet, User } = require('../models')
+const helpers = require('../_helpers')
 const replyController = {
   getReplies: async (req, res) => {
     try {
@@ -52,7 +53,8 @@ const replyController = {
   postReplies: (req, res) => {
     const { comment } = req.body
     const TweetId = req.params.id 
-    const UserId = req.user.id
+    const { id } = helpers.getUser(req)
+
     if (!comment) {
       return res
         .status(400)
@@ -70,7 +72,7 @@ const replyController = {
         })
     }
     return Promise.all([
-      User.findByPk(UserId),
+      User.findByPk(id),
       Tweet.findByPk(TweetId)
     ])
       .then(([user, tweet]) => {
@@ -93,7 +95,7 @@ const replyController = {
         return Reply.create({
           comment,
           TweetId,
-          UserId
+          UserId: id
         })
       })
       .then(reply => {

@@ -63,13 +63,15 @@ const likeController = {
     }
   },
   postUnlike: async (req, res, next) => {
+    const { id } = helpers.getUser(req)
+
     try {
       const { id } = helpers.getUser(req)
       const tweet = await Tweet.findByPk(req.params.id)
       const like = await Like.findOne({
         where: {
           UserId: id,
-          TweetId: req.params.id,
+          TweetId: req.params.id
         }
       })
       if (!tweet) {

@@ -348,7 +348,7 @@ const userController = {
   putUser: async (req, res, next) => {
     try {
       const id = +req.params.id
-      const userId = req.user.id
+      const userId = helpers.getUser(req).id
       const { account, name, email, password, checkPassword, introduction, cover, avatar } = req.body
       const { files } = req
 
