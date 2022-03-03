@@ -143,8 +143,56 @@ const userController = {
   getUserFollowings: (req, res, next) => {
 
   },
-  getUserFollowers: (req, res, next) => {
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const currentUserId = helpers.getUser(req).id
+      const targetUserId = req.params.id
+      const role = (await User.findByPk(targetUserId)).dataValues.role
+      if (!targetUserId || role === 'admin') {
+        return res.status(404).json({
+          status: 'error',
+          message: '使用者不存在'
+        })
+      }
+      const findOption = {
+        include: [
+          {
+            model: User,
+            as: 'Followers',
+            attributes: [
+              ['id', 'followerId'],
+              'name', 'account', 'introduction',
+              'cover', 'avatar',
+              [
+                sequelize.literal(`
+                  EXISTS (
+                      SELECT 1 FROM Followships
+                      WHERE followerId = ${currentUserId} 
+                      AND followingId = Followers.id
+                    )
+                `),
+                'isFollowed'
+              ]
+            ]
+          }
+        ],
+        attributes: [],
+        order: [
+          [sequelize.literal('`Followers->Followship`.`createdAt`'), 'DESC']
+        ]
+      }
+      const followerUsers = await User.findByPk(targetUserId, findOption)
 
+      const result = followerUsers.toJSON().Followers
+
+      result.forEach(fu => {
+        fu.isFollowed = Boolean(fu.isFollowed)
+      })
+
+      return res
+        .status(200)
+        .json(result)
+    } catch (err) { next(err) }
   },
   getTopUsers: async (req, res, next) => {
     try {
