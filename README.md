@@ -26,9 +26,6 @@ Just like real twitter, user can sign-up, sign-in, tweet, reply, like a tweet an
 
 
 ## 目錄 Table of Contents
-
-<details>
-  <summary>目錄 Table of Contents</summary>
   <ol>
     <li><a href="#建置環境-built-with">建置環境 Built With</a></li>
     <li>
@@ -40,7 +37,6 @@ Just like real twitter, user can sign-up, sign-in, tweet, reply, like a tweet an
     </li>
     <li><a href="#致謝-acknowledgments">致謝 Acknowledgments</a></li>
   </ol>
-</details>
 
 <!-- ABOUT THE PROJECT -->
 
