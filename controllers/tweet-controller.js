@@ -8,9 +8,8 @@ const tweetController = {
       order: [['createdAt', 'desc']],
       include: [
         {
-          model:User,
+          model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          // as:'TweetAuthor'
         },
         {
           model: User,
@@ -19,12 +18,13 @@ const tweetController = {
         }
       ]
     })
-      .then(tweets => { 
+      .then((tweets) => {
         const tweetsLiked = tweets.map(tweet => ({
           ...tweet,
           isLiked: req.user.LikedTweets.some(f => f.id === tweet.id)
+          && tweet.LikedUsers.Like.isDeleted !== 1 
         }))
-        return res.status(200).json(tweetsLiked)
+        return res.status(200).json(tweetsLiked) 
       })
       .catch((error) => res.status(500).json({
         status: 'error',
@@ -32,11 +32,10 @@ const tweetController = {
       }))
   },
   getTweet: (req, res) => {
-    const TweetId = req.params.id
-    Tweet.findByPk(TweetId, {
+    Promise.all([
+      Tweet.findByPk(req.params.id, {
         include: [{
           model: User,
-          // as: 'TweetAuthor',
           attributes: ['id','name','account','avatar']
         },
         {
@@ -47,9 +46,16 @@ const tweetController = {
             attributes: []
           }
         }
-      ]
-    })
-      .then((tweet) => {
+        ]
+      }),
+      Like.findOne({
+        where: {
+          UserId: req.user.id,
+          TweetId: req.params.id
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
         if (!tweet) {
           return res.status(404).json({
             status: 'error',
@@ -58,7 +64,8 @@ const tweetController = {
         } else {
           const tweetsLiked = {
             ...tweet.toJSON(),
-            isLiked: req.user.LikedTweets.some(f => f.id === tweet.id)
+            isLiked: req.user.LikedTweets.some(f => f.id === tweet.id) 
+            && like.isDeleted !== true
           }
           return res.status(200).json(tweetsLiked)
         }
