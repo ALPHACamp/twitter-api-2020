@@ -23,7 +23,6 @@ const tweetController = {
       .then((tweets) => {
         tweets = tweets.map((tweet) => {
           const { id, UserId, description, likeCount, replyCount, createdAt, updatedAt, User } = tweet
-          // console.log(tweet.LikedUsers)
           return {
             id,
             UserId,
@@ -38,17 +37,6 @@ const tweetController = {
         })
         return res.status(200).json(tweets)
       })
-      // .then((tweets) => {
-      //   console.log(tweet.LikedUsers[0])
-      //   const tweetsLiked = tweets.map(tweet => ({
-      //     ...tweet,
-      //     isLiked: tweet.LikedUsers.length !== 0 &&
-      //       tweet.LikedUsers[0].id === helpers.getUser(req).id
-      //     //isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id)
-      //     // && tweet.LikedUsers.Like.isDeleted !== 1
-      //   }))
-      //   return res.status(200).json(tweetsLiked) 
-      // })
       .catch((error) => res.status(500).json({
         status: 'error',
         message: error
@@ -99,17 +87,6 @@ const tweetController = {
             isLike: tweet.LikedUsers.some((user) => user.id === helpers.getUser(req).id),
           })
         }
-          // console.log(tweet.LikedUsers[0].id)
-          // console.log(helpers.getUser(req).id)
-          // const tweetsLiked = {
-          //   ...tweet.toJSON(),
-          //   isLiked: tweet.LikedUsers.length !==0 &&
-          //     tweet.LikedUsers[0].id === helpers.getUser(req).id
-          //   // isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id) 
-          //   // && like.isDeleted !== true
-          // }
-          // return res.status(200).json(tweetsLiked)
-        // }
       })
       .catch((error) => res.status(500).json({
         status: 'error',
