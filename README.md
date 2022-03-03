@@ -11,7 +11,7 @@ git clone https://github.com/dandywhy/twitter-api-2020.git
 
 ### 安裝相關套件
 ```
-cd twitter-api-2020.git
+cd twitter-api-2020
 npm install
 ```
 
@@ -23,16 +23,14 @@ vi .env
 
 修改以下資訊
 ```
-PORT=3000 // Port號
 IMGUR_CLIENT_ID=SKIP //圖片圖床 imgur 請至imgur申請
 JWT_SECRET=alphacamp
-SESSION_SECRET=SKIP
 ```
 esc + :wq 存檔離開
 
 ### 建立資料庫
 
-建立MySQL資料庫，需與config/config.json中的development和test的database名字一致
+建立MySQL資料庫，需與config/config.json中的development和test的database名字一致  
 以下是MySQL中的指令
 ```
 create database ac_twitter_workspace;
