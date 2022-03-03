@@ -338,7 +338,7 @@ const userController = {
             createdAt,
             updatedAt,
             follower,
-            isFollowed: followship.followerId === helpers.getUser(req).id
+            isFollowed: followship.followingId === helpers.getUser(req).id
           }
         })
         return res.status(200).json(followshipsData)
