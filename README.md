@@ -25,11 +25,10 @@ vi .env
 ```
 PORT=3000 // Port號
 IMGUR_CLIENT_ID=SKIP //圖片圖床 imgur 請至imgur申請
-JWT_SECRET=SKIP 
+JWT_SECRET=alphacamp
 SESSION_SECRET=SKIP
 ```
 esc + :wq 存檔離開
-JWT_SECRET
 
 ### 建立資料庫
 
@@ -40,7 +39,7 @@ create database ac_twitter_workspace;
 create database ac_twitter_workspace_test;
 ```
 
-以下為終端機頁面，進入專案資料夾
+以下回到終端機頁面，進入專案資料夾. 
 
 資料庫內新增資料表(Table) 與關聯
 ```
