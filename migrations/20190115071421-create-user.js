@@ -37,22 +37,22 @@ module.exports = {
       totalTweets: {
         allowNull: false,
         defaultValue: 0,
-        type: Sequelize.INTEGER.UNSIGNED
+        type: Sequelize.INTEGER
       },
       totalFollowings: {
         allowNull: false,
         defaultValue: 0,
-        type: Sequelize.INTEGER.UNSIGNED
+        type: Sequelize.INTEGER
       },
       totalFollowers: {
         allowNull: false,
         defaultValue: 0,
-        type: Sequelize.INTEGER.UNSIGNED
+        type: Sequelize.INTEGER
       },
       totalLiked: {
         allowNull: false,
         defaultValue: 0,
-        type: Sequelize.INTEGER.UNSIGNED
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
