@@ -77,57 +77,25 @@ const userController = {
       .catch(err => next(err))
   },
   getUserTweets: async (req, res, next) => {
-    try {
-      const error = new Error()
-      const targetUserId = req.params.id
-      const loginUserId = helpers.getUser(req).id
-
-      if (isNaN(targetUserId) || !(await User.findByPk(targetUserId))) {
-        error.code = 404
-        error.message = '對應使用者不存在'
-        return next(error)
-      }
-
-      const tweets = await Tweet.findAll({
-        where: { UserId: targetUserId },
-        attributes: [
-          'id',
-          'UserId',
-          'description',
-          'createdAt',
-          'updatedAt',
-          'likeCount',
-          'replyCount',
-          [
-            sequelize.literal(
-              `EXISTS (SELECT 1 FROM Likes WHERE UserId = ${loginUserId} AND TweetId = Tweet.id)`
-            ),
-            'isLiked'
-          ],
-          [
-            sequelize.literal(
-              `EXISTS (SELECT 1 FROM Replies WHERE UserId = ${loginUserId} AND TweetId = Tweet.id)`
-            ),
-            'isReplied'
-          ]
-        ],
-        include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-        ],
+    const userId = Number(req.params.id)
+    return Promise.all([
+      User.findByPk(userId),
+      Tweet.findAll({
+        where: { userId: userId },
+        include: [{
+          model: User,
+          attributes: ['id', 'name', 'account', 'avatar']
+        }],
         order: [['createdAt', 'DESC']]
       })
-
-      const results = tweets.map(t => {
-        t = t.toJSON()
-        t.isLiked = Boolean(t.isLiked)
-        t.isReplied = Boolean(t.isReplied)
-        return t
+    ])
+      .then(([user, tweets]) => {
+        if (!user) throw new Error('帳號不存在！')
+        if (!tweets) throw new Error('使用者沒有任何推文!')
+        return res.status(200).json(tweets)
       })
 
-      return res.json([...results])
-    } catch (err) {
-      next(err)
-    }
+      .catch(err => next(err))
   },
   getRepliedTweets: (req, res, next) => {
     const userId = Number(req.params.id)
