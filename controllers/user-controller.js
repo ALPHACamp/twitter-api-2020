@@ -331,6 +331,7 @@ const userController = {
             message: '此使用者沒有跟隨者'
           })
       } else {
+        console.log(followships)
         followshipsData = followships.map((followship) => {
           const { id, followerId, followingId, createdAt, updatedAt, follower} = followship
           return {
