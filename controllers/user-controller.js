@@ -232,7 +232,7 @@ const userController = {
   getUserFollowings: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      const followship = await Followship.findAll({
+      const followships = await Followship.findAll({
         where: {
           followerId: req.params.id
         },
@@ -258,7 +258,7 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      if (followship.length === 0) {
+      if (followships.length === 0) {
         return res
           .status(400)
           .json({
@@ -266,12 +266,25 @@ const userController = {
             message: '此使用者沒有追蹤任何人'
           })
       } else {
-        const userFollowings = followship
-        .map(userFollowing => ({
-          ...userFollowing.toJSON(),
-          isFollowed: true
-        }))
-        return res.status(200).json(userFollowings)
+        followshipsData = followships.map((followship) => {
+          const { id, followerId, followingId, createdAt, updatedAt, following } = followship
+          return {
+            id,
+            followerId,
+            followingId,
+            createdAt,
+            updatedAt,
+            following,
+            isFollowed: followship.followerId === helpers.getUser(req).id
+          }
+        })
+        return res.status(200).json(followshipsData)
+        // const userFollowings = followship
+        // .map(userFollowing => ({
+        //   ...userFollowing.toJSON(),
+        //   isFollowed: true
+        // }))
+        // return res.status(200).json(userFollowings)
       }
     } catch (error) {
       res.status(500).json({
@@ -325,7 +338,7 @@ const userController = {
             createdAt,
             updatedAt,
             follower,
-            isFollowed: followship.followerId === helpers.getUser(req).id
+            isFollowed: followship.followingId === helpers.getUser(req).id
           }
         })
         return res.status(200).json(followshipsData)
