@@ -107,14 +107,6 @@ const likeController = {
       //     })
       // } else {
       //   await like.update({isDeleted: true})
-      //   await tweet.decrement('likeCount')
-      //   await tweet.update({ isLiked: false })
-      //   const user = await User.findByPk(tweet.UserId)
-      //   await user.decrement('likedCount')
-      //   return res.status(200).json({
-      //     status: 'success',
-      //     message: 'Unlike成功!'
-      //   })
       // }
     } catch (error) {
       res.status(500).json({
