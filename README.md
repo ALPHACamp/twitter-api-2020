@@ -32,7 +32,7 @@ esc + :wq 存檔離開
 
 ### 建立資料庫
 
-建立MySQL資料庫，需與config/config.json中的development和test的database名字一致
+建立MySQL資料庫，需與config/config.json中的development和test的database名字一致  
 以下是MySQL中的指令
 ```
 create database ac_twitter_workspace;
