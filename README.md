@@ -24,7 +24,7 @@
 1. Clone 專案到本地
 
 ```
-git clone https://github.com/bradychen2/twitter-api-2020.git
+git clone https://github.com/lavender0822/twitter-api-2020.git
 ```
 2. 進入此專案資料夾
 ```
