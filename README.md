@@ -8,7 +8,7 @@
 ---
 ### 執行步驟
 1. 打開你的 terminal，Clone 此專案至本機電腦
-`git clone git@github.com:dream184/twitter-api-2020.git`
+`git clone https://github.com/dream184/twitter-api-2020.git`
 2. 開啟終端機(Terminal)，進入存放此專案的資料夾
 `cd twitter-api-2020`
 3. 在 Terminal 輸入 `npm install` 指令，安裝專案所需套件
