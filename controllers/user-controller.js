@@ -289,6 +289,7 @@ const userController = {
         attributes: ['id', 'followingId', 'followerId', 'createdAt'],
         order: [['createdAt', 'desc']]
       })
+      console.log(followship)
       if (!user) {
         return res
           .status(404)
@@ -310,6 +311,8 @@ const userController = {
             ...userFollower.toJSON(),
             isFollowed: req.user.Followers.some(f => f.id === userFollower.id)
           }))
+        console.log('=================')
+        console.log(userFollowers)
         return res.status(200).json(userFollowers)
       }
     } catch (error) {
