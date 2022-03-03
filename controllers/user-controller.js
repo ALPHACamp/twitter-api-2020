@@ -271,6 +271,7 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
+      console.log(helpers.getUser(req))
       const followship = await Followship.findAll({
         where: {
           followingId: req.params.id
@@ -287,7 +288,9 @@ const userController = {
           ],
         },
         attributes: ['id', 'followingId', 'followerId', 'createdAt'],
-        order: [['createdAt', 'desc']]
+        order: [['createdAt', 'desc']],
+        raw: true,
+        nest: true
       })
       console.log(followship)
       if (!user) {
@@ -308,7 +311,7 @@ const userController = {
       } else {
         const userFollowers = followship
           .map(userFollower => ({
-            ...userFollower.toJSON(),
+            ...userFollower,
             isFollowed: req.user.Followers.some(f => f.id === userFollower.id)
           }))
         console.log('=================')
