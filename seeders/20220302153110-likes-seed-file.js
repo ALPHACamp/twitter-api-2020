@@ -35,7 +35,7 @@ module.exports = {
           // pre fill tweetSet with specific TweetId
           const tweetSet = new Set()
           tweets.forEach(t => {
-            if (t.UserId === user.id) tweetSet.add(t.TweetId)
+            if (t.UserId === user.id) tweetSet.add(t.id)
           })
 
           return Array.from({ length: DEFAULT_LIKES_NUMBER }, () => {
