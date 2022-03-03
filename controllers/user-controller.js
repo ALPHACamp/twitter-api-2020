@@ -344,7 +344,6 @@ const userController = {
             isFollowed: followship.followingId === helpers.getUser(req).id
           }
         })
-        console.log(followships)
         return res.status(200).json(followshipsData)
       }
     } catch (error) {
