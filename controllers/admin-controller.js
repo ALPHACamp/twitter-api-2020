@@ -60,7 +60,7 @@ const adminController = {
     return Tweet.findAll({
       attributes: ['id', 'description', 'createdAt'],
       order: [['createdAt', 'DESC']],
-      include: { model: User, attributes: ['id', 'name', 'account'] }
+      include: { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
     })
       .then(tweets => {
         const result = tweets
