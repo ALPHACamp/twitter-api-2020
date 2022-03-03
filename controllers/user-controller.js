@@ -297,6 +297,7 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req).id
       const user = await User.findByPk(req.params.id)
       const followships = await Followship.findAll({
         where: {
@@ -349,11 +350,12 @@ const userController = {
             createdAt,
             updatedAt,
             follower,
-            isFollowed: followship.followingId === helpers.getUser(req).id
-            // isFollowed: follower.Followers.id ? follower.Followers.some(f => f.id === id) : false
+            // isFollowed: followship.followingId === helpers.getUser(req).id
+            isFollowed: follower.Followers.id ? follower.Followers.some(f => f.id === userId) : false
           }
         })
         delete followshipsData.follower
+        console.log(followshipsData)
         return res.status(200).json(followshipsData)
       }
     } catch (error) {
