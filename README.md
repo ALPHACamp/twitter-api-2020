@@ -113,6 +113,6 @@ user5
 ## Contributor 專案開發人員
 [Joy-Chang](https://github.com/Joy-Chang-2021)<br>
 [MuChuan-Hung](https://github.com/muchuanhung)<br>
-[Iun](https://github.com/zheRoom)<br>
+[Lun](https://github.com/zheRoom)<br>
 [Lena](https://github.com/hmrvc) <br>
 [deansyue](https://github.com/deansyue)
