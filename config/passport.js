@@ -15,9 +15,7 @@ passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   // 使用payload的id資料尋找user資料，並關連其他model
   User.findByPk(jwtPayload.id, {
     include: [
-      { model: Tweet },
-      { model: Like, include: Tweet },
-      { model: Reply, include: Tweet },
+      Like,
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
     ]
