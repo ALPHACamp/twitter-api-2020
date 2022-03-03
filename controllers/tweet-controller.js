@@ -24,9 +24,9 @@ const tweetController = {
       const userId = req.user.id
       const returnTweets = tweets.map(tweet => {
         const returnTweet = tweet.toJSON()
-        returnTweet.repliesCount = returnTweet.Replies.length
-        returnTweet.likesCount = returnTweet.Likes.length
-        returnTweet.isLiked = returnTweet.Likes.some(Like => Like.UserId === userId)
+        returnTweet.replyCount = returnTweet.Replies.length
+        returnTweet.likeCount = returnTweet.Likes.length
+        returnTweet.isLike = returnTweet.Likes.some(Like => Like.UserId === userId)
         return returnTweet
       })
 
@@ -52,12 +52,12 @@ const tweetController = {
           [Reply, 'createdAt', 'DESC']
         ]
       })
-      if (!tweet) throw new Error('tweet_id does not exist.')
+      if (!tweet) throw new Error('此推文不存在')
       const userId = req.user.id
       const returnTweet = tweet.toJSON()
-      returnTweet.repliesCount = returnTweet.Replies.length
-      returnTweet.likesCount = returnTweet.Likes.length
-      returnTweet.isLiked = returnTweet.Likes.some(Like => Like.UserId === userId)
+      returnTweet.replyCount = returnTweet.Replies.length
+      returnTweet.likeCount = returnTweet.Likes.length
+      returnTweet.isLike = returnTweet.Likes.some(Like => Like.UserId === userId)
 
       return res.status(200).json(returnTweet)
     } catch (err) { next(err) }
