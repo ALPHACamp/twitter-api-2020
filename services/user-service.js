@@ -304,10 +304,11 @@ const userServices = {
     })
     if (!likes) throw new Error("This user doesn't like any tweets")
 
+    const userLikes = await getLikedTweetsIds(req)
     // Clean data
     likes = likes.map(like => ({
       ...like,
-      likedTweet: true
+      likedTweet: userLikes.includes(likes.TweetId)
     }))
 
     return likes
