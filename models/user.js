@@ -1,14 +1,25 @@
 'use strict'
+const COVER_DEFAULT = 'https://i.imgur.com/dfpDjBN.jpg'
+const AVATAR_DEFAULT = 'https://i.imgur.com/zYddUs8.png'
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     name: DataTypes.STRING,
     account: DataTypes.STRING,
-    cover: DataTypes.STRING,
-    avatar: DataTypes.STRING,
+    cover: {
+      type: DataTypes.STRING,
+      defaultValue: COVER_DEFAULT
+    },
+    avatar: {
+      type: DataTypes.STRING,
+      defaultValue: AVATAR_DEFAULT
+    },
     role: DataTypes.STRING,
-    introduction: DataTypes.TEXT
+    introduction: {
+      type: DataTypes.TEXT,
+      defaultValue: ''
+    }
   }, {
     modelName: 'User',
     tableName: 'Users'
