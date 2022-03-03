@@ -42,11 +42,11 @@ const adminController = {
       const users = await User.findAll({
         // where: { [Op.not]: [{ role: 'admin' }] },
         attributes: ['id', 'account', 'email', 'name', 'avatar', 'cover', 'introduction', 'role', 'createdAt', 'updatedAt',
-          [Sequelize.literal(`(SELECT COUNT(Tweets.UserId) FROM Tweets WHERE Tweets.UserId = User.id)`), 'tweetsCount'],
-          [Sequelize.literal(`(SELECT COUNT(Replies.UserId) FROM Replies WHERE Replies.UserId = User.id)`), 'repliesCount'],
-          [Sequelize.literal(`(SELECT COUNT(Likes.UserId) FROM Likes WHERE Likes.UserId = User.id)`), 'likesCount'],
-          [Sequelize.literal(`(SELECT COUNT(Followships.followerId) FROM Followships WHERE Followships.followerId = User.id)`), 'followingsCount'],
-          [Sequelize.literal(`(SELECT COUNT(Followships.followingId) FROM Followships WHERE Followships.followingId = User.id)`), 'followersCount']
+          [Sequelize.literal(`(SELECT COUNT(Tweets.UserId) FROM Tweets WHERE Tweets.UserId = User.id)`), 'TweetsCount'],
+          [Sequelize.literal(`(SELECT COUNT(Replies.UserId) FROM Replies WHERE Replies.UserId = User.id)`), 'repliedCount'],
+          [Sequelize.literal(`(SELECT COUNT(Likes.UserId) FROM Likes WHERE Likes.UserId = User.id)`), 'likedCount'],
+          [Sequelize.literal(`(SELECT COUNT(Followships.followerId) FROM Followships WHERE Followships.followerId = User.id)`), 'followingCount'],
+          [Sequelize.literal(`(SELECT COUNT(Followships.followingId) FROM Followships WHERE Followships.followingId = User.id)`), 'followedCount']
         ],
         order: Sequelize.literal('TweetsCount DESC'),
         raw: true,
