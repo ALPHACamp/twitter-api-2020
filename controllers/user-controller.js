@@ -54,15 +54,32 @@ const userController = {
       })
       .catch(error => next(error))
   },
-  getUser: (req, res, next) => {
-    const userId = Number(req.params.id)
-    User.findByPk(userId)
-      .then(user => {
-        if (!user) throw new Error('帳號不存在')
-        // if (user.role === 'admin') throw new Error('帳號不存在！')
-        return res.status(200).json(user)
+  getUser: async (req, res, next) => {
+    try {
+      const targetUserId = req.params.id
+      const selfUserId = helpers.getUser(req).id
+
+      let user = await User.findByPk(targetUserId, {
+        attributes: { exclude: ['password'] },
+        include: [{
+          model: User,
+          as: 'Followers',
+          where: { id: selfUserId },
+          required: false
+        }],
+        nest: true
       })
-      .catch(err => next(err))
+      user = user.toJSON()
+
+      // add isFollowed
+      user.isFollowed = Boolean(user.Followers.length)
+
+      delete user.Followers
+
+      return res.status(200).json(user)
+    } catch (err) {
+      next(err)
+    }
   },
   putUser: async (req, res, next) => {
     try {

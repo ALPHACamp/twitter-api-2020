@@ -52,16 +52,47 @@ PORT=3000
 
 #### 資料庫
 
-1. 設定 MySQL 連線資訊: 
+1. 設定 MySQL 連線資訊: 在 ./config/config.json，請確保MySQL Server帳號密碼與username、password一致
+```
+  "development": {
+    "username": "root",
+    "password": "password",
+    "database": "ac_twitter_workspace",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": "password",
+    "database": "ac_twitter_workspace_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  }
+```
+
+2. 登入MySQL Workbench後，在SQL File輸入並執行
+```
 create database ac_twitter_workspace
 create database ac_twitter_workspace_test
+```
+3. 建立資料庫table，在終端機輸入
+```
 npx sequelize db:migrate
+```
+4. 建立種子資料
+```
 npx sequelize db:seed:all
+```
 
 #### 啟動本地端伺服器
 需先安裝 [nodemon](https://www.npmjs.com/package/nodemon)
 ```
 npm run dev
+```
+#### 成功執行
+```
+Example app listening on port <PORT>
 ```
 #### 測試帳號
 ```
@@ -92,8 +123,6 @@ password: 12345678
 
 
 ## 本次專案人員
-Abbie 前端
-Miki  前端
-Rain  後端
-Kemal 後端
+[Rain](https://github.com/lcy101u)  
+[Kemal](https://github.com/Kemal-Wuzhi) 
 
