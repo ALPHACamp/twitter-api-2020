@@ -176,6 +176,7 @@ module.exports = {
             where: { id: selfUserId }, required: false
           }
         ],
+        order: [['createdAt', 'DESC']],
         nest: true,
       })
 
