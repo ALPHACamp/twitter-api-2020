@@ -23,10 +23,8 @@ vi .env
 
 修改以下資訊
 ```
-PORT=3000 // Port號
 IMGUR_CLIENT_ID=SKIP //圖片圖床 imgur 請至imgur申請
 JWT_SECRET=alphacamp
-SESSION_SECRET=SKIP
 ```
 esc + :wq 存檔離開
 
