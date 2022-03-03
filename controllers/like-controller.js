@@ -64,7 +64,6 @@ const likeController = {
   },
   postUnlike: async (req, res, next) => {
     const { id } = helpers.getUser(req)
-
     try {
       const { id } = helpers.getUser(req)
       const tweet = await Tweet.findByPk(req.params.id)
@@ -84,7 +83,7 @@ const likeController = {
       }
       if (!like) {
         return res
-          .status(404)
+          .status(400)
           .json({
             status: 'error',
             message: '沒有喜歡過的紀錄'
@@ -100,16 +99,7 @@ const likeController = {
           message: 'Unlike成功!'
         })
       }
-      // if (like.isDeleted) {
-      //   return res
-      //     .status(400)
-      //     .json({
-      //       status: 'error',
-      //       message: '已經按過Unlike囉'
-      //     })
-      // } else {
-      //   await like.update({isDeleted: true})
-      // }
+    // await like.update({isDeleted: true})
     } catch (error) {
       res.status(500).json({
         status: 'error',
