@@ -175,8 +175,13 @@ const userServices = {
         message: 'Introduction must not exceed 160 words.'
       }
 
-    // User didn't change password
+    // Check if it's initial intro
+    if (!introduction) {
+      introduction === user.introduction
+    }
+    
     if (password === user.password) {
+      // User didn't change password
       password = null
     }
 
@@ -184,14 +189,9 @@ const userServices = {
       email,
       password: password ? bcrypt.hashSync(password, 10) : user.password,
       name,
-      account
+      account,
+      introduction
     })
-
-    if (introduction) {
-      await user.update({
-        introduction
-      })
-    }
 
     // If user uploads images
     const images = {}
