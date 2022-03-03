@@ -300,7 +300,6 @@ const userController = {
           ]
         }
       })
-      console.log(followship)
       if (!user) {
         return res
           .status(404)
