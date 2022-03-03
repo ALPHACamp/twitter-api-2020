@@ -276,6 +276,7 @@ const userServices = {
     return User.findByPk(req.params.id)
       .then(user => {
         const { files } = req
+        const introduction = req.body.introduction.replace(/\r\n|\n/g, ' ')
         // 有上傳封面或頭像
         if (JSON.stringify(files) !== '{}' && files !== undefined) {
           return Promise.all([
@@ -285,7 +286,7 @@ const userServices = {
             .then(([coverFilePath, avatarFilePath]) => {
               return user.update({
                 name: req.body.name !== undefined ? req.body.name : user.toJSON().name,
-                introduction: req.body.introduction !== undefined ? req.body.introduction : user.toJSON().introduction,
+                introduction: introduction !== undefined ? introduction : user.toJSON().introduction,
                 cover: coverFilePath || user.toJSON().cover,
                 avatar: avatarFilePath || user.toJSON().avatar
               })
@@ -293,7 +294,7 @@ const userServices = {
         } else {
           return user.update({
             name: req.body.name !== undefined ? req.body.name : user.toJSON().name,
-            introduction: req.body.introduction !== undefined ? req.body.introduction : user.toJSON().introduction
+            introduction: introduction !== undefined ? introduction : user.toJSON().introduction
           })
         }
       })
