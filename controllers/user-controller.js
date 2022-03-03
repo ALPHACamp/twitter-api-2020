@@ -69,8 +69,10 @@ const userController = {
       const targetUserId = Number(req.params.id)
       const currentUserId = helpers.getUser(req).id
       const user = await User.findByPk(targetUserId)
-      const { name, introduction } = req.body
+      const { name, introduction, cover, avatar } = req.body
       const { files } = req
+      console.log(cover)
+      console.log(avatar)
 
       if (targetUserId !== currentUserId) {
         return res.status(400).json({
@@ -78,11 +80,12 @@ const userController = {
           message: '使用者只能修改自己的資料'
         })
       }
-
-      const uploadAvatar = files && files.cover
+      let uploadAvatar = ''
+      let uploadCover = ''
+      uploadAvatar = files && files.cover
         ? await imgurFileHandler(files.cover[0])
         : user.cover
-      const uploadCover = files && files.cover
+      uploadCover = files && files.cover
         ? await imgurFileHandler(files.cover[0])
         : user.cover
 
