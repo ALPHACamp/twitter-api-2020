@@ -9,12 +9,12 @@ const followshipController = {
     const { id } = req.body
 
     // 檢查followingId非登入者
-    if (currentUser.id === Number(id)) throw new Error('不可追隨自已!')
+    if (currentUser.id === Number(id)) return res.json({ status: 'error', message: '不可追隨自已!' })
 
     return User.findByPk(id, { attributes: ['id'] })
       .then(user => {
         // 檢查followingId使用者是否存在
-        if (!user) return res.json({ status: 'error', message: '使用者不存在!'})
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
 
         // 查詢條件資料是否存在，沒有在新增資料
         return Followship.findOrCreate({
