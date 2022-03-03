@@ -4,11 +4,14 @@
 [![ORM](https://img.shields.io/badge/ORM-Sequelize-steelblue.svg)](https://www.npmjs.com/package/mysql)
 [![Database](https://img.shields.io/badge/Database-MySQL-lightblue.svg)](https://www.npmjs.com/package/mysql)
 
-一個後端 API 伺服器，提供類似 Twitter 的社群媒體服務功能，例如發佈推文、點讚、或是追隨等動作，主要使用技術包含 Node.js + Express + passport + bcryptjs + Sequelize。
+此為簡易推特專案(`Simple Twitter`)專用的一個後端 API 伺服器，提供類似 Twitter 的社群媒體服務功能，例如發佈推文、點讚、或是追隨等動作，主要使用技術包含 Node.js + Express + passport + bcryptjs + Sequelize。
+
+<span style="color: red">注意:</span> `簡易推特專案一共需要前端網頁以及後端API伺服器，而此 Github Repo 頁面為後端 Repo，如果要前往前端 Github Repo 的頁面，請看接下來的前後端協作資訊，裡面有前端 Github Repo 連結。`
 
 <br>
 
 - 前後端協作資訊:
+  - [前端 Github Repo 連結](https://github.com/ChiaLine/Simple-Twitter)
   - [ERD 資訊連結](https://app.quickdatabasediagrams.com/#/d/BdkVRy)
   - [API 文件連結](https://app.swaggerhub.com/apis-docs/Richie-Yang/simpleTwitter/1.0.0-oas3)
 
@@ -68,7 +71,7 @@
 ## <strong>安裝步驟</strong>
 <br>
 
-> 1. 請先確認本機<strong style="color: red">已經安裝環境建置需求</strong>裡面的所有軟體項目。
+> 1. 請先確認本機<strong style="color: red">已經達到環境建置需求</strong>裡面的所有需求項目。
 
 <br>
 
@@ -155,9 +158,10 @@ npm run start
 ```
 
 > 2. 在到前台的頁面之前，請先確認以下的項目。
->> <ol>2-1. 如果，你的前台和後台都是建立在同一台本機上，前台需要確定界接的 API 網址是否為 127.0.0.1:<指定伺服器通訊埠></ol>
->> <ol>2-2. 如果，你的前台和後台都是建立不同的主機上面，前台需要確定界接的 API 網址是否為 <主機 IP address>:<指定伺服器通訊埠></ol>
->> <ol>2-3. 承接 2-2 的情境，如果前台後台分別在不同主機上面，需要確認後台所屬主機的防火牆是否允許前台存取。</ol>
+>> <ol>2-1. 前台如果還沒建立，記得先到我們<a href="https://github.com/ChiaLine/Simple-Twitter" target="_blank">前台的 Github Repo 連結</a>，依照前台 README.md 提供的步驟建立前台網站。</ol>
+>> <ol>2-2. 如果，你的前台和後台都是建立在同一台本機上，前台需要確定界接的 API 網址是否為 127.0.0.1:<指定伺服器通訊埠></ol>
+>> <ol>2-3. 如果，你的前台和後台都是建立不同的主機上面，前台需要確定界接的 API 網址是否為 <後台主機 IP address>:<指定伺服器通訊埠></ol>
+>> <ol>2-4. 承接 2-3 的情境，如果前台後台分別在不同主機上面，需要確認後台所屬主機的防火牆是否允許前台存取。</ol>
 
 > 3. 接著可以來到前台的頁面，使用以下種子帳號進行登入。
 
@@ -186,11 +190,16 @@ password : 12345678
 <br>
 <br>
 
-## <strong>參與專案協作者</strong>
-- 靜易 - [個人 Github 連結](https://github.com/z88243310)
-- Richie - [個人 Github 連結](https://github.com/Richie-Yang)
+## <strong>感謝，參與此次專案的協作者們，大家辛苦了!</strong>
+| 組員 | 負責範圍 | 個人 Github 連結 |
+| --- | --- | --- | 
+| Egg | 前端 | https://github.com/ChiaLine |
+| 罐子 Kuan | 前端 | https://github.com/Kanmurio406 |
+| Christine | 前端 | https://github.com/Christinnne |
+| 靜易 | 後端 | https://github.com/z88243310 |
+| Richie | 後端 | https://github.com/Richie-Yang |
 
 <br>
 <br>
 
-<p style="text-align: right; font-size: 1.2em">更新時間 : 2021.03.01</p>
+<p style="font-size: 1.2em">更新時間 : 2021.03.03</p>
