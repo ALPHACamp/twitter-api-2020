@@ -88,7 +88,7 @@ const userController = {
 
     })
       .then(user => {
-        if (!user) throw new Error('使用者不存在!')
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
         user = user.toJSON()
         const data = {
           id: user.id,
@@ -195,7 +195,7 @@ const userController = {
       })
     ])
       .then(([user, likes]) => {
-        if (!user) throw new Error('使用者不存在!')
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
         likes = likes.map(like => ({
           ...like.dataValues,
           likeCount: like.dataValues.Tweet.Likes ? like.dataValues.Tweet.Likes.length : 0,
