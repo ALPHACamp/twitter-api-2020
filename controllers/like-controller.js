@@ -1,8 +1,11 @@
 const { Like, Tweet, User } = require('../models')
+const helpers = require('../_helpers')
 const likeController = {
   postLike: async (req, res, next) => {
     try {
       const tweet = await Tweet.findByPk(req.params.id)
+      const { id } = helpers.getUser(req)
+
       if (!tweet) {
         return res
           .status(404)
@@ -13,13 +16,13 @@ const likeController = {
       }
       const like = await Like.findOne({
         where: {
-          UserId: req.user.id,
+          UserId: id,
           TweetId: req.params.id
         }
       })
       if (!like) {
         const likeData = await Like.create({
-          UserId: req.user.id,
+          UserId: id,
           TweetId: req.params.id,
           isDeleted: false
         })
@@ -27,7 +30,8 @@ const likeController = {
         const tweetFind = await Tweet.findByPk(tweet.id)
         const user = await User.findByPk(tweetFind.UserId)
         await user.increment('likedCount')
-        res.status(200).json(likeData)
+        console.log(likeData)
+        return res.status(200).json(likeData.dataValues)
       } else if (like && like.isDeleted === true) {
         await like.update({
           isDeleted: !like.isDeleted
