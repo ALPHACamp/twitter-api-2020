@@ -1,5 +1,6 @@
 const { Tweet, User, Like } = require('../models')
-const tweet = require('../models/tweet')
+const helpers = require('../_helpers')
+
 const tweetController = {
   getTweets: (req, res) => {
     Tweet.findAll({
@@ -9,7 +10,7 @@ const tweetController = {
       include: [
         {
           model: User,
-          attributes: ['id', 'account', 'name', 'avatar'],
+          attributes: ['id', 'account', 'name', 'avatar']
         },
         {
           model: User,
@@ -19,10 +20,11 @@ const tweetController = {
       ]
     })
       .then((tweets) => {
+        console.log(helpers.getUser(req).LikedTweets)
         const tweetsLiked = tweets.map(tweet => ({
           ...tweet,
-          isLiked: req.user.LikedTweets.some(f => f.id === tweet.id)
-          && tweet.LikedUsers.Like.isDeleted !== 1 
+          isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id)
+          // && tweet.LikedUsers.Like.isDeleted !== 1
         }))
         return res.status(200).json(tweetsLiked) 
       })
@@ -50,7 +52,7 @@ const tweetController = {
       }),
       Like.findOne({
         where: {
-          UserId: req.user.id,
+          UserId: helpers.getUser(req).id,
           TweetId: req.params.id
         }
       })
@@ -64,7 +66,7 @@ const tweetController = {
         } else {
           const tweetsLiked = {
             ...tweet.toJSON(),
-            isLiked: req.user.LikedTweets.some(f => f.id === tweet.id) 
+            isLiked: helpers.getUser(req).LikedTweets.some(f => f.id === tweet.id) 
             && like.isDeleted !== true
           }
           return res.status(200).json(tweetsLiked)
@@ -77,7 +79,7 @@ const tweetController = {
   },
   postTweet: async (req, res) => {
     const { description } = req.body
-    const UserId = req.user.id
+    const UserId = helpers.getUser(req).id
     if (!description) {
       return res
         .status(400)
