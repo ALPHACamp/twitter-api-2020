@@ -9,6 +9,7 @@ router.get('/:id/replied_tweets', authenticated, userController.getRepliedTweets
 router.get('/:id/likes', authenticated, userController.getLikes)
 router.get('/:id/followings', authenticated, userController.getUserFollowings)
 router.get('/:id/followers', authenticated, userController.getUserFollowers)
+router.put('/:id/settings', authenticated, userController.putUserSettings)
 router.get('/top', authenticated, userController.getTopUsers)
 router.get('/current_user', authenticated, userController.getCurrentUser)
 router.get('/:id', authenticated, userController.getUser)

@@ -73,8 +73,46 @@ const userController = {
         if (!user) throw new Error('帳號不存在！')
         return user.update({ name, introduction, avatar, cover })
       })
-      .then(updatedUser => res.status(200).json({ user: updatedUser }))
+      .then(user => res.status(200).json({
+        status: 'success',
+        message: '成功更新資料',
+        data: user
+      }))
       .catch(err => next(err))
+  },
+  putUserSettings: async (req, res, next) => {
+    try {
+      const { name, account, email, password, checkPassword } = req.body
+      const currentUserId = helpers.getUser(req).id
+      const targetUserId = Number(req.params.id)
+      if (currentUserId !== targetUserId) {
+        return res.status(400).json({
+          status: 'error',
+          message: '只能更新自己的資料'
+        })
+      }
+
+      // 判斷Account、Email 是唯一
+      const [isExistAccount, isExistEmail] = await Promise.all([
+        User.findOne({ attributes: ['id', 'account'], where: { account } }),
+        User.findOne({ attributes: ['id', 'email'], where: { email } })
+      ])
+      if (isExistAccount) throw new Error('此 account 已被註冊')
+      if (isExistEmail) throw new Error('此 email 已被註冊')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符！')
+      await User.update({
+        name,
+        account,
+        email,
+        password: bcrypt.hashSync(password, 10)
+      }, { where: { id: targetUserId } })
+      const result = { name, account, email }
+      return res.status(200).json({
+        status: 'success',
+        message: '資料修改成功',
+        data: result
+      })
+    } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
     const userId = Number(req.params.id)
