@@ -8,9 +8,8 @@ const tweetController = {
       order: [['createdAt', 'desc']],
       include: [
         {
-          model:User,
+          model: User,
           attributes: ['id', 'account', 'name', 'avatar'],
-          // as:'TweetAuthor'
         },
         {
           model: User,
@@ -19,12 +18,13 @@ const tweetController = {
         }
       ]
     })
-      .then(tweets => { 
+      .then((tweets) => {
         const tweetsLiked = tweets.map(tweet => ({
           ...tweet,
           isLiked: req.user.LikedTweets.some(f => f.id === tweet.id)
+          && tweet.LikedUsers.Like.isDeleted !== 1 
         }))
-        return res.status(200).json(tweetsLiked)
+        return res.status(200).json(tweetsLiked) 
       })
       .catch((error) => res.status(500).json({
         status: 'error',
