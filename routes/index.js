@@ -12,7 +12,7 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 router.use('/admin', admin)
 router.use('/users', users)
 router.use('/tweets', tweets)
-router.use('/followship', followship)
+router.use('/followships', followship)
 
 router.get('/currentuser', authenticated, userController.getCurrentUser)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
