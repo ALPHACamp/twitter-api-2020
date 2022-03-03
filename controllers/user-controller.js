@@ -314,13 +314,6 @@ const userController = {
             'name',
             'avatar',
             'introduction'
-          ],
-          include: [
-            {
-              model: User,
-              as: 'Followers',
-              attributes: ['id']
-            }
           ]
         }
       })
