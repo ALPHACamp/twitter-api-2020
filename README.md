@@ -1,7 +1,7 @@
 # 簡易推特 API
 
 [![Framework](https://img.shields.io/badge/Framework-Express-aliceblue.svg)](https://www.npmjs.com/package/express)
-[![ORM](https://img.shields.io/badge/ORM-Sequelize-steelblue.svg)](https://www.npmjs.com/package/mysql)
+[![ORM](https://img.shields.io/badge/ORM-Sequelize-steelblue.svg)](https://www.npmjs.com/package/sequelize)
 [![Database](https://img.shields.io/badge/Database-MySQL-lightblue.svg)](https://www.npmjs.com/package/mysql)
 
 此為簡易推特專案(`Simple Twitter`)專用的一個後端 API 伺服器，提供類似 Twitter 的社群媒體服務功能，例如發佈推文、點讚、或是追隨等動作，主要使用技術包含 Node.js + Express + passport + bcryptjs + Sequelize。
@@ -55,13 +55,14 @@
 - Node.js 14.16.X
   - [下載連結](https://nodejs.org/dist/v14.16.0/)
 - 終端機工具 Terminal、CMD、Git Bash
-  - <span style="color: red">注意:</span> `只需要上述的終端機工具項目其中一個即可`
+  - <span style="color: red">注意:</span> `只需要上述的終端機工具項目其中一個即可，但是如果您是使用 Windows 作業系統，我們非常建議使用 Git Bash。`
   - [Git Bash下載連結](https://gitforwindows.org/)
 - MySQL Community Server 8.0.15
   - [下載連結](https://downloads.mysql.com/archives/installer/)
 - MySQL Workbench 8.0.15 
-  - <span style="color: red">注意:</span> `安裝 MySQL Community Server 時選擇同時安裝 Workbench`
+  - <span style="color: red">注意:</span> `安裝 MySQL Community Server 時選擇同時安裝 Workbench。`
 - Imgur 第三方雲端圖片分享服務商的 API Client ID 
+  - <span style="color: red">注意:</span> `申請 API Client ID 之前，您必須先到 Imgur 註冊成為會員，然後才透過以下連結來申請 API。`
   - [官方網站連結](https://imgur.com/) 
   - [申請 API 步驟](https://apidocs.imgur.com/)
 
@@ -126,22 +127,22 @@ IMGUR_CLIENT_ID=<輸入 Imgur 第三方圖片服務的 Client ID>
 <br>
 
 > 7. 在 MySQL Workbench 裡面先行建立資料庫。
->> <ol>7-1. 須先確定 MySQL 服務已經啟動，並且透過 MySQL Workbench 成功登入資料庫。</ol>
->> <ol>7-2. 輸入以下 SQL 指令，並且點擊閃電圖示直接執行 SQL 指令。</ol>
+>> <ol>7-1. 須先確定 MySQL 服務已經啟動，並且透過 MySQL Workbench 可以成功登入資料庫。</ol>
+>> <ol>7-2. 在 MySQL Workbench 軟體裡面輸入以下 SQL 指令，並且點擊閃電圖示直接執行 SQL 指令。</ol>
 ```sql
 CREATE DATABASE ac_twitter_workspace;
 ```
 
 <br>
 
-> 8. 執行資料庫的遷徙檔案。
+> 8. 回到終端機畫面或是 Git Bash，輸入以下指令執行資料庫的遷徙檔案。
 ```text
 npx sequelize db:migrate
 ```
 
 <br>
 
-> 9. 執行資料庫的種子檔案。
+> 9. 在終端機畫面上或是 Git Bash，輸入以下指令執行資料庫的種子檔案。
 ```text
 npx sequelize db:seed:all
 ```
@@ -169,16 +170,32 @@ npm run start
 <br>
 
 ## <strong>種子資料</strong>
-> 1. root (這個帳號只能使用於後台)
+> 1. 一個管理員帳號密碼 (這個帳號只能使用於後台)
 ```text
-account : root
-password : 12345678
+account: root
+password: 12345678
 ```
 
-> 2. user1 (這個帳號只能使用於前台)
+> 2. 五個使用者帳號密碼 (這個帳號只能使用於前台)
 ```text
-account : user1
-password : 12345678
+account: user1
+password: 12345678
+```
+```text
+account: user2
+password: 12345678
+```
+```text
+account: user3
+password: 12345678
+```
+```text
+account: user4
+password: 12345678
+```
+```text
+account: user5
+password: 12345678
 ```
 
 <br>
