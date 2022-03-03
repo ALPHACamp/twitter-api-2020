@@ -19,7 +19,7 @@ module.exports = {
       },
       avatar: {
         type: Sequelize.STRING,
-        defaultValue: "https://upload.wikimedia.org/wikipedia/zh/4/49/Nobi_Nobita.png"
+        defaultValue: "https://i.imgur.com/Tjgb68w.png"
       },
       introduction: {
         type: Sequelize.TEXT
