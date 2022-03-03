@@ -8,11 +8,12 @@ const tweetController = {
     // 找到所有推文，並關連User
     Tweet.findAll({
       include: [
-        User,
-        Reply,
-        Like
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Reply, attributes: ['id'] },
+        { model: Like, attributes: ['id'] }
       ],
-      order: [['createdAt', 'DESC']],
+      attributes: ['id', 'description', 'createdAt'],
+      order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         const data = tweets.map(tweet => {
@@ -43,9 +44,10 @@ const tweetController = {
     // 以tweet_id取得Tweet推文，並關連Reply-User
     Tweet.findByPk(req.params.tweet_id, {
       include: [
-        User,
-        Like,
-      ]
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Like, attributes: ['id'] },
+      ],
+      attributes: ['id', 'description', 'createdAt']
     })
       .then(tweet => {
         // 檢查推文是否存在
@@ -79,16 +81,15 @@ const tweetController = {
     const { description } = req.body
 
     // 檢查description不可空白
-    if (!description.trim()) throw new Error('推文內容不可是空白的!')
+    if (!description.trim()) return res.json({ status: 'error', message: '推文內容不可是空白的!' })
 
     // 使用helpers.getUser取得登入者id，取得登入者使用者資料
     return User.findByPk(helpers.getUser(req).id, {
-      raw: true,
-      nest: true
+      attributes: ['id']
     })
       .then(user => {
         // 檢查使用者是否存在
-        if (!user) throw new Error('使用者不存在!')
+        if (!user) return res.json({ status: 'error', message: '使用者不存在!' })
 
         // 將UserId與description 儲存進tweet資料庫
         return Tweet.create({
