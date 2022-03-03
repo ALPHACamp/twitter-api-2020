@@ -1,9 +1,11 @@
 const { Followship, User } = require('../models')
+const helpers = require('../_helpers')
 const followshipController = {
   addFollowing: async (req, res, next) => {
     try {
+      const { id } = helpers.getUser(req)
       const userFollowing = await User.findByPk(req.params.id)
-      const userFollower = await User.findByPk(req.user.id)
+      const userFollower = await User.findByPk(id)
       if (!userFollowing) {
         return res
           .status(404)
@@ -23,7 +25,7 @@ const followshipController = {
       const followingUser = await Followship.findOne({
         where: {
           followingId: req.params.id,
-          followerId: req.user.id
+          followerId: id
         }
       })
       if (followingUser) {
@@ -35,7 +37,7 @@ const followshipController = {
           })
       }
       const followship = await Followship.create({
-        followerId: req.user.id,
+        followerId: id,
         followingId: req.params.id
       })
       if (followship) {
@@ -55,8 +57,9 @@ const followshipController = {
   },
   removeFollowing: async (req, res, next) => {
     try {
+      const { id } = helpers.getUser(req)
       const userFollowing = await User.findByPk(req.params.id)
-      const userFollower = await User.findByPk(req.user.id)
+      const userFollower = await User.findByPk(id)
       if (!userFollowing) {
         return res
           .status(404)
@@ -65,7 +68,7 @@ const followshipController = {
             message: '您要取消追蹤的使用者不存在'
           })
       }
-      if (req.user.id == req.params.id) {
+      if (id == req.params.id) {
         return res
           .status(400)
           .json({
@@ -76,7 +79,7 @@ const followshipController = {
       const followingUser = await Followship.findOne({
         where: {
           followingId: req.params.id,
-          followerId: req.user.id
+          followerId: id
         }
       })
       if (!followingUser) {

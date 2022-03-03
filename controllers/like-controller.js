@@ -30,8 +30,8 @@ const likeController = {
         const tweetFind = await Tweet.findByPk(tweet.id)
         const user = await User.findByPk(tweetFind.UserId)
         await user.increment('likedCount')
-        console.log(likeData)
-        return res.status(200).json(likeData.dataValues)
+        return res.status(200).json(likeData)
+        
       } else if (like && like.isDeleted === true) {
         await like.update({
           isDeleted: !like.isDeleted
@@ -57,11 +57,13 @@ const likeController = {
     }
   },
   postUnlike: async (req, res, next) => {
+    const { id } = helpers.getUser(req)
+
     try {
       const tweet = await Tweet.findByPk(req.params.id)
       const like = await Like.findOne({
         where: {
-          UserId: req.user.id,
+          UserId: id,
           TweetId: req.params.id
         }
       })
