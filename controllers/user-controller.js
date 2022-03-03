@@ -83,7 +83,6 @@ const userController = {
           userData.isFollowed = false
         }
         delete userData.password
-        console.log(userData)
         res.json(userData)
       }
     } catch (err) { next(err) }
@@ -354,8 +353,9 @@ const userController = {
             // isFollowed: follower.Followers.id ? follower.Followers.some(f => f.id === userId) : false
           }
         })
-        delete followshipsData.follower
-        console.log(followshipsData)
+        // delete followshipsData.follower
+        // console.log('====================')
+        // console.log(followshipsData)
         return res.status(200).json(followshipsData)
       }
     } catch (error) {
