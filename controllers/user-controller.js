@@ -237,7 +237,7 @@ const userController = {
       .then(([user, likes]) => {
         if (!user) throw new Error('帳號不存在!')
         if (likes.length === 0) throw new Error('使用者並未喜歡任何推文!')
-        const userLikes = likes.map(like => ({ ...like.toJSON(), isLiked: true }))
+        const userLikes = likes.map(like => ({ ...like.toJSON(), isLike: true }))
         return res.status(200).json(userLikes)
       })
       .catch(err => next(err))
