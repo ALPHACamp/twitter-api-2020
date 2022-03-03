@@ -3,6 +3,7 @@
 
 ## 初始化
 
+進入終端機
 ### 將專案複製到本機
 ```
 git clone https://github.com/dandywhy/twitter-api-2020.git
@@ -27,15 +28,18 @@ IMGUR_CLIENT_ID=SKIP //圖片圖床 imgur 請至imgur申請
 JWT_SECRET=SKIP 
 SESSION_SECRET=SKIP
 ```
-shift + :wq 存檔離開
+esc + :wq 存檔離開
 
 ### 建立資料庫
 
 建立MySQL資料庫，需與config/config.json中的development和test的database名字一致
+以下是MySQL中的指令
 ```
 create database ac_twitter_workspace;
 create database ac_twitter_workspace_test;
 ```
+
+以下為終端機頁面，進入專案資料夾
 
 資料庫內新增資料表(Table) 與關聯
 ```
