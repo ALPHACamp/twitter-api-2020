@@ -271,10 +271,11 @@ const userController = {
   getUserFollowers: async (req, res, next) => {
     try {
       const user = await User.findByPk(req.params.id)
-      const followship = await Followship.findAll({
+      const followships = await Followship.findAll({
         where: {
           followingId: req.params.id
         },
+        order: [['createdAt', 'desc']],
         include: {
           model: User,
           as: 'follower',
@@ -284,10 +285,8 @@ const userController = {
             'name',
             'avatar',
             'introduction'
-          ],
-        },
-        attributes: ['id', 'followingId', 'followerId', 'createdAt'],
-        order: [['createdAt', 'desc']]
+          ]
+        }
       })
       if (!user) {
         return res
@@ -297,7 +296,7 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      if (followship.length === 0) {
+      if (followships.length === 0) {
         return res
           .status(400)
           .json({
@@ -305,12 +304,19 @@ const userController = {
             message: '此使用者沒有跟隨者'
           })
       } else {
-        const userFollowers = followship
-          .map(userFollower => ({
-            ...userFollower.toJSON(),
-            isFollowed: req.user.Followers.some(f => f.id === userFollower.id)
-          }))
-        return res.status(200).json(userFollowers)
+        followshipsData = followships.map((followship) => {
+          const { id, followerId, followingId, createdAt, updatedAt, follower} = followship
+          return {
+            id,
+            followerId,
+            followingId,
+            createdAt,
+            updatedAt,
+            follower,
+            isFollowed: followship.followerId === helpers.getUser(req).id
+          }
+        })
+        return res.status(200).json(followshipsData)
       }
     } catch (error) {
       res.status(500).json({

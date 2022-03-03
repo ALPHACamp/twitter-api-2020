@@ -32,7 +32,7 @@ const tweetController = {
             createdAt,
             updatedAt,
             User,
-            isLiked: tweet.LikedUsers.Like.UserId === helpers.getUser(req).id,
+            isLiked: tweet.LikedUsers.Like.UserId === helpers.getUser(req).id
           }
         })
         return res.status(200).json(tweets)
