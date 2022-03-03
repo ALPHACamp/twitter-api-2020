@@ -69,7 +69,7 @@ const userController = {
       const following = await Followship.findAndCountAll({ where: { followerId: id }, raw: true, nest: true })
       const followers = await Followship.findAndCountAll({ where: { followingId: id }, raw: true, nest: true })
       const tweets = await Tweet.findAndCountAll({ where: { UserId: id }, raw: true, nest: true })
-      const followersId = followers.rows.map(follower => follower.id) || []
+      const followersId = followers.rows.map(follower => follower.followerId) || []
       const isFollowing = followersId.includes(userId)
       const isUser = Boolean(userId === id)
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
