@@ -67,11 +67,23 @@ const userController = {
       const userData = await User.findByPk(id, {
         raw: true
       })
-      if (!userData) throw new Error('User not found!')
-
-      delete userData.password
-
-      res.json(userData)
+      const followship = await Followship.findOne({
+        where: {
+          followerId: req.user.id,
+          followingId: id
+        }
+      })
+      if (!userData) {
+        throw new Error('User not found!')
+      } else {
+        if (followship) {
+          userData.isFollowed = true
+        } else {
+          userData.isFollowed = false
+        }
+        delete userData.password
+        res.json(userData)
+      }
     } catch (err) { next(err) }
   },
   getUserTweets: async (req, res, next) => {
