@@ -29,6 +29,7 @@ JWT_SECRET=SKIP
 SESSION_SECRET=SKIP
 ```
 esc + :wq 存檔離開
+JWT_SECRET
 
 ### 建立資料庫
 
