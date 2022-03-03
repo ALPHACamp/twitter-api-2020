@@ -26,20 +26,20 @@ vi .env
 IMGUR_CLIENT_ID=SKIP //圖片圖床 imgur 請至imgur申請
 JWT_SECRET=alphacamp
 ```
-esc + :wq 存檔離開
+esc跳脫編輯模式，shift + :wq 存檔離開
 
 ### 建立資料庫
 
 建立MySQL資料庫，需與config/config.json中的development和test的database名字一致  
-以下是MySQL中的指令
+請將以下指令輸入MySQL中的script並執行（閃電按鈕）
 ```
-create database ac_twitter_workspace;
-create database ac_twitter_workspace_test;
+create database ac_twitter_workspace; 
+create database ac_twitter_workspace_test; 
 ```
 
-以下回到終端機頁面，進入專案資料夾. 
+接著請回到終端機頁面，進入專案資料夾   
 
-資料庫內新增資料表(Table) 與關聯
+在資料庫內新增資料表(Table) 與關聯
 ```
 npx sequelize db:migrate
 ```
@@ -62,6 +62,11 @@ npx sequelize db:seed:undo:all
 ### 啟動本機端伺服器
 ```
 npm run dev
+```
+
+＊若跑出「沒有安裝nodemon」的相關錯誤，則重新安裝
+```
+npm install nodemon
 ```
 
 ## 遠端若有更新，要拉到本地端時
