@@ -26,5 +26,8 @@ app.use('/api', router)
 server.listen(PORT, () =>
   console.log(`Alphitter api server listening on port ${PORT}!`)
 )
+app.get('/', (req, res) => {
+  res.sendFile(`${__dirname}/public/index.html`)
+})
 
 module.exports = app
