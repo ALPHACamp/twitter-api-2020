@@ -279,13 +279,13 @@ const userController = {
           })
       } else {
         if (req.params.id === helpers.getUser(req).id) {
-          followshipsData = followships.map((followship) => {
+          const followshipsData = followships.map((followship) => {
             followship.isFollowed = true
             delete followship.following.Followers
             return followship
           })
         } else {
-          followshipsData = followships.map((followship) => {
+          const followshipsData = followships.map((followship) => {
             const follow_or_not = followship.following.Followers.id === helpers.getUser(req).id
             followship.isFollowed = follow_or_not
             delete followship.following.Followers
