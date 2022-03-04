@@ -33,7 +33,7 @@ cd twitter-api-2020
 npm install
 ```
 #### 環境設定
-依照 .env.example 中資訊範例設立 .env
+依照 .env.example 中資訊範例新增一個名稱為 .env 的檔案
 ```
 JWT_SECRET=
 IMGUR_CLIENT_ID=
