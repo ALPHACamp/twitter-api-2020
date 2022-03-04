@@ -143,7 +143,12 @@ const tweetController = {
       const UserId = helpers.getUser(req).id
       if (!comment) throw new Error('Comment text is required!')
       if (comment.length > 140) throw new Error('回應字數不可大於140字！')
-      const tweet = await Tweet.findByPk(TweetId)
+      const tweet = await Tweet.findByPk(TweetId, {
+        include: {
+          model: User,
+          attributes: ['account']
+        }
+      })
       if (!tweet) throw new Error('Tweet is not exist!')
       const reply = await Reply.create({
         TweetId,
@@ -155,7 +160,12 @@ const tweetController = {
       } else {
         res.json({
           status: 'success',
-          data: { reply: reply.toJSON() }
+          data: {
+            reply: {
+              ...reply.toJSON(),
+              replyTo: tweet.User.account
+            }
+          }
         })
       }
     } catch (err) {
