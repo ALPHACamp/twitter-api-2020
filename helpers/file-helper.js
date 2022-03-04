@@ -4,11 +4,10 @@ imgur.setClientId(IMGUR_CLIENT_ID)
 
 const imgurFileHandler = file => {
   return new Promise((resolve, reject) => {
-    if (!file) return resolve(null)
-    return imgur.uploadFile(file.path)
+    if (file === undefined) return resolve(null)
+    return imgur.uploadFile(file[0].path)
       .then(img => {
-        const imgLink = img ? img.link : null
-        return resolve(imgLink)
+        resolve(img.link || null)
       })
       .catch(err => reject(err))
   })

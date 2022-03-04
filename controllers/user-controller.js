@@ -83,25 +83,27 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const targetUserId = Number(req.params.id)
-      const currentUserId = helpers.getUser(req).id
-      const user = await User.findByPk(targetUserId)
+      let targetUserId = req.params.id
+      const currentUser = helpers.getUser(req)
+      const currentUserId = currentUser.id
+      const user = !isNaN(targetUserId) && await User.findByPk(targetUserId)
       const { name, introduction, cover, avatar } = req.body
       const { files } = req
 
+      targetUserId = Number(targetUserId)
       if (targetUserId !== currentUserId) {
         return res.status(400).json({
           status: 'error',
           message: '使用者只能修改自己的資料'
         })
       }
-      const uploadAvatar = files && files.cover
-        ? await imgurFileHandler(files.cover[0])
-        : avatar
-      const uploadCover = files && files.cover
-        ? await imgurFileHandler(files.cover[0])
-        : cover
-
+      let uploadAvatar = ''
+      let uploadCover = ''
+      const filesCover = files ? files.cover : null
+      const filesAvatar = files ? files.avatar : null
+      uploadAvatar = filesCover ? await imgurFileHandler(files.cover[0]) : currentUser.avatar
+      uploadCover = filesAvatar ? await imgurFileHandler(files.cover[0]) : currentUser.cover
+      console.log(uploadAvatar)
       await user.update({
         name,
         introduction,
