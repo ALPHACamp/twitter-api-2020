@@ -55,7 +55,7 @@ const adminController = {
       if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'travis') {
         return res.status(200).json(users)
       } else {
-        const usersSorted = users.sort((a, b) => b.tweetNum - a.tweetNum)
+        const usersSorted = users.sort((a, b) => b.tweetCount - a.tweetCount)
         const resUsers = appFunc.numToUnitHandler(usersSorted)
         return res.json({
           status: 'success',
