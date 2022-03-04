@@ -63,13 +63,14 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req).id
       const { id } = req.params
       const userData = await User.findByPk(id, {
         raw: true
       })
       const followship = await Followship.findOne({
         where: {
-          followerId: req.user.id,
+          followerId: userId,
           followingId: id
         }
       })
@@ -236,6 +237,8 @@ const userController = {
         where: {
           followerId: req.params.id
         },
+        raw: true,
+        nest: true,
         include: {
           model: User,
           as: 'following',
@@ -245,7 +248,16 @@ const userController = {
             'name',
             'avatar',
             'introduction'
-          ],
+          ], include: [
+            {
+              model: User,
+              as: 'Followings',
+              attributes: ['id'],
+              through: {
+                attributes: []
+              }
+            }
+          ]
         },
         attributes: ['id', 'followingId', 'followerId', 'createdAt'],
         order: [['createdAt', 'desc']]
@@ -267,24 +279,14 @@ const userController = {
           })
       } else {
         followshipsData = followships.map((followship) => {
-          const { id, followerId, followingId, createdAt, updatedAt, following } = followship
-          return {
-            id,
-            followerId,
-            followingId,
-            createdAt,
-            updatedAt,
-            following,
-            isFollowed: followship.followerId === helpers.getUser(req).id
-          }
+          console.log(followship.following)
+          const follow_or_not = followship.following.Followings.id !== null && followship.following.Followings.id === helpers.getUser(req)
+          console.log(follow_or_not)
+          followship.isFollowed = follow_or_not
+          delete followship.following.Followings
+          return followship
         })
         return res.status(200).json(followshipsData)
-        // const userFollowings = followship
-        // .map(userFollowing => ({
-        //   ...userFollowing.toJSON(),
-        //   isFollowed: true
-        // }))
-        // return res.status(200).json(userFollowings)
       }
     } catch (error) {
       res.status(500).json({
@@ -295,12 +297,15 @@ const userController = {
   },
   getUserFollowers: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req).id
       const user = await User.findByPk(req.params.id)
       const followships = await Followship.findAll({
         where: {
           followingId: req.params.id
         },
         order: [['createdAt', 'desc']],
+        raw: true,
+        nest: true,
         include: {
           model: User,
           as: 'follower',
@@ -310,10 +315,18 @@ const userController = {
             'name',
             'avatar',
             'introduction'
+          ],
+          include: [
+            {
+              model: User,
+              as: 'Followers',
+              attributes: ['id'],
+              through: {
+                attributes: []
+              }
+            }
           ]
-        },
-        raw: true,
-        nest: true
+        }
       })
       if (!user) {
         return res
@@ -323,7 +336,7 @@ const userController = {
             message: '使用者不存在'
           })
       }
-      if (followships.length === 0) {
+      if (!followships || followships.length === 0) {
         return res
           .status(400)
           .json({
@@ -331,18 +344,11 @@ const userController = {
             message: '此使用者沒有跟隨者'
           })
       } else {
-        console.log(followships)
         followshipsData = followships.map((followship) => {
-          const { id, followerId, followingId, createdAt, updatedAt, follower} = followship
-          return {
-            id,
-            followerId,
-            followingId,
-            createdAt,
-            updatedAt,
-            follower,
-            isFollowed: followship.followerId === helpers.getUser(req).id
-          }
+          const follow_or_not = followship.follower.Followers.id === helpers.getUser(req).id
+          followship.isFollowed = follow_or_not
+          delete followship.follower.Followers
+          return followship
         })
         return res.status(200).json(followshipsData)
       }
@@ -418,8 +424,8 @@ const userController = {
         req.body.password = hash
       }
       
-      const imgurUploadAvatar = files?.avatar ? await imgurFileHandler(files.avatar[0]) : null
-      const imgurUploadCover = files?.cover ? await imgurFileHandler(files.cover[0]) : null
+      const imgurUploadAvatar = files && files.avatar ? await imgurFileHandler(files.avatar[0]) : null
+      const imgurUploadCover = files && files.cover ? await imgurFileHandler(files.cover[0]) : null
       if (imgurUploadAvatar) req.body.avatar = imgurUploadAvatar.toString()
       if (imgurUploadCover) req.body.cover = imgurUploadCover.toString()
       
