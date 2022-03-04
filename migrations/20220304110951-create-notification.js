@@ -1,18 +1,32 @@
 'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Subscriptions', {
+    return queryInterface.createTable('Notifications', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      subscriberId: {
-        type: Sequelize.INTEGER
+      UserId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
-      subscribingId: {
-        type: Sequelize.INTEGER
+      receiverId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      TweetId: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
+      ReplyId: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
+      type: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
@@ -27,6 +41,6 @@ module.exports = {
     })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Subscriptions')
+    return queryInterface.dropTable('Notifications')
   }
 }
