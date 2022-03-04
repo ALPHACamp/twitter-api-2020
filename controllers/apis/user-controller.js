@@ -407,7 +407,7 @@ const userController = {
       const userId = Number(helpers.getUser(req).id)
       const user = await User.findById(userId, {
         raw: true,
-        attributes: ['id', 'name', 'account', 'avatar']
+        attributes: ['id', 'name', 'account', 'avatar', 'role']
       })
       res.json({
         status: 'success',
