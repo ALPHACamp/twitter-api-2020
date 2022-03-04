@@ -12,6 +12,9 @@ module.exports = {
       UserId: {
         type: Sequelize.INTEGER
       },
+      roomId: {
+        type: Sequelize.STRING
+      },
       content: {
         type: Sequelize.STRING
       },
