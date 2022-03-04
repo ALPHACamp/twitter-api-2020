@@ -251,7 +251,7 @@ const userController = {
           ], include: [
             {
               model: User,
-              as: 'Followings',
+              as: 'Followers',
               attributes: ['id'],
               through: {
                 attributes: []
@@ -278,14 +278,20 @@ const userController = {
             message: '此使用者沒有追蹤任何人'
           })
       } else {
-        followshipsData = followships.map((followship) => {
-          console.log(followship.following)
-          const follow_or_not = followship.following.Followings.id !== null && followship.following.Followings.id === helpers.getUser(req)
-          console.log(follow_or_not)
-          followship.isFollowed = follow_or_not
-          delete followship.following.Followings
-          return followship
-        })
+        if (req.params.id === helpers.getUser(req).id) {
+          followshipsData = followships.map((followship) => {
+            followship.isFollowed = true
+            delete followship.following.Followers
+            return followship
+          })
+        } else {
+          followshipsData = followships.map((followship) => {
+            const follow_or_not = followship.following.Followers.id === helpers.getUser(req).id
+            followship.isFollowed = follow_or_not
+            delete followship.following.Followers
+            return followship
+          })
+        }
         return res.status(200).json(followshipsData)
       }
     } catch (error) {
