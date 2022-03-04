@@ -5,6 +5,7 @@ module.exports = server => {
     console.log('---user connected---')
 
     socket.on('chat message', message => {
+      if (message.replace(/\s+/, "") === "") throw new Error("message can't be null")
       console.log('message: ' + message)
 
       //發送 allMessage事件的訊息給所有連線用戶
