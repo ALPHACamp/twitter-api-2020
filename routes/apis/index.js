@@ -37,6 +37,7 @@ router.get('/users/:id', authenticated, authenticatedUser, userController.getUse
 router.post('/users', userController.signUp)
 
 router.delete('/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+router.get('/admin/current', authenticated, authenticatedAdmin, userController.getCurrentUser)
 router.get('/admin/tweets', authenticated, authenticatedAdmin, adminController.getTweets)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
 router.post('/admin/signin', passport.authenticate('local', { session: false }), adminController.signIn)
