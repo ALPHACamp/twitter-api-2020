@@ -13,5 +13,11 @@ module.exports = server => {
       //發送 allMessage事件的訊息給所有連線用戶
       io.emit('chat message', message)
     })
+
+
+
+    socket.on('disconnect', () => {
+      console.log('Bye~');  // 顯示 bye~
+    });
   })
 }

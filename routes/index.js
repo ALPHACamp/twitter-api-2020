@@ -9,6 +9,7 @@ const users = require('./modules/users')
 const tweets = require('./modules/tweets')
 const admin = require('./modules/admin')
 const followships = require('./modules/followships')
+const messages = require('./modules/messages')
 
 // Login & Registration & Current user
 router.post('/users/login', userController.login)
@@ -19,6 +20,8 @@ router.use('/users', authenticated, blockRole('admin'), users)
 router.use('/tweets', authenticated, blockRole('admin'), tweets)
 
 router.use('/followships', authenticated, blockRole('admin'), followships)
+
+router.use('/messages', authenticated, blockRole('admin'), messages)
 
 // fallback route for 404 not found (temporary)
 router.get('/', (req, res) => res.send('Hello World!'))

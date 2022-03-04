@@ -19,6 +19,7 @@ app.use(methodOverride('_method'))
 app.use(express.json())
 
 app.use(passport.initialize())
+app.use(express.static('public'))
 
 require('./socket/server')(server)
 
