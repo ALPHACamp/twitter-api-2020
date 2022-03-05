@@ -277,28 +277,13 @@ const userController = {
             status: 'error',
             message: '此使用者沒有追蹤任何人'
           })
-      } else if (followships.length !== 0){
-        if (req.params.id == helpers.getUser(req).id) {
-          const followshipsData = followships.map((followship) => {
-            const {id ,followerId, followingId, following} = followship
-            return {
-              id,
-              followerId,
-              followingId,
-              following,
-              isFollowed: true
-            }
-          })
-          return res.status(200).json(followshipsData)
-        } else {
-          const followshipsData = followships.map((followship) => {
-          const follow_or_not = followship.following.Followers.id === helpers.getUser(req).id
-          followship.isFollowed = follow_or_not
-          delete followship.following.Followers
-          return followship
-          })
-          return res.status(200).json(followshipsData)
-        }
+      } else {
+        const followshipsData = followships.map((followship) => {
+          const following_or_not = followship.following.Followers.id === helpers.getUser(req).id
+          followship.isFollowed = following_or_not
+          if (followship.following.Followers.id == req.params.id) return followship
+        })
+        return res.status(200).json(followshipsData.filter(Boolean) )
       }
     } catch (error) {
       res.status(500).json({
