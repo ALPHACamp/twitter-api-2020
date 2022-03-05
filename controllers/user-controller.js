@@ -101,8 +101,8 @@ const userController = {
       let uploadCover = ''
       const filesCover = files ? files.cover : null
       const filesAvatar = files ? files.avatar : null
-      uploadAvatar = filesCover ? await imgurFileHandler(files.cover[0]) : currentUser.avatar
-      uploadCover = filesAvatar ? await imgurFileHandler(files.cover[0]) : currentUser.cover
+      uploadAvatar = filesAvatar ? await imgurFileHandler(files.avatar[0]) : currentUser.avatar
+      uploadCover = filesCover ? await imgurFileHandler(files.cover[0]) : currentUser.cover
       console.log(uploadAvatar)
       await user.update({
         name,
