@@ -10,7 +10,7 @@ const router = require('./routes')
 const app = express()
 const PORT = process.env.PORT
 
-const server = require('https').createServer(app)
+const server = require('http').createServer(app)
 
 // http
 app.use(cors())

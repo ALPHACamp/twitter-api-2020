@@ -26,7 +26,12 @@ const authenticatedSocket = (socket, next) => {
 }
 
 module.exports = server => {
-  const io = require('socket.io')(server)
+  const io = require('socket.io')(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    }
+  })
   io.use(authenticatedSocket).on('connection', socket => {
     console.log('---user connected---')
     console.log('目前連線數量: ', socket.server.engine.clientsCount)
