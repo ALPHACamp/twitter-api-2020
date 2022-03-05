@@ -79,6 +79,7 @@
         e.preventDefault();
         if (input.value) {
           socket.emit('chat message', input.value);
+          socket.emit('public-chat', input.value)
           input.value = '';
         }
       });
@@ -107,6 +108,8 @@
         window.scrollTo(0, document.body.scrollHeight);
         console.log(msg)
       })
+
+
     </script>
   </body>
 
