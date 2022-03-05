@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const PUBLIC_ROOM_ID = 1
 const messageServices = require('../services/message-service')
+const { generateMessage } = require('../helpers/message')
 
 // Auth middleware
 const authenticatedSocket = (socket, next) => {
@@ -53,11 +54,11 @@ module.exports = server => {
 
     socket.on('public-chat', async message => {
       console.log('receive public chat message')
-      await messageServices.saveMessages(message, socket.user.id)
       io.to(`${PUBLIC_ROOM_ID}`).emit('send-message', (message, socket.user))
+      await messageServices.saveMessages(generateMessage(PUBLIC_ROOM_ID, message, socket.user, 'message'))
     })
 
-    socket.on('chat message', message => {
+    socket.on('chat message', async message => {
       if (message.replace(/\s+/, '') === '')
         throw new Error("message can't be null")
       console.log('message: ' + message)
@@ -65,6 +66,7 @@ module.exports = server => {
 
       //發送 allMessage事件的訊息給所有連線用戶
       io.emit('chat message', message)
+      await messageServices.saveMessages(generateMessage(PUBLIC_ROOM_ID, message, socket.user, 'message'))
     })
 
     socket.on('disconnect', reason => {
