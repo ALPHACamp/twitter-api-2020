@@ -1,25 +1,21 @@
-const { Message } = require('../models')
+const { Message, User } = require('../models')
 
 const messageServices = {
-  saveMessages: async (message, userId, next) => {
-    try {
-      return await Message.create({
-        UserId: userId,
-        content: message.content,
-        roomId: message.roomId
-      })
-    } catch (err) {
-      next(err)
-    }
+  saveMessages: async (message) => {
+    console.log(message)
+    return await Message.create({
+      UserId: message.userId,
+      content: message.text,
+      roomId: message.roomId
+    })
   },
   getMessages: async roomId => {
     const messages = await Message.findAll({
       where: { roomId },
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       attributes: ['content', 'createdAt'],
-      order: ['createdAt', 'DESC']
+      order: [['createdAt', 'ASC']]
     })
-
     return messages
   }
 }
