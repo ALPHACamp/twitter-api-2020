@@ -37,16 +37,17 @@ module.exports = server => {
 
     socket.on('join', ({ roomId }) => {
       roomId = Number(roomId)
-      console.log(roomId)
       socket.join(`${roomId}`)
       io.emit('test message', '後端 test 123，收到請回答')
+      console.log(socket.rooms)
 
       //如果是公開聊天室
       if (roomId === PUBLIC_ROOM_ID) {
-        io.to(`${PUBLIC_ROOM_ID}`).emit('join', {
+        socket.broadcast.to(`${PUBLIC_ROOM_ID}`).emit('join', {
           message: `${socket.user.name}上線`,
           type: 'notice'
         })
+        console.log(`@${socket.user.account}加入公開聊天室`)
       }
     })
 
@@ -54,11 +55,14 @@ module.exports = server => {
       if (message.replace(/\s+/, '') === '')
         throw new Error("message can't be null")
       console.log('message: ' + message)
-      console.log(socket.user)
+      console.log(socket.rooms)
 
       //發送 allMessage事件的訊息給所有連線用戶
       io.emit('chat message', message)
     })
+
+    // user leave room
+    socket.on('leave', (userId, roomId) => {})
 
     socket.on('disconnect', reason => {
       console.log(reason)
