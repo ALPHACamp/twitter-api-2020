@@ -1,26 +1,25 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Tweets', {
+    return queryInterface.createTable('Messages', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      UserId: {
+      senderId: {
         type: Sequelize.INTEGER
       },
-      description: {
-        type: Sequelize.TEXT
+      receiverId: {
+        type: Sequelize.INTEGER
       },
-      replyCounts: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0
+      content: {
+        type: Sequelize.STRING
       },
-      likeCounts: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0
+      isPublic: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,
@@ -33,6 +32,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Tweets');
+    return queryInterface.dropTable('Messages');
   }
 };
