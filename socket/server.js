@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const PUBLIC_ROOM_ID = 1
+const messageServices = require('../services/message-service')
 
 // Auth middleware
 const authenticatedSocket = (socket, next) => {
@@ -7,7 +8,7 @@ const authenticatedSocket = (socket, next) => {
 
   // Mock socket auth
   socket.handshake.auth.token =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInBhc3N3b3JkIjoiJDJhJDEwJGRTbHBQWWlVMVg2Qm5FL2M2Nm4wZXVpVmU3aVVHZzJrSWVJVmQ2M0c1dllNTzBGQ1JqQVFLIiwibmFtZSI6InVzZXIxIiwiYWNjb3VudCI6InVzZXIxIiwiY292ZXIiOiJodHRwczovL2kuaW1ndXIuY29tL2p1NXdGdDMuanBnIiwiYXZhdGFyIjoiaHR0cHM6Ly9pLmltZ3VyLmNvbS9oQUtjUzNFLmpwZyIsImludHJvZHVjdGlvbiI6bnVsbCwicm9sZSI6InVzZXIiLCJsaWtlZENvdW50IjoyMCwicmVwbGllZENvdW50IjozMCwiZm9sbG93aW5nQ291bnQiOjIsImZvbGxvd2VyQ291bnQiOjEsImNyZWF0ZWRBdCI6IjIwMjItMDMtMDVUMDg6NDE6MDcuMDAwWiIsInVwZGF0ZWRBdCI6IjIwMjItMDMtMDVUMDg6NDE6MDcuMDAwWiIsImlhdCI6MTY0NjQ2OTY3MSwiZXhwIjoxNjQ3MDc0NDcxfQ.foXKkN5Vu_XRcYxjd18QXoMcytgHyAriTXrnkKZIM_k'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInBhc3N3b3JkIjoiJDJhJDEwJFBYZnBDQTJpRDhMY2tRNm91MTZ5Vy50VW1iaHM2S05iMEE5MEJRVXV0a1lxTkF1em5NN3pHIiwibmFtZSI6InVzZXIxIiwiYWNjb3VudCI6InVzZXIxIiwiY292ZXIiOiJodHRwczovL2kuaW1ndXIuY29tL2p1NXdGdDMuanBnIiwiYXZhdGFyIjoiaHR0cHM6Ly9pLmltZ3VyLmNvbS9oQUtjUzNFLmpwZyIsImludHJvZHVjdGlvbiI6bnVsbCwicm9sZSI6InVzZXIiLCJsaWtlZENvdW50IjoyMCwicmVwbGllZENvdW50IjozMCwiZm9sbG93aW5nQ291bnQiOjIsImZvbGxvd2VyQ291bnQiOjEsImNyZWF0ZWRBdCI6IjIwMjItMDMtMDVUMDk6MTM6NDUuMDAwWiIsInVwZGF0ZWRBdCI6IjIwMjItMDMtMDVUMDk6MTM6NDUuMDAwWiIsImlhdCI6MTY0NjQ3MTY1NiwiZXhwIjoxNjQ3MDc2NDU2fQ.HWkNJTFm7LRiAWTtZA2FBO2E4jZkstbNW6Vi_n6c5wc'
 
   if (!socket.handshake.auth.token) throw Error('No socket token!')
   jwt.verify(
@@ -48,6 +49,12 @@ module.exports = server => {
           type: 'notice'
         })
       }
+    })
+
+    socket.on('public-chat', async message => {
+      console.log('receive public chat message')
+      await messageServices.saveMessages(message, socket.user.id)
+      io.to(`${PUBLIC_ROOM_ID}`).emit('send-message', (message, socket.user))
     })
 
     socket.on('chat message', message => {
