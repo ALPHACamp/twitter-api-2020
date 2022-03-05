@@ -1,4 +1,4 @@
-const { Message } = require('../models')
+const { Message, User } = require('../models')
 
 const messageServices = {
   saveMessages: async (message) => {
@@ -14,9 +14,8 @@ const messageServices = {
       where: { roomId },
       include: [{ model: User, attributes: ['id', 'name', 'account', 'avatar'] }],
       attributes: ['content', 'createdAt'],
-      order: ['createdAt', 'DESC']
+      order: [['createdAt', 'ASC']]
     })
-
     return messages
   }
 }
