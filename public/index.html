@@ -92,6 +92,21 @@
         console.log("=== receive message ===")
         console.log(msg)
       });
+
+      socket.emit('join', { roomId: '1' })
+
+      //test
+      socket.on('test message', (msg) => {
+        console.log(msg)
+      })
+
+      socket.on('join', (msg) => {
+        var item = document.createElement('p');
+        item.textContent = msg.message;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+        console.log(msg)
+      })
     </script>
   </body>
 

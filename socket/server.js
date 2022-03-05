@@ -4,9 +4,11 @@ const PUBLIC_ROOM_ID = 1
 // Auth middleware
 const authenticatedSocket = (socket, next) => {
   console.log('=== Socket auth ===')
+
   // Mock socket auth
   socket.handshake.auth.token =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInBhc3N3b3JkIjoiJDJhJDEwJGRTbHBQWWlVMVg2Qm5FL2M2Nm4wZXVpVmU3aVVHZzJrSWVJVmQ2M0c1dllNTzBGQ1JqQVFLIiwibmFtZSI6InVzZXIxIiwiYWNjb3VudCI6InVzZXIxIiwiY292ZXIiOiJodHRwczovL2kuaW1ndXIuY29tL2p1NXdGdDMuanBnIiwiYXZhdGFyIjoiaHR0cHM6Ly9pLmltZ3VyLmNvbS9oQUtjUzNFLmpwZyIsImludHJvZHVjdGlvbiI6bnVsbCwicm9sZSI6InVzZXIiLCJsaWtlZENvdW50IjoyMCwicmVwbGllZENvdW50IjozMCwiZm9sbG93aW5nQ291bnQiOjIsImZvbGxvd2VyQ291bnQiOjEsImNyZWF0ZWRBdCI6IjIwMjItMDMtMDVUMDg6NDE6MDcuMDAwWiIsInVwZGF0ZWRBdCI6IjIwMjItMDMtMDVUMDg6NDE6MDcuMDAwWiIsImlhdCI6MTY0NjQ2OTY3MSwiZXhwIjoxNjQ3MDc0NDcxfQ.foXKkN5Vu_XRcYxjd18QXoMcytgHyAriTXrnkKZIM_k'
+
   if (!socket.handshake.auth.token) throw Error('No socket token!')
   jwt.verify(
     socket.handshake.auth.token,
@@ -15,7 +17,6 @@ const authenticatedSocket = (socket, next) => {
       if (err) {
         next(err)
       }
-
       socket.user = decoded
     }
   )
@@ -36,13 +37,14 @@ module.exports = server => {
 
     socket.on('join', ({ roomId }) => {
       roomId = Number(roomId)
+      console.log(roomId)
       socket.join(`${roomId}`)
       io.emit('test message', '後端 test 123，收到請回答')
 
       //如果是公開聊天室
       if (roomId === PUBLIC_ROOM_ID) {
-        io.to(`${PUBLIC_ROOM_ID}`).emit('message', {
-          message: `${user.name}上線`,
+        io.to(`${PUBLIC_ROOM_ID}`).emit('join', {
+          message: `${socket.user.name}上線`,
           type: 'notice'
         })
       }
@@ -52,7 +54,7 @@ module.exports = server => {
       if (message.replace(/\s+/, '') === '')
         throw new Error("message can't be null")
       console.log('message: ' + message)
-      console.log(socket.userId)
+      console.log(socket.user)
 
       //發送 allMessage事件的訊息給所有連線用戶
       io.emit('chat message', message)
