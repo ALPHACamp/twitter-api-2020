@@ -13,9 +13,10 @@ const socket = server => {
   let numUsers = 0
   let connectedUser = []
 
-  io.use((socket, next) => {
+ io.use((socket, next) => {
     const { handshake } = socket
-
+    console.log('========== SOCKET AUTH ==========')
+    console.log('socket.handshake', socket.handshake)
     if (!handshake.auth || !handshake.auth.token) {
       throw new Error('尚未授權，禁止存取!')
     }
