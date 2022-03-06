@@ -1,7 +1,6 @@
 const socketio = require('socket.io')
 const { authenticatedSocket } = require('../middleware/auth')
 
-
 const socket = server => {
   const io = socketio(server, {
     cors: {

@@ -24,7 +24,7 @@ app.use(methodOverride('_method'))
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', routes)
-require('./socket/index').socket(server)
+require('./socket/index')(server)
 
 server.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
 
