@@ -11,7 +11,7 @@ const routes = require('./routes')
 const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 4000
 
 
 app.use(express.urlencoded({ extended: true }))
@@ -29,14 +29,6 @@ require('./socket/index', server)
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html')
 })
-
-io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg)
-  })
-})
-
-io.emit('some event', { someProperty: 'some value', otherProperty: 'other value' })
 
 server.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
 

@@ -19,15 +19,25 @@ const authenticatedAdmin = (req, res, next) => {
 
 const authenticatedSocket = (socket, next) => {
   console.log('========== SOCKET AUTH ==========')
-  console.log('socket:', socket)
-  console.log('socket.handshake:', socket.handshake)
-  console.log('sock.handshake.auth:', socket.handshake.auth.token)
+  console.log('socket', socket)
+  console.log('socket.handshake', socket.handshake)
+  console.log('sock.handshake.auth', socket.handshake.auth.token)
   if (socket.handshake.auth?.token) {
-    jwt.verify(socket.handshake.auth.token)
+    jwt.verify(
+      socket.handshake.auth.token,
+      process.env.JWT_SECRET,
+      (err ,decoded) => {
+        if (err) return next(new Error('Authentiaction Error'))
+        socket.userId = decoded
+        console.log('socket.usrId', socket.userId)
+        next()
+      }
+    )
   }
 }
 
 module.exports = {
   authenticated,
-  authenticatedAdmin
+  authenticatedAdmin,
+  authenticatedSocket
 }
