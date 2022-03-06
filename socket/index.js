@@ -16,6 +16,7 @@ const socket = server => {
   })
 
   let numUsers = 0
+  let connectedUser = []
 
   io.on('connection', socket => {
     let joinUser = false
@@ -30,37 +31,24 @@ const socket = server => {
     })
 
     // when the client emits 'add user', this listens and executes
-    socket.on('join', (username) => {
+    socket.on('join', () => {
       if (joinUser) return
 
+      const socketId = socket.user.id
+      const socketAvatar = socket.user.avatar
 
-      socket.username = username
       ++numUsers
       joinUser = true
-      socket.emit('login', {
-        numUsers: numUsers
+      connectedUser.push(userName)
+      io.emit('chat message', msg)
+      socket.broadcast.emit('login', {
+        numUsers
       })
 
       // socket.broadcast.emit('user joined', {
       //   username: socket.username
       // })
     })
-
-    // when the client emits 'typing', we broadcast it to others
-    // socket.on('typing', () => {
-    //   socket.broadcast.emit('typing', {
-    //     username: socket.username
-    //   })
-    // })
-
-    // when the client emits 'stop typing', we broadcast it to others
-    // socket.on('stop typing', () => {
-    //   socket.broadcast.emit('stop typing', {
-    //     username: socket.username
-    //   })
-    // })
-
-    // when the user disconnects.. perform this
     socket.on('disconnect', () => {
       if (joinUser) {
         --numUsers

@@ -1,6 +1,7 @@
 const passport = require('../config/passport')
 const helper = require('../_helpers')
 const jwt = require('jsonwebtoken')
+const { User } = require('../models')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -26,12 +27,14 @@ const authenticatedSocket = (socket, next) => {
       socket.handshake.auth.token,
       process.env.JWT_SECRET,
       async (err, decoded) => {
-        try {
-          if (err) return next(new Error('Authentiaction Error'))
-          socket.userId = decoded.id
-          console.log('socket.usrId', socket.userId)
-          next()
-        } catch (err) { next(err) }
+        if (err) return next(new Error('Authentiaction Error'))
+        socket.decoded = decoded
+        let user = await User.findById(decoded.id, {
+          attributes: { excludes: ['password'] },
+          raw: true
+        })
+        socket.user = user
+        next()
       } 
     )
   }
