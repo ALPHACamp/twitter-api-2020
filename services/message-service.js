@@ -1,4 +1,5 @@
 const { Message, User } = require('../models')
+const { Op } = require('sequelize');
 
 const messageServices = {
   saveMessages: async (message) => {
@@ -16,6 +17,17 @@ const messageServices = {
       attributes: ['content', 'createdAt'],
       order: [['createdAt', 'ASC']]
     })
+    return messages
+  },
+  privateMessages: async userId => {
+    const messages = await Message.findAll({
+      where: {
+        [Op.or]: [{ UserId: userId }, { receiverId: userId }], //or
+        roomId: { [Op.ne]: 1} //!== 1
+      },
+      order: [['createdAt', 'ASC']]
+    })
+
     return messages
   }
 }

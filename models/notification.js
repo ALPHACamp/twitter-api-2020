@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       receiverId: DataTypes.INTEGER,
       TweetId: DataTypes.INTEGER,
       ReplyId: DataTypes.INTEGER,
-      type: DataTypes.STRING
+      type: DataTypes.INTEGER
     },
     {
       tableName: 'Notifications'
