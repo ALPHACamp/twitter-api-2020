@@ -22,12 +22,13 @@ const socket = server => {
     let joinUser = false
 
     socket.on('chat message', msg => {
-      const userData = {
-        socketId: socket.user.id,
-        socketAvatar: socket.user.avatar,
-        createdTime: new Date()
-      }
-      io.emit('chat message', { msg, ...userData })
+      // const userData = {
+      //   socketId: socket.user.id,
+      //   socketAvatar: socket.user.avatar,
+      //   createdTime: new Date()
+      // }
+
+      io.emit('chat message', { msg })
     })
 
     // when the client emits 'add user', this listens and executes
