@@ -21,10 +21,10 @@ const authenticatedAdmin = (req, res, next) => {
 const authenticatedSocket = (socket, next) => {
   console.log('========== SOCKET AUTH ==========')
   console.log('socket.handshake', socket.handshake)
-  console.log('socket.handshake.t', socket.handshake.query.t)
-  if (socket.handshake.query && socket.handshake.query.t) {
+  console.log('socket.handshake.auth.token', socket.handshake.auth.token)
+  if (socket.handshake.auth && socket.handshake.auth.token) {
     jwt.verify(
-      socket.handshake.query.t,
+      socket.handshake.auth.token,
       process.env.JWT_SECRET,
       async (err, jwtPayload) => {
         if (err) return next(new Error('Authentiaction Error'))

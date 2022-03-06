@@ -18,13 +18,13 @@ const socket = server => {
     let joinUser = false
 
     socket.on('chat message', msg => {
-      const userData = {
-        socketId: socket.user.id,
-        socketAvatar: socket.user.avatar,
-        createdTime: new Date()
-      }
-
-      socket.emit('chat message', { msg, ...userData })
+      // const userData = {
+      //   socketId: socket.user.id,
+      //   socketAvatar: socket.user.avatar,
+      //   createdTime: new Date()
+      // }
+      socket.emit('chat message', msg)
+      // socket.emit('chat message', { msg, ...userData })
     })
 
     socket.on('join', () => {
