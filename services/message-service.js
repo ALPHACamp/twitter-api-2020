@@ -19,16 +19,19 @@ const messageServices = {
     })
     return messages
   },
-  privateMessages: async userId => {
+  privateMessages: async (userId, roomId) => {
     const messages = await Message.findAll({
       where: {
         [Op.or]: [{ UserId: userId }, { receiverId: userId }], //or
-        roomId: { [Op.ne]: 1} //!== 1
+        roomId
       },
       order: [['createdAt', 'ASC']]
     })
 
-    return messages
+    const set = new Set()
+    let result = messages.filter(i => set.has(i.roomId) ? false : set.add(i.roomId))
+
+    return result
   }
 }
 

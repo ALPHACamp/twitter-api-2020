@@ -3,7 +3,7 @@ const helpers = require('../_helpers')
 
 const messageController = {
   getMessages: async (req, res) => {
-    const { roomId } = req.params
+    const roomId = 1
     try {
       const messages = await messageService.getMessages(roomId)
 
@@ -16,9 +16,10 @@ const messageController = {
     }
   },
   privateMessages: async (req, res) => {
-    const userId = helpers.getUser(req)
+    const userId = helpers.getUser(req).id
+    const { roomId } = req.params
     try {
-      const data = await messageService.privateMessages(userId)
+      const data = await messageService.privateMessages(userId, roomId)
 
       return res.status(200).json(data)
     } catch (error) {

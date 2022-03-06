@@ -47,6 +47,14 @@ module.exports = server => {
       )
     })
 
+    socket.on('private-chat', async message => {
+      console.log('receive private chat message')
+      await socketService.saveMessages(
+        generateMessage(message.roomId, message, socket.user, 'message')
+        )
+      io.to(`${message.roomId}`).emit('send-message', (message, socket.user))
+    })
+
     socket.on('chat message', async message => {
       if (message.replace(/\s+/, '') === '')
         throw new Error("message can't be null")
