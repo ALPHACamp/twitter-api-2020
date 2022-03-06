@@ -18,7 +18,7 @@ const socket = server => {
   let numUsers = 0
   let connectedUser = []
 
-  io.on('connection', socket => {
+  io.use(authenticatedSocket).on('connection', socket => {
     let joinUser = false
 
     socket.on('chat message', msg => {
@@ -34,21 +34,29 @@ const socket = server => {
     socket.on('join', () => {
       if (joinUser) return
 
-      const msg = '已經進入聊天室'
+      const msg = '進入聊天室'
       ++numUsers
       joinUser = true
       connectedUser.push(userName)
-      io.emit('user connected', msg)
+      updateUserName()
+      io.emit('user join', msg)
     })
     
     socket.on('disconnect', () => {
       if (joinUser) {
+        const msg = '離開聊天室'
         --numUsers
+        connectedUser.splice(connectedUser.indexOf(userName), 1)
+        io.emit('user leave', msg)
+        updateUserName()
       }
     })
+
+    function updateUserName() {
+      io.emit('loadUser', connectedUser)
+    }
   })
 }
-
 
 module.exports = {
   socket
