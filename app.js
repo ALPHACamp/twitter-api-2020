@@ -9,6 +9,8 @@ const methodOverride = require('method-override')
 const routes = require('./routes')
 
 const app = express()
+const server = require('http').createServer(app)
+const io = require('socket.io')(server)
 const port = process.env.PORT || 3000
 
 
@@ -22,7 +24,20 @@ app.use(methodOverride('_method'))
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', routes)
+require('./socket/index', server)
 
-app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html')
+})
+
+io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    io.emit('chat message', msg)
+  })
+})
+
+io.emit('some event', { someProperty: 'some value', otherProperty: 'other value' })
+
+server.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
 
 module.exports = app
