@@ -24,7 +24,7 @@ const socket = server => {
         createdTime: new Date()
       }
 
-      io.emit('chat message', { msg, ...userData })
+      socket.emit('chat message', { msg, ...userData })
     })
 
     socket.on('join', () => {
@@ -35,7 +35,7 @@ const socket = server => {
       joinUser = true
       connectedUser.push(userName)
       updateUserName()
-      io.emit('user join', msg)
+      socket.emit('user join', msg)
     })
     
     socket.on('disconnect', () => {
@@ -43,7 +43,7 @@ const socket = server => {
         const msg = '離開聊天室'
         --numUsers
         connectedUser.splice(connectedUser.indexOf(userName), 1)
-        io.emit('user leave', msg)
+        socket.emit('user leave', msg)
         updateUserName()
       }
     })
