@@ -1,5 +1,6 @@
 const PUBLIC_ROOM_ID = 1
 const messageServices = require('../services/message-service')
+const notificationController = require('../controllers/notification-controller')
 const { generateMessage } = require('../helpers/message')
 const { authenticatedSocket } = require('../helpers/auth')
 
@@ -58,13 +59,17 @@ module.exports = server => {
       )
     })
 
+    // Subscription to target account
+    socket.on('suscription', account => {
+      console.log(account)
+      socket.join(account)
+      console.log(socket.rooms)
+    })
+
     // Notification
-    socket.on('notification', async (message, type) => {
-      if (type === 'public message') {
-        socket.broadcast
-          .to(`${PUBLIC_ROOM_ID}`)
-          .emit('public message', (message, socket.user))
-      }
+    socket.on('notification', async type => {
+      await notificationController.saveNotification(socket.user.id, type)
+      socket.broadcast.to(socket.user.account).emit('notification')
     })
 
     socket.on('disconnect', reason => {

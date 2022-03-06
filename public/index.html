@@ -80,6 +80,11 @@
         if (input.value) {
           socket.emit('chat message', input.value);
           socket.emit('public-chat', input.value)
+
+          // notification test
+          socket.emit('suscription', 'user1')
+          socket.emit('notification', 'reply')
+
           input.value = '';
         }
       });
@@ -99,6 +104,10 @@
       //test
       socket.on('test message', (msg) => {
         console.log(msg)
+      })
+
+      socket.on('notification', () => {
+        console.log('被通知了')
       })
 
       socket.on('join', (msg) => {

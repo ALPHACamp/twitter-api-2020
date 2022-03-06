@@ -135,6 +135,16 @@ const userController = {
     }
   },
 
+  getNotifications: async (req, res, next) => {
+    try {
+      const notifications = await userServices.getNotifications(req)
+
+      return res.status(200).json(notifications)
+    } catch (error) {
+      next(error)
+    }
+  },
+
   // Get current user info
   getCurrentUser: async (req, res, next) => {
     try {

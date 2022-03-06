@@ -1,6 +1,14 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like, Followship, sequelize } = require('../models')
+const {
+  User,
+  Tweet,
+  Reply,
+  Like,
+  Followship,
+  Notification,
+  sequelize
+} = require('../models')
 const validator = require('validator')
 const uploadFile = require('../helpers/file')
 const helpers = require('../_helpers')
@@ -335,6 +343,18 @@ const userServices = {
     if (!followers) throw new Error("This user doesn't have any followers")
 
     return followers
+  },
+
+  getNotifications: async req => {
+    const notifications = await Notification.findAll({
+      where: {
+        receiverId: req.params.id
+      },
+      include: [User, Tweet, Reply],
+      order: [['createdAt', 'DESC']]
+    })
+
+    return notifications
   },
 
   getCurrentUser: async req => {
