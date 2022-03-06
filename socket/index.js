@@ -5,10 +5,7 @@ const { authenticatedSocket } = require('../middleware/auth')
 const socket = server => {
   const io = socketio(server, {
     cors: {
-      origin: [
-        'http://localhost:8080',
-        'https://lgtits.github.io'
-      ],
+      origin: '*',
       methods: ["GET", "POST"],
       credentials: true
     },

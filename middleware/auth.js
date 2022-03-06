@@ -26,10 +26,9 @@ const authenticatedSocket = (socket, next) => {
     jwt.verify(
       socket.handshake.auth.token,
       process.env.JWT_SECRET,
-      async (err, decoded) => {
+      async (err, jwtPayload) => {
         if (err) return next(new Error('Authentiaction Error'))
-        socket.decoded = decoded
-        let user = await User.findById(decoded.id, {
+        const user = await User.findById(jwtPayload.id, {
           attributes: { excludes: ['password'] },
           raw: true
         })
