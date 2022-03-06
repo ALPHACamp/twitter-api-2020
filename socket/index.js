@@ -21,7 +21,7 @@ const socket = server => {
 
     socket.on('chat message', msg => {
       io.emit('chat message', msg)
-      socket.emit('chat message', {
+      socket.broadcast.emit('chat message', {
         userId: socket.userId,
         username: socket.username,
         msg
@@ -40,24 +40,24 @@ const socket = server => {
         numUsers: numUsers
       })
 
-      socket.broadcast.emit('user joined', {
-        username: socket.username
-      })
+      // socket.broadcast.emit('user joined', {
+      //   username: socket.username
+      // })
     })
 
     // when the client emits 'typing', we broadcast it to others
-    socket.on('typing', () => {
-      socket.broadcast.emit('typing', {
-        username: socket.username
-      })
-    })
+    // socket.on('typing', () => {
+    //   socket.broadcast.emit('typing', {
+    //     username: socket.username
+    //   })
+    // })
 
     // when the client emits 'stop typing', we broadcast it to others
-    socket.on('stop typing', () => {
-      socket.broadcast.emit('stop typing', {
-        username: socket.username
-      })
-    })
+    // socket.on('stop typing', () => {
+    //   socket.broadcast.emit('stop typing', {
+    //     username: socket.username
+    //   })
+    // })
 
     // when the user disconnects.. perform this
     socket.on('disconnect', () => {
