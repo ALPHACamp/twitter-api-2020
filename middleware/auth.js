@@ -21,24 +21,24 @@ const authenticatedAdmin = (req, res, next) => {
 const authenticatedSocket = (socket, next) => {
   console.log('========== SOCKET AUTH ==========')
   console.log('socket.handshake', socket.handshake)
-  console.log('socket.handshake.auth', socket.handshake.queryh)
-  if (socket.handshake.auth && socket.handshake.auth.token) {
-    jwt.verify(
-      socket.handshake.auth.token,
-      process.env.JWT_SECRET,
-      async (err, jwtPayload) => {
-        if (err) return next(new Error('Authentiaction Error'))
-        const user = await User.findById(jwtPayload.id, {
-          attributes: { excludes: ['password'] },
-          raw: true
-        })
-        socket.user = user
-        console.log("===== socket user =====")
-        console.log(socket.user)
-        next()
-      } 
-    )
-  }
+  console.log('socket.handshake.auth', socket.handshake.query)
+  // if (socket.handshake.auth && socket.handshake.auth.token) {
+  //   jwt.verify(
+  //     socket.handshake.auth.token,
+  //     process.env.JWT_SECRET,
+  //     async (err, jwtPayload) => {
+  //       if (err) return next(new Error('Authentiaction Error'))
+  //       const user = await User.findById(jwtPayload.id, {
+  //         attributes: { excludes: ['password'] },
+  //         raw: true
+  //       })
+  //       socket.user = user
+  //       console.log("===== socket user =====")
+  //       console.log(socket.user)
+  //       next()
+  //     } 
+  //   )
+  // }
 }
 
 module.exports = {
