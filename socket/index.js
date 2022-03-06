@@ -5,13 +5,13 @@ const socket = server => {
   const io = socketio(server, {
     cors: {
       origin: '*',
-      methods: ['GET', 'POST'],
-      // credentials: true
+      methods: ["GET", "POST"],
+      credentials: true
     },
     allowEI03: true
   })
   io.on('connection', socket => {
-    console.log('===== connected =====')
+    console.log('===== User connected =====')
     // console.log('socket.userId', socket.userId)
     socket.on('chat message', msg => {
       io.emit('chat message', msg)
