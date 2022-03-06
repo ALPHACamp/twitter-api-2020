@@ -14,10 +14,20 @@ const socket = server => {
     allowEI03: true
   })
   io.on('connection', socket => {
-    console.log('===== User connected =====')
-    // console.log('socket.userId', socket.userId)
     socket.on('chat message', msg => {
       io.emit('chat message', msg)
+    })
+
+    socket.on('join', () => {
+      console.log('===== user join =====')
+      socket.join('chatroom')
+      socket.broadcast.to('chatroom').emit('===== User connect =====')
+    })
+
+    socket.on('leave', () => {
+      console.log('===== user leave =====')
+      socket.leave('chatroom')
+      socket.broadcast.to('chatroom').emit('===== User disconnect =====')
     })
   })
 }
