@@ -10,7 +10,8 @@ const publicPath = path.join(__dirname, '/public')
 const routes = require('./routes')
 
 const app = express()
-const server = require('http').createServer(app)
+const http = require('http')
+const server = http.createServer(app)
 const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }))
@@ -23,7 +24,7 @@ app.use(methodOverride('_method'))
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', routes)
-require('./socket/index', server)
+require('./socket/index').socket(server)
 
 server.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
 
