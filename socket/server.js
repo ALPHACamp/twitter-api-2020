@@ -9,7 +9,7 @@ const authenticatedSocket = (socket, next) => {
 
   // Mock socket auth
   socket.handshake.auth.token =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiZW1haWwiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInBhc3N3b3JkIjoiJDJhJDEwJEFSYnpVaW1PdE1BSkNPODNHSzdFM3V3RFhBa1BZdG1jSlJvS1hudktxNzcwdldEQzBGaE11IiwibmFtZSI6InVzZXIxIiwiYWNjb3VudCI6InVzZXIxIiwiY292ZXIiOiJodHRwczovL2kuaW1ndXIuY29tL2p1NXdGdDMuanBnIiwiYXZhdGFyIjoiaHR0cHM6Ly9pLmltZ3VyLmNvbS9oQUtjUzNFLmpwZyIsImludHJvZHVjdGlvbiI6bnVsbCwicm9sZSI6InVzZXIiLCJsaWtlZENvdW50IjoyMCwicmVwbGllZENvdW50IjozMCwiZm9sbG93aW5nQ291bnQiOjIsImZvbGxvd2VyQ291bnQiOjMsImNyZWF0ZWRBdCI6IjIwMjItMDMtMDVUMTI6NTE6MDMuMDAwWiIsInVwZGF0ZWRBdCI6IjIwMjItMDMtMDVUMTI6NTE6MDMuMDAwWiIsImlhdCI6MTY0NjQ4NDY3NSwiZXhwIjoxNjQ3MDg5NDc1fQ.r1I8-nQw4pVPKNnKOwj42C3JtcWy2piIVEECWGefzi8'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInBhc3N3b3JkIjoiJDJhJDEwJGRTbHBQWWlVMVg2Qm5FL2M2Nm4wZXVpVmU3aVVHZzJrSWVJVmQ2M0c1dllNTzBGQ1JqQVFLIiwibmFtZSI6InVzZXIxIiwiYWNjb3VudCI6InVzZXIxIiwiY292ZXIiOiJodHRwczovL2kuaW1ndXIuY29tL2p1NXdGdDMuanBnIiwiYXZhdGFyIjoiaHR0cHM6Ly9pLmltZ3VyLmNvbS9oQUtjUzNFLmpwZyIsImludHJvZHVjdGlvbiI6bnVsbCwicm9sZSI6InVzZXIiLCJsaWtlZENvdW50IjoyMCwicmVwbGllZENvdW50IjozMCwiZm9sbG93aW5nQ291bnQiOjIsImZvbGxvd2VyQ291bnQiOjEsImNyZWF0ZWRBdCI6IjIwMjItMDMtMDVUMDg6NDE6MDcuMDAwWiIsInVwZGF0ZWRBdCI6IjIwMjItMDMtMDVUMDg6NDE6MDcuMDAwWiIsImlhdCI6MTY0NjQ5NTM0OCwiZXhwIjoxNjQ3MTAwMTQ4fQ.B1ZF8Xc-GSHRKXWIEUVXbt7vpmCA6Kifm9E42fPFUPg'
 
   if (!socket.handshake.auth.token) throw Error('No socket token!')
   jwt.verify(
@@ -29,7 +29,7 @@ module.exports = server => {
   const io = require('socket.io')(server, {
     cors: {
       origin: '*',
-      methods: ['GET', 'POST'],
+      methods: ['GET', 'POST']
     }
   })
   io.use(authenticatedSocket).on('connection', socket => {
