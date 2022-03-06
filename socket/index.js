@@ -4,24 +4,17 @@ const { authenticatedSocket } = require('../middleware/auth')
 const socket = server => {
   const io = socketio(server, {
     cors: {
-      origin: [
-        'http://localhost:3000',
-        'http://localhost:8080',
-        'https://lgtits.github.io'
-      ],
+      origin: '*',
       methods: ['GET', 'POST'],
-      credentials: true
+      // credentials: true
     },
     allowEI03: true
   })
-  io.on('connection', async socket => {
+  io.on('connection', socket => {
     console.log('===== connected =====')
-    console.log('socket.userId', socket.userId)
-    socket.on('connection', async data => {
-      console.log('User connect!')
-      socket.on('chat message', (msg) => {
-        io.emit('chat message', msg)
-      })
+    // console.log('socket.userId', socket.userId)
+    socket.on('chat message', msg => {
+      io.emit('chat message', msg)
     })
   })
 }
