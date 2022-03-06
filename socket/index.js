@@ -22,21 +22,19 @@ const socket = server => {
     let joinUser = false
 
     socket.on('chat message', msg => {
-      io.emit('chat message', msg)
-      socket.broadcast.emit('chat message', {
-        userId: socket.userId,
-        username: socket.username,
-        msg
-      })
+      const userData = {
+        socketId: socket.user.id,
+        socketAvatar: socket.user.avatar,
+        createdTime: new Date()
+      }
+      io.emit('chat message', { msg, ...userData })
     })
 
     // when the client emits 'add user', this listens and executes
     socket.on('join', () => {
       if (joinUser) return
 
-      const socketId = socket.user.id
-      const socketAvatar = socket.user.avatar
-
+  
       ++numUsers
       joinUser = true
       connectedUser.push(userName)
