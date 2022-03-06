@@ -1,5 +1,6 @@
 const socketio = require('socket.io')
 const { authenticatedSocket } = require('../middleware/auth')
+const { User } = require('../models')
 
 const socket = server => {
   const io = socketio(server, {
