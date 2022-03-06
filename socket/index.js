@@ -1,6 +1,6 @@
 const socketio = require('socket.io')
 const { authenticatedSocket } = require('../middleware/auth')
-const { User } = require('../models')
+
 
 const socket = server => {
   const io = socketio(server, {
@@ -22,41 +22,28 @@ const socket = server => {
     let joinUser = false
 
     socket.on('chat message', msg => {
-      // const userData = {
-      //   socketId: socket.user.id,
-      //   socketAvatar: socket.user.avatar,
-      //   createdTime: new Date()
-      // }
+      const userData = {
+        socketId: socket.user.id,
+        socketAvatar: socket.user.avatar,
+        createdTime: new Date()
+      }
 
-      io.emit('chat message', { msg })
+      io.emit('chat message', { msg, ...userData })
     })
 
-    // when the client emits 'add user', this listens and executes
     socket.on('join', () => {
       if (joinUser) return
 
-  
+      const msg = '已經進入聊天室'
       ++numUsers
       joinUser = true
       connectedUser.push(userName)
-      io.emit('chat message', msg)
-      socket.broadcast.emit('login', {
-        numUsers
-      })
-
-      // socket.broadcast.emit('user joined', {
-      //   username: socket.username
-      // })
+      io.emit('user connected', msg)
     })
+    
     socket.on('disconnect', () => {
       if (joinUser) {
         --numUsers
-
-        // echo globally that this client has left
-        socket.broadcast.emit('user left', {
-          username: socket.username,
-          numUsers: numUsers
-        })
       }
     })
   })
