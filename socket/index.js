@@ -6,8 +6,7 @@ const socket = server => {
   const io = socketio(server, {
     cors: {
       origin: '*',
-      methods: ["GET", "POST"],
-      credentials: true
+      methods: ["GET", "POST"]
     },
     allowEI03: true
   })
