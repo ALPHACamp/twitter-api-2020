@@ -283,7 +283,7 @@ const userController = {
           followship.isFollowed = following_or_not
           if (followship.following.Followers.id == req.params.id) return followship
         })
-        return res.status(200).json(followshipsData.filter(Boolean) )
+        return res.status(200).json(followshipsData.filter(Boolean))
       }
     } catch (error) {
       res.status(500).json({
@@ -301,8 +301,8 @@ const userController = {
           followingId: req.params.id
         },
         order: [['createdAt', 'desc']],
-        raw: true,
-        nest: true,
+        //raw: true,
+        //nest: true,
         include: {
           model: User,
           as: 'follower',
@@ -317,10 +317,7 @@ const userController = {
             {
               model: User,
               as: 'Followers',
-              attributes: ['id'],
-              through: {
-                attributes: []
-              }
+              attributes: ['id']
             }
           ]
         }
@@ -342,9 +339,9 @@ const userController = {
           })
       } else {
         followshipsData = followships.map((followship) => {
-          const follow_or_not = followship.follower.Followers.id === helpers.getUser(req).id
-          followship.isFollowed = follow_or_not
-          delete followship.follower.Followers
+          const following_or_not = followship.follower.Followers.some((user) => user.id === helpers.getUser(req).id)
+          followship.dataValues.isFollowed = following_or_not
+          delete followship.follower.dataValues.Followers
           return followship
         })
         return res.status(200).json(followshipsData)
