@@ -33,8 +33,6 @@ const authenticatedSocket = (socket, next) => {
           raw: true
         })
         socket.user = user
-        console.log("===== socket =====")
-        console.log(socket)
         console.log("===== socket user =====")
         console.log(socket.user)
         next()
