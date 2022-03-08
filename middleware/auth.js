@@ -19,9 +19,9 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 const authenticatedSocket = (socket, next) => {
-  console.log('========== SOCKET AUTH ==========')
-  console.log('socket.handshake', socket.handshake)
-  console.log('socket.handshake.auth.token', socket.handshake.auth.token)
+  // console.log('========== SOCKET AUTH ==========')
+  // console.log('socket.handshake', socket.handshake)
+  // console.log('socket.handshake.auth.token', socket.handshake.auth.token)
   if (socket.handshake.auth && socket.handshake.auth.token) {
     jwt.verify(
       socket.handshake.auth.token,
