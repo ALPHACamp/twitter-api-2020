@@ -28,7 +28,7 @@ const socket = server => {
         createdTime: new Date(),
       }
 
-      io.emit('chat message', { userData })
+      io.emit('chat message', userData)
     })
 
     socket.on('join', () => {
