@@ -16,10 +16,13 @@ const socket = server => {
 
   io.use(authenticatedSocket).on('connection', async socket => {
     const sockets = await io.fetchSockets()
+    const userId = await io.fetchUserId(socket)
     let joinUser = false
     let isHere = true
     console.log("===== sockets =====")
     console.log(sockets)
+    console.log("===== userId =====")
+    console.log(userId)
     socket.on('chat message', msg => {
       const userData = {
         isHere,
