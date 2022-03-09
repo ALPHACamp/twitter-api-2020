@@ -249,10 +249,10 @@ const userController = {
           { model: Tweet, include: User }
         ]
       })
+      console.log(reply)
       const result = replies.map(reply => {
         const repliedTweet = reply.Tweet
-        console.log(repliedTweet)
-        return {
+       return {
           commentId: reply.id,
           comment: reply.comment,
           tweetId: repliedTweet.id,
