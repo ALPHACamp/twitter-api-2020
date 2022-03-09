@@ -17,13 +17,15 @@ const socket = server => {
   io.on('connection', socket => {
     let joinUser = false
     let isHere = true
-    const loginUser = {
-      isHere,
-      avatar: socket.user.avatar,
-      name: socket.user.name,
-      account: socket.user.account
-    }
-    connectedUser.push(loginUser)
+    console.log('===== SOCKET =====')
+    console.log(socket)
+    // const loginUser = {
+    //   isHere,
+    //   avatar: socket.user.avatar,
+    //   name: socket.user.name,
+    //   account: socket.user.account
+    // }
+    // connectedUser.push(loginUser)
     updateUser()
 
     socket.on('chat message', msg => {
