@@ -14,7 +14,7 @@ const socket = server => {
   let numUsers = 0
   let connectedUser = []
 
-  io.on('connection', socket => {
+  io.use(authenticatedSocket).on('connection', socket => {
     let joinUser = false
     let isHere = true
     console.log('===== SOCKET =====')
@@ -54,16 +54,16 @@ const socket = server => {
     //   socket.emit('user join', msg)
     // })
     
-    socket.on('disconnect', () => {
-      // if (joinUser) {
-      //   const msg = '離開聊天室'
-      //   console.log(msg)
-      //   --numUsers
-      //   connectedUser.splice(connectedUser.indexOf(userName), 1)
-      //   socket.emit('user leave', msg)
-      //   updateUser()
-      // }
-    })
+    // socket.on('disconnect', () => {
+    //   if (joinUser) {
+    //     const msg = '離開聊天室'
+    //     console.log(msg)
+    //     --numUsers
+    //     connectedUser.splice(connectedUser.indexOf(userName), 1)
+    //     socket.emit('user leave', msg)
+    //     updateUser()
+    //   }
+    // })
 
     function updateUser() {
       io.emit('connectedUser', connectedUser)
