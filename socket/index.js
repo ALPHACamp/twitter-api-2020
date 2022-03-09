@@ -14,12 +14,17 @@ const socket = server => {
   let numUsers = 0
   let connectedUser = []
 
-  io.use(authenticatedSocket).on('connection', async socket => {
-    const sockets = await io.fetchSockets()
+  io.on('connection', socket => {
     let joinUser = false
     let isHere = true
-    console.log("===== sockets =====")
-    console.log(sockets)
+    const loginUser = {
+      isHere,
+      avatar: socket.user.avatar,
+      name: socket.user.name,
+      account: socket.user.account
+    }
+    connectedUser.push(loginUser)
+    updateUser()
 
     socket.on('chat message', msg => {
       const userData = {
@@ -35,29 +40,31 @@ const socket = server => {
       io.emit('chat message', userData)
     })
 
-    socket.on('join', () => {
-      if (joinUser) return
+    // socket.on('join room', () => {
+    //   if (joinUser) return
 
-      const msg = '進入聊天室'
-      ++numUsers
-      joinUser = true
-      connectedUser.push(userName)
-      updateUserName()
-      socket.emit('user join', msg)
-    })
+    //   const msg = '進入聊天室'
+    //   console.log(msg)
+    //   ++numUsers
+    //   joinUser = true
+    //   connectedUser.push(userName)
+    //   updateUser()
+    //   socket.emit('user join', msg)
+    // })
     
     socket.on('disconnect', () => {
-      if (joinUser) {
-        const msg = '離開聊天室'
-        --numUsers
-        connectedUser.splice(connectedUser.indexOf(userName), 1)
-        socket.emit('user leave', msg)
-        updateUserName()
-      }
+      // if (joinUser) {
+      //   const msg = '離開聊天室'
+      //   console.log(msg)
+      //   --numUsers
+      //   connectedUser.splice(connectedUser.indexOf(userName), 1)
+      //   socket.emit('user leave', msg)
+      //   updateUser()
+      // }
     })
 
-    function updateUserName() {
-      io.emit('loadUser', connectedUser)
+    function updateUser() {
+      io.emit('connectedUser', connectedUser)
     }
   })
 }
