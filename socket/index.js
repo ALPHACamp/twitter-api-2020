@@ -19,13 +19,13 @@ const socket = server => {
     let isHere = true
     console.log('===== SOCKET =====')
     console.log(socket)
-    // const loginUser = {
-    //   isHere,
-    //   avatar: socket.user.avatar,
-    //   name: socket.user.name,
-    //   account: socket.user.account
-    // }
-    // connectedUser.push(loginUser)
+    const loginUser = {
+      isHere,
+      avatar: socket.user.avatar,
+      name: socket.user.name,
+      account: socket.user.account
+    }
+    connectedUser.push(loginUser)
     updateUser()
 
     socket.on('chat message', msg => {
