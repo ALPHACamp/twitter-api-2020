@@ -87,7 +87,7 @@ const userController = {
       const currentUser = helpers.getUser(req)
       const currentUserId = currentUser.id
       const user = !isNaN(targetUserId) && await User.findByPk(targetUserId)
-      const { name, introduction, cover, avatar } = req.body
+      const { name, introduction } = req.body
       const { files } = req
 
       targetUserId = Number(targetUserId)
@@ -101,9 +101,8 @@ const userController = {
       let uploadCover = ''
       const filesCover = files ? files.cover : null
       const filesAvatar = files ? files.avatar : null
-      uploadAvatar = filesAvatar ? await imgurFileHandler(files.avatar[0]) : currentUser.avatar
-      uploadCover = filesCover ? await imgurFileHandler(files.cover[0]) : currentUser.cover
-      console.log(uploadAvatar)
+      uploadAvatar = filesAvatar ? await imgurFileHandler(files.avatar[0], res) : currentUser.avatar
+      uploadCover = filesCover ? await imgurFileHandler(files.cover[0], res) : currentUser.cover
       await user.update({
         name,
         introduction,
