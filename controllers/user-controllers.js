@@ -251,7 +251,7 @@ const userController = {
       })
       const result = replies.map(reply => {
         const repliedTweet = reply.Tweet
-
+        console.log(repliedTweet.id)
         return {
           commentId: reply.id,
           comment: reply.comment,
