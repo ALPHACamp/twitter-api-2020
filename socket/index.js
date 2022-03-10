@@ -56,16 +56,16 @@ const socket = server => {
     //   socket.emit('user join', msg)
     // })
     
-    socket.on('disconnect', () => {
-      if (isHere) {
-        const msg = `${socket.user.name} 已離開囉`
-        --numUsers
-        connectedUser.splice(connectedUser.indexOf(userName), 1)
-        socket.emit('user disconnect', msg)
-        updateUser()
-        updateNumUsers
-      }
-    })
+    // socket.on('disconnect', () => {
+    //   if (isHere) {
+    //     const msg = `${socket.user.name} 已離開囉`
+    //     --numUsers
+    //     connectedUser.splice(connectedUser.indexOf(userName), 1)
+    //     socket.emit('user disconnect', msg)
+    //     updateUser()
+    //     updateNumUsers
+    //   }
+    // })
 
     const updateUser = () => io.emit('connectedUser', connectedUser)
     const updateNumUsers = () => io.emit('numUsers', numUsers)
