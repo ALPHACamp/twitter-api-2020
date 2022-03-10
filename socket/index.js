@@ -26,7 +26,6 @@ const socket = server => {
 
     // connectedUser.push(loginUser)
     console.log(loginUser)
-    updateNumUsers()
     updateUser()
 
     socket.on('chat message', msg => {
@@ -62,7 +61,6 @@ const socket = server => {
         // --numUsers
         socket.emit('user disconnect', msg)
         updateUser()
-        updateNumUsers()
       }
     })
 
