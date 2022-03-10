@@ -24,12 +24,10 @@ const socket = server => {
         type: 'login'
       }))
       const usersList = arr.filter(i => !set.has(i.userId) ? set.add(i.userId) : false)
-      console.log('===== LOGIN USER =====')
-      console.log(usersList)
       io.emit('userList', usersList)
     }
     updateUserList()
-
+    
     socket.on('chat message', msg => {
       const userData = {
         isHere,
@@ -56,9 +54,7 @@ const socket = server => {
 
       updateUserList()
       io.emit('disconnect', msg)
-      
     })
-
   })
 }
 
