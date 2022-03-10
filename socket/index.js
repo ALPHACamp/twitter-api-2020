@@ -13,9 +13,9 @@ const socket = server => {
   // let numUsers = 0
 
   io.use(authenticatedSocket).on('connection', async socket => {
+    let isHere = true
     const updateUserList = async () => {
       const sockets = await io.fetchSockets()
-      let isHere = true
       const loginUser = sockets.map(data => ({
         isHere,
         userId: data.user.id,
@@ -27,7 +27,7 @@ const socket = server => {
       io.emit('userList', loginUser)
     }
     updateUserList()
-    
+
     socket.on('chat message', msg => {
       const userData = {
         isHere,
