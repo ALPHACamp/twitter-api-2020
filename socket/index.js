@@ -14,21 +14,21 @@ const socket = server => {
 
   io.use(authenticatedSocket).on('connection', socket => {
     let isHere = true
-    let userListSet = new Set()
+    let set = new Set()
     const updateUserList = async () => {
       const sockets = await io.fetchSockets()
-      const loginUser = sockets.map(data => ({
+      const arr = sockets.map(data => ({
         isHere,
         userId: data.user.id,
         avatar: data.user.avatar,
         name: data.user.name,
         account: data.user.account
       }))
+      const loginUser = arr.filter(i => !set.has(i.userId) ? set.add(i.userId) : false)
       console.log('===== LOGIN USER =====')
       console.log(loginUser)
-      userListSet.add(loginUser)
       console.log('===== LIST =====')
-      console.log(userListSet)
+      console.log(set)
       io.emit('userList', loginUser)
     }
     updateUserList()
