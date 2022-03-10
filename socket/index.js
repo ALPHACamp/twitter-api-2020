@@ -52,7 +52,6 @@ const socket = server => {
         type: 'logout'
       }
 
-      updateUserList()
       io.emit('disconnect', msg)
     })
   })
