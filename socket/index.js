@@ -20,14 +20,21 @@ const socket = server => {
         userId: data.user.id,
         avatar: data.user.avatar,
         name: data.user.name,
-        account: data.user.account,
-        type: 'login'
+        account: data.user.account
       }))
       const usersList = arr.filter(i => !set.has(i.userId) ? set.add(i.userId) : false)
       io.emit('userList', usersList)
     }
     updateUserList()
-    
+
+    const userData = {
+      isHere,
+      userId: socket.user.userId,
+      name: socket.user.name,
+      type: 'login'
+    }
+    io.emit('chat message', userData)
+
     socket.on('chat message', msg => {
       const userData = {
         isHere,
@@ -52,7 +59,7 @@ const socket = server => {
         type: 'logout'
       }
 
-      io.emit('disconnect', msg)
+      io.emit('chat message', msg)
     })
   })
 }
