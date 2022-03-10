@@ -30,7 +30,7 @@ const socket = server => {
     connectedUser.push(loginUser)
     updateNumUsers()
     updateUser()
-    console.log(connectedUser)
+    // console.log(connectedUser)
     socket.on('chat message', msg => {
       const userData = {
         isHere,
