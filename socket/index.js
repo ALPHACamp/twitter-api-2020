@@ -16,7 +16,7 @@ const socket = server => {
 
   io.use(authenticatedSocket).on('connection', async socket => {
     const sockets = await io.fetchSockets()
-    console.log(sockets)
+    console.log(sockets.user)
     let isHere = true
     ++numUsers
     const loginUser = {
