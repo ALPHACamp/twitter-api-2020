@@ -24,7 +24,10 @@ const socket = server => {
         name: data.user.name,
         account: data.user.account
       }))
-      userListSet.add(loginUser[0])
+      console.log('===== LOGIN USER =====')
+      console.log(loginUser)
+      userListSet.add(loginUser)
+      console.log('===== LIST =====')
       console.log(userListSet)
       io.emit('userList', loginUser)
     }
