@@ -14,7 +14,7 @@ const socket = server => {
 
   io.use(authenticatedSocket).on('connection', socket => {
     let isHere = true
-    let userSet = new Set()
+    let userListSet = new Set()
     const updateUserList = async () => {
       const sockets = await io.fetchSockets()
       const loginUser = sockets.map(data => ({
@@ -24,6 +24,7 @@ const socket = server => {
         name: data.user.name,
         account: data.user.account
       }))
+      userListSet.add(loginUser)
       console.log(loginUser)
       io.emit('userList', loginUser)
     }
