@@ -27,13 +27,13 @@ const socket = server => {
     }
     updateUserList()
 
-    const userData = {
+    const loginData = {
       isHere,
       userId: socket.user.userId,
-      name: socket.user.name,
+      message: '${socket.user.name} 已加入',
       type: 'login'
     }
-    io.emit('chat message', userData)
+    io.emit('chat message', loginData)
 
     socket.on('chat message', msg => {
       const userData = {
@@ -51,15 +51,15 @@ const socket = server => {
       io.emit('chat message', userData)
     })
     
-    socket.on('disconnect', reason => {
-      console.log(reason)
-      const msg = {
+    socket.on('disconnect', () => {
+      const logoutData = {
+        isHere,
         userId: socket.user.userId,
-        name: socket.user.name,
+        message: '${socket.user.name} 已加入',
         type: 'logout'
       }
 
-      io.emit('chat message', msg)
+      io.emit('chat message', logoutData)
     })
   })
 }
