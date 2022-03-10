@@ -13,8 +13,8 @@ const socket = server => {
   // let numUsers = 0
 
   io.use(authenticatedSocket).on('connection', async socket => {
-    const userList = () => {
-      const sockets = io.fetchSockets()
+    const userList = async () => {
+      const sockets = await io.fetchSockets()
     // let connectedUser = []
       let isHere = true
       const loginUser = sockets.map(data => ({
