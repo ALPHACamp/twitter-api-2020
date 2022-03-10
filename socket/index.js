@@ -19,10 +19,10 @@ const socket = server => {
     let isHere = true
     const loginUser = sockets.map(data => ({
       isHere,
-      userId: data.id,
-      avatar: data.avatar,
-      name: data.name,
-      account: data.account
+      userId: data.user.id,
+      avatar: data.user.avatar,
+      name: data.user.name,
+      account: data.user.account
     }))
     console.log(loginUser)
       // return loginUser
