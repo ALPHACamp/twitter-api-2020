@@ -26,7 +26,7 @@ const socket = server => {
     }
 
     connectedUser.push(loginUser)
-    // updateNumUsers()
+    updateNumUsers()
     updateUser()
     console.log(connectedUser)
     socket.on('chat message', msg => {
@@ -66,8 +66,12 @@ const socket = server => {
     //   }
     // })
 
-    const updateUser = () => io.emit('connectedUser', connectedUser)
-    const updateNumUsers = () => io.emit('numUsers', numUsers)
+    const updateUser = () => {
+      io.emit('connectedUser', connectedUser)
+    }
+    const updateNumUsers = () => {
+      io.emit('numUsers', numUsers)
+    }
   })
 }
 
