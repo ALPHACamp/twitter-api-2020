@@ -24,7 +24,7 @@ const socket = server => {
         name: data.user.name,
         account: data.user.account
       }))
-      userListSet.add(loginUser)
+      userListSet.add(loginUser[0])
       console.log(userListSet)
       io.emit('userList', loginUser)
     }
