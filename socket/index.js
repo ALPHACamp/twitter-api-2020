@@ -14,7 +14,7 @@ const socket = server => {
 
   io.use(authenticatedSocket).on('connection', async socket => {
     const sockets = await io.fetchSockets()
-    let connectedUser = []
+    // let connectedUser = []
     let isHere = true
     const loginUser = sockets.map(data => ({
       isHere,
@@ -24,8 +24,8 @@ const socket = server => {
       account: data.account
     }))
 
-    connectedUser.push(loginUser)
-    console.log(connectedUser)
+    // connectedUser.push(loginUser)
+    console.log(loginUser)
     updateNumUsers()
     updateUser()
 
@@ -56,7 +56,7 @@ const socket = server => {
     // })
     
     socket.on('disconnect', () => {
-      socket.leave()
+      // socket.leave()
       if (isHere) {
         const msg = `${socket.user.name} 已離開囉`
         // --numUsers
