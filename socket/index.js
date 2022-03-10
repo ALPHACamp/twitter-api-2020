@@ -13,19 +13,20 @@ const socket = server => {
   // let numUsers = 0
 
   io.use(authenticatedSocket).on('connection', async socket => {
-    const sockets = await io.fetchSockets()
+    const userList = () => {
+      const sockets = await io.fetchSockets()
     // let connectedUser = []
-    let isHere = true
-    const loginUser = sockets.map(data => ({
-      isHere,
-      userId: data.id,
-      avatar: data.avatar,
-      name: data.name,
-      account: data.account
-    }))
-
-    // connectedUser.push(loginUser)
-    console.log(loginUser)
+      let isHere = true
+      const loginUser = sockets.map(data => ({
+        isHere,
+        userId: data.id,
+        avatar: data.avatar,
+        name: data.name,
+        account: data.account
+      }))
+      console.log(loginUser)
+      return loginUser
+    }
     updateUser()
 
     socket.on('chat message', msg => {
@@ -38,7 +39,7 @@ const socket = server => {
         account: socket.user.account,
         createdTime: new Date(),
       }
-
+      updateUser()
       io.emit('chat message', userData)
     })
 
@@ -65,7 +66,7 @@ const socket = server => {
     })
 
     function updateUser() {
-      io.emit('connectedUser', connectedUser)
+      io.emit('connectedUser', userList)
     }
     // function updateNumUsers () {
     //   io.emit('numUsers', numUsers)
