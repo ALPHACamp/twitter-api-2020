@@ -10,26 +10,23 @@ const socket = server => {
     allowEI03: true
   })
 
-  // let numUsers = 0
-
   io.use(authenticatedSocket).on('connection', socket => {
     let isHere = true
-    let set = new Set()
     const updateUserList = async () => {
       const sockets = await io.fetchSockets()
+      let set = new Set()
       const arr = sockets.map(data => ({
         isHere,
         userId: data.user.id,
         avatar: data.user.avatar,
         name: data.user.name,
-        account: data.user.account
+        account: data.user.account,
+        type: 'login'
       }))
-      const loginUser = arr.filter(i => !set.has(i.userId) ? set.add(i.userId) : false)
+      const usersList = arr.filter(i => !set.has(i.userId) ? set.add(i.userId) : false)
       console.log('===== LOGIN USER =====')
-      console.log(loginUser)
-      console.log('===== LIST =====')
-      console.log(set)
-      io.emit('userList', loginUser)
+      console.log(usersList)
+      io.emit('userList', usersList)
     }
     updateUserList()
 
@@ -42,36 +39,25 @@ const socket = server => {
         name: socket.user.name,
         account: socket.user.account,
         createdTime: new Date(),
+        type: 'chat'
       }
-      // updateUser()
+
+      updateUserList()
       io.emit('chat message', userData)
     })
-
-    // socket.on('join room', () => {
-    //   if (joinUser) return
-
-    //   const msg = '進入聊天室'
-    //   console.log(msg)
-    //   ++numUsers
-    //   joinUser = true
-    //   connectedUser.push(userName)
-    //   updateUser()
-    //   socket.emit('user join', msg)
-    // })
     
     socket.on('disconnect', () => {
-      // socket.leave()
-      if (isHere) {
-        const msg = `${socket.user.name} 已離開囉`
-        // --numUsers
-        socket.emit('user disconnect', msg)
-        // updateUser()
+      const msg = {
+        userId: socket.user.userId,
+        name: socket.user.name,
+        type: 'logout'
       }
+      
+      updateUserList()
+      io.emit('disconnect', msg)
+      
     })
 
-    // function updateUser() {
-    //   io.emit('connectedUser', userList)
-    // }
   })
 }
 
