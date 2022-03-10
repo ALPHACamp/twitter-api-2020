@@ -8,6 +8,8 @@
 
 <span style="color: red">注意:</span> `簡易推特專案一共需要前端網頁以及後端API伺服器，而此 Github Repo 頁面為後端 Repo，如果要前往前端 Github Repo 的頁面，請看接下來的前後端協作資訊，裡面有前端 Github Repo 連結。`
 
+如果有想要試用我們的專案作品，可以透過這個README最下方的<a href="#種子資料">種子資料<a>，直接登入到[我們的 DEMO 網站](https://chialine.github.io/Simple-Twitter/#/Login):
+
 <br>
 
 - 前後端協作資訊:
