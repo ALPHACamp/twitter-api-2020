@@ -24,7 +24,7 @@ const socket = server => {
         name: data.user.name,
         account: data.user.account
       }))
-      const loginUser = arr.filter(i => !set.has(i.userId) ? set.add(i.userId) : false)
+      const loginUser = arr.filter(i => !set.has(i.userId))
       console.log('===== LOGIN USER =====')
       console.log(loginUser)
       console.log('===== LIST =====')
