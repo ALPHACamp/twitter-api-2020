@@ -46,13 +46,14 @@ const socket = server => {
       io.emit('chat message', userData)
     })
     
-    socket.on('disconnect', () => {
+    socket.on('disconnect', reason => {
+      console.log(reason)
       const msg = {
         userId: socket.user.userId,
         name: socket.user.name,
         type: 'logout'
       }
-      
+
       updateUserList()
       io.emit('disconnect', msg)
       
