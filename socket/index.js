@@ -66,10 +66,10 @@ const socket = server => {
     //   }
     // })
 
-    const updateUser = () => {
+    function updateUser() {
       io.emit('connectedUser', connectedUser)
     }
-    const updateNumUsers = () => {
+    function updateNumUsers () {
       io.emit('numUsers', numUsers)
     }
   })
