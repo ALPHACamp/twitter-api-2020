@@ -15,19 +15,21 @@ const socket = server => {
   let connectedUser = []
 
   io.use(authenticatedSocket).on('connection', socket => {
-    let joinUser = false
     let isHere = true
+    ++numUsers
     console.log('===== SOCKET =====')
-    console.log(socket)
+    console.log(socket.user)
     const loginUser = {
       isHere,
       avatar: socket.user.avatar,
       name: socket.user.name,
       account: socket.user.account
     }
-    connectedUser.push(loginUser)
-    updateUser()
 
+    connectedUser.push(loginUser)
+    updateNumUsers()
+    updateUser()
+    console.log(connectedUser)
     socket.on('chat message', msg => {
       const userData = {
         isHere,
@@ -55,19 +57,18 @@ const socket = server => {
     // })
     
     socket.on('disconnect', () => {
-      if (joinUser) {
-        const msg = '離開聊天室'
-        console.log(msg)
+      if (isHere) {
+        const msg = `${socket.user.name} 已離開囉`
         --numUsers
         connectedUser.splice(connectedUser.indexOf(userName), 1)
-        socket.emit('user leave', msg)
+        socket.emit('user disconnect', msg)
         updateUser()
+        updateNumUsers
       }
     })
 
-    function updateUser() {
-      io.emit('connectedUser', connectedUser)
-    }
+    const updateUser = () => io.emit('connectedUser', connectedUser)
+    const updateNumUsers = () => io.emit('numUsers', numUsers)
   })
 }
 
