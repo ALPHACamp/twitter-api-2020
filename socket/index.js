@@ -1,7 +1,6 @@
 const socketio = require('socket.io')
 const { authenticatedSocket } = require('../middleware/auth')
 
-
 const socket = server => {
   const io = socketio(server, {
     cors: {
@@ -11,26 +10,25 @@ const socket = server => {
     allowEI03: true
   })
 
-  let numUsers = 0
-  let connectedUser = []
+  // let numUsers = 0
 
   io.use(authenticatedSocket).on('connection', async socket => {
     const sockets = await io.fetchSockets()
-    sockets.map(data => console.log(data.user))
+    let connectedUser = []
     let isHere = true
-    ++numUsers
-    const loginUser = {
+    const loginUser = sockets.map(data => ({
       isHere,
-      userId: socket.user.id,
-      avatar: socket.user.avatar,
-      name: socket.user.name,
-      account: socket.user.account
-    }
+      userId: data.id,
+      avatar: data.avatar,
+      name: data.name,
+      account: data.account
+    }))
 
     connectedUser.push(loginUser)
+    console.log(connectedUser)
     updateNumUsers()
     updateUser()
-    // console.log(connectedUser)
+
     socket.on('chat message', msg => {
       const userData = {
         isHere,
@@ -57,23 +55,23 @@ const socket = server => {
     //   socket.emit('user join', msg)
     // })
     
-    // socket.on('disconnect', () => {
-    //   if (isHere) {
-    //     const msg = `${socket.user.name} 已離開囉`
-    //     --numUsers
-    //     connectedUser.splice(connectedUser.indexOf(userName), 1)
-    //     socket.emit('user disconnect', msg)
-    //     updateUser()
-    //     updateNumUsers
-    //   }
-    // })
+    socket.on('disconnect', () => {
+      socket.leave()
+      if (isHere) {
+        const msg = `${socket.user.name} 已離開囉`
+        // --numUsers
+        socket.emit('user disconnect', msg)
+        updateUser()
+        updateNumUsers()
+      }
+    })
 
     function updateUser() {
       io.emit('connectedUser', connectedUser)
     }
-    function updateNumUsers () {
-      io.emit('numUsers', numUsers)
-    }
+    // function updateNumUsers () {
+    //   io.emit('numUsers', numUsers)
+    // }
   })
 }
 
