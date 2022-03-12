@@ -440,12 +440,16 @@ const userController = {
       const user = await User.findByPk(req.user.id, {
         attributes: [
           'id',
-          'account',
           'name',
           'email',
           'avatar',
+          'account',
           'cover',
-          'role'
+          'introduction',
+          'role',
+          'followerCount',
+          'followingCount',
+          'tweetCount'
         ]
       })
       if (!user) throw new Error('user not found')
