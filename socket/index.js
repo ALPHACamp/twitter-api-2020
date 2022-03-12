@@ -30,7 +30,7 @@ const socket = server => {
     const loginData = {
       isHere,
       userId: socket.user.userId,
-      message: '${socket.user.name} 已加入',
+      message: `${socket.user.name} 已加入`,
       type: 'login'
     }
     io.emit('chat message', loginData)
