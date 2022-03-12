@@ -55,7 +55,7 @@ const socket = server => {
       const logoutData = {
         isHere,
         userId: socket.user.userId,
-        message: '${socket.user.name} 已加入',
+        message: `${socket.user.name} 已離開`,
         type: 'logout'
       }
 
