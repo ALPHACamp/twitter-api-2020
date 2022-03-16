@@ -80,8 +80,8 @@ describe('# tweet requests', () => {
             helpers, 'getUser'
         ).returns({id: 1, Followings: []});
         // 在測試資料庫中，新增 mock 資料
-        await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
-        await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
+        await db.User.create({ account: 'User1', name: 'User1', email: 'User1', password: 'User1' })
+        await db.Tweet.create({ UserId: 1, description: 'User1 的 Tweet1' })
       })
 
       // GET /tweets - 所有推文，包括推文作者
