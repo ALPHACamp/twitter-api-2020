@@ -1,15 +1,17 @@
 
 # Simple-twitter
-模擬Twitter開發的專案，提供前端開發者API。
+ 4 人團隊採前後分離的開發模式，在兩週內打造的簡易社群平台。
 
 
 [![Framework](https://img.shields.io/badge/express-4.16.4-yellow.svg)](https://www.npmjs.com/package/express)
 [![Database](https://img.shields.io/badge/Database-MYSQL-yellow.svg)](https://www.npmjs.com/package/mysql)
 
-(<a href="https://dzbr-alphatwitter.herokuapp.com">API連結</a>)
-(<a href="https://basalt-nerve-0ff.notion.site/API-44c1f841134341c59846c42eab049329">API文件</a>)
-(<a href="https://basalt-nerve-0ff.notion.site/postman-export-9ebbca32f21b4bfb84f833cba5a5dfcd">POSTMAN JSON檔案</a>)
-
+API URL: https://dzbr-alphatwitter.herokuapp.com
+| <a href="https://basalt-nerve-0ff.notion.site/API-44c1f841134341c59846c42eab049329">API文件</a> 
+| <a href="https://basalt-nerve-0ff.notion.site/postman-export-9ebbca32f21b4bfb84f833cba5a5dfcd">POSTMAN JSON檔案</a> 
+  
+  <a href="https://github.com/jj280385/Twitter-by-ALPHA-Camp">前端repo</a> 
+ | <a href="https://jj280385.github.io/Twitter-by-ALPHA-Camp">demo</a> 
 ## 功能介紹
   * 提供使用者登入、登出及註冊帳號功能
     * 網站具備JWT驗證功能 
@@ -39,16 +41,9 @@ git clone https://github.com/RonnyChiang/twitter-api-2020.git
 
 ```
 cd twitter-api-2020 //切至專案資料夾
-```
-
-```
 npm install  //安裝套件
-```
-
-```
 npm install nodemon   // 另行安裝nodemon
-``` 
-
+```
 ```
 將資料夾內'.env.example'檔案名稱改為'.env'
 ```
@@ -62,9 +57,6 @@ create database ac_twitter_workspace
 
 ```
 npx sequelize db:migrate   // 載入模組
-```
-
-```
 npx sequelize db:seed:all  // 載入種子資料 
 ```
 
@@ -100,10 +92,15 @@ ctrl + c
 環境變數請參閱 env.example
 
 # 專案開發人員
+後端：
 [熊熊](https://github.com/ReoNaBear),
 [Ronny Chiang](https://github.com/RonnyChiang)
-
+  
+ 前端：
+[ZORA CHEN](https://github.com/jj280385),
+[Davis](https://github.com/Pudding1989)
 ## Screen Photo
+<img width="1270" alt="截圖 2022-03-04 上午11 40 37" src="https://user-images.githubusercontent.com/43169057/158582265-9f216648-755b-4ebe-b78c-ccc122d0cd35.png">
 
 ## 版本更新 
 
