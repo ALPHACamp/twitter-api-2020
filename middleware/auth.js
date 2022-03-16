@@ -1,6 +1,7 @@
 const passport = require('../config/passport')
 const helper = require('../_helpers')
 const jwt = require('jsonwebtoken')
+const { User } = require('../models')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
@@ -18,20 +19,23 @@ const authenticatedAdmin = (req, res, next) => {
 }
 
 const authenticatedSocket = (socket, next) => {
-  console.log('========== SOCKET AUTH ==========')
-  console.log('socket.handshake', socket.handshake)
-  console.log('sock.handshake.auth', socket.handshake.auth.token)
-  if (socket.handshake.auth?.token) {
+  // console.log('========== SOCKET AUTH ==========')
+  // console.log('socket.handshake', socket.handshake)
+  // console.log('socket.handshake.auth.token', socket.handshake.auth.token)
+  if (socket.handshake.auth && socket.handshake.auth.token) {
     jwt.verify(
       socket.handshake.auth.token,
       process.env.JWT_SECRET,
-      async (err, decoded) => {
-        try {
-          if (err) return next(new Error('Authentiaction Error'))
-          socket.userId = decoded.id
-          console.log('socket.usrId', socket.userId)
-          next()
-        } catch (err) { next(err) }
+      async (err, jwtPayload) => {
+        if (err) return next(new Error('Authentiaction Error'))
+        const user = await User.findById(jwtPayload.id, {
+          attributes: { excludes: ['password'] },
+          raw: true
+        })
+        socket.user = user
+        // console.log("===== socket user =====")
+        // console.log(socket.user)
+        next()
       } 
     )
   }
