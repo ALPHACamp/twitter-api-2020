@@ -383,7 +383,7 @@ const userController = {
     try {
       const id = +req.params.id
       const userId = helpers.getUser(req).id
-      const { account, name, email, password, checkPassword, introduction, cover, avatar } = req.body
+      const { account, name, email, password, checkPassword, introduction } = req.body
       const { files } = req
 
       if (userId !== id) return res.status(400).json({
@@ -399,7 +399,7 @@ const userController = {
       if (name && !validator.isLength(name, { min: 0, max: 50 })) throw new Error('名字長度不能超過 50 個字')
 
       if (introduction && !validator.isLength(introduction, { min: 0, max: 160 })) throw new Error('自我介紹不能超過 160 個字')
-      // 列出全部有相同 account or email 的 user
+
       const checkedUser = await User.findAll({
         where: { [Op.or]: [{ account }, { email }]},
         attributes: ['id', 'name', 'account', 'email', 'avatar', 'introduction', 'role'],
