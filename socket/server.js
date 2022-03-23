@@ -7,7 +7,7 @@ const { authenticatedSocket } = require('../helpers/auth')
 module.exports = server => {
   const io = require('socket.io')(server, {
     cors: {
-      origin: '*',
+      origin: 'https://zheanzheng.github.io/vue_twitter_hackathon/',
       methods: ['GET', 'POST']
     }
   })
@@ -26,7 +26,6 @@ module.exports = server => {
       roomId = Number(roomId)
       socket.join(`${roomId}`)
       io.emit('test message', '後端 test 123，收到請回答')
-      console.log(socket.rooms)
 
       //如果是公開聊天室
       if (roomId === PUBLIC_ROOM_ID) {
@@ -39,7 +38,6 @@ module.exports = server => {
     })
 
     socket.on('public-chat', async message => {
-      console.log('public chat: ' + message)
       console.log('receive public chat message')
       io.to(`${PUBLIC_ROOM_ID}`).emit('send-message', (message, socket.user))
       await messageServices.saveMessages(
@@ -51,21 +49,21 @@ module.exports = server => {
       console.log('receive private chat message')
       await socketService.saveMessages(
         generateMessage(message.roomId, message, socket.user, 'message')
-        )
+      )
       io.to(`${message.roomId}`).emit('send-message', (message, socket.user))
     })
 
-    socket.on('chat message', async message => {
-      if (message.replace(/\s+/, '') === '')
-        throw new Error("message can't be null")
-      console.log('message: ' + message)
+    // socket.on('chat message', async message => {
+    //   if (message.replace(/\s+/, '') === '')
+    //     throw new Error("message can't be null")
+    //   console.log('message: ' + message)
 
-      //發送 allMessage事件的訊息給所有連線用戶
-      io.emit('chat message', message)
-      await messageServices.saveMessages(
-        generateMessage(PUBLIC_ROOM_ID, message, socket.user, 'message')
-      )
-    })
+    //   //發送 allMessage事件的訊息給所有連線用戶
+    //   io.emit('chat message', message)
+    //   await messageServices.saveMessages(
+    //     generateMessage(PUBLIC_ROOM_ID, message, socket.user, 'message')
+    //   )
+    // })
 
     // Subscription to target account
     socket.on('suscription', account => {
@@ -80,10 +78,11 @@ module.exports = server => {
       socket.broadcast.to(socket.user.account).emit('notification')
     })
 
-    socket.on('disconnect', reason => {
-      console.log(reason)
-      console.log(socket.rooms)
-      console.log('Bye~') // 顯示 bye~
+    socket.on('leave', reason => {
+      console.log('== receive leave message===')
+      if (roomId === PUBLIC_ROOM_ID) {
+        io.to(`${PUBLIC_ROOM_ID}`).emit('message', { message: `${user.name}下線`, type: 'notice' })
+      }
     })
   })
 }
