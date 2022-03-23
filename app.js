@@ -1,15 +1,34 @@
 const express = require('express')
-const helpers = require('./_helpers');
+const cors = require('cors')
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+const passport = require('./config/passport')
+const methodOverride = require('method-override')
+const router = require('./routes')
 
 const app = express()
-const port = 3000
+const PORT = process.env.PORT
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+const server = require('http').createServer(app)
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+// http
+app.use(cors())
+app.use(express.urlencoded({ extended: true }))
+app.use(methodOverride('_method'))
+app.use(express.json())
+
+app.use(passport.initialize())
+app.use(express.static('public'))
+
+require('./socket/server')(server)
+
+app.use('/api', router)
+server.listen(PORT, () =>
+  console.log(`Alphitter api server listening on port ${PORT}!`)
+)
+app.get('/', (req, res) => {
+  res.sendFile(`${__dirname}/public/index.html`)
+})
 
 module.exports = app

@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Users', {
@@ -17,14 +17,39 @@ module.exports = {
       name: {
         type: Sequelize.STRING
       },
-      avatar: {
+      account: {
         type: Sequelize.STRING
+      },
+      cover: {
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/ju5wFt3.jpg'
+      },
+      avatar: {
+        type: Sequelize.STRING,
+        defaultValue: 'https://i.imgur.com/hAKcS3E.jpg'
       },
       introduction: {
         type: Sequelize.TEXT
       },
       role: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'user'
+      },
+      likedCount: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+      },
+      repliedCount: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+      },
+      followingCount: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+      },
+      followerCount: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,
@@ -34,9 +59,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
+    })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Users');
+    return queryInterface.dropTable('Users')
   }
-};
+}
