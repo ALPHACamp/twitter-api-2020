@@ -82,6 +82,7 @@ describe('# tweet requests', () => {
         // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
         await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
+        await db.Reply.create({UserId: 1, TweetId: 1, comment: 'Tweet1 的 comment'})
       })
 
       // GET /tweets - 所有推文，包括推文作者
@@ -95,6 +96,8 @@ describe('# tweet requests', () => {
             expect(res.body).to.be.an('array');
             // 檢查是否回傳資料有 User1 的 Tweet1
             res.body[0].description.should.equal('User1 的 Tweet1');
+            // 檢查是否回傳資料有推文資料
+            res.body[0].comment.should.equal('Tweet1 的 comment');
             return done();
           })
       });
