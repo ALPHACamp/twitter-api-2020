@@ -44,8 +44,8 @@ describe('# admin requests', () => {
             if (err) return done(err);
             // 檢查回傳資料是否是陣列類型
             expect(res.body).to.be.an('array');
-            // 檢查回傳資料是否有 root 這個使用者資料
-            res.body[0].name.should.equal('root');
+            // 檢查回傳資料是否有 3 筆使用者資料
+            res.body.length.should.equal(3);
             return done();
           })
       });
