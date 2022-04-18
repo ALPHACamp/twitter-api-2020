@@ -1,39 +1,53 @@
 var chai = require('chai')
 var sinon = require('sinon')
+var proxyquire = require('proxyquire');
 chai.use(require('sinon-chai'))
 
 const { expect } = require('chai')
 const {
   sequelize,
-  dataTypes,
-  checkModelName,
-  checkPropertyExists
+  Sequelize
 } = require('sequelize-test-helpers')
 
 const db = require('../../models')
-const UserModel = require('../../models/user')
 
 describe('# User Model', () => {
-  // 使用寫好的 User Model
-  const User = UserModel(sequelize, dataTypes)
-  // 創建 user instance 
-  const user = new User()
-  // 檢查 Model name
-  checkModelName(User)('User')
-
-  // 檢查 user 是否有 name, email, password, account, cover, avatar 屬性
-  context('properties', () => {
-    ;[
-      'name', 'email', 'password', 'account',  'cover', 'avatar'
-    ].forEach(checkPropertyExists(user))
+  // 取出 Sequelize 的 DataTypes
+  const { DataTypes } = Sequelize
+  // 將 models/user 中的 sequelize 取代成這裡的 Sequelize
+  const UserFactory = proxyquire('../../models/user', {
+    sequelize: Sequelize
   })
 
-  // 檢查 User 的關聯是否正確
+  // 宣告 FollowShip 變數
+  let User
+
+  before(() => {
+    // 賦予 FollowShip 值，成為 FollowShip Model 的 instance
+    User = UserFactory(sequelize, DataTypes)
+  })
+
+  // 清除 init 過的資料
+  after(() => {
+    User.init.resetHistory()
+  })
+
+  // 檢查 user 是否有 name 屬性, 自動化測試會用到
+  context('properties', () => {
+    it('called User.init with the correct parameters', () => {
+      expect(User.init).to.have.been.calledWithMatch(
+        {
+          name: DataTypes.STRING,
+        }
+      )
+    })
+  })
+
+  // 檢查 tweet 的關聯是否正確
   context('associations', () => {
     const Reply = 'Reply'
     const Tweet = 'Tweet'
     const Like = 'Like'
-
     before(() => {
       // 將 User model 對 User, Tweet, Reply, Like 做關聯(呼叫 associate)
       User.associate({ Reply })
@@ -67,7 +81,6 @@ describe('# User Model', () => {
   // 檢查 model 的新增、修改、刪除、更新
   context('action', () => {
     let data = null
-
     // 檢查 db.User 是否真的可以新增一筆資料
     it('create', (done) => {
       db.User.create({}).then((user) => {

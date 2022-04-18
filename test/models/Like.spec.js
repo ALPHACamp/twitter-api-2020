@@ -1,30 +1,45 @@
 var chai = require('chai');
 var sinon = require('sinon');
+var proxyquire = require('proxyquire');
 chai.use(require('sinon-chai'));
 
 const { expect } = require('chai')
 const {
   sequelize,
-  dataTypes,
-  checkModelName,
-  checkPropertyExists
+  Sequelize
 } = require('sequelize-test-helpers')
 
 const db = require('../../models')
-const LikeModel = require('../../models/like')
 
 describe('# Like Model', () => {
-  // 使用寫好的 Like Model
-  const Like = LikeModel(sequelize, dataTypes)
-  // 創建 like instance 
-  const like = new Like()
-  // 檢查 Model name
-  checkModelName(Like)('Like')
+  // 取出 Sequelize 的 DataTypes
+  const { DataTypes } = Sequelize
+  // 將 models/like 中的 sequelize 取代成這裡的 Sequelize
+  const LikeFactory = proxyquire('../../models/like', {
+    sequelize: Sequelize
+  })
 
-  // 檢查 like 是否有 ___ 屬性(由於希望學員可以彈性命名 model 欄位，因此這邊留空)
-  context('properties', () => {
-    ;[
-    ].forEach(checkPropertyExists(like))
+  // 宣告 Like 變數
+  let Like
+
+  before(() => {
+    // 賦予 Like 值，成為 Like Model 的 instance
+    Like = LikeFactory(sequelize, DataTypes)
+  })
+
+  // 清除 init 過的資料
+  after(() => {
+    Like.init.resetHistory()
+  })
+
+  // 檢查 like 是否有 UserId, TweetId 屬性，自動化測試會用到
+  it('called Like.init with the correct parameters', () => {
+    expect(Like.init).to.have.been.calledWithMatch(
+      {
+        UserId: DataTypes.INTEGER,
+        TweetId: DataTypes.INTEGER
+      }
+    )
   })
 
   // 檢查 like 的關聯是否正確
