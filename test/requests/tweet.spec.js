@@ -96,13 +96,11 @@ describe('# tweet requests', () => {
             expect(res.body).to.be.an('array');
             // 檢查是否回傳資料有 User1 的 Tweet1
             res.body[0].description.should.equal('User1 的 Tweet1');
-            // 檢查是否回傳資料有推文資料
-            res.body[0].comment.should.equal('Tweet1 的 comment');
             return done();
           })
       });
 
-      // GET /tweets/:tweet_id - 一筆推文與回覆
+      // GET /tweets/:tweet_id - 一筆推文
       it(' - successfully', (done) => {
         request(app)
           .get('/api/tweets/1')
