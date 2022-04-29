@@ -19,11 +19,11 @@ describe('# User Model', () => {
     sequelize: Sequelize
   })
 
-  // 宣告 FollowShip 變數
+  // 宣告 User 變數
   let User
 
   before(() => {
-    // 賦予 FollowShip 值，成為 FollowShip Model 的 instance
+    // 賦予 User 值，成為 User Model 的 instance
     User = UserFactory(sequelize, DataTypes)
   })
 
@@ -71,7 +71,7 @@ describe('# User Model', () => {
       expect(User.hasMany).to.have.been.calledWith(Like)
       done()
     })
-    it('should have many followships', (done) => {
+    it('should have many Users', (done) => {
       // 檢查是否有呼叫 belongsToMany(User)
       expect(User.belongsToMany).to.have.been.calledWith(User)
       done()

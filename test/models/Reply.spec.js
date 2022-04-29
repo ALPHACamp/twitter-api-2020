@@ -23,7 +23,7 @@ describe('# Reply Model', () => {
   let Reply
 
   before(() => {
-    // 賦予 FollowShip 值，成為 FollowShip Model 的 instance
+    // 賦予 Reply 值，成為 Reply Model 的 instance
     Reply = ReplyFactory(sequelize, DataTypes)
   })
 
