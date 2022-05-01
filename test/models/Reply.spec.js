@@ -1,33 +1,49 @@
 var chai = require('chai');
 var sinon = require('sinon');
+var proxyquire = require('proxyquire');
 chai.use(require('sinon-chai'));
 
 const { expect } = require('chai')
 const {
   sequelize,
-  dataTypes,
-  checkModelName,
-  checkPropertyExists
+  Sequelize
 } = require('sequelize-test-helpers')
 
 const db = require('../../models')
-const ReplyModel = require('../../models/reply')
 
 describe('# Reply Model', () => {
-  // 使用寫好的 Reply Model
-  const Reply = ReplyModel(sequelize, dataTypes)
-  // 創建 reply instance 
-  const like = new Reply()
-  // 檢查 Model name
-  checkModelName(Reply)('Reply')
-
-   // 檢查 reply 是否有 __ 屬性(由於希望學員可以彈性命名 model 欄位，因此這邊留空)
-  context('properties', () => {
-    ;[
-    ].forEach(checkPropertyExists(like))
+  // 取出 Sequelize 的 DataTypes
+  const { DataTypes } = Sequelize
+  // 將 models/reply 中的 sequelize 取代成這裡的 Sequelize
+  const ReplyFactory = proxyquire('../../models/reply', {
+    sequelize: Sequelize
   })
 
-  // 檢查 reply 的關聯是否正確   
+  // 宣告 Reply 變數
+  let Reply
+
+  before(() => {
+    // 賦予 Reply 值，成為 Reply Model 的 instance
+    Reply = ReplyFactory(sequelize, DataTypes)
+  })
+
+  // 清除 init 過的資料
+  after(() => {
+    Reply.init.resetHistory()
+  })
+
+  // 檢查 reply 是否有 comment 屬性，自動化測試會用到
+  context('properties', () => {
+    it('called Reply.init with the correct parameters', () => {
+      expect(Reply.init).to.have.been.calledWithMatch(
+        {
+          comment: DataTypes.TEXT,
+        },
+      )
+    })
+  })
+
+  // 檢查 reply 的關聯是否正確 
   context('associations', () => {
     const User = 'User'
     const Tweet = 'Tweet'
@@ -48,7 +64,6 @@ describe('# Reply Model', () => {
       done()
     })
   })
-
   // 檢查 model 的新增、修改、刪除、更新
   context('action', () => {
 

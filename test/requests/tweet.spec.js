@@ -82,6 +82,7 @@ describe('# tweet requests', () => {
         // 在測試資料庫中，新增 mock 資料
         await db.User.create({account: 'User1', name: 'User1', email: 'User1', password: 'User1'})
         await db.Tweet.create({UserId: 1, description: 'User1 的 Tweet1'})
+        await db.Reply.create({UserId: 1, TweetId: 1, comment: 'Tweet1 的 comment'})
       })
 
       // GET /tweets - 所有推文，包括推文作者
@@ -99,7 +100,7 @@ describe('# tweet requests', () => {
           })
       });
 
-      // GET /tweets/:tweet_id - 一筆推文與回覆
+      // GET /tweets/:tweet_id - 一筆推文
       it(' - successfully', (done) => {
         request(app)
           .get('/api/tweets/1')
