@@ -73,7 +73,7 @@ describe('# Reply Model', () => {
       db.Reply.create({}).then((reply) => {   
         data = reply
         done()
-      })
+      }).catch(err => console.log(err))
     })
     // 檢查 db.Reply 是否真的可以讀取一筆資料
     it('read', (done) => {
