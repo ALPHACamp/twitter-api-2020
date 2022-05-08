@@ -4,19 +4,11 @@ const routes = require('./routes')
 const app = express()
 const { getUser } = require('./_helpers')
 const port = 3000
-const hbv = require('express-handlebars')
 
 // use helpers.getUser(req) to replace req.user
 function authenticated (req, res, next) {
   // passport.authenticate('jwt', { ses...
 };
-
-const hbs = hbv.create({
-})
-
-app.engine('handlebars', hbs.engine)
-app.set('view engine', 'handlebars')
-app.set('views', './views')
 
 app.use(express.urlencoded({ extended: true }))
 
