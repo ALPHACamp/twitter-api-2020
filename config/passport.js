@@ -16,7 +16,6 @@ passport.use(new LocalStrategy(
       .then(user => {
         if (!user) return cb(null, false)
         if (password !== user.password) return cb(null, false)
-
         return cb(null, user)
       })
   }
