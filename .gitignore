@@ -85,3 +85,6 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# System_doc
+System_doc
