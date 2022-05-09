@@ -9,7 +9,7 @@ const { authenticated, authenticatedUser, authenticatedAdmin } = require('../mid
 
 const passportAuth = passport.authenticate('local', { session: false })
 // 註冊以及登入不用驗證身份
-router.post('/register', userController.register)
+router.post('/users', userController.register)
 router.post('/login', passportAuth, authenticatedUser, userController.login)
 router.post('/admin/login', passportAuth, authenticatedAdmin, userController.login)
 
