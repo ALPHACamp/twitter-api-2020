@@ -1,12 +1,12 @@
 'use strict'
 const faker = require('faker')
-function generateTweets () {
+function generateReplies () {
   const arr = []
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 180; i++) {
     arr[i] = {
-      id: i + 1,
-      description: faker.lorem.sentence(),
+      comment: faker.lorem.sentence(),
       user_id: i % 6 + 1,
+      tweet_id: i % 60 + 1,
       created_at: new Date(),
       updated_at: new Date()
     }
@@ -16,12 +16,12 @@ function generateTweets () {
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('Tweets',
-      generateTweets()
+    await queryInterface.bulkInsert('Replies',
+      generateReplies()
     )
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('Tweets', null, {})
+    await queryInterface.bulkDelete('Replies', null, {})
   }
 }
