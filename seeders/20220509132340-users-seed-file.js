@@ -6,7 +6,6 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Users', [
-      // admin
       {
         account: 'root',
         name: 'root',
@@ -14,7 +13,7 @@ module.exports = {
         role: 'admin',
         avatar: 'https://loremflickr.com/280/280/admin',
         cover_image: 'https://loremflickr.com/1280/400/landscape',
-        introduction: faker.lorem.sentence(),
+        introduction: faker.lorem.sentence(3),
         password: bcrypt.hashSync('12345678', 10),
         created_at: new Date(),
         updated_at: new Date()
@@ -28,7 +27,7 @@ module.exports = {
         role: 'user',
         avatar: 'https://loremflickr.com/280/280/admin',
         cover_image: 'https://loremflickr.com/1280/400/landscape',
-        introduction: faker.lorem.sentence(),
+        introduction: faker.lorem.sentence(4),
         password: bcrypt.hashSync('12345678', 10),
         created_at: new Date(),
         updated_at: new Date()
@@ -42,7 +41,7 @@ module.exports = {
         role: 'user',
         avatar: 'https://loremflickr.com/280/280/admin',
         cover_image: 'https://loremflickr.com/1280/400/landscape',
-        introduction: faker.lorem.sentence(),
+        introduction: faker.lorem.sentence(3),
         password: bcrypt.hashSync('12345678', 10),
         created_at: new Date(),
         updated_at: new Date()
@@ -54,7 +53,7 @@ module.exports = {
         role: 'user',
         avatar: 'https://loremflickr.com/280/280/admin',
         cover_image: 'https://loremflickr.com/1280/400/landscape',
-        introduction: faker.lorem.sentence(),
+        introduction: faker.lorem.sentence(5),
         password: bcrypt.hashSync('12345678', 10),
         created_at: new Date(),
         updated_at: new Date()
@@ -64,6 +63,9 @@ module.exports = {
         name: 'tang',
         email: 'tang@example.com',
         role: 'user',
+        avatar: 'https://loremflickr.com/280/280/admin',
+        cover_image: 'https://loremflickr.com/1280/400/landscape',
+        introduction: faker.lorem.sentence(5),
         password: bcrypt.hashSync('12345678', 10),
         created_at: new Date(),
         updated_at: new Date()
@@ -73,10 +75,11 @@ module.exports = {
         name: 'winnie',
         email: 'winnie@example.com',
         role: 'user',
+        introduction: faker.lorem.sentence(3),
         password: bcrypt.hashSync('12345678', 10),
         created_at: new Date(),
         updated_at: new Date()
-      },
+      }
     ], {})
   },
 
