@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const passport = require('passport')
+const { errorHandler } = require('../middleware/error-handler')
 const userController = require('../controllers/user-controller')
 
 const admin = require('./modules/admin')
@@ -15,5 +16,6 @@ router.post('/admin/login', passportAuth, authenticatedAdmin, userController.log
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, authenticatedUser, user)
+router.use('/', errorHandler)
 
 module.exports = router
