@@ -13,8 +13,7 @@ const userController = {
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10),
-        role: req.body.role === 'admin' ? 'admin' : 'user'
+        password: bcrypt.hashSync(req.body.password, 10)
       })
       res.json({ status: 'success', user })
     } catch (err) {
@@ -36,6 +35,9 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUser: async (req, res, next) => {
+    res.send('GET USER!')
   }
 }
 module.exports = userController
