@@ -9,8 +9,15 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Like.init({
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
+    },
     userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER
+    tweetId: DataTypes.INTEGER,
+    createdAt: DataTypes.DATE,
+    updatedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Like',
