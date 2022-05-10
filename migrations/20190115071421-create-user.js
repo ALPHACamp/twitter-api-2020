@@ -14,7 +14,7 @@ module.exports = {
       },
       name: {
         allowNull: false,
-        type: Sequelize.STRING(50)
+        type: Sequelize.STRING
       },
       email: {
         allowNull: false,
@@ -26,10 +26,10 @@ module.exports = {
       },
       role: {
         allowNull: false,
-        type: Sequelize.STRING(10)
+        type: Sequelize.STRING
       },
       introduction: {
-        type: Sequelize.STRING(160)
+        type: Sequelize.STRING
       },
       avatar: {
         type: Sequelize.STRING

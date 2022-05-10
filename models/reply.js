@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: DataTypes.INTEGER,
     tweetId: DataTypes.INTEGER,
-    comment: DataTypes.STRING,
+    comment: DataTypes.TEXT,
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE
   }, {
