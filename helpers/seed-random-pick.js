@@ -1,5 +1,6 @@
 module.exports = {
   randomPick: (collection, picks) => {
+    
     // collection: array
     // picks: number
     const users = collection.slice()
