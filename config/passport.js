@@ -1,6 +1,7 @@
 const passport = require('passport')
 const passportJWT = require('passport-jwt')
 const LocalStrategy = require('passport-local')
+const bcrypt = require('bcryptjs')
 const { User } = require('../models')
 
 const JWTStrategy = passportJWT.Strategy
@@ -9,13 +10,17 @@ const ExtractJWT = passportJWT.ExtractJwt
 passport.use(new LocalStrategy(
   {
     usernameField: 'account',
-    passwordField: 'password',
-    passReqToCallback: true
+    passwordField: 'password'
   },
-  async (req, account, password, cb) => {
-    const user = await User.findOne({ where: { account, password } })
-    if (!user) return cb(null, false, { message: '帳號或密碼輸入錯誤！' })
-    cb(null, user)
+  async (account, password, cb) => {
+    try {
+      const user = await User.findOne({ where: { account } })
+      if (!user) throw new Error('無此帳號。')
+      if (!bcrypt.compareSync(password, user.password)) throw new Error('帳號或密碼錯誤。')
+      cb(null, user)
+    } catch (err) {
+      cb(err)
+    }
   }
 ))
 
