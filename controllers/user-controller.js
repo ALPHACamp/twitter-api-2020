@@ -1,4 +1,4 @@
-const { User } = require('../models')
+const { User, Reply, Tweet, Like } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
@@ -37,7 +37,20 @@ const userController = {
     }
   },
   getUser: async (req, res, next) => {
-    res.send('GET USER!')
+    try {
+      const user = await User.findByPk(req.params.id, {
+        include: [
+          Like,
+          Tweet,
+          Reply,
+          { model: User, as: 'Followers' }
+        ]
+      })
+      if (user.role === 'admin') throw new Error('不可查看管理員資料。')
+      res.json({ status: 'success', user })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
