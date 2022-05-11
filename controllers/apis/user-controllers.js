@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 
 const userController = {
-  signIn: (req, res, next) => {
+  signin: (req, res, next) => {
     try {
       const userData = req.user.toJSON()
       delete userData.password
