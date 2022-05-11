@@ -8,9 +8,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      account: {
-        type: Sequelize.STRING
-      },
       email: {
         type: Sequelize.STRING
       },
@@ -23,36 +20,20 @@ module.exports = {
       avatar: {
         type: Sequelize.STRING
       },
-      cover: {
-        type: Sequelize.STRING
-      },
       introduction: {
         type: Sequelize.TEXT
       },
       role: {
         type: Sequelize.STRING
       },
-      tweet_count: {
-        type: Sequelize.STRING
-      },
-      following_count: {
-        type: Sequelize.STRING
-      },
-      follower_count: {
-        type: Sequelize.STRING
-      },
-      like_count: {
-        type: Sequelize.STRING
-      },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
-
     });
   },
   down: (queryInterface, Sequelize) => {
