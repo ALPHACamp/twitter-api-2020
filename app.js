@@ -8,7 +8,6 @@ const app = express()
 
 const helpers = require('./_helpers')
 const handlebars = require('express-handlebars')
-const methodOverride = require('method-override')
 const session = require('express-session')
 
 const SESSION_SECRET = process.env.SESSION_SECRET
@@ -19,7 +18,6 @@ app.set('view engine', 'handlebars')
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
-app.use(methodOverride('_method'))
 
 // use helpers.getUser(req) to replace req.user
 function authenticated (req, res, next) {
