@@ -1,5 +1,4 @@
 'use strict'
-const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const tweets = await queryInterface.sequelize.query(
@@ -15,7 +14,7 @@ module.exports = {
     for (let i = 0; i < tweets.length; i++) {
       for (let j = 0; j < eachTweetReply; j++) {
         data.push({
-          comment: faker.lorem.text(),
+          comment: "comment",
           tweet_id: tweets[i].id,
           user_id: users[Math.floor(Math.random() * (users.length - 1)) + 1].id,
           created_at: new Date(),
