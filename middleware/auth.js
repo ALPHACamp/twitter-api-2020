@@ -1,24 +1,19 @@
-const helpers = require('../helpers/auth-helpers')
+const passport = require('../config/passport')
 
-// 登入驗證
 const authenticated = (req, res, next) => {
-  // if (req.isAuthenticated)
-  if (helpers.ensureAuthenticated(req)) {
-    return next()
-  }
-  res.redirect('/signin')
+  passport.authenticate('jwt', { session: false }, (err, user) => {
+    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
+
+    next()
+  })(req, res, next)
 }
 
-// admin 身份驗證
 const authenticatedAdmin = (req, res, next) => {
-  // if (req.isAuthenticated)
-  if (helpers.ensureAuthenticated(req)) { // 是否登入
-    if (helpers.getUser(req).isAdmin) return next() // 是否為 admin，是就往下走
-    res.redirect('/') // 否就導回首頁
-  } else {
-    res.redirect('/signin') // 沒有登入就回 signin page
-  }
+  if (req.user && req.user.isAdmin) return next()
+
+  return res.status(403).json({ status: 'error', message: 'permission denied' })
 }
+
 module.exports = {
   authenticated,
   authenticatedAdmin
