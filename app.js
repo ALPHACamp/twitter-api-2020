@@ -17,9 +17,7 @@ app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 
 // use helpers.getUser(req) to replace req.user
-
 function authenticated (req, res, next) {
-
   // passport.authenticate('jwt', { ses...
 }
 
