@@ -1,11 +1,11 @@
-const { User, Reply, Tweet, Like } = require('../models')
+const { User, Reply, Tweet, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
 const userController = {
   register: async (req, res, next) => {
     try {
-      if (req.body.password !== req.body.passwordCheck) throw new Error('密碼與確認密碼不符。')
+      if (req.body.password !== req.body.checkPassword) throw new Error('密碼與確認密碼不符。')
 
       if (await User.findOne({ where: { account: req.body.account } })) throw new Error('此帳號已經註冊。')
 
@@ -38,15 +38,10 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id, {
-        include: [
-          Like,
-          Tweet,
-          Reply,
-          { model: User, as: 'Followers' }
-        ]
+      const user = await User.findOne({
+        where: { account: 'root'},
+        include: [{ model: User, as: 'Followers' }]
       })
-      if (user.role === 'admin') throw new Error('不可查看管理員資料。')
       res.json({ status: 'success', user })
     } catch (err) {
       next(err)
