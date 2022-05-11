@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {
       User.hasMany(models.Tweet, { foreignKey: 'userId' })
       User.hasMany(models.Reply, { foreignKey: 'userId' })
+      User.hasMany(models.Like, { foreignKey: 'userId' })
       User.belongsToMany(models.Tweet, {
         through: models.Like,
         foreignKey: 'userId',
@@ -30,6 +31,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   User.init({
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
+    },
     account: DataTypes.STRING,
     name: DataTypes.STRING,
     email: DataTypes.STRING,
@@ -37,7 +43,9 @@ module.exports = (sequelize, DataTypes) => {
     role: DataTypes.STRING,
     introduction: DataTypes.STRING,
     avatar: DataTypes.STRING,
-    cover: DataTypes.STRING
+    cover: DataTypes.STRING,
+    createdAt: DataTypes.DATE,
+    updatedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'User',

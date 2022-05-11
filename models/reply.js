@@ -15,9 +15,16 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Reply.init({
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
+    },
     userId: DataTypes.INTEGER,
     tweetId: DataTypes.INTEGER,
-    comment: DataTypes.STRING
+    comment: DataTypes.TEXT,
+    createdAt: DataTypes.DATE,
+    updatedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Reply',
