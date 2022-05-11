@@ -5,10 +5,10 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const port = process.env.PORT || 3000
 const app = express()
-
 const helpers = require('./_helpers')
 const handlebars = require('express-handlebars')
 const session = require('express-session')
+const passport = require('./config/passport')
 
 const SESSION_SECRET = process.env.SESSION_SECRET
 
@@ -18,6 +18,8 @@ app.set('view engine', 'handlebars')
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
+app.use(passport.initialize())
+app.use(passport.session())
 
 // use helpers.getUser(req) to replace req.user
 function authenticated (req, res, next) {
