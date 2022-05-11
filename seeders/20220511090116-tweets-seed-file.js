@@ -3,8 +3,8 @@
 const db = require('../models')
 const User = db.User
 
-const faker = require('faker')
 const tweet = require('../models/tweet')
+const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -14,13 +14,12 @@ module.exports = {
       'Tweets',
       Array.from({ length: 50 }).map((item, index) => ({
         id: index + 1,
-        UserId: Math.ceil(( index + 1) / 10),
+        user_id: Math.ceil(( index + 1) / 10),
         description: faker.lorem.text().substring(0, 140),
-        likeCount: 5,
-        replyCount: 3,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-
+        like_count: 5,
+        reply_count: 3,
+        created_at: new Date(),
+        updated_at: new Date()
       })),
       {}
     )

@@ -1,4 +1,6 @@
 const bcrypt = require('bcryptjs')
+const faker = require('faker')
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert(
@@ -15,7 +17,7 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date(),
+          updated_at: new Date()
         },
         {
           // 新增五筆使用者種子資料
@@ -28,7 +30,7 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date(),
+          updated_at: new Date()
         },
         {
           account: 'user2',
@@ -40,9 +42,10 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date(),
+          updated_at: new Date()
         },
         {
+          account: 'user3',
           name: 'user3',
           email: 'user3@example.com',
           password: await bcrypt.hash('12345678', 10),
@@ -51,7 +54,7 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date(),
+          updated_at: new Date()
         },
         {
           account: 'user4',
@@ -63,10 +66,10 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date(),
+          updated_at: new Date()
         },
         {
-          account: 'user4',
+          account: 'user5',
           name: 'user5',
           email: 'user5@example.com',
           password: await bcrypt.hash('12345678', 10),
@@ -75,8 +78,8 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date(),
-        },
+          updated_at: new Date()
+        }
       ],
       {}
     )

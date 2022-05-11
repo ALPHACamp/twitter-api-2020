@@ -15,12 +15,13 @@ module.exports = {
       'Replies',
       Array.from({ length: 150 }).map((item, index) => ({
         id: index + 1,
-        UserId: Math.ceil(Math.random() * 9) + 1,
-        TweetId: Math.ceil(( index + 1 ) / 3),
+        user_id: Math.ceil(Math.random() * 9) + 1,
+        tweet_id: Math.ceil(( index + 1 ) / 3 ),
         comment: faker.lorem.text().substring(0, 50),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }))
+        created_at: new Date(),
+        updated_at: new Date()
+      })),
+      {}
     )
   },
 
