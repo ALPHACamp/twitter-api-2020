@@ -8,12 +8,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      tweet_text: {
-        allowNull: false,
+      description: {
         type: Sequelize.TEXT
       },
       user_id: {
-        allowNull: false,
         type: Sequelize.INTEGER
       },
       created_at: {

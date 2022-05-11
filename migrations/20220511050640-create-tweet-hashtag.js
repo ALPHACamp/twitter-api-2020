@@ -9,6 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       hashtag_id: {
+        allowNull: false,
         type: Sequelize.INTEGER
       },
       tweet_id: {

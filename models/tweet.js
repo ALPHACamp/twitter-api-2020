@@ -16,12 +16,12 @@ module.exports = (sequelize, DataTypes) => {
         as: 'HashtagsInTweets'
       })
       Tweet.belongsTo(models.User, { foreignKey: 'userId' })
-      Tweet.hasMany(models.Like, { foreignKey: 'tweetId' })
+      Tweet.hasMany(models.Like, { foreignKey: 'TweetId' })
       Tweet.hasMany(models.Reply, { foreignKey: 'tweetId' })
     }
   }
   Tweet.init({
-    tweetText: DataTypes.TEXT,
+    description: DataTypes.TEXT,
     userId: DataTypes.INTEGER
   }, {
     sequelize,
