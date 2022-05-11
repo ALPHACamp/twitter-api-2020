@@ -15,6 +15,9 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  signup: (req, res, next) => {
+
   }
 
 }
