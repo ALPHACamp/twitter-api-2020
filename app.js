@@ -6,8 +6,6 @@ const express = require('express')
 const port = process.env.PORT || 3000
 const app = express()
 
-const helpers = require('./_helpers')
-const handlebars = require('express-handlebars')
 const session = require('express-session')
 
 const SESSION_SECRET = process.env.SESSION_SECRET

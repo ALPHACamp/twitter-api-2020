@@ -16,7 +16,7 @@ module.exports = {
     for (let i = 0; i < tweets.length; i++) {
       for (let j = 0; j < 3; j++) {
         const reply = {
-          reply_text: faker.lorem.text(),
+          comment: faker.lorem.text(),
           created_at: new Date(),
           updated_at: new Date(),
           user_id: users[Math.floor(Math.random() * users.length)].id,
