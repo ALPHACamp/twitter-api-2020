@@ -8,7 +8,7 @@ const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const users = await User.findAll({ where: { role: 'user' } })
+    const users = await User.findAll({ where: { role: '' } })
     const tweets = await Tweet.findAll()
 
     await queryInterface.bulkInsert(
