@@ -4,7 +4,7 @@ const faker = require('faker')
 module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.bulkInsert('Users', [{
-      id: 1,
+      id: 6,
       email: 'root@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'admin',
@@ -16,7 +16,7 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date()
     }, {
-      id: 2,
+      id: 1,
       email: 'user1@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
@@ -28,7 +28,7 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date()
     }, {
-      id: 3,
+      id: 2,
       email: 'user2@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
@@ -40,7 +40,7 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date()
     }, {
-      id: 4,
+      id: 3,
       email: 'user3@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
@@ -52,7 +52,7 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date()
     }, {
-      id: 5,
+      id: 4,
       email: 'user4@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
@@ -64,7 +64,7 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date()
     }, {
-      id: 6,
+      id: 5,
       email: 'user5@example.com',
       password: await bcrypt.hash('12345678', 10),
       role: 'user',
