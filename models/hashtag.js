@@ -1,7 +1,7 @@
-'use strict';
+'use strict'
 const {
   Model
-} = require('sequelize');
+} = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class Hashtag extends Model {
     /**
@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+    static associate (models) {
       Hashtag.belongsToMany(models.Tweet, {
         through: models.TweetHashtag,
         foreignKey: 'hashtagId',
@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Hashtag',
     tableName: 'Hashtags',
-    underscored: true,
-  });
-  return Hashtag;
-};
+    underscored: true
+  })
+  return Hashtag
+}

@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up (queryInterface, Sequelize) {
     await queryInterface.createTable('Hashtags', {
       id: {
         allowNull: false,
@@ -20,9 +20,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    });
+    })
   },
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Hashtags');
+  async down (queryInterface, Sequelize) {
+    await queryInterface.dropTable('Hashtags')
   }
-};
+}
