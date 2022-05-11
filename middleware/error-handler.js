@@ -1,12 +1,12 @@
 module.exports = {
   errorHandler: (err, req, res, next) => {
     if (err instanceof Error) {
-      res.json({
+      res.status(200).json({
         status: 'error',
         message: `${err.name}: ${err.message}`
       })
     } else {
-      res.json({
+      res.status(200).json({
         status: 'error',
         message: `${err}`
       })
