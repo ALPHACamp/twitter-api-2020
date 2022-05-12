@@ -17,7 +17,7 @@ const tweetController = {
     return Tweet.findAndCountAll({
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { nodel: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] }
+        { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] }
       ],
       order: [['createdAt', 'DESC']],
       limit,
@@ -39,7 +39,34 @@ const tweetController = {
           data: {
             tweets: resultTweets,
             pagination: getPagination(limit, page, restaurants.count)
-          }
+          },
+          message: ''
+        })
+      })
+      .catch(err => next(err))
+  },
+  getTweet: (req, res, next) => {
+    /*
+    :param id: tweetId
+    This api would return a json that concluding a specific tweet information
+    */
+    return Tweet.findByPk(req.params.id, {
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] }
+      ]
+    })
+      .then(tweet => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        const isLiked = tweet.LikedUsers.some(l => l.id === req.user.id)
+        return res.json({
+          status: 'success',
+          statusCode: 200,
+          data: {
+            tweet: tweet.toJSON(),
+            isLiked
+          },
+          message: ''
         })
       })
       .catch(err => next(err))
