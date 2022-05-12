@@ -17,10 +17,9 @@ const jwtOptions = {
 const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
   const user = await User.findByPk(jwt_payload.id, {
     include: [
-      { model: Tweet, as: 'RepliedTweets' },
       { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' },
+      { model: User, as: 'Followings' }
     ],
   })
 
