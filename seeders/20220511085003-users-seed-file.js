@@ -1,3 +1,5 @@
+'use strict'
+
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
 
@@ -17,7 +19,7 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         {
           // 新增五筆使用者種子資料
@@ -30,7 +32,7 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         {
           account: 'user2',
@@ -42,7 +44,7 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         {
           account: 'user3',
@@ -54,7 +56,7 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         {
           account: 'user4',
@@ -66,7 +68,7 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         {
           account: 'user5',
@@ -78,8 +80,8 @@ module.exports = {
           cover: 'https://source.unsplash.com/1000x200/?nature',
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
-          updated_at: new Date()
-        }
+          updated_at: new Date(),
+        },
       ],
       {}
     )

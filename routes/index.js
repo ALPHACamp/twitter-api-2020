@@ -1,12 +1,15 @@
 const express = require('express')
 const router = express.Router()
+const passport = require('../config/passport')
 
-const UserController = require('../controllers/userControllers')
+const userController = require('../controllers/user-controller')
 
 // 尚未加入 authenticatedAdmin
 const { authenticated, authenticatedUser } = require('../middleware/auth')
+const { apiErrorHandler } = require('../middleware/error-handler')
 
-// 以下待完成/routes/modules/users.js路由後再補上
-
+router.post('/users', userController.signUp)
+router.post('/signin', passport.authenticate('jwt', { session: false }), userController.signIn)
+router.use('/', apiErrorHandler)
 
 module.exports = router

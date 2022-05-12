@@ -23,7 +23,6 @@ app.use(express.json())
 
 // Setting passport
 app.use(passport.initialize())
-app.use(passport.session())
 
 // Setting middleware
 app.use(methodOverride('_method'))

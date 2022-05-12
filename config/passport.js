@@ -1,5 +1,4 @@
 const passport = require('passport')
-
 const { User, Tweet } = require('../models')
 
 // JWT Authentication
@@ -12,19 +11,16 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 
-const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
-  const user = await User.findByPk(jwt_payload.id, {
+passport.use(new JwtStrategy(jwtOptions, (jwt_payload, cb) => {
+  User.findByPk(jwt_payload.id, {
     include: [
       { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
       { model: User, as: 'Followings' }
-    ],
+    ]
   })
-
-  if (!user) return next(null, false)
-  return next(null, user)
-})
-
-passport.use(strategy)
+  .then(user => cb(null, user))
+    .catch(err => cb(err))
+}))
 
 module.exports = passport
