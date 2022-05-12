@@ -34,7 +34,7 @@ const tweetController = {
           totalLikes: r.LikedUser? r.LikedUser.length(): 0
         }))
         return res.json({
-          status: 'success',
+          status: 'Success',
           statusCode: 200,
           data: {
             tweets: resultTweets,
@@ -60,11 +60,34 @@ const tweetController = {
         if (!tweet) throw new Error("Tweet didn't exist!")
         const isLiked = tweet.LikedUsers.some(l => l.id === req.user.id)
         return res.json({
-          status: 'success',
+          status: 'Success',
           statusCode: 200,
           data: {
             tweet: tweet.toJSON(),
             isLiked
+          },
+          message: ''
+        })
+      })
+      .catch(err => next(err))
+  },
+  postTweet: (req, res, next) => {
+    /*
+    :body description: tweet's content
+    This api would create a tweet record and return a json
+    */
+    const description = req.body.description
+    if (!description) throw new Error('Description is required!')
+    return Tweet.create({
+      userId: req.user.id,
+      description
+    })
+      .then(tweet => {
+        return res.json({
+          status: 'Success',
+          statusCode: 200,
+          data: {
+            tweet
           },
           message: ''
         })
