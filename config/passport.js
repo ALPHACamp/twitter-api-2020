@@ -7,12 +7,12 @@ const { User, Tweet, Identity } = require('../models')
 
 passport.use(new LocalStrategy(
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password',
     passReqToCallback: true
   },
-  async (req, email, password, cb) => {
-    const user = await User.findOne({ where: { email }, include: Identity })
+  async (req, account, password, cb) => {
+    const user = await User.findOne({ where: { account }, include: Identity })
     if (!user) return cb(null, false)
     const res = await bcrypt.compare(password, user.password)
     if (!res) return cb(null, false)
