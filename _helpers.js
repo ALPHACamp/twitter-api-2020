@@ -1,4 +1,5 @@
 function getUser (req) {
+  console.log(req.body)
   return req.user
 }
 
