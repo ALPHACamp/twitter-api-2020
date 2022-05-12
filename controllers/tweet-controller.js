@@ -198,6 +198,10 @@ const tweetController = {
       .catch(err => next(err))
   },
   unlikeTweet: (req, res, next) => {
+    /*
+    :param id: tweetId
+    This api would destroy a like relation between user and tweet, and return a json
+    */
     const userId = req.user.id
     const tweetId = req.params.id
     return Like.findOne({
