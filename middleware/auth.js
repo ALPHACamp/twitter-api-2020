@@ -9,7 +9,7 @@ const authenticated = (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         status: 'error',
-        message: 'Permission denied'
+        message: 'Unauthorized'
       })
     }
     req.user = user
@@ -20,7 +20,7 @@ const authenticated = (req, res, next) => {
 const authenticatedUser = (req, res, next) => {
   req.user = helper.getUser(req)
   if (req.user && req.user.role === '') return next()
-  return res.status(401).json({
+  return res.status(403).json({
     status: 'error',
     message: 'Permission denied',
   })
