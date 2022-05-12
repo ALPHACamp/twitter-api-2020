@@ -4,16 +4,24 @@ const { User } = require('../../models')
 
 const userController = {
   signIn: (req, res, next) => {
-    const userData = req.user.toJSON()
-    delete userData.password
-    const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-    res.json({
-      status: 'success',
-      data: {
-        token,
-        user: userData
-      }
-    })
+    try {
+      const userData = req.user.toJSON()
+      if (userData.Identity.identity === 'admin') {
+        userData.is_admin = true
+      } else { userData.is_admin = false }
+      delete userData.password
+      delete userData.Identity
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      res.json({
+        status: 'success',
+        data: {
+          token,
+          user: userData
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   },
 
   signUp: async (req, res, next) => {

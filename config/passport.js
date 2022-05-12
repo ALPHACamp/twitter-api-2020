@@ -3,7 +3,7 @@ const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
 const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
-const { User } = require('../models')
+const { User, Tweet, Identity } = require('../models')
 
 passport.use(new LocalStrategy(
   {
@@ -12,7 +12,7 @@ passport.use(new LocalStrategy(
     passReqToCallback: true
   },
   async (req, email, password, cb) => {
-    const user = await User.findOne({ where: { email } })
+    const user = await User.findOne({ where: { email }, include: Identity })
     if (!user) return cb(null, false)
     const res = await bcrypt.compare(password, user.password)
     if (!res) return cb(null, false)
@@ -38,10 +38,10 @@ passport.use(new JwtStrategy(jwtOptions, async function (jwtPayload, cb) {
   try {
     const user = await User.findByPk(jwtPayload.id, {
       include: [
-        { model: Tweet, as: '' },
-        { model: Identity, as: '' },
-        { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' }
+        { model: Tweet },
+        { model: Identity },
+        { model: User, as: 'Follower' },
+        { model: User, as: 'Following' }
       ]
     })
     cb(null, user)
