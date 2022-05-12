@@ -1,10 +1,9 @@
 const { Tweet, User, Like, Reply } = require('../models')
-const { getUser } = require('../_helpers')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getAllTweet: async (req, res, next) => {
     try {
-      const userId = getUser(req).id
       const rawTweets = await Tweet.findAll({
         include: [
           {
@@ -36,6 +35,32 @@ const tweetController = {
       next(err)
     }
   },
+  postTweet: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const description = req.body.description
+      
+      if (!description) throw new Error('不可以提交空白的推文。')
+      if (description.length > 140) throw new Error('不可以提交字數過長的推文。')
+
+      const rawTweets = await Tweet.create({
+        userId,
+        description
+      })
+
+      const newTweet = rawTweets.toJSON()
+
+      res.json({
+        status: 'success',
+        message: '已成功新增一筆推文！',
+        data: {
+          newTweet
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  }
 }
 
 module.exports = tweetController
