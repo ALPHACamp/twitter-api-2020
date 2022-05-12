@@ -1,5 +1,5 @@
 const passport = require('../config/passport')
-const helpers = require('../helpers/auth-helpers')
+// const helpers = require('../helpers/auth-helpers')
 const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 
@@ -17,7 +17,7 @@ const authenticated = (req, res, next) => {
   }) (req, res, next)
 }
 
-authenticatedUser: (req, res, next) => {
+const authenticatedUser= (req, res, next) => {
   if (req.user && req.user.role === '') return next()
   return res.status(401).json({
     status: 'error',
