@@ -1,9 +1,33 @@
 const passport = require('passport')
+const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
+const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply } = require('../models')
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
 
+passport.use(new LocalStrategy( // passport.use(new LocalStrategy(option 設定客製化選項, function登入的認證程序))
+  // customize user field
+  {
+    usernameField: 'account',
+    passwordField: 'password'
+  },
+  // authenticate user
+  (account, password, cb) => {
+    User.findOne({ where: { account } })
+      .then(user => {
+        // 找不到使用者
+        if (!user) return cb(null, false) // 第一個 null 是 Passport 的設計，代表沒有錯誤發生
+        // 使用者存在，驗證密碼
+        bcrypt.compare(password, user.password).then(res => {
+          // 找到 user 但資料庫裡的密碼和表單密碼不一致
+          if (!res) return cb(null, false)
+          // 驗證通過
+          return cb(null, user)
+        })
+      })
+  }
+))
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET
