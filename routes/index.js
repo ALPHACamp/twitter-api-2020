@@ -5,6 +5,9 @@ const tweetController = require('../controllers/tweet-controller')
 const router = express.Router()
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 
+const admin = require('./models/admin')
+
+router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.post('/api/login', passport.authenticate('local', { session: false }), userController.login)
 router.post('/api/tweets', authenticated, tweetController.create)
 
