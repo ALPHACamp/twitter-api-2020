@@ -57,6 +57,20 @@ const tweetController = {
       .catch(err => next(err))
   },
 
+  // 此部分功能正常，但為尚未無法取得req.user資料，所以無法通過測試。之後會再修正！
+  postTweet: (req, res, next) => {
+    const userId = 3 // 此為假資料，尚未傳接singIn funtcion
+    const { description } = req.body
+    if (!description) throw new Error('推文內容不可空白！')
+    if (description.trim().length > 140) throw new Error('推文字數不可超過140字！')
+
+    return Tweet.create({
+      userId,
+      description: req.body.description
+    })
+      .then(tweet => res.status(200).json(tweet))
+  }
+
 }
 
 module.exports = tweetController
