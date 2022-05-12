@@ -4,12 +4,6 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const port = process.env.PORT || 3000
 const app = express()
-<<<<<<< HEAD
-
-=======
-const helpers = require('./_helpers')
-const handlebars = require('express-handlebars')
->>>>>>> feature/api/users
 const session = require('express-session')
 const passport = require('./config/passport')
 const apis = require('./routes')
