@@ -26,19 +26,19 @@ const tweetController = {
       raw: true
     })
       .then(tweets => {
-        const likedTweetId = req.user?.LikedTweets ? req.user.LikedTweets.map(likeTweet => likeTweet.id): []
+        const likedTweetId = req.user?.LikedTweets ? req.user.LikedTweets.map(likeTweet => likeTweet.id) : []
         const resultTweets = tweets.rows.map(r => ({
           ...r,
           description: r.description.substring(0, DEFAULT_DESCRIPTION_LIMIT),
           isLiked: likedTweetId.includes(r.id),
-          totalLikes: r.LikedUser? r.LikedUser.length(): 0
+          totalLikes: r.LikedUser ? r.LikedUser.length() : 0
         }))
         return res.json({
           status: 'Success',
           statusCode: 200,
           data: {
             tweets: resultTweets,
-            pagination: getPagination(limit, page, restaurants.count)
+            pagination: getPagination(limit, page, tweets.count)
           },
           message: ''
         })
@@ -88,6 +88,37 @@ const tweetController = {
           statusCode: 200,
           data: {
             tweet
+          },
+          message: ''
+        })
+      })
+      .catch(err => next(err))
+  },
+  getreplies: (req, res, next) => {
+    const DEFAULT_DESCRIPTION_LIMIT = 140
+    const tweetId = req.params.id
+    return Reply.findAll({
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] }
+      ],
+      where: { tweetId },
+      order: [['createdAt', 'DESC']],
+      nest: true,
+      raw: true
+    })
+      .then(replies => {
+        const likedReplyId = req.user?.LikedTweets ? req.user.LikedReplies.map(likeReply => likeReply.id) : []
+        const resultReplies = replies.map(r => ({
+          ...r,
+          comment: r.comment.substring(0, DEFAULT_DESCRIPTION_LIMIT),
+          isLiked: likedReplyId.includes(r.id)
+        }))
+        return res.json({
+          status: 'Success',
+          statusCode: 200,
+          data: {
+            replies: resultReplies
           },
           message: ''
         })
