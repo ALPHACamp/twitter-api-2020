@@ -26,6 +26,34 @@ const adminController = {
       next(err)
     }
   },
+  getAllTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        attributes: [
+          'id', 'description', 'created_at',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 
+            'likeCounts']
+        ],
+        include: [
+          { 
+            model: User,
+            attributes: [
+              'name', 'account', 'avatar'
+            ]
+          }
+        ],
+        order: [[sequelize.col('likeCounts', 'DESC')], ['created_at']],
+        nest: true,
+        raw: true
+      })
+
+      res.json({
+        data: tweets
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
   deleteTweets: async (req, res, next) => {
     try {
       const deletedTweetId = req.params.id
