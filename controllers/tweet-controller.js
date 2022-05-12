@@ -35,6 +35,44 @@ const tweetController = {
       next(err)
     }
   },
+  getTweet: async (req, res, next) => {
+    try {
+      const tweetId = req.params.id
+      // catch this tweet including replies & likes
+      // catch tweet's author
+      const rawTweet = await Tweet.findByPk(tweetId, {
+        include: [
+          {
+            model: Like,
+            attributes: ['tweet_id', 'user_id']
+          },
+          {
+            model: Reply,
+            attributes: ['tweet_id', 'user_id']
+          },
+          {
+            model: User,
+            attributes: ['name', 'account', 'avatar']
+          }
+        ]
+      })
+
+      if (!rawTweet) throw new Error('無法查看不存在的推文！')
+
+
+      const tweet = ({
+        ...rawTweet.toJSON(),
+        likeCounts: rawTweet.Likes.length,
+        repliesCounts: rawTweet.Replies.length
+      })
+
+      res.json({
+        tweet
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
   postTweet: async (req, res, next) => {
     try {
       const userId = helpers.getUser(req).id

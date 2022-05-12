@@ -10,7 +10,6 @@ const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
-const { route } = require('./modules/tweet')
 
 const passportAuth = passport.authenticate('local', { session: false })
 
