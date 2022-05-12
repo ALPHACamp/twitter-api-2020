@@ -9,7 +9,11 @@ const { authenticated, authenticatedUser } = require('../middleware/auth')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 router.post('/users', userController.signUp)
-router.post('/signin', passport.authenticate('jwt', { session: false }), userController.signIn)
+router.post('/signin', passport.authenticate('jwt', { session: false }), authenticatedUser, userController.signIn)
+
+router.get('/users/:id', authenticatedUser, userController.getUser)
+
+
 router.use('/', apiErrorHandler)
 
 module.exports = router

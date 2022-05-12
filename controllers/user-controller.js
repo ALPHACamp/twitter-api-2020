@@ -57,6 +57,25 @@ const userController = {
         return res.status(200).json(user)
       })
       .catch(err => next(err))
+  },
+  getUser: (req, res, next) => {
+    const userId = Number(req.params.id)
+    const reqUserId = helpers.getUser(req).id
+    return User.findByPk(userId, {
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: User, as: 'LikedTweets' },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
+      ]
+    })
+    .then (user => {
+      if (!user) throw new Error ('Account does not exist!')
+      if (user.role === 'admin') throw new Error ('Account does not exist!')
+      user.dataValues.isFollowed = user.Followers.map(u => u.id).includes(reqUserId)
+      return res.status(200).json(user)
+    })
+    .catch(err => next(err))
   }
 }
 
