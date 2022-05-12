@@ -62,14 +62,23 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getUserTweet: (req, res, next) => {
+    try {
+      const userId = req.params.id
+      Tweet.findAll({
+        where: { userId },
+        include: User,
+        nest: true,
+        raw: true
+      })
+        .then(tweet => {
+          res.json(tweet)
+        })
+    } catch (err) {
+      next(err)
+    }
   }
-  // getUserTweet: (req, res, next) => {
-  //   try {
-
-  //   } catch (err) {
-  //     next(err)
-  //   }
-  // }
 }
 
 module.exports = userController
