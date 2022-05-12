@@ -1,4 +1,4 @@
-const { Tweet, User, Like } = require('../models')
+const { Tweet, User, Like, Reply } = require('../models')
 const { dummyUser } = require('../dummyUser.js')
 
 
@@ -12,7 +12,8 @@ const tweetController = {
       order: [
         ['createdAt', 'DESC']
       ],
-      raw: true
+      raw: true,
+      nest: true
     })
       .then(tweets => {
         //尚未與登入功能結合，尚無法取得req.user資料，以dummyUser假資料暫代
@@ -28,7 +29,33 @@ const tweetController = {
       .catch(err => next(err))
   },
 
+  getTweet: (req, res, next) => {
+    Tweet.findByPk(req.params.tweet_id, {
+      include: [
+        Reply,
+        { model: User, as: 'LikedUsers' }
+      ],
+      order: [
+        ['createdAt', 'DESC']
+      ]
+    })
+      .then(tweet => {
+        if (!tweet) throw new Error('推文不存在！')
 
+        return tweet.update({
+          replyCount: tweet.Replies.length,
+          likeCount: tweet.LikedUsers.length,
+        })
+      })
+      .then(tweet => {
+        //尚未與登入功能結合，尚無法取得req.user資料，以dummyUser假資料暫代
+        const likedTweetId = dummyUser.LikedTweets ? dummyUser.LikedTweets.map(t => t.id) : []
+        const data = tweet.toJSON()
+        data.isLiked = likedTweetId.some(item => item === tweet.id)
+        return res.status(200).json(data)
+      })
+      .catch(err => next(err))
+  },
 
 }
 
