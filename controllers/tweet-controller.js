@@ -95,6 +95,10 @@ const tweetController = {
       .catch(err => next(err))
   },
   getreplies: (req, res, next) => {
+    /*
+    :param id: tweetId
+    This api would return a json that including all replies of a specific tweet
+    */
     const DEFAULT_DESCRIPTION_LIMIT = 140
     const tweetId = req.params.id
     return Reply.findAll({
@@ -126,6 +130,11 @@ const tweetController = {
       .catch(err => next(err))
   },
   postReply: (req, res, next) => {
+    /*
+    :param id: tweetId
+    :body comment: reply's content
+    This api would create a reply of specific tweet and return a json
+    */
     const userId = req.user.id
     const tweetId = req.params.id
     const comment = req.body.comment
