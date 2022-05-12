@@ -3,11 +3,12 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const helpers = require('./helpers/auth-helpers')
+const helpers = require('./_helpers')
 
 const session = require('express-session')
 const routes = require('./routes')
 const passport = require('./config/passport')
+const methodOverride = require('method-override')
 const cors = require('cors') 
 
 const app = express()
