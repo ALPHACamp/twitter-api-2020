@@ -1,4 +1,4 @@
-const { User, Tweet } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 
 // setting tweet-related controller
@@ -88,6 +88,36 @@ const tweetController = {
           statusCode: 200,
           data: {
             tweet
+          },
+          message: ''
+        })
+      })
+      .catch(err => next(err))
+  },
+  postReply: (req, res, next) => {
+    const userId = req.user.id
+    const tweetId = req.params.id
+    const comment = req.body.comment
+    if (!comment) throw new Error('Comment is required!')
+    return Promise.all([
+      User.findByPk(userId),
+      Tweet.findByPk(tweetId)
+    ])
+      .then(([user, tweet]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        return Reply.create({
+          userId,
+          tweetId,
+          comment
+        })
+      })
+      .then((reply) => {
+        return res.json({
+          status: 'Success',
+          statusCode: 200,
+          data: {
+            reply
           },
           message: ''
         })
