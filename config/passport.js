@@ -1,8 +1,6 @@
 const passport = require('passport')
 
-const db = require('../models')
-const User = db.User
-const Tweet = db.Tweet
+const { User, Tweet } = require('../models')
 
 // JWT Authentication
 const passportJWT = require('passport-jwt')
@@ -28,9 +26,5 @@ const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
 })
 
 passport.use(strategy)
-
-module.exports = passport
-
-
 
 module.exports = passport

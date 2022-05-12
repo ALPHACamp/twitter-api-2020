@@ -18,6 +18,7 @@ const authenticated = (req, res, next) => {
 }
 
 authenticatedUser: (req, res, next) => {
+  req.user = helper.getUser(req)
   if (req.user && req.user.role === '') return next()
   return res.status(401).json({
     status: 'error',

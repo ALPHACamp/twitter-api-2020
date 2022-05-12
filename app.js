@@ -3,11 +3,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const helpers = require('./_helpers')
-
-app.use(methodOverride('_method'))
+const helpers = require('./helpers/auth-helpers')
 
 const session = require('express-session')
+const routes = require('./routes')
 const passport = require('./config/passport')
 const cors = require('cors') 
 
@@ -27,6 +26,8 @@ app.use(passport.session())
 
 // Setting middleware
 app.use(methodOverride('_method'))
+
+app.use(routes)
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
