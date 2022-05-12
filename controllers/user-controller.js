@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Followship } = require('../models')
 const userController = {
   signIn: (req, res, next) => {
     try {
@@ -20,11 +20,26 @@ const userController = {
   },
   getUser: (req, res, next) => {
     return User.findOne({
-      where: { id: req.params.id, role: 'user' }
+      where: { id: req.params.id, role: 'user' },
+      include: [
+        { model: User, as: 'Followers', attributes: ['id', 'account', 'avatar', 'name'] },
+        { model: User, as: 'Followings', attributes: ['id', 'account', 'avatar', 'name'] }
+      ],
+      order: [['createdAt', 'DESC']]
     })
       .then(user => {
         if (!user) throw new Error("User doen't have permission!")
-        return res.json({ status: 'success', user })
+        user = user.toJSON()
+        return res.json({
+          status: 'success',
+          statusCode: 200,
+          data: {
+            user,
+            followerCount: user.Followers.length,
+            followingCount: user.Followings.length
+          },
+          message: ''
+        })
       })
       .catch(err => next(err))
   },

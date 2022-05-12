@@ -14,7 +14,7 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 // router.post('/users/signup', userController.signUp) #Todo
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
-router.use('/users', authenticated, authenticatedUser, users) // 把 authenticated, authenticatedUser, 加回去 #Todo
+router.use('/users', users) // 把 authenticated, authenticatedUser, 加回去 #Todo
 router.use('/tweets', authenticated, authenticatedUser, tweets)
 router.use('/followships', authenticated, authenticatedUser, followships)
 router.use('/replies', authenticated, authenticatedUser, replies)
