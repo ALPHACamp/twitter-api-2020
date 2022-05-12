@@ -1,4 +1,4 @@
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 
 // setting tweet-related controller
@@ -154,6 +154,43 @@ const tweetController = {
           statusCode: 200,
           data: {
             reply
+          },
+          message: ''
+        })
+      })
+      .catch(err => next(err))
+  },
+  likeTweet: (req, res, next) => {
+    /*
+    :param id: tweetId
+    This api would create a like relation between user and tweet, and return a json
+    */
+    const userId = req.user.id
+    const tweetId = req.params.id
+    return Promise.all([
+      Tweet.findByPk(tweetId),
+      Like.findOne({
+        where: {
+          userId,
+          tweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        if (like) throw new Error('You have liked this tweet!')
+
+        return Like.create({
+          userId,
+          tweetId
+        })
+      })
+      .then((like) => {
+        return res.json({
+          status: 'Success',
+          statusCode: 200,
+          data: {
+            like
           },
           message: ''
         })
