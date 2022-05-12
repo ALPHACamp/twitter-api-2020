@@ -29,7 +29,7 @@ const tweetController = {
           ...r.toJSON(),
           description: r.description.substring(0, DEFAULT_DESCRIPTION_LIMIT),
           isLiked: likedTweetId.includes(r.id),
-          totalLikes: r.LikedUser ? r.LikedUser.length() : 0
+          totalLikes: r.LikedUsers ? r.LikedUsers.length : 0
         }))
         return res.json({
           status: 'Success',
@@ -184,6 +184,32 @@ const tweetController = {
           userId,
           tweetId
         })
+      })
+      .then((like) => {
+        return res.json({
+          status: 'Success',
+          statusCode: 200,
+          data: {
+            like
+          },
+          message: ''
+        })
+      })
+      .catch(err => next(err))
+  },
+  unlikeTweet: (req, res, next) => {
+    const userId = req.user.id
+    const tweetId = req.params.id
+    return Like.findOne({
+      where: {
+        userId,
+        tweetId
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error("You haven't liked this tweet!")
+
+        return like.destroy()
       })
       .then((like) => {
         return res.json({
