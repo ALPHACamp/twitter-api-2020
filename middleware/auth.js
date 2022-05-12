@@ -1,11 +1,16 @@
+const { getUser } = require('../_helpers')
 const passport = require('../config/passport')
 const authenticated = passport.authenticate('jwt', { session: false })
 
+const authenticatedUser = (req, res, next) => {
+  getUser(req).role === 'user' ? next() : res.status(403).json({ status: 'error', message: 'account is not exist'})
+}
+
 const authenticatedAdmin = (req, res, next) => {
-  if (req.user && req.user.isAdmin) return next()
-  return res.status(403).json({ status: 'error', message: 'permission denied' })
+  getUser(req).role === 'admin' ? next() : res.status(403).json({ status: 'error', message: 'account is not exist' })
 }
 module.exports = {
   authenticated,
-  authenticatedAdmin
+  authenticatedAdmin,
+  authenticatedUser
 }
