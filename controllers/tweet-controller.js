@@ -21,14 +21,12 @@ const tweetController = {
       ],
       order: [['createdAt', 'DESC']],
       limit,
-      offset,
-      nest: true,
-      raw: true
+      offset
     })
       .then(tweets => {
         const likedTweetId = req.user?.LikedTweets ? req.user.LikedTweets.map(likeTweet => likeTweet.id) : []
         const resultTweets = tweets.rows.map(r => ({
-          ...r,
+          ...r.toJSON(),
           description: r.description.substring(0, DEFAULT_DESCRIPTION_LIMIT),
           isLiked: likedTweetId.includes(r.id),
           totalLikes: r.LikedUser ? r.LikedUser.length() : 0
@@ -107,14 +105,12 @@ const tweetController = {
         { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] }
       ],
       where: { tweetId },
-      order: [['createdAt', 'DESC']],
-      nest: true,
-      raw: true
+      order: [['createdAt', 'DESC']]
     })
       .then(replies => {
         const likedReplyId = req.user?.LikedTweets ? req.user.LikedReplies.map(likeReply => likeReply.id) : []
         const resultReplies = replies.map(r => ({
-          ...r,
+          ...r.toJSON(),
           comment: r.comment.substring(0, DEFAULT_DESCRIPTION_LIMIT),
           isLiked: likedReplyId.includes(r.id)
         }))
