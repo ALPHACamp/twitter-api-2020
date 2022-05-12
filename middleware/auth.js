@@ -22,7 +22,7 @@ const authenticatedUser = (req, res, next) => {
   if (req.user && req.user.role === '') return next()
   return res.status(403).json({
     status: 'error',
-    message: 'Permission denied',
+    message: 'Permission denied'
   })
 }
 

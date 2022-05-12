@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express')
-const helpers = require('./_helpers')
+const { getUser } = require('./_helpers')
 
 const session = require('express-session')
 const routes = require('./routes')
@@ -23,6 +23,7 @@ app.use(express.json())
 
 // Setting passport
 app.use(passport.initialize())
+app.use(passport.session())
 
 // Setting middleware
 app.use(methodOverride('_method'))
