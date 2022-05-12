@@ -1,9 +1,17 @@
 const express = require('express')
 const router = express.Router()
 
-module.exports = router
 
 // 尚未加入 authenticatedAdmin
 const { authenticated, authenticatedUser } = require('../middleware/auth')
 
-// 以下待完成/routes/modules/users.js路由後再補上
+const tweetController = require('../controllers/tweet-controller')
+
+
+
+// Tweet APIs
+router.get('/tweets', tweetController.getTweets)
+
+
+
+module.exports = router

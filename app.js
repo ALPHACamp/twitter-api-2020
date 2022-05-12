@@ -8,7 +8,8 @@ const helpers = require('./_helpers')
 const methodOverride = require('method-override')
 const session = require('express-session')
 const passport = require('./config/passport')
-const cors = require('cors') 
+const cors = require('cors')
+const routes = require('./routes')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -26,6 +27,8 @@ app.use(passport.session())
 
 // Setting middleware
 app.use(methodOverride('_method'))
+
+app.use('/api', routes)
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
