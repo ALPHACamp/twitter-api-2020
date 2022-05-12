@@ -92,7 +92,7 @@ const tweetController = {
       })
       .catch(err => next(err))
   },
-  getreplies: (req, res, next) => {
+  getReplies: (req, res, next) => {
     /*
     :param id: tweetId
     This api would return a json that including all replies of a specific tweet
@@ -148,7 +148,7 @@ const tweetController = {
           comment
         })
       })
-      .then((reply) => {
+      .then(reply => {
         return res.json({
           status: 'Success',
           statusCode: 200,
@@ -185,7 +185,7 @@ const tweetController = {
           tweetId
         })
       })
-      .then((like) => {
+      .then(like => {
         return res.json({
           status: 'Success',
           statusCode: 200,
@@ -211,7 +211,7 @@ const tweetController = {
 
         return like.destroy()
       })
-      .then((like) => {
+      .then(like => {
         return res.json({
           status: 'Success',
           statusCode: 200,
