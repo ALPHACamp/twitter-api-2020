@@ -21,11 +21,6 @@ app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: fals
 app.use(passport.initialize())
 app.use(passport.session())
 
-// use helpers.getUser(req) to replace req.user
-// function authenticated (req, res, next) {
-// passport.authenticate('jwt', { ses...
-// };
-
 app.use('/api', apis)
 app.get('/', (req, res) => res.send('Hello World!'))
 
