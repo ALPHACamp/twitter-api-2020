@@ -7,11 +7,14 @@ const { authenticated, authenticatedUser } = require('../middleware/auth')
 
 const tweetController = require('../controllers/tweet-controller')
 
+const { apiErrorHandler } = require('../middleware/error-handler')
+
 
 
 // Tweet APIs
+router.get('/tweets/:tweet_id', tweetController.getTweet)
 router.get('/tweets', tweetController.getTweets)
 
-
+router.use('/', apiErrorHandler)
 
 module.exports = router
