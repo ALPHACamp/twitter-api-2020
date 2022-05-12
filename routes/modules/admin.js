@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 
-router.get('/users', (req, res) => res.send('All Users'))
+const adminController = require('../../controllers/admin-controller')
+
+router.delete('/tweets/:id', adminController.deleteTweets)
 
 module.exports = router
