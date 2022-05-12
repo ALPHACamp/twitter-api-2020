@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const bcrypt = require('bcryptjs')
 
 const userController = {
@@ -98,6 +98,31 @@ const userController = {
               newData.push(reply)
             } else {
               return false
+            }
+          })
+          res.json(newData)
+        })
+    } catch (err) {
+      next(err)
+    }
+  },
+  userLikes: (req, res, next) => {
+    try {
+      const userId = req.params.id
+      Like.findAll({
+        where: { userId },
+        include: [User, Tweet],
+        raw: true,
+        nest: true
+      })
+        .then(tweet => {
+          const repeatDataId = []
+          const newData = []
+          // eslint-disable-next-line array-callback-return
+          tweet.map(tweet => {
+            if (!repeatDataId.includes(tweet.tweetId)) {
+              repeatDataId.push(tweet.tweetId)
+              newData.push(tweet)
             }
           })
           res.json(newData)
