@@ -5,8 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const helpers = require('./_helpers')
 
-app.use(methodOverride('_method'))
-
+const methodOverride = require('method-override')
 const session = require('express-session')
 const passport = require('./config/passport')
 const cors = require('cors') 
