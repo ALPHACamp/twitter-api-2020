@@ -1,5 +1,6 @@
 'use strict'
 const bcrypt = require('bcryptjs')
+const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('Users', [{ // 一次新增三筆資料
@@ -8,7 +9,7 @@ module.exports = {
       email: 'root@example.com',
       password: await bcrypt.hash('12345678', 10),
       avatar: `https://loremflickr.com/800/350/paradise/?random=${Math.random() * 100}`,
-      introduction: 'FEWFWFWWDC',
+      introduction: faker.lorem.text(),
       cover: `https://loremflickr.com/250/250/selfie/?random=${Math.random() * 100}`,
       role: 'admin',
       created_at: new Date(),
@@ -19,7 +20,7 @@ module.exports = {
       email: 'user1@example.com',
       password: await bcrypt.hash('12345678', 10),
       avatar: `https://loremflickr.com/800/350/paradise/?random=${Math.random() * 100}`,
-      introduction: 'FEWFWFWWDC',
+      introduction: faker.lorem.text(),
       cover: `https://loremflickr.com/250/250/selfie/?random=${Math.random() * 100}`,
       role: 'user',
       created_at: new Date(),
@@ -30,7 +31,7 @@ module.exports = {
       email: 'user2@example.com',
       password: await bcrypt.hash('12345678', 10),
       avatar: `https://loremflickr.com/800/350/paradise/?random=${Math.random() * 100}`,
-      introduction: 'FEWFWFWWDC',
+      introduction: faker.lorem.text(),
       cover: `https://loremflickr.com/250/250/selfie/?random=${Math.random() * 100}`,
       role: 'user',
       created_at: new Date(),
@@ -41,7 +42,7 @@ module.exports = {
       email: 'user3@example.com',
       password: await bcrypt.hash('12345678', 10),
       avatar: `https://loremflickr.com/800/350/paradise/?random=${Math.random() * 100}`,
-      introduction: 'FEWFWFWWDC',
+      introduction: faker.lorem.text(),
       cover: `https://loremflickr.com/250/250/selfie/?random=${Math.random() * 100}`,
       role: 'user',
       created_at: new Date(),
@@ -52,7 +53,7 @@ module.exports = {
       email: 'user4@example.com',
       password: await bcrypt.hash('12345678', 10),
       avatar: `https://loremflickr.com/800/350/paradise/?random=${Math.random() * 100}`,
-      introduction: 'FEWFWFWWDC',
+      introduction: faker.lorem.text(),
       cover: `https://loremflickr.com/250/250/selfie/?random=${Math.random() * 100}`,
       role: 'user',
       created_at: new Date(),
@@ -63,7 +64,7 @@ module.exports = {
       email: 'user5@example.com',
       password: await bcrypt.hash('12345678', 10),
       avatar: `https://loremflickr.com/800/350/paradise/?random=${Math.random() * 100}`,
-      introduction: 'FEWFWFWWDC',
+      introduction: faker.lorem.text(),
       cover: `https://loremflickr.com/250/250/selfie/?random=${Math.random() * 100}`,
       role: 'user',
       created_at: new Date(),

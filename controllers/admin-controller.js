@@ -1,5 +1,7 @@
 const { User } = require('../models')
+
 const userServices = require('../services/user')
+const tweetServices = require('../services/tweets')
 
 const adminController = {
   login: async (req, res, next) => {
@@ -29,6 +31,19 @@ const adminController = {
         }
       })
       res.status(200).json(users)
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  getTweets: async (req, res) => {
+    try {
+      const tweets = await tweetServices.getAll()
+      res.json({
+        status: 'success',
+        data: {
+          tweets
+        }
+      })
     } catch (err) {
       console.log(err)
     }

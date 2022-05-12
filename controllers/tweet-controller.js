@@ -3,13 +3,17 @@ const tweetServices = require('../services/tweets')
 
 const tweetController = {
   getAll: async (req, res) => {
-    const tweets = await tweetServices.getAll()
-    res.json({
-      status: 'success',
-      data: {
-        tweets
-      }
-    })
+    try {
+      const tweets = await tweetServices.getAll()
+      res.json({
+        status: 'success',
+        data: {
+          tweets
+        }
+      })
+    } catch (err) {
+      console.log(err)
+    }
   },
   create: async (req, res, next) => {
     try {
