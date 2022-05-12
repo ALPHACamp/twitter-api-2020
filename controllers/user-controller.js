@@ -1,7 +1,7 @@
 const userServices = require('../services/user')
 
 const userController = {
-  login: async (req, res, next) => {
+  login: async (req, res) => {
     try {
       const userData = req.user.toJSON()
       delete userData.password
@@ -17,10 +17,9 @@ const userController = {
         }
       })
     } catch (err) {
-      next(err)
+      console.log(err)
     }
   }
-
 }
 
 module.exports = userController

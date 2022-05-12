@@ -1,5 +1,16 @@
 const { Tweet } = require('../models')
+const tweetServices = require('../services/tweets')
+
 const tweetController = {
+  getAll: async (req, res) => {
+    const tweets = await tweetServices.getAll()
+    res.json({
+      status: 'success',
+      data: {
+        tweets
+      }
+    })
+  },
   create: async (req, res, next) => {
     try {
       const userId = req.user.id || 1

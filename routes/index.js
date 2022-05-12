@@ -8,6 +8,7 @@ const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 
 const admin = require('./models/admin')
 
+router.get('/api/tweets', authenticated, tweetController.getAll)
 router.post('/api/admin/login', passport.authenticate('local', { session: false }), adminController.login)
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 router.post('/api/login', passport.authenticate('local', { session: false }), userController.login)
