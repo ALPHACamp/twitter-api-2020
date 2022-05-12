@@ -1,10 +1,14 @@
-const jwt = require('jsonwebtoken')
+const userServices = require('../services/user')
 
 const userController = {
-  login: (req, res, next) => {
+  login: async (req, res, next) => {
     try {
       const userData = req.user.toJSON()
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '10d' })
+      delete userData.password
+      if (userData.role !== 'user') {
+        return res.status(403).json({ status: 'error', message: '非使用者' })
+      }
+      const token = await userServices.token(userData)
       res.json({
         status: 'success',
         data: {
