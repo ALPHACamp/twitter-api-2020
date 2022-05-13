@@ -44,6 +44,7 @@ const userController = {
     .then (users => {
       if (users.some(u => u.email === email)) throw new Error('此 Email 已被註冊！')
       if (users.some(u => u.account === account)) throw new Error('此 Account 已被註冊！')
+      if (name.length > 50 || account.length > 50) throw new Error ('字數上限為 50 個字！')
 
       return bcrypt.hash(password, 10)
     })
@@ -75,9 +76,8 @@ const userController = {
     const reqUserId = getUser(req).id
     return User.findByPk(userId, {
       include: [
-        { model: User, as: 'LikedTweets' },
         { model: User, as: 'Followers' },
-        { model: User, as: 'Followings' },
+        { model: User, as: 'Followings' }
       ],
     })
       .then((user) => {
