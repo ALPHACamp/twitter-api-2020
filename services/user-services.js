@@ -5,9 +5,9 @@ const userServices = {
     const { account, name, email, password, checkPassword } = req.body
     if (password != checkPassword) throw new Error('Password do not match!')
 
-    User.findOne({ where: { email } })
+    User.findOne({ where: { account } })
       .then(user => {
-        if (user) throw new Error('Email already exists!')
+        if (user) throw new Error('Account already exists!')
         return bcrypt.hash(password, 10)
       })
       .then(hash => User.create({

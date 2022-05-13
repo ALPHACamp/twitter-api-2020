@@ -14,8 +14,10 @@ router.post('/users', userController.signUp)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, authenticatedUser, users)
 
-router.post('/users', userController.signUp)
 
+
+
+router.get('/users/:id', authenticated, userController.getUser)
 
 router.use('/', apiErrorHandler)
 module.exports = router
