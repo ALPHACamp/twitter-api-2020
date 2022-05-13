@@ -1,10 +1,11 @@
 const passport = require('passport')
+const bcrypt = require('bcryptjs')
 const { User, Tweet } = require('../models')
 
 // JWT Authentication
 const passportJWT = require('passport-jwt')
 const LocalStrategy = require('passport-local')
-const ExtractJwt = passportJWT.ExtractJwt
+const ExtractJWT = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 
 passport.use(
@@ -13,13 +14,13 @@ passport.use(
       usernameField: 'account',
       passwordField: 'password',
     },
-    (account, password, done) => {
+    (account, password, cb) => {
       User.findOne({ where: { account } })
         .then((user) => {
           if (!user) throw new Error("帳號不存在！")
           if (!bcrypt.compareSync(password, user.password))
             throw new Error('帳號或密碼錯誤！')
-          return done(null, user)
+          return cb(null, user.toJSON())
         })
         .catch((err) => done(err, false))
     }
@@ -27,12 +28,12 @@ passport.use(
 )
 
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET
 }
 
-passport.use(new JwtStrategy(jwtOptions, (jwt_payload, cb) => {
-  User.findByPk(jwt_payload.id, {
+passport.use(new JwtStrategy(jwtOptions, (jwtPayload, cb) => {
+  User.findByPk(jwtPayload.id, {
     include: [
       { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
