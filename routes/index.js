@@ -8,10 +8,11 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 // 尚未加入 authenticatedAdmin
 const { authenticated, authenticatedUser } = require('../middleware/auth')
 
-
+// 註冊/登入
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
+// 取得指定使用者資料
 router.get('/users/:id', authenticatedUser, userController.getUser)
 
 

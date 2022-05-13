@@ -28,7 +28,7 @@ app.use(passport.session())
 // Setting middleware
 app.use(methodOverride('_method'))
 
-app.use(routes)
+app.use('/api', routes)
 
 app.get('/', (req, res) => res.send('Hello World!'))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
