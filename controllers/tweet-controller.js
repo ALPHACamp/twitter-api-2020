@@ -51,7 +51,7 @@ const tweetController = {
         ]
       })
 
-      if (!tweet) throw new Error('無法查看不存在的推文！')
+      if (!tweet) throw new Error('無法查看不存在的推文。')
 
       res.status(200).json(tweet)
     } catch (err) {
@@ -75,7 +75,7 @@ const tweetController = {
 
       res.status(200).json({
         status: 'success',
-        message: '已成功新增一筆推文！',
+        message: '已成功新增一筆推文。',
         data: {
           newTweet
         }
@@ -173,10 +173,10 @@ const tweetController = {
       const tweetId = req.params.id
       const comment = req.body.comment
 
-      if (!comment) throw new Error('不可以提交空白的推文。')
+      if (!comment) throw new Error('不可以提交空白的留言。')
 
       const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) throw new Error('想要回覆的貼文不存在。')
+      if (!tweet) throw new Error('想要回覆的推文不存在。')
 
       const reply = await Reply.create({
         comment,
