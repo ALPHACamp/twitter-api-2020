@@ -1,4 +1,4 @@
-const { Tweet } = require('../models')
+const { Tweet, User, Like } = require('../models')
 
 const adminController = {
   deleteTweet: (req, cb) => {
@@ -9,7 +9,19 @@ const adminController = {
       })
       .then(tweet => cb(null, tweet))
       .catch(err => cb(err))
-  }
+  },
+  getUsers: (req, cb) => {
+    return User.findAll({
+      include: [
+        Tweet,
+        Like,
+        { model: User, as: 'Followings'},
+        { model: User, as: 'Followers'}
+      ]
+    })
+    .then(users => cb(null, users))
+    .catch(err => cb(err))
+  },
 }
 
 module.exports = adminController
