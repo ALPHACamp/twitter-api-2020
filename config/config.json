@@ -15,11 +15,7 @@
     "logging": false
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "use_env_variable": "mysql://bd00ba3229a59a:8f6da845@us-cdbr-east-05.cleardb.net/heroku_3d0a8aa83ecb600?"
   },
   "travis": {
     "username": "travis",
