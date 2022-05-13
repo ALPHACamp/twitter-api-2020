@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -66,7 +66,7 @@ const userController = {
     return User.findByPk(req.params.id)
       .then(user => {
         user.update({
-          name, account, email, password: hash, avatar: avatar || null, cover, introduction
+          name, account, email, password: hash, avatar: avatar || null, cover: cover || null, introduction
         })
         user = user.toJSON()
         delete user.password
@@ -78,6 +78,32 @@ const userController = {
         })
       })
       .catch(err => next(err))
+  },
+  getTweets: (req, res, next) => {
+    return Tweet.findAll({
+      where: { id: req.params.id },
+      include: [{
+        model: Reply,
+        as: 'Replies',
+        attributes: ['id']
+      }, {
+        model: Like,
+        as: 'Likes',
+        attributes: ['id']
+      }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => {
+        if (!tweets) throw new Error('This account does not exist.')
+        const resultTweets = tweets.map(t => ({ ...t, replyCount: tweets.Reply.length, likeCount: tweets.Like.length }))
+        tweets = tweets.toJSON()
+        return res.json({
+          status: 'success',
+          data: {
+            tweets: resultTweets
+          }
+        })
+      }).catch(err => next(err))
   }
 }
 module.exports = userController
