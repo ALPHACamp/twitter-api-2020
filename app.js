@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express')
 const app = express()
+const cors = require('cors')
 const routes = require('./routes')
 const port = process.env.PORT || 3000
 const session = require('express-session')
@@ -10,6 +11,7 @@ const passport = require('./config/passport')
 const SESSION_SECRET = 'secret'
 const { getUser } = require('./helpers/auth-helpers')
 
+app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true })) // Express v4.16 以後的版本已內建 body-parser
 app.use(session({
