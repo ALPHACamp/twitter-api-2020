@@ -4,6 +4,7 @@ const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
+const likeControler = require('../controllers/like-controller')
 const router = express.Router()
 
 // 身份驗證中間件
@@ -27,5 +28,8 @@ router.post('/api/tweets', authenticated, tweetController.create)
 // 回覆相關路由
 router.get('/api/tweets/:tweet_id/replies', authenticated, replyController.getAll)
 router.post('/api/tweets/:tweet_id/replies', authenticated, replyController.create)
+
+// 喜歡相關路由
+router.post('/api/tweets/:id/like', authenticated, likeControler.add)
 
 module.exports = router
