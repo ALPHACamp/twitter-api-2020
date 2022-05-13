@@ -1,6 +1,10 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
+const passportJWT = require('passport-jwt')
 const { User } = require('../models')
+
+const JWTStrategy = passportJWT.Strategy
+const ExtractJWT = passportJWT.ExtractJwt
 
 // setup passport strategy
 passport.use(new LocalStrategy(
@@ -20,5 +24,20 @@ passport.use(new LocalStrategy(
       })
   }
 ))
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: 'alphacamp',
+  passReqToCallback: true
+}
+passport.use(new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
+  User.findByPk(jwtPayload.id)
+    .then(user => {
+      console.log(user)
+      req.user = user
+      cb(null, user)
+    })
+    .catch(err => cb(err))
+}))
 
 module.exports = passport
