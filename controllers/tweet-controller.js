@@ -25,7 +25,7 @@ const tweetController = {
         raw: true
       })
 
-      res.json(tweets)
+      res.status(200).json(tweets)
     } catch (err) {
       next(err)
     }
@@ -53,7 +53,7 @@ const tweetController = {
 
       if (!tweet) throw new Error('無法查看不存在的推文！')
 
-      res.json(tweet)
+      res.status(200).json(tweet)
     } catch (err) {
       next(err)
     }
@@ -73,7 +73,7 @@ const tweetController = {
 
       const newTweet = rawTweets.toJSON()
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '已成功新增一筆推文！',
         data: {
@@ -101,7 +101,7 @@ const tweetController = {
 
       if (!created) throw new Error('你已經喜歡過該則推文。')
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '你已成功喜歡該則推文。',
         data: {
@@ -129,7 +129,7 @@ const tweetController = {
 
       if (!isLiked) throw new Error('你沒有喜歡過該則推文。')
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '你已成功取消喜歡該則推文。',
         data: {
@@ -157,7 +157,7 @@ const tweetController = {
         raw: true
       })
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         data: {
           replies
@@ -184,7 +184,7 @@ const tweetController = {
         tweetId
       })
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '你已成功建立一筆留言。',
         data: {

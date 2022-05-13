@@ -24,7 +24,7 @@ const followshipController = {
 
       if (!created) throw new Error('你已經追蹤該名使用者。')
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '已成功追蹤該名使用者',
         data: {
@@ -56,7 +56,7 @@ const followshipController = {
 
       if (!isFollowed) throw new Error('你尚未追蹤該使用者！')
 
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '已成功取消追蹤該使用者。',
         data: {
