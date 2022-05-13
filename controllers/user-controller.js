@@ -2,6 +2,7 @@ const { User, Reply, Tweet, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../_helpers')
+const sequelize = require('sequelize')
 
 const userController = {
   register: async (req, res, next) => {
@@ -33,14 +34,35 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findOne({
-        where: { account: 'root'},
-        include: [{ model: User, as: 'Followers' }]
+      const user = await User.findByPk(req.params.id, {
+        attributes: [
+          'avatar', 'name', 'account', 'cover_image', 'introduction',
+          [sequelize.literal('(SELECT COUNT(DISTINCT following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCounts'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCounts']
+        ]
       })
-      res.json({ status: 'success', user })
+      res.status(200).json(user)
     } catch (err) {
       next(err)
     }
-  }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        attributes: [
+          'description', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCounts'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCounts']
+        ]
+      })
+      res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
 }
 module.exports = userController
