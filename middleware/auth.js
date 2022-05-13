@@ -3,10 +3,10 @@ const passport = require('../config/passport')
 
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (err || !user) return res.status(401).json({ status: 'error', message: 'unauthorized' })
+    if (err || !user) return res.status(401).json({ status: 'error', message: '是不是這裡的錯' })
     if (user) {
-      req.user = user
-    }
+    req.user = user
+  }
     return next()
   })(req, res, next)
 }
