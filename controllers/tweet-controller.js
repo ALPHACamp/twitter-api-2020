@@ -1,5 +1,6 @@
 const { Tweet } = require('../models')
 const tweetServices = require('../services/tweets')
+const helpers = require('../_helpers')
 
 const tweetController = {
   getAll: async (req, res) => {
@@ -17,9 +18,9 @@ const tweetController = {
   },
   create: async (req, res, next) => {
     try {
-      const userId = req.user.id || 1
+      const user = helpers.getUser(req)
       await Tweet.create({
-        userId,
+        UserId: user.id,
         description: req.body.description
       })
       res.sendStatus(200)
