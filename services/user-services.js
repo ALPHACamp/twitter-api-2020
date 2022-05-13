@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const userServices = {
   signUp: (req, cb) => {
     const { account, name, email, password, checkPassword } = req.body
@@ -20,14 +20,51 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    User.findByPk(req.params.id, {
-    })
+    User.findByPk(req.params.id)
       .then(user => {
         if (!user) throw new Error("User didn't exists!")
         return user = user.get({ plain: true })
       })
       .then(user => cb(null, user ))
       .catch(err => cb(err))
+  },
+  getUserTweets: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, { raw: true }),
+      Tweet.findAll({
+        raw: true,
+        where: { UserId: req.params.id }
+      })
+    ])
+      .then(([user, tweets]) => {
+        if (!user) throw new Error("User didn't exists!")
+        return cb(null, tweets)
+      })
+      .catch(err => cb(err))
+  },
+  getUserRepliedTweets: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, { raw: true }),
+      Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        include: Tweet
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user) throw new Error("User didn't exists!")
+        const repliedTweets = replies.map(r => ({
+          ...r.Tweet,
+          comment: r.comment
+        }))
+        return cb(null, repliedTweets)
+      })
+      .catch(err => cb(err))
+
+  },
+  getUserLikes: (req, cb) => {
+
   }
 }
 module.exports = userServices

@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const { User, Tweet } = require('../models')
 const userServices = require('../services/user-services')
 const userController = {
   signIn: (req, res, next) => {
@@ -12,10 +13,19 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    userServices.signUp(req, (err, user) => err ? next(err) : res.json(user))
+    userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, user) => err ? next(err) : res.json(user))
-  }
+  },
+  getUserTweets: (req, res, next) => {
+    userServices.getUserTweets(req, (err, tweets) => err ? next(err) : res.json(tweets))
+  },
+  getUserRepliedTweets: (req, res, next) => {
+    userServices.getUserRepliedTweets(req, (err, repliedTweets) => err ? next(err) : res.json(repliedTweets))
+  },
+  getUserLikes: (req, res, next) => {
+    userServices.getUserLikes(req, (err, user) => err ? next(err) : res.json({ status: 'success', data: user }))
+  },
 }
 module.exports = userController 

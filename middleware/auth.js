@@ -12,6 +12,7 @@ const authenticated = (req, res, next) => {
 }
 
 const authenticatedUser = (req, res, next) => {
+  // console.log(req.user.toJSON())
   if (req.user) {
     if (req.user.role === 'admin') throw new Error('account is not exist')
     return next()

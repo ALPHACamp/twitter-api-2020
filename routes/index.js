@@ -3,8 +3,7 @@ const router = express.Router()
 const passport = require('../config/passport')
 const admin = require('./modules/admin')
 const users = require('./modules/users')
-const { authenticated, authenticatedUser,
-  authenticatedAdmin } = require('../middleware/auth')
+const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
@@ -13,6 +12,7 @@ router.post('/signin', passport.authenticate('local', { session: false }), authe
 
 router.post('/users', userController.signUp)
 
+// router.get('/users/:id', userController.getUser)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, authenticatedUser, users)
 
