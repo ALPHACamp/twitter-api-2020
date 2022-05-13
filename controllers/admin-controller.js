@@ -1,4 +1,5 @@
 const createToken = require('../function/token')
+const { Tweet } = require('../models')
 
 const adminController = {
   login: async (req, res) => {
@@ -11,6 +12,19 @@ const adminController = {
         data: {
           token,
           user: userData
+        }
+      })
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  tweets: async (req, res) => {
+    try {
+      const tweets = await Tweet.findAll({ raw: true })
+      res.json({
+        status: 'success',
+        data: {
+          data: tweets
         }
       })
     } catch (err) {
