@@ -64,7 +64,6 @@ const userController = {
       next(err)
     }
   },
-  // {avatar, name, account, createdAt , repliedAccount, comment}
   getRepliedTweets: async (req, res, next) => {
     try {
       const replies = await Reply.findAll({
@@ -78,6 +77,25 @@ const userController = {
         ]
       })
       res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getLikes: async (req, res, next) => {
+    try {
+      const likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        attributes: [
+          'TweetId', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
+          [sequelize.literal('(SELECT description FROM Tweets WHERE Tweets.id = tweet_id)'), 'description'],
+          [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id)'), 'likeCounts'],
+          [sequelize.literal('(SELECT COUNT(Replies.tweet_id) FROM Replies WHERE Replies.tweet_id = Like.tweet_id)'), 'replyCounts']
+        ]
+      })
+      res.status(200).json(likes)
     } catch (err) {
       next(err)
     }
