@@ -3,7 +3,7 @@ const router = express.Router()
 const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
-const upload = require('../../middleware/multer')
+const upload = require('../middleware/multer')
 const tweetController = require('../controllers/tweet-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 

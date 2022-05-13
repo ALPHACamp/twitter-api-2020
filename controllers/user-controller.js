@@ -92,28 +92,29 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     const reqUser = getUser(req)
-    const result = reqUser.toJSON()
-    delete result.password
-    return res.status(200).json(result)
+    const userData = reqUser.toJSON()
+    delete userData.password
+    return res.status(200).json(userData)
   },
 
   putUser: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
+    
+    // check if user is the current user
+    if (getUser(req).id !== Number(req.params.id)) throw new Error('Permission denied')
+
+    // check password
     if(password !== checkPassword) throw new Error('密碼與確認密碼不符！')
+
+    // check account
     if(!account || ! name || !email) throw new Error('帳號、名稱和 email 欄位不可空白！')
-    if(getUser(req.id) !== Number(req.params.id)) throw new Error('Permission denied')
+
+
 
     return Promise.all([
       User.findAll({
-        where: {
-          $or: [
-            { account },
-            { email }
-          ]
-        },
-        raw: true,
-        nest: true
-      }),
+      $or: [{ where: { email } }, { where: { account } }],
+    }),
       User.findByPk(Number(req.params.id)),
       bcrypt.hash(password, 10)
     ])
@@ -131,8 +132,6 @@ const userController = {
     .then(updatedUser => res.status(200).json({ user: updatedUser }))
     .catch(err => next(err))
   },
-
-  
 }
 
 
