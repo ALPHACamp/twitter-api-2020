@@ -12,7 +12,7 @@ passport.use(new LocalStrategy(
     passwordField: 'password'
   },
   (email, password, done) => {
-    User.findOne({ where: { email }})
+    User.findOne({ where: { email } })
       .then(user => {
         if (!user) throw new Error("User didn't exists!")
         if (!bcrypt.compareSync(password, user.password)) throw new Error('Email or Password Error!')
@@ -28,7 +28,9 @@ const jwtOptions = {
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id)
-  .then(user => cb(null, user))
-  .catch(err => cb(err))
+    .then(user => 
+      cb(null, user)
+    )
+    .catch(err => cb(err))
 }))
 module.exports = passport
