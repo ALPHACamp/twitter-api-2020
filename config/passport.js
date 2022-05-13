@@ -8,11 +8,11 @@ const ExtractJWT = passportJWT.ExtractJwt
 
 passport.use(new LocalStrategy(
   {
-    usernameField: 'email',
+    usernameField: 'account',
     passwordField: 'password'
   },
-  (email, password, done) => {
-    User.findOne({ where: { email }})
+  (account, password, done) => {
+    User.findOne({ where: { account }})
       .then(user => {
         if (!user) throw new Error("User didn't exists!")
         if (!bcrypt.compareSync(password, user.password)) throw new Error('Email or Password Error!')
@@ -24,7 +24,7 @@ passport.use(new LocalStrategy(
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: process.env.JWT_SECRET,
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id)
