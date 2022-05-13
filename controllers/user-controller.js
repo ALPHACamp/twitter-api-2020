@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Followship } = require('../models')
+const { User } = require('../models')
 const userController = {
   signIn: (req, res, next) => {
+    if (req.user.role === 'admin') throw new Error("Admin doen't have permission!") // admin 不能登入
     try {
       const userData = req.user.toJSON()
       delete userData.password
@@ -45,7 +46,7 @@ const userController = {
   },
   putUser: (req, res, next) => {
     if (Number(req.params.id) !== Number(req.user.id)) {
-      return res.json({ status: 'error' })
+      throw new Error("User doen't have permission!")
     }
     const { account, name, password, email, introduction, avatar, cover } = req.body
     const hash = bcrypt.hashSync(password, 10)
@@ -54,7 +55,12 @@ const userController = {
         user.update({
           name, account, email, password: hash, avatar, cover, introduction
         })
-        return res.json({ status: 'success', account, name, email, introduction, avatar, cover })
+        return res.json({
+          status: 'success',
+          data: {
+            user
+          }
+        })
       })
       .catch(err => next(err))
   }

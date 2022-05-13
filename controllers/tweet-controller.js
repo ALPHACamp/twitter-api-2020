@@ -152,7 +152,7 @@ const tweetController = {
           comment
         })
       })
-      .then((reply) => {
+      .then(reply => {
         return res.json({
           status: 'Success',
           statusCode: 200,
