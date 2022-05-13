@@ -66,9 +66,7 @@ const tweetController = {
         repliesCounts: rawTweet.Replies.length
       })
 
-      res.json({
-        tweet
-      })
+      res.json(tweet)
     } catch (err) {
       next(err)
     }
