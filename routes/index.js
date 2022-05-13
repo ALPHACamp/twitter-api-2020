@@ -22,6 +22,8 @@ router.get('/users/current_user', authenticated, authenticatedUser, getCurrentUs
 // 取得指定使用者資料
 router.get('/users/:id', authenticated, userController.getUser)
 
+// 修改目前登入的使用者個人資料
+router.put('/api/users/:id', authenticated,  authenticatedUser, userController.putUser)
 
 
 // Tweet APIs
