@@ -66,12 +66,13 @@ const userController = {
   },
   getUserTweet: (req, res, next) => {
     try {
-      const userId = req.params.id
+      const UserId = req.params.id
+
       Tweet.findAll({
-        where: { userId },
+        where: { UserId },
         include: User,
-        nest: true,
-        raw: true
+        raw: true,
+        nest: true
       })
         .then(tweet => {
           res.json(tweet)
@@ -82,9 +83,9 @@ const userController = {
   },
   userRepliedTweets: (req, res, next) => {
     try {
-      const userId = req.params.id
+      const UserId = req.params.id
       Reply.findAll({
-        where: { userId },
+        where: { UserId },
         include: [Tweet, User],
         raw: true,
         nest: true
@@ -94,8 +95,8 @@ const userController = {
           const newData = []
           // eslint-disable-next-line array-callback-return
           reply.map(reply => {
-            if (!repeatDataId.includes(reply.tweetId)) {
-              repeatDataId.push(reply.tweetId)
+            if (!repeatDataId.includes(reply.TweetId)) {
+              repeatDataId.push(reply.TweetId)
               newData.push(reply)
             } else {
               return false

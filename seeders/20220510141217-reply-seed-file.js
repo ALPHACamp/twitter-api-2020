@@ -16,8 +16,8 @@ module.exports = {
       for (let j = 0; j < eachTweetReply; j++) {
         data.push({
           comment: faker.lorem.text(),
-          tweet_id: tweets[i].id,
-          user_id: users[Math.floor(Math.random() * (users.length - 1)) + 1].id,
+          Tweet_id: tweets[i].id,
+          User_id: users[Math.floor(Math.random() * (users.length - 1)) + 1].id,
           created_at: new Date(),
           updated_at: new Date()
         })
