@@ -9,9 +9,9 @@ const tweetController = {
 
     // 為節省重新重資料庫拉資料的時間，getTweets直接用資料的likeCount和replyCount做數字顯示。但為確保數字正確。會在讀取單筆tweet資料的controller中，重拉資料並計數
     Tweet.findAll({
-      order: [
-        ['createdAt', 'DESC']
-      ],
+      Tweet
+      order: [['createdAt', 'DESC']],
+      include: [User],
       raw: true,
       nest: true
     })
@@ -32,12 +32,12 @@ const tweetController = {
   getTweet: (req, res, next) => {
     Tweet.findByPk(req.params.tweet_id, {
       include: [
+        Tweet
+        User,
         Reply,
         { model: User, as: 'LikedUsers' }
       ],
-      order: [
-        ['createdAt', 'DESC']
-      ]
+      order: [['createdAt', 'DESC']]
     })
       .then(tweet => {
         if (!tweet) throw new Error('推文不存在！')
