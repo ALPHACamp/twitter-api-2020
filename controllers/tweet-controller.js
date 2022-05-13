@@ -146,7 +146,7 @@ const tweetController = {
         status: 'success',
         message: '你已成功取消喜歡該則推文。',
         data: {
-          deledTweet: tweet.toJSON(), // deleted tweet
+          deletedTweet: tweet.toJSON(), // deleted tweet
         }
       })
     } catch (err) {
