@@ -131,6 +131,16 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      const userUpdate = await user.update(req.body)
+      res.status(200).json(userUpdate)
+    } catch (err) {
+      next(err)
+    }
+    res.status(200).json()
   }
 }
 module.exports = userController
