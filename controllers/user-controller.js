@@ -8,16 +8,18 @@ const userController = {
   register: async (req, res, next) => {
     try {
       if (req.body.password !== req.body.checkPassword) throw new Error('密碼與確認密碼不符。')
-
-      if (await User.findOne({ where: { account: req.body.account } })) throw new Error('此帳號已經註冊。')
-
+      if (
+        await User.findOne({ where: { account: req.body.account }})||
+        await User.findOne({ where: { email: req.body.email } })
+        ) throw new Error('帳號或 email 已經註冊。')
+        
       const user = await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10)
       })
-      res.json({ status: 'success', message: '註冊成功' })
+      res.status(200).json('註冊成功')
     } catch (err) {
       next(err)
     }
@@ -27,7 +29,7 @@ const userController = {
       const user = getUser(req)
       delete user.password
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.json({ status: 'success', token, user })
+      res.status(200).json({token, user})
     } catch (err) {
       next(err)
     }
@@ -36,9 +38,11 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         attributes: [
-          'id','avatar', 'name', 'account', 'cover_image', 'introduction',
+          'avatar', 'name', 'account', 'cover_image', 'introduction',
+          [sequelize.literal(`(SELECT id FROM Users WHERE id = ${req.params.id})`), 'userId'],
           [sequelize.literal('(SELECT COUNT(DISTINCT following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCounts'],
-          [sequelize.literal('(SELECT COUNT(DISTINCT follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCounts']
+          [sequelize.literal('(SELECT COUNT(DISTINCT follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCounts'],
+          [sequelize.literal(`(SELECT COUNT(DISTINCT Tweets.id) FROM Tweets WHERE ${req.params.id} = User.id)`), 'tweetCounts'],
         ]
       })
       res.status(200).json(user)
@@ -53,11 +57,13 @@ const userController = {
         attributes: [
           'description', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT id FROM Users WHERE id = ${req.params.id})`), 'userId'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
           [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
           [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCounts'],
           [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCounts']
-        ]
+        ],
+        order: [['createdAt', 'ASC'], ['id', 'DESC']]
       })
       res.status(200).json(tweets)
     } catch (err) {
@@ -71,10 +77,16 @@ const userController = {
         attributes: [
           'comment', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT id FROM Users WHERE id = ${req.params.id})`), 'userId'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
           [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
-          //[sequelize.literal(`(SELECT account FROM Users JOIN Tweets ON id = Tweets.user_id WHERE id = Replies.user_id)`), 'repliedAccount']
-        ]
+          [sequelize.col('account'), 'repliedAccount']
+        ],
+        include: [
+          { model: Tweet, attributes:[] ,include: [
+          { model: User, Where: { id: Tweet.userId }}]
+        }],
+        order: [['createdAt', 'ASC'], ['id', 'DESC']]
       })
       res.status(200).json(replies)
     } catch (err) {
@@ -93,7 +105,8 @@ const userController = {
           [sequelize.literal('(SELECT description FROM Tweets WHERE Tweets.id = tweet_id)'), 'description'],
           [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id)'), 'likeCounts'],
           [sequelize.literal('(SELECT COUNT(Replies.tweet_id) FROM Replies WHERE Replies.tweet_id = Like.tweet_id)'), 'replyCounts']
-        ]
+        ], 
+        order: [['createdAt', 'ASC'], ['id', 'DESC']]
       })
       res.status(200).json(likes)
     } catch (err) {
@@ -105,11 +118,13 @@ const userController = {
       const followings = await Followship.findAll({
         where: { followerId: req.params.id },
         attributes: [
-          'followingId',
+          'followingId', 'createdAt',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = followingId)`), 'avatar'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = followingId)`), 'name'],
-          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followingId)`), 'introduction']
-        ]
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followingId)`), 'introduction'],
+          [sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
+        ],
+        order: [['createdAt', 'ASC'], ['id', 'DESC']]
       })
       res.status(200).json(followings)
     } catch (err) {
@@ -124,13 +139,25 @@ const userController = {
           'followerId',
           [sequelize.literal(`(SELECT avatar FROM Users WHERE id = followerId)`), 'avatar'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = followerId)`), 'name'],
-          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followerId)`), 'introduction']
-        ]
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followerId)`), 'introduction'],
+          [sequelize.literal(`(CASE WHEN following_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
+        ],
+        order: [['createdAt', 'ASC'], ['id', 'DESC']]
       })
       res.status(200).json(followers)
     } catch (err) {
       next(err)
     }
+  },
+  putUser: async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      const userUpdate = await user.update(req.body)
+      res.status(200).json(userUpdate)
+    } catch (err) {
+      next(err)
+    }
+    res.status(200).json()
   }
 }
 module.exports = userController

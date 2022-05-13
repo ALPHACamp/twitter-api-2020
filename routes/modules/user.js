@@ -8,5 +8,6 @@ router.get('/:id/replied_tweets', userController.getRepliedTweets)
 router.get('/:id/likes', userController.getLikes)
 router.get('/:id/followings', userController.getFollowings)
 router.get('/:id/followers', userController.getFollowers)
+router.put('/:id', userController.putUser)
 
 module.exports = router
