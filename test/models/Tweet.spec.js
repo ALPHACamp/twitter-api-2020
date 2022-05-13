@@ -78,7 +78,7 @@ describe('# Tweet Model', () => {
     let data = null
     // 檢查 db.Tweet 是否真的可以新增一筆資料
     it('create', (done) => {
-      db.Tweet.create({UserId: 1, description: 'hi'}).then((tweet) => {   
+      db.Tweet.create({}).then((tweet) => {   
         data = tweet
         done()
       })
