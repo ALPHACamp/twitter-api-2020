@@ -33,11 +33,14 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const user = await User.findOne({
-        where: { account: 'root'},
-        include: [{ model: User, as: 'Followers' }]
+      const user = await User.findByPk(req.params.id, {
+        attributes: [
+          'avatar', 'name', 'account', 'cover_image', 'introduction',
+          [sequelize.literal('(SELECT COUNT(DISTINCT following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCounts'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCounts']
+        ]
       })
-      res.json({ status: 'success', user })
+      res.status(200).json(user)
     } catch (err) {
       next(err)
     }
