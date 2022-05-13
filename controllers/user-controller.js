@@ -64,5 +64,23 @@ const userController = {
       next(err)
     }
   },
+  // {avatar, name, account, createdAt , repliedAccount, comment}
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id, },
+        attributes: [
+          'comment', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
+          //[sequelize.literal(`(SELECT account FROM Users JOIN Tweets ON id = Tweets.user_id WHERE id = Replies.user_id)`), 'repliedAccount']
+        ]
+      })
+      res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  }
 }
 module.exports = userController
