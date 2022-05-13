@@ -1,3 +1,5 @@
+'use strict'
+
 const bcrypt = require('bcryptjs')
 const faker = require('faker')
 
@@ -79,7 +81,7 @@ module.exports = {
           introduction: faker.lorem.text().substring(0, 50),
           created_at: new Date(),
           updated_at: new Date()
-        }
+        },
       ],
       {}
     )

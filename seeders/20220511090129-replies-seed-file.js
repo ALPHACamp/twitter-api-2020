@@ -1,9 +1,6 @@
 'use strict'
 
-const db = require('../models')
-
-const User = db.User
-const Tweet = db.Tweet
+const { User, Tweet } = require('../models')
 const faker = require('faker')
 
 module.exports = {
