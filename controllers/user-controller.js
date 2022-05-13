@@ -81,7 +81,7 @@ const userController = {
   },
   getTweets: (req, res, next) => {
     return Tweet.findAll({
-      where: { id: req.params.id },
+      where: { userId: req.params.id },
       include: [{
         model: Reply,
         as: 'Replies',
@@ -95,8 +95,7 @@ const userController = {
     })
       .then(tweets => {
         if (!tweets) throw new Error('This account does not exist.')
-        const resultTweets = tweets.map(t => ({ ...t, replyCount: tweets.Reply.length, likeCount: tweets.Like.length }))
-        tweets = tweets.toJSON()
+        const resultTweets = tweets.map(t => ({ ...t.toJSON(), replyCount: t.Replies.length, likeCount: t.Likes.length }))
         return res.json({
           status: 'success',
           data: {
