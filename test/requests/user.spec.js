@@ -81,7 +81,6 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查是否回傳資料裡有 root 的資料
-            console.log(res.body)
             res.body.name.should.equal('root');
 
             return done();
@@ -128,7 +127,6 @@ describe('# user requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-
             expect(res.body).to.be.an('array');
             // 有回傳某使用者的推文資料
             res.body[0].description.should.equal('User1 的 Tweet1');
