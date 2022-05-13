@@ -11,7 +11,7 @@ const tweetController = {
       console.log(err)
     }
   },
-  create: async (req, res, next) => {
+  create: async (req, res) => {
     try {
       const user = helpers.getUser(req)
       await Tweet.create({
@@ -20,7 +20,7 @@ const tweetController = {
       })
       res.sendStatus(200)
     } catch (err) {
-      next(err)
+      console.log(err)
     }
   },
   getOne: async (req, res) => {
