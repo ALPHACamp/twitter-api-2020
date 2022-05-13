@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
 const userServices = require('../services/user-services')
-const helpers = require('../_helpers')
 const userController = {
   signIn: (req, res, next) => {
     try {
@@ -13,7 +12,7 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    userServices.signUp(req, (err, user) => err ? next(err) : res.json(user))
   },
   getUser: (req, res, next) => {
     userServices.getUser(req, (err, user) => err ? next(err) : res.json(user))

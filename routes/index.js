@@ -3,7 +3,8 @@ const router = express.Router()
 const passport = require('../config/passport')
 const admin = require('./modules/admin')
 const users = require('./modules/users')
-const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
+const { authenticated, authenticatedUser,
+  authenticatedAdmin } = require('../middleware/auth')
 const userController = require('../controllers/user-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
