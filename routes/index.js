@@ -3,6 +3,7 @@ const router = express.Router()
 const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
+const upload = require('../../middleware/multer')
 const tweetController = require('../controllers/tweet-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
@@ -23,8 +24,10 @@ router.get('/users/current_user', authenticated, authenticatedUser, getCurrentUs
 router.get('/users/:id', authenticated, userController.getUser)
 
 // 修改目前登入的使用者個人資料
-router.put('/api/users/:id', authenticated,  authenticatedUser, userController.putUser)
+router.put('/users/:id', authenticated,  authenticatedUser, userController.putUser)
 
+// 目前登入使用者資料的上傳單張圖片路由
+router.put('/users/:id', upload.single('image'), userController.putUser)
 
 // Tweet APIs
 router.get('/tweets/:tweet_id', tweetController.getTweet)
