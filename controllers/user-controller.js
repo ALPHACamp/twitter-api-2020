@@ -22,7 +22,7 @@ const userController = {
     userServices.getUserTweets(req, (err, tweets) => err ? next(err) : res.json(tweets))
   },
   getUserRepliedTweets: (req, res, next) => {
-    userServices.getUserRepliedTweets(req, (err, user) => err ? next(err) : res.json({ status: 'success', data: user }))
+    userServices.getUserRepliedTweets(req, (err, repliedTweets) => err ? next(err) : res.json(repliedTweets))
   },
   getUserLikes: (req, res, next) => {
     userServices.getUserLikes(req, (err, user) => err ? next(err) : res.json({ status: 'success', data: user }))

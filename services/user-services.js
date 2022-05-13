@@ -33,7 +33,7 @@ const userServices = {
       User.findByPk(req.params.id, { raw: true }),
       Tweet.findAll({
         raw: true,
-        where: { userId: req.params.id }
+        where: { UserId: req.params.id }
       })
     ])
       .then(([user, tweets]) => {
@@ -43,6 +43,24 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUserRepliedTweets: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.params.id, { raw: true }),
+      Reply.findAll({
+        raw: true,
+        nest: true,
+        where: { UserId: req.params.id },
+        include: Tweet
+      })
+    ])
+      .then(([user, replies]) => {
+        if (!user) throw new Error("User didn't exists!")
+        const repliedTweets = replies.map(r => ({
+          ...r.Tweet,
+          comment: r.comment
+        }))
+        return cb(null, repliedTweets)
+      })
+      .catch(err => cb(err))
 
   },
   getUserLikes: (req, cb) => {
