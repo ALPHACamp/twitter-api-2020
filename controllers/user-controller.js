@@ -59,8 +59,8 @@ const userController = {
     .then(newUser => {
       const userData = newUser.toJSON()
       delete userData.password
-      const token = jwt.sign(newUser, process.env.JWT_SECRET, {
-        expriesIn: '30d',
+      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+        expiresIn: '30d',
       })
       return res.status(200).json({
         token,
@@ -70,7 +70,7 @@ const userController = {
     .catch(err => next(err))
   },
 
-  getUser: (req, res, next) => {
+  getUser: (req, cb) => {
     const userId = Number(req.params.id)
     const reqUserId = getUser(req).id
     return User.findByPk(userId, {
