@@ -1,9 +1,9 @@
-const { LikedReply } = require('../models')
+const { Reply, LikedReply } = require('../models')
 
 // setting reply-related controller
 const replyController = {
   likeReply: (req, res, next) => {
-     /*
+    /*
     :param id: replyId
     This api would create a like relation between user and reply, and return a json
     */
@@ -18,26 +18,26 @@ const replyController = {
         }
       })
     ])
-    .then(([reply, likedReply]) => {
-      if (!reply) throw new Error("Reply didn't exist!")
-      if (likedReply) throw new Error('You have liked this reply!')
+      .then(([reply, likedReply]) => {
+        if (!reply) throw new Error("Reply didn't exist!")
+        if (likedReply) throw new Error('You have liked this reply!')
 
-      return LikedReply.create({
-        userId,
-        replyId
+        return LikedReply.create({
+          userId,
+          replyId
+        })
       })
-    })
-    .then(likedReply => {
-      return res.json({
-        status: 'Success',
-        statusCode: 200,
-        data: {
-          likedReply
-        },
-        message: ''
+      .then(likedReply => {
+        return res.json({
+          status: 'Success',
+          statusCode: 200,
+          data: {
+            likedReply
+          },
+          message: ''
+        })
       })
-    })
-    .catch(err => next(err))
+      .catch(err => next(err))
   },
   unlikeReply: (req, res, next) => {
     /*

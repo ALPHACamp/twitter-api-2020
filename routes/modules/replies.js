@@ -3,7 +3,7 @@ const router = express.Router()
 const replyController = require('../../controllers/reply-controller')
 
 // setting routes
-router.post('/replies/:id/like', replyController.likeReply)
-router.post('/replies/:id/like', replyController.unlikeReply)
+router.post('/:id/like', replyController.likeReply)
+router.post('/:id/unlike', replyController.unlikeReply)
 
 module.exports = router
