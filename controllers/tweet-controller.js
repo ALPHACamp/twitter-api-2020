@@ -4,31 +4,26 @@ const helpers = require('../_helpers')
 const tweetController = {
   getAllTweet: async (req, res, next) => {
     try {
-      const rawTweets = await Tweet.findAll({
+      const tweets = await Tweet.findAll({
+        attributes: [
+          'id', 'description', 'user_id',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
+            'likeCounts'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
+            'replyCounts']
+        ],
         include: [
           {
             model: User,
             attributes: ['name', 'account', 'avatar']
-          },
-          {
-            model: Like,
-            attributes: ['tweet_id', 'user_id']
-          },
-          {
-            model: Reply,
-            attributes: ['tweet_id', 'user_id']
           }
         ],
         order: [
           ['created_at', 'DESC']
-        ]
+        ],
+        nest: true,
+        raw: true
       })
-
-      const tweets = rawTweets.map((tweet, _index) => ({
-        ...tweet.toJSON(),
-        likeCounts: tweet.Likes.length,
-        repliesCounts: tweet.Replies.length
-      }))
 
       res.json(tweets)
     } catch (err) {
@@ -40,16 +35,15 @@ const tweetController = {
       const tweetId = req.params.id
       // catch this tweet including replies & likes
       // catch tweet's author
-      const rawTweet = await Tweet.findByPk(tweetId, {
+      const tweet = await Tweet.findByPk(tweetId, {
+        attributes: [
+          'id', 'description', 'user_id',
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
+            'likeCounts'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
+            'replyCounts']
+        ],
         include: [
-          {
-            model: Like,
-            attributes: ['tweet_id', 'user_id']
-          },
-          {
-            model: Reply,
-            attributes: ['tweet_id', 'user_id']
-          },
           {
             model: User,
             attributes: ['name', 'account', 'avatar']
@@ -57,14 +51,7 @@ const tweetController = {
         ]
       })
 
-      if (!rawTweet) throw new Error('無法查看不存在的推文！')
-
-
-      const tweet = ({
-        ...rawTweet.toJSON(),
-        likeCounts: rawTweet.Likes.length,
-        repliesCounts: rawTweet.Replies.length
-      })
+      if (!tweet) throw new Error('無法查看不存在的推文！')
 
       res.json(tweet)
     } catch (err) {
@@ -104,7 +91,7 @@ const tweetController = {
 
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) throw new Error('無法喜歡不存在的推文。')
-    
+
       const [isLiked, created] = await Like.findOrCreate({
         where: {
           userId,
@@ -163,7 +150,7 @@ const tweetController = {
           tweetId: req.params.id
         },
         include: [
-          { model: User , attributes: ['name', 'account', 'avatar'] }
+          { model: User, attributes: ['name', 'account', 'avatar'] }
         ],
         order: [['created_at', 'DESC']],
         rest: true,
@@ -187,10 +174,10 @@ const tweetController = {
       const comment = req.body.comment
 
       if (!comment) throw new Error('不可以提交空白的推文。')
-      
+
       const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) throw new Error('想要回覆的貼文不存在。')
-      
+
       const reply = await Reply.create({
         comment,
         userId,
