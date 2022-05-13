@@ -12,7 +12,9 @@ const { getUser } = require('./_helpers')
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
+app.use(
+  session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
+)
 app.use(passport.initialize())
 app.use(passport.session())
 app.use((req, res, next) => {
@@ -23,6 +25,8 @@ app.use((req, res, next) => {
 app.use('/api', apis)
 app.get('/', (req, res) => res.send('Hello World!'))
 
-app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
+app.listen(port, () =>
+  console.log(`Example app listening on http://localhost:${port}`)
+)
 
 module.exports = app
