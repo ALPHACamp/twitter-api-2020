@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User } = require('../../models')
+const helpers = require('../../_helpers')
 
 const userController = {
   signIn: (req, res, next) => {
     try {
-      const userData = req.user.toJSON()
+      const userData = helpers.getUser(req).toJSON()
       if (userData.Identity.identity === 'admin') {
         userData.is_admin = true
       } else { userData.is_admin = false }
