@@ -3,7 +3,7 @@ const { User } = require('../models')
 const userServices = {
   signUp: (req, cb) => {
     const { account, name, email, password, checkPassword } = req.body
-    if(password != checkPassword) throw new Error('Password do not match!')
+    if (password != checkPassword) throw new Error('Password do not match!')
 
     User.findOne({ where: { account } })
       .then(user => {
@@ -16,16 +16,15 @@ const userServices = {
         email,
         password: hash
       }))
-      .then( createdUser => cb(null, { createdUser }))
+      .then(createdUser => cb(null, { createdUser }))
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
     User.findByPk(req.params.id, {
-      raw: true
     })
       .then(user => {
         if (!user) throw new Error("User didn't exists!")
-        return user
+        return user = user.get({ plain: true })
       })
       .then(user => cb(null, user ))
       .catch(err => cb(err))

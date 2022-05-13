@@ -81,6 +81,7 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查是否回傳資料裡有 root 的資料
+            console.log(res.body)
             res.body.name.should.equal('root');
 
             return done();
