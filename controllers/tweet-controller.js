@@ -75,7 +75,7 @@ const tweetController = {
     try {
       const userId = helpers.getUser(req).id
       const description = req.body.description
-      
+
       if (!description) throw new Error('不可以提交空白的推文。')
       if (description.length > 140) throw new Error('不可以提交字數過長的推文。')
 
@@ -103,18 +103,50 @@ const tweetController = {
       const tweetId = req.params.id
 
       const tweet = await Tweet.findByPk(tweetId)
-      if (!tweet) throw new Error('無法喜歡不存在的推文')
-
-      const likedTweet = await Like.create({
-        userId,
-        tweetId
+      if (!tweet) throw new Error('無法喜歡不存在的推文。')
+    
+      const [isLiked, created] = await Like.findOrCreate({
+        where: {
+          userId,
+          tweetId
+        },
       })
+
+      if (!created) throw new Error('你已經喜歡過該則推文。')
 
       res.json({
         status: 'success',
-        message: '你已成功喜歡該筆推文。',
+        message: '你已成功喜歡該則推文。',
         data: {
-          likedTweet
+          isLiked
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  deleteLikeTweet: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const tweetId = req.params.id
+
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) throw new Error('無法喜歡不存在的推文。')
+
+      const isLiked = await Like.destroy({
+        where: {
+          userId,
+          tweetId
+        }
+      })
+
+      if (!isLiked) throw new Error('你沒有喜歡過該則推文。')
+
+      res.json({
+        status: 'success',
+        message: '你已成功取消喜歡該則推文。',
+        data: {
+          deledTweet: tweet.toJSON(), // deleted tweet
         }
       })
     } catch (err) {
