@@ -31,5 +31,6 @@ router.post('/api/tweets/:tweet_id/replies', authenticated, replyController.crea
 
 // 喜歡相關路由
 router.post('/api/tweets/:id/like', authenticated, likeControler.add)
+router.post('/api/tweets/:id/unlike', authenticated, likeControler.remove)
 
 module.exports = router

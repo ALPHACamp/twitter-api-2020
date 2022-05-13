@@ -14,6 +14,21 @@ const likeControler = {
     } catch (err) {
       console.log(err)
     }
+  },
+  remove: async (req, res) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const TweetId = req.params.id
+      await Like.destroy({
+        where: {
+          UserId,
+          TweetId
+        }
+      })
+      res.sendStatus(200)
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 module.exports = likeControler
