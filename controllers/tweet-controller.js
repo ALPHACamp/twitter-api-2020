@@ -6,12 +6,7 @@ const tweetController = {
   getAll: async (req, res) => {
     try {
       const tweets = await tweetServices.getAll()
-      res.json({
-        status: 'success',
-        data: {
-          tweets
-        }
-      })
+      res.status(200).json(tweets)
     } catch (err) {
       console.log(err)
     }
@@ -26,6 +21,15 @@ const tweetController = {
       res.sendStatus(200)
     } catch (err) {
       next(err)
+    }
+  },
+  getOne: async (req, res) => {
+    try {
+      const tweetId = req.params.id
+      const tweet = await tweetServices.getOne(tweetId)
+      res.status(200).json(tweet)
+    } catch (err) {
+      console.log(err)
     }
   }
 }

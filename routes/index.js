@@ -19,6 +19,8 @@ router.post('/api/admin/login', passport.authenticate('local', { session: false 
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 
 // 推文相關路由
+router.get('/api/tweets/:id', authenticated, tweetController.getOne)
+router.get('/api/tweets', authenticated, tweetController.getAll)
 router.post('/api/tweets', authenticated, tweetController.create)
 
 module.exports = router
