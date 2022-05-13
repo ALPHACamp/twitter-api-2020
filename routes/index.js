@@ -3,6 +3,7 @@ const passport = require('../config/passport')
 const userController = require('../controllers/user-controller')
 const adminController = require('../controllers/admin-controller')
 const router = express.Router()
+const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
 
 // 身份驗證中間件
 const { authenticated, authenticatedAdmin } = require('../middleware/api-auth')
