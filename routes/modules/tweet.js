@@ -7,5 +7,6 @@ router.get('/', tweetController.getAllTweet)
 router.get('/:id', tweetController.getTweet)
 
 router.post('/', tweetController.postTweet)
+router.post('/:id/like', tweetController.likeTweet)
 
 module.exports = router

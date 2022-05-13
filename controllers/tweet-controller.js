@@ -96,6 +96,30 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  likeTweet: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const tweetId = req.params.id
+
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) throw new Error('無法喜歡不存在的推文')
+
+      const likedTweet = await Like.create({
+        userId,
+        tweetId
+      })
+
+      res.json({
+        status: 'success',
+        message: '你已成功喜歡該筆推文。',
+        data: {
+          likedTweet
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
