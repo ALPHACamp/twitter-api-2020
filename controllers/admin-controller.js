@@ -39,6 +39,21 @@ const adminController = {
     } catch (err) {
       console.log(err)
     }
+  },
+  deleteTweet: async (req, res) => {
+    try {
+      const tweetId = req.params.id
+      await Tweet.destroy({
+        where: {
+          id: tweetId
+        }
+      })
+      res.json({
+        status: 'success'
+      })
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 
