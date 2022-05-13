@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
+const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
 
 const userController = {
   login: (req, res, next) => {
@@ -126,6 +127,61 @@ const userController = {
             }
           })
           res.json(newData)
+        })
+    } catch (err) {
+      next(err)
+    }
+  },
+  userFollowings: (req, res, next) => {
+    try {
+      const followerId = req.params.id
+      Followship.findAll({
+        where: { followerId },
+        raw: true
+      })
+        .then(followings => {
+          res.json(followings)
+        })
+    } catch (err) {
+      next(err)
+    }
+  },
+  userFollowers: (req, res, next) => {
+    try {
+      const followingId = req.params.id
+      Followship.findAll({
+        where: { followingId },
+        raw: true
+      })
+        .then(followings => {
+          res.json(followings)
+        })
+    } catch (err) {
+      next(err)
+    }
+  },
+  putUser: (req, res, next) => {
+    try {
+      const userId = req.params.id
+      const { name, introduction } = req.body
+      const { files } = req
+      if (!name) throw new Error('請輸入使用者姓名！')
+      return Promise.all([
+        User.findByPk(userId),
+        imgurCoverHandler(files),
+        imgurAvatarHandler(files)
+      ])
+        .then(([user, coverUrl, avatarUrl]) => {
+          if (!user) throw new Error('使用者不存在！')
+          return user.update({
+            name,
+            introduction: introduction || user.introduction,
+            cover: coverUrl || user.cover,
+            avatar: avatarUrl || user.avatar
+          })
+        })
+        .then(user => {
+          res.json(user)
         })
     } catch (err) {
       next(err)
