@@ -1,4 +1,4 @@
-const { Tweet, User, Like, Reply } = require('../models')
+const { Tweet, User, Like, Reply, sequelize } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -147,6 +147,33 @@ const tweetController = {
         message: '你已成功取消喜歡該則推文。',
         data: {
           deletedTweet: tweet.toJSON(), // deleted tweet
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweetAllReplies: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.id)
+      if (!tweet) throw new Error('無法查找不存在的推文。')
+
+      const replies = await Reply.findAll({
+        where: {
+          tweetId: req.params.id
+        },
+        include: [
+          { model: User , attributes: ['name', 'account', 'avatar'] }
+        ],
+        order: [['created_at', 'DESC']],
+        rest: true,
+        raw: true
+      })
+
+      res.json({
+        status: 'success',
+        data: {
+          replies
         }
       })
     } catch (err) {
