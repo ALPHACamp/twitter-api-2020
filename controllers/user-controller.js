@@ -99,6 +99,22 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const followings = await Followship.findAll({
+        where: { followerId: req.params.id },
+        attributes: [
+          'followingId',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = followingId)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = followingId)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followingId)`), 'introduction']
+        ]
+      })
+      res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
