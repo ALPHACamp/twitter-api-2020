@@ -179,6 +179,34 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
+  },
+  postReply: async (req, res, next) => {
+    try {
+      const userId = helpers.getUser(req).id
+      const tweetId = req.params.id
+      const comment = req.body.comment
+
+      if (!comment) throw new Error('不可以提交空白的推文。')
+      
+      const tweet = await Tweet.findByPk(tweetId)
+      if (!tweet) throw new Error('想要回覆的貼文不存在。')
+      
+      const reply = await Reply.create({
+        comment,
+        userId,
+        tweetId
+      })
+
+      res.json({
+        status: 'success',
+        message: '你已成功建立一筆留言。',
+        data: {
+          comment
+        }
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
