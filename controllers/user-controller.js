@@ -36,7 +36,7 @@ const userController = {
     try {
       const user = await User.findByPk(req.params.id, {
         attributes: [
-          'avatar', 'name', 'account', 'cover_image', 'introduction',
+          'id','avatar', 'name', 'account', 'cover_image', 'introduction',
           [sequelize.literal('(SELECT COUNT(DISTINCT following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCounts'],
           [sequelize.literal('(SELECT COUNT(DISTINCT follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCounts']
         ]
