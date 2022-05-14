@@ -3,8 +3,8 @@ const bcrypt = require('bcryptjs')
 const { User, Tweet } = require('../models')
 
 // JWT Authentication
-const passportJWT = require('passport-jwt')
 const LocalStrategy = require('passport-local')
+const passportJWT = require('passport-jwt')
 const ExtractJWT = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
 

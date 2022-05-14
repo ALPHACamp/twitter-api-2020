@@ -1,12 +1,10 @@
-const { Tweet, User, Like, Reply } = require('../models')
-// const { dummyUser } = require('../dummyUser.js')
+const { Tweet, User, Reply } = require('../models')
 const { getUser } = require('../_helpers')
 
 const tweetController = {
 
   getTweets: (req, res, next) => {
     // 為節省重新重資料庫拉資料的時間，getTweets直接用資料的likeCount和replyCount做數字顯示。但為確保數字正確。會在讀取單筆tweet資料的controller中，重拉資料並計數
-
     Tweet.findAll({
       attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
       order: [['createdAt', 'DESC']],
@@ -58,14 +56,15 @@ const tweetController = {
       .catch(err => next(err))
   },
 
+  // 尚未通過測試檔
   postTweet: (req, res, next) => {
-    const userId = getUser(req).id
+    const UserId = req.user.id
     const { description } = req.body
     if (!description) throw new Error('推文內容不可空白！')
     if (description.trim().length > 140) throw new Error('推文字數不可超過140字！')
 
     return Tweet.create({
-      userId,
+      UserId,
       description: req.body.description
     })
       .then(tweet => res.status(200).json(tweet))
