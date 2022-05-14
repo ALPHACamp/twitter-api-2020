@@ -7,11 +7,9 @@ const upload = require('../middleware/multer')
 const tweetController = require('../controllers/tweet-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
-
 // 尚未加入 authenticatedAdmin
 const { authenticated, authenticatedUser } = require('../middleware/auth')
 const { getCurrentUser } = require('../controllers/user-controller')
-
 
 // 註冊/登入
 router.post('/users', userController.signUp)
@@ -33,8 +31,6 @@ router.put('/users/:id', authenticated,  authenticatedUser, userController.putUs
 router.get('/tweets/:tweet_id', tweetController.getTweet)
 router.get('/tweets', tweetController.getTweets)
 router.post('/tweets', tweetController.postTweet)
-
-
 
 router.use('/', apiErrorHandler)
 
