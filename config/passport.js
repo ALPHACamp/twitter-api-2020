@@ -20,13 +20,11 @@ passport.use(new LocalStrategy(
         if (!user) return cb(null, false)
         bcrypt.compare(password, user.password).then(res => {
           if (!res) return cb(null, false)
-
           return cb(null, user)
         })
-      }
-      )
-  })
-)
+      })
+  }
+))
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
