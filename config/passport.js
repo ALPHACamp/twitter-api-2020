@@ -17,7 +17,7 @@ passport.use(new LocalStrategy(
       .then(user => {
         if (!user) throw new Error("User didn't exists!")
         if (!bcrypt.compareSync(password, user.password)) throw new Error("Account or Password Error!")
-        return done(null, user)
+        return cb(null, user)
       })
       .catch(err => cb(err, false))
   }

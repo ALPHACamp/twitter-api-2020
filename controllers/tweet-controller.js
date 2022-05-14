@@ -5,7 +5,7 @@ const tweetController = {
     tweetServices.addLike(req, (err, addlike) => err ? next(err) : res.json(addlike))
   },
   removeLike: (req, res, next) => {
-    tweetServices.removeLike(req, (err, removelike) => eerr ? next(err) : res.json(removelike))
+    tweetServices.removeLike(req, (err, removelike) => err ? next(err) : res.json(removelike))
   }
 }
 

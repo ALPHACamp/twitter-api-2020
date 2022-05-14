@@ -31,10 +31,10 @@ const tweetController = {
         TweetId: req.params.id
       }
     })
-      .then(removelike => {
-        if (!removelike) throw new Error("You haven't like this tweet")
+      .then(like => {
+        if (!like) throw new Error("You haven't like this tweet")
 
-        return removelike.destroy()
+        return like.destroy()
       })
       .then(removelike => cb(null, removelike))
       .catch(err => cb(err))
