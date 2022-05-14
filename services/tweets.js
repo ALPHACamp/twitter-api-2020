@@ -11,18 +11,16 @@ const tweets = {
         include: [
           {
             model: User,
-            attributes: ['name']
+            attributes: [
+              'name',
+              'account',
+              'avatar'
+            ]
           },
           {
             model: Like,
             attributes: [
               [sequelize.fn('COUNT', sequelize.col('Likes.Tweet_id')), 'likeCounts']
-            ]
-          },
-          {
-            model: Reply,
-            attributes: [
-              [sequelize.fn('COUNT', sequelize.col('Replies.Tweet_id')), 'replyCounts']
             ]
           }
         ],
@@ -31,13 +29,31 @@ const tweets = {
         nest: true,
         raw: true
       })
+
+      const replies = await Reply.count({
+        group: ['Tweet_id'],
+        raw: true
+      })
+
+      for (let replyIndex = 0; replyIndex < replies.length; replyIndex++) {
+        for (let tweetIndex = 0; tweetIndex < rawTweets.length; tweetIndex++) {
+          if (rawTweets[tweetIndex].id === replies[replyIndex].Tweet_id) {
+            rawTweets[tweetIndex].replyCounts = replies[replyIndex].count
+          } else {
+            if (rawTweets[tweetIndex].replyCounts === undefined) rawTweets[tweetIndex].replyCounts = 0
+          }
+        }
+      }
+
       const tweets = rawTweets.map(element => ({
         id: element.id,
         name: element.User.name,
+        account: element.User.account,
+        avatar: element.User.avatar,
         description: element.description,
         createdAt: element.createdAt,
-        likeCounts: element.Likes.likeCounts,
-        replyCounts: element.Replies.replyCounts
+        likeCount: element.Likes.likeCounts,
+        replyCount: element.replyCounts
       }))
       return tweets
     } catch (err) {
