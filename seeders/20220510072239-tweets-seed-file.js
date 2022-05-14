@@ -12,7 +12,7 @@ module.exports = {
       for (let j = 0; j < eachUserTweets; j++) {
         data.push({
           description: faker.lorem.text(),
-          user_id: Number(users[i].id),
+          User_id: Number(users[i].id),
           created_at: new Date(),
           updated_at: new Date()
         })
