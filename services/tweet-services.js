@@ -1,16 +1,14 @@
 const { Tweet, Like } = require('../models')
-const { getUser } = require('./user-services')
+const helpers = require('../_helpers')
 
 const tweetController = {
   addLike: (req, cb) => {
-    const userId = Number(getUser(req).id)
-    const { tweetId } = req.params
     return Promise.all([
-      Tweet.findByPk(tweetId),
+      Tweet.findByPk(req.params.id),
       Like.findOne({
         where: {
-          UserId: userId,
-          TweetId: tweetId
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
         }
       })
     ])
@@ -19,11 +17,26 @@ const tweetController = {
         if (like) throw new Error('You have Like this Tweet')
 
         return Like.create({
-          UserId: userId,
-          TweetI: tweetId
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.id
         })
       })
       .then(addlike => cb(null, addlike))
+      .catch(err => cb(err))
+  },
+  removeLike: (req, cb) => {
+    return Like.findOne({
+      where: {
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.id
+      }
+    })
+      .then(removelike => {
+        if (!removelike) throw new Error("You haven't like this tweet")
+
+        return removelike.destroy()
+      })
+      .then(removelike => cb(null, removelike))
       .catch(err => cb(err))
   }
 }

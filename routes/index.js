@@ -13,7 +13,6 @@ router.post('/signin', passport.authenticate('local', { session: false }), authe
 
 router.post('/users', userController.signUp)
 
-// router.get('/users/:id', userController.getUser)
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, authenticatedUser, users)
 router.use('/tweets', authenticated, authenticatedUser, tweets)

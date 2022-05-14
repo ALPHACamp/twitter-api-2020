@@ -61,10 +61,6 @@ const userServices = {
         return cb(null, repliedTweets)
       })
       .catch(err => cb(err))
-
-  },
-  getUserLikes: (req, cb) => {
-
   }
 }
 module.exports = userServices
