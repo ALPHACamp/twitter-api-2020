@@ -6,7 +6,7 @@ const tweetController = {
     try {
       const tweets = await Tweet.findAll({
         attributes: [
-          'id', 'description', 'user_id', 'created_at',
+          'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
@@ -37,11 +37,11 @@ const tweetController = {
       // catch tweet's author
       const tweet = await Tweet.findByPk(tweetId, {
         attributes: [
-          'id', 'description', 'user_id',
+          'id', 'description', 'UserId',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
-            'likeCounts'],
+            'likeCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
-            'replyCounts']
+            'replyCount']
         ],
         include: [
           {
@@ -150,7 +150,7 @@ const tweetController = {
         order: [['created_at', 'DESC']]
       })
 
-      res.status(200).json(comment)
+      res.status(200).json([comment])
     } catch (err) {
       next(err)
     }
