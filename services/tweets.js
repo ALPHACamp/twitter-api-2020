@@ -22,12 +22,6 @@ const tweets = {
             attributes: [
               [sequelize.fn('COUNT', sequelize.col('Likes.Tweet_id')), 'likeCounts']
             ]
-          },
-          {
-            model: Reply,
-            attributes: [
-              [sequelize.fn('COUNT', sequelize.col('Replies.Tweet_id')), 'replyCounts']
-            ]
           }
         ],
         order: [['created_at', 'DESC']],
@@ -35,6 +29,22 @@ const tweets = {
         nest: true,
         raw: true
       })
+
+      const replies = await Reply.count({
+        group: ['Tweet_id'],
+        raw: true
+      })
+
+      for (let replyIndex = 0; replyIndex < replies.length; replyIndex++) {
+        for (let tweetIndex = 0; tweetIndex < rawTweets.length; tweetIndex++) {
+          if (rawTweets[tweetIndex].id === replies[replyIndex].Tweet_id) {
+            rawTweets[tweetIndex].replyCounts = replies[replyIndex].count
+          } else {
+            if (rawTweets[tweetIndex].replyCounts === undefined) rawTweets[tweetIndex].replyCounts = 0
+          }
+        }
+      }
+
       const tweets = rawTweets.map(element => ({
         id: element.id,
         name: element.User.name,
@@ -43,7 +53,7 @@ const tweets = {
         description: element.description,
         createdAt: element.createdAt,
         likeCount: element.Likes.likeCounts,
-        replyCount: element.Replies.replyCounts
+        replyCount: element.replyCounts
       }))
       return tweets
     } catch (err) {
