@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like, Followship } = require('../models')
-
+const { User, Tweet, Reply, Followship } = require('../models')
+const helpers = require('../_helpers')
 const userServices = {
   signUp: (req, cb) => {
     const { account, name, email, password, checkPassword } = req.body
@@ -65,13 +65,12 @@ const userServices = {
 
   },
   addFollowing: (req, cb) => {
-    const { UserId } = req.params
     return Promise.all([
-      User.findByPk(UserId),
+      User.findByPk(req.body.id),
       Followship.findOne({
         where: {
-          followerId: req.user.id,
-          followingId: req.params.UserId
+          followerId: helpers.getUser(req).id,
+          followingId: req.body.id
         }
       })
     ])
@@ -79,18 +78,18 @@ const userServices = {
         if (!user) throw new Error("User didn't exist!")
         if (followship) throw new Error('You are already following this user!')
         return Followship.create({
-          followerId: req.user.id,
-          followingId: UserId
+          followerId: helpers.getUser(req).id,
+          followingId: req.body.id
         })
       })
-      .then(addfollowing => cn(null, addfollowing))
+      .then(addfollowing => cb(null, addfollowing))
       .catch(err => cb(err))
   },
   removeFollowing: (req, cb) => {
     Followship.findOne({
       where: {
-        followerId: req.user.id,
-        followingId: req.params.UserId
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
       }
     })
       .then(followship => {
