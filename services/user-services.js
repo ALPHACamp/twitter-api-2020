@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Followship } = require('../models')
+const helpers = require('../_helpers')
 const userServices = {
   signUp: (req, cb) => {
     const { account, name, email, password, checkPassword } = req.body
@@ -25,7 +26,7 @@ const userServices = {
         if (!user) throw new Error("User didn't exists!")
         return user = user.get({ plain: true })
       })
-      .then(user => cb(null, user ))
+      .then(user => cb(null, user))
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
@@ -63,8 +64,40 @@ const userServices = {
       .catch(err => cb(err))
 
   },
-  getUserLikes: (req, cb) => {
-
+  addFollowing: (req, cb) => {
+    return Promise.all([
+      User.findByPk(req.body.id),
+      Followship.findOne({
+        where: {
+          followerId: helpers.getUser(req).id,
+          followingId: req.body.id
+        }
+      })
+    ])
+      .then(([user, followship]) => {
+        if (!user) throw new Error("User didn't exist!")
+        if (followship) throw new Error('You are already following this user!')
+        return Followship.create({
+          followerId: helpers.getUser(req).id,
+          followingId: req.body.id
+        })
+      })
+      .then(addfollowing => cb(null, addfollowing))
+      .catch(err => cb(err))
+  },
+  removeFollowing: (req, cb) => {
+    Followship.findOne({
+      where: {
+        followerId: helpers.getUser(req).id,
+        followingId: req.params.followingId
+      }
+    })
+      .then(followship => {
+        if (!followship) throw new Error("You haven't followed this user!")
+        return followship.destroy()
+      })
+      .then(removefollowship => cb(null, removefollowship))
+      .catch(err => cb(err))
   }
 }
 module.exports = userServices
