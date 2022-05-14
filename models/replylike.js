@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   ReplyLike.init({
     likeUnlike: DataTypes.BOOLEAN,
-    userId: DataTypes.INTEGER,
-    replyId: DataTypes.INTEGER
+    UserId: DataTypes.INTEGER,
+    ReplyId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'ReplyLike',

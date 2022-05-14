@@ -1,21 +1,64 @@
-const { User, Tweet, Identity } = require('../../models')
+const { User, Tweet, Identity, Like, Followship } = require('../../models')
+// const { Sequelize } = require('sequelize')
+// const sequelize = new Sequelize('sqlite::memory:')
 
-const userController = {
+const adminController = {
   getUsers: async (req, res, next) => {
-    const users = await User.findAll({
-      include: Identity,
-      raw: true,
-      nest: true
-    })
-    res.json({
-      status: 'success',
-      data: users
-    })
+    try {
+      const users = await User.findAll({
+        attributes: ['id', 'account', 'name', 'coverImg', 'avatarImg'],
+        include: [
+          {
+            model: Identity,
+            where: { identity: 'user' },
+            attributes: []
+          }
+        ],
+        raw: true,
+        nest: true
+      })
+      for (const user of users) {
+        Promise.all([
+          (user.tweetAmount = await Tweet.findAndCountAll({
+            where: { UserId: user.id },
+            attributes: ['id']
+          })),
+          (user.likeAmount = await Like.findAndCountAll({
+            where: { UserId: user.id },
+            attributes: ['id']
+          })),
+          (user.followingAmount = await Followship.findAndCountAll({
+            where: { follower_id: user.id },
+            attributes: ['id']
+          })),
+          (user.followedAmount = await Followship.findAndCountAll({
+            where: { following_id: user.id },
+            attributes: ['id']
+          }))
+        ])
+      }
+      res.json({
+        status: 'success',
+        data: users
+      })
+    } catch (err) {
+      next(err)
+    }
   },
 
   deleteTweet: async (req, res, next) => {
-    await Tweet.findByPk(req.params.id)
+    try {
+      const deletedTweet = await Tweet.findByPk(req.params.id)
+      if (!deletedTweet) throw new Error('找不到相關推文')
+      await deletedTweet.destroy()
+      res.json({
+        status: 'success',
+        data: deletedTweet
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
-module.exports = userController
+module.exports = adminController
