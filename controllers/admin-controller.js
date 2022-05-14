@@ -5,7 +5,7 @@ const adminController = {
     try {
       const user = await User.findAll({
         attributes: [
-          'name', 'account', 'avatar'
+          'name', 'account', 'avatar',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Tweets WHERE Tweets.User_id = User.id)'),
             'tweetCounts'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.User_id = User.id)'),
@@ -20,7 +20,7 @@ const adminController = {
         nest: true,
         raw: true
       })
-      
+
       res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -31,11 +31,11 @@ const adminController = {
       const tweets = await Tweet.findAll({
         attributes: [
           'id', 'description', 'created_at',
-          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'), 
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCounts']
         ],
         include: [
-          { 
+          {
             model: User,
             attributes: [
               'name', 'account', 'avatar'
@@ -48,7 +48,8 @@ const adminController = {
       })
 
       res.status(200).json({
-        data: tweets
+        message: '成功獲得所有推文資料。',
+        tweets
       })
     } catch (err) {
       next(err)
@@ -70,12 +71,9 @@ const adminController = {
       if (!deletedCount) throw new Error('你已刪除過此推文。')
 
       res.status(200).json({
-        status: 'succuss',
-        message: '你已成功刪除該筆推文',
-        data: {
-          deletedTweet, // deleted Twitter
-          deletedCount // delete Count
-        }
+        message: '你已成功刪除該筆推文。',
+        deletedTweet, // deleted Twitter
+        deletedCount // delete Count
       })
     } catch (err) {
       next(err)
