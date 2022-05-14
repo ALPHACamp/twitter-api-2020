@@ -58,7 +58,7 @@ const tweetController = {
 
   // 尚未通過測試檔
   postTweet: (req, res, next) => {
-    const UserId = req.user.id
+    const UserId = Number(getUser(req).id)
     const { description } = req.body
     if (!description) throw new Error('推文內容不可空白！')
     if (description.trim().length > 140) throw new Error('推文字數不可超過140字！')
@@ -72,7 +72,6 @@ const tweetController = {
   },
 
   getTweetReplies: (req, res, next) => {
-    // get tweet id get all replies
     Reply.findAll({
       where: {
         tweetId: req.params.tweet_id
@@ -84,6 +83,23 @@ const tweetController = {
       order: [['createdAt', 'DESC']]
     })
       .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
+  },
+
+  // 尚未通過測試
+  postTweetReply: (req, res, next) => {
+    const UserId = Number(getUser(req).id)
+    const TweetId = Number(req.body.TweetId)
+    const { comment } = req.body
+    console.log(UserId, TweetId)
+    if (comment.length > 140) throw new Error('回覆字數不可超過140字！')
+    if (!comment) throw new Error('回覆內容不可空白！')
+    return Reply.create({
+      TweetId,
+      comment,
+      UserId
+    })
+      .then(reply => res.status(200).json(reply))
       .catch(err => next(err))
   }
 

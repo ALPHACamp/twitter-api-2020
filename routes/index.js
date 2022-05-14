@@ -22,6 +22,7 @@ router.get('/users/:id', authenticated, userController.getUser)
 
 // Tweet APIs
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.postTweetReply)
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
