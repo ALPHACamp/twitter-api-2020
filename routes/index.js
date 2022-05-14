@@ -6,11 +6,9 @@ const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
-
 // 尚未加入 authenticatedAdmin
 const { authenticated, authenticatedUser } = require('../middleware/auth')
 const { getCurrentUser } = require('../controllers/user-controller')
-
 
 // 註冊/登入
 router.post('/users', userController.signUp)
@@ -22,14 +20,10 @@ router.get('/users/current_user', authenticated, authenticatedUser, getCurrentUs
 // 取得指定使用者資料
 router.get('/users/:id', authenticated, userController.getUser)
 
-
-
 // Tweet APIs
 router.get('/tweets/:tweet_id', tweetController.getTweet)
 router.get('/tweets', tweetController.getTweets)
 router.post('/tweets', tweetController.postTweet)
-
-
 
 router.use('/', apiErrorHandler)
 
