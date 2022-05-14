@@ -3,7 +3,7 @@ const passport = require('passport')
 const bcrypt = require('bcryptjs')
 const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
-const { User } = require('../models')
+const { User, Tweet, Like } = require('../models')
 
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
@@ -37,7 +37,14 @@ const jwtOptions = {
   passReqToCallback: true
 }
 passport.use(new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id)
+  User.findByPk(jwtPayload.id, {
+    include: [
+      Tweet,
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' },
+      Like
+    ]
+  })
     .then(user => {
       req.user = user
       cb(null, user)
