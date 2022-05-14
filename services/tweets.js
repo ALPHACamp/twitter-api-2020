@@ -11,7 +11,11 @@ const tweets = {
         include: [
           {
             model: User,
-            attributes: ['name']
+            attributes: [
+              'name',
+              'account',
+              'avatar'
+            ]
           },
           {
             model: Like,
@@ -34,10 +38,12 @@ const tweets = {
       const tweets = rawTweets.map(element => ({
         id: element.id,
         name: element.User.name,
+        account: element.User.account,
+        avatar: element.User.avatar,
         description: element.description,
         createdAt: element.createdAt,
-        likeCounts: element.Likes.likeCounts,
-        replyCounts: element.Replies.replyCounts
+        likeCount: element.Likes.likeCounts,
+        replyCount: element.Replies.replyCounts
       }))
       return tweets
     } catch (err) {
