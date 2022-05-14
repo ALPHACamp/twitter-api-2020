@@ -228,6 +228,11 @@ const tweetController = {
       .catch(err => next(err))
   },
   putTweet: async (req, res, next) => {
+    /*
+    :param id: tweetId
+    :body description: tweet's content
+    This api would edit a tweet record and return a json
+    */
     const userId = req.user.id
     const tweetId = req.params.id
     const description = req.body.description
