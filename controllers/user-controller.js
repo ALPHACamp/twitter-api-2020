@@ -27,7 +27,6 @@ const userController = {
   login: async (req, res, next) => {
     try {
       const user = getUser(req)
-      delete user.password
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
       res.status(200).json({token, user})
     } catch (err) {
@@ -58,7 +57,7 @@ const userController = {
         where: { UserId: req.params.id },
         attributes: [
           'id','description', 'createdAt',
-          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'userAvatar'],
           [sequelize.literal(`(SELECT id FROM Users WHERE id = ${req.params.id})`), 'userId'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
           [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
@@ -80,19 +79,21 @@ const userController = {
         where: { UserId: req.params.id, },
         attributes: [
           'id', 'comment', 'createdAt',
-          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
-          [sequelize.literal(`(SELECT id FROM Users WHERE id = ${req.params.id})`), 'userId'],
           [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
-          [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
-          [sequelize.col('account'), 'repliedAccount']
+          [sequelize.col('account'), 'repliedAccount'],
+          [sequelize.col('avatar'), 'repliedAvatar'],
+          // [sequelize.col('repliedUserId'), 'repliedUserId']
         ],
         include: [{
           model: Tweet, attributes: [],
-          include: [{ model: User, Where: { id: Tweet.userId } }]
+          include: [{ model: User, 
+            attributes:['account', 'avatar',
+              [sequelize.col('id'), 'repliedUserId']
+          ],
+            Where: { id: Tweet.userId } }]
         }],
         order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true,
-        nest: true
+        raw: true
       })
       res.status(200).json(replies)
     } catch (err) {
