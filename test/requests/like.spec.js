@@ -41,6 +41,7 @@ describe('# like requests', () => {
           .set('Accept', 'application/json')
           .expect(200)
           .end(function(err, res) {
+            console.log(res)
             if (err) return done(err);
             // 檢查 Like 資料裡，是否有 UserId=1, TweetId =1 的資料
             db.Like.findByPk(1).then(like => {
