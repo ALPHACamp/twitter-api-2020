@@ -23,7 +23,7 @@ const tweetController = {
       next(err)
     }
   },
-  getTweet: async (req, res, next) => {
+  getTweets: async (req, res, next) => {
     try {
       const limit = Number(req.query.limit) || null
       const tweets = await Tweet.findAll({
@@ -56,6 +56,47 @@ const tweetController = {
           Likes: likeTotal
         }
       })
+      return res.status(200).json(
+        data
+      )
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweet: async (req, res, next) => {
+    try {
+      const tweet = await Tweet.findByPk(req.params.tId, {
+        attributes: ['id', 'description', 'createdAt', 'updatedAt'],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'name', 'avatarImg']
+          },
+          {
+            model: Reply,
+            attributes: ['id', 'comment'],
+            include: {
+              model: User,
+              attributes: ['id', 'account', 'name', 'avatarImg']
+            }
+          },
+          {
+            model: Like,
+            attributes: ['id', 'likeUnlike'],
+            include: {
+              model: User,
+              attributes: ['id', 'account', 'name', 'avatarImg']
+            }
+          }
+        ],
+        nest: true
+      })
+
+      const data = {
+        ...tweet.toJSON(),
+        replyTotal: tweet.Replies.length,
+        likeTotal: tweet.Likes.filter(l => l.likeUnlike).length
+      }
       return res.status(200).json(
         data
       )

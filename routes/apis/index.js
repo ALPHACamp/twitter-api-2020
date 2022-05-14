@@ -10,8 +10,9 @@ const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.post('/users', userController.signUp)
 
+router.get('/tweets/:tId', authenticated, tweetController.getTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
-router.get('/tweets', authenticated, tweetController.getTweet)
 
 router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
