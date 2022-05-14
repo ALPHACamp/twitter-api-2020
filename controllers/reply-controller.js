@@ -1,4 +1,4 @@
-const { Reply } = require('../models')
+const { Reply, User } = require('../models')
 const helpers = require('../_helpers')
 const replyController = {
   create: async (req, res) => {
@@ -18,13 +18,26 @@ const replyController = {
   getAll: async (req, res) => {
     try {
       const TweetId = req.params.tweet_id
-      const reply = await Reply.findAll({
+      const rawReply = await Reply.findAll({
         where: {
           TweetId
         },
+        include: [
+          { model: User }
+        ],
+        nest: true,
         raw: true
       })
-      res.status(200).json(reply)
+      const replies = rawReply.map(element => ({
+        id: element.id,
+        comment: element.comment,
+        tweetId: element.TweetId,
+        userId: element.UserId,
+        name: element.User.name,
+        avatar: element.User.avatar,
+        account: element.User.account
+      }))
+      res.status(200).json(replies)
     } catch (err) {
       console.log(err)
     }
