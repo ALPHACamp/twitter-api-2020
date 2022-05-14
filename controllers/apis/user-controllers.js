@@ -9,10 +9,14 @@ const userController = {
       const userData = helpers.getUser(req).toJSON()
       if (userData.Identity.identity === 'admin') {
         userData.is_admin = true
-      } else { userData.is_admin = false }
+      } else {
+        userData.is_admin = false
+      }
       delete userData.password
       delete userData.Identity
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const token = jwt.sign(userData, process.env.JWT_SECRET, {
+        expiresIn: '30d'
+      })
       res.json({
         status: 'success',
         data: {
@@ -26,7 +30,9 @@ const userController = {
   },
 
   signUp: async (req, res, next) => {
-    if (req.body.password !== req.body.passwordCheck) throw new Error('驗證密碼不正確')
+    if (req.body.password !== req.body.passwordCheck) {
+      throw new Error('驗證密碼不正確')
+    }
     const user = await User.findOne({ where: { email: req.body.email } })
     if (user) throw new Error('使用者已經存在')
     const registeredUser = await User.create({
@@ -34,7 +40,9 @@ const userController = {
       email: req.body.email,
       password: bcrypt.hash(req.body.password, 10)
     })
-    const token = jwt.sign(registeredUser.password, process.env.JWT_SECRET, { expiresIn: '30d' })
+    const token = jwt.sign(registeredUser.password, process.env.JWT_SECRET, {
+      expiresIn: '30d'
+    })
     const userData = registeredUser.toJSON()
     delete userData.password
 
