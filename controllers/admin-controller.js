@@ -1,4 +1,4 @@
-const createToken = require('../function/token')
+const createToken = require('../helpers/token')
 const tweetServices = require('../services/tweets')
 const { Tweet, User, Followship } = require('../models')
 

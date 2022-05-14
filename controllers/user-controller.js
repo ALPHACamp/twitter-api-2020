@@ -1,4 +1,4 @@
-const createToken = require('../function/token')
+const createToken = require('../helpers/token')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
