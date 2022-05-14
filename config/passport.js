@@ -47,20 +47,4 @@ passport.use(new JWTStrategy(jwtOptions, (req, jwtPayload, cb) => {
     .catch(err => cb(err))
 }))
 
-passport.serializeUser((user, cb) => {
-  cb(null, user.id)
-})
-passport.deserializeUser((id, cb) => {
-  User.findByPk(id, {
-    include: [
-      Tweet,
-      { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' },
-      Like
-    ]
-  })
-    .then(user => cb(null, user.toJSON()))
-    .catch(err => cb(err))
-})
-
 module.exports = passport
