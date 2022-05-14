@@ -17,7 +17,11 @@ const authenticatedUser = (req, res, next) => {
   })(req, res, next)
 }
 
+
+// Angela: authenticatedAdmin
+
+
 module.exports = {
   authenticated,
-  authenticatedUser
+  authenticatedUser,
 }
