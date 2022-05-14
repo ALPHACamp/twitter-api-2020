@@ -5,7 +5,7 @@ const adminController = {
     try {
       const user = await User.findAll({
         attributes: [
-          'name', 'account', 'avatar',
+          'name', 'account', 'avatar'
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Tweets WHERE Tweets.User_id = User.id)'),
             'tweetCounts'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.User_id = User.id)'),
