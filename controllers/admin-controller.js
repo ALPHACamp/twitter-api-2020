@@ -48,7 +48,7 @@ const adminController = {
       })
 
       res.status(200).json({
-        message: '成功獲得所有推文資料',
+        message: '成功獲得所有推文資料。',
         tweets
       })
     } catch (err) {
@@ -71,7 +71,7 @@ const adminController = {
       if (!deletedCount) throw new Error('你已刪除過此推文。')
 
       res.status(200).json({
-        message: '你已成功刪除該筆推文',
+        message: '你已成功刪除該筆推文。',
         deletedTweet, // deleted Twitter
         deletedCount // delete Count
       })
