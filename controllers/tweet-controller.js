@@ -226,6 +226,31 @@ const tweetController = {
         })
       })
       .catch(err => next(err))
+  },
+  putTweet: async (req, res, next) => {
+    const userId = req.user.id
+    const tweetId = req.params.id
+    const description = req.body.description
+    if (!description) throw new Error('Description is required!')
+    try {
+      const tweet = await Tweet.findOne({
+        where: { id: tweetId, userId }
+      })
+      if (!tweet) throw new Error("Tweet didn't exist or you don't have permission to edit!")
+      const updatedTweet = await tweet.update({
+        description
+      })
+      res.json({
+        status: 'Success',
+        statusCode: 200,
+        data: {
+          tweet: updatedTweet
+        },
+        message: ''
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
