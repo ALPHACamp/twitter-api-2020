@@ -150,7 +150,7 @@ const tweetController = {
         order: [['created_at', 'DESC']]
       })
 
-      res.status(200).json([comment])
+      res.status(200).json(comment)
     } catch (err) {
       next(err)
     }
