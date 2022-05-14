@@ -101,6 +101,33 @@ const userController = {
       .catch((err) => next(err))
   },
 
+  getTopUsers: (req, res, next) => {
+    const userId = Number(req.user.id)
+    return User.findAll({
+      include: { model: User, as: 'Followers' },
+      attributes: ['id', 'account', 'name', 'avatar', 'createdAt'],
+      where: { role: '' }
+    })
+      .then(users => {
+        const result = users
+          .map(user => ({
+            ...user.toJSON(),
+            followerCount: user.Followers.length,
+            isFollowed: req.user.Followings.some(f => f.id === user.id),
+            owner: Number(user.id) !== userId
+          }))
+          .sort((a, b) => b.followedCount - a.followedCount || b.createdAt - a.createdAt)
+          .slice(0, 10)
+
+        result.forEach(r => {
+          delete r.Followers
+        })
+
+        res.status(200).json(result)
+      })
+      .catch(err => next(err))
+  },
+
   putUserSetting: (req, res, next) => {
     const { account, name, email, password, checkPassword } = req.body
     const userId = Number(req.params.id)
@@ -136,6 +163,37 @@ const userController = {
       .then((updatedUser) => res.status(200).json({ user: updatedUser }))
       .catch((err) => next(err))
   },
+
+  putUser: (req, res) => {
+    const { account, name, email, password, checkPassword } = req.body
+    const userId = Number(req.params.id)
+    const reqUserId = getUser(req).id
+    const { files } = req
+
+    // check if user is the current user
+    if (userId !== reqUserId) throw new Error('Permission denied')
+    // check password
+    if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
+    // check account
+    if (!account || !name || !email)
+      throw new Error('帳號、名稱和 email 欄位不可空白！')
+    if (name.length > 50 || account.length > 50)
+      throw new Error('字數上限為 50 個字！')
+
+      return User.findByPk(userId)
+      .then(user => {
+        if (!user) throw new Error('帳號不存在！')
+        return User.update({
+          name,
+          introduction,
+          avatar: avatar ? avatar : user.avatar,
+          cover: cover ? cover : user.cover
+        })
+      })
+      .then(updatedUser => res.status(200).json({ user: updatedUser }))
+      .catch((err) => next(err))
+  }
+
 }
 
 module.exports = userController
