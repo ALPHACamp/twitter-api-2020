@@ -28,9 +28,7 @@ const adminController = {
       })
       res.json({
         status: 'success',
-        data: {
-          data: tweets
-        }
+        data: tweets
       })
     } catch (err) {
       console.log(err)
