@@ -43,7 +43,9 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(DISTINCT following_id) FROM Followships WHERE  following_id = User.id)'), 'followerCounts'],
           [sequelize.literal('(SELECT COUNT(DISTINCT follower_id) FROM Followships WHERE  follower_id = User.id)'), 'folloingCounts'],
           [sequelize.literal(`(SELECT COUNT(DISTINCT Tweets.id) FROM Tweets WHERE ${req.params.id} = User.id)`), 'tweetCounts'],
-        ]
+        ],
+        raw: true,
+        nest: true
       })
       res.status(200).json(user)
     } catch (err) {
@@ -63,7 +65,9 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCounts'],
           [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCounts']
         ],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']]
+        order: [['createdAt', 'DESC'], ['id', 'DESC']],
+        raw: true,
+        nest: true
       })
       res.status(200).json(tweets)
     } catch (err) {
@@ -86,7 +90,9 @@ const userController = {
           { model: Tweet, attributes:[] ,include: [
           { model: User, Where: { id: Tweet.userId }}]
         }],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']]
+        order: [['createdAt', 'DESC'], ['id', 'DESC']],
+        raw: true,
+        nest: true
       })
       res.status(200).json(replies)
     } catch (err) {
@@ -106,7 +112,9 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id)'), 'likeCounts'],
           [sequelize.literal('(SELECT COUNT(Replies.tweet_id) FROM Replies WHERE Replies.tweet_id = Like.tweet_id)'), 'replyCounts']
         ], 
-        order: [['createdAt', 'ASC'], ['id', 'DESC']]
+        order: [['createdAt', 'ASC'], ['id', 'DESC']],
+        raw: true,
+        nest: true
       })
       res.status(200).json(likes)
     } catch (err) {
@@ -124,7 +132,9 @@ const userController = {
           [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followingId)`), 'introduction'],
           [sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
         ],
-        order: [['createdAt', 'ASC'], ['id', 'DESC']]
+        order: [['createdAt', 'ASC'], ['id', 'DESC']],
+        raw: true,
+        nest: true
       })
       res.status(200).json(followings)
     } catch (err) {
@@ -142,7 +152,9 @@ const userController = {
           [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followerId)`), 'introduction'],
           [sequelize.literal(`(CASE WHEN following_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
         ],
-        order: [['createdAt', 'ASC'], ['id', 'DESC']]
+        order: [['createdAt', 'ASC'], ['id', 'DESC']],
+        raw: true,
+        nest: true
       })
       res.status(200).json(followers)
     } catch (err) {
