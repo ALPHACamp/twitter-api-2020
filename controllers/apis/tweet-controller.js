@@ -9,7 +9,9 @@ const tweetController = {
     const UserId = helpers.getUser(req)?.id
 
     try {
-      if (!description || !UserId) throw new Error('Data is missing a description or UserId!!')
+      if (!description || !UserId) {
+        throw new Error('Data is missing a description or UserId!!')
+      }
       const data = await Tweet.create({
         description,
         UserId
