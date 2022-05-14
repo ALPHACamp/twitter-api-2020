@@ -56,7 +56,7 @@ const tweetController = {
           Likes: likeTotal
         }
       })
-      return res.json(
+      return res.status(200).json(
         data
       )
     } catch (err) {
