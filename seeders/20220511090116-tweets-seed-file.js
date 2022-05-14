@@ -1,14 +1,8 @@
 'use strict'
-
-const db = require('../models')
-const User = db.User
-
-const tweet = require('../models/tweet')
 const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const users = await User.findAll({ where: { role: '' } })
 
     await queryInterface.bulkInsert(
       'Tweets',

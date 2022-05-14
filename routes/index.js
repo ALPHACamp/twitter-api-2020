@@ -18,13 +18,13 @@ router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
 // 取得目前登入的使用者資料
-router.get('/users/current_user', authenticated, authenticatedUser, getCurrentUser)
+router.get('/current_user', authenticated, authenticatedUser, getCurrentUser)
 
 // 取得指定使用者資料
 router.get('/users/:id', authenticated, userController.getUser)
 
 // 修改目前登入的使用者個人資料
-router.put('/users/:id', authenticated,  authenticatedUser, userController.putUser)
+router.put('/users/:id', authenticated,  authenticatedUser, userController.putUserSetting)
 
 // 目前登入使用者資料的上傳單張圖片路由
 router.put('/users/:id', upload.single('image'), userController.putUser)
