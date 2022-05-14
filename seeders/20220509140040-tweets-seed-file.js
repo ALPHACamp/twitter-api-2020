@@ -15,7 +15,7 @@ module.exports = {
       tweetList.push(...Array.from({ length: 10 }, () => ({
         user_id: user.id,
         description: faker.lorem.sentence(),
-        created_at: new Date(),
+        created_at: faker.date.recent(),
         updated_at: new Date()
       })))
     })

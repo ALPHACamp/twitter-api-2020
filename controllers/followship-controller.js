@@ -19,12 +19,11 @@ const followshipController = {
         where: {
           followingId,
           followerId
-        },
+        }
       })
 
       if (!created) throw new Error('你已經追蹤該名使用者。')
-
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '已成功追蹤該名使用者',
         data: {
@@ -38,30 +37,28 @@ const followshipController = {
   deleteFollowing: async (req, res, next) => {
     try {
       // want to delete following
-      const deleteddFollowingId = req.params.followingId
+      const followingId = req.params.followingId
       // login user
       const followerId = helpers.getUser(req).id
 
-      const user = await User.findByPk(deleteddFollowingId)
+      const user = await User.findByPk(followingId)
 
       if (!user) throw new Error('無法取消追蹤不存在的使用者！')
 
-      const deletedFollowship = await Followship.destroy({
+      const isFollowed = await Followship.destroy({
         where: {
-          followingId: deleteddFollowingId,
+          followingId,
           followerId
         }
       })
 
+      if (!isFollowed) throw new Error('你尚未追蹤該使用者！')
 
-      if (!deletedFollowship) throw new Error('你尚未追蹤該使用者！')
-
-      res.json({
+      res.status(200).json({
         status: 'success',
         message: '已成功取消追蹤該使用者。',
         data: {
-          deleteddFollowingId, // deleted user
-          deletedFollowship // delete count 
+          deleteFollowingUser: user // deleted user
         }
       })
 
