@@ -10,6 +10,9 @@ const { apiErrorHandler } = require('../middleware/error-handler')
 router.post('/admin/signin', passport.authenticate('local', { session: false }), authenticatedAdmin, userController.signIn)
 router.post('/signin', passport.authenticate('local', { session: false }), authenticatedUser, userController.signIn)
 
+router.delete('/followships/:followingId', authenticated, authenticatedUser, userController.removeFollowing)
+router.post('/followships', authenticated, authenticatedUser, userController.addFollowing)
+
 router.post('/users', userController.signUp)
 
 // router.get('/users/:id', userController.getUser)

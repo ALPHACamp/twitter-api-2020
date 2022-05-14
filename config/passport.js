@@ -17,7 +17,7 @@ passport.use(new LocalStrategy(
       .then(user => {
         if (!user) throw new Error("User didn't exists!")
         if (!bcrypt.compareSync(password, user.password)) throw new Error("Account or Password Error!")
-        return done(null, user)
+        return cb(null, user)
       })
       .catch(err => cb(err, false))
   }
@@ -28,7 +28,12 @@ const jwtOptions = {
   secretOrKey: process.env.JWT_SECRET
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id)
+  User.findByPk(jwtPayload.id, {
+    include: [
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
+    ]
+  })
     .then(user => cb(null, user))
     .catch(err => cb(err))
 }))
