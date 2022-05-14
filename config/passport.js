@@ -12,17 +12,16 @@ passport.use(
   new LocalStrategy(
     {
       usernameField: 'account',
-      passwordField: 'password',
+      passwordField: 'password'
     },
     (account, password, cb) => {
       User.findOne({ where: { account } })
-        .then((user) => {
-          if (!user) throw new Error("帳號不存在！")
-          if (!bcrypt.compareSync(password, user.password))
-            throw new Error('帳號或密碼錯誤！')
+        .then(user => {
+          if (!user) throw new Error('帳號不存在！')
+          if (!bcrypt.compareSync(password, user.password)) { throw new Error('帳號或密碼錯誤！') }
           return cb(null, user.toJSON())
         })
-        .catch((err) => done(err, false))
+        .catch(err => cb(err, false))
     }
   )
 )
@@ -40,7 +39,7 @@ passport.use(new JwtStrategy(jwtOptions, (jwtPayload, cb) => {
       { model: User, as: 'Followings' }
     ]
   })
-  .then(user => cb(null, user))
+    .then(user => cb(null, user))
     .catch(err => cb(err))
 }))
 
@@ -53,11 +52,11 @@ passport.deserializeUser((id, cb) => {
     include: [
       { model: Tweet, as: 'LikedTweets' },
       { model: User, as: 'Followers' },
-      { model: User, as: 'Followings' },
-    ],
+      { model: User, as: 'Followings' }
+    ]
   })
-    .then((user) => cb(null, user.toJSON()))
-    .catch((err) => cb(err))
+    .then(user => cb(null, user.toJSON()))
+    .catch(err => cb(err))
 })
 
 module.exports = passport
