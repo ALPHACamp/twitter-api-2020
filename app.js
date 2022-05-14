@@ -12,7 +12,9 @@ const { getUser } = require('./_helpers')
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
+app.use(
+  session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
+)
 app.use(passport.initialize())
 app.use(passport.session())
 app.use((req, res, next) => {
@@ -20,9 +22,22 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('/api', apis)
-app.get('/', (req, res) => res.send('Hello World!'))
+// 新增
+const path = require('path')
+const serveStatic = require('serve-static')
+app.use(serveStatic(path.join(__dirname, '/vue/dist')))
 
-app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
+app.use('/api', apis)
+// app.get('/', (req, res) => res.send('Hello World!'))
+
+// 新增
+app.get('/', function (req, res) {
+  // for the initial connect
+  res.sendFile(path.join(__dirname, '/vue/public/index.html'))
+})
+
+app.listen(port, () =>
+  console.log(`Example app listening on http://localhost:${port}`)
+)
 
 module.exports = app
