@@ -32,9 +32,9 @@ router.get(
   adminController.getUsers
 )
 
-router.get('/test', authenticated, (req, res) => {
-  res.send('OK')
-})
+// router.get('/test', authenticated, (req, res) => {
+//   res.send('OK')
+// })
 
 router.use('/', apiErrorHandler)
 
