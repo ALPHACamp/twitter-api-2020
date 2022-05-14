@@ -41,6 +41,7 @@ describe('# admin requests', () => {
           .end(function (err, res) {
             if (err) return done(err)
             // 檢查回傳資料是否是陣列類型
+            console.log('res.body.isArray()', res.body.isArray())
             expect(res.body).to.be.an('array')
             // 檢查回傳資料是否有 3 筆使用者資料
             res.body.length.should.equal(3)
