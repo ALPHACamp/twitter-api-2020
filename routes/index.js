@@ -37,9 +37,11 @@ router.put('/users/:id/setting', authenticated, authenticatedUser, userControlle
 router.put('/api/users/:id', authenticated, authenticatedUser, userController.putUser)
 
 // Tweet APIs
-router.get('/tweets/:tweet_id', tweetController.getTweet)
-router.get('/tweets', tweetController.getTweets)
-router.post('/tweets', tweetController.postTweet)
+router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
+router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.postTweetReply)
+router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
+router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
+router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 router.use('/', apiErrorHandler)
 
