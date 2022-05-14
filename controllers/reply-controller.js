@@ -98,6 +98,34 @@ const replyController = {
     } catch (err) {
       next(err)
     }
+  },
+  deleteReply: async (req, res, next) => {
+    /*
+    :param id: replyId
+    This api would delete a reply record and its related likeReplies record, and return a json
+    */
+    const userId = req.user.id
+    const replyId = req.params.id
+    try {
+      const reply = await Reply.findOne({
+        where: { id: replyId, userId }
+      })
+      if (!reply) throw new Error("Reply didn't exist or you don't have permission to edit!")
+      const destroyedReply = await reply.destroy()
+      await LikedReply.destroy({
+        where: { replyId }
+      })
+      res.json({
+        status: 'Success',
+        statusCode: 200,
+        data: {
+          reply: destroyedReply
+        },
+        message: ''
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
