@@ -89,10 +89,12 @@ const userController = {
   },
 
   getCurrentUser: (req, res) => {
+    const reqUserId = getUser(req).id
     const options = {
       attributes: ['id', 'account', 'name', 'email', 'avatar', 'role'],
     }
-    User.findByPk(req.user.id, options)
+    
+    User.findByPk(reqUserId, options)
       .then((user) => {
         return res.status(200).json(user)
       })
@@ -110,6 +112,8 @@ const userController = {
     // check account
     if (!account || !name || !email)
       throw new Error('帳號、名稱和 email 欄位不可空白！')
+    if (name.length > 50 || account.length > 50)
+      throw new Error('字數上限為 50 個字！')
 
     return Promise.all([
       User.findAll({ $or: [{ where: { email } }, { where: { account } }] }),
