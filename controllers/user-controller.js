@@ -1,9 +1,33 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
+  signUp: (req, res, next) => {
+    if (req.body.password !== req.body.confirmPassword) throw new Error('Passwords do not match!')
+    if (User.findOne({ where: { account: req.body.account } })) throw new Error('Account has already been take.')
+    User.findOne({ where: { email: req.body.email } })
+      .then(user => {
+        if (user) throw new Error('Email already exists!')
+        return bcrypt.hash(req.body.password, 10)
+      })
+      .then(hash => User.create({ // 上面錯誤狀況都沒發生，就把使用者的資料寫入資料庫
+        name: req.body.name,
+        account: req.body.account,
+        email: req.body.email,
+        password: hash
+      }))
+      .then(user => {
+        res.json({
+          status: 'success',
+          data: {
+            user
+          }
+        })
+      })
+      .catch(err => next(err))
+  },
   signIn: (req, res, next) => {
     if (req.user.role === 'admin') throw new Error("Admin doen't have permission!") // admin 不能登入
     try {
@@ -46,6 +70,10 @@ const userController = {
         })
       })
       .catch(err => next(err))
+  },
+  getCurrentUser: (req, res, next) => {
+    const currentUser = res.locals.user.toJSON()
+    return currentUser
   },
   putUser: (req, res, next) => {
     if (Number(req.params.id) !== Number(req.user.id)) {
@@ -103,6 +131,107 @@ const userController = {
           }
         })
       }).catch(err => next(err))
+  },
+  getRepliedTweets: (req, res, next) => {
+    return Reply.findAll({
+      where: { userId: req.params.id },
+      include: [{
+        model: Tweet,
+        as: 'Tweets',
+        attributes: ['usereId'],
+        include: [{
+          model: User,
+          as: 'Users',
+          attributes: ['account']
+        }]
+      }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => {
+        if (!replies) throw new Error('This account does not exist.')
+        const resultReplies = replies.toSJON()
+        return res.json({
+          status: 'success',
+          data: {
+            tweets: resultReplies
+          }
+        })
+      }).catch(err => next(err))
+  },
+  getLikes: (req, res, next) => {
+    return Like.findAll({
+      where: { userId: req.params.id },
+      include: [{
+        model: Tweet,
+        as: 'Tweets',
+        attributes: ['description']
+      }, {
+        model: Reply,
+        as: 'Replies',
+        attributes: ['id']
+      }, {
+        model: Like,
+        as: 'Likes',
+        attributes: ['id']
+      },
+      {
+        model: User,
+        as: 'Users',
+        attributes: ['name, account']
+      }],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(likes => {
+        if (!likes) throw new Error('This account does not exist.')
+        const resultLikes = likes.map(l => ({ ...l.toJSON(), replyCount: l.Replies.length, likeCount: l.Likes.length }))
+        return res.json({
+          status: 'success',
+          data: {
+            tweets: resultLikes
+          }
+        })
+      }).catch(err => next(err))
+  },
+  getFollowings: (req, res, next) => {
+    return Followship.findAll({
+      where: { followerId: req.params.id },
+      include: [
+        { model: User, as: 'Followings', attributes: ['id', 'account', 'avatar', 'name', 'introduction'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    }).then(followings => {
+      followings = followings.toJSON()
+      return res.json({
+        status: 'success',
+        data: {
+          followings
+        }
+      })
+    })
+  },
+  getFollowers: (req, res, next) => {
+    return Followship.findAll({
+      where: { followingId: req.params.id },
+      include: [
+        { model: User, as: 'Followers', attributes: ['id', 'account', 'avatar', 'name', 'introduction'] },
+        { model: User, as: 'Followings', attributes: ['id', 'account', 'avatar', 'name', 'introduction'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    }).then(followers => {
+      const resultFollowers = followers.map(f => ({
+        ...f.toJSON(),
+        isFollowing: Followship.findOne({
+          where: { followerId: f.followers.folloingId }
+        })
+      }))
+      followers = followers.toJSON()
+      return res.json({
+        status: 'success',
+        data: {
+          resultFollowers
+        }
+      })
+    })
   }
 }
 module.exports = userController
