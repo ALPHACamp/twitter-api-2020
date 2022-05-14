@@ -37,10 +37,8 @@ const adminController = {
           }))
         ])
       }
-      res.json({
-        status: 'success',
-        data: users
-      })
+      console.log('res.json(users)', res.json(users))
+      res.json(users)
     } catch (err) {
       next(err)
     }

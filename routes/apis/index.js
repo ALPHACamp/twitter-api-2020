@@ -10,6 +10,8 @@ const {
   authenticatedAdmin
 } = require('../../middleware/api-auth')
 
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
+
 router.post(
   '/signin',
   passport.authenticate('local', { session: false }),
