@@ -6,7 +6,7 @@ const tweetController = {
     try {
       const tweets = await Tweet.findAll({
         attributes: [
-          'id', 'description', 'user_id',
+          'id', 'description', 'user_id', 'created_at',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCounts'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
@@ -67,18 +67,15 @@ const tweetController = {
       if (description.length > 140) throw new Error('不可以提交字數過長的推文。')
 
       const rawTweets = await Tweet.create({
-        userId,
+        UserId: userId,
         description
       })
 
       const newTweet = rawTweets.toJSON()
 
       res.status(200).json({
-        status: 'success',
         message: '已成功新增一筆推文。',
-        data: {
-          newTweet
-        }
+        newTweet
       })
     } catch (err) {
       next(err)
@@ -94,19 +91,16 @@ const tweetController = {
 
       const [isLiked, created] = await Like.findOrCreate({
         where: {
-          userId,
-          tweetId
+          UserId: userId,
+          TweetId: tweetId
         },
       })
 
       if (!created) throw new Error('你已經喜歡過該則推文。')
 
       res.status(200).json({
-        status: 'success',
         message: '你已成功喜歡該則推文。',
-        data: {
-          isLiked
-        }
+        isLiked
       })
     } catch (err) {
       next(err)
@@ -122,19 +116,16 @@ const tweetController = {
 
       const isLiked = await Like.destroy({
         where: {
-          userId,
-          tweetId
+          UserId: userId,
+          TweetId: tweetId
         }
       })
 
       if (!isLiked) throw new Error('你沒有喜歡過該則推文。')
 
       res.status(200).json({
-        status: 'success',
         message: '你已成功取消喜歡該則推文。',
-        data: {
-          deletedTweet: tweet.toJSON(), // deleted tweet
-        }
+        deletedTweet: tweet.toJSON(), // deleted tweet
       })
     } catch (err) {
       next(err)
@@ -142,26 +133,24 @@ const tweetController = {
   },
   getTweetAllReplies: async (req, res, next) => {
     try {
-      const tweet = await Tweet.findByPk(req.params.id)
+      const tweetId = req.params.id
+      const tweet = await Tweet.findByPk(tweetId)
       if (!tweet) throw new Error('無法查找不存在的推文。')
 
-      const replies = await Reply.findAll({
+      const comment = await Reply.findAll({
         where: {
-          tweetId: req.params.id
+          tweetId
         },
         include: [
           { model: User, attributes: ['name', 'account', 'avatar'] }
         ],
-        order: [['created_at', 'DESC']],
-        rest: true
+        plain: true,
+        nest: true,
+        raw: true,
+        order: [['created_at', 'DESC']]
       })
 
-      res.status(200).json({
-        status: 'success',
-        data: {
-          replies
-        }
-      })
+      res.status(200).json(comment)
     } catch (err) {
       next(err)
     }
@@ -184,11 +173,8 @@ const tweetController = {
       })
 
       res.status(200).json({
-        status: 'success',
         message: '你已成功建立一筆留言。',
-        data: {
-          comment
-        }
+        comment
       })
     } catch (err) {
       next(err)
