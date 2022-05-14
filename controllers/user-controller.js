@@ -112,7 +112,7 @@ const userController = {
           [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id)'), 'likeCounts'],
           [sequelize.literal('(SELECT COUNT(Replies.tweet_id) FROM Replies WHERE Replies.tweet_id = Like.tweet_id)'), 'replyCounts']
         ], 
-        order: [['createdAt', 'ASC'], ['id', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']],
         raw: true,
         nest: true
       })
@@ -132,7 +132,7 @@ const userController = {
           [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followingId)`), 'introduction'],
           [sequelize.literal(`(CASE WHEN follower_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
         ],
-        order: [['createdAt', 'ASC'], ['id', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']],
         raw: true,
         nest: true
       })
@@ -152,7 +152,7 @@ const userController = {
           [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followerId)`), 'introduction'],
           [sequelize.literal(`(CASE WHEN following_id = ${req.params.id} THEN true ELSE false END)`), 'isFollowing']
         ],
-        order: [['createdAt', 'ASC'], ['id', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'DESC']],
         raw: true,
         nest: true
       })
