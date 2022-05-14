@@ -9,7 +9,6 @@ const {
   authenticated,
   authenticatedAdmin
 } = require('../../middleware/api-auth')
-const helpers = require('../../_helpers')
 
 router.post(
   '/signin',
@@ -34,7 +33,6 @@ router.get(
 )
 
 router.get('/test', authenticated, (req, res) => {
-  console.log('model/index.js test: =============', helpers.getUser(req)?.id)
   res.send('OK')
 })
 
