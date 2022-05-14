@@ -5,6 +5,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 // 將 request 導入路由器
 app.use(routes)

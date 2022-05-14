@@ -44,7 +44,6 @@ router.get('/api/users/:id/likes', authenticated, userController.userLikes)
 router.get('/api/users/:id/followings', authenticated, userController.userFollowings)
 router.get('/api/users/:id/followers', authenticated, userController.userFollowers)
 router.put('/api/users/:id', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
-
 router.use('/', errorHandler)
 
 module.exports = router
