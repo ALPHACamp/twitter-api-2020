@@ -153,8 +153,7 @@ const tweetController = {
           { model: User, attributes: ['name', 'account', 'avatar'] }
         ],
         order: [['created_at', 'DESC']],
-        rest: true,
-        raw: true
+        rest: true
       })
 
       res.status(200).json({
