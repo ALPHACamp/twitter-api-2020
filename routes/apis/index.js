@@ -22,6 +22,7 @@ router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.delete(
   '/admin/tweets/:id',
+  authenticated,
   authenticatedAdmin,
   adminController.deleteTweet
 )

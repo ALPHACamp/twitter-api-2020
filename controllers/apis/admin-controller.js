@@ -19,22 +19,22 @@ const adminController = {
       })
       for (const user of users) {
         Promise.all([
-          user.tweetAmount = await Tweet.findAndCountAll({
+          (user.tweetAmount = await Tweet.findAndCountAll({
             where: { UserId: user.id },
             attributes: ['id']
-          }),
-          user.likeAmount = await Like.findAndCountAll({
+          })),
+          (user.likeAmount = await Like.findAndCountAll({
             where: { UserId: user.id },
             attributes: ['id']
-          }),
-          user.followingAmount = await Followship.findAndCountAll({
+          })),
+          (user.followingAmount = await Followship.findAndCountAll({
             where: { follower_id: user.id },
             attributes: ['id']
-          }),
-          user.followedAmount = await Followship.findAndCountAll({
+          })),
+          (user.followedAmount = await Followship.findAndCountAll({
             where: { following_id: user.id },
             attributes: ['id']
-          })
+          }))
         ])
       }
       res.json({
@@ -47,7 +47,17 @@ const adminController = {
   },
 
   deleteTweet: async (req, res, next) => {
-    await Tweet.findByPk(req.params.id)
+    try {
+      const deletedTweet = await Tweet.findByPk(req.params.id)
+      if (!deletedTweet) throw new Error('找不到相關推文')
+      await deletedTweet.destroy()
+      res.json({
+        status: 'success',
+        data: deletedTweet
+      })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
