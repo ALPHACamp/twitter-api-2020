@@ -42,6 +42,95 @@ const userController = {
         ]
       })
       res.status(200).json(user)
+<<<<<<< HEAD
+=======
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        attributes: [
+          'description', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCounts'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCounts']
+        ]
+      })
+      res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getRepliedTweets: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { UserId: req.params.id, },
+        attributes: [
+          'comment', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
+          //[sequelize.literal(`(SELECT account FROM Users JOIN Tweets ON id = Tweets.user_id WHERE id = Replies.user_id)`), 'repliedAccount']
+        ]
+      })
+      res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getLikes: async (req, res, next) => {
+    try {
+      const likes = await Like.findAll({
+        where: { UserId: req.params.id },
+        attributes: [
+          'TweetId', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
+          [sequelize.literal('(SELECT description FROM Tweets WHERE Tweets.id = tweet_id)'), 'description'],
+          [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id)'), 'likeCounts'],
+          [sequelize.literal('(SELECT COUNT(Replies.tweet_id) FROM Replies WHERE Replies.tweet_id = Like.tweet_id)'), 'replyCounts']
+        ]
+      })
+      res.status(200).json(likes)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowings: async (req, res, next) => {
+    try {
+      const followings = await Followship.findAll({
+        where: { followerId: req.params.id },
+        attributes: [
+          'followingId',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = followingId)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = followingId)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followingId)`), 'introduction']
+        ]
+      })
+      res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+  getFollowers: async (req, res, next) => {
+    try {
+      const followers = await Followship.findAll({
+        where: { followingId: req.params.id },
+        attributes: [
+          'followerId',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = followerId)`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = followerId)`), 'name'],
+          [sequelize.literal(`(SELECT introduction FROM Users WHERE id = followerId)`), 'introduction']
+        ]
+      })
+      res.status(200).json(followers)
+>>>>>>> origin
     } catch (err) {
       next(err)
     }
