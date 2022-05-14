@@ -1,5 +1,4 @@
 'use strict'
-const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -11,25 +10,24 @@ module.exports = {
       'SELECT id FROM Users;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    const replies = []
+    const likes = []
 
-    for (let i = 0; i < tweets.length; i++) {
-      for (let j = 0; j < 3; j++) {
-        const reply = {
-          comment: faker.lorem.text(),
+    for (let i = 0; i < users.length; i++) {
+      for (let j = 0; j < 20; j++) {
+        const like = {
+          like_unlike: true,
           created_at: new Date(),
           updated_at: new Date(),
-          user_id: users[Math.floor(Math.random() * users.length)].id,
-          tweet_id: tweets[i].id
+          user_id: users[i].id,
+          tweet_id: tweets[Math.floor(Math.random() * tweets.length)].id
         }
-        replies.push(reply)
+        if (i === 0 || like.tweet_id !== likes[i - 1].tweet_id) likes.push(like)
       }
     }
-
-    await queryInterface.bulkInsert('Replies', replies, {})
+    await queryInterface.bulkInsert('Likes', likes, {})
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Replies', null, {})
+    await queryInterface.bulkDelete('Likes', null, {})
   }
 }

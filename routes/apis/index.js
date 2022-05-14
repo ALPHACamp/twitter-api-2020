@@ -19,6 +19,8 @@ router.post(
 )
 router.post('/users', userController.signUp)
 
+router.get('/tweets/:tId', authenticated, tweetController.getTweet)
+router.get('/tweets', authenticated, tweetController.getTweets)
 router.post('/tweets', authenticated, tweetController.postTweet)
 
 router.delete(
