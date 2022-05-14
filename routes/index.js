@@ -16,9 +16,6 @@ const { errorHandler } = require('../middleware/error-handler')
 // 後台路由模組載入
 const admin = require('./models/admin')
 
-// 導入後台
-router.use('/api/admin', authenticated, authenticatedAdmin, admin)
-
 // 登入相關路由
 router.post('/api/login', passport.authenticate('local', { session: false }), userController.login)
 router.post('/api/admin/login', passport.authenticate('local', { session: false }), adminController.login)
@@ -50,5 +47,8 @@ router.get('/api/users/:id/followings', authenticated, userController.userFollow
 router.get('/api/users/:id/followers', authenticated, userController.userFollowers)
 router.put('/api/users/:id', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
 router.use('/', errorHandler)
+
+// 導入後台
+router.use('/api/admin', authenticated, authenticatedAdmin, admin)
 
 module.exports = router
