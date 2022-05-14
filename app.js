@@ -15,6 +15,8 @@ const { getUser } = require('./_helpers')
 const methodOverride = require('method-override')
 const cors = require('cors')
 
+const { getUser } = require('./_helpers')
+
 // Setting Cors
 app.use(cors())
 
@@ -33,6 +35,11 @@ app.use((req, res, next) => {
 
 // Setting middleware
 app.use(methodOverride('_method'))
+
+app.use((req, res, next) => {
+  res.locals.user = getUser(req)
+  next()
+})
 
 app.use('/api', routes)
 

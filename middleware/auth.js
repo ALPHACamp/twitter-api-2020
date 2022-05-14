@@ -14,10 +14,12 @@ const authenticatedUser = (req, res, next) => {
     req.user = getUser(req)
     if (req.user && req.user.role !== 'admin') return next()
     return res.status(403).json({ status: 'error', message: 'Permission denied' })
-  }) (req, res, next)
+  })(req, res, next)
 }
 
+
 // Angela: authenticatedAdmin
+
 
 module.exports = {
   authenticated,

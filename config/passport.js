@@ -4,6 +4,9 @@ const { User, Tweet } = require('../models')
 const LocalStrategy = require('passport-local')
 
 // JWT Authentication
+
+const LocalStrategy = require('passport-local')
+
 const passportJWT = require('passport-jwt')
 const ExtractJWT = passportJWT.ExtractJwt
 const JwtStrategy = passportJWT.Strategy
