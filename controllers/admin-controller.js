@@ -44,6 +44,7 @@ const adminController = {
         },
         raw: true
       })
+      console.log(users)
       const followers = await Followship.count({
         group: ['followerId'],
         raw: true
