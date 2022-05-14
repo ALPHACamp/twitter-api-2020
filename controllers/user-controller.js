@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
 
 const userController = {
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     try {
       const userData = req.user.toJSON()
       if (userData.role !== 'user') return res.status(403).json({ status: 'error', message: '非使用者' })
@@ -17,7 +17,7 @@ const userController = {
         }
       })
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   },
   signUp: (req, res, next) => {

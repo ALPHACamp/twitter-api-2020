@@ -6,6 +6,7 @@ const likeControler = {
     try {
       const UserId = helpers.getUser(req).id
       const TweetId = req.params.id
+      console.log(UserId)
       await Like.create({
         UserId,
         TweetId

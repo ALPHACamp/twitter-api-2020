@@ -5,6 +5,7 @@ const adminController = require('../controllers/admin-controller')
 const tweetController = require('../controllers/tweet-controller')
 const replyController = require('../controllers/reply-controller')
 const likeControler = require('../controllers/like-controller')
+const followshipController = require('../controllers/followship-controller')
 const router = express.Router()
 const upload = require('../middleware/multer')
 
@@ -34,6 +35,10 @@ router.post('/api/tweets', authenticated, tweetController.create)
 // 回覆相關路由
 router.get('/api/tweets/:tweet_id/replies', authenticated, replyController.getAll)
 router.post('/api/tweets/:tweet_id/replies', authenticated, replyController.create)
+
+// 追蹤相關路由
+router.delete('/api/followships/:followingId', followshipController.deleteFollowship)
+router.post('/api/followships', authenticated, followshipController.postFollowship)
 
 // 使用者相關路由
 router.post('/api/users', userController.signUp)
