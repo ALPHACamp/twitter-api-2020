@@ -1,7 +1,6 @@
 const fs = require('fs') // 引入 fs 模組
 const imgur = require('imgur')
-const IMGUR_CLIENT_ID = 'e08a4d97f420a14'
-imgur.setClientId(IMGUR_CLIENT_ID)
+imgur.setClientId(process.env.IMGUR_CLIENT_ID)
 const localFileHandler = file => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null)

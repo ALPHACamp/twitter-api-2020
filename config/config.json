@@ -15,7 +15,7 @@
     "logging": false
   },
   "production": {
-    "use_env_variable": "CLEARDB_DATABASE_URL"
+    "use_env_variable": "mysql://b64b0bc4165efe:b3efbbe0@us-cdbr-east-05.cleardb.net/heroku_2edac92741e0c2a?reconnect=true"
   },
   "travis": {
     "username": "travis",
