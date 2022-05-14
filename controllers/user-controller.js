@@ -198,6 +198,20 @@ const userController = {
     })
       .then(tweets => res.status(200).json(tweets))
       .catch(err => next(err))
+  },
+
+  getUsersReplies: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Reply.findAll({
+      where: { UserId },
+      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
   }
 
 }
