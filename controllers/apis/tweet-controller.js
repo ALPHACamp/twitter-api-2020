@@ -93,7 +93,7 @@ const tweetController = {
         ],
         nest: true
       })
-
+      if (!tweet) throw new Error('The user could not be found')
       const data = {
         ...tweet.toJSON(),
         replyTotal: tweet.Replies.length,
