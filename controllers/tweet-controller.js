@@ -1,23 +1,23 @@
 const { Tweet, User, Like, Reply } = require('../models')
-const { dummyUser } = require('../dummyUser.js')
-
-
+// const { dummyUser } = require('../dummyUser.js')
+const { getUser } = require('../_helpers')
 
 const tweetController = {
 
   getTweets: (req, res, next) => {
-
     // 為節省重新重資料庫拉資料的時間，getTweets直接用資料的likeCount和replyCount做數字顯示。但為確保數字正確。會在讀取單筆tweet資料的controller中，重拉資料並計數
+
     Tweet.findAll({
-      Tweet,
+      attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
       order: [['createdAt', 'DESC']],
-      include: [User],
+      include: [
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+      ],
       raw: true,
       nest: true
     })
       .then(tweets => {
-        //尚未與登入功能結合，尚無法取得req.user資料，以dummyUser假資料暫代
-        const likedTweetId = dummyUser.LikedTweets ? dummyUser.LikedTweets.map(t => t.id) : []
+        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
         const data = tweets.map(tweet => ({
           ...tweet,
           isLiked: likedTweetId.some(item => item === tweet.id)
@@ -31,10 +31,10 @@ const tweetController = {
 
   getTweet: (req, res, next) => {
     Tweet.findByPk(req.params.tweet_id, {
+      attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
       include: [
-        Tweet,
-        User,
         Reply,
+        { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: User, as: 'LikedUsers' }
       ],
       order: [['createdAt', 'DESC']]
@@ -44,22 +44,22 @@ const tweetController = {
 
         return tweet.update({
           replyCount: tweet.Replies.length,
-          likeCount: tweet.LikedUsers.length,
+          likeCount: tweet.LikedUsers.length
         })
       })
       .then(tweet => {
-        //尚未與登入功能結合，尚無法取得req.user資料，以dummyUser假資料暫代
-        const likedTweetId = dummyUser.LikedTweets ? dummyUser.LikedTweets.map(t => t.id) : []
+        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
         const data = tweet.toJSON()
         data.isLiked = likedTweetId.some(item => item === tweet.id)
+        delete data.Replies
+        delete data.LikedUsers
         return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
 
-  // 此部分功能正常，但為尚未無法取得req.user資料，所以無法通過測試。之後會再修正！
   postTweet: (req, res, next) => {
-    const userId = 3 // 此為假資料，尚未傳接singIn funtcion
+    const userId = getUser(req).id
     const { description } = req.body
     if (!description) throw new Error('推文內容不可空白！')
     if (description.trim().length > 140) throw new Error('推文字數不可超過140字！')
@@ -69,6 +69,23 @@ const tweetController = {
       description: req.body.description
     })
       .then(tweet => res.status(200).json(tweet))
+      .catch(err => next(err))
+  },
+
+  getTweetReplies: (req, res, next) => {
+    // get tweet id get all replies
+    Reply.findAll({
+      where: {
+        tweetId: req.params.tweet_id
+      },
+      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
   }
 
 }
