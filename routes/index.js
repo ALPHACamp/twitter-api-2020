@@ -27,7 +27,7 @@ router.get('/users/:id', authenticated, userController.getUser)
 router.put('/users/:id', authenticated,  authenticatedUser, userController.putUserSetting)
 
 // 目前登入使用者資料的上傳單張圖片路由
-router.put('/users/:id', upload.single('image'), userController.putUser)
+// router.put('/users/:id', upload.single('image'), userController.putUserSetting)
 
 // Tweet APIs
 router.get('/tweets/:tweet_id', tweetController.getTweet)
