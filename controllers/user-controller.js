@@ -81,19 +81,15 @@ const userController = {
           'id', 'comment', 'createdAt',
           [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
           [sequelize.col('account'), 'repliedAccount'],
-          [sequelize.col('avatar'), 'repliedAvatar'],
-          // [sequelize.col('repliedUserId'), 'repliedUserId']
+          [sequelize.col('avatar'), 'repliedAvatar']
         ],
         include: [{
           model: Tweet, attributes: [],
           include: [{ model: User, 
-            attributes:['account', 'avatar',
-              [sequelize.col('id'), 'repliedUserId']
-          ],
+            attributes:['account', 'avatar'],
             Where: { id: Tweet.userId } }]
         }],
-        order: [['createdAt', 'DESC'], ['id', 'DESC']],
-        raw: true
+        order: [['createdAt', 'DESC'], ['id', 'DESC']]
       })
       res.status(200).json(replies)
     } catch (err) {
