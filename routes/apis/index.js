@@ -11,6 +11,7 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.post('/users', userController.signUp)
 
 router.post('/tweets', authenticated, tweetController.postTweet)
+router.get('/tweets', authenticated, tweetController.getTweet)
 
 router.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
 router.get('/admin/users', authenticated, authenticatedAdmin, adminController.getUsers)
