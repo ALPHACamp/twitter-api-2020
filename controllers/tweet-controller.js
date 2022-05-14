@@ -8,9 +8,9 @@ const tweetController = {
         attributes: [
           'id', 'description', 'user_id', 'created_at',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
-            'likeCounts'],
+            'likeCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
-            'replyCounts']
+            'replyCount']
         ],
         include: [
           {
@@ -131,7 +131,8 @@ const tweetController = {
       next(err)
     }
   },
-  getTweetAllReplies: async (req, res, next) => {
+  // reply-feature
+  getReplies: async (req, res, next) => {
     try {
       const tweetId = req.params.id
       const tweet = await Tweet.findByPk(tweetId)
@@ -139,12 +140,11 @@ const tweetController = {
 
       const comment = await Reply.findAll({
         where: {
-          tweetId
+          TweetId: tweetId
         },
         include: [
           { model: User, attributes: ['name', 'account', 'avatar'] }
         ],
-        plain: true,
         nest: true,
         raw: true,
         order: [['created_at', 'DESC']]
@@ -168,8 +168,8 @@ const tweetController = {
 
       const reply = await Reply.create({
         comment,
-        userId,
-        tweetId
+        UserId: userId,
+        TweetId: tweetId
       })
 
       res.status(200).json({
