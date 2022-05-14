@@ -15,17 +15,24 @@ const { getCurrentUser } = require('../controllers/user-controller')
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
+
+// 取得前十名最多追蹤者的使用者
+router.get('/users/top', authenticated, userController.getTopUsers)
+
 // 取得目前登入的使用者資料
 router.get('/current_user', authenticated, authenticatedUser, getCurrentUser)
 
 // 取得指定使用者資料
-router.get('/users/:id', authenticated, userController.getUser)
+router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
-// 修改目前登入的使用者個人資料
-router.put('/users/:id', authenticated,  authenticatedUser, userController.putUserSetting)
+// 修改目前登入的使用者設定
+router.put('/users/:id/setting', authenticated,  authenticatedUser, userController.putUserSetting)
 
 // 目前登入使用者資料的上傳單張圖片路由
 // router.put('/users/:id', upload.single('image'), userController.putUserSetting)
+
+// 修改目前登入的使用者個人頁面
+router.put('/api/users/:id', authenticated, authenticatedUser, userController.putUser)
 
 // Tweet APIs
 router.get('/tweets/:tweet_id', tweetController.getTweet)
