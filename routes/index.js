@@ -23,7 +23,7 @@ router.get('/users/top', authenticated, userController.getTopUsers)
 router.get('/current_user', authenticated, authenticatedUser, getCurrentUser)
 
 // 取得指定使用者資料
-router.get('/users/:id', authenticated, userController.getUser)
+router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // 修改目前登入的使用者設定
 router.put('/users/:id/setting', authenticated,  authenticatedUser, userController.putUserSetting)

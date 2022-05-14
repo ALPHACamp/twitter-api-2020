@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Tweet, Reply } = require('../models')
 const { getUser } = require('../_helpers')
+const tweetController = require('./tweet-controller')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -194,7 +195,6 @@ const userController = {
       .then(updatedUser => res.status(200).json({ user: updatedUser }))
       .catch(err => next(err))
   }
-
 }
 
 module.exports = userController
