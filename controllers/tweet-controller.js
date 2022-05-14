@@ -65,7 +65,7 @@ const tweetController = {
 
     return Tweet.create({
       UserId,
-      description: req.body.description
+      description
     })
       .then(tweet => res.status(200).json(tweet))
       .catch(err => next(err))
@@ -89,9 +89,8 @@ const tweetController = {
   // 尚未通過測試
   postTweetReply: (req, res, next) => {
     const UserId = Number(getUser(req).id)
-    const TweetId = Number(req.body.TweetId)
+    const TweetId = Number(req.params.TweetId)
     const { comment } = req.body
-    console.log(UserId, TweetId)
     if (comment.length > 140) throw new Error('回覆字數不可超過140字！')
     if (!comment) throw new Error('回覆內容不可空白！')
     return Reply.create({
