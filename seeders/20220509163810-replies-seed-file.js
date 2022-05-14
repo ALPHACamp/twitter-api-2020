@@ -26,7 +26,7 @@ module.exports = {
         user_id: user.id,
         tweet_id: tweet.id,
         comment: faker.lorem.sentence(),
-        created_at: new Date(),
+        created_at: faker.date.recent(),
         updated_at: new Date()
       }))
 

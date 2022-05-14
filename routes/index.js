@@ -6,6 +6,7 @@ const userController = require('../controllers/user-controller')
 
 const admin = require('./modules/admin')
 const user = require('./modules/user')
+const tweet = require('./modules/tweet')
 const followship = require('./modules/followship')
 
 const { authenticated, authenticatedUser, authenticatedAdmin } = require('../middleware/auth')
@@ -18,6 +19,7 @@ router.post('/admin/login', passportAuth, authenticatedAdmin, userController.log
 
 router.use('/admin', authenticated, authenticatedAdmin, admin)
 router.use('/users', authenticated, authenticatedUser, user)
+router.use('/tweets', authenticated, authenticatedUser, tweet)
 router.use('/followships', authenticated, authenticatedUser, followship)
 
 router.use('/', errorHandler)

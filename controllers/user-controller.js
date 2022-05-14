@@ -42,6 +42,8 @@ const userController = {
         ]
       })
       res.status(200).json(user)
+<<<<<<< HEAD
+=======
     } catch (err) {
       next(err)
     }
@@ -128,9 +130,28 @@ const userController = {
         ]
       })
       res.status(200).json(followers)
+>>>>>>> origin
     } catch (err) {
       next(err)
     }
-  }
+  },
+  getTweets: async (req, res, next) => {
+    try {
+      const tweets = await Tweet.findAll({
+        where: { UserId: req.params.id },
+        attributes: [
+          'description', 'createdAt',
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = ${req.params.id})`), 'avatar'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = ${req.params.id})`), 'name'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = ${req.params.id})`), 'account'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCounts'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCounts']
+        ]
+      })
+      res.status(200).json(tweets)
+    } catch (err) {
+      next(err)
+    }
+  },
 }
 module.exports = userController
