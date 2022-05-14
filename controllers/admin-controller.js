@@ -7,16 +7,16 @@ const adminController = {
         attributes: [
           'name', 'account', 'avatar',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Tweets WHERE Tweets.User_id = User.id)'),
-            'tweetCounts'],
+            'tweetCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.User_id = User.id)'),
-            'replyCounts'],
+            'replyCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.User_id = User.id)'),
-            'likeCounts'],
+            'likeCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.Follower_id = User.id)'),
-            'FollowingCounts'],
-          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.Following_id = User.id)'), 'FollowerCounts']
+            'followingCount'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Followships WHERE Followships.Following_id = User.id)'), 'followerCount']
         ],
-        order: [[sequelize.col('tweetCounts'), 'DESC'], ['created_at']],
+        order: [[sequelize.col('tweetCount'), 'DESC'], ['created_at']],
         nest: true,
         raw: true
       })
@@ -30,9 +30,9 @@ const adminController = {
     try {
       const tweets = await Tweet.findAll({
         attributes: [
-          'id', 'description', 'created_at',
+          'id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
-            'likeCounts']
+            'likeCount']
         ],
         include: [
           {
@@ -42,7 +42,7 @@ const adminController = {
             ]
           }
         ],
-        order: [[sequelize.col('likeCounts', 'DESC')], ['created_at']],
+        order: [[sequelize.col('likeCount', 'DESC')], ['created_at']],
         nest: true,
         raw: true
       })
