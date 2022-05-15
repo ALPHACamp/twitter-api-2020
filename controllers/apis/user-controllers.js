@@ -107,6 +107,7 @@ const userController = {
           { model: User, as: 'Follower', attributes: ['id'] }
         ]
       })
+      const myData = JSON.parse(JSON.stringify(my))
 
       const user = await User.findAll({
         where: { id: req.params.id },
@@ -119,8 +120,8 @@ const userController = {
       })
       if (!user.length) throw new Error('使用者不存在')
 
-      const myData = JSON.parse(JSON.stringify(my))
       const userData = JSON.parse(JSON.stringify(user))
+
       userData[0].is_following = Boolean(
         await Followship.findOne({
           where: {
@@ -221,8 +222,9 @@ const userController = {
 
   getUserLikes: async (req, res, next) => {
     try {
-      const rawLikes = await Like.findAll({
+      const likes = await Like.findAll({
         where: { user_id: req.params.id },
+        raw: true,
         include: [
           {
             model: User,
@@ -251,8 +253,7 @@ const userController = {
         nest: true
       })
 
-      if (!rawLikes.length) throw new Error('沒有找到相關資料')
-      const likes = JSON.parse(JSON.stringify(rawLikes))
+      if (!likes.length) throw new Error('沒有找到相關資料')
 
       const data = likes.map(like => {
         const replyCount = like.Tweet.Replies.length
@@ -270,47 +271,29 @@ const userController = {
 
   getUserFollowings: async (req, res, next) => {
     try {
-      const rawFollowings = await Followship.findAll({
-        where: { follower_id: req.params.id }
+      const followings = await Followship.findAll({
+        where: { follower_id: req.params.id },
+        raw: true
       })
+      if (!followings) throw new Error('沒有找到相關資料')
 
-      if (!rawFollowings.length) throw new Error('沒有找到相關資料')
-      const followings = JSON.parse(JSON.stringify(rawFollowings))
+      const myId = helpers.getUser(req)?.id
+      if (!myId) return new Error('未存取到登入資料')
 
-      const me = helpers.getUser(req)?.toJSON()
-      if (!me) throw new Error('未存取到登入資料')
+      const myFollowing = await Followship.findAll({
+        where: { follower_id: myId },
+        raw: true
+      })
+      const myFollowingId = myFollowing.map(f => f.followingId)
 
-      // for (const following of followings) {
-      //   const followingUser = await User.findByPk(following.followingId, {
-      //     attributes: ['id', 'name', 'account', 'bio']
-      //   })
-      //   following.following_user = followingUser
-
-      //   const isFollowingRaw = await Followship.findOne({
-      //     where: {
-      //       follower_id: me.id,
-      //       following_id: following.followingId
-      //     }
-      //   })
-      //   following.is_following = Boolean(isFollowingRaw?.toJSON())
-      Promise.all([
-        User.findByPk(following.followingId, {
-          attributes: ['id', 'name', 'account', 'bio']
-        }),
-        Followship.findOne({
-          where: {
-            follower_id: me.id,
-            following_id: following.followingId
-          }
-        }).then((followingUser, isFollowingRaw) => {
-          for (const following of followings) {
-            following.following_user = followingUser
-            following.is_following = Boolean(isFollowingRaw?.toJSON())
-          }
-        })
-      ])
-
-      return res.status(200).json(followings)
+      const data = followings.map(f => {
+        const isFollowing = Boolean(myFollowingId.find(m => m === f.followingId))
+        return {
+          ...f,
+          is_following: isFollowing
+        }
+      })
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
@@ -318,32 +301,29 @@ const userController = {
 
   getUserFollowers: async (req, res, next) => {
     try {
-      const rawFollowers = await Followship.findAll({
-        where: { following_id: req.params.id }
+      const followers = await Followship.findAll({
+        where: { following_id: req.params.id },
+        raw: true
       })
+      if (!followers) throw new Error('沒有找到相關資料')
 
-      if (!rawFollowers) throw new Error('沒有找到相關資料')
-      const followers = JSON.parse(JSON.stringify(rawFollowers))
+      const myId = helpers.getUser(req)?.id
+      if (!myId) return new Error('未存取到登入資料')
 
-      const me = helpers.getUser(req)?.toJSON()
-      if (!me) throw new Error('未存取到登入資料')
+      const myFollowing = await Followship.findAll({
+        where: { follower_id: myId },
+        raw: true
+      })
+      const myFollowingId = myFollowing.map(f => f.followingId)
 
-      for (const follower of followers) {
-        const followedUser = await User.findByPk(follower.followerId, {
-          attributes: ['id', 'name', 'account', 'bio']
-        })
-        follower.followed_user = followedUser
-
-        const isFollowingRaw = await Followship.findOne({
-          where: {
-            follower_id: me.id,
-            following_id: follower.followerId
-          }
-        })
-        follower.is_following = Boolean(isFollowingRaw?.toJSON())
-      }
-
-      return res.status(200).json(followers)
+      const data = followers.map(f => {
+        const isFollowing = Boolean(myFollowingId.find(m => m === f.followerId))
+        return {
+          ...f,
+          is_following: isFollowing
+        }
+      })
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
