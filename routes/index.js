@@ -41,6 +41,8 @@ router.put('/api/users/:id', authenticated, authenticatedUser, userController.pu
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.postTweetReply)
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
+router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
+
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 

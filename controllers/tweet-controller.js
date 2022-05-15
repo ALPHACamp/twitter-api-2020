@@ -1,5 +1,5 @@
-const { Tweet, User, Reply } = require('../models')
-const { getUser } = require('../_helpers')
+const { Tweet, User, Reply, Like } = require('../models')
+const helpers = require('../_helpers')
 
 const tweetController = {
 
@@ -15,7 +15,7 @@ const tweetController = {
       nest: true
     })
       .then(tweets => {
-        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
+        const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(t => t.id) : []
         const data = tweets.map(tweet => ({
           ...tweet,
           isLiked: likedTweetId.some(item => item === tweet.id)
@@ -46,7 +46,7 @@ const tweetController = {
         })
       })
       .then(tweet => {
-        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(t => t.id) : []
+        const likedTweetId = helpers.getUser(req)?.LikedTweets ? helpers.getUser(req).LikedTweets.map(t => t.id) : []
         const data = tweet.toJSON()
         data.isLiked = likedTweetId.some(item => item === tweet.id)
         delete data.Replies
@@ -58,7 +58,7 @@ const tweetController = {
 
   // 尚未通過測試檔
   postTweet: (req, res, next) => {
-    const UserId = Number(getUser(req).id)
+    const UserId = Number(helpers.getUser(req).id)
     const { description } = req.body
     if (!description) throw new Error('推文內容不可空白！')
     if (description.trim().length > 140) throw new Error('推文字數不可超過140字！')
@@ -88,7 +88,7 @@ const tweetController = {
 
   // 尚未通過測試
   postTweetReply: (req, res, next) => {
-    const UserId = Number(getUser(req).id)
+    const UserId = Number(helpers.getUser(req).id)
     const TweetId = Number(req.params.TweetId)
     const { comment } = req.body
     if (comment.length > 140) throw new Error('回覆字數不可超過140字！')
@@ -99,6 +99,31 @@ const tweetController = {
       UserId
     })
       .then(reply => res.status(200).json(reply))
+      .catch(err => next(err))
+  },
+
+  addLike: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    const UserId = helpers.getUser(req).id
+    Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: {
+          UserId,
+          TweetId
+        }
+      })
+    ])
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error('推文不存在！')
+        if (like) throw new Error('已對這篇推文按過Like！')
+
+        return Like.create({
+          UserId,
+          TweetId
+        })
+      })
+      .then(() => res.status(200).json({ message: '已成功Like這篇推文！' }))
       .catch(err => next(err))
   }
 
