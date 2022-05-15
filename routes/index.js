@@ -15,18 +15,21 @@ const { getCurrentUser } = require('../controllers/user-controller')
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
-
 // 取得前十名最多追蹤者的使用者
 router.get('/users/top', authenticated, userController.getTopUsers)
 
 // 取得目前登入的使用者資料
 router.get('/current_user', authenticated, authenticatedUser, getCurrentUser)
 
-// 取得指定使用者資料
+// 取得特定使用者的所有推文、回覆
+router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUsersTweets)
+router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUsersReplies)
+
+// 取得指定使用者資料 （這條可能要往後放喔，不然資料很容繼跑進這條裡就不往後面跑了！）
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // 修改目前登入的使用者設定
-router.put('/users/:id/setting', authenticated,  authenticatedUser, userController.putUserSetting)
+router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
 
 // 目前登入使用者資料的上傳單張圖片路由
 // router.put('/users/:id', upload.single('image'), userController.putUserSetting)

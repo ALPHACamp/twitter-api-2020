@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply } = require('../models')
 const { getUser } = require('../_helpers')
-const tweetController = require('./tweet-controller')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -37,13 +36,10 @@ const userController = {
     User.findAll({
       $or: [{ where: { email } }, { where: { account } }]
     })
-      .then((users) => {
-        if (users.some((u) => u.email === email))
-          throw new Error('此 Email 已被註冊！')
-        if (users.some((u) => u.account === account))
-          throw new Error('此帳號已被註冊！')
-        if (name.length > 50 || account.length > 50)
-          throw new Error('字數上限為 50 個字！')
+      .then(users => {
+        if (users.some(u => u.email === email)) { throw new Error('此 Email 已被註冊！') }
+        if (users.some(u => u.account === account)) { throw new Error('此帳號已被註冊！') }
+        if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
 
         return bcrypt.hash(password, 10)
       })
@@ -90,14 +86,14 @@ const userController = {
   getCurrentUser: (req, res) => {
     const reqUserId = getUser(req).id
     const options = {
-      attributes: ['id', 'account', 'name', 'email', 'avatar', 'role'],
+      attributes: ['id', 'account', 'name', 'email', 'avatar', 'role']
     }
-    
+
     User.findByPk(reqUserId, options)
-      .then((user) => {
+      .then(user => {
         return res.status(200).json(user)
       })
-      .catch((err) => next(err))
+      .catch(err => next(err))
   },
 
   getTopUsers: (req, res, next) => {
@@ -136,30 +132,26 @@ const userController = {
     // check password
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
     // check account
-    if (!account || !name || !email)
-      throw new Error('帳號、名稱和 email 欄位不可空白！')
-    if (name.length > 50 || account.length > 50)
-      throw new Error('字數上限為 50 個字！')
+    if (!account || !name || !email) { throw new Error('帳號、名稱和 email 欄位不可空白！') }
+    if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
 
     return Promise.all([
       User.findAll({ $or: [{ where: { email } }, { where: { account } }] }),
       User.findByPk(userId),
-      bcrypt.hash(password, 10),
+      bcrypt.hash(password, 10)
     ])
       .then(([checkUsers, user, hash]) => {
         if (!user) throw new Error('帳號不存在！')
-        if (checkUsers.some((u) => u.email === email && u.id !== reqUserId))
-          throw new Error('此 Email 已被註冊！')
-        if (checkUsers.some((u) => u.account === account && u.id !== reqUserId))
-          throw new Error('此帳號已被註冊！')
+        if (checkUsers.some(u => u.email === email && u.id !== reqUserId)) { throw new Error('此 Email 已被註冊！') }
+        if (checkUsers.some(u => u.account === account && u.id !== reqUserId)) { throw new Error('此帳號已被註冊！') }
         return user.update({
           account,
           name,
           email,
-          password: hash,
+          password: hash
         })
       })
-      .then((updatedUser) => res.status(200).json({ user: updatedUser }))
+      .then(updatedUser => res.status(200).json({ user: updatedUser }))
       .catch(err => next(err))
   },
 
@@ -173,28 +165,55 @@ const userController = {
     // check password
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
     // check account
-    if (!account || !name || !email)
-      throw new Error('帳號、名稱和 email 欄位不可空白！')
-    if (name.length > 50 || account.length > 50)
-      throw new Error('字數上限為 50 個字！')
+    if (!account || !name || !email) { throw new Error('帳號、名稱和 email 欄位不可空白！') }
+    if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
 
-      return Promise.all([
+    return Promise.all([
       User.findAll({ $or: [{ where: { email } }, { where: { account } }] }),
       User.findByPk(userId),
-      bcrypt.hash(password, 10),
+      bcrypt.hash(password, 10)
     ])
       .then(user => {
         if (!user) throw new Error('帳號不存在！')
         return user.update({
           name,
           introduction,
-          avatar: avatar ? avatar : user.avatar,
-          cover: cover ? cover : user.cover
+          avatar: avatar || user.avatar,
+          cover: cover || user.cover
         })
       })
       .then(updatedUser => res.status(200).json({ user: updatedUser }))
       .catch(err => next(err))
+  },
+
+  getUsersTweets: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Tweet.findAll({
+      where: { UserId },
+      attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => res.status(200).json(tweets))
+      .catch(err => next(err))
+  },
+
+  getUsersReplies: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Reply.findAll({
+      where: { UserId },
+      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
   }
+
 }
 
 module.exports = userController
