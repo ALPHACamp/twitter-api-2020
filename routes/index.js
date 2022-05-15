@@ -3,13 +3,15 @@ const router = express.Router()
 const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
-const upload = require('../middleware/multer')
 const tweetController = require('../controllers/tweet-controller')
+const upload = require('../middleware/multer')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
-// 尚未加入 authenticatedAdmin
 const { authenticated, authenticatedUser } = require('../middleware/auth')
-const { getCurrentUser } = require('../controllers/user-controller')
+
+const admin = require('./modules/admin')
+
+router.use('/admin', admin)
 
 // 註冊/登入
 router.post('/users', userController.signUp)
@@ -19,7 +21,7 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.get('/users/top', authenticated, userController.getTopUsers)
 
 // 取得目前登入的使用者資料
-router.get('/current_user', authenticated, authenticatedUser, getCurrentUser)
+router.get('/current_user', authenticated, userController.getCurrentUser)
 
 // 取得特定使用者的所有推文、回覆
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUsersTweets)

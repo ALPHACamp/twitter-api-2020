@@ -83,17 +83,13 @@ const userController = {
       .catch(err => next(err))
   },
 
-  getCurrentUser: (req, res) => {
-    const reqUserId = getUser(req).id
-    const options = {
-      attributes: ['id', 'account', 'name', 'email', 'avatar', 'role']
+  getCurrentUser: (req, res, next) => {
+    try {
+      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
+      return res.status(200).json(userData)
+    } catch (err) {
+      next(err)
     }
-
-    User.findByPk(reqUserId, options)
-      .then(user => {
-        return res.status(200).json(user)
-      })
-      .catch(err => next(err))
   },
 
   getTopUsers: (req, res, next) => {
