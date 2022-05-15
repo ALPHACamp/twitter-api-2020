@@ -168,27 +168,29 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const userId = getUser(req).toJSON().id
-      const { name, introduction } = req.body
-      const { avatar, cover_image } = req.files
-      if (!name || !introduction) throw new Error('所有欄位必填。')
-      if (introduction.length > 50) throw new Error('自我介紹字數不可超過 50 字。')
-      // 上傳兩張圖片
-      const avatarPath = await imgurFileHandler(avatar[0])
-      const coverImagePath = await imgurFileHandler(cover_image[0])
+      const logUser = getUser(req)
 
-      const user = await User.findByPk(userId)
+      const { name, introduction } = req.body
+      let avatar = req.files.avatar || null
+      let coverImage = req.files.cover_image || null
+
+      if (!name || !introduction) throw new Error('名字和自我介紹欄位必填。')
+      if (introduction.length > 50) throw new Error('自我介紹字數不可超過 50 字。')
+      
+      if (avatar) avatar = await imgurFileHandler(avatar[0])
+      if (coverImage) coverImage = await imgurFileHandler(coverImage[0])
+
+      const user = await User.findByPk(req.params.id)
       const userUpdate = await user.update({
         name,
         introduction,
-        avatar: avatarPath || user.avatar,
-        cover_image: coverImagePath || user.cover_image
+        avatar: avatar || logUser.avatar,
+        cover_image: coverImage || logUser.cover_image
       })
       res.status(200).json(userUpdate)
     } catch (err) {
       next(err)
     }
-    res.status(200).json()
   }
 }
 module.exports = userController

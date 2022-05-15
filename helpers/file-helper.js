@@ -5,9 +5,7 @@ imgur.setClientId(IMGUR_CLIENT_ID)
 
 const imgurFileHandler = async file => {
   const img = await imgur.uploadFile(file.path)
-  //console.log(img)
-  const imgLink = img?.link || null
-  return imgLink
+  return img?.link || null
 }
 
 module.exports = imgurFileHandler
