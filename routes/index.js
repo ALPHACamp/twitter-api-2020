@@ -3,7 +3,6 @@ const router = express.Router()
 const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
-const upload = require('../middleware/multer')
 const tweetController = require('../controllers/tweet-controller')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
@@ -15,9 +14,12 @@ const { getCurrentUser } = require('../controllers/user-controller')
 router.post('/users', userController.signUp)
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
 
-
 // 取得前十名最多追蹤者的使用者
 router.get('/users/top', authenticated, userController.getTopUsers)
+
+// 取得指定使用者追隨中的所有使用者 & 取得追隨指定使用者的所有使用者
+// router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
+// router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
 
 // 取得目前登入的使用者資料
 router.get('/current_user', authenticated, authenticatedUser, getCurrentUser)
@@ -26,13 +28,16 @@ router.get('/current_user', authenticated, authenticatedUser, getCurrentUser)
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // 修改目前登入的使用者設定
-router.put('/users/:id/setting', authenticated,  authenticatedUser, userController.putUserSetting)
-
-// 目前登入使用者資料的上傳單張圖片路由
-// router.put('/users/:id', upload.single('image'), userController.putUserSetting)
+router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
 
 // 修改目前登入的使用者個人頁面
-router.put('/api/users/:id', authenticated, authenticatedUser, userController.putUser)
+router.put('/users/:id', authenticated, authenticatedUser, userController.putUser)
+
+// // 目前登入使用者資料的上傳單張圖片至個人頭像
+// router.put('/users/:id', upload.single('avatar'), userController.putUser)
+
+// // 目前登入使用者資料的上傳單張圖片至個人背景
+// router.put('/users/:id', upload.single('cover'), userController.putUser)
 
 // Tweet APIs
 router.get('/tweets/:tweet_id', tweetController.getTweet)
