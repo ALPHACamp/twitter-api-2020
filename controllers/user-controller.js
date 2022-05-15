@@ -35,6 +35,12 @@ const userController = {
   },
   putUser: (req, res, next) => {
     userServices.putUser(req, ((err, user) => err ? next(err) : res.json({status: 'success', user })))
+  },
+  addFollowing: (req, res, next) => {
+    userServices.addFollowing(req, (err, addfollowing) => err ? next(err) : res.json(addfollowing))
+  },
+  removeFollowing: (req, res, next) => {
+    userServices.removeFollowing(req, (err, removefollowing) => err ? next(err) : res.json(removefollowing))
   }
 }
 module.exports = userController 
