@@ -17,11 +17,15 @@ const authenticatedUser = (req, res, next) => {
   })(req, res, next)
 }
 
-
-// Angela: authenticatedAdmin
-
+const authenticatedAdmin = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, () => {
+    if (getUser(req) && getUser(req).role === 'admin') return next()
+    return res.status(403).json({ status: 'error', message: 'Permission denied' })
+  })(req, res, next)
+}
 
 module.exports = {
   authenticated,
   authenticatedUser,
+  authenticatedAdmin
 }
