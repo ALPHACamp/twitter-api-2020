@@ -3,6 +3,7 @@ const router = express.Router()
 const passport = require('../../config/passport')
 const userController = require('../../controllers/apis/user-controllers')
 const tweetController = require('../../controllers/apis/tweet-controller')
+const likeController = require('../../controllers/apis/like-controller')
 const adminController = require('../../controllers/apis/admin-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const {
@@ -16,6 +17,9 @@ router.post(
   userController.signIn
 )
 router.post('/users', userController.signUp)
+
+router.post('/tweets/:tId/like', authenticated, likeController.postLike)
+router.post('/tweets/:tId/unlike', authenticated, likeController.postUnlike)
 
 router.get('/tweets/:tId', authenticated, tweetController.getTweet)
 router.get('/tweets', authenticated, tweetController.getTweets)
