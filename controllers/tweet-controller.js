@@ -1,10 +1,13 @@
 const { Tweet, User, Like, Reply, sequelize } = require('../models')
+const { isLikedTweet, isRepliedTweet } = require('../helpers/tweet')
 const helpers = require('../_helpers')
 
 const tweetController = {
   getAllTweet: async (req, res, next) => {
     try {
-      const tweets = await Tweet.findAll({
+      const userId = helpers.getUser(req).id
+
+      const tweetData = await Tweet.findAll({
         attributes: [
           'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
@@ -24,6 +27,17 @@ const tweetController = {
         nest: true,
         raw: true
       })
+      // get tweet_id list liked by login user
+      const isLikedId = await isLikedTweet(userId)
+
+      // get reply_id list replied by login user
+      const isRepliedId = await isRepliedTweet(userId)
+
+      const tweets = tweetData.map(tweet => ({
+        ...tweet,
+        isLiked: isLikedId?.includes(tweet.id) || false,
+        isReplied: isRepliedId?.includes(tweet.id) || false
+      }))
 
       res.status(200).json(tweets)
     } catch (err) {
@@ -32,10 +46,11 @@ const tweetController = {
   },
   getTweet: async (req, res, next) => {
     try {
+      const userId = helpers.getUser(req).id
       const tweetId = req.params.id
       // catch this tweet including replies & likes
       // catch tweet's author
-      const tweet = await Tweet.findByPk(tweetId, {
+      const tweetData = await Tweet.findByPk(tweetId, {
         attributes: [
           'id', 'description', 'UserId',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
@@ -51,7 +66,17 @@ const tweetController = {
         ]
       })
 
-      if (!tweet) throw new Error('無法查看不存在的推文。')
+      if (!tweetData) throw new Error('無法查看不存在的推文。')
+      const tweet = tweetData.toJSON()
+      
+      // get tweet_id list liked by login user
+      const isLikedId = await isLikedTweet(userId)
+
+      // get reply_id list replied by login user
+      const isRepliedId = await isRepliedTweet(userId)
+
+      tweet.isLiked = isLikedId?.includes(tweet.id) || false
+      tweet.isReplied = isRepliedId?.includes(tweet.id) || false
 
       res.status(200).json(tweet)
     } catch (err) {
