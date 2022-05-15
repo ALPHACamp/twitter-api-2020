@@ -1,4 +1,4 @@
-const { Reply, User } = require('../models')
+const { Reply, User, ReplyLike } = require('../models')
 const helpers = require('../_helpers')
 const replyController = {
   create: async (req, res) => {
@@ -38,6 +38,48 @@ const replyController = {
         account: element.User.account
       }))
       res.status(200).json(replies)
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  add: async (req, res) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const ReplyId = Number(req.params.id)
+      const replyLike = await ReplyLike.findOne({
+        where: {
+          UserId,
+          ReplyId
+        }
+      })
+      if (replyLike) throw new Error('已經喜歡過了')
+      await ReplyLike.create({
+        UserId,
+        ReplyId
+      })
+      res.sendStatus(200)
+    } catch (err) {
+      console.log(err)
+    }
+  },
+  remove: async (req, res) => {
+    try {
+      const UserId = helpers.getUser(req).id
+      const ReplyId = Number(req.params.id)
+      const replyLike = await ReplyLike.findOne({
+        where: {
+          User_id: UserId,
+          Reply_id: ReplyId
+        }
+      })
+      if (!replyLike) throw new Error('已經不喜歡了')
+      await ReplyLike.destroy({
+        where: {
+          UserId,
+          ReplyId
+        }
+      })
+      res.sendStatus(200)
     } catch (err) {
       console.log(err)
     }

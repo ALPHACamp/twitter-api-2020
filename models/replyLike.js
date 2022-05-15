@@ -3,20 +3,20 @@ const {
   Model
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class Like extends Model {
+  class ReplyLike extends Model {
     static associate (models) {
-      Like.belongsTo(models.User, { foreignKey: 'UserId' })
-      Like.belongsTo(models.Reply, { foreignKey: 'ReplyId' })
+      ReplyLike.belongsTo(models.User, { foreignKey: 'UserId' })
+      ReplyLike.belongsTo(models.Reply, { foreignKey: 'ReplyId' })
     }
   };
-  Like.init({
+  ReplyLike.init({
     UserId: DataTypes.INTEGER,
-    TweetId: DataTypes.INTEGER
+    ReplyId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'ReplyLike',
     tableName: 'ReplyLikes',
     underscored: true
   })
-  return Like
+  return ReplyLike
 }

@@ -32,6 +32,8 @@ router.post('/api/tweets', authenticated, tweetController.create)
 // 回覆相關路由
 router.get('/api/tweets/:tweet_id/replies', authenticated, replyController.getAll)
 router.post('/api/tweets/:tweet_id/replies', authenticated, replyController.create)
+router.post('/api/replies/:id/like', authenticated, replyController.add)
+router.post('/api/replies/:id/unlike', authenticated, replyController.remove)
 
 // 追蹤相關路由
 router.delete('/api/followships/:followingId', followshipController.deleteFollowship)
