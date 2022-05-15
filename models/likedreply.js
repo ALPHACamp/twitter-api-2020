@@ -17,5 +17,5 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Liked_replies',
     underscored: true
   })
-  return LikedReply;
+  return LikedReply
 }

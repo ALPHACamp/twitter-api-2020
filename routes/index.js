@@ -12,7 +12,7 @@ const { authenticated, authenticatedAdmin, authenticatedUser } = require('../mid
 
 // 將不同的 routes 拆分
 router.use('/admin', authenticated, authenticatedAdmin, admin)
-router.post('/users/signup', userController.signUp)
+router.post('/users', userController.signUp)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.get('/get_current_user', authenticated, userController.getCurrentUser)
 router.use('/users', authenticated, authenticatedUser, users)
