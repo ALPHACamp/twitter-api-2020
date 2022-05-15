@@ -1,6 +1,6 @@
 const createToken = require('../helpers/token')
 const tweetServices = require('../services/tweets')
-const { Tweet, User, Followship, Like } = require('../models')
+const { Tweet, User, Followship, Like, Reply } = require('../models')
 
 const adminController = {
   login: async (req, res, next) => {
@@ -158,10 +158,20 @@ const adminController = {
   },
   deleteTweet: async (req, res) => {
     try {
-      const tweetId = req.params.id
+      const TweetId = req.params.id
+      await Like.destroy({
+        where: {
+          TweetId
+        }
+      })
+      await Reply.destroy({
+        where: {
+          TweetId
+        }
+      })
       await Tweet.destroy({
         where: {
-          id: tweetId
+          id: TweetId
         }
       })
       res.json({
