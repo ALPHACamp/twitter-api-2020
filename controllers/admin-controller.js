@@ -23,6 +23,9 @@ const adminController = {
     try {
       const tweets = await tweetServices.getAll()
       if (!(tweets.length)) return res.status(403).json({ status: 'error', message: '推文不存在' })
+
+      tweets.splice(10, tweets.length)
+
       tweets.forEach(element => {
         element.description = element.description.substring(0, 51)
       })
