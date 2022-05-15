@@ -10,13 +10,15 @@ const {
   authenticatedAdmin
 } = require('../../middleware/api-auth')
 
-router.get('/get_current_user', authenticated, userController.getCurrentUser)
-
 router.post(
   '/signin',
   passport.authenticate('local', { session: false }),
   userController.signIn
 )
+router.get('/get_current_user', authenticated, userController.currentUser)
+
+router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
 
 router.get('/tweets/:tId', authenticated, tweetController.getTweet)
