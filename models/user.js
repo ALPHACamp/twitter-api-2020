@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
   }, {})
-  User.associate = function(models) {
+  User.associate = function (models) {
     User.hasMany(models.Reply, { foreignKey: 'UserId' })
     User.hasMany(models.Tweet, { foreignKey: 'UserId' })
     User.hasMany(models.Like, { foreignKey: 'UserId' })
@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'followingId',
       as: 'Followers'
     })
-    
+
   }
   User.init({
     email: DataTypes.STRING,
@@ -24,7 +24,9 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     role: DataTypes.STRING,
     account: DataTypes.STRING,
-    cover: DataTypes.STRING
+    cover: DataTypes.STRING,
+    avatar: DataTypes.STRING,
+    introduction: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',
