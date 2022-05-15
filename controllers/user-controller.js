@@ -200,12 +200,11 @@ const userController = {
       User.findByPk(UserId)
     ])
       .then(([tweets, userOnChecked]) => {
-        // user tweetCount update
+        // update user tweetCount
         userOnChecked.update({
           tweetCount: tweets.count
         })
 
-        // data all tweets from this user
         return res.status(200).json(tweets.rows)
       })
       .catch(err => next(err))
@@ -213,11 +212,17 @@ const userController = {
 
   getUsersReplies: (req, res, next) => {
     const UserId = Number(req.params.id)
+
     Reply.findAll({
       where: { UserId },
       attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
       include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        { model: User, as: 'ReplyUser', attributes: ['id', 'name', 'account', 'avatar'] },
+        {
+          model: Tweet,
+          attributes: ['id'],
+          include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
+        }
       ],
       order: [['createdAt', 'DESC']]
     })
