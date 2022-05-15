@@ -7,7 +7,7 @@ const userController = {
   signIn: async (req, res, next) => {
     try {
       // 登入資料錯誤希望有回傳訊息
-      const userData = helpers.getUser(req).toJSON()
+      const userData = helpers.getUser(req)?.toJSON()
       if (userData.Identity.identity === 'admin') {
         userData.is_admin = true
       } else {
@@ -75,7 +75,7 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     try {
-      const userData = helpers.getUser(req).toJSON()
+      const userData = helpers.getUser(req)?.toJSON()
       const { token } = req.session
       if (userData.Identity.identity === 'admin') {
         userData.is_admin = true
@@ -99,7 +99,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const me = helpers.getUser(req)
-      if (!me) return new Error('當前使用者產生預期外的錯誤')
+      if (!me) return new Error('未存取到登入資料')
       const my = await User.findAll({
         where: { id: me.id },
         attributes: ['id', 'account', 'name'],
@@ -146,7 +146,7 @@ const userController = {
         }
       })
 
-      res.json(userData)
+      res.json(...userData)
     } catch (err) {
       next(err)
     }
@@ -221,39 +221,132 @@ const userController = {
 
   getUserLikes: async (req, res, next) => {
     try {
-      const user = await User.findOne({
-        where: { id: req.params.id },
-        attributes: ['id', 'account', 'name', 'coverImg', 'avatarImg'],
+      const rawLikes = await Like.findAll({
+        where: { user_id: req.params.id },
         include: [
           {
             model: User,
-            as: 'Follower',
-            attributes: ['id']
-          },
-          {
-            model: User,
-            as: 'Following',
-            attributes: ['id']
+            attributes: ['id', 'name', 'account', 'avatar_img', 'cover_img']
           },
           {
             model: Tweet,
-            attributes: ['id']
+            attributes: ['id', 'description', 'created_at', 'updated_at'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'name', 'account', 'avatar_img']
+              },
+              {
+                model: Reply,
+                attributes: ['tweet_id']
+              },
+              {
+                model: Like,
+                attributes: ['tweet_id']
+              }
+            ],
+            order: [['created_at', 'DESC']]
           }
         ],
-        order: [['created_at', 'DESC']],
         nest: true
       })
 
-      // if (!replies.length) throw new Error('沒有找到相關資料')
+      if (!rawLikes.length) throw new Error('沒有找到相關資料')
+      const likes = JSON.parse(JSON.stringify(rawLikes))
 
-      return res.status(200).json(user)
+      const data = likes.map(like => {
+        const replyCount = like.Tweet.Replies.length
+        like.Tweet.replyCount = replyCount
+        const likeCount = like.Tweet.Likes.length
+        like.Tweet.likeCount = likeCount
+        return like
+      })
+
+      return res.status(200).json(data)
     } catch (err) {
       next(err)
     }
   },
 
-  getUserFollowship: async (req, res, next) => {
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const rawFollowings = await Followship.findAll({
+        where: { follower_id: req.params.id }
+      })
 
+      if (!rawFollowings.length) throw new Error('沒有找到相關資料')
+      const followings = JSON.parse(JSON.stringify(rawFollowings))
+
+      const me = helpers.getUser(req)?.toJSON()
+      if (!me) throw new Error('未存取到登入資料')
+
+      // for (const following of followings) {
+      //   const followingUser = await User.findByPk(following.followingId, {
+      //     attributes: ['id', 'name', 'account', 'bio']
+      //   })
+      //   following.following_user = followingUser
+
+      //   const isFollowingRaw = await Followship.findOne({
+      //     where: {
+      //       follower_id: me.id,
+      //       following_id: following.followingId
+      //     }
+      //   })
+      //   following.is_following = Boolean(isFollowingRaw?.toJSON())
+      Promise.all([
+        User.findByPk(following.followingId, {
+          attributes: ['id', 'name', 'account', 'bio']
+        }),
+        Followship.findOne({
+          where: {
+            follower_id: me.id,
+            following_id: following.followingId
+          }
+        }).then((followingUser, isFollowingRaw) => {
+          for (const following of followings) {
+            following.following_user = followingUser
+            following.is_following = Boolean(isFollowingRaw?.toJSON())
+          }
+        })
+      ])
+
+      return res.status(200).json(followings)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const rawFollowers = await Followship.findAll({
+        where: { following_id: req.params.id }
+      })
+
+      if (!rawFollowers) throw new Error('沒有找到相關資料')
+      const followers = JSON.parse(JSON.stringify(rawFollowers))
+
+      const me = helpers.getUser(req)?.toJSON()
+      if (!me) throw new Error('未存取到登入資料')
+
+      for (const follower of followers) {
+        const followedUser = await User.findByPk(follower.followerId, {
+          attributes: ['id', 'name', 'account', 'bio']
+        })
+        follower.followed_user = followedUser
+
+        const isFollowingRaw = await Followship.findOne({
+          where: {
+            follower_id: me.id,
+            following_id: follower.followerId
+          }
+        })
+        follower.is_following = Boolean(isFollowingRaw?.toJSON())
+      }
+
+      return res.status(200).json(followers)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 
