@@ -40,17 +40,19 @@ router.delete('/api/followships/:followingId', followshipController.deleteFollow
 router.post('/api/followships', authenticated, followshipController.postFollowship)
 
 // 使用者相關路由
-router.post('/api/users', userController.signUp)
-router.get('/api/users/:id', authenticated, userController.getUser)
 router.get('/api/users/:id/tweets', authenticated, userController.getUserTweet)
 router.get('/api/users/:id/replied_tweets', authenticated, userController.userRepliedTweets)
 router.get('/api/users/:id/likes', authenticated, userController.userLikes)
 router.get('/api/users/:id/followings', authenticated, userController.userFollowings)
 router.get('/api/users/:id/followers', authenticated, userController.userFollowers)
+router.get('/api/users/:id', authenticated, userController.getUser)
 router.put('/api/users/:id', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), userController.putUser)
-router.use('/', errorHandler)
+router.post('/api/users', userController.signUp)
 
 // 導入後台
 router.use('/api/admin', authenticated, authenticatedAdmin, admin)
+
+// 錯誤處理
+router.use('/', errorHandler)
 
 module.exports = router
