@@ -193,9 +193,11 @@ const userController = {
         where: { UserId },
         attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
         include: [
-          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+          { model: User, as: 'TweetUser', attributes: ['id', 'name', 'account', 'avatar'] }
         ],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
       }),
       User.findByPk(UserId)
     ])
@@ -204,8 +206,12 @@ const userController = {
         userOnChecked.update({
           tweetCount: tweets.count
         })
-
-        return res.status(200).json(tweets.rows)
+        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
+        const tweetList = tweets.rows.map(data => ({
+          ...data,
+          isLiked: likedTweetId.some(item => item === data.id)
+        }))
+        res.status(200).json(tweetList)
       })
       .catch(err => next(err))
   },
@@ -236,7 +242,7 @@ const userController = {
     Promise.all([
       Like.findAndCountAll({
         where: { UserId },
-        attributes: ['id', 'createdAt'],
+        attributes: ['id', 'createdAt', 'TweetId', 'UserId'],
         include: [
           {
             model: Tweet,
