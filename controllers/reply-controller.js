@@ -1,5 +1,7 @@
 const { Reply, User, ReplyLike } = require('../models')
 const helpers = require('../_helpers')
+const sequelize = require('sequelize')
+
 const replyController = {
   create: async (req, res) => {
     try {
@@ -23,8 +25,15 @@ const replyController = {
           TweetId
         },
         include: [
-          { model: User }
+          { model: User },
+          {
+            model: ReplyLike,
+            attributes: [
+              [sequelize.fn('COUNT', sequelize.col('ReplyLikes.Reply_id')), 'likeCounts']
+            ]
+          }
         ],
+        group: ['id'],
         nest: true,
         raw: true
       })
@@ -35,7 +44,8 @@ const replyController = {
         userId: element.UserId,
         name: element.User.name,
         avatar: element.User.avatar,
-        account: element.User.account
+        account: element.User.account,
+        likeCount: element.ReplyLikes.likeCounts
       }))
       res.status(200).json(replies)
     } catch (err) {
