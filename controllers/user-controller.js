@@ -188,15 +188,26 @@ const userController = {
 
   getUsersTweets: (req, res, next) => {
     const UserId = Number(req.params.id)
-    Tweet.findAll({
-      where: { UserId },
-      attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
-      include: [
-        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
-      ],
-      order: [['createdAt', 'DESC']]
-    })
-      .then(tweets => res.status(200).json(tweets))
+    Promise.all([
+      Tweet.findAndCountAll({
+        where: { UserId },
+        attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
+        include: [
+          { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+        ],
+        order: [['createdAt', 'DESC']]
+      }),
+      User.findByPk(UserId)
+    ])
+      .then(([tweets, userOnChecked]) => {
+        // user tweetCount update
+        userOnChecked.update({
+          tweetCount: tweets.count
+        })
+
+        // data all tweets from this user
+        return res.status(200).json(tweets.rows)
+      })
       .catch(err => next(err))
   },
 
