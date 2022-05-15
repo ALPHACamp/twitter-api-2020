@@ -19,7 +19,17 @@ const adminController = {
         { model: User, as: 'Followers'}
       ]
     })
-    .then(users => cb(null, users))
+    .then(user => {
+      const dataUser = user.map(u => ({
+        ...u.toJSON(),
+        Tweets: u.Tweets.length,
+        Likes: u.Likes.length,
+        Followers: u.Followers.length,
+        Followings: u.Followings.length
+      }))
+        .sort((a, b) => b.Tweets - a.Tweets)
+      return cb(null, dataUser)
+    })
     .catch(err => cb(err))
   },
 }
