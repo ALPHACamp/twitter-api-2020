@@ -73,7 +73,7 @@ const userController = {
     }
   },
 
-  currentUser: (req, res, next) => {
+  getCurrentUser: (req, res, next) => {
     try {
       const userData = helpers.getUser(req).toJSON()
       const { token } = req.session

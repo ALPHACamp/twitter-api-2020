@@ -16,7 +16,7 @@ router.post(
   passport.authenticate('local', { session: false }),
   userController.signIn
 )
-router.get('/get_current_user', authenticated, userController.currentUser)
+router.get('/current_user', authenticated, userController.getCurrentUser)
 
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id', authenticated, userController.getUser)
