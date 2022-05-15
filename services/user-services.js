@@ -159,7 +159,40 @@ const userServices = {
     .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    const { name, introduction, cover, avatar } = req.body
+    let { name, introduction } = req.body
+  
+    const avatar = req.files ? req.files['avatar'][0] : null
+    const cover = req.files ? req.files['cover'][0] : null
+  
+    if (name) {
+      name =  name.trim()
+      if (name.length > 50) throw new Error('Length of the name is too long!')
+    }
+    if (introduction) {
+      introduction = introduction.trim()
+      if (introduction.length > 160) throw new Error('Length of the introduction is too long!')
+    }
+
+    return Promise.all([
+      User.findByPk(req.params.id),
+      helpers.imgurFileHandler(avatar),
+      helpers.imgurFileHandler(cover)
+    ])
+      .then(([user, avatarImg, coverImg]) => {
+        if (!user) throw new Error("User didn't exists!")
+        return user.update({
+          name,
+          introduction,
+          avatar: avatarImg || user.avatar,
+          cover: coverImg || user.cover
+        })
+      })
+      .then(putUser => {
+        const editUser = putUser.toJSON()
+        delete editUser.password
+        return cb(null, editUser)
+      })
+      .catch(err => cb(err))
   },
   addFollowing: (req, cb) => {
     return Promise.all([
