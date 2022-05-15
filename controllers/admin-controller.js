@@ -37,9 +37,6 @@ const adminController = {
   users: async (req, res) => {
     try {
       const users = await User.findAll({
-        where: {
-          role: 'user'
-        },
         attributes: {
           exclude: ['createdAt', 'password', 'introduction', 'updatedAt']
         },
@@ -131,7 +128,7 @@ const adminController = {
           }
         }
       }
-
+      console.log(users)
       if (!users) return res.status(403).json({ status: 'error', message: '沒有使用者' })
       res.status(200)
         .json(users)
