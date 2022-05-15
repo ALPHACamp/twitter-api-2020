@@ -146,7 +146,7 @@ const userController = {
         }
       })
 
-      res.json({ userData })
+      res.json(userData)
     } catch (err) {
       next(err)
     }
@@ -174,6 +174,9 @@ const userController = {
         order: [['created_at', 'DESC']],
         nest: true
       })
+
+      if (!tweets.length) throw new Error('沒有找到相關資料')
+
       const data = tweets.map(tweet => {
         const replyTotal = tweet.Replies.length
         const likeTotal = tweet.Likes.filter(item => item.likeUnlike).length
@@ -187,6 +190,70 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  getUserReplies: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { user_id: req.params.id },
+        attributes: ['id', 'comment', 'user_id', 'tweet_id', 'created_at', 'updated_at'],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'name']
+          },
+          {
+            model: Tweet,
+            attributes: ['id', 'description', 'user_id']
+          }
+        ],
+        order: [['created_at', 'DESC']],
+        nest: true
+      })
+
+      if (!replies.length) throw new Error('沒有找到相關資料')
+
+      return res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserLikes: async (req, res, next) => {
+    try {
+      const user = await User.findOne({
+        where: { id: req.params.id },
+        attributes: ['id', 'account', 'name', 'coverImg', 'avatarImg'],
+        include: [
+          {
+            model: User,
+            as: 'Follower',
+            attributes: ['id']
+          },
+          {
+            model: User,
+            as: 'Following',
+            attributes: ['id']
+          },
+          {
+            model: Tweet,
+            attributes: ['id']
+          }
+        ],
+        order: [['created_at', 'DESC']],
+        nest: true
+      })
+
+      // if (!replies.length) throw new Error('沒有找到相關資料')
+
+      return res.status(200).json(user)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserFollowship: async (req, res, next) => {
+
   }
 }
 

@@ -19,6 +19,10 @@ router.post(
 router.get('/current_user', authenticated, userController.getCurrentUser)
 
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/followings', authenticated, userController.getUserFollowship)
+
 router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
 
