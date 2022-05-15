@@ -128,7 +128,6 @@ const adminController = {
           }
         }
       }
-      console.log(users)
       if (!users) return res.status(403).json({ status: 'error', message: '沒有使用者' })
       res.status(200)
         .json(users)
