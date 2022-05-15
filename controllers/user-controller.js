@@ -2,6 +2,7 @@ const { User, Reply, Tweet, Like, Followship } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../_helpers')
+const imgurFileHandler = require('../helpers/file-helper')
 const sequelize = require('sequelize')
 
 const userController = {
@@ -167,8 +168,22 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id)
-      const userUpdate = await user.update(req.body)
+      const userId = getUser(req).toJSON().id
+      const { name, introduction } = req.body
+      const { avatar, cover_image } = req.files
+      if (!name || !introduction) throw new Error('所有欄位必填。')
+      if (introduction.length > 50) throw new Error('自我介紹字數不可超過 50 字。')
+      // 上傳兩張圖片
+      const avatarPath = await imgurFileHandler(avatar[0])
+      const coverImagePath = await imgurFileHandler(cover_image[0])
+
+      const user = await User.findByPk(userId)
+      const userUpdate = await user.update({
+        name,
+        introduction,
+        avatar: avatarPath || user.avatar,
+        cover_image: coverImagePath || user.cover_image
+      })
       res.status(200).json(userUpdate)
     } catch (err) {
       next(err)

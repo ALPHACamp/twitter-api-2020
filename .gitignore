@@ -88,3 +88,5 @@ typings/
 
 .eslintrc.js
 .eslintignore
+/temp
+/upload
