@@ -23,6 +23,9 @@ const adminController = {
     try {
       const tweets = await tweetServices.getAll()
       if (!(tweets.length)) return res.status(403).json({ status: 'error', message: '推文不存在' })
+
+      tweets.splice(10, tweets.length)
+
       tweets.forEach(element => {
         element.description = element.description.substring(0, 51)
       })
@@ -37,32 +40,16 @@ const adminController = {
   users: async (req, res) => {
     try {
       const users = await User.findAll({
-        where: {
-          role: 'user'
-        },
         attributes: {
           exclude: ['createdAt', 'password', 'introduction', 'updatedAt']
         },
         raw: true
       })
-      const followers = await Followship.count({
-        group: ['followerId'],
-        raw: true
-      })
-      const followings = await Followship.count({
-        group: ['followingId'],
-        raw: true
-      })
 
+      // 使用者發文總數
       const tweets = await Tweet.count({
         group: ['User_id']
       })
-
-      const likes = await Like.count({
-        group: ['User_id']
-      })
-
-      // 使用者發文總數
 
       if (!tweets.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
@@ -81,6 +68,9 @@ const adminController = {
       }
 
       // 使用者 like 總數
+      const likes = await Like.count({
+        group: ['User_id']
+      })
 
       if (!likes.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
@@ -99,6 +89,10 @@ const adminController = {
       }
 
       // 使用者的跟隨者總數
+      const followers = await Followship.count({
+        group: ['followerId'],
+        raw: true
+      })
 
       if (!followers.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
@@ -117,6 +111,10 @@ const adminController = {
       }
 
       // 使用者追隨者總數
+      const followings = await Followship.count({
+        group: ['followingId'],
+        raw: true
+      })
 
       if (!followings.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
@@ -126,7 +124,6 @@ const adminController = {
 
       for (let followingIndex = 0; followingIndex < followings.length; followingIndex++) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
-          console.log(users[userIndex])
           if (users[userIndex].id === followings[followingIndex].followingId) {
             users[userIndex].followingsCount = followings[followingIndex].count
           } else {
@@ -134,7 +131,6 @@ const adminController = {
           }
         }
       }
-
       if (!users) return res.status(403).json({ status: 'error', message: '沒有使用者' })
       res.status(200)
         .json(users)

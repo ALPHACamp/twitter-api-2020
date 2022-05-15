@@ -87,23 +87,38 @@ const userController = {
       const UserId = req.params.id
       Reply.findAll({
         where: { UserId },
-        include: [Tweet, User],
+        include: [
+          {
+            model: Tweet,
+            include: [
+              {
+                model: User
+              }
+            ]
+          },
+          User],
         raw: true,
         nest: true
       })
         .then(reply => {
           const repeatDataId = []
-          const newData = []
+          const rawData = []
           // eslint-disable-next-line array-callback-return
           reply.map(reply => {
             if (!repeatDataId.includes(reply.TweetId)) {
               repeatDataId.push(reply.TweetId)
-              newData.push(reply)
+              rawData.push(reply)
             } else {
               return false
             }
           })
-          res.json(newData)
+          const data = rawData.map(element => ({
+            id: element.id,
+            comment: element.comment,
+            replyAccount: element.Tweet.User.account,
+            createAt: element.createdAt
+          }))
+          res.json(data)
         })
     } catch (err) {
       next(err)
