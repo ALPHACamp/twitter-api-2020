@@ -10,5 +10,7 @@ router.get('/:id/likes', userController.getLikes)
 router.get('/:id/followings', userController.getFollowings)
 router.get('/:id/followers', userController.getFollowers)
 router.put('/:id', userController.putUser)
+router.put('/:id/setting', userController.putUserSetting)
+
 
 module.exports = router

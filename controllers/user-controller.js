@@ -13,7 +13,7 @@ const userController = {
         await User.findOne({ where: { email: req.body.email } })
         ) throw new Error('帳號或 email 已經註冊。')
         
-      const user = await User.create({
+      await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
@@ -174,6 +174,27 @@ const userController = {
       next(err)
     }
     res.status(200).json()
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      const { name, account, email, password, checkPassword } = req.body
+      const user = getUser(req)
+      
+      if (!account) throw new Error('帳號不可空白。')
+      if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
+      if (await User.findOne({ where: { email } })) throw new Error('此email已經存在。')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符。')
+
+      const userUpdate = await user.update({
+        name,
+        account,
+        email,
+        password: password ? bcrypt.hashSync(password, 10) : user.password,
+      })
+      res.status(200).json(userUpdate)
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController
