@@ -86,17 +86,16 @@ const tweetController = {
         .catch(err => cb(err))
   },
   addReply: (req, cb) => {
-    const { reply } = req.body
-    if (reply.trim().length === 0) throw new Error("Please enter you reply!")
-
-    return Tweet.findByPk(req.params.tweet_id)
+    const comment = req.body.comment.trim()
+    if (!comment) throw new Error("Please enter you reply!")
+    return Tweet.findByPk(req.params.tweet_id, {raw: true})
       .then(tweet => {
         if(!tweet) throw new Error("Tweet didn't exist!")
       
         return Reply.create({
           UserId: helpers.getUser(req).id,
-          TweetId: tweet.id,
-          comment: reply
+          TweetId: req.params.tweet_id,
+          comment
         })
       })
       .then(addedReply => cb(null, addedReply))
