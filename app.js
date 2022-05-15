@@ -30,23 +30,11 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.use((req, res, next) => {
-  res.locals.user = getUser(req)
-  next()
-})
-
 // Setting middleware
 app.use(methodOverride('_method'))
 
-<<<<<<< HEAD
 // Setting upload path
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
-=======
-app.use((req, res, next) => {
-  res.locals.user = getUser(req)
-  next()
-})
->>>>>>> 1a7250bae794c4d751fdd15bec3a54fa65f81040
 
 app.use('/api', routes)
 
