@@ -5,7 +5,7 @@ const likeController = {
   postLike: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req)?.id
-      const TweetId = req.params.tId
+      const TweetId = Number(req.params.tId)
       const tweet = await Tweet.findByPk(TweetId)
       const user = await User.findByPk(UserId)
       if (!tweet || !user) throw new Error('Tweet or user does not exist!!')
@@ -30,7 +30,7 @@ const likeController = {
   postUnlike: async (req, res, next) => {
     try {
       const UserId = helpers.getUser(req)?.id
-      const TweetId = req.params.tId
+      const TweetId = Number(req.params.tId)
       const tweet = await Tweet.findByPk(TweetId)
       const user = await User.findByPk(UserId)
       if (!tweet || !user) throw new Error('Tweet or user does not exist!!')
