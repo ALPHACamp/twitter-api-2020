@@ -44,6 +44,8 @@ const adminController = {
         raw: true
       })
 
+      if (!users) return res.status(403).json({ status: 'error', message: '沒有使用者' })
+
       // 使用者發文總數
       const tweets = await Tweet.count({
         group: ['User_id']
@@ -129,7 +131,25 @@ const adminController = {
           }
         }
       }
-      if (!users) return res.status(403).json({ status: 'error', message: '沒有使用者' })
+
+      const selectionSort = (arr) => {
+        const length = arr.length
+        for (let index = 0; index < length; index++) {
+          let min = arr[index].totalTweetCount
+          let minIndex = index
+          let secIndex = index
+          for (secIndex; secIndex < length; secIndex++) {
+            if (arr[secIndex].totalTweetCount < min) {
+              min = arr[secIndex].totalTweetCount
+              minIndex = secIndex
+            }
+          }
+          [arr[minIndex], arr[index]] = [arr[secIndex], arr[minIndex]]
+        }
+        return arr
+      }
+      selectionSort(users).reverse()
+
       res.status(200)
         .json(users)
     } catch (err) {
