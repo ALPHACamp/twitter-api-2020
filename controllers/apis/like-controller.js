@@ -12,7 +12,7 @@ const likeController = {
 
       const like = await Like.findOne({ where: { UserId, TweetId } })
       if (like) throw new Error('Like record already exists!!')
-      console.log(typeof TweetId)
+
       const data = await Like.create({
         likeUnlike: true,
         UserId,
