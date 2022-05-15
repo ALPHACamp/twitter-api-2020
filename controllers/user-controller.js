@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply } = require('../models')
+const { User, Tweet, Reply, Like } = require('../models')
 const { getUser } = require('../_helpers')
 
 const userController = {
@@ -227,6 +227,46 @@ const userController = {
       order: [['createdAt', 'DESC']]
     })
       .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
+  },
+
+  getUsersLikes: (req, res, next) => {
+    const UserId = Number(req.params.id)
+
+    Promise.all([
+      Like.findAndCountAll({
+        where: { UserId },
+        attributes: ['id', 'createdAt'],
+        include: [
+          {
+            model: Tweet,
+            attributes: ['id', 'description', 'likeCount', 'replyCount'],
+            include: [
+              {
+                model: User,
+                as: 'TweetUser',
+                attributes: ['id', 'name', 'account', 'avatar']
+              }
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      }),
+      User.findByPk(UserId)
+    ])
+      .then(([likes, userOnChecked]) => {
+        userOnChecked.update({
+          likeCount: likes.count
+        })
+        const likedTweetId = getUser(req)?.LikedTweets ? getUser(req).LikedTweets.map(l => l.id) : []
+        const likeList = likes.rows.map(data => ({
+          ...data,
+          isLiked: likedTweetId.some(item => item === data.Tweet.id)
+        }))
+        res.status(200).json(likeList)
+      })
       .catch(err => next(err))
   }
 
