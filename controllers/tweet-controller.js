@@ -15,7 +15,13 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     tweetServices.getTweet(req, (err, tweet) => err ? next(err) : res.json(tweet))
-  }
+  },
+  addReply: (req, res, next) => {
+    tweetServices.addReply(req, (err, createdReply) => err ? next(err) : res.json(createdReply))
+  },
+  viewReply: (req, res, next) => {
+    tweetServices.viewReply(req, (err, replies) => err ? next(err) : res.json(replies))
+  } 
 }
 
 module.exports = tweetController
