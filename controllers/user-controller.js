@@ -37,13 +37,10 @@ const userController = {
     User.findAll({
       $or: [{ where: { email } }, { where: { account } }]
     })
-      .then((users) => {
-        if (users.some((u) => u.email === email))
-          throw new Error('此 Email 已被註冊！')
-        if (users.some((u) => u.account === account))
-          throw new Error('此帳號已被註冊！')
-        if (name.length > 50 || account.length > 50)
-          throw new Error('字數上限為 50 個字！')
+      .then(users => {
+        if (users.some(u => u.email === email)) { throw new Error('此 Email 已被註冊！') }
+        if (users.some(u => u.account === account)) { throw new Error('此帳號已被註冊！') }
+        if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
 
         return bcrypt.hash(password, 10)
       })
@@ -87,17 +84,26 @@ const userController = {
       .catch(err => next(err))
   },
 
-  getCurrentUser: (req, res) => {
-    const reqUserId = getUser(req).id
-    const options = {
-      attributes: ['id', 'account', 'name', 'email', 'avatar', 'role'],
+  getCurrentUser: (req, res, next) => {
+    // const reqUserId = getUser(req).id
+    // const options = {
+    //   attributes: ['id', 'account', 'name', 'email', 'avatar', 'role']
+    // }
+
+    // User.findByPk(reqUserId, options)
+    //   .then(user => {
+    //     if (!user) throw new Error('帳號不存在！')
+    //     return res.status(200).json(user)
+    //   })
+    // .catch(err => next(err))
+
+    // 我發現以上88-95行內容好像根本不用寫，因為在passport裡面，已經有做過jwt查找資料、驗證與檢查，在/config/passport.js檔案的第34-44行，所以如果驗證有通過基本上就會丟出一包那個token的user資料，這邊應該是直接把這包user資料整理乾淨送出去給前端就可以了。這是我的看法，如果你覺得原本的比較正確，那也可以用你的版本。
+    try {
+      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
+      return res.status(200).json(userData)
+    } catch (err) {
+      next(err)
     }
-    
-    User.findByPk(reqUserId, options)
-      .then((user) => {
-        return res.status(200).json(user)
-      })
-      .catch((err) => next(err))
   },
 
   getTopUsers: (req, res, next) => {
@@ -136,30 +142,26 @@ const userController = {
     // check password
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
     // check account
-    if (!account || !name || !email)
-      throw new Error('帳號、名稱和 email 欄位不可空白！')
-    if (name.length > 50 || account.length > 50)
-      throw new Error('字數上限為 50 個字！')
+    if (!account || !name || !email) { throw new Error('帳號、名稱和 email 欄位不可空白！') }
+    if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
 
     return Promise.all([
       User.findAll({ $or: [{ where: { email } }, { where: { account } }] }),
       User.findByPk(userId),
-      bcrypt.hash(password, 10),
+      bcrypt.hash(password, 10)
     ])
       .then(([checkUsers, user, hash]) => {
         if (!user) throw new Error('帳號不存在！')
-        if (checkUsers.some((u) => u.email === email && u.id !== reqUserId))
-          throw new Error('此 Email 已被註冊！')
-        if (checkUsers.some((u) => u.account === account && u.id !== reqUserId))
-          throw new Error('此帳號已被註冊！')
+        if (checkUsers.some(u => u.email === email && u.id !== reqUserId)) { throw new Error('此 Email 已被註冊！') }
+        if (checkUsers.some(u => u.account === account && u.id !== reqUserId)) { throw new Error('此帳號已被註冊！') }
         return user.update({
           account,
           name,
           email,
-          password: hash,
+          password: hash
         })
       })
-      .then((updatedUser) => res.status(200).json({ user: updatedUser }))
+      .then(updatedUser => res.status(200).json({ user: updatedUser }))
       .catch(err => next(err))
   },
 
@@ -173,23 +175,21 @@ const userController = {
     // check password
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
     // check account
-    if (!account || !name || !email)
-      throw new Error('帳號、名稱和 email 欄位不可空白！')
-    if (name.length > 50 || account.length > 50)
-      throw new Error('字數上限為 50 個字！')
+    if (!account || !name || !email) { throw new Error('帳號、名稱和 email 欄位不可空白！') }
+    if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
 
-      return Promise.all([
+    return Promise.all([
       User.findAll({ $or: [{ where: { email } }, { where: { account } }] }),
       User.findByPk(userId),
-      bcrypt.hash(password, 10),
+      bcrypt.hash(password, 10)
     ])
       .then(user => {
         if (!user) throw new Error('帳號不存在！')
         return user.update({
           name,
           introduction,
-          avatar: avatar ? avatar : user.avatar,
-          cover: cover ? cover : user.cover
+          avatar: avatar || user.avatar,
+          cover: cover || user.cover
         })
       })
       .then(updatedUser => res.status(200).json({ user: updatedUser }))
