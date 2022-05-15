@@ -10,8 +10,6 @@ const port = process.env.PORT || 3000
 const routes = require('./routes')
 const passport = require('./config/passport')
 
-const { getUser } = require('./_helpers')
-
 const methodOverride = require('method-override')
 const cors = require('cors')
 
