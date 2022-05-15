@@ -37,10 +37,7 @@ const adminController = {
           }))
         ])
       }
-      res.json({
-        status: 'success',
-        data: users
-      })
+      return res.status(200).json(users)
     } catch (err) {
       next(err)
     }
@@ -51,9 +48,8 @@ const adminController = {
       const deletedTweet = await Tweet.findByPk(req.params.id)
       if (!deletedTweet) throw new Error('找不到相關推文')
       await deletedTweet.destroy()
-      res.json({
-        status: 'success',
-        data: deletedTweet
+      return res.status(200).json({
+        deletedTweet
       })
     } catch (err) {
       next(err)
