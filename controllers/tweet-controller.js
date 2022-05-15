@@ -19,8 +19,8 @@ const tweetController = {
   addReply: (req, res, next) => {
     tweetServices.addReply(req, (err, createdReply) => err ? next(err) : res.json(createdReply))
   },
-  viewReply: (req, res, next) => {
-    tweetServices.viewReply(req, (err, replies) => err ? next(err) : res.json(replies))
+  viewReplies: (req, res, next) => {
+    tweetServices.viewReplies(req, (err, replies) => err ? next(err) : res.json(replies))
   } 
 }
 
