@@ -13,8 +13,6 @@ const passport = require('./config/passport')
 const methodOverride = require('method-override')
 const cors = require('cors')
 
-const { getUser } = require('./_helpers')
-
 // Setting Cors
 app.use(cors())
 

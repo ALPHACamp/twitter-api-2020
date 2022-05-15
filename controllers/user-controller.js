@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Reply } = require('../models')
 const { getUser } = require('../_helpers')
-const tweetController = require('./tweet-controller')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -85,19 +84,6 @@ const userController = {
   },
 
   getCurrentUser: (req, res, next) => {
-    // const reqUserId = getUser(req).id
-    // const options = {
-    //   attributes: ['id', 'account', 'name', 'email', 'avatar', 'role']
-    // }
-
-    // User.findByPk(reqUserId, options)
-    //   .then(user => {
-    //     if (!user) throw new Error('帳號不存在！')
-    //     return res.status(200).json(user)
-    //   })
-    // .catch(err => next(err))
-
-    // 我發現以上88-95行內容好像根本不用寫，因為在passport裡面，已經有做過jwt查找資料、驗證與檢查，在/config/passport.js檔案的第34-44行，所以如果驗證有通過基本上就會丟出一包那個token的user資料，這邊應該是直接把這包user資料整理乾淨送出去給前端就可以了。這是我的看法，如果你覺得原本的比較正確，那也可以用你的版本。
     try {
       const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
       return res.status(200).json(userData)
@@ -194,7 +180,36 @@ const userController = {
       })
       .then(updatedUser => res.status(200).json({ user: updatedUser }))
       .catch(err => next(err))
+  },
+
+  getUsersTweets: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Tweet.findAll({
+      where: { UserId },
+      attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => res.status(200).json(tweets))
+      .catch(err => next(err))
+  },
+
+  getUsersReplies: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Reply.findAll({
+      where: { UserId },
+      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
   }
+
 }
 
 module.exports = userController
