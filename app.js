@@ -3,7 +3,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 const express = require('express')
 const passport = require('./config/passport')
-const helpers = require('./_helpers');
 const routes = require('./routes')
 
 const app = express()
