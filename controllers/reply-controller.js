@@ -1,5 +1,6 @@
 const { Reply, User, ReplyLike } = require('../models')
 const helpers = require('../_helpers')
+const replyLikeService = require('../services/replyLikes')
 const sequelize = require('sequelize')
 
 const replyController = {
@@ -67,7 +68,8 @@ const replyController = {
         UserId,
         ReplyId
       })
-      res.sendStatus(200)
+      const replyLikesNum = await replyLikeService.count(ReplyId)
+      res.status(200).json(replyLikesNum)
     } catch (err) {
       console.log(err)
     }
@@ -89,7 +91,8 @@ const replyController = {
           ReplyId
         }
       })
-      res.sendStatus(200)
+      const replyLikesNum = await replyLikeService.count(ReplyId)
+      res.status(200).json(replyLikesNum)
     } catch (err) {
       console.log(err)
     }
