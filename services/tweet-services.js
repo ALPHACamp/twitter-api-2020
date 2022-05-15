@@ -1,4 +1,4 @@
-const { Tweet, Like } = require('../models')
+const { Tweet, Like, User, Reply } = require('../models')
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -38,6 +38,52 @@ const tweetController = {
       })
       .then(removelike => cb(null, removelike))
       .catch(err => cb(err))
+  },
+  postTweet: (req, cb) => {
+    const { description } = req.body
+    const UserId = helpers.getUser(req).id
+    if (!description) throw new Error('tweet description is required!')
+    return User.findByPk(UserId)
+      .then(user => {
+        if (!user) throw new Error("User didn't exist!")
+        return Tweet.create({
+          description,
+          UserId
+        })
+      })
+      .then(newtweet => cb(null, newtweet))
+      .catch(err => cb(err))
+  },
+  getTweets: (req, cb) => {
+    return Tweet.findAll({
+      order: [['createdAt', 'DESC']],
+      include: [Like, Reply]
+    })
+      .then(tweet => {
+        const likeCount = tweet.map(r => ({
+          ...r.toJSON(),
+          Likes: r.Likes.length ? r.Likes.length : 0,
+          Replies: r.Replies.length ? r.Replies.length : 0
+        }))
+        return cb(null, likeCount)
+      })
+      .catch(err => cb(err))
+  },
+  getTweet: (req, cb) => {
+    return Tweet.findByPk(req.params.tweet_id, {
+      include: [
+        Like,
+        Reply
+      ]
+    })
+      .then(tweet => {
+        if (!tweet) throw new Error("Tweet didn't exist!")
+        const tweetData = tweet.toJSON()
+        tweetData.Likes = tweetData.Likes.length ? tweetData.Likes.length : 0
+        tweetData.Replies = tweetData.Replies.length ? tweetData.Replies.length : 0
+        return cb(null,  tweetData )
+        })
+        .catch(err => cb(err))
   }
 }
 
