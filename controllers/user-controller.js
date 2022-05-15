@@ -1,11 +1,13 @@
 const createToken = require('../helpers/token')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
+const helpers = require('../_helpers')
 const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
 
 const userController = {
   login: async (req, res, next) => {
     try {
+      console.log(helpers.getUser(helpers))
       const userData = req.user.toJSON()
       if (userData.role !== 'user') return res.status(403).json({ status: 'error', message: '非使用者' })
       const token = await createToken(userData)
