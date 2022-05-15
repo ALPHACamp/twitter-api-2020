@@ -30,7 +30,9 @@ const jwtOptions = {
 }
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, cb) => {
   try {
-    const user = await User.findByPk(jwtPayload.id)
+    const user = await User.findByPk(jwtPayload.id, {
+      include: [{ model: User, as: 'Followings' }]
+    })
     cb(null, user)
   } catch (err) {
     cb(err)

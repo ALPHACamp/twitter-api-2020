@@ -1,8 +1,7 @@
-const { User, Reply, Tweet, Like, Followship } = require('../models')
+const { User, Reply, Tweet, Like, Followship, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../_helpers')
-const sequelize = require('sequelize')
 
 const userController = {
   register: async (req, res, next) => {
@@ -28,7 +27,7 @@ const userController = {
     try {
       const user = getUser(req)
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.status(200).json({token, user})
+      res.status(200).json({ token, user })
     } catch (err) {
       next(err)
     }
@@ -179,7 +178,7 @@ const userController = {
     try {
       const { name, account, email, password, checkPassword } = req.body
       const user = getUser(req)
-      
+
       if (!account) throw new Error('帳號不可空白。')
       if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
       if (await User.findOne({ where: { email } })) throw new Error('此email已經存在。')
@@ -191,7 +190,33 @@ const userController = {
         email,
         password: password ? bcrypt.hashSync(password, 10) : user.password,
       })
-      res.status(200).json(userUpdate)
+      res.status(200).json({ message: '成功修改個人資料', userUpdate })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      const topUsers = await Followship.findAll({
+        attributes: [
+          ['following_id', 'id'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = following_id)`), 'account'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
+          [sequelize.literal(`(COUNT(follower_id))`), 'followerCount'],
+        ],
+        group: 'following_id',
+        limit: 10,
+        order: [[sequelize.col('followerCount'), 'DESC']]
+      })
+      if (!topUsers) throw new Error('查無資料。')
+      
+      const result = topUsers.map(user => ({
+        ...user.toJSON(),
+        isFollowing: req.user.Followings.some(f => f.id === user.id)
+      }))
+
+      res.status(200).json({ message: '前十人氣王', result })
     } catch (err) {
       next(err)
     }
