@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Followship } = require('../models')
+const { User, Tweet, Followship, Reply } = require('../models')
 const { getUser } = require('../_helpers')
 
 const userController = {
@@ -37,8 +37,8 @@ const userController = {
       $or: [{ where: { email } }, { where: { account } }]
     })
       .then(users => {
-        if (users.some(u => u.email === email)) { throw new Error('Email 已重複註冊！') }
-        if (users.some(u => u.account === account)) { throw new Error('Account 已重複註冊！') }
+        if (users.some(u => u.email === email)) { throw new Error('此 Email 已被註冊！') }
+        if (users.some(u => u.account === account)) { throw new Error('此帳號已被註冊！') }
         if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
 
         return bcrypt.hash(password, 10)
@@ -84,16 +84,12 @@ const userController = {
   },
 
   getCurrentUser: (req, res, next) => {
-    const reqUserId = getUser(req).id
-    const options = {
-      attributes: ['id', 'account', 'name', 'email', 'avatar', 'role']
+    try {
+      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
+      return res.status(200).json(userData)
+    } catch (err) {
+      next(err)
     }
-
-    User.findByPk(reqUserId, options)
-      .then(user => {
-        return res.status(200).json(user)
-      })
-      .catch(err => next(err))
   },
 
   getTopUsers: (req, res, next) => {
@@ -168,7 +164,36 @@ const userController = {
       next(err)
     }
     res.status(200).json()
+  },
+
+  getUsersTweets: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Tweet.findAll({
+      where: { UserId },
+      attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(tweets => res.status(200).json(tweets))
+      .catch(err => next(err))
+  },
+
+  getUsersReplies: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Reply.findAll({
+      where: { UserId },
+      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
+      include: [
+        { model: User, attributes: ['id', 'name', 'account', 'avatar'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    })
+      .then(replies => res.status(200).json(replies))
+      .catch(err => next(err))
   }
+
 }
 
 module.exports = userController

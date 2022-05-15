@@ -1,4 +1,4 @@
-function getUser(req) {
+const getUser = req => {
   return req.user || null
 }
 

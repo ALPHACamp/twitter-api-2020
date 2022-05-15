@@ -12,8 +12,6 @@ const SESSION_SECRET = 'secret'
 const routes = require('./routes')
 const passport = require('./config/passport')
 
-const { getUser } = require('./_helpers')
-
 const methodOverride = require('method-override')
 const session = require('express-session')
 const cors = require('cors')
@@ -40,8 +38,15 @@ app.use((req, res, next) => {
 // Setting middleware
 app.use(methodOverride('_method'))
 
+<<<<<<< HEAD
 // Setting upload path
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
+=======
+app.use((req, res, next) => {
+  res.locals.user = getUser(req)
+  next()
+})
+>>>>>>> 1a7250bae794c4d751fdd15bec3a54fa65f81040
 
 app.use('/api', routes)
 
