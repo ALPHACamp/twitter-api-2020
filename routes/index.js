@@ -4,6 +4,7 @@ const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
+const followship = require('../controllers/followship-controller')
 const upload = require('../middleware/multer')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
@@ -20,19 +21,12 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 // 取得前十名最多追蹤者的使用者
 router.get('/users/top', authenticated, userController.getTopUsers)
 
-// 取得指定使用者追隨中的所有使用者 & 取得追隨指定使用者的所有使用者
-// router.get('/users/:id/followings', authenticated, authenticatedUser, userController.getFollowings)
-// router.get('/users/:id/followers', authenticated, authenticatedUser, userController.getFollowers)
-
 // 取得目前登入的使用者資料
 router.get('/current_user', authenticated, userController.getCurrentUser)
 
 // 取得特定使用者的所有推文、回覆
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUsersTweets)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUsersReplies)
-
-// 取得指定使用者資料 （這條可能要往後放喔，不然資料很容繼跑進這條裡就不往後面跑了！）
-router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // 修改目前登入的使用者設定
 router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
@@ -43,11 +37,12 @@ router.put('/users/:id/setting', authenticated, authenticatedUser, userControlle
 // 修改目前登入的使用者個人頁面
 router.put('/users/:id', authenticated, authenticatedUser, userController.putUser)
 
-// // 目前登入使用者資料的上傳單張圖片至個人頭像
-// router.put('/users/:id', upload.single('avatar'), userController.putUser)
+// 取得指定使用者追隨中的所有使用者 & 取得追隨指定使用者的所有使用者
+router.get('/users/:id/followings', userController.getFollowings)
+router.get('/users/:id/followers', userController.getFollowers)
 
-// // 目前登入使用者資料的上傳單張圖片至個人背景
-// router.put('/users/:id', upload.single('cover'), userController.putUser)
+// 取得指定使用者資料 （往後放到最後囉）
+router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // Tweet APIs
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
@@ -55,6 +50,10 @@ router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweet
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
+
+// Followship APIs
+router.post('/followships/:id', authenticated, followship.addFollowing)
+router.delete('/followships/:id', authenticated, followship.removeFollowing)
 
 router.use('/', apiErrorHandler)
 

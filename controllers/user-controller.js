@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User, Tweet, Followship, Reply } = require('../models')
 const { getUser } = require('../_helpers')
+const Sequelize = require('sequelize')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -157,7 +158,8 @@ const userController = {
 
   putUser: async (req, res, next) => {
     try {
-      const user = await User.findByPk(req.params.id)
+      const UserId = Number(req.params.id)
+      const user = await User.findByPk(UserId)
       const userUpdate = await user.update(req.body)
       res.status(200).json(userUpdate)
     } catch (err) {
@@ -192,8 +194,47 @@ const userController = {
     })
       .then(replies => res.status(200).json(replies))
       .catch(err => next(err))
-  }
+  },
 
+  getFollowings: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Followship.findAll({
+      where: { followerId: UserId },
+      attributes: [
+        'followerId', 'createdAt',
+        [Sequelize.literal('(SELECT account FROM Users WHERE id = following_id)'), 'account'],
+        [Sequelize.literal('(SELECT name FROM Users WHERE id = following_id)'), 'name'],
+        [Sequelize.literal('(SELECT avatar FROM Users WHERE id = following_id)'), 'avatar'],
+        [Sequelize.literal('(SELECT introduction FROM Users WHERE id = following_id)'), 'introduction'],
+        [Sequelize.literal(`(CASE WHEN following_id = ${UserId} THEN true ELSE false END)`), 'isFollowing']
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followers => res.status(200).json(followers))
+      .catch(err => next(err))
+  },
+
+  getFollowers: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Followship.findAll({
+      where: { followingId: UserId },
+      attributes: [
+        'followerId', 'createdAt',
+        [Sequelize.literal('(SELECT account FROM Users WHERE id = follower_id)'), 'account'],
+        [Sequelize.literal('(SELECT name FROM Users WHERE id = follower_id)'), 'name'],
+        [Sequelize.literal('(SELECT avatar FROM Users WHERE id = follower_id)'), 'avatar'],
+        [Sequelize.literal('(SELECT introduction FROM Users WHERE id = follower_id)'), 'introduction'],
+        [Sequelize.literal(`(CASE WHEN follower_id = ${UserId} THEN true ELSE false END)`), 'isFollowing']
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followers => res.status(200).json(followers))
+      .catch(err => next(err))
+  }
 }
 
 module.exports = userController
