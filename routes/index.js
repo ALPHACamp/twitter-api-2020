@@ -42,6 +42,7 @@ router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetC
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.postTweetReply)
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
 router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
+router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.addUnlike)
 
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)

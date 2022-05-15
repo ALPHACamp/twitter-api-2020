@@ -104,14 +104,11 @@ const tweetController = {
 
   addLike: (req, res, next) => {
     const TweetId = Number(req.params.id)
-    const UserId = helpers.getUser(req).id
+    const UserId = Number(helpers.getUser(req).id)
     Promise.all([
       Tweet.findByPk(TweetId),
       Like.findOne({
-        where: {
-          UserId,
-          TweetId
-        }
+        where: { UserId, TweetId }
       })
     ])
       .then(([tweet, like]) => {
@@ -124,6 +121,27 @@ const tweetController = {
         })
       })
       .then(() => res.status(200).json({ message: '已成功Like這篇推文！' }))
+      .catch(err => next(err))
+  },
+
+  addUnlike: (req, res, next) => {
+    const TweetId = Number(req.params.id)
+    const UserId = Number(helpers.getUser(req).id)
+
+    Promise.all([
+      Tweet.findByPk(TweetId),
+      Like.findOne({
+        where: { TweetId, UserId }
+      })
+    ])
+
+      .then(([tweet, like]) => {
+        if (!tweet) throw new Error('推文不存在！')
+        if (!like) throw new Error('沒有對這篇推文按過Like！')
+
+        return like.destroy()
+      })
+      .then(() => res.status(200).json({ message: '已取消Like這篇推文！' }))
       .catch(err => next(err))
   }
 
