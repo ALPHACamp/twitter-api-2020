@@ -12,11 +12,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       Tweet_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Tweets',
-          key: 'id'
-        }
+        type: Sequelize.INTEGER
       },
       created_at: {
         allowNull: false,
