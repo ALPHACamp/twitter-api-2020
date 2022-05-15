@@ -3,12 +3,25 @@ const { User, Tweet, Reply, Like, Followship } = require('../models')
 const { imgurHandler } = require('../_helpers')
 const userServices = {
   signUp: (req, cb) => {
-    const { account, name, email, password, checkPassword } = req.body
-    if (password != checkPassword) throw new Error('Password do not match!')
+    let { account, name, email, password, checkPassword } = req.body
 
-    User.findOne({ where: { account } })
-      .then(user => {
-        if (user) throw new Error('Account already exists!')
+    account = account.trim()
+    name = name.trim()
+    email = email.trim()
+    password = password.trim()
+    checkPassword = checkPassword.trim()
+
+    if (password != checkPassword) throw new Error('Password do not match!')
+    if (!account || !password || !checkPassword || !email) throw new Error('Please fill required fields!')
+    if (name.length > 50) throw new Error('Length of the name is too long!')
+
+    return Promise.all([
+      User.findOne({ where: { account }}),
+      User.findOne({ where: { email }})
+    ])
+      .then(([accountCheck, emailCheck]) => {
+        if (accountCheck) throw new Error('Account already exists!')
+        if (emailCheck) throw new Error('Email already exists!')
         return bcrypt.hash(password, 10)
       })
       .then(hash => User.create({
@@ -21,25 +34,43 @@ const userServices = {
       .catch(err => cb(err))
   },
   getUser: (req, cb) => {
-    User.findByPk(req.params.id)
+    return User.findByPk(req.params.id, {
+      nest: true,
+      include: [
+        { model: User, as: 'Followers'},
+        { model: User, as: 'Followings'}
+      ]
+    })
       .then(user => {
-        if (!user) throw new Error("User didn't exists!")
-        return user = user.get({ plain: true })
+        if (!user) throw new Error("User didn't exists!")      
+        const userData = user.toJSON()
+        delete userData.password
+        userData.Followers = userData.Followers.length
+        userData.Followings = userData.Followings.length
+        return cb(null, userData)
       })
-      .then(user => cb(null, user ))
       .catch(err => cb(err))
   },
   getUserTweets: (req, cb) => {
     return Promise.all([
       User.findByPk(req.params.id, { raw: true }),
-      Tweet.findAll({
-        raw: true,
-        where: { UserId: req.params.id }
+      Tweet.findAll(
+        {
+        where: { UserId: req.params.id },
+          include: [{model: User},{ model: Reply }, { model: Like}]
       })
     ])
       .then(([user, tweets]) => {
         if (!user) throw new Error("User didn't exists!")
-        return cb(null, tweets)
+        const tweetsData = tweets.map(t => ({
+          ...t.toJSON(),
+          userAccount: t.User.account,
+          userAvatar: t.User.avatar,
+          User: t.User.name,
+          Replies:t.Replies.length,
+          Likes: t.Likes.length
+        }))
+        return cb(null, tweetsData)
       })
       .catch(err => cb(err))
   },
@@ -47,16 +78,16 @@ const userServices = {
     return Promise.all([
       User.findByPk(req.params.id, { raw: true }),
       Reply.findAll({
-        raw: true,
-        nest: true,
         where: { UserId: req.params.id },
-        include: Tweet
+        include:[{model: Tweet, include: User}]
       })
     ])
       .then(([user, replies]) => {
         if (!user) throw new Error("User didn't exists!")
         const repliedTweets = replies.map(r => ({
-          ...r.Tweet,
+          ...r.Tweet.toJSON(),
+          User: r.Tweet.User.name, 
+          userAvatar: r.Tweet.User.avatar,
           comment: r.comment
         }))
         return cb(null, repliedTweets)
@@ -68,18 +99,21 @@ const userServices = {
     return Promise.all([
       User.findByPk(req.params.id, { raw: true }),
       Like.findAll({
-        raw: true,
-        nest: true,
         where: { UserId: req.params.id },
-        include: [ Tweet ]
+        include: [{ model: Tweet, include: [{model: User}, {model: Reply}, {model: Like}]}]
       })
     ])
     .then(([user, likes]) => {
       if (!user) throw new Error("User didn't exists!")
       const userLikes = likes.map(l => ({
         UserId: l.UserId,
+        tweetName: l.Tweet.User.name,
+        tweetAccount: l.Tweet.User.account,
+        tweetAvatar: l.Tweet.User.avatar,
         TweetId: l.TweetId,
-        description: l.Tweet.description,
+        tweetDescription: l.Tweet.description,
+        tweetLikesCount: l.Tweet.Likes.length,
+        tweetRepliesCount: l.Tweet.Replies.length,
         createdAt: l.createdAt,
         updatedAt: l.updatedAt
       }))
@@ -88,41 +122,44 @@ const userServices = {
     .catch(err => cb(err))
   },
   getUserFollowings: (req, cb) => {
-    return Promise.all([
-      User.findByPk(req.params.id),
-      Followship.findAll({
-        raw: true,
-        where: { 
-          followerId: req.params.id
-        }
-      })
-    ])
-    .then(([user, followings]) => {
-      if (!user) throw new Error("User didn't exists!")
-      return cb(null, followings)
+    return User.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'Followings' }
+      ]
     })
-    .catch(err => cb(err))
-
+      .then((user) => {
+        const userFollowings = user.Followings.map(f => ({
+          followingId: f.id,
+          followingName: f.name,
+          followingAccount: f.account,
+          followingAvatar: f.avatar,
+          followingIntroduction: f.introduction
+        }))
+        if (!user) throw new Error("User didn't exists!")
+        return cb(null, userFollowings)
+      })
+      .catch(err => cb(err))
   },
   getUserFollowers: (req, cb) => {
-    return Promise.all([
-      User.findByPk(req.params.id, {raw: true}),
-      Followship.findAll({
-        raw: true,
-        where: {
-          followingId: req.params.id
-        }
-      })
-    ])
-    .then(([user, followers]) => {
+    return User.findByPk(req.params.id, {
+      include: [
+        {model: User, as: 'Followers'}
+      ]})
+    .then((user) => {
+      const userFollowers = user.Followers.map(f => ({
+        followerId: f.id,
+        followerName: f.name,
+        followerAccount: f.account,
+        followerAvatar: f.avatar,
+        followerIntroduction: f.introduction
+      }))
       if (!user) throw new Error("User didn't exists!")
-      return cb(null, followers)
+      return cb(null, userFollowers)
     })
     .catch(err => cb(err))
   },
   putUser: (req, cb) => {
-    const { name, description, cover, avatar } = req.body
-
+    const { name, introduction, cover, avatar } = req.body
   }
 }
 module.exports = userServices
