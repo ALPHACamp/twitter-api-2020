@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { User, Identity, Tweet, Followship, Reply, Like } = require('../../models')
 const helpers = require('../../_helpers')
+// const { Sequelize } = require('sequelize')
+// const sequelize = new Sequelize('sqlite::memory:')
 
 const userController = {
   signIn: async (req, res, next) => {
@@ -328,18 +330,18 @@ const userController = {
 
   editUser: async (req, res, next) => {
     try {
-      const { name, bio } = req.body
-      // const { avatarImg, coverImg } = req.files
+      const { name, introduction } = req.body
+      const { avatarImg, coverImg } = req.files
       const user = await User.findByPk(req.params.id)
-      // const avatarImgUrl = await helpers.imgurFileHandler(avatarImg)
-      // const coverImgUrl = await helpers.imgurFileHandler(coverImg)
+      const avatarImgUrl = await helpers.imgurFileHandler(avatarImg)
+      const coverImgUrl = await helpers.imgurFileHandler(coverImg)
       if (!user) throw new Error('沒有找到相關的使用者資料')
 
       const updatedUser = await user.update({
         name,
-        bio
-        // avatar_img: avatarImgUrl || '',
-        // cover_img: coverImgUrl || ''
+        introduction,
+        avatar_img: avatarImgUrl || '',
+        cover_img: coverImgUrl || ''
       })
       const data = updatedUser.toJSON()
       return res.status(200).json(data)
@@ -350,7 +352,40 @@ const userController = {
 
   getTopUser: async (req, res, next) => {
     try {
-      const rank = Number(req.query.rank) || null
+      const identityId = (await Identity.findOne({
+        where: { identity: 'user' },
+        attributes: ['id']
+      })).id
+
+      let users = await (User.findAll({
+        nest: true,
+        where: { identity_id: identityId },
+        attributes: [
+          'id',
+          'name',
+          'account',
+          'avatar_img'
+          // [sequelize.fn('COUNT', sequelize.col('User.id')), 'follower_count']
+        ],
+        include: {
+          model: User,
+          as: 'Following',
+          attributes: [
+            'id'
+          ]
+        }
+      }))
+      const limit = Number(req.query.limit) || users.length
+      users = users.map(user => {
+        const followerCount = user.Following.length
+        return {
+          ...user.toJSON(),
+          follower_count: followerCount
+        }
+      })
+      users = users.sort((a, b) => b.follower_count - a.follower_count).slice(0, limit)
+
+      return res.status(200).json(users)
     } catch (err) {
       next(err)
     }
