@@ -25,6 +25,6 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Liked_replies');
+    await queryInterface.dropTable('Liked_replies')
   }
 }
