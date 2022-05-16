@@ -2,6 +2,7 @@ const createToken = require('../helpers/token')
 const { User, Tweet, Reply, Like, Followship } = require('../models')
 const bcrypt = require('bcryptjs')
 const { imgurCoverHandler, imgurAvatarHandler } = require('../helpers/file-helpers')
+const tweets = require('../services/tweets')
 
 const userController = {
   login: async (req, res, next) => {
@@ -58,6 +59,7 @@ const userController = {
           res.json({
             status: 'success',
             ...user,
+            tweetCount: user.Tweets.length,
             followingsCount: user.Followings.length,
             followersCount: user.Followers.length
           })
@@ -270,6 +272,28 @@ const userController = {
         })
         .then(user => {
           res.json(user)
+        })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopUsers: (req, res, next) => {
+    try {
+      User.findAll({
+        include: [{ model: User, as: 'Followers' }],
+        nest: true
+      })
+        .then(user => {
+          const newData = []
+          // eslint-disable-next-line array-callback-return
+          user.map(user => {
+            user = user.toJSON()
+            delete user.password
+            newData.push(user)
+          })
+          res.json({
+            newData
+          })
         })
     } catch (err) {
       next(err)
