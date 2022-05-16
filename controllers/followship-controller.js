@@ -29,6 +29,7 @@ const followshipController = {
       })
       .catch(err => next(err))
   },
+
   removeFollowing: (req, res, next) => {
     const followingId = Number(req.params.id)
     const followerId = helpers.getUser(req).id
