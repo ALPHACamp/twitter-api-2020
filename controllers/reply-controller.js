@@ -4,17 +4,17 @@ const { Reply, LikedReply } = require('../models')
 const replyController = {
   likeReply: (req, res, next) => {
     /*
-    :param id: replyId
+    :param id: ReplyId
     This api would create a like relation between user and reply, and return a json
     */
-    const userId = req.user.id
-    const replyId = req.params.id
+    const UserId = req.user.id
+    const ReplyId = req.params.id
     return Promise.all([
-      Reply.findByPk(replyId),
+      Reply.findByPk(ReplyId),
       LikedReply.findOne({
         where: {
-          userId,
-          replyId
+          UserId,
+          ReplyId
         }
       })
     ])
@@ -23,8 +23,8 @@ const replyController = {
         if (likedReply) throw new Error('You have liked this reply!')
 
         return LikedReply.create({
-          userId,
-          replyId
+          UserId,
+          ReplyId
         })
       })
       .then(likedReply => {
@@ -41,15 +41,15 @@ const replyController = {
   },
   unlikeReply: (req, res, next) => {
     /*
-    :param id: replyId
+    :param id: ReplyId
     This api would destroy a like relation between user and reply, and return a json
     */
-    const userId = req.user.id
-    const replyId = req.params.id
+    const UserId = req.user.id
+    const ReplyId = req.params.id
     return LikedReply.findOne({
       where: {
-        userId,
-        replyId
+        UserId,
+        ReplyId
       }
     })
       .then(likedReply => {
@@ -71,17 +71,17 @@ const replyController = {
   },
   putReply: async (req, res, next) => {
     /*
-    :param id: replyId
+    :param id: ReplyId
     :body comment: reply's content
     This api would edit a reply record and return a json
     */
-    const userId = req.user.id
-    const replyId = req.params.id
+    const UserId = req.user.id
+    const ReplyId = req.params.id
     const comment = req.body.comment
     if (!comment) throw new Error('Comment is required!')
     try {
       const reply = await Reply.findOne({
-        where: { id: replyId, userId }
+        where: { id: ReplyId, UserId }
       })
       if (!reply) throw new Error("Reply didn't exist or you don't have permission to edit!")
       const updatedReply = await reply.update({
@@ -101,19 +101,19 @@ const replyController = {
   },
   deleteReply: async (req, res, next) => {
     /*
-    :param id: replyId
+    :param id: ReplyId
     This api would delete a reply record and its related likeReplies record, and return a json
     */
-    const userId = req.user.id
-    const replyId = req.params.id
+    const UserId = req.user.id
+    const ReplyId = req.params.id
     try {
       const reply = await Reply.findOne({
-        where: { id: replyId, userId }
+        where: { id: ReplyId, UserId }
       })
       if (!reply) throw new Error("Reply didn't exist or you don't have permission to edit!")
       const destroyedReply = await reply.destroy()
       await LikedReply.destroy({
-        where: { replyId }
+        where: { ReplyId }
       })
       res.json({
         status: 'Success',
