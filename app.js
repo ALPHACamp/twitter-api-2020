@@ -7,13 +7,11 @@ const express = require('express')
 
 const app = express()
 const port = process.env.PORT || 3000
-const SESSION_SECRET = 'secret'
 
 const routes = require('./routes')
 const passport = require('./config/passport')
 
 const methodOverride = require('method-override')
-const session = require('express-session')
 const cors = require('cors')
 
 // Setting Cors
@@ -22,9 +20,6 @@ app.use(cors())
 // Setting body-parser
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(
-  session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
-)
 
 // Setting passport
 app.use(passport.initialize())

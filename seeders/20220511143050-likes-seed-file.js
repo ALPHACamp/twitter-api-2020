@@ -16,5 +16,5 @@ module.exports = {
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Likes', null, {})
-  },
+  }
 }
