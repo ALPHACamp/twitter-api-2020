@@ -14,12 +14,12 @@ module.exports = {
         description: faker.lorem.text().substring(0, 140),
         created_at: new Date(),
         updated_at: new Date(),
-        user_id: users[Math.floor(Math.random() * users.length)].id,
+        user_id: users[Math.floor(Math.random() * users.length)].id
       }))
     )
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Tweets', null, {})
-  },
+  }
 }

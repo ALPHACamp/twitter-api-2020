@@ -24,9 +24,10 @@ router.get('/users/top', authenticated, userController.getTopUsers)
 // 取得目前登入的使用者資料
 router.get('/current_user', authenticated, userController.getCurrentUser)
 
-// 取得特定使用者的所有推文、回覆
+// 取得特定使用者的所有推文、回覆、like資料
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUsersTweets)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUsersReplies)
+router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getUsersLikes)
 
 // 修改目前登入的使用者設定
 router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
@@ -48,6 +49,9 @@ router.get('/users/:id', authenticated, authenticatedUser, userController.getUse
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.postTweetReply)
 router.get('/tweets/:tweet_id', authenticated, authenticatedUser, tweetController.getTweet)
+router.post('/tweets/:id/like', authenticated, authenticatedUser, tweetController.addLike)
+router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetController.addUnlike)
+
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
