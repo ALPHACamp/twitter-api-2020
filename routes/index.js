@@ -56,7 +56,7 @@ router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweet
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 // Followship APIs
-router.post('/followships/:id', authenticated, followshipController.addFollowing)
+router.post('/followships', authenticated, followshipController.addFollowing)
 router.delete('/followships/:id', authenticated, followshipController.removeFollowing)
 
 router.use('/', apiErrorHandler)

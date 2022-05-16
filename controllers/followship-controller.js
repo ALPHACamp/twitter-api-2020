@@ -3,8 +3,9 @@ const helpers = require('../_helpers')
 
 const followshipController = {
   addFollowing: (req, res, next) => {
-    const followingId = Number(req.params.id)
+    const followingId = Number(req.body.id)
     const followerId = helpers.getUser(req).id
+
     if (followingId === followerId) throw new Error('不能追蹤自己!')
     return Promise.all([
       User.findByPk(followingId),
