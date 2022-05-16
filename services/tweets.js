@@ -62,7 +62,52 @@ const tweets = {
   },
   getOne: async (tweetId) => {
     try {
-      const tweet = await Tweet.findByPk(tweetId, { raw: true })
+      const rawTweet = await Tweet.findByPk(tweetId, {
+        attributes: {
+          exclude: ['updatedAt']
+        },
+        include: [
+          {
+            model: User,
+            attributes: [
+              'name',
+              'account',
+              'avatar'
+            ]
+          },
+          {
+            model: Like,
+            attributes: [
+              [sequelize.fn('COUNT', sequelize.col('Likes.Tweet_id')), 'likeCounts']
+            ]
+          }
+        ],
+        order: [['created_at', 'DESC']],
+        group: ['id'],
+        nest: true,
+        raw: true
+      })
+      const replies = await Reply.count({
+        group: ['Tweet_id'],
+        raw: true
+      })
+
+      if (replies !== undefined) {
+        rawTweet.replyCounts = 0
+      } else {
+        rawTweet.replyCounts = replies[0].count
+      }
+
+      const tweet = {
+        id: rawTweet.id,
+        name: rawTweet.User.name,
+        account: rawTweet.User.account,
+        avatar: rawTweet.User.avatar,
+        description: rawTweet.description,
+        createdAt: rawTweet.createdAt,
+        likeCount: rawTweet.Likes.likeCounts,
+        replyCount: rawTweet.replyCounts
+      }
       return tweet
     } catch (err) {
       console.log(err)

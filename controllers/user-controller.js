@@ -124,27 +124,20 @@ const userController = {
       next(err)
     }
   },
-  userLikes: (req, res, next) => {
+  userLikes: async (req, res, next) => {
     try {
-      const userId = req.params.id
-      Like.findAll({
-        where: { userId },
-        include: [User, Tweet],
-        raw: true,
-        nest: true
+      const UserId = req.params.id
+      const userLikes = await Like.findAll({
+        where: {
+          UserId
+        },
+        include: [{
+          model: Tweet
+        }],
+        nest: true,
+        raw: true
       })
-        .then(tweet => {
-          const repeatDataId = []
-          const newData = []
-          // eslint-disable-next-line array-callback-return
-          tweet.map(tweet => {
-            if (!repeatDataId.includes(tweet.tweetId)) {
-              repeatDataId.push(tweet.tweetId)
-              newData.push(tweet)
-            }
-          })
-          res.json(newData)
-        })
+      console.log(userLikes)
     } catch (err) {
       next(err)
     }
