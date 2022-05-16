@@ -6,7 +6,7 @@ const adminController = {
   login: async (req, res, next) => {
     try {
       const userData = req.user.toJSON()
-      if (userData.role !== 'admin') res.status(403).json({ status: 'error', message: '非管理者' })
+      if (userData.role !== 'admin') throw new Error('非管理者')
       const token = await createToken(userData)
       res.json({
         status: 'success',
@@ -22,7 +22,7 @@ const adminController = {
   tweets: async (req, res) => {
     try {
       const tweets = await tweetServices.getAll()
-      if (!(tweets.length)) return res.status(403).json({ status: 'error', message: '推文不存在' })
+      if (!(tweets.length)) throw new Error('推文不存在')
 
       tweets.forEach(element => {
         element.description = element.description.substring(0, 51)
@@ -44,8 +44,7 @@ const adminController = {
         raw: true
       })
 
-      if (!users) return res.status(403).json({ status: 'error', message: '沒有使用者' })
-
+      if (!users) throw new Error('沒有使用者')
       // 使用者發文總數
       const tweets = await Tweet.count({
         group: ['User_id']

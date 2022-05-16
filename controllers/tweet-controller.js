@@ -14,13 +14,14 @@ const tweetController = {
   create: async (req, res) => {
     try {
       const user = helpers.getUser(req)
-      const tweet = req.body.description
-      if (tweet.length > 140) throw new Error('字數超過 140')
+      const description = req.body.description
+      if (description.length > 140) throw new Error('字數超過 140')
       await Tweet.create({
         UserId: user.id,
-        description: tweet
+        description
       })
-      res.sendStatus(200)
+      const tweets = await tweetServices.getAll()
+      return res.status(200).json(tweets)
     } catch (err) {
       console.log(err)
     }
