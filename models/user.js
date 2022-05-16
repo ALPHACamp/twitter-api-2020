@@ -8,7 +8,6 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Tweet, { foreignKey: 'UserId' })
       User.hasMany(models.Reply, { foreignKey: 'UserId' })
       User.hasMany(models.Like, { foreignKey: 'UserId' })
-      User.hasMany(models.LikedReply, { foreignKey: 'UserId' })
       User.belongsToMany(models.Tweet, {
         through: models.Like,
         foreignKey: 'UserId',
@@ -38,13 +37,11 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     },
     account: {
-      type: DataTypes.STRING,
-      unique: true
+      type: DataTypes.STRING
     },
     name: DataTypes.STRING,
     email: {
-      type: DataTypes.STRING,
-      unique: true
+      type: DataTypes.STRING
     },
     password: DataTypes.STRING,
     role: {

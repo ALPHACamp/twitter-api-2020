@@ -5,11 +5,15 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class LikedReply extends Model {
     static associate (models) {
-      LikedReply.belongsTo(models.User, { foreignKey: 'UserId' })
-      LikedReply.belongsTo(models.Reply, { foreignKey: 'ReplyId' })
+
     }
   };
   LikedReply.init({
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
+    },
     UserId: DataTypes.INTEGER,
     ReplyId: DataTypes.INTEGER,
     createdAt: DataTypes.DATE,

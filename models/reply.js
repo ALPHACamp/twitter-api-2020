@@ -7,7 +7,6 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {
       Reply.belongsTo(models.User, { foreignKey: 'UserId' })
       Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
-      Reply.hasMany(models.LikedReply, { foreignKey: 'TweetId' })
       Reply.belongsToMany(models.User, {
         through: models.LikedReply,
         foreignKey: 'ReplyId',
