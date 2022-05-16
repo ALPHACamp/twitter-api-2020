@@ -5,7 +5,7 @@ const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.confirmPassword) throw new Error('Passwords do not match!')
+    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     Promise.all([User.findOne({ where: { account: req.body.account } }), User.findOne({ where: { email: req.body.email } })]).then(([findAccount, findEmail]) => {
       if (findAccount) throw new Error('Account has already been taken.')
       if (findEmail) throw new Error('Email has already been taken.')
@@ -90,21 +90,24 @@ const userController = {
     if (!account) throw new Error('Account is required!')
     if (!password) throw new Error('Password is required!')
     if (!email) throw new Error('Email is required!')
-    Promise.all([User.findOne({ where: { email } }), User.findOne({ where: { account } })])
-      .then(([findEmail, findAccount]) => {
+    Promise.all([User.findOne({ where: { email } }, { raw: true, nest: true }), User.findOne({ where: { account } }, { raw: true }), User.findByPk(req.params.id)])
+      .then(([findEmail, findAccount, user]) => {
         if (findEmail && findEmail.id !== req.user.id) throw new Error('Email has already been taken.')
-        if (findAccount && findAccount !== req.user.id) throw new Error('Account has already been taken.')
+        if (findAccount && findAccount.id !== req.user.id) throw new Error('Account has already been taken.')
+        console.log(findEmail)
         imgurFileHandler(avatar)
         imgurFileHandler(cover)
-        findAccount.update({
+        return user.update({
           name, account, email, password: hash, avatar: avatar || null, cover: cover || null, introduction
         })
-        findAccount = findAccount.toJSON()
-        delete findAccount.password
+      })
+      .then(user => {
+        user = user.toJSON()
+        delete user.password
         return res.json({
           status: 'success',
           data: {
-            findAccount
+            user
           }
         })
       })
