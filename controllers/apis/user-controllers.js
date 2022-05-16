@@ -202,11 +202,17 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name']
+            attributes: ['id', 'account', 'name', 'avatarImg']
           },
           {
             model: Tweet,
-            attributes: ['id', 'description', 'user_id']
+            attributes: ['id', 'description', 'user_id'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'account', 'name', 'avatarImg']
+              }
+            ]
           }
         ],
         order: [['created_at', 'DESC']],
