@@ -43,7 +43,7 @@ router.post('/api/followships', authenticated, followshipController.postFollowsh
 // 使用者相關路由
 router.post('/api/users', userController.signUp)
 router.get('/api/users/:id', authenticated, userController.getUser)
-router.get('/api/users/:id/tweets', authenticated, userController.getUserTweet)
+router.get('/api/users/:id/tweets', userController.getUserTweet)
 router.get('/api/users/:id/replied_tweets', authenticated, userController.userRepliedTweets)
 router.get('/api/users/:id/likes', authenticated, userController.userLikes)
 router.get('/api/users/:id/followings', authenticated, userController.userFollowings)

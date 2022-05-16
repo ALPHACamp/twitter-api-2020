@@ -36,7 +36,9 @@ const userController = {
           role: 'user'
         }))
         .then(user => {
-          res.json({ status: 'success', user })
+          user = user.toJSON()
+          delete user.password
+          res.json(user)
         })
     } catch (err) {
       next(err)
@@ -55,6 +57,7 @@ const userController = {
         .then(user => {
           if (!user) res.status(403).json({ status: 'error', message: '找不到使用者！' })
           user = user.toJSON()
+          delete user.password
           res.json({
             status: 'success',
             ...user,
@@ -72,15 +75,26 @@ const userController = {
 
       Tweet.findAll({
         where: { UserId },
-        include: User,
-        raw: true,
+        include: [User, Reply, Like],
         nest: true
       })
         .then(tweet => {
           if (!tweet) {
             res.status(403).json({ status: 'error', message: '找不到使用者的推文！' })
           } else {
-            res.json(tweet)
+            const newData = tweet.map(tweet => ({
+              description: tweet.description,
+              createdAt: tweet.createdAt,
+              updatedAt: tweet.updatedAt,
+              User: {
+                account: tweet.User.account,
+                name: tweet.User.name,
+                avatar: tweet.User.avatar
+              },
+              repliesCount: tweet.Replies.length,
+              likesCount: tweet.Likes.length
+            }))
+            res.json(newData)
           }
         })
     } catch (err) {
@@ -105,6 +119,7 @@ const userController = {
           // eslint-disable-next-line array-callback-return
           reply.map(reply => {
             if (!repeatDataId.includes(reply.TweetId)) {
+              delete reply.User.password
               repeatDataId.push(reply.TweetId)
               newData.push(reply)
             } else {
@@ -135,6 +150,7 @@ const userController = {
             // eslint-disable-next-line array-callback-return
             tweet.map(tweet => {
               if (!repeatDataId.includes(tweet.tweetId)) {
+                delete tweet.User.password
                 repeatDataId.push(tweet.tweetId)
                 newData.push(tweet)
               }
@@ -154,6 +170,7 @@ const userController = {
         raw: true
       })
         .then(followings => {
+          console.log(followings)
           res.json(followings)
         })
     } catch (err) {
@@ -179,14 +196,14 @@ const userController = {
       const userId = req.params.id
       const { name, introduction } = req.body
       const { files } = req
-      if (!name) throw new Error('請輸入使用者姓名！')
+      if (!name) return res.status(403).json({ status: 'error', message: '姓名為必填欄位' })
       return Promise.all([
         User.findByPk(userId),
         imgurCoverHandler(files),
         imgurAvatarHandler(files)
       ])
         .then(([user, coverUrl, avatarUrl]) => {
-          if (!user) throw new Error('使用者不存在！')
+          if (!user) return res.status(403).json({ status: 'error', message: '使用者不存在！' })
           return user.update({
             name,
             introduction: introduction || user.introduction,
