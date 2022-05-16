@@ -7,17 +7,24 @@ const imgurFileHandler = require('../helpers/file-helper')
 const userController = {
   register: async (req, res, next) => {
     try {
-      if (req.body.password !== req.body.checkPassword) throw new Error('密碼與確認密碼不符。')
+      const {name, account, email, password, checkPassword} = req.body
+      if (!name.trim() ||
+          !account.trim() ||
+          !email.trim() ||
+          !password.trim() ||
+          !checkPassword.trim()) throw new Error('所有欄位必填。')
+
+      if (req.body.password.trim() !== req.body.checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
       if (
         await User.findOne({ where: { account: req.body.account }})||
         await User.findOne({ where: { email: req.body.email } })
         ) throw new Error('帳號或 email 已經註冊。')
         
       await User.create({
-        account: req.body.account,
-        name: req.body.name,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10)
+        account,
+        name,
+        email,
+        password: bcrypt.hashSync(password, 10)
       })
       res.status(200).json('註冊成功')
     } catch (err) {
@@ -201,6 +208,14 @@ const userController = {
     try {
       const { name, account, email, password, checkPassword } = req.body
       const user = getUser(req)
+
+      if (!name.trim() ||
+        !account.trim() ||
+        !email.trim() ||
+        !password.trim() ||
+        !checkPassword.trim()) throw new Error('所有欄位必填。')
+
+      if (req.body.password.trim() !== req.body.checkPassword.trim()) throw new Error('密碼與確認密碼不符。')
 
       if (!account) throw new Error('帳號不可空白。')
       if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
