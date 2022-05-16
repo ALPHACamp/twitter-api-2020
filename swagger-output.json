@@ -280,7 +280,7 @@
         },
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
@@ -298,6 +298,14 @@
                   },
                   "introduction": {
                     "example": "any"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "cover": {
+                    "type": "string",
+                    "format": "binary"
                   }
                 }
               }
