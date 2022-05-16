@@ -5,11 +5,12 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Reply extends Model {
     static associate (models) {
-      Reply.belongsTo(models.User, { foreignKey: 'userId' })
-      Reply.belongsTo(models.Tweet, { foreignKey: 'tweetId' })
+      Reply.belongsTo(models.User, { foreignKey: 'UserId' })
+      Reply.belongsTo(models.Tweet, { foreignKey: 'TweetId' })
+      Reply.hasMany(models.LikedReply, { foreignKey: 'TweetId' })
       Reply.belongsToMany(models.User, {
         through: models.LikedReply,
-        foreignKey: 'replyId',
+        foreignKey: 'ReplyId',
         as: 'LikedUsers'
       })
     }
@@ -20,8 +21,8 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
-    userId: DataTypes.INTEGER,
-    tweetId: DataTypes.INTEGER,
+    UserId: DataTypes.INTEGER,
+    TweetId: DataTypes.INTEGER,
     comment: DataTypes.TEXT,
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE

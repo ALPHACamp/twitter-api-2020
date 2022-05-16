@@ -5,17 +5,18 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate (models) {
-      User.hasMany(models.Tweet, { foreignKey: 'userId' })
-      User.hasMany(models.Reply, { foreignKey: 'userId' })
-      User.hasMany(models.Like, { foreignKey: 'userId' })
+      User.hasMany(models.Tweet, { foreignKey: 'UserId' })
+      User.hasMany(models.Reply, { foreignKey: 'UserId' })
+      User.hasMany(models.Like, { foreignKey: 'UserId' })
+      User.hasMany(models.LikedReply, { foreignKey: 'UserId' })
       User.belongsToMany(models.Tweet, {
         through: models.Like,
-        foreignKey: 'userId',
+        foreignKey: 'UserId',
         as: 'LikedTweets'
       })
       User.belongsToMany(models.Reply, {
         through: models.LikedReply,
-        foreignKey: 'userId',
+        foreignKey: 'UserId',
         as: 'LikedReplies'
       })
       User.belongsToMany(User, {
