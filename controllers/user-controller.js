@@ -86,7 +86,7 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     try {
-      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
+      const userData = (({ id, account, name, email, avatar, cover, introduction, role }) => ({ id, account, name, email, avatar, cover, introduction, role }))(getUser(req))
       return res.status(200).json(userData)
     } catch (err) {
       next(err)
