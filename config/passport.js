@@ -13,11 +13,15 @@ passport.use(
       passReqToCallback: true
     },
     async (req, account, password, cb) => {
-      const user = await User.findOne({ where: { account }, include: Identity })
-      if (!user) return cb(null, false)
-      const res = await bcrypt.compare(password, user.password)
-      if (!res) return cb(null, false)
-      return cb(null, user)
+      try {
+        const user = await User.findOne({ where: { account }, include: Identity })
+        if (!user) return cb(null, false)
+        const res = await bcrypt.compare(password, user.password)
+        if (!res) return cb(null, false)
+        return cb(null, user)
+      } catch (err) {
+        cb(err)
+      }
     }
   )
 )
