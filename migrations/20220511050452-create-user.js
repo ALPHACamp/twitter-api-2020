@@ -32,8 +32,8 @@ module.exports = {
       introduction: {
         type: Sequelize.TEXT
       },
-      identity_id: {
-        type: Sequelize.INTEGER
+      role: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,
