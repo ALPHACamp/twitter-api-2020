@@ -88,7 +88,7 @@ const tweetController = {
 
   // 尚未通過測試
   postTweetReply: (req, res, next) => {
-    const UserId = Number(helpers.getUser(req).id)
+    const UserId = Number(getUser(req).id)
     const TweetId = Number(req.params.tweet_id)
     const { comment } = req.body
     if (comment.length > 140) throw new Error('回覆字數不可超過140字！')
