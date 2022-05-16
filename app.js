@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
+const path = require('path')
 const express = require('express')
 
 const app = express()
@@ -9,6 +10,7 @@ const port = process.env.PORT || 3000
 
 const routes = require('./routes')
 const passport = require('./config/passport')
+
 const methodOverride = require('method-override')
 const cors = require('cors')
 
@@ -25,6 +27,9 @@ app.use(passport.session())
 
 // Setting middleware
 app.use(methodOverride('_method'))
+
+// Setting upload path
+app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
 app.use('/api', routes)
 

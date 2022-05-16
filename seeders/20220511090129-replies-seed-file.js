@@ -1,31 +1,40 @@
 'use strict'
-
-const { User, Tweet } = require('../models')
 const faker = require('faker')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const users = await User.findAll({ where: { role: '' } })
-    const tweets = await Tweet.findAll()
-
-    await queryInterface.bulkInsert(
-      'Replies',
-      Array.from({ length: 150 }).map((item, index) => ({
-        id: index + 1,
-        user_id: Math.ceil(Math.random() * 9) + 1,
-        tweet_id: Math.ceil(( index + 1 ) / 3 ),
-        comment: faker.lorem.text().substring(0, 50),
-        created_at: new Date(),
-        updated_at: new Date()
-      })),
-      {}
+    const users = await queryInterface.sequelize.query(
+      "SELECT id FROM Users WHERE role = '';",
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
+
+    const tweets = await queryInterface.sequelize.query(
+      'SELECT id FROM Tweets',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    )
+
+    const replies = []
+
+    for (let i = 0; i < tweets.length; i++) {
+      for (let c = 0; c < 3; c++) {
+        const data = {
+          user_id: users[Math.floor(Math.random() * users.length)].id,
+          tweet_id: tweets[i].id,
+          comment: faker.lorem.text().substring(0, 50),
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+        replies.push(data)
+      }
+    }
+
+    await queryInterface.bulkInsert('Replies', replies, {})
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Replies', null, {
       where: {},
-      truncate: true,
+      truncate: true
     })
-  },
+  }
 }
