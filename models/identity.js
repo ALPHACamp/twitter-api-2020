@@ -14,7 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Identity.init({
-    id: DataTypes.STRING
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true
+    }
   }, {
     sequelize,
     modelName: 'Identity',
