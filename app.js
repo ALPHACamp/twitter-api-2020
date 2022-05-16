@@ -4,6 +4,8 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./swagger-output.json')
 const routes = require('./routes')
 const port = process.env.PORT || 3000
 const session = require('express-session')
@@ -25,6 +27,7 @@ app.use((req, res, next) => {
   res.locals.user = getUser(req)
   next()
 })
+app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile, { swaggerOptions: { persistAuthorization: true } }))
 app.use('/api', routes)
 app.listen(port, () => console.log(`App is listening on port ${port}!`))
 

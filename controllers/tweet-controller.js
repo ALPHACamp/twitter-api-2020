@@ -5,6 +5,10 @@ const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const tweetController = {
   getTweets: (req, res, next) => {
     /*
+    #swagger.tags = ['Tweets']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :query page: specific slice of all tweets
     :query limit: limit return number of tweets
     This api would return a json that concluding tweets with specific page & limit, pagination information
@@ -45,6 +49,10 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     /*
+    #swagger.tags = ['Tweets']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :param id: TweetId
     This api would return a json that concluding a specific tweet information
     */
@@ -71,6 +79,18 @@ const tweetController = {
   },
   postTweet: (req, res, next) => {
     /*
+    #swagger.tags = ['Tweets']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
+    #swagger.requestBody = {
+      required: true,
+      content: {
+          'application/json': {
+            schema: { $ref: "#/definitions/sample" },
+          }
+      }
+    }
     :body description: tweet's content
     This api would create a tweet record and return a json
     */
@@ -94,6 +114,10 @@ const tweetController = {
   },
   getReplies: (req, res, next) => {
     /*
+    #swagger.tags = ['Tweets']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :param id: TweetId
     This api would return a json that including all replies of a specific tweet
     */
@@ -127,6 +151,18 @@ const tweetController = {
   },
   postReply: (req, res, next) => {
     /*
+    #swagger.tags = ['Tweets']
+    #swagger.security = [{
+      'bearerAuth': []
+    }]
+    #swagger.requestBody = {
+      required: true,
+      content: {
+          'application/json': {
+            schema: { $ref: "#/definitions/sample" },
+          }
+      }
+    }
     :param id: TweetId
     :body comment: reply's content
     This api would create a reply of specific tweet and return a json
@@ -162,6 +198,10 @@ const tweetController = {
   },
   likeTweet: (req, res, next) => {
     /*
+    #swagger.tags = ['Tweets']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :param id: TweetId
     This api would create a like relation between user and tweet, and return a json
     */
@@ -199,6 +239,10 @@ const tweetController = {
   },
   unlikeTweet: (req, res, next) => {
     /*
+    #swagger.tags = ['Tweets']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
     :param id: TweetId
     This api would destroy a like relation between user and tweet, and return a json
     */
@@ -229,6 +273,18 @@ const tweetController = {
   },
   putTweet: async (req, res, next) => {
     /*
+    #swagger.tags = ['Tweets']
+    #swagger.security = [{
+            'bearerAuth': []
+    }]
+    #swagger.requestBody = {
+      required: true,
+      content: {
+          'application/json': {
+            schema: { $ref: "#/definitions/sample" },
+          }
+      }
+    }
     :param id: TweetId
     :body description: tweet's content
     This api would edit a tweet record and return a json
