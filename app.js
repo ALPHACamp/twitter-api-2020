@@ -1,15 +1,23 @@
+
+require('dotenv').config()
 const express = require('express')
-const helpers = require('./_helpers');
-
+const routes = require('./routes')
 const app = express()
-const port = 3000
+const { getUser } = require('./_helpers')
+const port = process.env.PORT || 3000
+const passport = require('./config/passport')
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+app.use(passport.initialize())
+app.use(passport.session())
 
-// use helpers.getUser(req) to replace req.user
-function authenticated(req, res, next){
-  // passport.authenticate('jwt', { ses...
-};
+app.use((req, res, next) => {
+  res.locals.user = getUser(req)
+  next()
+})
+// 將 request 導入路由器
+app.use(routes)
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => console.log(`App listening on port ${port}!`))
 
 module.exports = app
