@@ -33,9 +33,6 @@ const userController = {
 
   signUp: async (req, res, next) => {
     try {
-      if (req.body.password !== req.body.passwordCheck) {
-        throw new Error('驗證密碼不正確')
-      }
       const user = await User.findOne({ where: { account: req.body.account } })
       if (user) throw new Error('使用者已經存在')
 
@@ -44,15 +41,15 @@ const userController = {
         attributes: ['id']
       })
       const { id } = userIdentity.toJSON()
+      const password = await bcrypt.hash(req.body.password, 10)
 
       const registeredUser = await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password: await bcrypt.hash(req.body.password, 10),
+        password,
         identityId: id
       })
-
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
         expiresIn: '30d'
       })
@@ -84,8 +81,8 @@ const userController = {
       }
       delete userData.password
       delete userData.Identity
-      res.json({
-        status: 'success',
+
+      return res.status(200).json({
         data: {
           token,
           user: userData
@@ -147,7 +144,7 @@ const userController = {
         }
       })
 
-      res.json(...userData)
+      return res.status(200).json(...userData)
     } catch (err) {
       next(err)
     }
@@ -324,6 +321,36 @@ const userController = {
         }
       })
       return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  editUser: async (req, res, next) => {
+    try {
+      const { name, bio } = req.body
+      // const { avatarImg, coverImg } = req.files
+      const user = await User.findByPk(req.params.id)
+      // const avatarImgUrl = await helpers.imgurFileHandler(avatarImg)
+      // const coverImgUrl = await helpers.imgurFileHandler(coverImg)
+      if (!user) throw new Error('沒有找到相關的使用者資料')
+
+      const updatedUser = await user.update({
+        name,
+        bio
+        // avatar_img: avatarImgUrl || '',
+        // cover_img: coverImgUrl || ''
+      })
+      const data = updatedUser.toJSON()
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getTopUser: async (req, res, next) => {
+    try {
+      const rank = Number(req.query.rank) || null
     } catch (err) {
       next(err)
     }

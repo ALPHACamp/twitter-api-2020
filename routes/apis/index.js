@@ -18,6 +18,7 @@ router.post(
   userController.signIn
 )
 router.get('/current_user', authenticated, userController.getCurrentUser)
+router.get('/users/top', authenticated, userController.getTopUser)
 
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
 router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
@@ -26,6 +27,7 @@ router.get('/users/:id/followings', authenticated, userController.getUserFollowi
 router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
 
 router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', authenticated, userController.editUser)
 router.post('/users', userController.signUp)
 
 router.get('/tweets/:tId/replies', authenticated, replyController.getReply)
