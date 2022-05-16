@@ -1,7 +1,10 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Tweet, Reply, Like } = require('../models')
+
+const { User, Tweet, Followship, Reply, Like } = require('../models')
+
 const { getUser } = require('../_helpers')
+const Sequelize = require('sequelize')
 
 const userController = {
   signIn: (req, res, next) => {
@@ -83,17 +86,13 @@ const userController = {
       .catch(err => next(err))
   },
 
-  getCurrentUser: (req, res) => {
-    const reqUserId = getUser(req).id
-    const options = {
-      attributes: ['id', 'account', 'name', 'email', 'avatar', 'role']
+  getCurrentUser: (req, res, next) => {
+    try {
+      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
+      return res.status(200).json(userData)
+    } catch (err) {
+      next(err)
     }
-
-    User.findByPk(reqUserId, options)
-      .then(user => {
-        return res.status(200).json(user)
-      })
-      .catch(err => next(err))
   },
 
   getTopUsers: (req, res, next) => {
@@ -127,17 +126,21 @@ const userController = {
     const { account, name, email, password, checkPassword } = req.body
     const userId = Number(req.params.id)
     const reqUserId = getUser(req).id
-    // check if user is the current user
+
     if (userId !== reqUserId) throw new Error('Permission denied')
-    // check password
     if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
-    // check account
-    if (!account || !name || !email) { throw new Error('帳號、名稱和 email 欄位不可空白！') }
+    if (!account) throw new Error('帳號欄位不可空白！')
+    if (!name) throw new Error('名稱欄位不可空白！')
+    if (!email) throw new Error('Email 欄位不可空白！')
+    if (!password) throw new Error('密碼欄位不可空白！')
+    if (!checkPassword) throw new Error('確認密碼欄位不可空白！')
     if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
 
     return Promise.all([
       User.findAll({ $or: [{ where: { email } }, { where: { account } }] }),
-      User.findByPk(userId),
+      User.findByPk(userId, {
+        attributes: ['id', 'account', 'name', 'email', 'password', 'createdAt']
+      }),
       bcrypt.hash(password, 10)
     ])
       .then(([checkUsers, user, hash]) => {
@@ -155,35 +158,16 @@ const userController = {
       .catch(err => next(err))
   },
 
-  putUser: (req, res) => {
-    const { account, name, email, password, checkPassword } = req.body
-    const userId = Number(req.params.id)
-    const reqUserId = getUser(req).id
-
-    // check if user is the current user
-    if (userId !== reqUserId) throw new Error('Permission denied')
-    // check password
-    if (password !== checkPassword) throw new Error('密碼與確認密碼不符！')
-    // check account
-    if (!account || !name || !email) { throw new Error('帳號、名稱和 email 欄位不可空白！') }
-    if (name.length > 50 || account.length > 50) { throw new Error('字數上限為 50 個字！') }
-
-    return Promise.all([
-      User.findAll({ $or: [{ where: { email } }, { where: { account } }] }),
-      User.findByPk(userId),
-      bcrypt.hash(password, 10)
-    ])
-      .then(user => {
-        if (!user) throw new Error('帳號不存在！')
-        return user.update({
-          name,
-          introduction,
-          avatar: avatar || user.avatar,
-          cover: cover || user.cover
-        })
-      })
-      .then(updatedUser => res.status(200).json({ user: updatedUser }))
-      .catch(err => next(err))
+  putUser: async (req, res, next) => {
+    try {
+      const UserId = Number(req.params.id)
+      const user = await User.findByPk(UserId)
+      const userUpdate = await user.update(req.body)
+      res.status(200).json(userUpdate)
+    } catch (err) {
+      next(err)
+    }
+    res.status(200).json()
   },
 
   getUsersTweets: (req, res, next) => {
@@ -276,6 +260,45 @@ const userController = {
       .catch(err => next(err))
   }
 
+  getFollowings: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Followship.findAll({
+      where: { followerId: UserId },
+      attributes: [
+        'followingId', 'createdAt',
+        [Sequelize.literal('(SELECT account FROM Users WHERE id = following_id)'), 'account'],
+        [Sequelize.literal('(SELECT name FROM Users WHERE id = following_id)'), 'name'],
+        [Sequelize.literal('(SELECT avatar FROM Users WHERE id = following_id)'), 'avatar'],
+        [Sequelize.literal('(SELECT introduction FROM Users WHERE id = following_id)'), 'introduction'],
+        [Sequelize.literal(`(CASE WHEN following_id = ${UserId} THEN true ELSE false END)`), 'isFollowing']
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followers => res.status(200).json(followers))
+      .catch(err => next(err))
+  },
+
+  getFollowers: (req, res, next) => {
+    const UserId = Number(req.params.id)
+    Followship.findAll({
+      where: { followingId: UserId },
+      attributes: [
+        'followerId', 'createdAt',
+        [Sequelize.literal('(SELECT account FROM Users WHERE id = follower_id)'), 'account'],
+        [Sequelize.literal('(SELECT name FROM Users WHERE id = follower_id)'), 'name'],
+        [Sequelize.literal('(SELECT avatar FROM Users WHERE id = follower_id)'), 'avatar'],
+        [Sequelize.literal('(SELECT introduction FROM Users WHERE id = follower_id)'), 'introduction'],
+        [Sequelize.literal(`(CASE WHEN follower_id = ${UserId} THEN true ELSE false END)`), 'isFollowing']
+      ],
+      order: [['createdAt', 'DESC']],
+      raw: true,
+      nest: true
+    })
+      .then(followers => res.status(200).json(followers))
+      .catch(err => next(err))
+  }
 }
 
 module.exports = userController

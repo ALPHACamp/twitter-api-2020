@@ -3,13 +3,15 @@ const router = express.Router()
 const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
-const upload = require('../middleware/multer')
 const tweetController = require('../controllers/tweet-controller')
+const upload = require('../middleware/multer')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
-// 尚未加入 authenticatedAdmin
 const { authenticated, authenticatedUser } = require('../middleware/auth')
-const { getCurrentUser } = require('../controllers/user-controller')
+
+const admin = require('./modules/admin')
+
+router.use('/admin', admin)
 
 // 註冊/登入
 router.post('/users', userController.signUp)
@@ -19,15 +21,12 @@ router.post('/signin', passport.authenticate('local', { session: false }), userC
 router.get('/users/top', authenticated, userController.getTopUsers)
 
 // 取得目前登入的使用者資料
-router.get('/current_user', authenticated, authenticatedUser, getCurrentUser)
+router.get('/current_user', authenticated, userController.getCurrentUser)
 
 // 取得特定使用者的所有推文、回覆、like資料
 router.get('/users/:id/tweets', authenticated, authenticatedUser, userController.getUsersTweets)
 router.get('/users/:id/replied_tweets', authenticated, authenticatedUser, userController.getUsersReplies)
 router.get('/users/:id/likes', authenticated, authenticatedUser, userController.getUsersLikes)
-
-// 取得指定使用者資料 （這條可能要往後放喔，不然資料很容繼跑進這條裡就不往後面跑了！）
-router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // 修改目前登入的使用者設定
 router.put('/users/:id/setting', authenticated, authenticatedUser, userController.putUserSetting)
@@ -36,7 +35,14 @@ router.put('/users/:id/setting', authenticated, authenticatedUser, userControlle
 // router.put('/users/:id', upload.single('image'), userController.putUserSetting)
 
 // 修改目前登入的使用者個人頁面
-router.put('/api/users/:id', authenticated, authenticatedUser, userController.putUser)
+router.put('/users/:id', authenticated, authenticatedUser, userController.putUser)
+
+// 取得指定使用者追隨中的所有使用者 & 取得追隨指定使用者的所有使用者
+router.get('/users/:id/followings', userController.getFollowings)
+router.get('/users/:id/followers', userController.getFollowers)
+
+// 取得指定使用者資料 （往後放到最後囉）
+router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
 // Tweet APIs
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
