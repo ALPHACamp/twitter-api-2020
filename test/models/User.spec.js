@@ -80,6 +80,7 @@ describe('# User Model', () => {
 
   // 檢查 model 的新增、修改、刪除、更新
   context('action', () => {
+    
     let data = null
     // 檢查 db.User 是否真的可以新增一筆資料
     it('create', (done) => {
