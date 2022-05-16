@@ -29,6 +29,7 @@ router.get('/users/:id/followers', authenticated, userController.getUserFollower
 router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
 
+router.delete('/followships/:fId', authenticated, followshipController.deleteFollowship)
 router.post('/followships', authenticated, followshipController.postFollowship)
 
 router.get('/tweets/:tId/replies', authenticated, replyController.getReply)
