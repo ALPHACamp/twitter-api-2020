@@ -29,7 +29,7 @@ module.exports = {
       avatar_img: {
         type: Sequelize.TEXT
       },
-      bio: {
+      introduction: {
         type: Sequelize.TEXT
       },
       identity_id: {
