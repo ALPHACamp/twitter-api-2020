@@ -45,7 +45,7 @@ const tweetController = {
   },
   getTweet: (req, res, next) => {
     /*
-    :param id: tweetId
+    :param id: TweetId
     This api would return a json that concluding a specific tweet information
     */
     return Tweet.findByPk(req.params.id, {
@@ -77,7 +77,7 @@ const tweetController = {
     const description = req.body.description
     if (!description) throw new Error('Description is required!')
     return Tweet.create({
-      userId: req.user.id,
+      UserId: req.user.id,
       description
     })
       .then(tweet => {
@@ -94,17 +94,17 @@ const tweetController = {
   },
   getReplies: (req, res, next) => {
     /*
-    :param id: tweetId
+    :param id: TweetId
     This api would return a json that including all replies of a specific tweet
     */
     const DEFAULT_DESCRIPTION_LIMIT = 140
-    const tweetId = req.params.id
+    const TweetId = req.params.id
     return Reply.findAll({
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
         { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] }
       ],
-      where: { tweetId },
+      where: { TweetId },
       order: [['createdAt', 'DESC']]
     })
       .then(replies => {
@@ -127,24 +127,24 @@ const tweetController = {
   },
   postReply: (req, res, next) => {
     /*
-    :param id: tweetId
+    :param id: TweetId
     :body comment: reply's content
     This api would create a reply of specific tweet and return a json
     */
-    const userId = req.user.id
-    const tweetId = req.params.id
+    const UserId = req.user.id
+    const TweetId = req.params.id
     const comment = req.body.comment
     if (!comment) throw new Error('Comment is required!')
     return Promise.all([
-      User.findByPk(userId),
-      Tweet.findByPk(tweetId)
+      User.findByPk(UserId),
+      Tweet.findByPk(TweetId)
     ])
       .then(([user, tweet]) => {
         if (!user) throw new Error("User didn't exist!")
         if (!tweet) throw new Error("Tweet didn't exist!")
         return Reply.create({
-          userId,
-          tweetId,
+          UserId,
+          TweetId,
           comment
         })
       })
@@ -162,17 +162,17 @@ const tweetController = {
   },
   likeTweet: (req, res, next) => {
     /*
-    :param id: tweetId
+    :param id: TweetId
     This api would create a like relation between user and tweet, and return a json
     */
-    const userId = req.user.id
-    const tweetId = req.params.id
+    const UserId = req.user.id
+    const TweetId = req.params.id
     return Promise.all([
-      Tweet.findByPk(tweetId),
+      Tweet.findByPk(TweetId),
       Like.findOne({
         where: {
-          userId,
-          tweetId
+          UserId,
+          TweetId
         }
       })
     ])
@@ -181,8 +181,8 @@ const tweetController = {
         if (like) throw new Error('You have liked this tweet!')
 
         return Like.create({
-          userId,
-          tweetId
+          UserId,
+          TweetId
         })
       })
       .then(like => {
@@ -199,15 +199,15 @@ const tweetController = {
   },
   unlikeTweet: (req, res, next) => {
     /*
-    :param id: tweetId
+    :param id: TweetId
     This api would destroy a like relation between user and tweet, and return a json
     */
-    const userId = req.user.id
-    const tweetId = req.params.id
+    const UserId = req.user.id
+    const TweetId = req.params.id
     return Like.findOne({
       where: {
-        userId,
-        tweetId
+        UserId,
+        TweetId
       }
     })
       .then(like => {
@@ -229,17 +229,17 @@ const tweetController = {
   },
   putTweet: async (req, res, next) => {
     /*
-    :param id: tweetId
+    :param id: TweetId
     :body description: tweet's content
     This api would edit a tweet record and return a json
     */
-    const userId = req.user.id
-    const tweetId = req.params.id
+    const UserId = req.user.id
+    const TweetId = req.params.id
     const description = req.body.description
     if (!description) throw new Error('Description is required!')
     try {
       const tweet = await Tweet.findOne({
-        where: { id: tweetId, userId }
+        where: { id: TweetId, UserId }
       })
       if (!tweet) throw new Error("Tweet didn't exist or you don't have permission to edit!")
       const updatedTweet = await tweet.update({
