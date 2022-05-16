@@ -1,16 +1,23 @@
 const { Tweet, User, Reply, Like } = require('../models')
 const helpers = require('../_helpers')
+const { getUser } = require('../_helpers')
+
+const Sequelize = require('sequelize')
 
 const tweetController = {
 
   getTweets: (req, res, next) => {
-    // 為節省重新重資料庫拉資料的時間，getTweets直接用資料的likeCount和replyCount做數字顯示。但為確保數字正確。會在讀取單筆tweet資料的controller中，重拉資料並計數
     Tweet.findAll({
-      attributes: ['id', 'description', 'createdAt', 'updatedAt', 'replyCount', 'likeCount'],
-      order: [['createdAt', 'DESC']],
+      attributes: {
+        include: [
+          [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Tweet.id = Replies.Tweet_id )'), 'replyCount'],
+          [Sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Tweet.id = Likes.Tweet_id )'), 'likeCount']
+        ]
+      },
       include: [
-        { model: User, attributes: ['id', 'account', 'name', 'avatar'] }
+        { model: User, as: 'TweetUser', attributes: ['id', 'account', 'name', 'avatar'] }
       ],
+      order: [['createdAt', 'DESC']],
       raw: true,
       nest: true
     })
@@ -20,9 +27,7 @@ const tweetController = {
           ...tweet,
           isLiked: likedTweetId.some(item => item === tweet.id)
         }))
-
-        // res.status(200).json({ status: 'success', data }) 這樣寫測試過不了
-        res.status(200).json(data)
+        return res.status(200).json(data)
       })
       .catch(err => next(err))
   },
@@ -89,7 +94,7 @@ const tweetController = {
   // 尚未通過測試
   postTweetReply: (req, res, next) => {
     const UserId = Number(helpers.getUser(req).id)
-    const TweetId = Number(req.params.TweetId)
+    const TweetId = Number(req.params.tweet_id)
     const { comment } = req.body
     if (comment.length > 140) throw new Error('回覆字數不可超過140字！')
     if (!comment) throw new Error('回覆內容不可空白！')
