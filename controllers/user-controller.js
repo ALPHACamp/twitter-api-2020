@@ -127,17 +127,87 @@ const userController = {
   userLikes: async (req, res, next) => {
     try {
       const UserId = req.params.id
-      const userLikes = await Like.findAll({
+      const rawUserLikes = await Like.findAll({
         where: {
           UserId
         },
         include: [{
-          model: Tweet
+          model: Tweet,
+          attributes: [
+            'id'
+          ]
         }],
         nest: true,
         raw: true
       })
-      console.log(userLikes)
+
+      const likeTweetId = []
+
+      for (let index = 0; index < rawUserLikes.length; index++) {
+        likeTweetId.push(rawUserLikes[index].Tweet.id)
+      }
+
+      const likeTweets = await Tweet.findAll({
+        where: {
+          id: likeTweetId
+        },
+        include: [
+          { model: User }
+        ],
+        nest: true,
+        raw: true
+      })
+
+      // 推文 like 總數
+      const likes = await Like.count({
+        group: ['Tweet_id']
+      })
+
+      if (!likes) {
+        for (let index = 0; index < likeTweets.length; index++) {
+          likeTweets[index].totalLikeCount = 0
+        }
+      }
+
+      for (let likesIndex = 0; likesIndex < likes.length; likesIndex++) {
+        for (let tweetIndex = 0; tweetIndex < likeTweets.length; tweetIndex++) {
+          if (likeTweets[tweetIndex].id === likes[likesIndex].Tweet_id) {
+            likeTweets[tweetIndex].totalLikeCount = likes[likesIndex].count
+          } else {
+            if (likeTweets[tweetIndex].totalLikeCount === undefined) likeTweets[tweetIndex].totalLikeCount = 0
+          }
+        }
+      }
+      // 推文 reply 總數
+      const replies = await Reply.count({
+        group: ['Tweet_id']
+      })
+
+      if (!replies) {
+        for (let index = 0; index < likeTweets.length; index++) {
+          likeTweets[index].totalReplyCount = 0
+        }
+      }
+      for (let replyIndex = 0; replyIndex < replies.length; replyIndex++) {
+        for (let tweetIndex = 0; tweetIndex < likeTweets.length; tweetIndex++) {
+          if (likeTweets[tweetIndex].id === replies[replyIndex].Tweet_id) {
+            likeTweets[tweetIndex].totalReplyCount = replies[replyIndex].count
+          } else {
+            if (likeTweets[tweetIndex].totalReplyCount === undefined) likeTweets[tweetIndex].totalReplyCount = 0
+          }
+        }
+      }
+      const data = likeTweets.map(element => ({
+        TweetId: element.id,
+        description: element.description,
+        createdAt: element.createAt,
+        name: element.User.name,
+        account: element.User.account,
+        avatar: element.User.avatar,
+        totalLikeCount: element.totalLikeCount,
+        totalReplyCount: element.totalReplyCount
+      }))
+      res.status(200).json(data)
     } catch (err) {
       next(err)
     }
