@@ -11,7 +11,7 @@ const userController = require('../controllers/user-controller')
 const { authenticated, authenticatedAdmin, authenticatedUser } = require('../middleware/auth')
 
 // 將不同的 routes 拆分
-router.use('/admin', authenticated, authenticatedAdmin, admin)
+router.use('/admin', admin) // add authenticated, authenticatedAdmin,
 router.post('/users', userController.signUp)
 router.post('/users/signin', passport.authenticate('local', { session: false }), userController.signIn)
 router.get('/get_current_user', authenticated, userController.getCurrentUser)

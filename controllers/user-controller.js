@@ -75,8 +75,7 @@ const userController = {
       .catch(err => next(err))
   },
   getCurrentUser: (req, res, next) => { // #todo need more info
-    const currentUser = res.locals.user
-    return currentUser
+    return res.json(req.user)
   },
   putUser: (req, res, next) => {
     if (Number(req.params.id) !== Number(req.user.id)) {
