@@ -81,7 +81,7 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
             // 檢查是否回傳資料裡有 root 的資料
-            res.body.name.should.equal('root');
+            res.body.data.user.name.should.equal('root');
 
             return done();
           })
@@ -128,9 +128,9 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
 
-            expect(res.body).to.be.an('array');
+            expect(res.body.data.tweets).to.be.an('array');
             // 有回傳某使用者的推文資料
-            res.body[0].description.should.equal('User1 的 Tweet1');
+            res.body.data.tweets[0].description.should.equal('User1 的 Tweet1');
 
             return done();
           })
@@ -179,9 +179,9 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
 
-            expect(res.body).to.be.an('array');
+            expect(res.body.data.replies).to.be.an('array');
             // 有回傳 Tweet1 的 comment 這筆資料
-            res.body[0].comment.should.equal('Tweet1 的 comment');
+            res.body.data.replies[0].comment.should.equal('Tweet1 的 comment');
 
             return done();
           })
@@ -223,7 +223,7 @@ describe('# user requests', () => {
         await db.Like.create({UserId: 1, TweetId: 1})
       })
 
-      // GET /users/:id/likes - 看見某使用者點過的 Like 
+      // GET /users/:id/likes - 看見某使用者點過的 Like
       it(' - successfully', (done) => {
         request(app)
           .get('/api/users/1/likes')
@@ -231,9 +231,9 @@ describe('# user requests', () => {
           .expect(200)
           .end(function(err, res) {
             if (err) return done(err);
-            expect(res.body).to.be.an('array');
+            expect(res.body.data.tweets).to.be.an('array');
             // 檢查回傳資料是否有 TweetId = 1
-            res.body[0].TweetId.should.equal(1);
+            res.body.data.tweets[0].TweetId.should.equal(1);
 
             return done();
           })
@@ -283,9 +283,9 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
 
-            expect(res.body).to.be.an('array');
+            expect(res.body.data.user).to.be.an('array');
             //回傳資料中是否有跟隨中的人的 id = 2
-            res.body[0].followingId.should.equal(2);
+            res.body.data.user[0].followingId.should.equal(2);
 
             return done();
           })
@@ -335,9 +335,9 @@ describe('# user requests', () => {
           .end(function(err, res) {
             if (err) return done(err);
 
-            expect(res.body).to.be.an('array');
+            expect(res.body.data.user).to.be.an('array');
             // 有跟隨者的 followerId = 1
-            res.body[0].followerId.should.equal(1);
+            res.body.data.user[0].followerId.should.equal(1);
 
             return done();
           })
