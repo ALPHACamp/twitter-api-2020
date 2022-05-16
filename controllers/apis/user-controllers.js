@@ -162,7 +162,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name']
+            attributes: ['id', 'account', 'name', 'avatarImg']
           },
           {
             model: Reply,
