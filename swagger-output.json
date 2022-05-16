@@ -93,6 +93,23 @@
           "403": {
             "description": "Forbidden"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "example": "user1"
+                  },
+                  "account": {
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -375,11 +392,15 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/sample"
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "example": "希望 Heroku 測試成功！！"
+                  }
+                }
               }
             }
           }
@@ -448,11 +469,15 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/sample"
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "example": "希望 Heroku 測試成功！！"
+                  }
+                }
               }
             }
           }
@@ -524,11 +549,15 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/sample"
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "example": "阿，就沒有其他人的token阿"
+                  }
+                }
               }
             }
           }
@@ -617,20 +646,6 @@
           "403": {
             "description": "Forbidden"
           }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "example": "any"
-                  }
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -656,20 +671,6 @@
           },
           "403": {
             "description": "Forbidden"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "example": "any"
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -704,11 +705,15 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/sample"
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "example": "阿，就沒有其他人的token阿"
+                  }
+                }
               }
             }
           }

@@ -83,14 +83,6 @@ const tweetController = {
     #swagger.security = [{
             'bearerAuth': []
     }]
-    #swagger.requestBody = {
-      required: true,
-      content: {
-          'application/json': {
-            schema: {}
-          }
-      }
-    }
     :body description: tweet's content
     This api would create a tweet record and return a json
     */
@@ -155,14 +147,6 @@ const tweetController = {
     #swagger.security = [{
       'bearerAuth': []
     }]
-    #swagger.requestBody = {
-      required: true,
-      content: {
-          'application/json': {
-            schema: {}
-          }
-      }
-    }
     :param id: TweetId
     :body comment: reply's content
     This api would create a reply of specific tweet and return a json
@@ -277,14 +261,6 @@ const tweetController = {
     #swagger.security = [{
             'bearerAuth': []
     }]
-    #swagger.requestBody = {
-      required: true,
-      content: {
-          'application/json': {
-            schema: {}
-          }
-      }
-    }
     :param id: TweetId
     :body description: tweet's content
     This api would edit a tweet record and return a json

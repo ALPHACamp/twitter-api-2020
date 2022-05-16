@@ -83,14 +83,6 @@ const replyController = {
     #swagger.security = [{
             'bearerAuth': []
     }]
-    #swagger.requestBody = {
-      required: true,
-      content: {
-          'application/json': {
-            schema: {}
-          }
-      }
-    }
     :param id: ReplyId
     :body comment: reply's content
     This api would edit a reply record and return a json
