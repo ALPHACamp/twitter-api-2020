@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Identity.init({
-    identity: DataTypes.STRING
+    id: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Identity',
