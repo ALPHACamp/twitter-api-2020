@@ -3,7 +3,7 @@ module.exports = {
     if (err instanceof Error) {
       res.status(200).json({
         status: 'error',
-        message: `${err.name}: ${err.message}`
+        message: `${err.message}`
       })
     } else {
       res.status(200).json({
