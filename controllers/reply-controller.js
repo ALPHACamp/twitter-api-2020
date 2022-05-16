@@ -87,7 +87,7 @@ const replyController = {
       required: true,
       content: {
           'application/json': {
-            schema: { $ref: "#/definitions/sample" },
+            schema: {}
           }
       }
     }

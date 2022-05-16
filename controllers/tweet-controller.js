@@ -87,7 +87,7 @@ const tweetController = {
       required: true,
       content: {
           'application/json': {
-            schema: { $ref: "#/definitions/sample" },
+            schema: {}
           }
       }
     }
@@ -159,7 +159,7 @@ const tweetController = {
       required: true,
       content: {
           'application/json': {
-            schema: { $ref: "#/definitions/sample" },
+            schema: {}
           }
       }
     }
@@ -281,7 +281,7 @@ const tweetController = {
       required: true,
       content: {
           'application/json': {
-            schema: { $ref: "#/definitions/sample" },
+            schema: {}
           }
       }
     }
