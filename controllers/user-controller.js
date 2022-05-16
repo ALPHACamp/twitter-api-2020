@@ -45,6 +45,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!user) throw new Error('無此使用者。')
       res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -69,6 +70,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!tweets.length) throw new Error('沒有任何推文。')
       res.status(200).json(tweets)
     } catch (err) {
       next(err)
@@ -94,6 +96,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!replies.length) throw new Error('沒有回覆過的推文。')
       res.status(200).json(replies)
     } catch (err) {
       next(err)
@@ -120,6 +123,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!likes.length) throw new Error('沒有喜歡的推文。')
       res.status(200).json(likes)
     } catch (err) {
       next(err)
@@ -140,6 +144,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!followings.length) throw new Error('沒有追隨者名單。')
       res.status(200).json(followings)
     } catch (err) {
       next(err)
@@ -160,6 +165,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!followers.length) throw new Error('沒有粉絲名單。')
       res.status(200).json(followers)
     } catch (err) {
       next(err)
