@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken')
-const { User, Tweet } = require('../models')
+const JWTSECRET = process.env.JWT_SECRET || 'alphacamp'
 const userServices = require('../services/user-services')
 const userController = {
   signIn: (req, res, next) => {
     try {
       const userData = req.user.toJSON()
       delete userData.password
-      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const token = jwt.sign(userData, JWTSECRET, { expiresIn: '30d' })
       res.json({ status: 'success', token, user: userData })
     } catch (err) {
       next(err)
@@ -34,7 +34,7 @@ const userController = {
     userServices.getUserFollowers(req, ((err, userFollowers) => err ? next(err) : res.json(userFollowers)))
   },
   putUser: (req, res, next) => {
-    userServices.putUser(req, ((err, user) => err ? next(err) : res.json({status: 'success', user })))
+    userServices.putUser(req, ((err, user) => err ? next(err) : res.json({ status: 'success', user })))
   },
   addFollowing: (req, res, next) => {
     userServices.addFollowing(req, (err, addfollowing) => err ? next(err) : res.json(addfollowing))

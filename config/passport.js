@@ -3,6 +3,7 @@ const LocalStrategy = require('passport-local')
 const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
 const { User } = require('../models')
+const JWTSECRET = process.env.JWT_SECRET || 'alphacamp'
 
 const JWTStrategy = passportJWT.Strategy
 const ExtractJWT = passportJWT.ExtractJwt
@@ -25,7 +26,7 @@ passport.use(new LocalStrategy(
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
+  secretOrKey: JWTSECRET
 }
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
   User.findByPk(jwtPayload.id, {
