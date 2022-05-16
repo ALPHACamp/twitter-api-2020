@@ -21,7 +21,8 @@ const tweetController = {
     return Tweet.findAndCountAll({
       include: [
         { model: User, attributes: ['id', 'account', 'name', 'avatar'] },
-        { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] }
+        { model: User, as: 'LikedUsers', attributes: ['id', 'account', 'name', 'avatar'] },
+        { model: Reply, attributes: ['id'] }
       ],
       order: [['createdAt', 'DESC']],
       limit,
@@ -33,7 +34,8 @@ const tweetController = {
           ...r.toJSON(),
           description: r.description.substring(0, DEFAULT_DESCRIPTION_LIMIT),
           isLiked: likedTweetId.includes(r.id),
-          totalLikes: r.LikedUsers ? r.LikedUsers.length : 0
+          totalLikes: r.LikedUsers ? r.LikedUsers.length : 0,
+          totalReplies: r.Replies ? r.Replies.length : 0
         }))
         return res.json({
           status: 'Success',
@@ -65,12 +67,13 @@ const tweetController = {
       .then(tweet => {
         if (!tweet) throw new Error("Tweet didn't exist!")
         const isLiked = tweet.LikedUsers.some(l => l.id === req.user.id)
+        const resultTweet = tweet.toJSON()
+        resultTweet.isLiked = isLiked
         return res.json({
           status: 'Success',
           statusCode: 200,
           data: {
-            tweet: tweet.toJSON(),
-            isLiked
+            tweet: resultTweet
           },
           message: ''
         })
