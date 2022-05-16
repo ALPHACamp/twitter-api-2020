@@ -21,11 +21,11 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.checkPassword) throw new Error('密碼與確認密碼不符，請重新輸入')
+    if (req.body.password !== req.body.checkPassword) res.status(403).json({ status: 'error', message: '密碼與確認密碼不符，請重新輸入' })
     try {
       User.findOne({ where: { email: req.body.email } })
         .then(user => {
-          if (user) throw new Error('此Email已被註冊！')
+          if (user) res.status(403).json({ status: 'error', message: '此Email已被註冊！' })
           return bcrypt.hash(req.body.password, 10)
         })
         .then(hash => User.create({
