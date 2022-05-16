@@ -5,7 +5,7 @@ const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.confirmPassword) throw new Error('Passwords do not match!')
+    if (req.body.password !== req.body.checkPassword) throw new Error('Passwords do not match!')
     Promise.all([User.findOne({ where: { account: req.body.account } }), User.findOne({ where: { email: req.body.email } })]).then(([findAccount, findEmail]) => {
       if (findAccount) throw new Error('Account has already been taken.')
       if (findEmail) throw new Error('Email has already been taken.')
