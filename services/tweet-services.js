@@ -84,6 +84,47 @@ const tweetController = {
         return cb(null,  tweetData )
         })
         .catch(err => cb(err))
+  },
+  addReply: (req, cb) => {
+    const comment = req.body.comment.trim()
+    if (!comment) throw new Error("Please enter you reply!")
+    return Tweet.findByPk(req.params.tweet_id, {raw: true})
+      .then(tweet => {
+        if(!tweet) throw new Error("Tweet didn't exist!")
+        return Reply.create({
+          UserId: helpers.getUser(req).id,
+          TweetId: req.params.tweet_id,
+          comment
+        })
+      })
+      .then(addedReply => cb(null, addedReply))
+      .catch(err => cb(err))
+  },
+  viewReplies: (req, cb) => {
+    return Promise.all([
+      Tweet.findByPk(req.params.tweet_id),
+      Reply.findAll({
+        where: { TweetId: req.params.tweet_id},
+        include: [{model: Tweet, include: User}, {model: User}],
+        order: [['createdAt', 'DESC']]
+      })
+    ])
+    .then(([tweet, replies]) => {
+      if (!tweet) throw new Error("Tweet didn't exist!")
+      const repliesData = replies.map(r => ({
+        ...r.toJSON(),
+        userName: r.User.name,
+        userAvatar: r.User.avatar,
+        replyUserId: r.Tweet.User.id,
+        replyUserAccount: r.Tweet.User.account,
+        replyUserName: r.Tweet.User.name,
+        User,
+        Tweet
+      }))
+
+      return cb(null, repliesData)
+    })
+    .catch(err => cb(err))
   }
 }
 
