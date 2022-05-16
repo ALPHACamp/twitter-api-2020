@@ -4,7 +4,8 @@ const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
-const upload = require('../middleware/multer')
+const followshipController = require('../controllers/followship-controller')
+// const upload = require('../middleware/multer')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 const { authenticated, authenticatedUser } = require('../middleware/auth')
@@ -53,6 +54,10 @@ router.post('/tweets/:id/unlike', authenticated, authenticatedUser, tweetControl
 
 router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweets)
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
+
+// Followship APIs
+router.post('/followships', authenticated, followshipController.addFollowing)
+router.delete('/followships/:id', authenticated, followshipController.removeFollowing)
 
 router.use('/', apiErrorHandler)
 

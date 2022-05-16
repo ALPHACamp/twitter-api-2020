@@ -88,7 +88,7 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     try {
-      const userData = (({ id, account, name, email, avatar, role }) => ({ id, account, name, email, avatar, role }))(getUser(req))
+      const userData = (({ id, account, name, email, avatar, cover, introduction, role }) => ({ id, account, name, email, avatar, cover, introduction, role }))(getUser(req))
       return res.status(200).json(userData)
     } catch (err) {
       next(err)
@@ -96,7 +96,8 @@ const userController = {
   },
 
   getTopUsers: (req, res, next) => {
-    const userId = Number(req.user.id)
+    const userId = Number(req.params.id)
+    const reqUserId = getUser(req).id
     return User.findAll({
       include: { model: User, as: 'Followers' },
       attributes: ['id', 'account', 'name', 'avatar', 'createdAt'],
@@ -108,9 +109,9 @@ const userController = {
             ...user.toJSON(),
             followerCount: user.Followers.length,
             isFollowed: req.user.Followings.some(f => f.id === user.id),
-            owner: Number(user.id) !== userId
+            owner: reqUserId !== userId
           }))
-          .sort((a, b) => b.followedCount - a.followedCount || b.createdAt - a.createdAt)
+          .sort((a, b) => b.followerCount - a.followerCount || b.createdAt - a.createdAt)
           .slice(0, 10)
 
         result.forEach(r => {
