@@ -32,7 +32,9 @@ const adminController = {
         attributes: [
           'id', 'description', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
-            'likeCount']
+            'likeCount'],
+          [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
+            'replyCount']
         ],
         include: [
           {

@@ -52,7 +52,7 @@ const tweetController = {
       // catch tweet's author
       const tweetData = await Tweet.findByPk(tweetId, {
         attributes: [
-          'id', 'description', 'UserId',
+          'id', 'description', 'UserId', 'createdAt',
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Likes WHERE Likes.Tweet_id = Tweet.id)'),
             'likeCount'],
           [sequelize.literal('(SELECT COUNT(DISTINCT id) FROM Replies WHERE Replies.Tweet_id = Tweet.id)'),
@@ -204,7 +204,7 @@ const tweetController = {
     } catch (err) {
       next(err)
     }
-  }
+  },
 }
 
 module.exports = tweetController
