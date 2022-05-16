@@ -285,7 +285,7 @@ const userController = {
     Followship.findAll({
       where: { followingId: UserId },
       attributes: [
-        'followerId', 'createdAt',
+        'followingId', 'createdAt',
         [Sequelize.literal('(SELECT account FROM Users WHERE id = follower_id)'), 'account'],
         [Sequelize.literal('(SELECT name FROM Users WHERE id = follower_id)'), 'name'],
         [Sequelize.literal('(SELECT avatar FROM Users WHERE id = follower_id)'), 'avatar'],

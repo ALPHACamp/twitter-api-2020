@@ -4,8 +4,8 @@ const passport = require('../config/passport')
 
 const userController = require('../controllers/user-controller')
 const tweetController = require('../controllers/tweet-controller')
-const followship = require('../controllers/followship-controller')
-const upload = require('../middleware/multer')
+const followshipController = require('../controllers/followship-controller')
+// const upload = require('../middleware/multer')
 const { apiErrorHandler } = require('../middleware/error-handler')
 
 const { authenticated, authenticatedUser } = require('../middleware/auth')
@@ -45,13 +45,6 @@ router.get('/users/:id/followers', userController.getFollowers)
 // 取得指定使用者資料 （往後放到最後囉）
 router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
 
-// 取得指定使用者追隨中的所有使用者 & 取得追隨指定使用者的所有使用者
-router.get('/users/:id/followings', userController.getFollowings)
-router.get('/users/:id/followers', userController.getFollowers)
-
-// 取得指定使用者資料 （往後放到最後囉）
-router.get('/users/:id', authenticated, authenticatedUser, userController.getUser)
-
 // Tweet APIs
 router.get('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.getTweetReplies)
 router.post('/tweets/:tweet_id/replies', authenticated, authenticatedUser, tweetController.postTweetReply)
@@ -63,8 +56,8 @@ router.get('/tweets', authenticated, authenticatedUser, tweetController.getTweet
 router.post('/tweets', authenticated, authenticatedUser, tweetController.postTweet)
 
 // Followship APIs
-router.post('/followships/:id', authenticated, followship.addFollowing)
-router.delete('/followships/:id', authenticated, followship.removeFollowing)
+router.post('/followships/:id', authenticated, followshipController.addFollowing)
+router.delete('/followships/:id', authenticated, followshipController.removeFollowing)
 
 router.use('/', apiErrorHandler)
 
