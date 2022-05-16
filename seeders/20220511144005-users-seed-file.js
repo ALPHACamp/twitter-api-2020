@@ -37,7 +37,7 @@ module.exports = {
         nickname: faker.name.firstName(),
         cover_img: 'https://picsum.photos/800/300',
         avatar_img: 'https://i.pravatar.cc/300',
-        bio: faker.lorem.text(),
+        introduction: faker.lorem.text(),
         identity_id: userData.id,
         created_at: new Date(),
         updated_at: new Date()
