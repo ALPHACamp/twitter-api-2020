@@ -21,18 +21,19 @@ const userController = {
     }
   },
   signUp: (req, res, next) => {
-    if (req.body.password !== req.body.checkPassword) throw new Error('密碼與確認密碼不符，請重新輸入')
+    if (req.body.password !== req.body.checkPassword) res.status(403).json({ status: 'error', message: '密碼與確認密碼不符，請重新輸入' })
     try {
       User.findOne({ where: { email: req.body.email } })
         .then(user => {
-          if (user) throw new Error('此Email已被註冊！')
+          if (user) res.status(403).json({ status: 'error', message: '此Email已被註冊！' })
           return bcrypt.hash(req.body.password, 10)
         })
         .then(hash => User.create({
           name: req.body.name,
           account: req.body.account,
           email: req.body.email,
-          password: hash
+          password: hash,
+          role: 'user'
         }))
         .then(user => {
           res.json({ status: 'success', user })
@@ -52,10 +53,10 @@ const userController = {
         ]
       })
         .then(user => {
-          if (!user) throw new Error('User Error!')
+          if (!user) res.status(403).json({ status: 'error', message: '找不到使用者！' })
           user = user.toJSON()
           res.json({
-            status: 'sucess',
+            status: 'success',
             ...user,
             followingsCount: user.Followings.length,
             followersCount: user.Followers.length
@@ -76,7 +77,11 @@ const userController = {
         nest: true
       })
         .then(tweet => {
-          res.json(tweet)
+          if (!tweet) {
+            res.status(403).json({ status: 'error', message: '找不到使用者的推文！' })
+          } else {
+            res.json(tweet)
+          }
         })
     } catch (err) {
       next(err)
@@ -101,6 +106,9 @@ const userController = {
         nest: true
       })
         .then(reply => {
+          if (!reply) {
+            res.status(403).json({ status: 'error', message: '找不到使用者的回覆！' })
+          }
           const repeatDataId = []
           const rawData = []
           // eslint-disable-next-line array-callback-return
