@@ -57,7 +57,6 @@ const tweetController = {
       .catch(err => next(err))
   },
 
-  // 尚未通過測試檔
   postTweet: (req, res, next) => {
     const UserId = Number(getUser(req).id)
     const { description } = req.body
@@ -68,7 +67,7 @@ const tweetController = {
       UserId,
       description
     })
-      .then(tweet => res.status(200).json(tweet))
+      .then(tweet => res.status(200).json({ message: '推文已成功送出！', tweet }))
       .catch(err => next(err))
   },
 
