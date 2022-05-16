@@ -20,6 +20,11 @@ router.post(
 router.get('/current_user', authenticated, userController.getCurrentUser)
 
 router.get('/users/:id/tweets', authenticated, userController.getUserTweets)
+router.get('/users/:id/replied_tweets', authenticated, userController.getUserReplies)
+router.get('/users/:id/likes', authenticated, userController.getUserLikes)
+router.get('/users/:id/followings', authenticated, userController.getUserFollowings)
+router.get('/users/:id/followers', authenticated, userController.getUserFollowers)
+
 router.get('/users/:id', authenticated, userController.getUser)
 router.post('/users', userController.signUp)
 
@@ -45,10 +50,6 @@ router.get(
   authenticatedAdmin,
   adminController.getUsers
 )
-
-// router.get('/test', authenticated, (req, res) => {
-//   res.send('OK')
-// })
 
 router.use('/', apiErrorHandler)
 

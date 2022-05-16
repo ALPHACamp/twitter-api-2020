@@ -7,7 +7,7 @@ const userController = {
   signIn: async (req, res, next) => {
     try {
       // 登入資料錯誤希望有回傳訊息
-      const userData = helpers.getUser(req).toJSON()
+      const userData = helpers.getUser(req)?.toJSON()
       if (userData.Identity.identity === 'admin') {
         userData.is_admin = true
       } else {
@@ -75,7 +75,7 @@ const userController = {
 
   getCurrentUser: (req, res, next) => {
     try {
-      const userData = helpers.getUser(req).toJSON()
+      const userData = helpers.getUser(req)?.toJSON()
       const { token } = req.session
       if (userData.Identity.identity === 'admin') {
         userData.is_admin = true
@@ -99,7 +99,7 @@ const userController = {
   getUser: async (req, res, next) => {
     try {
       const me = helpers.getUser(req)
-      if (!me) return new Error('當前使用者產生預期外的錯誤')
+      if (!me) return new Error('未存取到登入資料')
       const my = await User.findAll({
         where: { id: me.id },
         attributes: ['id', 'account', 'name'],
@@ -107,6 +107,7 @@ const userController = {
           { model: User, as: 'Follower', attributes: ['id'] }
         ]
       })
+      const myData = JSON.parse(JSON.stringify(my))
 
       const user = await User.findAll({
         where: { id: req.params.id },
@@ -119,8 +120,8 @@ const userController = {
       })
       if (!user.length) throw new Error('使用者不存在')
 
-      const myData = JSON.parse(JSON.stringify(my))
       const userData = JSON.parse(JSON.stringify(user))
+
       userData[0].is_following = Boolean(
         await Followship.findOne({
           where: {
@@ -146,7 +147,7 @@ const userController = {
         }
       })
 
-      res.json({ userData })
+      res.json(...userData)
     } catch (err) {
       next(err)
     }
@@ -174,6 +175,9 @@ const userController = {
         order: [['created_at', 'DESC']],
         nest: true
       })
+
+      if (!tweets.length) throw new Error('沒有找到相關資料')
+
       const data = tweets.map(tweet => {
         const replyTotal = tweet.Replies.length
         const likeTotal = tweet.Likes.filter(item => item.likeUnlike).length
@@ -181,6 +185,142 @@ const userController = {
           ...tweet.toJSON(),
           Replies: replyTotal,
           Likes: likeTotal
+        }
+      })
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserReplies: async (req, res, next) => {
+    try {
+      const replies = await Reply.findAll({
+        where: { user_id: req.params.id },
+        attributes: ['id', 'comment', 'user_id', 'tweet_id', 'created_at', 'updated_at'],
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'account', 'name']
+          },
+          {
+            model: Tweet,
+            attributes: ['id', 'description', 'user_id']
+          }
+        ],
+        order: [['created_at', 'DESC']],
+        nest: true
+      })
+
+      if (!replies.length) throw new Error('沒有找到相關資料')
+
+      return res.status(200).json(replies)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserLikes: async (req, res, next) => {
+    try {
+      const likes = await Like.findAll({
+        where: { user_id: req.params.id },
+        raw: true,
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'name', 'account', 'avatar_img', 'cover_img']
+          },
+          {
+            model: Tweet,
+            attributes: ['id', 'description', 'created_at', 'updated_at'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'name', 'account', 'avatar_img']
+              },
+              {
+                model: Reply,
+                attributes: ['tweet_id']
+              },
+              {
+                model: Like,
+                attributes: ['tweet_id']
+              }
+            ],
+            order: [['created_at', 'DESC']]
+          }
+        ],
+        nest: true
+      })
+
+      if (!likes.length) throw new Error('沒有找到相關資料')
+
+      const data = likes.map(like => {
+        const replyCount = like.Tweet.Replies.length
+        like.Tweet.replyCount = replyCount
+        const likeCount = like.Tweet.Likes.length
+        like.Tweet.likeCount = likeCount
+        return like
+      })
+
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserFollowings: async (req, res, next) => {
+    try {
+      const followings = await Followship.findAll({
+        where: { follower_id: req.params.id },
+        raw: true
+      })
+      if (!followings) throw new Error('沒有找到相關資料')
+
+      const myId = helpers.getUser(req)?.id
+      if (!myId) return new Error('未存取到登入資料')
+
+      const myFollowing = await Followship.findAll({
+        where: { follower_id: myId },
+        raw: true
+      })
+      const myFollowingId = myFollowing.map(f => f.followingId)
+
+      const data = followings.map(f => {
+        const isFollowing = Boolean(myFollowingId.find(m => m === f.followingId))
+        return {
+          ...f,
+          is_following: isFollowing
+        }
+      })
+      return res.status(200).json(data)
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  getUserFollowers: async (req, res, next) => {
+    try {
+      const followers = await Followship.findAll({
+        where: { following_id: req.params.id },
+        raw: true
+      })
+      if (!followers) throw new Error('沒有找到相關資料')
+
+      const myId = helpers.getUser(req)?.id
+      if (!myId) return new Error('未存取到登入資料')
+
+      const myFollowing = await Followship.findAll({
+        where: { follower_id: myId },
+        raw: true
+      })
+      const myFollowingId = myFollowing.map(f => f.followingId)
+
+      const data = followers.map(f => {
+        const isFollowing = Boolean(myFollowingId.find(m => m === f.followerId))
+        return {
+          ...f,
+          is_following: isFollowing
         }
       })
       return res.status(200).json(data)
