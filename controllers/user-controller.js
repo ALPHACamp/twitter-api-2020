@@ -1,8 +1,8 @@
-const { User, Reply, Tweet, Like, Followship } = require('../models')
+const { User, Reply, Tweet, Like, Followship, sequelize } = require('../models')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../_helpers')
-const sequelize = require('sequelize')
+const imgurFileHandler = require('../helpers/file-helper')
 
 const userController = {
   register: async (req, res, next) => {
@@ -13,7 +13,7 @@ const userController = {
         await User.findOne({ where: { email: req.body.email } })
         ) throw new Error('帳號或 email 已經註冊。')
         
-      const user = await User.create({
+      await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
@@ -28,7 +28,7 @@ const userController = {
     try {
       const user = getUser(req)
       const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.status(200).json({token, user})
+      res.status(200).json({ token, user })
     } catch (err) {
       next(err)
     }
@@ -45,6 +45,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!user) throw new Error('無此使用者。')
       res.status(200).json(user)
     } catch (err) {
       next(err)
@@ -69,6 +70,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!tweets.length) throw new Error('沒有任何推文。')
       res.status(200).json(tweets)
     } catch (err) {
       next(err)
@@ -94,6 +96,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!replies.length) throw new Error('沒有回覆過的推文。')
       res.status(200).json(replies)
     } catch (err) {
       next(err)
@@ -120,6 +123,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!likes.length) throw new Error('沒有喜歡的推文。')
       res.status(200).json(likes)
     } catch (err) {
       next(err)
@@ -140,6 +144,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!followings.length) throw new Error('沒有追隨者名單。')
       res.status(200).json(followings)
     } catch (err) {
       next(err)
@@ -160,6 +165,7 @@ const userController = {
         raw: true,
         nest: true
       })
+      if (!followers.length) throw new Error('沒有粉絲名單。')
       res.status(200).json(followers)
     } catch (err) {
       next(err)
@@ -167,13 +173,76 @@ const userController = {
   },
   putUser: async (req, res, next) => {
     try {
+      const logUser = getUser(req)
+
+      const { name, introduction } = req.body
+      let avatar = req.files.avatar || null
+      let coverImage = req.files.cover_image || null
+
+      if (!name || !introduction) throw new Error('名字和自我介紹欄位必填。')
+      if (introduction.length > 50) throw new Error('自我介紹字數不可超過 50 字。')
+      
+      if (avatar) avatar = await imgurFileHandler(avatar[0])
+      if (coverImage) coverImage = await imgurFileHandler(coverImage[0])
+
       const user = await User.findByPk(req.params.id)
-      const userUpdate = await user.update(req.body)
+      const userUpdate = await user.update({
+        name,
+        introduction,
+        avatar: avatar || logUser.avatar,
+        cover_image: coverImage || logUser.cover_image
+      })
       res.status(200).json(userUpdate)
     } catch (err) {
       next(err)
     }
-    res.status(200).json()
+  },
+  putUserSetting: async (req, res, next) => {
+    try {
+      const { name, account, email, password, checkPassword } = req.body
+      const user = getUser(req)
+
+      if (!account) throw new Error('帳號不可空白。')
+      if (await User.findOne({ where:{ account } })) throw new Error('此帳號已經存在。')
+      if (await User.findOne({ where: { email } })) throw new Error('此email已經存在。')
+      if (password !== checkPassword) throw new Error('密碼與確認密碼不相符。')
+
+      const userUpdate = await user.update({
+        name,
+        account,
+        email,
+        password: password ? bcrypt.hashSync(password, 10) : user.password,
+      })
+      res.status(200).json({ message: '成功修改個人資料', userUpdate })
+    } catch (err) {
+      next(err)
+    }
+  },
+  getTopUsers: async (req, res, next) => {
+    try {
+      const topUsers = await Followship.findAll({
+        attributes: [
+          ['following_id', 'id'],
+          [sequelize.literal(`(SELECT account FROM Users WHERE id = following_id)`), 'account'],
+          [sequelize.literal(`(SELECT name FROM Users WHERE id = following_id)`), 'name'],
+          [sequelize.literal(`(SELECT avatar FROM Users WHERE id = following_id)`), 'avatar'],
+          [sequelize.literal(`(COUNT(follower_id))`), 'followerCount'],
+        ],
+        group: 'following_id',
+        limit: 10,
+        order: [[sequelize.col('followerCount'), 'DESC']]
+      })
+      if (!topUsers) throw new Error('查無資料。')
+      
+      const result = topUsers.map(user => ({
+        ...user.toJSON(),
+        isFollowing: req.user.Followings.some(f => f.id === user.id)
+      }))
+      
+      res.status(200).json({ message: '前十人氣王', result })
+    } catch (err) {
+      next(err)
+    }
   }
 }
 module.exports = userController

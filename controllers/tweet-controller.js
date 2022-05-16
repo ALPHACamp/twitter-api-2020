@@ -68,7 +68,7 @@ const tweetController = {
 
       if (!tweetData) throw new Error('無法查看不存在的推文。')
       const tweet = tweetData.toJSON()
-      
+
       // get tweet_id list liked by login user
       const isLikedId = await isLikedTweet(userId)
 

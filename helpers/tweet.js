@@ -12,7 +12,7 @@ module.exports = {
     })
 
     if (!likedList) return []
-    
+
     const isLikedId = likedList.map(like => like.TweetId)
     return isLikedId
   },
