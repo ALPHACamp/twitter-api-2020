@@ -38,6 +38,9 @@
   "paths": {
     "/api/users": {
       "post": {
+        "tags": [
+          "Users"
+        ],
         "description": "",
         "parameters": [],
         "responses": {
@@ -57,12 +60,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "password": {
-                    "example": "any"
-                  },
-                  "checkPassword": {
-                    "example": "any"
-                  },
                   "account": {
                     "example": "any"
                   },
@@ -70,6 +67,14 @@
                     "example": "any"
                   },
                   "name": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "any"
+                  },
+                  "checkPassword": {
+                    "type": "string",
                     "example": "any"
                   }
                 }
@@ -81,6 +86,9 @@
     },
     "/api/users/signin": {
       "post": {
+        "tags": [
+          "Users"
+        ],
         "description": "",
         "parameters": [],
         "responses": {
@@ -100,11 +108,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "password": {
+                  "account": {
                     "example": "user1"
                   },
-                  "account": {
-                    "example": "123456"
+                  "password": {
+                    "type": "string",
+                    "example": "12345678"
                   }
                 }
               }
@@ -115,6 +124,14 @@
     },
     "/api/get_current_user": {
       "get": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [],
         "responses": {
@@ -126,6 +143,14 @@
     },
     "/api/users/{id}/tweets": {
       "get": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [
           {
@@ -152,6 +177,14 @@
     },
     "/api/users/{id}/replied_tweets": {
       "get": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [
           {
@@ -178,6 +211,14 @@
     },
     "/api/users/{id}/likes": {
       "get": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [
           {
@@ -204,6 +245,14 @@
     },
     "/api/users/{id}/followings": {
       "get": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [
           {
@@ -230,6 +279,14 @@
     },
     "/api/users/{id}/followers": {
       "get": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [
           {
@@ -256,6 +313,14 @@
     },
     "/api/users/{id}": {
       "put": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [
           {
@@ -314,6 +379,14 @@
         }
       },
       "get": {
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [
           {
@@ -642,6 +715,14 @@
     },
     "/api/followships/": {
       "post": {
+        "tags": [
+          "Followships"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [],
         "responses": {
@@ -659,6 +740,14 @@
     },
     "/api/followships/{followingId}": {
       "delete": {
+        "tags": [
+          "Followships"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "description": "",
         "parameters": [
           {
