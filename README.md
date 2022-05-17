@@ -4,9 +4,8 @@
 
 # Base URL
 
-```
 [https://pacific-mountain-24114.herokuapp.com/api](https://pacific-mountain-24114.herokuapp.com/api)
-```
+
 
 種子帳戶資料
 ```
