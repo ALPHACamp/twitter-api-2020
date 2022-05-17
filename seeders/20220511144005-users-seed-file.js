@@ -5,11 +5,11 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const [adminData] = await queryInterface.sequelize.query(
-      'SELECT id FROM Identities WHERE identity = "admin";',
+      'SELECT id FROM Identities WHERE id = "admin";',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
     const [userData] = await queryInterface.sequelize.query(
-      'SELECT id FROM Identities WHERE identity = "user";',
+      'SELECT id FROM Identities WHERE id = "user";',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
 
@@ -22,7 +22,7 @@ module.exports = {
       nickname: 'root',
       cover_img: 'https://picsum.photos/800/300',
       avatar_img: 'https://i.pravatar.cc/300',
-      identity_id: adminData.id,
+      role: adminData.id,
       created_at: new Date(),
       updated_at: new Date()
     }
@@ -37,8 +37,8 @@ module.exports = {
         nickname: faker.name.firstName(),
         cover_img: 'https://picsum.photos/800/300',
         avatar_img: 'https://i.pravatar.cc/300',
-        bio: faker.lorem.text(),
-        identity_id: userData.id,
+        introduction: faker.lorem.text(),
+        role: userData.id,
         created_at: new Date(),
         updated_at: new Date()
       }

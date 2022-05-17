@@ -79,7 +79,7 @@ const tweetController = {
             attributes: ['id', 'comment'],
             include: {
               model: User,
-              attributes: ['id', 'account', 'name', 'avatarImg']
+              attributes: ['id', 'account', 'name', 'avatarImg', 'createdAt', 'updatedAt']
             }
           },
           {
@@ -87,7 +87,7 @@ const tweetController = {
             attributes: ['id', 'likeUnlike'],
             include: {
               model: User,
-              attributes: ['id', 'account', 'name', 'avatarImg']
+              attributes: ['id', 'account', 'name', 'avatarImg', 'createdAt', 'updatedAt']
             }
           }
         ],

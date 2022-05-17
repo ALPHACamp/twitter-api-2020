@@ -5,6 +5,7 @@ const userController = require('../../controllers/apis/user-controllers')
 const tweetController = require('../../controllers/apis/tweet-controller')
 const likeController = require('../../controllers/apis/like-controller')
 const replyController = require('../../controllers/apis/reply-controller')
+const followshipController = require('../../controllers/apis/followship-controller')
 const adminController = require('../../controllers/apis/admin-controller')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const upload = require('../../middleware/multer')
@@ -33,6 +34,9 @@ router.put('/users/:id', authenticated, upload.fields([
   { name: 'cover_img', maxCount: 1 }
 ]), userController.editUser)
 router.post('/users', userController.signUp)
+
+router.delete('/followships/:fId', authenticated, followshipController.deleteFollowship)
+router.post('/followships', authenticated, followshipController.postFollowship)
 
 router.get('/tweets/:tId/replies', authenticated, replyController.getReply)
 router.post('/tweets/:tId/replies', authenticated, replyController.postReply)

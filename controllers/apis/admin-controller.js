@@ -10,7 +10,7 @@ const adminController = {
         include: [
           {
             model: Identity,
-            where: { role: 'user' },
+            where: { id: 'user' },
             attributes: []
           }
         ],

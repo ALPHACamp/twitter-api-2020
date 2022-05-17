@@ -10,7 +10,8 @@ const userController = {
     try {
       // 登入資料錯誤希望有回傳訊息
       const userData = helpers.getUser(req)?.toJSON()
-      if (userData.Identity.identity === 'admin') {
+
+      if (userData.Identity.id === 'admin') {
         userData.is_admin = true
       } else {
         userData.is_admin = false
@@ -39,18 +40,18 @@ const userController = {
       if (user) throw new Error('使用者已經存在')
 
       const userIdentity = await Identity.findOne({
-        where: { identity: 'user' },
-        attributes: ['identity']
+        where: { id: 'user' },
+        attributes: ['id']
       })
       const { identity } = userIdentity.toJSON()
-      const password = await bcrypt.hash(req.body.password, 10)
+      // const password = await bcrypt.hash(req.body.password, 10)
 
       const registeredUser = await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password,
-        role: identity
+        password: await bcrypt.hash(req.body.password, 10),
+        role: id
       })
 
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
@@ -77,7 +78,7 @@ const userController = {
     try {
       const userData = helpers.getUser(req)?.toJSON()
       const { token } = req.session
-      if (userData.Identity.identity === 'admin') {
+      if (userData.Identity.id === 'admin') {
         userData.is_admin = true
       } else {
         userData.is_admin = false
@@ -161,7 +162,7 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name']
+            attributes: ['id', 'account', 'name', 'avatarImg']
           },
           {
             model: Reply,
@@ -201,11 +202,17 @@ const userController = {
         include: [
           {
             model: User,
-            attributes: ['id', 'account', 'name', 'avatar_img']
+            attributes: ['id', 'account', 'name', 'avatarImg']
           },
           {
             model: Tweet,
-            attributes: ['id', 'description', 'user_id']
+            attributes: ['id', 'description', 'user_id'],
+            include: [
+              {
+                model: User,
+                attributes: ['id', 'account', 'name', 'avatarImg']
+              }
+            ]
           }
         ],
         order: [['created_at', 'DESC']],
