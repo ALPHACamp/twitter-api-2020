@@ -54,8 +54,8 @@ const adminController = {
           users[userIndex].totalTweetCount = 0
         }
       } else {
-        for (let tweetsIndex = 0; tweetsIndex < tweets.length; tweetsIndex++) {
-          for (let userIndex = 0; userIndex < users.length; userIndex++) {
+        for (let userIndex = 0; userIndex < users.length; userIndex++) {
+          for (let tweetsIndex = 0; tweetsIndex < tweets.length; tweetsIndex++) {
             if (users[userIndex].id === tweets[tweetsIndex].User_id) {
               users[userIndex].totalTweetCount = tweets[tweetsIndex].count
             } else {
@@ -64,7 +64,6 @@ const adminController = {
           }
         }
       }
-      console.log(users)
       // 使用者 like 總數
       const likes = await Like.count({
         group: ['User_id']
@@ -75,8 +74,8 @@ const adminController = {
           users[userIndex].totalLikeCount = 0
         }
       } else {
-        for (let likesIndex = 0; likesIndex < likes.length; likesIndex++) {
-          for (let userIndex = 0; userIndex < likes.length; userIndex++) {
+        for (let userIndex = 0; userIndex < users.length; userIndex++) {
+          for (let likesIndex = 0; likesIndex < likes.length; likesIndex++) {
             if (users[userIndex].id === likes[likesIndex].User_id) {
               users[userIndex].totalLikeCount = likes[likesIndex].count
             } else {
@@ -96,8 +95,8 @@ const adminController = {
           users[userIndex].followersCount = 0
         }
       } else {
-        for (let followerIndex = 0; followerIndex < followers.length; followerIndex++) {
-          for (let userIndex = 0; userIndex < users.length; userIndex++) {
+        for (let userIndex = 0; userIndex < users.length; userIndex++) {
+          for (let followerIndex = 0; followerIndex < followers.length; followerIndex++) {
             if (users[userIndex].id === followers[followerIndex].followerId) {
               users[userIndex].followersCount = followers[followerIndex].count
             } else {
@@ -134,6 +133,9 @@ const adminController = {
       //     let minIndex = index
       //     let secIndex = index
       //     for (secIndex; secIndex < length; secIndex++) {
+      //       console.log(arr[secIndex].totalTweetCount)
+      //       console.log(min)
+      //       console.log(arr[secIndex].totalTweetCount < min)
       //       if (arr[secIndex].totalTweetCount < min) {
       //         min = arr[secIndex].totalTweetCount
       //         minIndex = secIndex
@@ -143,9 +145,8 @@ const adminController = {
       //   }
       //   return arr
       // }
-      // console.log(users)
       // selectionSort(users).reverse()
-      console.log(users)
+
       res.status(200)
         .json(users)
     } catch (err) {
