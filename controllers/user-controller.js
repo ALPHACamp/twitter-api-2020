@@ -221,21 +221,32 @@ const userController = {
 
   getUsersReplies: (req, res, next) => {
     const UserId = Number(req.params.id)
-
-    Reply.findAll({
-      where: { UserId },
-      attributes: ['id', 'comment', 'createdAt', 'updatedAt'],
-      include: [
-        { model: User, as: 'ReplyUser', attributes: ['id', 'name', 'account', 'avatar'] },
-        {
-          model: Tweet,
-          attributes: ['id'],
-          include: [{ model: User, as: 'TweetUser', attributes: ['id', 'name', 'account'] }]
-        }
-      ],
-      order: [['createdAt', 'DESC']]
-    })
-      .then(replies => res.status(200).json(replies))
+    Promise.all([
+      Reply.findAll({
+        where: { UserId },
+        attributes: ['id', 'UserId', 'TweetId', 'comment', 'createdAt', 'updatedAt'],
+        include: [
+          { model: User, as: 'ReplyUser', attributes: ['id', 'name', 'account', 'avatar'] },
+          {
+            model: Tweet,
+            attributes: [
+              [Sequelize.literal('(SELECT id FROM Users WHERE Tweet.User_Id = Users.id)'), 'UserId'],
+              [Sequelize.literal('(SELECT name FROM Users WHERE Tweet.User_Id = Users.id)'), 'UserName'],
+              [Sequelize.literal('(SELECT account FROM Users WHERE Tweet.User_Id = Users.id)'), 'UserAccount']
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']],
+        raw: true,
+        nest: true
+      }),
+      User.findByPk(UserId)
+    ])
+      .then(([replies, user]) => {
+        if (!user) throw new Error('使用者不存在！')
+        if (replies.length <= 0) throw new Error('該使用者沒有回覆！')
+        return res.status(200).json(replies)
+      })
       .catch(err => next(err))
   },
 
