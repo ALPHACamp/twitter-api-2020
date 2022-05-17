@@ -37,7 +37,7 @@ nodemon app.js
 ```bash
 App is listening on port 3000!
 ```
-### 6. 於網址輸入 localhost:3000/api-doc
+### 6. 於網址輸入 [localhost:3000/api-doc](http://localhost:3000/api-doc)
 ### 7. 若要暫停使用
 ```bash
 ctrl + c
