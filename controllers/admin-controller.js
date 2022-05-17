@@ -51,15 +51,15 @@ const adminController = {
       })
       if (!tweets.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
-          users[userIndex].totalTweetCount = 0
+          users[userIndex].totalTweetNum = 0
         }
       } else {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
           for (let tweetsIndex = 0; tweetsIndex < tweets.length; tweetsIndex++) {
             if (users[userIndex].id === tweets[tweetsIndex].User_id) {
-              users[userIndex].totalTweetCount = tweets[tweetsIndex].count
+              users[userIndex].totalTweetNum = tweets[tweetsIndex].count
             } else {
-              if (users[userIndex].totalTweetCount === undefined) users[userIndex].totalTweetCount = 0
+              if (users[userIndex].totalTweetNum === undefined) users[userIndex].totalTweetNum = 0
             }
           }
         }
@@ -71,15 +71,15 @@ const adminController = {
 
       if (!likes.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
-          users[userIndex].totalLikeCount = 0
+          users[userIndex].totalLikeNum = 0
         }
       } else {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
           for (let likesIndex = 0; likesIndex < likes.length; likesIndex++) {
             if (users[userIndex].id === likes[likesIndex].User_id) {
-              users[userIndex].totalLikeCount = likes[likesIndex].count
+              users[userIndex].totalLikeNum = likes[likesIndex].count
             } else {
-              if (users[userIndex].totalLikeCount === undefined) users[userIndex].totalLikeCount = 0
+              if (users[userIndex].totalLikeNum === undefined) users[userIndex].totalLikeNum = 0
             }
           }
         }
@@ -92,15 +92,15 @@ const adminController = {
 
       if (!followers.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
-          users[userIndex].followersCount = 0
+          users[userIndex].followersNum = 0
         }
       } else {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
           for (let followerIndex = 0; followerIndex < followers.length; followerIndex++) {
             if (users[userIndex].id === followers[followerIndex].followerId) {
-              users[userIndex].followersCount = followers[followerIndex].count
+              users[userIndex].followersNum = followers[followerIndex].count
             } else {
-              if (users[userIndex].followersCount === undefined) users[userIndex].followersCount = 0
+              if (users[userIndex].followersNum === undefined) users[userIndex].followersNum = 0
             }
           }
         }
@@ -113,15 +113,15 @@ const adminController = {
 
       if (!followings.length) {
         for (let userIndex = 0; userIndex < users.length; userIndex++) {
-          users[userIndex].followingsCount = 0
+          users[userIndex].followingsNum = 0
         }
       } else {
         for (let followingIndex = 0; followingIndex < followings.length; followingIndex++) {
           for (let userIndex = 0; userIndex < users.length; userIndex++) {
             if (users[userIndex].id === followings[followingIndex].followingId) {
-              users[userIndex].followingsCount = followings[followingIndex].count
+              users[userIndex].followingsNum = followings[followingIndex].count
             } else {
-              if (users[userIndex].followingsCount === undefined) users[userIndex].followingsCount = 0
+              if (users[userIndex].followingsNum === undefined) users[userIndex].followingsNum = 0
             }
           }
         }
