@@ -9,7 +9,7 @@ module.exports = {
       'Users',
       [
         {
-          // 新增Admin資料
+          // 新增 Admin 資料
           account: 'root',
           name: 'root',
           email: 'root@example.com',

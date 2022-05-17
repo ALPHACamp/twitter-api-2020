@@ -25,10 +25,11 @@ const followshipController = {
         })
       })
       .then(getFollowing => {
-        res.status(200).json('成功追蹤使用者！')
+        res.status(200).json({ message: '成功追蹤使用者！', getFollowing })
       })
       .catch(err => next(err))
   },
+
   removeFollowing: (req, res, next) => {
     const followingId = Number(req.params.id)
     const followerId = helpers.getUser(req).id
@@ -52,7 +53,7 @@ const followshipController = {
           }
         })
       })
-      .then(() => res.status(200).json('成功取消追蹤該名使用者！'))
+      .then(removeFollowing => res.status(200).json({ message: '成功取消追蹤該名使用者！', removeFollowing }))
       .catch(err => next(err))
   }
 }
