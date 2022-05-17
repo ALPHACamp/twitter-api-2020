@@ -156,7 +156,7 @@ const tweetController = {
 
         return like.destroy()
       })
-      .then(() => res.status(200).json({ message: '已取消Like這篇推文！' }))
+      .then(unlike => res.status(200).json({ message: '已取消Like這篇推文！', unlike }))
       .catch(err => next(err))
   }
 
