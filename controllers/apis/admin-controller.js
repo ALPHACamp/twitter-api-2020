@@ -6,17 +6,12 @@ const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'coverImg', 'avatarImg'],
-        include: [
-          {
-            model: Identity,
-            where: { id: 'user' },
-            attributes: []
-          }
-        ],
+        attributes: ['id', 'account', 'name', 'cover_img', 'avatar_img'],
+        where: { role: 'user' },
         raw: true,
         nest: true
       })
+      console.log('===== test =====', users)
 
       for (const user of users) {
         Promise.all([
@@ -46,13 +41,13 @@ const adminController = {
 
   deleteTweet: async (req, res, next) => {
     try {
-      const TweetId = req.params.ud
-      const deletedTweet = await Tweet.findByPk(TweetId)
+      const tweetId = req.params.id
+      const deletedTweet = await Tweet.findByPk(tweetId)
       if (!deletedTweet) throw new Error('找不到相關推文')
 
-      await Reply.destroy({ where: { TweetId } })
-      await Like.destroy({ where: { TweetId } })
-      await Tweet.destroy({ where: { TweetId } })
+      await Reply.destroy({ where: { tweet_id: tweetId } })
+      await Like.destroy({ where: { tweet_id: tweetId } })
+      await Tweet.destroy({ where: { id: tweetId } })
 
       return res.status(200).json({
         deletedTweet

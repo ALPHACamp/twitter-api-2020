@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { User, Identity, Tweet, Followship, Reply, Like } = require('../../models')
+const { User, Tweet, Followship, Reply, Like } = require('../../models')
 const helpers = require('../../_helpers')
 // const { Sequelize } = require('sequelize')
 // const sequelize = new Sequelize('sqlite::memory:')
@@ -39,19 +39,13 @@ const userController = {
       const user = await User.findOne({ where: { account: req.body.account } })
       if (user) throw new Error('使用者已經存在')
 
-      const userIdentity = await Identity.findOne({
-        where: { id: 'user' },
-        attributes: ['id']
-      })
-      const { identity } = userIdentity.toJSON()
-      // const password = await bcrypt.hash(req.body.password, 10)
-
+      const password = await bcrypt.hash(req.body.password, 10)
       const registeredUser = await User.create({
         account: req.body.account,
         name: req.body.name,
         email: req.body.email,
-        password: await bcrypt.hash(req.body.password, 10),
-        role: id
+        password: password,
+        role: 'user'
       })
 
       const token = jwt.sign(registeredUser.toJSON(), process.env.JWT_SECRET, {
@@ -338,18 +332,16 @@ const userController = {
 
   editUser: async (req, res, next) => {
     try {
-      const { name, bio } = req.body
+      const { name, introduction } = req.body
       const { files } = req
-      const avatarImg = files.avatar_img
-      const coverImg = files.cover_img
       const user = await User.findByPk(req.params.id)
-      const avatarImgUrl = await helpers.imgurFileHandler(avatarImg[0])
-      const coverImgUrl = await helpers.imgurFileHandler(coverImg[0])
+      const avatarImgUrl = await helpers.imgurFileHandler(files?.avatar_img[0])
+      const coverImgUrl = await helpers.imgurFileHandler(files?.cover_img[0])
       if (!user) throw new Error('沒有找到相關的使用者資料')
 
       const updatedUser = await user.update({
         name,
-        bio,
+        introduction,
         avatarImg: avatarImgUrl || '',
         coverImg: coverImgUrl || ''
       })
@@ -363,13 +355,9 @@ const userController = {
 
   getTopUser: async (req, res, next) => {
     try {
-      const userIdentity = (await Identity.findOne({
-        where: { role: 'user' }
-      }))
-
       let users = await (User.findAll({
         nest: true,
-        where: { role: userIdentity },
+        where: { role: 'user' },
         attributes: [
           'id',
           'name',
