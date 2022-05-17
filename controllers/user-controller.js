@@ -64,8 +64,8 @@ const userController = {
         where: { UserId: req.params.id },
         attributes: [
           'id','description', 'createdAt',
-          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
-          [sequelize.literal('(SELECT COUNT(DISTINCT tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCount']
+          [sequelize.literal('(SELECT COUNT(tweet_id) FROM Replies WHERE tweet_id = Tweet.id)'), 'replyCount'],
+          [sequelize.literal('(SELECT COUNT(tweet_id) FROM Likes WHERE tweet_id = Tweet.id)'), 'likeCount']
         ],
         include: [{
           model: User,
